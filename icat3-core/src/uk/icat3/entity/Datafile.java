@@ -17,6 +17,8 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
@@ -54,6 +56,7 @@ import javax.persistence.TemporalType;
 public class Datafile extends EntityBaseBean implements Serializable {
 
     @Id
+    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="DATAFILE_SEQUENCE")  
     @Column(name = "ID", nullable = false)
     private BigDecimal id;
 
