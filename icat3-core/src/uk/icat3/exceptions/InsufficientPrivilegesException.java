@@ -10,10 +10,11 @@
 package uk.icat3.exceptions;
 
 /**
- *
+ * Exception class to denote that user does not have the appropriate privileges to perform
+ * a requested operation
  * @author df01
  */
-public class InsufficientPrivilegesException extends java.lang.Exception {
+public class InsufficientPrivilegesException extends ICATAPIException {
     
     /**
      * Creates a new instance of <code>InsufficientPrivilegesException</code> without detail message.
