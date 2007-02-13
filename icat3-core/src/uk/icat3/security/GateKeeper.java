@@ -63,8 +63,7 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have 
      *                  permission to perform operation.
      */
-    public static void performAuthorisation(String user, Datafile datafile, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        Logger log = Logger.getLogger("uk.icat3.security");  
+    public static void performAuthorisation(String user, Datafile datafile, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {        
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(datafile.getDatasetId().getInvestigationId());   
         performAuthorisation(user, invList, access, datafile.getClass().toString(), datafile.toString(), manager);
@@ -86,8 +85,7 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have 
      *                  permission to perform operation.       
      */
-    public static void performAuthorisation(String user, Dataset dataset, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        Logger log = Logger.getLogger("uk.icat3.security");  
+    public static void performAuthorisation(String user, Dataset dataset, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {        
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(dataset.getInvestigationId());
         performAuthorisation(user, invList, access, dataset.getClass().toString(), dataset.toString(), manager);
@@ -109,8 +107,7 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have 
      *                  permission to perform operation.       
      */
-    public static void performAuthorisation(String user, Sample sample, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        Logger log = Logger.getLogger("uk.icat3.security");  
+    public static void performAuthorisation(String user, Sample sample, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {        
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(sample.getInvestigationId());
         performAuthorisation(user, invList, access, sample.getClass().toString(), sample.toString(), manager);
@@ -132,8 +129,7 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have 
      *                      permission to perform operation.       
      */
-    public static void performAuthorisation(String user, SampleParameter sampleParam, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        Logger log = Logger.getLogger("uk.icat3.security");  
+    public static void performAuthorisation(String user, SampleParameter sampleParam, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {        
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(sampleParam.getSample().getInvestigationId());
         performAuthorisation(user, invList, access, sampleParam.getClass().toString(), sampleParam.toString(), manager);
@@ -155,8 +151,7 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have 
      *                      permission to perform operation.       
      */
-    public static void performAuthorisation (String user, DatasetParameter datasetParam, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        Logger log = Logger.getLogger("uk.icat3.security");  
+    public static void performAuthorisation (String user, DatasetParameter datasetParam, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {        
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(datasetParam.getDataset().getInvestigationId());
         performAuthorisation(user, invList, access, datasetParam.getClass().toString(), datasetParam.toString(), manager);
@@ -178,8 +173,7 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have 
      *                      permission to perform operation.       
      */
-    public static void performAuthorisation (String user, DatafileParameter datafileParam, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        Logger log = Logger.getLogger("uk.icat3.security");  
+    public static void performAuthorisation (String user, DatafileParameter datafileParam, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {        
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(datafileParam.getDatafile().getDatasetId().getInvestigationId());
         performAuthorisation(user, invList, access, datafileParam.getClass().toString(), datafileParam.toString(), manager);
@@ -201,8 +195,7 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have 
      *                      permission to perform operation.       
      */
-    public static void performAuthorisation (String user, Investigation investigation, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        Logger log = Logger.getLogger("uk.icat3.security");          
+    public static void performAuthorisation (String user, Investigation investigation, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {        
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(investigation);
         performAuthorisation(user, invList, access, investigation.getClass().toString(), investigation.toString(), manager);
@@ -232,8 +225,7 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have 
      *                      permission to perform operation.       
      */
-    public static void performAuthorisation (String user, Study study, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        Logger log = Logger.getLogger("uk.icat3.security");          
+    public static void performAuthorisation (String user, Study study, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {                 
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         for (Iterator<StudyInvestigation> iter = study.getStudyInvestigationCollection().iterator(); iter.hasNext(); ) {
             invList.add(iter.next().getInvestigation());
@@ -274,28 +266,38 @@ public class GateKeeper {
                 
                 //READ, UPDATE, DELETE, CREATE, ADMIN, FINE_GRAINED_ACCESS;
                 switch (access) {
-                    case READ:      System.out.println("access is READ");
-                                    if (perm.getPrmRead() == 1) return;
+                    case READ:      if (perm.getPrmRead() == 1) {
+                                        log.debug("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
+                                        return;
+                                    }//end if
                                     break;
                                 
-                    case UPDATE:    System.out.println("access is UPDATE");
-                                    if (perm.getPrmUpdate() == 1) return;
+                    case UPDATE:    if (perm.getPrmUpdate() == 1){
+                                        log.debug("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
+                                        return;
+                                    }//end if
                                     break;
                     
-                    case DELETE:    System.out.println("access is DELETE");
-                                    if (perm.getPrmDelete() == 1) return;
+                    case DELETE:    if (perm.getPrmDelete() == 1) {
+                                        log.debug("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
+                                        return;
+                                    }//end if
                                     break;
                     
-                    case CREATE:    System.out.println("access is CREATE");
-                                    if (perm.getPrmCreate() == 1) return;
+                    case CREATE:    if (perm.getPrmCreate() == 1) {
+                                        log.debug("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
+                                        return;
+                                    }//end if
                                     break;
                                     
-                    case ADMIN:     System.out.println("access is ADMIN");
-                                    if (perm.getPrmAdmin() == 1) return;
+                    case ADMIN:     if (perm.getPrmAdmin() == 1) {
+                                        log.debug("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
+                                        return;
+                                    }//end if
                                     break;
                     
                     //not yet used
-                    case FINE_GRAINED_ACCESS:   System.out.println("access is FINE_GRAINED_ACCESS");
+                    case FINE_GRAINED_ACCESS:   log.warn("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
                                                 break;
                                                 
                 }//end switch
