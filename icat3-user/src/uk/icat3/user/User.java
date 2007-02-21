@@ -1,5 +1,7 @@
 package uk.icat3.user;
 
+import uk.icat3.user.exceptions.LoginException;
+
 /*
  * User.java
  *
@@ -22,11 +24,11 @@ package uk.icat3.user;
  */
 public interface User {
     
-    public String getUserIdFromSessionId (String sessionId);
+    public String getUserIdFromSessionId (String sessionId) throws LoginException;
     
-    public String login (String username, String password);
+    public String login (String username, String password) throws LoginException;
     
     public void logout (String sessionId);
     
-    public UserDetails getUserDetails(String sessionId, String user);     
+    public UserDetails getUserDetails(String sessionId, String user) throws LoginException;     
 }
