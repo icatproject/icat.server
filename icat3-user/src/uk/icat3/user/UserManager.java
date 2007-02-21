@@ -1,19 +1,21 @@
+package uk.icat3.user;
+
+import uk.icat3.user.facility.ISISUser;
+
 /*
  * UserManager.java
  *
  * Created on 20 February 2007, 15:53
  *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
-package uk.icat3.user;
-
-import uk.icat3.user.facility.ISISUser;
-
-/**
- *
+ * Added UserManager class that will act as the user database implementation 
+ * and will be used directly by icat3.  In fact, this class will delegate all 
+ * method calls to a facility specific implementation of the User.java interface 
+ * (e.g. to ISISUser.java - which will provide all the necessary work to 
+ * retrieve the desired information from the ISIS user database and present it 
+ * in a form digestable for icat3).
+ * 
  * @author df01
+ * @version 1.0
  */
 public class UserManager implements User {        
     private User user;
