@@ -10,11 +10,14 @@
 package uk.icat3.test;
 
 import java.util.Collection;
+import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Investigation;
+import uk.icat3.search.AdvancedSearchDTO;
 import uk.icat3.search.Search;
 import uk.icat3.util.EntityManagerResource;
 
@@ -102,6 +105,38 @@ public class TestSearch {
         
     }
     
+    public void seachByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun) throws Exception {
+        
+        setUp();
+        
+        //test code here
+        log.info("Testing");
+        Collection<Datafile> datafiles = Search.searchByRunNumber(userId,instruments,startRun,endRun, 0,300,em);
+        log.info("Results: "+datafiles.size());
+        for(Datafile datafile : datafiles){
+            log.info(datafile.getId());
+        }
+        
+        tearDown();
+        
+    }
+    
+    public void seachByAdvanced(String userId, AdvancedSearchDTO dto) throws Exception {
+        
+        setUp();
+        
+        //test code here
+        log.info("Testing");
+        Collection<Investigation> investigations =  Search.searchByAdvanced(userId,dto, 0,300,em);
+        log.info("Results: "+investigations.size());
+        for(Investigation investigation : investigations){
+            log.info(investigation.getId()+" "+investigation.getTitle());
+        }
+        
+        tearDown();
+        
+    }
+    
     
     /**
      * @param args the command line arguments
@@ -111,12 +146,27 @@ public class TestSearch {
         
         TestSearch ts = new TestSearch();
         
-       // ts.seachByKeyword("885", "Applicatio");
+        // ts.seachByKeyword("885", "Applicatio");
         
-      //  ts.seachBySurname("885", "Stuar,");
+        //  ts.seachBySurname("885", "Stuar,");
         
-       //   ts.seachByUserID("885", "dis79");
-           ts.seachByUserID("885", "gjd37");
+        //   ts.seachByUserID("885", "dis79");
+        // ts.seachByUserID("885", "gjd37");
+        
+        
+       /* Collection<String> in  =   new ArrayList<String>();
+        in.add("alf");
+        
+        ts.seachByRunNumber("JAMES", in, 0L,2000L);*/
+        
+        AdvancedSearchDTO dto = new AdvancedSearchDTO();
+        
+        dto.setExperimentTitle("RROT=-85");
+        dto.setInvestigators("HEALY");
+        dto.setYearRangeStart(new Date(120,1,1));  //120 = 2020
+        dto.setYearRangeEnd(new Date(120,1,1));
+        
+        ts.seachByAdvanced("JAMES",dto);
     }
     
 }

@@ -51,10 +51,11 @@ import uk.icat3.util.Queries;
         @NamedQuery(name = "Investigation.findByGrantId", query = "SELECT i FROM Investigation i WHERE i.grantId = :grantId"),
         @NamedQuery(name = "Investigation.findByReleaseDate", query = "SELECT i FROM Investigation i WHERE i.releaseDate = :releaseDate"),
         @NamedQuery(name = "Investigation.findByModTime", query = "SELECT i FROM Investigation i WHERE i.modTime = :modTime"),
-        @NamedQuery(name = "Investigation.findByModId", query = "SELECT i FROM Investigation i WHERE i.modId = :modId")
+        @NamedQuery(name = "Investigation.findByModId", query = "SELECT i FROM Investigation i WHERE i.modId = :modId"),
         
         //Added searches for ICAT3 API
-         // @NamedQuery(name = Queries.INVESTIGATIONS_BY_KEYWORD, query ="SELECT  FROM  (SELECT Investigation i FROM i WHERE i.investigatorCollection.investigatorPK.facilityUserId = :userId) ")
+        // @NamedQuery(name = Queries.INVESTIGATIONS_BY_KEYWORD, query ="SELECT  FROM  (SELECT Investigation i FROM i WHERE i.investigatorCollection.investigatorPK.facilityUserId = :userId) ")
+        @NamedQuery(name = Queries.ADVANCED_SEARCH, query ="SELECT  i FROM Investigation i WHERE (i.investigatorCollection.investigatorPK.facilityUserId = :userId OR i.investigatorCollection IS EMPTY) AND (i.title LIKE :investigationName OR :investigationName IS NULL) AND (i.sampleCollection.name LIKE :sampleName OR :sampleName IS NULL) AND (i.investigatorCollection.facilityUser.lastName LIKE :investigatorName OR :investigatorName IS NULL) AND (i.releaseDate < :endDate OR :endDate IS NULL) AND (i.releaseDate > :startDate OR :startDate IS NULL)")
   
       
     })

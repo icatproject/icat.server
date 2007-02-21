@@ -34,15 +34,25 @@
         <class>uk.icat3.entity.DatasetLevelPermission</class>
         <class>uk.icat3.entity.UserAccessGroup</class>
         <class>uk.icat3.entity.TopicList</class>
-        <properties>
+         <properties>
+            <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))"/>
+            <property name="toplink.jdbc.user" value="icatisis"/>
+            <property name="toplink.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
+            <property name="toplink.jdbc.password" value="ihave4name"/>
+            <property name="toplink.logging.level" value="FINE"/> 
+            
+            <property name="toplink.cache.shared.default" value="false"/>
+        </properties>
+        
+        <!--<properties>
             <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))"/>
             <property name="toplink.jdbc.user" value="icatdls"/>
             <property name="toplink.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
-            <property name="toplink.jdbc.password" value="ihave4name"/>
+            <property name="toplink.jdbc.password" value="ihave4name"/>-->
             <!-- Prints out SQL generated from EJBQL -->
-            <property name="toplink.logging.level" value="FINE"/> 
+            <!--<property name="toplink.logging.level" value="FINE"/> -->
             <!-- Not caching of entity data -->
-            <property name="toplink.cache.shared.default" value="false"/>
-        </properties>
+            <!--<property name="toplink.cache.shared.default" value="false"/>
+        </properties>-->
     </persistence-unit>
 </persistence>

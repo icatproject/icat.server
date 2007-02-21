@@ -25,6 +25,8 @@ public class Queries {
     public static final String INVESTIGATION_NATIVE_LIST_BY_USERID = "Investigation.findByUserIDNative";
     
     
+    public static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER = "Datafile.findByRunNumberNative";
+    public static final String DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER = "Datafile.findByRunNumber";
     
-    
+    public static final String ADVANCED_SEARCH = "Investigation.findByAdvancedSearch";
 }

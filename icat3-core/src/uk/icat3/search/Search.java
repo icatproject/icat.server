@@ -10,9 +10,10 @@
 package uk.icat3.search;
 
 import java.util.Collection;
-import javax.naming.directory.SearchResult;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.util.Queries;
@@ -177,6 +178,63 @@ public class Search {
      */
     public static Collection<Investigation> searchByUserID(String userId, String searchUserId, int startIndex, int number_results, EntityManager manager)  {
         return  searchByUserImpl(userId, searchUserId, SearchType.USERID, startIndex, number_results, manager);
+    }
+    
+    
+    public static Collection<Datafile> searchByRunNumberImpl(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
+        if(instruments == null) throw new IllegalArgumentException("Instrument collection cannot be null");
+        log.trace("searchByRunNumber("+userId+", "+instruments.toArray()+", "+startRun+", "+endRun+", EntityManager)");
+        
+        
+        
+        if(number_results < 0){
+            return  manager.createNamedQuery(Queries.DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER).setParameter("userId",userId).setParameter("instrument",instruments.iterator().next()).setParameter("lower",startRun).setParameter("upper",endRun).getResultList();
+        } else {
+            // return  manager.createNamedQuery(Queries.DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER).setParameter("userId",userId).setParameter("instrument",instruments.iterator().next()).setParameter("lower",startRun).setParameter("upper",endRun).setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+            return  manager.createNamedQuery(Queries.DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER).setParameter("lower",startRun).setParameter("upper",endRun).setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+            
+        }
+        
+    }
+    
+    public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun, EntityManager manager){
+        return searchByRunNumberImpl(userId, instruments, startRun, endRun, -1,-1, manager);
+    }
+    
+    public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
+        return searchByRunNumberImpl(userId, instruments, startRun, endRun, startIndex, number_results, manager);
+        
+    }
+    
+    
+    public static Collection<Investigation> searchByAdvancedImpl(String userId, AdvancedSearchDTO advanDTO,int startIndex, int number_results, EntityManager manager){
+        if(advanDTO == null) throw new IllegalArgumentException("AdvancedSearchDTO cannot be null");
+        log.trace("searchByAdvancedImpl("+userId+", "+advanDTO);
+        
+        Query query = manager.createNamedQuery(Queries.ADVANCED_SEARCH);
+        query = query.setParameter("userId",userId);
+        
+        //add all of the advanced search criteria
+        //  query = query.setParameter("year",advanDTO.getYear());
+        query = query.setParameter("investigationName",advanDTO.getExperimentTitle());
+        query = query.setParameter("sampleName",advanDTO.getSampleName());
+        query = query.setParameter("investigatorName",advanDTO.getSampleType());
+        query = query.setParameter("startDate",advanDTO.getYearRangeStart());
+        query = query.setParameter("endDate",advanDTO.getYearRangeEnd());
+        
+        if(number_results < 0){
+            return query.getResultList();
+        } else {
+            return query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+        }
+    }
+    
+    public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDTO advanDTO,int startIndex, int number_results, EntityManager manager){
+        return searchByAdvancedImpl(userId, advanDTO, startIndex, number_results, manager);
+    }
+    
+    public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDTO advanDTO, EntityManager manager){
+        return searchByAdvancedImpl(userId, advanDTO, -1, -1, manager);
     }
     
     
