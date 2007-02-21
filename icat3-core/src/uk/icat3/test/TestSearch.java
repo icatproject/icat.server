@@ -161,7 +161,7 @@ public class TestSearch {
         
         AdvancedSearchDTO dto = new AdvancedSearchDTO();
         
-        dto.setExperimentTitle("RROT=-85");
+        dto.setInvestigationName("RROT=-85");
         dto.setInvestigators("HEALY");
         dto.setYearRangeStart(new Date(120,1,1));  //120 = 2020
         dto.setYearRangeEnd(new Date(120,1,1));

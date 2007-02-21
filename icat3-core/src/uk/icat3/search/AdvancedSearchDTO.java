@@ -21,8 +21,8 @@ public class AdvancedSearchDTO {
     private String experimentTitle;
     private String investigationName;
     private String investigators;
-    private String experimentNumber;
-    private String[] instruments;
+    private String experimentNumber; //inv_number
+    private String instrument;
     private Long runStart;
     private Long runEnd;
  //   ParameterSearchTerm[] parameterSearchTerms;
@@ -40,13 +40,15 @@ public class AdvancedSearchDTO {
     public AdvancedSearchDTO() {
     }
 
-    public String getExperimentTitle() {
+    
+    //this is investigation name
+    /*public String getExperimentTitle() {
         return experimentTitle;
     }
 
     public void setExperimentTitle(String experimentTitle) {
         this.experimentTitle = experimentTitle;
-    }
+    }*/
 
     public String getInvestigationName() {
         return investigationName;
@@ -72,12 +74,12 @@ public class AdvancedSearchDTO {
         this.experimentNumber = experimentNumber;
     }
 
-    public String[] getInstruments() {
-        return instruments;
+    public String getInstrument() {
+        return instrument;
     }
 
-    public void setInstruments(String[] instruments) {
-        this.instruments = instruments;
+    public void setInstrument(String instrument) {
+        this.instrument = instrument;
     }
 
     public Long getRunStart() {

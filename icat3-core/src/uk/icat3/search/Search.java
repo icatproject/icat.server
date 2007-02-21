@@ -10,11 +10,13 @@
 package uk.icat3.search;
 
 import java.util.Collection;
+import java.util.HashSet;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.Keyword;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.util.Queries;
 
@@ -254,11 +256,12 @@ public class Search {
         
         //add all of the advanced search criteria
         //  query = query.setParameter("year",advanDTO.getYear());
-        query = query.setParameter("investigationName",advanDTO.getExperimentTitle());
+        query = query.setParameter("investigationName",advanDTO.getInvestigationName());
         query = query.setParameter("sampleName",advanDTO.getSampleName());
         query = query.setParameter("investigatorName",advanDTO.getSampleType());
         query = query.setParameter("startDate",advanDTO.getYearRangeStart());
         query = query.setParameter("endDate",advanDTO.getYearRangeEnd());
+        query = query.setParameter("instrument",advanDTO.getInstrument());
         
         if(number_results < 0){
             return query.getResultList();
@@ -291,5 +294,39 @@ public class Search {
         return searchByAdvancedImpl(userId, advanDTO, -1, -1, manager);
     }
     
+    
+    /**
+     * 
+     * @param userId 
+     * @param manager 
+     * @return 
+     */
+    public static Collection<String> getKeywordsForUser(String userId, EntityManager manager){
+        log.trace("getKeywordsForUser("+userId+", EntityManager)");
+        
+        Collection<Investigation> investigations = manager.createNamedQuery(Queries.INVESTIGATIONS_BY_USER).setParameter("userId",userId).getResultList();
+        
+        //Turn into String Array
+        Collection<String> keywords = new HashSet<String>();
+        for(Investigation investigation : investigations){
+            for(Keyword keyword : investigation.getKeywordCollection()){
+                keywords.add(keyword.getKeywordPK().getName());
+            }
+        }
+        return keywords;
+        
+    }
+    
+    /**
+     * 
+     * @param manager 
+     * @return 
+     */
+    public static Collection<String> getAllKeywords(EntityManager manager){
+        log.trace("getAllKeywords(EntityManager)");
+        Collection<String> keywords = manager.createNamedQuery(Queries.ALLKEYWORDS_NATIVE).getResultList();
+        
+        return keywords;
+    }
     
 }

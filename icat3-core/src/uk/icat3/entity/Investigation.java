@@ -35,34 +35,40 @@ import uk.icat3.util.Queries;
 
 /**
  * Entity class Investigation
- * 
+ *
  * @author gjd37
  */
 @Entity
 @Table(name = "INVESTIGATION")
 @NamedQueries( {
-        @NamedQuery(name = "Investigation.findById", query = "SELECT i FROM Investigation i WHERE i.id = :id"),
-        @NamedQuery(name = "Investigation.findByInvNumber", query = "SELECT i FROM Investigation i WHERE i.invNumber = :invNumber"),
-        @NamedQuery(name = "Investigation.findByVisitId", query = "SELECT i FROM Investigation i WHERE i.visitId = :visitId"),
-        @NamedQuery(name = "Investigation.findByTitle", query = "SELECT i FROM Investigation i WHERE i.title = :title"),
-        @NamedQuery(name = "Investigation.findByInvAbstract", query = "SELECT i FROM Investigation i WHERE i.invAbstract = :invAbstract"),
-        @NamedQuery(name = "Investigation.findByPrevInvNumber", query = "SELECT i FROM Investigation i WHERE i.prevInvNumber = :prevInvNumber"),
-        @NamedQuery(name = "Investigation.findByBcatInvStr", query = "SELECT i FROM Investigation i WHERE i.bcatInvStr = :bcatInvStr"),
-        @NamedQuery(name = "Investigation.findByGrantId", query = "SELECT i FROM Investigation i WHERE i.grantId = :grantId"),
-        @NamedQuery(name = "Investigation.findByReleaseDate", query = "SELECT i FROM Investigation i WHERE i.releaseDate = :releaseDate"),
-        @NamedQuery(name = "Investigation.findByModTime", query = "SELECT i FROM Investigation i WHERE i.modTime = :modTime"),
-        @NamedQuery(name = "Investigation.findByModId", query = "SELECT i FROM Investigation i WHERE i.modId = :modId"),
-        
-        //Added searches for ICAT3 API
-        // @NamedQuery(name = Queries.INVESTIGATIONS_BY_KEYWORD, query ="SELECT  FROM  (SELECT Investigation i FROM i WHERE i.investigatorCollection.investigatorPK.facilityUserId = :userId) ")
-        @NamedQuery(name = Queries.ADVANCED_SEARCH, query ="SELECT  i FROM Investigation i WHERE (i.investigatorCollection.investigatorPK.facilityUserId = :userId OR i.investigatorCollection IS EMPTY) AND (i.title LIKE :investigationName OR :investigationName IS NULL) AND (i.sampleCollection.name LIKE :sampleName OR :sampleName IS NULL) AND (i.investigatorCollection.facilityUser.lastName LIKE :investigatorName OR :investigatorName IS NULL) AND (i.releaseDate < :endDate OR :endDate IS NULL) AND (i.releaseDate > :startDate OR :startDate IS NULL)")
-  
-      
-    })
+    @NamedQuery(name = "Investigation.findById", query = "SELECT i FROM Investigation i WHERE i.id = :id"),
+    @NamedQuery(name = "Investigation.findByInvNumber", query = "SELECT i FROM Investigation i WHERE i.invNumber = :invNumber"),
+    @NamedQuery(name = "Investigation.findByVisitId", query = "SELECT i FROM Investigation i WHERE i.visitId = :visitId"),
+    @NamedQuery(name = "Investigation.findByTitle", query = "SELECT i FROM Investigation i WHERE i.title = :title"),
+    @NamedQuery(name = "Investigation.findByInvAbstract", query = "SELECT i FROM Investigation i WHERE i.invAbstract = :invAbstract"),
+    @NamedQuery(name = "Investigation.findByPrevInvNumber", query = "SELECT i FROM Investigation i WHERE i.prevInvNumber = :prevInvNumber"),
+    @NamedQuery(name = "Investigation.findByBcatInvStr", query = "SELECT i FROM Investigation i WHERE i.bcatInvStr = :bcatInvStr"),
+    @NamedQuery(name = "Investigation.findByGrantId", query = "SELECT i FROM Investigation i WHERE i.grantId = :grantId"),
+    @NamedQuery(name = "Investigation.findByReleaseDate", query = "SELECT i FROM Investigation i WHERE i.releaseDate = :releaseDate"),
+    @NamedQuery(name = "Investigation.findByModTime", query = "SELECT i FROM Investigation i WHERE i.modTime = :modTime"),
+    @NamedQuery(name = "Investigation.findByModId", query = "SELECT i FROM Investigation i WHERE i.modId = :modId"),
     
+    //Added searches for ICAT3 API
+    // @NamedQuery(name = Queries.INVESTIGATIONS_BY_KEYWORD, query ="SELECT  FROM  (SELECT Investigation i FROM i WHERE i.investigatorCollection.investigatorPK.facilityUserId = :userId) ")
+    @NamedQuery(name = Queries.ADVANCED_SEARCH, query ="SELECT i FROM Investigation i WHERE (i.investigatorCollection.investigatorPK.facilityUserId = :userId OR i.investigatorCollection IS EMPTY) AND " +
+    "(i.title LIKE :investigationName OR :investigationName IS NULL) AND " +
+            "(i.sampleCollection.name LIKE :sampleName OR :sampleName IS NULL) AND" +
+            " (i.investigatorCollection.facilityUser.lastName LIKE :investigatorName OR :investigatorName IS NULL) AND" +
+            " (i.releaseDate < :endDate OR :endDate IS NULL) AND (i.releaseDate > :startDate OR :startDate IS NULL) AND" +
+            " (i.instrument.name LIKE :instrument OR :instrument IS NULL)"),
+    @NamedQuery(name = Queries.INVESTIGATIONS_BY_USER, query ="SELECT i FROM Investigation i WHERE (i.investigatorCollection.investigatorPK.facilityUserId = :userId OR i.investigatorCollection IS EMPTY)")
+    
+    
+})
+
 @NamedNativeQueries({
-   // @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD+"2", query="SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE FROM INVESTIGATION t0, INVESTIGATOR t1, KEYWORD t2 WHERE (((t2.NAME = ?3) AND (t2.INVESTIGATION_ID = t0.ID))) ALL  (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE FROM INVESTIGATION t0, INVESTIGATOR t1, KEYWORD t2 WHERE ((t1.FACILITY_USER_ID = ?1) AND (t1.INVESTIGATION_ID = t0.ID) OR (((SELECT COUNT(*) FROM INVESTIGATOR t1 WHERE (t1.INVESTIGATION_ID = t0.ID)) = 0)))  )",resultSetMapping="investigationMapping"),
- 
+    // @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD+"2", query="SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE FROM INVESTIGATION t0, INVESTIGATOR t1, KEYWORD t2 WHERE (((t2.NAME = ?3) AND (t2.INVESTIGATION_ID = t0.ID))) ALL  (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE FROM INVESTIGATION t0, INVESTIGATOR t1, KEYWORD t2 WHERE ((t1.FACILITY_USER_ID = ?1) AND (t1.INVESTIGATION_ID = t0.ID) OR (((SELECT COUNT(*) FROM INVESTIGATOR t1 WHERE (t1.INVESTIGATION_ID = t0.ID)) = 0)))  )",resultSetMapping="investigationMapping"),
+    
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_USERID,  query="SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.FEDERAL_ID FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE ((t1.FACILITY_USER_ID = ?1) AND (t1.INVESTIGATION_ID = t0.ID) OR (((SELECT COUNT(*) FROM INVESTIGATOR t1 WHERE (t1.INVESTIGATION_ID = t0.ID)) = 0))) AND t2.FEDERAL_ID LIKE ?2)",resultSetMapping="investigationMapping"),
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME, query="SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE ((t1.FACILITY_USER_ID = ?1) AND (t1.INVESTIGATION_ID = t0.ID) OR (((SELECT COUNT(*) FROM INVESTIGATOR t1 WHERE (t1.INVESTIGATION_ID = t0.ID)) = 0))) AND t2.LAST_NAME LIKE ?2)",resultSetMapping="investigationMapping"),
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD, query="SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.NAME FROM INVESTIGATION t0, INVESTIGATOR t1, KEYWORD t2 WHERE ((t1.FACILITY_USER_ID = ?1) AND (t1.INVESTIGATION_ID = t0.ID) OR (((SELECT COUNT(*) FROM INVESTIGATOR t1 WHERE (t1.INVESTIGATION_ID = t0.ID)) = 0))) AND t2.NAME LIKE ?2)",resultSetMapping="investigationMapping")
@@ -73,88 +79,88 @@ import uk.icat3.util.Queries;
     @SqlResultSetMapping(name="investigationIdMappingLong",entities={@EntityResult(entityClass=Long.class)})
     
 })
-    
-public class Investigation extends EntityBaseBean implements Serializable {
 
+public class Investigation extends EntityBaseBean implements Serializable {
+    
     @Id
     @Column(name = "ID", nullable = false)
     private BigDecimal id;
-
+    
     @Column(name = "INV_NUMBER", nullable = false)
     private String invNumber;
-
+    
     @Column(name = "VISIT_ID")
     private String visitId;
-
+    
     @Column(name = "TITLE", nullable = false)
     private String title;
-
+    
     @Column(name = "INV_ABSTRACT")
     private String invAbstract;
-
+    
     @Column(name = "PREV_INV_NUMBER")
     private String prevInvNumber;
-
+    
     @Column(name = "BCAT_INV_STR")
     private String bcatInvStr;
-
+    
     @Column(name = "GRANT_ID")
     private BigInteger grantId;
-
+    
     @Column(name = "RELEASE_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date releaseDate;
-
+    
     @Column(name = "MOD_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date modTime;
-
+    
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
     private Collection<Publication> publicationCollection;
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
     private Collection<Sample> sampleCollection;
-
+    
     @JoinColumn(name = "FACILITY_CYCLE", referencedColumnName = "NAME")
     @ManyToOne
     private FacilityCycle facilityCycle;
-
+    
     @JoinColumn(name = "INSTRUMENT", referencedColumnName = "NAME")
     @ManyToOne
     private Instrument instrument;
-
+    
     @JoinColumn(name = "INV_TYPE", referencedColumnName = "NAME")
     @ManyToOne
     private InvestigationType invType;
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
     private Collection<Dataset> datasetCollection;
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<Shift> shiftCollection;
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<Keyword> keywordCollection;
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<StudyInvestigation> studyInvestigationCollection;
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
     private Collection<InvestigationLevelPermission> investigationLevelPermissionCollection;
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<Investigator> investigatorCollection;
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<TopicList> topicListCollection;
     
     /** Creates a new instance of Investigation */
     public Investigation() {
     }
-
+    
     /**
      * Creates a new instance of Investigation with the specified values.
      * @param id the id of the Investigation
@@ -162,7 +168,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public Investigation(BigDecimal id) {
         this.id = id;
     }
-
+    
     /**
      * Creates a new instance of Investigation with the specified values.
      * @param id the id of the Investigation
@@ -178,7 +184,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         this.modTime = modTime;
         this.modId = modId;
     }
-
+    
     /**
      * Gets the id of this Investigation.
      * @return the id
@@ -186,7 +192,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public BigDecimal getId() {
         return this.id;
     }
-
+    
     /**
      * Sets the id of this Investigation to the specified value.
      * @param id the new id
@@ -194,7 +200,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setId(BigDecimal id) {
         this.id = id;
     }
-
+    
     /**
      * Gets the invNumber of this Investigation.
      * @return the invNumber
@@ -202,7 +208,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public String getInvNumber() {
         return this.invNumber;
     }
-
+    
     /**
      * Sets the invNumber of this Investigation to the specified value.
      * @param invNumber the new invNumber
@@ -210,7 +216,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setInvNumber(String invNumber) {
         this.invNumber = invNumber;
     }
-
+    
     /**
      * Gets the visitId of this Investigation.
      * @return the visitId
@@ -218,7 +224,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public String getVisitId() {
         return this.visitId;
     }
-
+    
     /**
      * Sets the visitId of this Investigation to the specified value.
      * @param visitId the new visitId
@@ -226,7 +232,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setVisitId(String visitId) {
         this.visitId = visitId;
     }
-
+    
     /**
      * Gets the title of this Investigation.
      * @return the title
@@ -234,7 +240,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public String getTitle() {
         return this.title;
     }
-
+    
     /**
      * Sets the title of this Investigation to the specified value.
      * @param title the new title
@@ -242,7 +248,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setTitle(String title) {
         this.title = title;
     }
-
+    
     /**
      * Gets the invAbstract of this Investigation.
      * @return the invAbstract
@@ -250,7 +256,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public String getInvAbstract() {
         return this.invAbstract;
     }
-
+    
     /**
      * Sets the invAbstract of this Investigation to the specified value.
      * @param invAbstract the new invAbstract
@@ -258,7 +264,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setInvAbstract(String invAbstract) {
         this.invAbstract = invAbstract;
     }
-
+    
     /**
      * Gets the prevInvNumber of this Investigation.
      * @return the prevInvNumber
@@ -266,7 +272,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public String getPrevInvNumber() {
         return this.prevInvNumber;
     }
-
+    
     /**
      * Sets the prevInvNumber of this Investigation to the specified value.
      * @param prevInvNumber the new prevInvNumber
@@ -274,7 +280,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setPrevInvNumber(String prevInvNumber) {
         this.prevInvNumber = prevInvNumber;
     }
-
+    
     /**
      * Gets the bcatInvStr of this Investigation.
      * @return the bcatInvStr
@@ -282,7 +288,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public String getBcatInvStr() {
         return this.bcatInvStr;
     }
-
+    
     /**
      * Sets the bcatInvStr of this Investigation to the specified value.
      * @param bcatInvStr the new bcatInvStr
@@ -290,7 +296,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setBcatInvStr(String bcatInvStr) {
         this.bcatInvStr = bcatInvStr;
     }
-
+    
     /**
      * Gets the grantId of this Investigation.
      * @return the grantId
@@ -298,7 +304,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public BigInteger getGrantId() {
         return this.grantId;
     }
-
+    
     /**
      * Sets the grantId of this Investigation to the specified value.
      * @param grantId the new grantId
@@ -306,7 +312,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setGrantId(BigInteger grantId) {
         this.grantId = grantId;
     }
-
+    
     /**
      * Gets the releaseDate of this Investigation.
      * @return the releaseDate
@@ -314,7 +320,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public Date getReleaseDate() {
         return this.releaseDate;
     }
-
+    
     /**
      * Sets the releaseDate of this Investigation to the specified value.
      * @param releaseDate the new releaseDate
@@ -322,7 +328,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
     }
-
+    
     /**
      * Gets the modTime of this Investigation.
      * @return the modTime
@@ -330,7 +336,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public Date getModTime() {
         return this.modTime;
     }
-
+    
     /**
      * Sets the modTime of this Investigation to the specified value.
      * @param modTime the new modTime
@@ -338,7 +344,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setModTime(Date modTime) {
         this.modTime = modTime;
     }
-
+    
     /**
      * Gets the modId of this Investigation.
      * @return the modId
@@ -346,7 +352,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public String getModId() {
         return this.modId;
     }
-
+    
     /**
      * Sets the modId of this Investigation to the specified value.
      * @param modId the new modId
@@ -354,7 +360,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setModId(String modId) {
         this.modId = modId;
     }
-
+    
     /**
      * Gets the publicationCollection of this Investigation.
      * @return the publicationCollection
@@ -362,7 +368,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public Collection<Publication> getPublicationCollection() {
         return this.publicationCollection;
     }
-
+    
     /**
      * Sets the publicationCollection of this Investigation to the specified value.
      * @param publicationCollection the new publicationCollection
@@ -370,7 +376,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setPublicationCollection(Collection<Publication> publicationCollection) {
         this.publicationCollection = publicationCollection;
     }
-
+    
     /**
      * Gets the sampleCollection of this Investigation.
      * @return the sampleCollection
@@ -378,7 +384,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public Collection<Sample> getSampleCollection() {
         return this.sampleCollection;
     }
-
+    
     /**
      * Sets the sampleCollection of this Investigation to the specified value.
      * @param sampleCollection the new sampleCollection
@@ -386,7 +392,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setSampleCollection(Collection<Sample> sampleCollection) {
         this.sampleCollection = sampleCollection;
     }
-
+    
     /**
      * Gets the facilityCycle of this Investigation.
      * @return the facilityCycle
@@ -394,7 +400,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public FacilityCycle getFacilityCycle() {
         return this.facilityCycle;
     }
-
+    
     /**
      * Sets the facilityCycle of this Investigation to the specified value.
      * @param facilityCycle the new facilityCycle
@@ -402,7 +408,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setFacilityCycle(FacilityCycle facilityCycle) {
         this.facilityCycle = facilityCycle;
     }
-
+    
     /**
      * Gets the instrument of this Investigation.
      * @return the instrument
@@ -410,7 +416,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public Instrument getInstrument() {
         return this.instrument;
     }
-
+    
     /**
      * Sets the instrument of this Investigation to the specified value.
      * @param instrument the new instrument
@@ -418,7 +424,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setInstrument(Instrument instrument) {
         this.instrument = instrument;
     }
-
+    
     /**
      * Gets the invType of this Investigation.
      * @return the invType
@@ -426,7 +432,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public InvestigationType getInvType() {
         return this.invType;
     }
-
+    
     /**
      * Sets the invType of this Investigation to the specified value.
      * @param invType the new invType
@@ -434,7 +440,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setInvType(InvestigationType invType) {
         this.invType = invType;
     }
-
+    
     /**
      * Gets the datasetCollection of this Investigation.
      * @return the datasetCollection
@@ -442,7 +448,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public Collection<Dataset> getDatasetCollection() {
         return this.datasetCollection;
     }
-
+    
     /**
      * Sets the datasetCollection of this Investigation to the specified value.
      * @param datasetCollection the new datasetCollection
@@ -450,7 +456,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setDatasetCollection(Collection<Dataset> datasetCollection) {
         this.datasetCollection = datasetCollection;
     }
-
+    
     /**
      * Gets the shiftCollection of this Investigation.
      * @return the shiftCollection
@@ -458,7 +464,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public Collection<Shift> getShiftCollection() {
         return this.shiftCollection;
     }
-
+    
     /**
      * Sets the shiftCollection of this Investigation to the specified value.
      * @param shiftCollection the new shiftCollection
@@ -466,7 +472,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setShiftCollection(Collection<Shift> shiftCollection) {
         this.shiftCollection = shiftCollection;
     }
-
+    
     /**
      * Gets the keywordCollection of this Investigation.
      * @return the keywordCollection
@@ -474,7 +480,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public Collection<Keyword> getKeywordCollection() {
         return this.keywordCollection;
     }
-
+    
     /**
      * Sets the keywordCollection of this Investigation to the specified value.
      * @param keywordCollection the new keywordCollection
@@ -482,7 +488,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setKeywordCollection(Collection<Keyword> keywordCollection) {
         this.keywordCollection = keywordCollection;
     }
-
+    
     /**
      * Gets the studyInvestigationCollection of this Investigation.
      * @return the studyInvestigationCollection
@@ -490,7 +496,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public Collection<StudyInvestigation> getStudyInvestigationCollection() {
         return this.studyInvestigationCollection;
     }
-
+    
     /**
      * Sets the studyInvestigationCollection of this Investigation to the specified value.
      * @param studyInvestigationCollection the new studyInvestigationCollection
@@ -498,7 +504,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setStudyInvestigationCollection(Collection<StudyInvestigation> studyInvestigationCollection) {
         this.studyInvestigationCollection = studyInvestigationCollection;
     }
-
+    
     /**
      * Gets the investigationLevelPermissionCollection of this Investigation.
      * @return the investigationLevelPermissionCollection
@@ -506,7 +512,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public Collection<InvestigationLevelPermission> getInvestigationLevelPermissionCollection() {
         return this.investigationLevelPermissionCollection;
     }
-
+    
     /**
      * Sets the investigationLevelPermissionCollection of this Investigation to the specified value.
      * @param investigationLevelPermissionCollection the new investigationLevelPermissionCollection
@@ -514,7 +520,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setInvestigationLevelPermissionCollection(Collection<InvestigationLevelPermission> investigationLevelPermissionCollection) {
         this.investigationLevelPermissionCollection = investigationLevelPermissionCollection;
     }
-
+    
     /**
      * Gets the investigatorCollection of this Investigation.
      * @return the investigatorCollection
@@ -522,7 +528,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public Collection<Investigator> getInvestigatorCollection() {
         return this.investigatorCollection;
     }
-
+    
     /**
      * Sets the investigatorCollection of this Investigation to the specified value.
      * @param investigatorCollection the new investigatorCollection
@@ -530,7 +536,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setInvestigatorCollection(Collection<Investigator> investigatorCollection) {
         this.investigatorCollection = investigatorCollection;
     }
-
+    
     /**
      * Gets the topicListCollection of this Investigation.
      * @return the topicListCollection
@@ -538,7 +544,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public Collection<TopicList> getTopicListCollection() {
         return this.topicListCollection;
     }
-
+    
     /**
      * Sets the topicListCollection of this Investigation to the specified value.
      * @param topicListCollection the new topicListCollection
@@ -546,9 +552,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setTopicListCollection(Collection<TopicList> topicListCollection) {
         this.topicListCollection = topicListCollection;
     }
-
+    
     /**
-     * Returns a hash code value for the object.  This implementation computes 
+     * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
      */
@@ -558,10 +564,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
         hash += (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
-
+    
     /**
-     * Determines whether another object is equal to this Investigation.  The result is 
-     * <code>true</code> if and only if the argument is not null and is a Investigation object that 
+     * Determines whether another object is equal to this Investigation.  The result is
+     * <code>true</code> if and only if the argument is not null and is a Investigation object that
      * has the same id field values as this object.
      * @param object the reference object with which to compare
      * @return <code>true</code> if this object is the same as the argument;
@@ -577,9 +583,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
         if (this.id != other.id && (this.id == null || !this.id.equals(other.id))) return false;
         return true;
     }
-
+    
     /**
-     * Returns a string representation of the object.  This implementation constructs 
+     * Returns a string representation of the object.  This implementation constructs
      * that representation based on the id fields.
      * @return a string representation of the object.
      */
