@@ -1,12 +1,3 @@
-/*
- * ICATAPIException.java
- *
- * Created on 13 February 2007, 10:20
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
 package uk.icat3.exceptions;
 
 import java.io.PrintStream;
@@ -15,10 +6,17 @@ import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-/**
- * Core ICAT3API Exception class that provides nested exceptions in a string representation and also generates
- * a unique id for each exception that is thrown.  All other ICAT3API exceptions should extend this class.
+/*
+ * ICATAPIException.java
+ *
+ * Created on 13 February 2007, 10:20
+ *
+ * Core ICAT3API Exception class that provides nested exceptions in a string 
+ * representation and also generates a unique id for each exception that is 
+ * thrown.  All other ICAT3API exceptions should extend this class.
+ * 
  * @author df01
+ * @version 1.0
  */
 public class ICATAPIException extends java.lang.Exception {
     
