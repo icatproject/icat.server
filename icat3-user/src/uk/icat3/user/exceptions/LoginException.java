@@ -1,17 +1,16 @@
+
+package uk.icat3.user.exceptions;
+
 /*
  * LoginException.java
  *
  * Created on 21 February 2007, 10:17
  *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
-package uk.icat3.user.exceptions;
-
-/**
- *
+ * Exception class that must be thrown by facility user
+ * database in circumstances as decribed in User.java
+ * 
  * @author df01
+ * version 1.0
  */
 public class LoginException extends java.lang.Exception {
     
