@@ -29,7 +29,7 @@ public class AdvancedSearchDTO {
     private String sampleName;
     private String sampleType;
     private String datafileName;
-    private Timestamp year;
+    //private Timestamp year;
     private Date yearRangeStart;
     private Date yearRangeEnd;
     private String[] datafileTypes;
@@ -120,13 +120,15 @@ public class AdvancedSearchDTO {
         this.datafileName = datafileName;
     }
 
-    public Timestamp getYear() {
+    
+    //can do that with start and end
+    /*public Timestamp getYear() {
         return year;
     }
 
     public void setYear(Timestamp year) {
         this.year = year;
-    }
+    }*/
 
     public Date getYearRangeStart() {
         return yearRangeStart;

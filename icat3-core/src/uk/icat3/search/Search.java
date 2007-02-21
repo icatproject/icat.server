@@ -181,11 +181,20 @@ public class Search {
     }
     
     
+    /**
+     *
+     * @param userId
+     * @param instruments
+     * @param startRun
+     * @param endRun
+     * @param startIndex
+     * @param number_results
+     * @param manager
+     * @return
+     */
     public static Collection<Datafile> searchByRunNumberImpl(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
         if(instruments == null) throw new IllegalArgumentException("Instrument collection cannot be null");
         log.trace("searchByRunNumber("+userId+", "+instruments.toArray()+", "+startRun+", "+endRun+", EntityManager)");
-        
-        
         
         if(number_results < 0){
             return  manager.createNamedQuery(Queries.DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER).setParameter("userId",userId).setParameter("instrument",instruments.iterator().next()).setParameter("lower",startRun).setParameter("upper",endRun).getResultList();
@@ -197,16 +206,45 @@ public class Search {
         
     }
     
+    /**
+     *
+     * @param userId
+     * @param instruments
+     * @param startRun
+     * @param endRun
+     * @param manager
+     * @return
+     */
     public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun, EntityManager manager){
         return searchByRunNumberImpl(userId, instruments, startRun, endRun, -1,-1, manager);
     }
     
+    /**
+     *
+     * @param userId
+     * @param instruments
+     * @param startRun
+     * @param endRun
+     * @param startIndex
+     * @param number_results
+     * @param manager
+     * @return
+     */
     public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
         return searchByRunNumberImpl(userId, instruments, startRun, endRun, startIndex, number_results, manager);
         
     }
     
     
+    /**
+     *
+     * @param userId
+     * @param advanDTO
+     * @param startIndex
+     * @param number_results
+     * @param manager
+     * @return
+     */
     public static Collection<Investigation> searchByAdvancedImpl(String userId, AdvancedSearchDTO advanDTO,int startIndex, int number_results, EntityManager manager){
         if(advanDTO == null) throw new IllegalArgumentException("AdvancedSearchDTO cannot be null");
         log.trace("searchByAdvancedImpl("+userId+", "+advanDTO);
@@ -229,10 +267,26 @@ public class Search {
         }
     }
     
+    /**
+     *
+     * @param userId
+     * @param advanDTO
+     * @param startIndex
+     * @param number_results
+     * @param manager
+     * @return
+     */
     public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDTO advanDTO,int startIndex, int number_results, EntityManager manager){
         return searchByAdvancedImpl(userId, advanDTO, startIndex, number_results, manager);
     }
     
+    /**
+     *
+     * @param userId
+     * @param advanDTO
+     * @param manager
+     * @return
+     */
     public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDTO advanDTO, EntityManager manager){
         return searchByAdvancedImpl(userId, advanDTO, -1, -1, manager);
     }
