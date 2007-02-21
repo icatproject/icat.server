@@ -32,6 +32,7 @@ public class Search {
     
     //used for type of user search
     private enum SearchType { SURNAME, USERID };
+    
     /**
      *
      * @param userId
@@ -48,8 +49,6 @@ public class Search {
         Collection<Investigation> investigations = null;
         if(number_results < 0){
             //get all
-           // investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD).setParameter(1,userId).getResultList();
-    
             investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD).setParameter(1,userId).setParameter(2,"%"+keyword+"%").getResultList();
         } else {
             //list all Investigation ids that the users has access to
@@ -59,8 +58,8 @@ public class Search {
     }
     
     /**
-     * 
-     * 
+     *
+     *
      * @param userId userId of the user.  Could be USERID , username or federal ID
      * @param keyword
      * @param manager manager object that will facilitate interaction with underlying database
@@ -73,8 +72,8 @@ public class Search {
     }
     
     /**
-     * 
-     * 
+     *
+     *
      * @param userId userId of the user.  Could be USERID , username or federal ID
      * @param keyword
      * @param startIndex start index of the results found
@@ -106,14 +105,14 @@ public class Search {
             if(searchType == searchType.SURNAME){
                 investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME).setParameter(1,userId).setParameter(2,"%"+searchString+"%").getResultList();
             } else {
-                investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_USERID).setParameter(1,userId).setParameter(2,"%"+searchString+"%").getResultList();               
-            }           
+                investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_USERID).setParameter(1,userId).setParameter(2,"%"+searchString+"%").getResultList();
+            }
         } else {
             if(searchType == searchType.SURNAME){
                 //list all Investigation ids that the users has access to
                 investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME).setParameter(1,userId).setParameter(2,"%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             } else {
-                investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_USERID).setParameter(1,userId).setParameter(2,"%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();                
+                investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_USERID).setParameter(1,userId).setParameter(2,"%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             }
         }
         return investigations;
@@ -121,9 +120,9 @@ public class Search {
     
     
     /**
-     * 
-     * 
-     * @param userId userId of the user. 
+     *
+     *
+     * @param userId userId of the user.
      * @param surname
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
@@ -136,9 +135,9 @@ public class Search {
     
     
     /**
-     * 
-     * 
-     * @param userId userId of the user.  
+     *
+     *
+     * @param userId userId of the user.
      * @param surname
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
@@ -150,10 +149,10 @@ public class Search {
         return  searchByUserImpl(userId, surname, SearchType.SURNAME, startIndex, number_results, manager);
     }
     
-     /**
-     * 
-     * 
-     * @param userId userId of the user. 
+    /**
+     *
+     *
+     * @param userId userId of the user.
      * @param searchUserId  Could be DN , username or federal ID
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
@@ -166,10 +165,10 @@ public class Search {
     
     
     /**
-     * 
-     * 
-     * @param userId userId of the user.  
-      * @param searchUserId  Could be DN , username or federal ID
+     *
+     *
+     * @param userId userId of the user.
+     * @param searchUserId  Could be DN , username or federal ID
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
