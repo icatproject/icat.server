@@ -34,7 +34,7 @@ import javax.persistence.TemporalType;
         @NamedQuery(name = "DatafileFormat.findByVersion", query = "SELECT d FROM DatafileFormat d WHERE d.datafileFormatPK.version = :version"),
         @NamedQuery(name = "DatafileFormat.findByFormatType", query = "SELECT d FROM DatafileFormat d WHERE d.formatType = :formatType"),
         @NamedQuery(name = "DatafileFormat.findByDescription", query = "SELECT d FROM DatafileFormat d WHERE d.description = :description"),
-        @NamedQuery(name = "DatafileFormat.findByModTime", query = "SELECT d FROM DatafileFormat d WHERE d.modTime = :modTime"),
+       // @NamedQuery(name = "DatafileFormat.findByModTime", query = "SELECT d FROM DatafileFormat d WHERE d.modTime = :modTime"),
         @NamedQuery(name = "DatafileFormat.findByModId", query = "SELECT d FROM DatafileFormat d WHERE d.modId = :modId")
     })
 public class DatafileFormat extends EntityBaseBean implements Serializable {
