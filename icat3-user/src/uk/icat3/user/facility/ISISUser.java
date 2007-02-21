@@ -9,6 +9,7 @@
 
 package uk.icat3.user.facility;
 
+import com.cclrc.ral.isis.userdb.session.userdb.PersonDetailsDTO;
 import com.cclrc.ral.isis.userdb.session.userdb.UserDBFacade;
 import com.cclrc.ral.isis.userdb.session.userdb.UserDBFacadeHome;
 import java.util.Hashtable;
@@ -18,6 +19,7 @@ import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 import uk.icat3.user.User;
 import uk.icat3.user.UserDetails;
+import uk.icat3.user.exceptions.LoginException;
 
 /**
  *
@@ -28,21 +30,30 @@ public class ISISUser implements User {
     UserDBFacade userDBFacade;
     
     /** Creates a new instance of ISISUser */
-    public ISISUser() {
+    public ISISUser() throws LoginException {
         try {
-        Context context = getInitialContext();
-        UserDBFacadeHome userDBFacadeHome = (UserDBFacadeHome)PortableRemoteObject.narrow(context.lookup("ejb/userdb/UserDBFacade"), UserDBFacadeHome.class);                
-        userDBFacade = userDBFacadeHome.create();      
+            Context context = getInitialContext();
+            UserDBFacadeHome userDBFacadeHome = (UserDBFacadeHome)PortableRemoteObject.narrow(context.lookup("ejb/userdb/UserDBFacade"), UserDBFacadeHome.class);                
+            userDBFacade = userDBFacadeHome.create();      
         } catch (Exception e) {
             e.printStackTrace();
-        }
+            throw new LoginException("Unable to establish connection to ISIS User database");
+        }//end try/catch
     }      
     
-    public String getUserIdFromSessionId (String sessionId) {
-       return null; 
+    public String getUserIdFromSessionId (String sessionId) throws LoginException {        
+        Long userNum = null;
+        try {
+            userNum = userDBFacade.getUserNumberFromSessionId(sessionId);
+            if (userNum == null) throw new LoginException();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new LoginException("Unable to retrieve userid/distinguished name from ISIS user database using sessionId '" + sessionId + "'. Please try logging in again." );
+        }//end try/catch
+       return userNum.toString(); 
     }
     
-    public String login (String username, String password) {              
+    public String login (String username, String password) throws LoginException {              
       String token = null;
       
       try {
@@ -51,17 +62,42 @@ public class ISISUser implements User {
           System.out.println("logged on...sessionId is: " + token);      
       } catch (Exception e) {
           e.printStackTrace();
+          throw new LoginException();
       }
       
        return token;
     }
     
     public void logout (String sessionId) {
-        
+        try {
+            userDBFacade.logout(sessionId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }//end try/catch
     }
     
-    public UserDetails getUserDetails(String sessionId, String user) {
-        return null;
+    public UserDetails getUserDetails(String sessionId, String user) throws LoginException {
+        UserDetails details = new UserDetails();
+        
+        try {
+            
+            Long userNum = userDBFacade.getUserNumberFromSessionId(sessionId);
+            if (userNum == null) throw new LoginException();
+            
+            PersonDetailsDTO dto = userDBFacade.getPersonDetails(sessionId, new Long(user));
+            details.setTitle(dto.getTitle());
+            details.setInitial(dto.getInitials());
+            details.setFirstName(dto.getFirstNameKnownAs());
+            details.setLastName(dto.getFamilyName());
+            details.setDepartment(dto.getDeptName());
+            details.setInstitution(dto.getOrgName());
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new LoginException("An error occured while trying to retrieve UserDetails from ISIS user database for user# " + user + " with sessionId# " + sessionId);
+        }//end try/catch
+        
+        return details;
     }
     
     private static Context getInitialContext() throws NamingException {
