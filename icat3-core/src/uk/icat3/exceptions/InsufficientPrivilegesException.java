@@ -1,18 +1,15 @@
+package uk.icat3.exceptions;
+
 /*
  * InsufficientPrivilegesException.java
  *
  * Created on 13 February 2007, 09:55
  *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
-package uk.icat3.exceptions;
-
-/**
- * Exception class to denote that user does not have the appropriate privileges to perform
- * a requested operation
+ * Exception class to denote that user does not have the appropriate privileges 
+ * to perform a requested operation.  Used by the GateKeeper service.
+ *
  * @author df01
+ * @version 1.0
  */
 public class InsufficientPrivilegesException extends ICATAPIException {
     
