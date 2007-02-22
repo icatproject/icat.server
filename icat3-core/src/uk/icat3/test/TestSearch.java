@@ -18,7 +18,8 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Investigation;
 import uk.icat3.search.AdvancedSearchDTO;
-import uk.icat3.search.Search;
+import uk.icat3.search.DatafileSearch;
+import uk.icat3.search.InvestigationSearch;
 import uk.icat3.util.EntityManagerResource;
 
 /**
@@ -63,7 +64,7 @@ public class TestSearch {
         
         //test code here
         log.info("Testing");
-        Collection<Investigation> investigations = Search.searchByKeyword(userId,keyword,em);
+        Collection<Investigation> investigations = InvestigationSearch.searchByKeyword(userId,keyword,em);
         log.info("Results: "+investigations.size());
         for(Investigation investigation : investigations){
             log.info(investigation.getId());
@@ -79,7 +80,7 @@ public class TestSearch {
         
         //test code here
         log.info("Testing");
-        Collection<Investigation> investigations = Search.searchByUser(userId,surname,em);
+        Collection<Investigation> investigations = InvestigationSearch.searchByUser(userId,surname,em);
         log.info("Results: "+investigations.size());
         for(Investigation investigation : investigations){
             log.info(investigation.getId());
@@ -95,7 +96,7 @@ public class TestSearch {
         
         //test code here
         log.info("Testing");
-        Collection<Investigation> investigations = Search.searchByUserID(userId,searchUserID,em);
+        Collection<Investigation> investigations = InvestigationSearch.searchByUserID(userId,searchUserID,em);
         log.info("Results: "+investigations.size());
         for(Investigation investigation : investigations){
             log.info(investigation.getId());
@@ -111,7 +112,7 @@ public class TestSearch {
         
         //test code here
         log.info("Testing");
-        Collection<Datafile> datafiles = Search.searchByRunNumber(userId,instruments,startRun,endRun, 0,300,em);
+        Collection<Datafile> datafiles = DatafileSearch.searchByRunNumber(userId,instruments,startRun,endRun, 0,300,em);
         log.info("Results: "+datafiles.size());
         for(Datafile datafile : datafiles){
             log.info(datafile.getId());
@@ -127,7 +128,7 @@ public class TestSearch {
         
         //test code here
         log.info("Testing");
-        Collection<Investigation> investigations =  Search.searchByAdvanced(userId,dto, 0,300,em);
+        Collection<Investigation> investigations =  InvestigationSearch.searchByAdvanced(userId,dto, 0,300,em);
         log.info("Results: "+investigations.size());
         for(Investigation investigation : investigations){
             log.info(investigation.getId()+" "+investigation.getTitle());

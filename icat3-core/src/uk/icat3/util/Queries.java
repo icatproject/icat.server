@@ -60,7 +60,7 @@ public class Queries {
     
     /*
      *
-     * All the investigations that a user can view.  Ie his ones and the global ones (at the moment
+     * All the investigations that a user can view.  Ie their ones and the global ones (at the moment
      * these are ones with no ionvestigators
      *
      */
