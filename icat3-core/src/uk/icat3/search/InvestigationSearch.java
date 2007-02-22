@@ -19,7 +19,7 @@ import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Keyword;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.util.Queries;
-
+import static uk.icat3.util.Queries.*;
 /**
  * This is the service to allows access to the search throught that icat schema.
  * Checks are made through SQL and JPQL for access rights to view investigation
@@ -54,10 +54,10 @@ public class InvestigationSearch {
         Collection<Investigation> investigations = null;
         if(number_results < 0){
             //get all, maybe should limit this to 500?
-            investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD).setParameter(1,userId).setParameter(2,"%"+keyword+"%").getResultList();
+            investigations = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_KEYWORD).setParameter(1,userId).setParameter(2,"%"+keyword+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
             //list all Investigation ids that the users has access to
-            investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD).setParameter(1,userId).setParameter(2,"%"+keyword+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+            investigations = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_KEYWORD).setParameter(1,userId).setParameter(2,"%"+keyword+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         return investigations;
     }
@@ -110,18 +110,20 @@ public class InvestigationSearch {
         log.trace("searchByUserImpl("+userId+", "+searchType+", "+searchString+", "+startIndex+", "+number_results+", EntityManager)");
         Collection<Investigation> investigations = null;
         if(number_results < 0){
+            
             //get all, maybe should limit this to 500?
             if(searchType == searchType.SURNAME){
-                investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME).setParameter(1,userId).setParameter(2,"%"+searchString+"%").getResultList();
+              
+                investigations = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_SURNAME).setParameter(1,userId).setParameter(2,"%"+searchString+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             } else {
-                investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_USERID).setParameter(1,userId).setParameter(2,"%"+searchString+"%").getResultList();
+                investigations = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_USERID).setParameter(1,userId).setParameter(2,"%"+searchString+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             }
         } else {
             if(searchType == searchType.SURNAME){
                 //list all Investigation ids that the users has access to
-                investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME).setParameter(1,userId).setParameter(2,"%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+                investigations = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_SURNAME).setParameter(1,userId).setParameter(2,"%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             } else {
-                investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_USERID).setParameter(1,userId).setParameter(2,"%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+                investigations = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_USERID).setParameter(1,userId).setParameter(2,"%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             }
         }
         return investigations;
@@ -138,7 +140,7 @@ public class InvestigationSearch {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
-    public static Collection<Investigation> searchByUser(String userId, String surname, EntityManager manager) throws InsufficientPrivilegesException {
+    public static Collection<Investigation> searchByUser(String userId, String surname, EntityManager manager)  {
         //search and return all investigations
         return  searchByUserImpl(userId, surname, SearchType.SURNAME, -1, -1, manager);
     }
@@ -170,7 +172,7 @@ public class InvestigationSearch {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
-    public static Collection<Investigation> searchByUserID(String userId, String searchUserId, EntityManager manager) throws InsufficientPrivilegesException {
+    public static Collection<Investigation> searchByUserID(String userId, String searchUserId, EntityManager manager) {
         //search and return all investigations
         return  searchByUserImpl(userId, searchUserId, SearchType.USERID, -1, -1, manager);
     }
@@ -208,7 +210,7 @@ public class InvestigationSearch {
         if(advanDTO == null) throw new IllegalArgumentException("AdvancedSearchDTO cannot be null");
         log.trace("searchByAdvancedImpl("+userId+", "+advanDTO);
         
-        Query query = manager.createNamedQuery(Queries.ADVANCED_SEARCH);
+        Query query = manager.createNamedQuery(ADVANCED_SEARCH);
         query = query.setParameter("userId",userId);
         
         //add all of the advanced search criteria
@@ -222,7 +224,7 @@ public class InvestigationSearch {
         
         if(number_results < 0){
             //get all, maybe should limit this to 500?
-            return query.getResultList();
+            return query.setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
             return query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
@@ -271,9 +273,9 @@ public class InvestigationSearch {
         log.trace("getUserInvestigations("+userId+", "+startIndex+", "+number_results+", EnitiyManager)");
         if(number_results < 0){
             //get all, maybe should limit this to 500?
-            return  manager.createNamedQuery(Queries.INVESTIGATIONS_FOR_USER).setParameter("userId",userId).getResultList();
+            return  manager.createNamedQuery(INVESTIGATIONS_FOR_USER).setParameter("userId",userId).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
-            return  manager.createNamedQuery(Queries.INVESTIGATIONS_FOR_USER).setParameter("userId",userId).setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+            return  manager.createNamedQuery(INVESTIGATIONS_FOR_USER).setParameter("userId",userId).setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
     }
     

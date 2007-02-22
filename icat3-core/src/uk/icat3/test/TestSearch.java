@@ -178,11 +178,11 @@ public class TestSearch {
         //test code here
         log.info("Testing");
         Collection<Investigation> investigations =  InvestigationSearch.getUsersInvestigations(userId,em);
-        log.info("Results: "+investigations.size());
+        
         for(Investigation investigation : investigations){
             log.info(investigation.getId()+" "+investigation.getTitle());
         }
-        
+        log.info("Results: "+investigations.size());
         tearDown();
         
     }
@@ -192,20 +192,28 @@ public class TestSearch {
         
         setUp();
         
-        Vector keys = new Vector();
-        keys.addElement("ddd");
-        keys.addElement("Testing PSD");
-        Vector titles = new Vector(1);
-        titles.addElement(keys);
+        
+        
+        String INVESTIGATIONS_BY_USER_SQL = "SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
+                "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  " +
+                "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE t2.facility_user_id = t1.facility_user_id " +
+                "AND t2.federal_id = ?1 AND t0.id = t1.investigation_id UNION " +
+                "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE id NOT IN (SELECT investigation_id from investigator)) WHERE LAST_NAME LIKE ?2";
         
         //test code here
         log.info("Testing");
-        Collection<Investigation> investigations =  em.createQuery("SELECT i FROM Investigation i WHERE i.title IN (:titles)").setParameter("titles",keys.toString()).getResultList();
+       /* Collection<java.math.BigInteger> investigations =  em.createQuery(INVESTIGATIONS_BY_USER_JPQL).setMaxResults(100).getResultList();
         log.info("Results: "+investigations.size());
+        for(java.math.BigInteger investigation : investigations){
+            log.info(investigation);
+        }*/
+        
+        Collection<Investigation> investigations =  em.createNativeQuery(INVESTIGATIONS_BY_USER_SQL,Investigation.class).setParameter(1,"JAMES").setParameter(2, "HEALY").setMaxResults(100).getResultList();
+        
         for(Investigation investigation : investigations){
             log.info(investigation.getId()+" "+investigation.getTitle());
         }
-        
+        log.info("Results: "+investigations.size());
         tearDown();
         
     }
@@ -219,12 +227,12 @@ public class TestSearch {
         
         TestSearch ts = new TestSearch();
         
-        // ts.seachByKeyword("885", "Applicatio");
+        // ts.seachByKeyword("JAMES", "Appl");
         
-        //  ts.seachBySurname("885", "Stuar,");
+        // ts.seachBySurname("JAMES", "HEALY");
         
         //   ts.seachByUserID("885", "dis79");
-        // ts.seachByUserID("885", "gjd37");
+        //      ts.seachByUserID("JAMES", "JAMES");
         
         
        /* Collection<String> in  =   new ArrayList<String>();
@@ -241,13 +249,13 @@ public class TestSearch {
         
         ts.seachByAdvanced("JAMES",dto);*/
         
-        //   ts.getAllKeywords("JAMES");
+        //  ts.getAllKeywords("JAMES");
         
-        //ts.getUserKeywords("JAMES", null);
-       
-        ts.getUserInvestigations("JAMES");
+        ts.getUserKeywords("JAMES", "alf");
         
-     //   ts.test();
+        // ts.getUserInvestigations("JAMES");
+        
+        //  ts.test();
     }
     
 }

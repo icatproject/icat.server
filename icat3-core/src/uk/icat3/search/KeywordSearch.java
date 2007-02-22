@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Keyword;
 import uk.icat3.util.Queries;
-
+import static uk.icat3.util.Queries.*;
 /**
  *
  * @author gjd37
@@ -71,7 +71,7 @@ public class KeywordSearch {
         log.trace("getKeywordsForUser("+userId+", EntityManager)");
         
         if(startKeyword != null) startKeyword = startKeyword+"%";
-        Collection<String> keywords = manager.createNamedQuery(Queries.KEYWORDS_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).getResultList();
+        Collection<String> keywords = manager.createNamedQuery(KEYWORDS_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).getResultList();
         
         return keywords;
         
@@ -88,7 +88,7 @@ public class KeywordSearch {
      */
     public static Collection<String> getAllKeywords(String userId, EntityManager manager){
         log.trace("getAllKeywords("+userId+", EntityManager)");
-        Collection<String> keywords = manager.createNamedQuery(Queries.ALLKEYWORDS).setMaxResults(200).getResultList();
+        Collection<String> keywords = manager.createNamedQuery(ALLKEYWORDS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         
         return keywords;
     }
