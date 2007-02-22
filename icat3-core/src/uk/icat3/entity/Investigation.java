@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
+import javax.management.Query;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -55,23 +56,17 @@ import uk.icat3.util.Queries;
     
     //Added searches for ICAT3 API
     // @NamedQuery(name = Queries.INVESTIGATIONS_BY_KEYWORD, query ="SELECT  FROM  (SELECT Investigation i FROM i WHERE i.investigatorCollection.investigatorPK.facilityUserId = :userId) ")
-    @NamedQuery(name = Queries.ADVANCED_SEARCH, query ="SELECT i FROM Investigation i WHERE (i.investigatorCollection.investigatorPK.facilityUserId = :userId OR i.investigatorCollection IS EMPTY) AND " +
-    "(i.title LIKE :investigationName OR :investigationName IS NULL) AND " +
-            "(i.sampleCollection.name LIKE :sampleName OR :sampleName IS NULL) AND" +
-            " (i.investigatorCollection.facilityUser.lastName LIKE :investigatorName OR :investigatorName IS NULL) AND" +
-            " (i.releaseDate < :endDate OR :endDate IS NULL) AND (i.releaseDate > :startDate OR :startDate IS NULL) AND" +
-            " (i.instrument.name LIKE :instrument OR :instrument IS NULL)"),
-    @NamedQuery(name = Queries.INVESTIGATIONS_BY_USER, query ="SELECT i FROM Investigation i WHERE (i.investigatorCollection.investigatorPK.facilityUserId = :userId OR i.investigatorCollection IS EMPTY)")
+    @NamedQuery(name = Queries.ADVANCED_SEARCH, query = Queries.ADVANCED_SEARCH_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATIONS_BY_USER, query = Queries.INVESTIGATIONS_BY_USER_JPQL)
     
     
 })
 
 @NamedNativeQueries({
-    // @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD+"2", query="SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE FROM INVESTIGATION t0, INVESTIGATOR t1, KEYWORD t2 WHERE (((t2.NAME = ?3) AND (t2.INVESTIGATION_ID = t0.ID))) ALL  (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE FROM INVESTIGATION t0, INVESTIGATOR t1, KEYWORD t2 WHERE ((t1.FACILITY_USER_ID = ?1) AND (t1.INVESTIGATION_ID = t0.ID) OR (((SELECT COUNT(*) FROM INVESTIGATOR t1 WHERE (t1.INVESTIGATION_ID = t0.ID)) = 0)))  )",resultSetMapping="investigationMapping"),
-    
-    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_USERID,  query="SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.FEDERAL_ID FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE ((t1.FACILITY_USER_ID = ?1) AND (t1.INVESTIGATION_ID = t0.ID) OR (((SELECT COUNT(*) FROM INVESTIGATOR t1 WHERE (t1.INVESTIGATION_ID = t0.ID)) = 0))) AND t2.FEDERAL_ID LIKE ?2)",resultSetMapping="investigationMapping"),
-    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME, query="SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE ((t1.FACILITY_USER_ID = ?1) AND (t1.INVESTIGATION_ID = t0.ID) OR (((SELECT COUNT(*) FROM INVESTIGATOR t1 WHERE (t1.INVESTIGATION_ID = t0.ID)) = 0))) AND t2.LAST_NAME LIKE ?2)",resultSetMapping="investigationMapping"),
-    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD, query="SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.NAME FROM INVESTIGATION t0, INVESTIGATOR t1, KEYWORD t2 WHERE ((t1.FACILITY_USER_ID = ?1) AND (t1.INVESTIGATION_ID = t0.ID) OR (((SELECT COUNT(*) FROM INVESTIGATOR t1 WHERE (t1.INVESTIGATION_ID = t0.ID)) = 0))) AND t2.NAME LIKE ?2)",resultSetMapping="investigationMapping")
+    //Added searches for ICAT3 API
+    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_USERID,  query= Queries.INVESTIGATION_NATIVE_LIST_BY_USERID_SQL,resultSetMapping="investigationMapping"),
+    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_BY_USER_SURNAME_SQL, resultSetMapping="investigationMapping"),
+    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_SQL, resultSetMapping="investigationMapping")
     
 })
 @SqlResultSetMappings({
