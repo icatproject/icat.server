@@ -16,7 +16,7 @@ import org.junit.BeforeClass;
 
 /**
  *
- * Extend this when you want setUp and tear down to be called one in the class and not after and before  every @Test method
+ * Extend this when you want setUp and tear down to be called one in the class and not after and before every @Test method
  *
  * @author gjd37
  */

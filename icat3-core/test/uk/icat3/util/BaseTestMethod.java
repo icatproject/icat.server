@@ -15,7 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 
 /**
- * Extend this when you want setUp and tear down to be called after and before  every @Test method
+ * Extend this when you want setUp and tear down to be called after and before every @Test method
  *
  * @author gjd37
  */

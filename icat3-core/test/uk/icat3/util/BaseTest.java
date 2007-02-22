@@ -20,7 +20,7 @@ public class BaseTest {
     
     
     // TODO code application logic here
-    static EntityManagerFactory  emf = null;
+    static protected  EntityManagerFactory  emf = null;
     // Create new EntityManager
-    static EntityManager  em = null;
+    static protected EntityManager  em = null;
 }
