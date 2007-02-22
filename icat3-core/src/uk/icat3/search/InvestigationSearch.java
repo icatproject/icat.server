@@ -38,6 +38,8 @@ public class InvestigationSearch {
     
     /**
      *
+     * Searches the investigations the user has access to view by keyword
+     *
      * @param userId
      * @param keyword
      * @param startIndex start index of the results found
@@ -51,7 +53,7 @@ public class InvestigationSearch {
         
         Collection<Investigation> investigations = null;
         if(number_results < 0){
-            //get all
+            //get all, maybe should limit this to 500?
             investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD).setParameter(1,userId).setParameter(2,"%"+keyword+"%").getResultList();
         } else {
             //list all Investigation ids that the users has access to
@@ -62,6 +64,7 @@ public class InvestigationSearch {
     
     /**
      *
+     * Searches the investigations the user has access to view by keyword
      *
      * @param userId userId of the user.  Could be USERID , username or federal ID
      * @param keyword
@@ -76,6 +79,7 @@ public class InvestigationSearch {
     
     /**
      *
+     * Searches the investigations the user has access to view by keyword
      *
      * @param userId userId of the user.  Could be USERID , username or federal ID
      * @param keyword
@@ -92,6 +96,8 @@ public class InvestigationSearch {
     
     /**
      *
+     * Searches the investigations the user has access to view user id or surname
+     *
      * @param userId
      * @param surname
      * @param startIndex start index of the results found
@@ -104,7 +110,7 @@ public class InvestigationSearch {
         log.trace("searchByUserImpl("+userId+", "+searchType+", "+searchString+", "+startIndex+", "+number_results+", EntityManager)");
         Collection<Investigation> investigations = null;
         if(number_results < 0){
-            //get all
+            //get all, maybe should limit this to 500?
             if(searchType == searchType.SURNAME){
                 investigations = manager.createNamedQuery(Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME).setParameter(1,userId).setParameter(2,"%"+searchString+"%").getResultList();
             } else {
@@ -124,6 +130,7 @@ public class InvestigationSearch {
     
     /**
      *
+     * Searches the investigations the user has access to view by surname
      *
      * @param userId userId of the user.
      * @param surname
@@ -139,6 +146,7 @@ public class InvestigationSearch {
     
     /**
      *
+     ** Searches the investigations the user has access to view by surname
      *
      * @param userId userId of the user.
      * @param surname
@@ -154,6 +162,7 @@ public class InvestigationSearch {
     
     /**
      *
+     * Searches the investigations the user has access to view user id
      *
      * @param userId userId of the user.
      * @param searchUserId  Could be DN , username or federal ID
@@ -169,6 +178,7 @@ public class InvestigationSearch {
     
     /**
      *
+     * Searches the investigations the user has access to view user id
      *
      * @param userId userId of the user.
      * @param searchUserId  Could be DN , username or federal ID
@@ -183,10 +193,9 @@ public class InvestigationSearch {
     }
     
     
-  
-    
-    
     /**
+     *
+     *  Searches investigations from the ones they can view by the advanced criteria
      *
      * @param userId
      * @param advanDTO
@@ -195,7 +204,7 @@ public class InvestigationSearch {
      * @param manager
      * @return
      */
-    public static Collection<Investigation> searchByAdvancedImpl(String userId, AdvancedSearchDTO advanDTO,int startIndex, int number_results, EntityManager manager){
+    private static Collection<Investigation> searchByAdvancedImpl(String userId, AdvancedSearchDTO advanDTO,int startIndex, int number_results, EntityManager manager){
         if(advanDTO == null) throw new IllegalArgumentException("AdvancedSearchDTO cannot be null");
         log.trace("searchByAdvancedImpl("+userId+", "+advanDTO);
         
@@ -212,6 +221,7 @@ public class InvestigationSearch {
         query = query.setParameter("instrument",advanDTO.getInstrument());
         
         if(number_results < 0){
+            //get all, maybe should limit this to 500?
             return query.getResultList();
         } else {
             return query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
@@ -219,6 +229,8 @@ public class InvestigationSearch {
     }
     
     /**
+     *
+     *    Searches investigations from the ones they can view by the advanced criteria
      *
      * @param userId
      * @param advanDTO
@@ -233,6 +245,8 @@ public class InvestigationSearch {
     
     /**
      *
+     *  Searches investigations from the ones they can view by the advanced criteria
+     *
      * @param userId
      * @param advanDTO
      * @param manager
@@ -243,6 +257,35 @@ public class InvestigationSearch {
     }
     
     
-   
+    /**
+     *
+     *  Gets all the investigations associated with that user
+     *
+     * @param userId
+     * @param startIndex
+     * @param number_results
+     * @param manager
+     * @return
+     */
+    public static Collection<Investigation> getUsersInvestigations(String userId, int startIndex, int number_results, EntityManager manager){
+        log.trace("getUserInvestigations("+userId+", "+startIndex+", "+number_results+", EnitiyManager)");
+        if(number_results < 0){
+            //get all, maybe should limit this to 500?
+            return  manager.createNamedQuery(Queries.INVESTIGATIONS_FOR_USER).setParameter("userId",userId).getResultList();
+        } else {
+            return  manager.createNamedQuery(Queries.INVESTIGATIONS_FOR_USER).setParameter("userId",userId).setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+        }
+    }
+    
+    /**
+     * Gets all the investigations associated with that user
+     *
+     * @param userId
+     * @param manager
+     * @return
+     */
+    public static Collection<Investigation> getUsersInvestigations(String userId, EntityManager manager){
+        return getUsersInvestigations(userId,-1, -1, manager);
+    }
     
 }

@@ -2,6 +2,8 @@
 <persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
     <persistence-unit name="icat3-core-testing-PU" transaction-type="RESOURCE_LOCAL">
         <provider>oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider</provider>
+       <!-- <provider>org.hibernate.ejb.HibernatePersistence</provider>-->
+      
         <class>uk.icat3.entity.Publication</class>
         <class>uk.icat3.entity.Sample</class>
         <class>uk.icat3.entity.Investigation</class>
@@ -34,7 +36,8 @@
         <class>uk.icat3.entity.DatasetLevelPermission</class>
         <class>uk.icat3.entity.UserAccessGroup</class>
         <class>uk.icat3.entity.TopicList</class>
-         <properties>
+     
+       <properties>
             <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))"/>
             <property name="toplink.jdbc.user" value="icatisis"/>
             <property name="toplink.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
@@ -43,6 +46,16 @@
             
             <property name="toplink.cache.shared.default" value="false"/>
         </properties>
+         <!--
+           <properties>
+            <property name="hibernate.connection.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))"/>
+            <property name="hibernate.connection.driver_class" value="oracle.jdbc.driver.OracleDriver"/>
+            <property name="hibernate.connection.password" value="ihave4name"/>
+            <property name="hibernate.connection.username" value="icatisis"/>
+            <property name="hibernate.cache.provider_class" value="org.hibernate.cache.NoCacheProvider"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle9Dialect"/>
+        </properties>-->
+        
         
         <!--<properties>
             <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))"/>

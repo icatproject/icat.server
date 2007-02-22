@@ -10,7 +10,7 @@
 package uk.icat3.test;
 
 import java.util.Collection;
-import java.util.Date;
+import java.util.Vector;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -20,6 +20,7 @@ import uk.icat3.entity.Investigation;
 import uk.icat3.search.AdvancedSearchDTO;
 import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.InvestigationSearch;
+import uk.icat3.search.KeywordSearch;
 import uk.icat3.util.EntityManagerResource;
 
 /**
@@ -138,6 +139,77 @@ public class TestSearch {
         
     }
     
+    public void getAllKeywords(String userId) throws Exception {
+        
+        setUp();
+        
+        //test code here
+        log.info("Testing");
+        Collection<String> keywords =  KeywordSearch.getAllKeywords(userId,em);
+        log.info("Results: "+keywords.size());
+        for(String keyword : keywords){
+            log.info(keyword);
+        }
+        
+        tearDown();
+        
+    }
+    
+    public void getUserKeywords(String userId, String startkeyword) throws Exception {
+        
+        setUp();
+        
+        //test code here
+        log.info("Testing");
+        Collection<String> keywords =  KeywordSearch.getKeywordsForUser(userId,startkeyword,em);
+        log.info("Results: "+keywords.size());
+        for(String keyword : keywords){
+            log.info(keyword);
+        }
+        
+        tearDown();
+        
+    }
+    
+    public void getUserInvestigations(String userId) throws Exception {
+        
+        setUp();
+        
+        //test code here
+        log.info("Testing");
+        Collection<Investigation> investigations =  InvestigationSearch.getUsersInvestigations(userId,em);
+        log.info("Results: "+investigations.size());
+        for(Investigation investigation : investigations){
+            log.info(investigation.getId()+" "+investigation.getTitle());
+        }
+        
+        tearDown();
+        
+    }
+    
+    
+    public void test() throws Exception {
+        
+        setUp();
+        
+        Vector keys = new Vector();
+        keys.addElement("ddd");
+        keys.addElement("Testing PSD");
+        Vector titles = new Vector(1);
+        titles.addElement(keys);
+        
+        //test code here
+        log.info("Testing");
+        Collection<Investigation> investigations =  em.createQuery("SELECT i FROM Investigation i WHERE i.title IN (:titles)").setParameter("titles",keys.toString()).getResultList();
+        log.info("Results: "+investigations.size());
+        for(Investigation investigation : investigations){
+            log.info(investigation.getId()+" "+investigation.getTitle());
+        }
+        
+        tearDown();
+        
+    }
+    
     
     /**
      * @param args the command line arguments
@@ -160,14 +232,22 @@ public class TestSearch {
         
         ts.seachByRunNumber("JAMES", in, 0L,2000L);*/
         
-        AdvancedSearchDTO dto = new AdvancedSearchDTO();
+       /* AdvancedSearchDTO dto = new AdvancedSearchDTO();
         
         dto.setInvestigationName("RROT=-85");
         dto.setInvestigators("HEALY");
         dto.setYearRangeStart(new Date(120,1,1));  //120 = 2020
         dto.setYearRangeEnd(new Date(120,1,1));
         
-        ts.seachByAdvanced("JAMES",dto);
+        ts.seachByAdvanced("JAMES",dto);*/
+        
+        //   ts.getAllKeywords("JAMES");
+        
+        //ts.getUserKeywords("JAMES", null);
+       
+        ts.getUserInvestigations("JAMES");
+        
+     //   ts.test();
     }
     
 }

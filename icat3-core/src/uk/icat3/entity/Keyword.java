@@ -15,13 +15,19 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EntityResult;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.SqlResultSetMapping;
+import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import uk.icat3.util.Queries;
 
 /**
  * Entity class Keyword
@@ -34,8 +40,23 @@ import javax.persistence.TemporalType;
         @NamedQuery(name = "Keyword.findByInvestigationId", query = "SELECT k FROM Keyword k WHERE k.keywordPK.investigationId = :investigationId"),
         @NamedQuery(name = "Keyword.findByName", query = "SELECT k FROM Keyword k WHERE k.keywordPK.name = :name"),
         @NamedQuery(name = "Keyword.findByModTime", query = "SELECT k FROM Keyword k WHERE k.modTime = :modTime"),
-        @NamedQuery(name = "Keyword.findByModId", query = "SELECT k FROM Keyword k WHERE k.modId = :modId")
+        @NamedQuery(name = "Keyword.findByModId", query = "SELECT k FROM Keyword k WHERE k.modId = :modId"),
+        
+        //ICAT 3 queries
+        @NamedQuery(name = Queries.ALLKEYWORDS, query = Queries.ALLKEYWORDS_JPQL),
+        @NamedQuery(name = Queries.KEYWORDS_FOR_USER, query = Queries.KEYWORDS_FOR_USER_JPQL)
+     
     })
+    
+@NamedNativeQueries({
+    //Added searches for ICAT3 API
+    @NamedNativeQuery(name = Queries.ALLKEYWORDS_NATIVE, query= Queries.ALLKEYWORDS_SQL, resultSetMapping="keywordsMapping")
+    
+})
+@SqlResultSetMappings({
+    @SqlResultSetMapping(name="keywordsMapping",entities={@EntityResult(entityClass=String.class)})
+    
+})
 public class Keyword extends EntityBaseBean implements Serializable {
 
     /**

@@ -69,11 +69,38 @@ public class Queries {
             " (i.investigatorCollection.investigatorPK.facilityUserId = :userId OR i.investigatorCollection IS EMPTY)";
     
     
+    /*
+     *
+     * All the investigations of the user.  
+     *
+     */
+    public static final String INVESTIGATIONS_FOR_USER = "Investigation.findOfUser";
+    public static final String INVESTIGATIONS_FOR_USER_JPQL = "SELECT i FROM Investigation i WHERE" +
+            " i.investigatorCollection.investigatorPK.facilityUserId = :userId";
+    
+    
     
     public static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER = "Datafile.findByRunNumberNative";
     public static final String DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER = "Datafile.findByRunNumber";
     public static final String INVESTIGATIONS_BY_KEYWORD = "Investigation.findByKeyword";
     public static final String INVESTIGATION_LIST_BY_KEYWORD = "Investigation.findByKeword";
     public static final String INVESTIGATION_NATIVE_LIST_BY_SURNAME = "Investigation.findBySurnameNative";
-    public static final String ALLKEYWORDS_NATIVE = "Investigation.getAllKeywords";
+    
+    /*
+     * Find all keywords
+     *
+     */
+    public static final String ALLKEYWORDS = "Investigation.getAllKeywords";
+    public static final String ALLKEYWORDS_NATIVE = "Investigation.getAllKeywordsNative";
+    //TODO cannot lower the result in JPQL
+    public static final String ALLKEYWORDS_JPQL = "SELECT DISTINCT k.keywordPK.name FROM Keyword k ORDER BY k.keywordPK.name ASC";
+    public static final String ALLKEYWORDS_SQL = "select distinct(lower(name)) as name from keyword order by name asc";
+    
+    
+    /*
+     * Find all keywords for user
+     *
+     */
+    public static final String KEYWORDS_FOR_USER = "Keywords.getAllKeywordsForUser";
+    public static final String KEYWORDS_FOR_USER_JPQL = "SELECT DISTINCT k.keywordPK.name FROM Keyword k WHERE (k.investigation.investigatorCollection.investigatorPK.facilityUserId = :userId OR k.investigation.investigatorCollection IS EMPTY) AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) ORDER BY k.keywordPK.name";
 }
