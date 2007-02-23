@@ -36,6 +36,35 @@ public class InvestigationSearch {
     //used for type of user search
     private enum SearchType { SURNAME, USERID };
     
+    private static Collection<Long>  searchByKeywordRtnIdImpl(String userId, String keyword, int startIndex, int number_results, EntityManager manager)  {
+        log.trace("searchByKeyword("+userId+", "+keyword+", "+startIndex+", "+number_results+", EntityManager)");
+        
+        Collection<Long> investigationsId = null;
+        if(number_results < 0){
+            //get all, maybe should limit this to 500?
+            investigationsId = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID).setParameter(1,userId).setParameter(2,"%"+keyword+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+        } else {
+            //list all Investigation ids that the users has access to
+            investigationsId = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID).setParameter(1,userId).setParameter(2,"%"+keyword+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+        }
+        return investigationsId;
+    }
+    
+     /**
+     *
+     * Searches the investigations the user has access to view by keyword
+     *
+     * @param userId userId of the user.  Could be USERID , username or federal ID
+     * @param keyword
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     */
+    public static Collection<Long> searchByKeywordRtnId(String userId, String keyword, EntityManager manager) throws InsufficientPrivilegesException {
+        //search and return all investigations
+        return  searchByKeywordRtnIdImpl(userId, keyword, -1, -1, manager);
+    }
+    
     /**
      *
      * Searches the investigations the user has access to view by keyword
@@ -106,24 +135,24 @@ public class InvestigationSearch {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @return collection of {@link Investigation} investigation objects
      */
-    private  static Collection<Investigation> searchByUserImpl(String userId, String searchString, SearchType searchType, int startIndex, int number_results, EntityManager manager)  {
+    private  static Collection<Investigation> searchByUserSurnameImpl(String userId, String searchString, SearchType searchType, int startIndex, int number_results, EntityManager manager)  {
         log.trace("searchByUserImpl("+userId+", "+searchType+", "+searchString+", "+startIndex+", "+number_results+", EntityManager)");
         Collection<Investigation> investigations = null;
         if(number_results < 0){
             
             //get all, maybe should limit this to 500?
             if(searchType == searchType.SURNAME){
-              
-                investigations = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_SURNAME).setParameter(1,userId).setParameter(2,"%"+searchString+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+                
+                investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).setParameter("userId",userId).setParameter("surname","%"+searchString+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             } else {
-                investigations = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_USERID).setParameter(1,userId).setParameter(2,"%"+searchString+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+                investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).setParameter("userId",userId).setParameter("userIdSearched","%"+searchString+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             }
         } else {
             if(searchType == searchType.SURNAME){
                 //list all Investigation ids that the users has access to
-                investigations = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_SURNAME).setParameter(1,userId).setParameter(2,"%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+                investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).setParameter("userId",userId).setParameter("surname","%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             } else {
-                investigations = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_USERID).setParameter(1,userId).setParameter(2,"%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+                investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).setParameter("userId",userId).setParameter("userIdSearched","%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             }
         }
         return investigations;
@@ -140,9 +169,9 @@ public class InvestigationSearch {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
-    public static Collection<Investigation> searchByUser(String userId, String surname, EntityManager manager)  {
+    public static Collection<Investigation> searchByUserSurname(String userId, String surname, EntityManager manager)  {
         //search and return all investigations
-        return  searchByUserImpl(userId, surname, SearchType.SURNAME, -1, -1, manager);
+        return  searchByUserSurnameImpl(userId, surname, SearchType.SURNAME, -1, -1, manager);
     }
     
     
@@ -158,8 +187,8 @@ public class InvestigationSearch {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
-    public static Collection<Investigation> searchByUser(String userId, String surname, int startIndex, int number_results, EntityManager manager)  {
-        return  searchByUserImpl(userId, surname, SearchType.SURNAME, startIndex, number_results, manager);
+    public static Collection<Investigation> searchByUserSurname(String userId, String surname, int startIndex, int number_results, EntityManager manager)  {
+        return  searchByUserSurnameImpl(userId, surname, SearchType.SURNAME, startIndex, number_results, manager);
     }
     
     /**
@@ -174,7 +203,7 @@ public class InvestigationSearch {
      */
     public static Collection<Investigation> searchByUserID(String userId, String searchUserId, EntityManager manager) {
         //search and return all investigations
-        return  searchByUserImpl(userId, searchUserId, SearchType.USERID, -1, -1, manager);
+        return  searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, -1, -1, manager);
     }
     
     
@@ -191,7 +220,7 @@ public class InvestigationSearch {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
     public static Collection<Investigation> searchByUserID(String userId, String searchUserId, int startIndex, int number_results, EntityManager manager)  {
-        return  searchByUserImpl(userId, searchUserId, SearchType.USERID, startIndex, number_results, manager);
+        return  searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, startIndex, number_results, manager);
     }
     
     
@@ -290,4 +319,10 @@ public class InvestigationSearch {
         return getUsersInvestigations(userId,-1, -1, manager);
     }
     
+    public static Collection<Long> getUsersInvestigationsRtnId(String userId, EntityManager manager){
+        log.trace("getUsersInvestigationsRtnId("+userId+", EnitiyManager)");
+        
+        return  manager.createNamedQuery(INVESTIGATIONS_FOR_USER_RTN_ID).setParameter("userId",userId).getResultList();
+        
+    }
 }

@@ -58,21 +58,24 @@ import uk.icat3.util.Queries;
     // @NamedQuery(name = Queries.INVESTIGATIONS_BY_KEYWORD, query ="SELECT  FROM  (SELECT Investigation i FROM i WHERE i.investigatorCollection.investigatorPK.facilityUserId = :userId) ")
     @NamedQuery(name = Queries.ADVANCED_SEARCH, query = Queries.ADVANCED_SEARCH_JPQL),
     @NamedQuery(name = Queries.INVESTIGATIONS_BY_USER, query = Queries.INVESTIGATIONS_BY_USER_JPQL),
-    @NamedQuery(name = Queries.INVESTIGATIONS_FOR_USER, query = Queries.INVESTIGATIONS_FOR_USER_JPQL)
-   
+    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_SURNAME_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID, query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATIONS_FOR_USER, query = Queries.INVESTIGATIONS_FOR_USER_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATIONS_FOR_USER_RTN_ID, query = Queries.INVESTIGATIONS_FOR_USER_RTN_ID_JPQL)
     
 })
 
 @NamedNativeQueries({
     //Added searches for ICAT3 API
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_USERID,  query= Queries.INVESTIGATION_NATIVE_LIST_BY_USERID_SQL,resultSetMapping="investigationMapping"),
-    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_BY_USER_SURNAME_SQL, resultSetMapping="investigationMapping"),
+    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_SQL, resultSetMapping="investigationMapping"),
+    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID_SQL, resultSetMapping="investigationIdMapping"),
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_SQL, resultSetMapping="investigationMapping")
     
 })
 @SqlResultSetMappings({
     @SqlResultSetMapping(name="investigationMapping",entities={@EntityResult(entityClass=Investigation.class)}),
-    @SqlResultSetMapping(name="investigationIdMappingLong",entities={@EntityResult(entityClass=Long.class)})
+    @SqlResultSetMapping(name="investigationIdMapping",entities={@EntityResult(entityClass=Long.class)})
     
 })
 public class Investigation extends EntityBaseBean implements Serializable {

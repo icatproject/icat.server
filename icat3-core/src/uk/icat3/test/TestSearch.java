@@ -81,7 +81,7 @@ public class TestSearch {
         
         //test code here
         log.info("Testing");
-        Collection<Investigation> investigations = InvestigationSearch.searchByUser(userId,surname,em);
+        Collection<Investigation> investigations = InvestigationSearch.searchByUserSurname(userId,surname,em);
         log.info("Results: "+investigations.size());
         for(Investigation investigation : investigations){
             log.info(investigation.getId());
@@ -191,8 +191,7 @@ public class TestSearch {
     public void test() throws Exception {
         
         setUp();
-        
-        
+               
         
         String INVESTIGATIONS_BY_USER_SQL = "SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
                 "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  " +
@@ -227,35 +226,36 @@ public class TestSearch {
         
         TestSearch ts = new TestSearch();
         
-        // ts.seachByKeyword("JAMES", "Appl");
+         ts.seachByKeyword("JAMES", "ccw");
         
         // ts.seachBySurname("JAMES", "HEALY");
         
-        //   ts.seachByUserID("885", "dis79");
-        //      ts.seachByUserID("JAMES", "JAMES");
+    //    ts.seachByUserID("JAMES", "JAMES");
+        
+        // ts.seachByUserID("JAMES", "JAMES");
         
         
-       /* Collection<String> in  =   new ArrayList<String>();
+        /* Collection<String> in  =   new ArrayList<String>();
         in.add("alf");
-        
+         
         ts.seachByRunNumber("JAMES", in, 0L,2000L);*/
         
-       /* AdvancedSearchDTO dto = new AdvancedSearchDTO();
-        
+        /* AdvancedSearchDTO dto = new AdvancedSearchDTO();
+         
         dto.setInvestigationName("RROT=-85");
         dto.setInvestigators("HEALY");
         dto.setYearRangeStart(new Date(120,1,1));  //120 = 2020
         dto.setYearRangeEnd(new Date(120,1,1));
-        
+         
         ts.seachByAdvanced("JAMES",dto);*/
         
-        //  ts.getAllKeywords("JAMES");
+        // ts.getAllKeywords("JAMES");
         
-        ts.getUserKeywords("JAMES", "alf");
+        // ts.getUserKeywords("JAMES", "alf");
         
         // ts.getUserInvestigations("JAMES");
         
-        //  ts.test();
+        // ts.test();
     }
     
 }
