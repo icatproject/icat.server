@@ -44,7 +44,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Collection 'userInvestigations' should be zero size", 0 , userInvestigations.size());
         
         log.debug("Testing user investigations: "+INVALID_USER);        
-        Collection<Investigation> investigationsSurname = InvestigationSearch.searchByUser(INVALID_USER, VALID_INVESTIGATION_SURNAME, em);
+        Collection<Investigation> investigationsSurname = InvestigationSearch.searchByUserSurname(INVALID_USER, VALID_INVESTIGATION_SURNAME, em);
         log.trace("Investigations for user "+VALID_INVESTIGATION_SURNAME+" is "+investigationsSurname.size());        
         
         assertNotNull("Must not be an empty collection", investigationsSurname);
