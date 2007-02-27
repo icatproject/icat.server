@@ -16,7 +16,7 @@ import javax.persistence.EntityNotFoundException;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
-import uk.icat3.manager.InvestigationUtil;
+import uk.icat3.manager.ManagerUtil;
 
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
@@ -59,7 +59,7 @@ public class InvestigationManager {
         }
         
         //add include information
-        InvestigationUtil.getInvestigationInformation(investigations, includes);
+        ManagerUtil.getInvestigationInformation(investigations, includes);
         
         return investigations;
     }

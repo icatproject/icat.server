@@ -15,7 +15,7 @@ import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
-import uk.icat3.manager.InvestigationUtil;
+import uk.icat3.manager.ManagerUtil;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 import static uk.icat3.util.Queries.*;
@@ -389,7 +389,7 @@ public class InvestigationSearch {
             investigations = query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         
-        InvestigationUtil.getInvestigationInformation(investigations,include);
+        ManagerUtil.getInvestigationInformation(investigations,include);
         
         return investigations;
     }

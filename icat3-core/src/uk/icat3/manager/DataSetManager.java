@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
-import uk.icat3.manager.InvestigationUtil;
+import uk.icat3.manager.ManagerUtil;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.DatasetInclude;
@@ -126,13 +126,20 @@ public class DataSetManager {
         }
         
         //add include information
-        DatasetUtil.getDatasetInformation(datasets, includes);
+        ManagerUtil.getDatasetInformation(datasets, includes);
         
         return datasets;
     }
     
     public Collection<Dataset> getDataSets(String userId, Collection<Long> dataSetIds, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         return getDataSets(userId, dataSetIds,DatasetInclude.NONE, manager);
+    }
+    
+    public Collection<Dataset> getDataSet(String userId, Long dataSetId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+        Collection<Long> datasets = new ArrayList<Long>();
+        datasets.add(dataSetId);
+        
+        return getDataSets(userId, datasets, DatasetInclude.NONE, manager);
     }
     
     private Dataset checkDataSet(Long datasetId, EntityManager manager) throws EntityNotFoundException {
