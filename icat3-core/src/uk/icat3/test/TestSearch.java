@@ -19,12 +19,13 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.manager.InvestigationManager;
 import uk.icat3.search.AdvancedSearchDTO;
 import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.InvestigationSearch;
-import uk.icat3.search.InvestigationUtil.Includes;
 import uk.icat3.search.KeywordSearch;
 import uk.icat3.util.EntityManagerResource;
+import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 
 /**
@@ -49,6 +50,9 @@ public class TestSearch {
         em = emf.createEntityManager();
         EntityManagerResource.getInstance().set(em);
         
+        
+        
+     
         // Begin transaction
         em.getTransaction().begin();
         
@@ -68,7 +72,7 @@ public class TestSearch {
         
         //test code here
         log.info("Testing");
-        Collection<Investigation> investigations = InvestigationSearch.getInvestigations(userId, ids, em);
+        Collection<Investigation> investigations = InvestigationManager.getInvestigations(userId, ids, em);
         
         for(Investigation investigation : investigations){
             log.info(investigation.getId());
@@ -83,7 +87,7 @@ public class TestSearch {
         
         //test code here
         log.info("Testing");
-        Investigation investigation = InvestigationSearch.getInvestigation(userId, id, em);
+        Investigation investigation = InvestigationManager.getInvestigation(userId, id, em);
         
         
         log.info(investigation.getId());
@@ -110,7 +114,7 @@ public class TestSearch {
         
     }
     
-    public  void seachByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, Includes includes) throws Exception {
+    public  void seachByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, InvestigationInclude includes) throws Exception {
         
         setUp();
         

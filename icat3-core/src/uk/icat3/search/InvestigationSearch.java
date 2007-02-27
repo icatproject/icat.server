@@ -9,17 +9,14 @@
 
 package uk.icat3.search;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
-import uk.icat3.search.InvestigationUtil.Includes;
-import uk.icat3.security.GateKeeper;
-import uk.icat3.util.AccessType;
+import uk.icat3.manager.InvestigationUtil;
+import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 import static uk.icat3.util.Queries.*;
 /**
@@ -38,50 +35,7 @@ public class InvestigationSearch {
     //used for type of user search
     private enum SearchType { SURNAME, USERID };
     
-    /**
-     *
-     * @param userId
-     * @param investigationIds
-     * @param includes
-     * @param manager
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws javax.persistence.EntityNotFoundException
-     * @return
-     */
-    public static  Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds, Includes includes, EntityManager manager) throws InsufficientPrivilegesException, EntityNotFoundException {
-        log.trace("getInvestigations("+userId+", "+investigationIds+", EntityManager)");
-        
-        Collection<Investigation> investigations = new ArrayList<Investigation>();
-        
-        for(Long investigationId : investigationIds) {
-            //find the investigation
-            Investigation investigation = manager.find(Investigation.class, investigationId);
-            
-            //check if the id exists in the database
-            if(investigation == null) throw new EntityNotFoundException("Investigation: id: "+investigationId+" not found.");
-            
-            //check user has read access
-            GateKeeper.performAuthorisation(userId, investigation, AccessType.READ, manager);
-            
-            //add to arraylist
-            investigations.add(investigation);
-        }
-        
-        //add include information
-        InvestigationUtil.getInvestigationInformation(investigations, includes);
-        
-        return investigations;
-    }
-    
-    public static Investigation getInvestigation(String userId, Long investigationId, EntityManager manager) throws InsufficientPrivilegesException, EntityNotFoundException {
-        Collection<Long> investigationIds = new ArrayList<Long>();
-        investigationIds.add(investigationId);
-        return getInvestigations(userId, investigationIds, Includes.NONE, manager).iterator().next();
-    }
-    
-    public static  Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds, EntityManager manager) throws InsufficientPrivilegesException, EntityNotFoundException {
-        return getInvestigations(userId, investigationIds, Includes.NONE, manager);
-    }
+   
     
     private static Collection<Long>  searchByKeywordRtnIdImpl(String userId, String keyword, int startIndex, int number_results, EntityManager manager)  {
         log.trace("searchByKeyword("+userId+", "+keyword+", "+startIndex+", "+number_results+", EntityManager)");
@@ -379,7 +333,7 @@ public class InvestigationSearch {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator,  Includes include, boolean fuzzy, boolean use_security, int startIndex, int number_results, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator,  InvestigationInclude include, boolean fuzzy, boolean use_security, int startIndex, int number_results, EntityManager manager)  {
         log.trace("searchByKeyword("+userId+", "+keywords+", "+operator +", "+include+", "+fuzzy+", "+use_security+", "+startIndex+", "+number_results+", EntityManager)");
         
         Collection<Investigation> investigations = null;
@@ -440,42 +394,42 @@ public class InvestigationSearch {
         return investigations;
     }
     
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, Includes includes, boolean fuzzy, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, boolean fuzzy, EntityManager manager)  {
         //secuirty on, AND
         return searchByKeywords(userId, keywords, LogicalOperator.AND, includes, fuzzy ,true , -1, -1, manager);
     }
     
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, boolean fuzzy, EntityManager manager)  {
         //secuirty on, AND, no includes
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, Includes.NONE, fuzzy ,true , -1, -1, manager);
+        return searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationInclude.NONE, fuzzy ,true , -1, -1, manager);
     }
     
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, EntityManager manager)  {
         //exact match, secuirty true, AND
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, Includes.NONE, false ,true ,-1 , -1,manager);
+        return searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationInclude.NONE, false ,true ,-1 , -1,manager);
     }
     
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, Includes includes, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, EntityManager manager)  {
         //exact match, secuirty true, AND
         return searchByKeywords(userId, keywords, LogicalOperator.AND, includes, false ,true ,-1 , -1,manager);
     }
     
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, EntityManager manager)  {
         //exact match, secuirty true, AND
-        return searchByKeywords(userId, keywords, operator, Includes.NONE, false ,true ,-1 , -1,manager);
+        return searchByKeywords(userId, keywords, operator, InvestigationInclude.NONE, false ,true ,-1 , -1,manager);
     }
     
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, Includes includes, LogicalOperator operator, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, LogicalOperator operator, EntityManager manager)  {
         //exact match, secuirty true, AND
         return searchByKeywords(userId, keywords, operator, includes,  false ,true ,-1 , -1,manager);
     }
     
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, EntityManager manager)  {
         //exact match, secuirty true,
-        return searchByKeywords(userId, keywords, operator, Includes.NONE, fuzzy ,true ,-1 , -1,manager);
+        return searchByKeywords(userId, keywords, operator, InvestigationInclude.NONE, fuzzy ,true ,-1 , -1,manager);
     }
     
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, Includes includes, boolean fuzzy, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude includes, boolean fuzzy, EntityManager manager)  {
         //exact match, secuirty true,
         return searchByKeywords(userId, keywords, operator, includes, fuzzy ,true ,-1 , -1,manager);
     }

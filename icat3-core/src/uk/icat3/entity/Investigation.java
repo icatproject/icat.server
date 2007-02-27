@@ -455,6 +455,21 @@ public class Investigation extends EntityBaseBean implements Serializable {
         this.datasetCollection = datasetCollection;
     }
     
+    
+    /**
+     * Adds a DataSet to the investigation,
+     * also adds the investigation to the DataSet.
+     */
+    public void addDataSet(Dataset dataSet){
+        dataSet.setInvestigationId(this);
+        
+        Collection<Dataset> datasets = this.getDatasetCollection();
+        datasets.add(dataSet);
+        
+        this.setDatasetCollection(datasets);
+        
+    }
+    
     /**
      * Gets the shiftCollection of this Investigation.
      * @return the shiftCollection
