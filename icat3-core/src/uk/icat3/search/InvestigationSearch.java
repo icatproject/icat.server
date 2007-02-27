@@ -57,7 +57,6 @@ public class InvestigationSearch {
      * @param keyword
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
     public static Collection<Long> searchByKeywordRtnId(String userId, String keyword, EntityManager manager) throws InsufficientPrivilegesException {
         //search and return all investigations
@@ -73,7 +72,6 @@ public class InvestigationSearch {
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @return collection of {@link Investigation} investigation objects
      */
     private static Collection<Investigation>  searchByKeywordImpl(String userId, String keyword, int startIndex, int number_results, EntityManager manager)  {
@@ -98,7 +96,6 @@ public class InvestigationSearch {
      * @param keyword
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
     public static Collection<Investigation> searchByKeyword(String userId, String keyword, EntityManager manager) throws InsufficientPrivilegesException {
         //search and return all investigations
@@ -115,7 +112,6 @@ public class InvestigationSearch {
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
     public static Collection<Investigation> searchByKeyword(String userId, String keyword, int startIndex, int number_results, EntityManager manager) {
         return  searchByKeywordImpl(userId, keyword, startIndex, number_results, manager);
@@ -131,7 +127,6 @@ public class InvestigationSearch {
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @return collection of {@link Investigation} investigation objects
      */
     private  static Collection<Investigation> searchByUserSurnameImpl(String userId, String searchString, SearchType searchType, int startIndex, int number_results, EntityManager manager)  {
@@ -166,7 +161,6 @@ public class InvestigationSearch {
      * @param surname
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
     public static Collection<Investigation> searchByUserSurname(String userId, String surname, EntityManager manager)  {
         //search and return all investigations
@@ -184,7 +178,6 @@ public class InvestigationSearch {
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
     public static Collection<Investigation> searchByUserSurname(String userId, String surname, int startIndex, int number_results, EntityManager manager)  {
         return  searchByUserSurnameImpl(userId, surname, SearchType.SURNAME, startIndex, number_results, manager);
@@ -198,7 +191,6 @@ public class InvestigationSearch {
      * @param searchUserId  Could be DN , username or federal ID
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
     public static Collection<Investigation> searchByUserID(String userId, String searchUserId, EntityManager manager) {
         //search and return all investigations
@@ -216,7 +208,6 @@ public class InvestigationSearch {
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
     public static Collection<Investigation> searchByUserID(String userId, String searchUserId, int startIndex, int number_results, EntityManager manager)  {
         return  searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, startIndex, number_results, manager);
@@ -232,7 +223,7 @@ public class InvestigationSearch {
      * @param startIndex
      * @param number_results
      * @param manager
-     * @return
+     * @return collection of {@link Investigation} investigation objects
      */
     private static Collection<Investigation> searchByAdvancedImpl(String userId, AdvancedSearchDTO advanDTO,int startIndex, int number_results, EntityManager manager){
         if(advanDTO == null) throw new IllegalArgumentException("AdvancedSearchDTO cannot be null");
@@ -264,10 +255,10 @@ public class InvestigationSearch {
      *
      * @param userId
      * @param advanDTO
-     * @param startIndex
-     * @param number_results
-     * @param manager
-     * @return
+     * @param startIndex start index of the results found
+     * @param number_results number of results found from the start index
+     * @param manager manager object that will facilitate interaction with underlying database     *
+     * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDTO advanDTO,int startIndex, int number_results, EntityManager manager){
         return searchByAdvancedImpl(userId, advanDTO, startIndex, number_results, manager);
@@ -280,7 +271,7 @@ public class InvestigationSearch {
      * @param userId
      * @param advanDTO
      * @param manager
-     * @return
+     * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDTO advanDTO, EntityManager manager){
         return searchByAdvancedImpl(userId, advanDTO, -1, -1, manager);
@@ -292,10 +283,11 @@ public class InvestigationSearch {
      *  Gets all the investigations associated with that user
      *
      * @param userId
-     * @param startIndex
-     * @param number_results
-     * @param manager
-     * @return
+     * @param startIndex start index of the results found
+     * @param number_results number of results found from the start index
+     * @param manager manager object that will facilitate interaction with underlying database
+     *
+     * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> getUsersInvestigations(String userId, int startIndex, int number_results, EntityManager manager){
         log.trace("getUserInvestigations("+userId+", "+startIndex+", "+number_results+", EnitiyManager)");
@@ -312,7 +304,7 @@ public class InvestigationSearch {
      *
      * @param userId
      * @param manager
-     * @return
+     * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> getUsersInvestigations(String userId, EntityManager manager){
         return getUsersInvestigations(userId,-1, -1, manager);
@@ -326,6 +318,19 @@ public class InvestigationSearch {
     }
     
     
+    /**
+     *
+     * @param userId
+     * @param keywords Collection of keywords to search on
+     * @param operator LogicalOperator, either AND or OR
+     * @param include Set of information to return with investigations, ie their keywords, investigators
+     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword
+     * @param use_securuty search all investigations regardless of who owns it
+     * @param startIndex start index of the results found
+     * @param number_results number of results found from the start index
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
+     */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator,  InvestigationIncludes include, boolean fuzzy, boolean use_securuty, int startIndex, int number_results, EntityManager manager)  {
         log.trace("searchByKeyword("+userId+", "+keywords+", "+operator +", "+include+", "+fuzzy+", "+use_securuty+", "+startIndex+", "+number_results+", EntityManager)");
         
@@ -394,12 +399,12 @@ public class InvestigationSearch {
                 }
             }
             
-        // return datasets with these investigations
+            // return datasets with these investigations
         } else if(include.toString().equals(InvestigationIncludes.DATASETS_ONLY.toString())){
             for(Investigation investigation : investigations){
                 investigation.getDatasetCollection().size();
             }
-        // return datasets and their datafiles with these investigations
+            // return datasets and their datafiles with these investigations
         } else if(include.toString().equals(InvestigationIncludes.DATASETS_AND_DATAFILES.toString())){
             for(Investigation investigation : investigations){
                 investigation.getDatasetCollection().size();
@@ -408,19 +413,19 @@ public class InvestigationSearch {
                     dataset.getDatafileCollection().size();
                 }
             }
-        // return keywords with these investigations
+            // return keywords with these investigations
         } else if(include.toString().equals(InvestigationIncludes.KEYWORDS_ONLY.toString())){
             for(Investigation investigation : investigations){
                 //size invokes teh JPA to get the information
                 investigation.getKeywordCollection().size();
             }
-        // return c with these investigations    
+            // return c with these investigations
         } else if(include.toString().equals(InvestigationIncludes.INVESTIGATORS_ONLY.toString())){
             for(Investigation investigation : investigations){
                 //size invokes teh JPA to get the information
                 investigation.getInvestigatorCollection().size();
             }
-        // return investigators and keywords with these investigations                
+            // return investigators and keywords with these investigations
         } else if(include.toString().equals(InvestigationIncludes.INVESTIGATORS_AND_KEYWORDS.toString())){
             for(Investigation investigation : investigations){
                 //size invokes the JPA to get the information

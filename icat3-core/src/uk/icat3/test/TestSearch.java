@@ -77,7 +77,7 @@ public class TestSearch {
         
     }
     
-    public  void seachByKeywords(String userId, Collection<String> keywords,LogicalOperator operator, boolean fuzzy, InvestigationIncludes includes) throws Exception {
+    public  void seachByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, InvestigationIncludes includes) throws Exception {
         
         setUp();
         
