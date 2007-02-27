@@ -9,14 +9,17 @@
 
 package uk.icat3.search;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
-import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
-import uk.icat3.util.InvestigationIncludes;
+import uk.icat3.search.InvestigationUtil.Includes;
+import uk.icat3.security.GateKeeper;
+import uk.icat3.util.AccessType;
 import uk.icat3.util.LogicalOperator;
 import static uk.icat3.util.Queries.*;
 /**
@@ -34,6 +37,51 @@ public class InvestigationSearch {
     
     //used for type of user search
     private enum SearchType { SURNAME, USERID };
+    
+    /**
+     *
+     * @param userId
+     * @param investigationIds
+     * @param includes
+     * @param manager
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws javax.persistence.EntityNotFoundException
+     * @return
+     */
+    public static  Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds, Includes includes, EntityManager manager) throws InsufficientPrivilegesException, EntityNotFoundException {
+        log.trace("getInvestigations("+userId+", "+investigationIds+", EntityManager)");
+        
+        Collection<Investigation> investigations = new ArrayList<Investigation>();
+        
+        for(Long investigationId : investigationIds) {
+            //find the investigation
+            Investigation investigation = manager.find(Investigation.class, investigationId);
+            
+            //check if the id exists in the database
+            if(investigation == null) throw new EntityNotFoundException("Investigation: id: "+investigationId+" not found.");
+            
+            //check user has read access
+            GateKeeper.performAuthorisation(userId, investigation, AccessType.READ, manager);
+            
+            //add to arraylist
+            investigations.add(investigation);
+        }
+        
+        //add include information
+        InvestigationUtil.getInvestigationInformation(investigations, includes);
+        
+        return investigations;
+    }
+    
+    public static Investigation getInvestigation(String userId, Long investigationId, EntityManager manager) throws InsufficientPrivilegesException, EntityNotFoundException {
+        Collection<Long> investigationIds = new ArrayList<Long>();
+        investigationIds.add(investigationId);
+        return getInvestigations(userId, investigationIds, Includes.NONE, manager).iterator().next();
+    }
+    
+    public static  Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds, EntityManager manager) throws InsufficientPrivilegesException, EntityNotFoundException {
+        return getInvestigations(userId, investigationIds, Includes.NONE, manager);
+    }
     
     private static Collection<Long>  searchByKeywordRtnIdImpl(String userId, String keyword, int startIndex, int number_results, EntityManager manager)  {
         log.trace("searchByKeyword("+userId+", "+keyword+", "+startIndex+", "+number_results+", EntityManager)");
@@ -184,7 +232,7 @@ public class InvestigationSearch {
     }
     
     /**
-     * 
+     *
      * Searches the investigations the user has access to view by user id
      * @param userId userId of the user.
      * @param searchUserId Could be DN , username or federal ID
@@ -331,7 +379,7 @@ public class InvestigationSearch {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator,  InvestigationIncludes include, boolean fuzzy, boolean use_security, int startIndex, int number_results, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator,  Includes include, boolean fuzzy, boolean use_security, int startIndex, int number_results, EntityManager manager)  {
         log.trace("searchByKeyword("+userId+", "+keywords+", "+operator +", "+include+", "+fuzzy+", "+use_security+", "+startIndex+", "+number_results+", EntityManager)");
         
         Collection<Investigation> investigations = null;
@@ -387,93 +435,47 @@ public class InvestigationSearch {
             investigations = query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         
-        // now collect the information associated with the investigations requested
-        if(include.toString().equals(InvestigationIncludes.ALL.toString())){
-            for(Investigation investigation : investigations){
-                //size invokes the JPA to get the information, other wise the collections are null
-                investigation.getKeywordCollection().size();
-                investigation.getInvestigatorCollection().size();
-                investigation.getDatasetCollection().size();
-                
-                for(Dataset dataset : investigation.getDatasetCollection()){
-                    dataset.getDatafileCollection().size();
-                }
-            }
-            
-            // return datasets with these investigations
-        } else if(include.toString().equals(InvestigationIncludes.DATASETS_ONLY.toString())){
-            for(Investigation investigation : investigations){
-                investigation.getDatasetCollection().size();
-            }
-            // return datasets and their datafiles with these investigations
-        } else if(include.toString().equals(InvestigationIncludes.DATASETS_AND_DATAFILES.toString())){
-            for(Investigation investigation : investigations){
-                investigation.getDatasetCollection().size();
-                
-                for(Dataset dataset : investigation.getDatasetCollection()){
-                    dataset.getDatafileCollection().size();
-                }
-            }
-            // return keywords with these investigations
-        } else if(include.toString().equals(InvestigationIncludes.KEYWORDS_ONLY.toString())){
-            for(Investigation investigation : investigations){
-                //size invokes teh JPA to get the information
-                investigation.getKeywordCollection().size();
-            }
-            // return c with these investigations
-        } else if(include.toString().equals(InvestigationIncludes.INVESTIGATORS_ONLY.toString())){
-            for(Investigation investigation : investigations){
-                //size invokes teh JPA to get the information
-                investigation.getInvestigatorCollection().size();
-            }
-            // return investigators and keywords with these investigations
-        } else if(include.toString().equals(InvestigationIncludes.INVESTIGATORS_AND_KEYWORDS.toString())){
-            for(Investigation investigation : investigations){
-                //size invokes the JPA to get the information
-                investigation.getKeywordCollection().size();
-                investigation.getInvestigatorCollection().size();
-            }
-        }
+        InvestigationUtil.getInvestigationInformation(investigations,include);
         
         return investigations;
     }
     
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationIncludes includes, boolean fuzzy, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, Includes includes, boolean fuzzy, EntityManager manager)  {
         //secuirty on, AND
         return searchByKeywords(userId, keywords, LogicalOperator.AND, includes, fuzzy ,true , -1, -1, manager);
     }
     
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, boolean fuzzy, EntityManager manager)  {
         //secuirty on, AND, no includes
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationIncludes.NONE, fuzzy ,true , -1, -1, manager);
+        return searchByKeywords(userId, keywords, LogicalOperator.AND, Includes.NONE, fuzzy ,true , -1, -1, manager);
     }
     
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, EntityManager manager)  {
         //exact match, secuirty true, AND
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationIncludes.NONE, false ,true ,-1 , -1,manager);
+        return searchByKeywords(userId, keywords, LogicalOperator.AND, Includes.NONE, false ,true ,-1 , -1,manager);
     }
     
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationIncludes includes, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, Includes includes, EntityManager manager)  {
         //exact match, secuirty true, AND
         return searchByKeywords(userId, keywords, LogicalOperator.AND, includes, false ,true ,-1 , -1,manager);
     }
     
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, EntityManager manager)  {
         //exact match, secuirty true, AND
-        return searchByKeywords(userId, keywords, operator, InvestigationIncludes.NONE, false ,true ,-1 , -1,manager);
+        return searchByKeywords(userId, keywords, operator, Includes.NONE, false ,true ,-1 , -1,manager);
     }
     
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationIncludes includes, LogicalOperator operator, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, Includes includes, LogicalOperator operator, EntityManager manager)  {
         //exact match, secuirty true, AND
         return searchByKeywords(userId, keywords, operator, includes,  false ,true ,-1 , -1,manager);
     }
     
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, EntityManager manager)  {
         //exact match, secuirty true,
-        return searchByKeywords(userId, keywords, operator, InvestigationIncludes.NONE, fuzzy ,true ,-1 , -1,manager);
+        return searchByKeywords(userId, keywords, operator, Includes.NONE, fuzzy ,true ,-1 , -1,manager);
     }
     
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationIncludes includes, boolean fuzzy, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, Includes includes, boolean fuzzy, EntityManager manager)  {
         //exact match, secuirty true,
         return searchByKeywords(userId, keywords, operator, includes, fuzzy ,true ,-1 , -1,manager);
     }

@@ -82,7 +82,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     
     @Id
     @Column(name = "ID", nullable = false)
-    private BigDecimal id;
+    private Long id;
     
     @Column(name = "INV_NUMBER", nullable = false)
     private String invNumber;
@@ -163,7 +163,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Creates a new instance of Investigation with the specified values.
      * @param id the id of the Investigation
      */
-    public Investigation(BigDecimal id) {
+    public Investigation(Long id) {
         this.id = id;
     }
     
@@ -175,7 +175,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * @param modTime the modTime of the Investigation
      * @param modId the modId of the Investigation
      */
-    public Investigation(BigDecimal id, String invNumber, String title, Date modTime, String modId) {
+    public Investigation(Long id, String invNumber, String title, Date modTime, String modId) {
         this.id = id;
         this.invNumber = invNumber;
         this.title = title;
@@ -187,7 +187,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the id of this Investigation.
      * @return the id
      */
-    public BigDecimal getId() {
+    public Long getId() {
         return this.id;
     }
     
@@ -195,7 +195,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Sets the id of this Investigation to the specified value.
      * @param id the new id
      */
-    public void setId(BigDecimal id) {
+    public void setId(Long id) {
         this.id = id;
     }
     

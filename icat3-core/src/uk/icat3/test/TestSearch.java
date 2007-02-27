@@ -13,16 +13,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.Persistence;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Investigation;
+import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.search.AdvancedSearchDTO;
 import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.InvestigationSearch;
+import uk.icat3.search.InvestigationUtil.Includes;
 import uk.icat3.search.KeywordSearch;
 import uk.icat3.util.EntityManagerResource;
-import uk.icat3.util.InvestigationIncludes;
 import uk.icat3.util.LogicalOperator;
 
 /**
@@ -61,6 +63,37 @@ public class TestSearch {
     }
     
     
+    public void getInvestigations(String userId, Collection<Long> ids) throws EntityNotFoundException, InsufficientPrivilegesException{
+        setUp();
+        
+        //test code here
+        log.info("Testing");
+        Collection<Investigation> investigations = InvestigationSearch.getInvestigations(userId, ids, em);
+        
+        for(Investigation investigation : investigations){
+            log.info(investigation.getId());
+        }
+        
+        tearDown();
+        
+    }
+    
+    public void getInvestigation(String userId, Long id) throws EntityNotFoundException, InsufficientPrivilegesException{
+        setUp();
+        
+        //test code here
+        log.info("Testing");
+        Investigation investigation = InvestigationSearch.getInvestigation(userId, id, em);
+        
+        
+        log.info(investigation.getId());
+        
+        
+        tearDown();
+        
+    }
+    
+    
     public  void seachByKeyword(String userId, String keyword ) throws Exception {
         
         setUp();
@@ -77,7 +110,7 @@ public class TestSearch {
         
     }
     
-    public  void seachByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, InvestigationIncludes includes) throws Exception {
+    public  void seachByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, Includes includes) throws Exception {
         
         setUp();
         
@@ -253,7 +286,19 @@ public class TestSearch {
         //isis
         keywords.add("copper");
         keywords.add("isis");
-        ts.seachByKeywords("gjd37", keywords, LogicalOperator.AND, false, InvestigationIncludes.ALL);
+        //  ts.seachByKeywords("gjd37", keywords, LogicalOperator.AND, false, InvestigationUtil.ALL);
+        
+        ///  get Investigations ////
+        
+        Collection<Long> ids  =   new ArrayList<Long>();
+        
+        ids.add(9525280L);
+        ts.getInvestigations("gjd37",ids);
+        
+        ts.getInvestigation("gjd37",9525454280L);
+        //////////////////////////
+        
+        
         
         //keywords.add("ccw");
         //  ts.seachByKeywords("JAMES", keywords);
