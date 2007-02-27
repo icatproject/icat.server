@@ -9,8 +9,8 @@
 
 package uk.icat3.test;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Vector;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -22,6 +22,8 @@ import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.InvestigationSearch;
 import uk.icat3.search.KeywordSearch;
 import uk.icat3.util.EntityManagerResource;
+import uk.icat3.util.InvestigationIncludes;
+import uk.icat3.util.LogicalOperator;
 
 /**
  *
@@ -59,18 +61,34 @@ public class TestSearch {
     }
     
     
-    public  void seachByKeyword(String userId, String keyword) throws Exception {
+    public  void seachByKeyword(String userId, String keyword ) throws Exception {
         
         setUp();
         
         //test code here
         log.info("Testing");
-        Collection<Investigation> investigations = InvestigationSearch.searchByKeyword(userId,keyword,em);
-        log.info("Results: "+investigations.size());
+        Collection<Investigation> investigations = InvestigationSearch.searchByKeyword(userId,keyword, em);
+        
         for(Investigation investigation : investigations){
             log.info(investigation.getId());
         }
+        log.info("Results: "+investigations.size());
+        tearDown();
         
+    }
+    
+    public  void seachByKeywords(String userId, Collection<String> keywords,LogicalOperator operator, boolean fuzzy, InvestigationIncludes includes) throws Exception {
+        
+        setUp();
+        
+        //test code here
+        log.info("Testing");
+        Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(userId,keywords, operator, includes, fuzzy,  false, -1, -1, em);
+        
+        for(Investigation investigation : investigations){
+            log.info(investigation.getId()+" "+investigation.getTitle());
+        }
+        log.info("Results: "+investigations.size());
         tearDown();
         
     }
@@ -191,27 +209,29 @@ public class TestSearch {
     public void test() throws Exception {
         
         setUp();
-               
         
-        String INVESTIGATIONS_BY_USER_SQL = "SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
-                "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  " +
+        String INVESTIGATIONS_BY_USER_SQL = "SELECT i.id FROM Investigation i WHERE" +
+                " (i.investigatorCollection.investigatorPK.facilityUserId = :userId AND   i.investigatorCollection IS EMPTY";
+        
+        //  String INVESTIGATIONS_BY_USER_SQL = "SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
+              /*  "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  " +
                 "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE t2.facility_user_id = t1.facility_user_id " +
                 "AND t2.federal_id = ?1 AND t0.id = t1.investigation_id UNION " +
-                "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE id NOT IN (SELECT investigation_id from investigator)) WHERE LAST_NAME LIKE ?2";
+                "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE id NOT IN (SELECT investigation_id from investigator)) WHERE LAST_NAME LIKE ?2";*/
         
         //test code here
         log.info("Testing");
-       /* Collection<java.math.BigInteger> investigations =  em.createQuery(INVESTIGATIONS_BY_USER_JPQL).setMaxResults(100).getResultList();
+        Collection<java.math.BigDecimal> investigations =  em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES").getResultList();
         log.info("Results: "+investigations.size());
-        for(java.math.BigInteger investigation : investigations){
+        for(java.math.BigDecimal investigation : investigations){
             log.info(investigation);
-        }*/
+        }
         
-        Collection<Investigation> investigations =  em.createNativeQuery(INVESTIGATIONS_BY_USER_SQL,Investigation.class).setParameter(1,"JAMES").setParameter(2, "HEALY").setMaxResults(100).getResultList();
+       /* Collection<Investigation> investigations =  em.createNativeQuery(INVESTIGATIONS_BY_USER_SQL,Investigation.class).setParameter(1,"JAMES").setMaxResults(100).getResultList();
         
         for(Investigation investigation : investigations){
             log.info(investigation.getId()+" "+investigation.getTitle());
-        }
+        }*/
         log.info("Results: "+investigations.size());
         tearDown();
         
@@ -226,11 +246,21 @@ public class TestSearch {
         
         TestSearch ts = new TestSearch();
         
-         ts.seachByKeyword("JAMES", "ccw");
+        // ts.seachByKeyword("JAMES", "ccw");
+        
+        Collection<String> keywords  =   new ArrayList<String>();
+        
+        //isis
+        keywords.add("copper");
+        keywords.add("isis");
+        ts.seachByKeywords("gjd37", keywords, LogicalOperator.AND, false, InvestigationIncludes.ALL);
+        
+        //keywords.add("ccw");
+        //  ts.seachByKeywords("JAMES", keywords);
         
         // ts.seachBySurname("JAMES", "HEALY");
         
-    //    ts.seachByUserID("JAMES", "JAMES");
+        //    ts.seachByUserID("JAMES", "JAMES");
         
         // ts.seachByUserID("JAMES", "JAMES");
         
@@ -255,7 +285,7 @@ public class TestSearch {
         
         // ts.getUserInvestigations("JAMES");
         
-        // ts.test();
+        //ts.test();
     }
     
 }
