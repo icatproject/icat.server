@@ -60,7 +60,7 @@ public class KeywordSearch {
     
     /**
      *
-     *  This gets all the keywords avaliable for that user, beginning with a keyword, he can only see keywords associated with thier
+     *  This gets all the keywords avaliable for that user, beginning with a keyword, they can only see keywords associated with their
      * investigations or public investigations
      *
      * @param userId
@@ -80,7 +80,7 @@ public class KeywordSearch {
     
     
     /**
-     * This gets all the keywords avaliable for that user, he can only see keywords associated with thier
+     * This gets all the keywords avaliable for that user, they can only see keywords associated with their
      * investigations or public investigations
      *
      * @param manager

@@ -20,8 +20,8 @@ import uk.icat3.util.InvestigationIncludes;
 import uk.icat3.util.LogicalOperator;
 import static uk.icat3.util.Queries.*;
 /**
- * This is the service to allows access to the search throught that icat schema.
- * Checks are made through SQL and JPQL for access rights to view investigation
+ * This is the service to allows access to search through the icat schema.
+ * Checks are made through SQL and JPQL for access rights to view investigations
  *
  * @author Glen Drinkwater
  */
@@ -184,11 +184,10 @@ public class InvestigationSearch {
     }
     
     /**
-     *
-     * Searches the investigations the user has access to view user id
-     *
+     * 
+     * Searches the investigations the user has access to view by user id
      * @param userId userId of the user.
-     * @param searchUserId  Could be DN , username or federal ID
+     * @param searchUserId Could be DN , username or federal ID
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
@@ -200,7 +199,7 @@ public class InvestigationSearch {
     
     /**
      *
-     * Searches the investigations the user has access to view user id
+     * Searches the investigations the user has access to view by user id
      *
      * @param userId userId of the user.
      * @param searchUserId  Could be DN , username or federal ID
@@ -225,7 +224,7 @@ public class InvestigationSearch {
      * @param manager
      * @return collection of {@link Investigation} investigation objects
      */
-    private static Collection<Investigation> searchByAdvancedImpl(String userId, AdvancedSearchDTO advanDTO,int startIndex, int number_results, EntityManager manager){
+    private static Collection<Investigation> searchByAdvancedImpl(String userId, AdvancedSearchDTO advanDTO, int startIndex, int number_results, EntityManager manager){
         if(advanDTO == null) throw new IllegalArgumentException("AdvancedSearchDTO cannot be null");
         log.trace("searchByAdvancedImpl("+userId+", "+advanDTO);
         
@@ -260,7 +259,7 @@ public class InvestigationSearch {
      * @param manager manager object that will facilitate interaction with underlying database     *
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDTO advanDTO,int startIndex, int number_results, EntityManager manager){
+    public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDTO advanDTO, int startIndex, int number_results, EntityManager manager){
         return searchByAdvancedImpl(userId, advanDTO, startIndex, number_results, manager);
     }
     
@@ -319,20 +318,21 @@ public class InvestigationSearch {
     
     
     /**
+     * Search by keywords
      *
-     * @param userId
+     * @param userId userId of the user.
      * @param keywords Collection of keywords to search on
-     * @param operator LogicalOperator, either AND or OR
-     * @param include Set of information to return with investigations, ie their keywords, investigators
-     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword
-     * @param use_securuty search all investigations regardless of who owns it
-     * @param startIndex start index of the results found
-     * @param number_results number of results found from the start index
+     * @param operator LogicalOperator, either AND or OR, default AND
+     * @param include Set of information to return with investigations, ie their keywords, investigators, datasets, default none.  Having more information returned means the query will take longer.
+     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
+     * @param use_security search all investigations regardless of who owns it, default true
+     * @param startIndex start index of the results found, default 0
+     * @param number_results number of results found from the start index, default {@link Queries}.MAX_QUERY_RESULTSET
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator,  InvestigationIncludes include, boolean fuzzy, boolean use_securuty, int startIndex, int number_results, EntityManager manager)  {
-        log.trace("searchByKeyword("+userId+", "+keywords+", "+operator +", "+include+", "+fuzzy+", "+use_securuty+", "+startIndex+", "+number_results+", EntityManager)");
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator,  InvestigationIncludes include, boolean fuzzy, boolean use_security, int startIndex, int number_results, EntityManager manager)  {
+        log.trace("searchByKeyword("+userId+", "+keywords+", "+operator +", "+include+", "+fuzzy+", "+use_security+", "+startIndex+", "+number_results+", EntityManager)");
         
         Collection<Investigation> investigations = null;
         
@@ -353,20 +353,21 @@ public class InvestigationSearch {
             }
         }
         
-        //need to do this if used a EJB cos of the hashcode difference if serialized
+        //need to do this if used a EJB cos of the hashcode difference if LogicalOperator is serialized
+        //so == and equals do not work, only on string of object
         if(operator.toString().equals(LogicalOperator.AND.toString())) {
             SQL = SQL +" GROUP BY ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT," +
                     " RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, " +
-                    "FACILITY_CYCLE HAVING Count(*) = ?"+(i++);        }
+                    "FACILITY_CYCLE HAVING Count(*) = ?number_keywords";        }
         
-        log.info("DYNAMIC SQL: "+SQL);
+        log.info("DYNAMIC SQL GENERATED: "+SQL);
         
-        //set all parameters
+        //set query with investigation as entity object
         Query query = manager.createNativeQuery(SQL, Investigation.class);
         
         //use security??
-        if(use_securuty) query = query.setParameter(1,userId);
-        else query = query.setParameter(1,"%");
+        if(use_security) query = query.setParameter("userId",userId);
+        else query = query.setParameter("userId","%");
         
         //set keywords
         int j = 2;
@@ -376,7 +377,7 @@ public class InvestigationSearch {
         }
         
         //add in the number of keywords
-        query.setParameter(j,keywords.size());
+        query.setParameter("number_keywords",keywords.size());
         
         //run query
         if(number_results < 0){
