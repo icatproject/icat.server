@@ -16,8 +16,11 @@ import uk.icat3.user.exceptions.NoSuchUserException;
  * JUnit tests for UserManager.java - Please update setUp() method
  * with a valid username and password for testing purposes.
  *
+ * 05-03-07 DWF Converted all unit tests so that they comply with new JUNIT4 
+ * implementation of JUNIT which uses Java 1.5 Annotations
+ *
  * @author df01
- * @version 1.0
+ * @version 1.1
  */
 public class UserManagerTest {
     
