@@ -415,22 +415,22 @@ public class InvestigationSearch {
     }
     
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, EntityManager manager)  {
-        //exact match, security true, AND
+        //exact match, secuirty true, AND
         return searchByKeywords(userId, keywords, operator, InvestigationInclude.NONE, false ,true ,-1 , -1,manager);
     }
     
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, LogicalOperator operator, EntityManager manager)  {
-        //exact match, security true, AND
+        //exact match, secuirty true, AND
         return searchByKeywords(userId, keywords, operator, includes,  false ,true ,-1 , -1,manager);
     }
     
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, EntityManager manager)  {
-        //exact match, security true,
+        //exact match, secuirty true,
         return searchByKeywords(userId, keywords, operator, InvestigationInclude.NONE, fuzzy ,true ,-1 , -1,manager);
     }
     
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude includes, boolean fuzzy, EntityManager manager)  {
-        //exact match, security true,
+        //exact match, secuirty true,
         return searchByKeywords(userId, keywords, operator, includes, fuzzy ,true ,-1 , -1,manager);
     }
     

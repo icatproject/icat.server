@@ -260,9 +260,13 @@ public class GateKeeper {
      */
     private static void performAuthorisation(String user, Collection<Investigation> investigations, AccessType access, String element, String elementId, EntityManager manager) throws InsufficientPrivilegesException {
         
+        //if user is a system administrator then return (no need to check each request)
+        //TBI...
         
         for (Iterator<Investigation> iter = investigations.iterator(); iter.hasNext(); ) {
-            //Investigation investigation = iter.next();
+            
+            //user is instrument scientist for instrument in investigation then return (no need to check individual permissions)
+            //TBI...
             
             for (Iterator<InvestigationLevelPermission> perms = iter.next().getInvestigationLevelPermissionCollection().iterator(); perms.hasNext(); ) {
                 InvestigationLevelPermission perm = perms.next();

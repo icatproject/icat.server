@@ -71,16 +71,4 @@ public class EntityBaseBean {
         else return fasle;
     }*/    
     
-    //this is for the web interface so that i can use the 
-    //returned entitys in selection, downloads etc
-    private boolean selected;
-
-    public boolean isSelected() {
-        return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-    
 }
