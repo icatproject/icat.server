@@ -1,6 +1,11 @@
 package uk.icat3.user;
 
-import junit.framework.*;
+
+import junit.framework.JUnit4TestAdapter;
+import org.junit.After;
+import org.junit.Test;
+import static org.junit.Assert.*;
+import org.junit.Before;
 import uk.icat3.user.exceptions.LoginException;
 import uk.icat3.user.exceptions.NoSuchUserException;
 /*
@@ -14,29 +19,22 @@ import uk.icat3.user.exceptions.NoSuchUserException;
  * @author df01
  * @version 1.0
  */
-public class UserManagerTest extends TestCase {
+public class UserManagerTest {
     
     String username = null;
     String password = null;
     UserManager instance = null;
     String sessionId = null;
     
-    public UserManagerTest(String testName) {        
-        super(testName);        
-    }
-
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         username = "damian.flannery@rl.ac.uk";
-        password = "helloworld";    
-        
-        try {
-            instance = new UserManager();
-        } catch (Exception e) {            
-            fail("failed to establish connection with user database");
-        }
+        password = "helloworld";                    
+        instance = new UserManager();        
     }
 
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         instance.logout(sessionId);
         sessionId = null;
         username = null;
@@ -47,20 +45,15 @@ public class UserManagerTest extends TestCase {
     /**
      * Test of getUserIdFromSessionId method, of class uk.icat3.user.UserManager.
      */
-    public void testGetUserIdFromSessionIdWithInvalidSessionId() throws Exception {                           
-        try {        
-            String result = instance.getUserIdFromSessionId(sessionId);
-            fail("Shouldn't get here because I passed in an invalid sessionId!");
-        } catch (LoginException le) {
-            assertTrue(true);
-        } catch (Exception e) {
-            fail("Failed as expected, but with an unexpected exception type");
-        }//end try/catch                
+    @Test(expected=LoginException.class)
+    public void testGetUserIdFromSessionIdWithInvalidSessionId() throws Exception {                                          
+            String result = instance.getUserIdFromSessionId(sessionId);        
     }
 
     /**
      * Test of login method, of class uk.icat3.user.UserManager.
      */
+    @Test
     public void testValidLogin() throws Exception {        
         String result = instance.login(username, password);
         assertNotNull(result);        
@@ -69,118 +62,79 @@ public class UserManagerTest extends TestCase {
     /**
      * Test of login method, of class uk.icat3.user.UserManager.
      */
-    public void testLoginWithInvalidUsername() throws Exception {   
-        try {
-            String result = instance.login("mickeymouse", password);
-            fail("Should have thrown exception by now");
-        } catch (LoginException le) {
-            assertTrue(true);
-        } catch (Exception e) {
-            fail("wrong exception type was thrown");
-        }//end try/catch        
+    @Test(expected=LoginException.class)
+    public void testLoginWithInvalidUsername() throws Exception {           
+        String result = instance.login("mickeymouse", password);                    
     }
 
     /**
      * Test of login method, of class uk.icat3.user.UserManager.
      */
-    public void testLoginWithInvalidPassword() throws Exception {   
-        try {
-            String result = instance.login(username, "pluto");
-            fail("Should have thrown exception before now");
-        } catch (LoginException le) {
-            assertTrue(true);
-        } catch (Exception e) {
-            fail("incorrect exception was thrown");
-        }//end try/catch        
+    @Test(expected=LoginException.class)
+    public void testLoginWithInvalidPassword() throws Exception {           
+        String result = instance.login(username, "pluto");        
     }
     
     /**
      * Test of logout method, of class uk.icat3.user.UserManager.
      */
-    public void testLogoutWithInvalidSessionId() {                     
-        try {
-            instance.logout(sessionId);
-            assertTrue(true);
-        } catch(Exception e) {
-            fail("Should not throw an exception");
-        }//end try/catch        
+    @Test
+    public void testLogoutWithInvalidSessionId() throws Exception {                             
+        instance.logout(sessionId);
+        assertTrue(true);        
     }
     
     /**
      * Test of logout method, of class uk.icat3.user.UserManager.
      */
-    public void testLogoutWithValidSessionId() {                       
-        try {
-            sessionId = instance.login(username, password);
-            instance.logout(sessionId);
-            assertTrue(true);
-        } catch(Exception e) {
-            fail("Should not throw an exception");
-        }//end try/catch        
+    @Test
+    public void testLogoutWithValidSessionId() throws Exception {                               
+        sessionId = instance.login(username, password);
+        instance.logout(sessionId);
+        assertTrue(true);        
     }
 
     /**
      * Test of getUserDetails method, of class uk.icat3.user.UserManager.
      */
+    @Test(expected=LoginException.class)
     public void testGetUserDetailsWithInvalidSessionId() throws Exception {                        
-        String user = "9932";                        
-        try {
-            UserDetails result = instance.getUserDetails(sessionId, user);            
-            fail("Should have thrown an exception before here");
-        } catch (LoginException le) {
-            assertTrue(true);
-        } catch(Exception e) {
-            fail("Failed as expected, but with the wrong exception type");
-        }//end try/catch                
+        String user = "9932";                                
+        UserDetails result = instance.getUserDetails(sessionId, user);                    
     }
     
     /**
      * Test of getUserDetails method, of class uk.icat3.user.UserManager.
      */
+    @Test(expected=NoSuchUserException.class)
     public void testGetUserDetailsWithInvalidUser() throws Exception {                        
-        String user = "thedarkoverlord";                        
-        try {
-            sessionId = instance.login(username, password);
-            UserDetails result = instance.getUserDetails(sessionId, user);            
-            fail("Should have thrown an exception before here");
-        } catch (LoginException le) {
-            fail("Wrong exception type thrown, should be NoSuchUserException");
-        } catch (NoSuchUserException nsu) {
-            assertTrue(true);
-        } catch(Exception e) {
-            fail("Failed as expected, but with the wrong exception type");
-        }//end try/catch                
+        String user = "thedarkoverlord";                                
+        sessionId = instance.login(username, password);
+        UserDetails result = instance.getUserDetails(sessionId, user);                    
     }
     
     /**
      * Test of getUserDetails method, of class uk.icat3.user.UserManager.
      */
+    @Test(expected=LoginException.class)
     public void testGetUserDetailsWithInvalidSessionIdAndInvalidUser() throws Exception {                        
-        String user = "monkeyboy";                        
-        try {
-            UserDetails result = instance.getUserDetails(sessionId, user);            
-            fail("Should have thrown an exception before here");
-        } catch (NoSuchUserException nsu) {
-            fail("wrong exception type thrown");
-        } catch (LoginException le) {
-            assertTrue(true);
-        } catch(Exception e) {
-            fail("Failed as expected, but with the wrong exception type");
-        }//end try/catch                
+        String user = "monkeyboy";                                
+        UserDetails result = instance.getUserDetails(sessionId, user);                    
     }
     
     /**
      * Test of getUserDetails method, of class uk.icat3.user.UserManager.
      */
+    @Test
     public void testValidGetUserDetails() throws Exception {                        
-        String user = "9932";                        
-        try {
-            sessionId = instance.login(username, password);
-            UserDetails result = instance.getUserDetails(sessionId, user);            
-            assertNotNull(result);                
-        } catch(Exception e) {
-            fail("Should not have failed");
-        }//end try/catch                
+        String user = "9932";                                
+        sessionId = instance.login(username, password);
+        UserDetails result = instance.getUserDetails(sessionId, user);            
+        assertNotNull(result);                        
+    }
+    
+    public static junit.framework.Test suite(){
+        return new JUnit4TestAdapter(UserManagerTest.class);
     }
     
 }
