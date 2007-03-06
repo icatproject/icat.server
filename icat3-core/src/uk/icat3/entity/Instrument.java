@@ -23,48 +23,51 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
+import uk.icat3.util.Queries;
 /**
  * Entity class Instrument
- * 
+ *
  * @author gjd37
  */
 @Entity
 @Table(name = "INSTRUMENT")
 @NamedQueries( {
-        @NamedQuery(name = "Instrument.findByName", query = "SELECT i FROM Instrument i WHERE i.name = :name"),
-        @NamedQuery(name = "Instrument.findByType", query = "SELECT i FROM Instrument i WHERE i.type = :type"),
-        @NamedQuery(name = "Instrument.findByDescription", query = "SELECT i FROM Instrument i WHERE i.description = :description"),
-        @NamedQuery(name = "Instrument.findByModTime", query = "SELECT i FROM Instrument i WHERE i.modTime = :modTime"),
-        @NamedQuery(name = "Instrument.findByModId", query = "SELECT i FROM Instrument i WHERE i.modId = :modId")
-    })
+    @NamedQuery(name = "Instrument.findByName", query = "SELECT i FROM Instrument i WHERE i.name = :name"),
+    @NamedQuery(name = "Instrument.findByType", query = "SELECT i FROM Instrument i WHERE i.type = :type"),
+    @NamedQuery(name = "Instrument.findByDescription", query = "SELECT i FROM Instrument i WHERE i.description = :description"),
+    @NamedQuery(name = "Instrument.findByModTime", query = "SELECT i FROM Instrument i WHERE i.modTime = :modTime"),
+    @NamedQuery(name = "Instrument.findByModId", query = "SELECT i FROM Instrument i WHERE i.modId = :modId"),
+    
+    //Added searches for ICAT3 API
+    @NamedQuery(name = Queries.ALL_INSTRUMENTS, query = Queries.ALL_INSTRUMENTS_JPQL)
+})
 public class Instrument extends EntityBaseBean implements Serializable {
-
+    
     @Id
     @Column(name = "NAME", nullable = false)
     private String name;
-
+    
     @Column(name = "TYPE")
     private String type;
-
+    
     @Column(name = "DESCRIPTION")
     private String description;
-
+    
     @Column(name = "MOD_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date modTime;
-
+    
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
-
+    
     @OneToMany(mappedBy = "instrument")
     private Collection<Investigation> investigationCollection;
-
-     
+    
+    
     /** Creates a new instance of Instrument */
     public Instrument() {
     }
-
+    
     /**
      * Creates a new instance of Instrument with the specified values.
      * @param name the name of the Instrument
@@ -72,7 +75,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public Instrument(String name) {
         this.name = name;
     }
-
+    
     /**
      * Creates a new instance of Instrument with the specified values.
      * @param name the name of the Instrument
@@ -84,7 +87,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
         this.modTime = modTime;
         this.modId = modId;
     }
-
+    
     /**
      * Gets the name of this Instrument.
      * @return the name
@@ -92,7 +95,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public String getName() {
         return this.name;
     }
-
+    
     /**
      * Sets the name of this Instrument to the specified value.
      * @param name the new name
@@ -100,7 +103,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
+    
     /**
      * Gets the type of this Instrument.
      * @return the type
@@ -108,7 +111,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public String getType() {
         return this.type;
     }
-
+    
     /**
      * Sets the type of this Instrument to the specified value.
      * @param type the new type
@@ -116,7 +119,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public void setType(String type) {
         this.type = type;
     }
-
+    
     /**
      * Gets the description of this Instrument.
      * @return the description
@@ -124,7 +127,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public String getDescription() {
         return this.description;
     }
-
+    
     /**
      * Sets the description of this Instrument to the specified value.
      * @param description the new description
@@ -132,7 +135,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-
+    
     /**
      * Gets the modTime of this Instrument.
      * @return the modTime
@@ -140,7 +143,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public Date getModTime() {
         return this.modTime;
     }
-
+    
     /**
      * Sets the modTime of this Instrument to the specified value.
      * @param modTime the new modTime
@@ -148,7 +151,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public void setModTime(Date modTime) {
         this.modTime = modTime;
     }
-
+    
     /**
      * Gets the modId of this Instrument.
      * @return the modId
@@ -156,7 +159,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public String getModId() {
         return this.modId;
     }
-
+    
     /**
      * Sets the modId of this Instrument to the specified value.
      * @param modId the new modId
@@ -164,7 +167,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public void setModId(String modId) {
         this.modId = modId;
     }
-
+    
     /**
      * Gets the investigationCollection of this Instrument.
      * @return the investigationCollection
@@ -172,7 +175,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public Collection<Investigation> getInvestigationCollection() {
         return this.investigationCollection;
     }
-
+    
     /**
      * Sets the investigationCollection of this Instrument to the specified value.
      * @param investigationCollection the new investigationCollection
@@ -180,10 +183,10 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public void setInvestigationCollection(Collection<Investigation> investigationCollection) {
         this.investigationCollection = investigationCollection;
     }
-   
-
+    
+    
     /**
-     * Returns a hash code value for the object.  This implementation computes 
+     * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
      */
@@ -193,10 +196,10 @@ public class Instrument extends EntityBaseBean implements Serializable {
         hash += (this.name != null ? this.name.hashCode() : 0);
         return hash;
     }
-
+    
     /**
-     * Determines whether another object is equal to this Instrument.  The result is 
-     * <code>true</code> if and only if the argument is not null and is a Instrument object that 
+     * Determines whether another object is equal to this Instrument.  The result is
+     * <code>true</code> if and only if the argument is not null and is a Instrument object that
      * has the same id field values as this object.
      * @param object the reference object with which to compare
      * @return <code>true</code> if this object is the same as the argument;
@@ -212,9 +215,9 @@ public class Instrument extends EntityBaseBean implements Serializable {
         if (this.name != other.name && (this.name == null || !this.name.equals(other.name))) return false;
         return true;
     }
-
+    
     /**
-     * Returns a string representation of the object.  This implementation constructs 
+     * Returns a string representation of the object.  This implementation constructs
      * that representation based on the id fields.
      * @return a string representation of the object.
      */

@@ -52,7 +52,7 @@ public class TestSearch {
         
         
         
-     
+        
         // Begin transaction
         em.getTransaction().begin();
         
@@ -247,9 +247,13 @@ public class TestSearch {
         
         setUp();
         
-        String INVESTIGATIONS_BY_USER_SQL = "SELECT i.id FROM Investigation i WHERE" +
-                " i.investigatorCollection.facilityUser.federalId = :userId ";
-        
+        String INVESTIGATIONS_BY_USER_SQL = "SELECT d.id FROM Datafile d WHERE" +
+                " d.datasetId.investigationId.investigatorCollection.facilityUser.federalId = :userId OR d.datasetId.investigationId.investigatorCollection IS EMPTY" +
+                " AND d.datasetId.investigationId.instrument.name LIKE :instrument " +
+                "AND d.datafileParameterCollection.datafileParameterPK.name = 'run_number' " +
+                "AND d.datafileParameterCollection.numericValue < :upperRunNumber " +
+                "AND d.datafileParameterCollection.numericValue > :lowerRunNumber";
+      
         //  String INVESTIGATIONS_BY_USER_SQL = "SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
               /*  "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  " +
                 "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE t2.facility_user_id = t1.facility_user_id " +
@@ -257,8 +261,9 @@ public class TestSearch {
                 "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE id NOT IN (SELECT investigation_id from investigator)) WHERE LAST_NAME LIKE ?2";*/
         
         //test code here
-        log.info("Testing");
-        Collection<Long> investigations =  em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES-JAMES").getResultList();
+                      
+        //log.info("Testing");
+        Collection<Long> investigations = em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES-JAMES").setParameter("instrument","alf").setParameter("lowerRunNumber",0).setParameter("upperRunNumber",10000).getResultList();
         log.info("Results: "+investigations.size());
         for(Long investigation : investigations){
             log.info(investigation);
@@ -297,7 +302,7 @@ public class TestSearch {
         Collection<Long> ids  =   new ArrayList<Long>();
         
         ids.add(9525280L);
-      //  ts.getInvestigations("gjd37",ids);
+        //  ts.getInvestigations("gjd37",ids);
         
         //ts.getInvestigation("gjd37",9525454280L);
         //////////////////////////
@@ -334,7 +339,7 @@ public class TestSearch {
         
         // ts.getUserInvestigations("JAMES");
         
-       ts.test();
+        ts.test();
     }
     
 }

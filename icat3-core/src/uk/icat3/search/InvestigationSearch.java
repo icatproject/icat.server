@@ -434,4 +434,15 @@ public class InvestigationSearch {
         return searchByKeywords(userId, keywords, operator, includes, fuzzy ,true ,-1 , -1,manager);
     }
     
+      /*
+     *
+     * List all the avalible instruments
+     */
+    public static Collection<String> listAllInstruments(String userId, EntityManager manager)  {
+        log.trace("listAllInstruments("+userId+", EntityManager)");
+        return  manager.createNamedQuery(ALL_INSTRUMENTS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+        
+        
+    }
+    
 }
