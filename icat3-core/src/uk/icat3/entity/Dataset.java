@@ -291,6 +291,20 @@ public class Dataset extends EntityBaseBean implements Serializable {
     }
     
     /**
+     * Adds a DataFile to the DataSet,
+     * also adds the DataSet to the DataFile.
+     */
+    public void addDataFile(Datafile dataFile){
+        dataFile.setDatasetId(this);
+        
+        Collection<Datafile> datafiles = this.getDatafileCollection();
+        datafiles.add(dataFile);
+        
+        this.setDatafileCollection(datafiles);
+        
+    }
+    
+    /**
      * Gets the datasetLevelPermissionCollection of this Dataset.
      * @return the datasetLevelPermissionCollection
      */

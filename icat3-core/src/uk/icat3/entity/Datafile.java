@@ -64,7 +64,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="DATAFILE_SEQUENCE")  
     @Column(name = "ID", nullable = false)
-    private BigDecimal id;
+    private Long id;
 
     @Column(name = "NAME")
     private String name;
@@ -136,7 +136,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
      * Creates a new instance of Datafile with the specified values.
      * @param id the id of the Datafile
      */
-    public Datafile(BigDecimal id) {
+    public Datafile(Long id) {
         this.id = id;
     }
 
@@ -146,7 +146,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
      * @param modTime the modTime of the Datafile
      * @param modId the modId of the Datafile
      */
-    public Datafile(BigDecimal id, Date modTime, String modId) {
+    public Datafile(Long id, Date modTime, String modId) {
         this.id = id;
         this.modTime = modTime;
         this.modId = modId;
@@ -156,7 +156,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
      * Gets the id of this Datafile.
      * @return the id
      */
-    public BigDecimal getId() {
+    public Long getId() {
         return this.id;
     }
 
@@ -164,7 +164,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
      * Sets the id of this Datafile to the specified value.
      * @param id the new id
      */
-    public void setId(BigDecimal id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -14,9 +14,9 @@ import java.util.Collection;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
-import uk.icat3.manager.ManagerUtil;
 
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
@@ -30,6 +30,9 @@ public class InvestigationManager {
     
     // Global class logger
     static Logger log = Logger.getLogger(InvestigationManager.class);
+    
+    
+    ////////////////////    Get Commands    /////////////////////////
     
     /**
      *
@@ -73,8 +76,97 @@ public class InvestigationManager {
     public static  Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds, EntityManager manager) throws InsufficientPrivilegesException, EntityNotFoundException {
         return getInvestigations(userId, investigationIds, InvestigationInclude.NONE, manager);
     }
+    ////////////////////    End of get Commands    /////////////////////////
     
-    public static Investigation checkInvestigation(Long investigationId, EntityManager manager) throws EntityNotFoundException {
+    
+    
+    ////////////////////    Delete Command /  Should be removed??  /////////////////////////
+    
+    public static void deleteInvestigation(String userId, Investigation investigation, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+        
+        deleteInvestigation(userId, investigation.getId(), manager);
+        
+    }
+    
+    public static void deleteInvestigation(String userId, Long investigationId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+        log.trace("deleteInvestigation("+userId+", "+investigationId+", EntityManager)");
+        
+        Investigation investigation = checkInvestigation(investigationId, manager);
+        
+        //check user has delete access
+        GateKeeper.performAuthorisation(userId, investigation, AccessType.DELETE, manager);
+        
+        //delete dataset (Cascade is true);
+        //TODO might have to remove all the datafiles first
+        manager.remove(investigation);
+        
+    }
+    
+    public static void deleteInvestigations(String userId, Collection<Long> investigationIds, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+        log.trace("deleteInvestigations("+userId+", "+investigationIds+", EntityManager)");
+        
+        for(Long investigationId : investigationIds){
+            deleteInvestigation(userId, investigationId, manager);
+        }
+    }
+    
+    //added boolean to avoid erausre name clash
+    //TODO
+    public static boolean deleteInvestigations(String userId, Collection<Investigation> investigations, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+        log.trace("deleteInvestigations("+userId+", "+investigations+", EntityManager)");
+        
+        for(Investigation investigation : investigations){
+            deleteInvestigation(userId, investigation, manager);
+        }
+        
+        return true;
+    }
+    ////////////////////        End of Delete Commands           /////////////////////////
+    
+    
+    
+    ////////////////////     Add/Update Commands    ///////////////////
+    
+    public static void updateInvestigation(String userId, Investigation investigation, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+        log.trace("updateInvestigation("+userId+", "+investigation+", EntityManager)");
+        
+        //check to see if DataSet exists, dont need the returned dataset as merging
+        checkInvestigation(investigation.getId(), manager);
+        
+        //check user has update access
+        GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
+        
+        manager.merge(investigation);
+        
+    }
+    
+    public static void addDataSet(String userId, Dataset dataSet, Long investigationId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+        log.trace("addDataSet("+userId+", "+dataSet+" "+investigationId+", EntityManager)");
+        
+        Collection<Dataset> datasets = new ArrayList<Dataset>();
+        datasets.add(dataSet);
+        
+        addDataSets(userId, datasets, investigationId, manager);
+    }
+    
+    public static void addDataSets(String userId, Collection<Dataset> dataSets, Long investigationId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+        log.trace("addDataSet("+userId+", "+dataSets+" "+investigationId+", EntityManager)");
+        
+        //check investigation exist
+        Investigation investigation  = InvestigationManager.checkInvestigation(investigationId, manager);
+        
+        //check user has update access
+        GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
+        
+        for(Dataset dataset : dataSets){
+            investigation.addDataSet(dataset);
+        }
+    }    
+    ///////////////   End of add/Update Commands    ///////////////////
+    
+    
+    
+    protected static Investigation checkInvestigation(Long investigationId, EntityManager manager) throws EntityNotFoundException {
         Investigation investigation = manager.find(Investigation.class, investigationId);
         //check if the id exists in the database
         if(investigation == null) throw new EntityNotFoundException("Investigation: id: "+investigationId+" not found.");
