@@ -248,7 +248,7 @@ public class TestSearch {
         setUp();
         
         String INVESTIGATIONS_BY_USER_SQL = "SELECT i.id FROM Investigation i WHERE" +
-                " (i.investigatorCollection.investigatorPK.facilityUserId = :userId AND   i.investigatorCollection IS EMPTY";
+                " i.investigatorCollection.facilityUser.federalId = :userId ";
         
         //  String INVESTIGATIONS_BY_USER_SQL = "SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
               /*  "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  " +
@@ -258,9 +258,9 @@ public class TestSearch {
         
         //test code here
         log.info("Testing");
-        Collection<java.math.BigDecimal> investigations =  em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES").getResultList();
+        Collection<Long> investigations =  em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES-JAMES").getResultList();
         log.info("Results: "+investigations.size());
-        for(java.math.BigDecimal investigation : investigations){
+        for(Long investigation : investigations){
             log.info(investigation);
         }
         
@@ -297,9 +297,9 @@ public class TestSearch {
         Collection<Long> ids  =   new ArrayList<Long>();
         
         ids.add(9525280L);
-        ts.getInvestigations("gjd37",ids);
+      //  ts.getInvestigations("gjd37",ids);
         
-        ts.getInvestigation("gjd37",9525454280L);
+        //ts.getInvestigation("gjd37",9525454280L);
         //////////////////////////
         
         
@@ -334,7 +334,7 @@ public class TestSearch {
         
         // ts.getUserInvestigations("JAMES");
         
-        //ts.test();
+       ts.test();
     }
     
 }
