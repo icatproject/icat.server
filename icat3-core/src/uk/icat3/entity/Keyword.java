@@ -10,9 +10,9 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Date;
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.EntityResult;
@@ -31,47 +31,49 @@ import uk.icat3.util.Queries;
 
 /**
  * Entity class Keyword
- * 
+ *
  * @author gjd37
  */
 @Entity
 @Table(name = "KEYWORD")
 @NamedQueries( {
-        @NamedQuery(name = "Keyword.findByInvestigationId", query = "SELECT k FROM Keyword k WHERE k.keywordPK.investigationId = :investigationId"),
-        @NamedQuery(name = "Keyword.findByName", query = "SELECT k FROM Keyword k WHERE k.keywordPK.name = :name"),
-        @NamedQuery(name = "Keyword.findByModTime", query = "SELECT k FROM Keyword k WHERE k.modTime = :modTime"),
-        @NamedQuery(name = "Keyword.findByModId", query = "SELECT k FROM Keyword k WHERE k.modId = :modId"),
-        
-        //ICAT 3 queries
-        @NamedQuery(name = Queries.ALLKEYWORDS, query = Queries.ALLKEYWORDS_JPQL),
-        @NamedQuery(name = Queries.KEYWORDS_FOR_USER, query = Queries.KEYWORDS_FOR_USER_JPQL)
-     
-    })
+    @NamedQuery(name = "Keyword.findByInvestigationId", query = "SELECT k FROM Keyword k WHERE k.keywordPK.investigationId = :investigationId"),
+    @NamedQuery(name = "Keyword.findByName", query = "SELECT k FROM Keyword k WHERE k.keywordPK.name = :name"),
+    @NamedQuery(name = "Keyword.findByModTime", query = "SELECT k FROM Keyword k WHERE k.modTime = :modTime"),
+    @NamedQuery(name = "Keyword.findByModId", query = "SELECT k FROM Keyword k WHERE k.modId = :modId"),
     
+    //ICAT 3 queries
+    @NamedQuery(name = Queries.ALLKEYWORDS, query = Queries.ALLKEYWORDS_JPQL),
+    @NamedQuery(name = Queries.KEYWORDS_FOR_USER, query = Queries.KEYWORDS_FOR_USER_JPQL)
+    
+})
+
 @NamedNativeQueries({
     //Added searches for ICAT3 API
-    @NamedNativeQuery(name = Queries.ALLKEYWORDS_NATIVE, query= Queries.ALLKEYWORDS_SQL, resultSetMapping="keywordsMapping")
+    @NamedNativeQuery(name = Queries.ALLKEYWORDS_NATIVE_ALPHA, query= Queries.ALLKEYWORDS_ALPHA_SQL, resultSetMapping="keywordsNameMapping"),
+    @NamedNativeQuery(name = Queries.ALLKEYWORDS_NATIVE_ALPHA_NUMERIC, query= Queries.ALLKEYWORDS_ALPHA_NUMERIC_SQL)
     
 })
 @SqlResultSetMappings({
+    @SqlResultSetMapping(name="keywordsNameMapping",columns={@ColumnResult(name="NAME")}),    
     @SqlResultSetMapping(name="keywordsMapping",entities={@EntityResult(entityClass=String.class)})
     
 })
 public class Keyword extends EntityBaseBean implements Serializable {
-
+    
     /**
      * EmbeddedId primary key field
      */
     @EmbeddedId
     protected KeywordPK keywordPK;
-
+    
     @Column(name = "MOD_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date modTime;
-
+    
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
-
+    
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     private Investigation investigation;
@@ -79,7 +81,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
     /** Creates a new instance of Keyword */
     public Keyword() {
     }
-
+    
     /**
      * Creates a new instance of Keyword with the specified values.
      * @param keywordPK the keywordPK of the Keyword
@@ -87,7 +89,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
     public Keyword(KeywordPK keywordPK) {
         this.keywordPK = keywordPK;
     }
-
+    
     /**
      * Creates a new instance of Keyword with the specified values.
      * @param keywordPK the keywordPK of the Keyword
@@ -99,7 +101,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
         this.modTime = modTime;
         this.modId = modId;
     }
-
+    
     /**
      * Creates a new instance of KeywordPK with the specified values.
      * @param name the name of the KeywordPK
@@ -108,7 +110,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
     public Keyword(String name, Long investigationId) {
         this.keywordPK = new KeywordPK(name, investigationId);
     }
-
+    
     /**
      * Gets the keywordPK of this Keyword.
      * @return the keywordPK
@@ -116,7 +118,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
     public KeywordPK getKeywordPK() {
         return this.keywordPK;
     }
-
+    
     /**
      * Sets the keywordPK of this Keyword to the specified value.
      * @param keywordPK the new keywordPK
@@ -124,7 +126,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
     public void setKeywordPK(KeywordPK keywordPK) {
         this.keywordPK = keywordPK;
     }
-
+    
     /**
      * Gets the modTime of this Keyword.
      * @return the modTime
@@ -132,7 +134,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
     public Date getModTime() {
         return this.modTime;
     }
-
+    
     /**
      * Sets the modTime of this Keyword to the specified value.
      * @param modTime the new modTime
@@ -140,7 +142,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
     public void setModTime(Date modTime) {
         this.modTime = modTime;
     }
-
+    
     /**
      * Gets the modId of this Keyword.
      * @return the modId
@@ -148,7 +150,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
     public String getModId() {
         return this.modId;
     }
-
+    
     /**
      * Sets the modId of this Keyword to the specified value.
      * @param modId the new modId
@@ -156,7 +158,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
     public void setModId(String modId) {
         this.modId = modId;
     }
-
+    
     /**
      * Gets the investigation of this Keyword.
      * @return the investigation
@@ -164,7 +166,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
     public Investigation getInvestigation() {
         return this.investigation;
     }
-
+    
     /**
      * Sets the investigation of this Keyword to the specified value.
      * @param investigation the new investigation
@@ -172,9 +174,9 @@ public class Keyword extends EntityBaseBean implements Serializable {
     public void setInvestigation(Investigation investigation) {
         this.investigation = investigation;
     }
-
+    
     /**
-     * Returns a hash code value for the object.  This implementation computes 
+     * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
      */
@@ -184,10 +186,10 @@ public class Keyword extends EntityBaseBean implements Serializable {
         hash += (this.keywordPK != null ? this.keywordPK.hashCode() : 0);
         return hash;
     }
-
+    
     /**
-     * Determines whether another object is equal to this Keyword.  The result is 
-     * <code>true</code> if and only if the argument is not null and is a Keyword object that 
+     * Determines whether another object is equal to this Keyword.  The result is
+     * <code>true</code> if and only if the argument is not null and is a Keyword object that
      * has the same id field values as this object.
      * @param object the reference object with which to compare
      * @return <code>true</code> if this object is the same as the argument;
@@ -203,9 +205,9 @@ public class Keyword extends EntityBaseBean implements Serializable {
         if (this.keywordPK != other.keywordPK && (this.keywordPK == null || !this.keywordPK.equals(other.keywordPK))) return false;
         return true;
     }
-
+    
     /**
-     * Returns a string representation of the object.  This implementation constructs 
+     * Returns a string representation of the object.  This implementation constructs
      * that representation based on the id fields.
      * @return a string representation of the object.
      */

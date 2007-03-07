@@ -26,6 +26,7 @@ import uk.icat3.search.InvestigationSearch;
 import uk.icat3.search.KeywordSearch;
 import uk.icat3.util.EntityManagerResource;
 import uk.icat3.util.InvestigationInclude;
+import uk.icat3.util.KeywordType;
 import uk.icat3.util.LogicalOperator;
 
 /**
@@ -200,10 +201,11 @@ public class TestSearch {
         
         //test code here
         log.info("Testing");
-        Collection<String> keywords =  KeywordSearch.getAllKeywords(userId,em);
+        Collection<String> keywords =  KeywordSearch.getAllKeywords(userId, KeywordType.ALPHA, em);
         log.info("Results: "+keywords.size());
+        log.info(keywords.getClass());
         for(String keyword : keywords){
-            log.info(keyword);
+       //     log.info(keyword);
         }
         
         tearDown();
@@ -315,7 +317,7 @@ public class TestSearch {
         //test code here
         // em.createQuery(INVESTIGATIONS_BY_USER_SQL2).setMaxResults(2).getResultList();
         
-        System.out.println(em.createQuery("SELECT count(i) FROM Investigation i where i.investigatorCollection IS EMPTY ").getResultList());
+        System.out.println(em.createNativeQuery("SELECT DISTINCT NAME FROM keyword WHERE regexp_like(NAME,'^[[:alpha:]]*$')").getResultList());
         //log.info("Testing");
         /*Collection<Long> investigations = em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES-JAMES").setParameter("instrument","alf").setParameter("lowerRunNumber",0).setParameter("upperRunNumber",10000).getResultList();
         log.info("Results: "+investigations.size());
@@ -387,13 +389,13 @@ public class TestSearch {
          
         ts.seachByAdvanced("JAMES",dto);*/
         
-        // ts.getAllKeywords("JAMES");
-        
+         ts.getAllKeywords("JAMES");
+        //
         // ts.getUserKeywords("JAMES", "alf");
         
         // ts.getUserInvestigations("JAMES");
         
-        ts.test();
+    //    ts.test();
         
         //  ts.testModify();
     }

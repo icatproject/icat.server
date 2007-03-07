@@ -9,18 +9,10 @@
 
 package uk.icat3.search;
 
-import java.sql.Array;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
 import javax.persistence.EntityManager;
-import oracle.sql.ARRAY;
 import org.apache.log4j.Logger;
-import uk.icat3.entity.Investigation;
-import uk.icat3.entity.Keyword;
-import uk.icat3.util.Queries;
+import uk.icat3.util.KeywordType;
 import static uk.icat3.util.Queries.*;
 /**
  *
@@ -41,7 +33,7 @@ public class KeywordSearch {
      */
     public static Collection<String> getKeywordsForUser(String userId, EntityManager manager){
         log.trace("getKeywordsForUser("+userId+", EntityManager)");
-               
+        
         return getKeywordsForUser(userId, null, manager);
         
     }
@@ -61,22 +53,36 @@ public class KeywordSearch {
         if(startKeyword != null) startKeyword = startKeyword+"%";
         Collection<String> keywords = manager.createNamedQuery(KEYWORDS_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).getResultList();
         
-        return keywords;        
+        return keywords;
     }
     
-        
+    
     /**
      * This gets all the keywords avaliable for that user, they can only see keywords associated with their
-     * investigations or public investigations
+     * investigations or public investigations.
      *
-     * @param manager
+     * Types,  ALPHA, ALPHA_NUMERIC only work with oracle DBs
+     *
      * @return
+     * @param userId
+     * @param type ALL, ALPHA, ALPHA_NUMERIC
+     * @param manager
      */
-    public static Collection<String> getAllKeywords(String userId, EntityManager manager){
+    public static Collection<String> getAllKeywords(String userId, KeywordType type, EntityManager manager){
         log.trace("getAllKeywords("+userId+", EntityManager)");
-        Collection<String> keywords = manager.createNamedQuery(ALLKEYWORDS).getResultList();
+        Collection<String> keywords  = null;
         
+        if(type.toString().equals(KeywordType.ALL.toString())){
+            keywords = manager.createNamedQuery(ALLKEYWORDS).getResultList();
+        } else if(type.toString().equals(KeywordType.ALPHA.toString())){
+            keywords = manager.createNamedQuery(ALLKEYWORDS_NATIVE_ALPHA).getResultList();
+        } else if(type.toString().equals(KeywordType.ALPHA_NUMERIC.toString())){
+            keywords = manager.createNamedQuery(ALLKEYWORDS_NATIVE_ALPHA_NUMERIC).getResultList();
+        } else {
+            keywords = manager.createNamedQuery(ALLKEYWORDS).getResultList();
+        }
+     
         return keywords;
-    }        
+    }
     
 }

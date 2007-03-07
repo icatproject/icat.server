@@ -221,10 +221,14 @@ public class Queries {
      *
      */
     public static final String ALLKEYWORDS = "Investigation.getAllKeywords";
-    public static final String ALLKEYWORDS_NATIVE = "Investigation.getAllKeywordsNative";
-    //TODO cannot lower the result in JPQL
-    public static final String ALLKEYWORDS_JPQL = "SELECT DISTINCT k.keywordPK.name FROM Keyword k ORDER BY k.keywordPK.name ASC";
-    public static final String ALLKEYWORDS_SQL = "select distinct(lower(name)) as name from keyword order by name asc";
+    public static final String ALLKEYWORDS_NATIVE_ALPHA_NUMERIC = "Investigation.getAllKeywordsNativeAplhaNumeric";   
+    public static final String ALLKEYWORDS_NATIVE_ALPHA = "Investigation.getAllKeywordsNativeAlpha";   
+    public static final String ALLKEYWORDS_JPQL = "SELECT DISTINCT k.keywordPK.name FROM Keyword k";
+    //TODO these are ORACLE queries only
+    //all alpha numeric
+    public static final String ALLKEYWORDS_ALPHA_NUMERIC_SQL = "SELECT DISTINCT NAME FROM keyword WHERE regexp_like(NAME,'^[[:alnum:]]*$')";
+    //all alpha
+    public static final String ALLKEYWORDS_ALPHA_SQL = "SELECT DISTINCT NAME FROM keyword WHERE regexp_like(NAME,'^[[:alpha:]]*$')";
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
