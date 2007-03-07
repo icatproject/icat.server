@@ -60,13 +60,13 @@ public class BaseTest {
     
     public static Object executeSingleResultCmd(String sql){
         return em.createQuery(sql).getSingleResult();
-    }    
+    }
     
-     public static Collection<?> executeNativeListResultCmd(String sql){
+    public static Collection<?> executeNativeListResultCmd(String sql, Class className){
         return em.createNativeQuery(sql).getResultList();
     }
     
-    public static Object executeNativeSingleResultCmd(String sql){
-        return em.createNativeQuery(sql).getSingleResult();
-    }    
+    public static Object executeNativeSingleResultCmd(String sql, Class className){
+        return em.createNativeQuery(sql, className).getSingleResult();
+    }
 }
