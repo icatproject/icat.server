@@ -27,14 +27,23 @@ import static uk.icat3.util.Queries.*;
  * @author Glen Drinkwater
  */
 public class InvestigationSearch extends ManagerUtil {
-        
+    
     // Global class logger
     static Logger log = Logger.getLogger(InvestigationSearch.class);
-        
+    
     //used for type of user search
     private enum SearchType { SURNAME, USERID };
-        
     
+    
+    /**
+     *
+     * @param userId userId of the user.
+     * @param keyword
+     * @param startIndex start index of the results found
+     * @param number_results number of results found from the start index
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection investigation ids
+     */
     private static Collection<Long>  searchByKeywordRtnIdImpl(String userId, String keyword, int startIndex, int number_results, EntityManager manager)  {
         log.trace("searchByKeyword("+userId+", "+keyword+", "+startIndex+", "+number_results+", EntityManager)");
         
@@ -53,7 +62,7 @@ public class InvestigationSearch extends ManagerUtil {
      *
      * Searches the investigations the user has access to view by keyword
      *
-     * @param userId userId of the user.  
+     * @param userId userId of the user.
      * @param keyword
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of investigation ids
@@ -92,7 +101,7 @@ public class InvestigationSearch extends ManagerUtil {
      *
      * Searches the investigations the user has access to view by keyword
      *
-     * @param userId userId of the user. 
+     * @param userId userId of the user.
      * @param keyword
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
@@ -106,7 +115,7 @@ public class InvestigationSearch extends ManagerUtil {
      *
      * Searches the investigations the user has access to view by keyword
      *
-     * @param userId userId of the user.  
+     * @param userId userId of the user.
      * @param keyword
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
@@ -115,7 +124,7 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<Investigation> searchByKeyword(String userId, String keyword, int startIndex, int number_results, EntityManager manager) {
         return  searchByKeywordImpl(userId, keyword, startIndex, number_results, manager);
-    }    
+    }
     
     /**
      *
@@ -150,7 +159,7 @@ public class InvestigationSearch extends ManagerUtil {
         }
         return investigations;
     }
-        
+    
     /**
      *
      * Searches the investigations the user has access to view by surname
@@ -165,7 +174,7 @@ public class InvestigationSearch extends ManagerUtil {
         return  searchByUserSurnameImpl(userId, surname, SearchType.SURNAME, -1, -1, manager);
     }
     
-        /**
+    /**
      *
      ** Searches the investigations the user has access to view by surname
      *
@@ -191,7 +200,7 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Investigation> searchByUserID(String userId, String searchUserId, EntityManager manager) {
         //search and return all investigations
         return  searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, -1, -1, manager);
-    }    
+    }
     
     /**
      *
@@ -207,7 +216,7 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Investigation> searchByUserID(String userId, String searchUserId, int startIndex, int number_results, EntityManager manager)  {
         return  searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, startIndex, number_results, manager);
     }
-        
+    
     /**
      *
      *  Searches investigations from the ones they can view by the advanced criteria
@@ -270,7 +279,7 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDTO advanDTO, EntityManager manager){
         return searchByAdvancedImpl(userId, advanDTO, -1, -1, manager);
     }
-        
+    
     /**
      *
      *  Gets all the investigations associated with that user
@@ -306,8 +315,8 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Long> getUsersInvestigationsRtnId(String userId, EntityManager manager){
         log.trace("getUsersInvestigationsRtnId("+userId+", EnitiyManager)");
         
-        return  manager.createNamedQuery(INVESTIGATIONS_FOR_USER_RTN_ID).setParameter("userId",userId).getResultList();        
-    }    
+        return  manager.createNamedQuery(INVESTIGATIONS_FOR_USER_RTN_ID).setParameter("userId",userId).getResultList();
+    }
     
     /**
      * Search by keywords
@@ -333,7 +342,7 @@ public class InvestigationSearch extends ManagerUtil {
         
         int i  = 2;
         //check if fuzzy
-        if(fuzzy){            
+        if(fuzzy){
             //fuzzy so LIKE
             for(String keyword : keywords){
                 if(i == 2) SQL = SQL + "NAME LIKE ?"+(i++);
@@ -353,7 +362,7 @@ public class InvestigationSearch extends ManagerUtil {
         if(operator.toString().equals(LogicalOperator.AND.toString())) {
             SQL = SQL +" GROUP BY ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT," +
                     " RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, " +
-                    "FACILITY_CYCLE HAVING Count(*) = ?number_keywords";  
+                    "FACILITY_CYCLE HAVING Count(*) = ?number_keywords";
         }
         
         log.info("DYNAMIC SQL GENERATED: "+SQL);
@@ -390,13 +399,13 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     * 
-     * @param userId 
-     * @param keywords 
-     * @param includes 
-     * @param fuzzy 
-     * @param manager 
-     * @return 
+     *
+     * @param userId
+     * @param keywords
+     * @param includes
+     * @param fuzzy
+     * @param manager
+     * @return
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, boolean fuzzy, EntityManager manager)  {
         //secuirty on, AND
@@ -404,12 +413,12 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     * 
-     * @param userId 
-     * @param keywords 
-     * @param fuzzy 
-     * @param manager 
-     * @return 
+     *
+     * @param userId
+     * @param keywords
+     * @param fuzzy
+     * @param manager
+     * @return
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, boolean fuzzy, EntityManager manager)  {
         //secuirty on, AND, no includes
@@ -417,11 +426,11 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     * 
-     * @param userId 
-     * @param keywords 
-     * @param manager 
-     * @return 
+     *
+     * @param userId
+     * @param keywords
+     * @param manager
+     * @return
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, EntityManager manager)  {
         //exact match, secuirty true, AND
@@ -429,12 +438,12 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     * 
-     * @param userId 
-     * @param keywords 
-     * @param includes 
-     * @param manager 
-     * @return 
+     *
+     * @param userId
+     * @param keywords
+     * @param includes
+     * @param manager
+     * @return
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, EntityManager manager)  {
         //exact match, secuirty true, AND
@@ -442,12 +451,12 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     * 
-     * @param userId 
-     * @param keywords 
-     * @param operator 
-     * @param manager 
-     * @return 
+     *
+     * @param userId
+     * @param keywords
+     * @param operator
+     * @param manager
+     * @return
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, EntityManager manager)  {
         //exact match, secuirty true, AND
@@ -455,13 +464,13 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     * 
-     * @param userId 
-     * @param keywords 
-     * @param includes 
-     * @param operator 
-     * @param manager 
-     * @return 
+     *
+     * @param userId
+     * @param keywords
+     * @param includes
+     * @param operator
+     * @param manager
+     * @return
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, LogicalOperator operator, EntityManager manager)  {
         //exact match, secuirty true, AND
@@ -469,13 +478,13 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     * 
-     * @param userId 
-     * @param keywords 
-     * @param operator 
-     * @param fuzzy 
-     * @param manager 
-     * @return 
+     *
+     * @param userId
+     * @param keywords
+     * @param operator
+     * @param fuzzy
+     * @param manager
+     * @return
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, EntityManager manager)  {
         //exact match, secuirty true,
@@ -483,19 +492,19 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     * 
-     * @param userId 
-     * @param keywords 
-     * @param operator 
-     * @param includes 
-     * @param fuzzy 
-     * @param manager 
-     * @return 
+     *
+     * @param userId
+     * @param keywords
+     * @param operator
+     * @param includes
+     * @param fuzzy
+     * @param manager
+     * @return
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude includes, boolean fuzzy, EntityManager manager)  {
         //exact match, secuirty true,
         return searchByKeywords(userId, keywords, operator, includes, fuzzy ,true ,-1 , -1,manager);
-    }    
+    }
     
     /**
      * Lists all the instruments
@@ -506,6 +515,6 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<String> listAllInstruments(String userId, EntityManager manager)  {
         log.trace("listAllInstruments("+userId+", EntityManager)");
-        return  manager.createNamedQuery(ALL_INSTRUMENTS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();       
-    }    
+        return  manager.createNamedQuery(ALL_INSTRUMENTS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+    }
 }

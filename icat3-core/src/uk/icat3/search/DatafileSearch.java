@@ -76,6 +76,7 @@ public class DatafileSearch {
     }
     
     /**
+     * Searches by run number range and list of instruments.
      *
      * @param userId userId of the user.
      * @param instruments
@@ -98,6 +99,6 @@ public class DatafileSearch {
      * @return
      */
     public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
-        return searchByRunNumberImpl(userId, instruments, startRun, endRun, startIndex, number_results, manager);        
+        return searchByRunNumberImpl(userId, instruments, startRun, endRun, startIndex, number_results, manager);
     }
 }
