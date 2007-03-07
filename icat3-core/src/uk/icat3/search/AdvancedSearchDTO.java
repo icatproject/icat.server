@@ -9,7 +9,7 @@
 
 package uk.icat3.search;
 
-import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -17,10 +17,9 @@ import java.util.Date;
  * @author gjd37
  */
 public class AdvancedSearchDTO {
-    
-    private String experimentTitle;
+       
     private String investigationName;
-    private String investigators;
+    private Collection<String> investigators; //surname
     private String experimentNumber; //inv_number
     private String instrument;
     private Long runStart;
@@ -32,24 +31,15 @@ public class AdvancedSearchDTO {
     //private Timestamp year;
     private Date yearRangeStart;
     private Date yearRangeEnd;
-    private String[] datafileTypes;
-    private String[] keywords;
+    private Collection<String> datafileTypes;
+    private Collection<String> keywords;
     private String searchFilterType;
     
     /** Creates a new instance of AdvancedSearchDTO */
     public AdvancedSearchDTO() {
     }
 
-    
-    //this is investigation name
-    /*public String getExperimentTitle() {
-        return experimentTitle;
-    }
-
-    public void setExperimentTitle(String experimentTitle) {
-        this.experimentTitle = experimentTitle;
-    }*/
-
+       
     public String getInvestigationName() {
         return investigationName;
     }
@@ -58,11 +48,11 @@ public class AdvancedSearchDTO {
         this.investigationName = investigationName;
     }
 
-    public String getInvestigators() {
+    public Collection<String> getInvestigators() {
         return investigators;
     }
 
-    public void setInvestigators(String investigators) {
+    public void setInvestigators(Collection<String> investigators) {
         this.investigators = investigators;
     }
 
@@ -148,19 +138,19 @@ public class AdvancedSearchDTO {
         this.yearRangeEnd = yearRangeEnd;
     }
 
-    public String[] getDatafileTypes() {
+    public Collection<String> getDatafileTypes() {
         return datafileTypes;
     }
 
-    public void setDatafileTypes(String[] datafileTypes) {
+    public void setDatafileTypes(Collection<String> datafileTypes) {
         this.datafileTypes = datafileTypes;
     }
 
-    public String[] getKeywords() {
+    public Collection<String> getKeywords() {
         return keywords;
     }
 
-    public void setKeywords(String[] keywords) {
+    public void setKeywords(Collection<String> keywords) {
         this.keywords = keywords;
     }
 
@@ -170,7 +160,5 @@ public class AdvancedSearchDTO {
 
     public void setSearchFilterType(String searchFilterType) {
         this.searchFilterType = searchFilterType;
-    }
-        
-    
+    }    
 }

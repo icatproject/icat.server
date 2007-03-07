@@ -55,7 +55,7 @@ public class InvestigationSearch extends ManagerUtil {
      *
      * Searches the investigations the user has access to view by keyword
      *
-     * @param userId userId of the user.  Could be USERID , username or federal ID
+     * @param userId userId of the user.  
      * @param keyword
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of investigation ids
@@ -94,7 +94,7 @@ public class InvestigationSearch extends ManagerUtil {
      *
      * Searches the investigations the user has access to view by keyword
      *
-     * @param userId userId of the user.  Could be USERID , username or federal ID
+     * @param userId userId of the user. 
      * @param keyword
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
@@ -108,7 +108,7 @@ public class InvestigationSearch extends ManagerUtil {
      *
      * Searches the investigations the user has access to view by keyword
      *
-     * @param userId userId of the user.  Could be USERID , username or federal ID
+     * @param userId userId of the user.  
      * @param keyword
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
@@ -342,13 +342,16 @@ public class InvestigationSearch extends ManagerUtil {
         String SQL = INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL;
         
         int i  = 2;
-        if(fuzzy){
+        //check if fuzzy
+        if(fuzzy){            
+            //fuzzy so LIKE
             for(String keyword : keywords){
                 if(i == 2) SQL = SQL + "NAME LIKE ?"+(i++);
                 else  SQL = SQL +" OR NAME LIKE ?"+(i++);
                 
             }
         } else {
+            //none fuzzy, =
             for(String keyword : keywords){
                 if(i == 2) SQL = SQL + "NAME = ?"+(i++);
                 else  SQL = SQL +" OR NAME = ?"+(i++);
@@ -360,7 +363,8 @@ public class InvestigationSearch extends ManagerUtil {
         if(operator.toString().equals(LogicalOperator.AND.toString())) {
             SQL = SQL +" GROUP BY ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT," +
                     " RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, " +
-                    "FACILITY_CYCLE HAVING Count(*) = ?number_keywords";        }
+                    "FACILITY_CYCLE HAVING Count(*) = ?number_keywords";  
+        }
         
         log.info("DYNAMIC SQL GENERATED: "+SQL);
         
@@ -389,6 +393,7 @@ public class InvestigationSearch extends ManagerUtil {
             investigations = query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         
+        //add all the investigation information to the list of investigations
         getInvestigationInformation(investigations,include);
         
         return investigations;

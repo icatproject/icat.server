@@ -27,17 +27,16 @@ public class DatafileSearch {
     
     /**
      *
-     *
-     * @param userId
-     * @param instruments
-     * @param startRun
-     * @param endRun
-     * @param startIndex
-     * @param number_results
-     * @param manager
+     * @param userId userId of the user.
+     * @param instruments collection of instruments
+     * @param startRun lower range of run number
+     * @param endRun upper range of run number
+     * @param startIndex start index of the results found
+     * @param number_results number of results found from the start index
+     * @param manager manager object that will facilitate interaction with underlying database
      * @return
      */
-    public static Collection<Datafile> searchByRunNumberImpl(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
+    private static Collection<Datafile> searchByRunNumberImpl(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
         if(instruments == null) throw new IllegalArgumentException("Instrument collection cannot be null");
         log.trace("searchByRunNumber("+userId+", "+instruments.toArray()+", "+startRun+", "+endRun+", EntityManager)");
         
@@ -78,11 +77,8 @@ public class DatafileSearch {
     
     /**
      *
-     * @param userId
+     * @param userId userId of the user.
      * @param instruments
-     * @param startRun
-     * @param endRun
-     * @param manager
      * @return
      */
     public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun, EntityManager manager){
@@ -90,14 +86,15 @@ public class DatafileSearch {
     }
     
     /**
+     * Searches by run number range and list of instruments.
      *
-     * @param userId
-     * @param instruments
-     * @param startRun
-     * @param endRun
-     * @param startIndex
-     * @param number_results
-     * @param manager
+     * @param userId userId of the user.
+     * @param instruments collection of instruments
+     * @param startRun lower range of run number
+     * @param endRun upper range of run number
+     * @param startIndex start index of the results found
+     * @param number_results number of results found from the start index
+     * @param manager manager object that will facilitate interaction with underlying database     *
      * @return
      */
     public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
