@@ -94,7 +94,7 @@ public class RelatedDatafiles implements Serializable {
      * @param destDatafileId the destDatafileId of the RelatedDatafilesPK
      * @param sourceDatafileId the sourceDatafileId of the RelatedDatafilesPK
      */
-    public RelatedDatafiles(BigInteger destDatafileId, BigInteger sourceDatafileId) {
+    public RelatedDatafiles(Long destDatafileId, Long sourceDatafileId) {
         this.relatedDatafilesPK = new RelatedDatafilesPK(destDatafileId, sourceDatafileId);
     }
 

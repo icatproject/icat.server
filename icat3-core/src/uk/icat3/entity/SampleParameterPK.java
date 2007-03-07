@@ -23,7 +23,7 @@ import javax.persistence.Embeddable;
 public class SampleParameterPK implements Serializable {
 
     @Column(name = "SAMPLE_ID", nullable = false)
-    private BigInteger sampleId;
+    private Long sampleId;
 
     @Column(name = "NAME", nullable = false)
     private String name;
@@ -41,7 +41,7 @@ public class SampleParameterPK implements Serializable {
      * @param name the name of the SampleParameterPK
      * @param sampleId the sampleId of the SampleParameterPK
      */
-    public SampleParameterPK(String units, String name, BigInteger sampleId) {
+    public SampleParameterPK(String units, String name, Long sampleId) {
         this.units = units;
         this.name = name;
         this.sampleId = sampleId;
@@ -51,7 +51,7 @@ public class SampleParameterPK implements Serializable {
      * Gets the sampleId of this SampleParameterPK.
      * @return the sampleId
      */
-    public BigInteger getSampleId() {
+    public Long getSampleId() {
         return this.sampleId;
     }
 
@@ -59,7 +59,7 @@ public class SampleParameterPK implements Serializable {
      * Sets the sampleId of this SampleParameterPK to the specified value.
      * @param sampleId the new sampleId
      */
-    public void setSampleId(BigInteger sampleId) {
+    public void setSampleId(Long sampleId) {
         this.sampleId = sampleId;
     }
 

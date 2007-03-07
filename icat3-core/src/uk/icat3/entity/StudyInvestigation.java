@@ -94,7 +94,7 @@ public class StudyInvestigation extends EntityBaseBean implements Serializable {
      * @param investigationId the investigationId of the StudyInvestigationPK
      * @param studyId the studyId of the StudyInvestigationPK
      */
-    public StudyInvestigation(BigInteger investigationId, BigInteger studyId) {
+    public StudyInvestigation(Long investigationId, Long studyId) {
         this.studyInvestigationPK = new StudyInvestigationPK(investigationId, studyId);
     }
 

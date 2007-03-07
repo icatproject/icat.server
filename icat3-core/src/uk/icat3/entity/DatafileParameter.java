@@ -118,7 +118,7 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
      * @param name the name of the DatafileParameterPK
      * @param datafileId the datafileId of the DatafileParameterPK
      */
-    public DatafileParameter(String units, String name, BigInteger datafileId) {
+    public DatafileParameter(String units, String name, Long datafileId) {
         this.datafileParameterPK = new DatafileParameterPK(units, name, datafileId);
     }
 

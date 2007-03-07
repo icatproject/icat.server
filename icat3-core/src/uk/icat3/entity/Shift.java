@@ -90,7 +90,7 @@ public class Shift extends EntityBaseBean implements Serializable {
      * @param startDate the startDate of the ShiftPK
      * @param investigationId the investigationId of the ShiftPK
      */
-    public Shift(Date endDate, Date startDate, BigInteger investigationId) {
+    public Shift(Date endDate, Date startDate, Long investigationId) {
         this.shiftPK = new ShiftPK(endDate, startDate, investigationId);
     }
 

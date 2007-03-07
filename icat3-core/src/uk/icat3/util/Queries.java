@@ -232,7 +232,7 @@ public class Queries {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /*
      * Find all keywords for user,
-     * /?TODO wrogn query
+     * //TODO wrong query
      */
     public static final String KEYWORDS_FOR_USER = "Keywords.getAllKeywordsForUser";
     public static final String KEYWORDS_FOR_USER_JPQL = "SELECT DISTINCT k.keywordPK.name FROM Keyword k WHERE (k.investigation.investigatorCollection.investigatorPK.facilityUserId = :userId OR k.investigation.investigatorCollection IS EMPTY) AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) ORDER BY k.keywordPK.name";
@@ -249,5 +249,5 @@ public class Queries {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
-    public static int MAX_QUERY_RESULTSET = 600;
+    public static int MAX_QUERY_RESULTSET = 500;
 }

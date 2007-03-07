@@ -48,7 +48,7 @@ public class Sample extends EntityBaseBean implements Serializable {
 
     @Id
     @Column(name = "ID", nullable = false)
-    private BigDecimal id;
+    private Long id;
 
     @Column(name = "NAME", nullable = false)
     private String name;
@@ -87,7 +87,7 @@ public class Sample extends EntityBaseBean implements Serializable {
      * Creates a new instance of Sample with the specified values.
      * @param id the id of the Sample
      */
-    public Sample(BigDecimal id) {
+    public Sample(Long id) {
         this.id = id;
     }
 
@@ -99,7 +99,7 @@ public class Sample extends EntityBaseBean implements Serializable {
      * @param modTime the modTime of the Sample
      * @param modId the modId of the Sample
      */
-    public Sample(BigDecimal id, String name, String safetyInformation, Date modTime, String modId) {
+    public Sample(Long id, String name, String safetyInformation, Date modTime, String modId) {
         this.id = id;
         this.name = name;
         this.safetyInformation = safetyInformation;
@@ -111,7 +111,7 @@ public class Sample extends EntityBaseBean implements Serializable {
      * Gets the id of this Sample.
      * @return the id
      */
-    public BigDecimal getId() {
+    public Long getId() {
         return this.id;
     }
 
@@ -119,7 +119,7 @@ public class Sample extends EntityBaseBean implements Serializable {
      * Sets the id of this Sample to the specified value.
      * @param id the new id
      */
-    public void setId(BigDecimal id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

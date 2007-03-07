@@ -23,10 +23,10 @@ import javax.persistence.Embeddable;
 public class StudyInvestigationPK implements Serializable {
 
     @Column(name = "STUDY_ID", nullable = false)
-    private BigInteger studyId;
+    private Long studyId;
 
     @Column(name = "INVESTIGATION_ID", nullable = false)
-    private BigInteger investigationId;
+    private Long investigationId;
     
     /** Creates a new instance of StudyInvestigationPK */
     public StudyInvestigationPK() {
@@ -37,7 +37,7 @@ public class StudyInvestigationPK implements Serializable {
      * @param investigationId the investigationId of the StudyInvestigationPK
      * @param studyId the studyId of the StudyInvestigationPK
      */
-    public StudyInvestigationPK(BigInteger investigationId, BigInteger studyId) {
+    public StudyInvestigationPK(Long investigationId, Long studyId) {
         this.investigationId = investigationId;
         this.studyId = studyId;
     }
@@ -46,7 +46,7 @@ public class StudyInvestigationPK implements Serializable {
      * Gets the studyId of this StudyInvestigationPK.
      * @return the studyId
      */
-    public BigInteger getStudyId() {
+    public Long getStudyId() {
         return this.studyId;
     }
 
@@ -54,7 +54,7 @@ public class StudyInvestigationPK implements Serializable {
      * Sets the studyId of this StudyInvestigationPK to the specified value.
      * @param studyId the new studyId
      */
-    public void setStudyId(BigInteger studyId) {
+    public void setStudyId(Long studyId) {
         this.studyId = studyId;
     }
 
@@ -62,7 +62,7 @@ public class StudyInvestigationPK implements Serializable {
      * Gets the investigationId of this StudyInvestigationPK.
      * @return the investigationId
      */
-    public BigInteger getInvestigationId() {
+    public Long getInvestigationId() {
         return this.investigationId;
     }
 
@@ -70,7 +70,7 @@ public class StudyInvestigationPK implements Serializable {
      * Sets the investigationId of this StudyInvestigationPK to the specified value.
      * @param investigationId the new investigationId
      */
-    public void setInvestigationId(BigInteger investigationId) {
+    public void setInvestigationId(Long investigationId) {
         this.investigationId = investigationId;
     }
 

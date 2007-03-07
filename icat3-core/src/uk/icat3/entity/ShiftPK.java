@@ -26,7 +26,7 @@ import javax.persistence.TemporalType;
 public class ShiftPK implements Serializable {
 
     @Column(name = "INVESTIGATION_ID", nullable = false)
-    private BigInteger investigationId;
+    private Long investigationId;
 
     @Column(name = "START_DATE", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -46,7 +46,7 @@ public class ShiftPK implements Serializable {
      * @param startDate the startDate of the ShiftPK
      * @param investigationId the investigationId of the ShiftPK
      */
-    public ShiftPK(Date endDate, Date startDate, BigInteger investigationId) {
+    public ShiftPK(Date endDate, Date startDate, Long investigationId) {
         this.endDate = endDate;
         this.startDate = startDate;
         this.investigationId = investigationId;
@@ -56,7 +56,7 @@ public class ShiftPK implements Serializable {
      * Gets the investigationId of this ShiftPK.
      * @return the investigationId
      */
-    public BigInteger getInvestigationId() {
+    public Long getInvestigationId() {
         return this.investigationId;
     }
 
@@ -64,7 +64,7 @@ public class ShiftPK implements Serializable {
      * Sets the investigationId of this ShiftPK to the specified value.
      * @param investigationId the new investigationId
      */
-    public void setInvestigationId(BigInteger investigationId) {
+    public void setInvestigationId(Long investigationId) {
         this.investigationId = investigationId;
     }
 

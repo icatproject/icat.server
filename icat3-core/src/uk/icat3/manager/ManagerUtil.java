@@ -10,18 +10,42 @@
 package uk.icat3.manager;
 
 import java.util.Collection;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
+import org.apache.log4j.Logger;
+import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.InvestigationInclude;
 
 /**
+ *  Class to be extended to allow util methods for EJB3/JPA
  *
  * @author gjd37
  */
 public class ManagerUtil {
     
-    public static void getInvestigationInformation(Collection<Investigation> investigations, InvestigationInclude include){
+    // Global class logger
+    static Logger log = Logger.getLogger(ManagerUtil.class);
+    
+    /**
+     * Goes and collects the information associated with the investigation depending on the InvestigationInclude.
+     * <br /><br />
+     * These are:<br /><br />
+     *
+     * INVESTIGATORS_ONLY - list of investigators.<br />
+     * KEYWORDS_ONLY - list of keywords.<br />
+     * INVESTIGATORS_AND_KEYWORDS - all keywords and investigators.<br />
+     * DATASETS_ONLY - list of datasets, without the list of data files.<br />
+     * DATASETS_AND_DATAFILES - list of all datasets with their list of data file.<br />
+     * ALL - all, datasets with file, keywords and investigators.<br />
+     * NONE -  only the investigation object with no default lazy information.<br />
+     *
+     * @param investigations list of investigations
+     * @param include The information that is needed to be returned with the investigation
+     */
+    protected static void getInvestigationInformation(Collection<Investigation> investigations, InvestigationInclude include){
         
         // now collect the information associated with the investigations requested
         if(include.toString().equals(InvestigationInclude.ALL.toString())){
@@ -73,8 +97,21 @@ public class ManagerUtil {
         }
     }
     
-        
-    public static void getDatasetInformation(Collection<Dataset> datasets, DatasetInclude include){
+    
+    /**
+     * Goes and collects the information associated with the dataset depending on the DatasetInclude.
+     * <br /><br />
+     * These are:<br /><br />
+     *
+     * DATASET_FILES_ONLY - list of data files. <br />
+     * DATASET_PARAMETERS_ONY - list of data parameters.<br />
+     * DATASET_FILES_AND_PARAMETERS - both data files and data parameters , ALL.<br />
+     * NONE- only the Dataset object with no default lazy information.<br />
+     *
+     * @param datasets
+     * @param include
+     */
+    protected static void getDatasetInformation(Collection<Dataset> datasets, DatasetInclude include){
         
         // now collect the information associated with the investigations requested
         if(include.toString().equals(DatasetInclude.DATASET_FILES_ONLY.toString())){
@@ -95,6 +132,64 @@ public class ManagerUtil {
             }
         }
         
+    }
+    
+    /**
+     * Checks that the investigation with investigationId exists in the database, if so
+     * it is returned
+     *
+     * @param investigationId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException
+     * @return Investigation if found
+     */
+    protected static Investigation checkInvestigation(Long investigationId, EntityManager manager) throws EntityNotFoundException {
+        Investigation investigation = manager.find(Investigation.class, investigationId);
+        //check if the id exists in the database
+        if(investigation == null) throw new EntityNotFoundException("Investigation: id: "+investigationId+" not found.");
+        
+        log.trace("Investigation: id: "+investigationId+" exists in the database");
+        
+        return investigation;
+        
+    }
+    
+    /**
+     * Checks that the Dataset with datasetId exists in the database, if so
+     * it is returned
+     *
+     * @param datasetId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException
+     * @return Dataset if found
+     */
+    protected static Dataset checkDataSet(Long datasetId, EntityManager manager) throws EntityNotFoundException {
+        Dataset dataset = manager.find(Dataset.class, datasetId);
+        //check if the id exists in the database
+        if(dataset == null) throw new EntityNotFoundException("Dataset: id: "+datasetId+" not found.");
+        
+        log.trace("DataSet: id: "+datasetId+" exists in the database");
+        
+        return dataset;
+    }
+    
+    /**
+     * Checks that the Datafile with dataFileId exists in the database, if so
+     * is returned
+     *
+     * @param dataFileId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException
+     * @return Datafile if found
+     */
+    protected Datafile checkDataFile(Long dataFileId, EntityManager manager) throws EntityNotFoundException {
+        Datafile dataFile = manager.find(Datafile.class, dataFileId);
+        //check if the id exists in the database
+        if(dataFile == null) throw new EntityNotFoundException("DataFile: id: "+dataFileId+" not found.");
+        
+        log.trace("DataFile: id: "+dataFileId+" exists in the database");
+        
+        return dataFile;
     }
     
 }

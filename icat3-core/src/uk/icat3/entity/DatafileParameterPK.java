@@ -23,7 +23,7 @@ import javax.persistence.Embeddable;
 public class DatafileParameterPK implements Serializable {
 
     @Column(name = "DATAFILE_ID", nullable = false)
-    private BigInteger datafileId;
+    private Long datafileId;
 
     @Column(name = "NAME", nullable = false)
     private String name;
@@ -41,7 +41,7 @@ public class DatafileParameterPK implements Serializable {
      * @param name the name of the DatafileParameterPK
      * @param datafileId the datafileId of the DatafileParameterPK
      */
-    public DatafileParameterPK(String units, String name, BigInteger datafileId) {
+    public DatafileParameterPK(String units, String name, Long datafileId) {
         this.units = units;
         this.name = name;
         this.datafileId = datafileId;
@@ -51,7 +51,7 @@ public class DatafileParameterPK implements Serializable {
      * Gets the datafileId of this DatafileParameterPK.
      * @return the datafileId
      */
-    public BigInteger getDatafileId() {
+    public Long getDatafileId() {
         return this.datafileId;
     }
 
@@ -59,7 +59,7 @@ public class DatafileParameterPK implements Serializable {
      * Sets the datafileId of this DatafileParameterPK to the specified value.
      * @param datafileId the new datafileId
      */
-    public void setDatafileId(BigInteger datafileId) {
+    public void setDatafileId(Long datafileId) {
         this.datafileId = datafileId;
     }
 

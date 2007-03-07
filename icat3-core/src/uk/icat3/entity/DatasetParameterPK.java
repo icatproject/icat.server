@@ -23,7 +23,7 @@ import javax.persistence.Embeddable;
 public class DatasetParameterPK implements Serializable {
 
     @Column(name = "DATASET_ID", nullable = false)
-    private BigInteger datasetId;
+    private Long datasetId;
 
     @Column(name = "NAME", nullable = false)
     private String name;
@@ -41,7 +41,7 @@ public class DatasetParameterPK implements Serializable {
      * @param name the name of the DatasetParameterPK
      * @param datasetId the datasetId of the DatasetParameterPK
      */
-    public DatasetParameterPK(String units, String name, BigInteger datasetId) {
+    public DatasetParameterPK(String units, String name, Long datasetId) {
         this.units = units;
         this.name = name;
         this.datasetId = datasetId;
@@ -51,7 +51,7 @@ public class DatasetParameterPK implements Serializable {
      * Gets the datasetId of this DatasetParameterPK.
      * @return the datasetId
      */
-    public BigInteger getDatasetId() {
+    public Long getDatasetId() {
         return this.datasetId;
     }
 
@@ -59,7 +59,7 @@ public class DatasetParameterPK implements Serializable {
      * Sets the datasetId of this DatasetParameterPK to the specified value.
      * @param datasetId the new datasetId
      */
-    public void setDatasetId(BigInteger datasetId) {
+    public void setDatasetId(Long datasetId) {
         this.datasetId = datasetId;
     }
 

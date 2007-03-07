@@ -42,7 +42,7 @@ public class SoftwareVersion implements Serializable {
 
     @Id
     @Column(name = "ID", nullable = false)
-    private BigDecimal id;
+    private Long id;
 
     @Column(name = "NAME")
     private String name;
@@ -74,7 +74,7 @@ public class SoftwareVersion implements Serializable {
      * Creates a new instance of SoftwareVersion with the specified values.
      * @param id the id of the SoftwareVersion
      */
-    public SoftwareVersion(BigDecimal id) {
+    public SoftwareVersion(Long id) {
         this.id = id;
     }
 
@@ -84,7 +84,7 @@ public class SoftwareVersion implements Serializable {
      * @param modTime the modTime of the SoftwareVersion
      * @param modId the modId of the SoftwareVersion
      */
-    public SoftwareVersion(BigDecimal id, Date modTime, String modId) {
+    public SoftwareVersion(Long id, Date modTime, String modId) {
         this.id = id;
         this.modTime = modTime;
         this.modId = modId;
@@ -94,7 +94,7 @@ public class SoftwareVersion implements Serializable {
      * Gets the id of this SoftwareVersion.
      * @return the id
      */
-    public BigDecimal getId() {
+    public Long getId() {
         return this.id;
     }
 
@@ -102,7 +102,7 @@ public class SoftwareVersion implements Serializable {
      * Sets the id of this SoftwareVersion to the specified value.
      * @param id the new id
      */
-    public void setId(BigDecimal id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

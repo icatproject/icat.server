@@ -114,7 +114,7 @@ public class SampleParameter implements Serializable {
      * @param name the name of the SampleParameterPK
      * @param sampleId the sampleId of the SampleParameterPK
      */
-    public SampleParameter(String units, String name, BigInteger sampleId) {
+    public SampleParameter(String units, String name, Long sampleId) {
         this.sampleParameterPK = new SampleParameterPK(units, name, sampleId);
     }
 

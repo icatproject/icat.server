@@ -84,7 +84,7 @@ public class UserAccessGroup implements Serializable {
      * @param accessGroupId the accessGroupId of the UserAccessGroupPK
      * @param userId the userId of the UserAccessGroupPK
      */
-    public UserAccessGroup(BigInteger accessGroupId, String userId) {
+    public UserAccessGroup(Long accessGroupId, String userId) {
         this.userAccessGroupPK = new UserAccessGroupPK(accessGroupId, userId);
     }
 

@@ -243,6 +243,58 @@ public class TestSearch {
     }
     
     
+    public void testModify() throws Exception {
+        
+        setUp();
+        
+        
+        Investigation investigation =  InvestigationManager.getInvestigation("JAMES-JAMES", 11915480L, em);
+        
+       /*
+        Testing PSD  - old title
+        *
+        investigation.setId(1L);
+        investigation.setDatasetCollection(null);
+        investigation.setInvestigationLevelPermissionCollection(null);
+        investigation.setKeywordCollection(null);
+        investigation.setInvestigatorCollection(null);
+        investigation.setPublicationCollection(null);
+        investigation.setSampleCollection(null);
+        investigation.setStudyInvestigationCollection(null);
+        investigation.setShiftCollection(null);
+        
+        investigation.setTitle("New Test Investigation");
+        
+        em.merge(investigation);
+        */
+        
+        Investigation investigation2 =  InvestigationManager.getInvestigation("JAMES-JAMES", 11915480L, em);
+        System.out.println("Investigation name is: "+investigation2.getTitle());
+        
+        Thread.sleep(20000);
+        
+        Investigation investigation3 =  InvestigationManager.getInvestigation("JAMES-JAMES", 11915480L, em);
+        System.out.println("Investigation name is now: "+investigation3.getTitle());
+        
+        tearDown();
+        setUp();
+        
+        Investigation investigation31 =  InvestigationManager.getInvestigation("JAMES-JAMES", 11915480L, em);
+        System.out.println("Investigation name is now with new entity manager: "+investigation31.getTitle());
+        
+        
+        Investigation investigation4 = (Investigation) em.createQuery("select i from Investigation i where i.id = 11915480").setHint("toplink.refresh", "true").getSingleResult();
+        System.out.println("Investigation name is after a select hine: "+investigation4.getTitle());
+        
+      //  em.refresh(investigation3);
+        
+       // System.out.println("Investigation name is now after refresh: "+investigation3.getTitle());
+        
+        tearDown();
+        
+    }
+    
+    
     public void test() throws Exception {
         
         setUp();
@@ -253,7 +305,7 @@ public class TestSearch {
                 "AND d.datafileParameterCollection.datafileParameterPK.name = 'run_number' " +
                 "AND d.datafileParameterCollection.numericValue < :upperRunNumber " +
                 "AND d.datafileParameterCollection.numericValue > :lowerRunNumber";
-      
+        String INVESTIGATIONS_BY_USER_SQL2 = "SELECT d FROM Datafile d";
         //  String INVESTIGATIONS_BY_USER_SQL = "SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
               /*  "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  " +
                 "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE t2.facility_user_id = t1.facility_user_id " +
@@ -261,20 +313,20 @@ public class TestSearch {
                 "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE id NOT IN (SELECT investigation_id from investigator)) WHERE LAST_NAME LIKE ?2";*/
         
         //test code here
-                      
+        em.createQuery(INVESTIGATIONS_BY_USER_SQL2).setMaxResults(2).getResultList();
         //log.info("Testing");
-        Collection<Long> investigations = em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES-JAMES").setParameter("instrument","alf").setParameter("lowerRunNumber",0).setParameter("upperRunNumber",10000).getResultList();
+        /*Collection<Long> investigations = em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES-JAMES").setParameter("instrument","alf").setParameter("lowerRunNumber",0).setParameter("upperRunNumber",10000).getResultList();
         log.info("Results: "+investigations.size());
         for(Long investigation : investigations){
             log.info(investigation);
-        }
+        }*/
         
        /* Collection<Investigation> investigations =  em.createNativeQuery(INVESTIGATIONS_BY_USER_SQL,Investigation.class).setParameter(1,"JAMES").setMaxResults(100).getResultList();
         
         for(Investigation investigation : investigations){
             log.info(investigation.getId()+" "+investigation.getTitle());
         }*/
-        log.info("Results: "+investigations.size());
+        //log.info("Results: "+investigations.size());
         tearDown();
         
     }
@@ -339,7 +391,9 @@ public class TestSearch {
         
         // ts.getUserInvestigations("JAMES");
         
-        ts.test();
+        //  ts.test();
+        
+      //  ts.testModify();
     }
     
 }

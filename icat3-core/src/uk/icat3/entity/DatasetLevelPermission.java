@@ -47,7 +47,7 @@ public class DatasetLevelPermission implements Serializable {
 
     @Id
     @Column(name = "ID", nullable = false)
-    private BigDecimal id;
+    private Long id;
 
     @Column(name = "PRM_ADMIN", nullable = false)
     private short prmAdmin;
@@ -86,7 +86,7 @@ public class DatasetLevelPermission implements Serializable {
      * Creates a new instance of DatasetLevelPermission with the specified values.
      * @param id the id of the DatasetLevelPermission
      */
-    public DatasetLevelPermission(BigDecimal id) {
+    public DatasetLevelPermission(Long id) {
         this.id = id;
     }
 
@@ -101,7 +101,7 @@ public class DatasetLevelPermission implements Serializable {
      * @param modTime the modTime of the DatasetLevelPermission
      * @param modId the modId of the DatasetLevelPermission
      */
-    public DatasetLevelPermission(BigDecimal id, short prmAdmin, short prmCreate, short prmRead, short prmUpdate, short prmDelete, Date modTime, String modId) {
+    public DatasetLevelPermission(Long id, short prmAdmin, short prmCreate, short prmRead, short prmUpdate, short prmDelete, Date modTime, String modId) {
         this.id = id;
         this.prmAdmin = prmAdmin;
         this.prmCreate = prmCreate;
@@ -116,7 +116,7 @@ public class DatasetLevelPermission implements Serializable {
      * Gets the id of this DatasetLevelPermission.
      * @return the id
      */
-    public BigDecimal getId() {
+    public Long getId() {
         return this.id;
     }
 
@@ -124,7 +124,7 @@ public class DatasetLevelPermission implements Serializable {
      * Sets the id of this DatasetLevelPermission to the specified value.
      * @param id the new id
      */
-    public void setId(BigDecimal id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -43,7 +43,7 @@ public class Publication extends EntityBaseBean implements Serializable {
 
     @Id
     @Column(name = "ID", nullable = false)
-    private BigDecimal id;
+    private Long id;
 
     @Column(name = "FULL_REFERENCE", nullable = false)
     private String fullReference;
@@ -76,7 +76,7 @@ public class Publication extends EntityBaseBean implements Serializable {
      * Creates a new instance of Publication with the specified values.
      * @param id the id of the Publication
      */
-    public Publication(BigDecimal id) {
+    public Publication(Long id) {
         this.id = id;
     }
 
@@ -87,7 +87,7 @@ public class Publication extends EntityBaseBean implements Serializable {
      * @param modTime the modTime of the Publication
      * @param modId the modId of the Publication
      */
-    public Publication(BigDecimal id, String fullReference, Date modTime, String modId) {
+    public Publication(Long id, String fullReference, Date modTime, String modId) {
         this.id = id;
         this.fullReference = fullReference;
         this.modTime = modTime;
@@ -98,7 +98,7 @@ public class Publication extends EntityBaseBean implements Serializable {
      * Gets the id of this Publication.
      * @return the id
      */
-    public BigDecimal getId() {
+    public Long getId() {
         return this.id;
     }
 
@@ -106,7 +106,7 @@ public class Publication extends EntityBaseBean implements Serializable {
      * Sets the id of this Publication to the specified value.
      * @param id the new id
      */
-    public void setId(BigDecimal id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

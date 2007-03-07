@@ -26,7 +26,7 @@ import uk.icat3.util.InvestigationInclude;
  *
  * @author gjd37
  */
-public class InvestigationManager {
+public class InvestigationManager extends ManagerUtil {
     
     // Global class logger
     static Logger log = Logger.getLogger(InvestigationManager.class);
@@ -62,7 +62,7 @@ public class InvestigationManager {
         }
         
         //add include information
-        ManagerUtil.getInvestigationInformation(investigations, includes);
+        getInvestigationInformation(investigations, includes);
         
         return investigations;
     }
@@ -166,14 +166,5 @@ public class InvestigationManager {
     
     
     
-    protected static Investigation checkInvestigation(Long investigationId, EntityManager manager) throws EntityNotFoundException {
-        Investigation investigation = manager.find(Investigation.class, investigationId);
-        //check if the id exists in the database
-        if(investigation == null) throw new EntityNotFoundException("Investigation: id: "+investigationId+" not found.");
-        
-        log.trace("Investigation: id: "+investigationId+" exists in the database");
-        
-        return investigation;
-        
-    }
+   
 }

@@ -44,16 +44,16 @@ public class Topic extends EntityBaseBean implements Serializable {
 
     @Id
     @Column(name = "ID", nullable = false)
-    private BigDecimal id;
+    private Long id;
 
     @Column(name = "NAME")
     private String name;
 
     @Column(name = "PARENT_ID")
-    private BigInteger parentId;
+    private Long parentId;
 
     @Column(name = "TOPIC_LEVEL")
-    private BigInteger topicLevel;
+    private Long topicLevel;
 
     @Column(name = "MOD_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -73,7 +73,7 @@ public class Topic extends EntityBaseBean implements Serializable {
      * Creates a new instance of Topic with the specified values.
      * @param id the id of the Topic
      */
-    public Topic(BigDecimal id) {
+    public Topic(Long id) {
         this.id = id;
     }
 
@@ -83,7 +83,7 @@ public class Topic extends EntityBaseBean implements Serializable {
      * @param modTime the modTime of the Topic
      * @param modId the modId of the Topic
      */
-    public Topic(BigDecimal id, Date modTime, String modId) {
+    public Topic(Long id, Date modTime, String modId) {
         this.id = id;
         this.modTime = modTime;
         this.modId = modId;
@@ -93,7 +93,7 @@ public class Topic extends EntityBaseBean implements Serializable {
      * Gets the id of this Topic.
      * @return the id
      */
-    public BigDecimal getId() {
+    public Long getId() {
         return this.id;
     }
 
@@ -101,7 +101,7 @@ public class Topic extends EntityBaseBean implements Serializable {
      * Sets the id of this Topic to the specified value.
      * @param id the new id
      */
-    public void setId(BigDecimal id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -125,7 +125,7 @@ public class Topic extends EntityBaseBean implements Serializable {
      * Gets the parentId of this Topic.
      * @return the parentId
      */
-    public BigInteger getParentId() {
+    public Long getParentId() {
         return this.parentId;
     }
 
@@ -133,7 +133,7 @@ public class Topic extends EntityBaseBean implements Serializable {
      * Sets the parentId of this Topic to the specified value.
      * @param parentId the new parentId
      */
-    public void setParentId(BigInteger parentId) {
+    public void setParentId(Long parentId) {
         this.parentId = parentId;
     }
 
@@ -141,7 +141,7 @@ public class Topic extends EntityBaseBean implements Serializable {
      * Gets the topicLevel of this Topic.
      * @return the topicLevel
      */
-    public BigInteger getTopicLevel() {
+    public Long getTopicLevel() {
         return this.topicLevel;
     }
 
@@ -149,7 +149,7 @@ public class Topic extends EntityBaseBean implements Serializable {
      * Sets the topicLevel of this Topic to the specified value.
      * @param topicLevel the new topicLevel
      */
-    public void setTopicLevel(BigInteger topicLevel) {
+    public void setTopicLevel(Long topicLevel) {
         this.topicLevel = topicLevel;
     }
 

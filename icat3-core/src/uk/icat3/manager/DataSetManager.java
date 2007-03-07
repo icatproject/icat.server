@@ -26,19 +26,39 @@ import uk.icat3.util.DatasetInclude;
  *
  * @author gjd37
  */
-public class DataSetManager {
+public class DataSetManager extends ManagerUtil {
     
     static Logger log = Logger.getLogger(DataSetManager.class);
     
     
     ////////////////   Delete commands       ///////////////////////////
     
+    /**
+     * Deletes the data set for a user depending if the users id has delete permissions to delete the data set
+     *
+     * @param userId
+     * @param dataSet
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
     public static void deleteDataSet(String userId, Dataset dataSet, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         
         deleteDataSet(userId, dataSet.getId(), manager);
         
     }
     
+    /**
+     *
+     * Deletes the data set for a user depending if the users id has delete permissions to delete the data set from the
+     * data set ID. 
+     *
+     * @param userId
+     * @param dataSetId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
     public static void deleteDataSet(String userId, Long dataSetId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataSet("+userId+", "+dataSetId+", EntityManager)");
         
@@ -55,6 +75,16 @@ public class DataSetManager {
         
     }
     
+    /**
+     * Deletes the collection of data set for a user depending if the users id has delete permissions to delete the data sets from the
+     * data set IDs
+     *
+     * @param userId
+     * @param dataSetIds
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
     public static void deleteDataSets(String userId, Collection<Long> dataSetIds, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataSets("+userId+", "+dataSetIds+", EntityManager)");
         
@@ -63,8 +93,19 @@ public class DataSetManager {
         }
     }
     
-    //added boolean to avoid erausre name clash
-    //TODO
+    
+    //TODO:  added boolean to avoid erausre name clash with above method    
+    /**
+     *
+     * Deletes the collection of data sets for a user depending if the user's id has delete permissions to delete the data sets
+     *
+     * @param userId
+     * @param dataSets
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @return
+     */
     public static boolean deleteDataSets(String userId, Collection<Dataset> dataSets, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataSets("+userId+", "+dataSets+", EntityManager)");
         
@@ -80,6 +121,15 @@ public class DataSetManager {
     
     ////////////////////     Add/Update Commands    ///////////////////
     
+    /**
+     * Updates a data set depending on weather the user has permission to update this data set
+     *
+     * @param userId
+     * @param dataSet
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
     public static void updateDataSet(String userId, Dataset dataSet, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         log.trace("updateDataSet("+userId+", "+dataSet+", EntityManager)");
         
@@ -92,11 +142,31 @@ public class DataSetManager {
         manager.merge(dataSet);
     }
     
+    /**
+     * Adds a data set to the list a files for a investigation, depending if the user has update permission on the investigation
+     *
+     * @param userId
+     * @param dataSet
+     * @param investigationId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
     public static void addDataSet(String userId, Dataset dataSet, Long investigationId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         log.trace("addDataSet("+userId+", "+dataSet+" "+investigationId+", EntityManager)");
         InvestigationManager.addDataSet(userId,dataSet,investigationId, manager);
     }
     
+    /**
+     * Adds a collection of data sets to the list a files for a investigation, depending if the user has update permission on the investigation
+     *
+     * @param userId
+     * @param dataSets
+     * @param investigationId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
     public static void addDataSets(String userId, Collection<Dataset> dataSets, Long investigationId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         log.trace("addDataSets("+userId+", "+dataSets+" "+investigationId+", EntityManager)");
         
@@ -108,6 +178,18 @@ public class DataSetManager {
     
     ////////////////////    Get Commands    /////////////////////////
     
+    /**
+     * Gets the data sets objects from a list of data set ids, depending if the users has access to read the data sets.
+     * Also gets extra information regarding the data set.  See {@link DatasetInclude}
+     *
+     * @param userId
+     * @param dataSetIds
+     * @param includes
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @return
+     */
     public static Collection<Dataset> getDataSets(String userId, Collection<Long> dataSetIds, DatasetInclude includes,  EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         log.trace("getDataSet("+userId+", "+dataSetIds+" EntityManager)");
         
@@ -131,28 +213,37 @@ public class DataSetManager {
         return datasets;
     }
     
+    /**
+     *  Gets the data sets objects from a list of data set ids, depending if the users has access to read the data sets
+     *
+     * @param userId
+     * @param dataSetIds
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @return
+     */
     public static Collection<Dataset> getDataSets(String userId, Collection<Long> dataSetIds, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         return getDataSets(userId, dataSetIds,DatasetInclude.NONE, manager);
     }
     
+    /**
+     * Gets the data set object from a list of data set ids, depending if the user has access to read the data set.
+     *
+     * @param userId
+     * @param dataSetId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @return
+     */
     public static Collection<Dataset> getDataSet(String userId, Long dataSetId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         Collection<Long> datasets = new ArrayList<Long>();
         datasets.add(dataSetId);
         
         return getDataSets(userId, datasets, DatasetInclude.NONE, manager);
     }
+    
     ////////////////////    End of get Commands    /////////////////////////
     
-    
-    
-    
-    protected static Dataset checkDataSet(Long datasetId, EntityManager manager) throws EntityNotFoundException {
-        Dataset dataset = manager.find(Dataset.class, datasetId);
-        //check if the id exists in the database
-        if(dataset == null) throw new EntityNotFoundException("Dataset: id: "+datasetId+" not found.");
-        
-        log.trace("DataSet: id: "+datasetId+" exists in the database");
-        
-        return dataset;
-    }
 }

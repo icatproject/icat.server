@@ -86,7 +86,7 @@ public class TopicList implements Serializable {
      * @param topicId the topicId of the TopicListPK
      * @param investigationId the investigationId of the TopicListPK
      */
-    public TopicList(BigInteger topicId, BigInteger investigationId) {
+    public TopicList(Long topicId, Long investigationId) {
         this.topicListPK = new TopicListPK(topicId, investigationId);
     }
 

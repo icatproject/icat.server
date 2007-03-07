@@ -23,7 +23,7 @@ import javax.persistence.Embeddable;
 public class KeywordPK implements Serializable {
 
     @Column(name = "INVESTIGATION_ID", nullable = false)
-    private BigInteger investigationId;
+    private Long investigationId;
 
     @Column(name = "NAME", nullable = false)
     private String name;
@@ -37,7 +37,7 @@ public class KeywordPK implements Serializable {
      * @param name the name of the KeywordPK
      * @param investigationId the investigationId of the KeywordPK
      */
-    public KeywordPK(String name, BigInteger investigationId) {
+    public KeywordPK(String name, Long investigationId) {
         this.name = name;
         this.investigationId = investigationId;
     }
@@ -46,7 +46,7 @@ public class KeywordPK implements Serializable {
      * Gets the investigationId of this KeywordPK.
      * @return the investigationId
      */
-    public BigInteger getInvestigationId() {
+    public Long getInvestigationId() {
         return this.investigationId;
     }
 
@@ -54,7 +54,7 @@ public class KeywordPK implements Serializable {
      * Sets the investigationId of this KeywordPK to the specified value.
      * @param investigationId the new investigationId
      */
-    public void setInvestigationId(BigInteger investigationId) {
+    public void setInvestigationId(Long investigationId) {
         this.investigationId = investigationId;
     }
 

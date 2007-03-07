@@ -24,16 +24,35 @@ import uk.icat3.util.AccessType;
  *
  * @author gjd37
  */
-public class DataFileManager {
+public class DataFileManager extends ManagerUtil {
     
     static Logger log = Logger.getLogger(DataFileManager.class);
     
+    /**
+     * Deletes the data file for a user depending if the user's id has delete permissions to delete the data file
+     *
+     * @param userId
+     * @param dataFile
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
     public void deleteDataFile(String userId, Datafile dataFile, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         
         deleteDataFile(userId, dataFile.getId(), manager);
         
     }
     
+    /**
+     * Deletes the data file with ID, for a users depending if the users id has delete permissions to delete the data file from
+     * the ID
+     *
+     * @param userId
+     * @param dataFileId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
     public void deleteDataFile(String userId, Long dataFileId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataFile("+userId+", "+dataFileId+", EntityManager)");
         
@@ -48,6 +67,17 @@ public class DataFileManager {
         
     }
     
+    /**
+     *
+     * Deletes the collection of files for a users depending if the users id has delete permissions to delete the files from
+     * their ids
+     *
+     * @param userId
+     * @param dataFileIds
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
     public void deleteDataFiles(String userId, Collection<Long> dataFileIds, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataFiles("+userId+", "+dataFileIds+", EntityManager)");
         
@@ -56,8 +86,18 @@ public class DataFileManager {
         }
     }
     
-    //added boolean to avoid erausre name clash
-    //TODO
+    // TODO:  added boolean to avoid erausre name clash with above method
+    
+    /**
+     * Deletes the collection of data files for a users depending if the users id has delete permissions to delete the data file
+     *  
+     * @param userId
+     * @param dataFiles
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @return
+     */
     public boolean deleteDataFiles(String userId, Collection<Datafile> dataFiles, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataFiles("+userId+", "+dataFiles+", EntityManager)");
         
@@ -68,6 +108,15 @@ public class DataFileManager {
         return true;
     }
     
+    /**
+     * Updates a data file depending on weather the user has permission to update this data file
+     *
+     * @param userId
+     * @param dataFile
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
     public void updateDataFile(String userId, Datafile dataFile, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         log.trace("updateDataFile("+userId+", "+dataFile+", EntityManager)");
         
@@ -81,15 +130,36 @@ public class DataFileManager {
         
     }
     
-    public void addDataFile(String userId, Datafile dataFile, Long investigationId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
-        log.trace("addDataFile("+userId+", "+dataFile+" "+investigationId+", EntityManager)");
+    /**
+     * Adds a data file to the list a files for a data set, depending if the user has update permission on the data set
+     *
+     * @param userId
+     * @param dataFile
+     * @param datasetId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
+    public void addDataFile(String userId, Datafile dataFile, Long datasetId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+        log.trace("addDataFile("+userId+", "+dataFile+" "+datasetId+", EntityManager)");
         
         Collection<Datafile> dataFiles = new ArrayList<Datafile>();
         dataFiles.add(dataFile);
         
-        addDataFiles(userId, dataFiles, investigationId, manager);
+        addDataFiles(userId, dataFiles, datasetId, manager);
     }
     
+    /**
+     *
+     *  Adds a collection of data files to the list a files for a data set, depending if the user has update permission on the data set
+     *
+     * @param userId
+     * @param dataFiles
+     * @param datasetId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
     public void addDataFiles(String userId, Collection<Datafile> dataFiles, Long datasetId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         log.trace("addDataFile("+userId+", "+dataFiles+" "+datasetId+", EntityManager)");
         
@@ -104,6 +174,16 @@ public class DataFileManager {
         }
     }
     
+    /**
+     * Gets the data file objects from a list of data file ids, depending if the users has access to read the data files
+     *
+     * @param userId
+     * @param dataFileIds
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @return
+     */
     public Collection<Datafile> getDataFiles(String userId, Collection<Long> dataFileIds, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         log.trace("getDataFile("+userId+", "+dataFileIds+" EntityManager)");
         
@@ -125,21 +205,21 @@ public class DataFileManager {
     }
     
     
+    /**
+     * Gets a data file object from a list of data file id, depending if the users has access to read the data file
+     *
+     * @param userId
+     * @param dataFileId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @return
+     */
     public Collection<Datafile> getDataFile(String userId, Long dataFileId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
         Collection<Long> dataFiles = new ArrayList<Long>();
         dataFiles.add(dataFileId);
         
         return getDataFiles(userId, dataFiles, manager);
-    }
-    
-    private Datafile checkDataFile(Long dataFileId, EntityManager manager) throws EntityNotFoundException {
-        Datafile dataFile = manager.find(Datafile.class, dataFileId);
-        //check if the id exists in the database
-        if(dataFile == null) throw new EntityNotFoundException("DataFile: id: "+dataFileId+" not found.");
-        
-        log.trace("DataFile: id: "+dataFileId+" exists in the database");
-        
-        return dataFile;
     }
     
 }

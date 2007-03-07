@@ -23,10 +23,10 @@ import javax.persistence.Embeddable;
 public class TopicListPK implements Serializable {
 
     @Column(name = "INVESTIGATION_ID", nullable = false)
-    private BigInteger investigationId;
+    private Long investigationId;
 
     @Column(name = "TOPIC_ID", nullable = false)
-    private BigInteger topicId;
+    private Long topicId;
     
     /** Creates a new instance of TopicListPK */
     public TopicListPK() {
@@ -37,7 +37,7 @@ public class TopicListPK implements Serializable {
      * @param topicId the topicId of the TopicListPK
      * @param investigationId the investigationId of the TopicListPK
      */
-    public TopicListPK(BigInteger topicId, BigInteger investigationId) {
+    public TopicListPK(Long topicId, Long investigationId) {
         this.topicId = topicId;
         this.investigationId = investigationId;
     }
@@ -46,7 +46,7 @@ public class TopicListPK implements Serializable {
      * Gets the investigationId of this TopicListPK.
      * @return the investigationId
      */
-    public BigInteger getInvestigationId() {
+    public Long getInvestigationId() {
         return this.investigationId;
     }
 
@@ -54,7 +54,7 @@ public class TopicListPK implements Serializable {
      * Sets the investigationId of this TopicListPK to the specified value.
      * @param investigationId the new investigationId
      */
-    public void setInvestigationId(BigInteger investigationId) {
+    public void setInvestigationId(Long investigationId) {
         this.investigationId = investigationId;
     }
 
@@ -62,7 +62,7 @@ public class TopicListPK implements Serializable {
      * Gets the topicId of this TopicListPK.
      * @return the topicId
      */
-    public BigInteger getTopicId() {
+    public Long getTopicId() {
         return this.topicId;
     }
 
@@ -70,7 +70,7 @@ public class TopicListPK implements Serializable {
      * Sets the topicId of this TopicListPK to the specified value.
      * @param topicId the new topicId
      */
-    public void setTopicId(BigInteger topicId) {
+    public void setTopicId(Long topicId) {
         this.topicId = topicId;
     }
 

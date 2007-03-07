@@ -48,7 +48,7 @@ public class Study implements Serializable {
 
     @Id
     @Column(name = "ID", nullable = false)
-    private BigDecimal id;
+    private Long id;
 
     @Column(name = "NAME", nullable = false)
     private String name;
@@ -88,7 +88,7 @@ public class Study implements Serializable {
      * Creates a new instance of Study with the specified values.
      * @param id the id of the Study
      */
-    public Study(BigDecimal id) {
+    public Study(Long id) {
         this.id = id;
     }
 
@@ -99,7 +99,7 @@ public class Study implements Serializable {
      * @param modTime the modTime of the Study
      * @param modId the modId of the Study
      */
-    public Study(BigDecimal id, String name, Date modTime, String modId) {
+    public Study(Long id, String name, Date modTime, String modId) {
         this.id = id;
         this.name = name;
         this.modTime = modTime;
@@ -110,7 +110,7 @@ public class Study implements Serializable {
      * Gets the id of this Study.
      * @return the id
      */
-    public BigDecimal getId() {
+    public Long getId() {
         return this.id;
     }
 
@@ -118,7 +118,7 @@ public class Study implements Serializable {
      * Sets the id of this Study to the specified value.
      * @param id the new id
      */
-    public void setId(BigDecimal id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

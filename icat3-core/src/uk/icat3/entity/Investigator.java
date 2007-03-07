@@ -88,7 +88,7 @@ public class Investigator implements Serializable {
      * @param facilityUserId the facilityUserId of the InvestigatorPK
      * @param investigationId the investigationId of the InvestigatorPK
      */
-    public Investigator(String facilityUserId, BigInteger investigationId) {
+    public Investigator(String facilityUserId, Long investigationId) {
         this.investigatorPK = new InvestigatorPK(facilityUserId, investigationId);
     }
 

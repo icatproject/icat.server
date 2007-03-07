@@ -48,7 +48,7 @@ public class InvestigationLevelPermission extends EntityBaseBean implements Seri
 
     @Id
     @Column(name = "ID", nullable = false)
-    private BigDecimal id;
+    private Long id;
 
     @Column(name = "PRM_ADMIN", nullable = false)
     private short prmAdmin;
@@ -90,7 +90,7 @@ public class InvestigationLevelPermission extends EntityBaseBean implements Seri
      * Creates a new instance of InvestigationLevelPermission with the specified values.
      * @param id the id of the InvestigationLevelPermission
      */
-    public InvestigationLevelPermission(BigDecimal id) {
+    public InvestigationLevelPermission(Long id) {
         this.id = id;
     }
 
@@ -106,7 +106,7 @@ public class InvestigationLevelPermission extends EntityBaseBean implements Seri
      * @param modTime the modTime of the InvestigationLevelPermission
      * @param modId the modId of the InvestigationLevelPermission
      */
-    public InvestigationLevelPermission(BigDecimal id, short prmAdmin, short prmFineGrainedAccess, short prmCreate, short prmRead, short prmUpdate, short prmDelete, Date modTime, String modId) {
+    public InvestigationLevelPermission(Long id, short prmAdmin, short prmFineGrainedAccess, short prmCreate, short prmRead, short prmUpdate, short prmDelete, Date modTime, String modId) {
         this.id = id;
         this.prmAdmin = prmAdmin;
         this.prmFineGrainedAccess = prmFineGrainedAccess;
@@ -122,7 +122,7 @@ public class InvestigationLevelPermission extends EntityBaseBean implements Seri
      * Gets the id of this InvestigationLevelPermission.
      * @return the id
      */
-    public BigDecimal getId() {
+    public Long getId() {
         return this.id;
     }
 
@@ -130,7 +130,7 @@ public class InvestigationLevelPermission extends EntityBaseBean implements Seri
      * Sets the id of this InvestigationLevelPermission to the specified value.
      * @param id the new id
      */
-    public void setId(BigDecimal id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

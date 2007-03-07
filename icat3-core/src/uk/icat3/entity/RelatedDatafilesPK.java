@@ -23,10 +23,10 @@ import javax.persistence.Embeddable;
 public class RelatedDatafilesPK implements Serializable {
 
     @Column(name = "SOURCE_DATAFILE_ID", nullable = false)
-    private BigInteger sourceDatafileId;
+    private Long sourceDatafileId;
 
     @Column(name = "DEST_DATAFILE_ID", nullable = false)
-    private BigInteger destDatafileId;
+    private Long destDatafileId;
     
     /** Creates a new instance of RelatedDatafilesPK */
     public RelatedDatafilesPK() {
@@ -37,7 +37,7 @@ public class RelatedDatafilesPK implements Serializable {
      * @param destDatafileId the destDatafileId of the RelatedDatafilesPK
      * @param sourceDatafileId the sourceDatafileId of the RelatedDatafilesPK
      */
-    public RelatedDatafilesPK(BigInteger destDatafileId, BigInteger sourceDatafileId) {
+    public RelatedDatafilesPK(Long destDatafileId, Long sourceDatafileId) {
         this.destDatafileId = destDatafileId;
         this.sourceDatafileId = sourceDatafileId;
     }
@@ -46,7 +46,7 @@ public class RelatedDatafilesPK implements Serializable {
      * Gets the sourceDatafileId of this RelatedDatafilesPK.
      * @return the sourceDatafileId
      */
-    public BigInteger getSourceDatafileId() {
+    public Long getSourceDatafileId() {
         return this.sourceDatafileId;
     }
 
@@ -54,7 +54,7 @@ public class RelatedDatafilesPK implements Serializable {
      * Sets the sourceDatafileId of this RelatedDatafilesPK to the specified value.
      * @param sourceDatafileId the new sourceDatafileId
      */
-    public void setSourceDatafileId(BigInteger sourceDatafileId) {
+    public void setSourceDatafileId(Long sourceDatafileId) {
         this.sourceDatafileId = sourceDatafileId;
     }
 
@@ -62,7 +62,7 @@ public class RelatedDatafilesPK implements Serializable {
      * Gets the destDatafileId of this RelatedDatafilesPK.
      * @return the destDatafileId
      */
-    public BigInteger getDestDatafileId() {
+    public Long getDestDatafileId() {
         return this.destDatafileId;
     }
 
@@ -70,7 +70,7 @@ public class RelatedDatafilesPK implements Serializable {
      * Sets the destDatafileId of this RelatedDatafilesPK to the specified value.
      * @param destDatafileId the new destDatafileId
      */
-    public void setDestDatafileId(BigInteger destDatafileId) {
+    public void setDestDatafileId(Long destDatafileId) {
         this.destDatafileId = destDatafileId;
     }
 

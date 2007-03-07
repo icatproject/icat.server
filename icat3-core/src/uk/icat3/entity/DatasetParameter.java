@@ -118,7 +118,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
      * @param name the name of the DatasetParameterPK
      * @param datasetId the datasetId of the DatasetParameterPK
      */
-    public DatasetParameter(String units, String name, BigInteger datasetId) {
+    public DatasetParameter(String units, String name, Long datasetId) {
         this.datasetParameterPK = new DatasetParameterPK(units, name, datasetId);
     }
 

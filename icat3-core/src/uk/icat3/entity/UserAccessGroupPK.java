@@ -26,7 +26,7 @@ public class UserAccessGroupPK implements Serializable {
     private String userId;
 
     @Column(name = "ACCESS_GROUP_ID", nullable = false)
-    private BigInteger accessGroupId;
+    private Long accessGroupId;
     
     /** Creates a new instance of UserAccessGroupPK */
     public UserAccessGroupPK() {
@@ -37,7 +37,7 @@ public class UserAccessGroupPK implements Serializable {
      * @param accessGroupId the accessGroupId of the UserAccessGroupPK
      * @param userId the userId of the UserAccessGroupPK
      */
-    public UserAccessGroupPK(BigInteger accessGroupId, String userId) {
+    public UserAccessGroupPK(Long accessGroupId, String userId) {
         this.accessGroupId = accessGroupId;
         this.userId = userId;
     }
@@ -62,7 +62,7 @@ public class UserAccessGroupPK implements Serializable {
      * Gets the accessGroupId of this UserAccessGroupPK.
      * @return the accessGroupId
      */
-    public BigInteger getAccessGroupId() {
+    public Long getAccessGroupId() {
         return this.accessGroupId;
     }
 
@@ -70,7 +70,7 @@ public class UserAccessGroupPK implements Serializable {
      * Sets the accessGroupId of this UserAccessGroupPK to the specified value.
      * @param accessGroupId the new accessGroupId
      */
-    public void setAccessGroupId(BigInteger accessGroupId) {
+    public void setAccessGroupId(Long accessGroupId) {
         this.accessGroupId = accessGroupId;
     }
 

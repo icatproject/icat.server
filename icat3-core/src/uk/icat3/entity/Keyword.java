@@ -105,7 +105,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
      * @param name the name of the KeywordPK
      * @param investigationId the investigationId of the KeywordPK
      */
-    public Keyword(String name, BigInteger investigationId) {
+    public Keyword(String name, Long investigationId) {
         this.keywordPK = new KeywordPK(name, investigationId);
     }
 
