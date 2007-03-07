@@ -24,7 +24,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import org.apache.log4j.Logger;
 
-class ExecuteDatabaseScript {
+public class ExecuteDatabaseScript {
     
     private String jdbcURL = "";
     private String username = "";
