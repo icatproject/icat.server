@@ -3,10 +3,15 @@
  *
  * Created on 07 March 2007, 14:44
  *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
+ * JUNIT Test Suite that creates a connection to a specified ICAT3 JUNIT
+ * test database schema and executes a number of scripts in order to 
+ * initialise the database for the JUNIT tests that are to be
+ * subsequently called.  Add each JUNIT class (that is to be run) to the
+ * @Suite.SuiteClasses annotation.
+ *
+ * @author df01 
+ * @version 1.0
  */
-
 package uk.icat3;
 
 import junit.framework.JUnit4TestAdapter;
@@ -25,6 +30,7 @@ import uk.icat3.util.BaseTestClass;
 })
 public class TestAll {
     public static Test suite() {
+        
         ExecuteDatabaseScript script = new ExecuteDatabaseScript("jdbc:oracle:thin:@murray.nd.rl.ac.uk:1521:prop", "icat3junit", "icat3junit");
         script.execute("database/ICAT3API_DropTables[v1].sql", ";");
         script.execute("database/ICAT3API_CreateSchema[v1].sql", ";");
