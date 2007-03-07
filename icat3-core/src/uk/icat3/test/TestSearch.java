@@ -286,9 +286,9 @@ public class TestSearch {
         Investigation investigation4 = (Investigation) em.createQuery("select i from Investigation i where i.id = 11915480").setHint("toplink.refresh", "true").getSingleResult();
         System.out.println("Investigation name is after a select hine: "+investigation4.getTitle());
         
-      //  em.refresh(investigation3);
+        //  em.refresh(investigation3);
         
-       // System.out.println("Investigation name is now after refresh: "+investigation3.getTitle());
+        // System.out.println("Investigation name is now after refresh: "+investigation3.getTitle());
         
         tearDown();
         
@@ -313,7 +313,9 @@ public class TestSearch {
                 "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE id NOT IN (SELECT investigation_id from investigator)) WHERE LAST_NAME LIKE ?2";*/
         
         //test code here
-        em.createQuery(INVESTIGATIONS_BY_USER_SQL2).setMaxResults(2).getResultList();
+        // em.createQuery(INVESTIGATIONS_BY_USER_SQL2).setMaxResults(2).getResultList();
+        
+        System.out.println(em.createQuery("SELECT count(i) FROM Investigation i where i.investigatorCollection IS EMPTY ").getResultList());
         //log.info("Testing");
         /*Collection<Long> investigations = em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES-JAMES").setParameter("instrument","alf").setParameter("lowerRunNumber",0).setParameter("upperRunNumber",10000).getResultList();
         log.info("Results: "+investigations.size());
@@ -391,9 +393,9 @@ public class TestSearch {
         
         // ts.getUserInvestigations("JAMES");
         
-        //  ts.test();
+        ts.test();
         
-      //  ts.testModify();
+        //  ts.testModify();
     }
     
 }

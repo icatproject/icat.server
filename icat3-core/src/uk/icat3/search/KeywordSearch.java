@@ -74,8 +74,9 @@ public class KeywordSearch {
      */
     public static Collection<String> getAllKeywords(String userId, EntityManager manager){
         log.trace("getAllKeywords("+userId+", EntityManager)");
-        Collection<String> keywords = manager.createNamedQuery(ALLKEYWORDS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+        Collection<String> keywords = manager.createNamedQuery(ALLKEYWORDS).getResultList();
         
         return keywords;
-    }    
+    }        
+    
 }

@@ -106,7 +106,7 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeyword(String userId, String keyword, EntityManager manager) throws InsufficientPrivilegesException {
+    public static Collection<Investigation> searchByKeyword(String userId, String keyword, EntityManager manager)  {
         //search and return all investigations
         return  searchByKeywordImpl(userId, keyword, -1, -1, manager);
     }
