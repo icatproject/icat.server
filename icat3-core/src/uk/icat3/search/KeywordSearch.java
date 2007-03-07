@@ -41,19 +41,7 @@ public class KeywordSearch {
      */
     public static Collection<String> getKeywordsForUser(String userId, EntityManager manager){
         log.trace("getKeywordsForUser("+userId+", EntityManager)");
-        
-        //TODO Prob can do this with straight JPQL/SQL
-        /*Collection<Investigation> investigations = manager.createNamedQuery(Queries.INVESTIGATIONS_BY_USER).setParameter("userId",userId).getResultList();
-         
-        //Turn into String Array
-        Collection<String> keywords = new HashSet<String>();
-        for(Investigation investigation : investigations){
-            for(Keyword keyword : investigation.getKeywordCollection()){
-                keywords.add(keyword.getKeywordPK().getName());
-            }
-        }
-        return keywords;*/
-        
+               
         return getKeywordsForUser(userId, null, manager);
         
     }
@@ -73,12 +61,10 @@ public class KeywordSearch {
         if(startKeyword != null) startKeyword = startKeyword+"%";
         Collection<String> keywords = manager.createNamedQuery(KEYWORDS_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).getResultList();
         
-        return keywords;
-        
+        return keywords;        
     }
     
-    
-    
+        
     /**
      * This gets all the keywords avaliable for that user, they can only see keywords associated with their
      * investigations or public investigations
@@ -91,6 +77,5 @@ public class KeywordSearch {
         Collection<String> keywords = manager.createNamedQuery(ALLKEYWORDS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         
         return keywords;
-    }
-    
+    }    
 }

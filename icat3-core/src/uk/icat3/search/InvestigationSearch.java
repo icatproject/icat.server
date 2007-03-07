@@ -19,6 +19,7 @@ import uk.icat3.manager.ManagerUtil;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 import static uk.icat3.util.Queries.*;
+
 /**
  * This is the service to allows access to search through the icat schema.
  * Checks are made through SQL and JPQL for access rights to view investigations
@@ -26,16 +27,13 @@ import static uk.icat3.util.Queries.*;
  * @author Glen Drinkwater
  */
 public class InvestigationSearch extends ManagerUtil {
-    
-    
+        
     // Global class logger
     static Logger log = Logger.getLogger(InvestigationSearch.class);
-    
-    
+        
     //used for type of user search
     private enum SearchType { SURNAME, USERID };
-    
-    
+        
     
     private static Collection<Long>  searchByKeywordRtnIdImpl(String userId, String keyword, int startIndex, int number_results, EntityManager manager)  {
         log.trace("searchByKeyword("+userId+", "+keyword+", "+startIndex+", "+number_results+", EntityManager)");
@@ -117,8 +115,7 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<Investigation> searchByKeyword(String userId, String keyword, int startIndex, int number_results, EntityManager manager) {
         return  searchByKeywordImpl(userId, keyword, startIndex, number_results, manager);
-    }
-    
+    }    
     
     /**
      *
@@ -153,8 +150,7 @@ public class InvestigationSearch extends ManagerUtil {
         }
         return investigations;
     }
-    
-    
+        
     /**
      *
      * Searches the investigations the user has access to view by surname
@@ -169,8 +165,7 @@ public class InvestigationSearch extends ManagerUtil {
         return  searchByUserSurnameImpl(userId, surname, SearchType.SURNAME, -1, -1, manager);
     }
     
-    
-    /**
+        /**
      *
      ** Searches the investigations the user has access to view by surname
      *
@@ -196,8 +191,7 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Investigation> searchByUserID(String userId, String searchUserId, EntityManager manager) {
         //search and return all investigations
         return  searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, -1, -1, manager);
-    }
-    
+    }    
     
     /**
      *
@@ -213,8 +207,7 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Investigation> searchByUserID(String userId, String searchUserId, int startIndex, int number_results, EntityManager manager)  {
         return  searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, startIndex, number_results, manager);
     }
-    
-    
+        
     /**
      *
      *  Searches investigations from the ones they can view by the advanced criteria
@@ -277,8 +270,7 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDTO advanDTO, EntityManager manager){
         return searchByAdvancedImpl(userId, advanDTO, -1, -1, manager);
     }
-    
-    
+        
     /**
      *
      *  Gets all the investigations associated with that user
@@ -314,10 +306,8 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Long> getUsersInvestigationsRtnId(String userId, EntityManager manager){
         log.trace("getUsersInvestigationsRtnId("+userId+", EnitiyManager)");
         
-        return  manager.createNamedQuery(INVESTIGATIONS_FOR_USER_RTN_ID).setParameter("userId",userId).getResultList();
-        
-    }
-    
+        return  manager.createNamedQuery(INVESTIGATIONS_FOR_USER_RTN_ID).setParameter("userId",userId).getResultList();        
+    }    
     
     /**
      * Search by keywords
@@ -505,8 +495,7 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude includes, boolean fuzzy, EntityManager manager)  {
         //exact match, secuirty true,
         return searchByKeywords(userId, keywords, operator, includes, fuzzy ,true ,-1 , -1,manager);
-    }
-    
+    }    
     
     /**
      * Lists all the instruments
@@ -517,9 +506,6 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<String> listAllInstruments(String userId, EntityManager manager)  {
         log.trace("listAllInstruments("+userId+", EntityManager)");
-        return  manager.createNamedQuery(ALL_INSTRUMENTS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
-        
-        
-    }
-    
+        return  manager.createNamedQuery(ALL_INSTRUMENTS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();       
+    }    
 }

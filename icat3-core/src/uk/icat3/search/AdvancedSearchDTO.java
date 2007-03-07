@@ -38,7 +38,6 @@ public class AdvancedSearchDTO {
     /** Creates a new instance of AdvancedSearchDTO */
     public AdvancedSearchDTO() {
     }
-
        
     public String getInvestigationName() {
         return investigationName;

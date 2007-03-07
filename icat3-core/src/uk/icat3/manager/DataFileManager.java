@@ -110,7 +110,7 @@ public class DataFileManager extends ManagerUtil {
     }
     
     /**
-     * Updates a data file depending on weather the user has permission to update this data file
+     * Updates a data file depending on whether the user has permission to update this data file
      *
      * @param userId
      * @param dataFile

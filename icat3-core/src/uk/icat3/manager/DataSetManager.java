@@ -122,7 +122,7 @@ public class DataSetManager extends ManagerUtil {
     ////////////////////     Add/Update Commands    ///////////////////
     
     /**
-     * Updates a data set depending on weather the user has permission to update this data set
+     * Updates a data set depending on whether the user has permission to update this data set
      *
      * @param userId
      * @param dataSet
@@ -143,7 +143,7 @@ public class DataSetManager extends ManagerUtil {
     }
     
     /**
-     * Adds a data set to the list a files for a investigation, depending if the user has update permission on the investigation
+     * Adds a data set to the list a data sets for a investigation, depending if the user has update permission on the investigation
      *
      * @param userId
      * @param dataSet
@@ -158,7 +158,7 @@ public class DataSetManager extends ManagerUtil {
     }
     
     /**
-     * Adds a collection of data sets to the list a files for a investigation, depending if the user has update permission on the investigation
+     * Adds a collection of data sets to the list a data sets for a investigation, depending if the user has update permission on the investigation
      *
      * @param userId
      * @param dataSets

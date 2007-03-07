@@ -98,7 +98,6 @@ public class DatafileSearch {
      * @return
      */
     public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
-        return searchByRunNumberImpl(userId, instruments, startRun, endRun, startIndex, number_results, manager);
-        
+        return searchByRunNumberImpl(userId, instruments, startRun, endRun, startIndex, number_results, manager);        
     }
 }

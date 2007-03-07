@@ -96,8 +96,7 @@ public class ManagerUtil {
             }
         }
     }
-    
-    
+        
     /**
      * Goes and collects the information associated with the dataset depending on the DatasetInclude.
      * <br /><br />
@@ -130,8 +129,7 @@ public class ManagerUtil {
                 //size invokes the JPA to get the information, other wise the collections are null
                 dataset.getDatasetParameterCollection().size();
             }
-        }
-        
+        }        
     }
     
     /**
@@ -150,8 +148,7 @@ public class ManagerUtil {
         
         log.trace("Investigation: id: "+investigationId+" exists in the database");
         
-        return investigation;
-        
+        return investigation;        
     }
     
     /**
@@ -190,6 +187,5 @@ public class ManagerUtil {
         log.trace("DataFile: id: "+dataFileId+" exists in the database");
         
         return dataFile;
-    }
-    
+    }    
 }
