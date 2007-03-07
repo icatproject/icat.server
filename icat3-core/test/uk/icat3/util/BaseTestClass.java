@@ -24,29 +24,14 @@ public class BaseTestClass extends BaseTest{
     
     private static Logger log = Logger.getLogger(BaseTestClass.class);
     
-    
     @BeforeClass
-    public static void setUp(){
-        
-        log.debug("setUp(), creating entityManager");
-        emf = Persistence.createEntityManagerFactory("icat3-core-testing-PU");
-        em = emf.createEntityManager();
-        EntityManagerResource.getInstance().set(em);
-        
-        // Begin transaction
-        em.getTransaction().begin();
-        
-        
+    public static void BeforeClassSetUp(){                
+       setUp();        
     }
     
     @AfterClass
-    public static void tearDown(){
-        
-        log.debug("tearDown(), closing entityManager");
-        // Commit the transaction
-        em.getTransaction().commit();
-        
-        em.close();
+    public static void AfterClassTearDown(){
+        tearDown();     
     }
     
     

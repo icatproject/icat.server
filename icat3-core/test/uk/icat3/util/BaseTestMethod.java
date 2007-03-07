@@ -22,31 +22,15 @@ import org.junit.Before;
 public class BaseTestMethod extends BaseTest {
     
     private static Logger log = Logger.getLogger(BaseTestMethod.class);
-    
-    
+        
     @Before
-    public static void setUp(){
-        
-        log.trace("setUp(), creating entityManager");
-        
-        emf = Persistence.createEntityManagerFactory("icat3-core-testing-PU");
-        em = emf.createEntityManager();
-        EntityManagerResource.getInstance().set(em);
-        
-        // Begin transaction
-        em.getTransaction().begin();
-        
-        
+    public static void BeforeSetUp(){
+        setUp();
     }
     
     @After
-    public static void tearDown(){
-        
-        log.trace("tearDown(), closing entityManager");
-        // Commit the transaction
-        em.getTransaction().commit();
-        
-        em.close();
+    public static void AftertearDown(){
+        tearDown();
     }
     
 }
