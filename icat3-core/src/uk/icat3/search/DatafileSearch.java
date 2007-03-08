@@ -38,36 +38,42 @@ public class DatafileSearch {
      */
     private static Collection<Datafile> searchByRunNumberImpl(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
         if(instruments == null) throw new IllegalArgumentException("Instrument collection cannot be null");
-        log.trace("searchByRunNumber("+userId+", "+instruments.toArray()+", "+startRun+", "+endRun+", EntityManager)");
+        log.trace("searchByRunNumber("+userId+", "+instruments+", "+startRun+", "+endRun+", EntityManager)");
         
         Collection<Datafile> datafiles = null;
         
         //dynamically create the SQL
-        String SQL = DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_PART_1 +" (";
+        String SQL = DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_1;
         
-        int i = 0;
+        //add in the instruments in the IN() cause of SQL
+        int i = 1;       
         for(String instrument : instruments){
-            if(i == 0) SQL = SQL + " t5.NAME LIKE ?instrument"+(i++);
-            else  SQL = SQL +" OR t5.NAME LIKE ?instrument"+(i++);
-            
+            if(i == instruments.size()) SQL += "?instrument"+(i++)+"";           
+            else  SQL += "?instrument"+(i++)+" , ";  
+           
         }
         
-        SQL = ") "+ DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_PART_2;
-        
-        //set query with investigation as entity object
-        Query query = manager.createNativeQuery(SQL, Datafile.class);
-        
+        SQL += DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_2;
+               
+        //set query with datafile as entity object
+        Query query = manager.createNativeQuery(SQL,Datafile.class);
+             
+        //sets the paramters
         query = query.setParameter("userId",userId);
+        query = query.setParameter("lower",startRun);
+        query = query.setParameter("upper",endRun);
         
-        //set keywords
-        int j = 0;
+        //set instruments
+        int j = 1;
         for(String instrument : instruments){
-            query = query.setParameter("instrument"+j++,"%"+instrument+"%");
+            query = query.setParameter("instrument"+j++,instrument);
         }
+               
+        log.trace("DYNAMIC SQL: "+SQL);
         
         if(number_results < 0){
             //get all, maybe should limit this to 500?
-            datafiles =  query.setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+            datafiles = query.setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
             datafiles = query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }

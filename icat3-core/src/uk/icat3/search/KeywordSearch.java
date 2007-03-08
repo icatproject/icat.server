@@ -32,10 +32,7 @@ public class KeywordSearch {
      * @return
      */
     public static Collection<String> getKeywordsForUser(String userId, EntityManager manager){
-        log.trace("getKeywordsForUser("+userId+", EntityManager)");
-        
-        return getKeywordsForUser(userId, null, manager);
-        
+        return getKeywordsForUser(userId, null, -1, manager);
     }
     
     /**
@@ -48,12 +45,29 @@ public class KeywordSearch {
      * @return
      */
     public static Collection<String> getKeywordsForUser(String userId, String startKeyword, EntityManager manager){
+        return getKeywordsForUser(userId, startKeyword, -1, manager);
+    }
+    
+    /**
+     *
+     *  This gets all the keywords avaliable for that user, beginning with a keyword, they can only see keywords associated with their
+     * investigations or public investigations
+     *
+     * @param userId
+     * @param manager
+     * @return
+     */
+    public static Collection<String> getKeywordsForUser(String userId, String startKeyword, int numberReturned, EntityManager manager){
         log.trace("getKeywordsForUser("+userId+", EntityManager)");
         
         if(startKeyword != null) startKeyword = startKeyword+"%";
-        Collection<String> keywords = manager.createNamedQuery(KEYWORDS_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).getResultList();
+        else startKeyword = "%";
         
-        return keywords;
+        if(numberReturned < 0){
+            return  manager.createNamedQuery(KEYWORDS_NATIVE_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).getResultList();
+        } else {
+            return  manager.createNamedQuery(KEYWORDS_NATIVE_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).setMaxResults(numberReturned).getResultList();
+        }
     }
     
     
@@ -81,7 +95,7 @@ public class KeywordSearch {
         } else {
             keywords = manager.createNamedQuery(ALLKEYWORDS).getResultList();
         }
-     
+        
         return keywords;
     }
     

@@ -82,7 +82,7 @@ public class Queries {
     public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL = "SELECT DISTINCT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
             "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t3.NAME  " +
             "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2, KEYWORD t3 WHERE t2.facility_user_id = t1.facility_user_id " +
-            "AND t2.federal_id = ?userId AND t0.id = t1.investigation_id AND t3.INVESTIGATION_ID = t0.ID UNION " +
+            "AND t2.federal_id = ?1 AND t0.id = t1.investigation_id AND t3.INVESTIGATION_ID = t0.ID UNION " +
             "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t3.NAME  FROM INVESTIGATION t0, KEYWORD t3 " +
             "WHERE t3.INVESTIGATION_ID = t0.ID AND id NOT IN (SELECT investigation_id from investigator)) WHERE ";
     
@@ -125,14 +125,86 @@ public class Queries {
      * This is the search for the advanced search
      */
     public static final String ADVANCED_SEARCH = "Investigation.findByAdvancedSearch";
-    public static final String ADVANCED_SEARCH_JPQL = "SELECT i FROM Investigation i WHERE (i.investigatorCollection.investigatorPK.facilityUserId = :userId OR i.investigatorCollection IS EMPTY) AND " +
-            "(i.title LIKE :investigationName OR :investigationName IS NULL) AND " +
-            "(i.sampleCollection.name LIKE :sampleName OR :sampleName IS NULL) AND" +
-            " (i.investigatorCollection.facilityUser.lastName LIKE :investigatorName OR :investigatorName IS NULL) AND" +
-            " (i.releaseDate < :endDate OR :endDate IS NULL) AND (i.releaseDate > :startDate OR :startDate IS NULL) AND" +
-            " (i.instrument.name LIKE :instrument OR :instrument IS NULL)";
+    
+    public static final String ADVANCED_SEARCH_SQL_1 = "SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, "+
+            "t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, "+
+            "t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE "+
+            "FROM INVESTIGATION t0 "+
+            "WHERE (inv_number = ?inv_number OR ?inv_number IS NULL) "+
+            "AND (Lower(title) LIKE '%'||Lower(?inv_title)||'%' OR ?inv_title IS NULL) ";
+    
+    private static final String ADVANCED_SEARCH_SQL_BASE = "";
+            /*SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID,
+            t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME,
+            t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE
+            FROM INVESTIGATION t0
+            WHERE (inv_number = ? OR ? IS NULL)
+            AND Lower(title) LIKE '%'||Lower(?)||'%' OR ? IS NULL
+             *
+            -- if instruments (ie if the instruments parameter is passed in, non-null)
+            AND instrument IN(?,?,?,etc)
+             
+            -- if "more params" (ie if there are other parameters passed in
+            --                   which haven't been catered for yet)
+            AND id IN(
+             
+            -- if investigators (surnames)
+              SELECT i.investigation_id
+              FROM investigator i, facility_user fu
+              WHERE i.facility_user_id = fu.facility_user_id
+              AND (InStr(Lower(fu.last_name),Lower(?)) > 0)
+             
+            -- if "more params"
+              INTERSECT
+             
+            -- if keywords ("AND" search)
+              SELECT investigation_id
+              FROM keyword
+              WHERE Lower(name) LIKE '%'||Lower(?)||'%'
+              AND Lower(name) LIKE '%'||Lower(?)||'%'
+              AND Lower(name) LIKE '%'||Lower(?)||'%'
+              etc
+             
+            -- if "more params"
+              INTERSECT
+             
+            -- if sample
+              SELECT investigation_id
+              FROM sample
+              WHERE (InStr(Lower(name),Lower(?)) > 0)
+             
+            -- if "more params"
+              INTERSECT
+             
+            -- if datafile and NOT datafile_parameter
+              SELECT ds.investigation_id
+              FROM dataset ds, DATAFILE df
+              WHERE df.dataset_id = ds.id
+              AND (InStr(Lower(df.name),Lower(?)) > 0 OR ? IS NULL)
+              AND (( (df.datafile_create_time >= ?date1 AND df.datafile_create_time < (?date2-1)))
+                   OR df.datafile_create_time IS NULL)
+            /* if the run number is to be stored in the dataset or datafile table then...
+              AND (run_number between ?run1 and ?run2 or ?run1 is null)
+             */
+    
+            /*-- if datafile parameter
+              SELECT ds.investigation_id
+              FROM dataset ds, DATAFILE df, datafile_parameter dfp
+              WHERE df.dataset_id = ds.id
+              AND (InStr(Lower(df.name),Lower(?)) > 0 OR ? IS NULL)
+              AND (( (df.datafile_create_time >= ?date1 AND df.datafile_create_time < (?date2-1)))
+                   OR df.datafile_create_time IS NULL)
+              AND dfp.datafile_id = df.id
+              AND dfp.NAME = 'run_number'
+              AND dfp.numeric_value BETWEEN ?1 AND ?2
+             
+             
+            -- if investigators OR keywords OR sample OR datafile or datafile_parameter
+            )"";*/
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    
     
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,6 +233,7 @@ public class Queries {
     
     
     
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /*
      *
@@ -179,38 +252,60 @@ public class Queries {
     
     
     
-     /*
-      *
-      * Data files by instrument and run number
-      *
-      */
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+         /*
+          *
+          * Data files by instrument and run number
+          *
+          */
     public static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER = "Datafile.findByRunNumberNative";
     public static final String DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER = "Datafile.findByRunNumber";
     
-    private static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_1 = "SELECT d.id FROM Datafile d WHERE" +
-            " d.datasetId.investigationId.investigatorCollection.facilityUser.federalId = :userId " +
-            " AND d.datasetId.investigationId.instrument.name LIKE :instrument " +
-            "AND d.datafileParameterCollection.datafileParameterPK.name = 'run_number' " +
-            "AND d.datafileParameterCollection.numericValue < :upperRunNumber " +
-            "AND d.datafileParameterCollection.numericValue > :lowerRunNumber";
+    //this is the SQL that is going to be dynamically generated
+    private static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_BASE = "SELECT d.ID, d.COMMAND, d.CHECKSUM, d.DESCRIPTION, d.SIGNATURE, d.DATAFILE_VERSION_COMMENT,"+
+            "d.MOD_TIME, d.DATAFILE_CREATE_TIME, d.MOD_ID, d.FILE_SIZE, d.LOCATION, d.DATAFILE_MODIFY_TIME, "+
+            "d.DATAFILE_VERSION, d.NAME, d.DATASET_ID, d.DATAFILE_FORMAT, d.DATAFILE_FORMAT_VERSION "+
+            "FROM DATAFILE d, dataset ds, datafile_parameter dp, "+
+            "(select i.id, i.instrument" +
+            "  from investigator g, facility_user f, investigation i "+
+            "where f.facility_user_id = g.facility_user_id "+
+            "and f.federal_id like 'JAMES-JAMES' "+
+            "and i.id = g.investigation_id "+
+            " UNION ALL "+
+            "select id, instrument "+
+            "from investigation "+
+            "where id not in (select investigation_id from investigator) "+
+            ") fed_inv "+
+            "WHERE d.dataset_id = ds.id "+
+            "AND ds.investigation_id = fed_inv.id "+
+            "AND fed_inv.instrument IN('alf','lad') "+
+            "AND dp.datafile_id = d.id "+
+            "AND dp.NAME = 'run_number' "+
+            "AND dp.numeric_value BETWEEN 2620 AND 2631";
     
-    //this is from INVESTIGATIONS_FOR_USER_JPQL_1, searches only one instrument
-    private static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_1 = "SELECT DISTINCT t0.ID FROM DATAFILE_PARAMETER t8, DATAFILE_PARAMETER t7, DATAFILE_PARAMETER t6, INSTRUMENT t5, DATASET t4, INVESTIGATION t3, INVESTIGATOR t2, FACILITY_USER t1, DATAFILE t0 WHERE ((((((t1.FEDERAL_ID = ?) AND (t5.NAME LIKE ?)) AND (t6.NAME = ?)) AND (t7.NUMERIC_VALUE < ?)) AND (t8.NUMERIC_VALUE > ?)) AND ((((((((t4.ID = t0.DATASET_ID) AND (t3.ID = t4.INVESTIGATION_ID)) AND (t2.INVESTIGATION_ID = t3.ID)) AND (t1.FACILITY_USER_ID = t2.FACILITY_USER_ID)) AND (t5.NAME = t3.INSTRUMENT)) AND (t6.DATAFILE_ID = t0.ID)) AND (t7.DATAFILE_ID = t0.ID)) AND (t8.DATAFILE_ID = t0.ID)))";
-    //same as above but with 2 instruments
-    private static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_2 = "SELECT DISTINCT t0.ID FROM DATAFILE_PARAMETER t8, DATAFILE_PARAMETER t7, DATAFILE_PARAMETER t6, INSTRUMENT t5, DATASET t4, INVESTIGATION t3, INVESTIGATOR t2, FACILITY_USER t1, DATAFILE t0 WHERE ((((((t1.FEDERAL_ID = ?) AND (t5.NAME LIKE ? OR t5.NAME LIKE ?)) AND (t6.NAME = ?)) AND (t7.NUMERIC_VALUE < ?)) AND (t8.NUMERIC_VALUE > ?)) AND ((((((((t4.ID = t0.DATASET_ID) AND (t3.ID = t4.INVESTIGATION_ID)) AND (t2.INVESTIGATION_ID = t3.ID)) AND (t1.FACILITY_USER_ID = t2.FACILITY_USER_ID)) AND (t5.NAME = t3.INSTRUMENT)) AND (t6.DATAFILE_ID = t0.ID)) AND (t7.DATAFILE_ID = t0.ID)) AND (t8.DATAFILE_ID = t0.ID)))";
-    //same as above but with 2 instruments populated with two instruments
-    private static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_2_POPULATED = "SELECT DISTINCT t0.ID FROM DATAFILE_PARAMETER t8, DATAFILE_PARAMETER t7, DATAFILE_PARAMETER t6, INSTRUMENT t5, DATASET t4, INVESTIGATION t3, INVESTIGATOR t2, FACILITY_USER t1, DATAFILE t0 WHERE ((((((t1.FEDERAL_ID = 'JAMES-JAMES') AND (t5.NAME LIKE '%aaalf' OR t5.NAME LIKE 'a%')) AND (t6.NAME = 'run_number')) AND (t7.NUMERIC_VALUE < 900000)) AND (t8.NUMERIC_VALUE > 0)) AND ((((((((t4.ID = t0.DATASET_ID) AND (t3.ID = t4.INVESTIGATION_ID)) AND (t2.INVESTIGATION_ID = t3.ID)) AND (t1.FACILITY_USER_ID = t2.FACILITY_USER_ID)) AND (t5.NAME = t3.INSTRUMENT)) AND (t6.DATAFILE_ID = t0.ID)) AND (t7.DATAFILE_ID = t0.ID)) AND (t8.DATAFILE_ID = t0.ID)))";
+    //Uses the new partiton DataFile_paramter table, JWH_DEF_PARAM_PARTITIONED
+    public static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_1 = "SELECT d.ID, d.COMMAND, d.CHECKSUM, d.DESCRIPTION, d.SIGNATURE, d.DATAFILE_VERSION_COMMENT,"+
+            "d.MOD_TIME, d.DATAFILE_CREATE_TIME, d.MOD_ID, d.FILE_SIZE, d.LOCATION, d.DATAFILE_MODIFY_TIME, "+
+            "d.DATAFILE_VERSION, d.NAME, d.DATASET_ID, d.DATAFILE_FORMAT, d.DATAFILE_FORMAT_VERSION "+
+            "FROM DATAFILE d, dataset ds, JWH_DEF_PARAM_PARTITIONED dp, "+ //using JWH_DEF_PARAM_PARTITIONED instead of DataFile_paramter
+            "(select i.id, i.instrument" +
+            "  from investigator g, facility_user f, investigation i "+
+            "where f.facility_user_id = g.facility_user_id "+
+            "and f.federal_id = ?userId "+
+            "and i.id = g.investigation_id "+
+            " UNION ALL "+
+            "select id, instrument "+
+            "from investigation "+
+            "where id not in (select investigation_id from investigator) "+
+            ") fed_inv "+
+            "WHERE d.dataset_id = ds.id "+
+            "AND ds.investigation_id = fed_inv.id "+
+            "AND fed_inv.instrument IN(";  //dynamically adding this here: IN(  'alf','lad'   )
     
-    
-    //DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_2 is broken up into two so that dynamic addinjg of collection
-    // of instruments can be added
-    public static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_PART_1 = "SELECT DISTINCT t0.ID FROM DATAFILE_PARAMETER t8, DATAFILE_PARAMETER t7, DATAFILE_PARAMETER t6, INSTRUMENT t5, DATASET t4, INVESTIGATION t3, INVESTIGATOR t2, FACILITY_USER t1, DATAFILE t0 " +
-            "WHERE ((((((t1.FEDERAL_ID = ?federal_id) AND ";
-    
-    private static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_DYNAMIC = " (t5.NAME LIKE '%aaalf' OR t5.NAME LIKE 'a%'))";
-    
-    public static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_PART_2 =  "(t6.NAME = 'run_number')) AND (t7.NUMERIC_VALUE < ?upperRunNumber)) AND (t8.NUMERIC_VALUE > ?lowerRunNumber)) " +
-            "AND ((((((((t4.ID = t0.DATASET_ID) AND (t3.ID = t4.INVESTIGATION_ID)) AND (t2.INVESTIGATION_ID = t3.ID)) AND (t1.FACILITY_USER_ID = t2.FACILITY_USER_ID)) AND (t5.NAME = t3.INSTRUMENT)) AND (t6.DATAFILE_ID = t0.ID)) AND (t7.DATAFILE_ID = t0.ID)) AND (t8.DATAFILE_ID = t0.ID)))";
+    public static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_2  = ") AND dp.datafile_id = d.id "+
+            "AND dp.NAME = 'run_number' "+
+            "AND dp.numeric_value BETWEEN ?lower AND ?upper";
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
     
@@ -221,8 +316,8 @@ public class Queries {
      *
      */
     public static final String ALLKEYWORDS = "Investigation.getAllKeywords";
-    public static final String ALLKEYWORDS_NATIVE_ALPHA_NUMERIC = "Investigation.getAllKeywordsNativeAplhaNumeric";   
-    public static final String ALLKEYWORDS_NATIVE_ALPHA = "Investigation.getAllKeywordsNativeAlpha";   
+    public static final String ALLKEYWORDS_NATIVE_ALPHA_NUMERIC = "Investigation.getAllKeywordsNativeAplhaNumeric";
+    public static final String ALLKEYWORDS_NATIVE_ALPHA = "Investigation.getAllKeywordsNativeAlpha";
     public static final String ALLKEYWORDS_JPQL = "SELECT DISTINCT k.keywordPK.name FROM Keyword k";
     //TODO these are ORACLE queries only
     //all alpha numeric
@@ -240,8 +335,15 @@ public class Queries {
      */
     public static final String KEYWORDS_FOR_USER = "Keywords.getAllKeywordsForUser";
     public static final String KEYWORDS_FOR_USER_JPQL = "SELECT DISTINCT k.keywordPK.name FROM Keyword k WHERE (k.investigation.investigatorCollection.investigatorPK.facilityUserId = :userId OR k.investigation.investigatorCollection IS EMPTY) AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) ORDER BY k.keywordPK.name";
+    public static final String KEYWORDS_NATIVE_FOR_USER = "Keywords.getAllKeywordsForUserNative";
+    public static final String KEYWORDS_FOR_USER_SQL = "SELECT DISTINCT NAME FROM (SELECT DISTINCT t3.NAME  " +
+            "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2, KEYWORD t3 WHERE t2.facility_user_id = t1.facility_user_id " +
+            "AND t2.federal_id = ?userId AND t0.id = t1.investigation_id AND t3.INVESTIGATION_ID = t0.ID UNION " +
+            "SELECT t3.NAME  FROM INVESTIGATION t0, KEYWORD t3 " +
+            "WHERE t3.INVESTIGATION_ID = t0.ID AND id NOT IN (SELECT investigation_id from investigator)) WHERE NAME LIKE ?startKeyword";
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /*

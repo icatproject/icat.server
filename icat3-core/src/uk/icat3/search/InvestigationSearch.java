@@ -232,17 +232,200 @@ public class InvestigationSearch extends ManagerUtil {
         if(advanDTO == null) throw new IllegalArgumentException("AdvancedSearchDTO cannot be null");
         log.trace("searchByAdvancedImpl("+userId+", "+advanDTO);
         
-        Query query = manager.createNamedQuery(ADVANCED_SEARCH);
-        query = query.setParameter("userId",userId);
+        Collection<Investigation> investigations = null;
         
-        //add all of the advanced search criteria
-        //  query = query.setParameter("year",advanDTO.getYear());
-        query = query.setParameter("investigationName",advanDTO.getInvestigationName());
-        query = query.setParameter("sampleName",advanDTO.getSampleName());
-        query = query.setParameter("investigatorName",advanDTO.getSampleType());
-        query = query.setParameter("startDate",advanDTO.getYearRangeStart());
-        query = query.setParameter("endDate",advanDTO.getYearRangeEnd());
-        query = query.setParameter("instrument",advanDTO.getInstrument());
+        //dynamically create the query
+        String SQL = ADVANCED_SEARCH_SQL_1;
+        
+        if(advanDTO.isInstruments()){
+            //add insturments section: AND instrument IN(?,?,?,etc)
+            SQL += "AND instrument IN(";
+            //add in the instruments in the IN() cause of SQL
+            int i = 1;
+            for(String instrument : advanDTO.getInstruments()){
+                if(i == advanDTO.getInstruments().size()) SQL += "?instrument"+(i++)+"";
+                else  SQL += "?instrument"+(i++)+" , ";
+            }
+            SQL += ")";
+        }
+        
+        //check for other parameters now
+        if(advanDTO.isOtherParameters()){
+            
+            SQL += " AND id IN(";
+            boolean firstSearch = false;
+            
+            if(advanDTO.isInvestigators()){
+                //add investigator section:
+                /* SELECT i.investigation_id
+                    FROM investigator i, facility_user fu
+                    WHERE i.facility_user_id = fu.facility_user_id
+                    AND (Lower(fu.last_name) LIKE '%'||Lower(?)||'%'
+                    OR Lower(fu.last_name) LIKE '%'||Lower(?)||'%')
+                 */
+                
+                SQL += "SELECT i.investigation_id "+
+                        "FROM investigator i, facility_user fu "+
+                        "WHERE i.facility_user_id = fu.facility_user_id "+
+                        "AND (";
+                
+                int i = 1;
+                for(String investigators : advanDTO.getInvestigators()){
+                    if(i == 1) SQL += "Lower(fu.last_name) LIKE '%'||Lower(?investigator"+(i++)+")||'%'";
+                    else  SQL += "OR Lower(fu.last_name) LIKE '%'||Lower(?investigator"+(i++)+")||'%'";
+                }
+                SQL += ")";
+                
+                firstSearch = true;
+            }
+            
+            if(advanDTO.isKeywords()){
+                //add keywords section:
+                /*
+                    SELECT investigation_id
+                    FROM keyword
+                    WHERE Lower(name) LIKE '%'||Lower(?)||'%'
+                    OR Lower(name) LIKE '%'||Lower(?)||'%'
+                    OR Lower(name) LIKE '%'||Lower(?)||'%'
+                 */
+                if(firstSearch) SQL += " INTERSECT ";
+                firstSearch = true;
+                
+                SQL += "SELECT investigation_id FROM keyword WHERE ";
+                int i = 1;
+                for(String keyword : advanDTO.getKeywords()){
+                    if(i == 1) SQL += "Lower(name) LIKE '%'||Lower(?keyword"+(i++)+")||'%'";
+                    else  SQL += "OR Lower(name) LIKE '%'||Lower(?keyword"+(i++)+")||'%'";
+                }
+            }
+            
+            if(advanDTO.getSampleName() != null){
+                //add sample section
+                 /*
+                    SELECT investigation_id
+                    FROM sample
+                    WHERE Lower(name) LIKE '%'||Lower(?)||'%'
+                  **/
+                
+                if(firstSearch) SQL += " INTERSECT ";
+                firstSearch = true;
+                
+                SQL += "SELECT investigation_id FROM sample WHERE Lower(name) LIKE '%'||Lower(?sampleName)||'%' ";
+            }
+            
+            //is run number
+            if(advanDTO.isRunNumber()){
+                log.trace("Searching data file name, run number and create time only");
+                //add data file and run number section
+                /*
+                    SELECT ds.investigation_id
+                    FROM dataset ds, DATAFILE df, datafile_parameter dfp
+                    WHERE df.dataset_id = ds.id
+                    AND (InStr(Lower(df.name),Lower(?)) > 0 OR ? IS NULL)
+                    AND ((df.datafile_create_time >= ?date1 AND df.datafile_create_time < (?date2-1))
+                    OR ?date1 IS NULL)
+                    AND dfp.datafile_id = df.id
+                    AND dfp.NAME = 'run_number'
+                    AND dfp.numeric_value BETWEEN ?1 AND ?2
+                 */
+                if(firstSearch) SQL += " INTERSECT ";
+                firstSearch = true;
+                
+                SQL += "SELECT ds.investigation_id "+
+                        "FROM dataset ds, DATAFILE df, JWH_DEF_PARAM_PARTITIONED dfp "+ //partitioned tabel instaed of datafile_parameter
+                        "WHERE df.dataset_id = ds.id "+
+                        "AND (Lower(df.name) LIKE '%'||Lower(?datafile_name)||'%' OR ?datafile_name IS NULL) "+
+                        "AND (( (df.datafile_create_time >= ?startDate AND df.datafile_create_time < (?endDate))) "+
+                        "OR df.datafile_create_time IS NULL) "+
+                        "AND dfp.datafile_id = df.id "+
+                        "AND dfp.NAME = 'run_number' "+
+                        "AND dfp.numeric_value BETWEEN ?lower AND ?upper ";
+                
+            } else if(advanDTO.isDatFileParameters()){
+                log.trace("Searching data file name and create time only");
+                //add datafile only section
+                /*
+                    SELECT ds.investigation_id
+                    FROM dataset ds, DATAFILE df
+                    WHERE df.dataset_id = ds.id
+                    AND (InStr(Lower(df.name),Lower(?)) > 0 OR ? IS NULL)
+                    AND ((df.datafile_create_time >= ?date1 AND df.datafile_create_time < (?date2-1))
+                    OR ?date1 IS NULL)
+                 */
+                if(firstSearch) SQL += " INTERSECT ";
+                firstSearch = true;
+                
+                SQL += " SELECT ds.investigation_id "+
+                        "FROM dataset ds, DATAFILE df "+
+                        "WHERE df.dataset_id = ds.id "+
+                        "AND (Lower(df.name) LIKE '%'||Lower(?datafile_name)||'%' OR ?datafile_name IS NULL) "+
+                        "AND (( (df.datafile_create_time >= ?startDate AND df.datafile_create_time < (?endDate))) OR df.datafile_create_time IS NULL)";
+            }
+            
+            SQL += ")";
+        }
+        
+        //set all the paramaters now
+        //set query with datafile as entity object
+        Query query = manager.createNativeQuery(SQL,Investigation.class);
+        
+        //sets the paramters
+        query = query.setParameter("userId",userId);
+        query = query.setParameter("inv_title",advanDTO.getInvestigationName());
+        query = query.setParameter("inv_number",advanDTO.getExperimentNumber());
+        
+        //set upper run number
+        if(advanDTO.isRunNumber()){
+            if(advanDTO.getRunEnd() != null) query = query.setParameter("upper",advanDTO.getRunEnd());
+            else query = query.setParameter("upper",1000000000L);
+            
+            //set lower run number
+            if(advanDTO.getRunStart() != null) query = query.setParameter("lower",advanDTO.getRunStart());
+            else query = query.setParameter("lower",0L);
+            
+             //dates need to be added
+            query.setParameter("startDate",advanDTO.getYearRangeStart());
+            query.setParameter("endDate",advanDTO.getYearRangeEnd());
+            query.setParameter("datafile_name",advanDTO.getDatafileName());
+        }
+        //set data file name
+        if(advanDTO.isDatFileParameters()){
+             //dates need to be added
+            query.setParameter("startDate",advanDTO.getYearRangeStart());
+            query.setParameter("endDate",advanDTO.getYearRangeEnd());
+            query.setParameter("datafile_name",advanDTO.getDatafileName());
+        }
+        
+        //set instruments
+        if(advanDTO.isInstruments()){
+            int j = 1;
+            for(String instrument : advanDTO.getInstruments()){
+                query = query.setParameter("instrument"+j++,instrument);
+            }
+        }
+        
+        //set instruments
+        if(advanDTO.isKeywords()){
+            int j = 1;
+            for(String keyword : advanDTO.getKeywords()){
+                query = query.setParameter("keyword"+j++,keyword);
+            }
+        }
+        
+        //set investigators
+        if(advanDTO.isInvestigators()){
+            int j = 1;
+            for(String investigator : advanDTO.getInstruments()){
+                query = query.setParameter("investigator"+j++,investigator);
+            }
+        }
+        
+        //set sample name
+        if(advanDTO.getSampleName() != null){
+            query.setParameter("sampleName",advanDTO.getSampleName());
+        }
+                
+        log.trace("DYNAMIC SQL: "+SQL);
         
         if(number_results < 0){
             //get all, maybe should limit this to 500?
@@ -254,7 +437,7 @@ public class InvestigationSearch extends ManagerUtil {
     
     /**
      *
-     *    Searches investigations from the ones they can view by the advanced criteria
+     * Searches investigations from the ones they can view by the advanced criteria
      *
      * @param userId
      * @param advanDTO

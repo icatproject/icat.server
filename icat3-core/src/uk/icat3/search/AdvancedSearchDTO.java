@@ -17,147 +17,149 @@ import java.util.Date;
  * @author gjd37
  */
 public class AdvancedSearchDTO {
-       
-    private String investigationName;
+    
+    private String investigationName; //inv title
     private Collection<String> investigators; //surname
     private String experimentNumber; //inv_number
-    private String instrument;
-    private Long runStart;
-    private Long runEnd;
- //   ParameterSearchTerm[] parameterSearchTerms;
-    private String sampleName;
-    private String sampleType;
-    private String datafileName;
-    //private Timestamp year;
-    private Date yearRangeStart;
-    private Date yearRangeEnd;
-    private Collection<String> datafileTypes;
+    private Collection<String> instruments;
+    private Long runStart; // data file parameter,  run_number datafile_parameter
+    private Long runEnd;// data file parameter, run_number datafile_parameter
+    private String sampleName; // sample
+    private String datafileName; // data file name
+    private Date yearRangeStart; // (datafile_CREATE_time)
+    private Date yearRangeEnd;// (datafile_CREATE_time)
     private Collection<String> keywords;
-    private String searchFilterType;
     
     /** Creates a new instance of AdvancedSearchDTO */
     public AdvancedSearchDTO() {
     }
-       
+    
     public String getInvestigationName() {
         return investigationName;
     }
-
+    
     public void setInvestigationName(String investigationName) {
         this.investigationName = investigationName;
     }
-
+    
     public Collection<String> getInvestigators() {
         return investigators;
     }
-
+    
     public void setInvestigators(Collection<String> investigators) {
         this.investigators = investigators;
     }
-
+    
     public String getExperimentNumber() {
         return experimentNumber;
     }
-
+    
     public void setExperimentNumber(String experimentNumber) {
         this.experimentNumber = experimentNumber;
     }
-
-    public String getInstrument() {
-        return instrument;
-    }
-
-    public void setInstrument(String instrument) {
-        this.instrument = instrument;
-    }
-
+    
     public Long getRunStart() {
         return runStart;
     }
-
+    
     public void setRunStart(Long runStart) {
         this.runStart = runStart;
     }
-
+    
     public Long getRunEnd() {
         return runEnd;
     }
-
+    
     public void setRunEnd(Long runEnd) {
         this.runEnd = runEnd;
     }
-
+    
     public String getSampleName() {
         return sampleName;
     }
-
+    
     public void setSampleName(String sampleName) {
         this.sampleName = sampleName;
     }
-
-    public String getSampleType() {
-        return sampleType;
-    }
-
-    public void setSampleType(String sampleType) {
-        this.sampleType = sampleType;
-    }
-
+    
     public String getDatafileName() {
         return datafileName;
     }
-
+    
     public void setDatafileName(String datafileName) {
         this.datafileName = datafileName;
-    }
-
+    }    
     
-    //can do that with start and end
-    /*public Timestamp getYear() {
-        return year;
-    }
-
-    public void setYear(Timestamp year) {
-        this.year = year;
-    }*/
-
     public Date getYearRangeStart() {
-        return yearRangeStart;
+        //if null, pass in 1901
+        if(yearRangeStart == null) return new Date(1,1,1); // 1901/1/1
+        else return yearRangeStart;
     }
-
+    
     public void setYearRangeStart(Date yearRangeStart) {
         this.yearRangeStart = yearRangeStart;
     }
-
+    
     public Date getYearRangeEnd() {
+        //if null, pass in todays date
+        if(yearRangeEnd == null) return new Date();
         return yearRangeEnd;
     }
-
+    
     public void setYearRangeEnd(Date yearRangeEnd) {
         this.yearRangeEnd = yearRangeEnd;
     }
-
-    public Collection<String> getDatafileTypes() {
-        return datafileTypes;
-    }
-
-    public void setDatafileTypes(Collection<String> datafileTypes) {
-        this.datafileTypes = datafileTypes;
-    }
-
+    
     public Collection<String> getKeywords() {
         return keywords;
     }
-
+    
     public void setKeywords(Collection<String> keywords) {
         this.keywords = keywords;
     }
-
-    public String getSearchFilterType() {
-        return searchFilterType;
+    
+    public Collection<String> getInstruments() {
+        return instruments;
     }
-
-    public void setSearchFilterType(String searchFilterType) {
-        this.searchFilterType = searchFilterType;
+    
+    public void setInstruments(Collection<String> instruments) {
+        this.instruments = instruments;
+    }
+    
+     /////////////  Util methods for AdvancedSearch creation in InvestigationSearch    /////////////////    
+    public boolean isOtherParameters(){
+        if(investigators != null && investigators.size() != 0) return true;
+        if(keywords != null && keywords.size() != 0) return true;
+        if(sampleName != null) return true;
+        if(datafileName != null) return true;
+        if(runEnd != null || runEnd != null) return true;
+        else return false;
     }    
+    
+    public boolean isInstruments(){
+        if(getInstruments() != null && getInstruments().size() != 0) return true;
+        else return false;
+    }
+    
+    public boolean isInvestigators(){
+        if(getInvestigators() != null && getInvestigators().size() != 0)return true;
+        else return false;
+    }
+    
+    public boolean isKeywords(){
+        if(getKeywords() != null && getKeywords().size() != 0) return true;
+        else return false;
+    }
+    
+    public boolean isRunNumber(){
+        if(runEnd != null || runEnd != null) return true;
+        else return false;
+    }
+    
+    public boolean isDatFileParameters(){
+        if(yearRangeEnd != null || yearRangeStart != null || datafileName != null) return true;
+        else return false;
+    }
+     /////////////  End of methods    /////////////////
+   
 }

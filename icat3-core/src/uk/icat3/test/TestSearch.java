@@ -11,6 +11,7 @@ package uk.icat3.test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
@@ -188,7 +189,7 @@ public class TestSearch {
         Collection<Investigation> investigations =  InvestigationSearch.searchByAdvanced(userId,dto, 0,300,em);
         log.info("Results: "+investigations.size());
         for(Investigation investigation : investigations){
-            log.info(investigation.getId()+" "+investigation.getTitle());
+            log.info(investigation.getId()+" "+investigation.getTitle()+" "+investigation.getInstrument());
         }
         
         tearDown();
@@ -205,7 +206,7 @@ public class TestSearch {
         log.info("Results: "+keywords.size());
         log.info(keywords.getClass());
         for(String keyword : keywords){
-       //     log.info(keyword);
+            //     log.info(keyword);
         }
         
         tearDown();
@@ -218,7 +219,7 @@ public class TestSearch {
         
         //test code here
         log.info("Testing");
-        Collection<String> keywords =  KeywordSearch.getKeywordsForUser(userId,startkeyword,em);
+        Collection<String> keywords =  KeywordSearch.getKeywordsForUser(userId,startkeyword,300, em);
         log.info("Results: "+keywords.size());
         for(String keyword : keywords){
             log.info(keyword);
@@ -357,7 +358,7 @@ public class TestSearch {
         
         Collection<Long> ids  =   new ArrayList<Long>();
         
-        ids.add(9525280L);
+        //    ids.add(9525280L);
         //  ts.getInvestigations("gjd37",ids);
         
         //ts.getInvestigation("gjd37",9525454280L);
@@ -375,27 +376,43 @@ public class TestSearch {
         // ts.seachByUserID("JAMES", "JAMES");
         
         
-        /* Collection<String> in  =   new ArrayList<String>();
-        in.add("alf");
-         
-        ts.seachByRunNumber("JAMES", in, 0L,2000L);*/
+        Collection<String> ins  =   new ArrayList<String>();
+        ins.add("crisp");
+        ins.add("lad");
         
-        /* AdvancedSearchDTO dto = new AdvancedSearchDTO();
-         
-        dto.setInvestigationName("RROT=-85");
-        dto.setInvestigators("HEALY");
-        dto.setYearRangeStart(new Date(120,1,1));  //120 = 2020
-        dto.setYearRangeEnd(new Date(120,1,1));
-         
-        ts.seachByAdvanced("JAMES",dto);*/
+        //   ts.seachByRunNumber("JAMES-JAMES", in, 2620L,2631L);
         
-         ts.getAllKeywords("JAMES");
+        AdvancedSearchDTO dto = new AdvancedSearchDTO();
+        
+        dto.setInvestigationName("angle scan 0.44");
+        Collection<String> inv  =   new ArrayList<String>();
+        //inv.add("JAMES-JAMES");
+        dto.setInvestigators(inv);
+        dto.setYearRangeStart(new Date(1,1,1));  //120 = 2020
+        dto.setYearRangeEnd(new Date());
+        dto.setSampleName("angle scan 0.44");
+        dto.setInstruments(ins);
+        dto.setExperimentNumber("0");
         //
-        // ts.getUserKeywords("JAMES", "alf");
+        dto.setDatafileName("a");
+        Collection<String> keywords2  =   new ArrayList<String>();
+        
+        //isis
+        keywords2.add("angle");
+        
+        dto.setKeywords(keywords2);
+        dto.setRunEnd(19624L);
+        dto.setRunStart(19622L);
+        
+        //   ts.seachByAdvanced("JAMES-JAMES",dto);
+        
+        //       ts.getAllKeywords("JAMES");
+        //
+        ts.getUserKeywords("JAMES-JAMES", "alf");
         
         // ts.getUserInvestigations("JAMES");
         
-    //    ts.test();
+        //    ts.test();
         
         //  ts.testModify();
     }
