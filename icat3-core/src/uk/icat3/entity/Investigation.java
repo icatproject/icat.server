@@ -10,14 +10,13 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
-import javax.management.Query;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityResult;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -32,6 +31,8 @@ import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import uk.icat3.exceptions.ValidationException;
+import uk.icat3.search.InvestigationSearch;
 import uk.icat3.util.Queries;
 
 /**
@@ -56,7 +57,7 @@ import uk.icat3.util.Queries;
     
     //Added searches for ICAT3 API
     // @NamedQuery(name = Queries.INVESTIGATIONS_BY_KEYWORD, query ="SELECT  FROM  (SELECT Investigation i FROM i WHERE i.investigatorCollection.investigatorPK.facilityUserId = :userId) ")
-   // @NamedQuery(name = Queries.ADVANCED_SEARCH, query = Queries.ADVANCED_SEARCH_JPQL),
+    // @NamedQuery(name = Queries.ADVANCED_SEARCH, query = Queries.ADVANCED_SEARCH_JPQL),
     @NamedQuery(name = Queries.INVESTIGATIONS_BY_USER, query = Queries.INVESTIGATIONS_BY_USER_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_SURNAME_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID, query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),
@@ -108,7 +109,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     @Column(name = "RELEASE_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date releaseDate;
-          
+    
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
     
@@ -322,7 +323,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
     }
-            
+    
     /**
      * Gets the modId of this Investigation.
      * @return the modId
@@ -586,5 +587,33 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public String toString() {
         return "uk.icat3.entity.Investigation[id=" + id + "]";
     }
+    
+    /**
+     * Overrides the isValid function, checks each of the datasets and that the instrument is present in database
+     * @throws ValidationException
+     * @return
+     */
+    @Override
+    public boolean isValid(EntityManager manager) throws ValidationException {
+        if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
+       
+        //check instrument is correct.
+        Collection<String> instruments = InvestigationSearch.listAllInstruments("null", manager);
+        boolean valid = false;
+        for(String instrument : instruments){
+            log.trace(instrument);
+            if(instrument.equals(getInstrument().getName())) valid = true;
+        }
+        if(!valid) throw new ValidationException("Investigation: "+getInstrument().getName()+" is not a valid instrument.");
+        
+        //check all datasets now
+        for(Dataset dataset : getDatasetCollection()){
+            dataset.isValid(manager);
+        }
+        
+       //if reached here investigation is valid
+        return isValid();
+    }
+    
     
 }

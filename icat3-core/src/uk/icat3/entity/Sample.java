@@ -10,7 +10,6 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
@@ -24,61 +23,59 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 /**
  * Entity class Sample
- * 
+ *
  * @author gjd37
  */
 @Entity
 @Table(name = "SAMPLE")
 @NamedQueries( {
-        @NamedQuery(name = "Sample.findById", query = "SELECT s FROM Sample s WHERE s.id = :id"),
-        @NamedQuery(name = "Sample.findByName", query = "SELECT s FROM Sample s WHERE s.name = :name"),
-        @NamedQuery(name = "Sample.findByInstance", query = "SELECT s FROM Sample s WHERE s.instance = :instance"),
-        @NamedQuery(name = "Sample.findByChemicalFormula", query = "SELECT s FROM Sample s WHERE s.chemicalFormula = :chemicalFormula"),
-        @NamedQuery(name = "Sample.findBySafetyInformation", query = "SELECT s FROM Sample s WHERE s.safetyInformation = :safetyInformation"),
-        @NamedQuery(name = "Sample.findByModTime", query = "SELECT s FROM Sample s WHERE s.modTime = :modTime"),
-        @NamedQuery(name = "Sample.findByModId", query = "SELECT s FROM Sample s WHERE s.modId = :modId"),
-        @NamedQuery(name = "Sample.findByProposalSampleId", query = "SELECT s FROM Sample s WHERE s.proposalSampleId = :proposalSampleId")
-    })
+    @NamedQuery(name = "Sample.findById", query = "SELECT s FROM Sample s WHERE s.id = :id"),
+    @NamedQuery(name = "Sample.findByName", query = "SELECT s FROM Sample s WHERE s.name = :name"),
+    @NamedQuery(name = "Sample.findByInstance", query = "SELECT s FROM Sample s WHERE s.instance = :instance"),
+    @NamedQuery(name = "Sample.findByChemicalFormula", query = "SELECT s FROM Sample s WHERE s.chemicalFormula = :chemicalFormula"),
+    @NamedQuery(name = "Sample.findBySafetyInformation", query = "SELECT s FROM Sample s WHERE s.safetyInformation = :safetyInformation"),
+    @NamedQuery(name = "Sample.findByModTime", query = "SELECT s FROM Sample s WHERE s.modTime = :modTime"),
+    @NamedQuery(name = "Sample.findByModId", query = "SELECT s FROM Sample s WHERE s.modId = :modId"),
+    @NamedQuery(name = "Sample.findByProposalSampleId", query = "SELECT s FROM Sample s WHERE s.proposalSampleId = :proposalSampleId")
+})
 public class Sample extends EntityBaseBean implements Serializable {
-
+    
     @Id
     @Column(name = "ID", nullable = false)
     private Long id;
-
+    
     @Column(name = "NAME", nullable = false)
     private String name;
-
+    
     @Column(name = "INSTANCE")
     private String instance;
-
+    
     @Column(name = "CHEMICAL_FORMULA")
     private String chemicalFormula;
-
+    
     @Column(name = "SAFETY_INFORMATION", nullable = false)
     private String safetyInformation;
-
+    
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
-
+    
     @Column(name = "PROPOSAL_SAMPLE_ID")
     private BigInteger proposalSampleId;
-
+    
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID")
     @ManyToOne
     private Investigation investigationId;
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
     private Collection<SampleParameter> sampleParameterCollection;
     
     /** Creates a new instance of Sample */
     public Sample() {
     }
-
+    
     /**
      * Creates a new instance of Sample with the specified values.
      * @param id the id of the Sample
@@ -86,7 +83,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public Sample(Long id) {
         this.id = id;
     }
-
+    
     /**
      * Creates a new instance of Sample with the specified values.
      * @param id the id of the Sample
@@ -102,7 +99,7 @@ public class Sample extends EntityBaseBean implements Serializable {
         this.modTime = modTime;
         this.modId = modId;
     }
-
+    
     /**
      * Gets the id of this Sample.
      * @return the id
@@ -110,7 +107,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public Long getId() {
         return this.id;
     }
-
+    
     /**
      * Sets the id of this Sample to the specified value.
      * @param id the new id
@@ -118,7 +115,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
-
+    
     /**
      * Gets the name of this Sample.
      * @return the name
@@ -126,7 +123,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public String getName() {
         return this.name;
     }
-
+    
     /**
      * Sets the name of this Sample to the specified value.
      * @param name the new name
@@ -134,7 +131,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
+    
     /**
      * Gets the instance of this Sample.
      * @return the instance
@@ -142,7 +139,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public String getInstance() {
         return this.instance;
     }
-
+    
     /**
      * Sets the instance of this Sample to the specified value.
      * @param instance the new instance
@@ -150,7 +147,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public void setInstance(String instance) {
         this.instance = instance;
     }
-
+    
     /**
      * Gets the chemicalFormula of this Sample.
      * @return the chemicalFormula
@@ -158,7 +155,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public String getChemicalFormula() {
         return this.chemicalFormula;
     }
-
+    
     /**
      * Sets the chemicalFormula of this Sample to the specified value.
      * @param chemicalFormula the new chemicalFormula
@@ -166,7 +163,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public void setChemicalFormula(String chemicalFormula) {
         this.chemicalFormula = chemicalFormula;
     }
-
+    
     /**
      * Gets the safetyInformation of this Sample.
      * @return the safetyInformation
@@ -174,7 +171,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public String getSafetyInformation() {
         return this.safetyInformation;
     }
-
+    
     /**
      * Sets the safetyInformation of this Sample to the specified value.
      * @param safetyInformation the new safetyInformation
@@ -190,7 +187,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public String getModId() {
         return this.modId;
     }
-
+    
     /**
      * Sets the modId of this Sample to the specified value.
      * @param modId the new modId
@@ -198,7 +195,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public void setModId(String modId) {
         this.modId = modId;
     }
-
+    
     /**
      * Gets the proposalSampleId of this Sample.
      * @return the proposalSampleId
@@ -206,7 +203,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public BigInteger getProposalSampleId() {
         return this.proposalSampleId;
     }
-
+    
     /**
      * Sets the proposalSampleId of this Sample to the specified value.
      * @param proposalSampleId the new proposalSampleId
@@ -214,7 +211,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public void setProposalSampleId(BigInteger proposalSampleId) {
         this.proposalSampleId = proposalSampleId;
     }
-
+    
     /**
      * Gets the investigationId of this Sample.
      * @return the investigationId
@@ -222,7 +219,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public Investigation getInvestigationId() {
         return this.investigationId;
     }
-
+    
     /**
      * Sets the investigationId of this Sample to the specified value.
      * @param investigationId the new investigationId
@@ -230,7 +227,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public void setInvestigationId(Investigation investigationId) {
         this.investigationId = investigationId;
     }
-
+    
     /**
      * Gets the sampleParameterCollection of this Sample.
      * @return the sampleParameterCollection
@@ -238,7 +235,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public Collection<SampleParameter> getSampleParameterCollection() {
         return this.sampleParameterCollection;
     }
-
+    
     /**
      * Sets the sampleParameterCollection of this Sample to the specified value.
      * @param sampleParameterCollection the new sampleParameterCollection
@@ -246,9 +243,9 @@ public class Sample extends EntityBaseBean implements Serializable {
     public void setSampleParameterCollection(Collection<SampleParameter> sampleParameterCollection) {
         this.sampleParameterCollection = sampleParameterCollection;
     }
-
+    
     /**
-     * Returns a hash code value for the object.  This implementation computes 
+     * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
      */
@@ -258,10 +255,10 @@ public class Sample extends EntityBaseBean implements Serializable {
         hash += (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
-
+    
     /**
-     * Determines whether another object is equal to this Sample.  The result is 
-     * <code>true</code> if and only if the argument is not null and is a Sample object that 
+     * Determines whether another object is equal to this Sample.  The result is
+     * <code>true</code> if and only if the argument is not null and is a Sample object that
      * has the same id field values as this object.
      * @param object the reference object with which to compare
      * @return <code>true</code> if this object is the same as the argument;
@@ -277,9 +274,9 @@ public class Sample extends EntityBaseBean implements Serializable {
         if (this.id != other.id && (this.id == null || !this.id.equals(other.id))) return false;
         return true;
     }
-
+    
     /**
-     * Returns a string representation of the object.  This implementation constructs 
+     * Returns a string representation of the object.  This implementation constructs
      * that representation based on the id fields.
      * @return a string representation of the object.
      */
@@ -287,5 +284,4 @@ public class Sample extends EntityBaseBean implements Serializable {
     public String toString() {
         return "uk.icat3.entity.Sample[id=" + id + "]";
     }
-    
 }

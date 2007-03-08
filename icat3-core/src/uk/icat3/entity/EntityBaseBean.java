@@ -11,11 +11,13 @@ package uk.icat3.entity;
 
 import java.util.Date;
 import javax.persistence.Column;
+import javax.persistence.EntityManager;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import org.apache.log4j.Logger;
 import uk.icat3.exceptions.ValidationException;
 
 /**
@@ -24,6 +26,8 @@ import uk.icat3.exceptions.ValidationException;
  */
 @MappedSuperclass
 public abstract class EntityBaseBean {
+    
+    protected static Logger log = Logger.getLogger(EntityBaseBean.class);
     
     /** Creates a new instance of EntityBaseBean */
     public EntityBaseBean() {
@@ -59,28 +63,41 @@ public abstract class EntityBaseBean {
     }
     
     /*@Column(name = "DELETE", nullable = true ) 
-    private String delete;
+    private String deleted;
   
-    public String getDelete() {
-        return delete;
+    public String getDeleted() {
+        return deleted;
     }
   
-    public void setDelete(String delete) {
-        this.delete = delete;
+    public void setDeleted(String deleted) {
+        this.deleted = deleted;
     }
   
-    public isDelete(){
-        if(getDelete() != null && getDelete().equalsIgnoreCase("Y")) return true;
+    public isDeleted(){
+        if(getDeleted() != null && getDeleted().equalsIgnoreCase("Y")) return true;
         else return fasle;
     }*/    
     
     /**
      * Method to be overriding if needed to check if the data held in the entity is valid.
+     *
      * @throws ValidationException if validation error.
      * @return true if validation is correct,
      */
     public boolean isValid() throws ValidationException {
         return true;
+    }
+    
+    /**
+     * Method to be overriding if needed to check if the data held in the entity is valid.
+     * 
+     * @return true if validation is correct,
+     * @param manager if queries are needed
+     * @throws ValidationException if validation error.
+     */
+    public boolean isValid(EntityManager manager) throws ValidationException {
+        //always call isValid()
+        return isValid();
     }
     
 }

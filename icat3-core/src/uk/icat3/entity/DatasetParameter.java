@@ -10,84 +10,83 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import uk.icat3.exceptions.ValidationException;
 
 /**
  * Entity class DatasetParameter
- * 
+ *
  * @author gjd37
  */
 @Entity
 @Table(name = "DATASET_PARAMETER")
 @NamedQueries( {
-        @NamedQuery(name = "DatasetParameter.findByDatasetId", query = "SELECT d FROM DatasetParameter d WHERE d.datasetParameterPK.datasetId = :datasetId"),
-        @NamedQuery(name = "DatasetParameter.findByName", query = "SELECT d FROM DatasetParameter d WHERE d.datasetParameterPK.name = :name"),
-        @NamedQuery(name = "DatasetParameter.findByUnits", query = "SELECT d FROM DatasetParameter d WHERE d.datasetParameterPK.units = :units"),
-        @NamedQuery(name = "DatasetParameter.findByStringValue", query = "SELECT d FROM DatasetParameter d WHERE d.stringValue = :stringValue"),
-        @NamedQuery(name = "DatasetParameter.findByNumericValue", query = "SELECT d FROM DatasetParameter d WHERE d.numericValue = :numericValue"),
-        @NamedQuery(name = "DatasetParameter.findByRangeTop", query = "SELECT d FROM DatasetParameter d WHERE d.rangeTop = :rangeTop"),
-        @NamedQuery(name = "DatasetParameter.findByRangeBottom", query = "SELECT d FROM DatasetParameter d WHERE d.rangeBottom = :rangeBottom"),
-        @NamedQuery(name = "DatasetParameter.findByError", query = "SELECT d FROM DatasetParameter d WHERE d.error = :error"),
-        @NamedQuery(name = "DatasetParameter.findByDescription", query = "SELECT d FROM DatasetParameter d WHERE d.description = :description"),
-        @NamedQuery(name = "DatasetParameter.findByModTime", query = "SELECT d FROM DatasetParameter d WHERE d.modTime = :modTime"),
-        @NamedQuery(name = "DatasetParameter.findByModId", query = "SELECT d FROM DatasetParameter d WHERE d.modId = :modId")
-    })
+    @NamedQuery(name = "DatasetParameter.findByDatasetId", query = "SELECT d FROM DatasetParameter d WHERE d.datasetParameterPK.datasetId = :datasetId"),
+    @NamedQuery(name = "DatasetParameter.findByName", query = "SELECT d FROM DatasetParameter d WHERE d.datasetParameterPK.name = :name"),
+    @NamedQuery(name = "DatasetParameter.findByUnits", query = "SELECT d FROM DatasetParameter d WHERE d.datasetParameterPK.units = :units"),
+    @NamedQuery(name = "DatasetParameter.findByStringValue", query = "SELECT d FROM DatasetParameter d WHERE d.stringValue = :stringValue"),
+    @NamedQuery(name = "DatasetParameter.findByNumericValue", query = "SELECT d FROM DatasetParameter d WHERE d.numericValue = :numericValue"),
+    @NamedQuery(name = "DatasetParameter.findByRangeTop", query = "SELECT d FROM DatasetParameter d WHERE d.rangeTop = :rangeTop"),
+    @NamedQuery(name = "DatasetParameter.findByRangeBottom", query = "SELECT d FROM DatasetParameter d WHERE d.rangeBottom = :rangeBottom"),
+    @NamedQuery(name = "DatasetParameter.findByError", query = "SELECT d FROM DatasetParameter d WHERE d.error = :error"),
+    @NamedQuery(name = "DatasetParameter.findByDescription", query = "SELECT d FROM DatasetParameter d WHERE d.description = :description"),
+    @NamedQuery(name = "DatasetParameter.findByModTime", query = "SELECT d FROM DatasetParameter d WHERE d.modTime = :modTime"),
+    @NamedQuery(name = "DatasetParameter.findByModId", query = "SELECT d FROM DatasetParameter d WHERE d.modId = :modId")
+})
 public class DatasetParameter extends EntityBaseBean implements Serializable {
-
+    
     /**
      * EmbeddedId primary key field
      */
     @EmbeddedId
     protected DatasetParameterPK datasetParameterPK;
-
+    
     @Column(name = "STRING_VALUE")
     private String stringValue;
-
+    
     @Column(name = "NUMERIC_VALUE")
     private Double numericValue;
-
+    
     @Column(name = "RANGE_TOP")
     private String rangeTop;
-
+    
     @Column(name = "RANGE_BOTTOM")
     private String rangeBottom;
-
+    
     @Column(name = "ERROR")
     private String error;
-
+    
     @Column(name = "DESCRIPTION")
     private String description;
-  
+    
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
-
+    
     @JoinColumn(name = "DATASET_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     private Dataset dataset;
-
+    
     @JoinColumns(value =  {
-            @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
-            @JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
-        })
+        @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
+@JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
+    })
     @ManyToOne
     private Parameter parameter;
     
     /** Creates a new instance of DatasetParameter */
     public DatasetParameter() {
     }
-
+    
     /**
      * Creates a new instance of DatasetParameter with the specified values.
      * @param datasetParameterPK the datasetParameterPK of the DatasetParameter
@@ -95,7 +94,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public DatasetParameter(DatasetParameterPK datasetParameterPK) {
         this.datasetParameterPK = datasetParameterPK;
     }
-
+    
     /**
      * Creates a new instance of DatasetParameter with the specified values.
      * @param datasetParameterPK the datasetParameterPK of the DatasetParameter
@@ -107,7 +106,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
         this.modTime = modTime;
         this.modId = modId;
     }
-
+    
     /**
      * Creates a new instance of DatasetParameterPK with the specified values.
      * @param units the units of the DatasetParameterPK
@@ -117,7 +116,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public DatasetParameter(String units, String name, Long datasetId) {
         this.datasetParameterPK = new DatasetParameterPK(units, name, datasetId);
     }
-
+    
     /**
      * Gets the datasetParameterPK of this DatasetParameter.
      * @return the datasetParameterPK
@@ -125,7 +124,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public DatasetParameterPK getDatasetParameterPK() {
         return this.datasetParameterPK;
     }
-
+    
     /**
      * Sets the datasetParameterPK of this DatasetParameter to the specified value.
      * @param datasetParameterPK the new datasetParameterPK
@@ -133,7 +132,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public void setDatasetParameterPK(DatasetParameterPK datasetParameterPK) {
         this.datasetParameterPK = datasetParameterPK;
     }
-
+    
     /**
      * Gets the stringValue of this DatasetParameter.
      * @return the stringValue
@@ -141,7 +140,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public String getStringValue() {
         return this.stringValue;
     }
-
+    
     /**
      * Sets the stringValue of this DatasetParameter to the specified value.
      * @param stringValue the new stringValue
@@ -149,7 +148,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public void setStringValue(String stringValue) {
         this.stringValue = stringValue;
     }
-
+    
     /**
      * Gets the numericValue of this DatasetParameter.
      * @return the numericValue
@@ -157,7 +156,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public Double getNumericValue() {
         return this.numericValue;
     }
-
+    
     /**
      * Sets the numericValue of this DatasetParameter to the specified value.
      * @param numericValue the new numericValue
@@ -165,7 +164,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public void setNumericValue(Double numericValue) {
         this.numericValue = numericValue;
     }
-
+    
     /**
      * Gets the rangeTop of this DatasetParameter.
      * @return the rangeTop
@@ -173,7 +172,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public String getRangeTop() {
         return this.rangeTop;
     }
-
+    
     /**
      * Sets the rangeTop of this DatasetParameter to the specified value.
      * @param rangeTop the new rangeTop
@@ -181,7 +180,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public void setRangeTop(String rangeTop) {
         this.rangeTop = rangeTop;
     }
-
+    
     /**
      * Gets the rangeBottom of this DatasetParameter.
      * @return the rangeBottom
@@ -189,7 +188,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public String getRangeBottom() {
         return this.rangeBottom;
     }
-
+    
     /**
      * Sets the rangeBottom of this DatasetParameter to the specified value.
      * @param rangeBottom the new rangeBottom
@@ -197,7 +196,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public void setRangeBottom(String rangeBottom) {
         this.rangeBottom = rangeBottom;
     }
-
+    
     /**
      * Gets the error of this DatasetParameter.
      * @return the error
@@ -205,7 +204,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public String getError() {
         return this.error;
     }
-
+    
     /**
      * Sets the error of this DatasetParameter to the specified value.
      * @param error the new error
@@ -213,7 +212,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public void setError(String error) {
         this.error = error;
     }
-
+    
     /**
      * Gets the description of this DatasetParameter.
      * @return the description
@@ -221,7 +220,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public String getDescription() {
         return this.description;
     }
-
+    
     /**
      * Sets the description of this DatasetParameter to the specified value.
      * @param description the new description
@@ -229,15 +228,15 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-
-        /**
+    
+    /**
      * Gets the modId of this DatasetParameter.
      * @return the modId
      */
     public String getModId() {
         return this.modId;
     }
-
+    
     /**
      * Sets the modId of this DatasetParameter to the specified value.
      * @param modId the new modId
@@ -245,7 +244,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public void setModId(String modId) {
         this.modId = modId;
     }
-
+    
     /**
      * Gets the dataset of this DatasetParameter.
      * @return the dataset
@@ -253,7 +252,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public Dataset getDataset() {
         return this.dataset;
     }
-
+    
     /**
      * Sets the dataset of this DatasetParameter to the specified value.
      * @param dataset the new dataset
@@ -261,7 +260,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public void setDataset(Dataset dataset) {
         this.dataset = dataset;
     }
-
+    
     /**
      * Gets the parameter of this DatasetParameter.
      * @return the parameter
@@ -269,7 +268,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public Parameter getParameter() {
         return this.parameter;
     }
-
+    
     /**
      * Sets the parameter of this DatasetParameter to the specified value.
      * @param parameter the new parameter
@@ -277,9 +276,9 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     public void setParameter(Parameter parameter) {
         this.parameter = parameter;
     }
-
+    
     /**
-     * Returns a hash code value for the object.  This implementation computes 
+     * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
      */
@@ -289,10 +288,10 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
         hash += (this.datasetParameterPK != null ? this.datasetParameterPK.hashCode() : 0);
         return hash;
     }
-
+    
     /**
-     * Determines whether another object is equal to this DatasetParameter.  The result is 
-     * <code>true</code> if and only if the argument is not null and is a DatasetParameter object that 
+     * Determines whether another object is equal to this DatasetParameter.  The result is
+     * <code>true</code> if and only if the argument is not null and is a DatasetParameter object that
      * has the same id field values as this object.
      * @param object the reference object with which to compare
      * @return <code>true</code> if this object is the same as the argument;
@@ -308,9 +307,9 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
         if (this.datasetParameterPK != other.datasetParameterPK && (this.datasetParameterPK == null || !this.datasetParameterPK.equals(other.datasetParameterPK))) return false;
         return true;
     }
-
+    
     /**
-     * Returns a string representation of the object.  This implementation constructs 
+     * Returns a string representation of the object.  This implementation constructs
      * that representation based on the id fields.
      * @return a string representation of the object.
      */
@@ -319,4 +318,42 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
         return "uk.icat3.entity.DatasetParameter[datasetParameterPK=" + datasetParameterPK + "]";
     }
     
+    /**
+     * Overrides the isValid function, checks that the parameters and valid for the dataset and is set to numeric or string
+     * @throws ValidationException
+     * @return
+     */
+    @Override
+    public boolean isValid(EntityManager manager) throws ValidationException {
+        if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
+        
+        //check valid
+        String paramName = this.getDatasetParameterPK().getName();
+        String paramUnits = this.getDatasetParameterPK().getUnits();
+        
+        //check if this name is parameter table
+        ParameterPK paramPK = new ParameterPK(paramUnits,paramName);
+        
+        Parameter parameterDB = manager.find(Parameter.class, paramPK);
+        
+        //check paramPK is in the parameter table
+        if(parameterDB == null) throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" is not a valid parameter.");
+        
+        //check that it is a dataset parameter
+        if(!parameterDB.isDataSetParameter()) throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" is not a data set parameter.");
+        
+        //check is numeric
+        if(parameterDB.isNumeric()){
+            if(this.getStringValue() != null) throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" must be a numeric value only.");
+        }
+        
+        //check if string
+        if(!parameterDB.isNumeric()){
+            if(this.getNumericValue() != null) throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" must be a string value only.");
+        }
+        
+        //once here then its valid
+        return isValid();
+    }
 }
+

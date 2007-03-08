@@ -10,11 +10,11 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
@@ -23,6 +23,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import uk.icat3.exceptions.ValidationException;
 
 /**
  * Entity class SampleParameter
@@ -43,7 +44,7 @@ import javax.persistence.TemporalType;
         @NamedQuery(name = "SampleParameter.findByModTime", query = "SELECT s FROM SampleParameter s WHERE s.modTime = :modTime"),
         @NamedQuery(name = "SampleParameter.findByModId", query = "SELECT s FROM SampleParameter s WHERE s.modId = :modId")
     })
-public class SampleParameter implements Serializable {
+public class SampleParameter extends EntityBaseBean implements Serializable {
 
     /**
      * EmbeddedId primary key field
@@ -66,11 +67,7 @@ public class SampleParameter implements Serializable {
     @Column(name = "RANGE_BOTTOM")
     private String rangeBottom;
 
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
-    @Column(name = "MOD_ID", nullable = false)
+   @Column(name = "MOD_ID", nullable = false)
     private String modId;
 
     @JoinColumns(value =  {
@@ -213,23 +210,7 @@ public class SampleParameter implements Serializable {
     public void setRangeBottom(String rangeBottom) {
         this.rangeBottom = rangeBottom;
     }
-
-    /**
-     * Gets the modTime of this SampleParameter.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this SampleParameter to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
+    
     /**
      * Gets the modId of this SampleParameter.
      * @return the modId
@@ -319,4 +300,42 @@ public class SampleParameter implements Serializable {
         return "uk.icat3.entity.SampleParameter[sampleParameterPK=" + sampleParameterPK + "]";
     }
     
+       /**
+     * Overrides the isValid function, checks that the parameters and valid for the sample and is set to numeric or string
+     * @throws ValidationException
+     * @return
+     */
+    @Override
+    public boolean isValid(EntityManager manager) throws ValidationException {
+        if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
+        
+        //check valid
+        String paramName = this.getSampleParameterPK().getName();
+        String paramUnits = this.getSampleParameterPK().getUnits();
+        
+        //check if this name is parameter table
+        ParameterPK paramPK = new ParameterPK(paramUnits,paramName);
+        
+        Parameter parameterDB = manager.find(Parameter.class, paramPK);
+        
+        //check paramPK is in the parameter table
+        if(parameterDB == null) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" is not a valid parameter.");
+        
+        //check that it is a dataset parameter
+        if(!parameterDB.isDatafileParameter()) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" is not a sample parameter.");
+                
+        //check is numeric
+        if(parameterDB.isNumeric()){
+            if(this.getStringValue() != null) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" must be a numeric value only.");
+        }
+        
+        //check if string
+        if(!parameterDB.isNumeric()){
+            if(this.getNumericValue() != null) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" must be a string value only.");
+            
+        }
+        
+        //once here then its valid
+        return isValid();
+    }
 }

@@ -10,13 +10,12 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -26,8 +25,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import uk.icat3.exceptions.ValidationException;
 
 /**
  * Entity class Dataset
@@ -59,7 +57,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
     
     @Column(name = "DESCRIPTION")
     private String description;
-           
+    
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
     
@@ -173,7 +171,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-        
+    
     /**
      * Gets the modId of this Dataset.
      * @return the modId
@@ -339,6 +337,5 @@ public class Dataset extends EntityBaseBean implements Serializable {
     @Override
     public String toString() {
         return "uk.icat3.entity.Dataset[id=" + id + "]";
-    }
-    
+    }    
 }

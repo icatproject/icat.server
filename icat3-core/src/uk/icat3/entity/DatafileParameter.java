@@ -10,19 +10,18 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import uk.icat3.exceptions.ValidationException;
 
 /**
  * Entity class DatafileParameter
@@ -319,4 +318,43 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
         return "uk.icat3.entity.DatafileParameter[datafileParameterPK=" + datafileParameterPK + "]";
     }
     
+     /**
+     * Overrides the isValid function, checks that the parameters and valid for the datafile and is set to numeric or string
+     * @throws ValidationException
+     * @return
+     */
+    @Override
+    public boolean isValid(EntityManager manager) throws ValidationException {
+        if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
+        
+        //check valid
+        String paramName = this.getDatafileParameterPK().getName();
+        String paramUnits = this.getDatafileParameterPK().getUnits();
+        
+        //check if this name is parameter table
+        ParameterPK paramPK = new ParameterPK(paramUnits,paramName);
+        
+        Parameter parameterDB = manager.find(Parameter.class, paramPK);
+        
+        //check paramPK is in the parameter table
+        if(parameterDB == null) throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" is not a valid parameter.");
+        
+        //check that it is a dataset parameter
+        if(!parameterDB.isDatafileParameter()) throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" is not a data file parameter.");
+        
+        
+        //check is numeric
+        if(parameterDB.isNumeric()){
+            if(this.getStringValue() != null) throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" must be a numeric value only.");
+        }
+        
+        //check if string
+        if(!parameterDB.isNumeric()){
+            if(this.getNumericValue() != null) throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" must be a string value only.");
+            
+        }
+        
+        //once here then its valid
+        return isValid();
+    }
 }
