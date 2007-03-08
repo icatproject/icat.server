@@ -18,6 +18,9 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.Persistence;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
+import uk.icat3.entity.DatafileParameter;
+import uk.icat3.entity.Dataset;
+import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.manager.InvestigationManager;
@@ -36,7 +39,7 @@ import uk.icat3.util.LogicalOperator;
  */
 public class TestSearch {
     
-    private  static Logger log = Logger.getLogger(TestSearch.class);
+    protected  static Logger log = Logger.getLogger(TestSearch.class);
     
     // TODO code application logic here
     static EntityManagerFactory  emf = null;
@@ -56,14 +59,14 @@ public class TestSearch {
         
         
         // Begin transaction
-        em.getTransaction().begin();
+        //  em.getTransaction().begin();
         
         
     }
     
     protected static void tearDown(){
         // Commit the transaction
-        em.getTransaction().commit();
+        // em.getTransaction().commit();
         
         em.close();
     }
@@ -192,6 +195,7 @@ public class TestSearch {
             log.info(investigation.getId()+" "+investigation.getTitle()+" "+investigation.getInstrument());
         }
         
+        
         tearDown();
         
     }
@@ -297,6 +301,38 @@ public class TestSearch {
         
     }
     
+    public void test2() throws Exception {
+        
+        setUp();
+        
+        Investigation investigation = InvestigationManager.getInvestigation("JAMES-JAMES",15068789L,em);
+        
+        /*for(Dataset dataset : investigation.getDatasetCollection()){
+            
+            Collection<DatasetParameter> params = dataset.getDatasetParameterCollection();
+            log.trace(investigation.getDatasetCollection().size()+" "+params.size());
+            for(DatasetParameter param : params){
+                param.isValid(em);
+            }
+            
+            for(Datafile datafile : dataset.getDatafileCollection()){
+                Collection<DatafileParameter> paramsfile = datafile.getDatafileParameterCollection();
+                log.trace(dataset.getDatafileCollection().size()+" "+params.size());
+                for(DatafileParameter param : paramsfile){
+                    param.isValid(em);
+                }                
+            }            
+        }*/
+        
+        log.trace("Searching all");
+        Collection<DatafileParameter> params = (Collection<DatafileParameter>)em.createQuery("select dsp from DatafileParameter dsp").setMaxResults(1000).getResultList();
+        
+        for(DatafileParameter param : params){
+            param.isValid(em);
+        }
+        
+        tearDown();
+    }
     
     public void test() throws Exception {
         
@@ -377,8 +413,8 @@ public class TestSearch {
         
         
         Collection<String> ins  =   new ArrayList<String>();
+        ins.add("scan");
         ins.add("crisp");
-        ins.add("lad");
         
         //   ts.seachByRunNumber("JAMES-JAMES", in, 2620L,2631L);
         
@@ -404,16 +440,18 @@ public class TestSearch {
         dto.setRunEnd(19624L);
         dto.setRunStart(19622L);
         
-        //   ts.seachByAdvanced("JAMES-JAMES",dto);
+        //  ts.seachByAdvanced("JAMES-JAMES",dto);
         
         //       ts.getAllKeywords("JAMES");
         //
-        ts.getUserKeywords("JAMES-JAMES", "alf");
+        // ts.getUserKeywords("JAMES-JAMES", "alf");
         
         // ts.getUserInvestigations("JAMES");
         
         //    ts.test();
         
+        
+        ts.test2();
         //  ts.testModify();
     }
     
