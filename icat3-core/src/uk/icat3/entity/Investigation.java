@@ -613,7 +613,5 @@ public class Investigation extends EntityBaseBean implements Serializable {
         
        //if reached here investigation is valid
         return isValid();
-    }
-    
-    
+    }    
 }
