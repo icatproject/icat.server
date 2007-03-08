@@ -94,6 +94,8 @@ public class ManagerUtil {
                 investigation.getKeywordCollection().size();
                 investigation.getInvestigatorCollection().size();
             }
+        } else {
+            log.trace("No additional info requested.");
         }
     }
         
