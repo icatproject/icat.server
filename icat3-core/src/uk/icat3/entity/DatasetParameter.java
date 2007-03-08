@@ -69,11 +69,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
 
     @Column(name = "DESCRIPTION")
     private String description;
-
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
+  
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
 
@@ -234,23 +230,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
         this.description = description;
     }
 
-    /**
-     * Gets the modTime of this DatasetParameter.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this DatasetParameter to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
-    /**
+        /**
      * Gets the modId of this DatasetParameter.
      * @return the modId
      */

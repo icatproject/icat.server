@@ -11,16 +11,19 @@ package uk.icat3.entity;
 
 import java.util.Date;
 import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import uk.icat3.exceptions.ValidationException;
 
 /**
  *
  * @author gjd37
  */
-public class EntityBaseBean {
+@MappedSuperclass
+public abstract class EntityBaseBean {
     
     /** Creates a new instance of EntityBaseBean */
     public EntityBaseBean() {
@@ -28,7 +31,7 @@ public class EntityBaseBean {
     
     @Column(name = "MOD_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    protected Date modTime;
+    protected Date modTime;    
     
     /**
      * Gets the modTime of this DatafileFormat.
@@ -51,7 +54,7 @@ public class EntityBaseBean {
      */
     @PrePersist
     @PreUpdate
-    public void prePersist(){
+    public void prePersist(){       
         modTime = new Date();
     }
     
@@ -70,5 +73,14 @@ public class EntityBaseBean {
         if(getDelete() != null && getDelete().equalsIgnoreCase("Y")) return true;
         else return fasle;
     }*/    
+    
+    /**
+     * Method to be overriding if needed to check if the data held in the entity is valid.
+     * @throws ValidationException if validation error.
+     * @return true if validation is correct,
+     */
+    public boolean isValid() throws ValidationException {
+        return true;
+    }
     
 }

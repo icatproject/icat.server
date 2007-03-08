@@ -108,11 +108,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     @Column(name = "RELEASE_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date releaseDate;
-    
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-    
+          
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
     
@@ -326,23 +322,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
     }
-    
-    /**
-     * Gets the modTime of this Investigation.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-    
-    /**
-     * Sets the modTime of this Investigation to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-    
+            
     /**
      * Gets the modId of this Investigation.
      * @return the modId

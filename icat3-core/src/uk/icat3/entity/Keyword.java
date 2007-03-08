@@ -49,14 +49,14 @@ import uk.icat3.util.Queries;
 })
 
 @NamedNativeQueries({
-    //Added searches for ICAT3 API    
-    @NamedNativeQuery(name = Queries.KEYWORDS_NATIVE_FOR_USER, query= Queries.KEYWORDS_FOR_USER_SQL, resultSetMapping="keywordsNameMapping"),   
+    //Added searches for ICAT3 API
+    @NamedNativeQuery(name = Queries.KEYWORDS_NATIVE_FOR_USER, query= Queries.KEYWORDS_FOR_USER_SQL, resultSetMapping="keywordsNameMapping"),
     @NamedNativeQuery(name = Queries.ALLKEYWORDS_NATIVE_ALPHA, query= Queries.ALLKEYWORDS_ALPHA_SQL, resultSetMapping="keywordsNameMapping"),
     @NamedNativeQuery(name = Queries.ALLKEYWORDS_NATIVE_ALPHA_NUMERIC, query= Queries.ALLKEYWORDS_ALPHA_NUMERIC_SQL)
     
 })
 @SqlResultSetMappings({
-    @SqlResultSetMapping(name="keywordsNameMapping",columns={@ColumnResult(name="NAME")}),    
+    @SqlResultSetMapping(name="keywordsNameMapping",columns={@ColumnResult(name="NAME")}),
     @SqlResultSetMapping(name="keywordsMapping",entities={@EntityResult(entityClass=String.class)})
     
 })
@@ -67,10 +67,6 @@ public class Keyword extends EntityBaseBean implements Serializable {
      */
     @EmbeddedId
     protected KeywordPK keywordPK;
-    
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
     
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
@@ -128,21 +124,6 @@ public class Keyword extends EntityBaseBean implements Serializable {
         this.keywordPK = keywordPK;
     }
     
-    /**
-     * Gets the modTime of this Keyword.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-    
-    /**
-     * Sets the modTime of this Keyword to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
     
     /**
      * Gets the modId of this Keyword.

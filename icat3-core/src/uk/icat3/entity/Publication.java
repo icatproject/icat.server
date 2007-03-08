@@ -57,10 +57,6 @@ public class Publication extends EntityBaseBean implements Serializable {
     @Column(name = "REPOSITORY")
     private String repository;
 
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
 
@@ -174,21 +170,7 @@ public class Publication extends EntityBaseBean implements Serializable {
         this.repository = repository;
     }
 
-    /**
-     * Gets the modTime of this Publication.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this Publication to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
+   
 
     /**
      * Gets the modId of this Publication.

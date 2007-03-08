@@ -44,7 +44,7 @@ import javax.persistence.TemporalType;
         @NamedQuery(name = "Parameter.findByModId", query = "SELECT p FROM Parameter p WHERE p.modId = :modId"),
         @NamedQuery(name = "Parameter.findByModTime", query = "SELECT p FROM Parameter p WHERE p.modTime = :modTime")
     })
-public class Parameter implements Serializable {
+public class Parameter extends EntityBaseBean implements Serializable {
 
     /**
      * EmbeddedId primary key field
@@ -78,10 +78,6 @@ public class Parameter implements Serializable {
 
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
-
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "parameter")
     private Collection<DatasetParameter> datasetParameterCollection;
@@ -286,23 +282,7 @@ public class Parameter implements Serializable {
     public String getModId() {
         return this.modId;
     }
-
-    /**
-     * Sets the modId of this Parameter to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
-    /**
-     * Gets the modTime of this Parameter.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
+   
     /**
      * Sets the modTime of this Parameter to the specified value.
      * @param modTime the new modTime

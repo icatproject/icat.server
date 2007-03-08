@@ -62,10 +62,6 @@ public class Sample extends EntityBaseBean implements Serializable {
     @Column(name = "SAFETY_INFORMATION", nullable = false)
     private String safetyInformation;
 
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
 
@@ -186,23 +182,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     public void setSafetyInformation(String safetyInformation) {
         this.safetyInformation = safetyInformation;
     }
-
-    /**
-     * Gets the modTime of this Sample.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this Sample to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
+    
     /**
      * Gets the modId of this Sample.
      * @return the modId
