@@ -307,6 +307,8 @@ public class TestSearch {
         
         Investigation investigation = InvestigationManager.getInvestigation("JAMES-JAMES",15068789L,em);
         
+        
+        System.out.println(investigation.isValid(em));
         /*for(Dataset dataset : investigation.getDatasetCollection()){
             
             Collection<DatasetParameter> params = dataset.getDatasetParameterCollection();
@@ -324,12 +326,12 @@ public class TestSearch {
             }            
         }*/
         
-        log.trace("Searching all");
+        /*log.trace("Searching all");
         Collection<DatafileParameter> params = (Collection<DatafileParameter>)em.createQuery("select dsp from DatafileParameter dsp").setMaxResults(1000).getResultList();
         
         for(DatafileParameter param : params){
             param.isValid(em);
-        }
+        }*/
         
         tearDown();
     }
@@ -416,7 +418,7 @@ public class TestSearch {
         ins.add("scan");
         ins.add("crisp");
         
-        //   ts.seachByRunNumber("JAMES-JAMES", in, 2620L,2631L);
+        //   ts.seachByRunNumber("JAMES-JAMES", ins, 2620L,2631L);
         
         AdvancedSearchDTO dto = new AdvancedSearchDTO();
         

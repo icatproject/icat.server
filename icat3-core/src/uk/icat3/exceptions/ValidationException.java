@@ -10,7 +10,7 @@
 package uk.icat3.exceptions;
 
 /**
- * 
+ *  Exception for entity validation
  *
  * @author gjd37
  */
