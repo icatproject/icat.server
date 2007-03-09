@@ -11,8 +11,8 @@ import javax.rmi.PortableRemoteObject;
 import org.apache.log4j.Logger;
 import uk.icat3.user.User;
 import uk.icat3.user.UserDetails;
-import uk.icat3.user.exceptions.LoginException;
-import uk.icat3.user.exceptions.NoSuchUserException;
+import uk.icat3.exceptions.LoginException;
+import uk.icat3.exceptions.NoSuchUserException;
 
 /*
  * ISISUser.java
