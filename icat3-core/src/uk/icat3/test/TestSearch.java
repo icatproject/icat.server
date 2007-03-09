@@ -18,9 +18,6 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.Persistence;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
-import uk.icat3.entity.DatafileParameter;
-import uk.icat3.entity.Dataset;
-import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.manager.InvestigationManager;
@@ -51,7 +48,7 @@ public class TestSearch {
     }
     
     protected static void setUp(){
-        emf = Persistence.createEntityManagerFactory("icat3-core-testing-PU");
+        emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
         em = emf.createEntityManager();
         EntityManagerResource.getInstance().set(em);
         
@@ -304,11 +301,13 @@ public class TestSearch {
     public void test2() throws Exception {
         
         setUp();
+        Collection<Long> ids = new ArrayList<Long>();
+        ids.add(2L);
+        ids.add(2L);
+       Collection<Investigation> investigations = InvestigationManager.getInvestigations("dwf64",ids,em);
         
-        Investigation investigation = InvestigationManager.getInvestigation("JAMES-JAMES",15068789L,em);
         
-        
-        System.out.println(investigation.isValid(em));
+        //System.out.println(investigation.isValid(em));
         /*for(Dataset dataset : investigation.getDatasetCollection()){
             
             Collection<DatasetParameter> params = dataset.getDatasetParameterCollection();
