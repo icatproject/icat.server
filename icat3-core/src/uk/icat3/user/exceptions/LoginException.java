@@ -1,5 +1,5 @@
 
-package uk.icat3.exceptions;
+package uk.icat3.user.exceptions;
 
 /*
  * LoginException.java
@@ -12,7 +12,7 @@ package uk.icat3.exceptions;
  * @author df01
  * version 1.0
  */
-public class LoginException extends ICATAPIException {
+public class LoginException extends java.lang.Exception {
     
     /**
      * Creates a new instance of <code>LoginException</code> without detail message.

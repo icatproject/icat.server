@@ -7,13 +7,13 @@
  * and open the template in the editor.
  */
 
-package uk.icat3.exceptions;
+package uk.icat3.user.exceptions;
 
 /**
  *
  * @author df01
  */
-public class NoSuchUserException extends ICATAPIException {
+public class NoSuchUserException extends java.lang.Exception {
     
     /**
      * Creates a new instance of <code>NoSuchUserException</code> without detail message.

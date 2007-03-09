@@ -1,7 +1,7 @@
 package uk.icat3.user;
 
-import uk.icat3.exceptions.LoginException;
-import uk.icat3.exceptions.NoSuchUserException;
+import uk.icat3.user.exceptions.LoginException;
+import uk.icat3.user.exceptions.NoSuchUserException;
 
 /*
  * User.java
