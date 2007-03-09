@@ -2,6 +2,7 @@ package uk.icat3.user;
 
 
 import junit.framework.JUnit4TestAdapter;
+import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -27,13 +28,13 @@ public class UserManagerTest {
     String username = null;
     String password = null;
     UserManager instance = null;
-    String sessionId = null;
+    String sessionId = null;    
     
     @Before
     public void setUp() throws Exception {
         username = "damian.flannery@rl.ac.uk";
         password = "helloworld";                    
-        instance = new UserManager();        
+        instance = new UserManager("uk.icat3.user.facility.ISISUser");        
     }
 
     @After
