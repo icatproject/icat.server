@@ -39,6 +39,10 @@ public class EntityBaseBean {
     @Temporal(TemporalType.TIMESTAMP)
     protected Date modTime;
     
+    
+    @Column(name = "CREATE_ID", nullable = false)
+    private String createId;
+    
     /**
      * Gets the modTime of this DatafileFormat.
      * @return the modTime
@@ -53,6 +57,21 @@ public class EntityBaseBean {
      */
     public void setModTime(Date modTime) {
         this.modTime = modTime;
+    }
+    
+    /**
+     * Gets the createId of this entity.
+     * @return the createId
+     */
+    public String getCreateId() {
+        return createId;
+    }
+     /**
+     * Sets the createId of this entity to the specified value.
+     * @param createId the new createId
+     */
+    public void setCreateId(String createId) {
+        this.createId = createId;
     }
     
     /**
@@ -79,11 +98,11 @@ public class EntityBaseBean {
         if(getDeleted() != null && getDeleted().equalsIgnoreCase("Y")) return true;
         else return fasle;
     }*/
-      
+    
     
     /**
      * Method to be overridden if needed to check if the data held in the entity is valid.
-     * This method checks whether all the fields which are marked as not null are not null     
+     * This method checks whether all the fields which are marked as not null are not null
      *
      * @throws ValidationException if validation error.
      * @return true if validation is correct,
@@ -91,33 +110,33 @@ public class EntityBaseBean {
     public boolean isValid() throws ValidationException {
         
         //get public the fields in class
-        Field[] allFields = EntityBaseBean.class.getDeclaredFields();       
+        Field[] allFields = EntityBaseBean.class.getDeclaredFields();
         //all subclasses should use this line below
         //Field[] allFields = getClass().getDeclaredFields();
         for (int i = 0; i < allFields.length; i++) {
-           
+            
             //get name of field
-            String fieldName = allFields[i].getName();            
+            String fieldName = allFields[i].getName();
             //now check all annoatations
             for (Annotation a : allFields[i].getDeclaredAnnotations()) {
                 //if this means its a none null column field
                 if(a.annotationType().getName().equals(
-                        javax.persistence.Column.class.getName()) && a.toString().contains("nullable=false") ){                    
+                        javax.persistence.Column.class.getName()) && a.toString().contains("nullable=false") ){
                     //now check if it is null, if so throw error
                     try {
-                        //get value                       
+                        //get value
                         //log.info(""+allFields[i]+"? "+allFields[i].isAccessible());
                         if(allFields[i].get(this) == null){
                             throw new ValidationException(getClass().getSimpleName()+": "+fieldName+" cannot be null.");
                         } else  log.trace(getClass().getSimpleName()+": "+fieldName+" is valid");
                     } catch (IllegalAccessException ex) {
-                        log.warn(getClass().getSimpleName()+": "+fieldName+" cannot be accessed.");                                                                     
+                        log.warn(getClass().getSimpleName()+": "+fieldName+" cannot be accessed.");
                     }
-                }                
+                }
             }
         }
         //ok here
-       return true;       
+        return true;
     }
     
     /**
@@ -131,5 +150,6 @@ public class EntityBaseBean {
     public boolean isValid(EntityManager manager) throws ValidationException {
         //always call isValid()
         return isValid();
-    }    
+    }
+    
 }
