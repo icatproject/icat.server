@@ -7,8 +7,8 @@ import org.junit.After;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
-import uk.icat3.user.exceptions.LoginException;
-import uk.icat3.user.exceptions.NoSuchUserException;
+import uk.icat3.exceptions.LoginException;
+import uk.icat3.exceptions.NoSuchUserException;
 /*
  * UserManagerTest.java
  *
