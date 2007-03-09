@@ -181,7 +181,7 @@ public class ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException
      * @return Datafile if found
      */
-    protected Datafile checkDataFile(Long dataFileId, EntityManager manager) throws EntityNotFoundException {
+    protected static Datafile checkDataFile(Long dataFileId, EntityManager manager) throws EntityNotFoundException {
         Datafile dataFile = manager.find(Datafile.class, dataFileId);
         //check if the id exists in the database
         if(dataFile == null) throw new EntityNotFoundException("DataFile: id: "+dataFileId+" not found.");

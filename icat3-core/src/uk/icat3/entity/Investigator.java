@@ -36,18 +36,14 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "Investigator.findByModTime", query = "SELECT i FROM Investigator i WHERE i.modTime = :modTime"),
     @NamedQuery(name = "Investigator.findByModId", query = "SELECT i FROM Investigator i WHERE i.modId = :modId")
 })
-public class Investigator implements Serializable {
+public class Investigator extends EntityBaseBean implements Serializable {
     
     /**
      * EmbeddedId primary key field
      */
     @EmbeddedId
     protected InvestigatorPK investigatorPK;
-    
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-    
+          
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
     
@@ -110,23 +106,7 @@ public class Investigator implements Serializable {
     public void setInvestigatorPK(InvestigatorPK investigatorPK) {
         this.investigatorPK = investigatorPK;
     }
-    
-    /**
-     * Gets the modTime of this Investigator.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-    
-    /**
-     * Sets the modTime of this Investigator to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-    
+           
     /**
      * Gets the modId of this Investigator.
      * @return the modId

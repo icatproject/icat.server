@@ -452,6 +452,28 @@ public class Datafile extends EntityBaseBean implements Serializable {
     }
     
     /**
+     * Sets deleted flag on all items owned by this datafiles
+     *
+     * @param isDeleted 
+     */
+    public void setCascadeDeleted(boolean isDeleted){
+        log.trace("Setting: "+toString()+" to deleted? "+isDeleted);
+        String deleted = (isDeleted) ? "Y" : "N";
+        
+        //data file parameters
+        for(DatafileParameter datafileParameter : getDatafileParameterCollection()){
+            datafileParameter.setDeleted(deleted);
+        }
+        
+        //relatedDatafiles
+        for(RelatedDatafiles relatedDatafile : getRelatedDatafilesCollection()){
+            relatedDatafile.setDeleted(deleted);
+        }
+        
+        this.setDeleted(deleted);       
+    }
+    
+    /**
      * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.

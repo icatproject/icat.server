@@ -37,7 +37,7 @@ import javax.persistence.TemporalType;
         @NamedQuery(name = "RelatedDatafiles.findByModTime", query = "SELECT r FROM RelatedDatafiles r WHERE r.modTime = :modTime"),
         @NamedQuery(name = "RelatedDatafiles.findByModId", query = "SELECT r FROM RelatedDatafiles r WHERE r.modId = :modId")
     })
-public class RelatedDatafiles implements Serializable {
+public class RelatedDatafiles extends EntityBaseBean implements Serializable {
 
     /**
      * EmbeddedId primary key field
@@ -47,11 +47,7 @@ public class RelatedDatafiles implements Serializable {
 
     @Column(name = "RELATION", nullable = false)
     private String relation;
-
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
+   
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
 
@@ -129,23 +125,7 @@ public class RelatedDatafiles implements Serializable {
     public void setRelation(String relation) {
         this.relation = relation;
     }
-
-    /**
-     * Gets the modTime of this RelatedDatafiles.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this RelatedDatafiles to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
+   
     /**
      * Gets the modId of this RelatedDatafiles.
      * @return the modId

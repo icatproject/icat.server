@@ -550,6 +550,69 @@ public class Investigation extends EntityBaseBean implements Serializable {
     }
     
     /**
+     * Sets deleted flag on all items owned by this datasets
+     *
+     * @param isDeleted
+     */
+    public void setCascadeDeleted(boolean isDeleted){
+        log.trace("Setting: "+toString()+" to deleted? "+isDeleted);
+        String deleted = (isDeleted) ? "Y" : "N";
+        
+        //datafiles
+        for(Dataset dataset : getDatasetCollection()){
+            dataset.setCascadeDeleted(isDeleted);
+        }
+        
+        //investigators
+        for(Investigator investigator : getInvestigatorCollection()){
+            investigator.setDeleted(deleted);
+        }
+        
+        //access groups
+        for(InvestigationLevelPermission investigationLevelPermission : getInvestigationLevelPermissionCollection()){
+            investigationLevelPermission.setDeleted(deleted);
+            for(AccessGroupIlp agilp : investigationLevelPermission.getAccessGroupIlpCollection()){
+                agilp.setDeleted(deleted);
+            }
+        }
+        
+        //sample
+        for(Sample sample : getSampleCollection()){
+            for(SampleParameter sp : sample.getSampleParameterCollection()){
+                sp.setDeleted(deleted);
+            }
+            sample.setDeleted(deleted);
+        }
+        
+        //study
+        for(StudyInvestigation study : getStudyInvestigationCollection()){
+            study.setDeleted(deleted);
+        }
+        
+        //shift
+        for(Shift shift : getShiftCollection()){
+            shift.setDeleted(deleted);
+        }
+        
+        //publication
+        for(Publication publication : getPublicationCollection()){
+            publication.setDeleted(deleted);
+        }
+        
+        //keyword
+        for(Keyword keyword : getKeywordCollection()){
+            keyword.setDeleted(deleted);
+        }
+        
+        //topicList parameter
+        for(TopicList topicList : getTopicListCollection()){
+            topicList.setDeleted(deleted);
+        }
+        
+        this.setDeleted(deleted);
+    }
+    
+    /**
      * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.

@@ -25,36 +25,32 @@ import javax.persistence.TemporalType;
 
 /**
  * Entity class TopicList
- * 
+ *
  * @author gjd37
  */
 @Entity
 @Table(name = "TOPIC_LIST")
 @NamedQueries( {
-        @NamedQuery(name = "TopicList.findByInvestigationId", query = "SELECT t FROM TopicList t WHERE t.topicListPK.investigationId = :investigationId"),
-        @NamedQuery(name = "TopicList.findByTopicId", query = "SELECT t FROM TopicList t WHERE t.topicListPK.topicId = :topicId"),
-        @NamedQuery(name = "TopicList.findByModTime", query = "SELECT t FROM TopicList t WHERE t.modTime = :modTime"),
-        @NamedQuery(name = "TopicList.findByModId", query = "SELECT t FROM TopicList t WHERE t.modId = :modId")
-    })
-public class TopicList implements Serializable {
-
+    @NamedQuery(name = "TopicList.findByInvestigationId", query = "SELECT t FROM TopicList t WHERE t.topicListPK.investigationId = :investigationId"),
+    @NamedQuery(name = "TopicList.findByTopicId", query = "SELECT t FROM TopicList t WHERE t.topicListPK.topicId = :topicId"),
+    @NamedQuery(name = "TopicList.findByModTime", query = "SELECT t FROM TopicList t WHERE t.modTime = :modTime"),
+    @NamedQuery(name = "TopicList.findByModId", query = "SELECT t FROM TopicList t WHERE t.modId = :modId")
+})
+public class TopicList extends EntityBaseBean implements Serializable {
+    
     /**
      * EmbeddedId primary key field
      */
     @EmbeddedId
     protected TopicListPK topicListPK;
-
-    @Column(name = "MOD_TIME")
-    @Temporal(TemporalType.DATE)
-    private Date modTime;
-
+    
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
-
+    
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     private Investigation investigation;
-
+    
     @JoinColumn(name = "TOPIC_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     private Topic topic;
@@ -62,7 +58,7 @@ public class TopicList implements Serializable {
     /** Creates a new instance of TopicList */
     public TopicList() {
     }
-
+    
     /**
      * Creates a new instance of TopicList with the specified values.
      * @param topicListPK the topicListPK of the TopicList
@@ -70,7 +66,7 @@ public class TopicList implements Serializable {
     public TopicList(TopicListPK topicListPK) {
         this.topicListPK = topicListPK;
     }
-
+    
     /**
      * Creates a new instance of TopicList with the specified values.
      * @param topicListPK the topicListPK of the TopicList
@@ -80,7 +76,7 @@ public class TopicList implements Serializable {
         this.topicListPK = topicListPK;
         this.modId = modId;
     }
-
+    
     /**
      * Creates a new instance of TopicListPK with the specified values.
      * @param topicId the topicId of the TopicListPK
@@ -89,7 +85,7 @@ public class TopicList implements Serializable {
     public TopicList(Long topicId, Long investigationId) {
         this.topicListPK = new TopicListPK(topicId, investigationId);
     }
-
+    
     /**
      * Gets the topicListPK of this TopicList.
      * @return the topicListPK
@@ -97,7 +93,7 @@ public class TopicList implements Serializable {
     public TopicListPK getTopicListPK() {
         return this.topicListPK;
     }
-
+    
     /**
      * Sets the topicListPK of this TopicList to the specified value.
      * @param topicListPK the new topicListPK
@@ -105,23 +101,7 @@ public class TopicList implements Serializable {
     public void setTopicListPK(TopicListPK topicListPK) {
         this.topicListPK = topicListPK;
     }
-
-    /**
-     * Gets the modTime of this TopicList.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this TopicList to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
+    
     /**
      * Gets the modId of this TopicList.
      * @return the modId
@@ -129,7 +109,7 @@ public class TopicList implements Serializable {
     public String getModId() {
         return this.modId;
     }
-
+    
     /**
      * Sets the modId of this TopicList to the specified value.
      * @param modId the new modId
@@ -137,7 +117,7 @@ public class TopicList implements Serializable {
     public void setModId(String modId) {
         this.modId = modId;
     }
-
+    
     /**
      * Gets the investigation of this TopicList.
      * @return the investigation
@@ -145,7 +125,7 @@ public class TopicList implements Serializable {
     public Investigation getInvestigation() {
         return this.investigation;
     }
-
+    
     /**
      * Sets the investigation of this TopicList to the specified value.
      * @param investigation the new investigation
@@ -153,7 +133,7 @@ public class TopicList implements Serializable {
     public void setInvestigation(Investigation investigation) {
         this.investigation = investigation;
     }
-
+    
     /**
      * Gets the topic of this TopicList.
      * @return the topic
@@ -161,7 +141,7 @@ public class TopicList implements Serializable {
     public Topic getTopic() {
         return this.topic;
     }
-
+    
     /**
      * Sets the topic of this TopicList to the specified value.
      * @param topic the new topic
@@ -169,9 +149,9 @@ public class TopicList implements Serializable {
     public void setTopic(Topic topic) {
         this.topic = topic;
     }
-
+    
     /**
-     * Returns a hash code value for the object.  This implementation computes 
+     * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
      */
@@ -181,10 +161,10 @@ public class TopicList implements Serializable {
         hash += (this.topicListPK != null ? this.topicListPK.hashCode() : 0);
         return hash;
     }
-
+    
     /**
-     * Determines whether another object is equal to this TopicList.  The result is 
-     * <code>true</code> if and only if the argument is not null and is a TopicList object that 
+     * Determines whether another object is equal to this TopicList.  The result is
+     * <code>true</code> if and only if the argument is not null and is a TopicList object that
      * has the same id field values as this object.
      * @param object the reference object with which to compare
      * @return <code>true</code> if this object is the same as the argument;
@@ -200,9 +180,9 @@ public class TopicList implements Serializable {
         if (this.topicListPK != other.topicListPK && (this.topicListPK == null || !this.topicListPK.equals(other.topicListPK))) return false;
         return true;
     }
-
+    
     /**
-     * Returns a string representation of the object.  This implementation constructs 
+     * Returns a string representation of the object.  This implementation constructs
      * that representation based on the id fields.
      * @return a string representation of the object.
      */

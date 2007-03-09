@@ -301,6 +301,36 @@ public class Dataset extends EntityBaseBean implements Serializable {
         this.datasetLevelPermissionCollection = datasetLevelPermissionCollection;
     }
     
+     /**
+     * Sets deleted flag on all items owned by this datasets
+     *
+     * @param isDeleted 
+     */
+    public void setCascadeDeleted(boolean isDeleted){
+        log.trace("Setting: "+toString()+" to deleted? "+isDeleted);
+        String deleted = (isDeleted) ? "Y" : "N";
+        
+        //data set parameters
+        for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
+            datasetParameter.setDeleted(deleted);
+        }
+        
+        //datafiles
+        for(Datafile datafile : getDatafileCollection()){
+            datafile.setCascadeDeleted(isDeleted);
+        }
+               
+        //access groups
+        for(DatasetLevelPermission datasetLevelPermission : getDatasetLevelPermissionCollection()){
+            datasetLevelPermission.setDeleted(deleted);
+            for(AccessGroupDlp agdlp : datasetLevelPermission.getAccessGroupDlpCollection()){                
+                agdlp.setDeleted(deleted);
+            }
+        }       
+        
+        this.setDeleted(deleted);       
+    }
+    
     /**
      * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.

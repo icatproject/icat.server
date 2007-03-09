@@ -20,6 +20,8 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.manager.DataFileManager;
+import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.InvestigationManager;
 import uk.icat3.search.AdvancedSearchDTO;
 import uk.icat3.search.DatafileSearch;
@@ -56,14 +58,14 @@ public class TestSearch {
         
         
         // Begin transaction
-        //  em.getTransaction().begin();
+        em.getTransaction().begin();
         
         
     }
     
     protected static void tearDown(){
         // Commit the transaction
-        // em.getTransaction().commit();
+        em.getTransaction().commit();
         
         em.close();
     }
@@ -304,30 +306,32 @@ public class TestSearch {
         Collection<Long> ids = new ArrayList<Long>();
         ids.add(2L);
         ids.add(2L);
-       Collection<Investigation> investigations = InvestigationManager.getInvestigations("dwf64",ids,em);
+        Collection<Investigation> investigations = InvestigationManager.getInvestigations("dwf64",ids,em);
         
-        
+        for(Investigation investigation : investigations){
+            log.info(investigation.getId()+" "+investigation.getTitle()+" "+investigation.getCreateId());
+        }
         //System.out.println(investigation.isValid(em));
         /*for(Dataset dataset : investigation.getDatasetCollection()){
-            
+         
             Collection<DatasetParameter> params = dataset.getDatasetParameterCollection();
             log.trace(investigation.getDatasetCollection().size()+" "+params.size());
             for(DatasetParameter param : params){
                 param.isValid(em);
             }
-            
+         
             for(Datafile datafile : dataset.getDatafileCollection()){
                 Collection<DatafileParameter> paramsfile = datafile.getDatafileParameterCollection();
                 log.trace(dataset.getDatafileCollection().size()+" "+params.size());
                 for(DatafileParameter param : paramsfile){
                     param.isValid(em);
-                }                
-            }            
+                }
+            }
         }*/
         
         /*log.trace("Searching all");
         Collection<DatafileParameter> params = (Collection<DatafileParameter>)em.createQuery("select dsp from DatafileParameter dsp").setMaxResults(1000).getResultList();
-        
+         
         for(DatafileParameter param : params){
             param.isValid(em);
         }*/
@@ -373,6 +377,15 @@ public class TestSearch {
         
     }
     
+    
+    public void testDelete() throws InsufficientPrivilegesException{
+        setUp();
+        
+        //DataFileManager.deleteDataFile("dwf64", 101L, em);
+        //DataSetManager.deleteDataSet("dwf64", 2L, em);
+        InvestigationManager.deleteInvestigation("dwf64", 2L, em);
+        tearDown();
+    }
     
     /**
      * @param args the command line arguments
@@ -452,8 +465,10 @@ public class TestSearch {
         //    ts.test();
         
         
-        ts.test2();
+        //ts.test2();
         //  ts.testModify();
+        
+        ts.testDelete();
     }
     
 }

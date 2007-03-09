@@ -39,9 +39,11 @@ public class EntityBaseBean {
     @Temporal(TemporalType.TIMESTAMP)
     protected Date modTime;
     
-    
     @Column(name = "CREATE_ID", nullable = false)
-    private String createId;
+    protected String createId;
+    
+    @Column(name = "DELETED", nullable = false )
+    protected String deleted;
     
     /**
      * Gets the modTime of this DatafileFormat.
@@ -66,7 +68,7 @@ public class EntityBaseBean {
     public String getCreateId() {
         return createId;
     }
-     /**
+    /**
      * Sets the createId of this entity to the specified value.
      * @param createId the new createId
      */
@@ -77,28 +79,32 @@ public class EntityBaseBean {
     /**
      * Automatically updates modTime when entity is persisted or merged
      */
-    @PrePersist
     @PreUpdate
-    public void prePersist(){
+    public void preUpdate(){
         modTime = new Date();
     }
     
-    /*@Column(name = "DELETE", nullable = true )
-    private String deleted;
-     
+    /**
+     * Automatically updates deleted and modTime when entity is persisted
+     */
+    @PrePersist
+    public void prePersist(){
+        deleted = "N";
+        modTime = new Date();
+    }
+    
     public String getDeleted() {
         return deleted;
     }
-     
+    
     public void setDeleted(String deleted) {
         this.deleted = deleted;
     }
-     
-    public isDeleted(){
-        if(getDeleted() != null && getDeleted().equalsIgnoreCase("Y")) return true;
-        else return fasle;
-    }*/
     
+    public boolean isDeleted(){
+        if(getDeleted() != null && getDeleted().equalsIgnoreCase("Y")) return true;
+        else return false;
+    }
     
     /**
      * Method to be overridden if needed to check if the data held in the entity is valid.
@@ -109,12 +115,15 @@ public class EntityBaseBean {
      */
     public boolean isValid() throws ValidationException {
         
+        //no need to check modTime, deleted and createId in validation cos always put in a create merge time
+        //or create id done by application and not user
+        
         //get public the fields in class
-        Field[] allFields = EntityBaseBean.class.getDeclaredFields();
+        /*Field[] allFields = EntityBaseBean.class.getDeclaredFields();
         //all subclasses should use this line below
         //Field[] allFields = getClass().getDeclaredFields();
         for (int i = 0; i < allFields.length; i++) {
-            
+         
             //get name of field
             String fieldName = allFields[i].getName();
             //now check all annoatations
@@ -134,7 +143,7 @@ public class EntityBaseBean {
                     }
                 }
             }
-        }
+        }*/
         //ok here
         return true;
     }

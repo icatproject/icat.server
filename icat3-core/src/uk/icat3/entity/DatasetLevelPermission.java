@@ -43,7 +43,7 @@ import javax.persistence.TemporalType;
         @NamedQuery(name = "DatasetLevelPermission.findByModTime", query = "SELECT d FROM DatasetLevelPermission d WHERE d.modTime = :modTime"),
         @NamedQuery(name = "DatasetLevelPermission.findByModId", query = "SELECT d FROM DatasetLevelPermission d WHERE d.modId = :modId")
     })
-public class DatasetLevelPermission implements Serializable {
+public class DatasetLevelPermission extends EntityBaseBean implements Serializable {
 
     @Id
     @Column(name = "ID", nullable = false)
@@ -64,11 +64,7 @@ public class DatasetLevelPermission implements Serializable {
     @Column(name = "PRM_DELETE", nullable = false)
     private short prmDelete;
 
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
-    @Column(name = "MOD_ID", nullable = false)
+        @Column(name = "MOD_ID", nullable = false)
     private String modId;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetLevelPermission")
@@ -207,23 +203,7 @@ public class DatasetLevelPermission implements Serializable {
     public void setPrmDelete(short prmDelete) {
         this.prmDelete = prmDelete;
     }
-
-    /**
-     * Gets the modTime of this DatasetLevelPermission.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this DatasetLevelPermission to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
+   
     /**
      * Gets the modId of this DatasetLevelPermission.
      * @return the modId

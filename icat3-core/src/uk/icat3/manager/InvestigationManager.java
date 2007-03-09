@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.ValidationException;
 
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
@@ -141,8 +142,11 @@ public class InvestigationManager extends ManagerUtil {
         
         //delete dataset (Cascade is true);
         //TODO might have to remove all the datafiles first
-        manager.remove(investigation);
+        //manager.remove(investigation);
+         //not deleting anymore, jsut changing deleted to Y
         
+         log.info("Deleting: "+investigation);
+        investigation.setCascadeDeleted(true);
     }
     
     /**
@@ -199,17 +203,29 @@ public class InvestigationManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void updateInvestigation(String userId, Investigation investigation, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static void updateInvestigation(String userId, Investigation investigation, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateInvestigation("+userId+", "+investigation+", EntityManager)");
         
         //check to see if DataSet exists, dont need the returned dataset as merging
+        if(investigation.getId() != null){
         checkInvestigation(investigation.getId(), manager);
+        }
+        
+         //check if valid investigation
+        investigation.isValid(manager);
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
         
-        manager.merge(investigation);
-        
+       
+        //if null then update
+        if(investigation.getId() != null){
+            manager.merge(investigation);
+        } else {
+            //new dataset, set createid
+            investigation.setCreateId(userId);
+            manager.persist(investigation);
+        }
     }
     
     /**

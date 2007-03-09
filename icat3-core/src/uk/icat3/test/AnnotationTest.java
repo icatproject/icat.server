@@ -8,17 +8,20 @@
  */
 
 package uk.icat3.test;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
+import java.util.Collection;
 import javax.persistence.Column;
-import uk.icat3.entity.EntityBaseBean;
-import uk.icat3.exceptions.ValidationException;
-
 
 public class AnnotationTest {
     
     public AnnotationTest(){
+       Collection<String> c = null;
        
+       for(String n : c){
+           System.out.println(n);
+       }
+        
+       /*
+        
         TestEntity te = new TestEntity("d");
         //EntityBaseBean te = new EntityBaseBean();
         try {
@@ -26,7 +29,7 @@ public class AnnotationTest {
             te.isValid();
         } catch (ValidationException ex) {
             ex.printStackTrace();
-        }
+        }*/
     }
     
     @Column(updatable = false, name = "flight_name", nullable = false,        length=50)

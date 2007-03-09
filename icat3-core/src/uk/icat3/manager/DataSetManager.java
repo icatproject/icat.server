@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.ManagerUtil;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
@@ -51,7 +52,7 @@ public class DataSetManager extends ManagerUtil {
     /**
      *
      * Deletes the data set for a user depending if the users id has delete permissions to delete the data set from the
-     * data set ID. 
+     * data set ID.
      *
      * @param userId
      * @param dataSetId
@@ -71,7 +72,11 @@ public class DataSetManager extends ManagerUtil {
         
         //delete dataset (Cascade is true);
         //TODO might have to remove all the datafiles first
-        manager.remove(dataset);
+        //manager.remove(dataset);
+        //not deleting anymore, jsut changing deleted to Y
+        
+        log.info("Deleting: "+dataset);
+        dataset.setCascadeDeleted(true);
         
     }
     
@@ -94,7 +99,7 @@ public class DataSetManager extends ManagerUtil {
     }
     
     
-    //TODO:  added boolean to avoid erausre name clash with above method    
+    //TODO:  added boolean to avoid erausre name clash with above method
     /**
      *
      * Deletes the collection of data sets for a user depending if the user's id has delete permissions to delete the data sets
@@ -122,7 +127,7 @@ public class DataSetManager extends ManagerUtil {
     ////////////////////     Add/Update Commands    ///////////////////
     
     /**
-     * Updates a data set depending on whether the user has permission to update this data set
+     * Updates / Adds a data set depending on whether the user has permission to update this data set or its investigation
      *
      * @param userId
      * @param dataSet
@@ -130,16 +135,28 @@ public class DataSetManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void updateDataSet(String userId, Dataset dataSet, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static void updateDataSet(String userId, Dataset dataSet, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateDataSet("+userId+", "+dataSet+", EntityManager)");
         
         //check to see if DataSet exists, dont need the returned dataset as merging
-        checkDataSet(dataSet.getId(), manager);
+        if(dataSet.getId() != null){
+            checkDataSet(dataSet.getId(), manager);
+        }
+        
+        //check if valid dataset
+        dataSet.isValid(manager);
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, dataSet, AccessType.UPDATE, manager);
         
-        manager.merge(dataSet);
+        //if null then update
+        if(dataSet.getId() != null){
+            manager.merge(dataSet);
+        } else {
+            //new dataset, set createid
+            dataSet.setCreateId(userId);
+            manager.persist(dataSet);
+        }
     }
     
     /**
