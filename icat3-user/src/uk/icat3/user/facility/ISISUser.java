@@ -8,6 +8,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
+import org.apache.log4j.Logger;
 import uk.icat3.user.User;
 import uk.icat3.user.UserDetails;
 import uk.icat3.user.exceptions.LoginException;
@@ -29,6 +30,7 @@ import uk.icat3.user.exceptions.NoSuchUserException;
 public class ISISUser implements User {
     
     UserDBFacade userDBFacade;
+    private static Logger log = Logger.getLogger(ISISUser.class);
     
     /** Creates a new instance of ISISUser */
     public ISISUser() throws LoginException {
@@ -37,7 +39,7 @@ public class ISISUser implements User {
             UserDBFacadeHome userDBFacadeHome = (UserDBFacadeHome)PortableRemoteObject.narrow(context.lookup("ejb/userdb/UserDBFacade"), UserDBFacadeHome.class);                
             userDBFacade = userDBFacadeHome.create();      
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e);
             throw new LoginException("Unable to establish connection to ISIS User database");
         }//end try/catch
     }      
@@ -48,7 +50,7 @@ public class ISISUser implements User {
             userNum = userDBFacade.getUserNumberFromSessionId(sessionId);
             if (userNum == null) throw new LoginException();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e);
             throw new LoginException("Unable to retrieve userid/distinguished name from ISIS user database using sessionId '" + sessionId + "'. Please try logging in again." );
         }//end try/catch
        return userNum.toString(); 
@@ -58,7 +60,8 @@ public class ISISUser implements User {
       String token = null;      
       try {          
           token = userDBFacade.login(username, password);                    
-      } catch (Exception e) {          
+      } catch (Exception e) { 
+          log.error(e);
           throw new LoginException("Invalid login credentials provided by user");
       }//end try/catch
       
@@ -69,7 +72,7 @@ public class ISISUser implements User {
         try {
             userDBFacade.logout(sessionId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn(e);          
         }//end try/catch
     }
     
@@ -89,9 +92,11 @@ public class ISISUser implements User {
             details.setDepartment(dto.getDeptName());
             details.setInstitution(dto.getOrgName());
             
-        } catch (LoginException le) {            
+        } catch (LoginException le) {
+            log.error(le);
             throw new LoginException("An error occured while trying to retrieve UserDetails from ISIS user database for user# " + user + " with sessionId# " + sessionId);
         } catch (Exception e) {
+            log.warn(e);
             throw new NoSuchUserException("User could not be found in ISIS user database");
         }//end try/catch
         
