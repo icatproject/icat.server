@@ -1,8 +1,8 @@
 package uk.icat3.user;
 
 import uk.icat3.user.*;
-import uk.icat3.user.exceptions.LoginException;
-import uk.icat3.user.exceptions.NoSuchUserException;
+import uk.icat3.exceptions.LoginException;
+import uk.icat3.exceptions.NoSuchUserException;
 
 
 /*
@@ -24,8 +24,8 @@ public class UserManager implements User {
     private User user;
     
     /** Creates a new instance of UserManager */
-    public UserManager() throws LoginException {
-        user = (uk.icat3.user.User) createObject("uk.icat3.user.ISISUser");     
+    public UserManager(String className) throws LoginException {
+        user = (uk.icat3.user.User) createObject(className);     
     }
     
     public String getUserIdFromSessionId (String sessionId) throws LoginException {
