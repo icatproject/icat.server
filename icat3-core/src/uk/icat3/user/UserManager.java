@@ -28,6 +28,7 @@ public class UserManager implements User {
         user = (uk.icat3.user.User) createObject("uk.icat3.user.ISISUser");
     }
     
+    /** Creates a new instance of UserManager for a particular User interface implemtation */
     public UserManager(String userImplClass) throws LoginException {
         user = (uk.icat3.user.User) createObject(userImplClass);
     }
