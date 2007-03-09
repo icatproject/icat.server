@@ -269,7 +269,7 @@ public class GateKeeper {
             //user is instrument scientist for instrument in investigation then return (no need to check individual permissions)
             //TBI...
                         
-            //TODO: added by gjd37, if user one of investigators then allow access           
+            //TODO: added by gjd37, if user one of investigators then allow access                  
             for(Investigator investigator : investigation.getInvestigatorCollection()){               
                 if(investigator.getFacilityUser().getFederalId().equals(user)){
                     //passed for this investigation    
@@ -277,7 +277,8 @@ public class GateKeeper {
                     return ;
                 }
             }            
-                                   
+                        
+            //if get to here, then user not a investigator so check investigations level permissions            
             for(InvestigationLevelPermission perm : investigation.getInvestigationLevelPermissionCollection()){
                 
                 //READ, UPDATE, DELETE, CREATE, ADMIN, FINE_GRAINED_ACCESS;
