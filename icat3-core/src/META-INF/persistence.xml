@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+     <!--  This is used for scratch arean for testing, the db will be populated and not be dropped etc -->
     <persistence-unit name="icat3-scratch-testing-PU" transaction-type="RESOURCE_LOCAL">
         <provider>oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider</provider>
         <class>uk.icat3.entity.Publication</class>
@@ -49,7 +50,7 @@
         </properties>
         
     </persistence-unit>
-    <!--  This is used for TestAll Junit
+    <!--  This is used for TestAll Junit tests -->
     <persistence-unit name="icat3-unit-testing-PU" transaction-type="RESOURCE_LOCAL">
         <provider>oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider</provider>      
         <class>uk.icat3.entity.Publication</class>
