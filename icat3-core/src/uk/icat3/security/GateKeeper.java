@@ -13,6 +13,7 @@ import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.InvestigationLevelPermission;
+import uk.icat3.entity.Investigator;
 import uk.icat3.entity.Sample;
 import uk.icat3.entity.SampleParameter;
 import uk.icat3.entity.Study;
@@ -232,7 +233,7 @@ public class GateKeeper {
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         for (Iterator<StudyInvestigation> iter = study.getStudyInvestigationCollection().iterator(); iter.hasNext(); ) {
             invList.add(iter.next().getInvestigation());
-        }//end for 
+        }//end for
         performAuthorisation(user, invList, access, study.getClass().toString(), study.toString(), manager);
     }//end method
     
@@ -263,13 +264,20 @@ public class GateKeeper {
         //if user is a system administrator then return (no need to check each request)
         //TBI...
         
-        for (Iterator<Investigation> iter = investigations.iterator(); iter.hasNext(); ) {
-            
+        //changed:  gjd37, iterators, not nice!
+        for(Investigation investigation : investigations){           
             //user is instrument scientist for instrument in investigation then return (no need to check individual permissions)
             //TBI...
-            
-            for (Iterator<InvestigationLevelPermission> perms = iter.next().getInvestigationLevelPermissionCollection().iterator(); perms.hasNext(); ) {
-                InvestigationLevelPermission perm = perms.next();
+                        
+            //TODO: added by gjd37, if user one of investigators then allow access           
+            for(Investigator investigator : investigation.getInvestigatorCollection()){               
+                if(investigator.getFacilityUser().getFederalId().equals(user)){
+                    //passed for this investigation                   
+                    return ;
+                }
+            }            
+                                   
+            for(InvestigationLevelPermission perm : investigation.getInvestigationLevelPermissionCollection()){
                 
                 //READ, UPDATE, DELETE, CREATE, ADMIN, FINE_GRAINED_ACCESS;
                 switch (access) {
