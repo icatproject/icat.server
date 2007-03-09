@@ -25,36 +25,39 @@ import javax.persistence.TemporalType;
 
 /**
  * Entity class Investigator
- * 
+ *
  * @author gjd37
  */
 @Entity
 @Table(name = "INVESTIGATOR")
 @NamedQueries( {
-        @NamedQuery(name = "Investigator.findByInvestigationId", query = "SELECT i FROM Investigator i WHERE i.investigatorPK.investigationId = :investigationId"),
-        @NamedQuery(name = "Investigator.findByFacilityUserId", query = "SELECT i FROM Investigator i WHERE i.investigatorPK.facilityUserId = :facilityUserId"),
-        @NamedQuery(name = "Investigator.findByModTime", query = "SELECT i FROM Investigator i WHERE i.modTime = :modTime"),
-        @NamedQuery(name = "Investigator.findByModId", query = "SELECT i FROM Investigator i WHERE i.modId = :modId")
-    })
+    @NamedQuery(name = "Investigator.findByInvestigationId", query = "SELECT i FROM Investigator i WHERE i.investigatorPK.investigationId = :investigationId"),
+    @NamedQuery(name = "Investigator.findByFacilityUserId", query = "SELECT i FROM Investigator i WHERE i.investigatorPK.facilityUserId = :facilityUserId"),
+    @NamedQuery(name = "Investigator.findByModTime", query = "SELECT i FROM Investigator i WHERE i.modTime = :modTime"),
+    @NamedQuery(name = "Investigator.findByModId", query = "SELECT i FROM Investigator i WHERE i.modId = :modId")
+})
 public class Investigator implements Serializable {
-
+    
     /**
      * EmbeddedId primary key field
      */
     @EmbeddedId
     protected InvestigatorPK investigatorPK;
-
+    
     @Column(name = "MOD_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date modTime;
-
+    
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
-
+    
+    @Column(name = "ROLE")
+    private String role;
+    
     @JoinColumn(name = "FACILITY_USER_ID", referencedColumnName = "FACILITY_USER_ID", insertable = false, updatable = false)
     @ManyToOne
     private FacilityUser facilityUser;
-
+    
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     private Investigation investigation;
@@ -62,7 +65,7 @@ public class Investigator implements Serializable {
     /** Creates a new instance of Investigator */
     public Investigator() {
     }
-
+    
     /**
      * Creates a new instance of Investigator with the specified values.
      * @param investigatorPK the investigatorPK of the Investigator
@@ -70,7 +73,7 @@ public class Investigator implements Serializable {
     public Investigator(InvestigatorPK investigatorPK) {
         this.investigatorPK = investigatorPK;
     }
-
+    
     /**
      * Creates a new instance of Investigator with the specified values.
      * @param investigatorPK the investigatorPK of the Investigator
@@ -82,7 +85,7 @@ public class Investigator implements Serializable {
         this.modTime = modTime;
         this.modId = modId;
     }
-
+    
     /**
      * Creates a new instance of InvestigatorPK with the specified values.
      * @param facilityUserId the facilityUserId of the InvestigatorPK
@@ -91,7 +94,7 @@ public class Investigator implements Serializable {
     public Investigator(String facilityUserId, Long investigationId) {
         this.investigatorPK = new InvestigatorPK(facilityUserId, investigationId);
     }
-
+    
     /**
      * Gets the investigatorPK of this Investigator.
      * @return the investigatorPK
@@ -99,7 +102,7 @@ public class Investigator implements Serializable {
     public InvestigatorPK getInvestigatorPK() {
         return this.investigatorPK;
     }
-
+    
     /**
      * Sets the investigatorPK of this Investigator to the specified value.
      * @param investigatorPK the new investigatorPK
@@ -107,7 +110,7 @@ public class Investigator implements Serializable {
     public void setInvestigatorPK(InvestigatorPK investigatorPK) {
         this.investigatorPK = investigatorPK;
     }
-
+    
     /**
      * Gets the modTime of this Investigator.
      * @return the modTime
@@ -115,7 +118,7 @@ public class Investigator implements Serializable {
     public Date getModTime() {
         return this.modTime;
     }
-
+    
     /**
      * Sets the modTime of this Investigator to the specified value.
      * @param modTime the new modTime
@@ -123,7 +126,7 @@ public class Investigator implements Serializable {
     public void setModTime(Date modTime) {
         this.modTime = modTime;
     }
-
+    
     /**
      * Gets the modId of this Investigator.
      * @return the modId
@@ -131,7 +134,7 @@ public class Investigator implements Serializable {
     public String getModId() {
         return this.modId;
     }
-
+    
     /**
      * Sets the modId of this Investigator to the specified value.
      * @param modId the new modId
@@ -139,7 +142,7 @@ public class Investigator implements Serializable {
     public void setModId(String modId) {
         this.modId = modId;
     }
-
+    
     /**
      * Gets the facilityUser of this Investigator.
      * @return the facilityUser
@@ -147,7 +150,7 @@ public class Investigator implements Serializable {
     public FacilityUser getFacilityUser() {
         return this.facilityUser;
     }
-
+    
     /**
      * Sets the facilityUser of this Investigator to the specified value.
      * @param facilityUser the new facilityUser
@@ -155,7 +158,23 @@ public class Investigator implements Serializable {
     public void setFacilityUser(FacilityUser facilityUser) {
         this.facilityUser = facilityUser;
     }
-
+    
+    /**
+     * Gets the role of this FacilityUser.
+     * @return the role
+     */
+    public String getRole() {
+        return this.role;
+    }
+    
+    /**
+     * Sets the role of this FacilityUser to the specified value.
+     * @param role the new role
+     */
+    public void setRole(String role) {
+        this.role = role;
+    }
+    
     /**
      * Gets the investigation of this Investigator.
      * @return the investigation
@@ -163,7 +182,7 @@ public class Investigator implements Serializable {
     public Investigation getInvestigation() {
         return this.investigation;
     }
-
+    
     /**
      * Sets the investigation of this Investigator to the specified value.
      * @param investigation the new investigation
@@ -171,9 +190,9 @@ public class Investigator implements Serializable {
     public void setInvestigation(Investigation investigation) {
         this.investigation = investigation;
     }
-
+    
     /**
-     * Returns a hash code value for the object.  This implementation computes 
+     * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
      */
@@ -183,10 +202,10 @@ public class Investigator implements Serializable {
         hash += (this.investigatorPK != null ? this.investigatorPK.hashCode() : 0);
         return hash;
     }
-
+    
     /**
-     * Determines whether another object is equal to this Investigator.  The result is 
-     * <code>true</code> if and only if the argument is not null and is a Investigator object that 
+     * Determines whether another object is equal to this Investigator.  The result is
+     * <code>true</code> if and only if the argument is not null and is a Investigator object that
      * has the same id field values as this object.
      * @param object the reference object with which to compare
      * @return <code>true</code> if this object is the same as the argument;
@@ -202,9 +221,9 @@ public class Investigator implements Serializable {
         if (this.investigatorPK != other.investigatorPK && (this.investigatorPK == null || !this.investigatorPK.equals(other.investigatorPK))) return false;
         return true;
     }
-
+    
     /**
-     * Returns a string representation of the object.  This implementation constructs 
+     * Returns a string representation of the object.  This implementation constructs
      * that representation based on the id fields.
      * @return a string representation of the object.
      */

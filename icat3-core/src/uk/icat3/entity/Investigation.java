@@ -627,6 +627,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
                 }
             }
         }
+        
         //ok here
         return super.isValid();
     }

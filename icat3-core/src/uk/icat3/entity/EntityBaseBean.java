@@ -79,6 +79,7 @@ public class EntityBaseBean {
         if(getDeleted() != null && getDeleted().equalsIgnoreCase("Y")) return true;
         else return fasle;
     }*/
+      
     
     /**
      * Method to be overridden if needed to check if the data held in the entity is valid.
@@ -116,7 +117,7 @@ public class EntityBaseBean {
             }
         }
         //ok here
-        return true;
+       return true;       
     }
     
     /**

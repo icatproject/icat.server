@@ -38,7 +38,6 @@ import javax.persistence.TemporalType;
         @NamedQuery(name = "FacilityUser.findByFirstName", query = "SELECT f FROM FacilityUser f WHERE f.firstName = :firstName"),
         @NamedQuery(name = "FacilityUser.findByMiddleName", query = "SELECT f FROM FacilityUser f WHERE f.middleName = :middleName"),
         @NamedQuery(name = "FacilityUser.findByLastName", query = "SELECT f FROM FacilityUser f WHERE f.lastName = :lastName"),
-        @NamedQuery(name = "FacilityUser.findByRole", query = "SELECT f FROM FacilityUser f WHERE f.role = :role"),
         @NamedQuery(name = "FacilityUser.findByModTime", query = "SELECT f FROM FacilityUser f WHERE f.modTime = :modTime"),
         @NamedQuery(name = "FacilityUser.findByModId", query = "SELECT f FROM FacilityUser f WHERE f.modId = :modId")
     })
@@ -65,10 +64,7 @@ public class FacilityUser implements Serializable {
 
     @Column(name = "LAST_NAME")
     private String lastName;
-
-    @Column(name = "ROLE")
-    private String role;
-
+   
     @Column(name = "MOD_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date modTime;
@@ -214,23 +210,7 @@ public class FacilityUser implements Serializable {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
-
-    /**
-     * Gets the role of this FacilityUser.
-     * @return the role
-     */
-    public String getRole() {
-        return this.role;
-    }
-
-    /**
-     * Sets the role of this FacilityUser to the specified value.
-     * @param role the new role
-     */
-    public void setRole(String role) {
-        this.role = role;
-    }
-
+   
     /**
      * Gets the modTime of this FacilityUser.
      * @return the modTime
