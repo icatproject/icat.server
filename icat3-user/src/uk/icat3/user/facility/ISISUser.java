@@ -4,6 +4,7 @@ import com.cclrc.ral.isis.userdb.session.userdb.PersonDetailsDTO;
 import com.cclrc.ral.isis.userdb.session.userdb.UserDBFacade;
 import com.cclrc.ral.isis.userdb.session.userdb.UserDBFacadeHome;
 import java.util.Hashtable;
+import javax.management.Notification;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -36,15 +37,15 @@ public class ISISUser implements User {
     public ISISUser() throws LoginException {
         try {
             Context context = getInitialContext();
-            UserDBFacadeHome userDBFacadeHome = (UserDBFacadeHome)PortableRemoteObject.narrow(context.lookup("ejb/userdb/UserDBFacade"), UserDBFacadeHome.class);                
-            userDBFacade = userDBFacadeHome.create();      
+            UserDBFacadeHome userDBFacadeHome = (UserDBFacadeHome)PortableRemoteObject.narrow(context.lookup("ejb/userdb/UserDBFacade"), UserDBFacadeHome.class);
+            userDBFacade = userDBFacadeHome.create();
         } catch (Exception e) {
             log.error(e);
             throw new LoginException("Unable to establish connection to ISIS User database");
         }//end try/catch
-    }      
+    }
     
-    public String getUserIdFromSessionId (String sessionId) throws LoginException {        
+    public String getUserIdFromSessionId(String sessionId) throws LoginException {
         Long userNum = null;
         try {
             userNum = userDBFacade.getUserNumberFromSessionId(sessionId);
@@ -53,26 +54,26 @@ public class ISISUser implements User {
             log.error(e);
             throw new LoginException("Unable to retrieve userid/distinguished name from ISIS user database using sessionId '" + sessionId + "'. Please try logging in again." );
         }//end try/catch
-       return userNum.toString(); 
+        return userNum.toString();
     }
     
-    public String login (String username, String password) throws LoginException {              
-      String token = null;      
-      try {          
-          token = userDBFacade.login(username, password);                    
-      } catch (Exception e) { 
-          log.error(e);
-          throw new LoginException("Invalid login credentials provided by user");
-      }//end try/catch
-      
-       return token;
+    public String login(String username, String password) throws LoginException {
+        String token = null;
+        try {
+            token = userDBFacade.login(username, password);
+        } catch (Exception e) {
+            log.error(e);
+            throw new LoginException("Invalid login credentials provided by user");
+        }//end try/catch
+        
+        return token;
     }
     
-    public void logout (String sessionId) {
+    public void logout(String sessionId) {
         try {
             userDBFacade.logout(sessionId);
         } catch (Exception e) {
-            log.warn(e);          
+            log.warn(e);
         }//end try/catch
     }
     
@@ -104,10 +105,26 @@ public class ISISUser implements User {
     }
     
     private static Context getInitialContext() throws NamingException {
-        Hashtable env = new Hashtable();        
-        env.put(Context.INITIAL_CONTEXT_FACTORY, "org.jnp.interfaces.NamingContextFactory");        
-        env.put(Context.PROVIDER_URL, "localhost");        
+        Hashtable env = new Hashtable();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "org.jnp.interfaces.NamingContextFactory");
+        env.put(Context.PROVIDER_URL, "localhost");
         env.put(Context.URL_PKG_PREFIXES, "org.jboss.naming:org.jnp.interfaces" );
         return new InitialContext(env);
-  }
+    }
+    
+    /**
+     * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
+     * will never be support by the ISIS implementation
+     */
+    public String login(String adminUsername, String AdminPassword, String runAsUser) throws LoginException {
+        throw new UnsupportedOperationException("Method not supported.");
+    }
+    
+    /**
+     * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
+     * will never be support by the ISIS implementation
+     */
+    public String login(String credential) throws LoginException {
+        throw new UnsupportedOperationException("Method not supported.");
+    }
 }
