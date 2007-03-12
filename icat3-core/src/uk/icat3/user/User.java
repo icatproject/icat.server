@@ -52,6 +52,38 @@ public interface User {
     public String login (String username, String password) throws LoginException;
     
     /**
+     * Returns a sessionId (authenitcation token) to a user after verification
+     * of correct admin username and password combination.  If user does not provide 
+     * the correct login credentials a {@link LoginException} will be thrown.  
+     * This login method allows an admin user, on behalf of another user, to
+     * perform their operations.
+     *
+     * @param adminUsername admin username of user
+     * @param AdminPassword admin password of user
+     * @param runAsUser user the admin wants the operations to be performed as
+     * @return sessionId authentication token that user can use in corresponding
+     *                   methods calls without having to provide username and
+     *                   password each time.
+     * @throws LoginException   if user provides an invalid admin username and password
+     *                          combination.
+     */
+    public String login (String adminUsername, String AdminPassword, String runAsUser) throws LoginException;
+    
+        /**
+     * Returns a sessionId (authenitcation token) to a user after verification
+     * of a string representation of a x509 proxy credential.  If user does not provide 
+     * the correct login credentials a {@link LoginException} will be thrown, i.e
+     * the cerfificate is invalid, not trusted, expired etc.
+     *    
+     * @param credential of user, string format
+     * @return sessionId authentication token that user can use in corresponding
+     *                   methods calls without having to provide a credential
+     *                   each time.
+     * @throws LoginException   if user provides an invalid credentials.
+     */
+    public String login(String credential) throws LoginException;
+    
+    /**
      * Removes sessionId authentication token from user database which
      * effectively logs user out of the system.  Any further attempt to
      * use the icat3 api with an 'old' sessionId will fail as it will
