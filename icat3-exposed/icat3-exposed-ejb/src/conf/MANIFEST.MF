@@ -1,2 +1,2 @@
 Manifest-Version: 1.0
-Class-Path: icat3-core.jar icat3-user-default.jar log4j-1.2.13.jar
+Class-Path: icat3-core.jar icat3-default-user.jar 
