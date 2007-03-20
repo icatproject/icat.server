@@ -70,7 +70,7 @@ public abstract class EJBObject {
     /**
      * AOP all method, log time of method call.
      */
-    @AroundInvoke
+ //   @AroundInvoke
     public Object logMethods(InvocationContext ctx)
     throws Exception {
         

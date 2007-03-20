@@ -19,6 +19,5 @@ public interface SearchLocal {
     
     public Collection<java.lang.Long> searchByKeywordsRtnId(String sessionId, String keyword, InvestigationInclude include) throws LoginException;
     
-    public String login(String username, String password) throws LoginException ;    
-    
+     
 }
