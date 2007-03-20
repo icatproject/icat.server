@@ -11,12 +11,18 @@ package uk.icat3.sessionbeans.search;
 
 import java.util.Collection;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Investigation;
+import uk.icat3.exceptions.LoginException;
 import uk.icat3.search.InvestigationSearch;
 import uk.icat3.sessionbeans.EJBObject;
+import uk.icat3.user.UserManager;
+import uk.icat3.userdefault.exception.LoginError;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 
@@ -39,31 +45,43 @@ public class Search extends EJBObject implements SearchLocal {
      * @return
      */
     @WebMethod
-    public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include)  {
-        log.trace("searchByKeywords("+sessionId+", "+keywords+", EntityManager)");
-        String userId = null;
+    @TransactionAttribute(TransactionAttributeType.NEVER)
+    public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include) throws LoginException {
+        log.trace("searchByKeywords("+sessionId+", "+keywords+")");
         
         //TODO: should user UserManager and User interface here to get the userId from the sessionId
-        
-        //but force user instead
-        userId = "JAMES-JAMES";
+        UserManager userManager = new UserManager(managerUser);
+        String userId = userManager.getUserIdFromSessionId(sessionId);
         
         //now do the search using the core API
-        return InvestigationSearch.searchByKeywords(userId, keywords,LogicalOperator.AND,include,false, true,0, 100, manager);
+        return InvestigationSearch.searchByKeywords(userId, keywords,LogicalOperator.AND,include, false, true,0, 500, manager);
     }
     
-     @WebMethod
-    public Collection<Long> searchByKeywordsRtnId(String sessionId, String keyword, InvestigationInclude include)  {
-        log.trace("searchByKeywords("+sessionId+", "+keyword+", EntityManager)");
-        String userId = null;
+    @WebMethod
+    @TransactionAttribute(TransactionAttributeType.NEVER)
+    public Collection<Long> searchByKeywordsRtnId(String sessionId, String keyword, InvestigationInclude include) throws LoginException {
+        log.trace("searchByKeywords("+sessionId+", "+keyword+")");
+      
         
         //TODO: should user UserManager and User interface here to get the userId from the sessionId
-        
-        //but force user instead
-        userId = "JAMES-JAMES";
+        UserManager userManager = new UserManager(managerUser);
+        String userId = userManager.getUserIdFromSessionId(sessionId);
         
         //now do the search using the core API
         return InvestigationSearch.searchByKeywordRtnId(userId, keyword, manager);
+    }
+    
+    @WebMethod
+    @TransactionAttribute(TransactionAttributeType.NEVER)
+    public String login(String username, String password) throws LoginException {
+        log.trace("login("+username+", "+password+")");
+      
+        
+        //TODO: should user UserManager and User interface here to get the userId from the sessionId
+        UserManager userManager = new UserManager(managerUser);
+        String sessionId = userManager.login(username,password);
+        
+        return sessionId;
     }
     
     
