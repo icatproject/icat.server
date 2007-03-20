@@ -127,4 +127,8 @@ public class ISISUser implements User {
     public String login(String credential) throws LoginException {
         throw new UnsupportedOperationException("Method not supported.");
     }
+    
+    public String login(String username, String password, int lifetime) throws LoginException {
+        throw new UnsupportedOperationException("Method not supported.");
+    }
 }
