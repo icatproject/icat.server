@@ -52,16 +52,21 @@ public class DefaultUser implements User{
             
             //is valid
             if(session.getExpireDateTime().before(new Date())) throw new LoginException(sessionId+" has expired");
-            
+          
             //check if session id is running as admin, if so, return runAs userId
             if(session.isAdmin()){
+                log.debug("user: "+session.getRunAs()+" is associated with: "+sessionId);
                 return session.getRunAs();
             } else {
+                log.debug("user: "+session.getUserId().getUserId()+" is associated with: "+sessionId);
                 return session.getUserId().getUserId();
             }
             
         } catch(NoResultException ex) {
             throw new LoginException("Invalid sessionid: "+sessionId);
+        } catch(LoginException ex) {
+            log.warn(sessionId+" has expired");
+            throw ex;
         } catch(Exception ex) {
             if(ex instanceof LoginException) throw (LoginException)ex;
             else throw new LoginException("Unable to find user by sessionid: "+sessionId);
@@ -86,6 +91,7 @@ public class DefaultUser implements User{
             //insert proxy into DB
             String sid = insertSessionImpl(username, myproxy_proxy);
             
+            log.info("Logged in for user: "+username+" with sessionid:" +sid);
             return sid;
             
         } catch(NoResultException ex) {
@@ -150,6 +156,8 @@ public class DefaultUser implements User{
         
         user.addSession(session);
         manager.persist(session);
+        
+        log.info("Logged in for user: "+runAsUser+" running as admin with sessionid:" +sid);
         
         return sid;
         

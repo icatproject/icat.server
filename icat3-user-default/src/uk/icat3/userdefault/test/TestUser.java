@@ -140,12 +140,12 @@ public class TestUser {
         TestUser tu = new TestUser();
         
         for(int i = 0; i < 1; i++){
-               //  tu.login("glen","kkkkkk",2);
+                 tu.login("glen","kkkkkk",2);
         }
         // tu.insertSession();
        // tu.logout("18c7f182-031f-42c2-a351-bf3ef3f7484e");
         
-        tu.getUserId("ad38ced4-6e7d-4df6-b6b4-a893d3826d8c");
+       // tu.getUserId("ad38ced4-6e7d-4df6-b6b4-a893d3826d8c");
         //tu.loginAdmin("admin","password","bob");
     }
 }
