@@ -60,7 +60,6 @@ public class ManagerUtil {
                     dataset.getDatafileCollection().size();
                 }
             }
-            
             // return datasets with these investigations
         } else if(include.toString().equals(InvestigationInclude.DATASETS_ONLY.toString())){
             for(Investigation investigation : investigations){
@@ -97,8 +96,19 @@ public class ManagerUtil {
         } else {
             log.trace("No additional info requested.");
         }
-    }
         
+        //set the investigation includes in the class
+        for(Investigation investigation : investigations){
+            investigation.setInvestigationInclude(include);
+            if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString()) || include.toString().equals(InvestigationInclude.ALL.toString())){                
+                for(Dataset dataset : investigation.getDatasetCollection()){
+                    log.trace("Setting data sets to include: "+DatasetInclude.DATASET_FILES_AND_PARAMETERS);
+                    dataset.setDatasetInclude(DatasetInclude.DATASET_FILES_AND_PARAMETERS);
+                }
+            }            
+        }
+    }
+    
     /**
      * Goes and collects the information associated with the dataset depending on the DatasetInclude.
      * <br /><br />
@@ -131,7 +141,7 @@ public class ManagerUtil {
                 //size invokes the JPA to get the information, other wise the collections are null
                 dataset.getDatasetParameterCollection().size();
             }
-        }        
+        }
     }
     
     /**
@@ -150,7 +160,7 @@ public class ManagerUtil {
         
         log.trace("Investigation: id: "+investigationId+" exists in the database");
         
-        return investigation;        
+        return investigation;
     }
     
     /**
@@ -189,5 +199,5 @@ public class ManagerUtil {
         log.trace("DataFile: id: "+dataFileId+" exists in the database");
         
         return dataFile;
-    }    
+    }
 }
