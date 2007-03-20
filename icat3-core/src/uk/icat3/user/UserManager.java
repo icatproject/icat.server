@@ -58,6 +58,14 @@ public class UserManager implements User {
       }
       return object;
    }
+
+    public String login(String adminUsername, String AdminPassword, String runAsUser) throws LoginException {
+        return this.user.login(adminUsername, AdminPassword, runAsUser);
+    }
+
+    public String login(String credential) throws LoginException {
+        return this.user.login(credential);
+    }
     
 }
 
