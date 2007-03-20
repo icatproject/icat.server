@@ -69,11 +69,13 @@ public class ISISUser implements User {
         return token;
     }
     
-    public void logout(String sessionId) {
+    public boolean logout(String sessionId) {
         try {
             userDBFacade.logout(sessionId);
+            return true;
         } catch (Exception e) {
             log.warn(e);
+            return false;
         }//end try/catch
     }
     
