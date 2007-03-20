@@ -64,6 +64,9 @@ public class DefaultUser implements User{
             
         } catch(NoResultException ex) {
             throw new LoginException("Invalid sessionid: "+sessionId);
+        }catch(LoginException ex) {
+            log.warn(sessionId+" has expired");
+            throw ex
         } catch(Exception ex) {
             if(ex instanceof LoginException) throw (LoginException)ex;
             else throw new LoginException("Unable to find user by sessionid: "+sessionId);
