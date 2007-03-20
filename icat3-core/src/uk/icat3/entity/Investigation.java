@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityResult;
@@ -33,8 +34,12 @@ import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.search.InvestigationSearch;
+import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.Queries;
 
 /**
@@ -78,9 +83,10 @@ import uk.icat3.util.Queries;
 })
 @SqlResultSetMappings({
     @SqlResultSetMapping(name="investigationMapping",entities={@EntityResult(entityClass=Investigation.class)}),
-    @SqlResultSetMapping(name="investigationIdMapping",entities={@EntityResult(entityClass=Long.class)})
+    @SqlResultSetMapping(name="investigationIdMapping",columns={@ColumnResult(name="ID")})
     
 })
+@XmlRootElement
 public class Investigation extends EntityBaseBean implements Serializable {
     
     @Id
@@ -153,6 +159,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<TopicList> topicListCollection;
+    
+    private transient InvestigationInclude investigationInclude = InvestigationInclude.NONE;
     
     /** Creates a new instance of Investigation */
     public Investigation() {
@@ -346,6 +354,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the publicationCollection of this Investigation.
      * @return the publicationCollection
      */
+    @XmlTransient
     public Collection<Publication> getPublicationCollection() {
         return this.publicationCollection;
     }
@@ -362,6 +371,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the sampleCollection of this Investigation.
      * @return the sampleCollection
      */
+    @XmlTransient
     public Collection<Sample> getSampleCollection() {
         return this.sampleCollection;
     }
@@ -378,6 +388,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the facilityCycle of this Investigation.
      * @return the facilityCycle
      */
+    
     public FacilityCycle getFacilityCycle() {
         return this.facilityCycle;
     }
@@ -394,6 +405,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the instrument of this Investigation.
      * @return the instrument
      */
+    
     public Instrument getInstrument() {
         return this.instrument;
     }
@@ -426,8 +438,28 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the datasetCollection of this Investigation.
      * @return the datasetCollection
      */
+    @XmlTransient
     public Collection<Dataset> getDatasetCollection() {
         return this.datasetCollection;
+    }
+    
+    /**
+     * This method is used by JAXWS to map to datasetCollection.  Depending on what the include is
+     * set to depends on what is returned to JAXWS and serialised into XML.  This is because without
+     * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+     * DB hits and serialisation).
+     */
+    @XmlElement(name="datasetCollection")
+    private Collection<Dataset> getDatasetCollection_() {
+        if(investigationInclude.toString().equals(investigationInclude.DATASETS_ONLY.toString())){
+            return this.datasetCollection;
+        } else if(investigationInclude.toString().equals(investigationInclude.ALL.toString())){
+            return this.datasetCollection;
+        }  else return null;
+    }
+    
+    private void setDatasetCollection_(Collection<Dataset> datasetCollection) {
+        this.datasetCollection = datasetCollection;
     }
     
     /**
@@ -457,6 +489,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the shiftCollection of this Investigation.
      * @return the shiftCollection
      */
+    @XmlTransient
     public Collection<Shift> getShiftCollection() {
         return this.shiftCollection;
     }
@@ -473,8 +506,30 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the keywordCollection of this Investigation.
      * @return the keywordCollection
      */
+    @XmlTransient //do not turn into XML
     public Collection<Keyword> getKeywordCollection() {
         return this.keywordCollection;
+    }
+    
+    /**
+     * This method is used by JAXWS to map to keywordCollection.  Depending on what the include is
+     * set to depends on what is returned to JAXWS and serialised into XML.  This is because without
+     * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+     * DB hits and serialisation).
+     */
+    @XmlElement(name="keywordCollection")
+    private Collection<Keyword> getKeywordCollection_() {
+        if(investigationInclude.toString().equals(investigationInclude.KEYWORDS_ONLY.toString())){
+            return this.keywordCollection;
+        } else if(investigationInclude.toString().equals(investigationInclude.ALL.toString())){
+            return this.keywordCollection;
+        } if(investigationInclude.toString().equals(investigationInclude.INVESTIGATORS_AND_KEYWORDS.toString())){
+            return this.keywordCollection;
+        }  else return null;
+    }
+    
+    private void setKeywordCollection_(Collection<Keyword> keywordCollection) {
+        this.keywordCollection = keywordCollection;
     }
     
     /**
@@ -489,6 +544,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the studyInvestigationCollection of this Investigation.
      * @return the studyInvestigationCollection
      */
+    @XmlTransient
     public Collection<StudyInvestigation> getStudyInvestigationCollection() {
         return this.studyInvestigationCollection;
     }
@@ -505,6 +561,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the investigationLevelPermissionCollection of this Investigation.
      * @return the investigationLevelPermissionCollection
      */
+    @XmlTransient
     public Collection<InvestigationLevelPermission> getInvestigationLevelPermissionCollection() {
         return this.investigationLevelPermissionCollection;
     }
@@ -521,8 +578,33 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the investigatorCollection of this Investigation.
      * @return the investigatorCollection
      */
+    @XmlTransient
     public Collection<Investigator> getInvestigatorCollection() {
         return this.investigatorCollection;
+    }
+    
+    /**
+     * This method is used by JAXWS to map to investigatorCollection.  Depending on what the include is
+     * set to depends on what is returned to JAXWS and serialised into XML.  This is because without
+     * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+     * DB hits and serialisation).
+     */
+    @XmlElement(name="investigatorCollection")
+    private Collection<Investigator> getInvestigatorCollection_() {
+        if(investigationInclude.toString().equals(investigationInclude.INVESTIGATORS_ONLY.toString())){
+            return this.investigatorCollection;
+            //return null;
+        } else if(investigationInclude.toString().equals(investigationInclude.ALL.toString())){
+            return this.investigatorCollection;
+            //return null;
+        } if(investigationInclude.toString().equals(investigationInclude.INVESTIGATORS_AND_KEYWORDS.toString())){
+            return this.investigatorCollection;
+            //return null;
+        }  else return null;
+    }
+    
+    private void setInvestigatorCollection_(Collection<Investigator> investigatorCollection) {
+        this.investigatorCollection = investigatorCollection;
     }
     
     /**
@@ -537,6 +619,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the topicListCollection of this Investigation.
      * @return the topicListCollection
      */
+    @XmlTransient
     public Collection<TopicList> getTopicListCollection() {
         return this.topicListCollection;
     }
@@ -720,5 +803,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
         
         //if reached here investigation is valid
         return isValid();
+    }
+    
+    
+    public void setInvestigationInclude(InvestigationInclude investigationInclude) {
+        this.investigationInclude = investigationInclude;
     }
 }

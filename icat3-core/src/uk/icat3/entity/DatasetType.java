@@ -22,6 +22,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class DatasetType
@@ -53,6 +54,7 @@ public class DatasetType extends EntityBaseBean implements Serializable {
     private String modId;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetType")
+     @XmlTransient
     private Collection<Dataset> datasetCollection;
     
     /** Creates a new instance of DatasetType */
@@ -147,6 +149,7 @@ public class DatasetType extends EntityBaseBean implements Serializable {
      * Gets the datasetCollection of this DatasetType.
      * @return the datasetCollection
      */
+     @XmlTransient
     public Collection<Dataset> getDatasetCollection() {
         return this.datasetCollection;
     }

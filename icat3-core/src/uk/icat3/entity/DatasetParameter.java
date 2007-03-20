@@ -23,6 +23,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
 
 /**
@@ -76,6 +77,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     
     @JoinColumn(name = "DATASET_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
+    @XmlTransient    
     private Dataset dataset;
     
     @JoinColumns(value =  {
@@ -251,6 +253,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
      * Gets the dataset of this DatasetParameter.
      * @return the dataset
      */
+     @XmlTransient
     public Dataset getDataset() {
         return this.dataset;
     }

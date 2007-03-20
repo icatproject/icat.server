@@ -10,7 +10,6 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,8 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class Publication
@@ -62,6 +60,7 @@ public class Publication extends EntityBaseBean implements Serializable {
 
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID")
     @ManyToOne
+    @XmlTransient
     private Investigation investigationId;
     
     /** Creates a new instance of Publication */
@@ -192,6 +191,7 @@ public class Publication extends EntityBaseBean implements Serializable {
      * Gets the investigationId of this Publication.
      * @return the investigationId
      */
+     @XmlTransient
     public Investigation getInvestigationId() {
         return this.investigationId;
     }

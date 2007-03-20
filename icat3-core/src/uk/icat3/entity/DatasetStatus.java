@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class DatasetStatus
@@ -52,6 +53,7 @@ public class DatasetStatus extends EntityBaseBean implements Serializable {
     private String modId;
 
     @OneToMany(mappedBy = "datasetStatus")
+    @XmlTransient
     private Collection<Dataset> datasetCollection;
     
     /** Creates a new instance of DatasetStatus */
@@ -146,6 +148,7 @@ public class DatasetStatus extends EntityBaseBean implements Serializable {
      * Gets the datasetCollection of this DatasetStatus.
      * @return the datasetCollection
      */
+     @XmlTransient
     public Collection<Dataset> getDatasetCollection() {
         return this.datasetCollection;
     }

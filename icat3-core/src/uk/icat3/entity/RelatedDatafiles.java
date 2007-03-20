@@ -10,7 +10,6 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -20,8 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class RelatedDatafiles
@@ -53,10 +51,12 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
 
     @JoinColumn(name = "DEST_DATAFILE_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
+    @XmlTransient
     private Datafile datafile;
 
     @JoinColumn(name = "SOURCE_DATAFILE_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
+    @XmlTransient
     private Datafile datafile1;
     
     /** Creates a new instance of RelatedDatafiles */
@@ -146,6 +146,7 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
      * Gets the datafile of this RelatedDatafiles.
      * @return the datafile
      */
+     @XmlTransient
     public Datafile getDatafile() {
         return this.datafile;
     }
@@ -162,6 +163,7 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
      * Gets the datafile1 of this RelatedDatafiles.
      * @return the datafile1
      */
+     @XmlTransient
     public Datafile getDatafile1() {
         return this.datafile1;
     }

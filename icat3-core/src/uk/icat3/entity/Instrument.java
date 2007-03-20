@@ -12,17 +12,14 @@ package uk.icat3.entity;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.util.Queries;
 /**
  * Entity class Instrument
@@ -57,6 +54,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     private String modId;
     
     @OneToMany(mappedBy = "instrument")
+     @XmlTransient
     private Collection<Investigation> investigationCollection;
     
     
@@ -152,6 +150,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
      * Gets the investigationCollection of this Instrument.
      * @return the investigationCollection
      */
+     @XmlTransient
     public Collection<Investigation> getInvestigationCollection() {
         return this.investigationCollection;
     }

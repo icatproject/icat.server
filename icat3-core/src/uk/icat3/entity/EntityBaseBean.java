@@ -39,11 +39,11 @@ public class EntityBaseBean {
     @Temporal(TemporalType.TIMESTAMP)
     protected Date modTime;
     
-    @Column(name = "CREATE_ID", nullable = false)
-    protected String createId;
+    //@Column(name = "CREATE_ID", nullable = false)
+    protected transient String createId;
     
-    @Column(name = "DELETED", nullable = false )
-    protected String deleted;
+  //  @Column(name = "DELETED", nullable = false )
+    protected transient String deleted;
     
     /**
      * Gets the modTime of this DatafileFormat.

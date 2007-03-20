@@ -35,6 +35,8 @@ import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
 
 /**
@@ -74,6 +76,7 @@ import uk.icat3.exceptions.ValidationException;
     @SqlResultSetMapping(name="dataFileMapping",entities={@EntityResult(entityClass=Datafile.class)})
     
 })
+@XmlRootElement
 public class Datafile extends EntityBaseBean implements Serializable {
     
     @Id
@@ -134,6 +137,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
     
     @JoinColumn(name = "DATASET_ID", referencedColumnName = "ID")
     @ManyToOne
+    @XmlTransient
     private Dataset datasetId;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
@@ -423,6 +427,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
      * Gets the datasetId of this Datafile.
      * @return the datasetId
      */
+     @XmlTransient
     public Dataset getDatasetId() {
         return this.datasetId;
     }

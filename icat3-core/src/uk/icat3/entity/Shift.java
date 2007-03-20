@@ -10,7 +10,6 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -22,6 +21,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class Shift
@@ -58,6 +58,7 @@ public class Shift extends EntityBaseBean implements Serializable {
 
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
+    @XmlTransient
     private Investigation investigation;
     
     /** Creates a new instance of Shift */
@@ -162,6 +163,7 @@ public class Shift extends EntityBaseBean implements Serializable {
      * Gets the investigation of this Shift.
      * @return the investigation
      */
+     @XmlTransient
     public Investigation getInvestigation() {
         return this.investigation;
     }

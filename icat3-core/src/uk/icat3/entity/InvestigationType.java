@@ -22,6 +22,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class InvestigationType
@@ -53,6 +54,7 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
     private String modId;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "invType")
+     @XmlTransient
     private Collection<Investigation> investigationCollection;
     
     /** Creates a new instance of InvestigationType */
@@ -147,6 +149,7 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
      * Gets the investigationCollection of this InvestigationType.
      * @return the investigationCollection
      */
+     @XmlTransient
     public Collection<Investigation> getInvestigationCollection() {
         return this.investigationCollection;
     }

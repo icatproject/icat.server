@@ -19,8 +19,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class DatafileFormat
@@ -55,6 +54,7 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
     private String modId;
 
     @OneToMany(mappedBy = "datafileFormat")
+     @XmlTransient
     private Collection<Datafile> datafileCollection;
     
     /** Creates a new instance of DatafileFormat */
@@ -159,6 +159,7 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
      * Gets the datafileCollection of this DatafileFormat.
      * @return the datafileCollection
      */
+     @XmlTransient
     public Collection<Datafile> getDatafileCollection() {
         return this.datafileCollection;
     }

@@ -27,8 +27,11 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
-import uk.icat3.search.InvestigationSearch;
+import uk.icat3.util.DatasetInclude;
 
 /**
  * Entity class Dataset
@@ -45,6 +48,7 @@ import uk.icat3.search.InvestigationSearch;
     @NamedQuery(name = "Dataset.findByModTime", query = "SELECT d FROM Dataset d WHERE d.modTime = :modTime"),
     @NamedQuery(name = "Dataset.findByModId", query = "SELECT d FROM Dataset d WHERE d.modId = :modId")
 })
+@XmlRootElement
 public class Dataset extends EntityBaseBean implements Serializable {
     
     @Id
@@ -74,6 +78,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
     
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID")
     @ManyToOne
+    @XmlTransient
     private Investigation investigationId;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
@@ -84,6 +89,8 @@ public class Dataset extends EntityBaseBean implements Serializable {
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetId")
     private Collection<DatasetLevelPermission> datasetLevelPermissionCollection;
+    
+    private transient DatasetInclude datasetInclude = DatasetInclude.NONE;
     
     /** Creates a new instance of Dataset */
     public Dataset() {
@@ -227,6 +234,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
      * Gets the investigationId of this Dataset.
      * @return the investigationId
      */
+    @XmlTransient
     public Investigation getInvestigationId() {
         return this.investigationId;
     }
@@ -243,8 +251,28 @@ public class Dataset extends EntityBaseBean implements Serializable {
      * Gets the datasetParameterCollection of this Dataset.
      * @return the datasetParameterCollection
      */
+    @XmlTransient
     public Collection<DatasetParameter> getDatasetParameterCollection() {
         return this.datasetParameterCollection;
+    }
+    
+    /**
+     * This method is used by JAXWS to map to datasetParameterCollection.  Depending on what the include is
+     * set to depends on what is returned to JAXWS and serialised into XML.  This is because without
+     * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+     * DB hits and serialisation).
+     */
+    @XmlElement(name="datasetParameterCollection")
+    private Collection<DatasetParameter> getDatasetParameterCollection_() {
+        if(datasetInclude.toString().equals(DatasetInclude.DATASET_FILES_AND_PARAMETERS.toString())){
+            return this.datasetParameterCollection;
+        } else if(datasetInclude.toString().equals(DatasetInclude.DATASET_PARAMETERS_ONY.toString())){
+            return this.datasetParameterCollection;
+        }  else return null;
+    }
+    
+    private void setDatasetParameterCollection_(Collection<DatasetParameter> datasetParameterCollection) {
+        this.datasetParameterCollection = datasetParameterCollection;
     }
     
     /**
@@ -259,8 +287,28 @@ public class Dataset extends EntityBaseBean implements Serializable {
      * Gets the datafileCollection of this Dataset.
      * @return the datafileCollection
      */
+    @XmlTransient
     public Collection<Datafile> getDatafileCollection() {
         return this.datafileCollection;
+    }
+    
+    /**
+     * This method is used by JAXWS to map to datafileCollection.  Depending on what the include is
+     * set to depends on what is returned to JAXWS and serialised into XML.  This is because without
+     * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+     * DB hits and serialisation).
+     */
+    @XmlElement(name="datafileCollection")
+    private Collection<Datafile> getDatafileCollection_() {
+        if(datasetInclude.toString().equals(DatasetInclude.DATASET_FILES_AND_PARAMETERS.toString())){
+            return this.datafileCollection;
+        } else if(datasetInclude.toString().equals(DatasetInclude.DATASET_FILES_ONLY.toString())){
+            return this.datafileCollection;
+        }  else return null;
+    }
+    
+    private void setDatafileCollection_(Collection<Datafile> datafileCollection) {
+        this.datafileCollection = datafileCollection;
     }
     
     /**
@@ -289,6 +337,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
      * Gets the datasetLevelPermissionCollection of this Dataset.
      * @return the datasetLevelPermissionCollection
      */
+    @XmlTransient
     public Collection<DatasetLevelPermission> getDatasetLevelPermissionCollection() {
         return this.datasetLevelPermissionCollection;
     }
@@ -301,10 +350,10 @@ public class Dataset extends EntityBaseBean implements Serializable {
         this.datasetLevelPermissionCollection = datasetLevelPermissionCollection;
     }
     
-     /**
+    /**
      * Sets deleted flag on all items owned by this datasets
      *
-     * @param isDeleted 
+     * @param isDeleted
      */
     public void setCascadeDeleted(boolean isDeleted){
         log.trace("Setting: "+toString()+" to deleted? "+isDeleted);
@@ -319,16 +368,16 @@ public class Dataset extends EntityBaseBean implements Serializable {
         for(Datafile datafile : getDatafileCollection()){
             datafile.setCascadeDeleted(isDeleted);
         }
-               
+        
         //access groups
         for(DatasetLevelPermission datasetLevelPermission : getDatasetLevelPermissionCollection()){
             datasetLevelPermission.setDeleted(deleted);
-            for(AccessGroupDlp agdlp : datasetLevelPermission.getAccessGroupDlpCollection()){                
+            for(AccessGroupDlp agdlp : datasetLevelPermission.getAccessGroupDlpCollection()){
                 agdlp.setDeleted(deleted);
             }
-        }       
+        }
         
-        this.setDeleted(deleted);       
+        this.setDeleted(deleted);
     }
     
     /**
@@ -432,7 +481,12 @@ public class Dataset extends EntityBaseBean implements Serializable {
         for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
             datasetParameter.isValid(manager);
         }
-               
+        
         return isValid();
+    }
+    
+    
+    public void setDatasetInclude(DatasetInclude datasetInclude) {
+        this.datasetInclude = datasetInclude;
     }
 }

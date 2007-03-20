@@ -25,8 +25,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.SqlResultSetMapping;
 import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.util.Queries;
 
 /**
@@ -73,6 +72,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
     
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
+    @XmlTransient
     private Investigation investigation;
     
     /** Creates a new instance of Keyword */
@@ -145,6 +145,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
      * Gets the investigation of this Keyword.
      * @return the investigation
      */
+     @XmlTransient
     public Investigation getInvestigation() {
         return this.investigation;
     }

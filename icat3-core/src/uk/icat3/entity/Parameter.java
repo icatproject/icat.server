@@ -22,6 +22,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class Parameter
@@ -80,12 +81,15 @@ public class Parameter extends EntityBaseBean implements Serializable {
     private String modId;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "parameter")
+    @XmlTransient
     private Collection<DatasetParameter> datasetParameterCollection;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "parameter")
+    @XmlTransient
     private Collection<SampleParameter> sampleParameterCollection;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "parameter")
+    @XmlTransient
     private Collection<DatafileParameter> datafileParameterCollection;
     
     /** Creates a new instance of Parameter */
@@ -295,6 +299,7 @@ public class Parameter extends EntityBaseBean implements Serializable {
      * Gets the datasetParameterCollection of this Parameter.
      * @return the datasetParameterCollection
      */
+    @XmlTransient
     public Collection<DatasetParameter> getDatasetParameterCollection() {
         return this.datasetParameterCollection;
     }
@@ -311,6 +316,7 @@ public class Parameter extends EntityBaseBean implements Serializable {
      * Gets the sampleParameterCollection of this Parameter.
      * @return the sampleParameterCollection
      */
+    @XmlTransient
     public Collection<SampleParameter> getSampleParameterCollection() {
         return this.sampleParameterCollection;
     }
@@ -327,6 +333,7 @@ public class Parameter extends EntityBaseBean implements Serializable {
      * Gets the datafileParameterCollection of this Parameter.
      * @return the datafileParameterCollection
      */
+    @XmlTransient
     public Collection<DatafileParameter> getDatafileParameterCollection() {
         return this.datafileParameterCollection;
     }

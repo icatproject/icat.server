@@ -23,6 +23,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class Sample
@@ -67,6 +68,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID")
     @ManyToOne
+    @XmlTransient
     private Investigation investigationId;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
@@ -216,6 +218,7 @@ public class Sample extends EntityBaseBean implements Serializable {
      * Gets the investigationId of this Sample.
      * @return the investigationId
      */
+     @XmlTransient
     public Investigation getInvestigationId() {
         return this.investigationId;
     }

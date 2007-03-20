@@ -10,7 +10,6 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -20,8 +19,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class Investigator
@@ -36,6 +35,7 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "Investigator.findByModTime", query = "SELECT i FROM Investigator i WHERE i.modTime = :modTime"),
     @NamedQuery(name = "Investigator.findByModId", query = "SELECT i FROM Investigator i WHERE i.modId = :modId")
 })
+@XmlRootElement
 public class Investigator extends EntityBaseBean implements Serializable {
     
     /**
@@ -52,10 +52,12 @@ public class Investigator extends EntityBaseBean implements Serializable {
     
     @JoinColumn(name = "FACILITY_USER_ID", referencedColumnName = "FACILITY_USER_ID", insertable = false, updatable = false)
     @ManyToOne
+    @XmlTransient
     private FacilityUser facilityUser;
     
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
+    @XmlTransient
     private Investigation investigation;
     
     /** Creates a new instance of Investigator */
@@ -127,6 +129,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
      * Gets the facilityUser of this Investigator.
      * @return the facilityUser
      */
+    @XmlTransient
     public FacilityUser getFacilityUser() {
         return this.facilityUser;
     }
@@ -159,6 +162,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
      * Gets the investigation of this Investigator.
      * @return the investigation
      */
+     @XmlTransient
     public Investigation getInvestigation() {
         return this.investigation;
     }
