@@ -18,7 +18,7 @@ import uk.icat3.exceptions.NoSuchUserException;
  * <p>In order to acheive this, the icat2 api provides a contract
  * (java interface) of methods that any user database (to be used
  * by icat3) must implement.  These methods and their signatures
- * are defined below.</p> 
+ * are defined below.</p>
  *
  * @author df01
  * @version 1.0
@@ -34,11 +34,11 @@ public interface User {
      * @return userid/distinguished name of user
      * @throws LoginException  if user provides an invalid sessionId
      */
-    public String getUserIdFromSessionId (String sessionId) throws LoginException;
+    public String getUserIdFromSessionId(String sessionId) throws LoginException;
     
     /**
      * Returns a sessionId (authenitcation token) to a user after verification
-     * of correct username and password combination.  If user does not provide 
+     * of correct username and password combination.  If user does not provide
      * the correct login credentials a {@link LoginException} will be thrown.
      *
      * @param username username/dn of user
@@ -49,12 +49,13 @@ public interface User {
      * @throws LoginException   if user provides an invalid username and password
      *                          combination.
      */
-    public String login (String username, String password) throws LoginException;
+    public String login(String username, String password) throws LoginException;
+    public String login(String username, String password, int lifetime) throws LoginException;
     
     /**
      * Returns a sessionId (authenitcation token) to a user after verification
-     * of correct admin username and password combination.  If user does not provide 
-     * the correct login credentials a {@link LoginException} will be thrown.  
+     * of correct admin username and password combination.  If user does not provide
+     * the correct login credentials a {@link LoginException} will be thrown.
      * This login method allows an admin user, on behalf of another user, to
      * perform their operations.
      *
@@ -67,14 +68,14 @@ public interface User {
      * @throws LoginException   if user provides an invalid admin username and password
      *                          combination.
      */
-    public String login (String adminUsername, String AdminPassword, String runAsUser) throws LoginException;
+    public String login(String adminUsername, String AdminPassword, String runAsUser) throws LoginException;
     
-        /**
+    /**
      * Returns a sessionId (authenitcation token) to a user after verification
-     * of a string representation of a x509 proxy credential.  If user does not provide 
+     * of a string representation of a x509 proxy credential.  If user does not provide
      * the correct login credentials a {@link LoginException} will be thrown, i.e
      * the cerfificate is invalid, not trusted, expired etc.
-     *    
+     *
      * @param credential of user, string format
      * @return sessionId authentication token that user can use in corresponding
      *                   methods calls without having to provide a credential
@@ -91,16 +92,16 @@ public interface User {
      * that could be raised should be suppressed e.g. logging out a user
      * who is already logged out.
      *
-     * @param sessionId authentication token obtained on successful login     
+     * @param sessionId authentication token obtained on successful login
      */
-    public void logout (String sessionId);
+    public boolean logout(String sessionId);
     
     /**
      * Returns a serializable object that contains personal details of a requested
      * <code>user</code> as defined in {@link UserDetails}.  A {@link LoginException}
-     * should be thrown if an invalid sessionId is supplied and a 
+     * should be thrown if an invalid sessionId is supplied and a
      * {@link No SuchUserException} should be thrown if the requested <code>user</code>
-     * cannot be found in the database.  If both <code>sessionId</code> and 
+     * cannot be found in the database.  If both <code>sessionId</code> and
      * <code>user</code> are invalid then a {@link LoginException} should be thrown first.
      *
      * @param username username/dn of user
@@ -112,5 +113,5 @@ public interface User {
      * @throws NoSuchUserException   if <code>user</code> cannot be found in user database
      * @see UserDetails
      */
-    public UserDetails getUserDetails(String sessionId, String user) throws LoginException, NoSuchUserException;     
+    public UserDetails getUserDetails(String sessionId, String user) throws LoginException, NoSuchUserException;
 }
