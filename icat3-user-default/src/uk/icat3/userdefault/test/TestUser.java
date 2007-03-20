@@ -130,7 +130,6 @@ public class TestUser {
                 "sOFJMwNqkftzDn4NviTDvatyi+2czTFkig4GNYP6usOenfmRL5nPbWPptdpy3hIUKKenULAB0qr4kIMzdEtgYnqelJB1zIu+Af6YF/Trq+R/WYOJIZyxVTtZp6OASBPRkTQfNFUQWJ93Md3b2gDFST1UWH4+abla4Y38yuOcuQ02geB35XItI24whes=---" +
                 "--END CERTIFICATE-----");
      
-        System.out.println(n.length());
         em.persist(se);
         
         tearDown();
