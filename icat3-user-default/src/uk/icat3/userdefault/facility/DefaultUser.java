@@ -50,7 +50,9 @@ public class DefaultUser implements User{
         try {
             Session session = (Session)manager.createNamedQuery("Session.findByUserSessionId").setParameter("userSessionId", sessionId).getSingleResult();
             
+            //is valid
             if(session.getExpireDateTime().before(new Date())) throw new LoginException(sessionId+" has expired");
+            
             //check if session id is running as admin, if so, return runAs userId
             if(session.isAdmin()){
                 return session.getRunAs();
@@ -81,6 +83,7 @@ public class DefaultUser implements User{
             myproxy_proxy = DelegateCredential.getProxy(username, password, lifetime, PortalCredential.getPortalProxy(),
                     proxyserver.getProxyServerAddress(),proxyserver.getPortNumber(),proxyserver.getCaRootCertificate());
             
+            //insert proxy into DB
             String sid = insertSessionImpl(username, myproxy_proxy);
             
             return sid;
