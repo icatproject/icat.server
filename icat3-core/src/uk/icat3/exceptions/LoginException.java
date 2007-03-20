@@ -8,7 +8,7 @@ package uk.icat3.exceptions;
  *
  * Exception class that must be thrown by facility user
  * database in circumstances as decribed in User.java
- * 
+ *
  * @author df01
  * version 1.0
  */
@@ -28,4 +28,13 @@ public class LoginException extends ICATAPIException {
     public LoginException(String msg) {
         super(msg);
     }
+    
+    /**
+     * Constructs an instance of <code>LoginException</code> with the specified detail message.
+     * @param msg the detail message.
+     */
+    public LoginException(String msg,Exception ex) {
+        super(msg,ex);
+    }
+    
 }
