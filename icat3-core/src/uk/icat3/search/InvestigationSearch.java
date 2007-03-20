@@ -67,7 +67,7 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of investigation ids
      */
-    public static Collection<Long> searchByKeywordRtnId(String userId, String keyword, EntityManager manager) throws InsufficientPrivilegesException {
+    public static Collection<Long> searchByKeywordRtnId(String userId, String keyword, EntityManager manager)  {
         //search and return all investigations
         return  searchByKeywordRtnIdImpl(userId, keyword, -1, -1, manager);
     }
@@ -137,8 +137,8 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    private  static Collection<Investigation> searchByUserSurnameImpl(String userId, String searchString, SearchType searchType, int startIndex, int number_results, EntityManager manager)  {
-        log.trace("searchByUserImpl("+userId+", "+searchType+", "+searchString+", "+startIndex+", "+number_results+", EntityManager)");
+    private  static Collection<Investigation> searchByUserSurnameImpl(String userId, String searchString, SearchType searchType, int startIndex, int number_results, InvestigationInclude include, EntityManager manager)  {
+        log.trace("searchByUserImpl("+userId+", "+searchType+", "+searchString+", "+startIndex+", "+number_results+", "+include+", EntityManager)");
         Collection<Investigation> investigations = null;
         if(number_results < 0){
             
@@ -157,6 +157,11 @@ public class InvestigationSearch extends ManagerUtil {
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).setParameter("userId",userId).setParameter("userIdSearched","%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             }
         }
+        
+         //add all the investigation information to the list of investigations
+        getInvestigationInformation(investigations,include);
+        
+        
         return investigations;
     }
     
@@ -171,7 +176,7 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<Investigation> searchByUserSurname(String userId, String surname, EntityManager manager)  {
         //search and return all investigations
-        return  searchByUserSurnameImpl(userId, surname, SearchType.SURNAME, -1, -1, manager);
+        return  searchByUserSurnameImpl(userId, surname, SearchType.SURNAME, -1, -1, InvestigationInclude.NONE, manager);
     }
     
     /**
@@ -186,7 +191,7 @@ public class InvestigationSearch extends ManagerUtil {
      * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByUserSurname(String userId, String surname, int startIndex, int number_results, EntityManager manager)  {
-        return  searchByUserSurnameImpl(userId, surname, SearchType.SURNAME, startIndex, number_results, manager);
+        return  searchByUserSurnameImpl(userId, surname, SearchType.SURNAME, startIndex, number_results, InvestigationInclude.NONE, manager);
     }
     
     /**
@@ -199,7 +204,7 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<Investigation> searchByUserID(String userId, String searchUserId, EntityManager manager) {
         //search and return all investigations
-        return  searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, -1, -1, manager);
+        return  searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, -1, -1, InvestigationInclude.NONE, manager);
     }
     
     /**
@@ -214,7 +219,7 @@ public class InvestigationSearch extends ManagerUtil {
      * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByUserID(String userId, String searchUserId, int startIndex, int number_results, EntityManager manager)  {
-        return  searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, startIndex, number_results, manager);
+        return  searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, startIndex, number_results,InvestigationInclude.NONE, manager);
     }
     
     /**
@@ -429,10 +434,15 @@ public class InvestigationSearch extends ManagerUtil {
         
         if(number_results < 0){
             //get all, maybe should limit this to 500?
-            return query.setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+            investigations = query.setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
-            return query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+            investigations = query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
+        
+         //add all the investigation information to the list of investigations
+        getInvestigationInformation(investigations,advanDTO.getInvestigationInclude());
+        
+        return investigations;
     }
     
     /**
@@ -516,7 +526,7 @@ public class InvestigationSearch extends ManagerUtil {
      * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator,  InvestigationInclude include, boolean fuzzy, boolean use_security, int startIndex, int number_results, EntityManager manager)  {
-        log.trace("searchByKeyword("+userId+", "+keywords+", "+operator +", "+include+", "+fuzzy+", "+use_security+", "+startIndex+", "+number_results+", EntityManager)");
+        log.trace("searchByKeywords("+userId+", "+keywords+", "+operator +", "+include+", "+fuzzy+", "+use_security+", "+startIndex+", "+number_results+", EntityManager)");
         
         Collection<Investigation> investigations = null;
         
@@ -570,7 +580,7 @@ public class InvestigationSearch extends ManagerUtil {
         //run query
         if(number_results < 0){
             //get all, maybe should limit this to 500?
-            investigations =  query.setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+            investigations = query.setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
             investigations = query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }

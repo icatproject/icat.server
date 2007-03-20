@@ -11,6 +11,7 @@ package uk.icat3.search;
 
 import java.util.Collection;
 import java.util.Date;
+import uk.icat3.util.InvestigationInclude;
 
 /**
  *
@@ -29,6 +30,7 @@ public class AdvancedSearchDTO {
     private Date yearRangeStart; // (datafile_CREATE_time)
     private Date yearRangeEnd;// (datafile_CREATE_time)
     private Collection<String> keywords;
+    private InvestigationInclude investigationInclude;
     
     /** Creates a new instance of AdvancedSearchDTO */
     public AdvancedSearchDTO() {
@@ -88,7 +90,7 @@ public class AdvancedSearchDTO {
     
     public void setDatafileName(String datafileName) {
         this.datafileName = datafileName;
-    }    
+    }
     
     public Date getYearRangeStart() {
         //if null, pass in 1901
@@ -126,7 +128,7 @@ public class AdvancedSearchDTO {
         this.instruments = instruments;
     }
     
-     /////////////  Util methods for AdvancedSearch creation in InvestigationSearch    /////////////////    
+    /////////////  Util methods for AdvancedSearch creation in InvestigationSearch    /////////////////
     public boolean isOtherParameters(){
         if(investigators != null && investigators.size() != 0) return true;
         if(keywords != null && keywords.size() != 0) return true;
@@ -134,7 +136,7 @@ public class AdvancedSearchDTO {
         if(datafileName != null) return true;
         if(runEnd != null || runEnd != null) return true;
         else return false;
-    }    
+    }
     
     public boolean isInstruments(){
         if(getInstruments() != null && getInstruments().size() != 0) return true;
@@ -160,6 +162,15 @@ public class AdvancedSearchDTO {
         if(yearRangeEnd != null || yearRangeStart != null || datafileName != null) return true;
         else return false;
     }
-     /////////////  End of methods    /////////////////
-   
+    /////////////  End of methods    /////////////////
+
+    public InvestigationInclude getInvestigationInclude() {
+        if(investigationInclude == null) return InvestigationInclude.NONE;
+        return investigationInclude;
+    }
+
+    public void setInvestigationInclude(InvestigationInclude investigationInclude) {
+        this.investigationInclude = investigationInclude;
+    }
+    
 }
