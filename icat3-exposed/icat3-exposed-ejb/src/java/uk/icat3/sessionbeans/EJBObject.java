@@ -63,8 +63,8 @@ public abstract class EJBObject {
       
     }
     
-   // @AroundInvoke
-   /* public Object logMethods(InvocationContext ctx)
+    @AroundInvoke
+    public Object logMethods(InvocationContext ctx)
     throws Exception {
         
         String className = ctx.getTarget().getClass().getName();
@@ -80,10 +80,10 @@ public abstract class EJBObject {
             throw e;
         } finally {
             long time = System.currentTimeMillis() - start;
-            //log.debug("Exiting " + target +" , This method takes " +
-            //time/1000 + "s to execute\n");
+            log.debug("Exiting " + target +" , This method takes " +
+            time/1000 + "s to execute\n");
             log.debug("\n");
         }
-    }*/
+    }
     
 }
