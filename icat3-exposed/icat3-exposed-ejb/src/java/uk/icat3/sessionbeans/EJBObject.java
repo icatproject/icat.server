@@ -2,7 +2,6 @@
  * EJBObject.java
  *
  */
-
 package uk.icat3.sessionbeans;
 
 import java.io.File;
@@ -16,7 +15,6 @@ import javax.persistence.PersistenceContext;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-
 /**
  *
  * @author gjd37
@@ -28,12 +26,18 @@ public abstract class EJBObject {
     @PersistenceContext(unitName="icat3-exposed")
     protected EntityManager manager;
     
+    @PersistenceContext(unitName="icat3-exposed-user")
+    protected EntityManager managerUser;
     
     // For junit testing only
     public void setEntityManager(EntityManager manager){
         this.manager = manager;
     }
-           
+    
+    public void setEntityManagerUser(EntityManager manager){
+        this.managerUser = manager;
+    }
+    
     public Object mergeEntity(Object entity) {
         return manager.merge(entity);
     }
@@ -60,9 +64,12 @@ public abstract class EJBObject {
         //PropertyConfigurator.configure(ClassLoader.getSystemResource("log4j.properties"));
         
         log.debug("Loaded log4j properties from : "+System.getProperty("user.home")+File.separator+"log4j.properties");
-      
+        
     }
     
+    /**
+     * AOP all method, log time of method call.
+     */
     @AroundInvoke
     public Object logMethods(InvocationContext ctx)
     throws Exception {
@@ -73,7 +80,7 @@ public abstract class EJBObject {
         
         long start = System.currentTimeMillis();
         
-        //log.debug("Invoking " + target);
+        log.debug("Invoking " + target);
         try {
             return ctx.proceed();
         } catch(Exception e) {
@@ -81,9 +88,8 @@ public abstract class EJBObject {
         } finally {
             long time = System.currentTimeMillis() - start;
             log.debug("Exiting " + target +" , This method takes " +
-            time/1000 + "s to execute\n");
+                    time/1000f + "s to execute\n");
             log.debug("\n");
         }
-    }
-    
+    }    
 }
