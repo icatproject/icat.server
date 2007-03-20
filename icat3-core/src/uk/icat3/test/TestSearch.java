@@ -55,7 +55,7 @@ public class TestSearch {
         EntityManagerResource.getInstance().set(em);
         
         
-        
+
         
         // Begin transaction
         em.getTransaction().begin();
@@ -125,6 +125,22 @@ public class TestSearch {
         //test code here
         log.info("Testing");
         Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(userId,keywords, operator, includes, fuzzy,  false, -1, -1, em);
+        
+        for(Investigation investigation : investigations){
+            log.info(investigation.getId()+" "+investigation.getTitle());
+        }
+        log.info("Results: "+investigations.size());
+        tearDown();
+        
+    }
+    
+    public  void seachByKeywords(String userId, Collection<String> keywords) throws Exception {
+        
+        setUp();
+        
+        //test code here
+        log.info("Testing");
+        Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(userId,keywords, em);
         
         for(Investigation investigation : investigations){
             log.info(investigation.getId()+" "+investigation.getTitle());
@@ -400,10 +416,10 @@ public class TestSearch {
         Collection<String> keywords  =   new ArrayList<String>();
         
         //isis
-        keywords.add("copper");
-        keywords.add("isis");
-        //  ts.seachByKeywords("gjd37", keywords, LogicalOperator.AND, false, InvestigationUtil.ALL);
-        
+        keywords.add("calibration");
+    //    keywords.add("isis");
+        // ts.seachByKeywords("gjd37", keywords, LogicalOperator.AND, false, InvestigationUtil.ALL);
+         ts.seachByKeywords("JAMES-JAMES", keywords);
         ///  get Investigations ////
         
         Collection<Long> ids  =   new ArrayList<Long>();
@@ -468,7 +484,9 @@ public class TestSearch {
         //ts.test2();
         //  ts.testModify();
         
-        ts.testDelete();
+      //  ts.testDelete();
     }
+
+  
     
 }
