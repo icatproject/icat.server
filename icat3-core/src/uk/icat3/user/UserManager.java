@@ -37,6 +37,11 @@ public class UserManager implements User {
         user = (uk.icat3.user.User) createObject(className);
     }
     
+     /** Creates a new instance of UserManager, uses default user implementation*/
+    public UserManager(EntityManager manager) throws LoginException {
+        user = (uk.icat3.user.User) createObject("uk.icat3.userdefault.facility.DefaultUser",manager);
+    }
+    
     /** Creates a new instance of UserManager with entity manager */
     public UserManager(String className, EntityManager manager) throws LoginException {
         user = (uk.icat3.user.User) createObject(className, manager);

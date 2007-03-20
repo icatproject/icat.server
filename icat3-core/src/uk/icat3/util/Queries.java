@@ -67,7 +67,7 @@ public class Queries {
      * Same but returning investigation Ids
      */
     public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID = "Investigation.findByKewordRtnIdNative";
-    public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID_SQL = "SELECT ID " +
+    public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID_SQL = "SELECT DISTINCT ID " +
             "FROM (SELECT DISTINCT t0.ID, t3.NAME " +
             "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2, KEYWORD t3 WHERE t2.facility_user_id = t1.facility_user_id " +
             "AND t2.federal_id = ?1 AND t0.id = t1.investigation_id AND t3.INVESTIGATION_ID = t0.ID UNION " +

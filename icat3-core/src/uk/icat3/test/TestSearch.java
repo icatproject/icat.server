@@ -55,7 +55,7 @@ public class TestSearch {
         EntityManagerResource.getInstance().set(em);
         
         
-
+        
         
         // Begin transaction
         em.getTransaction().begin();
@@ -112,6 +112,22 @@ public class TestSearch {
         
         for(Investigation investigation : investigations){
             log.info(investigation.getId());
+        }
+        log.info("Results: "+investigations.size());
+        tearDown();
+        
+    }
+    
+    public  void seachByKeywordRnId(String userId, String keyword ) throws Exception {
+        
+        setUp();
+        
+        //test code here
+        log.info("Testing");
+        Collection<Long> investigations = InvestigationSearch.searchByKeywordRtnId(userId,keyword, em);
+        
+        for(Object investigation : investigations){
+            log.info(investigation);
         }
         log.info("Results: "+investigations.size());
         tearDown();
@@ -411,15 +427,16 @@ public class TestSearch {
         
         TestSearch ts = new TestSearch();
         
-        // ts.seachByKeyword("JAMES", "ccw");
+        //  ts.seachByKeyword("JAMES", "ccw");
         
+        //ts.seachByKeywordRnId("JAMES-JAMES", "a");
         Collection<String> keywords  =   new ArrayList<String>();
         
         //isis
         keywords.add("calibration");
-    //    keywords.add("isis");
+        //    keywords.add("isis");
         // ts.seachByKeywords("gjd37", keywords, LogicalOperator.AND, false, InvestigationUtil.ALL);
-         ts.seachByKeywords("JAMES-JAMES", keywords);
+        // ts.seachByKeywords("JAMES-JAMES", keywords);
         ///  get Investigations ////
         
         Collection<Long> ids  =   new ArrayList<Long>();
@@ -437,7 +454,7 @@ public class TestSearch {
         
         // ts.seachBySurname("JAMES", "HEALY");
         
-        //    ts.seachByUserID("JAMES", "JAMES");
+        ts.seachByUserID("JAMES", "JAMES");
         
         // ts.seachByUserID("JAMES", "JAMES");
         
@@ -484,9 +501,9 @@ public class TestSearch {
         //ts.test2();
         //  ts.testModify();
         
-      //  ts.testDelete();
+        //  ts.testDelete();
     }
-
-  
+    
+    
     
 }

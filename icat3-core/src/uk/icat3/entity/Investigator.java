@@ -47,8 +47,8 @@ public class Investigator extends EntityBaseBean implements Serializable {
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
     
-    @Column(name = "ROLE")
-    private String role;
+   // @Column(name = "ROLE")
+    //private String role;
     
     @JoinColumn(name = "FACILITY_USER_ID", referencedColumnName = "FACILITY_USER_ID", insertable = false, updatable = false)
     @ManyToOne
@@ -146,17 +146,17 @@ public class Investigator extends EntityBaseBean implements Serializable {
      * Gets the role of this FacilityUser.
      * @return the role
      */
-    public String getRole() {
+  /*  public String getRole() {
         return this.role;
-    }
+    }*/
     
     /**
      * Sets the role of this FacilityUser to the specified value.
      * @param role the new role
      */
-    public void setRole(String role) {
+    /*public void setRole(String role) {
         this.role = role;
-    }
+    }*/
     
     /**
      * Gets the investigation of this Investigator.

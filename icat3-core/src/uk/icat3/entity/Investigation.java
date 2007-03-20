@@ -82,9 +82,8 @@ import uk.icat3.util.Queries;
     
 })
 @SqlResultSetMappings({
-    @SqlResultSetMapping(name="investigationMapping",entities={@EntityResult(entityClass=Investigation.class)}),
-    @SqlResultSetMapping(name="investigationIdMapping",columns={@ColumnResult(name="ID")})
-    
+    @SqlResultSetMapping(name="investigationMapping",entities={@EntityResult(entityClass=Investigation.class)}), 
+    @SqlResultSetMapping(name="investigationIdMapping",columns={@ColumnResult(name="ID")})    
 })
 @XmlRootElement
 public class Investigation extends EntityBaseBean implements Serializable {

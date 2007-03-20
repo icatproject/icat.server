@@ -9,12 +9,13 @@
 
 package uk.icat3.search;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Investigation;
-import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.manager.ManagerUtil;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
@@ -44,10 +45,10 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection investigation ids
      */
-    private static Collection<Long>  searchByKeywordRtnIdImpl(String userId, String keyword, int startIndex, int number_results, EntityManager manager)  {
+    public static Collection<Long>  searchByKeywordRtnId(String userId, String keyword, int startIndex, int number_results, EntityManager manager)  {
         log.trace("searchByKeyword("+userId+", "+keyword+", "+startIndex+", "+number_results+", EntityManager)");
         
-        Collection<Long> investigationsId = null;
+        Collection<BigDecimal> investigationsId = null;
         if(number_results < 0){
             //get all, maybe should limit this to 500?
             investigationsId = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID).setParameter(1,userId).setParameter(2,"%"+keyword+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
@@ -55,7 +56,12 @@ public class InvestigationSearch extends ManagerUtil {
             //list all Investigation ids that the users has access to
             investigationsId = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID).setParameter(1,userId).setParameter(2,"%"+keyword+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
-        return investigationsId;
+        //turn into longs
+        Collection<Long> investigationsIds = new ArrayList<Long>();
+        for(BigDecimal bd : investigationsId){          
+            investigationsIds.add(bd.longValue());
+        }
+        return investigationsIds;
     }
     
     /**
@@ -69,7 +75,7 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<Long> searchByKeywordRtnId(String userId, String keyword, EntityManager manager)  {
         //search and return all investigations
-        return  searchByKeywordRtnIdImpl(userId, keyword, -1, -1, manager);
+        return  searchByKeywordRtnId(userId, keyword, -1, -1, manager);
     }
     
     /**
