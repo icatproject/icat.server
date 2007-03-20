@@ -128,6 +128,10 @@ public class ISISUser implements User {
         throw new UnsupportedOperationException("Method not supported.");
     }
     
+     /**
+     * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
+     * will never be support by the ISIS implementation
+     */
     public String login(String username, String password, int lifetime) throws LoginException {
         throw new UnsupportedOperationException("Method not supported.");
     }
