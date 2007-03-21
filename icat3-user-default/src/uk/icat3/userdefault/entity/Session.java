@@ -50,7 +50,7 @@ public class Session implements Serializable {
     @Column(name = "ID", nullable = false)
     private Long id;
     
-    @Column(name = "USER_SESSION_ID", nullable = false)
+    @Column(name = "USER_SESSION_ID", nullable = false, unique=true)
     private String userSessionId;
     
     @Lob @Column(name = "CREDENTIAL", nullable = false)
