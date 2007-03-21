@@ -18,11 +18,11 @@ import javax.jws.WebMethod;
 import javax.jws.WebService;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Investigation;
-import uk.icat3.exceptions.LoginException;
+import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.InvestigationSearch;
+import uk.icat3.search.KeywordSearch;
 import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
-import uk.icat3.user.UserManager;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 
@@ -50,12 +50,11 @@ public class Search extends EJBObject {
      * @return
      */
     @WebMethod
-    public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include) throws LoginException {
+    public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include) throws SessionException {
         log.trace("searchByKeywords("+sessionId+", "+keywords+")");
         
-        //TODO: should user UserManager and User interface here to get the userId from the sessionId
-        UserManager userManager = new UserManager(managerUser);
-        String userId = userManager.getUserIdFromSessionId(sessionId);
+        //for user bean get userId
+        String userId = user.getUserId(sessionId);
         
         //now do the search using the core API
         return InvestigationSearch.searchByKeywords(userId, keywords,LogicalOperator.AND,include, false, true,0, 500, manager);
@@ -63,12 +62,10 @@ public class Search extends EJBObject {
     
     @WebMethod
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public Collection<Investigation> searchByKeyword(String sessionId, String keywords) throws LoginException {
+    public Collection<Investigation> searchByKeyword(String sessionId, String keywords) throws SessionException {
         log.trace("searchByKeyword("+sessionId+", "+keywords+")");
         
-        //TODO: should user UserManager and User interface here to get the userId from the sessionId
-        // UserManager userManager = new UserManager(managerUser);
-        //String userId = userManager.getUserIdFromSessionId(sessionId);
+        //for user bean get userId
         String userId = user.getUserId(sessionId);
         
         //now do the search using the core API
@@ -77,55 +74,47 @@ public class Search extends EJBObject {
     
     @WebMethod
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public Collection<Long> searchByKeywordsRtnId(String sessionId, String keyword) throws LoginException {
+    public Collection<Long> searchByKeywordsRtnId(String sessionId, String keyword) throws SessionException {
         log.trace("searchByKeywordsRtnId("+sessionId+", "+keyword+")");
         
-        //TODO: should user UserManager and User interface here to get the userId from the sessionId
-        //  UserManager userManager = new UserManager(managerUser);
-        // String userId = userManager.getUserIdFromSessionId(sessionId);
+        //for user bean get userId
         String userId = user.getUserId(sessionId);
         
-       /* Collection<Long> ids = new ArrayList<Long>();
-        Collection<String> key = new ArrayList<String>();
-        key.add(keyword);
-        Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(userId, key,LogicalOperator.AND,InvestigationInclude.NONE, false, true,0, 500, manager);
-        
-        for(Investigation investigation :investigations){
-            ids.add(investigation.getId());
-        }
-        
-        //now do the search using the core API
-        return ids;*/
         return InvestigationSearch.searchByKeywordRtnId(userId, keyword,  manager);
         
     }
     
     @WebMethod
-    public Collection<String> listInstruments(String sessionId) throws LoginException {
+    public Collection<String> listInstruments(String sessionId) throws SessionException {
         log.trace("listInstruments("+sessionId+")");
         
-        
-        //TODO: should user UserManager and User interface here to get the userId from the sessionId
-        UserManager userManager = new UserManager(managerUser);
-        String userId = userManager.getUserIdFromSessionId(sessionId);
-        
+        //for user bean get userId
+        String userId = user.getUserId(sessionId);
         
         return InvestigationSearch.listAllInstruments(userId, manager);
         
     }
     
     @WebMethod
-    public Collection<Investigation> searchUser(String sessionId, String userSearch) throws LoginException {
+    public Collection<Investigation> searchUser(String sessionId, String userSearch) throws SessionException {
         log.trace("searchUser("+sessionId+")");
         
-        
-        //TODO: should user UserManager and User interface here to get the userId from the sessionId
-       // UserManager userManager = new UserManager(managerUser);
-        //String userId = userManager.getUserIdFromSessionId(sessionId);
+        //for user bean get userId
         String userId = user.getUserId(sessionId);
         
         return InvestigationSearch.searchByUserID(userId, userSearch, manager);
         
+    }
+    
+    @WebMethod
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public Collection<String> searchUserKeywords(String sessionId) throws SessionException {
+        log.trace("searchUser("+sessionId+")");
+        
+        //for user bean get userId
+        String userId = user.getUserId(sessionId);
+        
+        return KeywordSearch.getKeywordsForUser(userId, "", 500, manager);          
     }
 }
 

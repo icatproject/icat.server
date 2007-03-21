@@ -15,7 +15,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import org.apache.log4j.Logger;
-import uk.icat3.exceptions.LoginException;
+import uk.icat3.exceptions.SessionException;
 import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.user.UserManager;
 
@@ -32,7 +32,7 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     
     @WebMethod
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String login(String username, String password) throws LoginException {
+    public String login(String username, String password) throws SessionException {
         log.trace("login("+username+", "+password+")");
         
         
@@ -45,7 +45,7 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     
     @WebMethod
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public boolean logout(String sid) throws LoginException {
+    public boolean logout(String sid) throws SessionException {
         log.trace("login("+sid+")");
         
         //TODO: should user UserManager and User interface here to get the userId from the sessionId
@@ -53,8 +53,8 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
         return userManager.logout(sid);
     }
     
-  //  @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String getUserId(String sid) throws LoginException {
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public String getUserId(String sid) throws SessionException {
         log.trace("getUserId("+sid+")");
         
         //TODO: should user UserManager and User interface here to get the userId from the sessionId
