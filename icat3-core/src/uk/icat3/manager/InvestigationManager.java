@@ -143,9 +143,9 @@ public class InvestigationManager extends ManagerUtil {
         //delete dataset (Cascade is true);
         //TODO might have to remove all the datafiles first
         //manager.remove(investigation);
-         //not deleting anymore, jsut changing deleted to Y
+        //not deleting anymore, jsut changing deleted to Y
         
-         log.info("Deleting: "+investigation);
+        log.info("Deleting: "+investigation);
         investigation.setCascadeDeleted(true);
     }
     
@@ -208,21 +208,22 @@ public class InvestigationManager extends ManagerUtil {
         
         //check to see if DataSet exists, dont need the returned dataset as merging
         if(investigation.getId() != null){
-        checkInvestigation(investigation.getId(), manager);
+            checkInvestigation(investigation.getId(), manager);
         }
         
-         //check if valid investigation
+        //check if valid investigation
         investigation.isValid(manager);
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
         
-       
+        
         //if null then update
         if(investigation.getId() != null){
             manager.merge(investigation);
         } else {
             //new dataset, set createid
+            investigation.setId(null); //should never be null at this point but check
             investigation.setCreateId(userId);
             manager.persist(investigation);
         }
@@ -240,6 +241,9 @@ public class InvestigationManager extends ManagerUtil {
      */
     public static void addDataSet(String userId, Dataset dataSet, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("addDataSet("+userId+", "+dataSet+" "+investigationId+", EntityManager)");
+        
+        //make sure id is null
+        dataSet.setId(null);
         
         Collection<Dataset> datasets = new ArrayList<Dataset>();
         datasets.add(dataSet);
@@ -267,6 +271,8 @@ public class InvestigationManager extends ManagerUtil {
         GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
         
         for(Dataset dataset : dataSets){
+            //make sure id is null
+            dataset.setId(null);
             investigation.addDataSet(dataset);
         }
     }

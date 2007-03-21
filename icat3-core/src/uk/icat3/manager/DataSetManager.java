@@ -63,9 +63,7 @@ public class DataSetManager extends ManagerUtil {
         log.trace("deleteDataSet("+userId+", "+dataSetId+", EntityManager)");
         
         Dataset dataset = checkDataSet(dataSetId, manager);
-        //check if the id exists in the database
-        if(dataset == null) throw new EntityNotFoundException("Dataset: id: "+dataSetId+" not found.");
-        
+               
         //check user has delete access
         GateKeeper.performAuthorisation(userId, dataset, AccessType.DELETE, manager);
         

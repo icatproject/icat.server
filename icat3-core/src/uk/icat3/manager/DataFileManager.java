@@ -40,9 +40,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void deleteDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
-        
         deleteDataFile(userId, dataFile.getId(), manager);
-        
     }
     
     /**
@@ -160,6 +158,9 @@ public class DataFileManager extends ManagerUtil {
     public static void addDataFile(String userId, Datafile dataFile, Long datasetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("addDataFile("+userId+", "+dataFile+" "+datasetId+", EntityManager)");
         
+        //make sure id is null
+        dataFile.setId(null);
+        
         Collection<Datafile> dataFiles = new ArrayList<Datafile>();
         dataFiles.add(dataFile);
         
@@ -187,6 +188,7 @@ public class DataFileManager extends ManagerUtil {
         GateKeeper.performAuthorisation(userId, dataset, AccessType.UPDATE, manager);
         
         for(Datafile dataFile : dataFiles){
+            dataFile.setId(null);
             dataset.addDataFile(dataFile);
         }
     }
