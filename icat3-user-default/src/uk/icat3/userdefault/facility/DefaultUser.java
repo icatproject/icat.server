@@ -20,7 +20,7 @@ import javax.persistence.NoResultException;
 import org.apache.log4j.Logger;
 import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSCredential;
-import uk.icat3.exceptions.LoginException;
+import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.user.User;
 import uk.icat3.user.UserDetails;
@@ -30,6 +30,11 @@ import uk.icat3.userdefault.entity.*;
 import uk.icat3.userdefault.exception.LoginError;
 
 /**
+ * This class uses a local DB connection through an entitymanager with three tables for the session
+ * information.  A user will present a username and password for a credential in a myproxy server
+ * configured in a table.  The code will get the proxy and insert the information in the session
+ * table with the associated user in the user table.  An admin user can log onto the system and
+ * run commands on behalf of a user, the admin password needs to be set up in the user table first
  *
  * @author gjd37
  */
@@ -45,14 +50,14 @@ public class DefaultUser implements User{
         this.manager = manager;
     }
     
-    public String getUserIdFromSessionId(String sessionId) throws LoginException {
+    public String getUserIdFromSessionId(String sessionId) throws SessionException {
         log.trace("getUserIdFromSessionId("+sessionId+")");
         try {
             Session session = (Session)manager.createNamedQuery("Session.findByUserSessionId").setParameter("userSessionId", sessionId).getSingleResult();
             
             //is valid
-            if(session.getExpireDateTime().before(new Date())) throw new LoginException(sessionId+" has expired");
-          
+            if(session.getExpireDateTime().before(new Date())) throw new SessionException("Session "+sessionId+" has expired");
+            
             //check if session id is running as admin, if so, return runAs userId
             if(session.isAdmin()){
                 log.debug("user: "+session.getRunAs()+" is associated with: "+sessionId);
@@ -63,21 +68,21 @@ public class DefaultUser implements User{
             }
             
         } catch(NoResultException ex) {
-            throw new LoginException("Invalid sessionid: "+sessionId);
-        } catch(LoginException ex) {
-            log.warn(sessionId+" has expired");
+            throw new SessionException("Invalid sessionid: "+sessionId);
+        } catch(SessionException ex) {
+            log.warn(ex.getMessage());
             throw ex;
         } catch(Exception ex) {
-            if(ex instanceof LoginException) throw (LoginException)ex;
-            else throw new LoginException("Unable to find user by sessionid: "+sessionId);
+            throw new SessionException("Unable to find user by sessionid: "+sessionId);
         }
     }
     
-    public String login(String username, String password) throws LoginException {
+    public String login(String username, String password) throws SessionException {
         return login(username, password, 2);
     }
     
-    public String login(String username, String password, int lifetime) throws LoginException {
+    public String login(String username, String password, int lifetime) throws SessionException {
+        log.trace("login("+username+", *********, "+lifetime+")");
         if(username == null || username.equals("")) throw new IllegalArgumentException("Username cannot be null or empty.");
         if(password == null || password.equals("")) throw new IllegalArgumentException("Password cannot be null or empty.");
         
@@ -95,20 +100,21 @@ public class DefaultUser implements User{
             return sid;
             
         } catch(NoResultException ex) {
-            throw new LoginException("MyProxy servers set up incorrectly");
+            throw new SessionException("MyProxy servers set up incorrectly");
         } catch (MyProxyException mex) {
             log.warn("Error from myproxy server: "+mex.getMessage(),mex);
-            throw new LoginException(handleMyProxyException(mex));
-        } catch (LoginException lex) {
+            throw new SessionException(handleMyProxyException(mex));
+        } catch (SessionException lex) {
             throw lex;
         } catch (Exception e) {
             log.warn("Unexpected error from myproxy: "+e.getMessage(),e);
-            throw new LoginException(e.getMessage(),e);
+            throw new SessionException(e.getMessage(),e);
         }
         
     }
     
     public boolean logout(String sessionId) {
+        log.trace("logout("+sessionId+")");
         try {
             Session session = (Session)manager.createNamedQuery("Session.findByUserSessionId").setParameter("userSessionId", sessionId).getSingleResult();
             manager.remove(session);
@@ -119,21 +125,23 @@ public class DefaultUser implements User{
         }
     }
     
-    public UserDetails getUserDetails(String sessionId, String user) throws LoginException, NoSuchUserException {
+    public UserDetails getUserDetails(String sessionId, String user) throws SessionException, NoSuchUserException {
         throw new UnsupportedOperationException("Method not supported.");
     }
     
     /**
      *
      */
-    public String login(String adminUsername, String AdminPassword, String runAsUser) throws LoginException {
+    public String login(String adminUsername, String AdminPassword, String runAsUser) throws SessionException {
+        log.trace("login("+adminUsername+", *********, "+runAsUser+")");
+        
         //find admin user first
         uk.icat3.userdefault.entity.User user =  null;
         try{
             user = (uk.icat3.userdefault.entity.User)manager.createNamedQuery("User.findByUserId").setParameter("userId","admin").getSingleResult();
         } catch(NoResultException ex) {
             log.warn("Admin user not set up in DB");
-            throw new LoginException("Admin user not set up in DB");
+            throw new SessionException("Admin user not set up in DB");
         }
         
         //check that password is the same, should really hash it
@@ -167,14 +175,14 @@ public class DefaultUser implements User{
      * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
      * will never be support by the default implementation
      */
-    public String login(String credential) throws LoginException {
+    public String login(String credential) throws SessionException {
         throw new UnsupportedOperationException("Method not supported.");
     }
     
     
     ///////////////////////////  Private Methods /////////////////////////////////////////////////////////////
     
-    private String insertSessionImpl(String username, GSSCredential credential) throws LoginException {
+    private String insertSessionImpl(String username, GSSCredential credential) throws SessionException {
         
         log.trace("Starting insertSessionImpl");
         
@@ -193,10 +201,10 @@ public class DefaultUser implements User{
             
         } catch (CertificateExpiredException ce) {
             log.warn("Certificate has expired.",ce);
-            throw new LoginException(LoginError.CREDENTIALS_EXPIRED.toString(),ce);
+            throw new SessionException(LoginError.CREDENTIALS_EXPIRED.toString(),ce);
         } catch (CertificateException ex) {
             log.warn("Unable to load certificate",ex);
-            throw new LoginException(LoginError.UNKNOWN.toString(),ex);
+            throw new SessionException(LoginError.UNKNOWN.toString(),ex);
             
         }
         
@@ -219,7 +227,7 @@ public class DefaultUser implements User{
                 log.trace("Setting expire time as: "+ cal.getTime());
             } catch (CertificateException ex) {
                 log.warn("Unable to load certificate",ex);
-                throw new LoginException(LoginError.UNKNOWN.toString(),ex);
+                throw new SessionException(LoginError.UNKNOWN.toString(),ex);
                 
             }
             session.setExpireDateTime(cal.getTime());
@@ -257,7 +265,7 @@ public class DefaultUser implements User{
             
         } else {
             log.warn("No session created. Proxy has expired for "+DN);
-            throw new LoginException(LoginError.CREDENTIALS_EXPIRED.toString());
+            throw new SessionException(LoginError.CREDENTIALS_EXPIRED.toString());
         }
     }
     
