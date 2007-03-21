@@ -12,7 +12,7 @@ import javax.rmi.PortableRemoteObject;
 import org.apache.log4j.Logger;
 import uk.icat3.user.User;
 import uk.icat3.user.UserDetails;
-import uk.icat3.exceptions.LoginException;
+import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.NoSuchUserException;
 
 /*
@@ -34,7 +34,7 @@ public class ISISUser implements User {
     private static Logger log = Logger.getLogger(ISISUser.class);
     
     /** Creates a new instance of ISISUser */
-    public ISISUser() throws LoginException {
+    public ISISUser() throws SessionException {
         try {
             Context context = getInitialContext();
             UserDBFacadeHome userDBFacadeHome = (UserDBFacadeHome)PortableRemoteObject.narrow(context.lookup("ejb/userdb/UserDBFacade"), UserDBFacadeHome.class);
@@ -45,7 +45,7 @@ public class ISISUser implements User {
         }//end try/catch
     }
     
-    public String getUserIdFromSessionId(String sessionId) throws LoginException {
+    public String getUserIdFromSessionId(String sessionId) throws SessionException {
         Long userNum = null;
         try {
             userNum = userDBFacade.getUserNumberFromSessionId(sessionId);
@@ -57,7 +57,7 @@ public class ISISUser implements User {
         return userNum.toString();
     }
     
-    public String login(String username, String password) throws LoginException {
+    public String login(String username, String password) throws SessionException {
         String token = null;
         try {
             token = userDBFacade.login(username, password);
@@ -79,7 +79,7 @@ public class ISISUser implements User {
         }//end try/catch
     }
     
-    public UserDetails getUserDetails(String sessionId, String user) throws LoginException, NoSuchUserException {
+    public UserDetails getUserDetails(String sessionId, String user) throws SessionException, NoSuchUserException {
         UserDetails details = new UserDetails();
         
         try {
@@ -118,7 +118,7 @@ public class ISISUser implements User {
      * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
      * will never be support by the ISIS implementation
      */
-    public String login(String adminUsername, String AdminPassword, String runAsUser) throws LoginException {
+    public String login(String adminUsername, String AdminPassword, String runAsUser) throws SessionException {
         throw new UnsupportedOperationException("Method not supported.");
     }
     
@@ -126,7 +126,7 @@ public class ISISUser implements User {
      * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
      * will never be support by the ISIS implementation
      */
-    public String login(String credential) throws LoginException {
+    public String login(String credential) throws SessionException {
         throw new UnsupportedOperationException("Method not supported.");
     }
     
@@ -134,7 +134,7 @@ public class ISISUser implements User {
      * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
      * will never be support by the ISIS implementation
      */
-    public String login(String username, String password, int lifetime) throws LoginException {
+    public String login(String username, String password, int lifetime) throws SessionException {
         throw new UnsupportedOperationException("Method not supported.");
     }
 }
