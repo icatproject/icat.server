@@ -1,6 +1,6 @@
 package uk.icat3.user;
 
-import uk.icat3.exceptions.LoginException;
+import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.NoSuchUserException;
 
 /*
@@ -28,61 +28,61 @@ public interface User {
     /**
      * Returns a userid/distinguished name for a user with a valid
      * sessionId.  If user does not have a valid sessionId then an
-     * {@link LoginException} will be thrown.
-     *
+     * {@link SessionException} will be thrown.
+     * 
      * @param sessionId authentication token obtained on successful login
      * @return userid/distinguished name of user
-     * @throws LoginException  if user provides an invalid sessionId
+     * @throws SessionException  if user provides an invalid sessionId
      */
-    public String getUserIdFromSessionId(String sessionId) throws LoginException;
+    public String getUserIdFromSessionId(String sessionId) throws SessionException;
     
     /**
      * Returns a sessionId (authenitcation token) to a user after verification
      * of correct username and password combination.  If user does not provide
-     * the correct login credentials a {@link LoginException} will be thrown.
-     *
+     * the correct login credentials a {@link SessionException} will be thrown.
+     * 
      * @param username username/dn of user
      * @param password of user
      * @return sessionId authentication token that user can use in corresponding
      *                   methods calls without having to provide username and
      *                   password each time.
-     * @throws LoginException   if user provides an invalid username and password
+     * @throws SessionException   if user provides an invalid username and password
      *                          combination.
      */
-    public String login(String username, String password) throws LoginException;
-    public String login(String username, String password, int lifetime) throws LoginException;
+    public String login(String username, String password) throws SessionException;
+    public String login(String username, String password, int lifetime) throws SessionException;
     
     /**
      * Returns a sessionId (authenitcation token) to a user after verification
      * of correct admin username and password combination.  If user does not provide
-     * the correct login credentials a {@link LoginException} will be thrown.
+     * the correct login credentials a {@link SessionException} will be thrown.
      * This login method allows an admin user, on behalf of another user, to
      * perform their operations.
-     *
+     * 
      * @param adminUsername admin username of user
      * @param AdminPassword admin password of user
      * @param runAsUser user the admin wants the operations to be performed as
      * @return sessionId authentication token that user can use in corresponding
      *                   methods calls without having to provide username and
      *                   password each time.
-     * @throws LoginException   if user provides an invalid admin username and password
+     * @throws SessionException   if user provides an invalid admin username and password
      *                          combination.
      */
-    public String login(String adminUsername, String AdminPassword, String runAsUser) throws LoginException;
+    public String login(String adminUsername, String AdminPassword, String runAsUser) throws SessionException;
     
     /**
      * Returns a sessionId (authenitcation token) to a user after verification
      * of a string representation of a x509 proxy credential.  If user does not provide
-     * the correct login credentials a {@link LoginException} will be thrown, i.e
+     * the correct login credentials a {@link SessionException} will be thrown, i.e
      * the cerfificate is invalid, not trusted, expired etc.
-     *
+     * 
      * @param credential of user, string format
      * @return sessionId authentication token that user can use in corresponding
      *                   methods calls without having to provide a credential
      *                   each time.
-     * @throws LoginException   if user provides an invalid credentials.
+     * @throws SessionException   if user provides an invalid credentials.
      */
-    public String login(String credential) throws LoginException;
+    public String login(String credential) throws SessionException;
     
     /**
      * Removes sessionId authentication token from user database which
@@ -98,20 +98,20 @@ public interface User {
     
     /**
      * Returns a serializable object that contains personal details of a requested
-     * <code>user</code> as defined in {@link UserDetails}.  A {@link LoginException}
+     * <code>user</code> as defined in {@link UserDetails}.  A {@link SessionException}
      * should be thrown if an invalid sessionId is supplied and a
      * {@link No SuchUserException} should be thrown if the requested <code>user</code>
      * cannot be found in the database.  If both <code>sessionId</code> and
-     * <code>user</code> are invalid then a {@link LoginException} should be thrown first.
-     *
+     * <code>user</code> are invalid then a {@link SessionException} should be thrown first.
+     * 
      * @param username username/dn of user
      * @param password of user
      * @return sessionId authentication token that user can use in corresponding
      *                   methods calls without having to provide username and
      *                   password each time.
-     * @throws LoginException   if user provides an invalid <code>sessionId</code>
-     * @throws NoSuchUserException   if <code>user</code> cannot be found in user database
      * @see UserDetails
+     * @throws SessionException   if user provides an invalid <code>sessionId</code>
+     * @throws NoSuchUserException   if <code>user</code> cannot be found in user database
      */
-    public UserDetails getUserDetails(String sessionId, String user) throws LoginException, NoSuchUserException;
+    public UserDetails getUserDetails(String sessionId, String user) throws SessionException, NoSuchUserException;
 }

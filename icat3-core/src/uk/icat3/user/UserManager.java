@@ -4,7 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
-import uk.icat3.exceptions.LoginException;
+import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.NoSuchUserException;
 
 
@@ -33,29 +33,29 @@ public class UserManager implements User {
     //private boolean isEntityManager = false;
     
     /** Creates a new instance of UserManager */
-    public UserManager(String className) throws LoginException {
+    public UserManager(String className) throws SessionException {
         user = (uk.icat3.user.User) createObject(className);
     }
     
      /** Creates a new instance of UserManager, uses default user implementation*/
-    public UserManager(EntityManager manager) throws LoginException {
+    public UserManager(EntityManager manager) throws SessionException {
         user = (uk.icat3.user.User) createObject("uk.icat3.userdefault.facility.DefaultUser",manager);
     }
     
     /** Creates a new instance of UserManager with entity manager */
-    public UserManager(String className, EntityManager manager) throws LoginException {
+    public UserManager(String className, EntityManager manager) throws SessionException {
         user = (uk.icat3.user.User) createObject(className, manager);
     }
     
-    public String getUserIdFromSessionId(String sessionId) throws LoginException {
+    public String getUserIdFromSessionId(String sessionId) throws SessionException {
         return user.getUserIdFromSessionId(sessionId);
     }
     
-    public String login(String username, String password) throws LoginException {
+    public String login(String username, String password) throws SessionException {
         return user.login(username, password);
     }
     
-    public String login(String username, String password, int lifetime) throws LoginException {
+    public String login(String username, String password, int lifetime) throws SessionException {
         return user.login(username, password, lifetime);
     }
     
@@ -63,7 +63,7 @@ public class UserManager implements User {
         return user.logout(sessionId);
     }
     
-    public UserDetails getUserDetails(String sessionId, String user) throws LoginException, NoSuchUserException {
+    public UserDetails getUserDetails(String sessionId, String user) throws SessionException, NoSuchUserException {
         return this.user.getUserDetails(sessionId, user);
     }
     
@@ -102,11 +102,11 @@ public class UserManager implements User {
         return object;
     }
     
-    public String login(String adminUsername, String AdminPassword, String runAsUser) throws LoginException {
+    public String login(String adminUsername, String AdminPassword, String runAsUser) throws SessionException {
         return this.user.login(adminUsername, AdminPassword, runAsUser);
     }
     
-    public String login(String credential) throws LoginException {
+    public String login(String credential) throws SessionException {
         return this.user.login(credential);
     }
     
