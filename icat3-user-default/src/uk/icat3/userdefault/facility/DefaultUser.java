@@ -38,8 +38,9 @@ import uk.icat3.userdefault.exception.LoginError;
  *
  * @author gjd37
  */
-public class DefaultUser implements User{
+public class DefaultUser implements User {
     
+    //entity manager for the session database.
     private EntityManager manager;
     
     // Global class logger
@@ -53,6 +54,7 @@ public class DefaultUser implements User{
     public String getUserIdFromSessionId(String sessionId) throws SessionException {
         log.trace("getUserIdFromSessionId("+sessionId+")");
         try {
+            //find the user by session id, throws NoResultException if session not found
             Session session = (Session)manager.createNamedQuery("Session.findByUserSessionId").setParameter("userSessionId", sessionId).getSingleResult();
             
             //is valid
@@ -70,17 +72,34 @@ public class DefaultUser implements User{
         } catch(NoResultException ex) {
             throw new SessionException("Invalid sessionid: "+sessionId);
         } catch(SessionException ex) {
-            log.warn(ex.getMessage());
             throw ex;
         } catch(Exception ex) {
+            log.warn(ex.getMessage());
             throw new SessionException("Unable to find user by sessionid: "+sessionId);
         }
     }
     
+    /**
+     * Logs on with username and password with default session timeout of 2 hours
+     *
+     * @param username
+     * @param password
+     * @throws uk.icat3.exceptions.SessionException
+     * @return session id
+     */
     public String login(String username, String password) throws SessionException {
-        return login(username, password, 2);
+        return login(username, password, 2); //2 hours
     }
     
+    /**
+     *  Logs on with username, password and lifetime of session
+     *
+     * @param username
+     * @param password
+     * @param lifetime lifetime of session before been invalid
+     * @throws uk.icat3.exceptions.SessionException
+     * @return session id
+     */
     public String login(String username, String password, int lifetime) throws SessionException {
         log.trace("login("+username+", *********, "+lifetime+")");
         if(username == null || username.equals("")) throw new IllegalArgumentException("Username cannot be null or empty.");
@@ -88,7 +107,7 @@ public class DefaultUser implements User{
         
         GSSCredential myproxy_proxy;
         try {
-            //lookup proxy and contact for users credential
+            //lookup proxy and contact MyProxy found for users credential
             ProxyServers proxyserver = (ProxyServers)manager.createNamedQuery("ProxyServers.findByActive").setParameter("active", true).getSingleResult();
             myproxy_proxy = DelegateCredential.getProxy(username, password, lifetime, PortalCredential.getPortalProxy(),
                     proxyserver.getProxyServerAddress(),proxyserver.getPortNumber(),proxyserver.getCaRootCertificate());
@@ -100,7 +119,8 @@ public class DefaultUser implements User{
             return sid;
             
         } catch(NoResultException ex) {
-            throw new SessionException("MyProxy servers set up incorrectly");
+            //no proxy in database or no proxy with active setup
+            throw new SessionException("MyProxy server information set up incorrectly.");
         } catch (MyProxyException mex) {
             log.warn("Error from myproxy server: "+mex.getMessage(),mex);
             throw new SessionException(handleMyProxyException(mex));
@@ -108,11 +128,17 @@ public class DefaultUser implements User{
             throw lex;
         } catch (Exception e) {
             log.warn("Unexpected error from myproxy: "+e.getMessage(),e);
-            throw new SessionException(e.getMessage(),e);
+            throw new SessionException("Unexpected exception logging into system.");
         }
         
     }
     
+    /**
+     * Logout of system
+     *
+     * @param sessionId 
+     * @return boolean is correctly logged out
+     */
     public boolean logout(String sessionId) {
         log.trace("logout("+sessionId+")");
         try {
@@ -124,13 +150,28 @@ public class DefaultUser implements User{
             return false;
         }
     }
-    
+       
+    /**
+     * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
+     * is not support by the default implementation     
+     *
+     * @param sessionId 
+     * @param user 
+     * @throws uk.icat3.exceptions.SessionException 
+     * @throws uk.icat3.exceptions.NoSuchUserException 
+     * @return UserDetails
+     */
     public UserDetails getUserDetails(String sessionId, String user) throws SessionException, NoSuchUserException {
         throw new UnsupportedOperationException("Method not supported.");
     }
     
     /**
-     *
+     * 
+     * @param adminUsername 
+     * @param AdminPassword 
+     * @param runAsUser 
+     * @throws uk.icat3.exceptions.SessionException 
+     * @return 
      */
     public String login(String adminUsername, String AdminPassword, String runAsUser) throws SessionException {
         log.trace("login("+adminUsername+", *********, "+runAsUser+")");
@@ -173,7 +214,7 @@ public class DefaultUser implements User{
     
     /**
      * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
-     * will never be support by the default implementation
+     * is not support by the default implementation
      */
     public String login(String credential) throws SessionException {
         throw new UnsupportedOperationException("Method not supported.");

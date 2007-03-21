@@ -37,6 +37,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 /**
+ * This is a util class used to manipulate the GSSCredential from MyProxy
  *
  * @author gjd37
  */
@@ -48,15 +49,27 @@ public class Certificate {
     static Logger log = Logger.getLogger(Certificate.class);
     
     
+    /**
+     * Creates a new instance of certificate from a string representation of a GSSCredential
+     *
+     * @param certificate
+     * @throws java.security.cert.CertificateException
+     */
     public Certificate(String certificate) throws CertificateException {
         this.certificate = certificate;
         loadCredential(this.certificate);
     }
     
+    /**
+     * Creates a new instance of certificate from a GSSCredential
+     *
+     * @param credential
+     * @throws java.security.cert.CertificateException
+     */
     public Certificate(GSSCredential credential) throws CertificateException {
         log.debug("new Certificate(credential)");
         try {
-           this.certificate =  turnintoString(credential);
+            this.certificate =  turnintoString(credential);
         } catch (IOException ioe) {
             throw new CertificateException("Unable to read in credential: "+ioe.getMessage(),ioe);
         } catch (GSSException ex) {
@@ -65,7 +78,13 @@ public class Certificate {
         this.credential = credential;
     }
     
-    /** Creates a new instance of certificate from a string */
+    /**
+     * Creates a new instance of certificate from a string
+     *
+     * @param certificate
+     * @throws java.security.cert.CertificateException
+     * @throws java.security.cert.CertificateExpiredException
+     */
     public Certificate(java.io.InputStream certificate) throws CertificateException , CertificateExpiredException{
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(certificate));
@@ -85,7 +104,13 @@ public class Certificate {
         loadCredential(this.certificate);
     }
     
-    /** Creates a new instance of certificate from a file */
+    /**
+     * Creates a new instance of certificate from a file
+     *
+     * @param certificate
+     * @throws java.security.cert.CertificateException
+     * @throws java.security.cert.CertificateExpiredException
+     */
     public Certificate(java.io.File certificate) throws CertificateException , CertificateExpiredException{
         try {
             BufferedReader in = new BufferedReader(new java.io.FileReader(certificate));
@@ -108,9 +133,12 @@ public class Certificate {
         loadCredential(this.certificate);
     }
     
-    /*
+    /**
      * Creates a new instance of certificate from a file
      * e.g. file:///E:/cog-1.1/build/cog-1.1/bin/x509up_36855.pem
+     *
+     * @param url
+     * @throws java.security.cert.CertificateException
      */
     public Certificate(URL url) throws CertificateException {
         try {
@@ -135,11 +163,11 @@ public class Certificate {
     private void loadCredential(String cred) throws CertificateException, CertificateExpiredException{
         try {
             
-            byte [] data = cred.getBytes();           
+            byte [] data = cred.getBytes();
             
             ExtendedGSSManager manager = (ExtendedGSSManager)ExtendedGSSManager.getInstance();
-            credential = (GSSCredential)manager.createCredential(data,ExtendedGSSCredential.IMPEXP_OPAQUE,  GSSCredential.DEFAULT_LIFETIME, null, GSSCredential.INITIATE_AND_ACCEPT);                             
-           
+            credential = (GSSCredential)manager.createCredential(data,ExtendedGSSCredential.IMPEXP_OPAQUE,  GSSCredential.DEFAULT_LIFETIME, null, GSSCredential.INITIATE_AND_ACCEPT);
+            
         } catch (GSSException ex) {
             throw new CertificateException("Unable to load credential: "+ex.getMessage(),ex);
         }
@@ -154,6 +182,12 @@ public class Certificate {
         
     }
     
+    /**
+     * Returns the  number of seconds life of the credential
+     * 
+     * @throws java.security.cert.CertificateException 
+     * @return number seconds left
+     */
     public long getLifetime() throws CertificateException {
         try {
             // Get remaining lifetime in seconds
@@ -164,6 +198,12 @@ public class Certificate {
         }
     }
     
+    /**
+     * Checks to see if there are more than 10 mins left of a credential
+     *
+     * @throws java.security.cert.CertificateException 
+     * @return 
+     */
     public boolean isLifetimeLeft() throws CertificateException {
         boolean result = false;
         // Check some lifetime left on proxy certificate (more than 10 mins left)
@@ -173,6 +213,12 @@ public class Certificate {
         return result;
     }
     
+    /**
+     * Gets the DN of the credential 
+     *
+     * @throws java.security.cert.CertificateException 
+     * @return Dn of GSSCredential object
+     */
     public String getDn() throws CertificateException {
         try {
             String DN =  credential.getName().toString();
@@ -182,10 +228,16 @@ public class Certificate {
         }
     }
     
+    /**
+     * Gets the credential in the form of a string.  This makes it easier to pass over EJBs and Web Services
+     * 
+     * @return string of GSSCredential object
+     */
     public String getStringRepresentation(){
         return this.certificate;
     }
     
+    @Override
     public String toString(){
         try {
             return getDn()+" has lifetime "+getLifetime()+" seconds";
@@ -194,6 +246,11 @@ public class Certificate {
         }
     }
     
+    /**
+     * Returns the GSSCredential object
+     *
+     * @return GSSCredential object
+     */
     public GSSCredential getCredential(){
         return credential;
     }

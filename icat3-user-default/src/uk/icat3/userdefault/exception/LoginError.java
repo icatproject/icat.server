@@ -9,11 +9,9 @@
 
 package uk.icat3.userdefault.exception;
 
+
 /**
- *
- * @author gjd37
- */
-/**
+ * List of errors that can be thrown from getting a proxy from MyProxy servers
  *
  * @author gjd37
  */
@@ -35,8 +33,6 @@ public enum LoginError {
     
     public String toString() {
         return value;
-    }
-    
-    
+    }    
 }
 
