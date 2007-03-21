@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.manager.DataFileManager;
 import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.InvestigationManager;
@@ -71,7 +72,7 @@ public class TestSearch {
     }
     
     
-    public void getInvestigations(String userId, Collection<Long> ids) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public void getInvestigations(String userId, Collection<Long> ids) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         setUp();
         
         //test code here
@@ -86,7 +87,7 @@ public class TestSearch {
         
     }
     
-    public void getInvestigation(String userId, Long id) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public void getInvestigation(String userId, Long id) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         setUp();
         
         //test code here
@@ -410,7 +411,7 @@ public class TestSearch {
     }
     
     
-    public void testDelete() throws InsufficientPrivilegesException{
+    public void testDelete() throws Exception{
         setUp();
         
         //DataFileManager.deleteDataFile("dwf64", 101L, em);
