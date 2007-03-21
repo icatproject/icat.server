@@ -14,7 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import org.apache.log4j.Logger;
-import uk.icat3.exceptions.LoginException;
+import uk.icat3.exceptions.SessionException;
 import uk.icat3.user.UserManager;
 import uk.icat3.userdefault.entity.User;
 
@@ -54,7 +54,7 @@ public class TestUser {
         em.close();
     }
     
-    public void login(String username, String password, int lifetime) throws LoginException {
+    public void login(String username, String password, int lifetime) throws SessionException {
         
         setUp();
         long time  = System.currentTimeMillis();
@@ -68,7 +68,7 @@ public class TestUser {
         tearDown();
     }
     
-    public void loginAdmin(String username, String password, String runAs) throws LoginException {
+    public void loginAdmin(String username, String password, String runAs) throws SessionException {
         
         setUp();
         long time  = System.currentTimeMillis();
@@ -83,7 +83,7 @@ public class TestUser {
     }
     
     
-    public void logout(String sessionId) throws LoginException {
+    public void logout(String sessionId) throws SessionException {
         
         setUp();
         long time  = System.currentTimeMillis();
@@ -97,7 +97,7 @@ public class TestUser {
         tearDown();
     }
     
-    public void getUserId(String sessionId) throws LoginException {
+    public void getUserId(String sessionId) throws SessionException {
         
         setUp();
         long time  = System.currentTimeMillis();
@@ -136,7 +136,7 @@ public class TestUser {
     }
     
     
-    public static void main(String[] args)throws LoginException {
+    public static void main(String[] args)throws SessionException {
         TestUser tu = new TestUser();
         
         for(int i = 0; i < 1; i++){
