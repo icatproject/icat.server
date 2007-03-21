@@ -51,7 +51,7 @@ public class DefaultUser implements User{
             Session session = (Session)manager.createNamedQuery("Session.findByUserSessionId").setParameter("userSessionId", sessionId).getSingleResult();
             
             //is valid
-            if(session.getExpireDateTime().before(new Date())) throw new LoginException(sessionId+" has expired");
+            if(session.getExpireDateTime().before(new Date())) throw new LoginException("Session "+sessionId+" has expired");
             
             //check if session id is running as admin, if so, return runAs userId
             if(session.isAdmin()){
@@ -64,12 +64,11 @@ public class DefaultUser implements User{
             
         } catch(NoResultException ex) {
             throw new LoginException("Invalid sessionid: "+sessionId);
-        }catch(LoginException ex) {
-            log.warn(sessionId+" has expired");
+        } catch(LoginException ex) {
+            log.warn(ex.getMessage());
             throw ex;
-        } catch(Exception ex) {
-            if(ex instanceof LoginException) throw (LoginException)ex;
-            else throw new LoginException("Unable to find user by sessionid: "+sessionId);
+        } catch(Exception ex) {           
+            throw new LoginException("Unable to find user by sessionid: "+sessionId);
         }
     }
     
