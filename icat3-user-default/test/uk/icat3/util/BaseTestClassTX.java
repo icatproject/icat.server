@@ -9,9 +9,10 @@
 
 package uk.icat3.util;
 
-import javax.persistence.Persistence;
 import org.apache.log4j.Logger;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 
 /**
@@ -20,18 +21,33 @@ import org.junit.BeforeClass;
  *
  * @author gjd37
  */
-public class BaseTestClass extends BaseTest{
+public class BaseTestClassTX extends BaseTest{
     
     private static Logger log = Logger.getLogger(BaseTestClass.class);
     
+    @Before
+    public void beginTX(){
+        // Begin transaction
+        log.debug("beginning transaction on entityManager");
+        
+        em.getTransaction().begin();
+    }
+    
+    @After
+    public void closeTX(){
+        // Commit the transaction
+        log.debug("commiting transaction on entityManager");
+        em.getTransaction().commit();
+    }
+    
     @BeforeClass
     public static void BeforeClassSetUp(){
-        setUp();
+        setUpEntityManagerOnly();
     }
     
     @AfterClass
     public static void AfterClassTearDown(){
-        tearDown();
+        tearDownEntityManagerOnly();
     }
     
     

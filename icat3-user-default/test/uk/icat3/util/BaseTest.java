@@ -31,7 +31,7 @@ public class BaseTest {
     
     public static void setUp(){
         
-        emf = Persistence.createEntityManagerFactory("icat3-core-testing-PU");
+        emf = Persistence.createEntityManagerFactory("icat3-user-testing-defaultPU");
         em = emf.createEntityManager();
         log.debug("setUp(), creating entityManager");
         
@@ -42,6 +42,22 @@ public class BaseTest {
         
         em.getTransaction().begin();
         
+    }
+    
+    public static void setUpEntityManagerOnly(){
+        
+        emf = Persistence.createEntityManagerFactory("icat3-user-testing-defaultPU");
+        em = emf.createEntityManager();
+        log.debug("setUp(), creating entityManager");
+        
+        EntityManagerResource.getInstance().set(em);
+        
+    }
+    
+    public static void tearDownEntityManagerOnly(){
+        
+        log.debug("tearDown(), closing entityManager");
+        em.close();
     }
     
     public static void tearDown(){
