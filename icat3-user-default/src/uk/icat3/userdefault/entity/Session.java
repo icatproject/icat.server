@@ -26,7 +26,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import uk.icat3.exceptions.LoginException;
+import uk.icat3.exceptions.SessionException;
 
 
 /**
@@ -77,8 +77,8 @@ public class Session implements Serializable {
     }
     
     //@PostLoad
-    public void postLoad() throws LoginException {
-        if(expireDateTime.after(new Date())) throw new LoginException(getUserSessionId()+" has expired");
+    public void isValid() throws SessionException {
+        if(expireDateTime.before(new Date()) throw new SessionException("Session id:" getUserSessionId()+" has expired");
     }
     
     /** Creates a new instance of Session */
