@@ -78,7 +78,7 @@ public class Session implements Serializable {
     
     //@PostLoad
     public void isValid() throws SessionException {
-        if(expireDateTime.before(new Date()) throw new SessionException("Session id:" getUserSessionId()+" has expired");
+        if(expireDateTime.before(new Date())) throw new SessionException("Session id:"+ getUserSessionId()+" has expired");
     }
     
     /** Creates a new instance of Session */
