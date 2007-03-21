@@ -18,6 +18,7 @@ import org.globus.common.CoGProperties;
 import java.security.cert.X509Certificate;
 import java.security.PrivateKey;
 import org.apache.log4j.*;
+
 /**
  *
  * @author  gjd37
