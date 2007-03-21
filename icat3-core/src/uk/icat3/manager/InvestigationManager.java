@@ -12,11 +12,11 @@ package uk.icat3.manager;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 
 import uk.icat3.security.GateKeeper;
@@ -47,7 +47,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds, InvestigationInclude includes, EntityManager manager) throws InsufficientPrivilegesException, EntityNotFoundException {
+    public static Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds, InvestigationInclude includes, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         log.trace("getInvestigations("+userId+", "+investigationIds+", EntityManager)");
         
         Collection<Investigation> investigations = new ArrayList<Investigation>();
@@ -81,7 +81,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return A {@link Investigation} investigation object
      */
-    public static Investigation getInvestigation(String userId, Long investigationId, EntityManager manager) throws InsufficientPrivilegesException, EntityNotFoundException {
+    public static Investigation getInvestigation(String userId, Long investigationId, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         Collection<Long> investigationIds = new ArrayList<Long>();
         investigationIds.add(investigationId);
         return getInvestigations(userId, investigationIds, InvestigationInclude.NONE, manager).iterator().next();
@@ -98,7 +98,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return collection of {@link Investigation} investigation objects
      */
-    public static  Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds, EntityManager manager) throws InsufficientPrivilegesException, EntityNotFoundException {
+    public static  Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         return getInvestigations(userId, investigationIds, InvestigationInclude.NONE, manager);
     }
     ////////////////////    End of get Commands    /////////////////////////
@@ -116,7 +116,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void deleteInvestigation(String userId, Investigation investigation, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static void deleteInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         
         deleteInvestigation(userId, investigation.getId(), manager);
         
@@ -132,7 +132,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void deleteInvestigation(String userId, Long investigationId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static void deleteInvestigation(String userId, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteInvestigation("+userId+", "+investigationId+", EntityManager)");
         
         Investigation investigation = checkInvestigation(investigationId, manager);
@@ -159,7 +159,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void deleteInvestigations(String userId, Collection<Long> investigationIds, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static void deleteInvestigations(String userId, Collection<Long> investigationIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteInvestigations("+userId+", "+investigationIds+", EntityManager)");
         
         for(Long investigationId : investigationIds){
@@ -179,7 +179,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return dummy boolean
      */
-    public static boolean deleteInvestigations(String userId, Collection<Investigation> investigations, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static boolean deleteInvestigations(String userId, Collection<Investigation> investigations, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteInvestigations("+userId+", "+investigations+", EntityManager)");
         
         for(Investigation investigation : investigations){
@@ -203,7 +203,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void updateInvestigation(String userId, Investigation investigation, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException, ValidationException{
+    public static void updateInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateInvestigation("+userId+", "+investigation+", EntityManager)");
         
         //check to see if DataSet exists, dont need the returned dataset as merging
@@ -238,7 +238,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void addDataSet(String userId, Dataset dataSet, Long investigationId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static void addDataSet(String userId, Dataset dataSet, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("addDataSet("+userId+", "+dataSet+" "+investigationId+", EntityManager)");
         
         Collection<Dataset> datasets = new ArrayList<Dataset>();
@@ -257,7 +257,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void addDataSets(String userId, Collection<Dataset> dataSets, Long investigationId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static void addDataSets(String userId, Collection<Dataset> dataSets, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("addDataSet("+userId+", "+dataSets+" "+investigationId+", EntityManager)");
         
         //check investigation exist

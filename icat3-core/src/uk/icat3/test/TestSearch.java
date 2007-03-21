@@ -58,14 +58,14 @@ public class TestSearch {
         
         
         // Begin transaction
-        em.getTransaction().begin();
+        //em.getTransaction().begin();
         
         
     }
     
     protected static void tearDown(){
         // Commit the transaction
-        em.getTransaction().commit();
+       // em.getTransaction().commit();
         
         em.close();
     }
@@ -454,7 +454,7 @@ public class TestSearch {
         
         // ts.seachBySurname("JAMES", "HEALY");
         
-        ts.seachByUserID("JAMES", "JAMES");
+        //ts.seachByUserID("JAMES", "JAMES");
         
         // ts.seachByUserID("JAMES", "JAMES");
         
@@ -491,7 +491,7 @@ public class TestSearch {
         
         //       ts.getAllKeywords("JAMES");
         //
-        // ts.getUserKeywords("JAMES-JAMES", "alf");
+         ts.getUserKeywords("JAMES-JAMES", "alf");
         
         // ts.getUserInvestigations("JAMES");
         

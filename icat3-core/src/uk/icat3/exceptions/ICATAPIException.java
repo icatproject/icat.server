@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import javax.ejb.ApplicationException;
 
 /*
  * ICATAPIException.java
@@ -18,6 +19,8 @@ import java.net.UnknownHostException;
  * @author df01
  * @version 1.0
  */
+//means that the transaction rolls back on this application exception (default is false)
+@ApplicationException(rollback=true)
 public class ICATAPIException extends java.lang.Exception {
     
     /** A wrapped Throwable */

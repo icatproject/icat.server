@@ -13,11 +13,11 @@ package uk.icat3.manager;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
@@ -39,7 +39,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void deleteDataFile(String userId, Datafile dataFile, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static void deleteDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         
         deleteDataFile(userId, dataFile.getId(), manager);
         
@@ -55,7 +55,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void deleteDataFile(String userId, Long dataFileId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static void deleteDataFile(String userId, Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataFile("+userId+", "+dataFileId+", EntityManager)");
         
         Datafile dataFile = checkDataFile(dataFileId, manager);
@@ -84,7 +84,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void deleteDataFiles(String userId, Collection<Long> dataFileIds, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static void deleteDataFiles(String userId, Collection<Long> dataFileIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataFiles("+userId+", "+dataFileIds+", EntityManager)");
         
         for(Long dataFileId : dataFileIds){
@@ -104,7 +104,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return
      */
-    public static boolean deleteDataFiles(String userId, Collection<Datafile> dataFiles, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static boolean deleteDataFiles(String userId, Collection<Datafile> dataFiles, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataFiles("+userId+", "+dataFiles+", EntityManager)");
         
         for(Datafile dataFile : dataFiles){
@@ -123,7 +123,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void updateDataFile(String userId, Datafile dataFile, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException, ValidationException{
+    public static void updateDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateDataFile("+userId+", "+dataFile+", EntityManager)");
         
         //check to see if DataFile exists, dont need the returned DataFile as merging
@@ -157,7 +157,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void addDataFile(String userId, Datafile dataFile, Long datasetId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static void addDataFile(String userId, Datafile dataFile, Long datasetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("addDataFile("+userId+", "+dataFile+" "+datasetId+", EntityManager)");
         
         Collection<Datafile> dataFiles = new ArrayList<Datafile>();
@@ -177,7 +177,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void addDataFiles(String userId, Collection<Datafile> dataFiles, Long datasetId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static void addDataFiles(String userId, Collection<Datafile> dataFiles, Long datasetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("addDataFile("+userId+", "+dataFiles+" "+datasetId+", EntityManager)");
         
         //check dataset exist
@@ -201,7 +201,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return
      */
-    public static Collection<Datafile> getDataFiles(String userId, Collection<Long> dataFileIds, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static Collection<Datafile> getDataFiles(String userId, Collection<Long> dataFileIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("getDataFile("+userId+", "+dataFileIds+" EntityManager)");
         
         Collection<Datafile> dataFiles = new ArrayList<Datafile>();
@@ -232,7 +232,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return
      */
-    public static Collection<Datafile> getDataFile(String userId, Long dataFileId, EntityManager manager) throws EntityNotFoundException, InsufficientPrivilegesException{
+    public static Collection<Datafile> getDataFile(String userId, Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         Collection<Long> dataFiles = new ArrayList<Long>();
         dataFiles.add(dataFileId);
         

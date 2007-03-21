@@ -11,11 +11,11 @@ package uk.icat3.manager;
 
 import java.util.Collection;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.InvestigationInclude;
 
@@ -98,6 +98,8 @@ public class ManagerUtil {
         }
         
         //set the investigation includes in the class
+        //This is because of JAXWS, it would down load all of the relationships with out this workaround
+        // See in Investigation.getInvestigatorCollection_() method
         for(Investigation investigation : investigations){
             investigation.setInvestigationInclude(include);
             if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString()) || include.toString().equals(InvestigationInclude.ALL.toString())){                
@@ -153,10 +155,10 @@ public class ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException
      * @return Investigation if found
      */
-    protected static Investigation checkInvestigation(Long investigationId, EntityManager manager) throws EntityNotFoundException {
+    protected static Investigation checkInvestigation(Long investigationId, EntityManager manager) throws NoSuchObjectFoundException {
         Investigation investigation = manager.find(Investigation.class, investigationId);
         //check if the id exists in the database
-        if(investigation == null) throw new EntityNotFoundException("Investigation: id: "+investigationId+" not found.");
+        if(investigation == null) throw new NoSuchObjectFoundException("Investigation: id: "+investigationId+" not found.");
         
         log.trace("Investigation: id: "+investigationId+" exists in the database");
         
@@ -172,10 +174,10 @@ public class ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException
      * @return Dataset if found
      */
-    protected static Dataset checkDataSet(Long datasetId, EntityManager manager) throws EntityNotFoundException {
+    protected static Dataset checkDataSet(Long datasetId, EntityManager manager) throws NoSuchObjectFoundException {
         Dataset dataset = manager.find(Dataset.class, datasetId);
         //check if the id exists in the database
-        if(dataset == null) throw new EntityNotFoundException("Dataset: id: "+datasetId+" not found.");
+        if(dataset == null) throw new NoSuchObjectFoundException("Dataset: id: "+datasetId+" not found.");
         
         log.trace("DataSet: id: "+datasetId+" exists in the database");
         
@@ -191,10 +193,10 @@ public class ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException
      * @return Datafile if found
      */
-    protected static Datafile checkDataFile(Long dataFileId, EntityManager manager) throws EntityNotFoundException {
+    protected static Datafile checkDataFile(Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException {
         Datafile dataFile = manager.find(Datafile.class, dataFileId);
         //check if the id exists in the database
-        if(dataFile == null) throw new EntityNotFoundException("DataFile: id: "+dataFileId+" not found.");
+        if(dataFile == null) throw new NoSuchObjectFoundException("DataFile: id: "+dataFileId+" not found.");
         
         log.trace("DataFile: id: "+dataFileId+" exists in the database");
         
