@@ -12,7 +12,6 @@ package uk.icat3.entity;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.CascadeType;
@@ -21,6 +20,8 @@ import javax.persistence.ColumnResult;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityResult;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -29,6 +30,7 @@ import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.SqlResultSetMapping;
 import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
@@ -82,13 +84,15 @@ import uk.icat3.util.Queries;
     
 })
 @SqlResultSetMappings({
-    @SqlResultSetMapping(name="investigationMapping",entities={@EntityResult(entityClass=Investigation.class)}), 
-    @SqlResultSetMapping(name="investigationIdMapping",columns={@ColumnResult(name="ID")})    
+    @SqlResultSetMapping(name="investigationMapping",entities={@EntityResult(entityClass=Investigation.class)}),
+    @SqlResultSetMapping(name="investigationIdMapping",columns={@ColumnResult(name="ID")})
 })
 @XmlRootElement
+@SequenceGenerator(name="INVESTIGATION_SEQ",sequenceName="INVESTIGATION_ID_SEQ",allocationSize=1)
 public class Investigation extends EntityBaseBean implements Serializable {
     
     @Id
+    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="INVESTIGATION_SEQ")   
     @Column(name = "ID", nullable = false)
     private Long id;
     
@@ -111,7 +115,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     private String bcatInvStr;
     
     @Column(name = "GRANT_ID")
-    private BigInteger grantId;
+    private Long grantId;
     
     @Column(name = "RELEASE_DATE")
     @Temporal(TemporalType.TIMESTAMP)
@@ -305,7 +309,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the grantId of this Investigation.
      * @return the grantId
      */
-    public BigInteger getGrantId() {
+    public Long getGrantId() {
         return this.grantId;
     }
     
@@ -313,7 +317,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Sets the grantId of this Investigation to the specified value.
      * @param grantId the new grantId
      */
-    public void setGrantId(BigInteger grantId) {
+    public void setGrantId(Long grantId) {
         this.grantId = grantId;
     }
     
@@ -404,7 +408,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Gets the instrument of this Investigation.
      * @return the instrument
      */
-    
     public Instrument getInstrument() {
         return this.instrument;
     }
@@ -749,9 +752,27 @@ public class Investigation extends EntityBaseBean implements Serializable {
         Field[] allFields = this.getClass().getDeclaredFields();
         //all subclasses should use this line below
         //Field[] allFields = getClass().getDeclaredFields();
-        for (int i = 0; i < allFields.length; i++) {
+        outer:
+            for (int i = 0; i < allFields.length; i++) {
             //get name of field
             String fieldName = allFields[i].getName();
+            
+            //check if field is labeled id and generateValue (primary key, then it can be null)
+            boolean id = false;
+            boolean generateValue = false;
+            
+            for (Annotation a : allFields[i].getDeclaredAnnotations()) {
+                if(a.annotationType().getName().equals(javax.persistence.Id.class.getName())){
+                    id = true;     }
+                if(a.annotationType().getName().equals(javax.persistence.GeneratedValue.class.getName())){
+                    generateValue = true;
+                }
+                if(generateValue && id) {
+                    log.trace(getClass().getSimpleName()+": "+fieldName+" is auto generated id value, no need to check.");
+                    continue outer;
+                }
+            }
+            
             //now check all annoatations
             for (Annotation a : allFields[i].getDeclaredAnnotations()) {
                 //if this means its a none null column field
@@ -771,7 +792,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
                     }
                 }
             }
-        }
+            }
         
         //ok here
         return super.isValid();

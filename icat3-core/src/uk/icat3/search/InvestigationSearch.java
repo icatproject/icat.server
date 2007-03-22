@@ -58,7 +58,7 @@ public class InvestigationSearch extends ManagerUtil {
         }
         //turn into longs
         Collection<Long> investigationsIds = new ArrayList<Long>();
-        for(BigDecimal bd : investigationsId){          
+        for(BigDecimal bd : investigationsId){
             investigationsIds.add(bd.longValue());
         }
         return investigationsIds;
@@ -164,7 +164,7 @@ public class InvestigationSearch extends ManagerUtil {
             }
         }
         
-         //add all the investigation information to the list of investigations
+        //add all the investigation information to the list of investigations
         getInvestigationInformation(investigations,include);
         
         
@@ -394,14 +394,14 @@ public class InvestigationSearch extends ManagerUtil {
             if(advanDTO.getRunStart() != null) query = query.setParameter("lower",advanDTO.getRunStart());
             else query = query.setParameter("lower",0L);
             
-             //dates need to be added
+            //dates need to be added
             query.setParameter("startDate",advanDTO.getYearRangeStart());
             query.setParameter("endDate",advanDTO.getYearRangeEnd());
             query.setParameter("datafile_name",advanDTO.getDatafileName());
         }
         //set data file name
         if(advanDTO.isDatFileParameters()){
-             //dates need to be added
+            //dates need to be added
             query.setParameter("startDate",advanDTO.getYearRangeStart());
             query.setParameter("endDate",advanDTO.getYearRangeEnd());
             query.setParameter("datafile_name",advanDTO.getDatafileName());
@@ -435,7 +435,7 @@ public class InvestigationSearch extends ManagerUtil {
         if(advanDTO.getSampleName() != null){
             query.setParameter("sampleName",advanDTO.getSampleName());
         }
-                
+        
         log.trace("DYNAMIC SQL: "+SQL);
         
         if(number_results < 0){
@@ -445,7 +445,7 @@ public class InvestigationSearch extends ManagerUtil {
             investigations = query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         
-         //add all the investigation information to the list of investigations
+        //add all the investigation information to the list of investigations
         getInvestigationInformation(investigations,advanDTO.getInvestigationInclude());
         
         return investigations;
@@ -564,6 +564,8 @@ public class InvestigationSearch extends ManagerUtil {
                     "FACILITY_CYCLE HAVING Count(*) = ?number_keywords";
         }
         
+        SQL = SQL +" ORDER BY TITLE ASC";
+        
         log.info("DYNAMIC SQL GENERATED: "+SQL);
         
         //set query with investigation as entity object
@@ -591,6 +593,7 @@ public class InvestigationSearch extends ManagerUtil {
             investigations = query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         
+        log.trace("number of investigations returned is: "+investigations.size());
         //add all the investigation information to the list of investigations
         getInvestigationInformation(investigations,include);
         

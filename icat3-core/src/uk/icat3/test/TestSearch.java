@@ -51,7 +51,8 @@ public class TestSearch {
     }
     
     protected static void setUp(){
-        emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
+        // emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
+        emf = Persistence.createEntityManagerFactory("icat3-isis");
         em = emf.createEntityManager();
         EntityManagerResource.getInstance().set(em);
         
@@ -66,7 +67,7 @@ public class TestSearch {
     
     protected static void tearDown(){
         // Commit the transaction
-       // em.getTransaction().commit();
+        // em.getTransaction().commit();
         
         em.close();
     }
@@ -78,6 +79,20 @@ public class TestSearch {
         //test code here
         log.info("Testing");
         Collection<Investigation> investigations = InvestigationManager.getInvestigations(userId, ids, em);
+        
+        for(Investigation investigation : investigations){
+            log.info(investigation.getId());
+        }
+        
+        tearDown();
+        
+    }
+      public void getMyInvestigations(String userId) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+        setUp();
+        
+        //test code here
+        log.info("getMyInvestigations");
+        Collection<Investigation> investigations = InvestigationSearch.getUsersInvestigations(userId,  em);
         
         for(Investigation investigation : investigations){
             log.info(investigation.getId());
@@ -135,7 +150,7 @@ public class TestSearch {
         
     }
     
-    public  void seachByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, InvestigationInclude includes) throws Exception {
+    public void seachByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, InvestigationInclude includes) throws Exception {
         
         setUp();
         
@@ -157,7 +172,9 @@ public class TestSearch {
         
         //test code here
         log.info("Testing");
-        Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(userId,keywords, em);
+        Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(userId, keywords,LogicalOperator.AND, InvestigationInclude.NONE, false, true, 0, 500, em);
+        
+        //Collection<Investigation> investigations  = InvestigationSearch.searchByKeywords(userId,keywords,em);
         
         for(Investigation investigation : investigations){
             log.info(investigation.getId()+" "+investigation.getTitle());
@@ -434,8 +451,9 @@ public class TestSearch {
         Collection<String> keywords  =   new ArrayList<String>();
         
         //isis
+        keywords.add("isis");
+        
         keywords.add("calibration");
-        //    keywords.add("isis");
         // ts.seachByKeywords("gjd37", keywords, LogicalOperator.AND, false, InvestigationUtil.ALL);
         // ts.seachByKeywords("JAMES-JAMES", keywords);
         ///  get Investigations ////
@@ -451,7 +469,9 @@ public class TestSearch {
         
         
         //keywords.add("ccw");
-        //  ts.seachByKeywords("JAMES", keywords);
+       // ts.seachByKeywords("JAMES-JAMES", keywords);
+        
+        ts.getMyInvestigations("JAMES-JAMES");
         
         // ts.seachBySurname("JAMES", "HEALY");
         
@@ -492,7 +512,7 @@ public class TestSearch {
         
         //       ts.getAllKeywords("JAMES");
         //
-         ts.getUserKeywords("JAMES-JAMES", "alf");
+        //    ts.getUserKeywords("JAMES-JAMES", "alf");
         
         // ts.getUserInvestigations("JAMES");
         

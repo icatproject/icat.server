@@ -77,10 +77,11 @@ import uk.icat3.exceptions.ValidationException;
     
 })
 @XmlRootElement
+@SequenceGenerator(name="DATAFILE_SEQ",sequenceName="DATAFILE_ID_SEQ",allocationSize=1)
 public class Datafile extends EntityBaseBean implements Serializable {
     
     @Id
-    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="DATAFILE_SEQUENCE")
+    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="DATAFILE_SEQ")
     @Column(name = "ID", nullable = false)
     private Long id;
     

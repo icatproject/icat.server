@@ -26,6 +26,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -49,10 +50,11 @@ import uk.icat3.util.DatasetInclude;
     @NamedQuery(name = "Dataset.findByModId", query = "SELECT d FROM Dataset d WHERE d.modId = :modId")
 })
 @XmlRootElement
+@SequenceGenerator(name="DATASET_SEQ",sequenceName="DATASET_ID_SEQ",allocationSize=1)
 public class Dataset extends EntityBaseBean implements Serializable {
     
     @Id
-    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="DATASET_SEQUENCE")
+    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="DATASET_SEQ")
     @Column(name = "ID", nullable = false)
     private Long id;
     

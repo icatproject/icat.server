@@ -10,66 +10,68 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 /**
  * Entity class DatasetLevelPermission
- * 
+ *
  * @author gjd37
  */
 @Entity
 @Table(name = "DATASET_LEVEL_PERMISSION")
 @NamedQueries( {
-        @NamedQuery(name = "DatasetLevelPermission.findById", query = "SELECT d FROM DatasetLevelPermission d WHERE d.id = :id"),
-        @NamedQuery(name = "DatasetLevelPermission.findByPrmAdmin", query = "SELECT d FROM DatasetLevelPermission d WHERE d.prmAdmin = :prmAdmin"),
-        @NamedQuery(name = "DatasetLevelPermission.findByPrmCreate", query = "SELECT d FROM DatasetLevelPermission d WHERE d.prmCreate = :prmCreate"),
-        @NamedQuery(name = "DatasetLevelPermission.findByPrmRead", query = "SELECT d FROM DatasetLevelPermission d WHERE d.prmRead = :prmRead"),
-        @NamedQuery(name = "DatasetLevelPermission.findByPrmUpdate", query = "SELECT d FROM DatasetLevelPermission d WHERE d.prmUpdate = :prmUpdate"),
-        @NamedQuery(name = "DatasetLevelPermission.findByPrmDelete", query = "SELECT d FROM DatasetLevelPermission d WHERE d.prmDelete = :prmDelete"),
-        @NamedQuery(name = "DatasetLevelPermission.findByModTime", query = "SELECT d FROM DatasetLevelPermission d WHERE d.modTime = :modTime"),
-        @NamedQuery(name = "DatasetLevelPermission.findByModId", query = "SELECT d FROM DatasetLevelPermission d WHERE d.modId = :modId")
-    })
+    @NamedQuery(name = "DatasetLevelPermission.findById", query = "SELECT d FROM DatasetLevelPermission d WHERE d.id = :id"),
+    @NamedQuery(name = "DatasetLevelPermission.findByPrmAdmin", query = "SELECT d FROM DatasetLevelPermission d WHERE d.prmAdmin = :prmAdmin"),
+    @NamedQuery(name = "DatasetLevelPermission.findByPrmCreate", query = "SELECT d FROM DatasetLevelPermission d WHERE d.prmCreate = :prmCreate"),
+    @NamedQuery(name = "DatasetLevelPermission.findByPrmRead", query = "SELECT d FROM DatasetLevelPermission d WHERE d.prmRead = :prmRead"),
+    @NamedQuery(name = "DatasetLevelPermission.findByPrmUpdate", query = "SELECT d FROM DatasetLevelPermission d WHERE d.prmUpdate = :prmUpdate"),
+    @NamedQuery(name = "DatasetLevelPermission.findByPrmDelete", query = "SELECT d FROM DatasetLevelPermission d WHERE d.prmDelete = :prmDelete"),
+    @NamedQuery(name = "DatasetLevelPermission.findByModTime", query = "SELECT d FROM DatasetLevelPermission d WHERE d.modTime = :modTime"),
+    @NamedQuery(name = "DatasetLevelPermission.findByModId", query = "SELECT d FROM DatasetLevelPermission d WHERE d.modId = :modId")
+})
+@SequenceGenerator(name="DATASET_LEVEL_PERMISSION_SEQ",sequenceName="DATASET_LEVEL_PERMISSION_ID_SEQ",allocationSize=1)
 public class DatasetLevelPermission extends EntityBaseBean implements Serializable {
-
+    
     @Id
+    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="DATASET_LEVEL_PERMISSION_SEQ")
     @Column(name = "ID", nullable = false)
     private Long id;
-
+    
     @Column(name = "PRM_ADMIN", nullable = false)
     private short prmAdmin;
-
+    
     @Column(name = "PRM_CREATE", nullable = false)
     private short prmCreate;
-
+    
     @Column(name = "PRM_READ", nullable = false)
     private short prmRead;
-
+    
     @Column(name = "PRM_UPDATE", nullable = false)
     private short prmUpdate;
-
+    
     @Column(name = "PRM_DELETE", nullable = false)
     private short prmDelete;
-
-        @Column(name = "MOD_ID", nullable = false)
+    
+    @Column(name = "MOD_ID", nullable = false)
     private String modId;
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetLevelPermission")
     private Collection<AccessGroupDlp> accessGroupDlpCollection;
-
+    
     @JoinColumn(name = "DATASET_ID", referencedColumnName = "ID")
     @ManyToOne
     private Dataset datasetId;
@@ -77,7 +79,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     /** Creates a new instance of DatasetLevelPermission */
     public DatasetLevelPermission() {
     }
-
+    
     /**
      * Creates a new instance of DatasetLevelPermission with the specified values.
      * @param id the id of the DatasetLevelPermission
@@ -85,7 +87,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public DatasetLevelPermission(Long id) {
         this.id = id;
     }
-
+    
     /**
      * Creates a new instance of DatasetLevelPermission with the specified values.
      * @param id the id of the DatasetLevelPermission
@@ -107,7 +109,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
         this.modTime = modTime;
         this.modId = modId;
     }
-
+    
     /**
      * Gets the id of this DatasetLevelPermission.
      * @return the id
@@ -115,7 +117,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public Long getId() {
         return this.id;
     }
-
+    
     /**
      * Sets the id of this DatasetLevelPermission to the specified value.
      * @param id the new id
@@ -123,7 +125,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public void setId(Long id) {
         this.id = id;
     }
-
+    
     /**
      * Gets the prmAdmin of this DatasetLevelPermission.
      * @return the prmAdmin
@@ -131,7 +133,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public short getPrmAdmin() {
         return this.prmAdmin;
     }
-
+    
     /**
      * Sets the prmAdmin of this DatasetLevelPermission to the specified value.
      * @param prmAdmin the new prmAdmin
@@ -139,7 +141,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public void setPrmAdmin(short prmAdmin) {
         this.prmAdmin = prmAdmin;
     }
-
+    
     /**
      * Gets the prmCreate of this DatasetLevelPermission.
      * @return the prmCreate
@@ -147,7 +149,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public short getPrmCreate() {
         return this.prmCreate;
     }
-
+    
     /**
      * Sets the prmCreate of this DatasetLevelPermission to the specified value.
      * @param prmCreate the new prmCreate
@@ -155,7 +157,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public void setPrmCreate(short prmCreate) {
         this.prmCreate = prmCreate;
     }
-
+    
     /**
      * Gets the prmRead of this DatasetLevelPermission.
      * @return the prmRead
@@ -163,7 +165,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public short getPrmRead() {
         return this.prmRead;
     }
-
+    
     /**
      * Sets the prmRead of this DatasetLevelPermission to the specified value.
      * @param prmRead the new prmRead
@@ -171,7 +173,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public void setPrmRead(short prmRead) {
         this.prmRead = prmRead;
     }
-
+    
     /**
      * Gets the prmUpdate of this DatasetLevelPermission.
      * @return the prmUpdate
@@ -179,7 +181,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public short getPrmUpdate() {
         return this.prmUpdate;
     }
-
+    
     /**
      * Sets the prmUpdate of this DatasetLevelPermission to the specified value.
      * @param prmUpdate the new prmUpdate
@@ -187,7 +189,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public void setPrmUpdate(short prmUpdate) {
         this.prmUpdate = prmUpdate;
     }
-
+    
     /**
      * Gets the prmDelete of this DatasetLevelPermission.
      * @return the prmDelete
@@ -195,7 +197,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public short getPrmDelete() {
         return this.prmDelete;
     }
-
+    
     /**
      * Sets the prmDelete of this DatasetLevelPermission to the specified value.
      * @param prmDelete the new prmDelete
@@ -203,7 +205,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public void setPrmDelete(short prmDelete) {
         this.prmDelete = prmDelete;
     }
-   
+    
     /**
      * Gets the modId of this DatasetLevelPermission.
      * @return the modId
@@ -211,7 +213,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public String getModId() {
         return this.modId;
     }
-
+    
     /**
      * Sets the modId of this DatasetLevelPermission to the specified value.
      * @param modId the new modId
@@ -219,7 +221,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public void setModId(String modId) {
         this.modId = modId;
     }
-
+    
     /**
      * Gets the accessGroupDlpCollection of this DatasetLevelPermission.
      * @return the accessGroupDlpCollection
@@ -227,7 +229,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public Collection<AccessGroupDlp> getAccessGroupDlpCollection() {
         return this.accessGroupDlpCollection;
     }
-
+    
     /**
      * Sets the accessGroupDlpCollection of this DatasetLevelPermission to the specified value.
      * @param accessGroupDlpCollection the new accessGroupDlpCollection
@@ -235,7 +237,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public void setAccessGroupDlpCollection(Collection<AccessGroupDlp> accessGroupDlpCollection) {
         this.accessGroupDlpCollection = accessGroupDlpCollection;
     }
-
+    
     /**
      * Gets the datasetId of this DatasetLevelPermission.
      * @return the datasetId
@@ -243,7 +245,7 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public Dataset getDatasetId() {
         return this.datasetId;
     }
-
+    
     /**
      * Sets the datasetId of this DatasetLevelPermission to the specified value.
      * @param datasetId the new datasetId
@@ -251,9 +253,9 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
     public void setDatasetId(Dataset datasetId) {
         this.datasetId = datasetId;
     }
-
+    
     /**
-     * Returns a hash code value for the object.  This implementation computes 
+     * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
      */
@@ -263,10 +265,10 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
         hash += (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
-
+    
     /**
-     * Determines whether another object is equal to this DatasetLevelPermission.  The result is 
-     * <code>true</code> if and only if the argument is not null and is a DatasetLevelPermission object that 
+     * Determines whether another object is equal to this DatasetLevelPermission.  The result is
+     * <code>true</code> if and only if the argument is not null and is a DatasetLevelPermission object that
      * has the same id field values as this object.
      * @param object the reference object with which to compare
      * @return <code>true</code> if this object is the same as the argument;
@@ -282,9 +284,9 @@ public class DatasetLevelPermission extends EntityBaseBean implements Serializab
         if (this.id != other.id && (this.id == null || !this.id.equals(other.id))) return false;
         return true;
     }
-
+    
     /**
-     * Returns a string representation of the object.  This implementation constructs 
+     * Returns a string representation of the object.  This implementation constructs
      * that representation based on the id fields.
      * @return a string representation of the object.
      */

@@ -16,12 +16,15 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -42,9 +45,11 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Sample.findByModId", query = "SELECT s FROM Sample s WHERE s.modId = :modId"),
     @NamedQuery(name = "Sample.findByProposalSampleId", query = "SELECT s FROM Sample s WHERE s.proposalSampleId = :proposalSampleId")
 })
+@SequenceGenerator(name="SAMPLE_SEQ",sequenceName="SAMPLE_ID_SEQ",allocationSize=1)
 public class Sample extends EntityBaseBean implements Serializable {
     
     @Id
+    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="SAMPLE_SEQ")
     @Column(name = "ID", nullable = false)
     private Long id;
     
@@ -218,7 +223,7 @@ public class Sample extends EntityBaseBean implements Serializable {
      * Gets the investigationId of this Sample.
      * @return the investigationId
      */
-     @XmlTransient
+    @XmlTransient
     public Investigation getInvestigationId() {
         return this.investigationId;
     }
