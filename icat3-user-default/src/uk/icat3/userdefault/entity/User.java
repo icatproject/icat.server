@@ -10,6 +10,7 @@
 package uk.icat3.userdefault.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.CascadeType;
@@ -19,17 +20,12 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -137,6 +133,9 @@ public class User implements Serializable {
     public void addSession(Session session){
         session.setUserId(this);
         Collection<Session> sessions = this.getSession();
+        if(sessions == null){
+            sessions = new ArrayList<Session>();
+        }
         sessions.add(session);
         this.setSession(sessions);
     }

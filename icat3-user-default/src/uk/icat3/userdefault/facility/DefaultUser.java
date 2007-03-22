@@ -115,7 +115,7 @@ public class DefaultUser implements User {
             //insert proxy into DB
             String sid = insertSessionImpl(username, myproxy_proxy);
             
-            log.info("Logged in for user: "+username+" with sessionid:" +sid);
+            log.info("Logged in for user: "+username+" with sessionid: " +sid);
             return sid;
             
         } catch(NoResultException ex) {

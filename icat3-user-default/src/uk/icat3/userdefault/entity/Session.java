@@ -64,14 +64,18 @@ public class Session implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date modTime;
     
-     @Column(name = "RUN_AS")
+    @Column(name = "RUN_AS")
     private String runAs;
     
     @JoinColumn(name = "USER_ID")
     @ManyToOne
     private User userId;
     
+   /**
+     * Automatically updates deleted and modTime when entity is persisted
+     */
     @PrePersist
+    @PreUpdate
     public void prePersist(){
         modTime = new Date();
     }
@@ -164,11 +168,11 @@ public class Session implements Serializable {
         if(getUserId().getUserId().equalsIgnoreCase("admin")) return true;
         else return false;
     }
-
+    
     public String getRunAs() {
         return runAs;
     }
-
+    
     public void setRunAs(String runAs) {
         this.runAs = runAs;
     }

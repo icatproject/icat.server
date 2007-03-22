@@ -12,8 +12,7 @@
       <property name="toplink.jdbc.password" value="c1sco"/>
     </properties>
   </persistence-unit>
-  
-   <persistence-unit name="icat3-user-testing-defaultPU" transaction-type="RESOURCE_LOCAL">
+  <persistence-unit name="icat3-user-testing-defaultPU" transaction-type="RESOURCE_LOCAL">
     <provider>oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider</provider>
     <class>uk.icat3.userdefault.entity.ProxyServers</class>
     <class>uk.icat3.userdefault.entity.User</class>
@@ -23,6 +22,7 @@
       <property name="toplink.jdbc.user" value="icat_scratch"/>
       <property name="toplink.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
       <property name="toplink.jdbc.password" value="c1sco"/>
+      <property name="toplink.ddl-generation" value="drop-and-create-tables"/>
     </properties>
   </persistence-unit>
 </persistence>
