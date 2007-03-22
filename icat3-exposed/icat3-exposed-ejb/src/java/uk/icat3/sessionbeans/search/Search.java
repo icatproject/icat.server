@@ -50,14 +50,15 @@ public class Search extends EJBObject {
      * @return
      */
     @WebMethod
-    public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include) throws SessionException {
+    public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy) throws SessionException {
         log.trace("searchByKeywords("+sessionId+", "+keywords+")");
         
         //for user bean get userId
         String userId = user.getUserId(sessionId);
         
         //now do the search using the core API
-        return InvestigationSearch.searchByKeywords(userId, keywords,LogicalOperator.AND,include, false, true,0, 500, manager);
+         return InvestigationSearch.searchByKeywords(userId, keywords,LogicalOperator.AND, include, fuzzy, true, 0, 500, manager);
+        //return InvestigationSearch.searchByKeywords(userId, keywords, manager);
     }
     
     @WebMethod
@@ -96,6 +97,17 @@ public class Search extends EJBObject {
     }
     
     @WebMethod
+    public Collection<Investigation> searchMyInvestigations(String sessionId) throws SessionException {
+        log.trace("searchUser("+sessionId+")");
+        
+        //for user bean get userId
+        String userId = user.getUserId(sessionId);
+        
+        return InvestigationSearch.getUsersInvestigations(userId, manager);
+        
+    }
+    
+      @WebMethod
     public Collection<Investigation> searchUser(String sessionId, String userSearch) throws SessionException {
         log.trace("searchUser("+sessionId+")");
         
@@ -114,7 +126,7 @@ public class Search extends EJBObject {
         //for user bean get userId
         String userId = user.getUserId(sessionId);
         
-        return KeywordSearch.getKeywordsForUser(userId, "", 500, manager);          
+        return KeywordSearch.getKeywordsForUser(userId, "", 500, manager);
     }
 }
 

@@ -25,18 +25,14 @@ public abstract class EJBObject {
     
     @PersistenceContext(unitName="icat3-exposed")
     protected EntityManager manager;
-    
-    @PersistenceContext(unitName="icat3-exposed-user")
-    protected EntityManager managerUser;
+       
     
     // For junit testing only
     public void setEntityManager(EntityManager manager){
         this.manager = manager;
     }
     
-    public void setEntityManagerUser(EntityManager manager){
-        this.managerUser = manager;
-    }
+    
     
     public Object mergeEntity(Object entity) {
         return manager.merge(entity);
@@ -70,7 +66,7 @@ public abstract class EJBObject {
     /**
      * AOP all method, log time of method call.
      */
- //   @AroundInvoke
+    @AroundInvoke
     public Object logMethods(InvocationContext ctx)
     throws Exception {
         
