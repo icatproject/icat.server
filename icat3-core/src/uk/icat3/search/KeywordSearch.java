@@ -64,9 +64,9 @@ public class KeywordSearch {
         else startKeyword = "%";
         
         if(numberReturned < 0){
-            return  manager.createNamedQuery(KEYWORDS_NATIVE_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).getResultList();
+            return  (Collection<String>)manager.createNamedQuery(KEYWORDS_NATIVE_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).getResultList();
         } else {
-            return  manager.createNamedQuery(KEYWORDS_NATIVE_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).setMaxResults(numberReturned).getResultList();
+            return  (Collection<String>)manager.createNamedQuery(KEYWORDS_NATIVE_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).setMaxResults(numberReturned).getResultList();
         }
     }
     
@@ -87,13 +87,13 @@ public class KeywordSearch {
         Collection<String> keywords  = null;
         
         if(type.toString().equals(KeywordType.ALL.toString())){
-            keywords = manager.createNamedQuery(ALLKEYWORDS).getResultList();
+            keywords = (Collection<String>)manager.createNamedQuery(ALLKEYWORDS).getResultList();
         } else if(type.toString().equals(KeywordType.ALPHA.toString())){
-            keywords = manager.createNamedQuery(ALLKEYWORDS_NATIVE_ALPHA).getResultList();
+            keywords = (Collection<String>)manager.createNamedQuery(ALLKEYWORDS_NATIVE_ALPHA).getResultList();
         } else if(type.toString().equals(KeywordType.ALPHA_NUMERIC.toString())){
-            keywords = manager.createNamedQuery(ALLKEYWORDS_NATIVE_ALPHA_NUMERIC).getResultList();
+            keywords = (Collection<String>)manager.createNamedQuery(ALLKEYWORDS_NATIVE_ALPHA_NUMERIC).getResultList();
         } else {
-            keywords = manager.createNamedQuery(ALLKEYWORDS).getResultList();
+            keywords = (Collection<String>)manager.createNamedQuery(ALLKEYWORDS).getResultList();
         }
         
         return keywords;

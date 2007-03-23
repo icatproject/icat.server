@@ -15,7 +15,7 @@ package uk.icat3.util;
  */
 public abstract class ThreadLocalResource<T> {
     
-    private final ThreadLocal<T> resource = new ThreadLocal( );
+    private final ThreadLocal<T> resource = new ThreadLocal<T>( );
     
     public void set( T em ) {
         resource.set(em);

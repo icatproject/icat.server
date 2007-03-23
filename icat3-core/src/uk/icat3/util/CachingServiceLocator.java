@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 public class CachingServiceLocator {
     
     
-    private Map cache;
+    private Map <String,EntityManagerFactory> cache;
     private  static Logger log = Logger.getLogger(CachingServiceLocator.class);
     
     private static CachingServiceLocator me;
@@ -36,7 +36,7 @@ public class CachingServiceLocator {
     
     private CachingServiceLocator() throws NamingException  {
         
-        cache = Collections.synchronizedMap(new HashMap());
+        cache = Collections.synchronizedMap(new HashMap<String,EntityManagerFactory>());
     }
     
     public static CachingServiceLocator getInstance() {

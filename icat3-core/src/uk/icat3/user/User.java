@@ -50,6 +50,21 @@ public interface User {
      *                          combination.
      */
     public String login(String username, String password) throws SessionException;
+    
+    /**
+     * Returns a sessionId (authenitcation token) to a user after verification
+     * of correct username and password combination.  If user does not provide
+     * the correct login credentials a {@link SessionException} will be thrown.
+     * 
+     * @param username username/dn of user
+     * @param password of user
+     * @param lifetime of the sesssion
+     * @return sessionId authentication token that user can use in corresponding
+     *                   methods calls without having to provide username and
+     *                   password each time.
+     * @throws SessionException   if user provides an invalid username and password
+     *                          combination.
+     */
     public String login(String username, String password, int lifetime) throws SessionException;
     
     /**
