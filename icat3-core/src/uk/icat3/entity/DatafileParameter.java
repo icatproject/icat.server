@@ -329,14 +329,15 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
         return "uk.icat3.entity.DatafileParameter[datafileParameterPK=" + datafileParameterPK + "]";
     }
     
-    /**
-     * Overrides the isValid function, checks that the parameters and valid for the datafile and is set to numeric or string
-     * @throws ValidationException
-     * @return
+     /**
+     * Method to be overridden if needed to check if the data held in the entity is valid.
+     * This method checks whether all the fields which are marked as not null are not null
+     *
+     * @throws ValidationException if validation error.
+     * @return true if validation is correct,
      */
     @Override
-    public boolean isValid(EntityManager manager) throws ValidationException {
-        if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
+    public boolean isValid() throws ValidationException {
         
         //get public the fields in class
         Field[] allFields = this.getClass().getDeclaredFields();
@@ -384,6 +385,22 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
             }
             }
         
+        //check private key
+        datafileParameterPK.isValid();   
+        
+        //ok here
+        return super.isValid();
+    }
+    
+    /**
+     * Overrides the isValid function, checks that the parameters and valid for the datafile and is set to numeric or string
+     * @throws ValidationException
+     * @return
+     */
+    @Override
+    public boolean isValid(EntityManager manager) throws ValidationException {
+        if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
+                      
         //check valid
         String paramName = this.getDatafileParameterPK().getName();
         String paramUnits = this.getDatafileParameterPK().getUnits();
@@ -410,8 +427,7 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
             if(this.getNumericValue() != null) throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" must be a string value only.");
             
         }
-        
-        
+              
         //once here then its valid
         return isValid();
     }

@@ -378,6 +378,10 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
                 }
             }
             }
+        
+        //check embedded primary key
+        datasetParameterPK.isValid();
+        
         //ok here
         return super.isValid();
     }

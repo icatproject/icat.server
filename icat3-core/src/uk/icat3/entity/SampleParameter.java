@@ -10,6 +10,8 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -21,8 +23,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import uk.icat3.exceptions.ValidationException;
 
 /**
@@ -298,6 +298,69 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     @Override
     public String toString() {
         return "uk.icat3.entity.SampleParameter[sampleParameterPK=" + sampleParameterPK + "]";
+    }
+    
+    /**
+     * Method to be overridden if needed to check if the data held in the entity is valid.
+     * This method checks whether all the fields which are marked as not null are not null
+     *
+     * @throws ValidationException if validation error.
+     * @return true if validation is correct,
+     */
+    @Override
+    public boolean isValid() throws ValidationException {
+        
+        //get public the fields in class
+        Field[] allFields = this.getClass().getDeclaredFields();
+        //all subclasses should use this line below
+        //Field[] allFields = getClass().getDeclaredFields();
+        outer:
+            for (int i = 0; i < allFields.length; i++) {
+            //get name of field
+            String fieldName = allFields[i].getName();
+            
+            //check if field is labeled id and generateValue (primary key, then it can be null)
+            boolean id = false;
+            boolean generateValue = false;
+            
+            for (Annotation a : allFields[i].getDeclaredAnnotations()) {
+                if(a.annotationType().getName().equals(javax.persistence.Id.class.getName())){
+                    id = true;     }
+                if(a.annotationType().getName().equals(javax.persistence.GeneratedValue.class.getName())){
+                    generateValue = true;
+                }
+                if(generateValue && id) {
+                    log.trace(getClass().getSimpleName()+": "+fieldName+" is auto generated id value, no need to check.");
+                    continue outer;
+                }
+            }
+            
+            //now check all annoatations
+            for (Annotation a : allFields[i].getDeclaredAnnotations()) {
+                //if this means its a none null column field
+                if(a.annotationType().getName().equals(
+                        javax.persistence.Column.class.getName()) && a.toString().contains("nullable=false") ){
+                    
+                    //now check if it is null, if so throw error
+                    try {
+                        //get value
+                        if(allFields[i].get(this) == null){
+                            throw new ValidationException(getClass().getSimpleName()+": "+fieldName+" cannot be null.");
+                        } else {
+                            log.trace(getClass().getSimpleName()+": "+fieldName+" is valid");
+                        }
+                    } catch (IllegalAccessException ex) {
+                        log.warn(getClass().getSimpleName()+": "+fieldName+" cannot be accessed.");
+                    }
+                }
+            }
+            }
+        
+        //check private key
+        sampleParameterPK.isValid();   
+        
+        //ok here
+        return super.isValid();
     }
     
        /**
