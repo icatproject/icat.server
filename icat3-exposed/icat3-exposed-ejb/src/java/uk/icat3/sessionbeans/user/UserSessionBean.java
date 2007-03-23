@@ -14,6 +14,8 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import org.apache.log4j.Logger;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.sessionbeans.EJBObject;
@@ -30,6 +32,9 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     
     static Logger log = Logger.getLogger(UserSessionBean.class);
     
+    @PersistenceContext(unitName="icat3-exposed-user")
+    private EntityManager managerUser;
+     
     @WebMethod
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String login(String username, String password) throws SessionException {

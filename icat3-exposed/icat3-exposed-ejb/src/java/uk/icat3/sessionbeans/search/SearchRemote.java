@@ -14,7 +14,8 @@ import uk.icat3.util.InvestigationInclude;
  * This is the business interface for NewSession enterprise bean.
  */
 
-public interface SearchLocal {
+@Remote
+public interface SearchRemote {
     
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy) throws SessionException ;
     
