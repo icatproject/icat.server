@@ -1,5 +1,5 @@
 /*
- * AdvancedSearchDTO.java
+ * AdvancedSearchDetails.java
  *
  * Created on 21 February 2007, 16:00
  *
@@ -17,7 +17,7 @@ import uk.icat3.util.InvestigationInclude;
  *
  * @author gjd37
  */
-public class AdvancedSearchDTO {
+public class AdvancedSearchDetails {
     
     private String investigationName; //inv title
     private Collection<String> investigators; //surname
@@ -32,8 +32,10 @@ public class AdvancedSearchDTO {
     private Collection<String> keywords;
     private InvestigationInclude investigationInclude;
     
-    /** Creates a new instance of AdvancedSearchDTO */
-    public AdvancedSearchDTO() {
+    /**
+     * Creates a new instance of AdvancedSearchDetails
+     */
+    public AdvancedSearchDetails() {
     }
     
     public String getInvestigationName() {

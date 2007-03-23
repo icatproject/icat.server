@@ -24,7 +24,7 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.manager.DataFileManager;
 import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.InvestigationManager;
-import uk.icat3.search.AdvancedSearchDTO;
+import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.InvestigationSearch;
 import uk.icat3.search.KeywordSearch;
@@ -232,7 +232,7 @@ public class TestSearch {
         
     }
     
-    public void seachByAdvanced(String userId, AdvancedSearchDTO dto) throws Exception {
+    public void seachByAdvanced(String userId, AdvancedSearchDetails dto) throws Exception {
         
         setUp();
         
@@ -486,7 +486,7 @@ public class TestSearch {
         
         //   ts.seachByRunNumber("JAMES-JAMES", ins, 2620L,2631L);
         
-        AdvancedSearchDTO dto = new AdvancedSearchDTO();
+        AdvancedSearchDetails dto = new AdvancedSearchDetails();
         
         dto.setInvestigationName("angle scan 0.44");
         Collection<String> inv  =   new ArrayList<String>();

@@ -239,7 +239,7 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager
      * @return collection of {@link Investigation} investigation objects
      */
-    private static Collection<Investigation> searchByAdvancedImpl(String userId, AdvancedSearchDTO advanDTO, int startIndex, int number_results, EntityManager manager){
+    private static Collection<Investigation> searchByAdvancedImpl(String userId, AdvancedSearchDetails advanDTO, int startIndex, int number_results, EntityManager manager){
         if(advanDTO == null) throw new IllegalArgumentException("AdvancedSearchDTO cannot be null");
         log.trace("searchByAdvancedImpl("+userId+", "+advanDTO);
         
@@ -462,7 +462,7 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database     *
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDTO advanDTO, int startIndex, int number_results, EntityManager manager){
+    public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDetails advanDTO, int startIndex, int number_results, EntityManager manager){
         return searchByAdvancedImpl(userId, advanDTO, startIndex, number_results, manager);
     }
     
@@ -475,7 +475,7 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDTO advanDTO, EntityManager manager){
+    public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDetails advanDTO, EntityManager manager){
         return searchByAdvancedImpl(userId, advanDTO, -1, -1, manager);
     }
     
