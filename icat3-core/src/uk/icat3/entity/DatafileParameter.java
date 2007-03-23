@@ -10,6 +10,8 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -336,6 +338,52 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
     public boolean isValid(EntityManager manager) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
         
+        //get public the fields in class
+        Field[] allFields = this.getClass().getDeclaredFields();
+        //all subclasses should use this line below
+        //Field[] allFields = getClass().getDeclaredFields();
+        outer:
+            for (int i = 0; i < allFields.length; i++) {
+            //get name of field
+            String fieldName = allFields[i].getName();
+            
+            //check if field is labeled id and generateValue (primary key, then it can be null)
+            boolean id = false;
+            boolean generateValue = false;
+            
+            for (Annotation a : allFields[i].getDeclaredAnnotations()) {
+                if(a.annotationType().getName().equals(javax.persistence.Id.class.getName())){
+                    id = true;     }
+                if(a.annotationType().getName().equals(javax.persistence.GeneratedValue.class.getName())){
+                    generateValue = true;
+                }
+                if(generateValue && id) {
+                    log.trace(getClass().getSimpleName()+": "+fieldName+" is auto generated id value, no need to check.");
+                    continue outer;
+                }
+            }
+            
+            //now check all annoatations
+            for (Annotation a : allFields[i].getDeclaredAnnotations()) {
+                //if this means its a none null column field
+                if(a.annotationType().getName().equals(
+                        javax.persistence.Column.class.getName()) && a.toString().contains("nullable=false") ){
+                    
+                    //now check if it is null, if so throw error
+                    try {
+                        //get value
+                        if(allFields[i].get(this) == null){
+                            throw new ValidationException(getClass().getSimpleName()+": "+fieldName+" cannot be null.");
+                        } else {
+                            log.trace(getClass().getSimpleName()+": "+fieldName+" is valid");
+                        }
+                    } catch (IllegalAccessException ex) {
+                        log.warn(getClass().getSimpleName()+": "+fieldName+" cannot be accessed.");
+                    }
+                }
+            }
+            }
+        
         //check valid
         String paramName = this.getDatafileParameterPK().getName();
         String paramUnits = this.getDatafileParameterPK().getUnits();
@@ -362,6 +410,7 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
             if(this.getNumericValue() != null) throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" must be a string value only.");
             
         }
+        
         
         //once here then its valid
         return isValid();

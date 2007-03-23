@@ -93,7 +93,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="INVESTIGATION_SEQ")   
-    @Column(name = "ID", nullable = false)
+    @Column(name = "ID", nullable = false)    
     private Long id;
     
     @Column(name = "INV_NUMBER", nullable = false)
@@ -205,6 +205,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * Sets the id of this Investigation to the specified value.
      * @param id the new id
      */
+    @XmlTransient
     public void setId(Long id) {
         this.id = id;
     }

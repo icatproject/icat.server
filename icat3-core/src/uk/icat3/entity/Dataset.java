@@ -437,9 +437,27 @@ public class Dataset extends EntityBaseBean implements Serializable {
         Field[] allFields = this.getClass().getDeclaredFields();
         //all subclasses should use this line below
         //Field[] allFields = getClass().getDeclaredFields();
-        for (int i = 0; i < allFields.length; i++) {
+        outer:
+            for (int i = 0; i < allFields.length; i++) {
             //get name of field
             String fieldName = allFields[i].getName();
+            
+            //check if field is labeled id and generateValue (primary key, then it can be null)
+            boolean id = false;
+            boolean generateValue = false;
+            
+            for (Annotation a : allFields[i].getDeclaredAnnotations()) {
+                if(a.annotationType().getName().equals(javax.persistence.Id.class.getName())){
+                    id = true;     }
+                if(a.annotationType().getName().equals(javax.persistence.GeneratedValue.class.getName())){
+                    generateValue = true;
+                }
+                if(generateValue && id) {
+                    log.trace(getClass().getSimpleName()+": "+fieldName+" is auto generated id value, no need to check.");
+                    continue outer;
+                }
+            }
+            
             //now check all annoatations
             for (Annotation a : allFields[i].getDeclaredAnnotations()) {
                 //if this means its a none null column field
@@ -459,7 +477,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
                     }
                 }
             }
-        }
+            }
         //ok here
         return super.isValid();
     }

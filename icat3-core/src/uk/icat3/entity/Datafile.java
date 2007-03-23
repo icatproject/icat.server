@@ -65,7 +65,7 @@ import uk.icat3.exceptions.ValidationException;
     
     
     ////Added searches for ICAT3 API
-    //@NamedQuery(name = "Datafile.findByRunNumber", query = "SELECT d FROM Datafile d WHERE d.datasetId.investigationId.investigatorCollection.investigatorPK.facilityUserId = :userId AND d.datasetId.investigationId.instrument.name = :instrument AND d.datafileParameterCollection.stringValue = 'run_number' AND d.datafileParameterCollection.numericValue BETWEEN :lower AND :upper")    
+    //@NamedQuery(name = "Datafile.findByRunNumber", query = "SELECT d FROM Datafile d WHERE d.datasetId.investigationId.investigatorCollection.investigatorPK.facilityUserId = :userId AND d.datasetId.investigationId.instrument.name = :instrument AND d.datafileParameterCollection.stringValue = 'run_number' AND d.datafileParameterCollection.numericValue BETWEEN :lower AND :upper")
     @NamedQuery(name = "Datafile.findByRunNumber", query = "SELECT d FROM Datafile d WHERE   d.datafileParameterCollection.stringValue = 'run_number' AND d.datafileParameterCollection.numericValue BETWEEN :lower AND :upper")
 })
 @NamedNativeQueries({
@@ -120,7 +120,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
     
     @Column(name = "SIGNATURE")
     private String signature;
-       
+    
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
     
@@ -360,7 +360,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
     public void setSignature(String signature) {
         this.signature = signature;
     }
-           
+    
     /**
      * Gets the modId of this Datafile.
      * @return the modId
@@ -429,7 +429,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
      * Gets the datasetId of this Datafile.
      * @return the datasetId
      */
-     @XmlTransient
+    @XmlTransient
     public Dataset getDatasetId() {
         return this.datasetId;
     }
@@ -461,7 +461,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
     /**
      * Sets deleted flag on all items owned by this datafiles
      *
-     * @param isDeleted 
+     * @param isDeleted
      */
     public void setCascadeDeleted(boolean isDeleted){
         log.trace("Setting: "+toString()+" to deleted? "+isDeleted);
@@ -477,7 +477,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
             relatedDatafile.setDeleted(deleted);
         }
         
-        this.setDeleted(deleted);       
+        this.setDeleted(deleted);
     }
     
     /**
@@ -521,7 +521,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
         return "uk.icat3.entity.Datafile[id=" + id + "]";
     }
     
-     /**
+    /**
      * Method to be overridden if needed to check if the data held in the entity is valid.
      * This method checks whether all the fields which are marked as not null are not null
      *
@@ -535,9 +535,27 @@ public class Datafile extends EntityBaseBean implements Serializable {
         Field[] allFields = this.getClass().getDeclaredFields();
         //all subclasses should use this line below
         //Field[] allFields = getClass().getDeclaredFields();
-        for (int i = 0; i < allFields.length; i++) {
+        outer:
+            for (int i = 0; i < allFields.length; i++) {
             //get name of field
             String fieldName = allFields[i].getName();
+            
+            //check if field is labeled id and generateValue (primary key, then it can be null)
+            boolean id = false;
+            boolean generateValue = false;
+            
+            for (Annotation a : allFields[i].getDeclaredAnnotations()) {
+                if(a.annotationType().getName().equals(javax.persistence.Id.class.getName())){
+                    id = true;     }
+                if(a.annotationType().getName().equals(javax.persistence.GeneratedValue.class.getName())){
+                    generateValue = true;
+                }
+                if(generateValue && id) {
+                    log.trace(getClass().getSimpleName()+": "+fieldName+" is auto generated id value, no need to check.");
+                    continue outer;
+                }
+            }
+            
             //now check all annoatations
             for (Annotation a : allFields[i].getDeclaredAnnotations()) {
                 //if this means its a none null column field
@@ -557,7 +575,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
                     }
                 }
             }
-        }
+            }
         //ok here
         return super.isValid();
     }
@@ -572,11 +590,11 @@ public class Datafile extends EntityBaseBean implements Serializable {
     public boolean isValid(EntityManager manager) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
         
-                //check all datafiles now
+        //check all datafiles now
         for(DatafileParameter datafileParameter : getDatafileParameterCollection()){
             datafileParameter.isValid(manager);
         }
-                      
+        
         return isValid();
     }
 }
