@@ -43,11 +43,11 @@ public class Investigator extends EntityBaseBean implements Serializable {
      */
     @EmbeddedId
     protected InvestigatorPK investigatorPK;
-          
+    
     @Column(name = "MOD_ID", nullable = false)
     private String modId;
     
-   // @Column(name = "ROLE")
+    // @Column(name = "ROLE")
     //private String role;
     
     @JoinColumn(name = "FACILITY_USER_ID", referencedColumnName = "FACILITY_USER_ID", insertable = false, updatable = false)
@@ -108,7 +108,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
     public void setInvestigatorPK(InvestigatorPK investigatorPK) {
         this.investigatorPK = investigatorPK;
     }
-           
+    
     /**
      * Gets the modId of this Investigator.
      * @return the modId
@@ -146,9 +146,10 @@ public class Investigator extends EntityBaseBean implements Serializable {
      * Gets the role of this FacilityUser.
      * @return the role
      */
-  /*  public String getRole() {
+     //TODO uncomment this
+     /*public String getRole() {
         return this.role;
-    }*/
+     }*/
     
     /**
      * Sets the role of this FacilityUser to the specified value.
@@ -162,7 +163,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
      * Gets the investigation of this Investigator.
      * @return the investigation
      */
-     @XmlTransient
+    @XmlTransient
     public Investigation getInvestigation() {
         return this.investigation;
     }
