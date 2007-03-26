@@ -12,6 +12,8 @@ package uk.icat3.search;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
@@ -44,7 +46,7 @@ public class InvestigationSearch extends ManagerUtil {
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection investigation ids
-     */
+     */    
     public static Collection<Long>  searchByKeywordRtnId(String userId, String keyword, int startIndex, int number_results, EntityManager manager)  {
         log.trace("searchByKeyword("+userId+", "+keyword+", "+startIndex+", "+number_results+", EntityManager)");
         

@@ -46,18 +46,18 @@ public class DatafileSearch {
         String SQL = DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_1;
         
         //add in the instruments in the IN() cause of SQL
-        int i = 1;       
+        int i = 1;
         for(String instrument : instruments){
-            if(i == instruments.size()) SQL += "?instrument"+(i++)+"";           
-            else  SQL += "?instrument"+(i++)+" , ";  
-           
+            if(i == instruments.size()) SQL += "?instrument"+(i++)+"";
+            else  SQL += "?instrument"+(i++)+" , ";
+            
         }
         
         SQL += DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_2;
-               
+        
         //set query with datafile as entity object
         Query query = manager.createNativeQuery(SQL,Datafile.class);
-             
+        
         //sets the paramters
         query = query.setParameter("userId",userId);
         query = query.setParameter("lower",startRun);
@@ -68,7 +68,7 @@ public class DatafileSearch {
         for(String instrument : instruments){
             query = query.setParameter("instrument"+j++,instrument);
         }
-               
+        
         log.trace("DYNAMIC SQL: "+SQL);
         
         if(number_results < 0){
@@ -107,4 +107,5 @@ public class DatafileSearch {
     public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
         return searchByRunNumberImpl(userId, instruments, startRun, endRun, startIndex, number_results, manager);
     }
+    
 }
