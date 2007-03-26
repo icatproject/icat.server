@@ -15,6 +15,8 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.xml.ws.RequestWrapper;
+import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
@@ -27,7 +29,7 @@ import uk.icat3.sessionbeans.user.UserSessionLocal;
 import uk.icat3.util.InvestigationInclude;
 
 /**
- * This web service exposes the functions that are needed on investigation 
+ * This web service exposes the functions that are needed on investigation
  *
  * @author gjd37
  */
@@ -44,7 +46,9 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
     /** Creates a new instance of InvestigationManagerBean */
     public InvestigationManagerBean() {}
     
-    @WebMethod
+    @WebMethod(operationName="getInvestigationDefault")
+    @RequestWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationDefault")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationDefaultResponse")
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Investigation getInvestigation(String sessionId, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
@@ -54,7 +58,9 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         return InvestigationManager.getInvestigation(userId, investigationId, manager);
     }
     
-    @WebMethod
+    @WebMethod(operationName="c")
+    @RequestWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationIncludes")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationIncludesResponse")
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Investigation getInvestigation(String sessionId, Long investigationId, InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
@@ -75,5 +81,5 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         InvestigationManager.addDataSet(userId, dataSet, investigationId, manager);
         
         return true;
-    }   
+    }
 }

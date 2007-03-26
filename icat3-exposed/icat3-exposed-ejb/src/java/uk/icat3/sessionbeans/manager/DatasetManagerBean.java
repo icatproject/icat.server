@@ -15,6 +15,8 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.xml.ws.RequestWrapper;
+import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
@@ -44,23 +46,27 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     
     
     @WebMethod
+    @RequestWrapper(className="uk.icat3.sessionbeans.manager.getDataset")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.manager.getDatasetResponse")
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Dataset getDataset(String sessionId, Long datasetId)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        return DataSetManager.getDataSet(userId, datasetId, manager);        
+        return DataSetManager.getDataSet(userId, datasetId, manager);
     }
     
-    @WebMethod
+    @WebMethod(operationName="getDatasetIncludes")
+    @RequestWrapper(className="uk.icat3.sessionbeans.manager.getDatasetIncludes")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.manager.getDatasetIncludesResponse")
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Dataset getDataset(String sessionId, Long datasetId, DatasetInclude includes)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        Dataset dataSet = DataSetManager.getDataSet(userId, datasetId, manager);        
+        Dataset dataSet = DataSetManager.getDataSet(userId, datasetId, manager);
         //now set the investigation includes for JAXB web service
         dataSet.setDatasetInclude(includes);
         

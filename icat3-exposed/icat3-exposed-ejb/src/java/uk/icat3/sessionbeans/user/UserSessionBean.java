@@ -16,6 +16,8 @@ import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.xml.ws.RequestWrapper;
+import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
 import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
@@ -37,37 +39,43 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     @PersistenceContext(unitName="icat3-exposed-user")
     private EntityManager managerUser;
     
-    @WebMethod
+    @WebMethod()
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String login(String username, String password) throws SessionException {        
+    public String login(String username, String password) throws SessionException {
         
         UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
         
         return userManager.login(username,password);
     }
     
-    @WebMethod
+    @WebMethod(operationName="loginLifetime")   
+    @RequestWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginLifetime")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginLifetimeResponse")
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String login(String username, String password, int lifetime) throws SessionException {
-                
+        
         UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
         
         return userManager.login(username,password, lifetime);
     }
     
-    @WebMethod
+    @WebMethod(operationName="loginCredentials")
+    @RequestWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginCredentials")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginCredentialsResponse")
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String login(String credential) throws SessionException {
-               
+        
         UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
         
         return userManager.login(credential);
     }
     
-    @WebMethod
+    @WebMethod(operationName="loginAdmin")
+    @RequestWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginAdmin")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginAdminResponse")
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String login(String username, String password, String runAs) throws SessionException {
-                
+        
         UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
         
         return userManager.login(username, password, runAs);
@@ -77,7 +85,7 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     @WebMethod
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public boolean logout(String sid) {
-       
+        
         UserManager userManager;
         try {
             userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
@@ -91,7 +99,7 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     @WebMethod
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public String getUserIdFromSessionId(String sid) throws SessionException {
-                
+        
         UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
         
         return userManager.getUserIdFromSessionId(sid);
@@ -100,11 +108,9 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     @WebMethod
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public UserDetails getUserDetails(String sid, String user) throws SessionException, NoSuchUserException {
-                
+        
         UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
         
         return userManager.getUserDetails(sid, user);
-    }
-    
-    
+    }    
 }
