@@ -34,7 +34,7 @@ public class DatasetSearch {
      * @param userId 
      * @param sampleName 
      * @param manager     
-     * @return 
+     * @return Collection of datasets
      */
     public static Collection<Dataset> getBySampleName(String userId, String sampleName, EntityManager manager) {
         log.trace("getBySampleId("+userId+", "+sampleName+", EntityManager)");

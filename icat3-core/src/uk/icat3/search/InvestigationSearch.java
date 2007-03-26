@@ -205,6 +205,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      *
      * Searches the investigations the user has access to view by user id
+     *
      * @param userId userId of the user.
      * @param searchUserId Could be DN , username or federal ID
      * @param manager manager object that will facilitate interaction with underlying database
