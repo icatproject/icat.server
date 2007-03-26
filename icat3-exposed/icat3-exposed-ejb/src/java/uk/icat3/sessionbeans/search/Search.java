@@ -9,16 +9,17 @@
 
 package uk.icat3.sessionbeans.search;
 
-import java.sql.SQLException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
-import javax.naming.NamingException;
 import org.apache.log4j.Logger;
 import uk.ac.cclrc.dpal.DPAccessLayer;
 import uk.icat3.entity.Investigation;
@@ -29,13 +30,14 @@ import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
+import static uk.icat3.util.Queries.*;
 
 /**
  *
  * @author gjd37
  */
 
-@Stateless(mappedName="SearchEJB")
+@Stateless(mappedName="SearchICATEJB")
 @WebService()
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class Search extends EJBObject implements SearchLocal, SearchRemote{
@@ -58,30 +60,30 @@ public class Search extends EJBObject implements SearchLocal, SearchRemote{
         log.trace("searchByKeywords("+sessionId+", "+keywords+")");
         
         //for user bean get userId
-        String userId = user.getUserId(sessionId);
+        String userId = user.getUserIdFromSessionId(sessionId);
         
         //now do the search using the core API
         return InvestigationSearch.searchByKeywords(userId, keywords,LogicalOperator.AND, include, fuzzy, true, 0, 500, manager);
         //return InvestigationSearch.searchByKeywords(userId, keywords, manager);
     }
     
-    @WebMethod
+   /* @WebMethod
     public Collection<uk.ac.cclrc.dpal.beans.Investigation> searchByKeywordsDPAL(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy) throws SessionException {
         log.trace("searchByKeywordsDPAL("+sessionId+", "+keywords+")");
         try {
             
             DPAccessLayer dpal = new DPAccessLayer("icat3") ;
-   
+            
             //for user bean get userId
             String userId = user.getUserId(sessionId);
             
             //now do the search using the core API
             return dpal.getInvestigations((ArrayList)keywords, userId, uk.ac.cclrc.dpal.enums.LogicalOperator.AND, fuzzy, 500, true);
         } catch (Exception ex) {
-           throw new SessionException(ex.getMessage());
-        //return InvestigationSearch.searchByKeywords(userId, keywords, manager);
+            throw new SessionException(ex.getMessage());
+            //return InvestigationSearch.searchByKeywords(userId, keywords, manager);
         }
-    }
+    }*/
     
     @WebMethod
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -89,7 +91,7 @@ public class Search extends EJBObject implements SearchLocal, SearchRemote{
         log.trace("searchByKeyword("+sessionId+", "+keywords+")");
         
         //for user bean get userId
-        String userId = user.getUserId(sessionId);
+        String userId = user.getUserIdFromSessionId(sessionId);
         
         //now do the search using the core API
         Collection<Investigation> invests = InvestigationSearch.searchByKeyword(userId, keywords, manager);
@@ -102,9 +104,26 @@ public class Search extends EJBObject implements SearchLocal, SearchRemote{
         log.trace("searchByKeywordsRtnId("+sessionId+", "+keyword+")");
         
         //for user bean get userId
-        String userId = user.getUserId(sessionId);
+        String userId = user.getUserIdFromSessionId(sessionId);
         
         return InvestigationSearch.searchByKeywordRtnId(userId, keyword,  manager);
+        
+    }
+    
+    @WebMethod
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public Collection<Investigation> testThisException(String sessionId, String keyword) throws SessionException {
+        log.trace("searchByKeywordsRtnId("+sessionId+", "+keyword+")");
+        
+        //for user bean get userId
+        String userId = "JAMES-JAMES";
+     
+        Collection<Investigation> investigationsId = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_KEYWORD).setParameter("2",keyword).setParameter("1","JAMES-JAMES").setMaxResults(300).setFirstResult(0).getResultList();
+       
+       //Collection<Investigation> investigationsId = manager.createNativeQuery(INVESTIGATION_NATIVE_LIST_BY_KEYWORD_SQL,Investigation.class).setParameter("2","isis").setParameter("1","JAMES-JAMES").setMaxResults(300).setFirstResult(0).getResultList();
+      //Collection<Investigation> investigationsId = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_KEYWORD+"test").setMaxResults(300).setFirstResult(0).getResultList();
+      
+        return investigationsId;
         
     }
     
@@ -113,7 +132,7 @@ public class Search extends EJBObject implements SearchLocal, SearchRemote{
         log.trace("listInstruments("+sessionId+")");
         
         //for user bean get userId
-        String userId = user.getUserId(sessionId);
+        String userId = user.getUserIdFromSessionId(sessionId);
         
         return InvestigationSearch.listAllInstruments(userId, manager);
         
@@ -124,7 +143,7 @@ public class Search extends EJBObject implements SearchLocal, SearchRemote{
         log.trace("searchUser("+sessionId+")");
         
         //for user bean get userId
-        String userId = user.getUserId(sessionId);
+        String userId = user.getUserIdFromSessionId(sessionId);
         
         return InvestigationSearch.getUsersInvestigations(userId, manager);
         
@@ -135,7 +154,7 @@ public class Search extends EJBObject implements SearchLocal, SearchRemote{
         log.trace("searchUser("+sessionId+")");
         
         //for user bean get userId
-        String userId = user.getUserId(sessionId);
+        String userId = user.getUserIdFromSessionId(sessionId);
         
         return InvestigationSearch.searchByUserID(userId, userSearch, manager);
         
@@ -147,7 +166,7 @@ public class Search extends EJBObject implements SearchLocal, SearchRemote{
         log.trace("searchUser("+sessionId+")");
         
         //for user bean get userId
-        String userId = user.getUserId(sessionId);
+        String userId = user.getUserIdFromSessionId(sessionId);
         
         return KeywordSearch.getKeywordsForUser(userId, "", 500, manager);
     }

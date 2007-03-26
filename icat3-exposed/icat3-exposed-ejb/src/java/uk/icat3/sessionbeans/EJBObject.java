@@ -76,16 +76,16 @@ public abstract class EJBObject {
         
         long start = System.currentTimeMillis();
         
-        log.debug("Invoking " + target);
+        log.trace("Invoking " + target);
         try {
             return ctx.proceed();
         } catch(Exception e) {
             throw e;
         } finally {
             long time = System.currentTimeMillis() - start;
-            log.debug("Exiting " + target +" , This method takes " +
+            log.trace("Exiting " + target +" , This method takes " +
                     time/1000f + "s to execute\n");
-            log.debug("\n");
+            log.trace("\n");
         }
     }    
 }

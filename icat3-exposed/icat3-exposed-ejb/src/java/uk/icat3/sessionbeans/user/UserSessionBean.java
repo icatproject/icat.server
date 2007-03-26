@@ -17,10 +17,12 @@ import javax.jws.WebService;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.apache.log4j.Logger;
+import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.sessionbeans.EJBObject;
+import uk.icat3.user.UserDetails;
 import uk.icat3.user.UserManager;
-
+import static uk.icat3.util.Constants.*;
 /**
  *
  * @author gjd37
@@ -34,36 +36,75 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     
     @PersistenceContext(unitName="icat3-exposed-user")
     private EntityManager managerUser;
-     
+    
     @WebMethod
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String login(String username, String password) throws SessionException {
-        log.trace("login("+username+", "+password+")");
+    public String login(String username, String password) throws SessionException {        
         
+        UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
         
-        //TODO: should user UserManager and User interface here to get the userId from the sessionId
-        UserManager userManager = new UserManager(managerUser);
-        String sessionId = userManager.login(username,password);
-        
-        return sessionId;
+        return userManager.login(username,password);
     }
     
     @WebMethod
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public boolean logout(String sid) throws SessionException {
-        log.trace("login("+sid+")");
+    public String login(String username, String password, int lifetime) throws SessionException {
+                
+        UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
         
-        //TODO: should user UserManager and User interface here to get the userId from the sessionId
-        UserManager userManager = new UserManager(managerUser);
+        return userManager.login(username,password, lifetime);
+    }
+    
+    @WebMethod
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public String login(String credential) throws SessionException {
+               
+        UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
+        
+        return userManager.login(credential);
+    }
+    
+    @WebMethod
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public String login(String username, String password, String runAs) throws SessionException {
+                
+        UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
+        
+        return userManager.login(username, password, runAs);
+    }
+    
+    
+    @WebMethod
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public boolean logout(String sid) {
+       
+        UserManager userManager;
+        try {
+            userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
+        } catch (SessionException ex) {
+            return false;
+        }
+        
         return userManager.logout(sid);
     }
     
+    @WebMethod
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public String getUserId(String sid) throws SessionException {
-        log.trace("getUserId("+sid+")");
+    public String getUserIdFromSessionId(String sid) throws SessionException {
+                
+        UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
         
-        //TODO: should user UserManager and User interface here to get the userId from the sessionId
-        UserManager userManager = new UserManager(managerUser);
         return userManager.getUserIdFromSessionId(sid);
     }
+    
+    @WebMethod
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public UserDetails getUserDetails(String sid, String user) throws SessionException, NoSuchUserException {
+                
+        UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
+        
+        return userManager.getUserDetails(sid, user);
+    }
+    
+    
 }
