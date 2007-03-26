@@ -80,7 +80,8 @@ import uk.icat3.util.Queries;
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_USERID,  query= Queries.INVESTIGATION_NATIVE_LIST_BY_USERID_SQL,resultSetMapping="investigationMapping"),
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_SQL, resultSetMapping="investigationMapping"),
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID_SQL, resultSetMapping="investigationIdMapping"),
-    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_SQL, resultSetMapping="investigationMapping")
+      //@NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD+"test", query= "SELECT DISTINCT ID, FROM INVESTIGATION where ID = 11915480", resultSetMapping="investigationMapping"), 
+     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_SQL, resultSetMapping="investigationMapping")
     
 })
 @SqlResultSetMappings({
@@ -826,7 +827,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
         return isValid();
     }
     
-    
+    /**
+     * See getInvestigatorCollection_()
+     */
     public void setInvestigationInclude(InvestigationInclude investigationInclude) {
         this.investigationInclude = investigationInclude;
     }

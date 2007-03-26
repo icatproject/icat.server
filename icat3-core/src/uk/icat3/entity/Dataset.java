@@ -47,6 +47,7 @@ import uk.icat3.util.DatasetInclude;
     @NamedQuery(name = "Dataset.findByName", query = "SELECT d FROM Dataset d WHERE d.name = :name"),
     @NamedQuery(name = "Dataset.findByDescription", query = "SELECT d FROM Dataset d WHERE d.description = :description"),
     @NamedQuery(name = "Dataset.findByModTime", query = "SELECT d FROM Dataset d WHERE d.modTime = :modTime"),
+    @NamedQuery(name = "Dataset.getBySampleId", query = "SELECT Dataset FROM Dataset d where name = :sampleName"),
     @NamedQuery(name = "Dataset.findByModId", query = "SELECT d FROM Dataset d WHERE d.modId = :modId")
 })
 @XmlRootElement
@@ -331,8 +332,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
         Collection<Datafile> datafiles = this.getDatafileCollection();
         datafiles.add(dataFile);
         
-        this.setDatafileCollection(datafiles);
-        
+        this.setDatafileCollection(datafiles);        
     }
     
     /**
@@ -505,7 +505,9 @@ public class Dataset extends EntityBaseBean implements Serializable {
         return isValid();
     }
     
-    
+    /**
+     * See InvestigationIncude.getInvestigatorCollection_()
+     */
     public void setDatasetInclude(DatasetInclude datasetInclude) {
         this.datasetInclude = datasetInclude;
     }

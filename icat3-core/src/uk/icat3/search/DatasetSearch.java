@@ -33,11 +33,10 @@ public class DatasetSearch {
      *
      * @param userId 
      * @param sampleName 
-     * @param manager 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
+     * @param manager     
      * @return 
      */
-    public static Collection<Dataset> getBySampleId(String userId, String sampleName, EntityManager manager) throws InsufficientPrivilegesException{
+    public static Collection<Dataset> getBySampleName(String userId, String sampleName, EntityManager manager) {
         log.trace("getBySampleId("+userId+", "+sampleName+", EntityManager)");
         
         Collection<Dataset> dataSets = (Collection<Dataset>)manager.createNamedQuery("Dataset.getBySampleId").setParameter("sampleName",sampleName).getResultList();

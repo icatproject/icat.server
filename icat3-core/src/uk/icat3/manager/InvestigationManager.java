@@ -11,6 +11,8 @@ package uk.icat3.manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;

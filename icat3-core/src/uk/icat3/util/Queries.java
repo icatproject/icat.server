@@ -362,6 +362,7 @@ public class Queries {
     public static final String ALL_INSTRUMENTS_JPQL = "SELECT DISTINCT i.name FROM Instrument i";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
+        
     
     public static int MAX_QUERY_RESULTSET = 500;
 }
