@@ -46,10 +46,11 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
     /**
      * This searches all DB for investigations with all the keywords that the user can see
      *
-     * @param sessionId
-     * @param keywords
-     * @param manager
-     * @return
+     * @param sessionId session id of the user.
+     * @param keywords Collection of keywords to search on
+     * @param include Set of information to return with investigations, ie their keywords, investigators, datasets, default none.  Having more information returned means the query will take longer.
+     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
+     * @return collection of {@link Investigation} investigation objects
      */
     @WebMethod
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy) throws SessionException {
@@ -62,20 +63,37 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
     }
     
     /**
-     * Lists all the investigations for the current user 
+     * Lists all the investigations for the current user
      *
-     * @param sessionId 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @return 
+     * @param sessionId
+     * @throws uk.icat3.exceptions.SessionException
+     * @return
      */
     @WebMethod
     public Collection<Investigation> getMyInvestigations(String sessionId) throws SessionException {
-               
+        
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
         return InvestigationSearch.getUsersInvestigations(userId, manager);
-        
     }
+    
+    /**
+     * Searches the investigations the user has access to view by user id
+     *
+     * @param sessionId session id of the user.
+     * @param searchUserId Could be DN , username or federal ID
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
+     */
+    @WebMethod
+    public Collection<Investigation> searchByUserID(String sessionId, String userSearch) throws SessionException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return InvestigationSearch.searchByUserID(userId, userSearch, manager);
+    }
+    
     
 }

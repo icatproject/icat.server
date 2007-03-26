@@ -32,7 +32,8 @@ import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 import static uk.icat3.util.Queries.*;
 
-/**
+/** 
+ * TEST CLASS FOR ME
  *
  * @author gjd37
  */
