@@ -24,6 +24,7 @@ public class UserDetails implements Serializable {
     private String institution;
     private String department;
     private String email;
+    private String credential;
 
      /** Creates a new instance of UserDetails */
     public UserDetails() {
@@ -94,7 +95,12 @@ public class UserDetails implements Serializable {
     public String getTitle() {
         return title;
     }
-    
-   
-    
+
+    public String getCredential() {
+        return credential;
+    }
+
+    public void setCredential(String credential) {
+        this.credential = credential;
+    }
 }
