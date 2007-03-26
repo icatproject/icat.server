@@ -251,11 +251,12 @@ public class DataSetManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return
      */
-    public static Collection<Dataset> getDataSet(String userId, Long dataSetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+    public static Dataset getDataSet(String userId, Long dataSetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         Collection<Long> datasets = new ArrayList<Long>();
         datasets.add(dataSetId);
         
-        return getDataSets(userId, datasets, DatasetInclude.NONE, manager);
+        Collection<Dataset> datasetsReturned = getDataSets(userId, datasets, DatasetInclude.NONE, manager);
+        return datasetsReturned.iterator().next();
     }
     
     ////////////////////    End of get Commands    /////////////////////////

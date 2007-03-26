@@ -234,11 +234,12 @@ public class DataFileManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return
      */
-    public static Collection<Datafile> getDataFile(String userId, Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+    public static Datafile getDataFile(String userId, Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         Collection<Long> dataFiles = new ArrayList<Long>();
         dataFiles.add(dataFileId);
         
-        return getDataFiles(userId, dataFiles, manager);
+        Collection<Datafile> datafiles =  getDataFiles(userId, dataFiles, manager);
+        return datafiles.iterator().next();
     }
     
 }
