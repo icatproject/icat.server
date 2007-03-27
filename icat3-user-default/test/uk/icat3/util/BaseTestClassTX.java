@@ -1,3 +1,4 @@
+
 /*
  * BaseTestClass.java
  *
@@ -18,6 +19,9 @@ import org.junit.BeforeClass;
 /**
  *
  * Extend this when you want setUp and tear down to be called one in the class and not after and before every @Test method
+ * But you want a new transaction to start and finish before and after evey method
+ *
+ * Basically, manager is loaded per class and new transactions with every method
  *
  * @author gjd37
  */
