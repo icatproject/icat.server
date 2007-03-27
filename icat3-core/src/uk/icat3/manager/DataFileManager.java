@@ -161,7 +161,7 @@ public class DataFileManager extends ManagerUtil {
         log.trace("createDataFile("+userId+", "+dataFile+" "+datasetId+", EntityManager)");
         
         //check isvalid
-        dataFile.isValid(manager);
+        /*dataFile.isValid(manager);
         
         //check dataset exist
         Dataset dataset  = DataSetManager.checkDataSet(datasetId, manager);
@@ -175,7 +175,12 @@ public class DataFileManager extends ManagerUtil {
         dataFile.setCreateId(userId);
         
         manager.persist(dataFile);
-        return dataFile;
+        return dataFile;*/
+        
+         //check dataset exist
+        Dataset dataset  = DataSetManager.checkDataSet(datasetId, manager);
+        dataFile.setDatasetId(dataset);
+        return updateDataFile(userId, dataFile, manager);
     }
     
     

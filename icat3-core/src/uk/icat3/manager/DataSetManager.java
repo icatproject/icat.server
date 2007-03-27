@@ -133,7 +133,7 @@ public class DataSetManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void updateDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+    public static Dataset updateDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateDataSet("+userId+", "+dataSet+", EntityManager)");
         
         //check to see if DataSet exists, dont need the returned dataset as merging
@@ -152,11 +152,12 @@ public class DataSetManager extends ManagerUtil {
         //if null then update
         if(dataSet.getId() != null){
             dataSet.setModId(userId);
-            manager.merge(dataSet);
+            return manager.merge(dataSet);
         } else {
             //new dataset, set createid, this srts mod id
             dataSet.setCreateId(userId);
             manager.persist(dataSet);
+            return dataSet;
         }
     }
     
@@ -174,7 +175,7 @@ public class DataSetManager extends ManagerUtil {
         log.trace("createDataFile("+userId+", "+dataSet+" "+investigationId+", EntityManager)");
         
         //check isvalid
-        dataSet.isValid(manager);
+       /* dataSet.isValid(manager);
         //check if unique
         if(!dataSet.isUnique(manager)) throw new ValidationException(dataSet+" is not unique.");
         
@@ -190,7 +191,14 @@ public class DataSetManager extends ManagerUtil {
         dataSet.setCreateId(userId);
         
         manager.persist(dataSet);
-        return dataSet;
+         return dataSet;
+        */
+        
+        //check investigation exists
+        Investigation investigation  = InvestigationManager.checkInvestigation(investigationId, manager);
+        dataSet.setInvestigationId(investigation);
+        
+        return updateDataSet(userId, dataSet, manager);
     }
     
     
