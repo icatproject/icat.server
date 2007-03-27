@@ -10,18 +10,18 @@
 package uk.icat3.sessionbeans.search;
 
 import java.util.Collection;
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.interceptor.Interceptors;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.InvestigationSearch;
+import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
-import uk.icat3.sessionbeans.user.UserSessionLocal;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 
@@ -30,15 +30,13 @@ import uk.icat3.util.LogicalOperator;
  * @author gjd37
  */
 @Stateless()
-@WebService()
+//this interceptor check no nulls passed in and logs the method arguments
+@Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class InvestigationSearchBean extends EJBObject implements InvestigationSearchLocal {
     
     static Logger log = Logger.getLogger(InvestigationSearchBean.class);
-    
-    @EJB
-    UserSessionLocal user;
-    
+            
     /** Creates a new instance of InvestigationSearchBean */
     public InvestigationSearchBean() {
     }
@@ -94,6 +92,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
         
         return InvestigationSearch.searchByUserID(userId, userSearch, manager);
     }
+       
     
     
 }
