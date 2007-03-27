@@ -27,6 +27,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -39,6 +40,7 @@ import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.util.Queries;
 
 /**
  * Entity class Datafile
@@ -70,7 +72,7 @@ import uk.icat3.exceptions.ValidationException;
 })
 @NamedNativeQueries({
     //Added searches for ICAT3 API
-    // @NamedNativeQuery(name = Queries.DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER, query= Queries.DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL, resultSetMapping="dataFileMapping")
+    //@NamedNativeQuery(name = Queries.DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER, query= Queries.DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL, resultSetMapping="dataFileMapping")
     
 })
 @SqlResultSetMappings({
@@ -86,7 +88,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
     @Column(name = "ID", nullable = false)
     private Long id;
     
-    @Column(name = "NAME")
+    @Column(name = "NAME", nullable = false)
     private String name;
     
     @Column(name = "DESCRIPTION")
@@ -110,7 +112,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
     private Date datafileModifyTime;
     
     @Column(name = "FILE_SIZE")
-    private BigInteger fileSize;
+    private Integer fileSize;
     
     @Column(name = "COMMAND")
     private String command;
@@ -121,8 +123,6 @@ public class Datafile extends EntityBaseBean implements Serializable {
     @Column(name = "SIGNATURE")
     private String signature;
     
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
     private Collection<RelatedDatafiles> relatedDatafilesCollection;
@@ -301,7 +301,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
      * Gets the fileSize of this Datafile.
      * @return the fileSize
      */
-    public BigInteger getFileSize() {
+    public Integer getFileSize() {
         return this.fileSize;
     }
     
@@ -309,7 +309,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
      * Sets the fileSize of this Datafile to the specified value.
      * @param fileSize the new fileSize
      */
-    public void setFileSize(BigInteger fileSize) {
+    public void setFileSize(Integer fileSize) {
         this.fileSize = fileSize;
     }
     
@@ -359,22 +359,6 @@ public class Datafile extends EntityBaseBean implements Serializable {
      */
     public void setSignature(String signature) {
         this.signature = signature;
-    }
-    
-    /**
-     * Gets the modId of this Datafile.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-    
-    /**
-     * Sets the modId of this Datafile to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
     }
     
     /**
@@ -591,8 +575,10 @@ public class Datafile extends EntityBaseBean implements Serializable {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
         
         //check all datafiles now
-        for(DatafileParameter datafileParameter : getDatafileParameterCollection()){
-            datafileParameter.isValid(manager);
+        if(getDatafileParameterCollection() != null) {
+            for(DatafileParameter datafileParameter : getDatafileParameterCollection()){
+                datafileParameter.isValid(manager);
+            }
         }
         
         return isValid();

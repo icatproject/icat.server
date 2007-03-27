@@ -471,7 +471,8 @@ public class TestSearch {
         //keywords.add("ccw");
        // ts.seachByKeywords("JAMES-JAMES", keywords);
         
-        ts.getMyInvestigations("JAMES-JAMES");
+        log.info("Hello");
+       // ts.getMyInvestigations("JAMES-JAMES");
         
         // ts.seachBySurname("JAMES", "HEALY");
         

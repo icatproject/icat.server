@@ -29,13 +29,16 @@ import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
+import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.SqlResultSetMapping;
 import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -50,7 +53,7 @@ import uk.icat3.util.Queries;
  * @author gjd37
  */
 @Entity
-@Table(name = "INVESTIGATION")
+@Table(name = "INVESTIGATION", uniqueConstraints={@UniqueConstraint(columnNames={"INV_NUMBER","VISIT_ID", "FACILITY_CYCLE","INSTRUMENT"})})
 @NamedQueries( {
     @NamedQuery(name = "Investigation.findById", query = "SELECT i FROM Investigation i WHERE i.id = :id"),
     @NamedQuery(name = "Investigation.findByInvNumber", query = "SELECT i FROM Investigation i WHERE i.invNumber = :invNumber"),
@@ -63,6 +66,8 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = "Investigation.findByReleaseDate", query = "SELECT i FROM Investigation i WHERE i.releaseDate = :releaseDate"),
     @NamedQuery(name = "Investigation.findByModTime", query = "SELECT i FROM Investigation i WHERE i.modTime = :modTime"),
     @NamedQuery(name = "Investigation.findByModId", query = "SELECT i FROM Investigation i WHERE i.modId = :modId"),
+    @NamedQuery(name = "Investigation.findByUnique", query = "SELECT i FROM Investigation i WHERE i.invNumber = :invNumber AND i.visitId = :visitId AND i.facilityCycle = :facilityCycle AND i.instrument = :instrument"),
+    
     
     //Added searches for ICAT3 API
     // @NamedQuery(name = Queries.INVESTIGATIONS_BY_KEYWORD, query ="SELECT  FROM  (SELECT Investigation i FROM i WHERE i.investigatorCollection.investigatorPK.facilityUserId = :userId) ")
@@ -80,8 +85,8 @@ import uk.icat3.util.Queries;
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_USERID,  query= Queries.INVESTIGATION_NATIVE_LIST_BY_USERID_SQL,resultSetMapping="investigationMapping"),
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_SQL, resultSetMapping="investigationMapping"),
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID_SQL, resultSetMapping="investigationIdMapping"),
-      //@NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD+"test", query= "SELECT DISTINCT ID, FROM INVESTIGATION where ID = 11915480", resultSetMapping="investigationMapping"), 
-     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_SQL, resultSetMapping="investigationMapping")
+    //@NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD+"test", query= "SELECT DISTINCT ID, FROM INVESTIGATION where ID = 11915480", resultSetMapping="investigationMapping"),
+    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_SQL, resultSetMapping="investigationMapping")
     
 })
 @SqlResultSetMappings({
@@ -93,8 +98,8 @@ import uk.icat3.util.Queries;
 public class Investigation extends EntityBaseBean implements Serializable {
     
     @Id
-    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="INVESTIGATION_SEQ")   
-    @Column(name = "ID", nullable = false)    
+    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="INVESTIGATION_SEQ")
+    @Column(name = "ID", nullable = false)
     private Long id;
     
     @Column(name = "INV_NUMBER", nullable = false)
@@ -825,6 +830,25 @@ public class Investigation extends EntityBaseBean implements Serializable {
         
         //if reached here investigation is valid
         return isValid();
+    }
+    
+    public boolean isUnique(EntityManager manager){
+        
+        Query query =  manager.createNamedQuery("Investigation.findByUnique");
+        query = query.setParameter("invNumber",invNumber);
+        query = query.setParameter("visitId", visitId);
+        query = query.setParameter("facilityCycle",facilityCycle);
+        query = query.setParameter("instrument",instrument);
+        
+        try {
+            Investigation investigation = (Investigation)query.getSingleResult();
+            //if found id is this id then it is unique
+            if(investigation.getId().equals(id)) return true;
+            else return false;
+        } catch(NoResultException nre) {
+            //means it is unique
+            return true;
+        }
     }
     
     /**

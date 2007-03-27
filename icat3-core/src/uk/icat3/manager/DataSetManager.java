@@ -12,9 +12,10 @@ package uk.icat3.manager;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
+import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -63,7 +64,7 @@ public class DataSetManager extends ManagerUtil {
         log.trace("deleteDataSet("+userId+", "+dataSetId+", EntityManager)");
         
         Dataset dataset = checkDataSet(dataSetId, manager);
-               
+        
         //check user has delete access
         GateKeeper.performAuthorisation(userId, dataset, AccessType.DELETE, manager);
         
@@ -142,19 +143,56 @@ public class DataSetManager extends ManagerUtil {
         
         //check if valid dataset
         dataSet.isValid(manager);
+        //check if unique
+        if(!dataSet.isUnique(manager)) throw new ValidationException(dataSet+" is not unique.");
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, dataSet, AccessType.UPDATE, manager);
         
         //if null then update
         if(dataSet.getId() != null){
+            dataSet.setModId(userId);
             manager.merge(dataSet);
         } else {
-            //new dataset, set createid
+            //new dataset, set createid, this srts mod id
             dataSet.setCreateId(userId);
             manager.persist(dataSet);
         }
     }
+    
+    /**
+     * Creates a data set, depending if the user has update permission on the data set associated with the investigation
+     *
+     * @param userId
+     * @param dataSet
+     * @param investigationId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
+    public static Dataset createDataSet(String userId, Dataset dataSet, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        log.trace("createDataFile("+userId+", "+dataSet+" "+investigationId+", EntityManager)");
+        
+        //check isvalid
+        dataSet.isValid(manager);
+        //check if unique
+        if(!dataSet.isUnique(manager)) throw new ValidationException(dataSet+" is not unique.");
+        
+        //check investigation exists
+        Investigation investigation  = InvestigationManager.checkInvestigation(investigationId, manager);
+        
+        //check user has update access
+        GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
+        
+        //make sure id is null
+        dataSet.setId(null);
+        dataSet.setInvestigationId(investigation);
+        dataSet.setCreateId(userId);
+        
+        manager.persist(dataSet);
+        return dataSet;
+    }
+    
     
     /**
      * Adds a data set to the list a data sets for a investigation, depending if the user has update permission on the investigation
@@ -166,7 +204,7 @@ public class DataSetManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void addDataSet(String userId, Dataset dataSet, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+    public static void addDataSet(String userId, Dataset dataSet, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("addDataSet("+userId+", "+dataSet+" "+investigationId+", EntityManager)");
         InvestigationManager.addDataSet(userId,dataSet,investigationId, manager);
     }
@@ -181,7 +219,7 @@ public class DataSetManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void addDataSets(String userId, Collection<Dataset> dataSets, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+    public static void addDataSets(String userId, Collection<Dataset> dataSets, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("addDataSets("+userId+", "+dataSets+" "+investigationId+", EntityManager)");
         
         InvestigationManager.addDataSets(userId, dataSets, investigationId, manager);

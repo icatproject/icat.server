@@ -39,11 +39,14 @@ public class EntityBaseBean {
     @Temporal(TemporalType.TIMESTAMP)
     protected Date modTime;
     
-    //@Column(name = "CREATE_ID", nullable = false)
-    protected transient String createId;
+    @Column(name = "CREATE_ID", nullable = false)
+    protected String createId;
     
-  //  @Column(name = "DELETED", nullable = false )
-    protected transient String deleted;
+    @Column(name = "DELETED", nullable = false )
+    protected String deleted;
+    
+     @Column(name = "MOD_ID", nullable = false)
+    protected String modId;
     
     /**
      * Gets the modTime of this DatafileFormat.
@@ -77,6 +80,22 @@ public class EntityBaseBean {
     }
     
     /**
+     * Gets the modId of this Datafile.
+     * @return the modId
+     */
+    public String getModId() {
+        return this.modId;
+    }
+    
+    /**
+     * Sets the modId of this Datafile to the specified value.
+     * @param modId the new modId
+     */
+    public void setModId(String modId) {
+        this.modId = modId;
+    }
+    
+    /**
      * Automatically updates modTime when entity is persisted or merged
      */
     @PreUpdate
@@ -85,11 +104,12 @@ public class EntityBaseBean {
     }
     
     /**
-     * Automatically updates deleted and modTime when entity is persisted
+     * Automatically updates deleted, modTime and modId when entity is created
      */
     @PrePersist
     public void prePersist(){
-        deleted = "N";
+        deleted = "N";        
+        modId = createId;        
         modTime = new Date();
     }
     

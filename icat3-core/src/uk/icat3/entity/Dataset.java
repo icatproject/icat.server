@@ -25,9 +25,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
+import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -40,15 +43,16 @@ import uk.icat3.util.DatasetInclude;
  * @author gjd37
  */
 @Entity
-@Table(name = "DATASET")
+@Table(name = "DATASET", uniqueConstraints={@UniqueConstraint(columnNames={"SAMPLE_ID","INVESTIGATION_ID", "NAME","DATASET_TYPE"})})
 @NamedQueries( {
     @NamedQuery(name = "Dataset.findById", query = "SELECT d FROM Dataset d WHERE d.id = :id"),
     @NamedQuery(name = "Dataset.findBySampleId", query = "SELECT d FROM Dataset d WHERE d.sampleId = :sampleId"),
     @NamedQuery(name = "Dataset.findByName", query = "SELECT d FROM Dataset d WHERE d.name = :name"),
     @NamedQuery(name = "Dataset.findByDescription", query = "SELECT d FROM Dataset d WHERE d.description = :description"),
     @NamedQuery(name = "Dataset.findByModTime", query = "SELECT d FROM Dataset d WHERE d.modTime = :modTime"),
-    @NamedQuery(name = "Dataset.getBySampleId", query = "SELECT Dataset FROM Dataset d where name = :sampleName"),
-    @NamedQuery(name = "Dataset.findByModId", query = "SELECT d FROM Dataset d WHERE d.modId = :modId")
+    @NamedQuery(name = "Dataset.getBySampleId", query = "SELECT d FROM Dataset d where d.name = :sampleName"),
+    @NamedQuery(name = "Dataset.findByModId", query = "SELECT d FROM Dataset d WHERE d.modId = :modId"),
+    @NamedQuery(name = "Dataset.findbyUnique", query = "SELECT d FROM Dataset d WHERE d.sampleId = :sampleId AND d.name = :name AND d.investigationId = :investigationId AND d.datasetType = :datasetType")
 })
 @XmlRootElement
 @SequenceGenerator(name="DATASET_SEQ",sequenceName="DATASET_ID_SEQ",allocationSize=1)
@@ -68,14 +72,11 @@ public class Dataset extends EntityBaseBean implements Serializable {
     @Column(name = "DESCRIPTION")
     private String description;
     
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-    
     @JoinColumn(name = "DATASET_STATUS", referencedColumnName = "NAME")
     @ManyToOne
     private DatasetStatus datasetStatus;
     
-    @JoinColumn(name = "DATASET_TYPE", referencedColumnName = "NAME")
+    @JoinColumn(name = "DATASET_TYPE", referencedColumnName = "NAME", nullable=false)
     @ManyToOne
     private DatasetType datasetType;
     
@@ -183,22 +184,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
      */
     public void setDescription(String description) {
         this.description = description;
-    }
-    
-    /**
-     * Gets the modId of this Dataset.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-    
-    /**
-     * Sets the modId of this Dataset to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
     }
     
     /**
@@ -332,7 +317,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
         Collection<Datafile> datafiles = this.getDatafileCollection();
         datafiles.add(dataFile);
         
-        this.setDatafileCollection(datafiles);        
+        this.setDatafileCollection(datafiles);
     }
     
     /**
@@ -461,8 +446,10 @@ public class Dataset extends EntityBaseBean implements Serializable {
             //now check all annoatations
             for (Annotation a : allFields[i].getDeclaredAnnotations()) {
                 //if this means its a none null column field
-                if(a.annotationType().getName().equals(
-                        javax.persistence.Column.class.getName()) && a.toString().contains("nullable=false") ){
+                if((a.annotationType().getName().equals(
+                        javax.persistence.Column.class.getName()) ||
+                        a.annotationType().getName().equals(
+                        javax.persistence.JoinColumn.class.getName())) && a.toString().contains("nullable=false") ){
                     
                     //now check if it is null, if so throw error
                     try {
@@ -494,15 +481,40 @@ public class Dataset extends EntityBaseBean implements Serializable {
         
         
         //check all datafiles now
-        for(Datafile datafile : getDatafileCollection()){
-            datafile.isValid(manager);
-        }
-        //check all datasetParameter now
-        for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
-            datasetParameter.isValid(manager);
+        if(getDatafileCollection() != null){
+            for(Datafile datafile : getDatafileCollection()){
+                datafile.isValid(manager);
+            }
         }
         
+        //check all datasetParameter now
+        if(getDatasetParameterCollection() != null){
+            for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
+                datasetParameter.isValid(manager);
+            }
+        }
+        
+        
         return isValid();
+    }
+    
+    public boolean isUnique(EntityManager manager){
+        
+        Query query =  manager.createNamedQuery("Dataset.findbyUnique");
+        query = query.setParameter("sampleId",sampleId);
+        query = query.setParameter("investigationId", investigationId);
+        query = query.setParameter("datasetType",datasetType);
+        query = query.setParameter("name",name);
+        
+        try {
+            Dataset dataset = (Dataset)query.getSingleResult();
+            //if found id is this id then it is unique
+            if(dataset.getId().equals(id)) return true;
+            else return false;
+        } catch(NoResultException nre) {
+            //means it is unique
+            return true;
+        }
     }
     
     /**

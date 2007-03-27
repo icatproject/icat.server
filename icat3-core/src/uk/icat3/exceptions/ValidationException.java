@@ -9,11 +9,14 @@
 
 package uk.icat3.exceptions;
 
+import javax.ejb.ApplicationException;
+
 /**
  *  Exception for entity validation
  *
  * @author gjd37
  */
+@ApplicationException(rollback=true)
 public class ValidationException extends ICATAPIException {
     
     /**
