@@ -24,6 +24,7 @@ import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
+import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.InvestigationManager;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
@@ -62,7 +63,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         return InvestigationManager.getInvestigation(userId, investigationId, manager);
     }
     
-    @WebMethod(operationName="c")
+    
     @RequestWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationIncludes")
     @ResponseWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationIncludesResponse")
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -76,14 +77,5 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         return investigation;
     }
     
-    @WebMethod
-    public boolean addDataSet(String sessionId, Long investigationId, Dataset dataSet) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
-        
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-        
-        InvestigationManager.addDataSet(userId, dataSet, investigationId, manager);
-        
-        return true;
-    }
+   
 }

@@ -9,6 +9,7 @@
 
 package uk.icat3.sessionbeans.manager;
 
+import java.util.Collection;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -20,10 +21,14 @@ import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
+import uk.icat3.entity.DatasetParameter;
+import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
+import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataSetManager;
+import uk.icat3.manager.ManagerUtil;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
@@ -75,5 +80,42 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
         dataSet.setDatasetInclude(includes);
         
         return dataSet;
-    }    
+    }
+    
+    @WebMethod
+    public Long createDataSet(String sessionId, Long investigationId, Dataset dataSet) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        Dataset dataset = DataSetManager.createDataSet(userId, dataSet, investigationId, manager);
+        
+        return dataset.getId();
+    }
+    
+    public void addDataSetParameter(String sessionId, DatasetParameter dataSetParameter, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        //check is valid
+        dataSetParameter.isValid(manager);
+        
+        //get dataset, checks read access
+        Dataset dataset = DataSetManager.getDataSet(userId, datasetId, manager);
+        
+        //add the dataset parameter to the dataset
+        dataset.addDataSetParamaeter(dataSetParameter);
+        
+        //update this, this also checks permissions,  no need to validate cos just loaded from DB
+        DataSetManager.updateDataSet(userId, dataset, manager, false);
+    }
+    
+    public void setDataSetSample(String sessionId, Long sampleId, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+                
+        DataSetManager.setDataSetSample(userId, sampleId, datasetId, manager);        
+    }
 }
