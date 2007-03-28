@@ -18,6 +18,8 @@ public class TestConstants {
     public final static String VALID_USER_FOR_INVESTIGATION =  "JAMES-JAMES";
     public final static long VALID_DATASET_ID_FOR_INVESTIGATION =  2;
     public final static long VALID_INVESTIGATION_ID =  2;
+    public final static long VALID_DATA_SET_ID =  2;
+    public final static long VALID_SAMPLE_ID_FOR_INVESTIGATION_ID =  2;
     
     public final static String INVALID_USER =  "invalidUser" +Math.random();
     public final static String VALID_INVESTIGATION_SURNAME  = "HEALY";

@@ -36,7 +36,7 @@ public class TestDatafileManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test
+    @Test
     public void testCreateValidDatafile() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
         
@@ -52,7 +52,7 @@ public class TestDatafileManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-   // @Test
+    @Test
     public void testAddValidDatafiles() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for add a files for daatset Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
         
@@ -97,7 +97,7 @@ public class TestDatafileManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=ValidationException.class)
+    @Test(expected=ValidationException.class)
     public void testCreateInValidDatafile() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file");
         
@@ -133,7 +133,7 @@ public class TestDatafileManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void testCreateInValidDatafileInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for creating a file");
         

@@ -20,9 +20,9 @@ import uk.icat3.exceptions.ICATAPIException;
 import uk.icat3.exceptions.ValidationException;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
-import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.entity.Sample;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.manager.DataSetManager;
 import uk.icat3.util.BaseTestClassTX;
 import static uk.icat3.util.TestConstants.*;
@@ -38,7 +38,7 @@ public class TestDatasetManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //  @Test
+    // @Test
     public void testCreateValidDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a set for investigation id: "+VALID_INVESTIGATION_ID);
         
@@ -61,7 +61,7 @@ public class TestDatasetManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    // @Test
     public void testAddValidDatafiles() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for add a files for datset Id: "+VALID_INVESTIGATION_ID);
         
@@ -75,7 +75,7 @@ public class TestDatasetManager extends BaseTestClassTX {
         
         //find dataset type
         Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
-                
+        
         DatasetType added =  datasetType.iterator().next();
         file1.setDatasetType(added);
         file2.setDatasetType(added);
@@ -113,7 +113,7 @@ public class TestDatasetManager extends BaseTestClassTX {
     /**
      * Tests creating a invalid file, no anme and type
      */
-    //@Test(expected=ValidationException.class)
+    // @Test(expected=ValidationException.class)
     public void testCreateInValidDatafile() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file");
         
@@ -172,7 +172,7 @@ public class TestDatasetManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    // @Test(expected=InsufficientPrivilegesException.class)
+    //  @Test(expected=InsufficientPrivilegesException.class)
     public void testCreateInValidDatasetInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for creating a file");
         
@@ -192,6 +192,34 @@ public class TestDatasetManager extends BaseTestClassTX {
             throw ex;
         }
     }
+    
+    /**
+     * Tests creating a file
+     */
+    //@Test
+    public void testAddValidSampleToDatasetValidUser() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sample");
+        
+        //update this, this also checks permissions, no need to validate cos just loaded from DB
+        DataSetManager.setDataSetSample(VALID_USER_FOR_INVESTIGATION, VALID_SAMPLE_ID_FOR_INVESTIGATION_ID, VALID_DATA_SET_ID, em);
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test(expected=ValidationException.class)
+    public void testAddInValidSampleToDatasetValidUser() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sample");
+        
+        try {
+             DataSetManager.setDataSetSample(VALID_USER_FOR_INVESTIGATION, 3045395454L,VALID_SAMPLE_ID_FOR_INVESTIGATION_ID, em);
+            
+        }  catch (ICATAPIException ex) {
+            log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());            
+            throw ex;
+        }
+    }
+    
     
     
     public static junit.framework.Test suite(){
