@@ -2,7 +2,6 @@ package uk.icat3.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import org.apache.log4j.Logger;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.util.AccessType;
@@ -14,6 +13,7 @@ import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.InvestigationLevelPermission;
 import uk.icat3.entity.Investigator;
+import uk.icat3.entity.Keyword;
 import uk.icat3.entity.Sample;
 import uk.icat3.entity.SampleParameter;
 import uk.icat3.entity.Study;
@@ -51,6 +51,7 @@ public class GateKeeper {
     // Global class logger
     static Logger log = Logger.getLogger(GateKeeper.class);
     
+    
     /**
      * Decides if a user has permission to perform an operation of type
      * {@link AccessType} on a {@link Datafile} element/entity.  If the
@@ -70,8 +71,10 @@ public class GateKeeper {
     public static void performAuthorisation(String user, Datafile datafile, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(datafile.getDatasetId().getInvestigationId());
-        performAuthorisation(user, invList, access, datafile.getClass().toString(), datafile.toString(), manager);
+        performAuthorisation(user, invList, access, datafile.getClass().toString(), datafile.toString(),  manager);
+        
     }//end method
+    
     
     /**
      * Decides if a user has permission to perform an operation of type
@@ -92,7 +95,8 @@ public class GateKeeper {
     public static void performAuthorisation(String user, Dataset dataset, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(dataset.getInvestigationId());
-        performAuthorisation(user, invList, access, dataset.getClass().toString(), dataset.toString(), manager);
+        performAuthorisation(user, invList, access, dataset.getClass().toString(), dataset.toString(),  manager);
+        
     }//end method
     
     /**
@@ -114,7 +118,8 @@ public class GateKeeper {
     public static void performAuthorisation(String user, Sample sample, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(sample.getInvestigationId());
-        performAuthorisation(user, invList, access, sample.getClass().toString(), sample.toString(), manager);
+        performAuthorisation(user, invList, access, sample.getClass().toString(), sample.toString(),  manager);
+        
     }//end method
     
     /**
@@ -137,6 +142,7 @@ public class GateKeeper {
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(sampleParam.getSample().getInvestigationId());
         performAuthorisation(user, invList, access, sampleParam.getClass().toString(), sampleParam.toString(), manager);
+        
     }//end method
     
     /**
@@ -159,6 +165,7 @@ public class GateKeeper {
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(datasetParam.getDataset().getInvestigationId());
         performAuthorisation(user, invList, access, datasetParam.getClass().toString(), datasetParam.toString(), manager);
+        
     }//end method
     
     /**
@@ -180,7 +187,7 @@ public class GateKeeper {
     public static void performAuthorisation(String user, DatafileParameter datafileParam, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(datafileParam.getDatafile().getDatasetId().getInvestigationId());
-        performAuthorisation(user, invList, access, datafileParam.getClass().toString(), datafileParam.toString(), manager);
+        performAuthorisation(user, invList, access, datafileParam.getClass().toString(), datafileParam.toString(),  manager);
     }//end method
     
     /**
@@ -202,7 +209,8 @@ public class GateKeeper {
     public static void performAuthorisation(String user, Investigation investigation, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(investigation);
-        performAuthorisation(user, invList, access, investigation.getClass().toString(), investigation.toString(), manager);
+        performAuthorisation(user, invList, access, investigation.getClass().toString(), investigation.toString(),  manager);
+        
     }//end method
     
     /*
@@ -231,10 +239,11 @@ public class GateKeeper {
      */
     public static void performAuthorisation(String user, Study study, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
-        for (Iterator<StudyInvestigation> iter = study.getStudyInvestigationCollection().iterator(); iter.hasNext(); ) {
-            invList.add(iter.next().getInvestigation());
+        for (StudyInvestigation si :  study.getStudyInvestigationCollection()) {
+            invList.add(si.getInvestigation());
         }//end for
         performAuthorisation(user, invList, access, study.getClass().toString(), study.toString(), manager);
+              
     }//end method
     
     /**
@@ -265,20 +274,20 @@ public class GateKeeper {
         //TBI...
         
         //changed:  gjd37, iterators, not nice!
-        for(Investigation investigation : investigations){           
+        for(Investigation investigation : investigations){
             //user is instrument scientist for instrument in investigation then return (no need to check individual permissions)
             //TBI...
-                        
-            //TODO: added by gjd37, if user one of investigators then allow access                  
-            for(Investigator investigator : investigation.getInvestigatorCollection()){               
+            
+            //TODO: added by gjd37, if user one of investigators then allow access
+            for(Investigator investigator : investigation.getInvestigatorCollection()){
                 if(investigator.getFacilityUser().getFederalId().equals(user)){
-                    //passed for this investigation    
-                    log.debug("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);                    
+                    //passed for this investigation
+                    log.debug("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
                     return ;
                 }
-            }            
-                        
-            //if get to here, then user not a investigator so check investigations level permissions            
+            }
+            
+            //if get to here, then user not a investigator so check investigations level permissions
             for(InvestigationLevelPermission perm : investigation.getInvestigationLevelPermissionCollection()){
                 
                 //READ, UPDATE, DELETE, CREATE, ADMIN, FINE_GRAINED_ACCESS;

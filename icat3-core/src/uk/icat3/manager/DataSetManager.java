@@ -326,7 +326,7 @@ public class DataSetManager extends ManagerUtil {
     
     /////////////////////   Util commands /////////////////////////
     
-    public static  void setDataSetSample(String userId, Long sampleId, Long datasetid, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public static void setDataSetSample(String userId, Long sampleId, Long datasetid, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //check valid sample id
         Sample sampleRef = manager.find(Sample.class,sampleId);

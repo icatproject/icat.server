@@ -15,5 +15,6 @@ package uk.icat3.util;
  */
 public enum AccessType {
     
-    READ, UPDATE, DELETE, CREATE, ADMIN, FINE_GRAINED_ACCESS;
+    //DELETE marks the record as delete in the deleted column, remove removes the record from the DB
+    READ, UPDATE, DELETE, REMOVE, CREATE, ADMIN, FINE_GRAINED_ACCESS;
 }

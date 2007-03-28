@@ -15,11 +15,12 @@ package uk.icat3.util;
  */
 public enum InvestigationInclude {
     
-      INVESTIGATORS_ONLY,
+    INVESTIGATORS_ONLY,
     KEYWORDS_ONLY,
     INVESTIGATORS_AND_KEYWORDS,
     DATASETS_ONLY,
     DATASETS_AND_DATAFILES,
+    SAMPLES_ONLY,
     ALL,
     NONE;
     

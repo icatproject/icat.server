@@ -11,9 +11,9 @@ package uk.icat3.entity;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -21,6 +21,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.exceptions.ValidationException;
 
 /**
  * Entity class Investigator
@@ -43,11 +44,8 @@ public class Investigator extends EntityBaseBean implements Serializable {
      */
     @EmbeddedId
     protected InvestigatorPK investigatorPK;
-    
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-    
-    // @Column(name = "ROLE")
+         
+    //TODO @Column(name = "ROLE")
     //private String role;
     
     @JoinColumn(name = "FACILITY_USER_ID", referencedColumnName = "FACILITY_USER_ID", insertable = false, updatable = false)
@@ -108,23 +106,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
     public void setInvestigatorPK(InvestigatorPK investigatorPK) {
         this.investigatorPK = investigatorPK;
     }
-    
-    /**
-     * Gets the modId of this Investigator.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-    
-    /**
-     * Sets the modId of this Investigator to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-    
+           
     /**
      * Gets the facilityUser of this Investigator.
      * @return the facilityUser
@@ -186,6 +168,18 @@ public class Investigator extends EntityBaseBean implements Serializable {
         int hash = 0;
         hash += (this.investigatorPK != null ? this.investigatorPK.hashCode() : 0);
         return hash;
+    }
+    
+     /**
+     * Overrides the isValid function, checks each of the datafiles and datafile parameters are valid
+     *
+     * @throws ValidationException
+     * @return
+     */
+    @Override
+    public boolean isValid(EntityManager manager) throws ValidationException {
+                      
+        return investigatorPK.isValid();
     }
     
     /**

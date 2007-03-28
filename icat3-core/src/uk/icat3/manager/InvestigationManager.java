@@ -11,12 +11,12 @@ package uk.icat3.manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.Investigator;
+import uk.icat3.entity.Keyword;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -205,7 +205,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static Investigation updateInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+    public static Investigation updateInvestigation(String userId, Investigation investigation, EntityManager manager, boolean validate) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateInvestigation("+userId+", "+investigation+", EntityManager)");
         
         //check to see if DataSet exists, dont need the returned dataset as merging
@@ -213,10 +213,12 @@ public class InvestigationManager extends ManagerUtil {
             checkInvestigation(investigation.getId(), manager);
         }
         
-        //check if valid investigation
-        investigation.isValid(manager);
-        //check if unique
-        if(!investigation.isUnique(manager)) throw new ValidationException(investigation+" is not unique.");
+        if(validate){
+            //check if valid investigation
+            investigation.isValid(manager);
+            //check if unique
+            if(!investigation.isUnique(manager)) throw new ValidationException(investigation+" is not unique.");
+        }
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
@@ -234,6 +236,20 @@ public class InvestigationManager extends ManagerUtil {
             return investigation;
         }
     }
+    
+    /**
+     * Updates a Investigation depending on whether the user has permission to update this Investigation
+     *
+     * @param userId userId of the user.
+     * @param investigation
+     * @param manager manager object that will facilitate interaction with underlying database     *
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
+    public static Investigation updateInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        return updateInvestigation(userId, investigation, manager, true);
+    }
+    
     
     /**
      * Adds a data set to the list a data sets for a investigation, depending if the user has update permission on the investigation
@@ -289,4 +305,127 @@ public class InvestigationManager extends ManagerUtil {
         }
     }
     ///////////////   End of add/Update Commands    ///////////////////
+    
+    
+    /////////////////////   Util add commands /////////////////////////
+    
+    public static void addKeyword(String userId, Keyword keyword, Long investigationId, EntityManager manager) throws ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        log.trace("addKeyword("+userId+", "+keyword+" "+investigationId+", EntityManager)");
+        
+        //check investigation exists
+        Investigation investigation = ManagerUtil.checkInvestigation(investigationId, manager);
+        
+        //check valid
+        keyword.isValid(manager);
+        
+        //check user has update access
+        GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
+        
+        //sets modId for persist
+        keyword.setCreateId(userId);
+        keyword.setInvestigation(investigation);
+        
+        manager.persist(keyword);
+        // add keyword to investigation
+        //investigation.addKeyword(keyword);
+    }
+    
+    public static void addInvestigator(String userId, Investigator investigator, Long investigationId, EntityManager manager) throws ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        log.trace("addInvestigator("+userId+", "+investigator+" "+investigationId+", EntityManager)");
+        
+        //check investigation exists
+        Investigation investigation = ManagerUtil.checkInvestigation(investigationId, manager);
+        
+        //check valid
+        investigator.isValid(manager);
+        
+        //check user has update access
+        GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
+        
+        try {
+            //check investigator not already added
+            Investigator investigatorManaged = ManagerUtil.find(Investigator.class, investigator.getInvestigatorPK(), manager);
+            if(investigatorManaged.isDeleted()){
+                investigatorManaged.setDeleted("N");
+                log.info(investigatorManaged +" been deleted, undeleting now.");
+            } else {
+                //do nothing, throw exception
+                log.warn(investigatorManaged +" already added to investigation.");
+            }
+        } catch (NoSuchObjectFoundException ex) {
+            //not already in DB so add
+            //sets modId for persist
+            investigator.setCreateId(userId);
+            investigator.setInvestigation(investigation);
+            manager.persist(investigator);
+        }
+    }
+    
+    ////////////////////////////////////////////////
+    
+    /////////////////////   Util delete commands /////////////////////////
+    
+    public static void deleteKeyword(String userId, Keyword keyword, EntityManager manager) throws  InsufficientPrivilegesException, NoSuchObjectFoundException{
+        log.trace("deleteKeyword("+userId+", "+keyword+" EntityManager)");
+        
+        //check keyword
+        Keyword keywordManaged = ManagerUtil.find(Keyword.class, keyword.getKeywordPK(), manager);
+        
+        //check user has delete access
+        GateKeeper.performAuthorisation(userId, keywordManaged.getInvestigation(), AccessType.DELETE, manager);
+        
+        //ok here fo delete
+        keywordManaged.setDeleted("Y");
+        keywordManaged.setModId(userId);
+    }
+    
+    public static void deleteInvestigator(String userId, Investigator investigator, EntityManager manager) throws ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        log.trace("deleteInvestigator("+userId+", "+investigator+" EntityManager)");
+        
+        //check keyword
+        Investigator investigatorManaged = ManagerUtil.find(Investigator.class, investigator.getInvestigatorPK(), manager);
+        
+        //check user has delete access
+        GateKeeper.performAuthorisation(userId, investigatorManaged.getInvestigation(), AccessType.UPDATE, manager);
+        
+        //ok here fo delete
+        investigatorManaged.setDeleted("Y");
+        investigatorManaged.setModId(userId);
+    }
+    
+    ////////////////////////////////////////////////
+    
+    /////////////////////   Util remove commands /////////////////////////
+    
+    public static void removeKeyword(String userId, Keyword keyword, EntityManager manager) throws  InsufficientPrivilegesException, NoSuchObjectFoundException{
+        log.trace("deleteKeyword("+userId+", "+keyword+" EntityManager)");
+        
+        //check keyword
+        Keyword keywordManaged = ManagerUtil.find(Keyword.class, keyword.getKeywordPK(), manager);
+        
+        //check user has delete access
+        GateKeeper.performAuthorisation(userId, keywordManaged.getInvestigation(), AccessType.REMOVE, manager);
+        
+        //ok here fo delete
+        keywordManaged.getInvestigation().getKeywordCollection().remove(keyword);
+        keywordManaged.setInvestigation(null);
+        manager.remove(keywordManaged);
+    }
+    
+    public static void removeInvestigator(String userId, Investigator investigator, EntityManager manager) throws ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        log.trace("deleteInvestigator("+userId+", "+investigator+" EntityManager)");
+        
+        //check keyword
+        Investigator investigatorManaged = ManagerUtil.find(Investigator.class, investigator.getInvestigatorPK(), manager);
+        
+        //check user has delete access
+        GateKeeper.performAuthorisation(userId, investigatorManaged.getInvestigation(), AccessType.REMOVE, manager);
+        
+        //ok here fo delete
+        investigatorManaged.getInvestigation().getInvestigatorCollection().remove(investigator);
+        investigatorManaged.setInvestigation(null);
+        investigatorManaged.setFacilityUser(null);
+        
+        manager.remove(investigatorManaged);
+    }
 }

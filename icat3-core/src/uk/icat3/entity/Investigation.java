@@ -387,6 +387,21 @@ public class Investigation extends EntityBaseBean implements Serializable {
     }
     
     /**
+     * This method is used by JAXWS to map to datasetCollection.  Depending on what the include is
+     * set to depends on what is returned to JAXWS and serialised into XML.  This is because without
+     * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+     * DB hits and serialisation).
+     */
+    @XmlElement(name="sampleCollection")
+    private Collection<Sample> getSampleCollection_() {
+        if(investigationInclude.toString().equals(investigationInclude.SAMPLES_ONLY.toString())){
+            return this.sampleCollection;
+        } else if(investigationInclude.toString().equals(investigationInclude.ALL.toString())){
+            return this.sampleCollection;
+        }  else return null;
+    }
+    
+    /**
      * Sets the sampleCollection of this Investigation to the specified value.
      * @param sampleCollection the new sampleCollection
      */
@@ -549,6 +564,19 @@ public class Investigation extends EntityBaseBean implements Serializable {
         this.keywordCollection = keywordCollection;
     }
     
+     /**
+     * Adds a Keyword to the investigation,
+     * also adds the investigation to the Keyword.
+     */
+    public void addKeyword(Keyword keyword){
+        keyword.setInvestigation(this);
+        
+        Collection<Keyword> keywords = this.getKeywordCollection();
+        keywords.add(keyword);
+        
+        this.setKeywordCollection(keywords);       
+    }
+    
     /**
      * Gets the studyInvestigationCollection of this Investigation.
      * @return the studyInvestigationCollection
@@ -615,6 +643,20 @@ public class Investigation extends EntityBaseBean implements Serializable {
     private void setInvestigatorCollection_(Collection<Investigator> investigatorCollection) {
         this.investigatorCollection = investigatorCollection;
     }
+    
+      /**
+     * Adds a Keyword to the investigation,
+     * also adds the investigation to the Keyword.
+     */
+    public void addInvestigator(Investigator investigator){
+        investigator.setInvestigation(this);
+        
+        Collection<Investigator> investigators = this.getInvestigatorCollection();
+        investigators.add(investigator);
+        
+        this.setInvestigatorCollection(investigators);        
+    }    
+  
     
     /**
      * Sets the investigatorCollection of this Investigation to the specified value.

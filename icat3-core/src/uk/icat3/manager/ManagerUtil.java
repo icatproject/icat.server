@@ -102,12 +102,12 @@ public class ManagerUtil {
         // See in Investigation.getInvestigatorCollection_() method
         for(Investigation investigation : investigations){
             investigation.setInvestigationInclude(include);
-            if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString()) || include.toString().equals(InvestigationInclude.ALL.toString())){                
+            if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString()) || include.toString().equals(InvestigationInclude.ALL.toString())){
                 for(Dataset dataset : investigation.getDatasetCollection()){
                     log.trace("Setting data sets to include: "+DatasetInclude.DATASET_FILES_AND_PARAMETERS);
                     dataset.setDatasetInclude(DatasetInclude.DATASET_FILES_AND_PARAMETERS);
                 }
-            }            
+            }
         }
     }
     
@@ -201,5 +201,15 @@ public class ManagerUtil {
         log.trace("DataFile: id: "+dataFileId+" exists in the database");
         
         return dataFile;
+    }
+    
+    protected static <T> T find(Class<T> entityClass, Object primaryKey, EntityManager manager) throws NoSuchObjectFoundException{
+        T object = manager.find(entityClass, primaryKey);
+        
+        if(object == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+": id: "+primaryKey+" not found.");
+        
+        log.trace(entityClass.getSimpleName()+": id: "+primaryKey+" exists in the database");
+        
+        return object;
     }
 }

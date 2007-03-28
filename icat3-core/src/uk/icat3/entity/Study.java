@@ -44,7 +44,7 @@ import javax.persistence.TemporalType;
         @NamedQuery(name = "Study.findByModTime", query = "SELECT s FROM Study s WHERE s.modTime = :modTime"),
         @NamedQuery(name = "Study.findByModId", query = "SELECT s FROM Study s WHERE s.modId = :modId")
     })
-public class Study implements Serializable {
+public class Study extends EntityBaseBean implements Serializable {
 
     @Id
     @Column(name = "ID", nullable = false)
@@ -65,14 +65,7 @@ public class Study implements Serializable {
 
     @Column(name = "STUDY_MANAGER")
     private BigInteger studyManager;
-
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
     private Collection<StudyInvestigation> studyInvestigationCollection;
 
@@ -202,31 +195,7 @@ public class Study implements Serializable {
         this.studyManager = studyManager;
     }
 
-    /**
-     * Gets the modTime of this Study.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this Study to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
-    /**
-     * Gets the modId of this Study.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
+        /**
      * Sets the modId of this Study to the specified value.
      * @param modId the new modId
      */

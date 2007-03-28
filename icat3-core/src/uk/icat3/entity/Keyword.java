@@ -11,10 +11,10 @@ package uk.icat3.entity;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Column;
 import javax.persistence.ColumnResult;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityResult;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -26,6 +26,7 @@ import javax.persistence.SqlResultSetMapping;
 import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.Queries;
 
 /**
@@ -66,10 +67,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
      */
     @EmbeddedId
     protected KeywordPK keywordPK;
-    
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-    
+            
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
@@ -123,24 +121,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
     public void setKeywordPK(KeywordPK keywordPK) {
         this.keywordPK = keywordPK;
     }
-    
-    
-    /**
-     * Gets the modId of this Keyword.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-    
-    /**
-     * Sets the modId of this Keyword to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-    
+          
     /**
      * Gets the investigation of this Keyword.
      * @return the investigation
@@ -168,6 +149,18 @@ public class Keyword extends EntityBaseBean implements Serializable {
         int hash = 0;
         hash += (this.keywordPK != null ? this.keywordPK.hashCode() : 0);
         return hash;
+    }
+    
+     /**
+     * Overrides the isValid function, checks each of the datafiles and datafile parameters are valid
+     *
+     * @throws ValidationException
+     * @return
+     */
+    @Override
+    public boolean isValid(EntityManager manager) throws ValidationException {
+                      
+        return keywordPK.isValid();
     }
     
     /**

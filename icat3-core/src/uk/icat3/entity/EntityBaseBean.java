@@ -80,6 +80,19 @@ public class EntityBaseBean {
     }
     
     /**
+     * To find out if they record can be modified    
+     */
+    public boolean isModifiable(){
+        //TODO will change to other colums here aswell as user supplied data and faility 
+        //at the moment if from props then cannot change
+        if(createId.contains("FROM SPREADSHEET") || createId.contains("PROPAGATION")){
+            //user cannot modify this
+            return false;
+        }
+        else return true;
+    }
+    
+    /**
      * Gets the modId of this Datafile.
      * @return the modId
      */
@@ -109,7 +122,9 @@ public class EntityBaseBean {
     @PrePersist
     public void prePersist(){
         deleted = "N";        
-        modId = createId;        
+        if(modId != null){
+            createId = modId;
+        } else if(createId != null) modId = createId;
         modTime = new Date();
     }
     
