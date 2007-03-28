@@ -38,7 +38,7 @@ public class TestDatasetManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    // @Test
+     @Test
     public void testCreateValidDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a set for investigation id: "+VALID_INVESTIGATION_ID);
         
@@ -207,7 +207,7 @@ public class TestDatasetManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=ValidationException.class)
+   // @Test(expected=ValidationException.class)
     public void testAddInValidSampleToDatasetValidUser() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sample");
         
