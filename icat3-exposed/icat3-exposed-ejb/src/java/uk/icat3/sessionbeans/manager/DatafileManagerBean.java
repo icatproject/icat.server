@@ -9,6 +9,8 @@
 
 package uk.icat3.sessionbeans.manager;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -18,7 +20,6 @@ import javax.jws.WebService;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
-import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
@@ -56,6 +57,15 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         return DataFileManager.getDataFile(userId, datafileId, manager);
     }
     
+     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public Collection<Datafile> getDatafiles(String sessionId, Collection<Long> datafileIds)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return DataFileManager.getDataFiles(userId, datafileIds, manager);
+    }
+    
     
     public Long createDataFile(String sessionId, Datafile dataFile, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
@@ -67,6 +77,22 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         
         //return new id
         return newDataFile.getId();
+    }
+    
+    public Collection<Long> createDataFiles(String sessionId, Collection<Datafile> dataFiles, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        Collection<Long> ids = new ArrayList<Long>();
+        //add the dataset, this checks permssions
+        for(Datafile file : dataFiles){
+            Datafile newDataFile = DataFileManager.createDataFile(userId, file, datasetId, manager);
+            ids.add(newDataFile.getId());
+        }
+        
+        //return ids
+        return ids;
     }
     
     public void addDataFileParameter(String sessionId, DatafileParameter dataFileParameter, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {

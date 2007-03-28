@@ -9,6 +9,7 @@
 
 package uk.icat3.sessionbeans.manager;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -22,13 +23,11 @@ import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
-import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataSetManager;
-import uk.icat3.manager.ManagerUtil;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
@@ -55,8 +54,6 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     
     
     @WebMethod
-    @RequestWrapper(className="uk.icat3.sessionbeans.manager.getDataset")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.manager.getDatasetResponse")
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Dataset getDataset(String sessionId, Long datasetId)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
@@ -64,6 +61,16 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
         String userId = user.getUserIdFromSessionId(sessionId);
         
         return DataSetManager.getDataSet(userId, datasetId, manager);
+    }
+    
+    @WebMethod
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public Collection<Dataset> getDatasets(String sessionId, Collection<Long> datasetIds)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return DataSetManager.getDataSets(userId, datasetIds, manager);
     }
     
     @WebMethod(operationName="getDatasetIncludes")
@@ -93,6 +100,22 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
         return dataset.getId();
     }
     
+    @WebMethod
+    public Collection<Long> createDataSets(String sessionId, Long investigationId, Collection<Dataset> dataSets) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        Collection<Long> ids = new ArrayList<Long>();
+        for(Dataset dataset : dataSets){
+            Dataset datasetReturned = DataSetManager.createDataSet(userId, dataset, investigationId, manager);
+            ids.add(datasetReturned.getId());
+        }
+        
+        return ids;
+    }
+    
+    @WebMethod
     public void addDataSetParameter(String sessionId, DatasetParameter dataSetParameter, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
@@ -111,11 +134,12 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
         DataSetManager.updateDataSet(userId, dataset, manager, false);
     }
     
+    @WebMethod
     public void setDataSetSample(String sessionId, Long sampleId, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
-                
-        DataSetManager.setDataSetSample(userId, sampleId, datasetId, manager);        
+        
+        DataSetManager.setDataSetSample(userId, sampleId, datasetId, manager);
     }
 }
