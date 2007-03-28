@@ -272,6 +272,18 @@ public class Dataset extends EntityBaseBean implements Serializable {
     }
     
     /**
+     * Adds a dataset parameter to the data set in both directions for model
+     */
+    public void addDataSetParamaeter(DatasetParameter datasetParameter){
+        datasetParameter.setDataset(this);
+        
+        Collection<DatasetParameter> datasetParameters = this.getDatasetParameterCollection();
+        datasetParameters.add(datasetParameter);
+        
+        this.setDatasetParameterCollection(datasetParameters);
+    }
+    
+    /**
      * Gets the datafileCollection of this Dataset.
      * @return the datafileCollection
      */
@@ -478,6 +490,26 @@ public class Dataset extends EntityBaseBean implements Serializable {
     @Override
     public boolean isValid(EntityManager manager) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
+        
+      
+        //check sample info, sample id must be a part of in investigations aswell
+        outer: if(sampleId != null){
+            //check valid sample id
+           
+            Sample sampleRef = manager.find(Sample.class,sampleId);
+            if(sampleRef == null)             
+                throw new ValidationException("Sample[id="+sampleId+"] is not a valid sample id");
+           
+            Collection<Sample> samples = investigationId.getSampleCollection();
+            for(Sample sample : samples){
+                if(sample.getId().equals(sampleId)){
+                    //invest has for this sample in
+                    break outer;
+                }
+            }
+            //if here not got sample in
+            throw new ValidationException("Sample[id="+sampleId+"] is not associated with Dataset[id="+id+ "]'s invesigation.");
+        }
         
         
         //check all datafiles now

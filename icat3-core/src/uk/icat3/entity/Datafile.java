@@ -443,6 +443,18 @@ public class Datafile extends EntityBaseBean implements Serializable {
     }
     
     /**
+     * Adds a datafile parameter to the data file in both directions for model
+     */
+    public void addDataFileParamaeter(DatafileParameter dataFileParameter){
+        dataFileParameter.setDatafile(this);
+        
+        Collection<DatafileParameter> datafileParameters = this.getDatafileParameterCollection();
+        datafileParameters.add(dataFileParameter);
+        
+        this.setDatafileParameterCollection(datafileParameters);
+    }
+    
+    /**
      * Sets deleted flag on all items owned by this datafiles
      *
      * @param isDeleted
@@ -452,13 +464,17 @@ public class Datafile extends EntityBaseBean implements Serializable {
         String deleted = (isDeleted) ? "Y" : "N";
         
         //data file parameters
-        for(DatafileParameter datafileParameter : getDatafileParameterCollection()){
-            datafileParameter.setDeleted(deleted);
+        if(getDatafileParameterCollection() != null){
+            for(DatafileParameter datafileParameter : getDatafileParameterCollection()){
+                datafileParameter.setDeleted(deleted);
+            }
         }
         
         //relatedDatafiles
-        for(RelatedDatafiles relatedDatafile : getRelatedDatafilesCollection()){
-            relatedDatafile.setDeleted(deleted);
+        if(getRelatedDatafilesCollection() != null){
+            for(RelatedDatafiles relatedDatafile : getRelatedDatafilesCollection()){
+                relatedDatafile.setDeleted(deleted);
+            }
         }
         
         this.setDeleted(deleted);

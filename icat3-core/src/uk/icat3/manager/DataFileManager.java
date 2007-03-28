@@ -118,10 +118,11 @@ public class DataFileManager extends ManagerUtil {
      * @param userId
      * @param dataFile
      * @param manager
+     * @param validate to validate the whole of the datafile
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static Datafile updateDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+    public static Datafile updateDataFile(String userId, Datafile dataFile, EntityManager manager, boolean validate) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateDataFile("+userId+", "+dataFile+", EntityManager)");
         
         //check to see if DataFile exists, dont need the returned DataFile as merging
@@ -129,8 +130,10 @@ public class DataFileManager extends ManagerUtil {
             checkDataFile(dataFile.getId(), manager);
         }
         
-        //check if valid datafile
-        dataFile.isValid(manager);
+        if(validate){
+            //check if valid datafile
+            dataFile.isValid(manager);
+        }
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, dataFile, AccessType.UPDATE, manager);
@@ -148,6 +151,19 @@ public class DataFileManager extends ManagerUtil {
     }
     
     /**
+     * Updates / Adds a data file depending on whether the user has permission to update this data file or data set
+     *
+     * @param userId
+     * @param dataFile
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
+    public static Datafile updateDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        return updateDataFile(userId, dataFile, manager, true);
+    }
+    
+    /**
      * Creates a data file, depending if the user has update permission on the data set associated with the data set
      *
      * @param userId
@@ -162,22 +178,22 @@ public class DataFileManager extends ManagerUtil {
         
         //check isvalid
         /*dataFile.isValid(manager);
-        
+         
         //check dataset exist
         Dataset dataset  = DataSetManager.checkDataSet(datasetId, manager);
-        
+         
         //check user has update access
         GateKeeper.performAuthorisation(userId, dataset, AccessType.UPDATE, manager);
-        
+         
         //make sure id is null
         dataFile.setId(null);
         dataFile.setDatasetId(dataset);
         dataFile.setCreateId(userId);
-        
+         
         manager.persist(dataFile);
         return dataFile;*/
         
-         //check dataset exist
+        //check dataset exist
         Dataset dataset  = DataSetManager.checkDataSet(datasetId, manager);
         dataFile.setDatasetId(dataset);
         return updateDataFile(userId, dataFile, manager);

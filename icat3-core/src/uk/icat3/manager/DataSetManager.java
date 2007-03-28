@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
-import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -130,10 +130,11 @@ public class DataSetManager extends ManagerUtil {
      * @param userId
      * @param dataSet
      * @param manager
+     * @param validate does the whole of dataset need validating
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static Dataset updateDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+    public static Dataset updateDataSet(String userId, Dataset dataSet, EntityManager manager, boolean validate) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateDataSet("+userId+", "+dataSet+", EntityManager)");
         
         //check to see if DataSet exists, dont need the returned dataset as merging
@@ -141,17 +142,19 @@ public class DataSetManager extends ManagerUtil {
             checkDataSet(dataSet.getId(), manager);
         }
         
-        //check if valid dataset
-        dataSet.isValid(manager);
-        //check if unique
-        if(!dataSet.isUnique(manager)) throw new ValidationException(dataSet+" is not unique.");
+        if(validate){
+            //check if valid dataset
+            dataSet.isValid(manager);
+            //check if unique
+            if(!dataSet.isUnique(manager)) throw new ValidationException(dataSet+" is not unique.");
+        }
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, dataSet, AccessType.UPDATE, manager);
         
         //if null then update
         if(dataSet.getId() != null){
-            dataSet.setModId(userId);
+            dataSet.setModId(userId);          
             return manager.merge(dataSet);
         } else {
             //new dataset, set createid, this srts mod id
@@ -159,6 +162,19 @@ public class DataSetManager extends ManagerUtil {
             manager.persist(dataSet);
             return dataSet;
         }
+    }
+    
+    /**
+     * Updates / Adds a data set depending on whether the user has permission to update this data set or its investigation
+     *
+     * @param userId
+     * @param dataSet
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
+    public static Dataset updateDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        return updateDataSet(userId, dataSet, manager, true);
     }
     
     /**
@@ -307,4 +323,34 @@ public class DataSetManager extends ManagerUtil {
     
     ////////////////////    End of get Commands    /////////////////////////
     
+    
+    /////////////////////   Util commands /////////////////////////
+    
+    public static  void setDataSetSample(String userId, Long sampleId, Long datasetid, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        
+        //check valid sample id
+        Sample sampleRef = manager.find(Sample.class,sampleId);
+        if(sampleRef == null) throw new ValidationException("Sample[id="+sampleId+"] is not a valid sample id");
+        
+        //get dataset,
+        Dataset datasetManaged = ManagerUtil.checkDataSet(datasetid, manager);
+        
+        outer: if(sampleId != null){
+            Collection<Sample> samples = datasetManaged.getInvestigationId().getSampleCollection();
+            for(Sample sample : samples){
+                if(sample.getId().equals(sampleId)){
+                    //invest has for this sample in
+                    break outer;
+                }
+            }
+            //if here not got sample in
+            throw new ValidationException("Sample[id="+sampleId+"] is not associated with Dataset[id="+datasetManaged.getId()+ "]'s invesigation.");
+        }
+        
+        //add the dataset parameter to the dataset
+        datasetManaged.setSampleId(sampleId);
+        
+        //update this, this also checks permissions, no need to validate cos just loaded from DB
+        DataSetManager.updateDataSet(userId, datasetManaged, manager, false);
+    }
 }
