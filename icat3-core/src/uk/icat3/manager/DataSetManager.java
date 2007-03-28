@@ -154,7 +154,7 @@ public class DataSetManager extends ManagerUtil {
         
         //if null then update
         if(dataSet.getId() != null){
-            dataSet.setModId(userId);          
+            dataSet.setModId(userId);
             return manager.merge(dataSet);
         } else {
             //new dataset, set createid, this srts mod id

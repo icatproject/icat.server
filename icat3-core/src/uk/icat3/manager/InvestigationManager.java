@@ -301,7 +301,9 @@ public class InvestigationManager extends ManagerUtil {
             dataset.setCreateId(userId);
             //make sure id is null
             dataset.setId(null);
+            dataset.setInvestigationId(investigation);
             investigation.addDataSet(dataset);
+            //manager.persist(dataset);
         }
     }
     ///////////////   End of add/Update Commands    ///////////////////
@@ -372,7 +374,7 @@ public class InvestigationManager extends ManagerUtil {
         Keyword keywordManaged = ManagerUtil.find(Keyword.class, keyword.getKeywordPK(), manager);
         
         //check user has delete access
-        GateKeeper.performAuthorisation(userId, keywordManaged.getInvestigation(), AccessType.DELETE, manager);
+        GateKeeper.performAuthorisation(userId, keywordManaged.getInvestigation(), keywordManaged, AccessType.DELETE, manager);
         
         //ok here fo delete
         keywordManaged.setDeleted("Y");
@@ -386,7 +388,7 @@ public class InvestigationManager extends ManagerUtil {
         Investigator investigatorManaged = ManagerUtil.find(Investigator.class, investigator.getInvestigatorPK(), manager);
         
         //check user has delete access
-        GateKeeper.performAuthorisation(userId, investigatorManaged.getInvestigation(), AccessType.UPDATE, manager);
+        GateKeeper.performAuthorisation(userId, investigatorManaged.getInvestigation(), investigatorManaged, AccessType.UPDATE, manager);
         
         //ok here fo delete
         investigatorManaged.setDeleted("Y");
@@ -404,7 +406,7 @@ public class InvestigationManager extends ManagerUtil {
         Keyword keywordManaged = ManagerUtil.find(Keyword.class, keyword.getKeywordPK(), manager);
         
         //check user has delete access
-        GateKeeper.performAuthorisation(userId, keywordManaged.getInvestigation(), AccessType.REMOVE, manager);
+        GateKeeper.performAuthorisation(userId, keywordManaged.getInvestigation(), keywordManaged, AccessType.REMOVE, manager);
         
         //ok here fo delete
         keywordManaged.getInvestigation().getKeywordCollection().remove(keyword);
@@ -419,7 +421,7 @@ public class InvestigationManager extends ManagerUtil {
         Investigator investigatorManaged = ManagerUtil.find(Investigator.class, investigator.getInvestigatorPK(), manager);
         
         //check user has delete access
-        GateKeeper.performAuthorisation(userId, investigatorManaged.getInvestigation(), AccessType.REMOVE, manager);
+        GateKeeper.performAuthorisation(userId, investigatorManaged.getInvestigation(), investigatorManaged, AccessType.REMOVE, manager);
         
         //ok here fo delete
         investigatorManaged.getInvestigation().getInvestigatorCollection().remove(investigator);

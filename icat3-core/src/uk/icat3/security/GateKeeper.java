@@ -3,6 +3,7 @@ package uk.icat3.security;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.util.AccessType;
 import javax.persistence.EntityManager;
@@ -73,6 +74,7 @@ public class GateKeeper {
         invList.add(datafile.getDatasetId().getInvestigationId());
         performAuthorisation(user, invList, access, datafile.getClass().toString(), datafile.toString(),  manager);
         
+        //now check for
     }//end method
     
     
@@ -213,6 +215,19 @@ public class GateKeeper {
         
     }//end method
     
+    public static void performAuthorisation(String user, Investigation investigation, EntityBaseBean object, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+        //now check modifiable
+        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
+            if(!object.isModifiable()){
+                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User#" + user + " does not have permission to perform '" + access + "' operation on " + object+", as it cannot be modified.");
+                log.warn(e.getStackTraceAsString(), e.getCause());
+                throw(e);
+            }
+        }
+        performAuthorisation(user, investigation, access, manager);
+        
+    }//end method
+    
     /*
      
      */
@@ -243,7 +258,7 @@ public class GateKeeper {
             invList.add(si.getInvestigation());
         }//end for
         performAuthorisation(user, invList, access, study.getClass().toString(), study.toString(), manager);
-              
+        
     }//end method
     
     /**
