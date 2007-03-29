@@ -17,12 +17,14 @@ import junit.framework.JUnit4TestAdapter;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.DatasetType;
 import uk.icat3.exceptions.ICATAPIException;
-import uk.icat3.exceptions.ValidationException;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import uk.icat3.entity.Datafile;
+import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
-import uk.icat3.entity.Sample;
-import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.entity.DatasetParameter;
+import uk.icat3.entity.DatasetStatus;
+import uk.icat3.entity.Parameter;
 import uk.icat3.manager.DataSetManager;
 import uk.icat3.util.BaseTestClassTX;
 import static uk.icat3.util.TestConstants.*;
@@ -38,23 +40,52 @@ public class TestDatasetManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-     @Test
+    //@Test
     public void testCreateValidDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a set for investigation id: "+VALID_INVESTIGATION_ID);
         
         //create valid file
         Dataset file = new Dataset();
         Random ram = new Random();
-        file.setName("unit test create data set "+ram.nextLong());
+        file.setName("unit test create data set with type "+ram.nextLong());
         
         //find dataset type
         Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
         
         file.setDatasetType(datasetType.iterator().next());
         
+        // file.setDatasetType(new DatasetType("raw"));
         
         Dataset dataset = DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, file, VALID_INVESTIGATION_ID, em);
         
+        validateFile(dataset);
+    }
+    
+    @Test
+    public void createWholeValidDataset() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a whole data set for investigation id: "+VALID_INVESTIGATION_ID);
+        
+        //create valid set
+        Dataset set = new Dataset();
+        Random ram = new Random();
+        set.setName("complete dataset:  "+ram.nextLong());
+        
+        //find dataset type
+        Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
+        set.setDatasetType(datasetType.iterator().next());
+        
+        //add status
+        Collection<DatasetStatus> datasetStstus = (Collection<DatasetStatus>)executeListResultCmd("select d from DatasetStatus d");
+        set.setDatasetStatus(datasetStstus.iterator().next());
+                       
+        //add a file
+        Datafile file = new Datafile();
+        file.setName("whole file: "+ram.nextLong());
+                      
+        set.addDataFile(file);
+                
+        Dataset dataset = DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, set, VALID_INVESTIGATION_ID, em);
+        log.info("Dataset: "+dataset);
         validateFile(dataset);
     }
     
@@ -84,7 +115,7 @@ public class TestDatasetManager extends BaseTestClassTX {
         datasets.add(file1);
         datasets.add(file2);
         
-        DataSetManager.addDataSets(VALID_USER_FOR_INVESTIGATION, datasets, VALID_INVESTIGATION_ID, em);
+        DataSetManager.createDataSets(VALID_USER_FOR_INVESTIGATION, datasets, VALID_INVESTIGATION_ID, em);
         
         for(Dataset file  : datasets){
             //get the file by searching through the DB
@@ -162,7 +193,7 @@ public class TestDatasetManager extends BaseTestClassTX {
         file.setDatasetType(datasetType.iterator().next());
         
         try {
-            DataSetManager.addDataSet(INVALID_USER, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            DataSetManager.createDataSet(INVALID_USER, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
         }  catch (ICATAPIException ex) {
             log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
             throw ex;
@@ -207,15 +238,15 @@ public class TestDatasetManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-   // @Test(expected=ValidationException.class)
+    // @Test(expected=ValidationException.class)
     public void testAddInValidSampleToDatasetValidUser() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sample");
         
         try {
-             DataSetManager.setDataSetSample(VALID_USER_FOR_INVESTIGATION, 3045395454L,VALID_SAMPLE_ID_FOR_INVESTIGATION_ID, em);
+            DataSetManager.setDataSetSample(VALID_USER_FOR_INVESTIGATION, 3045395454L,VALID_SAMPLE_ID_FOR_INVESTIGATION_ID, em);
             
         }  catch (ICATAPIException ex) {
-            log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());            
+            log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
             throw ex;
         }
     }

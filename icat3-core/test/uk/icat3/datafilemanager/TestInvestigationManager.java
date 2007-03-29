@@ -14,6 +14,7 @@ import java.util.Random;
 import junit.framework.JUnit4TestAdapter;
 
 import org.apache.log4j.Logger;
+import uk.icat3.exceptions.EntityNotModifiableError;
 import uk.icat3.exceptions.ICATAPIException;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -35,13 +36,14 @@ public class TestInvestigationManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test
+   // @Test
     public void testAddKeyword() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding keyword to investigation Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
         
         //create valid keyword
         Random ram = new Random();
         Keyword keyword = new Keyword("keyword "+ram.nextLong(),VALID_INVESTIGATION_ID );
+        
         
         InvestigationManager.addKeyword(VALID_USER_FOR_INVESTIGATION, keyword, VALID_DATASET_ID_FOR_INVESTIGATION, em);
     }
@@ -67,7 +69,7 @@ public class TestInvestigationManager extends BaseTestClassTX {
         InvestigationManager.deleteKeyword(VALID_USER_FOR_INVESTIGATION, keywordToDelete, em);
     }
     
-    // @Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void testDeleteKeywordPropagated() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting keyword from investigation Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
         
@@ -87,7 +89,7 @@ public class TestInvestigationManager extends BaseTestClassTX {
         }
     }
     
-    //  @Test
+     //@Test
     public void testRemoveKeyword() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing keyword from investigation Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
         
@@ -122,13 +124,13 @@ public class TestInvestigationManager extends BaseTestClassTX {
         }
     }
     
-    //@Test
+    @Test
     public void testAddInvestigator() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding investigator to investigation Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
         
         //create valid keyword
         Random ram = new Random();
-        Investigator investigator = new Investigator("9932",VALID_INVESTIGATION_ID );
+        Investigator investigator = new Investigator("9932",VALID_INVESTIGATION_ID );             
         
         InvestigationManager.addInvestigator(VALID_USER_FOR_INVESTIGATION, investigator, VALID_DATASET_ID_FOR_INVESTIGATION, em);
     }
@@ -153,7 +155,7 @@ public class TestInvestigationManager extends BaseTestClassTX {
         InvestigationManager.removeInvestigator(VALID_USER_FOR_INVESTIGATION, investigator,  em);
     }
     
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void testRemoveInvestigatorPropagated() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing investigator to investigation Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
         

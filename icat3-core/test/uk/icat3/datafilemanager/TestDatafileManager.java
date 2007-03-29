@@ -15,12 +15,14 @@ import java.util.Random;
 import junit.framework.JUnit4TestAdapter;
 
 import org.apache.log4j.Logger;
+import uk.icat3.entity.DatafileFormat;
+import uk.icat3.entity.DatafileParameter;
 import uk.icat3.exceptions.ICATAPIException;
-import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.ValidationException;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import uk.icat3.entity.Datafile;
+import uk.icat3.entity.Parameter;
 import uk.icat3.manager.DataFileManager;
 import uk.icat3.util.BaseTestClassTX;
 import static uk.icat3.util.TestConstants.*;
@@ -36,7 +38,7 @@ public class TestDatafileManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    // @Test
     public void testCreateValidDatafile() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
         
@@ -45,14 +47,116 @@ public class TestDatafileManager extends BaseTestClassTX {
         Random ram = new Random();
         file.setName("unit test create data file "+ram.nextLong());
         
+        
         Datafile datafile = DataFileManager.createDataFile(VALID_USER_FOR_INVESTIGATION, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
         
         validateFile(datafile);
+        
+        
+        ////new test with format
+        
+        //create valid file
+        Datafile file2 = new Datafile();
+        file2.setName("unit test format "+ram.nextLong());
+        
+        //now add valid format aswell
+        Collection<DatafileFormat> datafileFormats = (Collection<DatafileFormat>)executeListResultCmd("select d from DatafileFormat d");
+        if(datafileFormats.size() == 0) throw new ICATAPIException("No DatafileFormats found");
+        
+        
+        DatafileFormat ft = datafileFormats.iterator().next();
+        log.debug("Setting datafile format as "+ft);
+        file2.setDatafileFormat(ft);
+        
+        Datafile datafile2 = DataFileManager.createDataFile(VALID_USER_FOR_INVESTIGATION, file2, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        
+        assertNotNull("Format cannot be null", datafile2.getDatafileFormat());
+        assertNotNull("Format name cannot be null", datafile2.getDatafileFormat().getDatafileFormatPK().getName());
+        assertNotNull("Format version cannot be null", datafile2.getDatafileFormat().getDatafileFormatPK().getVersion());
+        
+        validateFile(datafile);
+        
     }
+    
     /**
      * Tests creating a file
      */
+    //@Test(expected=ValidationException.class)
+    public void testCreateValidDatafileInvalidFormat() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
+        
+        //create valid file
+        Datafile file = new Datafile();
+        Random ram = new Random();
+        file.setName("unit test create data file "+ram.nextLong());
+        
+        DatafileFormat format = new DatafileFormat("version","name");
+        file.setDatafileFormat(format);
+        
+        try {
+            Datafile datafile = DataFileManager.createDataFile(VALID_USER_FOR_INVESTIGATION, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        }  catch (ICATAPIException ex) {
+            log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
+            throw ex;
+        }
+    }
+    
+    //@Test(expected=ValidationException.class)
+    public void testCreateValidDatafileInvalidParameterCollection() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
+        
+        //create valid file
+        Datafile file = new Datafile();
+        Random ram = new Random();
+        file.setName("unit test invalid parameter "+ram.nextLong());
+        
+        DatafileParameter invalidParameter = new DatafileParameter("units","name", VALID_DATASET_ID_FOR_INVESTIGATION);
+        Collection<DatafileParameter> coll = new ArrayList<DatafileParameter>();
+        coll.add(invalidParameter);
+        
+        file.setDatafileParameterCollection(coll);
+        
+        try {
+            Datafile datafile = DataFileManager.createDataFile(VALID_USER_FOR_INVESTIGATION, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        }  catch (ICATAPIException ex) {
+            log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
+            throw ex;
+        }
+    }
+    
     @Test
+    public void testCreateValidDatafileValidParameterCollection() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
+        
+        //create valid file
+        Datafile file = new Datafile();
+        Random ram = new Random();
+        file.setName("unit test valid parameter "+ram.nextLong());
+        
+        Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.isDatafileParameter = 'Y'");
+        if(parameters.size() == 0) throw new ICATAPIException("No DatafileParameter found");
+        Parameter parameter = parameters.iterator().next() ;
+        
+        DatafileParameter dfp = new DatafileParameter(parameter.getParameterPK().getUnits(),parameter.getParameterPK().getName(),VALID_DATASET_ID_FOR_INVESTIGATION);
+        Collection<DatafileParameter> coll = new ArrayList<DatafileParameter>();
+        coll.add(dfp);
+        
+        file.setDatafileParameterCollection(coll);
+        
+        try {
+            Datafile datafile = DataFileManager.createDataFile(VALID_USER_FOR_INVESTIGATION, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        }  catch (ICATAPIException ex) {
+            log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
+            throw ex;
+        }
+    }
+    
+    
+    
+    /**
+     * Tests creating a file
+     */
+    // @Test
     public void testAddValidDatafiles() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for add a files for daatset Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
         
@@ -68,7 +172,7 @@ public class TestDatafileManager extends BaseTestClassTX {
         datafiles.add(file1);
         datafiles.add(file2);
         
-        DataFileManager.addDataFiles(VALID_USER_FOR_INVESTIGATION, datafiles, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        DataFileManager.createDataFiles(VALID_USER_FOR_INVESTIGATION, datafiles, VALID_DATASET_ID_FOR_INVESTIGATION, em);
         
         for(Datafile file  : datafiles){
             //get the file by searching through the DB
@@ -97,7 +201,7 @@ public class TestDatafileManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=ValidationException.class)
+    //@Test(expected=ValidationException.class)
     public void testCreateInValidDatafile() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file");
         
@@ -112,17 +216,17 @@ public class TestDatafileManager extends BaseTestClassTX {
         
     }
     
-     /**
+    /**
      * Tests creating a file
      */
-    @Test(expected=ValidationException.class)
+    //@Test(expected=ValidationException.class)
     public void testAddInValidDatafile() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding a file");
         
         //create invalid file, no name
         Datafile file = new Datafile();
         try {
-            DataFileManager.addDataFile(VALID_USER_FOR_INVESTIGATION, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            DataFileManager.createDataFile(VALID_USER_FOR_INVESTIGATION, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
         }  catch (ICATAPIException ex) {
             log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
             throw ex;
@@ -133,7 +237,7 @@ public class TestDatafileManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void testCreateInValidDatafileInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for creating a file");
         
