@@ -52,6 +52,67 @@ public class GateKeeper {
     // Global class logger
     static Logger log = Logger.getLogger(GateKeeper.class);
     
+    /**
+     * Decides if a user has permission to perform an operation of type
+     * {@link AccessType} on a {@link Datafile} element/entity.  If the
+     * user does not have permission to perform aforementioned operation
+     * then an {@link InsufficientPrivilegesException} will be thrown.
+     *
+     * @param user      username or dn of user who is to be authorised.
+     * @param keyword  element/entity that the user wishes to perform
+     *                  operation on.
+     * @param access    type of operation that the user is trying to
+     *                  perform.
+     * @param manager   manager object that will facilitate interaction
+     *                  with underlying database
+     * @throws InsufficientPrivilegesException  if user does not have
+     *                  permission to perform operation.
+     */
+    public static void performAuthorisation(String user, Keyword keyword, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+        //now check modifiable
+        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
+            if(!keyword.isModifiable()){
+                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + keyword+", as it cannot be modified.");
+                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + keyword+", as it cannot be modified.");
+                throw(e);
+            }
+        }
+        ArrayList<Investigation> invList = new ArrayList<Investigation>();
+        invList.add(keyword.getInvestigation());
+        performAuthorisation(user, invList, access, keyword,  manager);
+        
+    }//end method
+    
+    /**
+     * Decides if a user has permission to perform an operation of type
+     * {@link AccessType} on a {@link Datafile} element/entity.  If the
+     * user does not have permission to perform aforementioned operation
+     * then an {@link InsufficientPrivilegesException} will be thrown.
+     *
+     * @param user      username or dn of user who is to be authorised.
+     * @param investigator  element/entity that the user wishes to perform
+     *                  operation on.
+     * @param access    type of operation that the user is trying to
+     *                  perform.
+     * @param manager   manager object that will facilitate interaction
+     *                  with underlying database
+     * @throws InsufficientPrivilegesException  if user does not have
+     *                  permission to perform operation.
+     */
+    public static void performAuthorisation(String user, Investigator investigator, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+        //now check modifiable
+        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
+            if(!investigator.isModifiable()){
+                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + investigator+", as it cannot be modified.");
+                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + investigator+", as it cannot be modified.");
+                throw(e);
+            }
+        }
+        ArrayList<Investigation> invList = new ArrayList<Investigation>();
+        invList.add(investigator.getInvestigation());
+        performAuthorisation(user, invList, access, investigator,  manager);
+        
+    }//end method
     
     /**
      * Decides if a user has permission to perform an operation of type
@@ -70,13 +131,20 @@ public class GateKeeper {
      *                  permission to perform operation.
      */
     public static void performAuthorisation(String user, Datafile datafile, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+        //now check modifiable
+        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
+            if(!datafile.isModifiable()){
+                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + datafile+", as it cannot be modified.");
+                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + datafile+", as it cannot be modified.");
+                throw(e);
+            }
+        }
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(datafile.getDatasetId().getInvestigationId());
-        performAuthorisation(user, invList, access, datafile.getClass().toString(), datafile.toString(),  manager);
+        performAuthorisation(user, invList, access, datafile,  manager);
         
         //now check for
     }//end method
-    
     
     /**
      * Decides if a user has permission to perform an operation of type
@@ -95,11 +163,20 @@ public class GateKeeper {
      *                  permission to perform operation.
      */
     public static void performAuthorisation(String user, Dataset dataset, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+        //now check modifiable
+        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
+            if(!dataset.isModifiable()){
+                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + dataset+", as it cannot be modified.");
+                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + dataset+", as it cannot be modified.");
+                throw(e);
+            }
+        }
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(dataset.getInvestigationId());
-        performAuthorisation(user, invList, access, dataset.getClass().toString(), dataset.toString(),  manager);
+        performAuthorisation(user, invList, access, dataset,  manager);
         
     }//end method
+    
     
     /**
      * Decides if a user has permission to perform an operation of type
@@ -117,10 +194,18 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have
      *                  permission to perform operation.
      */
-    public static void performAuthorisation(String user, Sample sample, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+    public static void performAuthorisation(String user, Sample sample,  AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+        //now check modifiable
+        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
+            if(!sample.isModifiable()){
+                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + sample+", as it cannot be modified.");
+                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + sample+", as it cannot be modified.");
+                throw(e);
+            }
+        }
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(sample.getInvestigationId());
-        performAuthorisation(user, invList, access, sample.getClass().toString(), sample.toString(),  manager);
+        performAuthorisation(user, invList, access, sample,  manager);
         
     }//end method
     
@@ -140,10 +225,18 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have
      *                      permission to perform operation.
      */
-    public static void performAuthorisation(String user, SampleParameter sampleParam, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+    public static void performAuthorisation(String user, SampleParameter sampleParam,  AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+        //now check modifiable
+        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
+            if(!sampleParam.isModifiable()){
+                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + sampleParam+", as it cannot be modified.");
+                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + sampleParam+", as it cannot be modified.");
+                throw(e);
+            }
+        }
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(sampleParam.getSample().getInvestigationId());
-        performAuthorisation(user, invList, access, sampleParam.getClass().toString(), sampleParam.toString(), manager);
+        performAuthorisation(user, invList, access, sampleParam, manager);
         
     }//end method
     
@@ -163,10 +256,18 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have
      *                      permission to perform operation.
      */
-    public static void performAuthorisation(String user, DatasetParameter datasetParam, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+    public static void performAuthorisation(String user, DatasetParameter datasetParam,  AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+        //now check modifiable
+        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
+            if(!datasetParam.isModifiable()){
+                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + datasetParam+", as it cannot be modified.");
+                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + datasetParam+", as it cannot be modified.");
+                throw(e);
+            }
+        }
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(datasetParam.getDataset().getInvestigationId());
-        performAuthorisation(user, invList, access, datasetParam.getClass().toString(), datasetParam.toString(), manager);
+        performAuthorisation(user, invList, access, datasetParam, manager);
         
     }//end method
     
@@ -187,9 +288,17 @@ public class GateKeeper {
      *                      permission to perform operation.
      */
     public static void performAuthorisation(String user, DatafileParameter datafileParam, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+        //now check modifiable
+        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
+            if(!datafileParam.isModifiable()){
+                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + datafileParam+", as it cannot be modified.");
+                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + datafileParam+", as it cannot be modified.");
+                throw(e);
+            }
+        }
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(datafileParam.getDatafile().getDatasetId().getInvestigationId());
-        performAuthorisation(user, invList, access, datafileParam.getClass().toString(), datafileParam.toString(),  manager);
+        performAuthorisation(user, invList, access, datafileParam,  manager);
     }//end method
     
     /**
@@ -199,8 +308,8 @@ public class GateKeeper {
      * then an {@link InsufficientPrivilegesException} will be thrown.
      *
      * @param user          username or dn of user who is to be authorised.
-     * @param investigation element/entity that the user wishes to perform
-     *                      operation on.
+     * @param investigation investigation of the element/entity that the user
+     *                      wishes to perform operation on.
      * @param access        type of operation that the user is trying to
      *                      perform.
      * @param manager       manager object that will facilitate interaction
@@ -209,28 +318,20 @@ public class GateKeeper {
      *                      permission to perform operation.
      */
     public static void performAuthorisation(String user, Investigation investigation, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        ArrayList<Investigation> invList = new ArrayList<Investigation>();
-        invList.add(investigation);
-        performAuthorisation(user, invList, access, investigation.getClass().toString(), investigation.toString(),  manager);
-        
-    }//end method
-    
-    public static void performAuthorisation(String user, Investigation investigation, EntityBaseBean object, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
         //now check modifiable
         if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
-            if(!object.isModifiable()){
-                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User#" + user + " does not have permission to perform '" + access + "' operation on " + object+", as it cannot be modified.");
-                log.warn(e.getStackTraceAsString(), e.getCause());
+            if(!investigation.isModifiable()){
+                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + investigation+", as it cannot be modified.");
+                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + investigation+", as it cannot be modified.");
                 throw(e);
             }
         }
-        performAuthorisation(user, investigation, access, manager);
+        ArrayList<Investigation> invList = new ArrayList<Investigation>();
+        invList.add(investigation);
+        performAuthorisation(user, invList, access, investigation,  manager);
         
     }//end method
     
-    /*
-     
-     */
     /**
      * Decides if a user has permission to perform an operation of type
      * {@link AccessType} on a {@link Study} element/entity.  If the
@@ -252,12 +353,20 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have
      *                      permission to perform operation.
      */
-    public static void performAuthorisation(String user, Study study, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+    public static void performAuthorisation(String user, Study study, EntityBaseBean object, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+        //now check modifiable
+        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
+            if(!object.isModifiable()){
+                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + object+", as it cannot be modified.");
+                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + object+", as it cannot be modified.");
+                throw(e);
+            }
+        }
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         for (StudyInvestigation si :  study.getStudyInvestigationCollection()) {
             invList.add(si.getInvestigation());
         }//end for
-        performAuthorisation(user, invList, access, study.getClass().toString(), study.toString(), manager);
+        performAuthorisation(user, invList, access, study, manager);
         
     }//end method
     
@@ -283,7 +392,7 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have
      *                          permission to perform operation.
      */
-    private static void performAuthorisation(String user, Collection<Investigation> investigations, AccessType access, String element, String elementId, EntityManager manager) throws InsufficientPrivilegesException {
+    private static void performAuthorisation(String user, Collection<Investigation> investigations, AccessType access, EntityBaseBean element, EntityManager manager) throws InsufficientPrivilegesException {
         
         //if user is a system administrator then return (no need to check each request)
         //TBI...
@@ -297,7 +406,7 @@ public class GateKeeper {
             for(Investigator investigator : investigation.getInvestigatorCollection()){
                 if(investigator.getFacilityUser().getFederalId().equals(user)){
                     //passed for this investigation
-                    log.debug("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
+                    log.debug("User: " + user + " granted " + access + " permission on " + element );
                     return ;
                 }
             }
@@ -308,37 +417,37 @@ public class GateKeeper {
                 //READ, UPDATE, DELETE, CREATE, ADMIN, FINE_GRAINED_ACCESS;
                 switch (access) {
                     case READ:      if (perm.getPrmRead() == 1) {
-                        log.debug("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
+                        log.debug("User: " + user + " granted " + access + " permission on " + element );
                         return;
                     }//end if
                     break;
                     
                     case UPDATE:    if (perm.getPrmUpdate() == 1){
-                        log.debug("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
+                        log.debug("User: " + user + " granted " + access + " permission on " + element );
                         return;
                     }//end if
                     break;
                     
                     case DELETE:    if (perm.getPrmDelete() == 1) {
-                        log.debug("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
+                        log.debug("User: " + user + " granted " + access + " permission on " + element );
                         return;
                     }//end if
                     break;
                     
                     case CREATE:    if (perm.getPrmCreate() == 1) {
-                        log.debug("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
+                        log.debug("User: " + user + " granted " + access + " permission on " + element );
                         return;
                     }//end if
                     break;
                     
                     case ADMIN:     if (perm.getPrmAdmin() == 1) {
-                        log.debug("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
+                        log.debug("User: " + user + " granted " + access + " permission on " + element );
                         return;
                     }//end if
                     break;
                     
                     //not yet used
-                    case FINE_GRAINED_ACCESS:   log.warn("User: " + user + " granted " + access + " permission on " + element + "# " + elementId);
+                    case FINE_GRAINED_ACCESS:   log.warn("User: " + user + " granted " + access + " permission on " + element );
                     break;
                     
                 }//end switch
@@ -347,8 +456,8 @@ public class GateKeeper {
         }//end for
         
         //if we get to here then user does not have permission so we need to throw an exception
-        InsufficientPrivilegesException e = new InsufficientPrivilegesException("User#" + user + " does not have permission to perform '" + access + "' operation on " + element + "# " + elementId);
-        log.warn(e.getStackTraceAsString(), e.getCause());
+        InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
+        log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
         throw(e);
     }//end method
     

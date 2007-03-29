@@ -50,9 +50,6 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
     @Column(name = "DESCRIPTION")
     private String description;
 
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
     @OneToMany(mappedBy = "datafileFormat")
      @XmlTransient
     private Collection<Datafile> datafileCollection;
@@ -67,18 +64,6 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
      */
     public DatafileFormat(DatafileFormatPK datafileFormatPK) {
         this.datafileFormatPK = datafileFormatPK;
-    }
-
-    /**
-     * Creates a new instance of DatafileFormat with the specified values.
-     * @param datafileFormatPK the datafileFormatPK of the DatafileFormat
-     * @param modTime the modTime of the DatafileFormat
-     * @param modId the modId of the DatafileFormat
-     */
-    public DatafileFormat(DatafileFormatPK datafileFormatPK, Date modTime, String modId) {
-        this.datafileFormatPK = datafileFormatPK;
-        this.modTime = modTime;
-        this.modId = modId;
     }
 
     /**
@@ -137,24 +122,7 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    
-    /**
-     * Gets the modId of this DatafileFormat.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this DatafileFormat to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
+        
     /**
      * Gets the datafileCollection of this DatafileFormat.
      * @return the datafileCollection

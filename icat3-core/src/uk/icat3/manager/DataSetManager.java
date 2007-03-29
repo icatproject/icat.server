@@ -14,6 +14,7 @@ import java.util.Collection;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
+import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
@@ -21,6 +22,7 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
+import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
 
 /**
@@ -44,9 +46,7 @@ public class DataSetManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void deleteDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
-        
         deleteDataSet(userId, dataSet.getId(), manager);
-        
     }
     
     /**
@@ -74,7 +74,7 @@ public class DataSetManager extends ManagerUtil {
         //not deleting anymore, jsut changing deleted to Y
         
         log.info("Deleting: "+dataset);
-        dataset.setCascadeDeleted(true);
+        dataset.setCascade(Cascade.DELETE, Boolean.TRUE);
         
     }
     
@@ -134,7 +134,7 @@ public class DataSetManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static Dataset updateDataSet(String userId, Dataset dataSet, EntityManager manager, boolean validate) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+    public static Dataset updateDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateDataSet("+userId+", "+dataSet+", EntityManager)");
         
         //check to see if DataSet exists, dont need the returned dataset as merging
@@ -142,12 +142,12 @@ public class DataSetManager extends ManagerUtil {
             checkDataSet(dataSet.getId(), manager);
         }
         
-        if(validate){
-            //check if valid dataset
-            dataSet.isValid(manager);
-            //check if unique
-            if(!dataSet.isUnique(manager)) throw new ValidationException(dataSet+" is not unique.");
-        }
+        
+        //check if valid dataset
+        dataSet.isValid(manager);
+        //check if unique
+        if(!dataSet.isUnique(manager)) throw new ValidationException(dataSet+" is not unique.");
+        
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, dataSet, AccessType.UPDATE, manager);
@@ -157,26 +157,14 @@ public class DataSetManager extends ManagerUtil {
             dataSet.setModId(userId);
             return manager.merge(dataSet);
         } else {
-            //new dataset, set createid, this srts mod id
-            dataSet.setCreateId(userId);
+            //new dataset, set createid, this sets mod id and modtime
+            dataSet.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
+            dataSet.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
             manager.persist(dataSet);
             return dataSet;
         }
     }
-    
-    /**
-     * Updates / Adds a data set depending on whether the user has permission to update this data set or its investigation
-     *
-     * @param userId
-     * @param dataSet
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     */
-    public static Dataset updateDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-        return updateDataSet(userId, dataSet, manager, true);
-    }
-    
+           
     /**
      * Creates a data set, depending if the user has update permission on the data set associated with the investigation
      *
@@ -190,64 +178,36 @@ public class DataSetManager extends ManagerUtil {
     public static Dataset createDataSet(String userId, Dataset dataSet, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataFile("+userId+", "+dataSet+" "+investigationId+", EntityManager)");
         
-        //check isvalid
-       /* dataSet.isValid(manager);
-        //check if unique
-        if(!dataSet.isUnique(manager)) throw new ValidationException(dataSet+" is not unique.");
-        
         //check investigation exists
         Investigation investigation  = InvestigationManager.checkInvestigation(investigationId, manager);
-        
-        //check user has update access
-        GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
-        
-        //make sure id is null
+        dataSet.setInvestigationId(investigation);
         dataSet.setId(null);
-        dataSet.setInvestigationId(investigation);
-        dataSet.setCreateId(userId);
-        
-        manager.persist(dataSet);
-         return dataSet;
-        */
-        
-        //check investigation exists
-        Investigation investigation  = InvestigationManager.checkInvestigation(investigationId, manager);
-        dataSet.setInvestigationId(investigation);
         
         return updateDataSet(userId, dataSet, manager);
     }
     
-    
     /**
-     * Adds a data set to the list a data sets for a investigation, depending if the user has update permission on the investigation
+     * Creates a collection of data sets, depending if the user has update permission on the data set associated with the investigation
      *
      * @param userId
-     * @param dataSet
+     * @param dataSets collection of the datasets
      * @param investigationId
      * @param manager
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void addDataSet(String userId, Dataset dataSet, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-        log.trace("addDataSet("+userId+", "+dataSet+" "+investigationId+", EntityManager)");
-        InvestigationManager.addDataSet(userId,dataSet,investigationId, manager);
-    }
-    
-    /**
-     * Adds a collection of data sets to the list a data sets for a investigation, depending if the user has update permission on the investigation
-     *
-     * @param userId
-     * @param dataSets
-     * @param investigationId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     */
-    public static void addDataSets(String userId, Collection<Dataset> dataSets, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-        log.trace("addDataSets("+userId+", "+dataSets+" "+investigationId+", EntityManager)");
+    public static Collection<Dataset> createDataSets(String userId, Collection<Dataset> dataSets, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        log.trace("createDataFile("+userId+", "+dataSets+" "+investigationId+", EntityManager)");
         
-        InvestigationManager.addDataSets(userId, dataSets, investigationId, manager);
+        Collection<Dataset> datasetsCreated = new ArrayList<Dataset>();
+        for(Dataset dataset : dataSets){
+            Dataset datasetCreated = createDataSet(userId, dataset, investigationId, manager);
+            datasetsCreated.add(datasetCreated);
+        }
+        
+        return datasetsCreated;
     }
+    
     ///////////////   End of add/Update Commands    ///////////////////
     
     
@@ -329,8 +289,7 @@ public class DataSetManager extends ManagerUtil {
     public static void setDataSetSample(String userId, Long sampleId, Long datasetid, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //check valid sample id
-        Sample sampleRef = manager.find(Sample.class,sampleId);
-        if(sampleRef == null) throw new ValidationException("Sample[id="+sampleId+"] is not a valid sample id");
+        Sample sampleRef = ManagerUtil.find(Sample.class,sampleId, manager);
         
         //get dataset,
         Dataset datasetManaged = ManagerUtil.checkDataSet(datasetid, manager);
@@ -346,11 +305,63 @@ public class DataSetManager extends ManagerUtil {
             //if here not got sample in
             throw new ValidationException("Sample[id="+sampleId+"] is not associated with Dataset[id="+datasetManaged.getId()+ "]'s invesigation.");
         }
+        //ok, now check permissions
+        GateKeeper.performAuthorisation(userId, datasetManaged, AccessType.UPDATE, manager);
         
         //add the dataset parameter to the dataset
         datasetManaged.setSampleId(sampleId);
         
-        //update this, this also checks permissions, no need to validate cos just loaded from DB
-        DataSetManager.updateDataSet(userId, datasetManaged, manager, false);
+    }
+    
+    public static DatasetParameter addDataSetParameter(String userId, DatasetParameter dataSetParameter, Long datasetId,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        
+        //get dataset,
+        Dataset dataset = ManagerUtil.find(Dataset.class, datasetId, manager);
+        
+        //set id for dataSetParameter
+        dataSetParameter.setDataset(dataset);
+        
+        //check is valid
+        dataSetParameter.isValid(manager);
+        
+        //ok, now check permissions
+        GateKeeper.performAuthorisation(userId, dataSetParameter, AccessType.CREATE, manager);
+        
+        manager.persist(dataSetParameter);
+        
+        return dataSetParameter;
+    }
+    
+    public static DatasetParameter addDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        Long datasetId = dataSetParameter.getDatasetParameterPK().getDatasetId();
+        return  addDataSetParameter(userId, dataSetParameter, datasetId, manager);
+    }
+    
+    public static void removeDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        Long datasetId = dataSetParameter.getDatasetParameterPK().getDatasetId();
+        
+        //find the dataset
+        DatasetParameter dataSetParameterManaged = ManagerUtil.find(DatasetParameter.class, dataSetParameter.getDatasetParameterPK(), manager);
+        
+        //ok, now check permissions
+        GateKeeper.performAuthorisation(userId, dataSetParameterManaged, AccessType.REMOVE, manager);
+        
+        dataSetParameterManaged.setDataset(null);
+        
+        manager.remove(dataSetParameterManaged);
+    }
+    
+    public static void deleteDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        Long datasetId = dataSetParameter.getDatasetParameterPK().getDatasetId();
+        
+        //find the dataset
+        DatasetParameter dataSetParameterManaged = ManagerUtil.find(DatasetParameter.class, dataSetParameter.getDatasetParameterPK(), manager);
+        
+        //ok, now check permissions
+        GateKeeper.performAuthorisation(userId, dataSetParameterManaged, AccessType.DELETE, manager);
+        
+        dataSetParameterManaged.setDeleted("Y");
     }
 }
+
+

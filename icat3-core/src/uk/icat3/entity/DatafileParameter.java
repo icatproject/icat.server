@@ -22,6 +22,7 @@ import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -74,9 +75,6 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
     @Column(name = "DESCRIPTION")
     private String description;
     
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-    
     @JoinColumn(name = "DATAFILE_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
@@ -102,19 +100,7 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
     public DatafileParameter(DatafileParameterPK datafileParameterPK) {
         this.datafileParameterPK = datafileParameterPK;
     }
-    
-    /**
-     * Creates a new instance of DatafileParameter with the specified values.
-     * @param datafileParameterPK the datafileParameterPK of the DatafileParameter
-     * @param modTime the modTime of the DatafileParameter
-     * @param modId the modId of the DatafileParameter
-     */
-    public DatafileParameter(DatafileParameterPK datafileParameterPK, Date modTime, String modId) {
-        this.datafileParameterPK = datafileParameterPK;
-        this.modTime = modTime;
-        this.modId = modId;
-    }
-    
+      
     /**
      * Creates a new instance of DatafileParameterPK with the specified values.
      * @param units the units of the DatafileParameterPK
@@ -238,22 +224,6 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
     }
     
     /**
-     * Gets the modId of this DatafileParameter.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-    
-    /**
-     * Sets the modId of this DatafileParameter to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-    
-    /**
      * Gets the datafile of this DatafileParameter.
      * @return the datafile
      */
@@ -329,7 +299,7 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
         return "uk.icat3.entity.DatafileParameter[datafileParameterPK=" + datafileParameterPK + "]";
     }
     
-     /**
+    /**
      * Method to be overridden if needed to check if the data held in the entity is valid.
      * This method checks whether all the fields which are marked as not null are not null
      *
@@ -386,7 +356,7 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
             }
         
         //check private key
-        datafileParameterPK.isValid();   
+        datafileParameterPK.isValid();
         
         //ok here
         return super.isValid();
@@ -400,7 +370,7 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
     @Override
     public boolean isValid(EntityManager manager) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
-                      
+        
         //check valid
         String paramName = this.getDatafileParameterPK().getName();
         String paramUnits = this.getDatafileParameterPK().getUnits();
@@ -425,10 +395,26 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
         //check if string
         if(!parameterDB.isNumeric()){
             if(this.getNumericValue() != null) throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" must be a string value only.");
-            
         }
-              
+       
+        //check if datafile parameter is already in DB
+        DatafileParameter paramDB = manager.find(DatafileParameter.class, datafileParameterPK);
+        if(paramDB != null) throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" is already is a parameter of the datafile.");
+       
+         //check that the parameter datafile id is the same as actual datafile id
+        if(!datafileParameterPK.getDatafileId().equals(getDatafile().getId())){
+            throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" has dataset id: "+datafileParameterPK.getDatafileId()+ " that does not corresponds to its parent datafile id: "+getDatafile().getId());
+        }
+        
         //once here then its valid
         return isValid();
+    }
+    
+    /**
+     * Automatically updates deleted, modTime and modId when entity is created
+     */
+    @PrePersist
+    protected void prePersist(){
+        super.prePersist();
     }
 }

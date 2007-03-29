@@ -34,6 +34,7 @@ import javax.xml.bind.annotation.XmlTransient;
         @NamedQuery(name = "DatasetStatus.findByName", query = "SELECT d FROM DatasetStatus d WHERE d.name = :name"),
         @NamedQuery(name = "DatasetStatus.findByDescription", query = "SELECT d FROM DatasetStatus d WHERE d.description = :description"),
         @NamedQuery(name = "DatasetStatus.findByModTime", query = "SELECT d FROM DatasetStatus d WHERE d.modTime = :modTime"),
+         @NamedQuery(name = "DatasetStatus.getAll", query = "SELECT d FROM DatasetStatus d"),
         @NamedQuery(name = "DatasetStatus.findByModId", query = "SELECT d FROM DatasetStatus d WHERE d.modId = :modId")
     })
 public class DatasetStatus extends EntityBaseBean implements Serializable {
@@ -44,14 +45,7 @@ public class DatasetStatus extends EntityBaseBean implements Serializable {
 
     @Column(name = "DESCRIPTION")
     private String description;
-
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
+   
     @OneToMany(mappedBy = "datasetStatus")
     @XmlTransient
     private Collection<Dataset> datasetCollection;
@@ -67,19 +61,7 @@ public class DatasetStatus extends EntityBaseBean implements Serializable {
     public DatasetStatus(String name) {
         this.name = name;
     }
-
-    /**
-     * Creates a new instance of DatasetStatus with the specified values.
-     * @param name the name of the DatasetStatus
-     * @param modTime the modTime of the DatasetStatus
-     * @param modId the modId of the DatasetStatus
-     */
-    public DatasetStatus(String name, Date modTime, String modId) {
-        this.name = name;
-        this.modTime = modTime;
-        this.modId = modId;
-    }
-
+   
     /**
      * Gets the name of this DatasetStatus.
      * @return the name
@@ -111,39 +93,7 @@ public class DatasetStatus extends EntityBaseBean implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    /**
-     * Gets the modTime of this DatasetStatus.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this DatasetStatus to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
-    /**
-     * Gets the modId of this DatasetStatus.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this DatasetStatus to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
+   
     /**
      * Gets the datasetCollection of this DatasetStatus.
      * @return the datasetCollection

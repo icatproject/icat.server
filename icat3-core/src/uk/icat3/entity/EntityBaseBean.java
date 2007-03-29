@@ -9,8 +9,6 @@
 
 package uk.icat3.entity;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
@@ -19,7 +17,9 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 import org.apache.log4j.Logger;
+import uk.icat3.exceptions.EntityNotModifiableError;
 import uk.icat3.exceptions.ValidationException;
 
 /**
@@ -45,13 +45,14 @@ public class EntityBaseBean {
     @Column(name = "DELETED", nullable = false )
     protected String deleted;
     
-     @Column(name = "MOD_ID", nullable = false)
+    @Column(name = "MOD_ID", nullable = false)
     protected String modId;
     
     /**
      * Gets the modTime of this DatafileFormat.
      * @return the modTime
      */
+    @XmlTransient
     public Date getModTime() {
         return this.modTime;
     }
@@ -68,6 +69,7 @@ public class EntityBaseBean {
      * Gets the createId of this entity.
      * @return the createId
      */
+    @XmlTransient
     public String getCreateId() {
         return createId;
     }
@@ -77,25 +79,28 @@ public class EntityBaseBean {
      */
     public void setCreateId(String createId) {
         this.createId = createId;
+        modTime = new Date();
     }
     
     /**
-     * To find out if they record can be modified    
+     * To find out if they record can be modified
      */
     public boolean isModifiable(){
-        //TODO will change to other colums here aswell as user supplied data and faility 
+        //TODO will change to other colums here aswell as user supplied data and faility
         //at the moment if from props then cannot change
-        if(createId.contains("FROM SPREADSHEET") || createId.contains("PROPAGATION")){
-            //user cannot modify this
-            return false;
-        }
-        else return true;
+        if(createId != null){
+            if(createId.contains("FROM SPREADSHEET") || createId.contains("PROPAGATION")){
+                //user cannot modify this
+                return false;
+            } else return true;
+        } else return true;
     }
     
     /**
      * Gets the modId of this Datafile.
      * @return the modId
      */
+    @XmlTransient
     public String getModId() {
         return this.modId;
     }
@@ -106,13 +111,17 @@ public class EntityBaseBean {
      */
     public void setModId(String modId) {
         this.modId = modId;
+        modTime = new Date();
     }
     
     /**
      * Automatically updates modTime when entity is persisted or merged
      */
     @PreUpdate
-    public void preUpdate(){
+    public void preUpdate() throws EntityNotModifiableError {      
+        //this runtime error should not happen, the application should check
+        //isModifibale before trying to change the state
+        if(!isModifiable()) throw new EntityNotModifiableError(this +" cannot be modified");
         modTime = new Date();
     }
     
@@ -120,14 +129,15 @@ public class EntityBaseBean {
      * Automatically updates deleted, modTime and modId when entity is created
      */
     @PrePersist
-    public void prePersist(){
-        deleted = "N";        
+    protected void prePersist(){        
+        deleted = "N";
         if(modId != null){
             createId = modId;
         } else if(createId != null) modId = createId;
         modTime = new Date();
     }
     
+    @XmlTransient
     public String getDeleted() {
         return deleted;
     }

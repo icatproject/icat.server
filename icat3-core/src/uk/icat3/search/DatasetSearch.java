@@ -14,6 +14,8 @@ import java.util.Collection;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
+import uk.icat3.entity.DatasetStatus;
+import uk.icat3.entity.DatasetType;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
@@ -29,11 +31,11 @@ public class DatasetSearch {
     static Logger log = Logger.getLogger(DatasetSearch.class);
     
     /**
-     * From a sample name, return all the datasets a user can view asscoiated with the sample name 
+     * From a sample name, return all the datasets a user can view asscoiated with the sample name
      *
-     * @param userId 
-     * @param sampleName 
-     * @param manager     
+     * @param userId
+     * @param sampleName
+     * @param manager
      * @return Collection of datasets
      */
     public static Collection<Dataset> getBySampleName(String userId, String sampleName, EntityManager manager) {
@@ -62,6 +64,18 @@ public class DatasetSearch {
         }
         
         return dataSets;
+    }
+    
+    public Collection<DatasetType> listDatasetTypes(EntityManager manager) {
+        log.trace("listDatasetTypes(EntityManager)");
+        
+        return manager.createNamedQuery("DatasetType.getAll").getResultList();
+    }
+    
+    public Collection<DatasetStatus> listDatasetStatus(EntityManager manager) {
+        log.trace("listDatasetStatus(EntityManager)");
+        
+        return manager.createNamedQuery("DatasetStatus.getAll").getResultList();
     }
     
 }

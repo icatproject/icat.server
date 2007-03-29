@@ -12,7 +12,6 @@ package uk.icat3.entity;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.CascadeType;
@@ -27,10 +26,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.SqlResultSetMapping;
 import javax.persistence.SqlResultSetMappings;
@@ -40,7 +39,7 @@ import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
-import uk.icat3.util.Queries;
+import uk.icat3.util.Cascade;
 
 /**
  * Entity class Datafile
@@ -459,25 +458,44 @@ public class Datafile extends EntityBaseBean implements Serializable {
      *
      * @param isDeleted
      */
-    public void setCascadeDeleted(boolean isDeleted){
-        log.trace("Setting: "+toString()+" to deleted? "+isDeleted);
-        String deleted = (isDeleted) ? "Y" : "N";
+    public void setCascade(Cascade type, Object value){
+        log.trace("Setting: "+toString()+" from type: "+type+" to :"+value);
+        String deleted = "Y";
+        if(type == Cascade.DELETE){
+            deleted = (((Boolean)value).booleanValue()) ? "Y" : "N";
+        }
         
         //data file parameters
         if(getDatafileParameterCollection() != null){
             for(DatafileParameter datafileParameter : getDatafileParameterCollection()){
-                datafileParameter.setDeleted(deleted);
+                if(type == Cascade.DELETE) datafileParameter.setDeleted(deleted);
+                else if(type == Cascade.MOD_ID) datafileParameter.setModId(value.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    datafileParameter.setModId(value.toString());
+                    datafileParameter.setCreateId(value.toString());
+                }
             }
         }
         
         //relatedDatafiles
         if(getRelatedDatafilesCollection() != null){
             for(RelatedDatafiles relatedDatafile : getRelatedDatafilesCollection()){
-                relatedDatafile.setDeleted(deleted);
+                if(type == Cascade.DELETE) relatedDatafile.setDeleted(deleted);
+                else if(type == Cascade.MOD_ID) relatedDatafile.setModId(value.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    relatedDatafile.setModId(value.toString());
+                    relatedDatafile.setCreateId(value.toString());
+                }
+                
             }
         }
         
-        this.setDeleted(deleted);
+        if(type == Cascade.DELETE) this.setDeleted(deleted);
+        else if(type == Cascade.MOD_ID) this.setModId(value.toString());
+        else if(type == Cascade.MOD_AND_CREATE_IDS) {
+            this.setModId(value.toString());
+            this.setCreateId(value.toString());
+        }
     }
     
     /**
@@ -597,6 +615,29 @@ public class Datafile extends EntityBaseBean implements Serializable {
             }
         }
         
+        if(datafileFormat != null){
+            datafileFormat.isValid(manager);
+            
+            //check datafile format is valid
+            DatafileFormat format = manager.find(DatafileFormat.class, datafileFormat.getDatafileFormatPK());
+            if(format == null)  throw new ValidationException(datafileFormat+ " is not a valid Datafile Format");
+        }
+        
         return isValid();
+    }
+    
+    /**
+     * This method removes all the ids when persist is called.
+     * This is so you cannot attach an Id when creating a dataset
+     * that is not valid, ie auto generated
+     */
+    @PrePersist
+    @Override
+    protected void prePersist(){
+        if(this.id != null){
+            log.warn("Attempting to save a datafile: "+id +" when it should be auto generated, nulling id");
+            this.id = null;
+        }
+        super.prePersist();
     }
 }

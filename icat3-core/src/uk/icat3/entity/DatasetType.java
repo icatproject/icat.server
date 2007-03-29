@@ -26,41 +26,35 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class DatasetType
- * 
+ *
  * @author gjd37
  */
 @Entity
 @Table(name = "DATASET_TYPE")
 @NamedQueries( {
-        @NamedQuery(name = "DatasetType.findByName", query = "SELECT d FROM DatasetType d WHERE d.name = :name"),
-        @NamedQuery(name = "DatasetType.findByDescription", query = "SELECT d FROM DatasetType d WHERE d.description = :description"),
-        @NamedQuery(name = "DatasetType.findByModTime", query = "SELECT d FROM DatasetType d WHERE d.modTime = :modTime"),
-        @NamedQuery(name = "DatasetType.findByModId", query = "SELECT d FROM DatasetType d WHERE d.modId = :modId")
-    })
+    @NamedQuery(name = "DatasetType.findByName", query = "SELECT d FROM DatasetType d WHERE d.name = :name"),
+    @NamedQuery(name = "DatasetType.findByDescription", query = "SELECT d FROM DatasetType d WHERE d.description = :description"),
+    @NamedQuery(name = "DatasetType.findByModTime", query = "SELECT d FROM DatasetType d WHERE d.modTime = :modTime"),
+    @NamedQuery(name = "DatasetType.getAll", query = "SELECT d FROM DatasetType d"),
+    @NamedQuery(name = "DatasetType.findByModId", query = "SELECT d FROM DatasetType d WHERE d.modId = :modId")
+})
 public class DatasetType extends EntityBaseBean implements Serializable {
-
+    
     @Id
     @Column(name = "NAME", nullable = false)
     private String name;
-
+    
     @Column(name = "DESCRIPTION")
     private String description;
-
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetType")
-     @XmlTransient
+    @XmlTransient
     private Collection<Dataset> datasetCollection;
     
     /** Creates a new instance of DatasetType */
     public DatasetType() {
     }
-
+    
     /**
      * Creates a new instance of DatasetType with the specified values.
      * @param name the name of the DatasetType
@@ -68,19 +62,7 @@ public class DatasetType extends EntityBaseBean implements Serializable {
     public DatasetType(String name) {
         this.name = name;
     }
-
-    /**
-     * Creates a new instance of DatasetType with the specified values.
-     * @param name the name of the DatasetType
-     * @param modTime the modTime of the DatasetType
-     * @param modId the modId of the DatasetType
-     */
-    public DatasetType(String name, Date modTime, String modId) {
-        this.name = name;
-        this.modTime = modTime;
-        this.modId = modId;
-    }
-
+          
     /**
      * Gets the name of this DatasetType.
      * @return the name
@@ -88,7 +70,7 @@ public class DatasetType extends EntityBaseBean implements Serializable {
     public String getName() {
         return this.name;
     }
-
+    
     /**
      * Sets the name of this DatasetType to the specified value.
      * @param name the new name
@@ -96,7 +78,7 @@ public class DatasetType extends EntityBaseBean implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
+    
     /**
      * Gets the description of this DatasetType.
      * @return the description
@@ -104,7 +86,7 @@ public class DatasetType extends EntityBaseBean implements Serializable {
     public String getDescription() {
         return this.description;
     }
-
+    
     /**
      * Sets the description of this DatasetType to the specified value.
      * @param description the new description
@@ -112,48 +94,16 @@ public class DatasetType extends EntityBaseBean implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    /**
-     * Gets the modTime of this DatasetType.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this DatasetType to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
-    /**
-     * Gets the modId of this DatasetType.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this DatasetType to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
+    
     /**
      * Gets the datasetCollection of this DatasetType.
      * @return the datasetCollection
      */
-     @XmlTransient
+    @XmlTransient
     public Collection<Dataset> getDatasetCollection() {
         return this.datasetCollection;
     }
-
+    
     /**
      * Sets the datasetCollection of this DatasetType to the specified value.
      * @param datasetCollection the new datasetCollection
@@ -161,9 +111,9 @@ public class DatasetType extends EntityBaseBean implements Serializable {
     public void setDatasetCollection(Collection<Dataset> datasetCollection) {
         this.datasetCollection = datasetCollection;
     }
-
+    
     /**
-     * Returns a hash code value for the object.  This implementation computes 
+     * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
      */
@@ -173,10 +123,10 @@ public class DatasetType extends EntityBaseBean implements Serializable {
         hash += (this.name != null ? this.name.hashCode() : 0);
         return hash;
     }
-
+    
     /**
-     * Determines whether another object is equal to this DatasetType.  The result is 
-     * <code>true</code> if and only if the argument is not null and is a DatasetType object that 
+     * Determines whether another object is equal to this DatasetType.  The result is
+     * <code>true</code> if and only if the argument is not null and is a DatasetType object that
      * has the same id field values as this object.
      * @param object the reference object with which to compare
      * @return <code>true</code> if this object is the same as the argument;
@@ -192,9 +142,9 @@ public class DatasetType extends EntityBaseBean implements Serializable {
         if (this.name != other.name && (this.name == null || !this.name.equals(other.name))) return false;
         return true;
     }
-
+    
     /**
-     * Returns a string representation of the object.  This implementation constructs 
+     * Returns a string representation of the object.  This implementation constructs
      * that representation based on the id fields.
      * @return a string representation of the object.
      */

@@ -12,6 +12,7 @@ package uk.icat3.entity;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.CascadeType;
@@ -27,6 +28,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -35,6 +37,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
 
 /**
@@ -94,6 +97,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetId")
     private Collection<DatasetLevelPermission> datasetLevelPermissionCollection;
     
+    @XmlTransient
     private transient DatasetInclude datasetInclude = DatasetInclude.NONE;
     
     /** Creates a new instance of Dataset */
@@ -278,6 +282,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
         datasetParameter.setDataset(this);
         
         Collection<DatasetParameter> datasetParameters = this.getDatasetParameterCollection();
+        if(datasetParameters == null) datasetParameters = new ArrayList<DatasetParameter>();
         datasetParameters.add(datasetParameter);
         
         this.setDatasetParameterCollection(datasetParameters);
@@ -327,6 +332,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
         dataFile.setDatasetId(this);
         
         Collection<Datafile> datafiles = this.getDatafileCollection();
+        if(datafiles == null) datafiles = new ArrayList<Datafile>();
         datafiles.add(dataFile);
         
         this.setDatafileCollection(datafiles);
@@ -354,29 +360,54 @@ public class Dataset extends EntityBaseBean implements Serializable {
      *
      * @param isDeleted
      */
-    public void setCascadeDeleted(boolean isDeleted){
-        log.trace("Setting: "+toString()+" to deleted? "+isDeleted);
-        String deleted = (isDeleted) ? "Y" : "N";
+    public void setCascade(Cascade type, Object value){
+        log.trace("Setting: "+toString()+" from type: "+type+" to :"+value);
+        String deleted = "Y";
+        if(type == Cascade.DELETE){
+            deleted = (((Boolean)value).booleanValue()) ? "Y" : "N";
+        }
         
         //data set parameters
-        for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
-            datasetParameter.setDeleted(deleted);
-        }
-        
-        //datafiles
-        for(Datafile datafile : getDatafileCollection()){
-            datafile.setCascadeDeleted(isDeleted);
-        }
-        
-        //access groups
-        for(DatasetLevelPermission datasetLevelPermission : getDatasetLevelPermissionCollection()){
-            datasetLevelPermission.setDeleted(deleted);
-            for(AccessGroupDlp agdlp : datasetLevelPermission.getAccessGroupDlpCollection()){
-                agdlp.setDeleted(deleted);
+        if(getDatasetParameterCollection() != null){
+            for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
+                if(type == Cascade.DELETE) datasetParameter.setDeleted(deleted);
+                else if(type == Cascade.MOD_ID) datasetParameter.setModId(value.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    datasetParameter.setModId(value.toString());
+                    datasetParameter.setCreateId(value.toString());
+                }
             }
         }
         
-        this.setDeleted(deleted);
+        //datafiles
+        if(getDatafileCollection() != null){
+            for(Datafile datafile : getDatafileCollection()){
+                if(type == Cascade.DELETE) datafile.setDeleted(deleted);
+                else if(type == Cascade.MOD_ID) datafile.setModId(value.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    datafile.setModId(value.toString());
+                    datafile.setCreateId(value.toString());
+                }
+            }
+        }
+        
+        //access groups
+        if(getDatasetLevelPermissionCollection() != null){
+            for(DatasetLevelPermission datasetLevelPermission : getDatasetLevelPermissionCollection()){
+                datasetLevelPermission.setDeleted(deleted);
+                for(AccessGroupDlp agdlp : datasetLevelPermission.getAccessGroupDlpCollection()){
+                    if(type == Cascade.DELETE) agdlp.setDeleted(deleted);
+                }
+            }
+            
+        }
+        
+        if(type == Cascade.DELETE) this.setDeleted(deleted);
+        else if(type == Cascade.MOD_ID) this.setModId(value.toString());
+        else if(type == Cascade.MOD_AND_CREATE_IDS) {
+            this.setModId(value.toString());
+            this.setCreateId(value.toString());
+        }
     }
     
     /**
@@ -491,15 +522,15 @@ public class Dataset extends EntityBaseBean implements Serializable {
     public boolean isValid(EntityManager manager) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
         
-      
+        
         //check sample info, sample id must be a part of in investigations aswell
         outer: if(sampleId != null){
             //check valid sample id
-           
+            
             Sample sampleRef = manager.find(Sample.class,sampleId);
-            if(sampleRef == null)             
+            if(sampleRef == null)
                 throw new ValidationException("Sample[id="+sampleId+"] is not a valid sample id");
-           
+            
             Collection<Sample> samples = investigationId.getSampleCollection();
             for(Sample sample : samples){
                 if(sample.getId().equals(sampleId)){
@@ -526,6 +557,24 @@ public class Dataset extends EntityBaseBean implements Serializable {
             }
         }
         
+        //check is valid status
+        if(datasetStatus != null){
+            datasetStatus.isValid(manager);
+            
+            //check datafile format is valid
+            DatasetStatus status = manager.find(DatasetStatus.class, datasetStatus.getName());
+            if(status == null)  throw new ValidationException(datasetStatus+ " is not a valid Dataset Status");
+        }
+        
+        //check is valid status
+        if(datasetType != null){
+            datasetType.isValid(manager);
+            
+            //check datafile format is valid
+            DatasetType type = manager.find(DatasetType.class, datasetType.getName());
+            if(type == null)  throw new ValidationException(datasetType+ " is not a valid Dataset Type");
+        }
+        
         
         return isValid();
     }
@@ -547,6 +596,21 @@ public class Dataset extends EntityBaseBean implements Serializable {
             //means it is unique
             return true;
         }
+    }
+    
+    /**
+     * This method removes all the ids when persist is called.
+     * This is so you cannot attach an Id when creating a dataset
+     * that is not valid, ie auto generated
+     */
+    @PrePersist
+    @Override
+    protected void prePersist(){
+        if(this.id != null){
+            log.warn("Attempting to save a dataset: "+id +" when it should be auto generated, nulling id");
+            this.id = null;
+        }
+        super.prePersist();
     }
     
     /**

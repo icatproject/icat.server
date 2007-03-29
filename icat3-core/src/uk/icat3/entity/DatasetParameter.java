@@ -72,9 +72,6 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     @Column(name = "DESCRIPTION")
     private String description;
     
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-    
     @JoinColumn(name = "DATASET_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
@@ -97,18 +94,6 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
      */
     public DatasetParameter(DatasetParameterPK datasetParameterPK) {
         this.datasetParameterPK = datasetParameterPK;
-    }
-    
-    /**
-     * Creates a new instance of DatasetParameter with the specified values.
-     * @param datasetParameterPK the datasetParameterPK of the DatasetParameter
-     * @param modTime the modTime of the DatasetParameter
-     * @param modId the modId of the DatasetParameter
-     */
-    public DatasetParameter(DatasetParameterPK datasetParameterPK, Date modTime, String modId) {
-        this.datasetParameterPK = datasetParameterPK;
-        this.modTime = modTime;
-        this.modId = modId;
     }
     
     /**
@@ -231,22 +216,6 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
      */
     public void setDescription(String description) {
         this.description = description;
-    }
-    
-    /**
-     * Gets the modId of this DatasetParameter.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-    
-    /**
-     * Sets the modId of this DatasetParameter to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
     }
     
     /**
@@ -419,6 +388,21 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
         if(!parameterDB.isNumeric()){
             if(this.getNumericValue() != null) throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" must be a string value only.");
         }
+        
+        //check if datafile parameter is already in DB
+        DatasetParameter paramDB = manager.find(DatasetParameter.class, datasetParameterPK);
+        if(paramDB != null) throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" is already is a parameter of the dataset.");
+        
+        //check that the parameter dataset id is the same as actual dataset id
+        if(getDataset() != null){            
+            //check embedded primary key
+            datasetParameterPK.isValid();
+            
+            if(!datasetParameterPK.getDatasetId().equals(getDataset().getId())){
+                throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" has dataset id: "+datasetParameterPK.getDatasetId()+ " that does not corresponds to its parent dataset id: "+getDataset().getId());
+            }
+        } //else //throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" has not dataset id");
+        
         
         //once here then its valid
         return isValid();

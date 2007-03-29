@@ -55,6 +55,7 @@ public class ManagerUtil {
                 investigation.getKeywordCollection().size();
                 investigation.getInvestigatorCollection().size();
                 investigation.getDatasetCollection().size();
+                investigation.getSampleCollection().size();
                 
                 for(Dataset dataset : investigation.getDatasetCollection()){
                     dataset.getDatafileCollection().size();
@@ -64,6 +65,11 @@ public class ManagerUtil {
         } else if(include.toString().equals(InvestigationInclude.DATASETS_ONLY.toString())){
             for(Investigation investigation : investigations){
                 investigation.getDatasetCollection().size();
+            }
+            // return sample with these investigations
+        } else if(include.toString().equals(InvestigationInclude.SAMPLES_ONLY.toString())){
+            for(Investigation investigation : investigations){
+                investigation.getSampleCollection().size();
             }
             // return datasets and their datafiles with these investigations
         } else if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString())){
@@ -203,7 +209,7 @@ public class ManagerUtil {
         return dataFile;
     }
     
-    protected static <T> T find(Class<T> entityClass, Object primaryKey, EntityManager manager) throws NoSuchObjectFoundException{
+    public static <T> T find(Class<T> entityClass, Object primaryKey, EntityManager manager) throws NoSuchObjectFoundException{
         T object = manager.find(entityClass, primaryKey);
         
         if(object == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+": id: "+primaryKey+" not found.");

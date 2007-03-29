@@ -205,7 +205,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static Investigation updateInvestigation(String userId, Investigation investigation, EntityManager manager, boolean validate) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+    public static Investigation updateInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateInvestigation("+userId+", "+investigation+", EntityManager)");
         
         //check to see if DataSet exists, dont need the returned dataset as merging
@@ -213,12 +213,10 @@ public class InvestigationManager extends ManagerUtil {
             checkInvestigation(investigation.getId(), manager);
         }
         
-        if(validate){
-            //check if valid investigation
-            investigation.isValid(manager);
-            //check if unique
-            if(!investigation.isUnique(manager)) throw new ValidationException(investigation+" is not unique.");
-        }
+        //check if valid investigation
+        investigation.isValid(manager);
+        //check if unique
+        if(!investigation.isUnique(manager)) throw new ValidationException(investigation+" is not unique.");
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
@@ -235,77 +233,8 @@ public class InvestigationManager extends ManagerUtil {
             manager.persist(investigation);
             return investigation;
         }
-    }
+    }       
     
-    /**
-     * Updates a Investigation depending on whether the user has permission to update this Investigation
-     *
-     * @param userId userId of the user.
-     * @param investigation
-     * @param manager manager object that will facilitate interaction with underlying database     *
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     */
-    public static Investigation updateInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-        return updateInvestigation(userId, investigation, manager, true);
-    }
-    
-    
-    /**
-     * Adds a data set to the list a data sets for a investigation, depending if the user has update permission on the investigation
-     *
-     * @param userId userId of the user.
-     * @param dataSet
-     * @param investigationId
-     * @param manager manager object that will facilitate interaction with underlying database     *
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     */
-    public static void addDataSet(String userId, Dataset dataSet, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-        log.trace("addDataSet("+userId+", "+dataSet+" "+investigationId+", EntityManager)");
-        
-        //make sure id is null
-        dataSet.setId(null);
-        
-        Collection<Dataset> datasets = new ArrayList<Dataset>();
-        datasets.add(dataSet);
-        
-        addDataSets(userId, datasets, investigationId, manager);
-    }
-    
-    /**
-     * Adds a collection of data sets to the list a data sets for a investigation, depending if the user has update permission on the investigation
-     *
-     * @param userId userId of the user.
-     * @param dataSets
-     * @param investigationId
-     * @param manager manager object that will facilitate interaction with underlying database     *
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     */
-    public static void addDataSets(String userId, Collection<Dataset> dataSets, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-        log.trace("addDataSet("+userId+", "+dataSets+" "+investigationId+", EntityManager)");
-        
-        //check investigation exist
-        Investigation investigation  = InvestigationManager.checkInvestigation(investigationId, manager);
-        
-        //check user has update access
-        GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
-        
-        for(Dataset dataset : dataSets){
-            dataset.isValid(manager);
-            //check if unique
-            if(!dataset.isUnique(manager)) throw new ValidationException(dataset+" is not unique.");
-            
-            dataset.setModId(userId);
-            dataset.setCreateId(userId);
-            //make sure id is null
-            dataset.setId(null);
-            dataset.setInvestigationId(investigation);
-            investigation.addDataSet(dataset);
-            //manager.persist(dataset);
-        }
-    }
     ///////////////   End of add/Update Commands    ///////////////////
     
     
@@ -321,12 +250,11 @@ public class InvestigationManager extends ManagerUtil {
         keyword.isValid(manager);
         
         //check user has update access
-        GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
+        GateKeeper.performAuthorisation(userId, keyword, AccessType.CREATE, manager);
         
         //sets modId for persist
         keyword.setCreateId(userId);
         keyword.setInvestigation(investigation);
-        
         manager.persist(keyword);
         // add keyword to investigation
         //investigation.addKeyword(keyword);
@@ -342,7 +270,7 @@ public class InvestigationManager extends ManagerUtil {
         investigator.isValid(manager);
         
         //check user has update access
-        GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
+        GateKeeper.performAuthorisation(userId, investigator, AccessType.CREATE, manager);
         
         try {
             //check investigator not already added
@@ -374,7 +302,7 @@ public class InvestigationManager extends ManagerUtil {
         Keyword keywordManaged = ManagerUtil.find(Keyword.class, keyword.getKeywordPK(), manager);
         
         //check user has delete access
-        GateKeeper.performAuthorisation(userId, keywordManaged.getInvestigation(), keywordManaged, AccessType.DELETE, manager);
+        GateKeeper.performAuthorisation(userId, keywordManaged, AccessType.DELETE, manager);
         
         //ok here fo delete
         keywordManaged.setDeleted("Y");
@@ -388,7 +316,7 @@ public class InvestigationManager extends ManagerUtil {
         Investigator investigatorManaged = ManagerUtil.find(Investigator.class, investigator.getInvestigatorPK(), manager);
         
         //check user has delete access
-        GateKeeper.performAuthorisation(userId, investigatorManaged.getInvestigation(), investigatorManaged, AccessType.UPDATE, manager);
+        GateKeeper.performAuthorisation(userId, investigatorManaged, AccessType.DELETE, manager);
         
         //ok here fo delete
         investigatorManaged.setDeleted("Y");
@@ -406,11 +334,12 @@ public class InvestigationManager extends ManagerUtil {
         Keyword keywordManaged = ManagerUtil.find(Keyword.class, keyword.getKeywordPK(), manager);
         
         //check user has delete access
-        GateKeeper.performAuthorisation(userId, keywordManaged.getInvestigation(), keywordManaged, AccessType.REMOVE, manager);
+        GateKeeper.performAuthorisation(userId, keywordManaged, AccessType.REMOVE, manager);
         
         //ok here fo delete
-        keywordManaged.getInvestigation().getKeywordCollection().remove(keyword);
+        //keywordManaged.getInvestigation().getKeywordCollection().remove(keyword);
         keywordManaged.setInvestigation(null);
+        
         manager.remove(keywordManaged);
     }
     
@@ -421,10 +350,10 @@ public class InvestigationManager extends ManagerUtil {
         Investigator investigatorManaged = ManagerUtil.find(Investigator.class, investigator.getInvestigatorPK(), manager);
         
         //check user has delete access
-        GateKeeper.performAuthorisation(userId, investigatorManaged.getInvestigation(), investigatorManaged, AccessType.REMOVE, manager);
+        GateKeeper.performAuthorisation(userId, investigatorManaged, AccessType.REMOVE, manager);
         
         //ok here fo delete
-        investigatorManaged.getInvestigation().getInvestigatorCollection().remove(investigator);
+        //investigatorManaged.getInvestigation().getInvestigatorCollection().remove(investigator);
         investigatorManaged.setInvestigation(null);
         investigatorManaged.setFacilityUser(null);
         

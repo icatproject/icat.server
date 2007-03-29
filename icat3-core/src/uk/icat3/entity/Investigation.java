@@ -44,6 +44,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.search.InvestigationSearch;
+import uk.icat3.util.Cascade;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.Queries;
 
@@ -169,6 +170,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<TopicList> topicListCollection;
     
+    @XmlTransient
     private transient InvestigationInclude investigationInclude = InvestigationInclude.NONE;
     
     /** Creates a new instance of Investigation */
@@ -694,7 +696,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         
         //datafiles
         for(Dataset dataset : getDatasetCollection()){
-            dataset.setCascadeDeleted(isDeleted);
+            dataset.setCascade(Cascade.DELETE, isDeleted);
         }
         
         //investigators

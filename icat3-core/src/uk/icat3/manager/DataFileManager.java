@@ -21,6 +21,7 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
+import uk.icat3.util.Cascade;
 
 /**
  *
@@ -67,7 +68,7 @@ public class DataFileManager extends ManagerUtil {
         //not deleting anymore, jsut changing deleted to Y
         
         log.info("Deleting: "+dataFile);
-        dataFile.setCascadeDeleted(true);
+        dataFile.setCascade(Cascade.DELETE,Boolean.TRUE);
         
     }
     
@@ -122,7 +123,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static Datafile updateDataFile(String userId, Datafile dataFile, EntityManager manager, boolean validate) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+    public static Datafile updateDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateDataFile("+userId+", "+dataFile+", EntityManager)");
         
         //check to see if DataFile exists, dont need the returned DataFile as merging
@@ -130,10 +131,8 @@ public class DataFileManager extends ManagerUtil {
             checkDataFile(dataFile.getId(), manager);
         }
         
-        if(validate){
-            //check if valid datafile
-            dataFile.isValid(manager);
-        }
+        //check if valid datafile
+        dataFile.isValid(manager);
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, dataFile, AccessType.UPDATE, manager);
@@ -144,23 +143,10 @@ public class DataFileManager extends ManagerUtil {
             return manager.merge(dataFile);
         } else {
             //new dataset, set createid, this set mod id
-            dataFile.setCreateId(userId);
+            dataFile.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
             manager.persist(dataFile);
             return dataFile;
         }
-    }
-    
-    /**
-     * Updates / Adds a data file depending on whether the user has permission to update this data file or data set
-     *
-     * @param userId
-     * @param dataFile
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     */
-    public static Datafile updateDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-        return updateDataFile(userId, dataFile, manager, true);
     }
     
     /**
@@ -176,32 +162,16 @@ public class DataFileManager extends ManagerUtil {
     public static Datafile createDataFile(String userId, Datafile dataFile, Long datasetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataFile("+userId+", "+dataFile+" "+datasetId+", EntityManager)");
         
-        //check isvalid
-        /*dataFile.isValid(manager);
-         
         //check dataset exist
         Dataset dataset  = DataSetManager.checkDataSet(datasetId, manager);
-         
-        //check user has update access
-        GateKeeper.performAuthorisation(userId, dataset, AccessType.UPDATE, manager);
-         
-        //make sure id is null
+        dataFile.setDatasetId(dataset);
         dataFile.setId(null);
-        dataFile.setDatasetId(dataset);
-        dataFile.setCreateId(userId);
-         
-        manager.persist(dataFile);
-        return dataFile;*/
         
-        //check dataset exist
-        Dataset dataset  = DataSetManager.checkDataSet(datasetId, manager);
-        dataFile.setDatasetId(dataset);
         return updateDataFile(userId, dataFile, manager);
     }
     
-    
     /**
-     * Adds a data file to the list a files for a data set, depending if the user has update permission on the data set
+     * Creates a data file, depending if the user has update permission on the data set associated with the data set
      *
      * @param userId
      * @param dataFile
@@ -210,48 +180,19 @@ public class DataFileManager extends ManagerUtil {
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void addDataFile(String userId, Datafile dataFile, Long datasetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-        log.trace("addDataFile("+userId+", "+dataFile+" "+datasetId+", EntityManager)");
+    public static Collection<Datafile> createDataFiles(String userId, Collection<Datafile> dataFiles, Long datasetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        log.trace("createDataFiles("+userId+", "+dataFiles+" "+datasetId+", EntityManager)");
         
-        //make sure id is null
-        dataFile.setId(null);
-        
-        Collection<Datafile> dataFiles = new ArrayList<Datafile>();
-        dataFiles.add(dataFile);
-        
-        addDataFiles(userId, dataFiles, datasetId, manager);
-    }
-    
-    /**
-     *
-     *  Adds a collection of data files to the list a files for a data set, depending if the user has update permission on the data set
-     *
-     * @param userId
-     * @param dataFiles
-     * @param datasetId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     */
-    public static void addDataFiles(String userId, Collection<Datafile> dataFiles, Long datasetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-        log.trace("addDataFile("+userId+", "+dataFiles+" "+datasetId+", EntityManager)");
-        
-        //check dataset exist
-        Dataset dataset  = DataSetManager.checkDataSet(datasetId, manager);
-        
-        //check user has update access
-        GateKeeper.performAuthorisation(userId, dataset, AccessType.UPDATE, manager);
-        
-        for(Datafile dataFile : dataFiles){
-            //check isvalid first
-            dataFile.isValid(manager);
-            dataFile.setModId(userId);
-            dataFile.setCreateId(userId);
-            dataFile.setId(null);
-            
-            dataset.addDataFile(dataFile);
+        Collection<Datafile> datafilesCreated = new ArrayList<Datafile>();
+        for(Datafile datafile : dataFiles){
+            Datafile datafileCreated = createDataFile(userId, datafile, datasetId, manager);
+            datafilesCreated.add(datafileCreated);
         }
+        
+        return datafilesCreated;
     }
+    ///////////////   End of add/Update Commands    ///////////////////
+    
     
     /**
      * Gets the data file objects from a list of data file ids, depending if the users has access to read the data files
