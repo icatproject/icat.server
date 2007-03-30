@@ -15,7 +15,7 @@
         <class>uk.icat3.entity.FacilityCycle</class>
         <class>uk.icat3.entity.DatasetStatus</class>
         <class>uk.icat3.entity.StudyInvestigation</class>
-        <class>uk.icat3.entity.DatasetParameter</class>
+        <class>uk.icat3.entity.DatasetParameter</class>   
         <class>uk.icat3.entity.InvestigationLevelPermission</class>
         <class>uk.icat3.entity.Topic</class>
         <class>uk.icat3.entity.Instrument</class>
@@ -103,7 +103,7 @@
     
     <persistence-unit name="icat3-isis" transaction-type="RESOURCE_LOCAL">
         <provider>oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider</provider>
-      
+        
         <class>uk.icat3.entity.Publication</class>
         <class>uk.icat3.entity.Sample</class>
         <class>uk.icat3.entity.Investigation</class>

@@ -38,6 +38,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.omg.CORBA.MARSHAL;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.Cascade;
 
@@ -122,7 +123,6 @@ public class Datafile extends EntityBaseBean implements Serializable {
     @Column(name = "SIGNATURE")
     private String signature;
     
-    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
     private Collection<RelatedDatafiles> relatedDatafilesCollection;
     
@@ -139,6 +139,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
     @JoinColumn(name = "DATASET_ID", referencedColumnName = "ID")
     @ManyToOne
     @XmlTransient
+    @ICAT(merge=false)
     private Dataset datasetId;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
@@ -626,6 +627,44 @@ public class Datafile extends EntityBaseBean implements Serializable {
         return isValid();
     }
     
+    public void merge(DatasetParameter object){
+        
+        Field[] passsedFields = object.getClass().getDeclaredFields();
+        Field[] thisFields = this.getClass().getDeclaredFields();
+        
+        outer: for (Field field : passsedFields) {
+            //get name of field
+            String fieldName = field.getName();
+            //log.trace(fieldName);
+            //now check all annoatations
+            for (Annotation a : field.getDeclaredAnnotations()) {
+                //if this means its a none null column field
+                //log.trace(a.annotationType().getName());
+                if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("merge=false") ){
+                    log.trace("not merging, icat(merge=false) "+fieldName);
+                    continue outer;
+                }
+                if(!a.annotationType().getName().contains("Column") ||
+                        a.annotationType().getName().contains("Id")){
+                    log.trace("not merging, not Column, or Id"+fieldName);
+                    continue outer;
+                }
+            }
+            try {
+                for(Field thisField : thisFields) {
+                    // log.trace(thisField);
+                    if(thisField.getName().equals(fieldName)){
+                        //now transfer the data
+                        log.trace("Setting "+fieldName+" to "+field.get(object));
+                        thisField.set(this, field.get(object));
+                    }
+                }
+            }  catch (Exception ex) {
+                log.warn("Error transferring data for field: "+fieldName);
+            }
+        }
+    }
+    
     /**
      * This method removes all the ids when persist is called.
      * This is so you cannot attach an Id when creating a dataset
@@ -633,7 +672,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
      */
     @PrePersist
     @Override
-    protected void prePersist(){
+    public void prePersist(){
         if(this.id != null){
             log.warn("Attempting to save a datafile: "+id +" when it should be auto generated, nulling id");
             this.id = null;

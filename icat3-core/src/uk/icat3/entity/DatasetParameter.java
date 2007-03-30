@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Date;
+import javax.jws.WebParam;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -68,20 +69,23 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     
     @Column(name = "ERROR")
     private String error;
-    
+        
     @Column(name = "DESCRIPTION")
     private String description;
     
     @JoinColumn(name = "DATASET_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
+    @ICAT(merge=false)
     private Dataset dataset;
     
     @JoinColumns(value =  {
         @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
-@JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
+        @JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
     })
+    @ICAT(merge=false)
     @ManyToOne
+    @XmlTransient
     private Parameter parameter;
     
     /** Creates a new instance of DatasetParameter */
@@ -390,11 +394,13 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
         }
         
         //check if datafile parameter is already in DB
-        DatasetParameter paramDB = manager.find(DatasetParameter.class, datasetParameterPK);
-        if(paramDB != null) throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" is already is a parameter of the dataset.");
+       /* DatasetParameter paramDB = manager.find(DatasetParameter.class, datasetParameterPK);
+        if(paramDB != null) {
+            throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" is already is a parameter of the dataset.");
+        }*/
         
         //check that the parameter dataset id is the same as actual dataset id
-        if(getDataset() != null){            
+        if(getDataset() != null){
             //check embedded primary key
             datasetParameterPK.isValid();
             
@@ -406,6 +412,44 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
         
         //once here then its valid
         return isValid();
+    }
+    
+    public void merge(DatasetParameter object){
+        
+        Field[] passsedFields = object.getClass().getDeclaredFields();
+        Field[] thisFields = this.getClass().getDeclaredFields();
+        
+        outer: for (Field field : passsedFields) {
+            //get name of field
+            String fieldName = field.getName();
+            //log.trace(fieldName);
+            //now check all annoatations
+            for (Annotation a : field.getDeclaredAnnotations()) {
+                //if this means its a none null column field
+                //log.trace(a.annotationType().getName());
+                if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("merge=false") ){
+                    log.trace("not merging, icat(merge=false) "+fieldName);
+                    continue outer;
+                }
+                if(!a.annotationType().getName().contains("Column") ||
+                        a.annotationType().getName().contains("Id")){
+                    log.trace("not merging, not Column, or Id"+fieldName);
+                    continue outer;
+                }
+            }
+            try {
+                for(Field thisField : thisFields) {
+                    // log.trace(thisField);
+                    if(thisField.getName().equals(fieldName)){
+                        //now transfer the data
+                        log.trace("Setting "+fieldName+" to "+field.get(object));
+                        thisField.set(this, field.get(object));
+                    }
+                }
+            }  catch (Exception ex) {
+                log.warn("Error transferring data for field: "+fieldName);
+            }
+        }
     }
 }
 

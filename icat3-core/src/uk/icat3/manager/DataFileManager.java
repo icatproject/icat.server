@@ -15,7 +15,9 @@ import java.util.Collection;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
+import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
+import uk.icat3.entity.DatasetParameter;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -57,7 +59,7 @@ public class DataFileManager extends ManagerUtil {
     public static void deleteDataFile(String userId, Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataFile("+userId+", "+dataFileId+", EntityManager)");
         
-        Datafile dataFile = checkDataFile(dataFileId, manager);
+        Datafile dataFile = find(Datafile.class, dataFileId, manager);
         
         //check user has delete access
         GateKeeper.performAuthorisation(userId, dataFile, AccessType.DELETE, manager);
@@ -128,7 +130,7 @@ public class DataFileManager extends ManagerUtil {
         
         //check to see if DataFile exists, dont need the returned DataFile as merging
         if(dataFile.getId() != null){
-            checkDataFile(dataFile.getId(), manager);
+            find(Datafile.class, dataFile.getId(), manager);
         }
         
         //check if valid datafile
@@ -163,7 +165,7 @@ public class DataFileManager extends ManagerUtil {
         log.trace("createDataFile("+userId+", "+dataFile+" "+datasetId+", EntityManager)");
         
         //check dataset exist
-        Dataset dataset  = DataSetManager.checkDataSet(datasetId, manager);
+        Dataset dataset  = find(Dataset.class, datasetId, manager);
         dataFile.setDatasetId(dataset);
         dataFile.setId(null);
         
@@ -212,7 +214,7 @@ public class DataFileManager extends ManagerUtil {
         for(Long dataFileId : dataFileIds) {
             
             //check DataFile exist
-            Datafile dataFile  = checkDataFile(dataFileId, manager);
+            Datafile dataFile  = find(Datafile.class, dataFileId, manager);
             
             //check user has read access
             GateKeeper.performAuthorisation(userId, dataFile, AccessType.READ, manager);
@@ -243,4 +245,52 @@ public class DataFileManager extends ManagerUtil {
         return datafiles.iterator().next();
     }
     
+    /////////////////////   Util commands /////////////////////////
+    
+    
+    public static void updateDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        log.trace("updateDataSetParameter("+userId+", "+datafileParameter+", EntityManager)");
+        
+        DatafileParameter datafileParameterFound = find(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);
+        
+        //ok, now check permissions on found data set
+        GateKeeper.performAuthorisation(userId, datafileParameterFound, AccessType.UPDATE, manager);
+        
+        //update model with changed wanted
+        datafileParameterFound.merge(datafileParameter);
+        
+        datafileParameterFound.isValid(manager);
+    }
+    
+    public static DatafileParameter addDataFileParameter(String userId, DatafileParameter datafileParameter, Long datasetId,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        log.trace("addDataFileParameter("+userId+", "+datafileParameter+", "+datasetId+", EntityManager)");
+        
+        //check if param already in DB
+        if(manager.contains(datafileParameter))  throw new ValidationException("DatafileParameter: "+datafileParameter.getDatafileParameterPK().getName()+" with units: "+datafileParameter.getDatafileParameterPK().getUnits()+" is already is a parameter of the datafile.");
+        
+        //get datafile,
+        Datafile datafile = find(Datafile.class, datasetId, manager);
+        
+        //set id for datafileParameter
+        datafileParameter.setDatafile(datafile);
+        datafileParameter.setCreateId(userId);
+        
+        //check is valid, check parent datafile is in the private key
+        datafileParameter.isValid(manager);
+        
+        //ok, now check permissions
+        GateKeeper.performAuthorisation(userId, datafileParameter, AccessType.CREATE, manager);
+        
+        manager.persist(datafileParameter);
+        
+        return datafileParameter;
+    }
+    
+    public static DatafileParameter addDataFileParameter(String userId, DatafileParameter datafileParameter,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        log.trace("addDataFileParameter("+userId+", "+datafileParameter+", EntityManager)");
+        
+        Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
+        return  addDataFileParameter(userId, datafileParameter, datafileId, manager);
+        
+    }
 }

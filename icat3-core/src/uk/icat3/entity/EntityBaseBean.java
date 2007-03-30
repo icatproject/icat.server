@@ -44,6 +44,8 @@ public class EntityBaseBean {
     
     @Column(name = "DELETED", nullable = false )
     protected String deleted;
+    @XmlTransient
+    protected transient boolean deletedBoolean;
     
     @Column(name = "MOD_ID", nullable = false)
     protected String modId;
@@ -79,7 +81,7 @@ public class EntityBaseBean {
      */
     public void setCreateId(String createId) {
         this.createId = createId;
-        modTime = new Date();
+        if(isModifiable()) modTime = new Date();
     }
     
     /**
@@ -111,29 +113,30 @@ public class EntityBaseBean {
      */
     public void setModId(String modId) {
         this.modId = modId;
-        modTime = new Date();
+        if(isModifiable()) modTime = new Date();
     }
     
     /**
      * Automatically updates modTime when entity is persisted or merged
      */
     @PreUpdate
-    public void preUpdate() throws EntityNotModifiableError {      
+    public void preUpdate() throws EntityNotModifiableError {
         //this runtime error should not happen, the application should check
         //isModifibale before trying to change the state
-        if(!isModifiable()) throw new EntityNotModifiableError(this +" cannot be modified");
-        modTime = new Date();
+        //if(!isModifiable()) throw new EntityNotModifiableError(this +" cannot be modified");
+        //this way better, so not changed if not modifiable
+        if(isModifiable()) modTime = new Date();
     }
     
     /**
      * Automatically updates deleted, modTime and modId when entity is created
      */
     @PrePersist
-    protected void prePersist(){        
+    public void prePersist(){
         deleted = "N";
         if(modId != null){
             createId = modId;
-        } else if(createId != null) modId = createId;
+        } else if(createId != null) modId = createId;        
         modTime = new Date();
     }
     
@@ -142,8 +145,13 @@ public class EntityBaseBean {
         return deleted;
     }
     
-    public void setDeleted(String deleted) {
+    protected void setDeleted(String deleted) {
         this.deleted = deleted;
+    }
+           
+    public void setDeleted(boolean deletedBoolean) {
+        this.deletedBoolean = deletedBoolean;        
+        this.deleted = (deletedBoolean) ? "Y" : "N";
     }
     
     public boolean isDeleted(){

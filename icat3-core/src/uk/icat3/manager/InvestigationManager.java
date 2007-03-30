@@ -57,7 +57,7 @@ public class InvestigationManager extends ManagerUtil {
         for(Long investigationId : investigationIds) {
             
             //check investigation exist
-            Investigation investigation  = checkInvestigation(investigationId, manager);
+            Investigation investigation  = find(Investigation.class, investigationId, manager);
             
             //check user has read access
             GateKeeper.performAuthorisation(userId, investigation, AccessType.READ, manager);
@@ -137,7 +137,7 @@ public class InvestigationManager extends ManagerUtil {
     public static void deleteInvestigation(String userId, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteInvestigation("+userId+", "+investigationId+", EntityManager)");
         
-        Investigation investigation = checkInvestigation(investigationId, manager);
+        Investigation investigation = find(Investigation.class, investigationId, manager);
         
         //check user has delete access
         GateKeeper.performAuthorisation(userId, investigation, AccessType.DELETE, manager);
@@ -210,7 +210,7 @@ public class InvestigationManager extends ManagerUtil {
         
         //check to see if DataSet exists, dont need the returned dataset as merging
         if(investigation.getId() != null){
-            checkInvestigation(investigation.getId(), manager);
+            find(Investigation.class, investigation.getId(), manager);
         }
         
         //check if valid investigation
@@ -244,7 +244,7 @@ public class InvestigationManager extends ManagerUtil {
         log.trace("addKeyword("+userId+", "+keyword+" "+investigationId+", EntityManager)");
         
         //check investigation exists
-        Investigation investigation = ManagerUtil.checkInvestigation(investigationId, manager);
+        Investigation investigation = find(Investigation.class,investigationId, manager);
         
         //check valid
         keyword.isValid(manager);
@@ -264,7 +264,7 @@ public class InvestigationManager extends ManagerUtil {
         log.trace("addInvestigator("+userId+", "+investigator+" "+investigationId+", EntityManager)");
         
         //check investigation exists
-        Investigation investigation = ManagerUtil.checkInvestigation(investigationId, manager);
+        Investigation investigation = find(Investigation.class,investigationId, manager);
         
         //check valid
         investigator.isValid(manager);
@@ -274,9 +274,9 @@ public class InvestigationManager extends ManagerUtil {
         
         try {
             //check investigator not already added
-            Investigator investigatorManaged = ManagerUtil.find(Investigator.class, investigator.getInvestigatorPK(), manager);
+            Investigator investigatorManaged = find(Investigator.class, investigator.getInvestigatorPK(), manager);
             if(investigatorManaged.isDeleted()){
-                investigatorManaged.setDeleted("N");
+                investigatorManaged.setDeleted(false);
                 log.info(investigatorManaged +" been deleted, undeleting now.");
             } else {
                 //do nothing, throw exception
@@ -299,13 +299,13 @@ public class InvestigationManager extends ManagerUtil {
         log.trace("deleteKeyword("+userId+", "+keyword+" EntityManager)");
         
         //check keyword
-        Keyword keywordManaged = ManagerUtil.find(Keyword.class, keyword.getKeywordPK(), manager);
+        Keyword keywordManaged = find(Keyword.class, keyword.getKeywordPK(), manager);
         
         //check user has delete access
         GateKeeper.performAuthorisation(userId, keywordManaged, AccessType.DELETE, manager);
         
         //ok here fo delete
-        keywordManaged.setDeleted("Y");
+        keywordManaged.setDeleted(true);
         keywordManaged.setModId(userId);
     }
     
@@ -313,13 +313,13 @@ public class InvestigationManager extends ManagerUtil {
         log.trace("deleteInvestigator("+userId+", "+investigator+" EntityManager)");
         
         //check keyword
-        Investigator investigatorManaged = ManagerUtil.find(Investigator.class, investigator.getInvestigatorPK(), manager);
+        Investigator investigatorManaged = find(Investigator.class, investigator.getInvestigatorPK(), manager);
         
         //check user has delete access
         GateKeeper.performAuthorisation(userId, investigatorManaged, AccessType.DELETE, manager);
         
         //ok here fo delete
-        investigatorManaged.setDeleted("Y");
+        investigatorManaged.setDeleted(true);
         investigatorManaged.setModId(userId);
     }
     
@@ -331,7 +331,7 @@ public class InvestigationManager extends ManagerUtil {
         log.trace("deleteKeyword("+userId+", "+keyword+" EntityManager)");
         
         //check keyword
-        Keyword keywordManaged = ManagerUtil.find(Keyword.class, keyword.getKeywordPK(), manager);
+        Keyword keywordManaged = find(Keyword.class, keyword.getKeywordPK(), manager);
         
         //check user has delete access
         GateKeeper.performAuthorisation(userId, keywordManaged, AccessType.REMOVE, manager);
@@ -347,7 +347,7 @@ public class InvestigationManager extends ManagerUtil {
         log.trace("deleteInvestigator("+userId+", "+investigator+" EntityManager)");
         
         //check keyword
-        Investigator investigatorManaged = ManagerUtil.find(Investigator.class, investigator.getInvestigatorPK(), manager);
+        Investigator investigatorManaged = find(Investigator.class, investigator.getInvestigatorPK(), manager);
         
         //check user has delete access
         GateKeeper.performAuthorisation(userId, investigatorManaged, AccessType.REMOVE, manager);

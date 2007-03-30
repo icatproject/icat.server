@@ -86,6 +86,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID")
     @ManyToOne
     @XmlTransient
+    @ICAT(merge=false)
     private Investigation investigationId;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
@@ -598,6 +599,44 @@ public class Dataset extends EntityBaseBean implements Serializable {
         }
     }
     
+     public void merge(Dataset object){
+        
+        Field[] passsedFields = object.getClass().getDeclaredFields();
+        Field[] thisFields = this.getClass().getDeclaredFields();
+        
+        outer: for (Field field : passsedFields) {
+            //get name of field
+            String fieldName = field.getName();
+            //log.trace(fieldName);
+            //now check all annoatations
+            for (Annotation a : field.getDeclaredAnnotations()) {
+                //if this means its a none null column field
+                //log.trace(a.annotationType().getName());
+                if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("merge=false") ){
+                    log.trace("not merging, icat(merge=false) "+fieldName);
+                    continue outer;
+                }
+               if(!a.annotationType().getName().contains("Column") ||
+                        a.annotationType().getName().contains("Id")){
+                    log.trace("not merging, not Column, or Id"+fieldName);
+                    continue outer;
+                }
+            }
+            try {
+                for(Field thisField : thisFields) {
+                    // log.trace(thisField);
+                    if(thisField.getName().equals(fieldName)){
+                        //now transfer the data
+                        log.trace("Setting "+fieldName+" to "+field.get(object));
+                        thisField.set(this, field.get(object));
+                    }
+                }
+            }  catch (Exception ex) {
+                log.warn("Error transferring data for field: "+fieldName);
+            }
+        }
+    }
+    
     /**
      * This method removes all the ids when persist is called.
      * This is so you cannot attach an Id when creating a dataset
@@ -605,7 +644,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
      */
     @PrePersist
     @Override
-    protected void prePersist(){
+    public void prePersist(){
         if(this.id != null){
             log.warn("Attempting to save a dataset: "+id +" when it should be auto generated, nulling id");
             this.id = null;

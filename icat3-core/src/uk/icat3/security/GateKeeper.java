@@ -264,7 +264,7 @@ public class GateKeeper {
                 log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + datasetParam+", as it cannot be modified.");
                 throw(e);
             }
-        }
+        }      
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         invList.add(datasetParam.getDataset().getInvestigationId());
         performAuthorisation(user, invList, access, datasetParam, manager);
