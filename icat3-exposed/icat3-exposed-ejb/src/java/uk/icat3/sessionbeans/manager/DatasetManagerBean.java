@@ -28,6 +28,7 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataSetManager;
+import uk.icat3.manager.ManagerUtil;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
@@ -116,22 +117,11 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     @WebMethod
-    public void addDataSetParameter(String sessionId, DatasetParameter dataSetParameter, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
-        
+    public void addDataSetParameter(String sessionId, DatasetParameter dataSetParameter) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        //check is valid
-        dataSetParameter.isValid(manager);
-        
-        //get dataset, checks read access
-        Dataset dataset = DataSetManager.getDataSet(userId, datasetId, manager);
-        
-        //add the dataset parameter to the dataset
-        dataset.addDataSetParamaeter(dataSetParameter);
-        
-        //update this, this also checks permissions,  no need to validate cos just loaded from DB
-        DataSetManager.updateDataSet(userId, dataset, manager, false);
+        DataSetManager.addDataSetParameter(userId, dataSetParameter, manager);
     }
     
     @WebMethod

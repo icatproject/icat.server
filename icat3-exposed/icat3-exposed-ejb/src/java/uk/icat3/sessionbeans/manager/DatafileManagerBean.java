@@ -107,7 +107,7 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         file.addDataFileParamaeter(dataFileParameter);
         
         //update this, this also checks permissions
-        DataFileManager.updateDataFile(userId, file, manager);
+        //DataFileManager.updateDataFile(userId, file, manager);
     }
     
 }
