@@ -290,7 +290,36 @@ public class DataFileManager extends ManagerUtil {
         log.trace("addDataFileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
         Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
-        return  addDataFileParameter(userId, datafileParameter, datafileId, manager);
+        return  addDataFileParameter(userId, datafileParameter, datafileId, manager);        
+    }
+    
+     public static void removeDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        log.trace("removeDatafileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
+        Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
+        
+        //find the dataset
+        DatafileParameter datafileParameterManaged = find(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);
+        
+        //ok, now check permissions
+        GateKeeper.performAuthorisation(userId, datafileParameterManaged, AccessType.REMOVE, manager);
+        
+        datafileParameterManaged.setDatafile(null);
+        
+        manager.remove(datafileParameterManaged);
+    }
+    
+    public static void deleteDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        log.trace("deleteDatafileParameter("+userId+", "+datafileParameter+", EntityManager)");
+        
+        Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
+        
+        //find the dataset
+        DatafileParameter datafileParameterManaged = find(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);
+        
+        //ok, now check permissions
+        GateKeeper.performAuthorisation(userId, datafileParameterManaged, AccessType.DELETE, manager);
+        
+        datafileParameterManaged.setDeleted(true);
     }
 }

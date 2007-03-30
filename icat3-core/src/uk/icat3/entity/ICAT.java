@@ -17,7 +17,7 @@ import javax.annotation.security.RolesAllowed;
 
 /**
  * This determines at runtime what information is merged to the database.
- * Anything with ICAT(merge=false) wont be merged to DB
+ * Anything with ICAT(merge=false) wont be merged/updated to DB
  *
  * @author gjd37
  */
