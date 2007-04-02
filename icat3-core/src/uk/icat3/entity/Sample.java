@@ -29,7 +29,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
-import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
 
 /**
  * Entity class Sample
@@ -281,6 +281,26 @@ public class Sample extends EntityBaseBean implements Serializable {
             return true;
         }
     }
+    
+     /**
+     * Overrides the isValid function, checks each of the sampleparameters are valid
+     *
+     * @throws ValidationException
+     * @return
+     */
+    @Override
+    public boolean isValid(EntityManager manager) throws ValidationException {
+        if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
+        
+        if(getSampleParameterCollection() != null){
+            for(SampleParameter sampleParameter : getSampleParameterCollection()){
+                sampleParameter.isValid(manager);
+            }
+        } 
+        
+        //once here then its valid
+        return isValid();
+    }     
     
     /**
      * Determines whether another object is equal to this Sample.  The result is

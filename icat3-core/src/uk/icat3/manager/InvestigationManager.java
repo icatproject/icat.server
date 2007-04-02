@@ -20,6 +20,7 @@ import uk.icat3.entity.Investigator;
 import uk.icat3.entity.Keyword;
 import uk.icat3.entity.Publication;
 import uk.icat3.entity.Sample;
+import uk.icat3.entity.SampleParameter;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -279,6 +280,28 @@ public class InvestigationManager extends ManagerUtil {
                 
                 manager.remove(sampleManaged);
             }
+        }else if(object instanceof SampleParameter){
+            SampleParameter sampleParameter = (SampleParameter)object;
+            
+            //check keyword
+            SampleParameter sampleParameterManaged = find(SampleParameter.class, sampleParameter.getSampleParameterPK(), manager);
+            
+            if(type == AccessType.DELETE){
+                //check user has delete access
+                GateKeeper.performAuthorisation(userId, sampleParameterManaged, AccessType.DELETE, manager);
+                
+                //ok here fo delete
+                sampleParameterManaged.setDeleted(true);
+                sampleParameterManaged.setModId(userId);
+            } else if(type == AccessType.REMOVE){
+                //check user has delete access
+                GateKeeper.performAuthorisation(userId, sampleParameterManaged, AccessType.REMOVE, manager);
+                
+                //ok here fo delete
+                sampleParameterManaged.setSample(null);
+                
+                manager.remove(sampleParameterManaged);
+            }
         } else if(object instanceof Publication){
             Publication publication = (Publication)object;
             
@@ -399,6 +422,35 @@ public class InvestigationManager extends ManagerUtil {
                 //sets modId for persist
                 sample.setCreateId(userId);
                 manager.persist(sample);
+            }
+        } else if(object instanceof SampleParameter){
+            SampleParameter sampleParamter = (SampleParameter)object;
+            
+            Sample sample = find(Sample.class, sampleParamter.getSampleParameterPK().getSampleId(),  manager);
+            sampleParamter.setSample(sample);
+            
+            sampleParamter.isValid(manager);
+            
+            //check user has delete access
+            GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
+            
+            //TODO check for primary key
+            try {
+                //check investigator not already added
+                SampleParameter sampleManaged = find(SampleParameter.class, sampleParamter.getSampleParameterPK(), manager);
+                if(sampleManaged.isDeleted()){
+                    sampleManaged.setDeleted(false);
+                    log.info(sampleManaged +" been deleted, undeleting now.");
+                } else {
+                    //do nothing, throw exception
+                    log.warn(sampleManaged +" already added to investigation.");
+                    throw new ValidationException(sampleManaged+" is not unique");
+                }
+            } catch (NoResultException ex) {
+                //not already in DB so add
+                //sets modId for persist
+                sampleParamter.setCreateId(userId);
+                manager.persist(sampleParamter);
             }
         } else if(object instanceof Keyword){
             Keyword keyword = (Keyword)object;

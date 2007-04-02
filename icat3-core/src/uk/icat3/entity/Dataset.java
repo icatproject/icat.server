@@ -542,8 +542,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
             //if here not got sample in
             throw new ValidationException("Sample[id="+sampleId+"] is not associated with Dataset[id="+id+ "]'s invesigation.");
         }
-        
-        
+                        
         //check all datafiles now
         if(getDatafileCollection() != null){
             for(Datafile datafile : getDatafileCollection()){

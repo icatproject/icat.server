@@ -368,7 +368,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
         if(parameterDB == null) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" is not a valid parameter.");
         
         //check that it is a dataset parameter
-        if(!parameterDB.isDatafileParameter()) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" is not a sample parameter.");
+        if(!parameterDB.isSampleParameter()) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" is not a sample parameter.");
                 
         //check is numeric
         if(parameterDB.isNumeric()){
@@ -380,6 +380,17 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
             if(this.getNumericValue() != null) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" must be a string value only.");
             
         }
+        
+        //check that the parameter dataset id is the same as actual dataset id
+        if(getSample() != null){
+            //check embedded primary key
+            sampleParameterPK.isValid();
+            
+            if(!sampleParameterPK.getSampleId().equals(getSample().getId())){
+                throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" has sample id: "+sampleParameterPK.getSampleId()+ " that does not corresponds to its parent sample id: "+getSample().getId());
+            }
+        } //else //throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" has not dataset id");
+        
         
         //once here then its valid
         return isValid();
