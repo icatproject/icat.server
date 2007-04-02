@@ -125,7 +125,7 @@ public class InvestigationManager extends ManagerUtil {
         
         for(Long investigationId : investigationIds){
             Investigation investigation = find(Investigation.class, investigationId, manager);
-            deleteInvestigationObject(userId, investigation, null, AccessType.DELETE, manager);
+            deleteInvestigationObject(userId, investigation, AccessType.DELETE, manager);
         }
     }
     
@@ -143,7 +143,7 @@ public class InvestigationManager extends ManagerUtil {
         log.trace("deleteInvestigation("+userId+", "+investigationId+", EntityManager)");
         
         Investigation investigation = find(Investigation.class, investigationId, manager);
-        deleteInvestigationObject(userId, investigation, null, AccessType.DELETE, manager);
+        deleteInvestigationObject(userId, investigation, AccessType.DELETE, manager);
         
     }
     
@@ -163,7 +163,7 @@ public class InvestigationManager extends ManagerUtil {
         log.trace("deleteInvestigations("+userId+", "+investigations+", EntityManager)");
         
         for(Investigation investigation : investigations){
-            deleteInvestigationObject(userId, investigation, null, AccessType.DELETE, manager);
+            deleteInvestigationObject(userId, investigation,  AccessType.DELETE, manager);
         }
         
         return true;
@@ -230,11 +230,8 @@ public class InvestigationManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
-    public static void deleteInvestigationObject(String userId, EntityBaseBean object, Long investigationId, AccessType type, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException{
-        log.trace("deleteObject("+userId+", "+object+", "+investigationId+", " +type+", EntityManager)");
-        
-        //check investigation
-        Investigation investigation = find(Investigation.class, investigationId, manager);
+    public static void deleteInvestigationObject(String userId, EntityBaseBean object, AccessType type, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException{
+        log.trace("deleteObject("+userId+", "+object+", "+type+", EntityManager)");
         
         if(object instanceof Keyword){
             Keyword keyword = (Keyword)object;
@@ -303,20 +300,22 @@ public class InvestigationManager extends ManagerUtil {
                 manager.remove(investigatorManaged);
             }
         } else if(object instanceof Investigation){
-            
+            Investigation investigation = (Investigation)object;
+            //check investigation
+            Investigation investigationManaged = find(Investigation.class, investigation.getId(), manager);
             
             if(type == AccessType.DELETE){
                 //check user has delete access
-                GateKeeper.performAuthorisation(userId, investigation, AccessType.DELETE, manager);
+                GateKeeper.performAuthorisation(userId, investigationManaged, AccessType.DELETE, manager);
                 
                 //ok here fo delete
-                investigation.setCascadeDeleted(true);
-                investigation.setModId(userId);
+                investigationManaged.setCascadeDeleted(true);
+                investigationManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
-                GateKeeper.performAuthorisation(userId, investigation, AccessType.REMOVE, manager);
+                GateKeeper.performAuthorisation(userId, investigationManaged, AccessType.REMOVE, manager);
                 
-                manager.remove(investigation);
+                manager.remove(investigationManaged);
             }
         }
     }
