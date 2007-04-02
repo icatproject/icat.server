@@ -12,10 +12,11 @@ package uk.icat3.manager;
 import java.util.Collection;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
-import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.InvestigationInclude;
 
@@ -152,63 +153,43 @@ public class ManagerUtil {
         }
     }
     
-    /**
-     * Checks that the investigation with investigationId exists in the database, if so
-     * it is returned
-     *
-     * @param investigationId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException
-     * @return Investigation if found
-     */
-    protected static Investigation checkInvestigation(Long investigationId, EntityManager manager) throws NoSuchObjectFoundException {
-        Investigation investigation = manager.find(Investigation.class, investigationId);
-        //check if the id exists in the database
-        if(investigation == null) throw new NoSuchObjectFoundException("Investigation: id: "+investigationId+" not found.");
+    public Sample addSample(String userId, Sample sample, EntityManager manager) throws ValidationException{
+        boolean unique = sample.isUnique(manager);
+        if(!unique) throw new ValidationException(sample+" is not unique.");
         
-        log.trace("Investigation: id: "+investigationId+" exists in the database");
+        sample.isValid(manager);
         
-        return investigation;
+        sample.setId(null);
+        sample.setCreateId(userId);
+        
+        manager.persist(sample);
+        
+        return sample;
+    }
+    
+     public Sample removeaddSample(String userId, Sample sample, EntityManager manager) throws ValidationException{
+        boolean unique = sample.isUnique(manager);
+        if(!unique) throw new ValidationException(sample+" is not unique.");
+        
+        sample.isValid(manager);
+        
+        sample.setId(null);
+        sample.setCreateId(userId);
+        
+        manager.persist(sample);
+        
+        return sample;
     }
     
     /**
-     * Checks that the Dataset with datasetId exists in the database, if so
-     * it is returned
-     *
-     * @param datasetId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException
-     * @return Dataset if found
-     */
-    protected static Dataset checkDataSet(Long datasetId, EntityManager manager) throws NoSuchObjectFoundException {
-        Dataset dataset = manager.find(Dataset.class, datasetId);
-        //check if the id exists in the database
-        if(dataset == null) throw new NoSuchObjectFoundException("Dataset: id: "+datasetId+" not found.");
-        
-        log.trace("DataSet: id: "+datasetId+" exists in the database");
-        
-        return dataset;
-    }
-    
-    /**
-     * Checks that the Datafile with dataFileId exists in the database, if so
+     * Checks that the object with primary key exists in the database, if so
      * is returned
      *
      * @param dataFileId
      * @param manager
      * @throws javax.persistence.EntityNotFoundException
-     * @return Datafile if found
+     * @return object if found
      */
-    protected static Datafile checkDataFile(Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException {
-        Datafile dataFile = manager.find(Datafile.class, dataFileId);
-        //check if the id exists in the database
-        if(dataFile == null) throw new NoSuchObjectFoundException("DataFile: id: "+dataFileId+" not found.");
-        
-        log.trace("DataFile: id: "+dataFileId+" exists in the database");
-        
-        return dataFile;
-    }
-    
     public static <T> T find(Class<T> entityClass, Object primaryKey, EntityManager manager) throws NoSuchObjectFoundException{
         T object = manager.find(entityClass, primaryKey);
         

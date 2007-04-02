@@ -12,12 +12,14 @@ package uk.icat3.manager;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.Keyword;
 import uk.icat3.entity.Publication;
+import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -255,6 +257,28 @@ public class InvestigationManager extends ManagerUtil {
                 
                 manager.remove(keywordManaged);
             }
+        } else if(object instanceof Sample){
+            Sample sample = (Sample)object;
+            
+            //check keyword
+            Sample sampleManaged = find(Sample.class, sample.getId(), manager);
+            
+            if(type == AccessType.DELETE){
+                //check user has delete access
+                GateKeeper.performAuthorisation(userId, sampleManaged, AccessType.DELETE, manager);
+                
+                //ok here fo delete
+                sampleManaged.setDeleted(true);
+                sampleManaged.setModId(userId);
+            } else if(type == AccessType.REMOVE){
+                //check user has delete access
+                GateKeeper.performAuthorisation(userId, sampleManaged, AccessType.REMOVE, manager);
+                
+                //ok here fo delete
+                sampleManaged.setInvestigationId(null);
+                
+                manager.remove(sampleManaged);
+            }
         } else if(object instanceof Publication){
             Publication publication = (Publication)object;
             
@@ -349,6 +373,33 @@ public class InvestigationManager extends ManagerUtil {
             publication.setCreateId(userId);
             
             manager.persist(publication);
+        } else if(object instanceof Sample){
+            Sample sample = (Sample)object;
+            
+            sample.setInvestigationId(investigation);
+            sample.isValid(manager);
+            
+            //check user has delete access
+            GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
+            
+            //TODO check for primary key
+            try {
+                //check investigator not already added
+                Sample sampleManaged = sample.find(manager);
+                if(sampleManaged.isDeleted()){
+                    sampleManaged.setDeleted(false);
+                    log.info(sampleManaged +" been deleted, undeleting now.");
+                } else {
+                    //do nothing, throw exception
+                    log.warn(sampleManaged +" already added to investigation.");
+                    throw new ValidationException(sampleManaged+" is not unique");
+                }
+            } catch (NoResultException ex) {
+                //not already in DB so add
+                //sets modId for persist
+                sample.setCreateId(userId);
+                manager.persist(sample);
+            }
         } else if(object instanceof Keyword){
             Keyword keyword = (Keyword)object;
             
@@ -368,6 +419,7 @@ public class InvestigationManager extends ManagerUtil {
                 } else {
                     //do nothing, throw exception
                     log.warn(keywordManaged +" already added to investigation.");
+                    throw new ValidationException(keywordManaged+" is not unique");
                 }
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
@@ -393,6 +445,7 @@ public class InvestigationManager extends ManagerUtil {
                 } else {
                     //do nothing, throw exception
                     log.warn(investigatorManaged +" already added to investigation.");
+                    throw new ValidationException(investigatorManaged+" is not unique");
                 }
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add

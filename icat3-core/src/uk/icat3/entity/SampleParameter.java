@@ -23,6 +23,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
 
 /**
@@ -66,10 +67,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
 
     @Column(name = "RANGE_BOTTOM")
     private String rangeBottom;
-
-   @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
+   
     @JoinColumns(value =  {
             @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
             @JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
@@ -210,27 +208,12 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public void setRangeBottom(String rangeBottom) {
         this.rangeBottom = rangeBottom;
     }
-    
-    /**
-     * Gets the modId of this SampleParameter.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this SampleParameter to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
+       
     /**
      * Gets the parameter of this SampleParameter.
      * @return the parameter
      */
+    @XmlTransient
     public Parameter getParameter() {
         return this.parameter;
     }

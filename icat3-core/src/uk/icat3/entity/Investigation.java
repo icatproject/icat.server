@@ -887,7 +887,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         try {
             Investigation investigation = (Investigation)query.getSingleResult();
             //if found id is this id then it is unique
-            if(investigation.getId().equals(id)) return true;
+            if(investigation != null && investigation.getId().equals(id)) return true;
             else return false;
         } catch(NoResultException nre) {
             //means it is unique
