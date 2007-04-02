@@ -184,9 +184,11 @@ public class DataSetManager extends ManagerUtil {
     public static Dataset updateDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateDataSet("+userId+", "+dataSet+", EntityManager)");
         
+        Dataset datasetManaged = null;
+        
         //check to see if DataSet exists, dont need the returned dataset as merging
         if(dataSet.getId() != null){
-            find(Dataset.class, dataSet.getId(), manager);
+           datasetManaged = find(Dataset.class, dataSet.getId(), manager);
         }
         
         //check if valid dataset
@@ -199,8 +201,9 @@ public class DataSetManager extends ManagerUtil {
         
         //if null then update
         if(dataSet.getId() != null){
-            dataSet.setModId(userId);
-            return manager.merge(dataSet);
+            datasetManaged.setModId(userId);
+            datasetManaged.merge(dataSet);
+            return datasetManaged;
         } else {
             //new dataset, set createid, this sets mod id and modtime
             dataSet.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);

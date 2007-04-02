@@ -128,9 +128,11 @@ public class DataFileManager extends ManagerUtil {
     public static Datafile updateDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateDataFile("+userId+", "+dataFile+", EntityManager)");
         
+        Datafile datafileManaged = null;
+        
         //check to see if DataFile exists, dont need the returned DataFile as merging
         if(dataFile.getId() != null){
-            find(Datafile.class, dataFile.getId(), manager);
+            datafileManaged = find(Datafile.class, dataFile.getId(), manager);
         }
         
         //check if valid datafile
@@ -141,8 +143,9 @@ public class DataFileManager extends ManagerUtil {
         
         //if null then update
         if(dataFile.getId() != null){
-            dataFile.setModId(userId);
-            return manager.merge(dataFile);
+            datafileManaged.setModId(userId);
+            datafileManaged.merge(dataFile);
+            return datafileManaged;
         } else {
             //new dataset, set createid, this set mod id
             dataFile.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
@@ -290,10 +293,10 @@ public class DataFileManager extends ManagerUtil {
         log.trace("addDataFileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
         Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
-        return  addDataFileParameter(userId, datafileParameter, datafileId, manager);        
+        return  addDataFileParameter(userId, datafileParameter, datafileId, manager);
     }
     
-     public static void removeDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public static void removeDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("removeDatafileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
         Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();

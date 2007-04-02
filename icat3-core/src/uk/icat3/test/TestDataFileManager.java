@@ -186,8 +186,8 @@ public class TestDataFileManager {
         
         parma.setStringValue("2d");
         parma.setRangeTop("top");
-        parma.setDescription("description");
-        parma.setNumericValue(23d);
+        parma.setDescription("description 3");
+        //parma.setNumericValue(23d);
         
         DataFileManager.updateDatafileParameter(userId, parma, em);
      

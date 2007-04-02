@@ -15,6 +15,7 @@ import uk.icat3.entity.Investigation;
 import uk.icat3.entity.InvestigationLevelPermission;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.Keyword;
+import uk.icat3.entity.Publication;
 import uk.icat3.entity.Sample;
 import uk.icat3.entity.SampleParameter;
 import uk.icat3.entity.Study;
@@ -52,285 +53,8 @@ public class GateKeeper {
     // Global class logger
     static Logger log = Logger.getLogger(GateKeeper.class);
     
-    /**
-     * Decides if a user has permission to perform an operation of type
-     * {@link AccessType} on a {@link Datafile} element/entity.  If the
-     * user does not have permission to perform aforementioned operation
-     * then an {@link InsufficientPrivilegesException} will be thrown.
-     *
-     * @param user      username or dn of user who is to be authorised.
-     * @param keyword  element/entity that the user wishes to perform
-     *                  operation on.
-     * @param access    type of operation that the user is trying to
-     *                  perform.
-     * @param manager   manager object that will facilitate interaction
-     *                  with underlying database
-     * @throws InsufficientPrivilegesException  if user does not have
-     *                  permission to perform operation.
-     */
-    public static void performAuthorisation(String user, Keyword keyword, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        //now check modifiable
-        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
-            if(!keyword.isModifiable()){
-                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + keyword+", as it cannot be modified.");
-                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + keyword+", as it cannot be modified.");
-                throw(e);
-            }
-        }
-        ArrayList<Investigation> invList = new ArrayList<Investigation>();
-        invList.add(keyword.getInvestigation());
-        performAuthorisation(user, invList, access, keyword,  manager);
-        
-    }//end method
-    
-    /**
-     * Decides if a user has permission to perform an operation of type
-     * {@link AccessType} on a {@link Datafile} element/entity.  If the
-     * user does not have permission to perform aforementioned operation
-     * then an {@link InsufficientPrivilegesException} will be thrown.
-     *
-     * @param user      username or dn of user who is to be authorised.
-     * @param investigator  element/entity that the user wishes to perform
-     *                  operation on.
-     * @param access    type of operation that the user is trying to
-     *                  perform.
-     * @param manager   manager object that will facilitate interaction
-     *                  with underlying database
-     * @throws InsufficientPrivilegesException  if user does not have
-     *                  permission to perform operation.
-     */
-    public static void performAuthorisation(String user, Investigator investigator, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        //now check modifiable
-        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
-            if(!investigator.isModifiable()){
-                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + investigator+", as it cannot be modified.");
-                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + investigator+", as it cannot be modified.");
-                throw(e);
-            }
-        }
-        ArrayList<Investigation> invList = new ArrayList<Investigation>();
-        invList.add(investigator.getInvestigation());
-        performAuthorisation(user, invList, access, investigator,  manager);
-        
-    }//end method
-    
-    /**
-     * Decides if a user has permission to perform an operation of type
-     * {@link AccessType} on a {@link Datafile} element/entity.  If the
-     * user does not have permission to perform aforementioned operation
-     * then an {@link InsufficientPrivilegesException} will be thrown.
-     *
-     * @param user      username or dn of user who is to be authorised.
-     * @param datafile  element/entity that the user wishes to perform
-     *                  operation on.
-     * @param access    type of operation that the user is trying to
-     *                  perform.
-     * @param manager   manager object that will facilitate interaction
-     *                  with underlying database
-     * @throws InsufficientPrivilegesException  if user does not have
-     *                  permission to perform operation.
-     */
-    public static void performAuthorisation(String user, Datafile datafile, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        //now check modifiable
-        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
-            if(!datafile.isModifiable()){
-                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + datafile+", as it cannot be modified.");
-                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + datafile+", as it cannot be modified.");
-                throw(e);
-            }
-        }
-        ArrayList<Investigation> invList = new ArrayList<Investigation>();
-        invList.add(datafile.getDatasetId().getInvestigationId());
-        performAuthorisation(user, invList, access, datafile,  manager);
-        
-        //now check for
-    }//end method
-    
-    /**
-     * Decides if a user has permission to perform an operation of type
-     * {@link AccessType} on a {@link Dataset} element/entity.  If the
-     * user does not have permission to perform aforementioned operation
-     * then an {@link InsufficientPrivilegesException} will be thrown.
-     *
-     * @param user      username or dn of user who is to be authorised.
-     * @param dataset   element/entity that the user wishes to perform
-     *                  operation on.
-     * @param access    type of operation that the user is trying to
-     *                  perform.
-     * @param manager   manager object that will facilitate interaction
-     *                  with underlying database
-     * @throws InsufficientPrivilegesException  if user does not have
-     *                  permission to perform operation.
-     */
-    public static void performAuthorisation(String user, Dataset dataset, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        //now check modifiable
-        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
-            if(!dataset.isModifiable()){
-                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + dataset+", as it cannot be modified.");
-                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + dataset+", as it cannot be modified.");
-                throw(e);
-            }
-        }
-        ArrayList<Investigation> invList = new ArrayList<Investigation>();
-        invList.add(dataset.getInvestigationId());
-        performAuthorisation(user, invList, access, dataset,  manager);
-        
-    }//end method
     
     
-    /**
-     * Decides if a user has permission to perform an operation of type
-     * {@link AccessType} on a {@link Sample} element/entity.  If the
-     * user does not have permission to perform aforementioned operation
-     * then an {@link InsufficientPrivilegesException} will be thrown.
-     *
-     * @param user      username or dn of user who is to be authorised.
-     * @param sample    element/entity that the user wishes to perform
-     *                  operation on.
-     * @param access    type of operation that the user is trying to
-     *                  perform.
-     * @param manager   manager object that will facilitate interaction
-     *                  with underlying database
-     * @throws InsufficientPrivilegesException  if user does not have
-     *                  permission to perform operation.
-     */
-    public static void performAuthorisation(String user, Sample sample,  AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        //now check modifiable
-        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
-            if(!sample.isModifiable()){
-                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + sample+", as it cannot be modified.");
-                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + sample+", as it cannot be modified.");
-                throw(e);
-            }
-        }
-        ArrayList<Investigation> invList = new ArrayList<Investigation>();
-        invList.add(sample.getInvestigationId());
-        performAuthorisation(user, invList, access, sample,  manager);
-        
-    }//end method
-    
-    /**
-     * Decides if a user has permission to perform an operation of type
-     * {@link AccessType} on a {@link SampleParameter} element/entity.  If the
-     * user does not have permission to perform aforementioned operation
-     * then an {@link InsufficientPrivilegesException} will be thrown.
-     *
-     * @param user          username or dn of user who is to be authorised.
-     * @param sampleParam   element/entity that the user wishes to perform
-     *                      operation on.
-     * @param access        type of operation that the user is trying to
-     *                      perform.
-     * @param manager       manager object that will facilitate interaction
-     *                      with underlying database
-     * @throws InsufficientPrivilegesException  if user does not have
-     *                      permission to perform operation.
-     */
-    public static void performAuthorisation(String user, SampleParameter sampleParam,  AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        //now check modifiable
-        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
-            if(!sampleParam.isModifiable()){
-                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + sampleParam+", as it cannot be modified.");
-                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + sampleParam+", as it cannot be modified.");
-                throw(e);
-            }
-        }
-        ArrayList<Investigation> invList = new ArrayList<Investigation>();
-        invList.add(sampleParam.getSample().getInvestigationId());
-        performAuthorisation(user, invList, access, sampleParam, manager);
-        
-    }//end method
-    
-    /**
-     * Decides if a user has permission to perform an operation of type
-     * {@link AccessType} on a {@link DatasetParameter} element/entity.  If the
-     * user does not have permission to perform aforementioned operation
-     * then an {@link InsufficientPrivilegesException} will be thrown.
-     *
-     * @param user          username or dn of user who is to be authorised.
-     * @param datasetParam  element/entity that the user wishes to perform
-     *                      operation on.
-     * @param access        type of operation that the user is trying to
-     *                      perform.
-     * @param manager       manager object that will facilitate interaction
-     *                      with underlying database
-     * @throws InsufficientPrivilegesException  if user does not have
-     *                      permission to perform operation.
-     */
-    public static void performAuthorisation(String user, DatasetParameter datasetParam,  AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        //now check modifiable
-        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
-            if(!datasetParam.isModifiable()){
-                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + datasetParam+", as it cannot be modified.");
-                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + datasetParam+", as it cannot be modified.");
-                throw(e);
-            }
-        }      
-        ArrayList<Investigation> invList = new ArrayList<Investigation>();
-        invList.add(datasetParam.getDataset().getInvestigationId());
-        performAuthorisation(user, invList, access, datasetParam, manager);
-        
-    }//end method
-    
-    /**
-     * Decides if a user has permission to perform an operation of type
-     * {@link AccessType} on a {@link DatafileParameter} element/entity.  If the
-     * user does not have permission to perform aforementioned operation
-     * then an {@link InsufficientPrivilegesException} will be thrown.
-     *
-     * @param user          username or dn of user who is to be authorised.
-     * @param datafileParam element/entity that the user wishes to perform
-     *                      operation on.
-     * @param access        type of operation that the user is trying to
-     *                      perform.
-     * @param manager       manager object that will facilitate interaction
-     *                      with underlying database
-     * @throws InsufficientPrivilegesException  if user does not have
-     *                      permission to perform operation.
-     */
-    public static void performAuthorisation(String user, DatafileParameter datafileParam, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        //now check modifiable
-        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
-            if(!datafileParam.isModifiable()){
-                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + datafileParam+", as it cannot be modified.");
-                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + datafileParam+", as it cannot be modified.");
-                throw(e);
-            }
-        }
-        ArrayList<Investigation> invList = new ArrayList<Investigation>();
-        invList.add(datafileParam.getDatafile().getDatasetId().getInvestigationId());
-        performAuthorisation(user, invList, access, datafileParam,  manager);
-    }//end method
-    
-    /**
-     * Decides if a user has permission to perform an operation of type
-     * {@link AccessType} on a {@link Investigation} element/entity.  If the
-     * user does not have permission to perform aforementioned operation
-     * then an {@link InsufficientPrivilegesException} will be thrown.
-     *
-     * @param user          username or dn of user who is to be authorised.
-     * @param investigation investigation of the element/entity that the user
-     *                      wishes to perform operation on.
-     * @param access        type of operation that the user is trying to
-     *                      perform.
-     * @param manager       manager object that will facilitate interaction
-     *                      with underlying database
-     * @throws InsufficientPrivilegesException  if user does not have
-     *                      permission to perform operation.
-     */
-    public static void performAuthorisation(String user, Investigation investigation, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
-        //now check modifiable
-        if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
-            if(!investigation.isModifiable()){
-                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + investigation+", as it cannot be modified.");
-                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + investigation+", as it cannot be modified.");
-                throw(e);
-            }
-        }
-        ArrayList<Investigation> invList = new ArrayList<Investigation>();
-        invList.add(investigation);
-        performAuthorisation(user, invList, access, investigation,  manager);
-        
-    }//end method
     
     /**
      * Decides if a user has permission to perform an operation of type
@@ -344,8 +68,8 @@ public class GateKeeper {
      *  those permissions are extended to the parent Study element.</p>
      *
      * @param user          username or dn of user who is to be authorised.
-     * @param study         element/entity that the user wishes to perform
-     *                      operation on.
+     * @param object        object entitybasebean of the  element/entity that
+     *                      the user wishes to perform operation on.
      * @param access        type of operation that the user is trying to
      *                      perform.
      * @param manager       manager object that will facilitate interaction
@@ -353,7 +77,7 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have
      *                      permission to perform operation.
      */
-    public static void performAuthorisation(String user, Study study, EntityBaseBean object, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+    public static void performAuthorisation(String user, EntityBaseBean object, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
         //now check modifiable
         if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
             if(!object.isModifiable()){
@@ -363,11 +87,42 @@ public class GateKeeper {
             }
         }
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
-        for (StudyInvestigation si :  study.getStudyInvestigationCollection()) {
-            invList.add(si.getInvestigation());
-        }//end for
-        performAuthorisation(user, invList, access, study, manager);
         
+          if(object instanceof Publication){
+            invList.add(((Publication)object).getInvestigationId());
+            performAuthorisation(user, invList, access, ((Publication)object), manager);
+        } else if(object instanceof Investigation){
+            invList.add((Investigation)object);
+            performAuthorisation(user, invList, access, ((Investigation)object), manager);
+        } else if(object instanceof Keyword){
+            invList.add(((Keyword)object).getInvestigation());
+            performAuthorisation(user, invList, access, ((Keyword)object), manager);
+        } else if(object instanceof Dataset){
+            invList.add(((Dataset)object).getInvestigationId());
+            performAuthorisation(user, invList, access, ((Dataset)object), manager);
+        }else if(object instanceof Datafile){
+            invList.add(((Datafile)object).getDatasetId().getInvestigationId());
+            performAuthorisation(user, invList, access, ((Datafile)object), manager);
+        } else if(object instanceof DatasetParameter){
+            invList.add(((DatasetParameter)object).getDataset().getInvestigationId());
+            performAuthorisation(user, invList, access, ((Dataset)object), manager);
+        }else if(object instanceof DatafileParameter){
+            invList.add(((DatafileParameter)object).getDatafile().getDatasetId().getInvestigationId());
+            performAuthorisation(user, invList, access, ((DatafileParameter)object), manager);
+        } else if(object instanceof Study){
+            for (StudyInvestigation si :  ((Study)object).getStudyInvestigationCollection()) {
+                invList.add(si.getInvestigation());
+            }//end for            
+            performAuthorisation(user, invList, access, ((DatafileParameter)object), manager);
+        } else if(object instanceof SampleParameter){
+            invList.add(((SampleParameter)object).getSample().getInvestigationId());
+            performAuthorisation(user, invList, access, ((SampleParameter)object), manager);
+        } else if(object instanceof Investigator){
+            invList.add(((Investigator)object).getInvestigation());
+            performAuthorisation(user, invList, access, ((Investigator)object), manager);
+        } else throw new InsufficientPrivilegesException(object.getClass().getSimpleName()+" not supported for security check.");;
+        
+              
     }//end method
     
     /**

@@ -10,6 +10,7 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -47,17 +48,14 @@ public class Publication extends EntityBaseBean implements Serializable {
     private String fullReference;
 
     @Column(name = "URL")
-    private String url;
+    private URL url;
 
     @Column(name = "REPOSITORY_ID")
     private String repositoryId;
 
     @Column(name = "REPOSITORY")
     private String repository;
-
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
+    
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID")
     @ManyToOne
     @XmlTransient
@@ -125,7 +123,7 @@ public class Publication extends EntityBaseBean implements Serializable {
      * Gets the url of this Publication.
      * @return the url
      */
-    public String getUrl() {
+    public URL getUrl() {
         return this.url;
     }
 
@@ -133,7 +131,7 @@ public class Publication extends EntityBaseBean implements Serializable {
      * Sets the url of this Publication to the specified value.
      * @param url the new url
      */
-    public void setUrl(String url) {
+    public void setUrl(URL url) {
         this.url = url;
     }
 
@@ -168,25 +166,7 @@ public class Publication extends EntityBaseBean implements Serializable {
     public void setRepository(String repository) {
         this.repository = repository;
     }
-
    
-
-    /**
-     * Gets the modId of this Publication.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this Publication to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
     /**
      * Gets the investigationId of this Publication.
      * @return the investigationId

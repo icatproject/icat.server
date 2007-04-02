@@ -412,44 +412,6 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
         
         //once here then its valid
         return isValid();
-    }
-    
-    public void merge(DatasetParameter object){
-        
-        Field[] passsedFields = object.getClass().getDeclaredFields();
-        Field[] thisFields = this.getClass().getDeclaredFields();
-        
-        outer: for (Field field : passsedFields) {
-            //get name of field
-            String fieldName = field.getName();
-            //log.trace(fieldName);
-            //now check all annoatations
-            for (Annotation a : field.getDeclaredAnnotations()) {
-                //if this means its a none null column field
-                //log.trace(a.annotationType().getName());
-                if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("merge=false") ){
-                    log.trace("not merging, icat(merge=false) "+fieldName);
-                    continue outer;
-                }
-                if(!a.annotationType().getName().contains("Column") ||
-                        a.annotationType().getName().contains("Id")){
-                    log.trace("not merging, not Column, or Id"+fieldName);
-                    continue outer;
-                }
-            }
-            try {
-                for(Field thisField : thisFields) {
-                    // log.trace(thisField);
-                    if(thisField.getName().equals(fieldName)){
-                        //now transfer the data
-                        log.trace("Setting "+fieldName+" to "+field.get(object));
-                        thisField.set(this, field.get(object));
-                    }
-                }
-            }  catch (Exception ex) {
-                log.warn("Error transferring data for field: "+fieldName);
-            }
-        }
-    }
+    }     
 }
 

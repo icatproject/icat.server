@@ -8,22 +8,32 @@
  */
 
 package uk.icat3.test;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import javax.persistence.Column;
+import uk.icat3.entity.ICAT;
 import uk.icat3.exceptions.ValidationException;
 
 public class AnnotationTest {
     
     public AnnotationTest(){
         
-                
+        
         TestEntity te = new TestEntity("d");
+        
+        TestEntity fromte = new TestEntity("b");
+        
+       te.merge(fromte);
+        
+        System.out.println(te.getPurposeSeen());
+        
         //EntityBaseBean te = new EntityBaseBean();
-        try {
-            
-            te.isValid();
+       /* try {
+        
+            //te.isValid();
         } catch (ValidationException ex) {
             ex.printStackTrace();
-        }
+        }*/
     }
     
     @Column(updatable = false, name = "flight_name", nullable = false,        length=50)
@@ -35,6 +45,46 @@ public class AnnotationTest {
     
     @Deprecated
     public void aMethod() {
+    }
+    
+    
+    public void merge(Object toObject, Object fromObject){
+        
+        Field[] passsedFields = fromObject.getClass().getDeclaredFields();
+        Field[] thisFields = toObject.getClass().getDeclaredFields();
+        
+        outer: for (Field field : passsedFields) {
+            //get name of field
+            String fieldName = field.getName();
+            //log.trace(fieldName);
+            //now check all annoatations
+            for (Annotation a : field.getDeclaredAnnotations()) {
+                //if this means its a none null column field
+                //log.trace(a.annotationType().getName());
+                if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("merge=false") ){
+                    System.out.println("not merging, icat(merge=false) "+fieldName);
+                    continue outer;
+                }
+                if(!a.annotationType().getName().contains("Column") ||
+                        a.annotationType().getName().contains("Id")){
+                    System.out.println("not merging, not Column, or Id "+fieldName);
+                    continue outer;
+                }
+            }
+            
+            try {
+                for(Field thisField : thisFields) {
+                    // log.trace(thisField);
+                    if(thisField.getName().equals(fieldName)){
+                        //now transfer the data
+                        System.out.println("Setting "+fieldName+" to "+field.get(fromObject));
+                        thisField.set(toObject, field.get(fromObject));
+                    }
+                }
+            }  catch (Exception ex) {
+                System.out.println("Error transferring data for field: "+fieldName+"\n"+ex);
+            }
+        }
     }
     
     public static void main(String[] args) throws Exception {

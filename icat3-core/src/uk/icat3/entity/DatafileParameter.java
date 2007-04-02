@@ -399,8 +399,9 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
         }
         
         //check if datafile parameter is already in DB
-        DatafileParameter paramDB = manager.find(DatafileParameter.class, datafileParameterPK);
+       /* DatafileParameter paramDB = manager.find(DatafileParameter.class, datafileParameterPK);
         if(paramDB != null) throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" is already is a parameter of the datafile.");
+        */
         
         //check that the parameter datafile id is the same as actual datafile id
         if(!datafileParameterPK.getDatafileId().equals(getDatafile().getId())){
@@ -411,42 +412,6 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
         return isValid();
     }
     
-    public void merge(DatafileParameter object){
-        
-        Field[] passsedFields = object.getClass().getDeclaredFields();
-        Field[] thisFields = this.getClass().getDeclaredFields();
-        
-        outer: for (Field field : passsedFields) {
-            //get name of field
-            String fieldName = field.getName();
-            //log.trace(fieldName);
-            //now check all annoatations
-            for (Annotation a : field.getDeclaredAnnotations()) {
-                //if this means its a none null column field
-                //log.trace(a.annotationType().getName());
-                if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("merge=false") ){
-                    log.trace("not merging, icat(merge=false): "+fieldName);
-                    continue outer;
-                }
-               if(!a.annotationType().getName().contains("Column") ||
-                        a.annotationType().getName().contains("Id")){
-                    log.trace("not merging, not Column, or Id: " +fieldName);
-                    continue outer;
-                }
-            }
-            try {
-                for(Field thisField : thisFields) {
-                    // log.trace(thisField);
-                    if(thisField.getName().equals(fieldName)){
-                        //now transfer the data
-                        log.trace("Setting "+fieldName+" to "+field.get(object));
-                        thisField.set(this, field.get(object));
-                    }
-                }
-            }  catch (Exception ex) {
-                log.warn("Error transferring data for field: "+fieldName);
-            }
-        }
-    }
+  
     
 }
