@@ -227,18 +227,7 @@ public class InvestigationManager extends ManagerUtil {
     public static void updateInvestigationObject(String userId, EntityBaseBean object, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException{
         log.trace("updateInvestigationObject("+userId+", "+object+", EntityManager)");
         
-        if(object instanceof Keyword){
-            Keyword keyword = (Keyword)object;
-            
-            //check keyword
-            Keyword keywordManaged = find(Keyword.class, keyword.getKeywordPK(), manager);
-            
-            //check user has update access
-            GateKeeper.performAuthorisation(userId, keywordManaged, AccessType.UPDATE, manager);
-            
-            keywordManaged.merge(keyword);
-            keywordManaged.isValid(manager, false);
-        } else if(object instanceof Sample){
+        if(object instanceof Sample){
             Sample sample = (Sample)object;
             
             //check keyword
@@ -301,7 +290,7 @@ public class InvestigationManager extends ManagerUtil {
             investigationManaged.merge(investigation);
             
             investigationManaged.isValid(manager, false);
-        }
+        } else throw new RuntimeException(object +" is not avaliable to be modified");
         
     }
     
@@ -546,7 +535,7 @@ public class InvestigationManager extends ManagerUtil {
             
             keyword.setInvestigation(investigation);
             keyword.isValid(manager);
-            
+                 
             //check user has delete access
             GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
             

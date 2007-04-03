@@ -102,6 +102,7 @@ public class KeywordPK implements Serializable {
      */
     public boolean isValid() throws ValidationException {
         
+        
         //get public the fields in class
         Field[] allFields = this.getClass().getDeclaredFields();
         //all subclasses should use this line below
@@ -149,6 +150,7 @@ public class KeywordPK implements Serializable {
                 }
             }
             }
+         
         //ok here
         return true;
     }

@@ -160,8 +160,9 @@ public class Keyword extends EntityBaseBean implements Serializable {
      */
     @Override
     public boolean isValid(EntityManager manager) throws ValidationException {
-                      
+        if(keywordPK == null) throw new ValidationException(this +" private key cannot be null");
         return keywordPK.isValid();
+           
     }
     
     /**
