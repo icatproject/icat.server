@@ -44,7 +44,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
      */
     @EmbeddedId
     protected InvestigatorPK investigatorPK;
-         
+    
     //TODO @Column(name = "ROLE")
     //private String role;
     
@@ -56,6 +56,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
+    @ICAT(merge=false)
     private Investigation investigation;
     
     /** Creates a new instance of Investigator */
@@ -106,7 +107,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
     public void setInvestigatorPK(InvestigatorPK investigatorPK) {
         this.investigatorPK = investigatorPK;
     }
-           
+    
     /**
      * Gets the facilityUser of this Investigator.
      * @return the facilityUser
@@ -128,7 +129,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
      * Gets the role of this FacilityUser.
      * @return the role
      */
-     //TODO uncomment this
+    //TODO uncomment this
      /*public String getRole() {
         return this.role;
      }*/
@@ -170,16 +171,18 @@ public class Investigator extends EntityBaseBean implements Serializable {
         return hash;
     }
     
-     /**
+    /**
      * Overrides the isValid function, checks each of the datafiles and datafile parameters are valid
      *
      * @throws ValidationException
      * @return
      */
     @Override
-    public boolean isValid(EntityManager manager) throws ValidationException {
-                      
-        return investigatorPK.isValid();
+    public boolean isValid(EntityManager manager, boolean deepValidation) throws ValidationException {
+        
+        investigatorPK.isValid();
+        
+        return isValid();
     }
     
     /**

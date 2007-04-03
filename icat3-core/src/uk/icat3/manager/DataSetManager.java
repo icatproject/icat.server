@@ -68,14 +68,7 @@ public class DataSetManager extends ManagerUtil {
         //check user has delete access
         GateKeeper.performAuthorisation(userId, dataset, AccessType.DELETE, manager);
         
-        //delete dataset (Cascade is true);
-        //TODO might have to remove all the datafiles first
-        //manager.remove(dataset);
-        //not deleting anymore, jsut changing deleted to Y
-        
-        log.info("Deleting: "+dataset);
         dataset.setCascade(Cascade.DELETE, Boolean.TRUE);
-        
     }
     
     /**
@@ -170,6 +163,20 @@ public class DataSetManager extends ManagerUtil {
     
     
     ////////////////////     Add/Update Commands    ///////////////////
+    public static Dataset createDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        log.trace("createDataSet("+userId+", "+dataSet+", EntityManager)");
+        
+        //check user has update access
+        GateKeeper.performAuthorisation(userId, dataSet, AccessType.UPDATE, manager);
+        
+        dataSet.isValid(manager);
+        
+        //new dataset, set createid, this sets mod id and modtime
+        dataSet.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
+        dataSet.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
+        manager.persist(dataSet);
+        return dataSet;
+    }
     
     /**
      * Updates / Adds a data set depending on whether the user has permission to update this data set or its investigation
@@ -184,33 +191,17 @@ public class DataSetManager extends ManagerUtil {
     public static Dataset updateDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateDataSet("+userId+", "+dataSet+", EntityManager)");
         
-        Dataset datasetManaged = null;
-        
-        //check to see if DataSet exists, dont need the returned dataset as merging
-        if(dataSet.getId() != null){
-           datasetManaged = find(Dataset.class, dataSet.getId(), manager);
-        }
-        
-        //check if valid dataset
-        dataSet.isValid(manager);
-        //check if unique
-        if(!dataSet.isUnique(manager)) throw new ValidationException(dataSet+" is not unique.");
+        Dataset datasetManaged = find(Dataset.class, dataSet.getId(), manager);
         
         //check user has update access
-        GateKeeper.performAuthorisation(userId, dataSet, AccessType.UPDATE, manager);
+        GateKeeper.performAuthorisation(userId, datasetManaged, AccessType.UPDATE, manager);
         
-        //if null then update
-        if(dataSet.getId() != null){
-            datasetManaged.setModId(userId);
-            datasetManaged.merge(dataSet);
-            return datasetManaged;
-        } else {
-            //new dataset, set createid, this sets mod id and modtime
-            dataSet.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
-            dataSet.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
-            manager.persist(dataSet);
-            return dataSet;
-        }
+        datasetManaged.setModId(userId);
+        datasetManaged.merge(dataSet);
+        
+        datasetManaged.isValid(manager);
+        
+        return datasetManaged;
     }
     
     /**
@@ -231,7 +222,7 @@ public class DataSetManager extends ManagerUtil {
         dataSet.setInvestigationId(investigation);
         dataSet.setId(null);
         
-        return updateDataSet(userId, dataSet, manager);
+        return createDataSet(userId, dataSet, manager);
     }
     
     /**
@@ -366,9 +357,6 @@ public class DataSetManager extends ManagerUtil {
     
     public static DatasetParameter addDataSetParameter(String userId, DatasetParameter dataSetParameter, Long datasetId,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("addDataSetParameter("+userId+", "+dataSetParameter+", "+datasetId+", EntityManager)");
-        
-        //check if param already in DB
-        if(manager.contains(dataSetParameter))  throw new ValidationException("DatasetParameter: "+dataSetParameter.getDatasetParameterPK().getName()+" with units: "+dataSetParameter.getDatasetParameterPK().getUnits()+" is already is a parameter of the dataset.");
         
         //get dataset,
         Dataset dataset = find(Dataset.class, datasetId, manager);

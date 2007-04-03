@@ -369,7 +369,7 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
      * @return
      */
     @Override
-    public boolean isValid(EntityManager manager) throws ValidationException {
+    public boolean isValid(EntityManager manager, boolean deepValidation) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
         
         //check valid
@@ -399,9 +399,9 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
         }
         
         //check if datafile parameter is already in DB
-       /* DatafileParameter paramDB = manager.find(DatafileParameter.class, datafileParameterPK);
-        if(paramDB != null) throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" is already is a parameter of the datafile.");
-        */
+        DatafileParameter paramDB = manager.find(DatafileParameter.class, datafileParameterPK);
+        if(paramDB != null && !paramDB.getDatafileParameterPK().equals(datafileParameterPK)) throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" is already is a parameter of the datafile.");
+        
         
         //check that the parameter datafile id is the same as actual datafile id
         if(!datafileParameterPK.getDatafileId().equals(getDatafile().getId())){

@@ -10,9 +10,9 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigInteger;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,6 +26,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
@@ -46,7 +47,7 @@ import uk.icat3.exceptions.ValidationException;
     @NamedQuery(name = "Sample.findBySafetyInformation", query = "SELECT s FROM Sample s WHERE s.safetyInformation = :safetyInformation"),
     @NamedQuery(name = "Sample.findByModTime", query = "SELECT s FROM Sample s WHERE s.modTime = :modTime"),
     @NamedQuery(name = "Sample.findByModId", query = "SELECT s FROM Sample s WHERE s.modId = :modId"),
-    @NamedQuery(name = "Sample.findByUnique", query = "SELECT s FROM Sample s WHERE s.name = :name AND s.instance = :instance AND s.investigationId :investigationId"),
+    @NamedQuery(name = "Sample.findByUnique", query = "SELECT s FROM Sample s WHERE s.name = :name AND s.instance = :instance AND s.investigationId = :investigationId"),
     @NamedQuery(name = "Sample.findByProposalSampleId", query = "SELECT s FROM Sample s WHERE s.proposalSampleId = :proposalSampleId")
 })
 @SequenceGenerator(name="SAMPLE_SEQ",sequenceName="SAMPLE_ID_SEQ",allocationSize=1)
@@ -69,15 +70,13 @@ public class Sample extends EntityBaseBean implements Serializable {
     @Column(name = "SAFETY_INFORMATION", nullable = false)
     private String safetyInformation;
     
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-    
     @Column(name = "PROPOSAL_SAMPLE_ID")
-    private BigInteger proposalSampleId;
+    private Integer proposalSampleId;
     
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID")
     @ManyToOne
     @XmlTransient
+    @ICAT(merge=false)
     private Investigation investigationId;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
@@ -86,15 +85,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     /** Creates a new instance of Sample */
     public Sample() {
     }
-    
-    /**
-     * Creates a new instance of Sample with the specified values.
-     * @param id the id of the Sample
-     */
-    public Sample(Long id) {
-        this.id = id;
-    }
-    
+          
     /**
      * Creates a new instance of Sample with the specified values.
      * @param id the id of the Sample
@@ -103,12 +94,9 @@ public class Sample extends EntityBaseBean implements Serializable {
      * @param modTime the modTime of the Sample
      * @param modId the modId of the Sample
      */
-    public Sample(Long id, String name, String safetyInformation, Date modTime, String modId) {
-        this.id = id;
+    public Sample(String name, String safetyInformation) {       
         this.name = name;
-        this.safetyInformation = safetyInformation;
-        this.modTime = modTime;
-        this.modId = modId;
+        this.safetyInformation = safetyInformation;       
     }
     
     /**
@@ -192,26 +180,10 @@ public class Sample extends EntityBaseBean implements Serializable {
     }
     
     /**
-     * Gets the modId of this Sample.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-    
-    /**
-     * Sets the modId of this Sample to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-    
-    /**
      * Gets the proposalSampleId of this Sample.
      * @return the proposalSampleId
      */
-    public BigInteger getProposalSampleId() {
+    public Integer getProposalSampleId() {
         return this.proposalSampleId;
     }
     
@@ -219,7 +191,7 @@ public class Sample extends EntityBaseBean implements Serializable {
      * Sets the proposalSampleId of this Sample to the specified value.
      * @param proposalSampleId the new proposalSampleId
      */
-    public void setProposalSampleId(BigInteger proposalSampleId) {
+    public void setProposalSampleId(Integer proposalSampleId) {
         this.proposalSampleId = proposalSampleId;
     }
     
@@ -272,7 +244,7 @@ public class Sample extends EntityBaseBean implements Serializable {
         return (Sample)manager.createNamedQuery("Sample.findByUnique").setParameter("name", name).setParameter("instance", instance).setParameter("investigationId", investigationId).getSingleResult();
     }
     
-    public boolean isUnique(EntityManager manager){
+    private boolean isUnique(EntityManager manager){
         try {
             Sample sample = (Sample)manager.createNamedQuery("Sample.findByUnique").setParameter("name", name).setParameter("instance", instance).setParameter("investigationId", investigationId).getSingleResult();
             if(id != null && sample.getId().equals(id)) return true;
@@ -280,27 +252,32 @@ public class Sample extends EntityBaseBean implements Serializable {
         } catch(NoResultException nre) {
             return true;
         }
-    }
+    }        
     
-     /**
+    /**
      * Overrides the isValid function, checks each of the sampleparameters are valid
      *
      * @throws ValidationException
      * @return
      */
     @Override
-    public boolean isValid(EntityManager manager) throws ValidationException {
+    public boolean isValid(EntityManager manager, boolean deepValidation) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
         
-        if(getSampleParameterCollection() != null){
-            for(SampleParameter sampleParameter : getSampleParameterCollection()){
-                sampleParameter.isValid(manager);
+        if(deepValidation){
+            if(getSampleParameterCollection() != null){
+                for(SampleParameter sampleParameter : getSampleParameterCollection()){
+                    sampleParameter.isValid(manager);
+                }
             }
-        } 
+        }
+           //check if unique
+        if(!isUnique(manager)) throw new ValidationException(this+" is not unique.");
+            
         
         //once here then its valid
         return isValid();
-    }     
+    }
     
     /**
      * Determines whether another object is equal to this Sample.  The result is
@@ -319,6 +296,21 @@ public class Sample extends EntityBaseBean implements Serializable {
         Sample other = (Sample)object;
         if (this.id != other.id && (this.id == null || !this.id.equals(other.id))) return false;
         return true;
+    }
+    
+     /**
+     * This method removes all the ids when persist is called.
+     * This is so you cannot attach an Id when creating a dataset
+     * that is not valid, ie auto generated
+     */
+    @PrePersist
+    @Override
+    public void prePersist(){
+        if(this.id != null){
+            log.warn("Attempting to save a sample: "+id +" when it should be auto generated, nulling id");
+            this.id = null;
+        }
+        super.prePersist();
     }
     
     /**

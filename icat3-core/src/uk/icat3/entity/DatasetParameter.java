@@ -394,10 +394,10 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
         }
         
         //check if datafile parameter is already in DB
-       /* DatasetParameter paramDB = manager.find(DatasetParameter.class, datasetParameterPK);
-        if(paramDB != null) {
+        DatasetParameter paramDB = manager.find(DatasetParameter.class, datasetParameterPK);
+        if(paramDB != null && !paramDB.getDatasetParameterPK().equals(deleted)) {
             throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" is already is a parameter of the dataset.");
-        }*/
+        }
         
         //check that the parameter dataset id is the same as actual dataset id
         if(getDataset() != null){

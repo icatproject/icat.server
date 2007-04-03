@@ -520,7 +520,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
      * @return
      */
     @Override
-    public boolean isValid(EntityManager manager) throws ValidationException {
+    public boolean isValid(EntityManager manager, boolean deepValidation) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
         
         
@@ -542,18 +542,20 @@ public class Dataset extends EntityBaseBean implements Serializable {
             //if here not got sample in
             throw new ValidationException("Sample[id="+sampleId+"] is not associated with Dataset[id="+id+ "]'s invesigation.");
         }
-                        
-        //check all datafiles now
-        if(getDatafileCollection() != null){
-            for(Datafile datafile : getDatafileCollection()){
-                datafile.isValid(manager);
-            }
-        }
         
-        //check all datasetParameter now
-        if(getDatasetParameterCollection() != null){
-            for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
-                datasetParameter.isValid(manager);
+        if(deepValidation){
+            //check all datafiles now
+            if(getDatafileCollection() != null){
+                for(Datafile datafile : getDatafileCollection()){
+                    datafile.isValid(manager);
+                }
+            }
+            
+            //check all datasetParameter now
+            if(getDatasetParameterCollection() != null){
+                for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
+                    datasetParameter.isValid(manager);
+                }
             }
         }
         
@@ -575,11 +577,13 @@ public class Dataset extends EntityBaseBean implements Serializable {
             if(type == null)  throw new ValidationException(datasetType+ " is not a valid Dataset Type");
         }
         
+        //check if unique
+        if(!isUnique(manager)) throw new ValidationException(this+" is not unique.");
         
         return isValid();
     }
     
-    public boolean isUnique(EntityManager manager){
+    private boolean isUnique(EntityManager manager){
         
         Query query =  manager.createNamedQuery("Dataset.findbyUnique");
         query = query.setParameter("sampleId",sampleId);
@@ -596,7 +600,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
             //means it is unique
             return true;
         }
-    }        
+    }
     
     /**
      * This method removes all the ids when persist is called.

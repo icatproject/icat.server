@@ -10,22 +10,25 @@
 package uk.icat3.test;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import javax.persistence.Column;
 import uk.icat3.entity.ICAT;
-import uk.icat3.exceptions.ValidationException;
 
 public class AnnotationTest {
     
-    public AnnotationTest(){
+    public AnnotationTest() throws Exception{
         
         
         TestEntity te = new TestEntity("d");
         
         TestEntity fromte = new TestEntity("b");
+        te.isValid();
+    //    te.merge(fromte);
         
-       te.merge(fromte);
+        //swapProperty("purposeSeen",fromte, te);
         
-        System.out.println(te.getPurposeSeen());
+        System.out.println("old was d new is "+te.getPurposeSeen());
         
         //EntityBaseBean te = new EntityBaseBean();
        /* try {
@@ -47,6 +50,25 @@ public class AnnotationTest {
     public void aMethod() {
     }
     
+    @SuppressWarnings("all")
+    public void swapProperty(String name, Object from, Object to) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, NoSuchFieldException {
+        
+        
+        
+        String prop = Character.toUpperCase(name.charAt(0)) +
+                name.substring(1);
+        String mname = "get" + prop;
+        
+        Class[] types = new Class[]{};
+        Method method = from.getClass().getMethod(mname, types);
+        Object result = method.invoke(from, (Object[])types);
+        
+        
+        mname = "set" + prop;
+        types = new Class[] { from.getClass().getDeclaredField(name).getType() };
+        method = to.getClass().getMethod(mname, types);
+        method.invoke(to, new Object[] { result });
+    }
     
     public void merge(Object toObject, Object fromObject){
         

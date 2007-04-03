@@ -11,6 +11,8 @@ package uk.icat3.entity;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
@@ -39,17 +41,22 @@ public class EntityBaseBean {
     
     @Column(name = "MOD_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @ICAT(merge=false)
     protected Date modTime;
     
     @Column(name = "CREATE_ID", nullable = false)
+    @ICAT(merge=false)
     protected String createId;
     
     @Column(name = "DELETED", nullable = false )
+    @ICAT(merge=false)
     protected String deleted;
+    
     @XmlTransient
     protected transient boolean deletedBoolean;
     
     @Column(name = "MOD_ID", nullable = false)
+    @ICAT(merge=false)
     protected String modId;
     
     /**
@@ -161,6 +168,7 @@ public class EntityBaseBean {
         else return false;
     }
     
+    
     /**
      * Method to be overridden if needed to check if the data held in the entity is valid.
      * This method checks whether all the fields which are marked as not null are not null
@@ -170,36 +178,64 @@ public class EntityBaseBean {
      */
     public boolean isValid() throws ValidationException {
         
-        //no need to check modTime, deleted and createId in validation cos always put in a create merge time
-        //or create id done by application and not user
-        
         //get public the fields in class
-        /*Field[] allFields = EntityBaseBean.class.getDeclaredFields();
+        Field[] allFields = this.getClass().getDeclaredFields();
         //all subclasses should use this line below
         //Field[] allFields = getClass().getDeclaredFields();
-        for (int i = 0; i < allFields.length; i++) {
-         
+        outer:
+            for (int i = 0; i < allFields.length; i++) {
             //get name of field
             String fieldName = allFields[i].getName();
+            
+            //check if field is labeled id and generateValue (primary key, then it can be null)
+            boolean id = false;
+            boolean generateValue = false;
+            
+            for (Annotation a : allFields[i].getDeclaredAnnotations()) {
+                if(a.annotationType().getName().equals(javax.persistence.Id.class.getName())){
+                    id = true;     }
+                if(a.annotationType().getName().equals(javax.persistence.GeneratedValue.class.getName())){
+                    generateValue = true;
+                }
+                if(generateValue && id) {
+                    log.trace(getClass().getSimpleName()+": "+fieldName+" is auto generated id value, no need to check.");
+                    continue outer;
+                }
+            }
+            
             //now check all annoatations
             for (Annotation a : allFields[i].getDeclaredAnnotations()) {
                 //if this means its a none null column field
                 if(a.annotationType().getName().equals(
                         javax.persistence.Column.class.getName()) && a.toString().contains("nullable=false") ){
+                    
                     //now check if it is null, if so throw error
                     try {
                         //get value
-                        //log.info(""+allFields[i]+"? "+allFields[i].isAccessible());
-                        if(allFields[i].get(this) == null){
+                       /* if(allFields[i].get(this) == null){
                             throw new ValidationException(getClass().getSimpleName()+": "+fieldName+" cannot be null.");
-                        } else  log.trace(getClass().getSimpleName()+": "+fieldName+" is valid");
-                    } catch (IllegalAccessException ex) {
-                        log.warn(getClass().getSimpleName()+": "+fieldName+" cannot be accessed.");
+                        }*/
+                        //access using bean properties
+                        String prop = Character.toUpperCase(fieldName.charAt(0)) +
+                                fieldName.substring(1);
+                        String mname = "get" + prop;
+                        
+                        Class[] types = new Class[]{};
+                        Method method = this.getClass().getMethod(mname, types);
+                        Object result = method.invoke(this, (Object[])types);
+                        if(result == null){
+                            throw new ValidationException(getClass().getSimpleName()+": "+fieldName+" cannot be null.");
+                        } else {
+                            log.trace(getClass().getSimpleName()+": "+fieldName+" is valid");
+                        }
+                    } catch (ValidationException ex) {
+                        throw ex;
+                    } catch (Exception ex) {
+                        log.warn(getClass().getSimpleName()+": "+fieldName+" cannot be accessed.",ex);
                     }
                 }
             }
-        }*/
-        //ok here
+            }
         return true;
     }
     
@@ -213,6 +249,20 @@ public class EntityBaseBean {
      */
     public boolean isValid(EntityManager manager) throws ValidationException {
         //always call isValid()
+        return isValid(manager, true);
+    }
+    
+    /**
+     * Method to be overriding if needed to check if the data held in the entity is valid.
+     * This method should be used for search DB for foreign key constraints etc
+     * Deep validation if all of its children need to be validated
+     *
+     * @return true if validation is correct,
+     * @param manager if queries are needed
+     * @param deepValidation if all of child entities need to be validated
+     * @throws ValidationException if validation error.
+     */
+    public boolean isValid(EntityManager manager, boolean deepValidation)  throws ValidationException {
         return isValid();
     }
     
@@ -226,6 +276,7 @@ public class EntityBaseBean {
             String fieldName = field.getName();
             //log.trace(fieldName);
             //now check all annoatations
+            boolean fieldOk = false;
             for (Annotation a : field.getDeclaredAnnotations()) {
                 //if this means its a none null column field
                 //log.trace(a.annotationType().getName());
@@ -233,24 +284,49 @@ public class EntityBaseBean {
                     log.trace("not merging, icat(merge=false): "+fieldName);
                     continue outer;
                 }
-                if(!a.annotationType().getName().contains("Column") ||
-                        a.annotationType().getName().contains("Id")){
-                    log.trace("not merging, not Column, or Id: " +fieldName);
+                if(a.annotationType().getName().contains("Id")){
+                    log.trace("not merging, Id: " +fieldName);
                     continue outer;
                 }
+                if(a.annotationType().getName().contains("Column")){
+                    log.trace("Passed, it contains column "+ fieldName);
+                    fieldOk = true;
+                }
             }
+            //if get there and field contains column then merge
+            if(!fieldOk) continue outer;
             try {
                 for(Field thisField : thisFields) {
                     // log.trace(thisField);
                     if(thisField.getName().equals(fieldName)){
                         //now transfer the data
-                        log.trace("Setting "+fieldName+" to "+field.get(object));
-                        thisField.set(this, field.get(object));
+                        //log.trace("Setting "+fieldName+" to "+field.get(object));
+                        //thisField.set(this, field.get(object));
+                        //new way of using beadn properties
+                        swapProperty(fieldName, this, object);
+                        
                     }
                 }
             }  catch (Exception ex) {
-                log.warn("Error transferring data for field: "+fieldName);
+                log.warn("Error transferring data for field: "+fieldName, ex);
             }
         }
-    }    
+    }
+    
+    @SuppressWarnings("all")
+    private void swapProperty(String name, Object from, Object to) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, NoSuchFieldException {
+        String prop = Character.toUpperCase(name.charAt(0)) +
+                name.substring(1);
+        String mname = "get" + prop;
+        
+        Class[] types = new Class[]{};
+        Method method = from.getClass().getMethod(mname, types);
+        Object result = method.invoke(from, (Object[])types);
+        
+        
+        mname = "set" + prop;
+        types = new Class[] { from.getClass().getDeclaredField(name).getType() };
+        method = to.getClass().getMethod(mname, types);
+        method.invoke(to, new Object[] { result });
+    }
 }

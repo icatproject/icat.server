@@ -28,61 +28,63 @@ import uk.icat3.exceptions.ValidationException;
 
 /**
  * Entity class SampleParameter
- * 
+ *
  * @author gjd37
  */
 @Entity
 @Table(name = "SAMPLE_PARAMETER")
 @NamedQueries( {
-        @NamedQuery(name = "SampleParameter.findBySampleId", query = "SELECT s FROM SampleParameter s WHERE s.sampleParameterPK.sampleId = :sampleId"),
-        @NamedQuery(name = "SampleParameter.findByName", query = "SELECT s FROM SampleParameter s WHERE s.sampleParameterPK.name = :name"),
-        @NamedQuery(name = "SampleParameter.findByUnits", query = "SELECT s FROM SampleParameter s WHERE s.sampleParameterPK.units = :units"),
-        @NamedQuery(name = "SampleParameter.findByStringValue", query = "SELECT s FROM SampleParameter s WHERE s.stringValue = :stringValue"),
-        @NamedQuery(name = "SampleParameter.findByNumericValue", query = "SELECT s FROM SampleParameter s WHERE s.numericValue = :numericValue"),
-        @NamedQuery(name = "SampleParameter.findByError", query = "SELECT s FROM SampleParameter s WHERE s.error = :error"),
-        @NamedQuery(name = "SampleParameter.findByRangeTop", query = "SELECT s FROM SampleParameter s WHERE s.rangeTop = :rangeTop"),
-        @NamedQuery(name = "SampleParameter.findByRangeBottom", query = "SELECT s FROM SampleParameter s WHERE s.rangeBottom = :rangeBottom"),
-        @NamedQuery(name = "SampleParameter.findByModTime", query = "SELECT s FROM SampleParameter s WHERE s.modTime = :modTime"),
-        @NamedQuery(name = "SampleParameter.findByModId", query = "SELECT s FROM SampleParameter s WHERE s.modId = :modId")
-    })
+    @NamedQuery(name = "SampleParameter.findBySampleId", query = "SELECT s FROM SampleParameter s WHERE s.sampleParameterPK.sampleId = :sampleId"),
+    @NamedQuery(name = "SampleParameter.findByName", query = "SELECT s FROM SampleParameter s WHERE s.sampleParameterPK.name = :name"),
+    @NamedQuery(name = "SampleParameter.findByUnits", query = "SELECT s FROM SampleParameter s WHERE s.sampleParameterPK.units = :units"),
+    @NamedQuery(name = "SampleParameter.findByStringValue", query = "SELECT s FROM SampleParameter s WHERE s.stringValue = :stringValue"),
+    @NamedQuery(name = "SampleParameter.findByNumericValue", query = "SELECT s FROM SampleParameter s WHERE s.numericValue = :numericValue"),
+    @NamedQuery(name = "SampleParameter.findByError", query = "SELECT s FROM SampleParameter s WHERE s.error = :error"),
+    @NamedQuery(name = "SampleParameter.findByRangeTop", query = "SELECT s FROM SampleParameter s WHERE s.rangeTop = :rangeTop"),
+    @NamedQuery(name = "SampleParameter.findByRangeBottom", query = "SELECT s FROM SampleParameter s WHERE s.rangeBottom = :rangeBottom"),
+    @NamedQuery(name = "SampleParameter.findByModTime", query = "SELECT s FROM SampleParameter s WHERE s.modTime = :modTime"),
+    @NamedQuery(name = "SampleParameter.findByModId", query = "SELECT s FROM SampleParameter s WHERE s.modId = :modId")
+})
 public class SampleParameter extends EntityBaseBean implements Serializable {
-
+    
     /**
      * EmbeddedId primary key field
      */
     @EmbeddedId
     protected SampleParameterPK sampleParameterPK;
-
+    
     @Column(name = "STRING_VALUE")
     private String stringValue;
-
+    
     @Column(name = "NUMERIC_VALUE")
     private Double numericValue;
-
+    
     @Column(name = "ERROR")
     private String error;
-
+    
     @Column(name = "RANGE_TOP")
     private String rangeTop;
-
+    
     @Column(name = "RANGE_BOTTOM")
     private String rangeBottom;
-   
+    
     @JoinColumns(value =  {
-            @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
-            @JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
-        })
+        @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
+        @JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
+    })
     @ManyToOne
+    @ICAT(merge=false)
     private Parameter parameter;
-
+    
     @JoinColumn(name = "SAMPLE_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
+    @ICAT(merge=false)
     private Sample sample;
     
     /** Creates a new instance of SampleParameter */
     public SampleParameter() {
     }
-
+    
     /**
      * Creates a new instance of SampleParameter with the specified values.
      * @param sampleParameterPK the sampleParameterPK of the SampleParameter
@@ -90,7 +92,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public SampleParameter(SampleParameterPK sampleParameterPK) {
         this.sampleParameterPK = sampleParameterPK;
     }
-
+    
     /**
      * Creates a new instance of SampleParameter with the specified values.
      * @param sampleParameterPK the sampleParameterPK of the SampleParameter
@@ -102,7 +104,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
         this.modTime = modTime;
         this.modId = modId;
     }
-
+    
     /**
      * Creates a new instance of SampleParameterPK with the specified values.
      * @param units the units of the SampleParameterPK
@@ -112,7 +114,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public SampleParameter(String units, String name, Long sampleId) {
         this.sampleParameterPK = new SampleParameterPK(units, name, sampleId);
     }
-
+    
     /**
      * Gets the sampleParameterPK of this SampleParameter.
      * @return the sampleParameterPK
@@ -120,7 +122,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public SampleParameterPK getSampleParameterPK() {
         return this.sampleParameterPK;
     }
-
+    
     /**
      * Sets the sampleParameterPK of this SampleParameter to the specified value.
      * @param sampleParameterPK the new sampleParameterPK
@@ -128,7 +130,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public void setSampleParameterPK(SampleParameterPK sampleParameterPK) {
         this.sampleParameterPK = sampleParameterPK;
     }
-
+    
     /**
      * Gets the stringValue of this SampleParameter.
      * @return the stringValue
@@ -136,7 +138,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public String getStringValue() {
         return this.stringValue;
     }
-
+    
     /**
      * Sets the stringValue of this SampleParameter to the specified value.
      * @param stringValue the new stringValue
@@ -144,7 +146,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public void setStringValue(String stringValue) {
         this.stringValue = stringValue;
     }
-
+    
     /**
      * Gets the numericValue of this SampleParameter.
      * @return the numericValue
@@ -152,7 +154,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public Double getNumericValue() {
         return this.numericValue;
     }
-
+    
     /**
      * Sets the numericValue of this SampleParameter to the specified value.
      * @param numericValue the new numericValue
@@ -160,7 +162,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public void setNumericValue(Double numericValue) {
         this.numericValue = numericValue;
     }
-
+    
     /**
      * Gets the error of this SampleParameter.
      * @return the error
@@ -168,7 +170,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public String getError() {
         return this.error;
     }
-
+    
     /**
      * Sets the error of this SampleParameter to the specified value.
      * @param error the new error
@@ -176,7 +178,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public void setError(String error) {
         this.error = error;
     }
-
+    
     /**
      * Gets the rangeTop of this SampleParameter.
      * @return the rangeTop
@@ -184,7 +186,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public String getRangeTop() {
         return this.rangeTop;
     }
-
+    
     /**
      * Sets the rangeTop of this SampleParameter to the specified value.
      * @param rangeTop the new rangeTop
@@ -192,7 +194,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public void setRangeTop(String rangeTop) {
         this.rangeTop = rangeTop;
     }
-
+    
     /**
      * Gets the rangeBottom of this SampleParameter.
      * @return the rangeBottom
@@ -200,7 +202,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public String getRangeBottom() {
         return this.rangeBottom;
     }
-
+    
     /**
      * Sets the rangeBottom of this SampleParameter to the specified value.
      * @param rangeBottom the new rangeBottom
@@ -208,7 +210,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public void setRangeBottom(String rangeBottom) {
         this.rangeBottom = rangeBottom;
     }
-       
+    
     /**
      * Gets the parameter of this SampleParameter.
      * @return the parameter
@@ -217,7 +219,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public Parameter getParameter() {
         return this.parameter;
     }
-
+    
     /**
      * Sets the parameter of this SampleParameter to the specified value.
      * @param parameter the new parameter
@@ -225,7 +227,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public void setParameter(Parameter parameter) {
         this.parameter = parameter;
     }
-
+    
     /**
      * Gets the sample of this SampleParameter.
      * @return the sample
@@ -233,7 +235,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public Sample getSample() {
         return this.sample;
     }
-
+    
     /**
      * Sets the sample of this SampleParameter to the specified value.
      * @param sample the new sample
@@ -241,9 +243,9 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public void setSample(Sample sample) {
         this.sample = sample;
     }
-
+    
     /**
-     * Returns a hash code value for the object.  This implementation computes 
+     * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
      */
@@ -253,10 +255,10 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
         hash += (this.sampleParameterPK != null ? this.sampleParameterPK.hashCode() : 0);
         return hash;
     }
-
+    
     /**
-     * Determines whether another object is equal to this SampleParameter.  The result is 
-     * <code>true</code> if and only if the argument is not null and is a SampleParameter object that 
+     * Determines whether another object is equal to this SampleParameter.  The result is
+     * <code>true</code> if and only if the argument is not null and is a SampleParameter object that
      * has the same id field values as this object.
      * @param object the reference object with which to compare
      * @return <code>true</code> if this object is the same as the argument;
@@ -272,9 +274,9 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
         if (this.sampleParameterPK != other.sampleParameterPK && (this.sampleParameterPK == null || !this.sampleParameterPK.equals(other.sampleParameterPK))) return false;
         return true;
     }
-
+    
     /**
-     * Returns a string representation of the object.  This implementation constructs 
+     * Returns a string representation of the object.  This implementation constructs
      * that representation based on the id fields.
      * @return a string representation of the object.
      */
@@ -340,19 +342,19 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
             }
         
         //check private key
-        sampleParameterPK.isValid();   
+        sampleParameterPK.isValid();
         
         //ok here
         return super.isValid();
     }
     
-       /**
+    /**
      * Overrides the isValid function, checks that the parameters and valid for the sample and is set to numeric or string
      * @throws ValidationException
      * @return
      */
     @Override
-    public boolean isValid(EntityManager manager) throws ValidationException {
+    public boolean isValid(EntityManager manager, boolean deepValidation) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
         
         //check valid
@@ -369,7 +371,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
         
         //check that it is a dataset parameter
         if(!parameterDB.isSampleParameter()) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" is not a sample parameter.");
-                
+        
         //check is numeric
         if(parameterDB.isNumeric()){
             if(this.getStringValue() != null) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" must be a numeric value only.");

@@ -64,14 +64,7 @@ public class DataFileManager extends ManagerUtil {
         //check user has delete access
         GateKeeper.performAuthorisation(userId, dataFile, AccessType.DELETE, manager);
         
-        //delete DataFile (Cascade is true);
-        //TODO might have to remove all the datafiles first
-        //manager.remove(dataFile);
-        //not deleting anymore, jsut changing deleted to Y
-        
-        log.info("Deleting: "+dataFile);
         dataFile.setCascade(Cascade.DELETE,Boolean.TRUE);
-        
     }
     
     /**
@@ -115,6 +108,18 @@ public class DataFileManager extends ManagerUtil {
         return true;
     }
     
+    public static Datafile createDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        log.trace("createDataFile("+userId+", "+dataFile+", EntityManager)");
+        
+        dataFile.isValid(manager);
+        
+        //new dataset, set createid, this sets mod id and modtime
+        dataFile.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
+        dataFile.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
+        manager.persist(dataFile);
+        return dataFile;
+    }
+    
     /**
      * Updates / Adds a data file depending on whether the user has permission to update this data file or data set
      *
@@ -128,30 +133,14 @@ public class DataFileManager extends ManagerUtil {
     public static Datafile updateDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateDataFile("+userId+", "+dataFile+", EntityManager)");
         
-        Datafile datafileManaged = null;
-        
-        //check to see if DataFile exists, dont need the returned DataFile as merging
-        if(dataFile.getId() != null){
-            datafileManaged = find(Datafile.class, dataFile.getId(), manager);
-        }
-        
-        //check if valid datafile
-        dataFile.isValid(manager);
+        Datafile datafileManaged = find(Datafile.class, dataFile.getId(), manager);
         
         //check user has update access
-        GateKeeper.performAuthorisation(userId, dataFile, AccessType.UPDATE, manager);
+        GateKeeper.performAuthorisation(userId, datafileManaged, AccessType.UPDATE, manager);
         
-        //if null then update
-        if(dataFile.getId() != null){
-            datafileManaged.setModId(userId);
-            datafileManaged.merge(dataFile);
-            return datafileManaged;
-        } else {
-            //new dataset, set createid, this set mod id
-            dataFile.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
-            manager.persist(dataFile);
-            return dataFile;
-        }
+        datafileManaged.setModId(userId);
+        datafileManaged.merge(dataFile);
+        return datafileManaged;
     }
     
     /**
@@ -267,9 +256,6 @@ public class DataFileManager extends ManagerUtil {
     
     public static DatafileParameter addDataFileParameter(String userId, DatafileParameter datafileParameter, Long datasetId,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("addDataFileParameter("+userId+", "+datafileParameter+", "+datasetId+", EntityManager)");
-        
-        //check if param already in DB
-        if(manager.contains(datafileParameter))  throw new ValidationException("DatafileParameter: "+datafileParameter.getDatafileParameterPK().getName()+" with units: "+datafileParameter.getDatafileParameterPK().getUnits()+" is already is a parameter of the datafile.");
         
         //get datafile,
         Datafile datafile = find(Datafile.class, datasetId, manager);

@@ -566,7 +566,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         this.keywordCollection = keywordCollection;
     }
     
-     /**
+    /**
      * Adds a Keyword to the investigation,
      * also adds the investigation to the Keyword.
      */
@@ -576,7 +576,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         Collection<Keyword> keywords = this.getKeywordCollection();
         keywords.add(keyword);
         
-        this.setKeywordCollection(keywords);       
+        this.setKeywordCollection(keywords);
     }
     
     /**
@@ -646,7 +646,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         this.investigatorCollection = investigatorCollection;
     }
     
-      /**
+    /**
      * Adds a Keyword to the investigation,
      * also adds the investigation to the Keyword.
      */
@@ -656,9 +656,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
         Collection<Investigator> investigators = this.getInvestigatorCollection();
         investigators.add(investigator);
         
-        this.setInvestigatorCollection(investigators);        
-    }    
-  
+        this.setInvestigatorCollection(investigators);
+    }
+    
     
     /**
      * Sets the investigatorCollection of this Investigation to the specified value.
@@ -850,33 +850,40 @@ public class Investigation extends EntityBaseBean implements Serializable {
     }
     
     /**
-     * Overrides the isValid function, checks each of the datasets and that the instrument is present in database
-     * @throws ValidationException
-     * @return
+     * Method to be overriding if needed to check if the data held in the entity is valid.
+     * This method should be used for search DB for foreign key constraints etc
+     * Deep validation if all of its children need to be validated
+     *
+     * @return true if validation is correct,
+     * @param manager if queries are needed
+     * @param deepValidation if all of child entities need to be validated
+     * @throws ValidationException if validation error.
      */
-    @Override
-    public boolean isValid(EntityManager manager) throws ValidationException {
+    public boolean isValid(EntityManager manager, boolean deepValidation)  throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
         
-        //check instrument is correct.
-        Collection<String> instruments = InvestigationSearch.listAllInstruments("null", manager);
-        boolean valid = false;
-        for(String instrument : instruments){
-            //log.trace(instrument);
-            if(instrument.equals(getInstrument().getName())) valid = true;
+        if(deepValidation){
+            //check instrument is correct.
+            Collection<String> instruments = InvestigationSearch.listAllInstruments("null", manager);
+            boolean valid = false;
+            for(String instrument : instruments){
+                //log.trace(instrument);
+                if(instrument.equals(getInstrument().getName())) valid = true;
+            }
+            if(!valid) throw new ValidationException("Investigation: "+getInstrument().getName()+" is not a valid instrument.");
+            
+            //check all datasets now
+            for(Dataset dataset : getDatasetCollection()){
+                dataset.isValid(manager);
+            }
         }
-        if(!valid) throw new ValidationException("Investigation: "+getInstrument().getName()+" is not a valid instrument.");
+        //check if unique
+        if(!isUnique(manager)) throw new ValidationException(this+" is not unique.");
         
-        //check all datasets now
-        for(Dataset dataset : getDatasetCollection()){
-            dataset.isValid(manager);
-        }
-        
-        //if reached here investigation is valid
         return isValid();
     }
     
-    public boolean isUnique(EntityManager manager){
+    private boolean isUnique(EntityManager manager){
         
         Query query =  manager.createNamedQuery("Investigation.findByUnique");
         query = query.setParameter("invNumber",invNumber);
@@ -894,7 +901,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
             return true;
         }
     }
-           
+    
     /**
      * See getInvestigatorCollection_()
      */

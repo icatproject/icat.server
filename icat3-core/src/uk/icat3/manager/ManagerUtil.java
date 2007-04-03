@@ -153,7 +153,7 @@ public class ManagerUtil {
         }
     }
     
-    public Sample addSample(String userId, Sample sample, EntityManager manager) throws ValidationException{
+   /* public Sample addSample(String userId, Sample sample, EntityManager manager) throws ValidationException{
         boolean unique = sample.isUnique(manager);
         if(!unique) throw new ValidationException(sample+" is not unique.");
         
@@ -179,7 +179,7 @@ public class ManagerUtil {
         manager.persist(sample);
         
         return sample;
-    }
+    }*/
     
     /**
      * Checks that the object with primary key exists in the database, if so

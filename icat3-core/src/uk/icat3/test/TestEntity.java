@@ -44,7 +44,7 @@ public class TestEntity extends EntityBaseBean {
      * @throws ValidationException if validation error.
      * @return true if validation is correct,
      */
-    public boolean isValid() throws ValidationException {
+    /*public boolean isValid() throws ValidationException {
         
         //get public the fields in class
         Field[] allFields = getClass().getDeclaredFields();
@@ -92,17 +92,17 @@ public class TestEntity extends EntityBaseBean {
             }
         //ok here
         return super.isValid();
-    }
-
+    }*/
+    
     public String getPurposeSeen() {
         return purposeSeen;
     }
-
+    
     public void setPurposeSeen(String purposeSeen) {
         this.purposeSeen = purposeSeen;
     }
     
-       public void merge(Object object){
+    /*public void merge(Object object){
         
         Field[] passsedFields = object.getClass().getDeclaredFields();
         Field[] thisFields = this.getClass().getDeclaredFields();
@@ -119,7 +119,7 @@ public class TestEntity extends EntityBaseBean {
                     log.trace("not merging, icat(merge=false) "+fieldName);
                     continue outer;
                 }
-               if(!a.annotationType().getName().contains("Column") ||
+                if(!a.annotationType().getName().contains("Column") ||
                         a.annotationType().getName().contains("Id")){
                     log.trace("not merging, not Column, or Id"+fieldName);
                     continue outer;
@@ -138,5 +138,5 @@ public class TestEntity extends EntityBaseBean {
                 log.warn("Error transferring data for field: "+fieldName);
             }
         }
-    }
+    }*/
 }

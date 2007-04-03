@@ -176,7 +176,23 @@ public class InvestigationManager extends ManagerUtil {
     
     
     ////////////////////     Add/Update Commands    ///////////////////
-    
+    public static Investigation createInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        log.trace("createInvestigation("+userId+", "+investigation+", EntityManager)");
+        
+        //check if valid investigation
+        investigation.isValid(manager);
+        
+        //check user has update access
+        GateKeeper.performAuthorisation(userId, investigation, AccessType.CREATE, manager);
+        
+        //new dataset, set createid
+        investigation.setId(null); //should never be null at this point but check
+        investigation.setCreateId(userId);
+        manager.persist(investigation);
+        
+        return investigation;
+        
+    }
     /**
      * Updates a Investigation depending on whether the user has permission to update this Investigation
      *
@@ -189,39 +205,105 @@ public class InvestigationManager extends ManagerUtil {
     public static Investigation updateInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateInvestigation("+userId+", "+investigation+", EntityManager)");
         
-        Investigation  investigationManaged = null;
-        //check to see if DataSet exists, dont need the returned dataset as merging
-        if(investigation.getId() != null){
-            investigationManaged = find(Investigation.class, investigation.getId(), manager);
-        }
-        
-        //check if valid investigation
-        investigation.isValid(manager);
-        //check if unique
-        if(!investigation.isUnique(manager)) throw new ValidationException(investigation+" is not unique.");
+        Investigation  investigationManaged = find(Investigation.class, investigation.getId(), manager);
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, investigation, AccessType.UPDATE, manager);
         
-        //if null then update
-        if(investigation.getId() != null){
-            investigationManaged.setModId(userId);
-            investigationManaged.merge(investigation);
-            return investigationManaged;
-        } else {
-            //new dataset, set createid
-            investigation.setId(null); //should never be null at this point but check
-            investigation.setCreateId(userId);
-            manager.persist(investigation);
-            return investigation;
-        }
+        investigationManaged.setModId(userId);
+        investigationManaged.merge(investigation);
+        
+        //check if valid investigation
+        investigationManaged.isValid(manager, false);
+        
+        return investigationManaged;
+        
     }
     
-    ///////////////   End of add/Update Commands    ///////////////////
+///////////////   End of add/Update Commands    ///////////////////
     
     
-    /////////////////////   Util add commands /////////////////////////
-    
+/////////////////////   Util add commands /////////////////////////
+    public static void updateInvestigationObject(String userId, EntityBaseBean object, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException{
+        log.trace("updateInvestigationObject("+userId+", "+object+", EntityManager)");
+        
+        if(object instanceof Keyword){
+            Keyword keyword = (Keyword)object;
+            
+            //check keyword
+            Keyword keywordManaged = find(Keyword.class, keyword.getKeywordPK(), manager);
+            
+            //check user has update access
+            GateKeeper.performAuthorisation(userId, keywordManaged, AccessType.UPDATE, manager);
+            
+            keywordManaged.merge(keyword);
+            keywordManaged.isValid(manager, false);
+        } else if(object instanceof Sample){
+            Sample sample = (Sample)object;
+            
+            //check keyword
+            Sample sampleManaged = find(Sample.class, sample.getId(), manager);
+            
+            //check user has update access
+            GateKeeper.performAuthorisation(userId, sampleManaged, AccessType.UPDATE, manager);
+            
+            sampleManaged.merge(sample);
+            
+            sampleManaged.isValid(manager, false);
+            
+        }else if(object instanceof SampleParameter){
+            SampleParameter sampleParameter = (SampleParameter)object;
+            
+            //check keyword
+            SampleParameter sampleParameterManaged = find(SampleParameter.class, sampleParameter.getSampleParameterPK(), manager);
+            
+            //check user has update access
+            GateKeeper.performAuthorisation(userId, sampleParameterManaged, AccessType.UPDATE, manager);
+            
+            sampleParameterManaged.merge(sampleParameter);
+            
+            sampleParameterManaged.isValid(manager, false);
+            
+        } else if(object instanceof Publication){
+            Publication publication = (Publication)object;
+            
+            //check keyword
+            Publication PublicationManaged = find(Publication.class, publication.getId(), manager);
+            
+            //check user has update access
+            GateKeeper.performAuthorisation(userId, PublicationManaged, AccessType.UPDATE, manager);
+            
+            PublicationManaged.merge(publication);
+            
+            PublicationManaged.isValid(manager, false);
+            
+        } else if(object instanceof Investigator){
+            Investigator investigator = (Investigator)object;
+            
+            //check keyword
+            Investigator investigatorManaged = find(Investigator.class, investigator.getInvestigatorPK(), manager);
+            
+            //check user has update access
+            GateKeeper.performAuthorisation(userId, investigatorManaged, AccessType.UPDATE, manager);
+            
+            investigatorManaged.merge(investigator);
+            
+            investigatorManaged.isValid(manager, false);
+            
+        } else if(object instanceof Investigation){
+            Investigation investigation = (Investigation)object;
+            //check investigation
+            Investigation investigationManaged = find(Investigation.class, investigation.getId(), manager);
+            
+            //check user has update access
+            GateKeeper.performAuthorisation(userId, investigationManaged, AccessType.UPDATE, manager);
+            
+            investigationManaged.merge(investigation);
+            
+            investigationManaged.isValid(manager, false);
+        }
+        
+    }
     
     /**
      *
@@ -234,7 +316,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
     public static void deleteInvestigationObject(String userId, EntityBaseBean object, AccessType type, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException{
-        log.trace("deleteObject("+userId+", "+object+", "+type+", EntityManager)");
+        log.trace("modifyInvestigationObject("+userId+", "+object+", "+type+", EntityManager)");
         
         if(object instanceof Keyword){
             Keyword keyword = (Keyword)object;
@@ -276,7 +358,7 @@ public class InvestigationManager extends ManagerUtil {
                 GateKeeper.performAuthorisation(userId, sampleManaged, AccessType.REMOVE, manager);
                 
                 //ok here fo delete
-                sampleManaged.setInvestigationId(null);
+               // sampleManaged.setInvestigationId(null);
                 
                 manager.remove(sampleManaged);
             }
@@ -377,7 +459,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
-    public static void addInvestigationObject(String userId, EntityBaseBean object, Long investigationId, EntityManager manager) throws ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    public static EntityBaseBean addInvestigationObject(String userId, EntityBaseBean object, Long investigationId, EntityManager manager) throws ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         log.trace("addObject("+userId+", "+object+", "+investigationId+", EntityManager)");
         
         //check investigation
@@ -396,6 +478,8 @@ public class InvestigationManager extends ManagerUtil {
             publication.setCreateId(userId);
             
             manager.persist(publication);
+            
+            return publication;
         } else if(object instanceof Sample){
             Sample sample = (Sample)object;
             
@@ -412,6 +496,7 @@ public class InvestigationManager extends ManagerUtil {
                 if(sampleManaged.isDeleted()){
                     sampleManaged.setDeleted(false);
                     log.info(sampleManaged +" been deleted, undeleting now.");
+                    return sampleManaged;
                 } else {
                     //do nothing, throw exception
                     log.warn(sampleManaged +" already added to investigation.");
@@ -422,6 +507,8 @@ public class InvestigationManager extends ManagerUtil {
                 //sets modId for persist
                 sample.setCreateId(userId);
                 manager.persist(sample);
+                
+                return sample;
             }
         } else if(object instanceof SampleParameter){
             SampleParameter sampleParamter = (SampleParameter)object;
@@ -441,6 +528,7 @@ public class InvestigationManager extends ManagerUtil {
                 if(sampleManaged.isDeleted()){
                     sampleManaged.setDeleted(false);
                     log.info(sampleManaged +" been deleted, undeleting now.");
+                    return sampleManaged;
                 } else {
                     //do nothing, throw exception
                     log.warn(sampleManaged +" already added to investigation.");
@@ -451,6 +539,7 @@ public class InvestigationManager extends ManagerUtil {
                 //sets modId for persist
                 sampleParamter.setCreateId(userId);
                 manager.persist(sampleParamter);
+                return sampleParamter;
             }
         } else if(object instanceof Keyword){
             Keyword keyword = (Keyword)object;
@@ -468,6 +557,7 @@ public class InvestigationManager extends ManagerUtil {
                 if(keywordManaged.isDeleted()){
                     keywordManaged.setDeleted(false);
                     log.info(keywordManaged +" been deleted, undeleting now.");
+                    return keywordManaged;
                 } else {
                     //do nothing, throw exception
                     log.warn(keywordManaged +" already added to investigation.");
@@ -478,6 +568,7 @@ public class InvestigationManager extends ManagerUtil {
                 //sets modId for persist
                 keyword.setCreateId(userId);
                 manager.persist(keyword);
+                return keyword;
             }
         } else if(object instanceof Investigator){
             Investigator investigator = (Investigator)object;
@@ -494,6 +585,7 @@ public class InvestigationManager extends ManagerUtil {
                 if(investigatorManaged.isDeleted()){
                     investigatorManaged.setDeleted(false);
                     log.info(investigatorManaged +" been deleted, undeleting now.");
+                    return investigatorManaged;
                 } else {
                     //do nothing, throw exception
                     log.warn(investigatorManaged +" already added to investigation.");
@@ -504,7 +596,9 @@ public class InvestigationManager extends ManagerUtil {
                 //sets modId for persist
                 investigator.setCreateId(userId);
                 manager.persist(investigator);
+                return investigator;
             }
         }
+        return null;
     }
 }
