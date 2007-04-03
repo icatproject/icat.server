@@ -43,8 +43,9 @@ public class BaseTestClassTX extends BaseTest{
         log.debug("commiting transaction on entityManager");
         try {
             em.getTransaction().commit();
-        } catch(Exception t){
-            log.error(t);            
+        } catch(RuntimeException t){
+            log.error(t);  
+            throw t;
         }
     }
     

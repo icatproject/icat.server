@@ -22,6 +22,7 @@ import uk.icat3.entity.Investigator;
 import uk.icat3.entity.Keyword;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.manager.InvestigationManager;
+import uk.icat3.util.AccessType;
 import uk.icat3.util.BaseTestClassTX;
 import static uk.icat3.util.TestConstants.*;
 
@@ -36,7 +37,7 @@ public class TestInvestigationManager extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-   // @Test
+    @Test
     public void testAddKeyword() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding keyword to investigation Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
         
@@ -45,7 +46,7 @@ public class TestInvestigationManager extends BaseTestClassTX {
         Keyword keyword = new Keyword("keyword "+ram.nextLong(),VALID_INVESTIGATION_ID );
         
         
-        InvestigationManager.addKeyword(VALID_USER_FOR_INVESTIGATION, keyword, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, keyword, VALID_DATASET_ID_FOR_INVESTIGATION, em);
     }
     
     //@Test
@@ -66,10 +67,10 @@ public class TestInvestigationManager extends BaseTestClassTX {
         
         if(keywordToDelete == null) throw new ICATAPIException("No keywords to delete");
         
-        InvestigationManager.deleteKeyword(VALID_USER_FOR_INVESTIGATION, keywordToDelete, em);
+        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, keywordToDelete, AccessType.DELETE, em);
     }
     
-    @Test(expected=InsufficientPrivilegesException.class)
+   // @Test(expected=InsufficientPrivilegesException.class)
     public void testDeleteKeywordPropagated() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting keyword from investigation Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
         
@@ -82,7 +83,7 @@ public class TestInvestigationManager extends BaseTestClassTX {
         log.info("Trying to delete "+keywordToDelete);
         
         try {
-            InvestigationManager.deleteKeyword(VALID_USER_FOR_INVESTIGATION, keywordToDelete, em);
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, keywordToDelete, AccessType.DELETE, em);
         }  catch (ICATAPIException ex) {
             log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
             throw ex;
@@ -105,7 +106,7 @@ public class TestInvestigationManager extends BaseTestClassTX {
         }
         if(keywordToDelete == null) throw new ICATAPIException("No keywords to delete");
         
-        InvestigationManager.removeKeyword(VALID_USER_FOR_INVESTIGATION, keywordToDelete, em);
+        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, keywordToDelete, AccessType.REMOVE, em);
     }
     
     // @Test(expected=InsufficientPrivilegesException.class)
@@ -117,14 +118,14 @@ public class TestInvestigationManager extends BaseTestClassTX {
         Keyword keyword = new Keyword("keyword "+ram.nextLong(),VALID_INVESTIGATION_ID );
         
         try {
-            InvestigationManager.addKeyword(INVALID_USER, keyword, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            InvestigationManager.addInvestigationObject(INVALID_USER, keyword, VALID_DATASET_ID_FOR_INVESTIGATION, em);
         }  catch (ICATAPIException ex) {
             log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
             throw ex;
         }
     }
     
-    @Test
+   // @Test
     public void testAddInvestigator() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding investigator to investigation Id: "+VALID_DATASET_ID_FOR_INVESTIGATION);
         
@@ -132,7 +133,7 @@ public class TestInvestigationManager extends BaseTestClassTX {
         Random ram = new Random();
         Investigator investigator = new Investigator("9932",VALID_INVESTIGATION_ID );             
         
-        InvestigationManager.addInvestigator(VALID_USER_FOR_INVESTIGATION, investigator, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, investigator, VALID_DATASET_ID_FOR_INVESTIGATION, em);
     }
     
     // @Test
@@ -142,7 +143,7 @@ public class TestInvestigationManager extends BaseTestClassTX {
         
         Investigator investigator = new Investigator("9932",VALID_INVESTIGATION_ID );
         
-        InvestigationManager.deleteInvestigator(VALID_USER_FOR_INVESTIGATION, investigator,  em);
+        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, investigator,  AccessType.DELETE, em);
     }
     
     //@Test
@@ -152,7 +153,7 @@ public class TestInvestigationManager extends BaseTestClassTX {
         
         Investigator investigator = new Investigator("9932",VALID_INVESTIGATION_ID );
         
-        InvestigationManager.removeInvestigator(VALID_USER_FOR_INVESTIGATION, investigator,  em);
+        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, investigator, AccessType.REMOVE, em);
     }
     
     //@Test(expected=InsufficientPrivilegesException.class)
@@ -163,7 +164,7 @@ public class TestInvestigationManager extends BaseTestClassTX {
         Investigator investigator = new Investigator("JAMES",VALID_INVESTIGATION_ID );
         
         try {
-            InvestigationManager.removeInvestigator(VALID_USER_FOR_INVESTIGATION, investigator,  em);
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, investigator, AccessType.REMOVE, em);
         }  catch (ICATAPIException ex) {
             log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
             throw ex;

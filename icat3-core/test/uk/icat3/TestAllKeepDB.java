@@ -31,16 +31,13 @@ import uk.icat3.util.ExecuteDatabaseScript;
     TestSample.class,
     TestKeyword.class
 })
-public class TestAll {
+public class TestAllKeepDB {
        
     
     public static Test suite() {
         
-       ExecuteDatabaseScript script = new ExecuteDatabaseScript("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))", "icat_scratch", "c1sco");
-        script.execute("database/ICAT3API_CreateSchema[v1].sql", ";");
-        script.execute("database/ICAT3API_InsertListTables[v1].sql", ";");
-        script.execute("database/ICAT3API_JUNIT_InsertTestData[v1].sql", ";");
+      
         
-        return new JUnit4TestAdapter(TestAll.class);
+        return new JUnit4TestAdapter(TestAllKeepDB.class);
     }
 }
