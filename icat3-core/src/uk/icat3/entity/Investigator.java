@@ -11,6 +11,7 @@ package uk.icat3.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -45,8 +46,8 @@ public class Investigator extends EntityBaseBean implements Serializable {
     @EmbeddedId
     protected InvestigatorPK investigatorPK;
     
-    //TODO @Column(name = "ROLE")
-    //private String role;
+    /*TODO*/ @Column(name = "ROLE")
+    private String role;
     
     @JoinColumn(name = "FACILITY_USER_ID", referencedColumnName = "FACILITY_USER_ID", insertable = false, updatable = false)
     @ManyToOne
@@ -130,17 +131,17 @@ public class Investigator extends EntityBaseBean implements Serializable {
      * @return the role
      */
     //TODO uncomment this
-     /*public String getRole() {
+     public String getRole() {
         return this.role;
-     }*/
+     }
     
     /**
      * Sets the role of this FacilityUser to the specified value.
      * @param role the new role
      */
-    /*public void setRole(String role) {
+    public void setRole(String role) {
         this.role = role;
-    }*/
+    }
     
     /**
      * Gets the investigation of this Investigator.
@@ -179,6 +180,19 @@ public class Investigator extends EntityBaseBean implements Serializable {
      */
     @Override
     public boolean isValid(EntityManager manager, boolean deepValidation) throws ValidationException {
+        //check that the parameter dataset id is the same as actual dataset id
+        if(getInvestigation() != null){
+            //check embedded primary key
+            investigatorPK.isValid();
+            
+            if(!investigatorPK.getInvestigationId().equals(getInvestigation().getId())){
+                throw new ValidationException("Investigator: "+investigatorPK.getFacilityUserId()+" with investigation id: "+investigatorPK.getInvestigationId()+ " that does not corresponds to its parent investigation id: "+getInvestigation().getId());
+            }
+        } //else //throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" has not dataset id");
+        
+        //check if facility user exists
+        FacilityUser user = manager.find(FacilityUser.class, investigatorPK.getFacilityUserId());
+        if(user == null) throw new ValidationException("FacilityUser: "+investigatorPK.getFacilityUserId()+" does not exist");
         
         investigatorPK.isValid();
         

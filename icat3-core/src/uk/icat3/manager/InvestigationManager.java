@@ -347,7 +347,7 @@ public class InvestigationManager extends ManagerUtil {
                 GateKeeper.performAuthorisation(userId, sampleManaged, AccessType.REMOVE, manager);
                 
                 //ok here fo delete
-               // sampleManaged.setInvestigationId(null);
+                // sampleManaged.setInvestigationId(null);
                 
                 manager.remove(sampleManaged);
             }
@@ -391,7 +391,7 @@ public class InvestigationManager extends ManagerUtil {
                 GateKeeper.performAuthorisation(userId, PublicationManaged, AccessType.REMOVE, manager);
                 
                 //ok here fo delete
-                PublicationManaged.setInvestigationId(null);
+                //PublicationManaged.setInvestigationId(null);
                 
                 manager.remove(PublicationManaged);
             }
@@ -463,12 +463,29 @@ public class InvestigationManager extends ManagerUtil {
             //check user has delete access
             GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
             
-            //sets modId for persist
-            publication.setCreateId(userId);
+            try {
+                //check investigator not already added
+                if(publication.getId() == null) throw new NoSuchObjectFoundException();
+                Publication publicationManaged = find(Publication.class, publication.getId(), manager);
+                if(publicationManaged.isDeleted()){
+                    publicationManaged.setDeleted(false);
+                    log.info(publicationManaged +" been deleted, undeleting now.");
+                    return publicationManaged;
+                } else {
+                    //do nothing, throw exception
+                    log.warn(publicationManaged +" already added to investigation.");
+                    throw new ValidationException(publicationManaged+" is not unique");
+                }
+            } catch (NoSuchObjectFoundException ex) {
+                //not already in DB so add
+                //sets modId for persist
+                //sets modId for persist
+                publication.setCreateId(userId);
+                
+                manager.persist(publication);
+                return publication;
+            }                                 
             
-            manager.persist(publication);
-            
-            return publication;
         } else if(object instanceof Sample){
             Sample sample = (Sample)object;
             
@@ -535,7 +552,7 @@ public class InvestigationManager extends ManagerUtil {
             
             keyword.setInvestigation(investigation);
             keyword.isValid(manager);
-                 
+            
             //check user has delete access
             GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
             

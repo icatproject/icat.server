@@ -14,11 +14,14 @@ import java.net.URL;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -38,9 +41,11 @@ import javax.xml.bind.annotation.XmlTransient;
         @NamedQuery(name = "Publication.findByModTime", query = "SELECT p FROM Publication p WHERE p.modTime = :modTime"),
         @NamedQuery(name = "Publication.findByModId", query = "SELECT p FROM Publication p WHERE p.modId = :modId")
     })
+@SequenceGenerator(name="PUBLICATION_SEQ",sequenceName="PUBLICATION_ID_SEQ",allocationSize=1)
 public class Publication extends EntityBaseBean implements Serializable {
 
     @Id
+    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="PUBLICATION_SEQ")
     @Column(name = "ID", nullable = false)
     private Long id;
 
@@ -48,7 +53,7 @@ public class Publication extends EntityBaseBean implements Serializable {
     private String fullReference;
 
     @Column(name = "URL")
-    private URL url;
+    private String url;
 
     @Column(name = "REPOSITORY_ID")
     private String repositoryId;
@@ -123,7 +128,7 @@ public class Publication extends EntityBaseBean implements Serializable {
      * Gets the url of this Publication.
      * @return the url
      */
-    public URL getUrl() {
+    public String getUrl() {
         return this.url;
     }
 
@@ -131,7 +136,7 @@ public class Publication extends EntityBaseBean implements Serializable {
      * Sets the url of this Publication to the specified value.
      * @param url the new url
      */
-    public void setUrl(URL url) {
+    public void setUrl(String url) {
         this.url = url;
     }
 

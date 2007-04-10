@@ -193,7 +193,8 @@ public class EntityBaseBean {
             
             for (Annotation a : allFields[i].getDeclaredAnnotations()) {
                 if(a.annotationType().getName().equals(javax.persistence.Id.class.getName())){
-                    id = true;     }
+                    id = true;     
+                }
                 if(a.annotationType().getName().equals(javax.persistence.GeneratedValue.class.getName())){
                     generateValue = true;
                 }
