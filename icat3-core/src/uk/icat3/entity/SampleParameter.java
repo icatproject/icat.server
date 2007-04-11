@@ -356,7 +356,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     @Override
     public boolean isValid(EntityManager manager, boolean deepValidation) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
-        
+      
         //check valid
         String paramName = this.getSampleParameterPK().getName();
         String paramUnits = this.getSampleParameterPK().getUnits();
@@ -371,7 +371,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
         
         //check that it is a dataset parameter
         if(!parameterDB.isSampleParameter()) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" is not a sample parameter.");
-        
+     
         //check is numeric
         if(parameterDB.isNumeric()){
             if(this.getStringValue() != null) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" must be a numeric value only.");
@@ -396,5 +396,5 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
         
         //once here then its valid
         return isValid();
-    }
+    }        
 }

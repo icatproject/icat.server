@@ -77,10 +77,7 @@ public class Parameter extends EntityBaseBean implements Serializable {
 
     @Column(name = "DESCRIPTION")
     private String description;
-
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
+   
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "parameter")
     @XmlTransient
     private Collection<DatasetParameter> datasetParameterCollection;
@@ -279,23 +276,7 @@ public class Parameter extends EntityBaseBean implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    /**
-     * Gets the modId of this Parameter.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-   
-    /**
-     * Sets the modTime of this Parameter to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
+       
     /**
      * Gets the datasetParameterCollection of this Parameter.
      * @return the datasetParameterCollection

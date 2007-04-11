@@ -88,7 +88,7 @@ public class GateKeeper {
         }
         ArrayList<Investigation> invList = new ArrayList<Investigation>();
         
-          if(object instanceof Publication){
+        if(object instanceof Publication){
             invList.add(((Publication)object).getInvestigationId());
             performAuthorisation(user, invList, access, ((Publication)object), manager);
         } else if(object instanceof Investigation){
@@ -112,7 +112,7 @@ public class GateKeeper {
         } else if(object instanceof Study){
             for (StudyInvestigation si :  ((Study)object).getStudyInvestigationCollection()) {
                 invList.add(si.getInvestigation());
-            }//end for            
+            }//end for
             performAuthorisation(user, invList, access, ((DatafileParameter)object), manager);
         } else if(object instanceof SampleParameter){
             invList.add(((SampleParameter)object).getSample().getInvestigationId());
@@ -125,7 +125,7 @@ public class GateKeeper {
             performAuthorisation(user, invList, access, ((Investigator)object), manager);
         } else throw new InsufficientPrivilegesException(object.getClass().getSimpleName()+" not supported for security check.");;
         
-              
+        
     }//end method
     
     /**
@@ -152,6 +152,10 @@ public class GateKeeper {
      */
     private static void performAuthorisation(String user, Collection<Investigation> investigations, AccessType access, EntityBaseBean element, EntityManager manager) throws InsufficientPrivilegesException {
         
+        //TODO
+        //if creating investigation, anyone allowed to do that?
+        if(access == AccessType.CREATE && element instanceof Investigation) return ;
+        
         //if user is a system administrator then return (no need to check each request)
         //TBI...
         
@@ -162,6 +166,7 @@ public class GateKeeper {
             
             //TODO: added by gjd37, if user one of investigators then allow access
             for(Investigator investigator : investigation.getInvestigatorCollection()){
+                log.trace(investigator);
                 if(investigator.getFacilityUser().getFederalId().equals(user)){
                     //passed for this investigation
                     log.debug("User: " + user + " granted " + access + " permission on " + element );

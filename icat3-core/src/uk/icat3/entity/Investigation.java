@@ -67,7 +67,7 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = "Investigation.findByReleaseDate", query = "SELECT i FROM Investigation i WHERE i.releaseDate = :releaseDate"),
     @NamedQuery(name = "Investigation.findByModTime", query = "SELECT i FROM Investigation i WHERE i.modTime = :modTime"),
     @NamedQuery(name = "Investigation.findByModId", query = "SELECT i FROM Investigation i WHERE i.modId = :modId"),
-    @NamedQuery(name = "Investigation.findByUnique", query = "SELECT i FROM Investigation i WHERE i.invNumber = :invNumber AND i.visitId = :visitId AND i.facilityCycle = :facilityCycle AND i.instrument = :instrument"),
+    @NamedQuery(name = "Investigation.findByUnique", query = "SELECT i FROM Investigation i WHERE (i.invNumber = :invNumber OR i.invNumber is NULL) AND (i.visitId = :visitId OR i.visitId IS NULL) AND (i.facilityCycle = :facilityCycle OR i.facilityCycle IS NULL) AND (i.instrument = :instrument OR i.instrument IS NULL)"),
     
     
     //Added searches for ICAT3 API
@@ -128,9 +128,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date releaseDate;
     
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
     private Collection<Publication> publicationCollection;
     
@@ -145,7 +142,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     @ManyToOne
     private Instrument instrument;
     
-    @JoinColumn(name = "INV_TYPE", referencedColumnName = "NAME")
+    @JoinColumn(name = "INV_TYPE", referencedColumnName = "NAME", nullable= false)
     @ManyToOne
     private InvestigationType invType;
     
@@ -344,22 +341,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
      */
     public void setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
-    }
-    
-    /**
-     * Gets the modId of this Investigation.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-    
-    /**
-     * Sets the modId of this Investigation to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
     }
     
     /**
@@ -827,8 +808,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
             //now check all annoatations
             for (Annotation a : allFields[i].getDeclaredAnnotations()) {
                 //if this means its a none null column field
-                if(a.annotationType().getName().equals(
-                        javax.persistence.Column.class.getName()) && a.toString().contains("nullable=false") ){
+                if(a.annotationType().getName().contains("Column") && a.toString().contains("nullable=false") ){
                     
                     //now check if it is null, if so throw error
                     try {
@@ -863,18 +843,23 @@ public class Investigation extends EntityBaseBean implements Serializable {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
         
         if(deepValidation){
-            //check instrument is correct.
-            Collection<String> instruments = InvestigationSearch.listAllInstruments("null", manager);
             boolean valid = false;
-            for(String instrument : instruments){
-                //log.trace(instrument);
-                if(instrument.equals(getInstrument().getName())) valid = true;
-            }
+            if(instrument != null){
+                //check instrument is correct.
+                Collection<String> instruments = InvestigationSearch.listAllInstruments("null", manager);
+                
+                for(String instrument : instruments){
+                    //log.trace(instrument);
+                    if(instrument.equals(getInstrument().getName())) valid = true;
+                }
+            } else valid = true;
             if(!valid) throw new ValidationException("Investigation: "+getInstrument().getName()+" is not a valid instrument.");
             
             //check all datasets now
-            for(Dataset dataset : getDatasetCollection()){
-                dataset.isValid(manager);
+            if(getDatasetCollection() != null){
+                for(Dataset dataset : getDatasetCollection()){
+                    dataset.isValid(manager);
+                }
             }
         }
         //check if unique

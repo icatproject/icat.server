@@ -15,6 +15,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.EntityBaseBean;
+import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.Keyword;
@@ -133,7 +134,7 @@ public class InvestigationManager extends ManagerUtil {
     }
     
     /**
-     * Deletes a collection of investigations for a user depending if the user's id has delete permissions to delete the investigations from the
+     * Deletes the investigation for a user depending if the user's id has delete permissions to delete the investigations from the
      * investigation ids.
      *
      * @param userId userId of the user.
@@ -147,6 +148,25 @@ public class InvestigationManager extends ManagerUtil {
         
         Investigation investigation = find(Investigation.class, investigationId, manager);
         deleteInvestigationObject(userId, investigation, AccessType.DELETE, manager);
+        
+    }
+    
+    
+    /**
+     * Removes the investigation for a user depending if the user's id has delete permissions to delete the investigations from the
+     * investigation ids.
+     *
+     * @param userId userId of the user.
+     * @param investigationIds
+     * @param manager manager object that will facilitate interaction with underlying database     *
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
+    public static void removeInvestigation(String userId, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+        log.trace("removeInvestigation("+userId+", "+investigationId+", EntityManager)");
+        
+        Investigation investigation = find(Investigation.class, investigationId, manager);
+        deleteInvestigationObject(userId, investigation, AccessType.REMOVE, manager);
         
     }
     
@@ -179,16 +199,25 @@ public class InvestigationManager extends ManagerUtil {
     public static Investigation createInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createInvestigation("+userId+", "+investigation+", EntityManager)");
         
+        
         //check if valid investigation
         investigation.isValid(manager);
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, investigation, AccessType.CREATE, manager);
-        
+                
         //new dataset, set createid
         investigation.setId(null); //should never be null at this point but check
         investigation.setCreateId(userId);
         manager.persist(investigation);
+        
+        //need to add this user to the list of investigators now
+        FacilityUser facilityUser = (FacilityUser)manager.createQuery("SELECT f FROM FacilityUser f where f.federalId = :fedId").setParameter("fedId",userId).getSingleResult();
+        log.trace(""+facilityUser.getFederalId());
+        Investigator investigator = new Investigator(facilityUser.getFacilityUserId(), investigation.getId());
+        investigator.setCreateId(facilityUser.getFederalId());
+        log.trace("Adding "+investigator+" to investigation "+investigation);
+        investigation.addInvestigator(investigator);
         
         return investigation;
         
@@ -484,7 +513,7 @@ public class InvestigationManager extends ManagerUtil {
                 
                 manager.persist(publication);
                 return publication;
-            }                                 
+            }
             
         } else if(object instanceof Sample){
             Sample sample = (Sample)object;
@@ -519,6 +548,8 @@ public class InvestigationManager extends ManagerUtil {
         } else if(object instanceof SampleParameter){
             SampleParameter sampleParamter = (SampleParameter)object;
             
+            if(sampleParamter.getSampleParameterPK() == null) throw new ValidationException("SampleParameter PK cannot be null");
+            
             Sample sample = find(Sample.class, sampleParamter.getSampleParameterPK().getSampleId(),  manager);
             sampleParamter.setSample(sample);
             
@@ -540,7 +571,7 @@ public class InvestigationManager extends ManagerUtil {
                     log.warn(sampleManaged +" already added to investigation.");
                     throw new ValidationException(sampleManaged+" is not unique");
                 }
-            } catch (NoResultException ex) {
+            } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
                 sampleParamter.setCreateId(userId);
