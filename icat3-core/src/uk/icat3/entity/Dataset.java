@@ -97,8 +97,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetId")
     private Collection<DatasetLevelPermission> datasetLevelPermissionCollection;
-    
-    @XmlTransient
+      
     private transient DatasetInclude datasetInclude = DatasetInclude.NONE;
     
     /** Creates a new instance of Dataset */

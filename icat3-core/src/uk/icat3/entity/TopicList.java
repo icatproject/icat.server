@@ -43,9 +43,7 @@ public class TopicList extends EntityBaseBean implements Serializable {
      */
     @EmbeddedId
     protected TopicListPK topicListPK;
-    
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
+     
     
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
@@ -101,22 +99,7 @@ public class TopicList extends EntityBaseBean implements Serializable {
     public void setTopicListPK(TopicListPK topicListPK) {
         this.topicListPK = topicListPK;
     }
-    
-    /**
-     * Gets the modId of this TopicList.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-    
-    /**
-     * Sets the modId of this TopicList to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
+       
     
     /**
      * Gets the investigation of this TopicList.

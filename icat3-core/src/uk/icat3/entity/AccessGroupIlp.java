@@ -44,13 +44,6 @@ public class AccessGroupIlp extends EntityBaseBean implements Serializable {
     @EmbeddedId
     protected AccessGroupIlpPK accessGroupIlpPK;
 
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
     @JoinColumn(name = "ACCESS_GROUP_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     private AccessGroup accessGroup;
@@ -88,7 +81,7 @@ public class AccessGroupIlp extends EntityBaseBean implements Serializable {
      * @param ilpId the ilpId of the AccessGroupIlpPK
      * @param accessGroupId the accessGroupId of the AccessGroupIlpPK
      */
-    public AccessGroupIlp(BigInteger ilpId, BigInteger accessGroupId) {
+    public AccessGroupIlp(Long ilpId, Long accessGroupId) {
         this.accessGroupIlpPK = new AccessGroupIlpPK(ilpId, accessGroupId);
     }
 
@@ -107,39 +100,7 @@ public class AccessGroupIlp extends EntityBaseBean implements Serializable {
     public void setAccessGroupIlpPK(AccessGroupIlpPK accessGroupIlpPK) {
         this.accessGroupIlpPK = accessGroupIlpPK;
     }
-
-    /**
-     * Gets the modTime of this AccessGroupIlp.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this AccessGroupIlp to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
-    /**
-     * Gets the modId of this AccessGroupIlp.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this AccessGroupIlp to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
+    
     /**
      * Gets the accessGroup of this AccessGroupIlp.
      * @return the accessGroup

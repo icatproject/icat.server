@@ -23,10 +23,10 @@ import javax.persistence.Embeddable;
 public class AccessGroupDlpPK implements Serializable {
 
     @Column(name = "ACCESS_GROUP_ID", nullable = false)
-    private BigInteger accessGroupId;
+    private Long accessGroupId;
 
     @Column(name = "DLP_ID", nullable = false)
-    private BigInteger dlpId;
+    private Long dlpId;
     
     /** Creates a new instance of AccessGroupDlpPK */
     public AccessGroupDlpPK() {
@@ -37,7 +37,7 @@ public class AccessGroupDlpPK implements Serializable {
      * @param dlpId the dlpId of the AccessGroupDlpPK
      * @param accessGroupId the accessGroupId of the AccessGroupDlpPK
      */
-    public AccessGroupDlpPK(BigInteger dlpId, BigInteger accessGroupId) {
+    public AccessGroupDlpPK(Long dlpId, Long accessGroupId) {
         this.dlpId = dlpId;
         this.accessGroupId = accessGroupId;
     }
@@ -46,7 +46,7 @@ public class AccessGroupDlpPK implements Serializable {
      * Gets the accessGroupId of this AccessGroupDlpPK.
      * @return the accessGroupId
      */
-    public BigInteger getAccessGroupId() {
+    public Long getAccessGroupId() {
         return this.accessGroupId;
     }
 
@@ -54,7 +54,7 @@ public class AccessGroupDlpPK implements Serializable {
      * Sets the accessGroupId of this AccessGroupDlpPK to the specified value.
      * @param accessGroupId the new accessGroupId
      */
-    public void setAccessGroupId(BigInteger accessGroupId) {
+    public void setAccessGroupId(Long accessGroupId) {
         this.accessGroupId = accessGroupId;
     }
 
@@ -62,7 +62,7 @@ public class AccessGroupDlpPK implements Serializable {
      * Gets the dlpId of this AccessGroupDlpPK.
      * @return the dlpId
      */
-    public BigInteger getDlpId() {
+    public Long getDlpId() {
         return this.dlpId;
     }
 
@@ -70,7 +70,7 @@ public class AccessGroupDlpPK implements Serializable {
      * Sets the dlpId of this AccessGroupDlpPK to the specified value.
      * @param dlpId the new dlpId
      */
-    public void setDlpId(BigInteger dlpId) {
+    public void setDlpId(Long dlpId) {
         this.dlpId = dlpId;
     }
 

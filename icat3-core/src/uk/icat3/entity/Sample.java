@@ -85,7 +85,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     /** Creates a new instance of Sample */
     public Sample() {
     }
-          
+    
     /**
      * Creates a new instance of Sample with the specified values.
      * @param id the id of the Sample
@@ -94,9 +94,9 @@ public class Sample extends EntityBaseBean implements Serializable {
      * @param modTime the modTime of the Sample
      * @param modId the modId of the Sample
      */
-    public Sample(String name, String safetyInformation) {       
+    public Sample(String name, String safetyInformation) {
         this.name = name;
-        this.safetyInformation = safetyInformation;       
+        this.safetyInformation = safetyInformation;
     }
     
     /**
@@ -252,7 +252,7 @@ public class Sample extends EntityBaseBean implements Serializable {
         } catch(NoResultException nre) {
             return true;
         }
-    }        
+    }
     
     /**
      * Overrides the isValid function, checks each of the sampleparameters are valid
@@ -271,9 +271,9 @@ public class Sample extends EntityBaseBean implements Serializable {
                 }
             }
         }
-           //check if unique
+        //check if unique
         if(!isUnique(manager)) throw new ValidationException(this+" is not unique.");
-            
+        
         
         //once here then its valid
         return isValid();
@@ -298,12 +298,12 @@ public class Sample extends EntityBaseBean implements Serializable {
         return true;
     }
     
-     /**
+    /**
      * This method removes all the ids when persist is called.
      * This is so you cannot attach an Id when creating a dataset
      * that is not valid, ie auto generated
      */
-    @PrePersist
+   @PrePersist
     @Override
     public void prePersist(){
         if(this.id != null){

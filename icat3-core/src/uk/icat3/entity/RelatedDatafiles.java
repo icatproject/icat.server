@@ -23,37 +23,34 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class RelatedDatafiles
- * 
+ *
  * @author gjd37
  */
 @Entity
 @Table(name = "RELATED_DATAFILES")
 @NamedQueries( {
-        @NamedQuery(name = "RelatedDatafiles.findBySourceDatafileId", query = "SELECT r FROM RelatedDatafiles r WHERE r.relatedDatafilesPK.sourceDatafileId = :sourceDatafileId"),
-        @NamedQuery(name = "RelatedDatafiles.findByDestDatafileId", query = "SELECT r FROM RelatedDatafiles r WHERE r.relatedDatafilesPK.destDatafileId = :destDatafileId"),
-        @NamedQuery(name = "RelatedDatafiles.findByRelation", query = "SELECT r FROM RelatedDatafiles r WHERE r.relation = :relation"),
-        @NamedQuery(name = "RelatedDatafiles.findByModTime", query = "SELECT r FROM RelatedDatafiles r WHERE r.modTime = :modTime"),
-        @NamedQuery(name = "RelatedDatafiles.findByModId", query = "SELECT r FROM RelatedDatafiles r WHERE r.modId = :modId")
-    })
+    @NamedQuery(name = "RelatedDatafiles.findBySourceDatafileId", query = "SELECT r FROM RelatedDatafiles r WHERE r.relatedDatafilesPK.sourceDatafileId = :sourceDatafileId"),
+    @NamedQuery(name = "RelatedDatafiles.findByDestDatafileId", query = "SELECT r FROM RelatedDatafiles r WHERE r.relatedDatafilesPK.destDatafileId = :destDatafileId"),
+    @NamedQuery(name = "RelatedDatafiles.findByRelation", query = "SELECT r FROM RelatedDatafiles r WHERE r.relation = :relation"),
+    @NamedQuery(name = "RelatedDatafiles.findByModTime", query = "SELECT r FROM RelatedDatafiles r WHERE r.modTime = :modTime"),
+    @NamedQuery(name = "RelatedDatafiles.findByModId", query = "SELECT r FROM RelatedDatafiles r WHERE r.modId = :modId")
+})
 public class RelatedDatafiles extends EntityBaseBean implements Serializable {
-
+    
     /**
      * EmbeddedId primary key field
      */
     @EmbeddedId
     protected RelatedDatafilesPK relatedDatafilesPK;
-
+    
     @Column(name = "RELATION", nullable = false)
     private String relation;
-   
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
+    
     @JoinColumn(name = "DEST_DATAFILE_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
     private Datafile datafile;
-
+    
     @JoinColumn(name = "SOURCE_DATAFILE_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
@@ -62,7 +59,7 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
     /** Creates a new instance of RelatedDatafiles */
     public RelatedDatafiles() {
     }
-
+    
     /**
      * Creates a new instance of RelatedDatafiles with the specified values.
      * @param relatedDatafilesPK the relatedDatafilesPK of the RelatedDatafiles
@@ -70,7 +67,7 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
     public RelatedDatafiles(RelatedDatafilesPK relatedDatafilesPK) {
         this.relatedDatafilesPK = relatedDatafilesPK;
     }
-
+    
     /**
      * Creates a new instance of RelatedDatafiles with the specified values.
      * @param relatedDatafilesPK the relatedDatafilesPK of the RelatedDatafiles
@@ -84,7 +81,7 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
         this.modTime = modTime;
         this.modId = modId;
     }
-
+    
     /**
      * Creates a new instance of RelatedDatafilesPK with the specified values.
      * @param destDatafileId the destDatafileId of the RelatedDatafilesPK
@@ -93,7 +90,7 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
     public RelatedDatafiles(Long destDatafileId, Long sourceDatafileId) {
         this.relatedDatafilesPK = new RelatedDatafilesPK(destDatafileId, sourceDatafileId);
     }
-
+    
     /**
      * Gets the relatedDatafilesPK of this RelatedDatafiles.
      * @return the relatedDatafilesPK
@@ -101,7 +98,7 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
     public RelatedDatafilesPK getRelatedDatafilesPK() {
         return this.relatedDatafilesPK;
     }
-
+    
     /**
      * Sets the relatedDatafilesPK of this RelatedDatafiles to the specified value.
      * @param relatedDatafilesPK the new relatedDatafilesPK
@@ -109,7 +106,7 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
     public void setRelatedDatafilesPK(RelatedDatafilesPK relatedDatafilesPK) {
         this.relatedDatafilesPK = relatedDatafilesPK;
     }
-
+    
     /**
      * Gets the relation of this RelatedDatafiles.
      * @return the relation
@@ -117,7 +114,7 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
     public String getRelation() {
         return this.relation;
     }
-
+    
     /**
      * Sets the relation of this RelatedDatafiles to the specified value.
      * @param relation the new relation
@@ -125,32 +122,16 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
     public void setRelation(String relation) {
         this.relation = relation;
     }
-   
-    /**
-     * Gets the modId of this RelatedDatafiles.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this RelatedDatafiles to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
+    
     /**
      * Gets the datafile of this RelatedDatafiles.
      * @return the datafile
      */
-     @XmlTransient
+    @XmlTransient
     public Datafile getDatafile() {
         return this.datafile;
     }
-
+    
     /**
      * Sets the datafile of this RelatedDatafiles to the specified value.
      * @param datafile the new datafile
@@ -158,16 +139,16 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
     public void setDatafile(Datafile datafile) {
         this.datafile = datafile;
     }
-
+    
     /**
      * Gets the datafile1 of this RelatedDatafiles.
      * @return the datafile1
      */
-     @XmlTransient
+    @XmlTransient
     public Datafile getDatafile1() {
         return this.datafile1;
     }
-
+    
     /**
      * Sets the datafile1 of this RelatedDatafiles to the specified value.
      * @param datafile1 the new datafile1
@@ -175,9 +156,9 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
     public void setDatafile1(Datafile datafile1) {
         this.datafile1 = datafile1;
     }
-
+    
     /**
-     * Returns a hash code value for the object.  This implementation computes 
+     * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
      */
@@ -187,10 +168,10 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
         hash += (this.relatedDatafilesPK != null ? this.relatedDatafilesPK.hashCode() : 0);
         return hash;
     }
-
+    
     /**
-     * Determines whether another object is equal to this RelatedDatafiles.  The result is 
-     * <code>true</code> if and only if the argument is not null and is a RelatedDatafiles object that 
+     * Determines whether another object is equal to this RelatedDatafiles.  The result is
+     * <code>true</code> if and only if the argument is not null and is a RelatedDatafiles object that
      * has the same id field values as this object.
      * @param object the reference object with which to compare
      * @return <code>true</code> if this object is the same as the argument;
@@ -206,9 +187,9 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
         if (this.relatedDatafilesPK != other.relatedDatafilesPK && (this.relatedDatafilesPK == null || !this.relatedDatafilesPK.equals(other.relatedDatafilesPK))) return false;
         return true;
     }
-
+    
     /**
-     * Returns a string representation of the object.  This implementation constructs 
+     * Returns a string representation of the object.  This implementation constructs
      * that representation based on the id fields.
      * @return a string representation of the object.
      */

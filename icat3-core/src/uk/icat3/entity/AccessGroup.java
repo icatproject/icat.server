@@ -47,21 +47,14 @@ public class AccessGroup extends EntityBaseBean implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="ACCESS_GROUP_SEQ")
     @Column(name = "ID", nullable = false)
-    private BigDecimal id;
+    private Long id;
     
     @Column(name = "NAME", nullable = false)
     private String name;
     
     @Column(name = "DESCRIPTION")
     private String description;
-    
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-    
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-    
+           
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "accessGroup")
     private Collection<AccessGroupDlp> accessGroupDlpCollection;
     
@@ -79,7 +72,7 @@ public class AccessGroup extends EntityBaseBean implements Serializable {
      * Creates a new instance of AccessGroup with the specified values.
      * @param id the id of the AccessGroup
      */
-    public AccessGroup(BigDecimal id) {
+    public AccessGroup(Long id) {
         this.id = id;
     }
     
@@ -90,7 +83,7 @@ public class AccessGroup extends EntityBaseBean implements Serializable {
      * @param modTime the modTime of the AccessGroup
      * @param modId the modId of the AccessGroup
      */
-    public AccessGroup(BigDecimal id, String name, Date modTime, String modId) {
+    public AccessGroup(Long id, String name, Date modTime, String modId) {
         this.id = id;
         this.name = name;
         this.modTime = modTime;
@@ -101,7 +94,7 @@ public class AccessGroup extends EntityBaseBean implements Serializable {
      * Gets the id of this AccessGroup.
      * @return the id
      */
-    public BigDecimal getId() {
+    public Long getId() {
         return this.id;
     }
     
@@ -109,7 +102,7 @@ public class AccessGroup extends EntityBaseBean implements Serializable {
      * Sets the id of this AccessGroup to the specified value.
      * @param id the new id
      */
-    public void setId(BigDecimal id) {
+    public void setId(Long id) {
         this.id = id;
     }
     
@@ -144,39 +137,7 @@ public class AccessGroup extends EntityBaseBean implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-    
-    /**
-     * Gets the modTime of this AccessGroup.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-    
-    /**
-     * Sets the modTime of this AccessGroup to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-    
-    /**
-     * Gets the modId of this AccessGroup.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-    
-    /**
-     * Sets the modId of this AccessGroup to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-    
+        
     /**
      * Gets the accessGroupDlpCollection of this AccessGroup.
      * @return the accessGroupDlpCollection

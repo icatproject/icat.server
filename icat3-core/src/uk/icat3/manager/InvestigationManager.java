@@ -213,7 +213,7 @@ public class InvestigationManager extends ManagerUtil {
         
         //need to add this user to the list of investigators now
         FacilityUser facilityUser = (FacilityUser)manager.createQuery("SELECT f FROM FacilityUser f where f.federalId = :fedId").setParameter("fedId",userId).getSingleResult();
-        log.trace(""+facilityUser.getFederalId());
+        log.trace(""+facilityUser.getFederalId()+" "+investigation.getId());
         Investigator investigator = new Investigator(facilityUser.getFacilityUserId(), investigation.getId());
         investigator.setCreateId(facilityUser.getFederalId());
         log.trace("Adding "+investigator+" to investigation "+investigation);
@@ -464,7 +464,7 @@ public class InvestigationManager extends ManagerUtil {
                 
                 manager.remove(investigationManaged);
             }
-        }
+        }  else throw new RuntimeException(object +" is not avaliable to be deleted");
     }
     
     /**
@@ -635,7 +635,6 @@ public class InvestigationManager extends ManagerUtil {
                 manager.persist(investigator);
                 return investigator;
             }
-        }
-        return null;
+        }  else throw new RuntimeException(object +" is not avaliable to be added");     
     }
 }

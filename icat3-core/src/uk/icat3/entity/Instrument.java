@@ -49,10 +49,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     
     @Column(name = "DESCRIPTION")
     private String description;
-           
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-    
+               
     @OneToMany(mappedBy = "instrument")
      @XmlTransient
     private Collection<Investigation> investigationCollection;
@@ -128,24 +125,8 @@ public class Instrument extends EntityBaseBean implements Serializable {
      */
     public void setDescription(String description) {
         this.description = description;
-    }
-    
-           /**
-     * Gets the modId of this Instrument.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-    
-    /**
-     * Sets the modId of this Instrument to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-    
+    }    
+     
     /**
      * Gets the investigationCollection of this Instrument.
      * @return the investigationCollection

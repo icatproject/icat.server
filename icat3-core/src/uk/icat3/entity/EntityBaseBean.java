@@ -21,6 +21,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 import org.apache.log4j.Logger;
 import uk.icat3.exceptions.EntityNotModifiableError;
@@ -51,8 +52,7 @@ public class EntityBaseBean {
     @Column(name = "DELETED", nullable = false )
     @ICAT(merge=false)
     protected String deleted;
-    
-    @XmlTransient
+        
     protected transient boolean deletedBoolean;
     
     @Column(name = "MOD_ID", nullable = false)
@@ -193,7 +193,7 @@ public class EntityBaseBean {
             
             for (Annotation a : allFields[i].getDeclaredAnnotations()) {
                 if(a.annotationType().getName().equals(javax.persistence.Id.class.getName())){
-                    id = true;     
+                    id = true;
                 }
                 if(a.annotationType().getName().equals(javax.persistence.GeneratedValue.class.getName())){
                     generateValue = true;

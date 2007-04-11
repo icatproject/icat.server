@@ -36,20 +36,13 @@ import javax.persistence.TemporalType;
         @NamedQuery(name = "UserAccessGroup.findByModTime", query = "SELECT u FROM UserAccessGroup u WHERE u.modTime = :modTime"),
         @NamedQuery(name = "UserAccessGroup.findByModId", query = "SELECT u FROM UserAccessGroup u WHERE u.modId = :modId")
     })
-public class UserAccessGroup implements Serializable {
+public class UserAccessGroup extends EntityBaseBean implements Serializable {
 
     /**
      * EmbeddedId primary key field
      */
     @EmbeddedId
     protected UserAccessGroupPK userAccessGroupPK;
-
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
 
     @JoinColumn(name = "ACCESS_GROUP_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
@@ -66,19 +59,7 @@ public class UserAccessGroup implements Serializable {
     public UserAccessGroup(UserAccessGroupPK userAccessGroupPK) {
         this.userAccessGroupPK = userAccessGroupPK;
     }
-
-    /**
-     * Creates a new instance of UserAccessGroup with the specified values.
-     * @param userAccessGroupPK the userAccessGroupPK of the UserAccessGroup
-     * @param modTime the modTime of the UserAccessGroup
-     * @param modId the modId of the UserAccessGroup
-     */
-    public UserAccessGroup(UserAccessGroupPK userAccessGroupPK, Date modTime, String modId) {
-        this.userAccessGroupPK = userAccessGroupPK;
-        this.modTime = modTime;
-        this.modId = modId;
-    }
-
+ 
     /**
      * Creates a new instance of UserAccessGroupPK with the specified values.
      * @param accessGroupId the accessGroupId of the UserAccessGroupPK
@@ -103,39 +84,7 @@ public class UserAccessGroup implements Serializable {
     public void setUserAccessGroupPK(UserAccessGroupPK userAccessGroupPK) {
         this.userAccessGroupPK = userAccessGroupPK;
     }
-
-    /**
-     * Gets the modTime of this UserAccessGroup.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this UserAccessGroup to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
-    /**
-     * Gets the modId of this UserAccessGroup.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this UserAccessGroup to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
+    
     /**
      * Gets the accessGroup of this UserAccessGroup.
      * @return the accessGroup

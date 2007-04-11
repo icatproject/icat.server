@@ -47,14 +47,7 @@ public class StudyInvestigation extends EntityBaseBean implements Serializable {
 
     @Column(name = "INVESTIGATION_VISIT_ID", nullable = false)
     private String investigationVisitId;
-
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
+   
     @JoinColumn(name = "STUDY_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     private Investigation investigation;
@@ -129,39 +122,7 @@ public class StudyInvestigation extends EntityBaseBean implements Serializable {
     public void setInvestigationVisitId(String investigationVisitId) {
         this.investigationVisitId = investigationVisitId;
     }
-
-    /**
-     * Gets the modId of this StudyInvestigation.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this StudyInvestigation to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
-    /**
-     * Gets the modTime of this StudyInvestigation.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this StudyInvestigation to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
+  
     /**
      * Gets the investigation of this StudyInvestigation.
      * @return the investigation

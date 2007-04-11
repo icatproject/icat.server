@@ -48,14 +48,7 @@ public class Shift extends EntityBaseBean implements Serializable {
 
     @Column(name = "SHIFT_COMMENT")
     private String shiftComment;
-
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
+    
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
@@ -126,39 +119,7 @@ public class Shift extends EntityBaseBean implements Serializable {
     public void setShiftComment(String shiftComment) {
         this.shiftComment = shiftComment;
     }
-
-    /**
-     * Gets the modId of this Shift.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this Shift to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
-    /**
-     * Gets the modTime of this Shift.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this Shift to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
+   
     /**
      * Gets the investigation of this Shift.
      * @return the investigation

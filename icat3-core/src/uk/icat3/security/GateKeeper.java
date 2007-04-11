@@ -166,7 +166,7 @@ public class GateKeeper {
             
             //TODO: added by gjd37, if user one of investigators then allow access
             for(Investigator investigator : investigation.getInvestigatorCollection()){
-                log.trace(investigator);
+                log.trace(""+investigator.getFacilityUser());
                 if(investigator.getFacilityUser().getFederalId().equals(user)){
                     //passed for this investigation
                     log.debug("User: " + user + " granted " + access + " permission on " + element );

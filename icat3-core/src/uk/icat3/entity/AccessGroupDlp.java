@@ -43,14 +43,7 @@ public class AccessGroupDlp extends EntityBaseBean implements Serializable {
      */
     @EmbeddedId
     protected AccessGroupDlpPK accessGroupDlpPK;
-
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
+  
     @JoinColumn(name = "ACCESS_GROUP_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     private AccessGroup accessGroup;
@@ -88,7 +81,7 @@ public class AccessGroupDlp extends EntityBaseBean implements Serializable {
      * @param dlpId the dlpId of the AccessGroupDlpPK
      * @param accessGroupId the accessGroupId of the AccessGroupDlpPK
      */
-    public AccessGroupDlp(BigInteger dlpId, BigInteger accessGroupId) {
+    public AccessGroupDlp(Long dlpId, Long accessGroupId) {
         this.accessGroupDlpPK = new AccessGroupDlpPK(dlpId, accessGroupId);
     }
 
@@ -107,39 +100,7 @@ public class AccessGroupDlp extends EntityBaseBean implements Serializable {
     public void setAccessGroupDlpPK(AccessGroupDlpPK accessGroupDlpPK) {
         this.accessGroupDlpPK = accessGroupDlpPK;
     }
-
-    /**
-     * Gets the modTime of this AccessGroupDlp.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this AccessGroupDlp to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
-    /**
-     * Gets the modId of this AccessGroupDlp.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this AccessGroupDlp to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
+    
     /**
      * Gets the accessGroup of this AccessGroupDlp.
      * @return the accessGroup

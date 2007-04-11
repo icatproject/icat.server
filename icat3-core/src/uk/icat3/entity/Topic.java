@@ -54,14 +54,7 @@ public class Topic extends EntityBaseBean implements Serializable {
 
     @Column(name = "TOPIC_LEVEL")
     private Long topicLevel;
-
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
+ 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "topic")
     private Collection<TopicList> topicListCollection;
     
@@ -151,38 +144,6 @@ public class Topic extends EntityBaseBean implements Serializable {
      */
     public void setTopicLevel(Long topicLevel) {
         this.topicLevel = topicLevel;
-    }
-
-    /**
-     * Gets the modTime of this Topic.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this Topic to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
-    /**
-     * Gets the modId of this Topic.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this Topic to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
     }
 
     /**

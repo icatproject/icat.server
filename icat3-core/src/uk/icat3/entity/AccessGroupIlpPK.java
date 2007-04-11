@@ -23,10 +23,10 @@ import javax.persistence.Embeddable;
 public class AccessGroupIlpPK implements Serializable {
 
     @Column(name = "ACCESS_GROUP_ID", nullable = false)
-    private BigInteger accessGroupId;
+    private Long accessGroupId;
 
     @Column(name = "ILP_ID", nullable = false)
-    private BigInteger ilpId;
+    private Long ilpId;
     
     /** Creates a new instance of AccessGroupIlpPK */
     public AccessGroupIlpPK() {
@@ -37,7 +37,7 @@ public class AccessGroupIlpPK implements Serializable {
      * @param ilpId the ilpId of the AccessGroupIlpPK
      * @param accessGroupId the accessGroupId of the AccessGroupIlpPK
      */
-    public AccessGroupIlpPK(BigInteger ilpId, BigInteger accessGroupId) {
+    public AccessGroupIlpPK(Long ilpId, Long accessGroupId) {
         this.ilpId = ilpId;
         this.accessGroupId = accessGroupId;
     }
@@ -46,7 +46,7 @@ public class AccessGroupIlpPK implements Serializable {
      * Gets the accessGroupId of this AccessGroupIlpPK.
      * @return the accessGroupId
      */
-    public BigInteger getAccessGroupId() {
+    public Long getAccessGroupId() {
         return this.accessGroupId;
     }
 
@@ -54,7 +54,7 @@ public class AccessGroupIlpPK implements Serializable {
      * Sets the accessGroupId of this AccessGroupIlpPK to the specified value.
      * @param accessGroupId the new accessGroupId
      */
-    public void setAccessGroupId(BigInteger accessGroupId) {
+    public void setAccessGroupId(Long accessGroupId) {
         this.accessGroupId = accessGroupId;
     }
 
@@ -62,7 +62,7 @@ public class AccessGroupIlpPK implements Serializable {
      * Gets the ilpId of this AccessGroupIlpPK.
      * @return the ilpId
      */
-    public BigInteger getIlpId() {
+    public Long getIlpId() {
         return this.ilpId;
     }
 
@@ -70,7 +70,7 @@ public class AccessGroupIlpPK implements Serializable {
      * Sets the ilpId of this AccessGroupIlpPK to the specified value.
      * @param ilpId the new ilpId
      */
-    public void setIlpId(BigInteger ilpId) {
+    public void setIlpId(Long ilpId) {
         this.ilpId = ilpId;
     }
 

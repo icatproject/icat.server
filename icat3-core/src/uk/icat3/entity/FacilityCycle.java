@@ -54,13 +54,6 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
     @Column(name = "DESCRIPTION")
     private String description;
 
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
     @OneToMany(mappedBy = "facilityCycle")
     private Collection<Investigation> investigationCollection;
     
@@ -151,39 +144,7 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    /**
-     * Gets the modTime of this FacilityCycle.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this FacilityCycle to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
-    /**
-     * Gets the modId of this FacilityCycle.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this FacilityCycle to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
+   
     /**
      * Gets the investigationCollection of this FacilityCycle.
      * @return the investigationCollection

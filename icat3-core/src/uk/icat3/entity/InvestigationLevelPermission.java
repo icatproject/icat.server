@@ -71,14 +71,7 @@ public class InvestigationLevelPermission extends EntityBaseBean implements Seri
     
     @Column(name = "PRM_DELETE", nullable = false)
     private short prmDelete;
-    
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-    
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-    
+          
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID")
     @ManyToOne
     private Investigation investigationId;
@@ -233,39 +226,7 @@ public class InvestigationLevelPermission extends EntityBaseBean implements Seri
     public void setPrmDelete(short prmDelete) {
         this.prmDelete = prmDelete;
     }
-    
-    /**
-     * Gets the modTime of this InvestigationLevelPermission.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-    
-    /**
-     * Sets the modTime of this InvestigationLevelPermission to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-    
-    /**
-     * Gets the modId of this InvestigationLevelPermission.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-    
-    /**
-     * Sets the modId of this InvestigationLevelPermission to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-    
+           
     /**
      * Gets the investigationId of this InvestigationLevelPermission.
      * @return the investigationId

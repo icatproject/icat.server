@@ -167,7 +167,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<TopicList> topicListCollection;
     
-    @XmlTransient
     private transient InvestigationInclude investigationInclude = InvestigationInclude.NONE;
     
     /** Creates a new instance of Investigation */
@@ -863,13 +862,15 @@ public class Investigation extends EntityBaseBean implements Serializable {
             }
         }
         //check if unique
-        if(!isUnique(manager)) throw new ValidationException(this+" is not unique.");
+        boolean isUnique = isUnique(manager);
+        log.trace(isUnique);
+        if(!isUnique) throw new ValidationException(this+" is not unique.");
         
         return isValid();
     }
     
     private boolean isUnique(EntityManager manager){
-        
+        log.trace("isUnique?");
         Query query =  manager.createNamedQuery("Investigation.findByUnique");
         query = query.setParameter("invNumber",invNumber);
         query = query.setParameter("visitId", visitId);
@@ -883,6 +884,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
             else return false;
         } catch(NoResultException nre) {
             //means it is unique
+            log.trace("is unique");
             return true;
         }
     }
