@@ -33,7 +33,7 @@ import static uk.icat3.util.TestConstants.*;
 public class TestSample extends BaseTestClassTX {
     
     private static Logger log = Logger.getLogger(TestSample.class);
-    private Random random = new Random();
+    private static Random random = new Random();
     
     /**
      * Tests creating a file
@@ -262,7 +262,7 @@ public class TestSample extends BaseTestClassTX {
     
     
     
-    private Sample getSampleDuplicate(boolean last){
+     static Sample getSampleDuplicate(boolean last){
         Sample sample = null;
         if(!last){
             Collection<Sample> samples = (Collection<Sample>)executeListResultCmd("select d from Sample d where d.createId LIKE '%PROP%'");
@@ -275,7 +275,7 @@ public class TestSample extends BaseTestClassTX {
         return sample;
     }
     
-    private Sample getSample(boolean valid){
+    static Sample getSample(boolean valid){
         if(valid){
             //create valid sample
             Sample sample = new Sample();
