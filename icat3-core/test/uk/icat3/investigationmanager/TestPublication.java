@@ -300,8 +300,8 @@ public class TestPublication extends BaseTestClassTX {
         assertNotNull("getId cannot be null", publication.getId());
         assertNotNull("getInvestigationId cannot be null", publication.getInvestigationId());
         assertNotNull("full ref cannot be null", publication.getFullReference());
-        assertEquals("Create id must be "+VALID_USER_FOR_INVESTIGATION, publication.getCreateId(), VALID_USER_FOR_INVESTIGATION);
-        assertEquals("Mod id must be "+VALID_USER_FOR_INVESTIGATION, publication.getModId(), VALID_USER_FOR_INVESTIGATION);
+        assertEquals("Create id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, publication.getCreateId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
+        assertEquals("Mod id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, publication.getModId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
         assertEquals("Investigation id must be "+VALID_INVESTIGATION_ID, publication.getInvestigationId().getId(), VALID_INVESTIGATION_ID);
         
     }

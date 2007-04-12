@@ -251,8 +251,8 @@ public class TestKeyword extends BaseTestClassTX {
         assertNotNull("PK cannot be null", keyword.getKeywordPK());
         assertNotNull("name cannot be null", keyword.getKeywordPK().getName());
         assertNotNull("investigation id cannot be null", keyword.getKeywordPK().getInvestigationId());
-        assertEquals("Create id must be "+VALID_USER_FOR_INVESTIGATION, keyword.getCreateId(), VALID_USER_FOR_INVESTIGATION);
-        assertEquals("Mod id must be "+VALID_USER_FOR_INVESTIGATION, keyword.getModId(), VALID_USER_FOR_INVESTIGATION);
+        assertEquals("Create id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, keyword.getCreateId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
+        assertEquals("Mod id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, keyword.getModId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
         assertEquals("Investigation id must be "+VALID_INVESTIGATION_ID, keyword.getInvestigation().getId(), VALID_INVESTIGATION_ID);
         
     }

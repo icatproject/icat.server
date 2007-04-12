@@ -123,7 +123,7 @@ public class TestInvestigator extends BaseTestClassTX {
         
         Investigator investigatorInserted = (Investigator)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateInvestigator, VALID_DATASET_ID_FOR_INVESTIGATION, em);
         
-        Investigator modified = em.find(Investigator.class,investigatorInserted.getInvestigatorPK() );        
+        Investigator modified = em.find(Investigator.class,investigatorInserted.getInvestigatorPK() );
         
         checkInvestigator(modified);
         assertFalse("Deleted must be false", modified.isDeleted());
@@ -292,10 +292,10 @@ public class TestInvestigator extends BaseTestClassTX {
         assertNotNull("PK cannot be null", investigator.getInvestigatorPK());
         assertNotNull("FacilityUserId cannot be null", investigator.getInvestigatorPK().getFacilityUserId());
         assertNotNull("PK InvestigationId cannot be null", investigator.getInvestigatorPK().getInvestigationId());
-        assertEquals("Create id must be "+VALID_USER_FOR_INVESTIGATION, investigator.getCreateId(), VALID_USER_FOR_INVESTIGATION);
-        assertEquals("Mod id must be "+VALID_USER_FOR_INVESTIGATION, investigator.getModId(), VALID_USER_FOR_INVESTIGATION);
+        assertEquals("Create id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, investigator.getCreateId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
+        assertEquals("Mod id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, investigator.getModId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
         assertEquals("Investigation id must be "+VALID_INVESTIGATION_ID, investigator.getInvestigation().getId(), VALID_INVESTIGATION_ID);
-        assertEquals("PK Investigation id must be "+VALID_INVESTIGATION_ID, investigator.getInvestigatorPK().getInvestigationId(), VALID_INVESTIGATION_ID);        
+        assertEquals("PK Investigation id must be "+VALID_INVESTIGATION_ID, investigator.getInvestigatorPK().getInvestigationId(), VALID_INVESTIGATION_ID);
     }
     
     public static junit.framework.Test suite(){

@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 import junit.framework.JUnit4TestAdapter;
-
 import org.apache.log4j.Logger;
 import uk.icat3.entity.InvestigationType;
 import uk.icat3.exceptions.ICATAPIException;
@@ -89,9 +88,8 @@ public class TestInvestigation extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
         Investigation validInvestigation  = getInvestigationDuplicate(true);
-        
-        
-        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validInvestigation,  AccessType.DELETE, em);
+                
+        InvestigationManager.deleteInvestigation(VALID_USER_FOR_INVESTIGATION, validInvestigation, em);
         
         Investigation modified = em.find(Investigation.class,validInvestigation.getId() );
         
@@ -115,7 +113,7 @@ public class TestInvestigation extends BaseTestClassTX {
         //create invalid investigation, no name
         Investigation duplicateInvestigation = getInvestigationDuplicate(true);
         
-        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateInvestigation, AccessType.REMOVE, em);
+        InvestigationManager.removeInvestigation(VALID_USER_FOR_INVESTIGATION, duplicateInvestigation, em);
         
         Investigation modified = em.find(Investigation.class,duplicateInvestigation.getId() );
         
@@ -125,7 +123,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    // @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void addInvestigationInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for adding investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -274,8 +272,8 @@ public class TestInvestigation extends BaseTestClassTX {
         assertNotNull("investigation title cannot be null", investigation.getTitle());
         assertNotNull("investigation InvNumber cannot be null", investigation.getInvNumber());
         assertNotNull("investigation id cannot be null", investigation.getId());
-        assertEquals("Create id must be "+VALID_USER_FOR_INVESTIGATION, investigation.getCreateId(), VALID_USER_FOR_INVESTIGATION);
-        assertEquals("Mod id must be "+VALID_USER_FOR_INVESTIGATION, investigation.getModId(), VALID_USER_FOR_INVESTIGATION);
+        assertEquals("Create id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, investigation.getCreateId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
+        assertEquals("Mod id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, investigation.getModId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
     }
     
     public static junit.framework.Test suite(){
