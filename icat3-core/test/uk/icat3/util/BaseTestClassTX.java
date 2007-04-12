@@ -19,9 +19,9 @@ import org.junit.BeforeClass;
 /**
  *
  * Extend this when you want setUp and tear down to be called one in the class and not after and before every @Test method
- * But you want a new transaction to start and finish before and after evey method
+ * But you want a new transaction to start and finish before and after evey method aswell as new entity manager
  *
- * Basically, manager is loaded per class and new transactions with every method
+ * Basically, managerfactory is loaded per class and new transactions and entitymanager with every method
  *
  * @author gjd37
  */
@@ -31,6 +31,9 @@ public class BaseTestClassTX extends BaseTest{
     
     @Before
     public void beginTX(){
+        log.debug("setUp(), creating entityManager");
+        em = emf.createEntityManager();
+        
         // Begin transaction
         log.debug("beginning transaction on entityManager");
         
@@ -39,24 +42,28 @@ public class BaseTestClassTX extends BaseTest{
     
     @After
     public void closeTX(){
+        
         // Commit the transaction
         log.debug("commiting transaction on entityManager");
         try {
             em.getTransaction().commit();
         } catch(RuntimeException t){
-            log.error(t);  
+            log.error(t);
             throw t;
+        } finally {
+            log.debug("tearDown(), closing entityManager");
+            em.close();
         }
     }
     
     @BeforeClass
     public static void BeforeClassSetUp(){
-        setUpEntityManagerOnly();
+        setUpEntityManagerFactoryOnly();
     }
     
     @AfterClass
     public static void AfterClassTearDown(){
-        tearDownEntityManagerOnly();
+        tearDownEntityManagerFactoryOnly();
     }
     
     

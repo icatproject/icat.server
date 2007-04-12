@@ -16,7 +16,7 @@ package uk.icat3.util;
 public class TestConstants {
     
     public final static String VALID_USER_FOR_INVESTIGATION =  "JAMES-JAMES";
-     public final static String VALID_FACILITY_USER_FOR_INVESTIGATION =  "JAMES";
+    public final static String VALID_FACILITY_USER_FOR_INVESTIGATION =  "JAMES";
     public final static long VALID_DATASET_ID_FOR_INVESTIGATION =  2;
     public final static long VALID_INVESTIGATION_ID =  2;
     public final static long VALID_DATA_SET_ID =  2;

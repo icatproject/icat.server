@@ -60,6 +60,17 @@ public class BaseTest {
         em.close();
     }
     
+    public static void setUpEntityManagerFactoryOnly(){
+        
+        emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
+        
+    }
+    
+    public static void tearDownEntityManagerFactoryOnly(){
+        
+        emf.close();
+    }
+    
     public static void tearDown(){
         
         // Commit the transaction

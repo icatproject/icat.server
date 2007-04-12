@@ -40,7 +40,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //   @Test
+    @Test
     public void addSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -59,7 +59,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    // @Test
+    @Test
     public void modifySampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -81,7 +81,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    // @Test(expected=ValidationException.class)
+    @Test(expected=ValidationException.class)
     public void addDuplicateSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -100,7 +100,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //  @Test
+    @Test
     public void deleteSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -118,7 +118,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test
+    @Test
     public void addDeletedSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -136,7 +136,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    // @Test
+    @Test
     public void removeSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -153,7 +153,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    // @Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void addSampleParameterInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for adding sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -172,7 +172,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    // @Test(expected=NoSuchObjectFoundException.class)
+    @Test(expected=NoSuchObjectFoundException.class)
     public void addSampleParameterInvalidInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sampleParameter to invalid investigation Id");
         
@@ -191,7 +191,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=NoSuchObjectFoundException.class)
+    @Test(expected=NoSuchObjectFoundException.class)
     public void addSampleParameterInvalidSampleId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sampleParameter to invalid investigation Id");
         
@@ -210,7 +210,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //   @Test(expected=ValidationException.class)
+    @Test(expected=ValidationException.class)
     public void addInvalidSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -229,7 +229,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //  @Test(expected=ValidationException.class)
+    @Test(expected=ValidationException.class)
     public void addInvalidSampleParameter2() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -328,10 +328,11 @@ public class TestSampleParameter extends BaseTestClassTX {
     @Test
     public void removeParameter(){
         Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
-        Parameter  parameter = parameters.iterator().next();
-        if(parameter.getCreateId().equals("SAMPLE_PARAMETER_ADDED")){
-            log.info("Removing added parameter: "+parameter );
-            em.remove(parameter);
+        for(Parameter  parameter : parameters){
+            if(parameter.getCreateId().equals("SAMPLE_PARAMETER_ADDED")){
+                log.info("Removing added parameter: "+parameter );
+                em.remove(parameter);
+            }
         }
     }
     
@@ -357,7 +358,7 @@ public class TestSampleParameter extends BaseTestClassTX {
             Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.numericValue = 'N' AND d.isSampleParameter = 'Y'");
             if(parameters.size() == 0){
                 log.trace("Adding new parameter");
-                Parameter param = new Parameter("units","name");
+                Parameter param = new Parameter("units string","name");
                 param.setIsSampleParameter("Y");
                 param.setIsDatasetParameter("N");
                 param.setIsDatafileParameter("N");
