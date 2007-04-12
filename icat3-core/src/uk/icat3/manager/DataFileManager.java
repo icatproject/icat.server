@@ -63,7 +63,9 @@ public class DataFileManager extends ManagerUtil {
         
         //check user has delete access
         GateKeeper.performAuthorisation(userId, dataFile, AccessType.DELETE, manager);
+        String facilityUserId = getFacilityUserId(userId, manager);
         
+        dataFile.setCascade(Cascade.MOD_ID, facilityUserId);
         dataFile.setCascade(Cascade.DELETE,Boolean.TRUE);
     }
     
@@ -111,12 +113,17 @@ public class DataFileManager extends ManagerUtil {
     public static Datafile createDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataFile("+userId+", "+dataFile+", EntityManager)");
         
+        //check user has update access
+        GateKeeper.performAuthorisation(userId, dataFile, AccessType.CREATE, manager);
+        String facilityUserId = getFacilityUserId(userId, manager);
+        
         dataFile.isValid(manager);
         
         //new dataset, set createid, this sets mod id and modtime
         dataFile.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
-        dataFile.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
+        dataFile.setCascade(Cascade.MOD_AND_CREATE_IDS, facilityUserId);
         manager.persist(dataFile);
+        
         return dataFile;
     }
     
@@ -137,9 +144,11 @@ public class DataFileManager extends ManagerUtil {
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, datafileManaged, AccessType.UPDATE, manager);
+        String facilityUserId = getFacilityUserId(userId, manager);
         
-        datafileManaged.setModId(userId);
+        datafileManaged.setModId(facilityUserId);
         datafileManaged.merge(dataFile);
+        
         return datafileManaged;
     }
     
@@ -161,7 +170,7 @@ public class DataFileManager extends ManagerUtil {
         dataFile.setDatasetId(dataset);
         dataFile.setId(null);
         
-        return updateDataFile(userId, dataFile, manager);
+        return createDataFile(userId, dataFile, manager);
     }
     
     /**
@@ -247,9 +256,11 @@ public class DataFileManager extends ManagerUtil {
         
         //ok, now check permissions on found data set
         GateKeeper.performAuthorisation(userId, datafileParameterFound, AccessType.UPDATE, manager);
+        String facilityUserId = getFacilityUserId(userId, manager);
         
         //update model with changed wanted
         datafileParameterFound.merge(datafileParameter);
+        datafileParameterFound.setModId(facilityUserId);
         
         datafileParameterFound.isValid(manager);
     }
@@ -262,13 +273,15 @@ public class DataFileManager extends ManagerUtil {
         
         //set id for datafileParameter
         datafileParameter.setDatafile(datafile);
-        datafileParameter.setCreateId(userId);
         
         //check is valid, check parent datafile is in the private key
         datafileParameter.isValid(manager);
         
         //ok, now check permissions
         GateKeeper.performAuthorisation(userId, datafileParameter, AccessType.CREATE, manager);
+        String facilityUserId = getFacilityUserId(userId, manager);
+        
+        datafileParameter.setCreateId(facilityUserId);
         
         manager.persist(datafileParameter);
         
@@ -308,7 +321,9 @@ public class DataFileManager extends ManagerUtil {
         
         //ok, now check permissions
         GateKeeper.performAuthorisation(userId, datafileParameterManaged, AccessType.DELETE, manager);
+        String facilityUserId = getFacilityUserId(userId, manager);
         
+        datafileParameterManaged.setModId(facilityUserId);
         datafileParameterManaged.setDeleted(true);
     }
 }

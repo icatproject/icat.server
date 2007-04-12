@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.manager.ManagerUtil;
 import uk.icat3.util.AccessType;
 import javax.persistence.EntityManager;
 import uk.icat3.entity.Datafile;
@@ -105,7 +106,7 @@ public class GateKeeper {
             performAuthorisation(user, invList, access, ((Datafile)object), manager);
         } else if(object instanceof DatasetParameter){
             invList.add(((DatasetParameter)object).getDataset().getInvestigationId());
-            performAuthorisation(user, invList, access, ((Dataset)object), manager);
+            performAuthorisation(user, invList, access, ((DatasetParameter)object), manager);
         }else if(object instanceof DatafileParameter){
             invList.add(((DatafileParameter)object).getDatafile().getDatasetId().getInvestigationId());
             performAuthorisation(user, invList, access, ((DatafileParameter)object), manager);
@@ -151,10 +152,22 @@ public class GateKeeper {
      *                          permission to perform operation.
      */
     private static void performAuthorisation(String user, Collection<Investigation> investigations, AccessType access, EntityBaseBean element, EntityManager manager) throws InsufficientPrivilegesException {
-        
+       
         //TODO
         //if creating investigation, anyone allowed to do that?
-        if(access == AccessType.CREATE && element instanceof Investigation) return ;
+        if(access == AccessType.CREATE && element instanceof Investigation) {
+            try {
+                //check if user in facilityuser table
+                ManagerUtil.getFacilityUserId(user, manager);
+            } catch(Exception e) {               
+                //if we get to here then user does not have permission so we need to throw an exception
+                InsufficientPrivilegesException inse = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
+                log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
+                throw(inse);
+            }
+            log.debug("User: " + user + " granted " + access + " permission on " + element );
+            return ;
+        }
         
         //if user is a system administrator then return (no need to check each request)
         //TBI...
@@ -165,6 +178,7 @@ public class GateKeeper {
             //TBI...
             
             //TODO: added by gjd37, if user one of investigators then allow access
+            if(investigation.getInvestigatorCollection() == null) break;
             for(Investigator investigator : investigation.getInvestigatorCollection()){
                 log.trace(""+investigator.getFacilityUser());
                 if(investigator.getFacilityUser().getFederalId().equals(user)){

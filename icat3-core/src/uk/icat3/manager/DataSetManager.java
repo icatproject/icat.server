@@ -100,6 +100,21 @@ public class DataSetManager extends ManagerUtil {
     
     /**
      *
+     * Removes the data set for a user depending if the users id has delete permissions to delete the data set from the
+     * data set ID.
+     *
+     * @param userId
+     * @param dataSetId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
+    public static void removeDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+        removeDataSet(userId, dataSet.getId(), manager);
+    }
+    
+    /**
+     *
      * Removes a collection of data set for a user depending if the users id has delete permissions to delete the data set from the
      * data set ID.
      *
@@ -166,14 +181,22 @@ public class DataSetManager extends ManagerUtil {
     public static Dataset createDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataSet("+userId+", "+dataSet+", EntityManager)");
         
+        //check investigation exists
+        if(dataSet.getInvestigationId() == null) throw new NoSuchObjectFoundException(dataSet+" has no assoicated investigation");
+        Investigation investigation  = find(Investigation.class, dataSet.getInvestigationId().getId(), manager);
+        dataSet.setInvestigationId(investigation);
+        dataSet.setId(null);
+        
         //check user has update access
-        GateKeeper.performAuthorisation(userId, dataSet, AccessType.UPDATE, manager);
+        GateKeeper.performAuthorisation(userId, dataSet, AccessType.CREATE, manager);
+        String facilityUserId = getFacilityUserId(userId, manager);
         
         dataSet.isValid(manager);
         
         //new dataset, set createid, this sets mod id and modtime
-        dataSet.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
+        dataSet.setCascade(Cascade.MOD_AND_CREATE_IDS, facilityUserId);
         dataSet.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
+        
         manager.persist(dataSet);
         return dataSet;
     }
@@ -195,8 +218,9 @@ public class DataSetManager extends ManagerUtil {
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, datasetManaged, AccessType.UPDATE, manager);
+        String facilityUserId = getFacilityUserId(userId, manager);
         
-        datasetManaged.setModId(userId);
+        datasetManaged.setModId(facilityUserId);
         datasetManaged.merge(dataSet);
         
         datasetManaged.isValid(manager);
@@ -349,10 +373,11 @@ public class DataSetManager extends ManagerUtil {
         }
         //ok, now check permissions
         GateKeeper.performAuthorisation(userId, datasetManaged, AccessType.UPDATE, manager);
+        String facilityUserId = getFacilityUserId(userId, manager);
         
         //add the dataset parameter to the dataset
         datasetManaged.setSampleId(sampleId);
-        
+        datasetManaged.setModId(facilityUserId);
     }
     
     public static DatasetParameter addDataSetParameter(String userId, DatasetParameter dataSetParameter, Long datasetId,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
@@ -363,21 +388,42 @@ public class DataSetManager extends ManagerUtil {
         
         //set id for dataSetParameter
         dataSetParameter.setDataset(dataset);
-        dataSetParameter.setCreateId(userId);
         
         //check is valid, check parent dataset is in the private key
         dataSetParameter.isValid(manager);
         
         //ok, now check permissions
         GateKeeper.performAuthorisation(userId, dataSetParameter, AccessType.CREATE, manager);
+        String facilityUserId = getFacilityUserId(userId, manager);
         
-        manager.persist(dataSetParameter);
-        
-        return dataSetParameter;
+        try {
+            //check dataSetParameterManaged not already added
+            DatasetParameter dataSetParameterManaged = find(DatasetParameter.class, dataSetParameter.getDatasetParameterPK(), manager);
+            if(dataSetParameterManaged.isDeleted()){
+                dataSetParameterManaged.setDeleted(false);
+                dataSetParameterManaged.setModId(facilityUserId);
+                log.info(dataSetParameterManaged +" been deleted, undeleting now.");
+                return dataSetParameterManaged;
+            } else {
+                //do nothing, throw exception
+                log.warn(dataSetParameterManaged +" already added to dataset.");
+                throw new ValidationException(dataSetParameterManaged+" is not unique");
+            }
+        } catch (NoSuchObjectFoundException ex) {
+            //not already in DB so add
+            //sets modId for persist
+            dataSetParameter.setCreateId(facilityUserId);
+            manager.persist(dataSetParameter);
+            return dataSetParameter;
+        }        
+       
     }
     
     public static DatasetParameter addDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("addDataSetParameter("+userId+", "+dataSetParameter+", EntityManager)");
+        
+        //check investigation exists
+        if(dataSetParameter.getDatasetParameterPK() == null) throw new ValidationException(dataSetParameter+" has no assoicated primary key.");
         
         Long datasetId = dataSetParameter.getDatasetParameterPK().getDatasetId();
         return  addDataSetParameter(userId, dataSetParameter, datasetId, manager);
@@ -385,6 +431,9 @@ public class DataSetManager extends ManagerUtil {
     
     public static void removeDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("removeDataSetParameter("+userId+", "+dataSetParameter+", EntityManager)");
+        
+        //check investigation exists
+        if(dataSetParameter.getDatasetParameterPK() == null) throw new ValidationException(dataSetParameter+" has no assoicated primary key.");
         
         Long datasetId = dataSetParameter.getDatasetParameterPK().getDatasetId();
         
@@ -402,6 +451,8 @@ public class DataSetManager extends ManagerUtil {
     public static void deleteDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("deleteDataSetParameter("+userId+", "+dataSetParameter+", EntityManager)");
         
+        //check investigation exists
+        if(dataSetParameter.getDatasetParameterPK() == null) throw new ValidationException(dataSetParameter+" has no assoicated primary key.");
         Long datasetId = dataSetParameter.getDatasetParameterPK().getDatasetId();
         
         //find the dataset
@@ -409,7 +460,9 @@ public class DataSetManager extends ManagerUtil {
         
         //ok, now check permissions
         GateKeeper.performAuthorisation(userId, dataSetParameterManaged, AccessType.DELETE, manager);
+        String facilityUserId = getFacilityUserId(userId, manager);
         
+        dataSetParameterManaged.setModId(facilityUserId);
         dataSetParameterManaged.setDeleted(true);
     }
     
@@ -420,12 +473,14 @@ public class DataSetManager extends ManagerUtil {
         
         //ok, now check permissions on found data set
         GateKeeper.performAuthorisation(userId, dataSetParameterFound, AccessType.UPDATE, manager);
+        String facilityUserId = getFacilityUserId(userId, manager);
         
         //update model with changed wanted
         dataSetParameterFound.merge(dataSetParameter);
+        dataSetParameterFound.setModId(facilityUserId);
         
         //check is valid, check parent dataset is in the private key
-        dataSetParameter.isValid(manager);
+        dataSetParameter.isValid(manager, false);
     }
 }
 

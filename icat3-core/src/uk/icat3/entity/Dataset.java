@@ -55,7 +55,7 @@ import uk.icat3.util.DatasetInclude;
     @NamedQuery(name = "Dataset.findByModTime", query = "SELECT d FROM Dataset d WHERE d.modTime = :modTime"),
     @NamedQuery(name = "Dataset.getBySampleId", query = "SELECT d FROM Dataset d where d.name = :sampleName"),
     @NamedQuery(name = "Dataset.findByModId", query = "SELECT d FROM Dataset d WHERE d.modId = :modId"),
-    @NamedQuery(name = "Dataset.findbyUnique", query = "SELECT d FROM Dataset d WHERE d.sampleId = :sampleId AND d.name = :name AND d.investigationId = :investigationId AND d.datasetType = :datasetType")
+    @NamedQuery(name = "Dataset.findbyUnique", query = "SELECT d FROM Dataset d WHERE (d.sampleId = :sampleId OR d.sampleId IS NULL) AND (d.name = :name OR d.name IS NULL) AND (d.investigationId = :investigationId OR d.investigationId IS NULL)  AND (d.datasetType = :datasetType OR d.datasetType IS NULL)")
 })
 @XmlRootElement
 @SequenceGenerator(name="DATASET_SEQ",sequenceName="DATASET_ID_SEQ",allocationSize=1)

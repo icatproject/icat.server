@@ -69,7 +69,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     
     @Column(name = "ERROR")
     private String error;
-        
+    
     @Column(name = "DESCRIPTION")
     private String description;
     
@@ -81,7 +81,7 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
     
     @JoinColumns(value =  {
         @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
-        @JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
+@JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
     })
     @ICAT(merge=false)
     @ManyToOne
@@ -365,8 +365,9 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
      * @return
      */
     @Override
-    public boolean isValid(EntityManager manager) throws ValidationException {
+    public boolean isValid(EntityManager manager, boolean deepValidation) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
+        if(datasetParameterPK == null) throw new ValidationException(this +" primary key cannot be null");
         
         //check valid
         String paramName = this.getDatasetParameterPK().getName();
@@ -394,10 +395,10 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
         }
         
         //check if datafile parameter is already in DB
-        DatasetParameter paramDB = manager.find(DatasetParameter.class, datasetParameterPK);
+        /*DatasetParameter paramDB = manager.find(DatasetParameter.class, datasetParameterPK);
         if(paramDB != null && !paramDB.getDatasetParameterPK().equals(deleted)) {
             throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" is already is a parameter of the dataset.");
-        }
+        }*/
         
         //check that the parameter dataset id is the same as actual dataset id
         if(getDataset() != null){
@@ -412,6 +413,6 @@ public class DatasetParameter extends EntityBaseBean implements Serializable {
         
         //once here then its valid
         return isValid();
-    }     
+    }
 }
 

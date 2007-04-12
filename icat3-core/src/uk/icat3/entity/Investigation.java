@@ -670,59 +670,136 @@ public class Investigation extends EntityBaseBean implements Serializable {
      *
      * @param isDeleted
      */
-    public void setCascadeDeleted(boolean isDeleted){
-        log.trace("Setting: "+toString()+" to deleted? "+isDeleted);
-        String deleted = (isDeleted) ? "Y" : "N";
+    public void setCascade(Cascade type, Object value){
+        log.trace("Setting: "+toString()+" from type: "+type+" to :"+value);
+        String deleted = "Y";
+        if(type == Cascade.DELETE){
+            deleted = (((Boolean)value).booleanValue()) ? "Y" : "N";
+        }
         
         //datafiles
-        for(Dataset dataset : getDatasetCollection()){
-            dataset.setCascade(Cascade.DELETE, isDeleted);
+        if(getDatasetCollection() != null){
+            for(Dataset dataset : getDatasetCollection()){
+                if(type == Cascade.DELETE)  dataset.setCascade(Cascade.DELETE, deleted);
+                else if(type == Cascade.MOD_ID) dataset.setModId(value.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    dataset.setModId(value.toString());
+                    dataset.setCreateId(value.toString());
+                }
+                
+            }
         }
         
         //investigators
-        for(Investigator investigator : getInvestigatorCollection()){
-            investigator.setDeleted(deleted);
+        if(getInvestigatorCollection() != null){
+            for(Investigator investigator : getInvestigatorCollection()){
+                if(type == Cascade.DELETE)  investigator.setDeleted(deleted);
+                else if(type == Cascade.MOD_ID) investigator.setModId(value.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    investigator.setModId(value.toString());
+                    investigator.setCreateId(value.toString());
+                }
+            }
         }
         
         //access groups
-        for(InvestigationLevelPermission investigationLevelPermission : getInvestigationLevelPermissionCollection()){
-            investigationLevelPermission.setDeleted(deleted);
-            for(AccessGroupIlp agilp : investigationLevelPermission.getAccessGroupIlpCollection()){
-                agilp.setDeleted(deleted);
+        if(getInvestigationLevelPermissionCollection() != null){
+            for(InvestigationLevelPermission investigationLevelPermission : getInvestigationLevelPermissionCollection()){
+                if(type == Cascade.DELETE)  investigationLevelPermission.setDeleted(deleted);
+                else if(type == Cascade.MOD_ID) investigationLevelPermission.setModId(value.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    investigationLevelPermission.setModId(value.toString());
+                    investigationLevelPermission.setCreateId(value.toString());
+                }
+                for(AccessGroupIlp agilp : investigationLevelPermission.getAccessGroupIlpCollection()){
+                    if(type == Cascade.DELETE)  agilp.setDeleted(deleted);
+                    else if(type == Cascade.MOD_ID) agilp.setModId(value.toString());
+                    else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                        agilp.setModId(value.toString());
+                        agilp.setCreateId(value.toString());
+                    }
+                }
             }
         }
         
         //sample
-        for(Sample sample : getSampleCollection()){
-            for(SampleParameter sp : sample.getSampleParameterCollection()){
-                sp.setDeleted(deleted);
+        if(getSampleCollection() != null){
+            for(Sample sample : getSampleCollection()){
+                for(SampleParameter sp : sample.getSampleParameterCollection()){
+                    if(type == Cascade.DELETE)  sp.setDeleted(deleted);
+                    else if(type == Cascade.MOD_ID) sp.setModId(value.toString());
+                    else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                        sp.setModId(value.toString());
+                        sp.setCreateId(value.toString());
+                    }
+                }
+                if(type == Cascade.DELETE)  sample.setDeleted(deleted);
+                else if(type == Cascade.MOD_ID) sample.setModId(value.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    sample.setModId(value.toString());
+                    sample.setCreateId(value.toString());
+                }
             }
-            sample.setDeleted(deleted);
         }
         
         //study
-        for(StudyInvestigation study : getStudyInvestigationCollection()){
-            study.setDeleted(deleted);
+        if(getStudyInvestigationCollection() != null){
+            for(StudyInvestigation study : getStudyInvestigationCollection()){
+                if(type == Cascade.DELETE)  study.setDeleted(deleted);
+                else if(type == Cascade.MOD_ID) study.setModId(value.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    study.setModId(value.toString());
+                    study.setCreateId(value.toString());
+                }
+            }
         }
         
         //shift
-        for(Shift shift : getShiftCollection()){
-            shift.setDeleted(deleted);
+        if(getShiftCollection() != null){
+            for(Shift shift : getShiftCollection()){
+                if(type == Cascade.DELETE)  shift.setDeleted(deleted);
+                else if(type == Cascade.MOD_ID) shift.setModId(value.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    shift.setModId(value.toString());
+                    shift.setCreateId(value.toString());
+                }
+            }
         }
         
         //publication
-        for(Publication publication : getPublicationCollection()){
-            publication.setDeleted(deleted);
+        if(getPublicationCollection() != null){
+            for(Publication publication : getPublicationCollection()){
+                if(type == Cascade.DELETE)  publication.setDeleted(deleted);
+                else if(type == Cascade.MOD_ID) publication.setModId(value.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    publication.setModId(value.toString());
+                    publication.setCreateId(value.toString());
+                }
+            }
         }
         
         //keyword
-        for(Keyword keyword : getKeywordCollection()){
-            keyword.setDeleted(deleted);
+        if(getKeywordCollection() != null){
+            for(Keyword keyword : getKeywordCollection()){
+                if(type == Cascade.DELETE)  keyword.setDeleted(deleted);
+                else if(type == Cascade.MOD_ID) keyword.setModId(value.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    keyword.setModId(value.toString());
+                    keyword.setCreateId(value.toString());
+                }
+            }
         }
         
         //topicList parameter
-        for(TopicList topicList : getTopicListCollection()){
-            topicList.setDeleted(deleted);
+        if(getTopicListCollection() != null){
+            for(TopicList topicList : getTopicListCollection()){
+               if(type == Cascade.DELETE)  topicList.setDeleted(deleted);
+                else if(type == Cascade.MOD_ID) topicList.setModId(value.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    topicList.setModId(value.toString());
+                    topicList.setCreateId(value.toString());
+                }
+            }
         }
         
         this.setDeleted(deleted);

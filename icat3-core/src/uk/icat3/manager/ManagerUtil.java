@@ -11,12 +11,14 @@ package uk.icat3.manager;
 
 import java.util.Collection;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
+import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.Investigation;
-import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.exceptions.ValidationException;
+import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.InvestigationInclude;
 
@@ -156,28 +158,28 @@ public class ManagerUtil {
    /* public Sample addSample(String userId, Sample sample, EntityManager manager) throws ValidationException{
         boolean unique = sample.isUnique(manager);
         if(!unique) throw new ValidationException(sample+" is not unique.");
-        
+    
         sample.isValid(manager);
-        
+    
         sample.setId(null);
         sample.setCreateId(userId);
-        
+    
         manager.persist(sample);
-        
+    
         return sample;
     }
     
      public Sample removeaddSample(String userId, Sample sample, EntityManager manager) throws ValidationException{
         boolean unique = sample.isUnique(manager);
         if(!unique) throw new ValidationException(sample+" is not unique.");
-        
+    
         sample.isValid(manager);
-        
+    
         sample.setId(null);
         sample.setCreateId(userId);
-        
+    
         manager.persist(sample);
-        
+    
         return sample;
     }*/
     
@@ -191,6 +193,8 @@ public class ManagerUtil {
      * @return object if found
      */
     public static <T> T find(Class<T> entityClass, Object primaryKey, EntityManager manager) throws NoSuchObjectFoundException{
+        if(primaryKey == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+": id: "+primaryKey+" not found.");
+        
         T object = manager.find(entityClass, primaryKey);
         
         if(object == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+": id: "+primaryKey+" not found.");
@@ -198,5 +202,21 @@ public class ManagerUtil {
         log.trace(entityClass.getSimpleName()+": id: "+primaryKey+" exists in the database");
         
         return object;
+    }
+    
+    public static String getFacilityUserId(String federalId, EntityManager manager) {
+        FacilityUser facilityUser = null;
+        try {
+            facilityUser = (FacilityUser) manager.createQuery("SELECT f FROM FacilityUser f where f.federalId = :fedId").setParameter("fedId", federalId).getSingleResult();
+            log.trace(""+facilityUser.getFacilityUserId()+" corresponds to "+federalId);
+            return facilityUser.getFacilityUserId();
+        } catch(NoResultException nre) {
+            log.warn("federalId:" +federalId+" has no associated facility user");
+            throw new RuntimeException("FederalId:" +federalId+" has no associated facility user in DB.");
+        } catch(NonUniqueResultException nonue){
+            log.warn("federalId:" +federalId+" has more than one associated facility user.");
+            throw new RuntimeException("federalId:" +federalId+" has more than one associated facility user.  DB should never allow this error to be thrown.");
+        }
+        
     }
 }
