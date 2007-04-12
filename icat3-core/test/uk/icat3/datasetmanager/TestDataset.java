@@ -24,6 +24,7 @@ import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetStatus;
 import uk.icat3.entity.Investigator;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataSetManager;
 import uk.icat3.util.AccessType;
@@ -57,13 +58,53 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void setDatasetInvalidSampleId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for setting invalid sample id to dataset Id: ");
+        
+        //create invalid dataset, no name
+        Dataset dataset = getDatasetDuplicate(true);
+        assertNull("sample must be null", dataset.getSampleId());
+        
+        try {
+            DataSetManager.setDataSetSample(VALID_USER_FOR_INVESTIGATION, 7684384L, dataset.getId(), em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void setDatasetSample() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for setting sample to dataset Id: ");
+        
+        //create invalid dataset, no name
+        Dataset dataset = getDatasetDuplicate(true);
+        assertNull("sample must be null", dataset.getSampleId());
+        
+        DataSetManager.setDataSetSample(VALID_USER_FOR_INVESTIGATION, VALID_SAMPLE_ID_FOR_INVESTIGATION_ID, dataset.getId(), em);
+        
+        Dataset modified = em.find(Dataset.class,dataset.getId() );
+        
+        checkDataset(modified);
+        assertFalse("Deleted must be false", modified.isDeleted());
+        assertEquals("Sample id is "+VALID_SAMPLE_ID_FOR_INVESTIGATION_ID,VALID_SAMPLE_ID_FOR_INVESTIGATION_ID, modified.getSampleId());
+    }
+    
+    /**
+     * Tests creating a file
+     */
     @Test(expected=ValidationException.class)
     public void addDuplicateDataset() throws ICATAPIException, Exception {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid dataset, no name
         Dataset duplicateDataset = getDataset(true);
-        
+        duplicateDataset.setSampleId(VALID_SAMPLE_ID_FOR_INVESTIGATION_ID);
         try {
             Dataset datasetInserted = (Dataset)DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, duplicateDataset, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
@@ -191,7 +232,23 @@ public class TestDataset extends BaseTestClassTX {
         }
     }
     
-    // @Test
+    /**
+     * Tests creating a file
+     */
+    @Test(expected=InsufficientPrivilegesException.class)
+    public void setDatasetSampleProps() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for setting sample to dataset Id: "+VALID_DATA_SET_ID);
+        
+        try {
+            DataSetManager.setDataSetSample(VALID_USER_FOR_INVESTIGATION, VALID_SAMPLE_ID_FOR_INVESTIGATION_ID, VALID_DATA_SET_ID, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            throw ex;
+        }
+    }
+    
+    @Test
     public void createWholeValidDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a whole data set for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -216,13 +273,32 @@ public class TestDataset extends BaseTestClassTX {
         
         Dataset dataset = DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, set, VALID_INVESTIGATION_ID, em);
         log.info("Dataset: "+dataset);
-        checkDataset(dataset);
+        
+        Dataset modified = em.find(Dataset.class, dataset.getId());
+        
+        checkDataset(modified);
+        assertFalse("Deleted must be false", modified.isDeleted());
+        
+        for(Datafile datafile : modified.getDatafileCollection()){
+            assertFalse("Deleted must be false", datafile.isDeleted());
+            assertNotNull("createId must be not null", modified.getCreateId());
+            assertEquals("createId must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, modified.getCreateId());
+            
+            assertNotNull("modId must be not null", modified.getModId());
+            assertEquals("modId must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, modified.getModId());
+            
+            assertNotNull("dataset id must be not null", modified.getId());
+            assertEquals("dataset must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, modified.getInvestigationId().getId());
+        }
+        
+        em.remove(dataset);
+        
     }
     
     /**
      * Tests creating a file
      */
-    // @Test
+    @Test
     public void testAddValidDatafiles() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for add a files for datset Id: "+VALID_INVESTIGATION_ID);
         
@@ -245,15 +321,77 @@ public class TestDataset extends BaseTestClassTX {
         datasets.add(file1);
         datasets.add(file2);
         
-        DataSetManager.createDataSets(VALID_USER_FOR_INVESTIGATION, datasets, VALID_INVESTIGATION_ID, em);
+        Collection<Dataset> datasetsCreated =  DataSetManager.createDataSets(VALID_USER_FOR_INVESTIGATION, datasets, VALID_INVESTIGATION_ID, em);
         
-        for(Dataset file  : datasets){
-            //get the file by searching through the DB
-            Dataset datasetFound = (Dataset)executeSingleResultCmd("select d from Dataset d where d.name = '"+file.getName()+"'");
-            checkDataset(datasetFound);
+        for(Dataset file  : datasetsCreated){
+            Dataset modified = em.find(Dataset.class, file.getId());
+            checkDataset(modified);
+            
+            em.remove(file);
         }
     }
     
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void getDataset() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        
+        
+        Dataset datasetGot = DataSetManager.getDataSet(VALID_USER_FOR_INVESTIGATION, VALID_DATA_SET_ID,  em);
+        
+        checkDatasetProps(datasetGot);
+        assertFalse("Deleted must be false", datasetGot.isDeleted());
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test(expected=InsufficientPrivilegesException.class)
+    public void getDatasetInvalidUser() throws ICATAPIException {
+        log.info("Testing  user: "+INVALID_USER+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        
+        try {
+            Dataset datasetGot = DataSetManager.getDataSet(INVALID_USER, VALID_DATA_SET_ID,  em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void getDatasets() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        Collection<Long> dsIds = new ArrayList<Long>();
+        dsIds.add(VALID_DATA_SET_ID);
+        
+        Collection<Dataset> datasetsGot = DataSetManager.getDataSets(VALID_USER_FOR_INVESTIGATION, dsIds,  em);
+        
+        for(Dataset set : datasetsGot){
+            checkDatasetProps(set);
+            assertFalse("Deleted must be false", set.isDeleted());
+        }
+        
+    }
+    
+    private boolean checkDatasetProps(Dataset file){
+        assertTrue("dataset must be in db", em.contains(file));
+        
+        assertNotNull("createId must be not null", file.getCreateId());
+        assertEquals("createId must be "+VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION, VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION, file.getCreateId());
+        
+        assertNotNull("modId must be not null", file.getModId());
+        // assertEquals("modId must be "+VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION, VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION, file.getModId());
+        
+        assertNotNull("dataset id must be not null", file.getId());
+        assertEquals("dataset must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, file.getInvestigationId().getId());
+        return true;
+    }
     
     private boolean checkDataset(Dataset file){
         assertTrue("dataset must be in db", em.contains(file));
