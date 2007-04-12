@@ -20,6 +20,8 @@ import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import uk.icat3.datasetmanager.TestDataset;
+import uk.icat3.datasetmanager.TestDatasetParameter;
 import uk.icat3.investigationmanager.TestInvestigation;
 import uk.icat3.investigationmanager.TestInvestigator;
 import uk.icat3.investigationmanager.TestKeyword;
@@ -32,12 +34,15 @@ import uk.icat3.util.ExecuteDatabaseScript;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    TestSample.class,
+            TestSample.class,
             TestKeyword.class,
             TestPublication.class,
             TestInvestigator.class,
             TestInvestigation.class,
-            TestSampleParameter.class
+            TestSampleParameter.class,
+            
+            TestDataset.class,
+            TestDatasetParameter.class
 })
 public class TestAllKeepDB {
     

@@ -376,7 +376,6 @@ public class TestDataset extends BaseTestClassTX {
             checkDatasetProps(set);
             assertFalse("Deleted must be false", set.isDeleted());
         }
-        
     }
     
     private boolean checkDatasetProps(Dataset file){
