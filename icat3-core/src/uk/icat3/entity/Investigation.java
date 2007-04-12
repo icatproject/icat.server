@@ -793,7 +793,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         //topicList parameter
         if(getTopicListCollection() != null){
             for(TopicList topicList : getTopicListCollection()){
-               if(type == Cascade.DELETE)  topicList.setDeleted(deleted);
+                if(type == Cascade.DELETE)  topicList.setDeleted(deleted);
                 else if(type == Cascade.MOD_ID) topicList.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     topicList.setModId(value.toString());
@@ -802,7 +802,13 @@ public class Investigation extends EntityBaseBean implements Serializable {
             }
         }
         
-        this.setDeleted(deleted);
+        if(type == Cascade.DELETE)  this.setDeleted(deleted);
+        else if(type == Cascade.MOD_ID) this.setModId(value.toString());
+        else if(type == Cascade.MOD_AND_CREATE_IDS) {
+            this.setModId(value.toString());
+            this.setCreateId(value.toString());
+        }
+        
     }
     
     /**
