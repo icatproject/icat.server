@@ -110,6 +110,42 @@ public class DataFileManager extends ManagerUtil {
         return true;
     }
     
+    /**
+     * Removes the data file with ID, for a users depending if the users id has delete permissions to delete the data file from
+     * the ID
+     *
+     * @param userId
+     * @param dataFileId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
+    public static void removeDataFile(String userId, Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+        log.trace("removeDataFile("+userId+", "+dataFileId+", EntityManager)");
+        
+        Datafile dataFile = find(Datafile.class, dataFileId, manager);
+        
+        //check user has delete access
+        GateKeeper.performAuthorisation(userId, dataFile, AccessType.REMOVE, manager);
+        
+        manager.remove(dataFile);
+    }
+    
+    /**
+     * Removes the data file with ID, for a users depending if the users id has delete permissions to delete the data file from
+     * the ID
+     *
+     * @param userId
+     * @param dataFileId
+     * @param manager
+     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
+    public static void removeDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+        removeDataFile(userId, dataFile.getId(), manager);
+    }
+    
+    
     public static Datafile createDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataFile("+userId+", "+dataFile+", EntityManager)");
         
@@ -265,11 +301,11 @@ public class DataFileManager extends ManagerUtil {
         datafileParameterFound.isValid(manager);
     }
     
-    public static DatafileParameter addDataFileParameter(String userId, DatafileParameter datafileParameter, Long datasetId,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
-        log.trace("addDataFileParameter("+userId+", "+datafileParameter+", "+datasetId+", EntityManager)");
+    public static DatafileParameter addDataFileParameter(String userId, DatafileParameter datafileParameter, Long datafileId,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        log.trace("addDataFileParameter("+userId+", "+datafileParameter+", "+datafileId+", EntityManager)");
         
         //get datafile,
-        Datafile datafile = find(Datafile.class, datasetId, manager);
+        Datafile datafile = find(Datafile.class, datafileId, manager);
         
         //set id for datafileParameter
         datafileParameter.setDatafile(datafile);
@@ -281,11 +317,26 @@ public class DataFileManager extends ManagerUtil {
         GateKeeper.performAuthorisation(userId, datafileParameter, AccessType.CREATE, manager);
         String facilityUserId = getFacilityUserId(userId, manager);
         
-        datafileParameter.setCreateId(facilityUserId);
-        
-        manager.persist(datafileParameter);
-        
-        return datafileParameter;
+         try {
+            //check dataSetParameterManaged not already added
+            DatafileParameter dataFileParameterManaged = find(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);
+            if(dataFileParameterManaged.isDeleted()){
+                dataFileParameterManaged.setDeleted(false);
+                dataFileParameterManaged.setModId(facilityUserId);
+                log.info(dataFileParameterManaged +" been deleted, undeleting now.");
+                return dataFileParameterManaged;
+            } else {
+                //do nothing, throw exception
+                log.warn(dataFileParameterManaged +" already added to dataset.");
+                throw new ValidationException(dataFileParameterManaged+" is not unique");
+            }
+        } catch (NoSuchObjectFoundException ex) {
+            //not already in DB so add
+            //sets modId for persist
+            datafileParameter.setCreateId(facilityUserId);
+            manager.persist(datafileParameter);
+            return datafileParameter;
+        }            
     }
     
     public static DatafileParameter addDataFileParameter(String userId, DatafileParameter datafileParameter,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {

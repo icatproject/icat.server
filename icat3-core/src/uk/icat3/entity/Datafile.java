@@ -12,6 +12,7 @@ package uk.icat3.entity;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.CascadeType;
@@ -38,7 +39,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import org.omg.CORBA.MARSHAL;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.Cascade;
 
@@ -449,6 +449,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
         dataFileParameter.setDatafile(this);
         
         Collection<DatafileParameter> datafileParameters = this.getDatafileParameterCollection();
+        if(datafileParameters == null) datafileParameters = new ArrayList<DatafileParameter>();
         datafileParameters.add(dataFileParameter);
         
         this.setDatafileParameterCollection(datafileParameters);
@@ -627,7 +628,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
         return isValid();
     }
     
-  
+    
     
     /**
      * This method removes all the ids when persist is called.

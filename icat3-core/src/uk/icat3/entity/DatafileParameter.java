@@ -71,7 +71,7 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
     
     @Column(name = "ERROR")
     private String error;
-       
+    
     @Column(name = "DESCRIPTION")
     private String description;
     
@@ -80,7 +80,7 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
     @XmlTransient
     @ICAT(merge=false)
     private Datafile datafile;
-        
+    
     @JoinColumns(value =  {
         @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
 @JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
@@ -371,6 +371,7 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
     @Override
     public boolean isValid(EntityManager manager, boolean deepValidation) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
+        if(datafileParameterPK == null) throw new ValidationException(this +" primary key cannot be null");
         
         //check valid
         String paramName = this.getDatafileParameterPK().getName();
@@ -405,13 +406,13 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
         
         //check that the parameter datafile id is the same as actual datafile id
         if(!datafileParameterPK.getDatafileId().equals(getDatafile().getId())){
-            throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" has dataset id: "+datafileParameterPK.getDatafileId()+ " that does not corresponds to its parent datafile id: "+getDatafile().getId());
+            throw new ValidationException("DatafileParameter: "+paramName+" with units: "+paramUnits+" has datafile id: "+datafileParameterPK.getDatafileId()+ " that does not corresponds to its parent datafile id: "+getDatafile().getId());
         }
         
         //once here then its valid
         return isValid();
     }
     
-  
+    
     
 }
