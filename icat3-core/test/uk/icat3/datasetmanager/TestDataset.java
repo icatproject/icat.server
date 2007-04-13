@@ -281,13 +281,13 @@ public class TestDataset extends BaseTestClassTX {
         
         for(Datafile datafile : modified.getDatafileCollection()){
             assertFalse("Deleted must be false", datafile.isDeleted());
-            assertNotNull("createId must be not null", modified.getCreateId());
-            assertEquals("createId must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, modified.getCreateId());
+            assertNotNull("createId must be not null", datafile.getCreateId());
+            assertEquals("createId must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, datafile.getCreateId());
             
-            assertNotNull("modId must be not null", modified.getModId());
-            assertEquals("modId must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, modified.getModId());
+            assertNotNull("modId must be not null", datafile.getModId());
+            assertEquals("modId must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, datafile.getModId());
             
-            assertNotNull("dataset id must be not null", modified.getId());
+            assertNotNull("dataset id must be not null", datafile.getId());
             assertEquals("dataset must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, modified.getInvestigationId().getId());
         }
         

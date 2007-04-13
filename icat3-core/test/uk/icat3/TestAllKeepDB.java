@@ -14,12 +14,12 @@
  */
 package uk.icat3;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import uk.icat3.datafilemanager.TestDatafile;
+import uk.icat3.datafilemanager.TestDatafileParameter;
 import uk.icat3.datasetmanager.TestDataset;
 import uk.icat3.datasetmanager.TestDatasetParameter;
 import uk.icat3.investigationmanager.TestInvestigation;
@@ -28,9 +28,6 @@ import uk.icat3.investigationmanager.TestKeyword;
 import uk.icat3.investigationmanager.TestPublication;
 import uk.icat3.investigationmanager.TestSample;
 import uk.icat3.investigationmanager.TestSampleParameter;
-import uk.icat3.search.TestInvestigationSearch;
-import uk.icat3.search.TestNothing;
-import uk.icat3.util.ExecuteDatabaseScript;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -42,7 +39,10 @@ import uk.icat3.util.ExecuteDatabaseScript;
             TestSampleParameter.class,
             
             TestDataset.class,
-            TestDatasetParameter.class
+            TestDatasetParameter.class,
+                    
+            TestDatafile.class,
+            TestDatafileParameter.class        
 })
 public class TestAllKeepDB {
     
