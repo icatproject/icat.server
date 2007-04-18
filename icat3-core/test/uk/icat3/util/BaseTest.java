@@ -35,7 +35,7 @@ public class BaseTest {
         em = emf.createEntityManager();
         log.debug("setUp(), creating entityManager");
         
-        EntityManagerResource.getInstance().set(em);
+       
         
         // Begin transaction
         log.debug("beginning transaction on entityManager");
@@ -50,7 +50,7 @@ public class BaseTest {
         em = emf.createEntityManager();
         log.debug("setUp(), creating entityManager");
         
-        EntityManagerResource.getInstance().set(em);
+      
         
     }
     
