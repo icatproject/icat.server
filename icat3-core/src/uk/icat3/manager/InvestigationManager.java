@@ -50,7 +50,7 @@ public class InvestigationManager extends ManagerUtil {
      * @param userId userId of the user.
      * @param investigationIds
      * @param include The information that is needed to be returned with the investigation
-     * @param manager manager object that will facilitate interaction with underlying database     *
+     * @param manager manager object that will facilitate interaction with underlying database     
      * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return collection of {@link Investigation} investigation objects

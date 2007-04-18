@@ -26,6 +26,9 @@ import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
 
 /**
+ * This is the manager class for all operations for data files.  
+ * 
+ * These are update, remove, delete, create on data files and data file paramters
  *
  * @author gjd37
  */
@@ -34,12 +37,13 @@ public class DataFileManager extends ManagerUtil {
     static Logger log = Logger.getLogger(DataFileManager.class);
     
     /**
-     * Deletes the data file for a user depending if the user's id has delete permissions to delete the data file
+     * Deletes the data file for a user depending if the user's id has delete permissions to delete the data file.
+     * Deleting the file marks it as deleted but does not remove it from the database.
      *
-     * @param userId
-     * @param dataFile
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataFile  object to be deleted
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void deleteDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -48,12 +52,12 @@ public class DataFileManager extends ManagerUtil {
     
     /**
      * Deletes the data file with ID, for a users depending if the users id has delete permissions to delete the data file from
-     * the ID
+     * the ID.  Deleting the file marks it as deleted but does not remove it from the database.
      *
-     * @param userId
-     * @param dataFileId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataFileId Id of data file to be deleted
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void deleteDataFile(String userId, Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -70,14 +74,13 @@ public class DataFileManager extends ManagerUtil {
     }
     
     /**
-     *
      * Deletes the collection of files for a users depending if the users id has delete permissions to delete the files from
-     * their ids
+     * their ids.  Deleting the file marks it as deleted but does not remove it from the database.
      *
-     * @param userId
-     * @param dataFileIds
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataFileIds Ids of data files to be deleted
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void deleteDataFiles(String userId, Collection<Long> dataFileIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -91,14 +94,15 @@ public class DataFileManager extends ManagerUtil {
     // TODO:  added boolean to avoid erausre name clash with above method
     
     /**
-     * Deletes the collection of data files for a users depending if the users id has delete permissions to delete the data file
+     * Deletes the collection of data files for a users depending if the users id has delete permissions to
+     * delete the data file.  Deleting the file marks it as deleted but does not remove it from the database.
      *
-     * @param userId
-     * @param dataFiles
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataFiles objects to be deleted
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @return
+     * @return to avoid erausre name clash with another method
      */
     public static boolean deleteDataFiles(String userId, Collection<Datafile> dataFiles, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataFiles("+userId+", "+dataFiles+", EntityManager)");
@@ -111,13 +115,13 @@ public class DataFileManager extends ManagerUtil {
     }
     
     /**
-     * Removes the data file with ID, for a users depending if the users id has delete permissions to delete the data file from
-     * the ID
+     * Removes (from the database) the data file with ID, for a users depending if the users id has remove permissions to remove the data file from
+     * the ID.
      *
-     * @param userId
-     * @param dataFileId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataFileId Id of data file to be removed
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void removeDataFile(String userId, Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -132,20 +136,56 @@ public class DataFileManager extends ManagerUtil {
     }
     
     /**
-     * Removes the data file with ID, for a users depending if the users id has delete permissions to delete the data file from
+     * Removes (from the database) the data file with ID, for a users depending if the users id has remove permissions to remove the data file from
      * the ID
      *
-     * @param userId
-     * @param dataFileId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataFile object to be removed
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void removeDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         removeDataFile(userId, dataFile.getId(), manager);
     }
     
+    /**
+     * Updates data file depending on whether the user has permission to update this data file.
+     *
+     * @param userId facility userId of the user.
+     * @param dataFile object to be updated
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     * @return the updated data file object
+     */
+    public static Datafile updateDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        log.trace("updateDataFile("+userId+", "+dataFile+", EntityManager)");
+        
+        Datafile datafileManaged = find(Datafile.class, dataFile.getId(), manager);
+        
+        //check user has update access
+        GateKeeper.performAuthorisation(userId, datafileManaged, AccessType.UPDATE, manager);
+        String facilityUserId = getFacilityUserId(userId, manager);
+        
+        datafileManaged.setModId(facilityUserId);
+        datafileManaged.merge(dataFile);
+        
+        return datafileManaged;
+    }
     
+    /**
+     * Creates a data file, depending if the user has update permission on the data set associated with the data file
+     *
+     * @param userId facility userId of the user.
+      * @param dataFile object to be created
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     * @return the created data file object
+     */
     public static Datafile createDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataFile("+userId+", "+dataFile+", EntityManager)");
         
@@ -164,39 +204,16 @@ public class DataFileManager extends ManagerUtil {
     }
     
     /**
-     * Updates / Adds a data file depending on whether the user has permission to update this data file or data set
+     * Creates a data file, depending if the user has update permission on the data set associated with the data file
      *
-     * @param userId
-     * @param dataFile
-     * @param manager
-     * @param validate to validate the whole of the datafile
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataFile object to be created
+     * @param datasetId Id of data set
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     */
-    public static Datafile updateDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-        log.trace("updateDataFile("+userId+", "+dataFile+", EntityManager)");
-        
-        Datafile datafileManaged = find(Datafile.class, dataFile.getId(), manager);
-        
-        //check user has update access
-        GateKeeper.performAuthorisation(userId, datafileManaged, AccessType.UPDATE, manager);
-        String facilityUserId = getFacilityUserId(userId, manager);
-        
-        datafileManaged.setModId(facilityUserId);
-        datafileManaged.merge(dataFile);
-        
-        return datafileManaged;
-    }
-    
-    /**
-     * Creates a data file, depending if the user has update permission on the data set associated with the data set
-     *
-     * @param userId
-     * @param dataFile
-     * @param datasetId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     * @return the created data file object]
      */
     public static Datafile createDataFile(String userId, Datafile dataFile, Long datasetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataFile("+userId+", "+dataFile+" "+datasetId+", EntityManager)");
@@ -210,14 +227,16 @@ public class DataFileManager extends ManagerUtil {
     }
     
     /**
-     * Creates a data file, depending if the user has update permission on the data set associated with the data set
+     * Creates the collection of data files, depending if the user has update permission on the data set associated with the data file.
      *
-     * @param userId
-     * @param dataFile
-     * @param datasetId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataFiles objects to be created
+     * @param datasetId Id of data set
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     * @return the collection of created data file objects
      */
     public static Collection<Datafile> createDataFiles(String userId, Collection<Datafile> dataFiles, Long datasetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataFiles("+userId+", "+dataFiles+" "+datasetId+", EntityManager)");
@@ -234,14 +253,14 @@ public class DataFileManager extends ManagerUtil {
     
     
     /**
-     * Gets the data file objects from a list of data file ids, depending if the users has access to read the data files
+     * Gets the data file objects from a list of data file ids, depending if the user has access to read the data files.
      *
-     * @param userId
-     * @param dataFileIds
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataFileIds Ids of data files
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @return
+     * @return a collection of data file objects
      */
     public static Collection<Datafile> getDataFiles(String userId, Collection<Long> dataFileIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("getDataFile("+userId+", "+dataFileIds+" EntityManager)");
@@ -265,14 +284,14 @@ public class DataFileManager extends ManagerUtil {
     
     
     /**
-     * Gets a data file object from a list of data file id, depending if the users has access to read the data file
+     * Gets a data file object from a list of data file id, depending if the user has access to read the data file
      *
-     * @param userId
-     * @param dataFileId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataFileId Id of data file
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @return
+     * @return a  data file object
      */
     public static Datafile getDataFile(String userId, Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         Collection<Long> dataFiles = new ArrayList<Long>();
@@ -285,6 +304,16 @@ public class DataFileManager extends ManagerUtil {
     /////////////////////   Util commands /////////////////////////
     
     
+    /**
+     * Updates the data file paramter object, depending if the user has access to update the data file parameter.
+     *
+     * @param userId facility userId of the user.
+     * @param datafileParameter object to be updated
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     */
     public static void updateDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("updateDataSetParameter("+userId+", "+datafileParameter+", EntityManager)");
         
@@ -301,6 +330,21 @@ public class DataFileManager extends ManagerUtil {
         datafileParameterFound.isValid(manager);
     }
     
+    /**
+     * Adds a data file paramter object to a data file, depending if the user has access to create the data file parameter from
+     * the associated data file id.
+     *
+     * If the paramter is marked as deleted then it will be undeleted, if not present a new paramter is added.
+     *
+     * @param userId facility userId of the user.
+     * @param datafileParameter object to be added
+     * @param datafileId the data file id that you want a add the paramter to
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     * @return the added data file paramter object
+     */
     public static DatafileParameter addDataFileParameter(String userId, DatafileParameter datafileParameter, Long datafileId,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("addDataFileParameter("+userId+", "+datafileParameter+", "+datafileId+", EntityManager)");
         
@@ -317,7 +361,7 @@ public class DataFileManager extends ManagerUtil {
         GateKeeper.performAuthorisation(userId, datafileParameter, AccessType.CREATE, manager);
         String facilityUserId = getFacilityUserId(userId, manager);
         
-         try {
+        try {
             //check dataSetParameterManaged not already added
             DatafileParameter dataFileParameterManaged = find(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);
             if(dataFileParameterManaged.isDeleted()){
@@ -336,9 +380,23 @@ public class DataFileManager extends ManagerUtil {
             datafileParameter.setCreateId(facilityUserId);
             manager.persist(datafileParameter);
             return datafileParameter;
-        }            
+        }
     }
     
+    /**
+     * Adds a data file paramter object to a data file, depending if the user has access to create the data file parameter from
+     * the associated data file id.
+     *
+     * If the paramter is marked as deleted then it will be undeleted, if not present a new paramter is added.
+     *
+     * @param userId facility userId of the user.
+     * @param datafileParameter object to be added
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     * @return the added data file paramter object
+     */
     public static DatafileParameter addDataFileParameter(String userId, DatafileParameter datafileParameter,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("addDataFileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
@@ -346,7 +404,17 @@ public class DataFileManager extends ManagerUtil {
         return  addDataFileParameter(userId, datafileParameter, datafileId, manager);
     }
     
-    public static void removeDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    /**
+     * Removes (from the database) a data file paramter object, depending if the user has access to remove the data file parameter from
+     * the associated data file id.
+     *
+     * @param userId facility userId of the user.
+     * @param datafileParameter object to be removed
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
+    public static void removeDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         log.trace("removeDatafileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
         Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
@@ -362,7 +430,17 @@ public class DataFileManager extends ManagerUtil {
         manager.remove(datafileParameterManaged);
     }
     
-    public static void deleteDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    /**
+     * Deletes a data file paramter object, depending if the user has access to delete the data file parameter from
+     * the associated data file id.
+     *
+     * @param userId facility userId of the user.
+     * @param datafileParameter object to be deleted
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
+    public static void deleteDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         log.trace("deleteDatafileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
         Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
