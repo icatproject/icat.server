@@ -25,7 +25,7 @@ import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataFileManager;
 import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.InvestigationManager;
-import uk.icat3.util.EntityManagerResource;
+
 
 /**
  *
@@ -44,7 +44,7 @@ public class TestDataFileManager {
         emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
         //emf = Persistence.createEntityManagerFactory("icat3-isis");
         em = emf.createEntityManager();
-        EntityManagerResource.getInstance().set(em);
+       
         
         // Begin transaction
         em.getTransaction().begin();

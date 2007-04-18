@@ -28,7 +28,6 @@ import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.InvestigationSearch;
 import uk.icat3.search.KeywordSearch;
-import uk.icat3.util.EntityManagerResource;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.KeywordType;
 import uk.icat3.util.LogicalOperator;
@@ -54,10 +53,7 @@ public class TestSearch {
         // emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
         emf = Persistence.createEntityManagerFactory("icat3-isis");
         em = emf.createEntityManager();
-        EntityManagerResource.getInstance().set(em);
-        
-        
-        
+      
         
         // Begin transaction
         //em.getTransaction().begin();
