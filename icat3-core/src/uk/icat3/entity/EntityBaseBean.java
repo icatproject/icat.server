@@ -42,21 +42,22 @@ public class EntityBaseBean {
     
     @Column(name = "MOD_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @ICAT(merge=false)
+    @ICAT(merge=false, nullable=true)
     protected Date modTime;
     
     @Column(name = "CREATE_ID", nullable = false)
-    @ICAT(merge=false)
+    @ICAT(merge=false, nullable=true)
     protected String createId;
     
     @Column(name = "DELETED", nullable = false )
-    @ICAT(merge=false)
+    @ICAT(merge=false, nullable=true)
     protected String deleted;
-        
+    
+    @ICAT(merge=false, nullable=true)
     protected transient boolean deletedBoolean;
     
     @Column(name = "MOD_ID", nullable = false)
-    @ICAT(merge=false)
+    @ICAT(merge=false, nullable=true)
     protected String modId;
     
     /**
@@ -178,8 +179,10 @@ public class EntityBaseBean {
      */
     public boolean isValid() throws ValidationException {
         
-        //get public the fields in class
+        //get public, private, protected, package fields in class, but not inherited ones.
         Field[] allFields = this.getClass().getDeclaredFields();
+        log.trace("Checking validity of "+getClass().getSimpleName());
+        
         //all subclasses should use this line below
         //Field[] allFields = getClass().getDeclaredFields();
         outer:
@@ -202,28 +205,21 @@ public class EntityBaseBean {
                     log.trace(getClass().getSimpleName()+": "+fieldName+" is auto generated id value, no need to check.");
                     continue outer;
                 }
+                if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("nullable=true") ){
+                    log.trace(getClass().getSimpleName()+": "+fieldName+" is ICAT(nullable=true), no need to check.");                  
+                    continue outer;
+                }
             }
             
             //now check all annoatations
             for (Annotation a : allFields[i].getDeclaredAnnotations()) {
                 //if this means its a none null column field
-                if(a.annotationType().getName().equals(
-                        javax.persistence.Column.class.getName()) && a.toString().contains("nullable=false") ){
+                if(a.annotationType().getName().contains("Column") && a.toString().contains("nullable=false") ){
                     
                     //now check if it is null, if so throw error
                     try {
                         //get value
-                       /* if(allFields[i].get(this) == null){
-                            throw new ValidationException(getClass().getSimpleName()+": "+fieldName+" cannot be null.");
-                        }*/
-                        //access using bean properties
-                        String prop = Character.toUpperCase(fieldName.charAt(0)) +
-                                fieldName.substring(1);
-                        String mname = "get" + prop;
-                        
-                        Class[] types = new Class[]{};
-                        Method method = this.getClass().getMethod(mname, types);
-                        Object result = method.invoke(this, (Object[])types);
+                        Object result = getProperty(fieldName, this);
                         if(result == null){
                             throw new ValidationException(getClass().getSimpleName()+": "+fieldName+" cannot be null.");
                         } else {
@@ -312,6 +308,19 @@ public class EntityBaseBean {
                 log.warn("Error transferring data for field: "+fieldName, ex);
             }
         }
+    }
+    
+    @SuppressWarnings("all")
+    private Object getProperty(String name, Object from) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, NoSuchFieldException {
+        String prop = Character.toUpperCase(name.charAt(0)) +
+                name.substring(1);
+        String mname = "get" + prop;
+        
+        Class[] types = new Class[]{};
+        Method method = from.getClass().getMethod(mname, types);
+        Object result = method.invoke(from, (Object[])types);
+        
+        return result;
     }
     
     @SuppressWarnings("all")

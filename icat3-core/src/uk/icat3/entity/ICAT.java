@@ -18,6 +18,7 @@ import javax.annotation.security.RolesAllowed;
 /**
  * This determines at runtime what information is merged to the database.
  * Anything with ICAT(merge=false) wont be merged/updated to DB
+ * Anything with ICAT(nullable=true) wont be checked to see if valid as it can be null
  *
  * @author gjd37
  */
@@ -25,4 +26,5 @@ import javax.annotation.security.RolesAllowed;
 @Target(value=ElementType.FIELD)
 public @interface ICAT {
     boolean merge() default true;
+    boolean nullable() default false;
 }
