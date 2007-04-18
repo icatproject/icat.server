@@ -23,27 +23,19 @@ import uk.icat3.entity.Investigation;
  *
  * @author gjd37
  */
-public class TestInvalidUser extends BaseTestClass {
+public class TestKeyword extends BaseTestClass {
     
-    private static Logger log = Logger.getLogger(TestInvalidUser.class);
+    private static Logger log = Logger.getLogger(TestKeyword.class);
+    
     
     /**
-     * Tests whether the number of instruments is correct
+     * Tests whether the user has any investigations and that he has access to the number of investigations
+     * with no investigator
      */
     @Test
-    public void testInstrumentSearch(){
-        log.info("Testing invalid user: "+INVALID_USER+ " for number of instruments");
-        
-        //get the number of instruments
-        Collection<String> instrumentsInDB = (Collection<String>)executeListResultCmd("SELECT  DISTINCT i.name from Instrument i");
-        
-        //get all the instruments
-        Collection<String> instruments = InvestigationSearch.listAllInstruments(INVALID_USER, em);
-        
-        log.trace("number searched is: "+instruments.size()+", number in DB: "+instrumentsInDB.size());
-        assertNotNull("Must not be an null collection of instruments", instruments);
-        assertEquals("Number of instruments searched is different to number in DB",instrumentsInDB.size(),instruments.size());
-        
+    public void testValidUserKeyword(){
+        log.info("Testing valid user for all keywords: "+VALID_USER_FOR_INVESTIGATION);
+        testKeywords(VALID_USER_FOR_INVESTIGATION);
     }
     
     /**
@@ -51,16 +43,9 @@ public class TestInvalidUser extends BaseTestClass {
      * with no investigator
      */
     @Test
-    public void testUserInvestigations(){
-        log.info("Testing invalid user: "+INVALID_USER+ ", should be associated with no investigations");
-        
-        //search for users own investigations
-        Collection<Investigation> userInvestigations = InvestigationSearch.getUsersInvestigations(INVALID_USER, em);
-        log.trace("Investigations for user "+INVALID_USER+" is "+userInvestigations.size());
-        
-        assertNotNull("Must not be an null collection", userInvestigations);
-        assertEquals("Collection 'getUsersInvestigations()' should be zero size", 0 , userInvestigations.size());
-        
+    public void testInvalidUserKeyword(){
+        log.info("Testing invalid user for all keywords: "+INVALID_USER);
+        testKeywords(INVALID_USER);
     }
     
     /**
@@ -68,8 +53,23 @@ public class TestInvalidUser extends BaseTestClass {
      * with no investigator
      */
     @Test
-    public void testKeywords(){
-        log.info("Testing invalid user: "+INVALID_USER+ ", should be associated with keywords for only empty investigations investigators");
+    public void testValidUsersKeywords(){
+        log.info("Testing valid user for their keywords: "+VALID_USER_FOR_INVESTIGATION);
+        testUsersKeywords(VALID_USER_FOR_INVESTIGATION, false);
+    }
+    
+    /**
+     * Tests whether the user has any investigations and that he has access to the number of investigations
+     * with no investigator
+     */
+    @Test
+    public void testInvalidUsersKeywords(){
+        log.info("Testing invalid user for their keywords: "+INVALID_USER);
+        testUsersKeywords(INVALID_USER, true);
+    }
+    
+    private void testKeywords(String user){
+        log.info("Testing user: "+user);
         
         //get the number of keywords
         Collection<String> keywordsInDB = (Collection<String>)executeNativeListResultCmd("SELECT DISTINCT NAME FROM keyword WHERE regexp_like(NAME,'^[[:alpha:]]*$')", String.class);
@@ -79,7 +79,7 @@ public class TestInvalidUser extends BaseTestClass {
         em.clear();
         
         //search all keywords
-        Collection<String> keywords = KeywordSearch.getAllKeywords(INVALID_USER, KeywordType.ALPHA, em);
+        Collection<String> keywords = KeywordSearch.getAllKeywords(user, KeywordType.ALPHA, em);
         log.trace("Number keywords (ALPHA) from search is : "+keywords.size());
         
         assertNotNull("Must not be an null collection of keywords (ALPHA)", keywords);
@@ -96,7 +96,7 @@ public class TestInvalidUser extends BaseTestClass {
         em.clear();
         
         //search all keywords
-        keywords = KeywordSearch.getAllKeywords(INVALID_USER, KeywordType.ALPHA_NUMERIC, em);
+        keywords = KeywordSearch.getAllKeywords(user, KeywordType.ALPHA_NUMERIC, em);
         log.trace("Number keywords (ALPHA_NUMERIC) from search is : "+keywords.size());
         
         assertNotNull("Must not be an null collection of keywords (ALPHA_NUMERIC)", keywords);
@@ -104,8 +104,9 @@ public class TestInvalidUser extends BaseTestClass {
         
         //clear manager
         em.clear();
-        
-        
+    }
+    
+    private void testUsersKeywords(String user, boolean valid){
         
         //get number of keywords user can see starting with isis
        /* Collection<String> keywordsUserInDB = (Collection<String>)executeListResultCmd("SE");
@@ -132,7 +133,8 @@ public class TestInvalidUser extends BaseTestClass {
         log.info("Testing invalid user: "+INVALID_USER+ ", should be associated with no investigations");
         
         //get the number of keywords
-       /* Long investigations = (Long)executeSingleResultCmd("SELECT count(i) FROM Investigation i where i.investigatorCollection IS EMPTY ");
+        Long investigations = (Long)executeSingleResultCmd("SELECT count(i) FROM Investigation i where i.investigatorCollection IS EMPTY ");
+        log.trace("Investigations for user in DB for "+INVALID_USER+" is "+investigations);
         
         
         //search for users own investigations
@@ -140,7 +142,7 @@ public class TestInvalidUser extends BaseTestClass {
         log.trace("Investigations for user "+INVALID_USER+" is "+searchedInvestigations.size());
         
         assertNotNull("Must not be an null collection", searchedInvestigations);
-        assertEquals("Collection 'searchByKeyword()' should be zero size", investigations , searchedInvestigations.size());
+        assertEquals("Collection 'searchByKeyword()' should be zero size", investigations.intValue() , searchedInvestigations.size());
         
         //search by user id
         /*Collection<Investigation> searchedUserIdInvestigations = InvestigationSearch.searchByUserID(INVALID_USER,"JAMES-JAMES", em);
@@ -162,7 +164,7 @@ public class TestInvalidUser extends BaseTestClass {
     
     
     public static junit.framework.Test suite(){
-        return new JUnit4TestAdapter(TestInvalidUser.class);
+        return new JUnit4TestAdapter(TestKeyword.class);
     }
     
 }
