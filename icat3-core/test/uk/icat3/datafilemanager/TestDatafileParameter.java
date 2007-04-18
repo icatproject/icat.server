@@ -29,6 +29,8 @@ import uk.icat3.util.BaseTestClassTX;
 import static uk.icat3.util.TestConstants.*;
 
 /**
+ * Opens a new entitymanager and tranaction for each method and tests for get/ remove/ delete/ modify/ insert
+ * for data file paramters for valid and invalid users on the DataFileManager class
  *
  * @author gjd37
  */
@@ -38,7 +40,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
     private Random random = new Random();
     
     /**
-     * Tests creating a file
+     * Tests creating a file paramter
      */
     @Test
     public void addDatafileParameter() throws Exception {
@@ -57,7 +59,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests modifying a data file parameter
      */
     @Test
     public void modifyDatafileParameter() throws ICATAPIException {
@@ -79,7 +81,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests creating a duplicate data file paramter, should throw a ValidationException containing 'unique'
      */
     @Test(expected=ValidationException.class)
     public void addDuplicateDatafileParameter() throws ICATAPIException {
@@ -98,7 +100,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests deleting a data file parameter, marking as deleted Y
      */
     @Test
     public void deleteDatafileParameter() throws ICATAPIException {
@@ -115,7 +117,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests creating a data file parameter that has been marked as deleted, should undelete it
      */
     @Test
     public void addDeletedDatafileParameter() throws ICATAPIException {
@@ -133,7 +135,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests removing data file parameter from the DB
      */
     @Test
     public void removeDatafileParameter() throws ICATAPIException {
@@ -150,7 +152,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests creating a data file parameter for an invalid user, should throw InsufficientPrivilegesException containing
+     * 'does not have permission' in the message
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void addDatafileParameterInvalidUser() throws ICATAPIException {
@@ -169,7 +172,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests creating a data file parameter for an invalid data file at does not exist, should throw NoSuchObjectFoundException containing
+     * 'not found' in the message
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void addDatafileParameterInvalidDatafile() throws ICATAPIException {
@@ -187,7 +191,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests creating a data file parameter for an invalid data file id, should throw ValidationException containing
+     * 'does not correspond' in the message
      */
     @Test(expected=ValidationException.class)
     public void addDatafileParameterInvalidDatafileId() throws ICATAPIException {
@@ -206,7 +211,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests creating a invalid data file parameter, should throw ValidationException containing
+     * 'cannot be null' in the message
      */
     @Test(expected=ValidationException.class)
     public void addInvalidDatafileParameter() throws ICATAPIException, Exception {
@@ -228,7 +234,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests creating a invalid data file parameter, adding a string value to numeric value only, should throw ValidationException containing
+     * 'string value only' in the message
      */
     @Test(expected=ValidationException.class)
     public void addInvalidDatafileParameter2() throws ICATAPIException {
@@ -248,8 +255,9 @@ public class TestDatafileParameter extends BaseTestClassTX {
         }
     }
     
-    /**
-     * Tests creating a file
+     /**
+     * Tests creating a invalid data file parameter, adding a numeric value to string value only, should throw ValidationException containing
+     * 'numeric value only' in the message
      */
     @Test(expected=ValidationException.class)
     public void addInvalidDatafileParameter3() throws ICATAPIException {
@@ -350,10 +358,9 @@ public class TestDatafileParameter extends BaseTestClassTX {
         }
     }
     
-    
-    
-    
-    
+    /**
+     * gets a numeric or string paramter from DB, if not there creates one
+     */    
     static Parameter getParameter(boolean numeric){
         Parameter parameter = null;
         if(numeric){
@@ -393,6 +400,9 @@ public class TestDatafileParameter extends BaseTestClassTX {
         return parameter;
     }
     
+    /**
+     * Gets a datafile oparameter from the Db so that its a duplicate
+     */
     static DatafileParameter getDatafileParameterDuplicate(boolean last){
         DatafileParameter datafileParameter = null;
         if(!last){
@@ -406,6 +416,9 @@ public class TestDatafileParameter extends BaseTestClassTX {
         return datafileParameter;
     }
     
+     /**
+     * Creates a datafile parameter which is either valid or not also that is numeric or not
+     */
     static DatafileParameter getDatafileParameter(boolean valid, boolean numeric){
         Parameter parameter = getParameter(numeric);
         if(valid){
@@ -430,6 +443,9 @@ public class TestDatafileParameter extends BaseTestClassTX {
         }
     }
     
+    /**
+     * Checks that the data file parameter is valid in the DB
+     */
     private void checkDatafileParameter(DatafileParameter datafileParameter){
         assertNotNull("PK cannot be null", datafileParameter.getDatafileParameterPK());
         assertNotNull("PK units cannot be null", datafileParameter.getDatafileParameterPK().getUnits());

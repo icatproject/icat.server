@@ -28,6 +28,8 @@ import uk.icat3.util.BaseTestClassTX;
 import static uk.icat3.util.TestConstants.*;
 
 /**
+ * Opens a new entitymanager and tranaction for each method and tests for get/ remove/ delete/ modify/ insert 
+ * for data files for valid and invalid users on the DataFileManager class
  *
  * @author gjd37
  */
@@ -53,11 +55,11 @@ public class TestDatafile extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests deleting a file, marks it as deleted Y
      */
     @Test
     public void deleteDatafile() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving dataFile to dataFile Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting dataFile to dataFile Id: "+VALID_INVESTIGATION_ID);
         
         Datafile validDatafile  = getDatafileDuplicate(true);
         
@@ -76,7 +78,7 @@ public class TestDatafile extends BaseTestClassTX {
     
     
     /**
-     * Tests creating a file
+     * Tests removing a file, removes it from DB
      */
     @Test
     public void removeDatafile() throws ICATAPIException {
@@ -93,7 +95,8 @@ public class TestDatafile extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests creating a file for invalid user, should throw InsufficientPrivilegesException that contains
+     * message with 'does not have permission' in it
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void addDatafileInvalidUser() throws ICATAPIException {
@@ -111,7 +114,8 @@ public class TestDatafile extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests creating a invalid file, should throw ValidationException that contains
+     * message with 'cannot be null' in it
      */
     @Test(expected=ValidationException.class)
     public void addInvalidDatafile() throws ICATAPIException, Exception {
@@ -133,7 +137,8 @@ public class TestDatafile extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests deleting a file thats been made by propogation, should throw InsufficientPrivilegesException that contains
+     * message with 'cannot be modified' in it
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void deleteDatafileProps() throws ICATAPIException {
@@ -152,7 +157,8 @@ public class TestDatafile extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests removing a file thats been made by propogation, should throw InsufficientPrivilegesException that contains
+     * message with 'cannot be modified' in it
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void removeDatafileProps() throws ICATAPIException {
@@ -170,6 +176,10 @@ public class TestDatafile extends BaseTestClassTX {
         }
     }
     
+    /**
+     * Tests creating a valid file but adding a paramter to it.  A paramter must contains the parent datafile id and because
+     * this has not been persited yet it is unknown so throws ValidationException with message containing 'parent'
+     */
     @Test(expected=ValidationException.class)
     public void createValidDatafileParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating data file with in valid parameter for dataFile id: "+VALID_INVESTIGATION_ID);
@@ -191,6 +201,10 @@ public class TestDatafile extends BaseTestClassTX {
         }
         
     }
+    
+    /**
+     * Tests creating a valid file, deletes the file after wards.
+     */
     @Test
     public void createWholeValidDatafile() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a whole data set for dataFile id: "+VALID_INVESTIGATION_ID);
@@ -225,10 +239,11 @@ public class TestDatafile extends BaseTestClassTX {
         
         em.remove(dataFile);
         
+        assertFalse("file must be deleted "+dataFile.getId(), em.contains(dataFile));
     }
     
     /**
-     * Tests creating a file
+     * Tests creating a collection of files
      */
     @Test
     public void testAddValidDatafiles() throws ICATAPIException {
@@ -251,11 +266,12 @@ public class TestDatafile extends BaseTestClassTX {
             assertNotNull("Format cannot be null", modified.getDatafileFormat());
             
             em.remove(file);
+            assertFalse("file must be deleted "+file.getId(), em.contains(file));
         }
     }
     
     /**
-     * Tests creating a file
+     * Tests getting a propagated file
      */
     @Test
     public void getDatafile() throws ICATAPIException {
@@ -269,7 +285,7 @@ public class TestDatafile extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests getting a file for invalid user, should throw InsufficientPrivilegesException will message containing 'does not have permission'
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void getDatafileInvalidUser() throws ICATAPIException {
@@ -285,7 +301,7 @@ public class TestDatafile extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a file
+     * Tests getting a collection of propagated files.
      */
     @Test
     public void getDatafiles() throws ICATAPIException {
@@ -301,6 +317,9 @@ public class TestDatafile extends BaseTestClassTX {
         }
     }
     
+    /**
+     * Checks that the data file is valid in the DB for extra stuff for propagated fields
+     */
     private boolean checkDatafileProps(Datafile file){
         assertTrue("dataFile must be in db", em.contains(file));
         
@@ -320,6 +339,9 @@ public class TestDatafile extends BaseTestClassTX {
         return true;
     }
     
+    /**
+     * Checks that the data file is valid in the DB
+     */
     private boolean checkDatafile(Datafile file){
         assertTrue("dataFile must be in db", em.contains(file));
         
@@ -336,7 +358,8 @@ public class TestDatafile extends BaseTestClassTX {
     }
     
     /**
-     * Tests creating a invalid file, no anme and type
+     * Tests creating a invalid file for valid user, should throw ValidationException that contains
+     * message with 'cannot be null' in it
      */
     @Test(expected=ValidationException.class)
     public void testCreateInValidDatafile() throws ICATAPIException {
@@ -354,10 +377,9 @@ public class TestDatafile extends BaseTestClassTX {
         }
     }
     
-    
-    
     /**
-     * Tests creating a file
+     * Tests creating a invalid file for invalid user, should throw ValidationException that contains
+     * message with 'cannot be null' in it
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testCreateInValidDatafileInvalidUser() throws ICATAPIException {
@@ -375,7 +397,9 @@ public class TestDatafile extends BaseTestClassTX {
         }
     }
     
-    
+    /**
+     * Creates a datafile which is either valid or not
+     */
     private Datafile getDatafile(boolean valid){
         if(valid){
             //create valid dataFile
@@ -392,6 +416,9 @@ public class TestDatafile extends BaseTestClassTX {
         }
     }
     
+    /**
+     * Gets a datafile from the Db so that its a duplicate
+     */
     private Datafile getDatafileDuplicate(boolean last){
         Datafile dataFile = null;
         if(!last){
