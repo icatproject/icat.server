@@ -33,7 +33,9 @@ import uk.icat3.exceptions.ValidationException;
  */
 @MappedSuperclass
 public class EntityBaseBean {
-    
+    /**
+     * global static logger
+     */
     protected static Logger log = Logger.getLogger(EntityBaseBean.class);
     
     /** Creates a new instance of EntityBaseBean */
@@ -206,7 +208,7 @@ public class EntityBaseBean {
                     continue outer;
                 }
                 if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("nullable=true") ){
-                    log.trace(getClass().getSimpleName()+": "+fieldName+" is ICAT(nullable=true), no need to check.");                  
+                    log.trace(getClass().getSimpleName()+": "+fieldName+" is ICAT(nullable=true), no need to check.");
                     continue outer;
                 }
             }
@@ -263,6 +265,12 @@ public class EntityBaseBean {
         return isValid();
     }
     
+    /**
+     * This current class is merged with another class of the same type.  Uses reflection from the two
+     * classes to swap over the bean information.  Any field marked @ICAT(merge=false) is not merged.
+     *
+     * @param object object passed in to be merged with this class
+     */
     public void merge(Object object){
         
         Field[] passsedFields = object.getClass().getDeclaredFields();
@@ -310,6 +318,17 @@ public class EntityBaseBean {
         }
     }
     
+    /**
+     * Gets the value of the field from a passed in object using reflection
+     *
+     * @param name name of the field in the from object
+     * @param from object wanting to get the bean property value from
+     * @throws java.lang.NoSuchMethodException error
+     * @throws java.lang.IllegalAccessException error
+     * @throws java.lang.reflect.InvocationTargetException error
+     * @throws java.lang.NoSuchFieldException error
+     * @return object value of the field name
+     */
     @SuppressWarnings("all")
     private Object getProperty(String name, Object from) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, NoSuchFieldException {
         String prop = Character.toUpperCase(name.charAt(0)) +
@@ -323,6 +342,17 @@ public class EntityBaseBean {
         return result;
     }
     
+    /**
+     * This method merges the bean property name, from the from object to the to object
+     *
+     * @param name name of the field in the from object
+     * @param from object wanting to get the bean property value from
+     * @param to object wanting to pass the bean property value to
+     * @throws java.lang.NoSuchMethodException error
+     * @throws java.lang.IllegalAccessException error
+     * @throws java.lang.reflect.InvocationTargetException error
+     * @throws java.lang.NoSuchFieldException error
+     */
     @SuppressWarnings("all")
     private void swapProperty(String name, Object from, Object to) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, NoSuchFieldException {
         String prop = Character.toUpperCase(name.charAt(0)) +

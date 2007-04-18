@@ -13,7 +13,7 @@ import javax.ejb.ApplicationException;
 
 /**
  * Runtime error when attemping to modify facility acquired data.
- * This should not ben thrown unless a check has been missed by application
+ * This should not be thrown unless a check has been missed by application
  *
  * @author gjd37
  */

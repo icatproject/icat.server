@@ -10,7 +10,7 @@
 package uk.icat3.exceptions;
 
 /**
- * This is thrown when an investigation, dataset or datafile is not found in the DB from a ID
+ * This is thrown when an investigation, dataset or datafile is not found in the DB from a primary key ID
  *
  * @author gjd37
  */

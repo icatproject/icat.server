@@ -893,6 +893,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
         return isValid();
     }
     
+    /**
+     * Checks weather the investigation is unique in the database.
+     */
     private boolean isUnique(EntityManager manager){
         log.trace("isUnique?");
         Query query =  manager.createNamedQuery("Investigation.findByUnique");

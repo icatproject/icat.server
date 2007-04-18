@@ -371,21 +371,33 @@ public class Parameter extends EntityBaseBean implements Serializable {
         return "uk.icat3.entity.Parameter[parameterPK=" + parameterPK + "]";
     }
     
+    /**
+     * Check weather this paramter is a dataset parameter
+     */
     public boolean isDataSetParameter(){
         if(getIsDatasetParameter() != null && getIsDatasetParameter().equalsIgnoreCase("Y")) return true;
         else return false;
     }
     
+     /**
+     * Check weather this paramter is a datafile parameter
+     */
     public boolean isDatafileParameter(){
         if(getIsDatafileParameter() != null && getIsDatafileParameter().equalsIgnoreCase("Y")) return true;
         else return false;
     }
     
+     /**
+     * Check weather this paramter is a sample parameter
+     */
     public boolean isSampleParameter(){
         if(getIsSampleParameter()!= null && getIsSampleParameter().equalsIgnoreCase("Y")) return true;
         else return false;
     }
     
+     /**
+     * Check weather this paramter is a numeric parameter
+     */
     public boolean isNumeric(){
         if(getNumericValue()!= null && getNumericValue().equalsIgnoreCase("Y")) return true;
         else return false;

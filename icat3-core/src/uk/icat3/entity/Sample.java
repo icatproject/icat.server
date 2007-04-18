@@ -240,10 +240,16 @@ public class Sample extends EntityBaseBean implements Serializable {
         return hash;
     }
     
+    /**
+     * Used to see if there is a unique sample already in Db so that it can be merged or set as deleted
+     */
     public Sample find(EntityManager manager) {
         return (Sample)manager.createNamedQuery("Sample.findByUnique").setParameter("name", name).setParameter("instance", instance).setParameter("investigationId", investigationId).getSingleResult();
     }
     
+    /**
+     * Checks weather the sample is unique in the database.
+     */
     private boolean isUnique(EntityManager manager){
         try {
             Sample sample = (Sample)manager.createNamedQuery("Sample.findByUnique").setParameter("name", name).setParameter("instance", instance).setParameter("investigationId", investigationId).getSingleResult();

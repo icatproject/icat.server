@@ -521,6 +521,9 @@ public class Dataset extends EntityBaseBean implements Serializable {
         return isValid();
     }
     
+    /**
+     * Checks weather the dataset is unique in the database.
+     */
     private boolean isUnique(EntityManager manager){
         
         Query query =  manager.createNamedQuery("Dataset.findbyUnique");
