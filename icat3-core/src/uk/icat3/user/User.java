@@ -108,6 +108,7 @@ public interface User {
      * who is already logged out.
      *
      * @param sessionId authentication token obtained on successful login
+     * @return boolean
      */
     public boolean logout(String sessionId);
     
@@ -115,16 +116,13 @@ public interface User {
      * Returns a serializable object that contains personal details of a requested
      * <code>user</code> as defined in {@link UserDetails}.  A {@link SessionException}
      * should be thrown if an invalid sessionId is supplied and a
-     * {@link No SuchUserException} should be thrown if the requested <code>user</code>
+     * {@link NoSuchUserException} should be thrown if the requested <code>user</code>
      * cannot be found in the database.  If both <code>sessionId</code> and
      * <code>user</code> are invalid then a {@link SessionException} should be thrown first.
      * 
-     * @param username username/dn of user
-     * @param password of user
-     * @return sessionId authentication token that user can use in corresponding
-     *                   methods calls without having to provide username and
-     *                   password each time.
-     * @see UserDetails
+     * @param sessionId sessionId of user
+     * @param user users name
+     * @return UserDetails {@Link UserDetails}    
      * @throws SessionException   if user provides an invalid <code>sessionId</code>
      * @throws NoSuchUserException   if <code>user</code> cannot be found in user database
      */

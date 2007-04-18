@@ -10,9 +10,30 @@
 package uk.icat3.util;
 
 /**
+ * For cacsading down the model tree for setting columns or removing values.
  *
  * @author gjd37
  */
 public enum Cascade {
-    DELETE, MOD_ID, CREATE_ID, MOD_AND_CREATE_IDS, REMOVE_ID, MOD_CREATE_AND_ID;
+    /**
+     * Delete
+     */
+    DELETE,
+    /**
+     * Mod Id
+     */
+    MOD_ID,
+    /**
+     * Create Id
+     */
+    CREATE_ID,
+    /**
+     * Mod and create Ids
+     */
+    MOD_AND_CREATE_IDS,
+    /**
+     * Removes primary keys
+     */
+    REMOVE_ID;
+   
 }

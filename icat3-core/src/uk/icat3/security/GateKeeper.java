@@ -45,6 +45,9 @@ import uk.icat3.entity.StudyInvestigation;
  * @author Damian Flannery
  * @version 1.0
  */
+/**
+ * This grants or denies access to all the objects within the database
+ */
 public class GateKeeper {
     
     /** Creates a new instance of GateKeeper */

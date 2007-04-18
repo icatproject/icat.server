@@ -6,6 +6,7 @@
 
 package uk.icat3.util;
 /**
+ * Type of keyword search
  *
  * @author gjd37
  */
