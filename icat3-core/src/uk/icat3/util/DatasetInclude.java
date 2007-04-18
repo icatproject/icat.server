@@ -15,9 +15,21 @@ package uk.icat3.util;
  */
 public enum DatasetInclude {
     
+    /**
+     * list of data files
+     */
     DATASET_FILES_ONLY,
+    /**
+     * list of data parameters
+     */
     DATASET_PARAMETERS_ONY,
+    /**
+     *  both data files and data parameters, all
+     */
     DATASET_FILES_AND_PARAMETERS,
+    /**
+     * only the Dataset object with no default lazy information
+     */
     NONE;
     
 }

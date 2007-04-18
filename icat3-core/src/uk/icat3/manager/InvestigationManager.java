@@ -32,7 +32,11 @@ import uk.icat3.util.Cascade;
 import uk.icat3.util.InvestigationInclude;
 
 /**
- *
+ * This is the manager class for all operations for investigations.
+ * 
+ * These are update, remove, delete, create on investigations investigation objects.
+ * <br /><br />
+ * Objects can be {@link Keyword}, {@link Sample}, {@link SampleParameter}, {@link Publication}, {@link Investigator}
  * @author gjd37
  */
 public class InvestigationManager extends ManagerUtil {
@@ -236,9 +240,19 @@ public class InvestigationManager extends ManagerUtil {
     
     
     ////////////////////     Add/Update Commands    ///////////////////
+    /**
+     * Creates a investigation, depending if the user has create permission to create the investigation
+     *
+     * @param userId userId of the user.
+     * @param investigation objects to be created
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the investigation is invalid
+     * @return created investigation
+     */
     public static Investigation createInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createInvestigation("+userId+", "+investigation+", EntityManager)");
-        
         
         //check if valid investigation
         investigation.isValid(manager);
@@ -263,14 +277,17 @@ public class InvestigationManager extends ManagerUtil {
         
         return investigation;
     }
+    
     /**
      * Updates a Investigation depending on whether the user has permission to update this Investigation
      *
      * @param userId userId of the user.
-     * @param investigation
-     * @param manager manager object that will facilitate interaction with underlying database     *
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param investigation object to be updated
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the investigation is invalid
+     * @return updated investigation
      */
     public static Investigation updateInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateInvestigation("+userId+", "+investigation+", EntityManager)");
@@ -295,6 +312,20 @@ public class InvestigationManager extends ManagerUtil {
     
     
 /////////////////////   Util add commands /////////////////////////
+    /**
+     * Updates an investigation object, depending on whether the user has permission to update this Investigation object.
+     * <br /><br />
+     * Objects can be {@link Sample}, {@link SampleParameter}, {@link Publication}, {@link Investigator}, {@link Investigation}
+     * <br /><br />
+     * throws {@link java.lang.RuntimeException} if the {@link EntityBaseBean} object is not allowed.
+     *
+     * @param userId userId of the user.
+     * @param object {@link EntityBaseBean} object to be updated
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
+     */
     public static void updateInvestigationObject(String userId, EntityBaseBean object, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException{
         log.trace("updateInvestigationObject("+userId+", "+object+", EntityManager)");
         
@@ -376,14 +407,18 @@ public class InvestigationManager extends ManagerUtil {
     }
     
     /**
+     * Deletes or removed an investigation object, depending on whether the user has permission to delete this Investigation object.
+     * <br /><br />
+     * Objects can be {@link Keyword}, {@link Sample}, {@link SampleParameter}, {@link Publication}, {@link Investigator}, {@link Investigation}
+     * <br /><br />
+     * throws {@link java.lang.RuntimeException} if the {@link EntityBaseBean} object is not allowed.
      *
-     * @param userId
-     * @param object
-     * @param investigationId
-     * @param type
-     * @param manager
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     * @param userId userId of the user.
+     * @param object {@link EntityBaseBean} object to be updated
+     * @param type {@link AccessType} object, either REMOVE or DELETE
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void deleteInvestigationObject(String userId, EntityBaseBean object, AccessType type, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException{
         log.trace("modifyInvestigationObject("+userId+", "+object+", "+type+", EntityManager)");
@@ -526,14 +561,19 @@ public class InvestigationManager extends ManagerUtil {
     }
     
     /**
-     *
-     * @param userId
-     * @param object
-     * @param investigationId
-     * @param manager
-     * @throws uk.icat3.exceptions.ValidationException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     * Created an investigation object, depending on whether the user has permission to delete this Investigation object.
+     * <br /><br />
+     * Objects can be {@link Keyword}, {@link Sample}, {@link SampleParameter}, {@link Publication}, {@link Investigator}
+     * <br /><br />
+     * throws {@link java.lang.RuntimeException} if the {@link EntityBaseBean} object is not allowed.
+     * @param userId userId of the user.
+     * @param object {@link EntityBaseBean} object to be updated
+     * @param investigationId Id of investigation to add to
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return {@link EntityBaseBean} obejct that was added
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      */
     public static EntityBaseBean addInvestigationObject(String userId, EntityBaseBean object, Long investigationId, EntityManager manager) throws ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         log.trace("addObject("+userId+", "+object+", "+investigationId+", EntityManager)");

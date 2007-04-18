@@ -39,14 +39,15 @@ public class InvestigationSearch extends ManagerUtil {
     
     
     /**
+     * Searches a single keyword for a users and returns all the Id of the investigations
      *
-     * @param userId userId of the user.
-     * @param keyword
+     * @param userId facility userId of the user.
+     * @param keyword keywords to search
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection investigation ids
-     */    
+     */
     public static Collection<Long>  searchByKeywordRtnId(String userId, String keyword, int startIndex, int number_results, EntityManager manager)  {
         log.trace("searchByKeyword("+userId+", "+keyword+", "+startIndex+", "+number_results+", EntityManager)");
         
@@ -67,11 +68,10 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Searches a single keyword for a user and returns all the Id of the investigations
      *
-     * Searches the investigations the user has access to view by keyword
-     *
-     * @param userId userId of the user.
-     * @param keyword
+     * @param userId facility userId of the user.
+     * @param keyword keyword to search
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of investigation ids
      */
@@ -81,11 +81,10 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     *
      * Searches the investigations the user has access to view by keyword
      *
-     * @param userId
-     * @param keyword
+     * @param userId facility userId of the user.
+     * @param keyword keyword to search
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
@@ -106,11 +105,10 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     *
      * Searches the investigations the user has access to view by keyword
      *
-     * @param userId userId of the user.
-     * @param keyword
+     * @param userId facility userId of the user.
+     * @param keyword keyword to search
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
@@ -120,11 +118,10 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     *
      * Searches the investigations the user has access to view by keyword
      *
-     * @param userId userId of the user.
-     * @param keyword
+     * @param userId facility userId of the user.
+     * @param keyword keyword to search
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
@@ -135,11 +132,10 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Searches the investigations the user has access to view federalId or surname
      *
-     * Searches the investigations the user has access to view user id or surname
-     *
-     * @param userId
-     * @param surname
+     * @param userId facility userId of the user.
+     * @param searchString federalId or surname
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
@@ -174,11 +170,10 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Searches the investigations the user has access to view by investigator surname
      *
-     * Searches the investigations the user has access to view by surname
-     *
-     * @param userId userId of the user.
-     * @param surname
+     * @param userId facility userId of the user.
+     * @param surname investigator surname
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
@@ -188,11 +183,10 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Searches the investigations the user has access to view by investigator surname
      *
-     ** Searches the investigations the user has access to view by surname
-     *
-     * @param userId userId of the user.
-     * @param surname
+     * @param userId facility userId of the user.
+     * @param surname investigator surname
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
@@ -203,11 +197,10 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Searches the investigations the user has access to view by federalId
      *
-     * Searches the investigations the user has access to view by user id
-     *
-     * @param userId userId of the user.
-     * @param searchUserId Could be DN , username or federal ID
+     * @param userId facility userId of the user.
+     * @param searchUserId federalId of user
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
@@ -217,11 +210,10 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Searches the investigations the user has access to view by federalId
      *
-     * Searches the investigations the user has access to view by user id
-     *
-     * @param userId userId of the user.
-     * @param searchUserId  Could be DN , username or federal ID
+     * @param userId facility userId of the user.
+     * @param searchUserId federalId of user
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
@@ -232,14 +224,13 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     *
      *  Searches investigations from the ones they can view by the advanced criteria
      *
-     * @param userId
-     * @param advanDTO
-     * @param startIndex
-     * @param number_results
-     * @param manager
+     * @param userId facility userId of the user.
+     * @param advanDTO {@Link AdvancedSearchDetails}
+     * @param startIndex start index of the results found
+     * @param number_results number of results found from the start index
+     * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
     private static Collection<Investigation> searchByAdvancedImpl(String userId, AdvancedSearchDetails advanDTO, int startIndex, int number_results, EntityManager manager){
@@ -455,14 +446,13 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     *
      * Searches investigations from the ones they can view by the advanced criteria
      *
-     * @param userId
-     * @param advanDTO
+     * @param userId userId of the user.
+     * @param advanDTO {@Link AdvancedSearchDetails}
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
-     * @param manager manager object that will facilitate interaction with underlying database     *
+     * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDetails advanDTO, int startIndex, int number_results, EntityManager manager){
@@ -470,12 +460,11 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Searches investigations from the ones they can view by the advanced criteria
      *
-     *  Searches investigations from the ones they can view by the advanced criteria
-     *
-     * @param userId
-     * @param advanDTO
-     * @param manager
+     * @param userId facility userId of the user.
+     * @param advanDTO {@Link AdvancedSearchDetails}
+     * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDetails advanDTO, EntityManager manager){
@@ -483,14 +472,12 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     *  Gets all the investigations associated with that user, ie. thart they are investigator of.
      *
-     *  Gets all the investigations associated with that user
-     *
-     * @param userId
+     * @param userId facility userId of the user.
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
-     *
      * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> getUsersInvestigations(String userId, int startIndex, int number_results, EntityManager manager){
@@ -504,16 +491,23 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     * Gets all the investigations associated with that user
+     *  Gets all the investigations associated with that user, ie. thart they are investigator of.
      *
-     * @param userId
-     * @param manager
+     * @param userId facility userId of the user.
+     * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> getUsersInvestigations(String userId, EntityManager manager){
         return getUsersInvestigations(userId,-1, -1, manager);
     }
     
+    /**
+     *  Gets all the investigation ids associated with that user, ie. thart they are investigator of.
+     *
+     * @param userId facility userId of the user.
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation ids
+     */
     public static Collection<Long> getUsersInvestigationsRtnId(String userId, EntityManager manager){
         log.trace("getUsersInvestigationsRtnId("+userId+", EnitiyManager)");
         
@@ -521,12 +515,12 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     * Search by keywords
+     * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId userId of the user.
+     * @param userId facility userId of the user.
      * @param keywords Collection of keywords to search on
-     * @param operator LogicalOperator, either AND or OR, default AND
-     * @param include Set of information to return with investigations, ie their keywords, investigators, datasets, default none.  Having more information returned means the query will take longer.
+     * @param operator {@link LogicalOperator}, either AND or OR, default AND
+     * @param include {@link InvestigationInclude}
      * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
      * @param use_security search all investigations regardless of who owns it, default true
      * @param startIndex start index of the results found, default 0
@@ -604,13 +598,14 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId
-     * @param keywords
-     * @param includes
-     * @param fuzzy
-     * @param manager
-     * @return
+     * @param userId facility userId of the user.
+     * @param keywords Collection of keywords to search on
+     * @param includes {@link InvestigationInclude}
+     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, boolean fuzzy, EntityManager manager)  {
         //secuirty on, AND
@@ -618,12 +613,13 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId
-     * @param keywords
-     * @param fuzzy
-     * @param manager
-     * @return
+     * @param userId facility userId of the user.
+     * @param keywords Collection of keywords to search on
+     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, boolean fuzzy, EntityManager manager)  {
         //secuirty on, AND, no includes
@@ -631,11 +627,12 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId
-     * @param keywords
-     * @param manager
-     * @return
+     * @param userId facility userId of the user.
+     * @param keywords Collection of keywords to search on
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, EntityManager manager)  {
         //exact match, secuirty true, AND
@@ -643,12 +640,13 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId
-     * @param keywords
-     * @param includes
-     * @param manager
-     * @return
+     * @param userId facility userId of the user.
+     * @param keywords Collection of keywords to search on
+     * @param includes {@link InvestigationInclude}
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, EntityManager manager)  {
         //exact match, secuirty true, AND
@@ -656,12 +654,13 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId
-     * @param keywords
-     * @param operator
-     * @param manager
-     * @return
+     * @param userId facility userId of the user.
+     * @param keywords Collection of keywords to search on
+     * @param operator {@link LogicalOperator}, either AND or OR
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, EntityManager manager)  {
         //exact match, secuirty true, AND
@@ -669,13 +668,14 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId
-     * @param keywords
-     * @param includes
-     * @param operator
-     * @param manager
-     * @return
+     * @param userId facility userId of the user.
+     * @param keywords Collection of keywords to search on
+     * @param includes {@link InvestigationInclude}
+     * @param operator {@link LogicalOperator}, either AND or OR
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, LogicalOperator operator, EntityManager manager)  {
         //exact match, secuirty true, AND
@@ -683,13 +683,14 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId
-     * @param keywords
-     * @param operator
-     * @param fuzzy
-     * @param manager
-     * @return
+     * @param userId facility userId of the user.
+     * @param keywords Collection of keywords to search on
+     * @param operator {@link LogicalOperator}, either AND or OR
+     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, EntityManager manager)  {
         //exact match, secuirty true,
@@ -697,14 +698,15 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
+     * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId
-     * @param keywords
-     * @param operator
-     * @param includes
-     * @param fuzzy
-     * @param manager
-     * @return
+     * @param userId facility userId of the user.
+     * @param keywords Collection of keywords to search on
+     * @param operator {@link LogicalOperator}, either AND or OR
+     * @param includes {@link InvestigationInclude}
+     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude includes, boolean fuzzy, EntityManager manager)  {
         //exact match, secuirty true,
@@ -712,11 +714,11 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     * Lists all the instruments
+     * Lists all the instruments in the database
      *
-     * @param userId
-     * @param manager
-     * @return
+     * @param userId facility userId of the user.
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return List of instruments
      */
     public static Collection<String> listAllInstruments(String userId, EntityManager manager)  {
         log.trace("listAllInstruments("+userId+", EntityManager)");

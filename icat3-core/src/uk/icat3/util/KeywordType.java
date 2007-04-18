@@ -10,5 +10,16 @@ package uk.icat3.util;
  * @author gjd37
  */
 public enum KeywordType {
-    ALL, ALPHA_NUMERIC, ALPHA;
+    /**
+     * All keywords
+     */
+    ALL,
+    /**
+     * Consisting of or using letters, numbers, punctuation marks, and mathematical and other conventional symbols
+     */
+    ALPHA_NUMERIC,
+    /**
+     * Strings only, [a-zA-Z]
+     */
+    ALPHA;
 }

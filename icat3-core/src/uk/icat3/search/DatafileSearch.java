@@ -17,6 +17,7 @@ import uk.icat3.entity.Datafile;
 import uk.icat3.util.Queries;
 import static uk.icat3.util.Queries.*;
 /**
+ * Searchs on the datafiles for run number on the datafile parameter table.
  *
  * @author gjd37
  */
@@ -26,15 +27,17 @@ public class DatafileSearch {
     static Logger log = Logger.getLogger(DatafileSearch.class);
     
     /**
+     * Searchs database for data files from a start and end run on an instrument for which the userId has permission to read
+     * the data files investigation
      *
-     * @param userId userId of the user.
+      * @param userId facility userId of the user.    
      * @param instruments collection of instruments
      * @param startRun lower range of run number
      * @param endRun upper range of run number
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
-     * @return
+     * @return collection of datafiles returned from search
      */
     private static Collection<Datafile> searchByRunNumberImpl(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
         if(instruments == null) throw new IllegalArgumentException("Instrument collection cannot be null");
@@ -82,27 +85,32 @@ public class DatafileSearch {
     }
     
     /**
-     * Searches by run number range and list of instruments.
+     * Searchs database for data files from a start and end run on an instrument for which the userId has permission to read
+     * the data files investigation
      *
-     * @param userId userId of the user.
-     * @param instruments
-     * @return
+   * @param userId facility userId of the user.    
+     * @param instruments collection of instruments
+     * @param startRun lower range of run number
+     * @param endRun upper range of run number
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of datafiles returned from search
      */
     public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun, EntityManager manager){
         return searchByRunNumberImpl(userId, instruments, startRun, endRun, -1,-1, manager);
     }
     
     /**
-     * Searches by run number range and list of instruments.
+     * Searchs database for data files from a start and end run on an instrument for which the userId has permission to read
+     * the data files investigation
      *
-     * @param userId userId of the user.
+     * @param userId facility userId of the user.    
      * @param instruments collection of instruments
      * @param startRun lower range of run number
      * @param endRun upper range of run number
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
-     * @param manager manager object that will facilitate interaction with underlying database     *
-     * @return
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of datafiles returned from search
      */
     public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
         return searchByRunNumberImpl(userId, instruments, startRun, endRun, startIndex, number_results, manager);

@@ -34,16 +34,7 @@ public class ManagerUtil {
     
     /**
      * Goes and collects the information associated with the investigation depending on the InvestigationInclude.
-     * <br /><br />
-     * These are:<br /><br />
-     *
-     * INVESTIGATORS_ONLY - list of investigators.<br />
-     * KEYWORDS_ONLY - list of keywords.<br />
-     * INVESTIGATORS_AND_KEYWORDS - all keywords and investigators.<br />
-     * DATASETS_ONLY - list of datasets, without the list of data files.<br />
-     * DATASETS_AND_DATAFILES - list of all datasets with their list of data file.<br />
-     * ALL - all, datasets with file, keywords and investigators.<br />
-     * NONE -  only the investigation object with no default lazy information.<br />
+     *  See {@link InvestigationInclude}
      *
      * @param investigations list of investigations
      * @param include The information that is needed to be returned with the investigation
@@ -122,16 +113,10 @@ public class ManagerUtil {
     
     /**
      * Goes and collects the information associated with the dataset depending on the DatasetInclude.
-     * <br /><br />
-     * These are:<br /><br />
+     * See {@link DatasetInclude}
      *
-     * DATASET_FILES_ONLY - list of data files. <br />
-     * DATASET_PARAMETERS_ONY - list of data parameters.<br />
-     * DATASET_FILES_AND_PARAMETERS - both data files and data parameters , ALL.<br />
-     * NONE- only the Dataset object with no default lazy information.<br />
-     *
-     * @param datasets
-     * @param include
+     * @param datasets collection of datasets for gettting more info about them
+     * @param include include info
      */
     protected static void getDatasetInformation(Collection<Dataset> datasets, DatasetInclude include){
         
@@ -153,43 +138,16 @@ public class ManagerUtil {
                 dataset.getDatasetParameterCollection().size();
             }
         }
-    }
-    
-   /* public Sample addSample(String userId, Sample sample, EntityManager manager) throws ValidationException{
-        boolean unique = sample.isUnique(manager);
-        if(!unique) throw new ValidationException(sample+" is not unique.");
-    
-        sample.isValid(manager);
-    
-        sample.setId(null);
-        sample.setCreateId(userId);
-    
-        manager.persist(sample);
-    
-        return sample;
-    }
-    
-     public Sample removeaddSample(String userId, Sample sample, EntityManager manager) throws ValidationException{
-        boolean unique = sample.isUnique(manager);
-        if(!unique) throw new ValidationException(sample+" is not unique.");
-    
-        sample.isValid(manager);
-    
-        sample.setId(null);
-        sample.setCreateId(userId);
-    
-        manager.persist(sample);
-    
-        return sample;
-    }*/
+    }    
     
     /**
      * Checks that the object with primary key exists in the database, if so
      * is returned
      *
-     * @param dataFileId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException
+     * @param entityClass entity class that you are looking for
+     * @param primaryKey primary key of object wanting to find
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @return object if found
      */
     public static <T> T find(Class<T> entityClass, Object primaryKey, EntityManager manager) throws NoSuchObjectFoundException{
@@ -204,6 +162,13 @@ public class ManagerUtil {
         return object;
     }
     
+    /**
+     * Gets the facilityUserId of the user from the federalId 
+     *
+     * @param federalId federalId of user
+     * @param manager manager object that will facilitate interaction with underlying database   
+     * @return facilityUserId
+     */
     public static String getFacilityUserId(String federalId, EntityManager manager) {
         FacilityUser facilityUser = null;
         try {

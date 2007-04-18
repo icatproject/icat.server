@@ -19,17 +19,53 @@ import uk.icat3.util.InvestigationInclude;
  */
 public class AdvancedSearchDetails {
     
+    /**
+     * Investigation Name
+     */
     private String investigationName; //inv title
+    /**
+     * List of surnames
+     */
     private Collection<String> investigators; //surname
+    /**
+     * Investigation number
+     */
     private String experimentNumber; //inv_number
+    /**
+     * List of instruments
+     */
     private Collection<String> instruments;
+    /**
+     * Long value of start date in datafile parameter
+     */
     private Long runStart; // data file parameter,  run_number datafile_parameter
+    /**
+     * Long value of start end in datafile parameter
+     */
     private Long runEnd;// data file parameter, run_number datafile_parameter
+    /**
+     * Sample name
+     */
     private String sampleName; // sample
+    /**
+     * Datafile name
+     */
     private String datafileName; // data file name
+    /**
+     * datafile create date
+     */
     private Date yearRangeStart; // (datafile_CREATE_time)
+    /**
+     * datafile create date
+     */
     private Date yearRangeEnd;// (datafile_CREATE_time)
+    /**
+     * List of keywords
+     */
     private Collection<String> keywords;
+    /**
+     * InvestigationInclude in the data returned. {@link InvestigationInclude}
+     */
     private InvestigationInclude investigationInclude;
     
     /**
@@ -37,7 +73,7 @@ public class AdvancedSearchDetails {
      */
     public AdvancedSearchDetails() {
     }
-    
+       
     public String getInvestigationName() {
         return investigationName;
     }
@@ -165,14 +201,16 @@ public class AdvancedSearchDetails {
         else return false;
     }
     /////////////  End of methods    /////////////////
-
+    
     public InvestigationInclude getInvestigationInclude() {
         if(investigationInclude == null) return InvestigationInclude.NONE;
         return investigationInclude;
     }
-
+    
     public void setInvestigationInclude(InvestigationInclude investigationInclude) {
         this.investigationInclude = investigationInclude;
     }
+    
+    
     
 }

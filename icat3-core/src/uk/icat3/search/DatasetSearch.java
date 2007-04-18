@@ -22,6 +22,7 @@ import uk.icat3.util.AccessType;
 import uk.icat3.util.DatasetInclude;
 import static uk.icat3.util.Queries.*;
 /**
+ * Searchs on the datasets for samples and list types and status' of datasets.
  *
  * @author gjd37
  */
@@ -33,10 +34,10 @@ public class DatasetSearch {
     /**
      * From a sample name, return all the datasets a user can view asscoiated with the sample name
      *
-     * @param userId
-     * @param sampleName
-     * @param manager
-     * @return Collection of datasets
+        * @param userId facility userId of the user.    
+     * @param sampleName sample name wiching to search on
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of datasets returned from search
      */
     public static Collection<Dataset> getBySampleName(String userId, String sampleName, EntityManager manager) {
         log.trace("getBySampleId("+userId+", "+sampleName+", EntityManager)");
@@ -66,12 +67,24 @@ public class DatasetSearch {
         return dataSets;
     }
     
+    /**
+     *  List all the valid avaliable types' for datasets
+     *
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of types'
+     */
     public Collection<DatasetType> listDatasetTypes(EntityManager manager) {
         log.trace("listDatasetTypes(EntityManager)");
         
         return manager.createNamedQuery("DatasetType.getAll").getResultList();
     }
     
+    /**
+     * List all the valid avaliable status' for datasets
+     *
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of status'
+     */
     public Collection<DatasetStatus> listDatasetStatus(EntityManager manager) {
         log.trace("listDatasetStatus(EntityManager)");
         
