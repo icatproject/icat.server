@@ -26,6 +26,9 @@ import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
 
 /**
+ * This is the manager class for all operations for data sets.
+ *
+ * These are update, remove, delete, create on data sets and data set paramters and dataset sample
  *
  * @author gjd37
  */
@@ -37,12 +40,14 @@ public class DataSetManager extends ManagerUtil {
     ////////////////   Delete commands       ///////////////////////////
     
     /**
-     * Deletes the data set for a user depending if the users id has delete permissions to delete the data set
+     * Deletes the data set for a user depending if the users id has delete permissions to delete the data set.
+     * Deleting the set marks it, and all of its paramters and data files as deleted but does not remove it from the database.
      *
-     * @param userId
-     * @param dataSet
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     *
+     *  @param userId facility userId of the user.
+     * @param dataSet  object to be deleted
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void deleteDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -52,12 +57,12 @@ public class DataSetManager extends ManagerUtil {
     /**
      *
      * Deletes the data set for a user depending if the users id has delete permissions to delete the data set from the
-     * data set ID.
+     * data set ID. Deleting the set marks it, and all of its paramters and data files as deleted but does not remove it from the database.
      *
-     * @param userId
-     * @param dataSetId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataSetId  object Id to be deleted
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void deleteDataSet(String userId, Long dataSetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -72,14 +77,13 @@ public class DataSetManager extends ManagerUtil {
     }
     
     /**
+     * Removes (from the database) the data set, and its dataset paramters and data files for a user depending if the
+     * users id has remove permissions to delete the data set from the data set ID.
      *
-     * Removes the data set for a user depending if the users id has delete permissions to delete the data set from the
-     * data set ID.
-     *
-     * @param userId
-     * @param dataSetId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     *  @param userId facility userId of the user.
+     * @param dataSetId  object Id to be removed
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void removeDataSet(String userId, Long dataSetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -99,14 +103,13 @@ public class DataSetManager extends ManagerUtil {
     }
     
     /**
+     * Removes (from the database) the data set, and its dataset paramters and data files for a user depending if the
+     * users id has remove permissions to delete the data set from the data set ID.
      *
-     * Removes the data set for a user depending if the users id has delete permissions to delete the data set from the
-     * data set ID.
-     *
-     * @param userId
-     * @param dataSetId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataSet object to be removed
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void removeDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -115,14 +118,16 @@ public class DataSetManager extends ManagerUtil {
     
     /**
      *
-     * Removes a collection of data set for a user depending if the users id has delete permissions to delete the data set from the
+     * Removes a collection of data set for a user depending if the users id has remove permissions to delete the data set from the
      * data set ID.
      *
-     * @param userId
-     * @param dataSetIds collection of datasets
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataSetIds collection of dataset ids
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @return true to avoid erausre name clash with another method
+     *
      */
     public static boolean removeDataSets(String userId, Collection<Long> dataSetIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("removeDataSet("+userId+", "+dataSetIds+", EntityManager)");
@@ -135,12 +140,12 @@ public class DataSetManager extends ManagerUtil {
     
     /**
      * Deletes the collection of data set for a user depending if the users id has delete permissions to delete the data sets from the
-     * data set IDs
+     * data set IDs.  Deleting the set marks it, and all of its paramters and data files as deleted but does not remove it from the database.
      *
-     * @param userId
-     * @param dataSetIds
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataSetIds collection of dataset ids
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void deleteDataSets(String userId, Collection<Long> dataSetIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -155,14 +160,15 @@ public class DataSetManager extends ManagerUtil {
     //TODO:  added boolean to avoid erausre name clash with above method
     /**
      *
-     * Deletes the collection of data sets for a user depending if the user's id has delete permissions to delete the data sets
+     * Deletes the collection of data sets for a user depending if the user's id has delete permissions to delete the data sets.
+     * Deleting the set marks it, and all of its paramters and data files as deleted but does not remove it from the database.
      *
-     * @param userId
-     * @param dataSets
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataSets collection of datasets
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @return
+     * @return true to avoid erausre name clash with another method
      */
     public static boolean deleteDataSets(String userId, Collection<Dataset> dataSets, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataSets("+userId+", "+dataSets+", EntityManager)");
@@ -178,6 +184,17 @@ public class DataSetManager extends ManagerUtil {
     
     
     ////////////////////     Add/Update Commands    ///////////////////
+    /**
+     * Creates a data set, depending if the user has create permission on the data set associated with the investigation
+     *
+     * @param userId facility userId of the user.
+     * @param dataSet object to be created
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @return dataset that was created
+     */
     public static Dataset createDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataSet("+userId+", "+dataSet+", EntityManager)");
         
@@ -202,14 +219,15 @@ public class DataSetManager extends ManagerUtil {
     }
     
     /**
-     * Updates / Adds a data set depending on whether the user has permission to update this data set or its investigation
+     * Updates a data set depending on whether the user has permission to update this data set or its investigation
      *
-     * @param userId
-     * @param dataSet
-     * @param manager
-     * @param validate does the whole of dataset need validating
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataSet object to be created
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @return dataset that was updated
      */
     public static Dataset updateDataSet(String userId, Dataset dataSet, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateDataSet("+userId+", "+dataSet+", EntityManager)");
@@ -229,14 +247,16 @@ public class DataSetManager extends ManagerUtil {
     }
     
     /**
-     * Creates a data set, depending if the user has update permission on the data set associated with the investigation
+     * Creates a data set, depending if the user has create permission on the data set associated with the investigation
      *
-     * @param userId
-     * @param dataSet
-     * @param investigationId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataSet object to be created
+     * @param investigationId id of investigations to added the datasets to
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @return dataset that was created
      */
     public static Dataset createDataSet(String userId, Dataset dataSet, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataFile("+userId+", "+dataSet+" "+investigationId+", EntityManager)");
@@ -252,12 +272,14 @@ public class DataSetManager extends ManagerUtil {
     /**
      * Creates a collection of data sets, depending if the user has update permission on the data set associated with the investigation
      *
-     * @param userId
+     * @param userId facility userId of the user.
      * @param dataSets collection of the datasets
-     * @param investigationId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param investigationId id of investigations to added the datasets to
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @return collection of dataset that was created
      */
     public static Collection<Dataset> createDataSets(String userId, Collection<Dataset> dataSets, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataFile("+userId+", "+dataSets+" "+investigationId+", EntityManager)");
@@ -281,13 +303,13 @@ public class DataSetManager extends ManagerUtil {
      * Gets the data sets objects from a list of data set ids, depending if the users has access to read the data sets.
      * Also gets extra information regarding the data set.  See {@link DatasetInclude}
      *
-     * @param userId
-     * @param dataSetIds
-     * @param includes
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataSetIds Ids of objects
+     * @param includes other information wanted with the data set
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @return
+     * @return collection of datasets
      */
     public static Collection<Dataset> getDataSets(String userId, Collection<Long> dataSetIds, DatasetInclude includes,  EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("getDataSet("+userId+", "+dataSetIds+" EntityManager)");
@@ -315,12 +337,12 @@ public class DataSetManager extends ManagerUtil {
     /**
      *  Gets the data sets objects from a list of data set ids, depending if the users has access to read the data sets
      *
-     * @param userId
-     * @param dataSetIds
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataSetIds Ids of objects
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @return
+     * @return collection of datasets
      */
     public static Collection<Dataset> getDataSets(String userId, Collection<Long> dataSetIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         return getDataSets(userId, dataSetIds,DatasetInclude.NONE, manager);
@@ -329,12 +351,12 @@ public class DataSetManager extends ManagerUtil {
     /**
      * Gets the data set object from a list of data set ids, depending if the user has access to read the data set.
      *
-     * @param userId
-     * @param dataSetId
-     * @param manager
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param userId facility userId of the user.
+     * @param dataSetId Id of object
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @return
+     * @return collection of datasets
      */
     public static Dataset getDataSet(String userId, Long dataSetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("getDataSet("+userId+", "+dataSetId+" EntityManager)");
@@ -351,6 +373,17 @@ public class DataSetManager extends ManagerUtil {
     
     /////////////////////   Util commands /////////////////////////
     
+    /**
+     * Sets the dataset sample id, depending if the users has access to update the data set
+     *
+     * @param userId facility userId of the user.
+     * @param sampleId Id of sample
+     * @param datasetid Id of dataset
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     */
     public static void setDataSetSample(String userId, Long sampleId, Long datasetid, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("setDataSetSample("+userId+", "+sampleId+", "+datasetid+", EntityManager)");
         
@@ -380,6 +413,18 @@ public class DataSetManager extends ManagerUtil {
         datasetManaged.setModId(facilityUserId);
     }
     
+    /**
+     * Adds a data set paramter to a dataset, depending if the users has access to create the data set paramter
+     *
+     * @param userId facility userId of the user.
+     * @param dataSetParameter object to be created
+     * @param datasetId Id of dataset
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @return created dataset parameter
+     */
     public static DatasetParameter addDataSetParameter(String userId, DatasetParameter dataSetParameter, Long datasetId,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("addDataSetParameter("+userId+", "+dataSetParameter+", "+datasetId+", EntityManager)");
         
@@ -415,10 +460,21 @@ public class DataSetManager extends ManagerUtil {
             dataSetParameter.setCreateId(facilityUserId);
             manager.persist(dataSetParameter);
             return dataSetParameter;
-        }        
-       
+        }
+        
     }
     
+    /**
+     * Adds a data set paramter to a dataset, depending if the users has access to create the data set paramter
+     *
+     * @param userId facility userId of the user.
+     * @param dataSetParameter object to be created
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @return created dataset parameter
+     */
     public static DatasetParameter addDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("addDataSetParameter("+userId+", "+dataSetParameter+", EntityManager)");
         
@@ -429,6 +485,17 @@ public class DataSetManager extends ManagerUtil {
         return  addDataSetParameter(userId, dataSetParameter, datasetId, manager);
     }
     
+    /**
+     * Removes (from the database) a data set paramter object, depending if the user has access to remove the data set parameter from
+     * the associated data set id.
+     *
+     * @param userId facility userId of the user.
+     * @param dataSetParameter object to be removed
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set parameter is invalid
+     */
     public static void removeDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("removeDataSetParameter("+userId+", "+dataSetParameter+", EntityManager)");
         
@@ -448,6 +515,17 @@ public class DataSetManager extends ManagerUtil {
         manager.remove(dataSetParameterManaged);
     }
     
+    /**
+     * Deletes a data set paramter object, depending if the user has access to delete the data set parameter from
+     * the associated data set id.   Deleting the set marks it as deleted but does not remove it from the database.
+     *
+     * @param userId facility userId of the user.
+     * @param dataSetParameter object to be deleted
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set parameter is invalid
+     */
     public static void deleteDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("deleteDataSetParameter("+userId+", "+dataSetParameter+", EntityManager)");
         
@@ -466,9 +544,20 @@ public class DataSetManager extends ManagerUtil {
         dataSetParameterManaged.setDeleted(true);
     }
     
+    /**
+     * Updates the data file paramter object, depending if the user has access to update the data file parameter.
+     *
+     * @param userId facility userId of the user.
+     * @param dataSetParameter object to be updated
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     */
     public static void updateDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("updateDataSetParameter("+userId+", "+dataSetParameter+", EntityManager)");
         
+        if(dataSetParameter.getDatasetParameterPK() == null) throw new ValidationException(dataSetParameter+" has no assoicated primary key.");
         DatasetParameter dataSetParameterFound = find(DatasetParameter.class, dataSetParameter.getDatasetParameterPK(), manager);
         
         //ok, now check permissions on found data set

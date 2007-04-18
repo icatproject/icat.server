@@ -48,10 +48,10 @@ public class InvestigationManager extends ManagerUtil {
      * Also gets extra information regarding the investigation.  See {@link InvestigationInclude}
      *
      * @param userId userId of the user.
-     * @param investigationIds
-     * @param include The information that is needed to be returned with the investigation
-     * @param manager manager object that will facilitate interaction with underlying database     
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param investigationIds Ids of investigations
+     * @param includes information that is needed to be returned with the investigation
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return collection of {@link Investigation} investigation objects
      */
@@ -83,9 +83,9 @@ public class InvestigationManager extends ManagerUtil {
      * if the user has access to the investigation.
      *
      * @param userId userId of the user.
-     * @param investigationId
-     * @param manager manager object that will facilitate interaction with underlying database     *
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param investigationId Id of investigations
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return A {@link Investigation} investigation object
      */
@@ -100,9 +100,9 @@ public class InvestigationManager extends ManagerUtil {
      * if the user has access to the investigations.
      *
      * @param userId userId of the user.
-     * @param investigationIds
-     * @param manager manager object that will facilitate interaction with underlying database     *
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param investigationIds Ids of investigations
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return collection of {@link Investigation} investigation objects
      */
@@ -113,16 +113,17 @@ public class InvestigationManager extends ManagerUtil {
     
     
     
-    ////////////////////    Delete Command /  Should be removed??  /////////////////////////
+    ////////////////////    Delete / Remove Commands  /////////////////////////
     
     /**
      * Deletes a collection of investigations for a user depending if the user's id has delete permissions to delete the investigations from the
-     * investigation ids.
+     * investigation ids. Deleting a investigation marks it, and all of its paramters, datasets, datafiles, keywords
+     * investigators etc as deleted but does not remove it from the database.
      *
      * @param userId userId of the user.
-     * @param investigationIds
-     * @param manager manager object that will facilitate interaction with underlying database     *
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param investigationIds Ids of investigations
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void deleteInvestigations(String userId, Collection<Long> investigationIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -136,12 +137,13 @@ public class InvestigationManager extends ManagerUtil {
     
     /**
      * Deletes the investigation for a user depending if the user's id has delete permissions to delete the investigations from the
-     * investigation ids.
+     * investigation ids.  Deleting a investigation marks it, and all of its paramters, datasets, datafiles, keywords
+     * investigators etc as deleted but does not remove it from the database.
      *
      * @param userId userId of the user.
-     * @param investigationIds
-     * @param manager manager object that will facilitate interaction with underlying database     *
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param investigationId Id of investigations
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void deleteInvestigation(String userId, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -154,12 +156,13 @@ public class InvestigationManager extends ManagerUtil {
     
     /**
      * Deletes the investigation for a user depending if the user's id has delete permissions to delete the investigations from the
-     * investigation ids.
+     * investigation ids. Deleting a investigation marks it, and all of its paramters, datasets, datafiles, keywords
+     * investigators etc as deleted but does not remove it from the database.
      *
      * @param userId userId of the user.
-     * @param investigationIds
-     * @param manager manager object that will facilitate interaction with underlying database     *
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param investigation investigation object
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void deleteInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -171,13 +174,13 @@ public class InvestigationManager extends ManagerUtil {
     
     
     /**
-     * Removes the investigation for a user depending if the user's id has delete permissions to delete the investigations from the
+     * Removes (from the database) the investigation for a user depending if the user's id has delete permissions to delete the investigations from the
      * investigation ids.
      *
      * @param userId userId of the user.
-     * @param investigationIds
-     * @param manager manager object that will facilitate interaction with underlying database     *
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param investigationId Id of investigation
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void removeInvestigation(String userId, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -189,13 +192,13 @@ public class InvestigationManager extends ManagerUtil {
     }
     
     /**
-     * Removes the investigation for a user depending if the user's id has delete permissions to delete the investigations from the
+     * Removes (from the database) the investigation for a user depending if the user's id has delete permissions to delete the investigations from the
      * investigation ids.
      *
      * @param userId userId of the user.
-     * @param investigationIds
-     * @param manager manager object that will facilitate interaction with underlying database     *
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param investigation investigation object
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void removeInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -208,14 +211,16 @@ public class InvestigationManager extends ManagerUtil {
     
     //TODO added boolean to avoid erausre name clash
     /**
-     * Deletes a collection of investigations for a user depending if the user's id has delete permissions to delete the investigations f
+     * Deletes the investigations for a user depending if the user's id has delete permissions to delete the investigations from the
+     * investigation ids. Deleting a investigation marks it, and all of its paramters, datasets, datafiles, keywords
+     * investigators etc as deleted but does not remove it from the database.
      *
      * @param userId userId of the user.
-     * @param investigations
-     * @param manager manager object that will facilitate interaction with underlying database     *
-     * @throws javax.persistence.EntityNotFoundException if entity does not exist in database
+     * @param investigations objects to be deleted
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @return dummy boolean
+     * @return boolean dummy
      */
     public static boolean deleteInvestigations(String userId, Collection<Investigation> investigations, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteInvestigations("+userId+", "+investigations+", EntityManager)");
@@ -548,7 +553,7 @@ public class InvestigationManager extends ManagerUtil {
             
             try {
                 //check investigator not already added
-               // if(publication.getId() == null) throw new NoSuchObjectFoundException();
+                // if(publication.getId() == null) throw new NoSuchObjectFoundException();
                 Publication publicationManaged = find(Publication.class, publication.getId(), manager);
                 if(publicationManaged.isDeleted()){
                     publicationManaged.setDeleted(false);

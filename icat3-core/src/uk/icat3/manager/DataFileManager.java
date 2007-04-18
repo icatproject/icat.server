@@ -26,8 +26,8 @@ import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
 
 /**
- * This is the manager class for all operations for data files.  
- * 
+ * This is the manager class for all operations for data files.
+ *
  * These are update, remove, delete, create on data files and data file paramters
  *
  * @author gjd37
@@ -38,7 +38,7 @@ public class DataFileManager extends ManagerUtil {
     
     /**
      * Deletes the data file for a user depending if the user's id has delete permissions to delete the data file.
-     * Deleting the file marks it as deleted but does not remove it from the database.
+     * Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
      *
      * @param userId facility userId of the user.
      * @param dataFile  object to be deleted
@@ -52,7 +52,7 @@ public class DataFileManager extends ManagerUtil {
     
     /**
      * Deletes the data file with ID, for a users depending if the users id has delete permissions to delete the data file from
-     * the ID.  Deleting the file marks it as deleted but does not remove it from the database.
+     * the ID. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
      *
      * @param userId facility userId of the user.
      * @param dataFileId Id of data file to be deleted
@@ -75,7 +75,7 @@ public class DataFileManager extends ManagerUtil {
     
     /**
      * Deletes the collection of files for a users depending if the users id has delete permissions to delete the files from
-     * their ids.  Deleting the file marks it as deleted but does not remove it from the database.
+     * their ids. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
      *
      * @param userId facility userId of the user.
      * @param dataFileIds Ids of data files to be deleted
@@ -95,7 +95,7 @@ public class DataFileManager extends ManagerUtil {
     
     /**
      * Deletes the collection of data files for a users depending if the users id has delete permissions to
-     * delete the data file.  Deleting the file marks it as deleted but does not remove it from the database.
+     * delete the data file. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
      *
      * @param userId facility userId of the user.
      * @param dataFiles objects to be deleted
@@ -179,7 +179,7 @@ public class DataFileManager extends ManagerUtil {
      * Creates a data file, depending if the user has update permission on the data set associated with the data file
      *
      * @param userId facility userId of the user.
-      * @param dataFile object to be created
+     * @param dataFile object to be created
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
@@ -413,10 +413,12 @@ public class DataFileManager extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     *   @throws uk.icat3.exceptions.ValidationException if the data file parameter is invalid
      */
-    public static void removeDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public static void removeDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("removeDatafileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
+        if(datafileParameter.getDatafileParameterPK() == null) throw new ValidationException(datafileParameter+" has no assoicated primary key.");
         Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
         
         //find the dataset
@@ -439,10 +441,12 @@ public class DataFileManager extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file parameter is invalid
      */
-    public static void deleteDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public static void deleteDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("deleteDatafileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
+        if(datafileParameter.getDatafileParameterPK() == null) throw new ValidationException(datafileParameter+" has no assoicated primary key.");
         Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
         
         //find the dataset
