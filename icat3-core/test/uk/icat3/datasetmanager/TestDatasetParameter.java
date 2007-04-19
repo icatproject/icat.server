@@ -327,6 +327,66 @@ public class TestDatasetParameter extends BaseTestClassTX {
         }
     }
     
+    /**
+     * Tests a removing , no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void removeDatafileParameterNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid datasetarameter, no name
+        DatasetParameter datasetParameter = getDatasetParameter(true, true);
+        datasetParameter.setDatasetParameterPK(null);
+        
+        try {
+            DataSetManager.removeDataSetParameter(VALID_USER_FOR_INVESTIGATION, datasetParameter, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage(),ex);
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests delete a a dataset , no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void deleteDatafileParameterNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid datasetarameter, no name
+        DatasetParameter datasetParameter = getDatasetParameter(true, true);
+        datasetParameter.setDatasetParameterPK(null);
+        
+        try {
+            DataSetManager.deleteDataSetParameter(VALID_USER_FOR_INVESTIGATION, datasetParameter, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage(),ex);
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests update a dataset , no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void updateDatasetParameterNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid datasetarameter, no name
+        DatasetParameter datasetParameter = getDatasetParameter(true, true);
+        datasetParameter.setDatasetParameterPK(null);
+        
+        try {
+            DataSetManager.updateDataSetParameter(VALID_USER_FOR_INVESTIGATION, datasetParameter, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage(),ex);
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
     @Test
     public void removeParameter(){
         log.info("Removing parameters");

@@ -255,7 +255,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         }
     }
     
-     /**
+    /**
      * Tests creating a invalid data file parameter, adding a numeric value to string value only, should throw ValidationException containing
      * 'numeric value only' in the message
      */
@@ -334,6 +334,66 @@ public class TestDatafileParameter extends BaseTestClassTX {
         }
     }
     
+    /**
+     * Tests creating a file
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void removeDatafileParameterNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid datafileParameter, no name
+        DatafileParameter datafileParameter = getDatafileParameter(true, true);
+        datafileParameter.setDatafileParameterPK(null);
+        
+        try {
+            DataFileManager.removeDatafileParameter(VALID_USER_FOR_INVESTIGATION, datafileParameter, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage(),ex);
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests getting a file
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void deleteDatafileParameterNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid datafileParameter, no name
+        DatafileParameter datafileParameter = getDatafileParameter(true, true);
+        datafileParameter.setDatafileParameterPK(null);
+        
+        try {
+            DataFileManager.deleteDatafileParameter(VALID_USER_FOR_INVESTIGATION, datafileParameter, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage(),ex);
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests update a file
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void updateDatafileParameterNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid datafileParameter, no name
+        DatafileParameter datafileParameter = getDatafileParameter(true, true);
+        datafileParameter.setDatafileParameterPK(null);
+        
+        try {
+            DataFileManager.updateDatafileParameter(VALID_USER_FOR_INVESTIGATION, datafileParameter, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage(),ex);
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
     @Test
     public void removeParameter(){
         log.info("Removing parameters");
@@ -360,7 +420,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
     
     /**
      * gets a numeric or string paramter from DB, if not there creates one
-     */    
+     */
     static Parameter getParameter(boolean numeric){
         Parameter parameter = null;
         if(numeric){
@@ -416,7 +476,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         return datafileParameter;
     }
     
-     /**
+    /**
      * Creates a datafile parameter which is either valid or not also that is numeric or not
      */
     static DatafileParameter getDatafileParameter(boolean valid, boolean numeric){

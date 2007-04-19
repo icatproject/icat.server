@@ -22,13 +22,14 @@ import org.junit.Test;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataFileManager;
 import uk.icat3.util.BaseTestClassTX;
 import static uk.icat3.util.TestConstants.*;
 
 /**
- * Opens a new entitymanager and tranaction for each method and tests for get/ remove/ delete/ modify/ insert 
+ * Opens a new entitymanager and tranaction for each method and tests for get/ remove/ delete/ modify/ insert
  * for data files for valid and invalid users on the DataFileManager class
  *
  * @author gjd37
@@ -299,6 +300,64 @@ public class TestDatafile extends BaseTestClassTX {
             throw ex;
         }
     }
+    
+    /**
+     * Tests deleting a file with no primary key
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void deleteDatafileNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting dataFile to dataFile Id: "+VALID_INVESTIGATION_ID);
+        
+        Datafile validDatafile  = getDatafile(true);
+        validDatafile.setId(null);
+        
+        try {
+            DataFileManager.deleteDataFile(VALID_USER_FOR_INVESTIGATION, validDatafile, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found.'", ex.getMessage().contains("not found."));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests removing a file with no primary key
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void removingDatafileNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing dataFile to dataFile Id: "+VALID_INVESTIGATION_ID);
+        
+        Datafile validDatafile  = getDatafile(true);
+        validDatafile.setId(null);
+        
+        try {
+            DataFileManager.removeDataFile(VALID_USER_FOR_INVESTIGATION, validDatafile, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found.'", ex.getMessage().contains("not found."));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests update a file with no primary key
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void updateDatafileNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing dataFile to dataFile Id: "+VALID_INVESTIGATION_ID);
+        
+        Datafile validDatafile  = getDatafile(true);
+        validDatafile.setId(null);
+        
+        try {
+            DataFileManager.updateDataFile(VALID_USER_FOR_INVESTIGATION, validDatafile, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found.'", ex.getMessage().contains("not found."));
+            throw ex;
+        }
+    }
+    
     
     /**
      * Tests getting a collection of propagated files.

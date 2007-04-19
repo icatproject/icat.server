@@ -377,6 +377,68 @@ public class TestDataset extends BaseTestClassTX {
             assertFalse("Deleted must be false", set.isDeleted());
         }
     }
+       
+    
+    /**
+     * Tests remove a file, no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void removeDatasetNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid dataset, no name
+        Dataset validDataset = getDataset(true);
+        validDataset.setId(null);
+        
+        try {
+            DataSetManager.removeDataSet(VALID_USER_FOR_INVESTIGATION, validDataset,  em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests delete a file, no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void deleteDatasetNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid dataset, no name
+        Dataset validDataset = getDataset(true);
+        validDataset.setId(null);
+        
+        try {
+            DataSetManager.deleteDataSet(VALID_USER_FOR_INVESTIGATION, validDataset,  em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests update a file, no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void updateDatasetNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid dataset, no name
+        Dataset validDataset = getDataset(true);
+        validDataset.setId(null);
+        
+        try {
+            DataSetManager.updateDataSet(VALID_USER_FOR_INVESTIGATION, validDataset,  em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
     
     private boolean checkDatasetProps(Dataset file){
         assertTrue("dataset must be in db", em.contains(file));
