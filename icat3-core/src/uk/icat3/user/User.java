@@ -108,7 +108,7 @@ public interface User {
      * who is already logged out.
      *
      * @param sessionId authentication token obtained on successful login
-     * @return boolean
+     * @return boolean if logged out
      */
     public boolean logout(String sessionId);
     
