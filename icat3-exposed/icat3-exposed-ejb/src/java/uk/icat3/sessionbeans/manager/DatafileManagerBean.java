@@ -16,7 +16,10 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
+import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.xml.ws.RequestWrapper;
+import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
@@ -57,7 +60,7 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         return DataFileManager.getDataFile(userId, datafileId, manager);
     }
     
-     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Collection<Datafile> getDatafiles(String sessionId, Collection<Long> datafileIds)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
         //for user bean get userId
@@ -85,7 +88,7 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         String userId = user.getUserIdFromSessionId(sessionId);
         
         Collection<Long> ids = new ArrayList<Long>();
-        //add the dataset, this checks permssions
+        //add the dataset, this checks permissions
         for(Datafile file : dataFiles){
             Datafile newDataFile = DataFileManager.createDataFile(userId, file, datasetId, manager);
             ids.add(newDataFile.getId());
@@ -95,19 +98,63 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         return ids;
     }
     
+    public void deleteDataFile(String sessionId, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        //delete the dataset, this checks permsisions
+        DataFileManager.deleteDataFile(userId, datafileId, manager);
+    }
+    
+    @WebMethod(operationName="deleteDataFileObject")
+    @RequestWrapper(className="uk.icat3.sessionbeans.manager.deleteDataFileObject")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.manager.deleteDataFileObjectResponse")
+    public void deleteDataFile(String sessionId, Datafile dataFile) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        //delete the dataset, this checks permsisions
+        DataFileManager.deleteDataFile(userId, dataFile, manager);
+    }
+    
+    public void removeDataFile(String sessionId, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        //delete the dataset, this checks permsisions
+        DataFileManager.deleteDataFile(userId, datafileId, manager);
+    }
+    
+    @WebMethod(operationName="removeDataFileObject")
+    @RequestWrapper(className="uk.icat3.sessionbeans.manager.removeDataFileObject")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.manager.removeDataFileObjectResponse")
+    public void removeDataFile(String sessionId, Datafile dataFile) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        //delete the dataset, this checks permsisions
+        DataFileManager.removeDataFile(userId, dataFile, manager);
+    }
+    
+    public void updateDataFile(String sessionId, Datafile dataFile) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        //delete the dataset, this checks permsisions
+        DataFileManager.updateDataFile(userId, dataFile, manager);
+    }
+    
     public void addDataFileParameter(String sessionId, DatafileParameter dataFileParameter, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
         //get file, checks read access
-        Datafile file = DataFileManager.getDataFile(userId, datafileId, manager);
-        
-        //add the datafile parameter to the file
-        file.addDataFileParamaeter(dataFileParameter);
-        
-        //update this, this also checks permissions
-        //DataFileManager.updateDataFile(userId, file, manager);
-    }
-    
+        DataFileManager.addDataFileParameter(userId, dataFileParameter, datafileId, manager);
+    }    
 }

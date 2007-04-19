@@ -21,7 +21,6 @@ import javax.ejb.TransactionManagementType;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import org.apache.log4j.Logger;
-import uk.ac.cclrc.dpal.DPAccessLayer;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.InvestigationSearch;

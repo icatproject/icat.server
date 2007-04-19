@@ -38,7 +38,7 @@ import uk.icat3.util.InvestigationInclude;
  * @author gjd37
  */
 @Stateless()
-@WebService()
+@WebService(targetNamespace="uk.ac.stfc.manager")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -114,7 +114,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        InvestigationManager.addKeyword(userId, keyword, investigationId, manager);        
+        InvestigationManager.addInvestigationObject(userId, keyword, investigationId, manager);        
     }
     
     /**
@@ -132,6 +132,6 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        InvestigationManager.addInvestigator(userId, investigator, investigationId, manager);        
+        InvestigationManager.addInvestigationObject(userId, investigator, investigationId, manager);        
     }         
 }
