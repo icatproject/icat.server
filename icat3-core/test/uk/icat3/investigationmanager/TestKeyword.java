@@ -179,8 +179,8 @@ public class TestKeyword extends BaseTestClassTX {
             assertTrue("Exception must contain 'cannot be null'", ex.getMessage().contains("cannot be null"));
             throw ex;
         }
-    }    
-   
+    }
+    
     
     /**
      * Tests creating a file
@@ -220,7 +220,43 @@ public class TestKeyword extends BaseTestClassTX {
         }
     }
     
+    /**
+     * Tests deleting a keyword, no id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void deleteKeywordNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting keyword to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Keyword validKeyword  = getKeyword(true);
+        validKeyword.setKeywordPK(null);
+        
+        try {
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validKeyword,  AccessType.DELETE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }        
+    }
     
+    /**
+     * Tests remove a keyword, no id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void removeKeywordNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for remove keyword to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Keyword validKeyword  = getKeyword(true);
+        validKeyword.setKeywordPK(null);
+        
+        try {
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validKeyword,  AccessType.REMOVE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }        
+    }
     
     private Keyword getKeywordDuplicate(boolean last){
         Keyword keyword = null;

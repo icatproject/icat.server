@@ -21,6 +21,7 @@ import org.junit.Test;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.InvestigationManager;
 import uk.icat3.util.AccessType;
@@ -88,7 +89,7 @@ public class TestInvestigation extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
         Investigation validInvestigation  = getInvestigationDuplicate(true);
-                
+        
         InvestigationManager.deleteInvestigation(VALID_USER_FOR_INVESTIGATION, validInvestigation, em);
         
         Investigation modified = em.find(Investigation.class,validInvestigation.getId() );
@@ -236,6 +237,62 @@ public class TestInvestigation extends BaseTestClassTX {
     }
     
     
+    /**
+     * Tests deleting a investigation, no id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void deleteInvestigationNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting investigation to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Investigation validInvestigation  = getInvestigation(true);
+        validInvestigation.setId(null);
+        
+        try {
+            InvestigationManager.deleteInvestigation(VALID_USER_FOR_INVESTIGATION, validInvestigation, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage(),ex);
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests remove a investigation, no id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void removeInvestigationNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting investigation to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Investigation validInvestigation  = getInvestigation(true);
+        validInvestigation.setId(null);
+        
+        try {
+            InvestigationManager.removeInvestigation(VALID_USER_FOR_INVESTIGATION, validInvestigation, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests update a investigation, no id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void updateInvestigationNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for updating investigation to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Investigation validInvestigation  = getInvestigation(true);
+        validInvestigation.setId(null);
+        
+        try {
+            InvestigationManager.updateInvestigation(VALID_USER_FOR_INVESTIGATION, validInvestigation, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
     
     private Investigation getInvestigationDuplicate(boolean last){
         Investigation investigation = null;

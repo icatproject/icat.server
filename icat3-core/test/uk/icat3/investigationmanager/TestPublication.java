@@ -57,7 +57,7 @@ public class TestPublication extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-   @Test
+    @Test
     public void modifyPublication() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -81,7 +81,7 @@ public class TestPublication extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-  @Test(expected=ValidationException.class)
+    @Test(expected=ValidationException.class)
     public void addDuplicatePublication() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -100,7 +100,7 @@ public class TestPublication extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-   @Test
+    @Test
     public void deletePublication() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -118,7 +118,7 @@ public class TestPublication extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-   @Test
+    @Test
     public void addDeletedPublication() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -210,7 +210,64 @@ public class TestPublication extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-   //  @Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void deletePublicationNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for delete publication to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Publication validPublication  = getPublication(true);
+        validPublication.setId(null);
+        
+        try {
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validPublication,  AccessType.DELETE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }        
+    }
+    
+     /**
+     * Tests creating a file
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void removePublicationNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for delete publication to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Publication validPublication  = getPublication(true);
+        validPublication.setId(null);
+        
+        try {
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validPublication,  AccessType.REMOVE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }        
+    }
+    
+    /**
+     * Tests update a file
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void updatePublicationNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for delete publication to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Publication validPublication  = getPublication(true);
+        validPublication.setId(null);
+        
+        try {
+            InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, validPublication, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }        
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    //  @Test(expected=InsufficientPrivilegesException.class)
     public void modifyPublicationProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying a props publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -248,7 +305,7 @@ public class TestPublication extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-  //   @Test(expected=InsufficientPrivilegesException.class)
+    //   @Test(expected=InsufficientPrivilegesException.class)
     public void removePublicationProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a props publication to investigation Id: "+VALID_INVESTIGATION_ID);
         

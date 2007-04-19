@@ -269,6 +269,63 @@ public class TestSampleParameter extends BaseTestClassTX {
     }
     
     /**
+     * Tests deleting a file, no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void deleteSampleParameterNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        SampleParameter validSampleParameter  = getSampleParameter(true, true);
+        validSampleParameter.setSampleParameterPK(null);
+        
+        try {
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter,  AccessType.DELETE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests deleting a file, no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void removeSampleParameterNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        SampleParameter validSampleParameter  = getSampleParameter(true, true);
+        validSampleParameter.setSampleParameterPK(null);
+        
+        try {
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter,  AccessType.REMOVE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests deleting a file, no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void updateSampleParameterNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        SampleParameter validSampleParameter  = getSampleParameter(true, true);
+        validSampleParameter.setSampleParameterPK(null);
+        
+        try {
+            InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter,  em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
      * Tests creating a file
      */
     //@Test(expected=InsufficientPrivilegesException.class)

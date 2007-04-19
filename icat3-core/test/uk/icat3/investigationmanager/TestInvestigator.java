@@ -260,6 +260,62 @@ public class TestInvestigator extends BaseTestClassTX {
         }
     }
     
+    /**
+     * Tests deleting a investigator, no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void deleteInvestigatorNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting investigator to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Investigator validInvestigator  = getInvestigator(true);
+        validInvestigator.setInvestigatorPK(null);
+        
+        try {
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validInvestigator,  AccessType.DELETE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests deleting a investigator, no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void removeInvestigatorNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting investigator to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Investigator validInvestigator  = getInvestigator(true);
+        validInvestigator.setInvestigatorPK(null);
+        
+        try {
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validInvestigator,  AccessType.REMOVE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests update a investigator, no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void updateInvestigatorNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for update investigator to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Investigator validInvestigator  = getInvestigator(true);
+        validInvestigator.setInvestigatorPK(null);
+        
+        try {
+            InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, validInvestigator,  em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
     
     
     private Investigator getInvestigatorDuplicate(boolean last){

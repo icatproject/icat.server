@@ -67,9 +67,9 @@ public class TestSample extends BaseTestClassTX {
         InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSample, em);
         
         Sample modified = em.find(Sample.class,duplicateSample.getId() );
-      
+        
         assertEquals("SafetyInformation must be "+modifiedName+" and not "+modified.getSafetyInformation(), modified.getSafetyInformation(), modifiedName);
-       
+        
         checkSample(modified);
         assertFalse("Deleted must be false", modified.isDeleted());
     }
@@ -260,9 +260,64 @@ public class TestSample extends BaseTestClassTX {
         }
     }
     
+    /**
+     * Tests deleting a file, no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void deleteSampleNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting sample to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Sample validSample  = getSample(true);
+        validSample.setId(null);
+        
+        try {
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSample,  AccessType.DELETE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
     
+    /**
+     * Tests removing a file, no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void removeSampleNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing sample to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Sample validSample  = getSample(true);
+        validSample.setId(null);
+        
+        try {
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSample,  AccessType.REMOVE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
     
-     static Sample getSampleDuplicate(boolean last){
+    /**
+     * Tests updating a file, no Id
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void updatingSampleNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing sample to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Sample validSample  = getSample(true);
+        validSample.setId(null);
+        
+        try {
+            InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSample, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    static Sample getSampleDuplicate(boolean last){
         Sample sample = null;
         if(!last){
             Collection<Sample> samples = (Collection<Sample>)executeListResultCmd("select d from Sample d where d.createId LIKE '%PROP%'");
