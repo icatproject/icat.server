@@ -418,8 +418,8 @@ public class DataFileManager extends ManagerUtil {
     public static void removeDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("removeDatafileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
-        if(datafileParameter.getDatafileParameterPK() == null) throw new ValidationException(datafileParameter+" has no assoicated primary key.");
-        Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
+        //if(datafileParameter.getDatafileParameterPK() == null) throw new NoSuchObjectFoundException(datafileParameter+" has no assoicated primary key.");
+        //Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
         
         //find the dataset
         DatafileParameter datafileParameterManaged = find(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);
@@ -446,8 +446,8 @@ public class DataFileManager extends ManagerUtil {
     public static void deleteDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("deleteDatafileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
-        if(datafileParameter.getDatafileParameterPK() == null) throw new ValidationException(datafileParameter+" has no assoicated primary key.");
-        Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
+       // if(datafileParameter.getDatafileParameterPK() == null) throw new ValidationException(datafileParameter+" has no assoicated primary key.");
+      //  Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
         
         //find the dataset
         DatafileParameter datafileParameterManaged = find(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);

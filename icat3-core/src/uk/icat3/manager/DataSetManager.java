@@ -500,9 +500,9 @@ public class DataSetManager extends ManagerUtil {
         log.trace("removeDataSetParameter("+userId+", "+dataSetParameter+", EntityManager)");
         
         //check investigation exists
-        if(dataSetParameter.getDatasetParameterPK() == null) throw new ValidationException(dataSetParameter+" has no assoicated primary key.");
+        //if(dataSetParameter.getDatasetParameterPK() == null) throw new ValidationException(dataSetParameter+" has no assoicated primary key.");
         
-        Long datasetId = dataSetParameter.getDatasetParameterPK().getDatasetId();
+       // Long datasetId = dataSetParameter.getDatasetParameterPK().getDatasetId();
         
         //find the dataset
         DatasetParameter dataSetParameterManaged = find(DatasetParameter.class, dataSetParameter.getDatasetParameterPK(), manager);
@@ -530,8 +530,8 @@ public class DataSetManager extends ManagerUtil {
         log.trace("deleteDataSetParameter("+userId+", "+dataSetParameter+", EntityManager)");
         
         //check investigation exists
-        if(dataSetParameter.getDatasetParameterPK() == null) throw new ValidationException(dataSetParameter+" has no assoicated primary key.");
-        Long datasetId = dataSetParameter.getDatasetParameterPK().getDatasetId();
+      //  if(dataSetParameter.getDatasetParameterPK() == null) throw new ValidationException(dataSetParameter+" has no assoicated primary key.");
+       // Long datasetId = dataSetParameter.getDatasetParameterPK().getDatasetId();
         
         //find the dataset
         DatasetParameter dataSetParameterManaged = find(DatasetParameter.class, dataSetParameter.getDatasetParameterPK(), manager);
@@ -557,7 +557,7 @@ public class DataSetManager extends ManagerUtil {
     public static void updateDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("updateDataSetParameter("+userId+", "+dataSetParameter+", EntityManager)");
         
-        if(dataSetParameter.getDatasetParameterPK() == null) throw new ValidationException(dataSetParameter+" has no assoicated primary key.");
+       // if(dataSetParameter.getDatasetParameterPK() == null) throw new ValidationException(dataSetParameter+" has no assoicated primary key.");
         DatasetParameter dataSetParameterFound = find(DatasetParameter.class, dataSetParameter.getDatasetParameterPK(), manager);
         
         //ok, now check permissions on found data set
