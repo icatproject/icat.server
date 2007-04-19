@@ -28,6 +28,8 @@ import uk.icat3.investigationmanager.TestKeyword;
 import uk.icat3.investigationmanager.TestPublication;
 import uk.icat3.investigationmanager.TestSample;
 import uk.icat3.investigationmanager.TestSampleParameter;
+import uk.icat3.search.TestInvalidUser;
+import uk.icat3.search.TestKeywordSearch;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -40,9 +42,12 @@ import uk.icat3.investigationmanager.TestSampleParameter;
             
             TestDataset.class,
             TestDatasetParameter.class,
-                    
+            
             TestDatafile.class,
-            TestDatafileParameter.class        
+            TestDatafileParameter.class,
+            
+            TestKeywordSearch.class,
+            TestInvalidUser.class
 })
 public class TestAllKeepDB {
     

@@ -23,9 +23,9 @@ import uk.icat3.entity.Investigation;
  *
  * @author gjd37
  */
-public class TestKeyword extends BaseTestClass {
+public class TestKeywordSearch extends BaseTestClass {
     
-    private static Logger log = Logger.getLogger(TestKeyword.class);
+    private static Logger log = Logger.getLogger(TestKeywordSearch.class);
     
     
     /**
@@ -164,7 +164,7 @@ public class TestKeyword extends BaseTestClass {
     
     
     public static junit.framework.Test suite(){
-        return new JUnit4TestAdapter(TestKeyword.class);
+        return new JUnit4TestAdapter(TestKeywordSearch.class);
     }
     
 }
