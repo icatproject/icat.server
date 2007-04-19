@@ -30,7 +30,7 @@ public class DatafileSearch {
      * Searchs database for data files from a start and end run on an instrument for which the userId has permission to read
      * the data files investigation
      *
-      * @param userId facility userId of the user.    
+      * @param userId federalId of the user.    
      * @param instruments collection of instruments
      * @param startRun lower range of run number
      * @param endRun upper range of run number
@@ -88,7 +88,7 @@ public class DatafileSearch {
      * Searchs database for data files from a start and end run on an instrument for which the userId has permission to read
      * the data files investigation
      *
-   * @param userId facility userId of the user.    
+   * @param userId federalId of the user.    
      * @param instruments collection of instruments
      * @param startRun lower range of run number
      * @param endRun upper range of run number
@@ -103,7 +103,7 @@ public class DatafileSearch {
      * Searchs database for data files from a start and end run on an instrument for which the userId has permission to read
      * the data files investigation
      *
-     * @param userId facility userId of the user.    
+     * @param userId federalId of the user.    
      * @param instruments collection of instruments
      * @param startRun lower range of run number
      * @param endRun upper range of run number

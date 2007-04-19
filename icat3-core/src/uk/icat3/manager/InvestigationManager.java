@@ -51,7 +51,7 @@ public class InvestigationManager extends ManagerUtil {
      * if the user has access to the investigations.
      * Also gets extra information regarding the investigation.  See {@link InvestigationInclude}
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param investigationIds Ids of investigations
      * @param includes information that is needed to be returned with the investigation
      * @param manager manager object that will facilitate interaction with underlying database
@@ -86,7 +86,7 @@ public class InvestigationManager extends ManagerUtil {
      * Returns a {@link Investigation} investigation from a {@link Investigation} investigation id
      * if the user has access to the investigation.
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param investigationId Id of investigations
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -103,7 +103,7 @@ public class InvestigationManager extends ManagerUtil {
      * Returns a list of {@link Investigation} investigations from a list of {@link Investigation} investigation ids
      * if the user has access to the investigations.
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param investigationIds Ids of investigations
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -124,7 +124,7 @@ public class InvestigationManager extends ManagerUtil {
      * investigation ids. Deleting a investigation marks it, and all of its paramters, datasets, datafiles, keywords
      * investigators etc as deleted but does not remove it from the database.
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param investigationIds Ids of investigations
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -144,7 +144,7 @@ public class InvestigationManager extends ManagerUtil {
      * investigation ids.  Deleting a investigation marks it, and all of its paramters, datasets, datafiles, keywords
      * investigators etc as deleted but does not remove it from the database.
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param investigationId Id of investigations
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -163,7 +163,7 @@ public class InvestigationManager extends ManagerUtil {
      * investigation ids. Deleting a investigation marks it, and all of its paramters, datasets, datafiles, keywords
      * investigators etc as deleted but does not remove it from the database.
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param investigation investigation object
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -181,7 +181,7 @@ public class InvestigationManager extends ManagerUtil {
      * Removes (from the database) the investigation for a user depending if the user's id has delete permissions to delete the investigations from the
      * investigation ids.
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param investigationId Id of investigation
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -199,7 +199,7 @@ public class InvestigationManager extends ManagerUtil {
      * Removes (from the database) the investigation for a user depending if the user's id has delete permissions to delete the investigations from the
      * investigation ids.
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param investigation investigation object
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -219,7 +219,7 @@ public class InvestigationManager extends ManagerUtil {
      * investigation ids. Deleting a investigation marks it, and all of its paramters, datasets, datafiles, keywords
      * investigators etc as deleted but does not remove it from the database.
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param investigations objects to be deleted
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -243,7 +243,7 @@ public class InvestigationManager extends ManagerUtil {
     /**
      * Creates a investigation, depending if the user has create permission to create the investigation
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param investigation objects to be created
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -281,7 +281,7 @@ public class InvestigationManager extends ManagerUtil {
     /**
      * Updates a Investigation depending on whether the user has permission to update this Investigation
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param investigation object to be updated
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -319,7 +319,7 @@ public class InvestigationManager extends ManagerUtil {
      * <br /><br />
      * throws {@link java.lang.RuntimeException} if the {@link EntityBaseBean} object is not allowed.
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param object {@link EntityBaseBean} object to be updated
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -413,7 +413,7 @@ public class InvestigationManager extends ManagerUtil {
      * <br /><br />
      * throws {@link java.lang.RuntimeException} if the {@link EntityBaseBean} object is not allowed.
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param object {@link EntityBaseBean} object to be updated
      * @param type {@link AccessType} object, either REMOVE or DELETE
      * @param manager manager object that will facilitate interaction with underlying database
@@ -566,7 +566,7 @@ public class InvestigationManager extends ManagerUtil {
      * Objects can be {@link Keyword}, {@link Sample}, {@link SampleParameter}, {@link Publication}, {@link Investigator}
      * <br /><br />
      * throws {@link java.lang.RuntimeException} if the {@link EntityBaseBean} object is not allowed.
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param object {@link EntityBaseBean} object to be updated
      * @param investigationId Id of investigation to add to
      * @param manager manager object that will facilitate interaction with underlying database

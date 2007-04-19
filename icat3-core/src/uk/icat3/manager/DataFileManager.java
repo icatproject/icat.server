@@ -40,7 +40,7 @@ public class DataFileManager extends ManagerUtil {
      * Deletes the data file for a user depending if the user's id has delete permissions to delete the data file.
      * Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataFile  object to be deleted
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -54,7 +54,7 @@ public class DataFileManager extends ManagerUtil {
      * Deletes the data file with ID, for a users depending if the users id has delete permissions to delete the data file from
      * the ID. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataFileId Id of data file to be deleted
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -77,7 +77,7 @@ public class DataFileManager extends ManagerUtil {
      * Deletes the collection of files for a users depending if the users id has delete permissions to delete the files from
      * their ids. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataFileIds Ids of data files to be deleted
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -97,7 +97,7 @@ public class DataFileManager extends ManagerUtil {
      * Deletes the collection of data files for a users depending if the users id has delete permissions to
      * delete the data file. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataFiles objects to be deleted
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -118,7 +118,7 @@ public class DataFileManager extends ManagerUtil {
      * Removes (from the database) the data file with ID, for a users depending if the users id has remove permissions to remove the data file from
      * the ID.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataFileId Id of data file to be removed
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -139,7 +139,7 @@ public class DataFileManager extends ManagerUtil {
      * Removes (from the database) the data file with ID, for a users depending if the users id has remove permissions to remove the data file from
      * the ID
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataFile object to be removed
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -152,7 +152,7 @@ public class DataFileManager extends ManagerUtil {
     /**
      * Updates data file depending on whether the user has permission to update this data file.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataFile object to be updated
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -178,7 +178,7 @@ public class DataFileManager extends ManagerUtil {
     /**
      * Creates a data file, depending if the user has update permission on the data set associated with the data file
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataFile object to be created
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -206,7 +206,7 @@ public class DataFileManager extends ManagerUtil {
     /**
      * Creates a data file, depending if the user has update permission on the data set associated with the data file
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataFile object to be created
      * @param datasetId Id of data set
      * @param manager manager object that will facilitate interaction with underlying database
@@ -229,7 +229,7 @@ public class DataFileManager extends ManagerUtil {
     /**
      * Creates the collection of data files, depending if the user has update permission on the data set associated with the data file.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataFiles objects to be created
      * @param datasetId Id of data set
      * @param manager manager object that will facilitate interaction with underlying database
@@ -255,7 +255,7 @@ public class DataFileManager extends ManagerUtil {
     /**
      * Gets the data file objects from a list of data file ids, depending if the user has access to read the data files.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataFileIds Ids of data files
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -286,7 +286,7 @@ public class DataFileManager extends ManagerUtil {
     /**
      * Gets a data file object from a list of data file id, depending if the user has access to read the data file
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataFileId Id of data file
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -307,7 +307,7 @@ public class DataFileManager extends ManagerUtil {
     /**
      * Updates the data file paramter object, depending if the user has access to update the data file parameter.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param datafileParameter object to be updated
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -336,7 +336,7 @@ public class DataFileManager extends ManagerUtil {
      *
      * If the paramter is marked as deleted then it will be undeleted, if not present a new paramter is added.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param datafileParameter object to be added
      * @param datafileId the data file id that you want a add the paramter to
      * @param manager manager object that will facilitate interaction with underlying database
@@ -389,7 +389,7 @@ public class DataFileManager extends ManagerUtil {
      *
      * If the paramter is marked as deleted then it will be undeleted, if not present a new paramter is added.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param datafileParameter object to be added
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -408,7 +408,7 @@ public class DataFileManager extends ManagerUtil {
      * Removes (from the database) a data file paramter object, depending if the user has access to remove the data file parameter from
      * the associated data file id.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param datafileParameter object to be removed
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -436,7 +436,7 @@ public class DataFileManager extends ManagerUtil {
      * Deletes a data file paramter object, depending if the user has access to delete the data file parameter from
      * the associated data file id.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param datafileParameter object to be deleted
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database

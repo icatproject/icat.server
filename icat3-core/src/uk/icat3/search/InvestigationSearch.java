@@ -41,7 +41,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Searches a single keyword for a users and returns all the Id of the investigations
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keyword keywords to search
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
@@ -70,7 +70,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Searches a single keyword for a user and returns all the Id of the investigations
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keyword keyword to search
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of investigation ids
@@ -83,7 +83,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Searches the investigations the user has access to view by keyword
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keyword keyword to search
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
@@ -107,7 +107,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Searches the investigations the user has access to view by keyword
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keyword keyword to search
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
@@ -120,7 +120,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Searches the investigations the user has access to view by keyword
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keyword keyword to search
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
@@ -134,7 +134,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Searches the investigations the user has access to view federalId or surname
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param searchString federalId or surname
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
@@ -172,7 +172,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Searches the investigations the user has access to view by investigator surname
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param surname investigator surname
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
@@ -185,7 +185,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Searches the investigations the user has access to view by investigator surname
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param surname investigator surname
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
@@ -199,7 +199,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Searches the investigations the user has access to view by federalId
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param searchUserId federalId of user
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
@@ -212,7 +212,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Searches the investigations the user has access to view by federalId
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param searchUserId federalId of user
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
@@ -226,7 +226,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      *  Searches investigations from the ones they can view by the advanced criteria
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param advanDTO {@Link AdvancedSearchDetails}
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
@@ -448,7 +448,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Searches investigations from the ones they can view by the advanced criteria
      *
-     * @param userId userId of the user.
+     * @param userId federalId of the user.
      * @param advanDTO {@Link AdvancedSearchDetails}
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
@@ -462,7 +462,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Searches investigations from the ones they can view by the advanced criteria
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param advanDTO {@Link AdvancedSearchDetails}
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
@@ -474,7 +474,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      *  Gets all the investigations associated with that user, ie. thart they are investigator of.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
@@ -493,7 +493,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      *  Gets all the investigations associated with that user, ie. thart they are investigator of.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
@@ -504,7 +504,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      *  Gets all the investigation ids associated with that user, ie. thart they are investigator of.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation ids
      */
@@ -517,7 +517,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keywords Collection of keywords to search on
      * @param operator {@link LogicalOperator}, either AND or OR, default AND
      * @param include {@link InvestigationInclude}
@@ -600,7 +600,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keywords Collection of keywords to search on
      * @param includes {@link InvestigationInclude}
      * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
@@ -615,7 +615,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keywords Collection of keywords to search on
      * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
      * @param manager manager object that will facilitate interaction with underlying database
@@ -629,7 +629,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keywords Collection of keywords to search on
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
@@ -642,7 +642,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keywords Collection of keywords to search on
      * @param includes {@link InvestigationInclude}
      * @param manager manager object that will facilitate interaction with underlying database
@@ -656,7 +656,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keywords Collection of keywords to search on
      * @param operator {@link LogicalOperator}, either AND or OR
      * @param manager manager object that will facilitate interaction with underlying database
@@ -670,7 +670,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keywords Collection of keywords to search on
      * @param includes {@link InvestigationInclude}
      * @param operator {@link LogicalOperator}, either AND or OR
@@ -685,7 +685,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keywords Collection of keywords to search on
      * @param operator {@link LogicalOperator}, either AND or OR
      * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
@@ -700,7 +700,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param keywords Collection of keywords to search on
      * @param operator {@link LogicalOperator}, either AND or OR
      * @param includes {@link InvestigationInclude}
@@ -716,7 +716,7 @@ public class InvestigationSearch extends ManagerUtil {
     /**
      * Lists all the instruments in the database
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param manager manager object that will facilitate interaction with underlying database
      * @return List of instruments
      */

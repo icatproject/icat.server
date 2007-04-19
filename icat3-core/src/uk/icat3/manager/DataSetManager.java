@@ -44,7 +44,7 @@ public class DataSetManager extends ManagerUtil {
      * Deleting the set marks it, and all of its paramters and data files as deleted but does not remove it from the database.
      *
      *
-     *  @param userId facility userId of the user.
+     *  @param userId federalId of the user.
      * @param dataSet  object to be deleted
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -59,7 +59,7 @@ public class DataSetManager extends ManagerUtil {
      * Deletes the data set for a user depending if the users id has delete permissions to delete the data set from the
      * data set ID. Deleting the set marks it, and all of its paramters and data files as deleted but does not remove it from the database.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSetId  object Id to be deleted
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -80,7 +80,7 @@ public class DataSetManager extends ManagerUtil {
      * Removes (from the database) the data set, and its dataset paramters and data files for a user depending if the
      * users id has remove permissions to delete the data set from the data set ID.
      *
-     *  @param userId facility userId of the user.
+     *  @param userId federalId of the user.
      * @param dataSetId  object Id to be removed
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -106,7 +106,7 @@ public class DataSetManager extends ManagerUtil {
      * Removes (from the database) the data set, and its dataset paramters and data files for a user depending if the
      * users id has remove permissions to delete the data set from the data set ID.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSet object to be removed
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -121,7 +121,7 @@ public class DataSetManager extends ManagerUtil {
      * Removes a collection of data set for a user depending if the users id has remove permissions to delete the data set from the
      * data set ID.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSetIds collection of dataset ids
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -142,7 +142,7 @@ public class DataSetManager extends ManagerUtil {
      * Deletes the collection of data set for a user depending if the users id has delete permissions to delete the data sets from the
      * data set IDs.  Deleting the set marks it, and all of its paramters and data files as deleted but does not remove it from the database.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSetIds collection of dataset ids
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -163,7 +163,7 @@ public class DataSetManager extends ManagerUtil {
      * Deletes the collection of data sets for a user depending if the user's id has delete permissions to delete the data sets.
      * Deleting the set marks it, and all of its paramters and data files as deleted but does not remove it from the database.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSets collection of datasets
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -187,7 +187,7 @@ public class DataSetManager extends ManagerUtil {
     /**
      * Creates a data set, depending if the user has create permission on the data set associated with the investigation
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSet object to be created
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -221,7 +221,7 @@ public class DataSetManager extends ManagerUtil {
     /**
      * Updates a data set depending on whether the user has permission to update this data set or its investigation
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSet object to be created
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -249,7 +249,7 @@ public class DataSetManager extends ManagerUtil {
     /**
      * Creates a data set, depending if the user has create permission on the data set associated with the investigation
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSet object to be created
      * @param investigationId id of investigations to added the datasets to
      * @param manager manager object that will facilitate interaction with underlying database
@@ -272,7 +272,7 @@ public class DataSetManager extends ManagerUtil {
     /**
      * Creates a collection of data sets, depending if the user has update permission on the data set associated with the investigation
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSets collection of the datasets
      * @param investigationId id of investigations to added the datasets to
      * @param manager manager object that will facilitate interaction with underlying database
@@ -303,7 +303,7 @@ public class DataSetManager extends ManagerUtil {
      * Gets the data sets objects from a list of data set ids, depending if the users has access to read the data sets.
      * Also gets extra information regarding the data set.  See {@link DatasetInclude}
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSetIds Ids of objects
      * @param includes other information wanted with the data set
      * @param manager manager object that will facilitate interaction with underlying database
@@ -337,7 +337,7 @@ public class DataSetManager extends ManagerUtil {
     /**
      *  Gets the data sets objects from a list of data set ids, depending if the users has access to read the data sets
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSetIds Ids of objects
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -351,7 +351,7 @@ public class DataSetManager extends ManagerUtil {
     /**
      * Gets the data set object from a list of data set ids, depending if the user has access to read the data set.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSetId Id of object
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -376,7 +376,7 @@ public class DataSetManager extends ManagerUtil {
     /**
      * Sets the dataset sample id, depending if the users has access to update the data set
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param sampleId Id of sample
      * @param datasetid Id of dataset
      * @param manager manager object that will facilitate interaction with underlying database
@@ -416,7 +416,7 @@ public class DataSetManager extends ManagerUtil {
     /**
      * Adds a data set paramter to a dataset, depending if the users has access to create the data set paramter
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSetParameter object to be created
      * @param datasetId Id of dataset
      * @param manager manager object that will facilitate interaction with underlying database
@@ -467,7 +467,7 @@ public class DataSetManager extends ManagerUtil {
     /**
      * Adds a data set paramter to a dataset, depending if the users has access to create the data set paramter
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSetParameter object to be created
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -489,7 +489,7 @@ public class DataSetManager extends ManagerUtil {
      * Removes (from the database) a data set paramter object, depending if the user has access to remove the data set parameter from
      * the associated data set id.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSetParameter object to be removed
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -519,7 +519,7 @@ public class DataSetManager extends ManagerUtil {
      * Deletes a data set paramter object, depending if the user has access to delete the data set parameter from
      * the associated data set id.   Deleting the set marks it as deleted but does not remove it from the database.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSetParameter object to be deleted
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
@@ -547,7 +547,7 @@ public class DataSetManager extends ManagerUtil {
     /**
      * Updates the data file paramter object, depending if the user has access to update the data file parameter.
      *
-     * @param userId facility userId of the user.
+     * @param userId federalId of the user.
      * @param dataSetParameter object to be updated
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database

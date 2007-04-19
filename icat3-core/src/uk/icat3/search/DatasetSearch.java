@@ -34,7 +34,7 @@ public class DatasetSearch {
     /**
      * From a sample name, return all the datasets a user can view asscoiated with the sample name
      *
-        * @param userId facility userId of the user.    
+        * @param userId federalId of the user.    
      * @param sampleName sample name wiching to search on
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of datasets returned from search

@@ -165,22 +165,22 @@ public class ManagerUtil {
     /**
      * Gets the facilityUserId of the user from the federalId 
      *
-     * @param federalId federalId of user
+     * @param userId federalId of user
      * @param manager manager object that will facilitate interaction with underlying database   
      * @return facilityUserId
      */
-    public static String getFacilityUserId(String federalId, EntityManager manager) {
+    public static String getFacilityUserId(String userId, EntityManager manager) {
         FacilityUser facilityUser = null;
         try {
-            facilityUser = (FacilityUser) manager.createQuery("SELECT f FROM FacilityUser f where f.federalId = :fedId").setParameter("fedId", federalId).getSingleResult();
-            log.trace(""+facilityUser.getFacilityUserId()+" corresponds to "+federalId);
+            facilityUser = (FacilityUser) manager.createQuery("SELECT f FROM FacilityUser f where f.federalId = :fedId").setParameter("fedId", userId).getSingleResult();
+            log.trace(""+facilityUser.getFacilityUserId()+" corresponds to "+userId);
             return facilityUser.getFacilityUserId();
         } catch(NoResultException nre) {
-            log.warn("federalId:" +federalId+" has no associated facility user");
-            throw new RuntimeException("FederalId:" +federalId+" has no associated facility user in DB.");
+            log.warn("federalId:" +userId+" has no associated facility user");
+            throw new RuntimeException("FederalId:" +userId+" has no associated facility user in DB.");
         } catch(NonUniqueResultException nonue){
-            log.warn("federalId:" +federalId+" has more than one associated facility user.");
-            throw new RuntimeException("federalId:" +federalId+" has more than one associated facility user.  DB should never allow this error to be thrown.");
+            log.warn("federalId:" +userId+" has more than one associated facility user.");
+            throw new RuntimeException("federalId:" +userId+" has more than one associated facility user.  DB should never allow this error to be thrown.");
         }
         
     }
