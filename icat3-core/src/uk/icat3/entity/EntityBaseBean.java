@@ -49,11 +49,11 @@ public class EntityBaseBean {
     
     @Column(name = "CREATE_ID", nullable = false)
     @ICAT(merge=false, nullable=true)
-    protected String createId;
+    protected  String createId;
     
     @Column(name = "DELETED", nullable = false )
     @ICAT(merge=false, nullable=true)
-    protected String deleted;
+    protected  String deleted;
     
     @ICAT(merge=false, nullable=true)
     protected transient boolean deletedBoolean;
