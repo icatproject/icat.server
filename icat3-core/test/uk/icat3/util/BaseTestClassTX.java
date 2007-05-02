@@ -27,7 +27,7 @@ import org.junit.BeforeClass;
  */
 public class BaseTestClassTX extends BaseTest{
     
-    private static Logger log = Logger.getLogger(BaseTestClass.class);
+    private static Logger log = Logger.getLogger(BaseTestClassTX.class);
     
     @Before
     public void beginTX(){
