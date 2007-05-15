@@ -2,12 +2,10 @@ package uk.icat3.user;
 
 
 import junit.framework.JUnit4TestAdapter;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
-import uk.icat3.exceptions.LoginException;
 import uk.icat3.exceptions.NoSuchUserException;
 /*
  * UserManagerTest.java
@@ -23,6 +21,7 @@ import uk.icat3.exceptions.NoSuchUserException;
  * @author df01
  * @version 1.1
  */
+import uk.icat3.exceptions.SessionException;
 public class UserManagerTest {
     
     String username = null;
@@ -48,14 +47,16 @@ public class UserManagerTest {
 
     /**
      * Test of getUserIdFromSessionId method, of class uk.icat3.user.UserManager.
+     * @throws java.lang.Exception 
      */
-    @Test(expected=LoginException.class)
+    @Test(expected=SessionException.class)
     public void testGetUserIdFromSessionIdWithInvalidSessionId() throws Exception {                                          
             String result = instance.getUserIdFromSessionId(sessionId);        
     }
 
     /**
      * Test of login method, of class uk.icat3.user.UserManager.
+     * @throws java.lang.Exception 
      */
     @Test
     public void testValidLogin() throws Exception {        
@@ -65,22 +66,25 @@ public class UserManagerTest {
     
     /**
      * Test of login method, of class uk.icat3.user.UserManager.
+     * @throws java.lang.Exception 
      */
-    @Test(expected=LoginException.class)
+    @Test(expected=SessionException.class)
     public void testLoginWithInvalidUsername() throws Exception {           
         String result = instance.login("mickeymouse", password);                    
     }
 
     /**
      * Test of login method, of class uk.icat3.user.UserManager.
+     * @throws java.lang.Exception 
      */
-    @Test(expected=LoginException.class)
+    @Test(expected=SessionException.class)
     public void testLoginWithInvalidPassword() throws Exception {           
         String result = instance.login(username, "pluto");        
     }
     
     /**
      * Test of logout method, of class uk.icat3.user.UserManager.
+     * @throws java.lang.Exception 
      */
     @Test
     public void testLogoutWithInvalidSessionId() throws Exception {                             
@@ -90,6 +94,7 @@ public class UserManagerTest {
     
     /**
      * Test of logout method, of class uk.icat3.user.UserManager.
+     * @throws java.lang.Exception 
      */
     @Test
     public void testLogoutWithValidSessionId() throws Exception {                               
@@ -100,8 +105,9 @@ public class UserManagerTest {
 
     /**
      * Test of getUserDetails method, of class uk.icat3.user.UserManager.
+     * @throws java.lang.Exception 
      */
-    @Test(expected=LoginException.class)
+    @Test(expected=SessionException.class)
     public void testGetUserDetailsWithInvalidSessionId() throws Exception {                        
         String user = "9932";                                
         UserDetails result = instance.getUserDetails(sessionId, user);                    
@@ -109,6 +115,7 @@ public class UserManagerTest {
     
     /**
      * Test of getUserDetails method, of class uk.icat3.user.UserManager.
+     * @throws java.lang.Exception 
      */
     @Test(expected=NoSuchUserException.class)
     public void testGetUserDetailsWithInvalidUser() throws Exception {                        
@@ -119,8 +126,9 @@ public class UserManagerTest {
     
     /**
      * Test of getUserDetails method, of class uk.icat3.user.UserManager.
+     * @throws java.lang.Exception 
      */
-    @Test(expected=LoginException.class)
+    @Test(expected=SessionException.class)
     public void testGetUserDetailsWithInvalidSessionIdAndInvalidUser() throws Exception {                        
         String user = "monkeyboy";                                
         UserDetails result = instance.getUserDetails(sessionId, user);                    
@@ -128,6 +136,7 @@ public class UserManagerTest {
     
     /**
      * Test of getUserDetails method, of class uk.icat3.user.UserManager.
+     * @throws java.lang.Exception 
      */
     @Test
     public void testValidGetUserDetails() throws Exception {                        
