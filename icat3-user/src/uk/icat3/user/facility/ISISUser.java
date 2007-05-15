@@ -4,7 +4,6 @@ import com.cclrc.ral.isis.userdb.session.userdb.PersonDetailsDTO;
 import com.cclrc.ral.isis.userdb.session.userdb.UserDBFacade;
 import com.cclrc.ral.isis.userdb.session.userdb.UserDBFacadeHome;
 import java.util.Hashtable;
-import javax.management.Notification;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -33,7 +32,9 @@ public class ISISUser implements User {
     UserDBFacade userDBFacade;
     private static Logger log = Logger.getLogger(ISISUser.class);
     
-    /** Creates a new instance of ISISUser */
+    /** Creates a new instance of ISISUser 
+     * @throws uk.icat3.exceptions.SessionException 
+     */
     public ISISUser() throws SessionException {
         try {
             Context context = getInitialContext();
@@ -41,7 +42,7 @@ public class ISISUser implements User {
             userDBFacade = userDBFacadeHome.create();
         } catch (Exception e) {
             log.error(e);
-            throw new LoginException("Unable to establish connection to ISIS User database");
+            throw new SessionException("Unable to establish connection to ISIS User database");
         }//end try/catch
     }
     
@@ -49,10 +50,10 @@ public class ISISUser implements User {
         Long userNum = null;
         try {
             userNum = userDBFacade.getUserNumberFromSessionId(sessionId);
-            if (userNum == null) throw new LoginException();
+            if (userNum == null) throw new SessionException();
         } catch (Exception e) {
             log.error(e);
-            throw new LoginException("Unable to retrieve userid/distinguished name from ISIS user database using sessionId '" + sessionId + "'. Please try logging in again." );
+            throw new SessionException("Unable to retrieve userid/distinguished name from ISIS user database using sessionId '" + sessionId + "'. Please try logging in again." );
         }//end try/catch
         return userNum.toString();
     }
@@ -63,7 +64,7 @@ public class ISISUser implements User {
             token = userDBFacade.login(username, password);
         } catch (Exception e) {
             log.error(e);
-            throw new LoginException("Invalid login credentials provided by user");
+            throw new SessionException("Invalid login credentials provided by user");
         }//end try/catch
         
         return token;
@@ -85,7 +86,7 @@ public class ISISUser implements User {
         try {
             
             Long userNum = userDBFacade.getUserNumberFromSessionId(sessionId);
-            if (userNum == null) throw new LoginException();
+            if (userNum == null) throw new SessionException();
             
             PersonDetailsDTO dto = userDBFacade.getPersonDetails(sessionId, new Long(user));
             details.setTitle(dto.getTitle());
@@ -95,9 +96,9 @@ public class ISISUser implements User {
             details.setDepartment(dto.getDeptName());
             details.setInstitution(dto.getOrgName());
             
-        } catch (LoginException le) {
+        } catch (SessionException le) {
             log.error(le);
-            throw new LoginException("An error occured while trying to retrieve UserDetails from ISIS user database for user# " + user + " with sessionId# " + sessionId);
+            throw new SessionException("An error occured while trying to retrieve UserDetails from ISIS user database for user# " + user + " with sessionId# " + sessionId);
         } catch (Exception e) {
             log.warn(e);
             throw new NoSuchUserException("User could not be found in ISIS user database");
@@ -117,6 +118,7 @@ public class ISISUser implements User {
     /**
      * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
      * will never be support by the ISIS implementation
+     * @throws uk.icat3.exceptions.SessionException 
      */
     public String login(String adminUsername, String AdminPassword, String runAsUser) throws SessionException {
         throw new UnsupportedOperationException("Method not supported.");
@@ -125,6 +127,7 @@ public class ISISUser implements User {
     /**
      * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
      * will never be support by the ISIS implementation
+     * @throws uk.icat3.exceptions.SessionException 
      */
     public String login(String credential) throws SessionException {
         throw new UnsupportedOperationException("Method not supported.");
@@ -133,7 +136,8 @@ public class ISISUser implements User {
      /**
      * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
      * will never be support by the ISIS implementation
-     */
+     * @throws uk.icat3.exceptions.SessionException 
+      */
     public String login(String username, String password, int lifetime) throws SessionException {
         throw new UnsupportedOperationException("Method not supported.");
     }
