@@ -415,7 +415,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      *   @throws uk.icat3.exceptions.ValidationException if the data file parameter is invalid
      */
-    public static void removeDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public static void removeDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         log.trace("removeDatafileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
         //if(datafileParameter.getDatafileParameterPK() == null) throw new NoSuchObjectFoundException(datafileParameter+" has no assoicated primary key.");
@@ -443,7 +443,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the data file parameter is invalid
      */
-    public static void deleteDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public static void deleteDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         log.trace("deleteDatafileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
        // if(datafileParameter.getDatafileParameterPK() == null) throw new ValidationException(datafileParameter+" has no assoicated primary key.");

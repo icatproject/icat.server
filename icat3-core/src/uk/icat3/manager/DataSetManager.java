@@ -496,7 +496,7 @@ public class DataSetManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the data set parameter is invalid
      */
-    public static void removeDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public static void removeDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         log.trace("removeDataSetParameter("+userId+", "+dataSetParameter+", EntityManager)");
         
         //check investigation exists
@@ -526,7 +526,7 @@ public class DataSetManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the data set parameter is invalid
      */
-    public static void deleteDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public static void deleteDataSetParameter(String userId, DatasetParameter dataSetParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         log.trace("deleteDataSetParameter("+userId+", "+dataSetParameter+", EntityManager)");
         
         //check investigation exists
