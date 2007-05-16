@@ -565,7 +565,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
             
             //check datafile format is valid
             DatafileFormat format = manager.find(DatafileFormat.class, datafileFormat.getDatafileFormatPK());
-            if(format == null)  throw new ValidationException(datafileFormat+ " is not a valid Datafile Format");
+            if(format == null)  throw new ValidationException(datafileFormat+ " is not a valid DatafileFormat");
         }
         
         return isValid();

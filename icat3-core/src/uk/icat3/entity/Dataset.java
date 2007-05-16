@@ -503,7 +503,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
             
             //check datafile format is valid
             DatasetStatus status = manager.find(DatasetStatus.class, datasetStatus.getName());
-            if(status == null)  throw new ValidationException(datasetStatus+ " is not a valid Dataset Status");
+            if(status == null)  throw new ValidationException(datasetStatus+ " is not a valid DatasetStatus");
         }
         
         //check is valid status
@@ -512,7 +512,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
             
             //check datafile format is valid
             DatasetType type = manager.find(DatasetType.class, datasetType.getName());
-            if(type == null)  throw new ValidationException(datasetType+ " is not a valid Dataset Type");
+            if(type == null)  throw new ValidationException(datasetType+ " is not a valid DatasetType");
         }
         
         //check if unique
