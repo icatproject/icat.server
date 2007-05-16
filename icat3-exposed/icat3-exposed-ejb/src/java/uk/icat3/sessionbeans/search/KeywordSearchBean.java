@@ -15,6 +15,10 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+import javax.xml.ws.RequestWrapper;
+import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.KeywordSearch;
@@ -27,6 +31,7 @@ import uk.icat3.util.KeywordType;
  * @author gjd37
  */
 @Stateless
+@WebService()
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -60,6 +65,9 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
      * @param numberReturned
      * @return
      */
+      @WebMethod(operationName="getKeywordsForUserMax")
+    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserMax")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserMaxResponse")   
     public Collection<String> getKeywordsForUser(String sessionId, String startKeyword, int numberReturned) throws SessionException{
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
