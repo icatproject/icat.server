@@ -51,6 +51,10 @@ public class DefaultUser implements User {
         this.manager = manager;
     }
     
+    /** Creates a new instance of DefaultUser */
+    public DefaultUser() {
+    }
+    
     public String getUserIdFromSessionId(String sessionId) throws SessionException {
         log.trace("getUserIdFromSessionId("+sessionId+")");
         try {
@@ -136,7 +140,7 @@ public class DefaultUser implements User {
     /**
      * Logout of system
      *
-     * @param sessionId 
+     * @param sessionId
      * @return boolean is correctly logged out
      */
     public boolean logout(String sessionId) {
@@ -150,15 +154,15 @@ public class DefaultUser implements User {
             return false;
         }
     }
-       
+    
     /**
      * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
-     * is not support by the default implementation     
+     * is not support by the default implementation
      *
-     * @param sessionId 
-     * @param user 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.NoSuchUserException 
+     * @param sessionId
+     * @param user
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.NoSuchUserException
      * @return UserDetails
      */
     public UserDetails getUserDetails(String sessionId, String user) throws SessionException, NoSuchUserException {
@@ -166,12 +170,12 @@ public class DefaultUser implements User {
     }
     
     /**
-     * 
-     * @param adminUsername 
-     * @param AdminPassword 
-     * @param runAsUser 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @return 
+     *
+     * @param adminUsername
+     * @param AdminPassword
+     * @param runAsUser
+     * @throws uk.icat3.exceptions.SessionException
+     * @return
      */
     public String login(String adminUsername, String AdminPassword, String runAsUser) throws SessionException {
         log.trace("login("+adminUsername+", *********, "+runAsUser+")");
