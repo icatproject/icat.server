@@ -48,10 +48,7 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     
     static Logger log = Logger.getLogger(DatasetManagerBean.class);
     
-    @EJB
-    UserSessionLocal user;
-    
-    /** Creates a new instance of DatasetManagerBean */
+           /** Creates a new instance of DatasetManagerBean */
     public DatasetManagerBean() {}
     
     /**

@@ -71,7 +71,7 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
     /**
      *
      * @param sessionId
-     * * @param type
+     * @param type
      * @return
      */
     public Collection<String> getAllKeywords(String sessionId, KeywordType type) throws SessionException{

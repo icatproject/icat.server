@@ -48,10 +48,7 @@ import uk.icat3.sessionbeans.user.UserSessionLocal;
 public class DatafileManagerBean extends EJBObject implements DatafileManagerLocal {
     
     static Logger log = Logger.getLogger(DatafileManagerBean.class);
-    
-    @EJB
-    UserSessionLocal user;
-    
+           
     /** Creates a new instance of DatasetManagerBean */
     public DatafileManagerBean() {}
     

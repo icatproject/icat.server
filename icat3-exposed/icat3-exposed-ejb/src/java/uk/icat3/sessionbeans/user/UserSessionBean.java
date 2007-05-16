@@ -110,8 +110,7 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     @WebMethod(operationName="loginAdmin")
     @ExcludeClassInterceptors
     @RequestWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginAdmin")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginAdminResponse")
-    
+    @ResponseWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginAdminResponse")    
     public String login(String username, String password, String runAs) throws SessionException {
         log.trace("login("+username+", *******, "+runAs+")");
         

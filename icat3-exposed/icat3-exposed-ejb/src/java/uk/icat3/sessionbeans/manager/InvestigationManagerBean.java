@@ -51,10 +51,7 @@ import uk.icat3.util.InvestigationInclude;
 public class InvestigationManagerBean extends EJBObject implements InvestigationManagerLocal {
     
     static Logger log = Logger.getLogger(InvestigationManagerBean.class);
-    
-    @EJB
-    UserSessionLocal user;
-    
+           
     /** Creates a new instance of InvestigationManagerBean */
     public InvestigationManagerBean() {}
     
