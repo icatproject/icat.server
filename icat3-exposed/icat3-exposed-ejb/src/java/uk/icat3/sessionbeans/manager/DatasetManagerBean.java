@@ -60,6 +60,7 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      * @return
      */
+    @WebMethod
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Dataset getDataset(String sessionId, Long datasetId)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
@@ -78,6 +79,7 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      * @return
      */
+    @WebMethod
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Collection<Dataset> getDatasets(String sessionId, Collection<Long> datasetIds)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
@@ -124,6 +126,7 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @throws uk.icat3.exceptions.ValidationException
      * @return
      */
+    @WebMethod
     public Long createDataSet(String sessionId, Long investigationId, Dataset dataSet) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
@@ -145,6 +148,7 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @throws uk.icat3.exceptions.ValidationException
      * @return
      */
+    @WebMethod
     public Collection<Long> createDataSets(String sessionId, Long investigationId, Collection<Dataset> dataSets) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
@@ -167,12 +171,13 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod
     public void removeDataSet(String sessionId, Long dataSetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        DataSetManager.removeDataSet(sessionId, dataSetId, manager);
+        DataSetManager.removeDataSet(userId, dataSetId, manager);
     }
     
     /**
@@ -183,12 +188,13 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod
     public void deleteDataSet(String sessionId, Long dataSetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        DataSetManager.deleteDataSet(sessionId, dataSetId, manager);
+        DataSetManager.deleteDataSet(userId, dataSetId, manager);
     }
     
     /**
@@ -199,12 +205,13 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
      */
+    @WebMethod
     public void modifyDataSet(String sessionId, Dataset dataSet) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        DataSetManager.updateDataSet(sessionId, dataSet, manager);
+        DataSetManager.updateDataSet(userId, dataSet, manager);
     }
     
     /**
@@ -216,6 +223,7 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      * @throws uk.icat3.exceptions.ValidationException
      */
+    @WebMethod
     public void addDataSetParameter(String sessionId, DatasetParameter dataSetParameter, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -232,6 +240,7 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      * @throws uk.icat3.exceptions.ValidationException
      */
+    @WebMethod
     public void modifyDataSetParameter(String sessionId, DatasetParameter dataSetParameter) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -248,6 +257,7 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      * @throws uk.icat3.exceptions.ValidationException
      */
+    @WebMethod
     public void removeDataSetParameter(String sessionId, DatasetParameterPK datasetParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
         //for user bean get userId
@@ -267,6 +277,7 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      * @throws uk.icat3.exceptions.ValidationException
      */
+    @WebMethod
     public void deleteDataSetParameter(String sessionId, DatasetParameterPK datasetParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
         //for user bean get userId
@@ -287,6 +298,7 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      * @throws uk.icat3.exceptions.ValidationException
      */
+    @WebMethod
     public void setDataSetSample(String sessionId, Long sampleId, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
