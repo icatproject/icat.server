@@ -41,7 +41,7 @@ public class ArgumentValidator {
         int i = 1;
         for(Object arg : args){
             if(arg == null){
-                throw new IllegalArgumentException("Cannot pass in null arguments.");
+                throw new IllegalArgumentException("Cannot pass in null arguments to: "+className+":"+methodName);
             }
             if(i == args.length) builder.append(arg+")");
             else builder.append(arg+", ");

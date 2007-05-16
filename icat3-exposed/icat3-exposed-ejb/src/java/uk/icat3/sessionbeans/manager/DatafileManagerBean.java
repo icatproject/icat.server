@@ -23,11 +23,15 @@ import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
+import uk.icat3.entity.DatafileParameterPK;
+import uk.icat3.entity.DatasetParameterPK;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataFileManager;
+import uk.icat3.manager.DataSetManager;
+import uk.icat3.manager.ManagerUtil;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
@@ -51,6 +55,15 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     /** Creates a new instance of DatasetManagerBean */
     public DatafileManagerBean() {}
     
+    /**
+     * 
+     * @param sessionId 
+     * @param datafileId 
+     * @throws uk.icat3.exceptions.SessionException 
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * @return 
+     */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Datafile getDatafile(String sessionId, Long datafileId)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
@@ -60,6 +73,15 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         return DataFileManager.getDataFile(userId, datafileId, manager);
     }
     
+    /**
+     * 
+     * @param sessionId 
+     * @param datafileIds 
+     * @throws uk.icat3.exceptions.SessionException 
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * @return 
+     */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Collection<Datafile> getDatafiles(String sessionId, Collection<Long> datafileIds)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
@@ -70,6 +92,17 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     }
     
     
+    /**
+     * 
+     * @param sessionId 
+     * @param dataFile 
+     * @param datasetId 
+     * @throws uk.icat3.exceptions.SessionException 
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * @throws uk.icat3.exceptions.ValidationException 
+     * @return 
+     */
     public Long createDataFile(String sessionId, Datafile dataFile, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
@@ -82,6 +115,17 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         return newDataFile.getId();
     }
     
+    /**
+     * 
+     * @param sessionId 
+     * @param dataFiles 
+     * @param datasetId 
+     * @throws uk.icat3.exceptions.SessionException 
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * @throws uk.icat3.exceptions.ValidationException 
+     * @return 
+     */
     public Collection<Long> createDataFiles(String sessionId, Collection<Datafile> dataFiles, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
@@ -98,6 +142,14 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         return ids;
     }
     
+    /**
+     * 
+     * @param sessionId 
+     * @param datafileId 
+     * @throws uk.icat3.exceptions.SessionException 
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     */
     public void deleteDataFile(String sessionId, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
         //for user bean get userId
@@ -107,6 +159,14 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         DataFileManager.deleteDataFile(userId, datafileId, manager);
     }
     
+    /**
+     * 
+     * @param sessionId 
+     * @param dataFile 
+     * @throws uk.icat3.exceptions.SessionException 
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     */
     @WebMethod(operationName="deleteDataFileObject")
     @RequestWrapper(className="uk.icat3.sessionbeans.manager.deleteDataFileObject")
     @ResponseWrapper(className="uk.icat3.sessionbeans.manager.deleteDataFileObjectResponse")
@@ -119,6 +179,14 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         DataFileManager.deleteDataFile(userId, dataFile, manager);
     }
     
+    /**
+     * 
+     * @param sessionId 
+     * @param datafileId 
+     * @throws uk.icat3.exceptions.SessionException 
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     */
     public void removeDataFile(String sessionId, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
         //for user bean get userId
@@ -128,6 +196,14 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         DataFileManager.deleteDataFile(userId, datafileId, manager);
     }
     
+    /**
+     * 
+     * @param sessionId 
+     * @param dataFile 
+     * @throws uk.icat3.exceptions.SessionException 
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     */
     @WebMethod(operationName="removeDataFileObject")
     @RequestWrapper(className="uk.icat3.sessionbeans.manager.removeDataFileObject")
     @ResponseWrapper(className="uk.icat3.sessionbeans.manager.removeDataFileObjectResponse")
@@ -140,6 +216,15 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         DataFileManager.removeDataFile(userId, dataFile, manager);
     }
     
+    /**
+     * 
+     * @param sessionId 
+     * @param dataFile 
+     * @throws uk.icat3.exceptions.SessionException 
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * @throws uk.icat3.exceptions.ValidationException 
+     */
     public void updateDataFile(String sessionId, Datafile dataFile) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
@@ -149,6 +234,16 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         DataFileManager.updateDataFile(userId, dataFile, manager);
     }
     
+    /**
+     * 
+     * @param sessionId 
+     * @param dataFileParameter 
+     * @param datafileId 
+     * @throws uk.icat3.exceptions.SessionException 
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * @throws uk.icat3.exceptions.ValidationException 
+     */
     public void addDataFileParameter(String sessionId, DatafileParameter dataFileParameter, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
@@ -157,4 +252,77 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         //get file, checks read access
         DataFileManager.addDataFileParameter(userId, dataFileParameter, datafileId, manager);
     }    
+       
+    
+    /**
+     *
+     * @param sessionId
+     * @param dataSetParameter
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     * @throws uk.icat3.exceptions.ValidationException
+     */
+    public void modifyDataFileParameter(String sessionId, DatafileParameter dataFileParameter) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        DataFileManager.updateDatafileParameter(userId, dataFileParameter, manager);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param datasetParameterPK
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     * @throws uk.icat3.exceptions.ValidationException
+     */
+    public void removeDataFileParameter(String sessionId, DatafileParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        DatafileParameter datafileParameter = ManagerUtil.find(DatafileParameter.class, datafileParameterPK, manager);
+        
+        DataFileManager.removeDatafileParameter(userId, datafileParameter, manager);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param datasetParameterPK
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     * @throws uk.icat3.exceptions.ValidationException
+     */
+    public void deleteDataFileParameter(String sessionId, DatasetParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        DatafileParameter datafileParameter = ManagerUtil.find(DatafileParameter.class, datafileParameterPK, manager);
+        
+        DataFileManager.deleteDatafileParameter(userId, datafileParameter, manager);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param sampleId
+     * @param datasetId
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     * @throws uk.icat3.exceptions.ValidationException
+     */
+    public void setDataSetSample(String sessionId, Long sampleId, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        DataSetManager.setDataSetSample(userId, sampleId, datasetId, manager);
+    }
 }

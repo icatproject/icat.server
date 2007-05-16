@@ -21,15 +21,21 @@ import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
+import uk.icat3.entity.InvestigatorPK;
 import uk.icat3.entity.Keyword;
+import uk.icat3.entity.KeywordPK;
+import uk.icat3.entity.Sample;
+import uk.icat3.entity.SampleParameter;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.InvestigationManager;
+import uk.icat3.manager.ManagerUtil;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
+import uk.icat3.util.AccessType;
 import uk.icat3.util.InvestigationInclude;
 
 /**
@@ -53,13 +59,13 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
     public InvestigationManagerBean() {}
     
     /**
-     * 
-     * @param sessionId 
-     * @param investigationId 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
-     * @return 
+     *
+     * @param sessionId
+     * @param investigationId
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     * @return
      */
     @WebMethod(operationName="getInvestigationDefault")
     @RequestWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationDefault")
@@ -72,16 +78,16 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         
         return InvestigationManager.getInvestigation(userId, investigationId, manager);
     }
-        
+    
     /**
-     * 
-     * @param sessionId 
-     * @param investigationId 
-     * @param includes 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
-     * @return 
+     *
+     * @param sessionId
+     * @param investigationId
+     * @param includes
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     * @return
      */
     @RequestWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationIncludes")
     @ResponseWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationIncludesResponse")
@@ -97,41 +103,269 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         investigation.setInvestigationInclude(includes);
         
         return investigation;
-    }    
+    }
     
     /**
-     * 
-     * @param sessionId 
-     * @param keyword 
-     * @param investigationId 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.ValidationException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     *
+     * @param sessionId
+     * @param keyword
+     * @param investigationId
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
     public void addKeyword(String sessionId, Keyword keyword, Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        InvestigationManager.addInvestigationObject(userId, keyword, investigationId, manager);        
+        InvestigationManager.addInvestigationObject(userId, keyword, investigationId, manager);
     }
     
     /**
-     * 
-     * @param sessionId 
-     * @param investigator 
-     * @param investigationId 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.ValidationException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     *
+     * @param sessionId
+     * @param keywordId
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
-     public void addInvestigator(String sessionId, Investigator investigator, Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    public void removeKeyword(String sessionId, KeywordPK keywordPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        deleteKeywordImpl(sessionId, keywordPK, AccessType.REMOVE);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param keywordId
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     */
+    public void deleteKeyword(String sessionId, KeywordPK keywordPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        deleteKeywordImpl(sessionId, keywordPK, AccessType.DELETE);
+    }
+    
+    private void deleteKeywordImpl(String sessionId, KeywordPK keywordPK, AccessType type) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        if(!type.equals(AccessType.DELETE) || !type.equals(AccessType.REMOVE)) throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        InvestigationManager.addInvestigationObject(userId, investigator, investigationId, manager);        
-    }         
+        //find investigator
+        Keyword keyword = ManagerUtil.find(Keyword.class, keywordPK, manager);
+        
+        // remove/delete investigator
+        InvestigationManager.deleteInvestigationObject(userId, keyword, type, manager);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param investigator
+     * @param investigationId
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     */
+    public void addInvestigator(String sessionId, Investigator investigator, Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        InvestigationManager.addInvestigationObject(userId, investigator, investigationId, manager);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param investigatorId
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     */
+    public void removeInvestigator(String sessionId, InvestigatorPK investigatorPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        deleteInvestigatorImpl(sessionId, investigatorPK, AccessType.REMOVE);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param investigator
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     */
+    public void modifyInvestigator(String sessionId, Investigator investigator) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        // modify sample
+        InvestigationManager.updateInvestigationObject(userId, investigator, manager);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param investigatorId
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     */
+    public void deleteInvestigator(String sessionId, InvestigatorPK investigatorPK) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        deleteInvestigatorImpl(sessionId, investigatorPK, AccessType.DELETE);
+    }
+    
+    private void deleteInvestigatorImpl(String sessionId, InvestigatorPK investigatorPK, AccessType type) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        if(!type.equals(AccessType.DELETE) || !type.equals(AccessType.REMOVE)) throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        //find investigator
+        Investigator investigator = ManagerUtil.find(Investigator.class, investigatorPK, manager);
+        
+        // remove/delete investigator
+        InvestigationManager.deleteInvestigationObject(userId, investigator, type, manager);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param sample
+     * @param investigationId
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     */
+    public void addSample(String sessionId, Sample sample, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException{
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        InvestigationManager.addInvestigationObject(userId, sample, investigationId, manager);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param sampleId
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     */
+    public void removeSample(String sessionId, Long sampleId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        removeSampleImpl(sessionId, sampleId, AccessType.REMOVE);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param sampleId
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     */
+    public void deleteSample(String sessionId, Long sampleId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        removeSampleImpl(sessionId, sampleId, AccessType.DELETE);
+    }
+    
+    private void removeSampleImpl(String sessionId, Long sampleId, AccessType type) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        if(!type.equals(AccessType.DELETE) || !type.equals(AccessType.REMOVE)) throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        //find sample
+        Sample sample = ManagerUtil.find(Sample.class, sampleId, manager);
+        
+        // remove/delete sample
+        InvestigationManager.deleteInvestigationObject(userId, sample, type, manager);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param sample
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     */
+    public void modifySample(String sessionId, Sample sample) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        
+        // for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        // modify sample
+        InvestigationManager.updateInvestigationObject(userId, sample, manager);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param sampleParameterId
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     */
+    public void removeSampleParamter(String sessionId, Long sampleParameterId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        removeSampleParameterImpl(sessionId, sampleParameterId, AccessType.REMOVE);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param sampleParameterId
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     */
+    public void deleteSampleParamter(String sessionId, Long sampleParameterId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        removeSampleParameterImpl(sessionId, sampleParameterId, AccessType.DELETE);
+    }
+    
+    private void removeSampleParameterImpl(String sessionId, Long sampleParameterId, AccessType type) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        if(!type.equals(AccessType.DELETE) || !type.equals(AccessType.REMOVE)) throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        //find sample
+        SampleParameter sampleParameter = ManagerUtil.find(SampleParameter.class, sampleParameterId, manager);
+        
+        // remove/delete sample
+        InvestigationManager.deleteInvestigationObject(userId, sampleParameter, type, manager);
+    }
+    
+    /**
+     *
+     * @param sessionId
+     * @param sampleParameter
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.ValidationException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     */
+    public void modifySampleParameter(String sessionId, SampleParameter sampleParameter) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        
+        // for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        // modify sample
+        InvestigationManager.updateInvestigationObject(userId, sampleParameter, manager);
+    }
 }
