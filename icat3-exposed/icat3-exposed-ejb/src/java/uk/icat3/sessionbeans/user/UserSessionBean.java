@@ -46,16 +46,15 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     @PersistenceContext(unitName="icat3-exposed-user")
     private EntityManager managerUser;
     
-      
+    /**
+     *
+     * @param username
+     * @param password
+     * @throws uk.icat3.exceptions.SessionException
+     * @return
+     */
     @WebMethod()
     @ExcludeClassInterceptors
-     /**
-     * 
-     * @param username 
-     * @param password 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @return 
-     */
     public String login(String username, String password) throws SessionException {
         log.trace("login("+username+", *******)");
         
@@ -64,19 +63,18 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
         return userManager.login(username,password);
     }
     
-    
+    /**
+     *
+     * @param username
+     * @param password
+     * @param lifetime
+     * @throws uk.icat3.exceptions.SessionException
+     * @return
+     */
     @WebMethod(operationName="loginLifetime")
     @ExcludeClassInterceptors
     @RequestWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginLifetime")
     @ResponseWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginLifetimeResponse")
-    /**
-     * 
-     * @param username 
-     * @param password 
-     * @param lifetime 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @return 
-     */
     public String login(String username, String password, int lifetime) throws SessionException {
         log.trace("login("+username+", *******, "+lifetime+")");
         
@@ -85,16 +83,15 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
         return userManager.login(username,password, lifetime);
     }
     
-   
+    /**
+     *
+     * @param credential
+     * @throws uk.icat3.exceptions.SessionException
+     * @return
+     */
     @WebMethod(operationName="loginCredentials")
     @RequestWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginCredentials")
     @ResponseWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginCredentialsResponse")
-     /**
-     * 
-     * @param credential 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @return 
-     */
     public String login(String credential) throws SessionException {
         
         UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
@@ -102,19 +99,19 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
         return userManager.login(credential);
     }
     
-   
+    /**
+     *
+     * @param username
+     * @param password
+     * @param runAs
+     * @throws uk.icat3.exceptions.SessionException
+     * @return
+     */
     @WebMethod(operationName="loginAdmin")
     @ExcludeClassInterceptors
     @RequestWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginAdmin")
     @ResponseWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginAdminResponse")
-     /**
-     * 
-     * @param username 
-     * @param password 
-     * @param runAs 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @return 
-     */
+    
     public String login(String username, String password, String runAs) throws SessionException {
         log.trace("login("+username+", *******, "+runAs+")");
         
@@ -123,11 +120,10 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
         return userManager.login(username, password, runAs);
     }
     
-    
     /**
-     * 
-     * @param sid 
-     * @return 
+     *
+     * @param sid
+     * @return
      */
     public boolean logout(String sid) {
         
@@ -142,10 +138,10 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     }
     
     /**
-     * 
-     * @param sid 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @return 
+     *
+     * @param sid
+     * @throws uk.icat3.exceptions.SessionException
+     * @return
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public String getUserIdFromSessionId(String sid) throws SessionException {
@@ -156,12 +152,12 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     }
     
     /**
-     * 
-     * @param sid 
-     * @param user 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.NoSuchUserException 
-     * @return 
+     *
+     * @param sid
+     * @param user
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.NoSuchUserException
+     * @return
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public UserDetails getUserDetails(String sid, String user) throws SessionException, NoSuchUserException {

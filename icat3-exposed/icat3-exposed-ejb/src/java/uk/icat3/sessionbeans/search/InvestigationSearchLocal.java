@@ -14,10 +14,10 @@ import uk.icat3.util.InvestigationInclude;
 @Local
 public interface InvestigationSearchLocal {
     
-    Collection<Investigation> searchByUserID(String sessionId, String userSearch) throws SessionException;
+    public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy) throws SessionException ;
     
-    Collection<Investigation> getMyInvestigations(String sessionId) throws SessionException;
+    public Collection<Investigation> getMyInvestigations(String sessionId) throws SessionException ;
     
-    Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy) throws SessionException;
+    public Collection<Investigation> searchByUserID(String sessionId, String userSearch) throws SessionException ;
     
 }

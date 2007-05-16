@@ -13,6 +13,6 @@ import uk.icat3.user.User;
 @Local
 public interface UserSessionLocal extends User {
     
-   
+   //signatures extended from User.
   
 }
