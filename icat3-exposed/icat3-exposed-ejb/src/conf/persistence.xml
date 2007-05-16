@@ -59,6 +59,7 @@
       <!-- <property name="toplink.cache.shared.default" value="false"/>
             <property name="toplink.cache.type.default" value="NONE"/>
             <property name="toplink.cache.size.default" value="0"/>-->
+      <property name="toplink.ddl-generation" value="create-tables"/>
     </properties>
   </persistence-unit>
 </persistence>
