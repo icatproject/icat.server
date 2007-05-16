@@ -44,7 +44,7 @@ import uk.icat3.util.InvestigationInclude;
  * @author gjd37
  */
 @Stateless()
-@WebService(targetNamespace="uk.ac.stfc.manager")
+@WebService(targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -64,7 +64,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      * @return
      */
-    @WebMethod(operationName="getInvestigationDefault")
+    @WebMethod(operationName="getInvestigation")
     @RequestWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationDefault")
     @ResponseWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationDefaultResponse")
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
