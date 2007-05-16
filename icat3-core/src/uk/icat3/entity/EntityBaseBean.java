@@ -161,7 +161,8 @@ public class EntityBaseBean {
         this.deleted = deleted;
     }
     
-    public void setDeleted(boolean deletedBoolean) {
+    @XmlTransient
+    public void setDelete(boolean deletedBoolean) {
         this.deletedBoolean = deletedBoolean;
         this.deleted = (deletedBoolean) ? "Y" : "N";
     }

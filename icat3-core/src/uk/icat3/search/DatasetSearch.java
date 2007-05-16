@@ -73,7 +73,7 @@ public class DatasetSearch {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of types'
      */
-    public Collection<DatasetType> listDatasetTypes(EntityManager manager) {
+    public static Collection<DatasetType> listDatasetTypes(EntityManager manager) {
         log.trace("listDatasetTypes(EntityManager)");
         
         return manager.createNamedQuery("DatasetType.getAll").getResultList();
@@ -85,7 +85,7 @@ public class DatasetSearch {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of status'
      */
-    public Collection<DatasetStatus> listDatasetStatus(EntityManager manager) {
+    public static Collection<DatasetStatus> listDatasetStatus(EntityManager manager) {
         log.trace("listDatasetStatus(EntityManager)");
         
         return manager.createNamedQuery("DatasetStatus.getAll").getResultList();

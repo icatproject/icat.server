@@ -445,7 +445,7 @@ public class DataSetManager extends ManagerUtil {
             //check dataSetParameterManaged not already added
             DatasetParameter dataSetParameterManaged = find(DatasetParameter.class, dataSetParameter.getDatasetParameterPK(), manager);
             if(dataSetParameterManaged.isDeleted()){
-                dataSetParameterManaged.setDeleted(false);
+                dataSetParameterManaged.setDelete(false);
                 dataSetParameterManaged.setModId(facilityUserId);
                 log.info(dataSetParameterManaged +" been deleted, undeleting now.");
                 return dataSetParameterManaged;
@@ -541,7 +541,7 @@ public class DataSetManager extends ManagerUtil {
         String facilityUserId = getFacilityUserId(userId, manager);
         
         dataSetParameterManaged.setModId(facilityUserId);
-        dataSetParameterManaged.setDeleted(true);
+        dataSetParameterManaged.setDelete(true);
     }
     
     /**

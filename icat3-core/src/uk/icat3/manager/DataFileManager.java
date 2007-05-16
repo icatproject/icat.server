@@ -365,7 +365,7 @@ public class DataFileManager extends ManagerUtil {
             //check dataSetParameterManaged not already added
             DatafileParameter dataFileParameterManaged = find(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);
             if(dataFileParameterManaged.isDeleted()){
-                dataFileParameterManaged.setDeleted(false);
+                dataFileParameterManaged.setDelete(false);
                 dataFileParameterManaged.setModId(facilityUserId);
                 log.info(dataFileParameterManaged +" been deleted, undeleting now.");
                 return dataFileParameterManaged;
@@ -457,6 +457,6 @@ public class DataFileManager extends ManagerUtil {
         String facilityUserId = getFacilityUserId(userId, manager);
         
         datafileParameterManaged.setModId(facilityUserId);
-        datafileParameterManaged.setDeleted(true);
+        datafileParameterManaged.setDelete(true);
     }
 }

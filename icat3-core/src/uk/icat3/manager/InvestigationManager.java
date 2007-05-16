@@ -435,7 +435,7 @@ public class InvestigationManager extends ManagerUtil {
                 String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                keywordManaged.setDeleted(true);
+                keywordManaged.setDelete(true);
                 keywordManaged.setModId(facilityUserId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
@@ -458,7 +458,7 @@ public class InvestigationManager extends ManagerUtil {
                 String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                sampleManaged.setDeleted(true);
+                sampleManaged.setDelete(true);
                 sampleManaged.setModId(facilityUserId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
@@ -481,7 +481,7 @@ public class InvestigationManager extends ManagerUtil {
                 String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                sampleParameterManaged.setDeleted(true);
+                sampleParameterManaged.setDelete(true);
                 sampleParameterManaged.setModId(facilityUserId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
@@ -504,7 +504,7 @@ public class InvestigationManager extends ManagerUtil {
                 String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                PublicationManaged.setDeleted(true);
+                PublicationManaged.setDelete(true);
                 PublicationManaged.setModId(facilityUserId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
@@ -527,7 +527,7 @@ public class InvestigationManager extends ManagerUtil {
                 String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                investigatorManaged.setDeleted(true);
+                investigatorManaged.setDelete(true);
                 investigatorManaged.setModId(facilityUserId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
@@ -596,7 +596,7 @@ public class InvestigationManager extends ManagerUtil {
                 // if(publication.getId() == null) throw new NoSuchObjectFoundException();
                 Publication publicationManaged = find(Publication.class, publication.getId(), manager);
                 if(publicationManaged.isDeleted()){
-                    publicationManaged.setDeleted(false);
+                    publicationManaged.setDelete(false);
                     publicationManaged.setModId(facilityUserId);
                     log.info(publicationManaged +" been deleted, undeleting now.");
                     return publicationManaged;
@@ -630,7 +630,7 @@ public class InvestigationManager extends ManagerUtil {
                 //check investigator not already added
                 Sample sampleManaged = sample.find(manager);
                 if(sampleManaged.isDeleted()){
-                    sampleManaged.setDeleted(false);
+                    sampleManaged.setDelete(false);
                     sampleManaged.setModId(facilityUserId);
                     log.info(sampleManaged +" been deleted, undeleting now.");
                     return sampleManaged;
@@ -666,7 +666,7 @@ public class InvestigationManager extends ManagerUtil {
                 //check investigator not already added
                 SampleParameter sampleManaged = find(SampleParameter.class, sampleParamter.getSampleParameterPK(), manager);
                 if(sampleManaged.isDeleted()){
-                    sampleManaged.setDeleted(false);
+                    sampleManaged.setDelete(false);
                     sampleManaged.setModId(facilityUserId);
                     log.info(sampleManaged +" been deleted, undeleting now.");
                     return sampleManaged;
@@ -697,7 +697,7 @@ public class InvestigationManager extends ManagerUtil {
                 //check investigator not already added
                 Keyword keywordManaged = find(Keyword.class, keyword.getKeywordPK(), manager);
                 if(keywordManaged.isDeleted()){
-                    keywordManaged.setDeleted(false);
+                    keywordManaged.setDelete(false);
                     keywordManaged.setModId(facilityUserId);
                     log.info(keywordManaged +" been deleted, undeleting now.");
                     return keywordManaged;
@@ -727,7 +727,7 @@ public class InvestigationManager extends ManagerUtil {
                 //check investigator not already added
                 Investigator investigatorManaged = find(Investigator.class, investigator.getInvestigatorPK(), manager);
                 if(investigatorManaged.isDeleted()){
-                    investigatorManaged.setDeleted(false);
+                    investigatorManaged.setDelete(false);
                     investigatorManaged.setModId(facilityUserId);
                     log.info(investigatorManaged +" been deleted, undeleting now.");
                     return investigatorManaged;
