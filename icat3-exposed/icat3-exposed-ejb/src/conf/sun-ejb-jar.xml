@@ -6,7 +6,6 @@
       <ejb-name>UserSessionBean</ejb-name>
       <webservice-endpoint>
         <port-component-name>UserSessionBean</port-component-name>
-        <message-security-binding/>
         <transport-guarantee>CONFIDENTIAL</transport-guarantee>
       </webservice-endpoint>
     </ejb>
