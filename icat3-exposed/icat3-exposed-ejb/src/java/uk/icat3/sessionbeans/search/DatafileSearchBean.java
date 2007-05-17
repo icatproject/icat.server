@@ -14,6 +14,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
+import javax.jws.WebMethod;
 import javax.jws.WebService;
 import uk.icat3.entity.Datafile;
 import uk.icat3.exceptions.SessionException;
@@ -36,6 +37,7 @@ public class DatafileSearchBean extends EJBObject implements DatafileSearchLocal
     public DatafileSearchBean() {
     }
     
+    @WebMethod()
     public Collection<Datafile> searchByRunNumber(String sessionId, Collection<String> instruments, Long startRun, Long endRun) throws SessionException {
         
         //for user bean get userId

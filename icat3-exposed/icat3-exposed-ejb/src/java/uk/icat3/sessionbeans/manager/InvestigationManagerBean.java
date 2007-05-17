@@ -112,6 +112,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void addKeyword(String sessionId, Keyword keyword, Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         
         //for user bean get userId
@@ -129,6 +130,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void removeKeyword(String sessionId, KeywordPK keywordPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         deleteKeywordImpl(sessionId, keywordPK, AccessType.REMOVE);
     }
@@ -142,6 +144,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void deleteKeyword(String sessionId, KeywordPK keywordPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         deleteKeywordImpl(sessionId, keywordPK, AccessType.DELETE);
     }
@@ -169,6 +172,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void addInvestigator(String sessionId, Investigator investigator, Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         
         //for user bean get userId
@@ -186,6 +190,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void removeInvestigator(String sessionId, InvestigatorPK investigatorPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         deleteInvestigatorImpl(sessionId, investigatorPK, AccessType.REMOVE);
     }
@@ -199,6 +204,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void modifyInvestigator(String sessionId, Investigator investigator) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         
         //for user bean get userId
@@ -217,6 +223,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void deleteInvestigator(String sessionId, InvestigatorPK investigatorPK) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         deleteInvestigatorImpl(sessionId, investigatorPK, AccessType.DELETE);
     }
@@ -244,6 +251,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void addSample(String sessionId, Sample sample, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException{
         
         //for user bean get userId
@@ -261,6 +269,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void removeSample(String sessionId, Long sampleId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         removeSampleImpl(sessionId, sampleId, AccessType.REMOVE);
     }
@@ -274,6 +283,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void deleteSample(String sessionId, Long sampleId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         removeSampleImpl(sessionId, sampleId, AccessType.DELETE);
     }
@@ -300,6 +310,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void modifySample(String sessionId, Sample sample) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         
         // for user bean get userId
@@ -318,6 +329,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void removeSampleParamter(String sessionId, Long sampleParameterId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         removeSampleParameterImpl(sessionId, sampleParameterId, AccessType.REMOVE);
     }
@@ -331,6 +343,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void deleteSampleParamter(String sessionId, Long sampleParameterId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         removeSampleParameterImpl(sessionId, sampleParameterId, AccessType.DELETE);
     }
@@ -357,6 +370,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
+    @WebMethod()
     public void modifySampleParameter(String sessionId, SampleParameter sampleParameter) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         
         // for user bean get userId

@@ -50,6 +50,7 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
      * @param userId
      * @return
      */
+    @WebMethod()
     public Collection<String> getKeywordsForUser(String sessionId) throws SessionException{
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -65,9 +66,9 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
      * @param numberReturned
      * @return
      */
-      @WebMethod(operationName="getKeywordsForUserMax")
+    @WebMethod(operationName="getKeywordsForUserMax")
     @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserMax")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserMaxResponse")   
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserMaxResponse")
     public Collection<String> getKeywordsForUser(String sessionId, String startKeyword, int numberReturned) throws SessionException{
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -82,6 +83,7 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
      * @param type
      * @return
      */
+    @WebMethod()
     public Collection<String> getAllKeywords(String sessionId, KeywordType type) throws SessionException{
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);

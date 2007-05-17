@@ -124,6 +124,7 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
      * @param sid
      * @return
      */
+    @WebMethod()
     public boolean logout(String sid) {
         
         UserManager userManager;
@@ -141,7 +142,7 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
      * @param sid
      * @throws uk.icat3.exceptions.SessionException
      * @return
-     */
+     */    
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public String getUserIdFromSessionId(String sid) throws SessionException {
         
@@ -158,6 +159,7 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
      * @throws uk.icat3.exceptions.NoSuchUserException
      * @return
      */
+    @WebMethod()
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public UserDetails getUserDetails(String sid, String user) throws SessionException, NoSuchUserException {
         

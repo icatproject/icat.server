@@ -182,6 +182,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @throws uk.icat3.exceptions.SessionException
      * @return
      */
+    @WebMethod()
     public Collection<Investigation> getMyInvestigations(String sessionId) throws SessionException {
         
         //for user bean get userId
@@ -198,6 +199,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
+    @WebMethod()
     public Collection<Investigation> searchByUserID(String sessionId, String userSearch) throws SessionException {
         
         //for user bean get userId
@@ -234,6 +236,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @param manager
      * @return
      */
+    @WebMethod()
     public Collection<Investigation> searchByUserSurname(String sessionId, String surname) throws SessionException {
         
         //for user bean get userId
@@ -271,6 +274,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @throws uk.icat3.exceptions.SessionException
      * @return
      */
+    @WebMethod()
     public Collection<String> listAllInstruments(String sessionId) throws SessionException {
         
         //for user bean get userId

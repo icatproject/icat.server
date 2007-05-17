@@ -15,6 +15,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
+import javax.jws.WebMethod;
 import javax.jws.WebService;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetStatus;
@@ -47,6 +48,7 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
      * @throws uk.icat3.exceptions.SessionException
      * @return
      */
+    @WebMethod()
     public Collection<Dataset> searchBySampleName(String sessionId, String sampleName) throws SessionException {
         
         //for user bean get userId
@@ -61,6 +63,7 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
      * @param sessionid
      * @return collection of types'
      */
+    @WebMethod()
     public Collection<DatasetType> listDatasetTypes(String sessionId) throws SessionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -74,6 +77,7 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
      * @param sessionid
      * @return collection of status'
      */
+    @WebMethod()
     public Collection<DatasetStatus> listDatasetStatus(String sessionId) throws SessionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
