@@ -208,9 +208,63 @@ is divided into following sections:
     <!--
                 COMPILATION SECTION
             -->
-    <target name="-deps-module-jar" depends="init" if="no.dist.ear.dir" unless="no.deps"/>
-    <target name="-deps-ear-jar" depends="init" if="dist.ear.dir" unless="no.deps"/>
+    <target name="-deps-module-jar" depends="init" if="no.dist.ear.dir" unless="no.deps">
+        <ant target="jar" inheritall="false" antfile="${project.icat3-core}/build.xml"/>
+        <ant target="jar" inheritall="false" antfile="${project.icat3-user-default}/build.xml"/>
+    </target>
+    <target name="-deps-ear-jar" depends="init" if="dist.ear.dir" unless="no.deps">
+        <ant target="jar" inheritall="false" antfile="${project.icat3-core}/build.xml"/>
+        <ant target="jar" inheritall="false" antfile="${project.icat3-user-default}/build.xml"/>
+    </target>
     <target name="deps-jar" depends="init, -deps-module-jar, -deps-ear-jar"/>
+    <target name="wsgen-init" depends="init">
+        <mkdir dir="${build.generated.dir}/wsgen/service"/>
+        <mkdir dir="${classes.dir}"/>
+        <taskdef name="wsgen" classname="com.sun.tools.ws.ant.WsGen">
+            <classpath path="${j2ee.platform.wsgen.classpath}"/>
+        </taskdef>
+    </target>
+    <target name="wsgen-KeywordSearchBean" depends="wsgen-init, compile">
+        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.search.KeywordSearchBean">
+            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
+        </wsgen>
+    </target>
+    <target name="wsgen-InvestigationManagerBean" depends="wsgen-init, compile">
+        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.manager.InvestigationManagerBean">
+            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
+        </wsgen>
+    </target>
+    <target name="wsgen-DatafileSearchBean" depends="wsgen-init, compile">
+        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.search.DatafileSearchBean">
+            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
+        </wsgen>
+    </target>
+    <target name="wsgen-InvestigationSearchBean" depends="wsgen-init, compile">
+        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.search.InvestigationSearchBean">
+            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
+        </wsgen>
+    </target>
+    <target name="wsgen-DatasetSearchBean" depends="wsgen-init, compile">
+        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.search.DatasetSearchBean">
+            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
+        </wsgen>
+    </target>
+    <target name="wsgen-DatasetManagerBean" depends="wsgen-init, compile">
+        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.manager.DatasetManagerBean">
+            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
+        </wsgen>
+    </target>
+    <target name="wsgen-UserSessionBean" depends="wsgen-init, compile">
+        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.user.UserSessionBean">
+            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
+        </wsgen>
+    </target>
+    <target name="wsgen-DatafileManagerBean" depends="wsgen-init, compile">
+        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.manager.DatafileManagerBean">
+            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
+        </wsgen>
+    </target>
+    <target name="wsgen-generate" depends="wsgen-KeywordSearchBean, wsgen-InvestigationManagerBean, wsgen-DatafileSearchBean, wsgen-InvestigationSearchBean, wsgen-DatasetSearchBean, wsgen-DatasetManagerBean, wsgen-UserSessionBean, wsgen-DatafileManagerBean"/>
     <target name="-pre-pre-compile" depends="init,deps-jar">
         <mkdir dir="${build.classes.dir}"/>
         <mkdir dir="${build.ear.classes.dir}"/>
@@ -219,9 +273,21 @@ is divided into following sections:
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
     </target>
-    <target name="library-inclusion-in-archive" depends="compile"/>
+    <target name="library-inclusion-in-archive" depends="compile">
+        <copy file="${reference.icat3-core.jar}" todir="${build.classes.dir}"/>
+        <copy file="${reference.icat3-user-default.jar}" todir="${build.classes.dir}"/>
+        <copy file="${libs.log4j.classpath}" todir="${build.classes.dir}"/>
+    </target>
     <target name="library-inclusion-in-manifest" depends="compile">
-        <manifest file="${build.ear.classes.dir}/META-INF/MANIFEST.MF" mode="update"/>
+        <basename property="included.lib.reference.icat3-core.jar" file="${reference.icat3-core.jar}"/>
+        <copy file="${reference.icat3-core.jar}" todir="${dist.ear.dir}"/>
+        <basename property="included.lib.reference.icat3-user-default.jar" file="${reference.icat3-user-default.jar}"/>
+        <copy file="${reference.icat3-user-default.jar}" todir="${dist.ear.dir}"/>
+        <basename property="included.lib.libs.log4j.classpath" file="${libs.log4j.classpath}"/>
+        <copy file="${libs.log4j.classpath}" todir="${dist.ear.dir}"/>
+        <manifest file="${build.ear.classes.dir}/META-INF/MANIFEST.MF" mode="update">
+            <attribute name="Class-Path" value="${included.lib.reference.icat3-core.jar} ${included.lib.reference.icat3-user-default.jar} ${included.lib.libs.log4j.classpath} "/>
+        </manifest>
     </target>
     <target name="-copy-meta-inf">
         <copy todir="${classes.dir}">
@@ -475,7 +541,10 @@ is divided into following sections:
     <!--
                 CLEANUP SECTION
             -->
-    <target name="deps-clean" depends="init" if="no.dist.ear.dir" unless="no.deps"/>
+    <target name="deps-clean" depends="init" if="no.dist.ear.dir" unless="no.deps">
+        <ant target="clean" inheritall="false" antfile="${project.icat3-core}/build.xml"/>
+        <ant target="clean" inheritall="false" antfile="${project.icat3-user-default}/build.xml"/>
+    </target>
     <target name="-do-clean" depends="init">
         <delete dir="${build.dir}"/>
         <delete dir="${dist.dir}"/>
