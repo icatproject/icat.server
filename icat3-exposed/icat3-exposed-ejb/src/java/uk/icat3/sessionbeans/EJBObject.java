@@ -36,6 +36,11 @@ public abstract class EJBObject {
     protected UserSessionLocal user;
     
     // For junit testing only
+    protected void setUserSession(UserSessionLocal localUserSession){
+        this.user = localUserSession;
+    }
+    
+    // For junit testing only
     protected void setEntityManager(EntityManager manager){
         this.manager = manager;
     }
