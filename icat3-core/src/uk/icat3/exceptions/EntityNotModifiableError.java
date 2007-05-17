@@ -6,7 +6,6 @@
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-
 package uk.icat3.exceptions;
 
 import javax.ejb.ApplicationException;
