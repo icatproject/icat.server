@@ -44,14 +44,14 @@ import uk.icat3.util.InvestigationInclude;
  * @author gjd37
  */
 @Stateless()
-@WebService(targetNamespace="client.icat3.uk")
+@WebService(name="ICATInvestigationManagerService",targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 public class InvestigationManagerBean extends EJBObject implements InvestigationManagerLocal {
     
     static Logger log = Logger.getLogger(InvestigationManagerBean.class);
-           
+    
     /** Creates a new instance of InvestigationManagerBean */
     public InvestigationManagerBean() {}
     
@@ -86,6 +86,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      * @return
      */
+    @WebMethod(operationName="getInvestigationIncludes")
     @RequestWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationIncludes")
     @ResponseWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationIncludesResponse")
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -330,8 +331,8 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
     @WebMethod()
-    public void removeSampleParamter(String sessionId, Long sampleParameterId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
-        removeSampleParameterImpl(sessionId, sampleParameterId, AccessType.REMOVE);
+    public void removeSampleParameter(String sessionId, SampleParameter sampleParameterPK) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        removeSampleParameterImpl(sessionId, sampleParameterPK, AccessType.REMOVE);
     }
     
     /**
@@ -344,18 +345,18 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      */
     @WebMethod()
-    public void deleteSampleParamter(String sessionId, Long sampleParameterId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
-        removeSampleParameterImpl(sessionId, sampleParameterId, AccessType.DELETE);
+    public void deleteSampleParameter(String sessionId, SampleParameter sampleParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        removeSampleParameterImpl(sessionId, sampleParameterPK, AccessType.DELETE);
     }
     
-    private void removeSampleParameterImpl(String sessionId, Long sampleParameterId, AccessType type) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    private void removeSampleParameterImpl(String sessionId, SampleParameter sampleParameterPK, AccessType type) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         if(!type.equals(AccessType.DELETE) || !type.equals(AccessType.REMOVE)) throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
         //find sample
-        SampleParameter sampleParameter = ManagerUtil.find(SampleParameter.class, sampleParameterId, manager);
+        SampleParameter sampleParameter = ManagerUtil.find(SampleParameter.class, sampleParameterPK, manager);
         
         // remove/delete sample
         InvestigationManager.deleteInvestigationObject(userId, sampleParameter, type, manager);

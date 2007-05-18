@@ -11,6 +11,7 @@ package uk.icat3.sessionbeans.search;
 
 
 import java.util.Collection;
+import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -30,6 +31,7 @@ import uk.icat3.sessionbeans.EJBObject;
  * @author gjd37
  */
 @Stateless
+@PermitAll
 @WebService(targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)

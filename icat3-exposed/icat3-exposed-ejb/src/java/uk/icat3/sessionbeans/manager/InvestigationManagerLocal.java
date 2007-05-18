@@ -44,9 +44,9 @@ public interface InvestigationManagerLocal {
     
     public void modifySample(String sessionId, Sample sample) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException;
     
-    public void removeSampleParamter(String sessionId, Long sampleParameterId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException;
+    public void removeSampleParameter(String sessionId, SampleParameter sampleParameterPK) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException;
     
-    public void deleteSampleParamter(String sessionId, Long sampleParameterId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException;
+    public void deleteSampleParameter(String sessionId, SampleParameter sampleParameterPK) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException;
     
     public void modifySampleParameter(String sessionId, SampleParameter sampleParameter) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException;
     
