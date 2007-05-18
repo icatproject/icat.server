@@ -58,10 +58,10 @@ import uk.icat3.util.LogicalOperator;
 @WebService(/*serviceName="ICATService", name="ICATServices", */ targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
-public class ICATNewTest extends EJBObject implements ICATLocal {
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+public class ICAT extends EJBObject implements ICATLocal {
     
-    static Logger log = Logger.getLogger(ICATNewTest.class);
+    static Logger log = Logger.getLogger(ICAT.class);
     
     ///////////////////////  Inject all the EJBs   //////////////////////////
     @EJB
@@ -89,7 +89,7 @@ public class ICATNewTest extends EJBObject implements ICATLocal {
     
     
     /** Creates a new instance of AllOperationsBean */
-    public ICATNewTest() {
+    public ICAT() {
     }
     
     ///////////////////////////////////////////////////////////////////////////////////////////////
