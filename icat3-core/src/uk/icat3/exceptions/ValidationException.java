@@ -33,4 +33,15 @@ public class ValidationException extends ICATAPIException {
     public ValidationException(String msg) {
         super(msg);
     }
+    
+    /**
+     * Constructs an instance of <code>ValidationException</code> with the specified detail message
+     * and original exception.
+     * 
+     * @param msg   the detail message.
+     * @param e     the underlying exception
+     */
+    public ValidationException(String msg, Exception e) {
+        super(msg, e);
+    }
 }
