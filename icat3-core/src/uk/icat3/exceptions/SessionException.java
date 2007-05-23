@@ -31,11 +31,13 @@ public class SessionException extends ICATAPIException {
     }
     
     /**
-     * Constructs an instance of <code>SessionException</code> with the specified detail message.
+     * Constructs an instance of <code>SessionException</code> with the specified detail message
+     * and underlying exception
      * 
-     * @param msg the detail message.
+     * @param msg   the detail message.
+     * @param ex    the original exception
      */
-    public SessionException(String msg,Exception ex) {
+    public SessionException(String msg, Exception ex) {
         super(msg,ex);
     }
     
