@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<icat version="1.0 RC6" xsi:noNamespaceSchemaLocation="icatXSD.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<study>
+		<name>study-test-1</name>
+		<purpose>Test the XML Schema</purpose>
+		<status>ONGOING</status>
+		<related_material>The schema named icatIngest.xsd is certainly related material.</related_material>
+		<study_creation_date>2006-03-02T13:24:10Z</study_creation_date>
+		<study_manager>ll56</study_manager>
+		<investigation>
+			<inv_number>000001</inv_number>
+			<visit_id>01</visit_id>
+			<instrument>MUSR</instrument>
+			<title>test investigation to test the XML schema.</title>
+			<investigator>
+				<user_id>ll56</user_id>
+				<role>tester, developer</role>
+				<title>Mr.</title>
+				<initials>L. L.</initials>
+				<first_name>Laurent</first_name>
+				<last_name>Lerusse</last_name>
+				<affiliation> CCLRC - e-Science Center - Facility Support Group - Data Management Group</affiliation>
+				<affiliation_id>CCLRC-ESC-EDM</affiliation_id>
+			</investigator>
+			<investigator>
+				<user_id>lhe430</user_id>
+				<role> Principal Investigator</role>
+				<title>Miss.</title>
+				<initials> L. H. E.</initials>
+				<first_name>Lisa</first_name>
+				<middle_name>Hedwidge</middle_name>
+				<last_name> Eccles</last_name>
+				<affiliation> CCLRC - e-Science Center - Data Management Group</affiliation>
+				<affiliation_id>CCLRC-ESC-EDM</affiliation_id>
+			</investigator>
+			<inv_abstract>Dummy investigation to verify the XML schema that will be used as a validation of the input of the XML ingestion</inv_abstract>
+			<inv_type>EXPERIMENT</inv_type>
+			<prev_inv_number> ????</prev_inv_number>
+			<bcat_inv_str>Not sure what this parameter is.</bcat_inv_str>
+			<grant_id>CCLRC_2006-001</grant_id>
+			<facility_cycle>cycle_07_02</facility_cycle>
+			<keyword>
+				<name>test</name>
+				<name>xml</name>
+				<name>xsd</name>
+				<name>icat</name>
+				<name>ingestion</name>
+				<name>0.1</name>
+			</keyword>
+			
+				<topic>
+					<name>XML</name>
+					<topic_level>1</topic_level>
+				</topic>
+				<topic>
+					<name>Schema</name>
+					<topic_level>1</topic_level>
+				</topic>
+				<topic>
+					<name>Ingestion</name>
+					<topic_level>2</topic_level>
+				</topic>
+			
+			
+				<publication>
+					<full_reference>L. Lerusse &amp; al., &quot;XML schema as validation of XML input for ICAT ingestion&quot;, 2007.</full_reference>
+					<url> http://epubs.cclrc.ac.uk/0098374</url>
+				</publication>
+				<publication>
+					<full_reference>L. Lerusse &amp; al., &quot;XML schema as validation of XML export for ICAT&quot;, 2007.</full_reference>
+					<url> http://epubs.cclrc.ac.uk/0098344</url>
+				</publication>
+			
+			<dataset>
+				<name>test-1</name>
+				<dataset_type>EXPERIMENT_RAW</dataset_type>
+				<dataset_status>COMPLETE</dataset_status>
+				<description>test dataset number 1</description>
+				<sample>
+					<name>sample A</name>
+					<instance>1</instance>
+					<chemical_formula>H2O</chemical_formula>
+					<safety_information>Unsafe, can be full of germs, better drink beer.</safety_information>
+					<parameter>
+						<name>quantity</name>
+						<numeric_value>1.5</numeric_value>
+						<units>pints</units>
+						<range_top>5</range_top>
+						<range_bottom>.5</range_bottom>
+						<error>.2</error>
+						<description>How much should we drink per day</description>
+					</parameter>
+					<parameter>
+						<name>colour</name>
+						<string_value> transparent</string_value>
+						<description> color of the water</description>
+					</parameter>
+					<parameter>
+						<name>taste</name>
+						<string_value>neutral</string_value>
+					</parameter>
+					<parameter>
+						<name>alcohol_content</name>
+						<numeric_value>0</numeric_value>
+						<units>%</units>
+						<range_top>45</range_top>
+						<range_bottom>0</range_bottom>
+						<error>.1</error>
+						<description>blah</description>
+					</parameter>
+				</sample>
+				<datafile>
+					<name>file_01</name>
+					<location>/test/inv_1/file_01.jpg</location>
+					<description>test file 1</description>
+					<datafile_version>1.0</datafile_version>
+					<datafile_version_comment>Just imagined</datafile_version_comment>
+					<datafile_format>image/jpeg</datafile_format>
+					<datafile_create_time>2007-03-02T13:48:00Z</datafile_create_time>
+					<parameter>
+						<name>size</name>
+						<numeric_value>31</numeric_value>
+						<units>kilobytes</units>
+					</parameter>
+					<parameter>
+						<name>compression_factor</name>
+						<numeric_value>9</numeric_value>
+						<description>Compression parameter used in Photoshop.</description>
+					</parameter>
+				</datafile>
+				<parameter>
+					<name> blah</name>
+					<string_value>blah</string_value>
+					<description> Blah Blah</description>
+				</parameter>
+				<parameter>
+					<name> blah2</name>
+					<string_value>blah</string_value>
+					<description> Blah Blah</description>
+				</parameter>
+			</dataset>
+		</investigation>
+	</study>
+</icat>
