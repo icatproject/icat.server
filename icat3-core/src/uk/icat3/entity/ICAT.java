@@ -27,4 +27,5 @@ import javax.annotation.security.RolesAllowed;
 public @interface ICAT {
     boolean merge() default true;
     boolean nullable() default false;
+    int max() default 255; 
 }

@@ -190,51 +190,69 @@ public class EntityBaseBean {
         //Field[] allFields = getClass().getDeclaredFields();
         outer:
             for (int i = 0; i < allFields.length; i++) {
-            //get name of field
-            String fieldName = allFields[i].getName();
-            
-            //check if field is labeled id and generateValue (primary key, then it can be null)
-            boolean id = false;
-            boolean generateValue = false;
-            
-            for (Annotation a : allFields[i].getDeclaredAnnotations()) {
-                if(a.annotationType().getName().equals(javax.persistence.Id.class.getName())){
-                    id = true;
-                }
-                if(a.annotationType().getName().equals(javax.persistence.GeneratedValue.class.getName())){
-                    generateValue = true;
-                }
-                if(generateValue && id) {
-                    log.trace(getClass().getSimpleName()+": "+fieldName+" is auto generated id value, no need to check.");
-                    continue outer;
-                }
-                if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("nullable=true") ){
-                    log.trace(getClass().getSimpleName()+": "+fieldName+" is ICAT(nullable=true), no need to check.");
-                    continue outer;
-                }
-            }
-            
-            //now check all annoatations
-            for (Annotation a : allFields[i].getDeclaredAnnotations()) {
-                //if this means its a none null column field
-                if(a.annotationType().getName().contains("Column") && a.toString().contains("nullable=false") ){
-                    
-                    //now check if it is null, if so throw error
-                    try {
-                        //get value
-                        Object result = getProperty(fieldName, this);
-                        if(result == null){
-                            throw new ValidationException(getClass().getSimpleName()+": "+fieldName+" cannot be null.");
-                        } else {
-                            log.trace(getClass().getSimpleName()+": "+fieldName+" is valid");
-                        }
-                    } catch (ValidationException ex) {
-                        throw ex;
-                    } catch (Exception ex) {
-                        log.warn(getClass().getSimpleName()+": "+fieldName+" cannot be accessed.",ex);
+                //get name of field
+                String fieldName = allFields[i].getName();
+                
+                //check if field is labeled id and generateValue (primary key, then it can be null)
+                boolean id = false;
+                boolean generateValue = false;
+                
+                for (Annotation a : allFields[i].getDeclaredAnnotations()) {
+                    if(a.annotationType().getName().equals(javax.persistence.Id.class.getName())){
+                        id = true;
+                    }
+                    if(a.annotationType().getName().equals(javax.persistence.GeneratedValue.class.getName())){
+                        generateValue = true;
+                    }
+                    if(generateValue && id) {
+                        log.trace(getClass().getSimpleName()+": "+fieldName+" is auto generated id value, no need to check.");
+                        continue outer;
+                    }
+                    if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("nullable=true") ){
+                        log.trace(getClass().getSimpleName()+": "+fieldName+" is ICAT(nullable=true), no need to check.");
+                        continue outer;
                     }
                 }
-            }
+                
+                //now check all annoatations
+                for (Annotation a : allFields[i].getDeclaredAnnotations()) {
+                    //if this means its a none null column field
+                    if(a.annotationType().getName().contains("Column") && a.toString().contains("nullable=false") ){
+                        
+                        //now check if it is null, if so throw error
+                        try {
+                            //get value
+                            Object result = getProperty(fieldName, this);
+                            if(result == null){
+                                throw new ValidationException(getClass().getSimpleName()+": "+fieldName+" cannot be null.");
+                            } else {
+                                log.trace(getClass().getSimpleName()+": "+fieldName+" is valid");
+                            }
+                        } catch (ValidationException ex) {
+                            throw ex;
+                        } catch (Exception ex) {
+                            log.warn(getClass().getSimpleName()+": "+fieldName+" cannot be accessed.",ex);
+                        }
+                    }
+                                        
+                    if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("max") ){
+                        log.trace("Checking maximum string length");
+                        try {
+                            //get value
+                            Object result = getProperty(fieldName, this);
+                            if(result instanceof String){
+                                int max = ((ICAT)a).max();
+                                if(((String)result).length() > max){
+                                    throw new ValidationException(getClass().getSimpleName()+": "+fieldName+" cannot be more than "+max+" in length.");
+                                }
+                            }
+                        } catch (ValidationException ex) {
+                            throw ex;
+                        } catch (Exception ex) {
+                            log.warn(getClass().getSimpleName()+": "+fieldName+" cannot be accessed.",ex);
+                        }
+                    }
+                }
             }
         return true;
     }

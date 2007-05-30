@@ -113,6 +113,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     private String title;
     
     @Column(name = "INV_ABSTRACT")
+    @ICAT(max=4000)
     private String invAbstract;
     
     @Column(name = "PREV_INV_NUMBER")
