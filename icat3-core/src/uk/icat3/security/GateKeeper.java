@@ -85,7 +85,7 @@ public class GateKeeper {
         //now check modifiable
         if(access == AccessType.REMOVE || access == AccessType.DELETE || access == AccessType.UPDATE){
             if(!object.isModifiable()){
-                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + object+", as it cannot be modified.");
+                InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + object.getClass().getSimpleName()+", as it cannot be modified.");
                 log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + object+", as it cannot be modified.");
                 throw(e);
             }
@@ -164,7 +164,7 @@ public class GateKeeper {
                 ManagerUtil.getFacilityUserId(user, manager);
             } catch(Exception e) {               
                 //if we get to here then user does not have permission so we need to throw an exception
-                InsufficientPrivilegesException inse = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
+                InsufficientPrivilegesException inse = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + element.getClass().getSimpleName() );
                 log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
                 throw(inse);
             }
@@ -236,7 +236,7 @@ public class GateKeeper {
         }//end for
         
         //if we get to here then user does not have permission so we need to throw an exception
-        InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
+        InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + element.getClass().getSimpleName() );
         log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
         throw(e);
     }//end method
