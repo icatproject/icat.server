@@ -57,6 +57,8 @@ public class DefaultUser implements User {
     
     public String getUserIdFromSessionId(String sessionId) throws SessionException {
         log.trace("getUserIdFromSessionId("+sessionId+")");
+        if(sessionId == null || sessionId.equals("")) throw new SessionException("Session Id cannot be null or empty.");
+      
         try {
             //find the user by session id, throws NoResultException if session not found
             Session session = (Session)manager.createNamedQuery("Session.findByUserSessionId").setParameter("userSessionId", sessionId).getSingleResult();
