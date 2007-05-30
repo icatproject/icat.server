@@ -1,2 +1,0 @@
-Manifest-Version: 1.0
-Class-Path: icat3-core.jar icat3-default-user.jar
