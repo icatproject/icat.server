@@ -45,7 +45,7 @@ public class TestInvestigation extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding investigation");
         
         Investigation validInvestigation  = getInvestigation(true);
-        
+               
         Investigation investigationInserted = (Investigation)InvestigationManager.createInvestigation(VALID_USER_FOR_INVESTIGATION, validInvestigation, em);
         
         Investigation modified = em.find(Investigation.class,investigationInserted.getId());
@@ -154,6 +154,31 @@ public class TestInvestigation extends BaseTestClassTX {
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'cannot be null'", ex.getMessage().contains("cannot be null"));
+            throw ex;
+        }
+    }
+    
+     /**
+     * Tests creating a file
+     */
+    @Test(expected=ValidationException.class)
+    public void addValidInvestigationInvalidAbstract() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding valid investigation with too big abstract to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid investigation, no name
+        Investigation invalidInvestigation = getInvestigation(true);
+        
+        StringBuilder builder  = new StringBuilder();
+        for(int i = 0; i  < 4001; i ++ ){
+            builder.append(i);            
+        }
+        invalidInvestigation.setInvAbstract(builder.toString());
+        
+        try {
+            Investigation investigationInserted = (Investigation)InvestigationManager.createInvestigation(VALID_USER_FOR_INVESTIGATION, invalidInvestigation, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'cannot be more than'", ex.getMessage().contains("cannot be more than"));
             throw ex;
         }
     }
