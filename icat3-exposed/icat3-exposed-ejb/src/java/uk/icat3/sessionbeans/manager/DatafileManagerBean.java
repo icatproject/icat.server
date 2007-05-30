@@ -314,24 +314,6 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         DatafileParameter datafileParameter = ManagerUtil.find(DatafileParameter.class, datafileParameterPK, manager);
         
         DataFileManager.deleteDatafileParameter(userId, datafileParameter, manager);
-    }
-    
-    /**
-     *
-     * @param sessionId
-     * @param sampleId
-     * @param datasetId
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @throws uk.icat3.exceptions.ValidationException
-     */
-    @WebMethod()
-    public void setDataSetSample(String sessionId, Long sampleId, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
-        
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-        
-        DataSetManager.setDataSetSample(userId, sampleId, datasetId, manager);
-    }
+    }   
+   
 }
