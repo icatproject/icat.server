@@ -34,6 +34,7 @@ public class MetadataParser {
        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes("UTF-8"));
        JAXBElement<Icat> po = (JAXBElement<Icat>)unMarshaller.unmarshal(bais);                                  
 
+       /*
        Icat icat = po.getValue();
        List<Study> studies = icat.getStudy();
         for (Study study : studies) {               
@@ -71,7 +72,7 @@ public class MetadataParser {
                }
            
            }
-        
+           */
        
        return po.getValue();              
     }
