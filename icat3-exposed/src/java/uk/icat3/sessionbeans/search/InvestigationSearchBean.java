@@ -32,7 +32,7 @@ import uk.icat3.util.LogicalOperator;
  * @author gjd37
  */
 @Stateless()
-@WebService(targetNamespace="client.icat3.uk")
+@WebService(/*targetNamespace="client.icat3.uk"*/)
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -94,9 +94,9 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @throws uk.icat3.exceptions.SessionException
      * @return
      */
-    @WebMethod(operationName="searchByKeywordsPagnation")
-    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPagnation")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPagnationResponse")
+    @WebMethod(operationName="searchByKeywordsPagination")
+    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPagination")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPaginationResponse")
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, int startIndex, int numberOfResults) throws SessionException {
         
         //for user bean get userId
@@ -117,9 +117,9 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @throws uk.icat3.exceptions.SessionException
      * @return
      */
-    @WebMethod(operationName="searchByKeywordsPagnationAndFuzzy")
-    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPagnationAndFuzzy")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPagnationAndFuzzyResponse")
+    @WebMethod(operationName="searchByKeywordsPaginationAndFuzzy")
+    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPaginationAndFuzzy")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPaginationAndFuzzyResponse")
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy, int startIndex, int numberOfResults) throws SessionException {
         
         //for user bean get userId
@@ -139,9 +139,9 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @throws uk.icat3.exceptions.SessionException
      * @return
      */
-    @WebMethod(operationName="searchByKeywordsPagnationFuzzyAndInclude")
-    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPagnationFuzzyAndInclude")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPagnationFuzzyAndIncludeResponse")
+    @WebMethod(operationName="searchByKeywordsPaginationFuzzyAndInclude")
+    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPaginationFuzzyAndInclude")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPaginationFuzzyAndIncludeResponse")
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include,  int startIndex, int numberOfResults) throws SessionException {
         
         //for user bean get userId
@@ -216,9 +216,9 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    @WebMethod(operationName="searchByUserIDPagnation")
-    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByUserIDPagnation")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByUserIDPagnationResponse")
+    @WebMethod(operationName="searchByUserIDPagination")
+    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByUserIDPagination")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByUserIDPaginationResponse")
     public Collection<Investigation> searchByUserID(String sessionId, String userSearch, int startIndex, int number_results) throws SessionException {
         
         //for user bean get userId
@@ -256,9 +256,9 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @param manager
      * @return
      */
-    @WebMethod(operationName="searchByUserSurnamePagnation")
-    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByUserSurnamePagnation")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByUserSurnamePagnationResponse")
+    @WebMethod(operationName="searchByUserSurnamePagination")
+    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByUserSurnamePagination")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByUserSurnamePaginationResponse")
     public Collection<Investigation> searchByUserSurname(String sessionId, String surname, int startIndex, int number_results) throws SessionException {
         
         //for user bean get userId

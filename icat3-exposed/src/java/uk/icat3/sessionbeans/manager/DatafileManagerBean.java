@@ -41,7 +41,7 @@ import uk.icat3.sessionbeans.user.UserSessionLocal;
  * @author gjd37
  */
 @Stateless()
-@WebService(targetNamespace="client.icat3.uk")
+@WebService(/*targetNamespace="client.icat3.uk"*/)
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)

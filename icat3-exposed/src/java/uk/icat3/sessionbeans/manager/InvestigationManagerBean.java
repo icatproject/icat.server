@@ -44,7 +44,7 @@ import uk.icat3.util.InvestigationInclude;
  * @author gjd37
  */
 @Stateless()
-@WebService(name="ICATInvestigationManagerService",targetNamespace="client.icat3.uk")
+@WebService(/*name="ICATInvestigationManagerService",targetNamespace="client.icat3.uk"*/)
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)

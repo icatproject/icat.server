@@ -60,7 +60,7 @@ import uk.icat3.util.LogicalOperator;
  * @author gjd37
  */
 @Stateless()
-@WebService(/*serviceName="ICATService", name="ICATServices", */ targetNamespace="client.icat3.uk")
+@WebService(/*serviceName="ICATService", name="ICATServices", targetNamespace="client.icat3.uk"*/)
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -183,23 +183,23 @@ public class ICAT extends EJBObject implements ICATLocal {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords);
     }
     
-    @WebMethod(operationName="searchByKeywordsPagnation")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPagnation")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPagnationResponse")
+    @WebMethod(operationName="searchByKeywordsPagination")
+    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPagination")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationResponse")
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, int startIndex, int numberOfResults) throws SessionException {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords, startIndex, numberOfResults);
     }
     
-    @WebMethod(operationName="searchByKeywordsPagnationAndFuzzy")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPagnationAndFuzzy")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPagnationAndFuzzyResponse")
+    @WebMethod(operationName="searchByKeywordsPaginationAndFuzzy")
+    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationAndFuzzy")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationAndFuzzyResponse")
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy, int startIndex, int numberOfResults) throws SessionException {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords, include, fuzzy, startIndex, numberOfResults);
     }
     
-    @WebMethod(operationName="searchByKeywordsPagnationFuzzyAndInclude")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPagnationFuzzyAndInclude")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPagnationFuzzyAndIncludeResponse")
+    @WebMethod(operationName="searchByKeywordsPaginationFuzzyAndInclude")
+    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationFuzzyAndInclude")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationFuzzyAndIncludeResponse")
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include,  int startIndex, int numberOfResults) throws SessionException {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords, include, startIndex, numberOfResults);
     }
@@ -221,9 +221,9 @@ public class ICAT extends EJBObject implements ICATLocal {
         return investigationSearchLocal.searchByUserID(sessionId, userSearch);
     }
     
-    @WebMethod(operationName="searchByUserIDPagnation")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByUserIDPagnation")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByUserIDPagnationResponse")
+    @WebMethod(operationName="searchByUserIDPagination")
+    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByUserIDPagination")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByUserIDPaginationResponse")
     public Collection<Investigation> searchByUserID(String sessionId, String userSearch, int startIndex, int number_results) throws SessionException {
         return investigationSearchLocal.searchByUserID(sessionId, userSearch, startIndex, number_results);
     }
@@ -233,9 +233,9 @@ public class ICAT extends EJBObject implements ICATLocal {
         return investigationSearchLocal.searchByUserSurname(sessionId, surname);
     }
     
-    @WebMethod(operationName="searchByUserSurnamePagnation")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByUserSurnamePagnation")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByUserSurnamePagnationResponse")
+    @WebMethod(operationName="searchByUserSurnamePagination")
+    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByUserSurnamePagination")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByUserSurnamePaginationResponse")
     public Collection<Investigation> searchByUserSurname(String sessionId, String surname, int startIndex, int number_results) throws SessionException {
         return investigationSearchLocal.searchByUserSurname(sessionId, surname, startIndex, number_results);
     }
@@ -256,16 +256,8 @@ public class ICAT extends EJBObject implements ICATLocal {
     @WebMethod()
     public Collection<DatasetType> listDatasetTypes(String sessionId) throws SessionException {
         return datasetSearchLocal.listDatasetTypes(sessionId);
-    }
-    
-    @WebMethod()
-    public Collection<DatasetType> listDatasetTypes2(String sessionId) throws SessionException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-        
-        return DatasetSearch.listDatasetTypes(manager);
-    }
-    
+    }    
+      
     @WebMethod()
     public Collection<DatasetStatus> listDatasetStatus(String sessionId) throws SessionException {
         return datasetSearchLocal.listDatasetStatus(sessionId);
