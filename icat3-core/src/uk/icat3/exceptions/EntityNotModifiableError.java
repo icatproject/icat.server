@@ -8,6 +8,7 @@
  */
 package uk.icat3.exceptions;
 
+
 import javax.ejb.ApplicationException;
 
 /**
