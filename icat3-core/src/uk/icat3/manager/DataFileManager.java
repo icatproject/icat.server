@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
-import uk.icat3.entity.DatasetParameter;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -158,7 +157,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
-     * @return the updated data file object
+     * @return the updated {@link Datafile} object
      */
     public static Datafile updateDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("updateDataFile("+userId+", "+dataFile+", EntityManager)");
@@ -213,7 +212,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
-     * @return the created data file object]
+     * @return the created {@link Datafile} object
      */
     public static Datafile createDataFile(String userId, Datafile dataFile, Long datasetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataFile("+userId+", "+dataFile+" "+datasetId+", EntityManager)");
@@ -236,7 +235,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
-     * @return the collection of created data file objects
+     * @return the collection of created {@link Datafile} objects
      */
     public static Collection<Datafile> createDataFiles(String userId, Collection<Datafile> dataFiles, Long datasetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataFiles("+userId+", "+dataFiles+" "+datasetId+", EntityManager)");
@@ -260,7 +259,7 @@ public class DataFileManager extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @return a collection of data file objects
+     * @return a collection of {@link Datafile} objects
      */
     public static Collection<Datafile> getDataFiles(String userId, Collection<Long> dataFileIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("getDataFile("+userId+", "+dataFileIds+" EntityManager)");
@@ -284,14 +283,14 @@ public class DataFileManager extends ManagerUtil {
     
     
     /**
-     * Gets a data file object from a list of data file id, depending if the user has access to read the data file
+     * Gets a data file object from a data file id, depending if the user has access to read the data file
      *
      * @param userId federalId of the user.
      * @param dataFileId Id of data file
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @return a  data file object
+     * @return {@link Datafile}
      */
     public static Datafile getDataFile(String userId, Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         Collection<Long> dataFiles = new ArrayList<Long>();
@@ -343,7 +342,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
-     * @return the added data file paramter object
+     * @return the added {@link DatafileParameter} object
      */
     public static DatafileParameter addDataFileParameter(String userId, DatafileParameter datafileParameter, Long datafileId,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("addDataFileParameter("+userId+", "+datafileParameter+", "+datafileId+", EntityManager)");
@@ -395,7 +394,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
-     * @return the added data file paramter object
+     * @return the added {@link DatafileParameter} object
      */
     public static DatafileParameter addDataFileParameter(String userId, DatafileParameter datafileParameter,  EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         log.trace("addDataFileParameter("+userId+", "+datafileParameter+", EntityManager)");
@@ -412,8 +411,7 @@ public class DataFileManager extends ManagerUtil {
      * @param datafileParameter object to be removed
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     *   @throws uk.icat3.exceptions.ValidationException if the data file parameter is invalid
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object    
      */
     public static void removeDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         log.trace("removeDatafileParameter("+userId+", "+datafileParameter+", EntityManager)");
@@ -440,14 +438,13 @@ public class DataFileManager extends ManagerUtil {
      * @param datafileParameter object to be deleted
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @throws uk.icat3.exceptions.ValidationException if the data file parameter is invalid
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object   
      */
     public static void deleteDatafileParameter(String userId, DatafileParameter datafileParameter, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         log.trace("deleteDatafileParameter("+userId+", "+datafileParameter+", EntityManager)");
         
-       // if(datafileParameter.getDatafileParameterPK() == null) throw new ValidationException(datafileParameter+" has no assoicated primary key.");
-      //  Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
+        // if(datafileParameter.getDatafileParameterPK() == null) throw new ValidationException(datafileParameter+" has no assoicated primary key.");
+        //  Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
         
         //find the dataset
         DatafileParameter datafileParameterManaged = find(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);

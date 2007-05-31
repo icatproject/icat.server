@@ -83,7 +83,7 @@ public class InvestigationManager extends ManagerUtil {
     }
     
     /**
-     * Returns a {@link Investigation} investigation from a {@link Investigation} investigation id
+     * Returns a {@link Investigation} investigation from a {@link Investigation} id
      * if the user has access to the investigation.
      *
      * @param userId federalId of the user.
@@ -91,7 +91,7 @@ public class InvestigationManager extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @return A {@link Investigation} investigation object
+     * @return {@link Investigation} object
      */
     public static Investigation getInvestigation(String userId, Long investigationId, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         Collection<Long> investigationIds = new ArrayList<Long>();
