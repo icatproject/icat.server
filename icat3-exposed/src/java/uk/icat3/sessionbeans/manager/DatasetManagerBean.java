@@ -11,7 +11,6 @@ package uk.icat3.sessionbeans.manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -32,7 +31,6 @@ import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.ManagerUtil;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
-import uk.icat3.sessionbeans.user.UserSessionLocal;
 import uk.icat3.util.DatasetInclude;
 
 /**
@@ -40,7 +38,7 @@ import uk.icat3.util.DatasetInclude;
  * @author gjd37
  */
 @Stateless()
-@WebService(/*targetNamespace="client.icat3.uk"*/)
+@WebService(targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -48,17 +46,18 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     
     static Logger log = Logger.getLogger(DatasetManagerBean.class);
     
-           /** Creates a new instance of DatasetManagerBean */
+    /** Creates a new instance of DatasetManagerBean */
     public DatasetManagerBean() {}
     
     /**
+     * Gets the data set object from a data set id, depending if the user has access to read the data set.
      *
-     * @param sessionId
-     * @param datasetId
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @return
+     * @param sessionId session id of the user.
+     * @param datasetId Id of object
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return {@link Dataset}
      */
     @WebMethod
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -71,13 +70,14 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
+     * Gets the data set object from a from a list of data set ids, depending if the user has access to read the data sets.
      *
-     * @param sessionId
-     * @param datasetIds
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @return
+     * @param sessionId session id of the user.
+     * @param datasetIds Id of object
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection of {@link Dataset}s
      */
     @WebMethod
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -90,14 +90,16 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
+     * Gets the data set object from a data set id, depending if the user has access to read the data set.
+     * Also gets extra information regarding the data set.  See {@link DatasetInclude}
      *
-     * @param sessionId
-     * @param datasetId
-     * @param includes
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @return
+     * @param sessionId session id of the user.
+     * @param datasetId Id of object
+     * @param includes other information wanted with the data set
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return {@link Dataset}
      */
     @WebMethod(operationName="getDatasetIncludes")
     @RequestWrapper(className="uk.icat3.sessionbeans.manager.getDatasetIncludes")
@@ -116,15 +118,16 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
+     * Creates a data set, depending if the user has create permission on the data set associated with the investigation
      *
-     * @param sessionId
-     * @param investigationId
-     * @param dataSet
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @throws uk.icat3.exceptions.ValidationException
-     * @return
+     * @param sessionId session id of the user.
+     * @param dataSet object to be created
+     * @param investigationId id of investigations to added the dataset to
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return {@link Dataset} that was created
      */
     @WebMethod
     public Long createDataSet(String sessionId, Long investigationId, Dataset dataSet) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
@@ -138,15 +141,16 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
+     * Creates a collection of data sets, depending if the user has update permission on the data set associated with the investigation
      *
-     * @param sessionId
-     * @param investigationId
-     * @param dataSets
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @throws uk.icat3.exceptions.ValidationException
-     * @return
+     * @param sessionId session id of the user.
+     * @param dataSets collection of the datasets
+     * @param investigationId id of investigations to added the datasets to
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection of {@link Dataset}s that were created
      */
     @WebMethod
     public Collection<Long> createDataSets(String sessionId, Long investigationId, Collection<Dataset> dataSets) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
@@ -164,12 +168,14 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
+     * Removes (from the database) the data set, and its dataset paramters and data files for a user depending if the
+     * users id has remove permissions to delete the data set from the data set ID.
      *
-     * @param sessionId
-     * @param dataSetId
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     * @param sessionId session id of the user.
+     * @param dataSetId primary key object to be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
     public void removeDataSet(String sessionId, Long dataSetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
@@ -181,12 +187,14 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
+     * Deletes the data set for a user depending if the users id has delete permissions to delete the data set from the
+     * data set ID. Deleting the set marks it, and all of its paramters and data files as deleted but does not remove it from the database.
      *
-     * @param sessionId
-     * @param dataSetId
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     * @param sessionId session id of the user.
+     * @param dataSetId primary key object to be deleted
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
     public void deleteDataSet(String sessionId, Long dataSetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
@@ -198,12 +206,14 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
-     * 
-     * @param sessionId 
-     * @param dataSet 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * Updates a data set depending on whether the user has permission to update this data set or its investigation
+     *
+     * @param sessionId session id of the user.
+     * @param dataSet object to be updated
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
     public void modifyDataSet(String sessionId, Dataset dataSet) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
@@ -215,13 +225,15 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
+     * Adds a data set paramter to a dataset, depending if the users has access to create the data set paramter
      *
-     * @param sessionId
-     * @param dataSetParameter
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @throws uk.icat3.exceptions.ValidationException
+     * @param sessionId session id of the user.
+     * @param dataSetParameter object to be created
+     * @param datasetId id of dataset to add to
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
     public void addDataSetParameter(String sessionId, DatasetParameter dataSetParameter, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
@@ -232,13 +244,14 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
+     * Modifies a data set paramter, depending if the users has access to update the data set paramter
      *
-     * @param sessionId
-     * @param dataSetParameter
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @throws uk.icat3.exceptions.ValidationException
+     * @param sessionId session id of the user.
+     * @param dataSetParameter object to be created
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
     public void modifyDataSetParameter(String sessionId, DatasetParameter dataSetParameter) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
@@ -249,13 +262,13 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
+     * Deletes the data set paramter, depending if the users has access to delete the data set paramter
      *
-     * @param sessionId
-     * @param datasetParameterPK
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @throws uk.icat3.exceptions.ValidationException
+     * @param sessionId session id of the user.
+     * @param datasetParameterPK {@link DatasetParameterPK} object to be deleted
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
     public void removeDataSetParameter(String sessionId, DatasetParameterPK datasetParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
@@ -269,13 +282,13 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
+     * Removes the data set paramter, depending if the users has access to remove the data set paramter
      *
-     * @param sessionId
-     * @param datasetParameterPK
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @throws uk.icat3.exceptions.ValidationException
+     * @param sessionId session id of the user.
+     * @param datasetParameterPK {@link DatasetParameterPK} object to be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
     public void deleteDataSetParameter(String sessionId, DatasetParameterPK datasetParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
@@ -289,14 +302,15 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
+     * Sets the dataset sample id, depending if the users has access to update the data set
      *
-     * @param sessionId
-     * @param sampleId
-     * @param datasetId
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @throws uk.icat3.exceptions.ValidationException
+     * @param sessionId session id of the user.
+     * @param sampleId Id of sample
+     * @param datasetId Id of dataset
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
     public void setDataSetSample(String sessionId, Long sampleId, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {

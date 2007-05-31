@@ -11,7 +11,6 @@ package uk.icat3.sessionbeans.manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -30,36 +29,35 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataFileManager;
-import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.ManagerUtil;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
-import uk.icat3.sessionbeans.user.UserSessionLocal;
 
 /**
  *
  * @author gjd37
  */
 @Stateless()
-@WebService(/*targetNamespace="client.icat3.uk"*/)
+@WebService(targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 public class DatafileManagerBean extends EJBObject implements DatafileManagerLocal {
     
     static Logger log = Logger.getLogger(DatafileManagerBean.class);
-           
+    
     /** Creates a new instance of DatasetManagerBean */
     public DatafileManagerBean() {}
     
     /**
-     * 
-     * @param sessionId 
-     * @param datafileId 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
-     * @return 
+     * Gets a data file object from a data file id, depending if the user has access to read the data file
+     *
+     * @param sessionId session id of the user.
+     * @param datafileId Id of data file
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return {@link Datafile}
      */
     @WebMethod()
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -72,13 +70,14 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     }
     
     /**
-     * 
-     * @param sessionId 
-     * @param datafileIds 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
-     * @return 
+     * Gets a collection of data file object from a collection of data file ids, depending if the user has access to read the data file
+     *
+     * @param sessionId session id of the user.
+     * @param datafileIds collection of data file ids
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection of {@link Datafile} objects
      */
     @WebMethod()
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -92,15 +91,16 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     
     
     /**
-     * 
-     * @param sessionId 
-     * @param dataFile 
-     * @param datasetId 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
-     * @throws uk.icat3.exceptions.ValidationException 
-     * @return 
+     * Creates a data file, depending if the user has update permission on the data set associated with the data file
+     *
+     * @param sessionId session id of the user.
+     * @param dataFile object to be created
+     * @param datasetId Id of data set
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return the created {@link Datafile} primary key
      */
     @WebMethod()
     public Long createDataFile(String sessionId, Datafile dataFile, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
@@ -116,15 +116,16 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     }
     
     /**
-     * 
-     * @param sessionId 
-     * @param dataFiles 
-     * @param datasetId 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
-     * @throws uk.icat3.exceptions.ValidationException 
-     * @return 
+     * Creates a collection of data files, depending if the user has update permission on the data set associated with the data file
+     *
+     * @param sessionId session id of the user.
+     * @param dataFiles collection of objects to be created
+     * @param datasetId Id of data set
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return the collection of created {@link Datafile} primary keys
      */
     @WebMethod()
     public Collection<Long> createDataFiles(String sessionId, Collection<Datafile> dataFiles, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
@@ -144,12 +145,14 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     }
     
     /**
-     * 
-     * @param sessionId 
-     * @param datafileId 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * Deletes a data file for a users depending if the users id has delete permissions to
+     * delete the data file. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
+     *
+     * @param sessionId session id of the user.
+     * @param datafileId id to be deleted
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
     public void deleteDataFile(String sessionId, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
@@ -162,12 +165,14 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     }
     
     /**
-     * 
-     * @param sessionId 
-     * @param dataFile 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * Deletes a data file for a users depending if the users id has delete permissions to
+     * delete the data file. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
+     *
+     * @param sessionId session id of the user.
+     * @param dataFile objectto be deleted
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod(operationName="deleteDataFileObject")
     @RequestWrapper(className="uk.icat3.sessionbeans.manager.deleteDataFileObject")
@@ -182,12 +187,14 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     }
     
     /**
-     * 
-     * @param sessionId 
-     * @param datafileId 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * Removes (from the database) the data file with ID, for a users depending if the users id has remove permissions to remove the data file from
+     * the ID.
+     *
+     * @param sessionId session id of the user.
+     * @param datafileId id be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
     public void removeDataFile(String sessionId, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
@@ -200,12 +207,14 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     }
     
     /**
-     * 
-     * @param sessionId 
-     * @param dataFile 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * Removes (from the database) the data file with ID, for a users depending if the users id has remove permissions to remove the data file from
+     * the ID.
+     *
+     * @param sessionId session id of the user.
+     * @param dataFile object to be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod(operationName="removeDataFileObject")
     @RequestWrapper(className="uk.icat3.sessionbeans.manager.removeDataFileObject")
@@ -220,13 +229,14 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     }
     
     /**
-     * 
-     * @param sessionId 
-     * @param dataFile 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
-     * @throws uk.icat3.exceptions.ValidationException 
+     * Updates data file depending on whether the user has permission to update this data file.
+     *
+     * @param sessionId session id of the user.
+     * @param dataFile object to be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
     public void updateDataFile(String sessionId, Datafile dataFile) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
@@ -239,14 +249,16 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     }
     
     /**
-     * 
-     * @param sessionId 
-     * @param dataFileParameter 
-     * @param datafileId 
-     * @throws uk.icat3.exceptions.SessionException 
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
-     * @throws uk.icat3.exceptions.ValidationException 
+     * Adds a data file paramter object to a data file, depending if the user has access to create the data file parameter from
+     * the associated data file id.
+     *
+     * @param sessionId session id of the user.
+     * @param dataFileParameter object to be added
+     * @param datafileId the data file id that you want a add the paramter to
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
     public void addDataFileParameter(String sessionId, DatafileParameter dataFileParameter, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
@@ -256,17 +268,18 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         
         //get file, checks read access
         DataFileManager.addDataFileParameter(userId, dataFileParameter, datafileId, manager);
-    }    
-       
+    }
+    
     
     /**
+     * Updates the data file paramter object, depending if the user has access to update the data file parameter.
      *
-     * @param sessionId
-     * @param dataSetParameter
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @throws uk.icat3.exceptions.ValidationException
+     * @param sessionId session id of the user.
+     * @param dataFileParameter object to be updated
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
     public void modifyDataFileParameter(String sessionId, DatafileParameter dataFileParameter) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
@@ -277,13 +290,14 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     }
     
     /**
+     * Removes (from the database) a data file paramter object, depending if the user has access to remove the data file parameter from
+     * the associated data file id.
      *
-     * @param sessionId
-     * @param datasetParameterPK
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @throws uk.icat3.exceptions.ValidationException
+     * @param sessionId session id of the user.
+     * @param datafileParameterPK {@link DatafileParameterPK} object to be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
     public void removeDataFileParameter(String sessionId, DatafileParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
@@ -297,13 +311,14 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     }
     
     /**
+     * Deletes a data file paramter object, depending if the user has access to remove the data file parameter from
+     * the associated data file id.
      *
-     * @param sessionId
-     * @param datasetParameterPK
-     * @throws uk.icat3.exceptions.SessionException
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
-     * @throws uk.icat3.exceptions.ValidationException
+     * @param sessionId session id of the user.
+     * @param datafileParameterPK {@link DatafileParameterPK} object to be deleted
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
     public void deleteDataFileParameter(String sessionId, DatasetParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
@@ -314,6 +329,6 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         DatafileParameter datafileParameter = ManagerUtil.find(DatafileParameter.class, datafileParameterPK, manager);
         
         DataFileManager.deleteDatafileParameter(userId, datafileParameter, manager);
-    }   
-   
+    }
+    
 }

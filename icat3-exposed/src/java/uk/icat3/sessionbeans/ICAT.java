@@ -36,6 +36,7 @@ import uk.icat3.entity.Keyword;
 import uk.icat3.entity.KeywordPK;
 import uk.icat3.entity.Sample;
 import uk.icat3.entity.SampleParameter;
+import uk.icat3.entity.SampleParameterPK;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.NoSuchUserException;
@@ -336,17 +337,17 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     
     @WebMethod()
-    public void removeSampleParameter(String sessionId, SampleParameter sampleParameterPK) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    public void removeSampleParameter(String sessionId,SampleParameterPK sampleParameterPK) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         investigationManagerLocal.removeSampleParameter(sessionId, sampleParameterPK);
     }
     
     @WebMethod()
-    public void deleteSampleParameter(String sessionId, SampleParameter sampleParameterPK) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    public void deleteSampleParameter(String sessionId,SampleParameterPK sampleParameterPK) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         investigationManagerLocal.deleteSampleParameter(sessionId, sampleParameterPK);
     }
     
     @WebMethod()
-    public void modifySampleParameter(String sessionId, SampleParameter sampleParameter) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    public void modifySampleParameter(String sessionId,SampleParameter sampleParameter) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         investigationManagerLocal.modifySampleParameter(sessionId, sampleParameter);
     }
     

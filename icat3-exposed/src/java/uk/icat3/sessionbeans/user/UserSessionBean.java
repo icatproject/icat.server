@@ -35,7 +35,7 @@ import static uk.icat3.util.Constants.*;
  */
 @Stateless()
 @PermitAll
-@WebService(/*targetNamespace="client.icat3.uk"*/)
+@WebService(targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 //requires new transaction for each method call
