@@ -48,7 +48,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         
         SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
         
-        SampleParameter modified = em.find(SampleParameter.class,sampleParameterInserted.getSampleParameterPK() );
+        SampleParameter modified = em.find(SampleParameter.class,sampleParameterInserted.getSampleParameterPK()  );
         
         checkSampleParameter(modified);
         assertFalse("Deleted must be false", modified.isDeleted());
@@ -70,7 +70,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         
         InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, em);
         
-        SampleParameter modified = em.find(SampleParameter.class, duplicateSampleParameter.getSampleParameterPK() );
+        SampleParameter modified = em.find(SampleParameter.class, duplicateSampleParameter.getSampleParameterPK()  );
         
         assertEquals("error must be "+modifiedError+" and not "+modified.getError(), modified.getError(), modifiedError);
         
@@ -127,7 +127,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         
         SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
         
-        SampleParameter modified = em.find(SampleParameter.class,sampleParameterInserted.getSampleParameterPK() );
+        SampleParameter modified = em.find(SampleParameter.class,sampleParameterInserted.getSampleParameterPK()  );
         
         checkSampleParameter(modified);
         assertFalse("Deleted must be false", modified.isDeleted());
@@ -145,7 +145,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         
         InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, AccessType.REMOVE, em);
         
-        SampleParameter modified = em.find(SampleParameter.class,duplicateSampleParameter.getSampleParameterPK() );
+        SampleParameter modified = em.find(SampleParameter.class,duplicateSampleParameter.getSampleParameterPK()  );
         
         assertNull("SampleParameter must not be found in DB "+duplicateSampleParameter, modified);
     }

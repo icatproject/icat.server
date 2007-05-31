@@ -45,7 +45,8 @@ public class TestInvestigation extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding investigation");
         
         Investigation validInvestigation  = getInvestigation(true);
-               
+        validInvestigation.setInvAbstract("Valid length");
+        
         Investigation investigationInserted = (Investigation)InvestigationManager.createInvestigation(VALID_USER_FOR_INVESTIGATION, validInvestigation, em);
         
         Investigation modified = em.find(Investigation.class,investigationInserted.getId());
@@ -158,7 +159,7 @@ public class TestInvestigation extends BaseTestClassTX {
         }
     }
     
-     /**
+    /**
      * Tests creating a file
      */
     @Test(expected=ValidationException.class)
@@ -170,7 +171,7 @@ public class TestInvestigation extends BaseTestClassTX {
         
         StringBuilder builder  = new StringBuilder();
         for(int i = 0; i  < 4001; i ++ ){
-            builder.append(i);            
+            builder.append(i);
         }
         invalidInvestigation.setInvAbstract(builder.toString());
         
