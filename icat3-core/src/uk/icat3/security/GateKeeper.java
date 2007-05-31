@@ -120,7 +120,7 @@ public class GateKeeper {
             performAuthorisation(user, invList, access, ((DatafileParameter)object), manager);
         } else if(object instanceof SampleParameter){
             invList.add(((SampleParameter)object).getSample().getInvestigationId());
-            performAuthorisation(user, invList, access, ((SampleParameter)object), manager);
+            performAuthorisation(user, invList, access,(SampleParameter)object, manager);
         } else if(object instanceof Sample){
             invList.add(((Sample)object).getInvestigationId());
             performAuthorisation(user, invList, access, ((Sample)object), manager);
