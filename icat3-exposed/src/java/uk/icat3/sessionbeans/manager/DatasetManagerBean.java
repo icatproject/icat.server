@@ -262,10 +262,10 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
-     * Deletes the data set paramter, depending if the users has access to delete the data set paramter
+     * Removes the data set paramter, depending if the users has access to delete the data set paramter
      *
      * @param sessionId session id of the user.
-     * @param datasetParameterPK {@link DatasetParameterPK} object to be deleted
+     * @param datasetParameterPK {@link DatasetParameterPK} object to be removed
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
@@ -282,10 +282,10 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
     }
     
     /**
-     * Removes the data set paramter, depending if the users has access to remove the data set paramter
+     * Deleted the data set paramter, depending if the users has access to remove the data set paramter
      *
      * @param sessionId session id of the user.
-     * @param datasetParameterPK {@link DatasetParameterPK} object to be removed
+     * @param datasetParameterPK {@link DatasetParameterPK} object to be deleted
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid

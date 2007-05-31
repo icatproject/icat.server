@@ -88,8 +88,7 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         
         return DataFileManager.getDataFiles(userId, datafileIds, manager);
     }
-    
-    
+        
     /**
      * Creates a data file, depending if the user has update permission on the data set associated with the data file
      *
@@ -268,8 +267,7 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         
         //get file, checks read access
         DataFileManager.addDataFileParameter(userId, dataFileParameter, datafileId, manager);
-    }
-    
+    }    
     
     /**
      * Updates the data file paramter object, depending if the user has access to update the data file parameter.
@@ -329,6 +327,5 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         DatafileParameter datafileParameter = ManagerUtil.find(DatafileParameter.class, datafileParameterPK, manager);
         
         DataFileManager.deleteDatafileParameter(userId, datafileParameter, manager);
-    }
-    
+    }    
 }

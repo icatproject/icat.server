@@ -48,11 +48,12 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     private EntityManager managerUser;
     
     /**
+     * Logs in with a username and password and returns a session id
      *
      * @param username
      * @param password
-     * @throws uk.icat3.exceptions.SessionException
-     * @return
+     * @throws uk.icat3.exceptions.SessionException if username and pasword are invalid
+     * @return session id
      */
     @WebMethod()
     @ExcludeClassInterceptors
@@ -65,12 +66,13 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     }
     
     /**
+     * Logs in with a username and password and returns a session id
      *
      * @param username
      * @param password
-     * @param lifetime
-     * @throws uk.icat3.exceptions.SessionException
-     * @return
+     * @param lifetime lifetime of the session
+     * @throws uk.icat3.exceptions.SessionException if username and pasword are invalid
+     * @return session id
      */
     @WebMethod(operationName="loginLifetime")
     @ExcludeClassInterceptors
@@ -85,10 +87,11 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     }
     
     /**
-     *
+     * Logs in with a credential and returns a session id
+     * 
      * @param credential
-     * @throws uk.icat3.exceptions.SessionException
-     * @return
+     * @throws uk.icat3.exceptions.SessionException if credential is invalid
+     * @return session id
      */
     @WebMethod(operationName="loginCredentials")
     @RequestWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginCredentials")
@@ -100,18 +103,19 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
         return userManager.login(credential);
     }
     
-    /**
+     /**
+     * Logs in with a username, password and runAs and returns a session id
      *
-     * @param username
-     * @param password
-     * @param runAs
-     * @throws uk.icat3.exceptions.SessionException
-     * @return
+     * @param username admin username
+     * @param password admin password
+     * @param runAs the user you wish to log in as
+     * @throws uk.icat3.exceptions.SessionException if username and pasword are invalid
+     * @return session id
      */
     @WebMethod(operationName="loginAdmin")
     @ExcludeClassInterceptors
     @RequestWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginAdmin")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginAdminResponse")    
+    @ResponseWrapper(className="uk.icat3.sessionbeans.user.jaxws.loginAdminResponse")
     public String login(String username, String password, String runAs) throws SessionException {
         log.trace("login("+username+", *******, "+runAs+")");
         
@@ -121,9 +125,10 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
     }
     
     /**
-     *
-     * @param sid
-     * @return
+     * Logs out of the system
+     * 
+     * @param sid seesion id
+     * @return true if sucessfully logged out
      */
     @WebMethod()
     public boolean logout(String sid) {
@@ -143,7 +148,7 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
      * @param sid
      * @throws uk.icat3.exceptions.SessionException
      * @return
-     */    
+     */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public String getUserIdFromSessionId(String sid) throws SessionException {
         

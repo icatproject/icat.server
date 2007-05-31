@@ -32,7 +32,7 @@ import uk.icat3.sessionbeans.EJBObject;
  */
 @Stateless
 @PermitAll
-@WebService(/*targetNamespace="client.icat3.uk"*/)
+@WebService(targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
