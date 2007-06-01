@@ -46,7 +46,7 @@ public class TestPublication extends BaseTestClassTX {
         
         Publication validPublication  = getPublication(true);
         
-        Publication publicationInserted = (Publication)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, validPublication, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        Publication publicationInserted = (Publication)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, validPublication, VALID_INVESTIGATION_ID, em);
         
         Publication modified = em.find(Publication.class,publicationInserted.getId() );
         
@@ -89,7 +89,7 @@ public class TestPublication extends BaseTestClassTX {
         Publication duplicatePublication = getPublicationDuplicate(true);
         
         try {
-            Publication publicationInserted = (Publication)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicatePublication, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            Publication publicationInserted = (Publication)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicatePublication, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
@@ -125,7 +125,7 @@ public class TestPublication extends BaseTestClassTX {
         //create invalid publication, no name
         Publication duplicatePublication = getPublicationDuplicate(true);
         
-        Publication publicationInserted = (Publication)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicatePublication, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        Publication publicationInserted = (Publication)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicatePublication, VALID_INVESTIGATION_ID, em);
         
         Publication modified = em.find(Publication.class,publicationInserted.getId() );
         
@@ -160,7 +160,7 @@ public class TestPublication extends BaseTestClassTX {
         Publication validPublication  = getPublication(true);
         
         try {
-            Publication publicationInserted = (Publication)InvestigationManager.addInvestigationObject(INVALID_USER, validPublication, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            Publication publicationInserted = (Publication)InvestigationManager.addInvestigationObject(INVALID_USER, validPublication, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
@@ -199,7 +199,7 @@ public class TestPublication extends BaseTestClassTX {
         Publication invalidPublication = getPublication(false);
         
         try {
-            Publication publicationInserted = (Publication)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidPublication, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            Publication publicationInserted = (Publication)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidPublication, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'cannot be null'", ex.getMessage().contains("cannot be null"));
