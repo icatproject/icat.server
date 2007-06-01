@@ -62,4 +62,5 @@
       <property name="toplink.ddl-generation" value="create-tables"/>
     </properties>
   </persistence-unit>
+ 
 </persistence>
