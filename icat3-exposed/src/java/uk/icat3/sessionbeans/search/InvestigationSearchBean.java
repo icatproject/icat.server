@@ -70,8 +70,8 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      *
      * @param sessionId
      * @param keywords
-     * @throws uk.icat3.exceptions.SessionException
-     * @return
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
      */
     @WebMethod(operationName="searchByKeywords")
     @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywords")
@@ -91,8 +91,8 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @param keywords
      * @param startIndex
      * @param numberOfResults
-     * @throws uk.icat3.exceptions.SessionException
-     * @return
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
      */
     @WebMethod(operationName="searchByKeywordsPagination")
     @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPagination")
@@ -114,8 +114,8 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @param fuzzy
      * @param startIndex
      * @param numberOfResults
-     * @throws uk.icat3.exceptions.SessionException
-     * @return
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
      */
     @WebMethod(operationName="searchByKeywordsPaginationAndFuzzy")
     @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPaginationAndFuzzy")
@@ -136,8 +136,8 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @param include
      * @param startIndex
      * @param numberOfResults
-     * @throws uk.icat3.exceptions.SessionException
-     * @return
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
      */
     @WebMethod(operationName="searchByKeywordsPaginationFuzzyAndInclude")
     @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPaginationFuzzyAndInclude")
@@ -160,8 +160,8 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @param fuzzy
      * @param startIndex
      * @param numberOfResults
-     * @throws uk.icat3.exceptions.SessionException
-     * @return
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
      */
     @WebMethod(operationName="searchByKeywordsAll")
     @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsAll")
@@ -179,8 +179,8 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * Lists all the investigations for the current user
      *
      * @param sessionId
-     * @throws uk.icat3.exceptions.SessionException
-     * @return
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
      */
     @WebMethod()
     public Collection<Investigation> getMyInvestigations(String sessionId) throws SessionException {
@@ -195,8 +195,8 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * Searches the investigations the user has access to view by user id
      *
      * @param sessionId session id of the user.
-     * @param searchUserId Could be DN , username or federal ID
-     * @param manager manager object that will facilitate interaction with underlying database
+     * @param userSearch Could be DN , username or federal ID
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of {@link Investigation} investigation objects
      */
     @WebMethod()
@@ -212,8 +212,10 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * Searches the investigations the user has access to view by user id
      *
      * @param sessionId session id of the user.
-     * @param searchUserId Could be DN , username or federal ID
-     * @param manager manager object that will facilitate interaction with underlying database
+     * @param userSearch Could be DN , username or federal ID
+     * @param startIndex
+     * @param number_results
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of {@link Investigation} investigation objects
      */
     @WebMethod(operationName="searchByUserIDPagination")
@@ -233,8 +235,8 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      *
      * @param sessionId
      * @param surname
-     * @param manager
-     * @return
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
      */
     @WebMethod()
     public Collection<Investigation> searchByUserSurname(String sessionId, String surname) throws SessionException {
@@ -253,8 +255,8 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @param surname
      * @param startIndex
      * @param number_results
-     * @param manager
-     * @return
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
      */
     @WebMethod(operationName="searchByUserSurnamePagination")
     @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByUserSurnamePagination")
@@ -272,7 +274,8 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      *
      * @param sessionId
      * @throws uk.icat3.exceptions.SessionException
-     * @return
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
      */
     @WebMethod()
     public Collection<String> listAllInstruments(String sessionId) throws SessionException {

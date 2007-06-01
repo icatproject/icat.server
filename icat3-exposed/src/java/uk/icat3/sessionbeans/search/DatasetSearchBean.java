@@ -48,7 +48,7 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
      * @param sessionId
      * @param sampleName
      * @throws uk.icat3.exceptions.SessionException
-     * @return
+     * @return collection
      */
     @WebMethod()
     public Collection<Dataset> searchBySampleName(String sessionId, String sampleName) throws SessionException {
@@ -62,8 +62,9 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
     /**
      *  List all the valid avaliable types' for datasets
      *
-     * @param sessionid
+     * @param sessionId
      * @return collection of types'
+     * @throws uk.icat3.exceptions.SessionException 
      */
     @WebMethod()
     public Collection<DatasetType> listDatasetTypes(String sessionId) throws SessionException {
@@ -76,7 +77,7 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
     /**
      * List all the valid avaliable status' for datasets
      *
-     * @param sessionid
+     * @param sessionId
      * @return collection of status'
      */
     @WebMethod()

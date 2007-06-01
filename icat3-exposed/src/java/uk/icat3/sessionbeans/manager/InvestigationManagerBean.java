@@ -131,9 +131,9 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * Removes the keyword from investigation, depending on whether the user has permission to remove this Investigation object.
      *
      * @param sessionId sessionid of the user.
-     * @param keywordPK {@link KeywordPK} object to be removed   
+     * @param keywordPK {@link KeywordPK} object to be removed
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object   
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
@@ -145,9 +145,9 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * Deletes the keyword from investigation, depending on whether the user has permission to delete this Investigation object.
      *
      * @param sessionId sessionid of the user.
-     * @param keywordPK {@link KeywordPK} object to be deleted   
+     * @param keywordPK {@link KeywordPK} object to be deleted
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object   
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
@@ -156,7 +156,8 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
     }
     
     private void deleteKeywordImpl(String sessionId, KeywordPK keywordPK, AccessType type) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
-        if(!type.equals(AccessType.DELETE) || !type.equals(AccessType.REMOVE)) throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
+        if(type.equals(AccessType.DELETE) || type.equals(AccessType.REMOVE)) ;
+        else throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -192,9 +193,9 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * Removes the investigator from investigation, depending on whether the user has permission to remove this Investigation object.
      *
      * @param sessionId sessionid of the user.
-     * @param investigatorPK {@link InvestigatorPK} object to be removed   
+     * @param investigatorPK {@link InvestigatorPK} object to be removed
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object   
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
@@ -202,14 +203,14 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         deleteInvestigatorImpl(sessionId, investigatorPK, AccessType.REMOVE);
     }
     
-   /**
+    /**
      * Modifies the investigator of the investigation, depending on whether the user has permission to update this Investigation object.
      *
      * @param sessionId sessionid of the user.
-     * @param investigator {@link Investigator} object to be updated   
+     * @param investigator {@link Investigator} object to be updated
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object 
-     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid      
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
@@ -222,13 +223,13 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         InvestigationManager.updateInvestigationObject(userId, investigator, manager);
     }
     
-   /**
+    /**
      * Deletes the investigator from investigation, depending on whether the user has permission to remove this Investigation object.
      *
      * @param sessionId sessionid of the user.
-     * @param investigatorPK {@link InvestigatorPK} object to be deleted   
+     * @param investigatorPK {@link InvestigatorPK} object to be deleted
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object   
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
@@ -273,9 +274,9 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * Removes the sample from the investigation, depending on whether the user has permission to remove this Investigation object.
      *
      * @param sessionId sessionid of the user.
-     * @param sampleId primary key object to be removed   
+     * @param sampleId primary key object to be removed
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object   
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
@@ -287,9 +288,9 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * Deletes the sample from the investigation, depending on whether the user has permission to remove this Investigation object.
      *
      * @param sessionId sessionid of the user.
-     * @param sampleId primary key object to be deleted   
+     * @param sampleId primary key object to be deleted
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object   
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
@@ -310,14 +311,14 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         InvestigationManager.deleteInvestigationObject(userId, sample, type, manager);
     }
     
-     /**
+    /**
      * Modifies the sample from the investigation, depending on whether the user has permission to update this Investigation object.
      *
      * @param sessionId sessionid of the user.
-     * @param sample {@link Sample} object to be updated   
+     * @param sample {@link Sample} object to be updated
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object 
-     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid      
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
@@ -330,13 +331,13 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         InvestigationManager.updateInvestigationObject(userId, sample, manager);
     }
     
-     /**
+    /**
      * Deletes the sample parameter from the investigation, depending on whether the user has permission to remove this Investigation object.
      *
      * @param sessionId sessionid of the user.
-     * @param sampleParameterPK {@link SampleParameterPK} primary key object to be deleted   
+     * @param sampleParameterPK {@link SampleParameterPK} primary key object to be deleted
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object   
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
@@ -348,9 +349,9 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * Removes the sample parameter from the investigation, depending on whether the user has permission to remove this Investigation object.
      *
      * @param sessionId sessionid of the user.
-     * @param sampleParameterPK {@link SampleParameterPK} primary key object to be removed   
+     * @param sampleParameterPK {@link SampleParameterPK} primary key object to be removed
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object   
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
@@ -371,14 +372,14 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         InvestigationManager.deleteInvestigationObject(userId, sampleParameter, type, manager);
     }
     
-   /**
+    /**
      * Modifies the sample parameter from the investigation, depending on whether the user has permission to update this Investigation object.
      *
      * @param sessionId sessionid of the user.
-     * @param sampleParameter {@link SampleParameter} object to be updated   
+     * @param sampleParameter {@link SampleParameter} object to be updated
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object 
-     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid      
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()

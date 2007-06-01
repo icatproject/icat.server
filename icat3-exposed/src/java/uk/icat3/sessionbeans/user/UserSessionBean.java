@@ -147,7 +147,7 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
      *
      * @param sid
      * @throws uk.icat3.exceptions.SessionException
-     * @return
+     * @return String
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public String getUserIdFromSessionId(String sid) throws SessionException {
@@ -163,7 +163,7 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal {
      * @param user
      * @throws uk.icat3.exceptions.SessionException
      * @throws uk.icat3.exceptions.NoSuchUserException
-     * @return
+     * @return userdeatils
      */
     @WebMethod()
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
