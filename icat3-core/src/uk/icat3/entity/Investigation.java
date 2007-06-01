@@ -850,7 +850,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.Investigation[id=" + id + "]";
+        return "Investigation[id=" + id + "]";
     }
         
     /**

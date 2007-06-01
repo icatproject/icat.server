@@ -155,14 +155,14 @@ public class GateKeeper {
      *                          permission to perform operation.
      */
     private static void performAuthorisation(String user, Collection<Investigation> investigations, AccessType access, EntityBaseBean element, EntityManager manager) throws InsufficientPrivilegesException {
-       
+        
         //TODO
         //if creating investigation, anyone allowed to do that?
         if(access == AccessType.CREATE && element instanceof Investigation) {
             try {
                 //check if user in facilityuser table
                 ManagerUtil.getFacilityUserId(user, manager);
-            } catch(Exception e) {               
+            } catch(Exception e) {
                 //if we get to here then user does not have permission so we need to throw an exception
                 InsufficientPrivilegesException inse = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + element.getClass().getSimpleName() );
                 log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
@@ -196,49 +196,48 @@ public class GateKeeper {
                 
                 //READ, UPDATE, DELETE, CREATE, ADMIN, FINE_GRAINED_ACCESS;
                 switch (access) {
-                    case READ:      if (perm.getPrmRead() == 1) {
-                        log.debug("User: " + user + " granted " + access + " permission on " + element );
-                        return;
-                    }//end if
-                    break;
-                    
-                    case UPDATE:    if (perm.getPrmUpdate() == 1){
-                        log.debug("User: " + user + " granted " + access + " permission on " + element );
-                        return;
-                    }//end if
-                    break;
-                    
-                    case DELETE:    if (perm.getPrmDelete() == 1) {
-                        log.debug("User: " + user + " granted " + access + " permission on " + element );
-                        return;
-                    }//end if
-                    break;
-                    
-                    case CREATE:    if (perm.getPrmCreate() == 1) {
-                        log.debug("User: " + user + " granted " + access + " permission on " + element );
-                        return;
-                    }//end if
-                    break;
-                    
-                    case ADMIN:     if (perm.getPrmAdmin() == 1) {
-                        log.debug("User: " + user + " granted " + access + " permission on " + element );
-                        return;
-                    }//end if
-                    break;
-                    
-                    //not yet used
-                    case FINE_GRAINED_ACCESS:   log.warn("User: " + user + " granted " + access + " permission on " + element );
-                    break;
-                    
+                case READ:      if (perm.getPrmRead() == 1) {
+                    log.debug("User: " + user + " granted " + access + " permission on " + element );
+                    return;
+                }//end if
+                break;
+                
+                case UPDATE:    if (perm.getPrmUpdate() == 1){
+                    log.debug("User: " + user + " granted " + access + " permission on " + element );
+                    return;
+                }//end if
+                break;
+                
+                case DELETE:    if (perm.getPrmDelete() == 1) {
+                    log.debug("User: " + user + " granted " + access + " permission on " + element );
+                    return;
+                }//end if
+                break;
+                
+                case CREATE:    if (perm.getPrmCreate() == 1) {
+                    log.debug("User: " + user + " granted " + access + " permission on " + element );
+                    return;
+                }//end if
+                break;
+                
+                case ADMIN:     if (perm.getPrmAdmin() == 1) {
+                    log.debug("User: " + user + " granted " + access + " permission on " + element );
+                    return;
+                }//end if
+                break;
+                
+                //not yet used
+                case FINE_GRAINED_ACCESS:   log.warn("User: " + user + " granted " + access + " permission on " + element );
+                break;
+                
                 }//end switch
                 
             }//end for
         }//end for
         
         //if we get to here then user does not have permission so we need to throw an exception
-        InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + element.getClass().getSimpleName() );
+        InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
         log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
         throw(e);
-    }//end method
-    
+    }//end method    
 }
