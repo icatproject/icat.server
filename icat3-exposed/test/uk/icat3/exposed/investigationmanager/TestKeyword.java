@@ -21,11 +21,8 @@ import uk.icat3.entity.Keyword;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
-import uk.icat3.manager.InvestigationManager;
-import uk.icat3.util.AccessType;
 import uk.icat3.exposed.util.BaseTestClassTX;
 import uk.icat3.exposed.util.TestUserLocal;
-import uk.icat3.sessionbeans.ICAT;
 import uk.icat3.sessionbeans.manager.InvestigationManagerBean;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
 import static uk.icat3.exposed.util.TestConstants.*;
@@ -54,9 +51,9 @@ public class TestKeyword extends BaseTestClassTX {
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        icat.addKeyword(VALID_SESSION,  validKeyword, VALID_INVESTIGATION_ID);
+        Keyword insertedKeyword = icat.addKeyword(VALID_SESSION,  validKeyword, VALID_INVESTIGATION_ID);
         
-        Keyword modified = em.find(Keyword.class,validKeyword.getKeywordPK() );
+        Keyword modified = em.find(Keyword.class, insertedKeyword.getKeywordPK() );
         
         checkKeyword(modified);
         assertFalse("Deleted must be false", modified.isDeleted());

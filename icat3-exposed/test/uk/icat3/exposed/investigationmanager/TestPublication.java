@@ -56,7 +56,7 @@ public class TestPublication extends BaseTestClassTX {
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        Publication insertedPublication = icat.addPublication(VALID_SESSION, validPublication, VALID_DATASET_ID_FOR_INVESTIGATION);
+        Publication insertedPublication = icat.addPublication(VALID_SESSION, validPublication, VALID_INVESTIGATION_ID);
         
         Publication modified = em.find(Publication.class, insertedPublication.getId() );
         
@@ -149,7 +149,7 @@ public class TestPublication extends BaseTestClassTX {
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        icat.addPublication(VALID_USER_FOR_INVESTIGATION, duplicatePublication, VALID_INVESTIGATION_ID);
+        icat.addPublication(VALID_SESSION, duplicatePublication, VALID_INVESTIGATION_ID);
         
         Publication modified = em.find(Publication.class,duplicatePublication.getId() );
         
@@ -206,7 +206,7 @@ public class TestPublication extends BaseTestClassTX {
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void addPublicationInvalidInvestigation() throws ICATAPIException {
-        log.info("Testing session: "+VALID_SESSION+ "for adding publication to invalid investigation Id");
+        log.info("Testing session: "+VALID_SESSION+ " for adding publication to invalid investigation Id");
         
         Publication validPublication  = getPublication(true);
         
@@ -229,7 +229,7 @@ public class TestPublication extends BaseTestClassTX {
      */
     @Test(expected=ValidationException.class)
     public void addInvalidPublication() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid publication to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing session: "+VALID_SESSION+ " for adding invalid publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid publication, no name
         Publication invalidPublication = getPublication(false);
@@ -239,7 +239,7 @@ public class TestPublication extends BaseTestClassTX {
         icat.setUserSession(tul);
         
         try {
-            Publication publicationInserted = (Publication)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidPublication, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            icat.addPublication(VALID_SESSION, invalidPublication, VALID_INVESTIGATION_ID);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'cannot be null'", ex.getMessage().contains("cannot be null"));
@@ -262,7 +262,7 @@ public class TestPublication extends BaseTestClassTX {
         icat.setUserSession(tul);
         
         try {
-            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validPublication,  AccessType.DELETE, em);
+            icat.deletePublication(VALID_SESSION, validPublication.getId());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
