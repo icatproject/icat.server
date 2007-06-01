@@ -32,17 +32,17 @@ import uk.icat3.sessionbeans.EJBObject;
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class DatafileSearchBean extends EJBObject implements DatafileSearchLocal {
-    
+
     /** Creates a new instance of DatafileSearchBean */
     public DatafileSearchBean() {
     }
-    
+
     @WebMethod()
     public Collection<Datafile> searchByRunNumber(String sessionId, Collection<String> instruments, Long startRun, Long endRun) throws SessionException {
-        
+
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
-        
+
         return DatafileSearch.searchByRunNumber(userId, instruments, startRun, endRun, manager);
     }
 }

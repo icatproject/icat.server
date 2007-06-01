@@ -10,8 +10,6 @@ import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.interceptor.AroundInvoke;
-import javax.interceptor.ExcludeClassInterceptors;
-import javax.interceptor.Interceptors;
 import javax.interceptor.InvocationContext;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -36,12 +34,12 @@ public abstract class EJBObject {
     protected UserSessionLocal user;
     
     // For junit testing only
-    protected void setUserSession(UserSessionLocal localUserSession){
+    public void setUserSession(UserSessionLocal localUserSession){
         this.user = localUserSession;
     }
     
     // For junit testing only
-    protected void setEntityManager(EntityManager manager){
+    public void setEntityManager(EntityManager manager){
         this.manager = manager;
     }
     
@@ -65,7 +63,7 @@ public abstract class EJBObject {
     
     @PostConstruct
     protected void init(){
-        
+        //System.out.println("Post Construct: "+new File(System.getProperty("user.home")+File.separator+".log4j.properties").exists());
         //load config from user.home
         PropertyConfigurator.configure(System.getProperty("user.home")+File.separator+".log4j.properties");
        // PropertyConfigurator.configure(ClassLoader.getSystemResource("log4j.properties"));
