@@ -15,6 +15,8 @@ package uk.icat3.exposed.util;
  */
 public class TestConstants {
     
+    public final static String VALID_SESSION =  "validSession";
+    public final static String INVALID_SESSION =  "invalidSession";
     public final static String VALID_USER_FOR_INVESTIGATION =  "JAMES-JAMES";
     public final static String VALID_FACILITY_USER_FOR_INVESTIGATION =  "JAMES";
     public final static String VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION =  "FIRST PROPAGATION";

@@ -31,11 +31,11 @@ public class BaseTest {
     
     public static void setUp(){
         
-        emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
+        // emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
+        emf = EntityManagerFactoryTest.getInstance().getEntityManagerFactory();
+        
         em = emf.createEntityManager();
         log.debug("setUp(), creating entityManager");
-        
-       
         
         // Begin transaction
         log.debug("beginning transaction on entityManager");
@@ -46,11 +46,11 @@ public class BaseTest {
     
     public static void setUpEntityManagerOnly(){
         
+        //    emf = Persistence.createEntityManagerFactory("icat3-exposed");
         emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
+        //emf = EntityManagerFactoryTest.getInstance().getEntityManagerFactory();
         em = emf.createEntityManager();
         log.debug("setUp(), creating entityManager");
-        
-      
         
     }
     
@@ -61,8 +61,10 @@ public class BaseTest {
     }
     
     public static void setUpEntityManagerFactoryOnly(){
-        
+        //      emf = Persistence.createEntityManagerFactory("icat3-exposed");
+        //
         emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
+        //emf = EntityManagerFactoryTest.getInstance().getEntityManagerFactory();
         
     }
     

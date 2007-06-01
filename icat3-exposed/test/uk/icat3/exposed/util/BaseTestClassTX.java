@@ -29,6 +29,8 @@ public class BaseTestClassTX extends BaseTest{
     
     private static Logger log = Logger.getLogger(BaseTestClassTX.class);
     
+    protected String sessionId;
+    
     @Before
     public void beginTX(){
         log.debug("setUp(), creating entityManager");
@@ -58,7 +60,7 @@ public class BaseTestClassTX extends BaseTest{
     
     @BeforeClass
     public static void BeforeClassSetUp(){
-        setUpEntityManagerFactoryOnly();
+        setUpEntityManagerFactoryOnly();        
     }
     
     @AfterClass
