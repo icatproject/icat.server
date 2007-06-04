@@ -109,6 +109,86 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
     }
     
     /**
+     * Creates a {@link Investigation} investigation from a {@link Investigation} object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param investigation object to be created
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
+     * @return {@link Investigation} object created
+     */
+    @WebMethod(/*operationName="createInvestigation"*/)
+    public Investigation createInvestigation(String sessionId, Investigation investigation) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        Investigation investigationcreated = InvestigationManager.createInvestigation(userId, investigation, manager);
+        
+        return investigationcreated;
+    }
+    
+    /**
+     * Removes a {@link Investigation} investigation from a {@link Investigation} object.
+     * if the user has access to remove the investigation.
+     *
+     * @param sessionId sessionid of the user.
+     * @param investigationId id of investigation
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod(/*operationName="createInvestigation"*/)
+    public void removeInvestigation(String sessionId, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        InvestigationManager.removeInvestigation(userId, investigationId, manager);
+    }
+    
+    /**
+     * Deletes a {@link Investigation} investigation from a {@link Investigation} object
+     * if the user has access to delete the investigation.
+     *
+     * @param sessionId sessionid of the user.
+     * @param investigationId id of investigation
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod(/*operationName="createInvestigation"*/)
+    public void deleteInvestigation(String sessionId, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        InvestigationManager.deleteInvestigation(userId, investigationId, manager);
+    }
+    
+    /**
+     * Modifies a {@link Investigation} investigation from a {@link Investigation} object
+     * if the user has access to delete the investigation.
+     *
+     * @param sessionId sessionid of the user.
+     * @param investigation investigation object to be updated
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
+     */
+    @WebMethod(/*operationName="investigation"*/)
+    public void modifyInvestigation(String sessionId, Investigation investigation) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        InvestigationManager.updateInvestigation(userId, investigation, manager);
+    }
+    
+    /**
      * Adds keyword to investigation, depending on whether the user has permission to update this Investigation object.
      *
      * @param sessionId sessionid of the user.
@@ -158,7 +238,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
     
     private void deleteKeywordImpl(String sessionId, KeywordPK keywordPK, AccessType type) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         if(!type.equals(AccessType.DELETE) && !type.equals(AccessType.REMOVE)) throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
-              
+        
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
@@ -217,9 +297,9 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         deletePublicationImpl(sessionId, publicationId, AccessType.DELETE);
     }
     
-     private void deletePublicationImpl(String sessionId, Long publicationId, AccessType type) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
-         if(!type.equals(AccessType.DELETE) && !type.equals(AccessType.REMOVE)) throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
-       
+    private void deletePublicationImpl(String sessionId, Long publicationId, AccessType type) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        if(!type.equals(AccessType.DELETE) && !type.equals(AccessType.REMOVE)) throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
+        
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
@@ -229,8 +309,8 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         // remove/delete publication
         InvestigationManager.deleteInvestigationObject(userId, publication, type, manager);
     }
-     
-     /**
+    
+    /**
      * Modifies the publication of the investigation, depending on whether the user has permission to update this Investigation object.
      *
      * @param sessionId sessionid of the user.
@@ -319,7 +399,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
     }
     
     private void deleteInvestigatorImpl(String sessionId, InvestigatorPK investigatorPK, AccessType type) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
-         if(!type.equals(AccessType.DELETE) && !type.equals(AccessType.REMOVE)) throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
+        if(!type.equals(AccessType.DELETE) && !type.equals(AccessType.REMOVE)) throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -441,7 +521,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
     }
     
     private void removeSampleParameterImpl(String sessionId, SampleParameterPK sampleParameterPK, AccessType type) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
-         if(!type.equals(AccessType.DELETE) && !type.equals(AccessType.REMOVE)) throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
+        if(!type.equals(AccessType.DELETE) && !type.equals(AccessType.REMOVE)) throw new IllegalArgumentException("AccessType must be either DELETE or REMOVE");
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -473,7 +553,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         InvestigationManager.updateInvestigationObject(userId, sampleParameter, manager);
     }
     
-     /**
+    /**
      * Adds a sample parameter to investigation, depending on whether the user has permission to update this Investigation object.
      *
      * @param sessionId sessionid of the user.
