@@ -4,6 +4,8 @@ import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import uk.icat3.exposed.datafilemanager.TestDatafile;
+import uk.icat3.exposed.datafilemanager.TestDatafileParameter;
 import uk.icat3.exposed.datasetmanager.TestDataset;
 import uk.icat3.exposed.datasetmanager.TestDatasetParameter;
 import uk.icat3.exposed.investigationmanager.TestInvestigation;
@@ -24,10 +26,10 @@ import uk.icat3.exposed.investigationmanager.TestSampleParameter;
             TestSampleParameter.class,
             
             TestDataset.class,
-            TestDatasetParameter.class
+            TestDatasetParameter.class,
             
-            //TestDatafile.class,
-            //TestDatafileParameter.class,
+            TestDatafile.class,
+            TestDatafileParameter.class
             
             //TestKeywordSearch.class,
             //TestInvalidUser.class

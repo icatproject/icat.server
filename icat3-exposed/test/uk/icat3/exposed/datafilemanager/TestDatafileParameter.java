@@ -1,5 +1,5 @@
 /*
- * TestDatafileManager.java
+ * Testicat.java
  *
  * Created on 07 March 2007, 12:42
  *
@@ -22,13 +22,15 @@ import uk.icat3.entity.DatafileParameter;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
-import uk.icat3.manager.DataFileManager;
 import uk.icat3.exposed.util.BaseTestClassTX;
+import uk.icat3.exposed.util.TestUserLocal;
+import uk.icat3.sessionbeans.manager.DatafileManagerBean;
+import uk.icat3.sessionbeans.user.UserSessionLocal;
 import static uk.icat3.exposed.util.TestConstants.*;
 
 /**
  * Opens a new entitymanager and tranaction for each method and tests for get/ remove/ delete/ modify/ insert
- * for data file paramters for valid and invalid users on the DataFileManager class
+ * for data file paramters for valid and invalid users on the icat class
  *
  * @author gjd37
  */
@@ -37,16 +39,24 @@ public class TestDatafileParameter extends BaseTestClassTX {
     private static Logger log = Logger.getLogger(TestDatafileParameter.class);
     private Random random = new Random();
     
+    private static DatafileManagerBean icat = new DatafileManagerBean();
+    private static UserSessionLocal tul = new TestUserLocal();
+    
+    
     /**
      * Tests creating a file paramter
      */
     @Test
     public void addDatafileParameter() throws Exception {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for adding datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         DatafileParameter validDatafileParameter  = getDatafileParameter(true, true);
         
-        DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
+        DatafileParameter datafileParameterInserted = icat.addDataFileParameter(VALID_SESSION, validDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
         
         DatafileParameter modified = em.find(DatafileParameter.class,datafileParameterInserted.getDatafileParameterPK() );
         
@@ -61,14 +71,18 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test
     public void modifyDatafileParameter() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for modifying datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         String modifiedError = "unit test error "+random.nextInt();
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
         duplicateDatafileParameter.setError(modifiedError);
         
-        DataFileManager.updateDatafileParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatafileParameter, em);
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
+        icat.modifyDataFileParameter(VALID_SESSION, duplicateDatafileParameter);
         
         DatafileParameter modified = em.find(DatafileParameter.class, duplicateDatafileParameter.getDatafileParameterPK() );
         
@@ -83,13 +97,17 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=ValidationException.class)
     public void addDuplicateDatafileParameter() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for adding invalid datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
         
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            DatafileParameter datafileParameterInserted = icat.addDataFileParameter(VALID_SESSION, duplicateDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
@@ -102,11 +120,15 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test
     public void deleteDatafileParameter() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for rmeoving datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         DatafileParameter validDatafileParameter  = getDatafileParameterDuplicate(true);
         
-        DataFileManager.deleteDatafileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter,  em);
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
+        icat.deleteDataFileParameter(VALID_SESSION, validDatafileParameter.getDatafileParameterPK());
         
         DatafileParameter modified = em.find(DatafileParameter.class,validDatafileParameter.getDatafileParameterPK());
         
@@ -119,12 +141,16 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test
     public void addDeletedDatafileParameter() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for adding deleted datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
         
-        DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
+        DatafileParameter datafileParameterInserted = icat.addDataFileParameter(VALID_SESSION, duplicateDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
         
         DatafileParameter modified = em.find(DatafileParameter.class,datafileParameterInserted.getDatafileParameterPK() );
         
@@ -137,12 +163,16 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test
     public void removeDatafileParameter() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for rmeoving datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
         
-        DataFileManager.removeDatafileParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatafileParameter, em);
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
+        icat.removeDataFileParameter(VALID_SESSION, duplicateDatafileParameter.getDatafileParameterPK());
         
         DatafileParameter modified = em.find(DatafileParameter.class,duplicateDatafileParameter.getDatafileParameterPK() );
         
@@ -155,12 +185,16 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void addDatafileParameterInvalidUser() throws ICATAPIException {
-        log.info("Testing  user: "+INVALID_USER+ " for adding datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ INVALID_SESSION +"  for adding datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         DatafileParameter validDatafileParameter  = getDatafileParameter(true, true);
         
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(INVALID_USER, validDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            DatafileParameter datafileParameterInserted = icat.addDataFileParameter(INVALID_SESSION, validDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
@@ -175,12 +209,17 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void addDatafileParameterInvalidDatafile() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datafileParameter to invalid investigation Id");
+        log.info("Testing  session: "+ VALID_SESSION +"  for adding datafileParameter to invalid investigation Id");
         
         DatafileParameter validDatafileParameter  = getDatafileParameter(true,true);
         
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, random.nextLong(), em);        } catch (ICATAPIException ex) {
+            DatafileParameter datafileParameterInserted = icat.addDataFileParameter(VALID_SESSION, validDatafileParameter, random.nextLong());    
+        } catch (ICATAPIException ex) {
                 log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
                 assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
                 
@@ -194,12 +233,17 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=ValidationException.class)
     public void addDatafileParameterInvalidDatafileId() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datafileParameter to invalid investigation Id");
+        log.info("Testing  session: "+ VALID_SESSION +"  for adding datafileParameter to invalid investigation Id");
         
         DatafileParameter validDatafileParameter  = getDatafileParameter(true,true);
         validDatafileParameter.getDatafileParameterPK().setDatafileId(456787L);
+        
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, VALID_INVESTIGATION_ID, em);
+            DatafileParameter datafileParameterInserted = icat.addDataFileParameter(VALID_SESSION, validDatafileParameter, VALID_INVESTIGATION_ID);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not correspond'", ex.getMessage().contains("does not correspond"));
@@ -214,13 +258,17 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=ValidationException.class)
     public void addInvalidDatafileParameter() throws ICATAPIException, Exception {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for adding invalid datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter invalidDatafileParameter = getDatafileParameter(false, true);
         
+        //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, invalidDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            DatafileParameter datafileParameterInserted = icat.addDataFileParameter(VALID_SESSION, invalidDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'cannot be null'", ex.getMessage().contains("cannot be null"));
@@ -237,15 +285,19 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=ValidationException.class)
     public void addInvalidDatafileParameter2() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for adding invalid datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter invalidDatafileParameter = getDatafileParameter(true, false);
         //string value only allowed
         invalidDatafileParameter.setNumericValue(45d);
         
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, invalidDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            DatafileParameter datafileParameterInserted = icat.addDataFileParameter(VALID_SESSION, invalidDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'string value only'", ex.getMessage().contains("string value only"));
@@ -259,15 +311,18 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=ValidationException.class)
     public void addInvalidDatafileParameter3() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for adding invalid datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter invalidDatafileParameter = getDatafileParameter(true, true);
         //string value only allowed
         invalidDatafileParameter.setStringValue("45d");
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
         
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, invalidDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            DatafileParameter datafileParameterInserted = icat.addDataFileParameter(VALID_SESSION, invalidDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'numeric value only'", ex.getMessage().contains("numeric value only"));
@@ -280,13 +335,17 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     //@Test(expected=InsufficientPrivilegesException.class)
     public void modifyDatafileParameterProps() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying a props datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for modifying a props datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter propsDatafileParameter = getDatafileParameterDuplicate(false);
         
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
         try {
-            DataFileManager.updateDatafileParameter(VALID_USER_FOR_INVESTIGATION, propsDatafileParameter, em);
+            icat.modifyDataFileParameter(VALID_SESSION, propsDatafileParameter);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
@@ -299,14 +358,18 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     //  @Test(expected=InsufficientPrivilegesException.class)
     public void deleteDatafileParameterProps() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a props datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for deleting a props datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter propsDatafileParameter = getDatafileParameterDuplicate(false);
         
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
         try {
-            DataFileManager.deleteDatafileParameter(VALID_USER_FOR_INVESTIGATION, propsDatafileParameter, em);
-        } catch (ICATAPIException ex) {
+            icat.deleteDataFileParameter(VALID_SESSION, propsDatafileParameter.getDatafileParameterPK());
+          } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
             throw ex;
@@ -318,13 +381,17 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     //  @Test(expected=InsufficientPrivilegesException.class)
     public void removeDatafileParameterProps() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a props datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for removing a props datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter propsDatafileParameter = getDatafileParameterDuplicate(false);
         
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
         try {
-            DataFileManager.removeDatafileParameter(VALID_USER_FOR_INVESTIGATION, propsDatafileParameter, em);
+            icat.removeDataFileParameter(VALID_SESSION, propsDatafileParameter.getDatafileParameterPK());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
@@ -337,14 +404,18 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void removeDatafileParameterNoId() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for removing a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter datafileParameter = getDatafileParameter(true, true);
         datafileParameter.setDatafileParameterPK(null);
         
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
         try {
-            DataFileManager.removeDatafileParameter(VALID_USER_FOR_INVESTIGATION, datafileParameter, em);
+            icat.removeDataFileParameter(VALID_SESSION, datafileParameter.getDatafileParameterPK());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage(),ex);
             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
@@ -357,14 +428,18 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void deleteDatafileParameterNoId() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION +"  for deleting a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter datafileParameter = getDatafileParameter(true, true);
         datafileParameter.setDatafileParameterPK(null);
         
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
         try {
-            DataFileManager.deleteDatafileParameter(VALID_USER_FOR_INVESTIGATION, datafileParameter, em);
+            icat.deleteDataFileParameter(VALID_SESSION, datafileParameter.getDatafileParameterPK());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage(),ex);
             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
@@ -373,18 +448,22 @@ public class TestDatafileParameter extends BaseTestClassTX {
     }
     
     /**
-     * Tests update a file
+     * Tests modify a file
      */
     @Test(expected=NoSuchObjectFoundException.class)
-    public void updateDatafileParameterNoId() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+    public void modifyDatafileParameterNoId() throws ICATAPIException {
+        log.info("Testing  session: "+ VALID_SESSION +"  for deleting a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter datafileParameter = getDatafileParameter(true, true);
         datafileParameter.setDatafileParameterPK(null);
         
+          //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
         try {
-            DataFileManager.updateDatafileParameter(VALID_USER_FOR_INVESTIGATION, datafileParameter, em);
+            icat.modifyDataFileParameter(VALID_SESSION, datafileParameter);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage(),ex);
             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
