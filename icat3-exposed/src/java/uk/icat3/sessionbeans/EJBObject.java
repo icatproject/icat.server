@@ -92,8 +92,7 @@ public abstract class EJBObject {
      * AOP all method, log time of method call.
      */
     @AroundInvoke   
-    protected Object logMethods(InvocationContext ctx)
-    throws Exception {
+    protected Object logMethods(InvocationContext ctx) throws Exception {
         
         String className = ctx.getTarget().getClass().getName();
         String methodName = ctx.getMethod().getName();

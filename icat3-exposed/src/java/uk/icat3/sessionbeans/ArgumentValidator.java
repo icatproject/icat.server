@@ -12,6 +12,7 @@ package uk.icat3.sessionbeans;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import org.apache.log4j.Logger;
+import uk.icat3.exceptions.SessionException;
 
 /**
  *
@@ -27,10 +28,10 @@ public class ArgumentValidator {
     public ArgumentValidator() {
     }
     
-   // @AroundInvoke
+    @AroundInvoke
     public Object checkArguments(InvocationContext ctx) throws Exception {
         Object[] args = ctx.getParameters();
-        String className = ctx.getTarget().getClass().getName();
+        String className = ctx.getTarget().getClass().getSimpleName();
         String methodName = ctx.getMethod().getName();
         
         //build up method call
@@ -41,7 +42,8 @@ public class ArgumentValidator {
         int i = 1;
         for(Object arg : args){
             if(arg == null){
-                throw new IllegalArgumentException("Cannot pass in null arguments to: "+className+":"+methodName);
+                log.trace("Cannot pass null into argument "+i+" into: "+className+"."+methodName+"() method.");
+                throw new SessionException("Cannot pass null into argument #"+i+" for this method.");
             }
             if(i == args.length) builder.append(arg+")");
             else builder.append(arg+", ");
