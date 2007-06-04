@@ -132,7 +132,7 @@ public class TestInvestigation extends BaseTestClassTX {
         Investigation validInvestigation  = getInvestigation(true);
         
         try {
-            Investigation investigationInserted = (Investigation)InvestigationManager.addInvestigationObject(INVALID_USER, validInvestigation, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            Investigation investigationInserted = (Investigation)InvestigationManager.addInvestigationObject(INVALID_USER, validInvestigation, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));

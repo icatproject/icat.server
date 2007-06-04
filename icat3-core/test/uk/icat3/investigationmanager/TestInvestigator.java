@@ -44,7 +44,7 @@ public class TestInvestigator extends BaseTestClassTX {
         
         Investigator validInvestigator  = getInvestigator(true);
         
-        Investigator investigatorInserted = (Investigator)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, validInvestigator, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        Investigator investigatorInserted = (Investigator)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, validInvestigator, VALID_INVESTIGATION_ID, em);
         
         Investigator modified = em.find(Investigator.class,investigatorInserted.getInvestigatorPK() );
         
@@ -85,7 +85,7 @@ public class TestInvestigator extends BaseTestClassTX {
         Investigator duplicateInvestigator = getInvestigatorDuplicate(true);
         
         try {
-            Investigator investigatorInserted = (Investigator)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateInvestigator, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            Investigator investigatorInserted = (Investigator)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateInvestigator, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
@@ -121,7 +121,7 @@ public class TestInvestigator extends BaseTestClassTX {
         //create invalid investigator, no name
         Investigator duplicateInvestigator = getInvestigatorDuplicate(true);
         
-        Investigator investigatorInserted = (Investigator)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateInvestigator, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        Investigator investigatorInserted = (Investigator)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateInvestigator, VALID_INVESTIGATION_ID, em);
         
         Investigator modified = em.find(Investigator.class,investigatorInserted.getInvestigatorPK() );
         
@@ -156,7 +156,7 @@ public class TestInvestigator extends BaseTestClassTX {
         Investigator validInvestigator  = getInvestigator(true);
         
         try {
-            Investigator investigatorInserted = (Investigator)InvestigationManager.addInvestigationObject(INVALID_USER, validInvestigator, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            Investigator investigatorInserted = (Investigator)InvestigationManager.addInvestigationObject(INVALID_USER, validInvestigator, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
@@ -195,7 +195,7 @@ public class TestInvestigator extends BaseTestClassTX {
         Investigator invalidInvestigator = getInvestigator(false);
         
         try {
-            Investigator investigatorInserted = (Investigator)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidInvestigator, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            Investigator investigatorInserted = (Investigator)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidInvestigator, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'exist'", ex.getMessage().contains("exist"));

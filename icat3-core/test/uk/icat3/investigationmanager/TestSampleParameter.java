@@ -46,7 +46,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         
         SampleParameter validSampleParameter  = getSampleParameter(true, true);
         
-        SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter, VALID_INVESTIGATION_ID, em);
         
         SampleParameter modified = em.find(SampleParameter.class,sampleParameterInserted.getSampleParameterPK()  );
         
@@ -89,7 +89,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
         
         try {
-            SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
@@ -125,7 +125,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         //create invalid sampleParameter, no name
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
         
-        SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, VALID_INVESTIGATION_ID, em);
         
         SampleParameter modified = em.find(SampleParameter.class,sampleParameterInserted.getSampleParameterPK()  );
         
@@ -160,7 +160,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         SampleParameter validSampleParameter  = getSampleParameter(true, true);
         
         try {
-            SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(INVALID_USER, validSampleParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(INVALID_USER, validSampleParameter, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
@@ -218,7 +218,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         SampleParameter invalidSampleParameter = getSampleParameter(false, true);
         
         try {
-            SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidSampleParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidSampleParameter, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'cannot be null'", ex.getMessage().contains("cannot be null"));
@@ -239,7 +239,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         invalidSampleParameter.setNumericValue(45d);
         
         try {
-            SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidSampleParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidSampleParameter, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'string value only'", ex.getMessage().contains("string value only"));
@@ -260,7 +260,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         invalidSampleParameter.setStringValue("45d");
         
         try {
-            SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidSampleParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidSampleParameter, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'numeric value only'", ex.getMessage().contains("numeric value only"));

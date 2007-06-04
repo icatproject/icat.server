@@ -44,7 +44,7 @@ public class TestSample extends BaseTestClassTX {
         
         Sample validSample  = getSample(true);
         
-        Sample sampleInserted = (Sample)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSample, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        Sample sampleInserted = (Sample)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSample, VALID_INVESTIGATION_ID, em);
         
         Sample modified = em.find(Sample.class,sampleInserted.getId() );
         
@@ -85,7 +85,7 @@ public class TestSample extends BaseTestClassTX {
         Sample duplicateSample = getSampleDuplicate(true);
         
         try {
-            Sample sampleInserted = (Sample)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSample, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            Sample sampleInserted = (Sample)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSample, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
@@ -121,7 +121,7 @@ public class TestSample extends BaseTestClassTX {
         //create invalid sample, no name
         Sample duplicateSample = getSampleDuplicate(true);
         
-        Sample sampleInserted = (Sample)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSample, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        Sample sampleInserted = (Sample)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSample, VALID_INVESTIGATION_ID, em);
         
         Sample modified = em.find(Sample.class,sampleInserted.getId() );
         
@@ -156,7 +156,7 @@ public class TestSample extends BaseTestClassTX {
         Sample validSample  = getSample(true);
         
         try {
-            Sample sampleInserted = (Sample)InvestigationManager.addInvestigationObject(INVALID_USER, validSample, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            Sample sampleInserted = (Sample)InvestigationManager.addInvestigationObject(INVALID_USER, validSample, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
@@ -195,7 +195,7 @@ public class TestSample extends BaseTestClassTX {
         Sample invalidSample = getSample(false);
         
         try {
-            Sample sampleInserted = (Sample)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidSample, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            Sample sampleInserted = (Sample)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidSample, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'cannot be null'", ex.getMessage().contains("cannot be null"));
@@ -321,9 +321,11 @@ public class TestSample extends BaseTestClassTX {
         Sample sample = null;
         if(!last){
             Collection<Sample> samples = (Collection<Sample>)executeListResultCmd("select d from Sample d where d.createId LIKE '%PROP%'");
+            if(samples.isEmpty()) throw new RuntimeException("No props samples found in DB");
             sample = samples.iterator().next();
         } else {
             Collection<Sample> samples = (Collection<Sample>)executeListResultCmd("select d from Sample d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+             if(samples.isEmpty()) throw new RuntimeException("No none props samples found in DB");
             sample = samples.iterator().next();
         }
         log.trace(sample);
