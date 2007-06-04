@@ -1,8 +1,11 @@
 package uk.icat3.exposed;
+
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import uk.icat3.exposed.datasetmanager.TestDataset;
+import uk.icat3.exposed.datasetmanager.TestDatasetParameter;
 import uk.icat3.exposed.investigationmanager.TestInvestigation;
 import uk.icat3.exposed.investigationmanager.TestInvestigator;
 import uk.icat3.exposed.investigationmanager.TestKeyword;
@@ -18,16 +21,16 @@ import uk.icat3.exposed.investigationmanager.TestSampleParameter;
             TestPublication.class,
             TestInvestigator.class,
             TestInvestigation.class,
-            TestSampleParameter.class
+            TestSampleParameter.class,
             
-           // TestDataset.class,
-            //TestDatasetParameter.class,
+            TestDataset.class,
+            TestDatasetParameter.class
             
-          //  TestDatafile.class,
-           // TestDatafileParameter.class,
+            //TestDatafile.class,
+            //TestDatafileParameter.class,
             
-          //  TestKeywordSearch.class,
-           // TestInvalidUser.class
+            //TestKeywordSearch.class,
+            //TestInvalidUser.class
 })
 public class TestAll {
        
