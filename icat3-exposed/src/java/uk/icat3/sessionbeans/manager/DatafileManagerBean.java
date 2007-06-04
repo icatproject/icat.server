@@ -102,7 +102,7 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
      * @return the created {@link Datafile} primary key
      */
     @WebMethod()
-    public Long createDataFile(String sessionId, Datafile dataFile, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public Datafile createDataFile(String sessionId, Datafile dataFile, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -111,7 +111,7 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         Datafile newDataFile = DataFileManager.createDataFile(userId, dataFile, datasetId, manager);
         
         //return new id
-        return newDataFile.getId();
+        return newDataFile;
     }
     
     /**
@@ -127,16 +127,16 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
      * @return the collection of created {@link Datafile} primary keys
      */
     @WebMethod()
-    public Collection<Long> createDataFiles(String sessionId, Collection<Datafile> dataFiles, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public Collection<Datafile> createDataFiles(String sessionId, Collection<Datafile> dataFiles, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        Collection<Long> ids = new ArrayList<Long>();
+        Collection<Datafile> ids = new ArrayList<Datafile>();
         //add the dataset, this checks permissions
         for(Datafile file : dataFiles){
             Datafile newDataFile = DataFileManager.createDataFile(userId, file, datasetId, manager);
-            ids.add(newDataFile.getId());
+            ids.add(newDataFile);
         }
         
         //return ids
@@ -202,7 +202,7 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         String userId = user.getUserIdFromSessionId(sessionId);
         
         //delete the dataset, this checks permsisions
-        DataFileManager.deleteDataFile(userId, datafileId, manager);
+        DataFileManager.removeDataFile(userId, datafileId, manager);
     }
     
     /**

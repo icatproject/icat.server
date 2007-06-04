@@ -130,14 +130,14 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @return {@link Dataset} that was created
      */
     @WebMethod
-    public Long createDataSet(String sessionId, Long investigationId, Dataset dataSet) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public Dataset createDataSet(String sessionId, Dataset dataSet, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
         Dataset dataset = DataSetManager.createDataSet(userId, dataSet, investigationId, manager);
         
-        return dataset.getId();
+        return dataset;
     }
     
     /**
@@ -153,15 +153,15 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      * @return collection of {@link Dataset}s that were created
      */
     @WebMethod
-    public Collection<Long> createDataSets(String sessionId, Long investigationId, Collection<Dataset> dataSets) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public Collection<Dataset> createDataSets(String sessionId, Collection<Dataset> dataSets, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        Collection<Long> ids = new ArrayList<Long>();
+        Collection<Dataset> ids = new ArrayList<Dataset>();
         for(Dataset dataset : dataSets){
             Dataset datasetReturned = DataSetManager.createDataSet(userId, dataset, investigationId, manager);
-            ids.add(datasetReturned.getId());
+            ids.add(datasetReturned);
         }
         
         return ids;
@@ -229,18 +229,19 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
      *
      * @param sessionId session id of the user.
      * @param dataSetParameter object to be created
-     * @param datasetId id of dataset to add to
+     * @param datasetId id of dataset to add to    
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return {@link DatasetParameter} that was created
      */
     @WebMethod
-    public void addDataSetParameter(String sessionId, DatasetParameter dataSetParameter, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public DatasetParameter addDataSetParameter(String sessionId, DatasetParameter dataSetParameter, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        DataSetManager.addDataSetParameter(userId, dataSetParameter, datasetId, manager);
+        return DataSetManager.addDataSetParameter(userId, dataSetParameter, datasetId, manager);
     }
     
     /**

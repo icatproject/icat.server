@@ -584,8 +584,8 @@ public class ICAT extends EJBObject implements ICATLocal {
      * @return {@link Dataset} that was created
      */
     @WebMethod
-    public Long createDataSet(@WebParam(name="sessionId") String sessionId, Long investigationId, Dataset dataSet) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
-        return datasetManagerLocal.createDataSet(sessionId, investigationId, dataSet);
+    public Dataset createDataSet(@WebParam(name="sessionId") String sessionId, Long investigationId, Dataset dataSet) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        return datasetManagerLocal.createDataSet(sessionId, dataSet, investigationId);
     }
     
       /**
@@ -601,8 +601,8 @@ public class ICAT extends EJBObject implements ICATLocal {
      * @return collection of {@link Dataset}s that were created
      */
     @WebMethod
-    public Collection<Long> createDataSets(@WebParam(name="sessionId") String sessionId, Long investigationId, Collection<Dataset> dataSets) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
-        return datasetManagerLocal.createDataSets(sessionId, investigationId, dataSets);
+    public Collection<Dataset> createDataSets(@WebParam(name="sessionId") String sessionId, Collection<Dataset> dataSets, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        return datasetManagerLocal.createDataSets(sessionId, dataSets, investigationId);
     }
     
     /**
@@ -662,8 +662,8 @@ public class ICAT extends EJBObject implements ICATLocal {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void addDataSetParameter(@WebParam(name="sessionId") String sessionId, DatasetParameter dataSetParameter, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
-        datasetManagerLocal.addDataSetParameter(sessionId, dataSetParameter, datasetId);
+    public DatasetParameter addDataSetParameter(@WebParam(name="sessionId") String sessionId, DatasetParameter dataSetParameter, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        return datasetManagerLocal.addDataSetParameter(sessionId, dataSetParameter, datasetId);
     }
     
       /**
@@ -770,7 +770,7 @@ public class ICAT extends EJBObject implements ICATLocal {
      * @return the created {@link Datafile} primary key
      */
     @WebMethod()
-    public Long createDataFile(@WebParam(name="sessionId") String sessionId, Datafile dataFile, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public Datafile createDataFile(@WebParam(name="sessionId") String sessionId, Datafile dataFile, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         return datafileManagerLocal.createDataFile(sessionId, dataFile, datasetId);
     }
     
@@ -787,7 +787,7 @@ public class ICAT extends EJBObject implements ICATLocal {
      * @return the collection of created {@link Datafile} primary keys
      */
     @WebMethod()
-    public Collection<Long> createDataFiles(@WebParam(name="sessionId") String sessionId, Collection<Datafile> dataFiles, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public Collection<Datafile> createDataFiles(@WebParam(name="sessionId") String sessionId, Collection<Datafile> dataFiles, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         return datafileManagerLocal.createDataFiles(sessionId, dataFiles, datasetId);
     }
     
