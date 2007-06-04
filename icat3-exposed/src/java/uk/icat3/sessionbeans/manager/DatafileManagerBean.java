@@ -258,15 +258,16 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return {@link DatafileParameter} created
      */
     @WebMethod()
-    public void addDataFileParameter(String sessionId, DatafileParameter dataFileParameter, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public DatafileParameter addDataFileParameter(String sessionId, DatafileParameter dataFileParameter, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
         //get file, checks read access
-        DataFileManager.addDataFileParameter(userId, dataFileParameter, datafileId, manager);
+        return DataFileManager.addDataFileParameter(userId, dataFileParameter, datafileId, manager);
     }    
     
     /**
@@ -319,7 +320,7 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
-    public void deleteDataFileParameter(String sessionId, DatasetParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public void deleteDataFileParameter(String sessionId, DatafileParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
