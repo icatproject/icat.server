@@ -870,11 +870,11 @@ public class Investigation extends EntityBaseBean implements Serializable {
             boolean valid = false;
             if(instrument != null){
                 //check instrument is correct.
-                Collection<String> instruments = InvestigationSearch.listAllInstruments("null", manager);
+                Collection<Instrument> instruments = InvestigationSearch.listAllInstruments("null", manager);
                 
-                for(String instrument : instruments){
+                for(Instrument instrument : instruments){
                     //log.trace(instrument);
-                    if(instrument.equals(getInstrument().getName())) valid = true;
+                    if(instrument.getName().equals(getInstrument().getName())) valid = true;
                 }
             } else valid = true;
             if(!valid) throw new ValidationException("Investigation: "+getInstrument().getName()+" is not a valid instrument.");

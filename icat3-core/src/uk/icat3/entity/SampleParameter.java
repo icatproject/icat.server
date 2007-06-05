@@ -45,7 +45,7 @@ import uk.icat3.exceptions.ValidationException;
     @NamedQuery(name = "SampleParameter.findByModTime", query = "SELECT s FROM SampleParameter s WHERE s.modTime = :modTime"),
     @NamedQuery(name = "SampleParameter.findByModId", query = "SELECT s FROM SampleParameter s WHERE s.modId = :modId")
 })
-public class SampleParameter extends EntityBaseBean implements Serializable {
+        public class SampleParameter extends EntityBaseBean implements Serializable {
     
     /**
      * EmbeddedId primary key field
@@ -67,6 +67,10 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     
     @Column(name = "RANGE_BOTTOM")
     private String rangeBottom;
+    
+    //TODO uncomment desc
+    //@Column(name = "DESCRIPTION")
+    //private String description;
     
     @JoinColumns(value =  {
         @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
@@ -284,8 +288,8 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public String toString() {
         return "uk.icat3.entity.SampleParameter[sampleParameterPK=" + sampleParameterPK + "]";
     }
-              
-      
+    
+    
     
     /**
      * Overrides the isValid function, checks that the parameters and valid for the sample and is set to numeric or string

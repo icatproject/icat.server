@@ -359,7 +359,7 @@ public class Queries {
      *
      */
     public static final String ALL_INSTRUMENTS = "Instrument.listAll";
-    public static final String ALL_INSTRUMENTS_JPQL = "SELECT DISTINCT i.name FROM Instrument i";
+    public static final String ALL_INSTRUMENTS_JPQL = "SELECT DISTINCT i FROM Instrument i";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
         

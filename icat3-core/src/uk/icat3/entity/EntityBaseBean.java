@@ -21,7 +21,6 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 import org.apache.log4j.Logger;
 import uk.icat3.exceptions.EntityNotModifiableError;
@@ -47,6 +46,12 @@ public class EntityBaseBean {
     @ICAT(merge=false, nullable=true)
     protected Date modTime;
     
+    //TODO uncomment this
+    /*@Column(name = "CREATE_TIME", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @ICAT(merge=false, nullable=true)
+    protected Date createTime;*/
+    
     @Column(name = "CREATE_ID", nullable = false)
     @ICAT(merge=false, nullable=true)
     protected  String createId;
@@ -63,7 +68,7 @@ public class EntityBaseBean {
     protected String modId;
     
     /**
-     * Gets the modTime of this DatafileFormat.
+     * Gets the modTime of this entity.
      * @return the modTime
      */
     @XmlTransient
@@ -72,12 +77,31 @@ public class EntityBaseBean {
     }
     
     /**
-     * Sets the modTime of this DatafileFormat to the specified value.
+     * Sets the modTime of this entity to the specified value.
      * @param modTime the new modTime
      */
     public void setModTime(Date modTime) {
         this.modTime = modTime;
     }
+    
+    /**
+     * Gets the createTime of this entity.
+     * @return the modTime
+     */
+    //TODO uncomment this
+   /* @XmlTransient
+    public Date getCreateTime() {
+        return this.createTime;
+    }*/
+    
+    /**
+     * Sets the createTime of this entity to the specified value.
+     * @param modTime the new modTime
+     */
+    //TODO uncomment this
+    /*public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }*/
     
     /**
      * Gets the createId of this entity.
@@ -111,7 +135,7 @@ public class EntityBaseBean {
     }
     
     /**
-     * Gets the modId of this Datafile.
+     * Gets the modId of this entity.
      * @return the modId
      */
     @XmlTransient
@@ -120,7 +144,7 @@ public class EntityBaseBean {
     }
     
     /**
-     * Sets the modId of this Datafile to the specified value.
+     * Sets the modId of this entity to the specified value.
      * @param modId the new modId
      */
     public void setModId(String modId) {

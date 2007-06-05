@@ -12,11 +12,10 @@ package uk.icat3.search;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
 import uk.icat3.manager.ManagerUtil;
 import uk.icat3.util.InvestigationInclude;
@@ -718,9 +717,9 @@ public class InvestigationSearch extends ManagerUtil {
      *
      * @param userId federalId of the user.
      * @param manager manager object that will facilitate interaction with underlying database
-     * @return List of instruments
+     * @return List of {@link Instrument}s
      */
-    public static Collection<String> listAllInstruments(String userId, EntityManager manager)  {
+    public static Collection<Instrument> listAllInstruments(String userId, EntityManager manager)  {
         log.trace("listAllInstruments("+userId+", EntityManager)");
         return  manager.createNamedQuery(ALL_INSTRUMENTS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }
