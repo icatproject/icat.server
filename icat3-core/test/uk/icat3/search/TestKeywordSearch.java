@@ -55,7 +55,7 @@ public class TestKeywordSearch extends BaseTestClass {
     @Test
     public void testValidUsersKeywords(){
         log.info("Testing valid user for their keywords: "+VALID_USER_FOR_INVESTIGATION);
-        testUsersKeywords(VALID_USER_FOR_INVESTIGATION, false);
+        testUsersKeywords(VALID_USER_FOR_INVESTIGATION, true);
     }
     
     /**
@@ -65,7 +65,7 @@ public class TestKeywordSearch extends BaseTestClass {
     @Test
     public void testInvalidUsersKeywords(){
         log.info("Testing invalid user for their keywords: "+INVALID_USER);
-        testUsersKeywords(INVALID_USER, true);
+        testUsersKeywords(INVALID_USER, false);
     }
     
     private void testKeywords(String user){
@@ -106,22 +106,30 @@ public class TestKeywordSearch extends BaseTestClass {
         em.clear();
     }
     
+    //TODO make this method better
     private void testUsersKeywords(String user, boolean valid){
         
         //get number of keywords user can see starting with isis
        /* Collection<String> keywordsUserInDB = (Collection<String>)executeListResultCmd("SE");
         
         //clear manager, because of alot of keywords
-        em.clear();
+        em.clear();*/
         
         //search all keywords
-        Collection<String> keywordsForUser = KeywordSearch.getKeywordsForUser(INVALID_USER, "isis", em);
+        Collection<String> keywordsForUser = KeywordSearch.getKeywordsForUser(user, "", em);
+        log.trace("Number keywords for user "+user+" from search is : "+keywordsForUser.size());
         
         assertNotNull("Must not be an null collection of user keywords", keywordsForUser);
-        assertSame("Number of user keywords searched for user is different to number in DB",keywordsUserInDB.size(),keywordsForUser.size());
+        if(valid){
+            assertTrue("Number of user keywords searched for user is different to number in DB", keywordsForUser.size() > 0);
+        } else {
+            assertSame("Number of user keywords searched for user is different to number in DB", 0 , keywordsForUser.size());
+            
+        }
+        
         
         //clear manager
-        em.clear();*/
+        em.clear();
     }
     
     /**
@@ -147,15 +155,15 @@ public class TestKeywordSearch extends BaseTestClass {
         //search by user id
         /*Collection<Investigation> searchedUserIdInvestigations = InvestigationSearch.searchByUserID(INVALID_USER,"JAMES-JAMES", em);
         log.trace("Investigations for user "+INVALID_USER+" is "+searchedUserIdInvestigations.size());
-        
+         
         assertNotNull("Must not be an null collection", searchedUserIdInvestigations);
         assertEquals("Collection 'searchByKeyword()' should be zero size", 0 , searchedUserIdInvestigations.size());
-        
-        
+         
+         
         //search by surname
         Collection<Investigation> searchedSurnameInvestigations = InvestigationSearch.searchByUserSurname(INVALID_USER,"HEALY", em);
         log.trace("Investigations for user "+INVALID_USER+" is "+searchedSurnameInvestigations.size());
-        
+         
         assertNotNull("Must not be an null collection", searchedSurnameInvestigations);
         assertEquals("Collection 'searchByKeyword()' should be zero size", 0 , searchedSurnameInvestigations.size());*/
     }

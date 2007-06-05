@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
 import uk.icat3.util.BaseTestClass;
 import static org.junit.Assert.*;
 import static uk.icat3.util.TestConstants.*;
-import uk.icat3.util.TestConstants;
 import uk.icat3.entity.Investigation;
 /**
  *
