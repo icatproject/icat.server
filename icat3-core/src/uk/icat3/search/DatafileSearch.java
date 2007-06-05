@@ -14,7 +14,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
-import uk.icat3.util.Queries;
 import static uk.icat3.util.Queries.*;
 /**
  * Searchs on the datafiles for run number on the datafile parameter table.
@@ -30,7 +29,7 @@ public class DatafileSearch {
      * Searchs database for data files from a start and end run on an instrument for which the userId has permission to read
      * the data files investigation
      *
-      * @param userId federalId of the user.    
+     * @param userId federalId of the user.
      * @param instruments collection of instruments
      * @param startRun lower range of run number
      * @param endRun upper range of run number
@@ -40,7 +39,7 @@ public class DatafileSearch {
      * @return collection of datafiles returned from search
      */
     private static Collection<Datafile> searchByRunNumberImpl(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
-        if(instruments == null) throw new IllegalArgumentException("Instrument collection cannot be null");
+        if(instruments == null || instruments.isEmpty()) throw new IllegalArgumentException("Instrument collection cannot be null or empty");
         log.trace("searchByRunNumber("+userId+", "+instruments+", "+startRun+", "+endRun+", EntityManager)");
         
         Collection<Datafile> datafiles = null;
@@ -88,7 +87,7 @@ public class DatafileSearch {
      * Searchs database for data files from a start and end run on an instrument for which the userId has permission to read
      * the data files investigation
      *
-   * @param userId federalId of the user.    
+     * @param userId federalId of the user.
      * @param instruments collection of instruments
      * @param startRun lower range of run number
      * @param endRun upper range of run number
@@ -103,7 +102,7 @@ public class DatafileSearch {
      * Searchs database for data files from a start and end run on an instrument for which the userId has permission to read
      * the data files investigation
      *
-     * @param userId federalId of the user.    
+     * @param userId federalId of the user.
      * @param instruments collection of instruments
      * @param startRun lower range of run number
      * @param endRun upper range of run number

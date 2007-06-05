@@ -326,6 +326,6 @@ public class Sample extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.Sample[id=" + id + "]";
+        return "Sample[id=" + id + "]";
     }
 }

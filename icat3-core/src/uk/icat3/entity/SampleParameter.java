@@ -70,7 +70,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     
     @JoinColumns(value =  {
         @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
-@JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
+        @JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
     })
     @ManyToOne
     @ICAT(merge=false)

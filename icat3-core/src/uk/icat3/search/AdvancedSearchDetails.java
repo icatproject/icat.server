@@ -210,7 +210,4 @@ public class AdvancedSearchDetails {
     public void setInvestigationInclude(InvestigationInclude investigationInclude) {
         this.investigationInclude = investigationInclude;
     }
-    
-    
-    
 }

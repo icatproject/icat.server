@@ -62,7 +62,7 @@ import uk.icat3.util.DatasetInclude;
 public class Dataset extends EntityBaseBean implements Serializable {
     
     @Id
-    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="DATASET_SEQ")
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="DATASET_SEQ")
     @Column(name = "ID", nullable = false)
     private Long id;
     
@@ -448,7 +448,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.Dataset[id=" + id + "]";
+        return "Dataset[id=" + id + "]";
     }
       
     /**

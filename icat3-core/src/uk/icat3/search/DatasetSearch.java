@@ -16,7 +16,10 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetStatus;
 import uk.icat3.entity.DatasetType;
+import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.manager.ManagerUtil;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.DatasetInclude;
@@ -32,39 +35,74 @@ public class DatasetSearch {
     static Logger log = Logger.getLogger(DatasetSearch.class);
     
     /**
-     * From a sample name, return all the datasets a user can view asscoiated with the sample name
+     * From a sample name, return all the samples a user can view asscoiated with the sample name
      *
-        * @param userId federalId of the user.    
+     * @param userId federalId of the user.
      * @param sampleName sample name wiching to search on
      * @param manager manager object that will facilitate interaction with underlying database
-     * @return collection of datasets returned from search
+     * @return collection of {@link Sample}s returned from search
      */
-    public static Collection<Dataset> getBySampleName(String userId, String sampleName, EntityManager manager) {
-        log.trace("getBySampleId("+userId+", "+sampleName+", EntityManager)");
+    public static Collection<Sample> getSamplesBySampleName(String userId, String sampleName, EntityManager manager) {
+        log.trace("getSamplesBySampleName("+userId+", "+sampleName+", EntityManager)");
         
-        Collection<Dataset> dataSets = (Collection<Dataset>)manager.createNamedQuery("Dataset.getBySampleId").setParameter("sampleName",sampleName).getResultList();
+        //get the sample id from sample name
+        Collection<Sample> samples = (Collection<Sample>)manager.createNamedQuery("Sample.findByName").setParameter("name", sampleName).getResultList();
         
-        Collection<Dataset> dataSetsPermssion = new ArrayList<Dataset>();
+        //now see which investigations they can see from these samples.
+        Collection<Sample> samplesPermssion = new ArrayList<Sample>();
         
         //check have permission
-        for(Dataset dataset : dataSets){
+        for(Sample sample : samples){
             try{
                 //check read permission
-                GateKeeper.performAuthorisation(userId, dataset, AccessType.READ, manager);
+                GateKeeper.performAuthorisation(userId, sample, AccessType.READ, manager);
                 
                 //add dataset to list returned to user
-                log.trace("Adding dataset Id:"+dataset.getId()+" to returned list");
-                dataSetsPermssion.add(dataset);
-                
-                //add the DataSetInclude for JAXB
-                dataset.setDatasetInclude(DatasetInclude.DATASET_FILES_ONLY);
+                log.trace("Adding "+ sample+" to returned list");
+                samplesPermssion.add(sample);
                 
             } catch(InsufficientPrivilegesException ignore){
                 //user does not have read access to these to dont add
             }
         }
         
-        return dataSets;
+        return samplesPermssion;
+    }
+    
+    /**
+     * From a sample, return all the datasets a user can view asscoiated with the sample
+     *
+     * @param userId federalId of the user.
+     * @param sample sample object
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @return collection of {@link Dataset} objects
+     */
+    public static Collection<Dataset> getDatasetsBySample(String userId, Sample sample, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException {
+        log.trace("getDatasetsBySample("+userId+", "+sample+", EntityManager)");
+        
+        //get the sample id from sample name
+        Sample sampleFound = ManagerUtil.find(Sample.class, sample.getId(), manager);
+        
+        //check read permission
+        GateKeeper.performAuthorisation(userId, sampleFound, AccessType.READ, manager);
+        
+        Collection<Dataset> datasets = sampleFound.getInvestigationId().getDatasetCollection();
+        
+        Collection<Dataset> datasetsPermission = new ArrayList<Dataset>();
+        
+        for (Dataset dataset : datasets) {
+            
+            if(sampleFound.getId().equals(dataset.getSampleId())){
+                datasetsPermission.add(dataset);
+                log.trace("Adding "+ dataset+" to returned list");
+                //add the DataSetInclude for JAXB
+                dataset.setDatasetInclude(DatasetInclude.DATASET_FILES_ONLY);
+            }
+        }
+        
+        return datasetsPermission;
     }
     
     /**

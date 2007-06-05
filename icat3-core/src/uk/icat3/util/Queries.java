@@ -295,7 +295,7 @@ public class Queries {
     public static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_1 = "SELECT d.ID, d.COMMAND, d.CHECKSUM, d.DESCRIPTION, d.SIGNATURE, d.DATAFILE_VERSION_COMMENT,"+
             "d.MOD_TIME, d.DATAFILE_CREATE_TIME, d.MOD_ID, d.FILE_SIZE, d.LOCATION, d.DATAFILE_MODIFY_TIME, "+
             "d.DATAFILE_VERSION, d.NAME, d.DATASET_ID, d.DATAFILE_FORMAT, d.DATAFILE_FORMAT_VERSION "+
-            "FROM DATAFILE d, dataset ds, JWH_DEF_PARAM_PARTITIONED dp, "+ //using JWH_DEF_PARAM_PARTITIONED instead of DataFile_paramter
+            "FROM DATAFILE d, dataset ds, DATAFILE_PARAMETER dp, "+ //using JWH_DEF_PARAM_PARTITIONED instead of DataFile_paramter
             "(select i.id, i.instrument" +
             "  from investigator g, facility_user f, investigation i "+
             "where f.facility_user_id = g.facility_user_id "+
