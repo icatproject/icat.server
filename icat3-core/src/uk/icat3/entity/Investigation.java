@@ -209,8 +209,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     /**
      * Sets the id of this Investigation to the specified value.
      * @param id the new id
-     */
-    @XmlTransient
+     */   
     public void setId(Long id) {
         this.id = id;
     }
@@ -870,7 +869,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
             boolean valid = false;
             if(instrument != null){
                 //check instrument is correct.
-                Collection<Instrument> instruments = InvestigationSearch.listAllInstruments("null", manager);
+                Collection<Instrument> instruments = InvestigationSearch.listAllInstruments(manager);
                 
                 for(Instrument instrument : instruments){
                     //log.trace(instrument);
