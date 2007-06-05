@@ -30,6 +30,7 @@ import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.DatasetParameterPK;
 import uk.icat3.entity.DatasetStatus;
 import uk.icat3.entity.DatasetType;
+import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.InvestigatorPK;
@@ -215,6 +216,38 @@ public class ICAT extends EJBObject implements ICATLocal {
         return investigationSearchLocal.getMyInvestigations(sessionId);
     }
     
+    /**
+     * Lists all the investigations for the current user
+     *
+     * @param sessionId
+     * @param include
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
+     */
+    @WebMethod(operationName="getMyInvestigationsIncludes")
+    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludes")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesResponse")
+    public Collection<Investigation> getMyInvestigations(@WebParam(name="sessionId") String sessionId, @WebParam(name="include")  InvestigationInclude include) throws SessionException {
+        return investigationSearchLocal.getMyInvestigations(sessionId, include);
+    }
+    
+    /**
+     * Lists all the investigations for the current user
+     *
+     * @param sessionId
+     * @param include
+     * @param startIndex start index of the results found
+     * @param number_results number of results found from the start index
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
+     */
+    @WebMethod(operationName="getMyInvestigationsIncludesPagination")
+    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesPagination")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesPaginationResponse")
+    public Collection<Investigation> getMyInvestigations(@WebParam(name="sessionId") String sessionId, @WebParam(name="include")  InvestigationInclude include, @WebParam(name="startIndex") int startIndex, @WebParam(name="number_results") int number_results) throws SessionException {
+        return investigationSearchLocal.getMyInvestigations(sessionId, include, startIndex, number_results);
+    }
+    
     @WebMethod()
     public Collection<Investigation> searchByUserID(@WebParam(name="sessionId") String sessionId, String userSearch) throws SessionException {
         return investigationSearchLocal.searchByUserID(sessionId, userSearch);
@@ -240,16 +273,21 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     
     @WebMethod()
-    public Collection<String> listAllInstruments(@WebParam(name="sessionId") String sessionId) throws SessionException {
-        return investigationSearchLocal.listAllInstruments(sessionId);
+    public Collection<Instrument> listInstruments(@WebParam(name="sessionId") String sessionId) throws SessionException {
+        return investigationSearchLocal.listInstruments(sessionId);
     }
     ///////////////////////////     End of Investigation Search methods  /////////////////////////////////////////
     
     
     ///////////////////////////     Dataset Search methods  /////////////////////////////////////////
     @WebMethod()
-    public Collection<Dataset> searchBySampleName(@WebParam(name="sessionId") String sessionId, String sampleName) throws SessionException {
-        return datasetSearchLocal.searchBySampleName(sessionId, sampleName);
+    public Collection<Sample> searchSamplesBySampleName(@WebParam(name="sessionId") String sessionId, String sampleName) throws SessionException {
+        return datasetSearchLocal.searchSamplesBySampleName(sessionId, sampleName);
+    }
+    
+    @WebMethod()
+    public Collection<Dataset> searchDatasetsBySample(@WebParam(name="sessionId") String sessionId, Sample sample) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+        return datasetSearchLocal.searchDataSetsBySample(sessionId, sample);
     }
     
     @WebMethod()
