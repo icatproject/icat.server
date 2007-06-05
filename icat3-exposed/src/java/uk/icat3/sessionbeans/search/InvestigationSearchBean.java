@@ -19,6 +19,7 @@ import javax.jws.WebService;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.InvestigationSearch;
@@ -192,6 +193,46 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
     }
     
     /**
+     * Lists all the investigations for the current user
+     *
+     * @param sessionId
+     * @param include
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
+     */
+    @WebMethod(operationName="getMyInvestigationsInclude")
+    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.getMyInvestigationsInclude")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.getMyInvestigationsIncludeResponse")
+    public Collection<Investigation> getMyInvestigations(String sessionId, InvestigationInclude include) throws SessionException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return InvestigationSearch.getUsersInvestigations(userId, include, manager);
+    }
+    
+    /**
+     * Lists all the investigations for the current user
+     *
+     * @param sessionId
+     * @param include
+     * @param startIndex start index of the results found
+     * @param number_results number of results found from the start index
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
+     */
+    @WebMethod(operationName="getMyInvestigationsIncludePagination")
+    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.getMyInvestigationsIncludePagination")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.getMyInvestigationsIncludePaginationResponse")
+    public Collection<Investigation> getMyInvestigations(String sessionId, InvestigationInclude include, int startIndex, int number_results) throws SessionException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return InvestigationSearch.getUsersInvestigations(userId, include, startIndex, number_results, manager);
+    }
+    
+    /**
      * Searches the investigations the user has access to view by user id
      *
      * @param sessionId session id of the user.
@@ -278,12 +319,11 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @return collection
      */
     @WebMethod()
-    public Collection<String> listAllInstruments(String sessionId) throws SessionException {
-        
+    public Collection<Instrument> listInstruments(String sessionId) throws SessionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        return InvestigationSearch.listAllInstruments(userId, manager);
+        return InvestigationSearch.listAllInstruments(manager);
     }
     
 }

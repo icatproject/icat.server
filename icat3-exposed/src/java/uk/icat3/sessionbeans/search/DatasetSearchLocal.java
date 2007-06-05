@@ -6,6 +6,9 @@ import javax.ejb.Local;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetStatus;
 import uk.icat3.entity.DatasetType;
+import uk.icat3.entity.Sample;
+import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
 
 
@@ -14,7 +17,9 @@ import uk.icat3.exceptions.SessionException;
  */
 @Local
 public interface DatasetSearchLocal {
-    public Collection<Dataset> searchBySampleName(String sessionId, String sampleName) throws SessionException ;
+    public Collection<Sample> searchSamplesBySampleName(String sessionId, String sampleName) throws SessionException ;
+    
+    public Collection<Dataset> searchDataSetsBySample(String sessionId, Sample sample) throws SessionException, NoSuchObjectFoundException, NoSuchObjectFoundException, InsufficientPrivilegesException ;
     
     public Collection<DatasetType> listDatasetTypes(String sessionId) throws SessionException ;
     

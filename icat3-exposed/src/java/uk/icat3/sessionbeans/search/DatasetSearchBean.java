@@ -21,6 +21,9 @@ import javax.jws.WebService;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetStatus;
 import uk.icat3.entity.DatasetType;
+import uk.icat3.entity.Sample;
+import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.DatasetSearch;
 import uk.icat3.sessionbeans.ArgumentValidator;
@@ -43,7 +46,7 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
     }
     
     /**
-     * From a sample name, return all the datasets a user can view asscoiated with the sample name
+     * From a sample name, return all the samples a user can view asscoiated with the sample name
      *
      * @param sessionId
      * @param sampleName
@@ -51,12 +54,31 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
      * @return collection
      */
     @WebMethod()
-    public Collection<Dataset> searchBySampleName(String sessionId, String sampleName) throws SessionException {
+    public Collection<Sample> searchSamplesBySampleName(String sessionId, String sampleName) throws SessionException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        return DatasetSearch.getBySampleName(userId, sampleName, manager);
+        return DatasetSearch.getSamplesBySampleName(userId, sampleName, manager);
+    }
+    
+    /**
+     * From a sample, return all the datafiles a user can view asscoiated with the sample name
+     *
+     * @param sessionId
+     * @param sample
+     * @throws uk.icat3.exceptions.SessionException
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException 
+     * @return collection
+     */
+    @WebMethod()
+    public Collection<Dataset> searchDataSetsBySample(String sessionId, Sample sample) throws SessionException, NoSuchObjectFoundException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return DatasetSearch.getDatasetsBySample(userId, sample, manager);
     }
     
     /**
