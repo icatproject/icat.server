@@ -8,8 +8,7 @@
                 <port-component-name>ICAT</port-component-name>
                 <transport-guarantee>CONFIDENTIAL</transport-guarantee>
             </webservice-endpoint>
-        </ejb>
-        
+        </ejb>        
         <ejb>
             <ejb-name>InvestigationManagerBean</ejb-name>
             <webservice-endpoint>
