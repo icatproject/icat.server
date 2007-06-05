@@ -40,72 +40,77 @@ public class ManagerUtil {
      * @param include The information that is needed to be returned with the investigation
      */
     protected static void getInvestigationInformation(Collection<Investigation> investigations, InvestigationInclude include){
-        
-        // now collect the information associated with the investigations requested
-        if(include.toString().equals(InvestigationInclude.ALL.toString())){
-            for(Investigation investigation : investigations){
-                //size invokes the JPA to get the information, other wise the collections are null
-                
-                investigation.getKeywordCollection().size();
-                investigation.getInvestigatorCollection().size();
-                investigation.getDatasetCollection().size();
-                investigation.getSampleCollection().size();
-                
-                for(Dataset dataset : investigation.getDatasetCollection()){
-                    dataset.getDatafileCollection().size();
+        if(include != null){
+            if(include.toString().equals(InvestigationInclude.NONE.toString())){
+                //do nothing
+                return ;
+            }
+            // now collect the information associated with the investigations requested
+            else if(include.toString().equals(InvestigationInclude.ALL.toString())){
+                for(Investigation investigation : investigations){
+                    //size invokes the JPA to get the information, other wise the collections are null
+                    
+                    investigation.getKeywordCollection().size();
+                    investigation.getInvestigatorCollection().size();
+                    investigation.getDatasetCollection().size();
+                    investigation.getSampleCollection().size();
+                    
+                    for(Dataset dataset : investigation.getDatasetCollection()){
+                        dataset.getDatafileCollection().size();
+                    }
                 }
-            }
-            // return datasets with these investigations
-        } else if(include.toString().equals(InvestigationInclude.DATASETS_ONLY.toString())){
-            for(Investigation investigation : investigations){
-                investigation.getDatasetCollection().size();
-            }
-            // return sample with these investigations
-        } else if(include.toString().equals(InvestigationInclude.SAMPLES_ONLY.toString())){
-            for(Investigation investigation : investigations){
-                investigation.getSampleCollection().size();
-            }
-            // return datasets and their datafiles with these investigations
-        } else if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString())){
-            for(Investigation investigation : investigations){
-                investigation.getDatasetCollection().size();
-                
-                for(Dataset dataset : investigation.getDatasetCollection()){
-                    dataset.getDatafileCollection().size();
+                // return datasets with these investigations
+            } else if(include.toString().equals(InvestigationInclude.DATASETS_ONLY.toString())){
+                for(Investigation investigation : investigations){
+                    investigation.getDatasetCollection().size();
                 }
+                // return sample with these investigations
+            } else if(include.toString().equals(InvestigationInclude.SAMPLES_ONLY.toString())){
+                for(Investigation investigation : investigations){
+                    investigation.getSampleCollection().size();
+                }
+                // return datasets and their datafiles with these investigations
+            } else if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString())){
+                for(Investigation investigation : investigations){
+                    investigation.getDatasetCollection().size();
+                    
+                    for(Dataset dataset : investigation.getDatasetCollection()){
+                        dataset.getDatafileCollection().size();
+                    }
+                }
+                // return keywords with these investigations
+            } else if(include.toString().equals(InvestigationInclude.KEYWORDS_ONLY.toString())){
+                for(Investigation investigation : investigations){
+                    //size invokes teh JPA to get the information
+                    investigation.getKeywordCollection().size();
+                }
+                // return c with these investigations
+            } else if(include.toString().equals(InvestigationInclude.INVESTIGATORS_ONLY.toString())){
+                for(Investigation investigation : investigations){
+                    //size invokes teh JPA to get the information
+                    investigation.getInvestigatorCollection().size();
+                }
+                // return investigators and keywords with these investigations
+            } else if(include.toString().equals(InvestigationInclude.INVESTIGATORS_AND_KEYWORDS.toString())){
+                for(Investigation investigation : investigations){
+                    //size invokes the JPA to get the information
+                    investigation.getKeywordCollection().size();
+                    investigation.getInvestigatorCollection().size();
+                }
+            } else {
+                log.trace("No additional info requested.");
             }
-            // return keywords with these investigations
-        } else if(include.toString().equals(InvestigationInclude.KEYWORDS_ONLY.toString())){
+            
+            //set the investigation includes in the class
+            //This is because of JAXWS, it would down load all of the relationships with out this workaround
+            // See in Investigation.getInvestigatorCollection_() method
             for(Investigation investigation : investigations){
-                //size invokes teh JPA to get the information
-                investigation.getKeywordCollection().size();
-            }
-            // return c with these investigations
-        } else if(include.toString().equals(InvestigationInclude.INVESTIGATORS_ONLY.toString())){
-            for(Investigation investigation : investigations){
-                //size invokes teh JPA to get the information
-                investigation.getInvestigatorCollection().size();
-            }
-            // return investigators and keywords with these investigations
-        } else if(include.toString().equals(InvestigationInclude.INVESTIGATORS_AND_KEYWORDS.toString())){
-            for(Investigation investigation : investigations){
-                //size invokes the JPA to get the information
-                investigation.getKeywordCollection().size();
-                investigation.getInvestigatorCollection().size();
-            }
-        } else {
-            log.trace("No additional info requested.");
-        }
-        
-        //set the investigation includes in the class
-        //This is because of JAXWS, it would down load all of the relationships with out this workaround
-        // See in Investigation.getInvestigatorCollection_() method
-        for(Investigation investigation : investigations){
-            investigation.setInvestigationInclude(include);
-            if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString()) || include.toString().equals(InvestigationInclude.ALL.toString())){
-                for(Dataset dataset : investigation.getDatasetCollection()){
-                    log.trace("Setting data sets to include: "+DatasetInclude.DATASET_FILES_AND_PARAMETERS);
-                    dataset.setDatasetInclude(DatasetInclude.DATASET_FILES_AND_PARAMETERS);
+                investigation.setInvestigationInclude(include);
+                if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString()) || include.toString().equals(InvestigationInclude.ALL.toString())){
+                    for(Dataset dataset : investigation.getDatasetCollection()){
+                        log.trace("Setting data sets to include: "+DatasetInclude.DATASET_FILES_AND_PARAMETERS);
+                        dataset.setDatasetInclude(DatasetInclude.DATASET_FILES_AND_PARAMETERS);
+                    }
                 }
             }
         }
@@ -138,7 +143,7 @@ public class ManagerUtil {
                 dataset.getDatasetParameterCollection().size();
             }
         }
-    }    
+    }
     
     /**
      * Checks that the object with primary key exists in the database, if so
@@ -163,10 +168,10 @@ public class ManagerUtil {
     }
     
     /**
-     * Gets the facilityUserId of the user from the federalId 
+     * Gets the facilityUserId of the user from the federalId
      *
      * @param userId federalId of user
-     * @param manager manager object that will facilitate interaction with underlying database   
+     * @param manager manager object that will facilitate interaction with underlying database
      * @return facilityUserId
      */
     public static String getFacilityUserId(String userId, EntityManager manager) {
