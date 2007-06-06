@@ -13,7 +13,8 @@ import java.util.Collection;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import org.apache.log4j.Logger;
-import uk.icat3.util.BaseTestClass;
+import uk.icat3.entity.Instrument;
+import uk.icat3.util.BaseTestClassTX;
 import static org.junit.Assert.*;
 import uk.icat3.util.KeywordType;
 import static uk.icat3.util.TestConstants.*;
@@ -23,7 +24,7 @@ import uk.icat3.entity.Investigation;
  *
  * @author gjd37
  */
-public class TestInvalidUser extends BaseTestClass {
+public class TestInvalidUser extends BaseTestClassTX {
     
     private static Logger log = Logger.getLogger(TestInvalidUser.class);
     
@@ -38,7 +39,7 @@ public class TestInvalidUser extends BaseTestClass {
         Collection<String> instrumentsInDB = (Collection<String>)executeListResultCmd("SELECT  DISTINCT i.name from Instrument i");
         
         //get all the instruments
-        Collection<String> instruments = InvestigationSearch.listAllInstruments(INVALID_USER, em);
+        Collection<Instrument> instruments = InvestigationSearch.listAllInstruments(em);
         
         log.trace("number searched is: "+instruments.size()+", number in DB: "+instrumentsInDB.size());
         assertNotNull("Must not be an null collection of instruments", instruments);

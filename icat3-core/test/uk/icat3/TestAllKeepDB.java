@@ -28,6 +28,8 @@ import uk.icat3.investigationmanager.TestKeyword;
 import uk.icat3.investigationmanager.TestPublication;
 import uk.icat3.investigationmanager.TestSample;
 import uk.icat3.investigationmanager.TestSampleParameter;
+import uk.icat3.search.TestDatafileSearch;
+import uk.icat3.search.TestDatasetSearch;
 import uk.icat3.search.TestInvalidUser;
 import uk.icat3.search.TestKeywordSearch;
 
@@ -47,7 +49,11 @@ import uk.icat3.search.TestKeywordSearch;
             TestDatafileParameter.class,
             
             TestKeywordSearch.class,
-            TestInvalidUser.class
+            TestInvalidUser.class,
+                    
+            TestDatafileSearch.class,
+            TestDatasetSearch.class
+            //TestInvestigationSearch.class
 })
 public class TestAllKeepDB {
     
