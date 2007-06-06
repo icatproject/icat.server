@@ -38,7 +38,7 @@ public class TestDatafile extends BaseTestClassTX {
     
     private static Logger log = Logger.getLogger(TestDatafile.class);
     private static Random random = new Random();
-    
+            
     /**
      * Tests creating a file
      */
@@ -72,9 +72,9 @@ public class TestDatafile extends BaseTestClassTX {
         assertTrue("Deleted must be true", modified.isDeleted());
         
         //check deep delete
-        //for(Investigator investigator : modified.getInvestigatorCollection()){
-        //  assertTrue("investigator must be deleted", investigator.isDeleted());
-        //}
+        for(DatafileParameter param : modified.getDatafileParameterCollection()){
+          assertTrue("investigator must be deleted", param.isDeleted());
+        }
     }
     
     
@@ -87,6 +87,9 @@ public class TestDatafile extends BaseTestClassTX {
         
         //create invalid dataFile, no name
         Datafile duplicateDatafile = getDatafileDuplicate(true);
+        
+        //TODO remove
+        duplicateDatafile.setDelete(false);
         
         DataFileManager.removeDataFile(VALID_USER_FOR_INVESTIGATION, duplicateDatafile, em);
         

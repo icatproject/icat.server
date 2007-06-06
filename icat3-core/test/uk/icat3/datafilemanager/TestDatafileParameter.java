@@ -18,13 +18,11 @@ import uk.icat3.exceptions.ICATAPIException;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import uk.icat3.entity.Parameter;
-import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataFileManager;
-import uk.icat3.util.AccessType;
 import uk.icat3.util.BaseTestClassTX;
 import static uk.icat3.util.TestConstants.*;
 
@@ -44,11 +42,11 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test
     public void addDatafileParameter() throws Exception {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         DatafileParameter validDatafileParameter  = getDatafileParameter(true, true);
         
-        DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, VALID_DATA_FILE_ID, em);
         
         DatafileParameter modified = em.find(DatafileParameter.class,datafileParameterInserted.getDatafileParameterPK() );
         
@@ -63,7 +61,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test
     public void modifyDatafileParameter() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         String modifiedError = "unit test error "+random.nextInt();
         //create invalid datafileParameter, no name
@@ -85,13 +83,13 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=ValidationException.class)
     public void addDuplicateDatafileParameter() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
         
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatafileParameter, VALID_DATA_FILE_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
@@ -104,7 +102,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test
     public void deleteDatafileParameter() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         DatafileParameter validDatafileParameter  = getDatafileParameterDuplicate(true);
         
@@ -121,7 +119,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test
     public void addDeletedDatafileParameter() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
@@ -139,7 +137,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test
     public void removeDatafileParameter() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
@@ -157,7 +155,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void addDatafileParameterInvalidUser() throws ICATAPIException {
-        log.info("Testing  user: "+INVALID_USER+ " for adding datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+INVALID_USER+ " for adding datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         DatafileParameter validDatafileParameter  = getDatafileParameter(true, true);
         
@@ -182,7 +180,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
         DatafileParameter validDatafileParameter  = getDatafileParameter(true,true);
         
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, random.nextLong(), em);        } catch (ICATAPIException ex) {
+            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, random.nextLong(), em);   
+        } catch (ICATAPIException ex) {
                 log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
                 assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
                 
@@ -201,7 +200,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         DatafileParameter validDatafileParameter  = getDatafileParameter(true,true);
         validDatafileParameter.getDatafileParameterPK().setDatafileId(456787L);
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, VALID_INVESTIGATION_ID, em);
+            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, VALID_DATA_FILE_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not correspond'", ex.getMessage().contains("does not correspond"));
@@ -216,13 +215,13 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=ValidationException.class)
     public void addInvalidDatafileParameter() throws ICATAPIException, Exception {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter invalidDatafileParameter = getDatafileParameter(false, true);
         
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, invalidDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, invalidDatafileParameter, VALID_DATA_FILE_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'cannot be null'", ex.getMessage().contains("cannot be null"));
@@ -239,7 +238,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=ValidationException.class)
     public void addInvalidDatafileParameter2() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter invalidDatafileParameter = getDatafileParameter(true, false);
@@ -247,7 +246,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         invalidDatafileParameter.setNumericValue(45d);
         
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, invalidDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, invalidDatafileParameter, VALID_DATA_FILE_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'string value only'", ex.getMessage().contains("string value only"));
@@ -261,7 +260,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=ValidationException.class)
     public void addInvalidDatafileParameter3() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter invalidDatafileParameter = getDatafileParameter(true, true);
@@ -269,7 +268,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         invalidDatafileParameter.setStringValue("45d");
         
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, invalidDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, invalidDatafileParameter, VALID_DATA_FILE_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'numeric value only'", ex.getMessage().contains("numeric value only"));
@@ -282,7 +281,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     //@Test(expected=InsufficientPrivilegesException.class)
     public void modifyDatafileParameterProps() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying a props datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying a props datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter propsDatafileParameter = getDatafileParameterDuplicate(false);
@@ -301,7 +300,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     //  @Test(expected=InsufficientPrivilegesException.class)
     public void deleteDatafileParameterProps() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a props datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a props datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter propsDatafileParameter = getDatafileParameterDuplicate(false);
@@ -320,7 +319,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     //  @Test(expected=InsufficientPrivilegesException.class)
     public void removeDatafileParameterProps() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a props datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a props datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter propsDatafileParameter = getDatafileParameterDuplicate(false);
@@ -339,7 +338,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void removeDatafileParameterNoId() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter datafileParameter = getDatafileParameter(true, true);
@@ -359,7 +358,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void deleteDatafileParameterNoId() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter datafileParameter = getDatafileParameter(true, true);
@@ -379,7 +378,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void updateDatafileParameterNoId() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter datafileParameter = getDatafileParameter(true, true);

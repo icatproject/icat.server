@@ -31,6 +31,7 @@ import uk.icat3.investigationmanager.TestSampleParameter;
 import uk.icat3.search.TestDatafileSearch;
 import uk.icat3.search.TestDatasetSearch;
 import uk.icat3.search.TestInvalidUser;
+import uk.icat3.search.TestInvestigationSearch;
 import uk.icat3.search.TestKeywordSearch;
 
 @RunWith(Suite.class)
@@ -52,8 +53,8 @@ import uk.icat3.search.TestKeywordSearch;
             TestInvalidUser.class,
                     
             TestDatafileSearch.class,
-            TestDatasetSearch.class
-            //TestInvestigationSearch.class
+            TestDatasetSearch.class,
+            TestInvestigationSearch.class
 })
 public class TestAllKeepDB {
     

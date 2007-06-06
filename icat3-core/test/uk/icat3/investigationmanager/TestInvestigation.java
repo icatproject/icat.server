@@ -104,6 +104,23 @@ public class TestInvestigation extends BaseTestClassTX {
         }
     }
     
+    /**
+     * Tests creating a file
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void getDeletedInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for gettings deleted investigation to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Investigation validInvestigation  = getInvestigationDuplicate(true);
+        
+        try {
+            Investigation investigation = InvestigationManager.getInvestigation(VALID_USER_FOR_INVESTIGATION, validInvestigation.getId(), em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage(),ex);
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
     
     /**
      * Tests creating a file
@@ -114,6 +131,9 @@ public class TestInvestigation extends BaseTestClassTX {
         
         //create invalid investigation, no name
         Investigation duplicateInvestigation = getInvestigationDuplicate(true);
+        
+        //TODO remove
+        duplicateInvestigation.setDelete(false);
         
         InvestigationManager.removeInvestigation(VALID_USER_FOR_INVESTIGATION, duplicateInvestigation, em);
         

@@ -20,14 +20,13 @@ import uk.icat3.exceptions.ICATAPIException;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import uk.icat3.entity.Datafile;
+import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetStatus;
-import uk.icat3.entity.Investigator;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataSetManager;
-import uk.icat3.util.AccessType;
 import uk.icat3.util.BaseTestClassTX;
 import static uk.icat3.util.TestConstants.*;
 
@@ -39,6 +38,7 @@ public class TestDataset extends BaseTestClassTX {
     
     private static Logger log = Logger.getLogger(TestDataset.class);
     private static Random random = new Random();
+    
     
     /**
      * Tests creating a file
@@ -131,11 +131,48 @@ public class TestDataset extends BaseTestClassTX {
         assertTrue("Deleted must be true", modified.isDeleted());
         
         //check deep delete
-        //for(Investigator investigator : modified.getInvestigatorCollection()){
-        //  assertTrue("investigator must be deleted", investigator.isDeleted());
-        //}
+        for(Datafile file : modified.getDatafileCollection()){
+            assertTrue("investigator must be deleted", file.isDeleted());
+            for(DatafileParameter datafileParameter : file.getDatafileParameterCollection()){
+                assertTrue("datafileParameter must be deleted", datafileParameter.isDeleted());
+            }
+        }
     }
     
+    /**
+     * Tests creating a file
+     */
+    @Test(expected=NoSuchObjectFoundException.class)
+    public void getDeletedDataset() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a deleted dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        
+        Dataset validDataset  = getDatasetDuplicate(true);
+        
+        try {
+            Dataset datasetGot = DataSetManager.getDataSet(VALID_USER_FOR_INVESTIGATION, validDataset.getId(),  em);
+            
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void createDeletedDataset() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        
+        Dataset validDataset  = getDatasetDuplicate(true);
+        validDataset.setId(null);
+        
+        Dataset datasetInserted = DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, validDataset, VALID_INVESTIGATION_ID, em);
+        
+        checkDataset(datasetInserted);
+        assertFalse("Deleted must be false", datasetInserted.isDeleted());
+    }
     
     /**
      * Tests creating a file
@@ -146,6 +183,9 @@ public class TestDataset extends BaseTestClassTX {
         
         //create invalid dataset, no name
         Dataset duplicateDataset = getDatasetDuplicate(true);
+        
+        //TODO remove this
+        duplicateDataset.setDelete(false);
         
         DataSetManager.removeDataSet(VALID_USER_FOR_INVESTIGATION, duplicateDataset, em);
         
@@ -377,7 +417,7 @@ public class TestDataset extends BaseTestClassTX {
             assertFalse("Deleted must be false", set.isDeleted());
         }
     }
-       
+    
     
     /**
      * Tests remove a file, no Id
