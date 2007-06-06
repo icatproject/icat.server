@@ -147,16 +147,19 @@ public class InvestigationSearch extends ManagerUtil {
             
             //get all, maybe should limit this to 500?
             if(searchType == searchType.SURNAME){
-                
+                 log.trace("Searching by SURNAME");
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).setParameter("userId",userId).setParameter("surname","%"+searchString+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             } else {
+                log.trace("Searching by USERID");
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).setParameter("userId",userId).setParameter("userIdSearched","%"+searchString+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             }
         } else {
             if(searchType == searchType.SURNAME){
                 //list all Investigation ids that the users has access to
+                log.trace("Searching by SURNAME");
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).setParameter("userId",userId).setParameter("surname","%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             } else {
+                log.trace("Searching by USERID");
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).setParameter("userId",userId).setParameter("userIdSearched","%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             }
         }
@@ -471,33 +474,66 @@ public class InvestigationSearch extends ManagerUtil {
     }
     
     /**
-     *  Gets all the investigations associated with that user, ie. thart they are investigator of.
+     *  Gets all the investigations associated with that user, ie. that they are investigator of.
      *
      * @param userId federalId of the user.
+     * @param include information that is needed to be returned with the investigation
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> getUsersInvestigations(String userId, int startIndex, int number_results, EntityManager manager){
+    public static Collection<Investigation> getUsersInvestigations(String userId, InvestigationInclude include, int startIndex, int number_results, EntityManager manager){
         log.trace("getUserInvestigations("+userId+", "+startIndex+", "+number_results+", EnitiyManager)");
+        
+        Collection<Investigation> investigations = null;
         if(number_results < 0){
             //get all, maybe should limit this to 500?
-            return  manager.createNamedQuery(INVESTIGATIONS_FOR_USER).setParameter("userId",userId).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+            investigations = manager.createNamedQuery(INVESTIGATIONS_FOR_USER).setParameter("userId",userId).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
-            return  manager.createNamedQuery(INVESTIGATIONS_FOR_USER).setParameter("userId",userId).setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+            investigations = manager.createNamedQuery(INVESTIGATIONS_FOR_USER).setParameter("userId",userId).setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
+        
+        //add include information
+        ManagerUtil.getInvestigationInformation(investigations, include);
+        
+        return investigations;
     }
     
     /**
-     *  Gets all the investigations associated with that user, ie. thart they are investigator of.
+     *  Gets all the investigations associated with that user, ie. that they are investigator of.
      *
      * @param userId federalId of the user.
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> getUsersInvestigations(String userId, EntityManager manager){
-        return getUsersInvestigations(userId,-1, -1, manager);
+        return getUsersInvestigations(userId, InvestigationInclude.NONE, -1, -1, manager);
+    }
+    
+    /**
+     *  Gets all the investigations associated with that user, ie. that they are investigator of.
+     *
+     * @param userId federalId of the user
+     * @param startIndex start index of the results found
+     * @param number_results number of results found from the start index
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
+     */
+    public static Collection<Investigation> getUsersInvestigations(String userId, int startIndex, int number_results, EntityManager manager){
+        return getUsersInvestigations(userId, InvestigationInclude.NONE, startIndex, number_results, manager);
+    }
+    
+    /**
+     *  Gets all the investigations associated with that user, ie. that they are investigator of.
+     *
+     * @param userId federalId of the user.
+     * @param include information that is needed to be returned with the investigation
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
+     */
+    public static Collection<Investigation> getUsersInvestigations(String userId, InvestigationInclude include, EntityManager manager){
+        return getUsersInvestigations(userId, include, -1, -1, manager);
     }
     
     /**
@@ -531,9 +567,11 @@ public class InvestigationSearch extends ManagerUtil {
         log.trace("searchByKeywords("+userId+", "+keywords+", "+operator +", "+include+", "+fuzzy+", "+use_security+", "+startIndex+", "+number_results+", EntityManager)");
         
         Collection<Investigation> investigations = null;
+        String SQL = null;
         
         //dynamically create the SQL
-        String SQL = INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL;
+        if(use_security)  SQL = INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL;
+        else  SQL = INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL_NOSECURITY;
         
         int i  = 2;
         //check if fuzzy
@@ -552,12 +590,16 @@ public class InvestigationSearch extends ManagerUtil {
             }
         }
         
+        //TODO: this section only works for one fuzzy keyword (AND)
         //need to do this if used a EJB cos of the hashcode difference if LogicalOperator is serialized
         //so == and equals do not work, only on string of object
         if(operator.toString().equals(LogicalOperator.AND.toString())) {
             SQL = SQL +" GROUP BY ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT," +
-                    " RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, " +
-                    "FACILITY_CYCLE HAVING Count(*) = ?number_keywords";
+                    " RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, ";
+            
+            //TODO put in check that works with one fuzy keyword
+            if(fuzzy) SQL = SQL +"FACILITY_CYCLE HAVING Count(*) >= ?number_keywords";
+            else SQL = SQL + "FACILITY_CYCLE HAVING Count(*) = ?number_keywords";
         }
         
         SQL = SQL +" ORDER BY TITLE ASC";
@@ -719,8 +761,8 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return List of {@link Instrument}s
      */
-    public static Collection<Instrument> listAllInstruments(String userId, EntityManager manager)  {
-        log.trace("listAllInstruments("+userId+", EntityManager)");
+    public static Collection<Instrument> listAllInstruments(EntityManager manager)  {
+        log.trace("listAllInstruments(EntityManager)");
         return  manager.createNamedQuery(ALL_INSTRUMENTS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }
 }

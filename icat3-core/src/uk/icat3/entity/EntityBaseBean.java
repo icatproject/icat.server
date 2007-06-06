@@ -165,7 +165,7 @@ public class EntityBaseBean {
     }
     
     /**
-     * Automatically updates deleted, modTime and modId when entity is created
+     * Automatically updates deleted, modTime, createTime and modId when entity is created
      */
     @PrePersist
     public void prePersist(){
@@ -174,6 +174,7 @@ public class EntityBaseBean {
             createId = modId;
         } else if(createId != null) modId = createId;
         modTime = new Date();
+        //TODO remove createTime = modTime;
     }
     
     @XmlTransient
@@ -258,7 +259,7 @@ public class EntityBaseBean {
                             log.warn(getClass().getSimpleName()+": "+fieldName+" cannot be accessed.",ex);
                         }
                     }
-                                        
+                    
                     if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("max") ){
                         log.trace("Checking maximum string length");
                         try {
