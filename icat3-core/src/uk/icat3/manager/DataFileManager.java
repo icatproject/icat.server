@@ -362,7 +362,7 @@ public class DataFileManager extends ManagerUtil {
         
         try {
             //check dataSetParameterManaged not already added
-            DatafileParameter dataFileParameterManaged = find(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);
+            DatafileParameter dataFileParameterManaged = findObject(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);
             if(dataFileParameterManaged.isDeleted()){
                 dataFileParameterManaged.setDelete(false);
                 dataFileParameterManaged.setModId(facilityUserId);

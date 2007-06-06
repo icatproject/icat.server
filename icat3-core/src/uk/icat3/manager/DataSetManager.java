@@ -406,11 +406,15 @@ public class DataSetManager extends ManagerUtil {
         }
         //ok, now check permissions
         GateKeeper.performAuthorisation(userId, datasetManaged, AccessType.UPDATE, manager);
+                         
         String facilityUserId = getFacilityUserId(userId, manager);
         
         //add the dataset parameter to the dataset
         datasetManaged.setSampleId(sampleId);
         datasetManaged.setModId(facilityUserId);
+        
+        //TODO her eto put this check is valid,
+        datasetManaged.isValid(manager);
     }
     
     /**
@@ -443,7 +447,7 @@ public class DataSetManager extends ManagerUtil {
         
         try {
             //check dataSetParameterManaged not already added
-            DatasetParameter dataSetParameterManaged = find(DatasetParameter.class, dataSetParameter.getDatasetParameterPK(), manager);
+            DatasetParameter dataSetParameterManaged = findObject(DatasetParameter.class, dataSetParameter.getDatasetParameterPK(), manager);
             if(dataSetParameterManaged.isDeleted()){
                 dataSetParameterManaged.setDelete(false);
                 dataSetParameterManaged.setModId(facilityUserId);

@@ -17,7 +17,10 @@ import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
+import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.manager.ManagerUtil;
+import uk.icat3.security.GateKeeper;
+import uk.icat3.util.AccessType;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 import static uk.icat3.util.Queries.*;
@@ -147,7 +150,7 @@ public class InvestigationSearch extends ManagerUtil {
             
             //get all, maybe should limit this to 500?
             if(searchType == searchType.SURNAME){
-                 log.trace("Searching by SURNAME");
+                log.trace("Searching by SURNAME");
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).setParameter("userId",userId).setParameter("surname","%"+searchString+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             } else {
                 log.trace("Searching by USERID");
@@ -339,7 +342,7 @@ public class InvestigationSearch extends ManagerUtil {
                 firstSearch = true;
                 
                 SQL += "SELECT ds.investigation_id "+
-                        "FROM dataset ds, DATAFILE df, JWH_DEF_PARAM_PARTITIONED dfp "+ //partitioned tabel instaed of datafile_parameter
+                        "FROM dataset ds, DATAFILE df, DATAFILE_PARAMETER dfp "+ //partitioned tabel instaed of datafile_parameter
                         "WHERE df.dataset_id = ds.id "+
                         "AND (Lower(df.name) LIKE '%'||Lower(?datafile_name)||'%' OR ?datafile_name IS NULL) "+
                         "AND (( (df.datafile_create_time >= ?startDate AND df.datafile_create_time < (?endDate))) "+
@@ -422,7 +425,7 @@ public class InvestigationSearch extends ManagerUtil {
         //set investigators
         if(advanDTO.isInvestigators()){
             int j = 1;
-            for(String investigator : advanDTO.getInstruments()){
+            for(String investigator : advanDTO.getInvestigators()){
                 query = query.setParameter("investigator"+j++,investigator);
             }
         }
@@ -441,10 +444,21 @@ public class InvestigationSearch extends ManagerUtil {
             investigations = query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         
-        //add all the investigation information to the list of investigations
-        getInvestigationInformation(investigations,advanDTO.getInvestigationInclude());
+        Collection<Investigation> allowed = new ArrayList<Investigation>();
+        //TODO no security on this search so done at the end
+        for (Investigation investigation : investigations) {
+            try {
+                GateKeeper.performAuthorisation(userId, investigation, AccessType.READ, manager);
+                allowed.add(investigation);
+            } catch (InsufficientPrivilegesException ex) {
+                //ignore
+            }
+        }
         
-        return investigations;
+        //add all the investigation information to the list of investigations
+        getInvestigationInformation(allowed,advanDTO.getInvestigationInclude());
+        
+        return allowed;
     }
     
     /**

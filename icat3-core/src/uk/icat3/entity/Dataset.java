@@ -10,8 +10,6 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -57,9 +55,9 @@ import uk.icat3.util.DatasetInclude;
     @NamedQuery(name = "Dataset.findByModId", query = "SELECT d FROM Dataset d WHERE d.modId = :modId"),
     @NamedQuery(name = "Dataset.findbyUnique", query = "SELECT d FROM Dataset d WHERE (d.sampleId = :sampleId OR d.sampleId IS NULL) AND (d.name = :name OR d.name IS NULL) AND (d.investigationId = :investigationId OR d.investigationId IS NULL)  AND (d.datasetType = :datasetType OR d.datasetType IS NULL)")
 })
-@XmlRootElement
-@SequenceGenerator(name="DATASET_SEQ",sequenceName="DATASET_ID_SEQ",allocationSize=1)
-public class Dataset extends EntityBaseBean implements Serializable {
+        @XmlRootElement
+        @SequenceGenerator(name="DATASET_SEQ",sequenceName="DATASET_ID_SEQ",allocationSize=1)
+        public class Dataset extends EntityBaseBean implements Serializable {
     
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="DATASET_SEQ")
@@ -97,7 +95,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetId")
     private Collection<DatasetLevelPermission> datasetLevelPermissionCollection;
-      
+    
     private transient DatasetInclude datasetInclude = DatasetInclude.NONE;
     
     /** Creates a new instance of Dataset */
@@ -382,7 +380,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
         //datafiles
         if(getDatafileCollection() != null){
             for(Datafile datafile : getDatafileCollection()){
-                if(type == Cascade.DELETE) datafile.setDeleted(deleted);
+                if(type == Cascade.DELETE) datafile.setCascade(Cascade.DELETE, value);
                 else if(type == Cascade.MOD_ID) datafile.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     datafile.setModId(value.toString());
@@ -450,7 +448,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
     public String toString() {
         return "Dataset[id=" + id + "]";
     }
-      
+    
     /**
      * Overrides the isValid function, checks each of the datafiles and datafile parameters are valid
      *
@@ -525,7 +523,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
      * Checks weather the dataset is unique in the database.
      */
     private boolean isUnique(EntityManager manager){
-        
+      
         Query query =  manager.createNamedQuery("Dataset.findbyUnique");
         query = query.setParameter("sampleId",sampleId);
         query = query.setParameter("investigationId", investigationId);
@@ -533,13 +531,30 @@ public class Dataset extends EntityBaseBean implements Serializable {
         query = query.setParameter("name",name);
         
         try {
-            Dataset dataset = (Dataset)query.getSingleResult();
+            
+            Collection<Dataset> datasets = (Collection<Dataset>)query.getResultList();
+            log.trace("Returned: "+datasets.size()+" datasets.");
+            for (Dataset dataset : datasets) {
+                log.trace(dataset);
+            }
+        
             //if found id is this id then it is unique
-            if(dataset.getId().equals(id)) return true;
+            if(datasets.size() == 1){
+                Long datasetId= datasets.iterator().next().getId();
+                if(datasetId != null && datasetId.equals(id)) {
+                    log.trace("Dataset found is same dataset");
+                    return true;
+                }
+                else {
+                    log.trace("Dataset found is not same dataset, not unique as "+datasets.iterator().next());
+                    return false;
+                }
+            } else if(datasets.size() == 0) return true;
             else return false;
-        } catch(NoResultException nre) {
+        } catch(Exception nre) {
+            log.warn(nre);
             //means it is unique
-            return true;
+            return false;
         }
     }
     

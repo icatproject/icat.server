@@ -15,6 +15,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
+import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
@@ -156,15 +157,38 @@ public class ManagerUtil {
      * @return object if found
      */
     public static <T> T find(Class<T> entityClass, Object primaryKey, EntityManager manager) throws NoSuchObjectFoundException{
+        return findObject(entityClass, primaryKey, manager, false);
+    }
+    
+    
+    private static <T> T findObject(Class<T> entityClass, Object primaryKey, EntityManager manager, boolean findDeleted) throws NoSuchObjectFoundException{
+        
         if(primaryKey == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+": id: "+primaryKey+" not found.");
         
         T object = manager.find(entityClass, primaryKey);
         
         if(object == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+": id: "+primaryKey+" not found.");
-        
+        if(((EntityBaseBean)object).isDeleted() && !findDeleted){
+            log.trace(entityClass.getSimpleName()+": id: "+primaryKey+" exists in the database but is deleted.");
+            throw new NoSuchObjectFoundException(entityClass.getSimpleName()+": id: "+primaryKey+" not found.");
+        }
         log.trace(entityClass.getSimpleName()+": id: "+primaryKey+" exists in the database");
         
         return object;
+    }
+    
+    /**
+     * Checks that the object with primary key exists in the database, also fins deleted objects, if so
+     * is returned
+     *
+     * @param entityClass entity class that you are looking for
+     * @param primaryKey primary key of object wanting to find
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @return object if found
+     */
+    public static <T> T findObject(Class<T> entityClass, Object primaryKey, EntityManager manager) throws NoSuchObjectFoundException{
+        return findObject(entityClass, primaryKey, manager, true);
     }
     
     /**

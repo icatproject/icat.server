@@ -671,7 +671,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * @param isDeleted
      */
     public void setCascade(Cascade type, Object value){
-        log.trace("Setting: "+toString()+" from type: "+type+" to :"+value);
+        log.trace("Setting: "+toString()+" from type: "+type+" to : "+value);
         String deleted = "Y";
         if(type == Cascade.DELETE){
             deleted = (((Boolean)value).booleanValue()) ? "Y" : "N";
@@ -680,7 +680,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         //datafiles
         if(getDatasetCollection() != null){
             for(Dataset dataset : getDatasetCollection()){
-                if(type == Cascade.DELETE)  dataset.setCascade(Cascade.DELETE, deleted);
+                if(type == Cascade.DELETE)  dataset.setCascade(Cascade.DELETE, value);
                 else if(type == Cascade.MOD_ID) dataset.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     dataset.setModId(value.toString());
@@ -905,13 +905,22 @@ public class Investigation extends EntityBaseBean implements Serializable {
         query = query.setParameter("instrument",instrument);
         
         try {
-            Investigation investigation = (Investigation)query.getSingleResult();
+            Collection<Investigation> investigations = (Collection<Investigation>)query.getResultList();
+           log.trace("Returned: "+investigations.size()+" investigations.");
             //if found id is this id then it is unique
-            if(investigation != null && investigation.getId().equals(id)) return true;
+            if(investigations.size() == 1){
+                if(investigations.iterator().next().getId().equals(id)) {
+                    log.trace("Investigations found is same dataset");
+                    return true;
+                }
+                else {
+                    log.trace("Investigations found is not same Investigations, not unique as "+investigations.iterator().next());
+                    return false;
+                }
+            } else if(investigations.size() == 0) return true;
             else return false;
         } catch(NoResultException nre) {
             //means it is unique
-            log.trace("is unique");
             return true;
         }
     }

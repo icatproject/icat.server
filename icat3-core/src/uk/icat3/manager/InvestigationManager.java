@@ -592,9 +592,8 @@ public class InvestigationManager extends ManagerUtil {
             String facilityUserId = getFacilityUserId(userId, manager);
             
             try {
-                //check investigator not already added
-                // if(publication.getId() == null) throw new NoSuchObjectFoundException();
-                Publication publicationManaged = find(Publication.class, publication.getId(), manager);
+                //check investigator not already added                
+                Publication publicationManaged = findObject(Publication.class, publication.getId(), manager);
                 if(publicationManaged.isDeleted()){
                     publicationManaged.setDelete(false);
                     publicationManaged.setModId(facilityUserId);
@@ -628,7 +627,7 @@ public class InvestigationManager extends ManagerUtil {
             //TODO check for primary key
             try {
                 //check investigator not already added
-                Sample sampleManaged = sample.find(manager);
+                Sample sampleManaged = findObject(Sample.class,sample.getId() ,manager);
                 if(sampleManaged.isDeleted()){
                     sampleManaged.setDelete(false);
                     sampleManaged.setModId(facilityUserId);
@@ -639,7 +638,7 @@ public class InvestigationManager extends ManagerUtil {
                     log.warn(sampleManaged +" already added to investigation.");
                     throw new ValidationException(sampleManaged+" is not unique");
                 }
-            } catch (NoResultException ex) {
+            } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
                 sample.setCreateId(facilityUserId);
@@ -664,7 +663,7 @@ public class InvestigationManager extends ManagerUtil {
             //TODO check for primary key
             try {
                 //check investigator not already added
-                SampleParameter sampleManaged = find(SampleParameter.class, sampleParamter.getSampleParameterPK(), manager);
+                SampleParameter sampleManaged = findObject(SampleParameter.class, sampleParamter.getSampleParameterPK(), manager);
                 if(sampleManaged.isDeleted()){
                     sampleManaged.setDelete(false);
                     sampleManaged.setModId(facilityUserId);
@@ -695,7 +694,7 @@ public class InvestigationManager extends ManagerUtil {
             //TODO check for primary key
             try {
                 //check investigator not already added
-                Keyword keywordManaged = find(Keyword.class, keyword.getKeywordPK(), manager);
+                Keyword keywordManaged = findObject(Keyword.class, keyword.getKeywordPK(), manager);
                 if(keywordManaged.isDeleted()){
                     keywordManaged.setDelete(false);
                     keywordManaged.setModId(facilityUserId);
@@ -725,7 +724,7 @@ public class InvestigationManager extends ManagerUtil {
             
             try {
                 //check investigator not already added
-                Investigator investigatorManaged = find(Investigator.class, investigator.getInvestigatorPK(), manager);
+                Investigator investigatorManaged = findObject(Investigator.class, investigator.getInvestigatorPK(), manager);
                 if(investigatorManaged.isDeleted()){
                     investigatorManaged.setDelete(false);
                     investigatorManaged.setModId(facilityUserId);
