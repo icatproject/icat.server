@@ -13,13 +13,15 @@ import java.util.Collection;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.Query;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.exceptions.NoSuchUserException;
+import uk.icat3.exceptions.ObjectDeletedException;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.InvestigationInclude;
 
@@ -168,6 +170,7 @@ public class ManagerUtil {
         T object = manager.find(entityClass, primaryKey);
         
         if(object == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+": id: "+primaryKey+" not found.");
+        //if dont want to find deleted items and it is deleted then throw exception
         if(((EntityBaseBean)object).isDeleted() && !findDeleted){
             log.trace(entityClass.getSimpleName()+": id: "+primaryKey+" exists in the database but is deleted.");
             throw new NoSuchObjectFoundException(entityClass.getSimpleName()+": id: "+primaryKey+" not found.");
@@ -178,7 +181,7 @@ public class ManagerUtil {
     }
     
     /**
-     * Checks that the object with primary key exists in the database, also fins deleted objects, if so
+     * Checks that the object with primary key exists in the database, also finds deleted objects, if so
      * is returned
      *
      * @param entityClass entity class that you are looking for
@@ -211,6 +214,48 @@ public class ManagerUtil {
             log.warn("federalId:" +userId+" has more than one associated facility user.");
             throw new RuntimeException("federalId:" +userId+" has more than one associated facility user.  DB should never allow this error to be thrown.");
         }
+    }
+    
+    
+    public static boolean isUnique(EntityBaseBean entityClass, EntityManager manager) {
+        if(entityClass instanceof Dataset){
+            Dataset dataset = (Dataset)entityClass;
+            Query query =  (Query) manager.createNamedQuery("Dataset.findbyUnique");
+            query = query.setParameter("sampleId",dataset.getSampleId());
+            query = query.setParameter("investigationId", dataset.getInvestigationId());
+            query = query.setParameter("datasetType",dataset.getDatasetType());
+            query = query.setParameter("name",dataset.getName());
+            
+            try {
+                log.trace("Looking for: sampleId: "+ dataset.getSampleId());
+                log.trace("Looking for: investigationId: "+ dataset.getInvestigationId());
+                log.trace("Looking for: datasetType: "+dataset.getDatasetType());
+                log.trace("Looking for: name: "+dataset.getName());
+                
+                Dataset datasetFound = (Dataset)query.getSingleResult();
+                log.trace("Returned: "+datasetFound);
+                if(datasetFound.getId() != null && datasetFound.getId().equals(dataset.getId())) {
+                    log.trace("Dataset found is this dataset");
+                    return true;
+                } else {
+                    log.trace("Dataset found is not this dataset, so no unique");
+                    return false;
+                }
+            } catch(NoResultException nre) {
+                log.trace("No results so unique");
+                //means it is unique
+                return true;
+            } catch(Throwable ex) {
+                log.warn(ex);
+                //means it is unique
+                return false;
+            }
+        } else if(entityClass instanceof Investigation){
+            log.trace("Investigation");
+        } else if(entityClass instanceof Datafile){
+            log.trace("Datafile");
+        }
         
+        return true;
     }
 }

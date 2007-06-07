@@ -523,7 +523,7 @@ import uk.icat3.util.DatasetInclude;
      * Checks weather the dataset is unique in the database.
      */
     private boolean isUnique(EntityManager manager){
-      
+        
         Query query =  manager.createNamedQuery("Dataset.findbyUnique");
         query = query.setParameter("sampleId",sampleId);
         query = query.setParameter("investigationId", investigationId);
@@ -531,28 +531,26 @@ import uk.icat3.util.DatasetInclude;
         query = query.setParameter("name",name);
         
         try {
+            log.trace("Looking for: sampleId: "+ sampleId);
+            log.trace("Looking for: investigationId: "+ investigationId);
+            log.trace("Looking for: datasetType: "+datasetType);
+            log.trace("Looking for: name: "+name);
             
-            Collection<Dataset> datasets = (Collection<Dataset>)query.getResultList();
-            log.trace("Returned: "+datasets.size()+" datasets.");
-            for (Dataset dataset : datasets) {
-                log.trace(dataset);
+            Dataset datasetFound = (Dataset)query.getSingleResult();
+            log.trace("Returned: "+datasetFound);
+            if(datasetFound.getId() != null && datasetFound.getId().equals(this.getId())) {
+                log.trace("Dataset found is this dataset");
+                return true;
+            } else {
+                log.trace("Dataset found is not this dataset, so no unique");
+                return false;
             }
-        
-            //if found id is this id then it is unique
-            if(datasets.size() == 1){
-                Long datasetId= datasets.iterator().next().getId();
-                if(datasetId != null && datasetId.equals(id)) {
-                    log.trace("Dataset found is same dataset");
-                    return true;
-                }
-                else {
-                    log.trace("Dataset found is not same dataset, not unique as "+datasets.iterator().next());
-                    return false;
-                }
-            } else if(datasets.size() == 0) return true;
-            else return false;
-        } catch(Exception nre) {
-            log.warn(nre);
+        } catch(NoResultException nre) {
+            log.trace("No results so unique");
+            //means it is unique
+            return true;
+        } catch(Throwable ex) {
+            log.warn(ex);
             //means it is unique
             return false;
         }

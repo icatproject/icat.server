@@ -46,11 +46,10 @@ public class EntityBaseBean {
     @ICAT(merge=false, nullable=true)
     protected Date modTime;
     
-    //TODO uncomment this
-    /*@Column(name = "CREATE_TIME", nullable = false)
+    @Column(name = "CREATE_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @ICAT(merge=false, nullable=true)
-    protected Date createTime;*/
+    protected Date createTime;
     
     @Column(name = "CREATE_ID", nullable = false)
     @ICAT(merge=false, nullable=true)
@@ -88,20 +87,19 @@ public class EntityBaseBean {
      * Gets the createTime of this entity.
      * @return the modTime
      */
-    //TODO uncomment this
-   /* @XmlTransient
+    @XmlTransient
     public Date getCreateTime() {
         return this.createTime;
-    }*/
+    }
     
     /**
      * Sets the createTime of this entity to the specified value.
      * @param modTime the new modTime
      */
-    //TODO uncomment this
-    /*public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }*/
+    public void setCreateTime(Date createTime) {
+        //not allowed to be set
+        // this.createTime = createTime;
+    }
     
     /**
      * Gets the createId of this entity.
@@ -154,6 +152,7 @@ public class EntityBaseBean {
     
     /**
      * Automatically updates modTime when entity is persisted or merged
+     * @throws uk.icat3.exceptions.EntityNotModifiableError
      */
     @PreUpdate
     public void preUpdate() throws EntityNotModifiableError {
@@ -174,7 +173,7 @@ public class EntityBaseBean {
             createId = modId;
         } else if(createId != null) modId = createId;
         modTime = new Date();
-        //TODO remove createTime = modTime;
+        createTime = modTime;
     }
     
     @XmlTransient
@@ -352,8 +351,8 @@ public class EntityBaseBean {
                         //log.trace("Setting "+fieldName+" to "+field.get(object));
                         //thisField.set(this, field.get(object));
                         //new way of using beadn properties
-                        swapProperty(fieldName, this, object);
-                        
+                        swapProperty(fieldName, object, this);
+                        //swapProperty(fieldName, this, object);
                     }
                 }
             }  catch (Exception ex) {

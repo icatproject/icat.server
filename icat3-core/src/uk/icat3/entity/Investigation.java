@@ -904,24 +904,29 @@ public class Investigation extends EntityBaseBean implements Serializable {
         query = query.setParameter("facilityCycle",facilityCycle);
         query = query.setParameter("instrument",instrument);
         
-        try {
-            Collection<Investigation> investigations = (Collection<Investigation>)query.getResultList();
-           log.trace("Returned: "+investigations.size()+" investigations.");
-            //if found id is this id then it is unique
-            if(investigations.size() == 1){
-                if(investigations.iterator().next().getId().equals(id)) {
-                    log.trace("Investigations found is same dataset");
-                    return true;
-                }
-                else {
-                    log.trace("Investigations found is not same Investigations, not unique as "+investigations.iterator().next());
-                    return false;
-                }
-            } else if(investigations.size() == 0) return true;
-            else return false;
+         try {
+            log.trace("Looking for: invNumber: "+ invNumber);
+            log.trace("Looking for: visitId: "+ visitId);
+            log.trace("Looking for: facilityCycle: "+facilityCycle);
+            log.trace("Looking for: instrument: "+instrument);
+            
+            Investigation investigationFound = (Investigation)query.getSingleResult();
+            log.trace("Returned: "+investigationFound);
+            if(investigationFound.getId() != null && investigationFound.getId().equals(this.getId())) {
+                log.trace("investigation found is this dataset");
+                return true;
+            } else {
+                log.trace("investigation found is not this investigation, so no unique");
+                return false;
+            }
         } catch(NoResultException nre) {
+            log.trace("No results so unique");
             //means it is unique
             return true;
+        } catch(Throwable ex) {
+            log.warn(ex);
+            //means it is unique
+            return false;
         }
     }
     

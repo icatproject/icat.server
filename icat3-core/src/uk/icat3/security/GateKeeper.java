@@ -181,7 +181,12 @@ public class GateKeeper {
             //TBI...
             
             //TODO: added by gjd37, if user one of investigators then allow access
-            if(investigation.getInvestigatorCollection() == null) break;
+            if(investigation.getInvestigatorCollection() == null) {
+                if(access == AccessType.READ){
+                    log.debug("User: " + user + " granted " + access + " permission on " + element +" as there are no investigators");
+                    return;
+                } else break;
+            }
             for(Investigator investigator : investigation.getInvestigatorCollection()){
                 log.trace(""+investigator.getFacilityUser());
                 if(investigator.getFacilityUser().getFederalId().equals(user)){
@@ -239,5 +244,5 @@ public class GateKeeper {
         InsufficientPrivilegesException e = new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
         log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
         throw(e);
-    }//end method    
+    }//end method
 }

@@ -188,6 +188,9 @@ public class DataFileManager extends ManagerUtil {
     public static Datafile createDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataFile("+userId+", "+dataFile+", EntityManager)");
         
+        //check id is null
+        dataFile.setId(null);
+        
         //check user has update access
         GateKeeper.performAuthorisation(userId, dataFile, AccessType.CREATE, manager);
         String facilityUserId = getFacilityUserId(userId, manager);
@@ -363,16 +366,16 @@ public class DataFileManager extends ManagerUtil {
         try {
             //check dataSetParameterManaged not already added
             DatafileParameter dataFileParameterManaged = findObject(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);
-            if(dataFileParameterManaged.isDeleted()){
+            /*if(dataFileParameterManaged.isDeleted()){
                 dataFileParameterManaged.setDelete(false);
                 dataFileParameterManaged.setModId(facilityUserId);
                 log.info(dataFileParameterManaged +" been deleted, undeleting now.");
                 return dataFileParameterManaged;
-            } else {
+            } else {*/
                 //do nothing, throw exception
                 log.warn(dataFileParameterManaged +" already added to dataset.");
                 throw new ValidationException(dataFileParameterManaged+" is not unique");
-            }
+            //}
         } catch (NoSuchObjectFoundException ex) {
             //not already in DB so add
             //sets modId for persist

@@ -448,16 +448,16 @@ public class DataSetManager extends ManagerUtil {
         try {
             //check dataSetParameterManaged not already added
             DatasetParameter dataSetParameterManaged = findObject(DatasetParameter.class, dataSetParameter.getDatasetParameterPK(), manager);
-            if(dataSetParameterManaged.isDeleted()){
+            /*if(dataSetParameterManaged.isDeleted()){
                 dataSetParameterManaged.setDelete(false);
                 dataSetParameterManaged.setModId(facilityUserId);
                 log.info(dataSetParameterManaged +" been deleted, undeleting now.");
                 return dataSetParameterManaged;
-            } else {
+            } else {*/
                 //do nothing, throw exception
                 log.warn(dataSetParameterManaged +" already added to dataset.");
                 throw new ValidationException(dataSetParameterManaged+" is not unique");
-            }
+            //}
         } catch (NoSuchObjectFoundException ex) {
             //not already in DB so add
             //sets modId for persist
