@@ -146,11 +146,11 @@ public class TestKeywordSearch extends BaseTestClass {
         
         
         //search for users own investigations
-        Collection<Investigation> searchedInvestigations = InvestigationSearch.searchByKeyword(INVALID_USER,"a", 0, 100000, em);
+        Collection<Investigation> searchedInvestigations = InvestigationSearch.searchByKeyword(INVALID_USER,"l", 0, 100000, em);
         log.trace("Investigations for user "+INVALID_USER+" is "+searchedInvestigations.size());
         
         assertNotNull("Must not be an null collection", searchedInvestigations);
-        assertEquals("Collection 'searchByKeyword()' should be zero size", investigations.size() , searchedInvestigations.size());
+        assertEquals("Collection 'searchByKeyword()' should be 1", investigations.size() , searchedInvestigations.size());
         
         //search by user id
         /*Collection<Investigation> searchedUserIdInvestigations = InvestigationSearch.searchByUserID(INVALID_USER,"JAMES-JAMES", em);
