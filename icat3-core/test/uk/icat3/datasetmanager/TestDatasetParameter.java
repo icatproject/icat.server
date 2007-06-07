@@ -65,10 +65,14 @@ public class TestDatasetParameter extends BaseTestClassTX {
         
         String modifiedError = "unit test error "+random.nextInt();
         //create invalid datasetParameter, no name
+          DatasetParameter modifiedDatasetParameter = getDatasetParameter(true, true);
         DatasetParameter duplicateDatasetParameter = getDatasetParameterDuplicate(true);
-        duplicateDatasetParameter.setError(modifiedError);
-        
-        DataSetManager.updateDataSetParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatasetParameter, em);
+        Dataset ds  =em.find(Dataset.class, VALID_DATA_SET_ID);
+        modifiedDatasetParameter.setError(modifiedError);
+        modifiedDatasetParameter.setDataset(ds);
+        modifiedDatasetParameter.setDatasetParameterPK(duplicateDatasetParameter.getDatasetParameterPK());
+                
+        DataSetManager.updateDataSetParameter(VALID_USER_FOR_INVESTIGATION, modifiedDatasetParameter, em);
         
         DatasetParameter modified = em.find(DatasetParameter.class, duplicateDatasetParameter.getDatasetParameterPK() );
         
@@ -117,19 +121,24 @@ public class TestDatasetParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=ValidationException.class)
     public void addDeletedDatasetParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datasetParameter, no name
         DatasetParameter duplicateDatasetParameter = getDatasetParameterDuplicate(true);
-        
-        DatasetParameter datasetParameterInserted = (DatasetParameter)DataSetManager.addDataSetParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
-        
-        DatasetParameter modified = em.find(DatasetParameter.class,datasetParameterInserted.getDatasetParameterPK() );
+        try{
+            DatasetParameter datasetParameterInserted = (DatasetParameter)DataSetManager.addDataSetParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+            
+            throw ex;
+        }
+       /* DatasetParameter modified = em.find(DatasetParameter.class,datasetParameterInserted.getDatasetParameterPK() );
         
         checkDatasetParameter(modified);
-        assertFalse("Deleted must be false", modified.isDeleted());
+        assertFalse("Deleted must be false", modified.isDeleted());*/
     }
     
     /**

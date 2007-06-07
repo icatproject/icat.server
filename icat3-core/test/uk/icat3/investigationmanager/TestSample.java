@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.ICATAPIException;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
@@ -59,12 +60,19 @@ public class TestSample extends BaseTestClassTX {
     public void modifySample() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying sample to investigation Id: "+VALID_INVESTIGATION_ID);
         
-        String modifiedName = "Modfied Name "+random.nextInt();
+        String modifiedName = "Modified Name "+random.nextInt();
         //create invalid sample, no name
+        Sample modifiedSample = getSample(true);
         Sample duplicateSample = getSampleDuplicate(true);
-        duplicateSample.setSafetyInformation(modifiedName);
         
-        InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSample, em);
+        modifiedSample.setSafetyInformation(modifiedName);
+        //set investigation id
+        Investigation in = em.find(Investigation.class, VALID_INVESTIGATION_ID);
+        modifiedSample.setInvestigationId(in);
+        modifiedSample.setId(duplicateSample.getId());
+        
+        
+        InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, modifiedSample, em);
         
         Sample modified = em.find(Sample.class,duplicateSample.getId() );
         
@@ -114,19 +122,24 @@ public class TestSample extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=ValidationException.class)
     public void addDeletedSample() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted sample to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid sample, no name
         Sample duplicateSample = getSampleDuplicate(true);
-        
-        Sample sampleInserted = (Sample)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSample, VALID_INVESTIGATION_ID, em);
-        
-        Sample modified = em.find(Sample.class,sampleInserted.getId() );
+        try{
+            Sample sampleInserted = (Sample)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSample, VALID_INVESTIGATION_ID, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+            
+            throw ex;
+        }
+       /* Sample modified = em.find(Sample.class,sampleInserted.getId() );
         
         checkSample(modified);
-        assertFalse("Deleted must be false", modified.isDeleted());
+        assertFalse("Deleted must be false", modified.isDeleted());*/
     }
     
     /**
@@ -138,6 +151,7 @@ public class TestSample extends BaseTestClassTX {
         
         //create invalid sample, no name
         Sample duplicateSample = getSampleDuplicate(true);
+        duplicateSample.setDelete(false);
         
         InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSample, AccessType.REMOVE, em);
         
@@ -325,7 +339,7 @@ public class TestSample extends BaseTestClassTX {
             sample = samples.iterator().next();
         } else {
             Collection<Sample> samples = (Collection<Sample>)executeListResultCmd("select d from Sample d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
-             if(samples.isEmpty()) throw new RuntimeException("No none props samples found in DB");
+            if(samples.isEmpty()) throw new RuntimeException("No none props samples found in DB");
             sample = samples.iterator().next();
         }
         log.trace(sample);

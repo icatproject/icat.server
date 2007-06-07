@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.ICATAPIException;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.Sample;
 import uk.icat3.entity.SampleParameter;
@@ -65,10 +66,16 @@ public class TestSampleParameter extends BaseTestClassTX {
         
         String modifiedError = "unit test error "+random.nextInt();
         //create invalid sampleParameter, no name
-        SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
-        duplicateSampleParameter.setError(modifiedError);
         
-        InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, em);
+        SampleParameter modifiedSampleParameter = getSampleParameter(true, true);
+        SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
+        modifiedSampleParameter.setError(modifiedError);
+        //set investigation id
+        Sample sample = em.find(Sample.class, VALID_SAMPLE_ID_FOR_INVESTIGATION_ID);
+        modifiedSampleParameter.setSample(sample);
+        modifiedSampleParameter.setSampleParameterPK(duplicateSampleParameter.getSampleParameterPK());
+        
+        InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, modifiedSampleParameter, em);
         
         SampleParameter modified = em.find(SampleParameter.class, duplicateSampleParameter.getSampleParameterPK()  );
         
@@ -118,19 +125,26 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=ValidationException.class)
     public void addDeletedSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid sampleParameter, no name
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
         
-        SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, VALID_INVESTIGATION_ID, em);
+        try {
+            SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, VALID_INVESTIGATION_ID, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+            
+            throw ex;
+        }
         
-        SampleParameter modified = em.find(SampleParameter.class,sampleParameterInserted.getSampleParameterPK()  );
+       /* SampleParameter modified = em.find(SampleParameter.class,sampleParameterInserted.getSampleParameterPK()  );
         
         checkSampleParameter(modified);
-        assertFalse("Deleted must be false", modified.isDeleted());
+        assertFalse("Deleted must be false", modified.isDeleted());*/
     }
     
     /**
@@ -142,6 +156,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         
         //create invalid sampleParameter, no name
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
+        duplicateSampleParameter.setDelete(false);
         
         InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, AccessType.REMOVE, em);
         

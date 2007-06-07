@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.ICATAPIException;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Publication;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
@@ -63,14 +64,20 @@ public class TestPublication extends BaseTestClassTX {
         
         String modifiedURL = "http://"+random.nextInt();
         //create invalid publication, no name
-        Publication duplicatePublication = getPublicationDuplicate(true);
+        Publication modifiedInvestigation = getPublication(true);
+        Publication duplicatePubilication = getPublicationDuplicate(true);
+        //set investigation id
+        Investigation in = em.find(Investigation.class, VALID_INVESTIGATION_ID);
+        modifiedInvestigation.setInvestigationId(in);
+        modifiedInvestigation.setId(duplicatePubilication.getId());
         
-        duplicatePublication.setUrl(modifiedURL);
+        log.trace("modifiedInvestigation url is  "+modifiedInvestigation.getUrl());
+        modifiedInvestigation.setUrl(modifiedURL);
+        log.trace("Modifies URl is "+modifiedURL);
         
+        InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, modifiedInvestigation, em);
         
-        InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicatePublication, em);
-        
-        Publication modified = em.find(Publication.class,duplicatePublication.getId() );
+        Publication modified = em.find(Publication.class,modifiedInvestigation.getId() );
         
         assertEquals("url must be "+modifiedURL+" and not "+modified.getUrl(), modified.getUrl().toString(), modifiedURL);
         
@@ -118,30 +125,36 @@ public class TestPublication extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=ValidationException.class)
     public void addDeletedPublication() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid publication, no name
         Publication duplicatePublication = getPublicationDuplicate(true);
-        
-        Publication publicationInserted = (Publication)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicatePublication, VALID_INVESTIGATION_ID, em);
-        
-        Publication modified = em.find(Publication.class,publicationInserted.getId() );
+        try{
+            Publication publicationInserted = (Publication)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicatePublication, VALID_INVESTIGATION_ID, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+            
+            throw ex;
+        }
+       /* Publication modified = em.find(Publication.class,publicationInserted.getId() );
         
         checkPublication(modified);
-        assertFalse("Deleted must be false", modified.isDeleted());
+        assertFalse("Deleted must be false", modified.isDeleted());*/
     }
     
     /**
      * Tests creating a file
      */
-    @Test
+    // @Test
     public void removePublication() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid publication, no name
         Publication duplicatePublication = getPublicationDuplicate(true);
+        duplicatePublication.setDelete(false);
         
         InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicatePublication, AccessType.REMOVE, em);
         
@@ -223,10 +236,10 @@ public class TestPublication extends BaseTestClassTX {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
             throw ex;
-        }        
+        }
     }
     
-     /**
+    /**
      * Tests creating a file
      */
     @Test(expected=NoSuchObjectFoundException.class)
@@ -242,7 +255,7 @@ public class TestPublication extends BaseTestClassTX {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
             throw ex;
-        }        
+        }
     }
     
     /**
@@ -261,7 +274,7 @@ public class TestPublication extends BaseTestClassTX {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
             throw ex;
-        }        
+        }
     }
     
     /**

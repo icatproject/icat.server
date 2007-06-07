@@ -23,6 +23,7 @@ import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetStatus;
+import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -50,6 +51,28 @@ public class TestDataset extends BaseTestClassTX {
         Dataset dataset = getDataset(true);
         
         Dataset datasetInserted = DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, dataset, VALID_INVESTIGATION_ID, em);
+        
+        checkDataset(datasetInserted);
+        assertFalse("Deleted must be false", datasetInserted.isDeleted());
+    }
+    
+    @Test
+    public void modifyDataset() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        
+        String modifiedDesc = "Modfied Desc "+random.nextInt();
+        
+        Dataset modifiedDataset = getDataset(true);
+        Dataset duplicateDataset = getDatasetDuplicate(true);
+        
+        Investigation in = em.find(Investigation.class, VALID_INVESTIGATION_ID);
+        modifiedDataset.setInvestigationId(in);
+        modifiedDataset.setDescription(modifiedDesc);
+        modifiedDataset.setId(duplicateDataset.getId());
+               
+        Dataset datasetInserted = DataSetManager.updateDataSet(VALID_USER_FOR_INVESTIGATION, modifiedDataset, em);
+        assertEquals("Desc must be "+modifiedDesc+" and not "+datasetInserted.getDescription(), datasetInserted.getDescription(), modifiedDesc);
+        
         
         checkDataset(datasetInserted);
         assertFalse("Deleted must be false", datasetInserted.isDeleted());
@@ -161,17 +184,20 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=ValidationException.class)
     public void createDeletedDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a dataset for dataset id: "+VALID_INVESTIGATION_ID);
         
         Dataset validDataset  = getDatasetDuplicate(true);
         validDataset.setId(null);
-        
-        Dataset datasetInserted = DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, validDataset, VALID_INVESTIGATION_ID, em);
-        
-        checkDataset(datasetInserted);
-        assertFalse("Deleted must be false", datasetInserted.isDeleted());
+        try{
+            Dataset datasetInserted = DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, validDataset, VALID_INVESTIGATION_ID, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+            
+            throw ex;
+        }
     }
     
     /**
@@ -486,6 +512,8 @@ public class TestDataset extends BaseTestClassTX {
         assertNotNull("createId must be not null", file.getCreateId());
         assertEquals("createId must be "+VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION, VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION, file.getCreateId());
         
+        assertNotNull("createTime must be not null", file.getCreateTime());
+        
         assertNotNull("modId must be not null", file.getModId());
         // assertEquals("modId must be "+VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION, VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION, file.getModId());
         
@@ -496,6 +524,8 @@ public class TestDataset extends BaseTestClassTX {
     
     private boolean checkDataset(Dataset file){
         assertTrue("dataset must be in db", em.contains(file));
+        
+        assertNotNull("createTime must be not null", file.getCreateTime());
         
         assertNotNull("createId must be not null", file.getCreateId());
         assertEquals("createId must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, file.getCreateId());

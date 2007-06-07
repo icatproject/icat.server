@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
+import uk.icat3.entity.Dataset;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -55,6 +56,28 @@ public class TestDatafile extends BaseTestClassTX {
         assertNotNull("Format cannot be null", dataFileInserted.getDatafileFormat());
     }
     
+     @Test
+    public void modifyDatafile() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying a datafile for datafile id: "+VALID_INVESTIGATION_ID);
+        
+        String modifiedDesc = "Modfied Desc "+random.nextInt();
+        
+        Datafile modifiedDatafile = getDatafile(true);
+        Datafile duplicateDatafile = getDatafileDuplicate(true);
+        
+        Dataset ds = em.find(Dataset.class, VALID_INVESTIGATION_ID);
+        modifiedDatafile.setDatasetId(ds);
+        modifiedDatafile.setDescription(modifiedDesc);
+        modifiedDatafile.setId(duplicateDatafile.getId());
+               
+        Datafile datafileInserted = DataFileManager.updateDataFile(VALID_USER_FOR_INVESTIGATION, modifiedDatafile, em);
+        assertEquals("Desc must be "+modifiedDesc+" and not "+datafileInserted.getDescription(), datafileInserted.getDescription(), modifiedDesc);
+        
+        
+        checkDatafile(datafileInserted);
+        assertFalse("Deleted must be false", datafileInserted.isDeleted());
+    }
+     
     /**
      * Tests deleting a file, marks it as deleted Y
      */
@@ -77,8 +100,7 @@ public class TestDatafile extends BaseTestClassTX {
         }
     }
     
-    
-    /**
+        /**
      * Tests removing a file, removes it from DB
      */
     @Test
@@ -407,6 +429,8 @@ public class TestDatafile extends BaseTestClassTX {
     private boolean checkDatafile(Datafile file){
         assertTrue("dataFile must be in db", em.contains(file));
         
+         assertNotNull("createTime must be not null", file.getCreateTime());
+         
         assertNotNull("createId must be not null", file.getCreateId());
         assertEquals("createId must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, file.getCreateId());
         

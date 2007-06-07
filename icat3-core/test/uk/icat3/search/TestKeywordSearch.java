@@ -123,7 +123,7 @@ public class TestKeywordSearch extends BaseTestClass {
         if(valid){
             assertTrue("Number of user keywords searched for user is different to number in DB", keywordsForUser.size() > 0);
         } else {
-            assertSame("Number of user keywords searched for user is different to number in DB", 0 , keywordsForUser.size());
+            assertSame("Number of user keywords searched for user is different to number in DB", 1 , keywordsForUser.size());
             
         }
         
@@ -141,16 +141,16 @@ public class TestKeywordSearch extends BaseTestClass {
         log.info("Testing invalid user: "+INVALID_USER+ ", should be associated with no investigations");
         
         //get the number of keywords
-        Long investigations = (Long)executeSingleResultCmd("SELECT count(i) FROM Investigation i where i.investigatorCollection IS EMPTY ");
-        log.trace("Investigations for user in DB for "+INVALID_USER+" is "+investigations);
+        Collection<Investigation> investigations = (Collection<Investigation> )executeListResultCmd("SELECT i FROM Investigation i where i.investigatorCollection IS EMPTY ");
+        log.trace("Investigations for user in DB for "+INVALID_USER+" is "+investigations.size());
         
         
         //search for users own investigations
-        Collection<Investigation> searchedInvestigations = InvestigationSearch.searchByKeyword(INVALID_USER,"%", 0, 100000, em);
+        Collection<Investigation> searchedInvestigations = InvestigationSearch.searchByKeyword(INVALID_USER,"a", 0, 100000, em);
         log.trace("Investigations for user "+INVALID_USER+" is "+searchedInvestigations.size());
         
         assertNotNull("Must not be an null collection", searchedInvestigations);
-        assertEquals("Collection 'searchByKeyword()' should be zero size", investigations.intValue() , searchedInvestigations.size());
+        assertEquals("Collection 'searchByKeyword()' should be zero size", investigations.size() , searchedInvestigations.size());
         
         //search by user id
         /*Collection<Investigation> searchedUserIdInvestigations = InvestigationSearch.searchByUserID(INVALID_USER,"JAMES-JAMES", em);

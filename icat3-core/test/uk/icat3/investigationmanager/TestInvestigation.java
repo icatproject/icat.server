@@ -63,6 +63,35 @@ public class TestInvestigation extends BaseTestClassTX {
         }
     }
     
+    @Test
+    public void modifyInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying investigation");
+        
+        String invAbstract = "Valid length modified";
+        Investigation validInvestigation  = getInvestigation(true);
+        Investigation duplicateInvestigation  = getInvestigationDuplicate(true);
+        validInvestigation.setInvAbstract(invAbstract);
+        validInvestigation.setId(duplicateInvestigation.getId());
+        
+        Investigation investigationInserted = (Investigation)InvestigationManager.updateInvestigation(VALID_USER_FOR_INVESTIGATION, validInvestigation, em);
+        
+        Investigation modified = em.find(Investigation.class,investigationInserted.getId());
+        
+        assertEquals("Abstract must be "+invAbstract+" and not "+modified.getInvAbstract(), modified.getInvAbstract(), invAbstract);
+     
+        
+        checkInvestigation(modified);
+        assertFalse("Deleted must be false", modified.isDeleted());
+        
+        //check that investigator is there
+        for(Investigator investigator : modified.getInvestigatorCollection()){
+            log.trace(investigator.getInvestigation());
+            log.trace(investigator.getInvestigatorPK().getFacilityUserId());
+            assertFalse("investigator must not be deleted", investigator.isDeleted());
+            assertEquals("investigator must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, investigator.getInvestigatorPK().getFacilityUserId());
+        }
+    }
+    
     /**
      * Tests creating a file
      */
@@ -122,6 +151,23 @@ public class TestInvestigation extends BaseTestClassTX {
         }
     }
     
+    //TODO add deleted investigation here
+    @Test(expected=ValidationException.class)
+    public void addDeletedInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted investigation to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Investigation validInvestigation  = getInvestigationDuplicate(true);
+       
+        try {
+            Investigation investigation = InvestigationManager.createInvestigation(VALID_USER_FOR_INVESTIGATION, validInvestigation, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+            
+            throw ex;
+        }
+    }
+    
     /**
      * Tests creating a file
      */
@@ -145,14 +191,14 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void addInvestigationInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for adding investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
         Investigation validInvestigation  = getInvestigation(true);
         
         try {
-            Investigation investigationInserted = (Investigation)InvestigationManager.addInvestigationObject(INVALID_USER, validInvestigation, VALID_INVESTIGATION_ID, em);
+            Investigation investigationInserted = (Investigation)InvestigationManager.createInvestigation(INVALID_USER, validInvestigation, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
@@ -255,6 +301,7 @@ public class TestInvestigation extends BaseTestClassTX {
         Collection<Investigation> investigationsFound = InvestigationManager.getInvestigations(VALID_USER_FOR_INVESTIGATION, investigations,em);
         
         for(Investigation investigation : investigationsFound){
+            assertNotNull("investigation create time cannot be null", investigation.getCreateTime());
             assertNotNull("investigation title cannot be null", investigation.getTitle());
             assertNotNull("investigation InvNumber cannot be null", investigation.getInvNumber());
             assertNotNull("investigation id cannot be null", investigation.getId());
@@ -275,7 +322,7 @@ public class TestInvestigation extends BaseTestClassTX {
         
         //checkInvestigation(investigation);
         assertEquals("investigation id is "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, investigation.getId());
-        // assertFalse("Deleted must be false", investigation.isDeleted());
+        assertFalse("Deleted must be false", investigation.isDeleted());
         assertNotNull("investigation title cannot be null", investigation.getTitle());
         assertNotNull("investigation InvNumber cannot be null", investigation.getInvNumber());
         assertNotNull("investigation id cannot be null", investigation.getId());
@@ -372,6 +419,7 @@ public class TestInvestigation extends BaseTestClassTX {
     }
     
     private void checkInvestigation(Investigation investigation){
+        assertNotNull("createTime must be not null", investigation.getCreateTime());
         assertNotNull("investigation title cannot be null", investigation.getTitle());
         assertNotNull("investigation InvNumber cannot be null", investigation.getInvNumber());
         assertNotNull("investigation id cannot be null", investigation.getId());

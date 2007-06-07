@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.ICATAPIException;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
@@ -65,10 +66,14 @@ public class TestDatafileParameter extends BaseTestClassTX {
         
         String modifiedError = "unit test error "+random.nextInt();
         //create invalid datafileParameter, no name
+        DatafileParameter modifiedDatafileParameter = getDatafileParameter(true, true);
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
-        duplicateDatafileParameter.setError(modifiedError);
+        Datafile df  =em.find(Datafile.class, VALID_DATA_FILE_ID);
+        modifiedDatafileParameter.setError(modifiedError);
+        modifiedDatafileParameter.setDatafile(df);
+        modifiedDatafileParameter.setDatafileParameterPK(duplicateDatafileParameter.getDatafileParameterPK());
         
-        DataFileManager.updateDatafileParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatafileParameter, em);
+        DataFileManager.updateDatafileParameter(VALID_USER_FOR_INVESTIGATION, modifiedDatafileParameter, em);
         
         DatafileParameter modified = em.find(DatafileParameter.class, duplicateDatafileParameter.getDatafileParameterPK() );
         
@@ -117,19 +122,25 @@ public class TestDatafileParameter extends BaseTestClassTX {
     /**
      * Tests creating a data file parameter that has been marked as deleted, should undelete it
      */
-    @Test
+    @Test(expected=ValidationException.class)
     public void addDeletedDatafileParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
         
-        DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
-        
-        DatafileParameter modified = em.find(DatafileParameter.class,datafileParameterInserted.getDatafileParameterPK() );
-        
+        try{
+            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+            
+            throw ex;
+        }
+        /*DatafileParameter modified = em.find(DatafileParameter.class,datafileParameterInserted.getDatafileParameterPK() );
+         
         checkDatafileParameter(modified);
-        assertFalse("Deleted must be false", modified.isDeleted());
+        assertFalse("Deleted must be false", modified.isDeleted());*/
     }
     
     /**
@@ -141,6 +152,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
         
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
+        
+        duplicateDatafileParameter.setDelete(false);
         
         DataFileManager.removeDatafileParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatafileParameter, em);
         
@@ -180,13 +193,13 @@ public class TestDatafileParameter extends BaseTestClassTX {
         DatafileParameter validDatafileParameter  = getDatafileParameter(true,true);
         
         try {
-            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, random.nextLong(), em);   
+            DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, random.nextLong(), em);
         } catch (ICATAPIException ex) {
-                log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-                assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
-                
-                throw ex;
-            }
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            
+            throw ex;
+        }
     }
     
     /**

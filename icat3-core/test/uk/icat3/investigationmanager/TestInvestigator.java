@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.ICATAPIException;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
@@ -61,10 +62,15 @@ public class TestInvestigator extends BaseTestClassTX {
         
         String modifiedRole = "Modfied Role "+random.nextInt();
         //create invalid investigator, no name
+        Investigator modifiedInvestigator = getInvestigator(true);
         Investigator duplicateInvestigator = getInvestigatorDuplicate(true);
-        duplicateInvestigator.setRole(modifiedRole);
+        modifiedInvestigator.setRole(modifiedRole);
         
-        InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateInvestigator, em);
+        Investigation in = em.find(Investigation.class, VALID_INVESTIGATION_ID);
+        modifiedInvestigator.setInvestigation(in);
+        modifiedInvestigator.setInvestigatorPK(duplicateInvestigator.getInvestigatorPK());
+        
+        InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, modifiedInvestigator, em);
         
         Investigator modified = em.find(Investigator.class,duplicateInvestigator.getInvestigatorPK() );
         
@@ -114,19 +120,25 @@ public class TestInvestigator extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=ValidationException.class)
     public void addDeletedInvestigator() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted investigator to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid investigator, no name
         Investigator duplicateInvestigator = getInvestigatorDuplicate(true);
+        try{
+            Investigator investigatorInserted = (Investigator)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateInvestigator, VALID_INVESTIGATION_ID, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+            
+            throw ex;
+        }
         
-        Investigator investigatorInserted = (Investigator)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateInvestigator, VALID_INVESTIGATION_ID, em);
-        
-        Investigator modified = em.find(Investigator.class,investigatorInserted.getInvestigatorPK() );
-        
+        /*Investigator modified = em.find(Investigator.class,investigatorInserted.getInvestigatorPK() );
+         
         checkInvestigator(modified);
-        assertFalse("Deleted must be false", modified.isDeleted());
+        assertFalse("Deleted must be false", modified.isDeleted());*/
     }
     
     /**
@@ -138,6 +150,7 @@ public class TestInvestigator extends BaseTestClassTX {
         
         //create invalid investigator, no name
         Investigator duplicateInvestigator = getInvestigatorDuplicate(true);
+        duplicateInvestigator.setDelete(false);
         
         InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateInvestigator, AccessType.REMOVE, em);
         
@@ -334,7 +347,7 @@ public class TestInvestigator extends BaseTestClassTX {
     private Investigator getInvestigator(boolean valid){
         if(valid){
             //create valid investigator
-            Investigator investigator = new Investigator("9932",  VALID_INVESTIGATION_ID);
+            Investigator investigator = new Investigator("Test User",  VALID_INVESTIGATION_ID);
             
             return investigator;
         } else {
