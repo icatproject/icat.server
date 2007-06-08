@@ -9,6 +9,8 @@
 
 package uk.icat3.sessionbeans;
 
+import javax.annotation.security.DeclareRoles;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -33,10 +35,13 @@ import uk.icat3.exceptions.SessionException;
 import uk.icat3.user.UserDetails;
 
 /**
- *
+ * This adds all the Admin methods to the ICAT methods and protects them with the role 'admin'
+ *  
  * @author gjd37
  */
 @Stateless()
+//this is proteted from normal use because it has admin functions in it
+@RolesAllowed("admin")
 @WebService(/*serviceName="ICATService", name="ICATServices",*/ targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
@@ -106,7 +111,7 @@ public class ICATAdmin extends ICAT implements ICATLocal {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
-    public void removeInvestigator(@WebParam(name="sessionId") String sessionId, InvestigatorPK investigatorPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    public void removeInvestigator(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigatorPK") InvestigatorPK investigatorPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         investigationManagerLocal.removeInvestigator(sessionId, investigatorPK);
     }
            
@@ -120,7 +125,7 @@ public class ICATAdmin extends ICAT implements ICATLocal {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
-    public void removeSample(@WebParam(name="sessionId") String sessionId, Long sampleId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    public void removeSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleId") Long sampleId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         investigationManagerLocal.removeSample(sessionId, sampleId);
     }
        
@@ -134,7 +139,7 @@ public class ICATAdmin extends ICAT implements ICATLocal {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
-    public void removeSampleParameter(@WebParam(name="sessionId") String sessionId,SampleParameterPK sampleParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    public void removeSampleParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleParameterPK") SampleParameterPK sampleParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         investigationManagerLocal.removeSampleParameter(sessionId, sampleParameterPK);
     }
         
@@ -153,7 +158,7 @@ public class ICATAdmin extends ICAT implements ICATLocal {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void removeDataSet(@WebParam(name="sessionId") String sessionId, Long dataSetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public void removeDataSet(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSetId") Long dataSetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datasetManagerLocal.removeDataSet(sessionId, dataSetId);
     }
        
@@ -167,7 +172,7 @@ public class ICATAdmin extends ICAT implements ICATLocal {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void removeDataSetParameter(@WebParam(name="sessionId") String sessionId, DatasetParameterPK datasetParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public void removeDataSetParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="datasetParameterPK") DatasetParameterPK datasetParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datasetManagerLocal.removeDataSetParameter(sessionId, datasetParameterPK);
     }
            ///////////////////////////     End of Dataset Manager methods  /////////////////////////////////////////
@@ -184,7 +189,7 @@ public class ICATAdmin extends ICAT implements ICATLocal {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
-    public void removeDataFile(@WebParam(name="sessionId") String sessionId, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public void removeDataFile(@WebParam(name="sessionId") String sessionId, @WebParam(name="datafileId") Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datafileManagerLocal.removeDataFile(sessionId, datafileId);
     }
     
@@ -201,7 +206,7 @@ public class ICATAdmin extends ICAT implements ICATLocal {
     @WebMethod(operationName="removeDataFileObject")
     @RequestWrapper(className="uk.icat3.sessionbeans.manager.removeDataFileObject")
     @ResponseWrapper(className="uk.icat3.sessionbeans.manager.removeDataFileObjectResponse")
-    public void removeDataFile(@WebParam(name="sessionId") String sessionId, Datafile dataFile) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public void removeDataFile(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataFile") Datafile dataFile) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datafileManagerLocal.removeDataFile(sessionId, dataFile);
     }
               
@@ -216,7 +221,7 @@ public class ICATAdmin extends ICAT implements ICATLocal {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
-    public void removeDataFileParameter(@WebParam(name="sessionId") String sessionId, DatafileParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public void removeDataFileParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="datafileParameterPK") DatafileParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datafileManagerLocal.removeDataFileParameter(sessionId, datafileParameterPK);
     }
    
