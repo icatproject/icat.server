@@ -44,7 +44,7 @@ import uk.icat3.util.InvestigationInclude;
  * @author gjd37
  */
 @Stateless()
-@WebService(/*name="ICATInvestigationManagerService",*/targetNamespace="client.icat3.uk")
+//@WebService(/*name="ICATInvestigationManagerService",*/targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -198,6 +198,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return keyword that was added
      */
     @WebMethod()
     public Keyword addKeyword(String sessionId, Keyword keyword, Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
@@ -259,6 +260,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return publication that was added
      */
     @WebMethod()
     public Publication addPublication(String sessionId, Publication publication, Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
@@ -340,6 +342,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return investigator that was added
      */
     @WebMethod()
     public Investigator addInvestigator(String sessionId, Investigator investigator, Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
@@ -421,6 +424,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return sample that was added
      */
     @WebMethod()
     public Sample addSample(String sessionId, Sample sample, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException{
@@ -563,6 +567,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return sampleparameter that was added
      */
     @WebMethod()
     public SampleParameter addSampleParameter(String sessionId, SampleParameter sampleParameter, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException{
