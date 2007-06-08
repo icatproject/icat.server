@@ -10,8 +10,6 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -68,10 +66,9 @@ import uk.icat3.exceptions.ValidationException;
     @Column(name = "RANGE_BOTTOM")
     private String rangeBottom;
     
-    //TODO uncomment desc
-    //@Column(name = "DESCRIPTION")
-    //private String description;
-    
+    @Column(name = "DESCRIPTION")
+    private String description;
+      
     @JoinColumns(value =  {
         @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
         @JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
@@ -182,7 +179,23 @@ import uk.icat3.exceptions.ValidationException;
     public void setError(String error) {
         this.error = error;
     }
-    
+
+    /**
+     * Gets the description of this SampleParameter.
+     * @return the description
+     */ 
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Sets the description of this SampleParameter to the specified value.
+     * @param description the new description
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     /**
      * Gets the rangeTop of this SampleParameter.
      * @return the rangeTop
