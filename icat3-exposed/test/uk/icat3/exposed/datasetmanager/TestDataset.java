@@ -22,6 +22,7 @@ import org.junit.Test;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetStatus;
+import uk.icat3.entity.Investigator;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -157,8 +158,8 @@ public class TestDataset extends BaseTestClassTX {
         assertTrue("Deleted must be true", modified.isDeleted());
         
         //check deep delete
-        //for(Investigator investigator : modified.getInvestigatorCollection()){
-        //  assertTrue("investigator must be deleted", investigator.isDeleted());
+       // for(Investigator investigator : modified.getInvestigatorCollection()){
+         // assertTrue("investigator must be deleted", investigator.isDeleted());
         //}
     }
     
@@ -172,6 +173,7 @@ public class TestDataset extends BaseTestClassTX {
         
         //create invalid dataset, no name
         Dataset duplicateDataset = getDatasetDuplicate(true);
+        duplicateDataset.setDelete(false);
         
         //set entitymanager for each new method
         icat.setEntityManager(em);

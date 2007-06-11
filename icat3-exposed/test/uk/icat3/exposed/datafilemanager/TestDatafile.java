@@ -102,7 +102,8 @@ public class TestDatafile extends BaseTestClassTX {
         
         //create invalid dataFile, no name
         Datafile duplicateDatafile = getDatafileDuplicate(true);
-        
+        duplicateDatafile.setDelete(false);
+                
         //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);

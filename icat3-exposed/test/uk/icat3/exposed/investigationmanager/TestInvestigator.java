@@ -138,7 +138,7 @@ public class TestInvestigator extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=ValidationException.class)
     public void addDeletedInvestigator() throws ICATAPIException {
         log.info("Testing  session: "+ VALID_SESSION +"  for adding deleted investigator to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -149,12 +149,14 @@ public class TestInvestigator extends BaseTestClassTX {
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        Investigator investigatorInserted = icat.addInvestigator(VALID_SESSION, duplicateInvestigator, VALID_INVESTIGATION_ID);
-        
-        Investigator modified = em.find(Investigator.class,investigatorInserted.getInvestigatorPK() );
-        
-        checkInvestigator(modified);
-        assertFalse("Deleted must be false", modified.isDeleted());
+        try{
+            Investigator investigatorInserted = icat.addInvestigator(VALID_SESSION, duplicateInvestigator, VALID_INVESTIGATION_ID);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+            
+            throw ex;
+        }
     }
     
     /**
@@ -166,6 +168,7 @@ public class TestInvestigator extends BaseTestClassTX {
         
         //create invalid investigator, no name
         Investigator duplicateInvestigator = getInvestigatorDuplicate(true);
+        duplicateInvestigator.setDelete(false);
         
         //set entitymanager for each new method
         icat.setEntityManager(em);
@@ -404,7 +407,7 @@ public class TestInvestigator extends BaseTestClassTX {
     private Investigator getInvestigator(boolean valid){
         if(valid){
             //create valid investigator
-            Investigator investigator = new Investigator("9932",  VALID_INVESTIGATION_ID);
+            Investigator investigator = new Investigator("Test User",  VALID_INVESTIGATION_ID);
             
             return investigator;
         } else {

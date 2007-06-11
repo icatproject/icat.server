@@ -138,7 +138,7 @@ public class TestPublication extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=ValidationException.class)
     public void addDeletedPublication() throws ICATAPIException {
         log.info("Testing  session: "+VALID_SESSION+ " for adding deleted publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -149,12 +149,14 @@ public class TestPublication extends BaseTestClassTX {
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        icat.addPublication(VALID_SESSION, duplicatePublication, VALID_INVESTIGATION_ID);
-        
-        Publication modified = em.find(Publication.class,duplicatePublication.getId() );
-        
-        checkPublication(modified);
-        assertFalse("Deleted must be false", modified.isDeleted());
+         try{
+             icat.addPublication(VALID_SESSION, duplicatePublication, VALID_INVESTIGATION_ID);
+         } catch (ICATAPIException ex) {
+             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+             assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+             
+             throw ex;
+         }
     }
     
     /**
@@ -166,7 +168,8 @@ public class TestPublication extends BaseTestClassTX {
         
         //create invalid publication, no name
         Publication duplicatePublication = getPublicationDuplicate(true);
-        
+        duplicatePublication.setDelete(false);
+                
         //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);

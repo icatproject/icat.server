@@ -133,7 +133,7 @@ public class TestSample extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+     @Test(expected=ValidationException.class)
     public void addDeletedSample() throws ICATAPIException {
         log.info("Testing session: "+VALID_SESSION+ " for adding deleted sample to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -144,12 +144,14 @@ public class TestSample extends BaseTestClassTX {
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        Sample sampleInserted = icat.addSample(VALID_SESSION, duplicateSample, VALID_INVESTIGATION_ID);
-        
-        Sample modified = em.find(Sample.class,sampleInserted.getId() );
-        
-        checkSample(modified);
-        assertFalse("Deleted must be false", modified.isDeleted());
+        try{
+            Sample sampleInserted = icat.addSample(VALID_SESSION, duplicateSample, VALID_INVESTIGATION_ID);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+            
+            throw ex;
+        }
     }
     
     /**
@@ -161,7 +163,8 @@ public class TestSample extends BaseTestClassTX {
         
         //create invalid sample, no name
         Sample duplicateSample = getSampleDuplicate(true);
-        
+         duplicateSample.setDelete(false);
+         
         //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
@@ -383,13 +386,13 @@ public class TestSample extends BaseTestClassTX {
         Sample sample = null;
         if(!last){
             Collection<Sample> samples = (Collection<Sample>)executeListResultCmd("select d from Sample d where d.createId LIKE '%PROP%'");
-             if(samples.isEmpty()) throw new RuntimeException("No props samples found in DB");
-       
+            if(samples.isEmpty()) throw new RuntimeException("No props samples found in DB");
+            
             sample = samples.iterator().next();
         } else {
             Collection<Sample> samples = (Collection<Sample>)executeListResultCmd("select d from Sample d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
-             if(samples.isEmpty()) throw new RuntimeException("No none props samples found in DB");
-       
+            if(samples.isEmpty()) throw new RuntimeException("No none props samples found in DB");
+            
             sample = samples.iterator().next();
         }
         log.trace(sample);

@@ -9,7 +9,6 @@
 
 package uk.icat3.exposed.investigationmanager;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 import junit.framework.JUnit4TestAdapter;
@@ -23,8 +22,6 @@ import uk.icat3.entity.Investigator;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
-import uk.icat3.manager.InvestigationManager;
-import uk.icat3.util.AccessType;
 import uk.icat3.exposed.util.BaseTestClassTX;
 import uk.icat3.exposed.util.TestUserLocal;
 import uk.icat3.sessionbeans.manager.InvestigationManagerBean;
@@ -132,6 +129,7 @@ public class TestInvestigation extends BaseTestClassTX {
         
         //create invalid investigation, no name
         Investigation duplicateInvestigation = getInvestigationDuplicate(true);
+        duplicateInvestigation.setDelete(false);
         
         //set entitymanager for each new method
         icat.setEntityManager(em);

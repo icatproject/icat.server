@@ -138,7 +138,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=ValidationException.class)
     public void addDeletedSampleParameter() throws ICATAPIException {
         log.info("Testing session: "+VALID_SESSION+ " for adding deleted sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -149,12 +149,15 @@ public class TestSampleParameter extends BaseTestClassTX {
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        SampleParameter sampleParameterInserted =icat.addSampleParameter(VALID_SESSION, duplicateSampleParameter, VALID_DATA_SET_ID);
         
-        SampleParameter modified = em.find(SampleParameter.class,sampleParameterInserted.getSampleParameterPK()  );
-        
-        checkSampleParameter(modified);
-        assertFalse("Deleted must be false", modified.isDeleted());
+        try{
+            SampleParameter sampleParameterInserted =icat.addSampleParameter(VALID_SESSION, duplicateSampleParameter, VALID_DATA_SET_ID);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+            
+            throw ex;
+        }
     }
     
     /**
@@ -166,7 +169,8 @@ public class TestSampleParameter extends BaseTestClassTX {
         
         //create invalid sampleParameter, no name
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
-        
+         duplicateSampleParameter.setDelete(false);
+         
         //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);

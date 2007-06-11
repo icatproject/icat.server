@@ -106,7 +106,7 @@ public class TestKeyword extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=ValidationException.class)
     public void addDeletedKeyword() throws ICATAPIException {
         log.info("Testing  session: "+VALID_SESSION+ " for adding deleted keyword to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -116,12 +116,16 @@ public class TestKeyword extends BaseTestClassTX {
         //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
-        icat.addKeyword(VALID_SESSION, duplicateKeyword, VALID_DATASET_ID_FOR_INVESTIGATION);
         
-        Keyword modified = em.find(Keyword.class,duplicateKeyword.getKeywordPK() );
         
-        checkKeyword(modified);
-        assertFalse("Deleted must be false", modified.isDeleted());
+        try{
+            icat.addKeyword(VALID_SESSION, duplicateKeyword, VALID_DATASET_ID_FOR_INVESTIGATION);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+            
+            throw ex;
+        }
     }
     
     /**
@@ -133,6 +137,7 @@ public class TestKeyword extends BaseTestClassTX {
         
         //create invalid keyword, no name
         Keyword duplicateKeyword = getKeywordDuplicate(true);
+        duplicateKeyword.setDelete(false);
         
         //set entitymanager for each new method
         icat.setEntityManager(em);
@@ -241,7 +246,7 @@ public class TestKeyword extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-     @Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void removeKeywordProps() throws ICATAPIException {
         log.info("Testing  session: "+VALID_USER_FOR_INVESTIGATION+ " for removing a props keyword to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -288,14 +293,14 @@ public class TestKeyword extends BaseTestClassTX {
     /**
      * Tests remove a keyword, no id
      */
-      @Test(expected=NoSuchObjectFoundException.class)
+    @Test(expected=NoSuchObjectFoundException.class)
     public void removeKeywordNoId() throws ICATAPIException {
         log.info("Testing  session: "+VALID_SESSION+ " for remove keyword to investigation Id: "+VALID_INVESTIGATION_ID);
         
         Keyword validKeyword  = getKeyword(true);
         validKeyword.setKeywordPK(null);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         

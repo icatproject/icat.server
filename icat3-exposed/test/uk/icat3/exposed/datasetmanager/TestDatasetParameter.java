@@ -138,7 +138,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=ValidationException.class)
     public void addDeletedDatasetParameter() throws ICATAPIException {
         log.info("Testing  session: "+ VALID_SESSION +"  for adding deleted datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -149,12 +149,15 @@ public class TestDatasetParameter extends BaseTestClassTX {
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        DatasetParameter datasetParameterInserted = icat.addDataSetParameter(VALID_SESSION, duplicateDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
         
-        DatasetParameter modified = em.find(DatasetParameter.class,datasetParameterInserted.getDatasetParameterPK() );
-        
-        checkDatasetParameter(modified);
-        assertFalse("Deleted must be false", modified.isDeleted());
+        try {
+            DatasetParameter datasetParameterInserted = icat.addDataSetParameter(VALID_SESSION, duplicateDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
+            
+            throw ex;
+        }
     }
     
     /**
@@ -166,6 +169,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         
         //create invalid datasetParameter, no name
         DatasetParameter duplicateDatasetParameter = getDatasetParameterDuplicate(true);
+        duplicateDatasetParameter.setDelete(false);
         
         //set entitymanager for each new method
         icat.setEntityManager(em);
@@ -264,7 +268,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         
         try {
             DatasetParameter datasetParameterInserted = icat.addDataSetParameter(VALID_SESSION, invalidDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
-      } catch (ICATAPIException ex) {
+        } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'cannot be null'", ex.getMessage().contains("cannot be null"));
             throw ex;
@@ -291,8 +295,8 @@ public class TestDatasetParameter extends BaseTestClassTX {
         icat.setUserSession(tul);
         
         try {
-              DatasetParameter datasetParameterInserted = icat.addDataSetParameter(VALID_SESSION, invalidDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
-    } catch (ICATAPIException ex) {
+            DatasetParameter datasetParameterInserted = icat.addDataSetParameter(VALID_SESSION, invalidDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
+        } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'string value only'", ex.getMessage().contains("string value only"));
             throw ex;
@@ -316,7 +320,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         icat.setUserSession(tul);
         
         try {
-             DatasetParameter datasetParameterInserted = icat.addDataSetParameter(VALID_SESSION, invalidDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
+            DatasetParameter datasetParameterInserted = icat.addDataSetParameter(VALID_SESSION, invalidDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'numeric value only'", ex.getMessage().contains("numeric value only"));
@@ -339,7 +343,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         icat.setUserSession(tul);
         
         try {
-            icat.modifyDataSetParameter(VALID_SESSION, propsDatasetParameter);          
+            icat.modifyDataSetParameter(VALID_SESSION, propsDatasetParameter);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
