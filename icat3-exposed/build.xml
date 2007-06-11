@@ -4,6 +4,7 @@
 <!-- (If you delete it and reopen the project it will be recreated.) -->
 <project name="icat3-exposed" default="default" basedir="." xmlns:ejbjarproject="http://www.netbeans.org/ns/j2ee-ejbjarproject/3">
     <description>Builds, tests, and runs the project icat3-exposed.</description>
+    <import file="nbproject/am-deploy.xml"/>
     <import file="nbproject/build-impl.xml"/>
     <!--
 
