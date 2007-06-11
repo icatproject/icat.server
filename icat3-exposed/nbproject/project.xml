@@ -5,7 +5,6 @@
         <data xmlns="http://www.netbeans.org/ns/j2ee-ejbjarproject/3">
             <name>icat3-exposed</name>
             <minimum-ant-version>1.6</minimum-ant-version>
-            <included-library files="1">file.reference.log4j-1.2.13.jar</included-library>
             <included-library files="1">reference.icat3-core.jar</included-library>
             <included-library files="1">reference.icat3-user-default.jar</included-library>
             <source-roots>
@@ -15,6 +14,7 @@
                 <root id="test.src.dir"/>
             </test-roots>
         </data>
+        <junit-version xmlns="http://www.netbeans.org/ns/junit/1" value="junit4"/>
         <references xmlns="http://www.netbeans.org/ns/ant-project-references/1">
             <reference>
                 <foreign-project>icat3-core</foreign-project>
