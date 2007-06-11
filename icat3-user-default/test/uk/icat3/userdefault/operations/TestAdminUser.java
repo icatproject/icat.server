@@ -43,8 +43,10 @@ public class TestAdminUser extends BaseTestClassTX {
         
         UserManager userManager = new UserManager(em);
         
+        //password not checked now
         String sessionId = userManager.login(correctUser,validAdminSession.getUserId().getPassword(), correctAdminUser);
-        
+        sessionId = userManager.login(correctUser+"invalid",validAdminSession.getUserId().getPassword()+"invalid", correctAdminUser);
+       
         assertNotNull("Correct session id, cannot be null", sessionId);
         log.debug("SessionId returned: "+sessionId);
         
