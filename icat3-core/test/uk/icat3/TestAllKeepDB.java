@@ -60,9 +60,7 @@ public class TestAllKeepDB {
     
     
     public static Test suite() {
-        
-        
-        
+               
         return new JUnit4TestAdapter(TestAllKeepDB.class);
     }
 }

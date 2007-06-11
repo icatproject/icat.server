@@ -4,12 +4,12 @@
  * Created on 07 March 2007, 14:44
  *
  * JUNIT Test Suite that creates a connection to a specified ICAT3 JUNIT
- * test database schema and executes a number of scripts in order to 
+ * test database schema and executes a number of scripts in order to
  * initialise the database for the JUNIT tests that are to be
  * subsequently called.  Add each JUNIT class (that is to be run) to the
  * @Suite.SuiteClasses annotation.
  *
- * @author df01 
+ * @author df01
  * @version 1.0
  */
 package uk.icat3;
@@ -38,14 +38,14 @@ import uk.icat3.util.ExecuteDatabaseScript;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-            TestSample.class,
+    TestSample.class,
             TestKeyword.class,
             TestPublication.class,
             TestInvestigator.class,
             TestInvestigation.class,
             TestSampleParameter.class,
             TestManagerUtil.class,
-                    
+            
             TestDataset.class,
             TestDatasetParameter.class,
             
@@ -54,17 +54,22 @@ import uk.icat3.util.ExecuteDatabaseScript;
             
             TestKeywordSearch.class,
             TestInvalidUser.class,
-                    
+            
             TestDatafileSearch.class,
             TestDatasetSearch.class,
             TestInvestigationSearch.class
 })
 public class TestAll {
-       
+    
     
     public static Test suite() {
         
-       ExecuteDatabaseScript script = new ExecuteDatabaseScript("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))", "icat_scratch", "c1sco");
+        //icat unit test
+        //ExecuteDatabaseScript script = new ExecuteDatabaseScript("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))", "icat_unittest", "s4nfr4n");
+        
+        //icat scratch
+        ExecuteDatabaseScript script = new ExecuteDatabaseScript("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))", "icat_scratch", "c1sco");
+        
         script.execute("database/ICAT3API_DropTables[v1].sql", ";");
         script.execute("database/ICAT3API_CreateSchema[v1].sql", ";");
         script.execute("database/ICAT3API_InsertListTables[v1].sql", ";");
