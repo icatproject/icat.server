@@ -33,10 +33,6 @@ is divided into following sections:
     </target>
     <target name="-init-user" depends="-pre-init,-init-private,-init-userdir">
         <property file="${user.properties.file}"/>
-        <!-- The two properties below are usually overridden -->
-        <!-- by the active platform. Just a fallback. -->
-        <property name="default.javac.source" value="1.4"/>
-        <property name="default.javac.target" value="1.4"/>
     </target>
     <target name="-init-project" depends="-pre-init,-init-private,-init-userdir,-init-user">
         <property file="nbproject/project.properties"/>
@@ -241,28 +237,8 @@ is divided into following sections:
             <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
         </wsgen>
     </target>
-    <target name="wsgen-InvestigationManagerBean" depends="wsgen-init, compile">
-        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.manager.InvestigationManagerBean">
-            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
-        </wsgen>
-    </target>
     <target name="wsgen-DatafileSearchBean" depends="wsgen-init, compile">
         <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.search.DatafileSearchBean">
-            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
-        </wsgen>
-    </target>
-    <target name="wsgen-InvestigationSearchBean" depends="wsgen-init, compile">
-        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.search.InvestigationSearchBean">
-            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
-        </wsgen>
-    </target>
-    <target name="wsgen-DatasetSearchBean" depends="wsgen-init, compile">
-        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.search.DatasetSearchBean">
-            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
-        </wsgen>
-    </target>
-    <target name="wsgen-DatasetManagerBean" depends="wsgen-init, compile">
-        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.manager.DatasetManagerBean">
             <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
         </wsgen>
     </target>
@@ -271,8 +247,28 @@ is divided into following sections:
             <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
         </wsgen>
     </target>
+    <target name="wsgen-InvestigationManagerBean" depends="wsgen-init, compile">
+        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.manager.InvestigationManagerBean">
+            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
+        </wsgen>
+    </target>
+    <target name="wsgen-DatasetManagerBean" depends="wsgen-init, compile">
+        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.manager.DatasetManagerBean">
+            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
+        </wsgen>
+    </target>
     <target name="wsgen-DatafileManagerBean" depends="wsgen-init, compile">
         <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.manager.DatafileManagerBean">
+            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
+        </wsgen>
+    </target>
+    <target name="wsgen-DatasetSearchBean" depends="wsgen-init, compile">
+        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.search.DatasetSearchBean">
+            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
+        </wsgen>
+    </target>
+    <target name="wsgen-InvestigationSearchBean" depends="wsgen-init, compile">
+        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.search.InvestigationSearchBean">
             <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
         </wsgen>
     </target>
@@ -281,7 +277,12 @@ is divided into following sections:
             <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
         </wsgen>
     </target>
-    <target name="wsgen-generate" depends="wsgen-KeywordSearchBean, wsgen-InvestigationManagerBean, wsgen-DatafileSearchBean, wsgen-InvestigationSearchBean, wsgen-DatasetSearchBean, wsgen-DatasetManagerBean, wsgen-UserSessionBean, wsgen-DatafileManagerBean, wsgen-ICAT"/>
+    <target name="wsgen-ICATAdmin" depends="wsgen-init, compile">
+        <wsgen sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.ICATAdmin">
+            <classpath path="${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
+        </wsgen>
+    </target>
+    <target name="wsgen-generate" depends="wsgen-KeywordSearchBean, wsgen-DatafileSearchBean, wsgen-UserSessionBean, wsgen-InvestigationManagerBean, wsgen-DatasetManagerBean, wsgen-DatafileManagerBean, wsgen-DatasetSearchBean, wsgen-InvestigationSearchBean, wsgen-ICAT, wsgen-ICATAdmin"/>
     <target name="-pre-pre-compile" depends="init,deps-jar">
         <mkdir dir="${build.classes.dir}"/>
         <mkdir dir="${build.ear.classes.dir}"/>
@@ -291,19 +292,16 @@ is divided into following sections:
         <!-- You can override this target in the ../build.xml file. -->
     </target>
     <target name="library-inclusion-in-archive" depends="compile">
-        <copy file="${file.reference.log4j-1.2.13.jar}" todir="${build.classes.dir}"/>
         <copy file="${reference.icat3-core.jar}" todir="${build.classes.dir}"/>
         <copy file="${reference.icat3-user-default.jar}" todir="${build.classes.dir}"/>
     </target>
     <target name="library-inclusion-in-manifest" depends="compile">
-        <basename property="included.lib.file.reference.log4j-1.2.13.jar" file="${file.reference.log4j-1.2.13.jar}"/>
-        <copy file="${file.reference.log4j-1.2.13.jar}" todir="${dist.ear.dir}"/>
         <basename property="included.lib.reference.icat3-core.jar" file="${reference.icat3-core.jar}"/>
         <copy file="${reference.icat3-core.jar}" todir="${dist.ear.dir}"/>
         <basename property="included.lib.reference.icat3-user-default.jar" file="${reference.icat3-user-default.jar}"/>
         <copy file="${reference.icat3-user-default.jar}" todir="${dist.ear.dir}"/>
         <manifest file="${build.ear.classes.dir}/META-INF/MANIFEST.MF" mode="update">
-            <attribute name="Class-Path" value="${included.lib.file.reference.log4j-1.2.13.jar} ${included.lib.reference.icat3-core.jar} ${included.lib.reference.icat3-user-default.jar} "/>
+            <attribute name="Class-Path" value="${included.lib.reference.icat3-core.jar} ${included.lib.reference.icat3-user-default.jar} "/>
         </manifest>
     </target>
     <target name="-copy-meta-inf">
