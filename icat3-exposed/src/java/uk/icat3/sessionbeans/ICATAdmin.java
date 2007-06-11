@@ -59,20 +59,23 @@ public class ICATAdmin extends ICAT implements ICATLocal {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     
     ///////////////////////////     UserSession methods  /////////////////////////////////////////       
-    @WebMethod(operationName="loginAdmin")
+    //@WebMethod(operationName="loginAdmin")
     @ExcludeClassInterceptors
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.loginAdmin")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.loginAdminResponse")
-    public String login(@WebParam(name="adminUsername") String adminUsername, @WebParam(name="AdminPassword") String AdminPassword, @WebParam(name="runAsUser") String runAsUser) throws SessionException{
-        return user.login(adminUsername, AdminPassword, runAsUser);
+    //@RequestWrapper(className="uk.icat3.sessionbeans.jaxws.loginAdmin")
+    //@ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.loginAdminResponse")
+    public String loginAdmin(/*@WebParam(name="adminUsername") String adminUsername, @WebParam(name="AdminPassword") String AdminPassword, */ @WebParam(name="runAsUser") String runAsUser) throws SessionException{
+        //Admin protected by GF authentication
+        //return user.login(adminUsername, AdminPassword, runAsUser);
+        return user.login("admin", "password" , runAsUser);
     }
     
-    @WebMethod(operationName="loginCredentials")
+    //TODO not yet supported
+    /*ebMethod(operationName="loginCredentials")
     @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.loginCredentials")
     @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.loginCredentialsResponse")
     public String login(@WebParam(name="credential") String credential) throws SessionException{
         return user.login(credential);
-    }
+    }*/
       
     @WebMethod()
     public UserDetails getUserDetails(@WebParam(name="sessionId") String sessionId, @WebParam(name="usersName") String usersName) throws SessionException, NoSuchUserException{

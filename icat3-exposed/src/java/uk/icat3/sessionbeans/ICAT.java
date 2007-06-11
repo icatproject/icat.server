@@ -112,7 +112,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     @ExcludeClassInterceptors
     @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.loginLifetime")
     @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.loginLifetimeResponse")
-    public String login(@WebParam(name="username") String username, @WebParam(name="password") String password, int lifetime) throws SessionException{
+    public String login(@WebParam(name="username") String username, @WebParam(name="password") String password, @WebParam(name="lifetime") int lifetime) throws SessionException{
         return user.login(username, password, lifetime);
     }
          
