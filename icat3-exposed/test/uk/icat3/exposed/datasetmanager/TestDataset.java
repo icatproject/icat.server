@@ -173,7 +173,7 @@ public class TestDataset extends BaseTestClassTX {
         
         //create invalid dataset, no name
         Dataset duplicateDataset = getDatasetDuplicate(true);
-        duplicateDataset.setDelete(false);
+        duplicateDataset.setDeleted(false);
         
         //set entitymanager for each new method
         icat.setEntityManager(em);

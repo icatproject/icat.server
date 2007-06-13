@@ -168,7 +168,7 @@ public class TestInvestigator extends BaseTestClassTX {
         
         //create invalid investigator, no name
         Investigator duplicateInvestigator = getInvestigatorDuplicate(true);
-        duplicateInvestigator.setDelete(false);
+        duplicateInvestigator.setDeleted(false);
         
         //set entitymanager for each new method
         icat.setEntityManager(em);

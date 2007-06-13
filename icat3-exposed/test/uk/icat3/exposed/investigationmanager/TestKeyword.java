@@ -137,7 +137,7 @@ public class TestKeyword extends BaseTestClassTX {
         
         //create invalid keyword, no name
         Keyword duplicateKeyword = getKeywordDuplicate(true);
-        duplicateKeyword.setDelete(false);
+        duplicateKeyword.setDeleted(false);
         
         //set entitymanager for each new method
         icat.setEntityManager(em);

@@ -163,7 +163,7 @@ public class TestSample extends BaseTestClassTX {
         
         //create invalid sample, no name
         Sample duplicateSample = getSampleDuplicate(true);
-         duplicateSample.setDelete(false);
+         duplicateSample.setDeleted(false);
          
         //set entitymanager for each new method
         icat.setEntityManager(em);

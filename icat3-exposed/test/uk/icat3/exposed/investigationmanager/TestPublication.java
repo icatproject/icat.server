@@ -168,7 +168,7 @@ public class TestPublication extends BaseTestClassTX {
         
         //create invalid publication, no name
         Publication duplicatePublication = getPublicationDuplicate(true);
-        duplicatePublication.setDelete(false);
+        duplicatePublication.setDeleted(false);
                 
         //set entitymanager for each new method
         icat.setEntityManager(em);

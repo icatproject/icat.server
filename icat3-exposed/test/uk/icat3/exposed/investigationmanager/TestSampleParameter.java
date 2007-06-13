@@ -169,7 +169,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         
         //create invalid sampleParameter, no name
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
-         duplicateSampleParameter.setDelete(false);
+         duplicateSampleParameter.setDeleted(false);
          
         //set entitymanager for each new method
         icat.setEntityManager(em);

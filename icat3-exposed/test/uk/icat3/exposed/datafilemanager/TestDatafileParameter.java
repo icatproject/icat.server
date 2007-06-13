@@ -170,7 +170,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
-        duplicateDatafileParameter.setDelete(false);
+        duplicateDatafileParameter.setDeleted(false);
                 
           //set entitymanager for each new method
         icat.setEntityManager(em);

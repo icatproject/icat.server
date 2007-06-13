@@ -169,7 +169,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         
         //create invalid datasetParameter, no name
         DatasetParameter duplicateDatasetParameter = getDatasetParameterDuplicate(true);
-        duplicateDatasetParameter.setDelete(false);
+        duplicateDatasetParameter.setDeleted(false);
         
         //set entitymanager for each new method
         icat.setEntityManager(em);
