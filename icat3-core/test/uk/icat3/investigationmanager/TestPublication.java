@@ -154,7 +154,7 @@ public class TestPublication extends BaseTestClassTX {
         
         //create invalid publication, no name
         Publication duplicatePublication = getPublicationDuplicate(true);
-        duplicatePublication.setDelete(false);
+        duplicatePublication.setDeleted(false);
         
         InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicatePublication, AccessType.REMOVE, em);
         

@@ -111,7 +111,7 @@ public class TestDatafile extends BaseTestClassTX {
         Datafile duplicateDatafile = getDatafileDuplicate(true);
         
         //TODO remove
-        duplicateDatafile.setDelete(false);
+        duplicateDatafile.setDeleted(false);
         
         DataFileManager.removeDataFile(VALID_USER_FOR_INVESTIGATION, duplicateDatafile, em);
         

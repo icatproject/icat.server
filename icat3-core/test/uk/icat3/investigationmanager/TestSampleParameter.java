@@ -156,7 +156,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         
         //create invalid sampleParameter, no name
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
-        duplicateSampleParameter.setDelete(false);
+        duplicateSampleParameter.setDeleted(false);
         
         InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, AccessType.REMOVE, em);
         

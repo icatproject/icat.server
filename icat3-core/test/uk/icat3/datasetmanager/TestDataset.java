@@ -211,7 +211,7 @@ public class TestDataset extends BaseTestClassTX {
         Dataset duplicateDataset = getDatasetDuplicate(true);
         
         //TODO remove this
-        duplicateDataset.setDelete(false);
+        duplicateDataset.setDeleted(false);
         
         DataSetManager.removeDataSet(VALID_USER_FOR_INVESTIGATION, duplicateDataset, em);
         

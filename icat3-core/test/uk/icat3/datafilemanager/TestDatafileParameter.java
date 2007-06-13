@@ -153,7 +153,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
         
-        duplicateDatafileParameter.setDelete(false);
+        duplicateDatafileParameter.setDeleted(false);
         
         DataFileManager.removeDatafileParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatafileParameter, em);
         

@@ -152,7 +152,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         DatasetParameter duplicateDatasetParameter = getDatasetParameterDuplicate(true);
         
         //TODO remove
-        duplicateDatasetParameter.setDelete(false);
+        duplicateDatasetParameter.setDeleted(false);
         
         DataSetManager.removeDataSetParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatasetParameter, em);
         

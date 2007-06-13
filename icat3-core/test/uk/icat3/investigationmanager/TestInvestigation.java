@@ -179,7 +179,7 @@ public class TestInvestigation extends BaseTestClassTX {
         Investigation duplicateInvestigation = getInvestigationDuplicate(true);
         
         //TODO remove
-        duplicateInvestigation.setDelete(false);
+        duplicateInvestigation.setDeleted(false);
         
         InvestigationManager.removeInvestigation(VALID_USER_FOR_INVESTIGATION, duplicateInvestigation, em);
         

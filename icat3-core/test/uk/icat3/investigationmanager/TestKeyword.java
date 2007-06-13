@@ -122,7 +122,7 @@ public class TestKeyword extends BaseTestClassTX {
         
         //create invalid keyword, no name
         Keyword duplicateKeyword = getKeywordDuplicate(true);
-        duplicateKeyword.setDelete(false);
+        duplicateKeyword.setDeleted(false);
         
         InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateKeyword, AccessType.REMOVE, em);
         

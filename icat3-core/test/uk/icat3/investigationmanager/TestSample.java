@@ -151,7 +151,7 @@ public class TestSample extends BaseTestClassTX {
         
         //create invalid sample, no name
         Sample duplicateSample = getSampleDuplicate(true);
-        duplicateSample.setDelete(false);
+        duplicateSample.setDeleted(false);
         
         InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSample, AccessType.REMOVE, em);
         
