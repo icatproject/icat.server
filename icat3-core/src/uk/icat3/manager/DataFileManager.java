@@ -457,6 +457,6 @@ public class DataFileManager extends ManagerUtil {
         String facilityUserId = getFacilityUserId(userId, manager);
         
         datafileParameterManaged.setModId(facilityUserId);
-        datafileParameterManaged.setDelete(true);
+        datafileParameterManaged.setDeleted(true);
     }
 }

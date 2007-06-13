@@ -436,7 +436,7 @@ public class InvestigationManager extends ManagerUtil {
                 String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                keywordManaged.setDelete(true);
+                keywordManaged.setDeleted(true);
                 keywordManaged.setModId(facilityUserId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
@@ -459,7 +459,7 @@ public class InvestigationManager extends ManagerUtil {
                 String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                sampleManaged.setDelete(true);
+                sampleManaged.setDeleted(true);
                 sampleManaged.setModId(facilityUserId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
@@ -482,7 +482,7 @@ public class InvestigationManager extends ManagerUtil {
                 String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                sampleParameterManaged.setDelete(true);
+                sampleParameterManaged.setDeleted(true);
                 sampleParameterManaged.setModId(facilityUserId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
@@ -505,7 +505,7 @@ public class InvestigationManager extends ManagerUtil {
                 String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                PublicationManaged.setDelete(true);
+                PublicationManaged.setDeleted(true);
                 PublicationManaged.setModId(facilityUserId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
@@ -528,7 +528,7 @@ public class InvestigationManager extends ManagerUtil {
                 String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                investigatorManaged.setDelete(true);
+                investigatorManaged.setDeleted(true);
                 investigatorManaged.setModId(facilityUserId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access

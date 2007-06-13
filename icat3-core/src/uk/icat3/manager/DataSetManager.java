@@ -543,7 +543,7 @@ public class DataSetManager extends ManagerUtil {
         String facilityUserId = getFacilityUserId(userId, manager);
         
         dataSetParameterManaged.setModId(facilityUserId);
-        dataSetParameterManaged.setDelete(true);
+        dataSetParameterManaged.setDeleted(true);
     }
     
     /**

@@ -17,10 +17,12 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 import org.apache.log4j.Logger;
 import uk.icat3.exceptions.EntityNotModifiableError;
@@ -65,6 +67,13 @@ public class EntityBaseBean {
     @Column(name = "MOD_ID", nullable = false)
     @ICAT(merge=false, nullable=true)
     protected String modId;
+    
+    @Transient
+    protected transient String uniqueId;
+    
+    @Transient
+    protected transient String selected;
+    
     
     /**
      * Gets the modTime of this entity.
@@ -162,7 +171,7 @@ public class EntityBaseBean {
         //this way better, so not changed if not modifiable
         if(isModifiable()) modTime = new Date();
     }
-    
+   
     /**
      * Automatically updates deleted, modTime, createTime and modId when entity is created
      */
@@ -176,6 +185,11 @@ public class EntityBaseBean {
         createTime = modTime;
     }
     
+    @PostLoad
+    public void postLoad(){
+        //setUniqueId(uniqueId);
+    }
+    
     @XmlTransient
     public String getDeleted() {
         return deleted;
@@ -183,10 +197,11 @@ public class EntityBaseBean {
     
     protected void setDeleted(String deleted) {
         this.deleted = deleted;
+        setDeleted(isDeleted());
     }
     
     @XmlTransient
-    public void setDelete(boolean deletedBoolean) {
+    public void setDeleted(boolean deletedBoolean) {
         this.deletedBoolean = deletedBoolean;
         this.deleted = (deletedBoolean) ? "Y" : "N";
     }
@@ -194,6 +209,30 @@ public class EntityBaseBean {
     public boolean isDeleted(){
         if(getDeleted() != null && getDeleted().equalsIgnoreCase("Y")) return true;
         else return false;
+    }
+    
+    public String getUniqueId() {
+        return uniqueId;
+    }
+    
+    public void setUniqueId(String uniqueId) {
+        this.uniqueId = uniqueId;
+    }
+    
+    /**
+     * Gets the selected of this entity.
+     * @return the selected
+     */
+    public String getSelected() {
+        return selected;
+    }
+    
+    /**
+     * Sets the selected of this entity to the specified value.
+     * @param selected the new modId
+     */
+    public void setSelected(String selected) {
+        this.selected = selected;
     }
     
     
