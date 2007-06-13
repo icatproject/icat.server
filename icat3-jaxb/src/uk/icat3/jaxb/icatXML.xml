@@ -39,14 +39,13 @@
 			<bcat_inv_str>Not sure what this parameter is.</bcat_inv_str>
 			<grant_id>CCLRC_2006-001</grant_id>
 			<facility_cycle>cycle_07_02</facility_cycle>
-			<keyword>
-				<name>test</name>
-				<name>xml</name>
-				<name>xsd</name>
-				<name>icat</name>
-				<name>ingestion</name>
-				<name>0.1</name>
-			</keyword>
+			<keyword><name>test</name></keyword>
+			<keyword><name>xml</name></keyword>
+			<keyword><name>xsd</name></keyword>
+			<keyword><name>icat</name></keyword>
+			<keyword><name>ingestion</name></keyword>
+			<keyword><name>0.1</name></keyword>
+			
 			
 				<topic>
 					<name>XML</name>
