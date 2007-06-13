@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by Damian Flannery (CCLRC) -->
-<xs:schema xmlns:ic="http://www.icat.ac.uk" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" xml:lang="en">
+<xs:schema xmlns:ic="http://www.icat.ac.uk" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" xml:lang="en" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="2.0">
+
+<xs:annotation>
+	<xs:appinfo>
+		<jaxb:globalBindings>
+			<jaxb:javaType name="java.util.Calendar" xmlType="xs:date" parseMethod="javax.xml.bind.DatatypeConverter.parseDate" printMethod="javax.xml.bind.DatatypeConverter.printDate" />
+		</jaxb:globalBindings>
+	</xs:appinfo>
+</xs:annotation>
+
+
 	<!-- ================================================================-->
 	<xs:element name="icat" type="Icat"/>
 	<!-- ================================================================-->
@@ -61,11 +71,8 @@
 	</xs:simpleType>
 	<!-- ================================================================-->
 	<xs:complexType name="Investigation">
-
 		<xs:sequence>
-
 			<xs:element name="inv_number" type="Inv_Number">
-				
 				<xs:annotation>
 					<xs:documentation>Investigation Number. 
 				Not a lot of restriction for the moment. 
@@ -92,7 +99,7 @@
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="inv_abstract" type="str4000" minOccurs="0"/>
-			<xs:element name="inv_type" type="Inv_Type" minOccurs="0">
+			<xs:element name="inv_type" type="Inv_Type">
 				<xs:annotation>
 					<xs:documentation>Correspond to the lookup table INVESTIGATION_TYPE</xs:documentation>
 				</xs:annotation>
@@ -107,7 +114,7 @@
 				We consider ISIS cycle like : cycle_06_03 or 2006/03</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="keyword" type="Keyword" minOccurs="0">
+			<xs:element name="keyword" type="Keyword" maxOccurs="unbounded">
 				<xs:annotation>
 					<xs:documentation>Correspond to the table KEYWORD </xs:documentation>
 				</xs:annotation>
@@ -244,7 +251,7 @@
 	</xs:simpleType>
 	<!-- ................................................................-->
 	<xs:complexType name="Keyword">
-		<xs:sequence maxOccurs="unbounded">
+		<xs:sequence>
 			<xs:element name="name" type="str255"/>
 		</xs:sequence>
 	</xs:complexType>
@@ -359,8 +366,13 @@
 			<xs:element name="datafile_version_comment" type="str255" minOccurs="0"/>
 			<xs:element name="datafile_format" type="str255" minOccurs="0"/>
 			<xs:element name="datafile_format_version" type="str255" minOccurs="0"/>
-			<xs:element name="datafile_create_time" type="str255" minOccurs="0"/>
-			<xs:element name="parameter" type="Parameter" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="datafile_create_time" type="xs:dateTime" minOccurs="0"/>
+			<xs:element name="datafile_modify_time" type="xs:dateTime" minOccurs="0"/>
+			<xs:element name="file_size" type="xs:integer" minOccurs="0"/>
+			<xs:element name="command" type="str4000" minOccurs="0"/>
+			<xs:element name="checksum" type="str255" minOccurs="0"/>
+			<xs:element name="signature" type="str4000" minOccurs="0"/>
+			<xs:element name="parameter" type="Parameter" minOccurs="0" maxOccurs="unbounded"/>			
 		</xs:sequence>
 	</xs:complexType>
 	<!-- ================================================================-->
