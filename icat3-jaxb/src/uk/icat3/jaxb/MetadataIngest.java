@@ -207,8 +207,9 @@ public class MetadataIngest {
         inv.setInvNumber(investigation.getInvNumber());
         inv.setPrevInvNumber(investigation.getPrevInvNumber());
         inv.setTitle(investigation.getTitle());
-        uk.icat3.entity.InvestigationType type = new uk.icat3.entity.InvestigationType(investigation.getInvType().value());
         
+        uk.icat3.entity.InvestigationType invType = new uk.icat3.entity.InvestigationType(investigation.getInvType().value().toLowerCase());
+        inv.setInvType(invType);
         //inv.setInvestigationInclude(investigation.get); --what is this?
         //inv.setModId(user);
         //inv.setModTime(new Date());
