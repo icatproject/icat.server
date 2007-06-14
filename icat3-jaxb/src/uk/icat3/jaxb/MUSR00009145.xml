@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<icat version="1.0 RC6" xsi:noNamespaceSchemaLocation="../../../icat_xsd/icatXSD.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <study>
+        <name>MUSR_2006</name>
+        <purpose>Group all Investigation per instrument and per year.</purpose>
+        <status>ONGOING</status>
+        <study_creation_date>2007-06-14T10:35:14</study_creation_date>
+        <investigation>
+            <inv_number>-1000</inv_number>
+            <visit_id>1</visit_id>
+            <instrument>MUSR</instrument>
+            <title>Fe T=100 F=20.0</title>
+            <investigator>
+                <user_id>Aidy</user_id>
+                <initials>Aidy</initials>
+                <role>experimenter</role>
+            </investigator>
+            <dataset>
+                <name>c:\data\MUSR00009145.nxs</name>
+                <dataset_type>EXPERIMENT_RAW</dataset_type>
+                <dataset_status>COMPLETE</dataset_status>
+                <description> Title =Fe T=100 F=20.0 Note =Slits=25</description>
+                <sample>
+                    <name>Fe</name>
+                    <instance>0</instance>
+                    <chemical_formula>Fe</chemical_formula>
+                    <parameter>
+                        <name>sample_state </name>
+                        <string_value>pow</string_value>
+                    </parameter>
+                    <parameter>
+                        <name>sample_situation </name>
+                        <string_value>CCR</string_value>
+                    </parameter>
+                </sample>
+                <datafile>
+                    <name>c:\data\MUSR00009145.nxs</name>
+                    <location>/.file_name</location>
+                    <description>Fe T=100 F=20.0</description>
+                    <datafile_version>1.0</datafile_version>
+                    <datafile_version_comment>First version</datafile_version_comment>
+                    <datafile_format>NeXus - HDF5</datafile_format>
+                    <datafile_create_time>2006-04-04T23:36:07</datafile_create_time>
+                    <parameter>
+                        <name>nexus_version </name>
+                        <string_value>2.1.0</string_value>
+                        <description>NeXus version used to create the file.</description>
+                    </parameter>
+                    <parameter>
+                        <name>hdf_version </name>
+                        <string_value>NCSA HDF Version 4.1 Release 5, November 5, 2001</string_value>
+                        <description>HDF Version used to create the file.</description>
+                    </parameter>
+                    <parameter>
+                        <name>program_name </name>
+                        <string_value>ICP</string_value>
+                        <description>Name of creating program.</description>
+                    </parameter>
+                    <parameter>
+                        <name>program_version </name>
+                        <string_value>v1</string_value>
+                        <description>version of creating program.</description>
+                    </parameter>
+                </datafile>
+                <parameter>
+                    <name>start_time </name>
+                    <string_value>2006-04-04T23:15:29</string_value>
+                    <description>Start Time of the dataset.</description>
+                </parameter>
+                <parameter>
+                    <name>end_time </name>
+                    <string_value>2006-04-04T23:36:07</string_value>
+                    <description>Start Time of the dataset.</description>
+                </parameter>
+                <parameter>
+                    <name>duration </name>
+                    <numeric_value>1238</numeric_value>
+                    <units>second</units>
+                    <description>Calculated duration.</description>
+                </parameter>
+                <parameter>
+                    <name>switching_states </name>
+                    <string_value>1</string_value>
+                    <description>1 = Normal data collection, 2 = Red/Green mode</description>
+                </parameter>
+                <parameter>
+                    <name>sample_temperature_setting </name>
+                    <numeric_value>100.000000</numeric_value>
+                    <units>Kelvin</units>
+                    <description>Desired temperature</description>
+                </parameter>
+                <parameter>
+                    <name>sample_magnetic_field_setting </name>
+                    <numeric_value>20.000000</numeric_value>
+                    <units>Gauss</units>
+                    <description>Desired Magnetic field</description>
+                </parameter>
+                <parameter>
+                    <name>sample_magnetic_field_state </name>
+                    <string_value>TF</string_value>
+                    <description>Magnetic field mode, e.g. TF</description>
+                </parameter>
+                <parameter>
+                    <name>detector_orientation </name>
+                    <string_value>l</string_value>
+                    <description>Detector arrangement. longitudinal 'l' or Transverse
+                    't'</description>
+                </parameter>
+                <parameter>
+                    <name>collimator_type </name>
+                    <string_value>Slits</string_value>
+                    <description>Collimator type. e.g. slits</description>
+                </parameter>
+                <parameter>
+                    <name>source_total_count </name>
+                    <numeric_value>10.090789</numeric_value>
+                    <units>Mev</units>
+                    <description>Total number of counts.</description>
+                </parameter>
+                <parameter>
+                    <name>source_daereads </name>
+                    <numeric_value>1</numeric_value>
+                    <description>number of readout from the DAE.</description>
+                </parameter>
+                <parameter>
+                    <name>source_frames </name>
+                    <numeric_value>61828</numeric_value>
+                    <description>ISIS frames collected on each DAE read.</description>
+                </parameter>
+                <parameter>
+                    <name>data_avg_counts </name>
+                    <numeric_value>2</numeric_value>
+                    <units>counts</units>
+                    <description>Average of number of counts in histogram_data_1.</description>
+                </parameter>
+                <parameter>
+                    <name>data_std_counts </name>
+                    <numeric_value>198.274</numeric_value>
+                    <units>counts</units>
+                    <description>Standard deviation of number of counts in
+                    histogram_data_1.</description>
+                </parameter>
+                <parameter>
+                    <name>histogram_resolution </name>
+                    <numeric_value>16000</numeric_value>
+                    <units>picoseconds</units>
+                    <description>Histogram resolution. set to 0 if not applicable.</description>
+                </parameter>
+                <parameter>
+                    <name>time_zero </name>
+                    <numeric_value>0.206000</numeric_value>
+                    <units>microseconds</units>
+                    <description>Time zero for muon measurement.</description>
+                </parameter>
+                <parameter>
+                    <name>temperature_avg </name>
+                    <numeric_value>91.413582</numeric_value>
+                    <units>K</units>
+                    <description> Average of :Temp_Sample</description>
+                </parameter>
+                <parameter>
+                    <name>temperature_std </name>
+                    <numeric_value>2.21598</numeric_value>
+                    <units>K</units>
+                    <description> Standard deviation of :Temp_Sample</description>
+                </parameter>
+            </dataset>
+        </investigation>
+    </study>
+</icat>

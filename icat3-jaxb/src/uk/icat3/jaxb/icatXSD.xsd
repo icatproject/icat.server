@@ -49,7 +49,7 @@
 			</xs:element>
 			<xs:element name="related_material" type="str4000" minOccurs="0"/>
 			<xs:element name="study_creation_date" type="timeStamp" minOccurs="0"/>
-			<xs:element name="study_manager" type="Fedid" minOccurs="0"/>
+			<xs:element name="study_manager" type="str255" minOccurs="0"/>
 			<xs:element name="investigation" type="Investigation" maxOccurs="unbounded">
 				<xs:annotation>
 					<xs:documentation> Investigation level group. 
@@ -227,6 +227,7 @@
 			<xs:enumeration value="B22-Infrared Microspectroscopy"/>
 			<xs:enumeration value="B23-Circular dichroism"/>
 			<xs:enumeration value="I24-Microfocus macromolecular crystallography"/>
+						<xs:enumeration value="gemini"/>
 			<!-- ISIS instruments -->
 			<!-- CLF instrument -->
 			<!-- Diamond instrument -->
@@ -273,8 +274,8 @@
 	</xs:complexType>
 	<!-- ................................................................-->
 	<xs:complexType name="Investigator">
-		<xs:sequence>
-			<xs:element name="user_id" type="Fedid"/>
+		<xs:all>
+			<xs:element name="user_id" type="str255"/>
 			<xs:element name="role" type="str255"/>
 			<xs:element name="title" type="str255" minOccurs="0"/>
 			<xs:element name="initials" type="str255" minOccurs="0"/>
@@ -283,7 +284,7 @@
 			<xs:element name="last_name" type="str255" minOccurs="0"/>
 			<xs:element name="affiliation" type="str255" minOccurs="0"/>
 			<xs:element name="affiliation_id" type="str255" minOccurs="0"/>
-		</xs:sequence>
+		</xs:all>
 	</xs:complexType>
 	<!-- ================================================================-->
 	<xs:complexType name="Dataset">
