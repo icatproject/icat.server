@@ -272,20 +272,31 @@ public class MetadataIngest {
         
         //if dataset does not exist in database then create it
         if (dataset == null) {
-                            
+            dataset = new uk.icat3.entity.Dataset();
+            
             //check to see if sample in database
-            uk.icat3.jaxb.gen.Sample _sample = _dataset.getSample();
-            uk.icat3.entity.Sample sample = getSample(userId, _sample, investigation, manager);
-
-            uk.icat3.entity.DatasetStatus status = new uk.icat3.entity.DatasetStatus(_dataset.getDatasetStatus().value());
-            uk.icat3.entity.DatasetType type = new uk.icat3.entity.DatasetType(_dataset.getDatasetType().value());
-            dataset.setDatasetStatus(status);
-            dataset.setDatasetType(type);
+            if (_dataset.getSample() != null) {
+                uk.icat3.jaxb.gen.Sample _sample = _dataset.getSample();
+                uk.icat3.entity.Sample sample = getSample(userId, _sample, investigation, manager);
+                dataset.setSampleId(sample.getId());
+            }//end if
+            
+            if (_dataset.getDatasetStatus() != null) {
+                uk.icat3.entity.DatasetStatus status = new uk.icat3.entity.DatasetStatus(_dataset.getDatasetStatus().value().toLowerCase());
+                dataset.setDatasetStatus(status);
+            }//end if
+            
+            if (_dataset.getDatasetType() != null) {
+                uk.icat3.entity.DatasetType type = new uk.icat3.entity.DatasetType(_dataset.getDatasetType().value().toLowerCase());
+                dataset.setDatasetType(type);
+            }//end if
+                        
+            
             dataset.setDescription(_dataset.getDescription());
             dataset.setInvestigationId(investigation);
             dataset.setName(_dataset.getName());
 
-            dataset.setSampleId(sample.getId());
+            
 
             //store in database
             DataSetManager.createDataSet(userId, dataset, manager);
@@ -355,19 +366,25 @@ public class MetadataIngest {
     private static uk.icat3.entity.Datafile getDatafile(String userId, uk.icat3.jaxb.gen.Datafile _datafile, uk.icat3.entity.Dataset dataset, EntityManager manager) throws Exception {
         
         uk.icat3.entity.Datafile datafile = new uk.icat3.entity.Datafile();
-        datafile.setChecksum(_datafile.getChecksum());
-        datafile.setCommand(_datafile.getCommand());
-        datafile.setDatafileCreateTime(Util.parseDate(_datafile.getDatafileCreateTime().toXMLFormat()));
-        
-        DatafileFormat format = new DatafileFormat(_datafile.getDatafileVersion(), _datafile.getDatafileFormat());
-        datafile.setDatafileFormat(format);
-        
-        datafile.setDatafileModifyTime(Util.parseDate(_datafile.getDatafileModifyTime().toXMLFormat()));
-        datafile.setDatafileVersion(_datafile.getDatafileVersion());
-        datafile.setDatafileVersionComment(_datafile.getDatafileVersionComment());
         datafile.setDatasetId(dataset);
+        
+        if (_datafile.getChecksum() != null) datafile.setChecksum(_datafile.getChecksum());
+        if (_datafile.getCommand() != null) datafile.setCommand(_datafile.getCommand());        
+        
+        if (_datafile.getDatafileFormat() != null) {
+            DatafileFormat format = new DatafileFormat(_datafile.getDatafileVersion(), _datafile.getDatafileFormat().toLowerCase());
+            datafile.setDatafileFormat(format);
+        }//end if
+        
+        if (_datafile.getDatafileModifyTime() != null) datafile.setDatafileModifyTime(Util.parseDate(_datafile.getDatafileModifyTime().toXMLFormat()));        
+        if (_datafile.getDatafileCreateTime() != null) datafile.setDatafileCreateTime(Util.parseDate(_datafile.getDatafileCreateTime().toXMLFormat()));        
+        
+        datafile.setDatafileVersion(_datafile.getDatafileVersion());
+        datafile.setDatafileVersionComment(_datafile.getDatafileVersionComment());        
         datafile.setDescription(_datafile.getDescription());
-        datafile.setFileSize(_datafile.getFileSize().intValue());
+        
+        if (_datafile.getFileSize() != null) datafile.setFileSize(_datafile.getFileSize().intValue());
+        
         datafile.setLocation(_datafile.getLocation());
         datafile.setName(_datafile.getName());
         datafile.setSignature(_datafile.getSignature());

@@ -346,16 +346,16 @@
 	</xs:complexType>
 	<!-- ================================================================-->
 	<xs:complexType name="Parameter">
-		<xs:sequence>
+		<xs:all>
 			<xs:element name="name" type="str255"/>
 			<xs:element name="string_value" type="str4000" minOccurs="0"/>
 			<xs:element name="numeric_value" type="xs:double" minOccurs="0"/>
-			<xs:element name="units" type="str255" minOccurs="0"/>
+			<xs:element name="units" type="str255" />
 			<xs:element name="range_top" type="str255" minOccurs="0"/>
 			<xs:element name="range_bottom" type="str255" minOccurs="0"/>
 			<xs:element name="error" type="str255" minOccurs="0"/>
 			<xs:element name="description" type="str4000" minOccurs="0"/>
-		</xs:sequence>
+		</xs:all>
 	</xs:complexType>
 	<!-- ================================================================-->
 	<xs:complexType name="Datafile">
@@ -367,8 +367,8 @@
 			<xs:element name="datafile_version_comment" type="str255" minOccurs="0"/>
 			<xs:element name="datafile_format" type="str255" minOccurs="0"/>
 			<xs:element name="datafile_format_version" type="str255" minOccurs="0"/>
-			<xs:element name="datafile_create_time" type="xs:dateTime" minOccurs="0"/>
-			<xs:element name="datafile_modify_time" type="xs:dateTime" minOccurs="0"/>
+			<xs:element name="datafile_create_time" type="xs:dateTime"/>
+			<xs:element name="datafile_modify_time" type="xs:dateTime"/>
 			<xs:element name="file_size" type="xs:integer" minOccurs="0"/>
 			<xs:element name="command" type="str4000" minOccurs="0"/>
 			<xs:element name="checksum" type="str255" minOccurs="0"/>

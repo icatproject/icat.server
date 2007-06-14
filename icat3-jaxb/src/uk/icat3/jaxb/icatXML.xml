@@ -91,12 +91,14 @@
 					</parameter>
 					<parameter>
 						<name>colour</name>
+						<units>N/A</units>
 						<string_value> transparent</string_value>
 						<description> color of the water</description>
 					</parameter>
 					<parameter>
 						<name>taste</name>
 						<string_value>neutral</string_value>
+						<units>N/A</units>
 					</parameter>
 					<parameter>
 						<name>alcohol_content</name>
@@ -109,34 +111,26 @@
 					</parameter>
 				</sample>
 				<datafile>
-					<name>file_01</name>
-					<location>/test/inv_1/file_01.jpg</location>
-					<description>test file 1</description>
-					<datafile_version>1.0</datafile_version>
+					<name>file_01.nxs</name>
+					<location>/test/inv_1/file_01.nxs</location>
+					<description>test nexus file 1</description>
+					<datafile_version>3.0.0</datafile_version>
 					<datafile_version_comment>Just imagined</datafile_version_comment>
-					<datafile_format>image/jpeg</datafile_format>
+					<datafile_format>nexus</datafile_format>
 					<datafile_create_time>2007-03-02T13:48:00Z</datafile_create_time>
+					<datafile_modify_time>2007-03-02T13:48:00Z</datafile_modify_time>
 					<parameter>
-						<name>size</name>
+						<name>good_frames</name>
 						<numeric_value>31</numeric_value>
-						<units>kilobytes</units>
+						<units>pulses</units>
 					</parameter>
 					<parameter>
-						<name>compression_factor</name>
-						<numeric_value>9</numeric_value>
+						<name>run_title_arse</name>
+						<string_value>Nerds run riot at JavaOne</string_value>
+						<units>N/A</units>
 						<description>Compression parameter used in Photoshop.</description>
 					</parameter>
-				</datafile>
-				<parameter>
-					<name> blah</name>
-					<string_value>blah</string_value>
-					<description> Blah Blah</description>
-				</parameter>
-				<parameter>
-					<name> blah2</name>
-					<string_value>blah</string_value>
-					<description> Blah Blah</description>
-				</parameter>
+				</datafile>				
 			</dataset>
 		</investigation>
 	</study>
