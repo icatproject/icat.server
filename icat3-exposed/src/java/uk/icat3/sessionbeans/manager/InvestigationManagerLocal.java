@@ -46,8 +46,8 @@ public interface InvestigationManagerLocal {
     
     public void modifySample(String sessionId, Sample sample) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException;
     
-     public SampleParameter addSampleParameter(String sessionId, SampleParameter sampleParameter, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException;
-   
+    public SampleParameter addSampleParameter(String sessionId, SampleParameter sampleParameter, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException;
+    
     public void removeSampleParameter(String sessionId,SampleParameterPK sampleParameterPK) throws SessionException,  InsufficientPrivilegesException, NoSuchObjectFoundException;
     
     public void deleteSampleParameter(String sessionId,SampleParameterPK sampleParameterPK) throws SessionException,  InsufficientPrivilegesException, NoSuchObjectFoundException;
@@ -61,6 +61,8 @@ public interface InvestigationManagerLocal {
     public Publication addPublication(String sessionId, Publication publication, Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException;
     
     public void removePublication(String sessionId, Long publicationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException;
+    
+    public void modifyPublication(String sessionId, Publication publication) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException;
     
     public void deletePublication(String sessionId, Long publicationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException;
 }

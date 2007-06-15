@@ -36,6 +36,7 @@ import uk.icat3.entity.Investigator;
 import uk.icat3.entity.InvestigatorPK;
 import uk.icat3.entity.Keyword;
 import uk.icat3.entity.KeywordPK;
+import uk.icat3.entity.Publication;
 import uk.icat3.entity.Sample;
 import uk.icat3.entity.SampleParameter;
 import uk.icat3.entity.SampleParameterPK;
@@ -115,11 +116,11 @@ public class ICAT extends EJBObject implements ICATLocal {
     public String login(@WebParam(name="username") String username, @WebParam(name="password") String password, @WebParam(name="lifetime") int lifetime) throws SessionException{
         return user.login(username, password, lifetime);
     }
-         
+    
     @WebMethod()
     public boolean logout(@WebParam(name="sessionId") String sessionId){
         return user.logout(sessionId);
-    }       
+    }
     ///////////////////////////     End of UserSession methods  //////////////////////////////////
     
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -344,20 +345,6 @@ public class ICAT extends EJBObject implements ICATLocal {
     public void addKeyword(@WebParam(name="sessionId") String sessionId, @WebParam(name="keyword") Keyword keyword, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         investigationManagerLocal.addKeyword(sessionId, keyword, investigationId);
     }
-            
-    /**
-     * Deletes the keyword from investigation, depending on whether the user has permission to delete this Investigation object.
-     *
-     * @param sessionId sessionid of the user.
-     * @param keywordPK {@link KeywordPK} object to be deleted
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
-     */
-    @WebMethod()
-    public void deleteKeyword(@WebParam(name="sessionId") String sessionId, @WebParam(name="keywordPK") KeywordPK keywordPK) throws SessionException,  InsufficientPrivilegesException, NoSuchObjectFoundException{
-        investigationManagerLocal.deleteKeyword(sessionId, keywordPK);
-    }
     
     /**
      * Adds investigator to investigation, depending on whether the user has permission to update this Investigation object.
@@ -376,6 +363,56 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     
     /**
+     * Adds a sample to investigation, depending on whether the user has permission to update this Investigation object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param sample {@link Sample} object to be updated
+     * @param investigationId id of the investigation
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void addSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sample") Sample sample, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        investigationManagerLocal.addSample(sessionId, sample, investigationId);
+    }
+    
+    /**
+     * Adds publication to investigation, depending on whether the user has permission to update this Investigation object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param publication {@link Publication} object to be updated
+     * @param investigationId id of the investigation
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return publication that was added
+     */
+    @WebMethod()
+    public Publication addPublication(@WebParam(name="sessionId") String sessionId, @WebParam(name="publication") Publication publication, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        return investigationManagerLocal.addPublication(sessionId, publication, investigationId);
+    }
+    
+    /**
+     * Adds a sample parameter to investigation, depending on whether the user has permission to update this Investigation object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param sampleParameter {@link SampleParameter} object to be updated
+     * @param investigationId id of the investigation
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return sampleparameter that was added
+     */
+    @WebMethod()
+    public SampleParameter addSampleParamater(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleParameter") SampleParameter sampleParameter, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        return investigationManagerLocal.addSampleParameter(sessionId, sampleParameter, investigationId);
+    }
+    
+    /**
      * Deletes the investigator from investigation, depending on whether the user has permission to remove this Investigation object.
      *
      * @param sessionId sessionid of the user.
@@ -388,7 +425,63 @@ public class ICAT extends EJBObject implements ICATLocal {
     public void deleteInvestigator(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigatorPK") InvestigatorPK investigatorPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         investigationManagerLocal.deleteInvestigator(sessionId, investigatorPK);
     }
-            
+    
+    /**
+     * Deletes the keyword from investigation, depending on whether the user has permission to delete this Investigation object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param keywordPK {@link KeywordPK} object to be deleted
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void deleteKeyword(@WebParam(name="sessionId") String sessionId, @WebParam(name="keywordPK") KeywordPK keywordPK) throws SessionException,  InsufficientPrivilegesException, NoSuchObjectFoundException{
+        investigationManagerLocal.deleteKeyword(sessionId, keywordPK);
+    }
+    
+    /**
+     * Deleted the publication from investigation, depending on whether the user has permission to remove this Investigation object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param publicationId ID of object to be deleted
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void deletePublication(@WebParam(name="sessionId") String sessionId, @WebParam(name="publicationId") Long publicationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        investigationManagerLocal.deletePublication(sessionId, publicationId);
+    }
+    
+    /**
+     * Deletes the sample from the investigation, depending on whether the user has permission to remove this Investigation object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param sampleId primary key object to be deleted
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void deleteSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleId") Long sampleId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        investigationManagerLocal.deleteSample(sessionId, sampleId);
+    }
+    
+    /**
+     * Removes the sample parameter from the investigation, depending on whether the user has permission to remove this Investigation object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param sampleParameterPK {@link SampleParameterPK} primary key object to be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void deleteSampleParameter(@WebParam(name="sessionId") String sessionId,@WebParam(name="sampleParameterPK") SampleParameterPK sampleParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        investigationManagerLocal.deleteSampleParameter(sessionId, sampleParameterPK);
+    }
+    
     /**
      * Modifies the investigator of the investigation, depending on whether the user has permission to update this Investigation object.
      *
@@ -405,36 +498,6 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     
     /**
-     * Adds a sample to investigation, depending on whether the user has permission to update this Investigation object.
-     *
-     * @param sessionId sessionid of the user.
-     * @param sample {@link Sample} object to be updated
-     * @param investigationId id of the investigation
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
-     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
-     */
-    @WebMethod()
-    public void addSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sample") Sample sample, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
-        investigationManagerLocal.addSample(sessionId, sample, investigationId);
-    }
-            
-    /**
-     * Deletes the sample from the investigation, depending on whether the user has permission to remove this Investigation object.
-     *
-     * @param sessionId sessionid of the user.
-     * @param sampleId primary key object to be deleted
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
-     */
-    @WebMethod()
-    public void deleteSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleId") Long sampleId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
-        investigationManagerLocal.deleteSample(sessionId, sampleId);
-    }
-    
-    /**
      * Modifies the sample from the investigation, depending on whether the user has permission to update this Investigation object.
      *
      * @param sessionId sessionid of the user.
@@ -447,20 +510,21 @@ public class ICAT extends EJBObject implements ICATLocal {
     @WebMethod()
     public void modifySample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sample") Sample sample) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         investigationManagerLocal.modifySample(sessionId, sample);
-    }      
+    }
     
-    /**
-     * Removes the sample parameter from the investigation, depending on whether the user has permission to remove this Investigation object.
+     /**
+     * Modifies the publication of the investigation, depending on whether the user has permission to update this Investigation object.
      *
      * @param sessionId sessionid of the user.
-     * @param sampleParameterPK {@link SampleParameterPK} primary key object to be removed
+     * @param publication {@link Publication} object to be updated
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
-    public void deleteSampleParameter(@WebParam(name="sessionId") String sessionId,@WebParam(name="sampleParameterPK") SampleParameterPK sampleParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
-        investigationManagerLocal.deleteSampleParameter(sessionId, sampleParameterPK);
+    public void modifyPublication(@WebParam(name="sessionId") String sessionId, @WebParam(name="publication") Publication publication) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        investigationManagerLocal.modifyPublication(sessionId, publication);
     }
     
     /**
@@ -478,6 +542,75 @@ public class ICAT extends EJBObject implements ICATLocal {
         investigationManagerLocal.modifySampleParameter(sessionId, sampleParameter);
     }
     
+    /**
+     * Removes the keyword from investigation, depending on whether the user has permission to remove this Investigation object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param keywordPK {@link KeywordPK} object to be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void removeKeyword(@WebParam(name="sessionId") String sessionId, @WebParam(name="keywordPK") KeywordPK keywordPK) throws SessionException,  InsufficientPrivilegesException, NoSuchObjectFoundException{
+        investigationManagerLocal.removeKeyword(sessionId, keywordPK);
+    }
+    
+    /**
+     * Removes the investigator from investigation, depending on whether the user has permission to remove this Investigation object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param investigatorPK {@link InvestigatorPK} object to be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void removeInvestigator(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigatorPK") InvestigatorPK investigatorPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        investigationManagerLocal.removeInvestigator(sessionId, investigatorPK);
+    }
+    
+     /**
+     * Removes the publication from investigation, depending on whether the user has permission to remove this Investigation object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param publicationId id of object to be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void removePublication(@WebParam(name="sessionId") String sessionId, @WebParam(name="publicationId")  Long publicationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        investigationManagerLocal.deletePublication(sessionId, publicationId);
+    }
+    
+    /**
+     * Removes the sample from the investigation, depending on whether the user has permission to remove this Investigation object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param sampleId primary key object to be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void removeSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleId") Long sampleId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        investigationManagerLocal.removeSample(sessionId, sampleId);
+    }
+    
+    /**
+     * Deletes the sample parameter from the investigation, depending on whether the user has permission to remove this Investigation object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param sampleParameterPK {@link SampleParameterPK} primary key object to be deleted
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void removeSampleParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleParameterPK") SampleParameterPK sampleParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        investigationManagerLocal.removeSampleParameter(sessionId, sampleParameterPK);
+    }
     
     ///////////////////////////     End of Investigation Manager methods  /////////////////////////////////////////
     
@@ -564,7 +697,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection<Dataset> createDataSets(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSets") Collection<Dataset> dataSets, @WebParam(name="investigationId") Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         return datasetManagerLocal.createDataSets(sessionId, dataSets, investigationId);
     }
-           
+    
     /**
      * Deletes the data set for a user depending if the users id has delete permissions to delete the data set from the
      * data set ID. Deleting the set marks it, and all of its paramters and data files as deleted but does not remove it from the database.
@@ -580,6 +713,20 @@ public class ICAT extends EJBObject implements ICATLocal {
         datasetManagerLocal.deleteDataSet(sessionId, dataSetId);
     }
     
+     /**
+     * Deleted the data set paramter, depending if the users has access to remove the data set paramter
+     *
+     * @param sessionId session id of the user.
+     * @param datasetParameterPK {@link DatasetParameterPK} object to be deleted
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod
+    public void deleteDataSetParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="datasetParameterPK") DatasetParameterPK datasetParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        datasetManagerLocal.deleteDataSetParameter(sessionId, datasetParameterPK);
+    }
+    
     /**
      * Updates a data set depending on whether the user has permission to update this data set or its investigation
      *
@@ -593,6 +740,37 @@ public class ICAT extends EJBObject implements ICATLocal {
     @WebMethod
     public void modifyDataSet(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSet") Dataset dataSet) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         datasetManagerLocal.modifyDataSet(sessionId, dataSet);
+    }
+    
+     /**
+     * Modifies a data set paramter, depending if the users has access to update the data set paramter
+     *
+     * @param sessionId session id of the user.
+     * @param dataSetParameter object to be created
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod
+    public void modifyDataSetParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSetParameter") DatasetParameter dataSetParameter) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        datasetManagerLocal.modifyDataSetParameter(sessionId, dataSetParameter);
+    }
+    
+     /**
+     * Sets the dataset sample id, depending if the users has access to update the data set
+     *
+     * @param sessionId session id of the user.
+     * @param sampleId Id of sample
+     * @param datasetId Id of dataset
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod
+    public void setDataSetSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleId") Long sampleId, @WebParam(name="datafileId") Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        datasetManagerLocal.setDataSetSample(sessionId, sampleId, datasetId);
     }
     
     /**
@@ -611,50 +789,34 @@ public class ICAT extends EJBObject implements ICATLocal {
     public DatasetParameter addDataSetParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSetParameter") DatasetParameter dataSetParameter,@WebParam(name="datasetId")  Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         return datasetManagerLocal.addDataSetParameter(sessionId, dataSetParameter, datasetId);
     }
-    
+           
     /**
-     * Modifies a data set paramter, depending if the users has access to update the data set paramter
+     * Removes (from the database) the data set, and its dataset paramters and data files for a user depending if the
+     * users id has remove permissions to delete the data set from the data set ID.
      *
      * @param sessionId session id of the user.
-     * @param dataSetParameter object to be created
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
-     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
-     */
-    @WebMethod
-    public void modifyDataSetParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSetParameter") DatasetParameter dataSetParameter) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
-        datasetManagerLocal.modifyDataSetParameter(sessionId, dataSetParameter);
-    }
-            
-    /**
-     * Deleted the data set paramter, depending if the users has access to remove the data set paramter
-     *
-     * @param sessionId session id of the user.
-     * @param datasetParameterPK {@link DatasetParameterPK} object to be deleted
+     * @param dataSetId primary key object to be removed
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void deleteDataSetParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="datasetParameterPK") DatasetParameterPK datasetParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
-        datasetManagerLocal.deleteDataSetParameter(sessionId, datasetParameterPK);
+    public void removeDataSet(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSetId") Long dataSetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        datasetManagerLocal.removeDataSet(sessionId, dataSetId);
     }
     
     /**
-     * Sets the dataset sample id, depending if the users has access to update the data set
+     * Removes the data set paramter, depending if the users has access to delete the data set paramter
      *
      * @param sessionId session id of the user.
-     * @param sampleId Id of sample
-     * @param datasetId Id of dataset
+     * @param datasetParameterPK {@link DatasetParameterPK} object to be removed
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void setDataSetSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleId") Long sampleId, @WebParam(name="datafileId") Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
-        datasetManagerLocal.setDataSetSample(sessionId, sampleId, datasetId);
+    public void removeDataSetParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="datasetParameterPK") DatasetParameterPK datasetParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        datasetManagerLocal.removeDataSetParameter(sessionId, datasetParameterPK);
     }
     ///////////////////////////     End of Dataset Manager methods  /////////////////////////////////////////
     
@@ -754,7 +916,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public void deleteDataFile(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataFile") Datafile dataFile) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datafileManagerLocal.deleteDataFile(sessionId, dataFile);
     }
-            
+    
     /**
      * Updates data file depending on whether the user has permission to update this data file.
      *
@@ -802,7 +964,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public void modifyDataFileParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataFileParameter") DatafileParameter dataFileParameter) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         datafileManagerLocal.modifyDataFileParameter(sessionId, dataFileParameter);
     }
-             
+    
     /**
      * Deletes a data file paramter object, depending if the user has access to remove the data file parameter from
      * the associated data file id.
@@ -816,6 +978,53 @@ public class ICAT extends EJBObject implements ICATLocal {
     @WebMethod()
     public void deleteDataFileParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="datafileParameterPK") DatafileParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datafileManagerLocal.deleteDataFileParameter(sessionId, datafileParameterPK);
+    }
+    
+    /**
+     * Removes (from the database) the data file with ID, for a users depending if the users id has remove permissions to remove the data file from
+     * the ID.
+     *
+     * @param sessionId session id of the user.
+     * @param datafileId id be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void removeDataFile(@WebParam(name="sessionId") String sessionId, @WebParam(name="datafileId") Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        datafileManagerLocal.removeDataFile(sessionId, datafileId);
+    }
+    
+    /**
+     * Removes (from the database) the data file with ID, for a users depending if the users id has remove permissions to remove the data file from
+     * the ID.
+     *
+     * @param sessionId session id of the user.
+     * @param dataFile object to be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod(operationName="removeDataFileObject")
+    @RequestWrapper(className="uk.icat3.sessionbeans.manager.removeDataFileObject")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.manager.removeDataFileObjectResponse")
+    public void removeDataFile(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataFile") Datafile dataFile) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        datafileManagerLocal.removeDataFile(sessionId, dataFile);
+    }
+    
+    /**
+     * Removes (from the database) a data file paramter object, depending if the user has access to remove the data file parameter from
+     * the associated data file id.
+     *
+     * @param sessionId session id of the user.
+     * @param datafileParameterPK {@link DatafileParameterPK} object to be removed
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void removeDataFileParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="datafileParameterPK") DatafileParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        datafileManagerLocal.removeDataFileParameter(sessionId, datafileParameterPK);
     }
     ///////////////////////////     End of Datafile Manager methods  /////////////////////////////////////////
     

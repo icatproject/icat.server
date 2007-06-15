@@ -111,8 +111,9 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
         String userId = user.getUserIdFromSessionId(sessionId);
         
         Dataset dataSet = DataSetManager.getDataSet(userId, datasetId, manager);
+        
         //now set the investigation includes for JAXB web service
-        dataSet.setDatasetInclude(includes);
+        ManagerUtil.getDatasetInformation(dataSet, includes);
         
         return dataSet;
     }

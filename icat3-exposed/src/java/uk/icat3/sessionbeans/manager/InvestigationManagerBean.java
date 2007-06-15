@@ -103,7 +103,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         Investigation investigation = InvestigationManager.getInvestigation(userId, investigationId, manager);
         
         //now set the investigation includes for JAXB web service
-        investigation.setInvestigationInclude(includes);
+        ManagerUtil.getInvestigationInformation(investigation, includes);
         
         return investigation;
     }
