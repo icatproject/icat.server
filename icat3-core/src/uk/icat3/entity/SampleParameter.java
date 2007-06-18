@@ -21,6 +21,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
 
@@ -76,6 +77,10 @@ import uk.icat3.exceptions.ValidationException;
     @ManyToOne
     @ICAT(merge=false)
     private Parameter parameter;
+    
+    @Transient
+    @ICAT(merge=false, nullable=true)
+    protected transient boolean numeric;
     
     @JoinColumn(name = "SAMPLE_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
@@ -259,6 +264,24 @@ import uk.icat3.exceptions.ValidationException;
      */
     public void setSample(Sample sample) {
         this.sample = sample;
+    }
+    
+      /**
+     * Gets the numeric of this DatafileParameter.
+     * @return the parameter
+     */
+    public boolean isNumeric() {
+        if(stringValue != null && numericValue == null) return false;
+        else if(numericValue != null && stringValue == null) return true;
+        else return false;
+    }
+    
+    /**
+     * Sets the numeric of this DatafileParameter to the specified value.
+     * @param numeric the new parameter
+     */
+    public void setNumeric(boolean numeric) {
+        //this.numeric = numeric;
     }
     
     /**
