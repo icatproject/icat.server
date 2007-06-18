@@ -256,7 +256,7 @@ import uk.icat3.util.DatasetInclude;
     private Collection<DatasetParameter> getDatasetParameterCollection_() {
         if(datasetInclude.toString().equals(DatasetInclude.DATASET_FILES_AND_PARAMETERS.toString())){
             return this.datasetParameterCollection;
-        } else if(datasetInclude.toString().equals(DatasetInclude.DATASET_PARAMETERS_ONY.toString())){
+        } else if(datasetInclude.toString().equals(DatasetInclude.DATASET_PARAMETERS_ONLY.toString())){
             return this.datasetParameterCollection;
         }  else return null;
     }
@@ -368,7 +368,7 @@ import uk.icat3.util.DatasetInclude;
         //data set parameters
         if(getDatasetParameterCollection() != null){
             for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
-                if(type == Cascade.DELETE) datasetParameter.setDeleted(deleted);
+                if(type == Cascade.DELETE) datasetParameter.setMarkedDeleted(deleted);
                 else if(type == Cascade.MOD_ID) datasetParameter.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     datasetParameter.setModId(value.toString());
@@ -392,15 +392,15 @@ import uk.icat3.util.DatasetInclude;
         //access groups
         if(getDatasetLevelPermissionCollection() != null){
             for(DatasetLevelPermission datasetLevelPermission : getDatasetLevelPermissionCollection()){
-                datasetLevelPermission.setDeleted(deleted);
+                datasetLevelPermission.setMarkedDeleted(deleted);
                 for(AccessGroupDlp agdlp : datasetLevelPermission.getAccessGroupDlpCollection()){
-                    if(type == Cascade.DELETE) agdlp.setDeleted(deleted);
+                    if(type == Cascade.DELETE) agdlp.setMarkedDeleted(deleted);
                 }
             }
             
         }
         
-        if(type == Cascade.DELETE) this.setDeleted(deleted);
+        if(type == Cascade.DELETE) this.setMarkedDeleted(deleted);
         else if(type == Cascade.MOD_ID) this.setModId(value.toString());
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
             this.setModId(value.toString());

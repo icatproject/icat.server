@@ -9,6 +9,7 @@
 
 package uk.icat3.manager;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -21,7 +22,6 @@ import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.exceptions.ObjectDeletedException;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.InvestigationInclude;
 
@@ -39,10 +39,24 @@ public class ManagerUtil {
      * Goes and collects the information associated with the investigation depending on the InvestigationInclude.
      *  See {@link InvestigationInclude}
      *
+     * @param investigation a investigation
+     * @param include The information that is needed to be returned with the investigation
+     */
+    public static void getInvestigationInformation(Investigation investigation, InvestigationInclude include){
+        Collection<Investigation> investigations = new ArrayList<Investigation>();
+        investigations.add(investigation);
+        
+        getInvestigationInformation(investigations, include);
+    }
+    
+    /**
+     * Goes and collects the information associated with the investigation depending on the InvestigationInclude.
+     *  See {@link InvestigationInclude}
+     *
      * @param investigations list of investigations
      * @param include The information that is needed to be returned with the investigation
      */
-    protected static void getInvestigationInformation(Collection<Investigation> investigations, InvestigationInclude include){
+    public static void getInvestigationInformation(Collection<Investigation> investigations, InvestigationInclude include){
         if(include != null){
             if(include.toString().equals(InvestigationInclude.NONE.toString())){
                 //do nothing
@@ -109,6 +123,7 @@ public class ManagerUtil {
             // See in Investigation.getInvestigatorCollection_() method
             for(Investigation investigation : investigations){
                 investigation.setInvestigationInclude(include);
+                  log.trace("Setting investigation to include: "+include);
                 if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString()) || include.toString().equals(InvestigationInclude.ALL.toString())){
                     for(Dataset dataset : investigation.getDatasetCollection()){
                         log.trace("Setting data sets to include: "+DatasetInclude.DATASET_FILES_AND_PARAMETERS);
@@ -123,10 +138,24 @@ public class ManagerUtil {
      * Goes and collects the information associated with the dataset depending on the DatasetInclude.
      * See {@link DatasetInclude}
      *
+     * @param dataset a dataset for gettting more info about it
+     * @param include include info
+     */
+    public static void getDatasetInformation(Dataset dataset, DatasetInclude include){
+        Collection<Dataset> datasets = new ArrayList<Dataset>();
+        datasets.add(dataset);
+        
+        getDatasetInformation(datasets, include);
+    }
+    
+    /**
+     * Goes and collects the information associated with the dataset depending on the DatasetInclude.
+     * See {@link DatasetInclude}
+     *
      * @param datasets collection of datasets for gettting more info about them
      * @param include include info
      */
-    protected static void getDatasetInformation(Collection<Dataset> datasets, DatasetInclude include){
+    public static void getDatasetInformation(Collection<Dataset> datasets, DatasetInclude include){
         
         // now collect the information associated with the investigations requested
         if(include.toString().equals(DatasetInclude.DATASET_FILES_ONLY.toString())){
@@ -140,11 +169,19 @@ public class ManagerUtil {
                 dataset.getDatafileCollection().size();
                 dataset.getDatasetParameterCollection().size();
             }
-        } else  if(include.toString().equals(DatasetInclude.DATASET_PARAMETERS_ONY.toString())){
+        } else  if(include.toString().equals(DatasetInclude.DATASET_PARAMETERS_ONLY.toString())){
             for(Dataset dataset : datasets){
                 //size invokes the JPA to get the information, other wise the collections are null
                 dataset.getDatasetParameterCollection().size();
             }
+        }
+        
+        //set the investigation includes in the class
+        //This is because of JAXWS, it would down load all of the relationships with out this workaround
+        // See in Dataset.getInvestigatorCollection_() method
+        for(Dataset dataset : datasets){
+            dataset.setDatasetInclude(include);
+            log.trace("Setting data sets to include: "+include);
         }
     }
     

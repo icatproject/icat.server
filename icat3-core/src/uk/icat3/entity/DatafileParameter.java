@@ -24,6 +24,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
@@ -48,8 +49,8 @@ import uk.icat3.exceptions.ValidationException;
     @NamedQuery(name = "DatafileParameter.findByModTime", query = "SELECT d FROM DatafileParameter d WHERE d.modTime = :modTime"),
     @NamedQuery(name = "DatafileParameter.findByModId", query = "SELECT d FROM DatafileParameter d WHERE d.modId = :modId")
 })
-@XmlRootElement
-public class DatafileParameter extends EntityBaseBean implements Serializable {
+        @XmlRootElement
+        public class DatafileParameter extends EntityBaseBean implements Serializable {
     
     /**
      * EmbeddedId primary key field
@@ -85,10 +86,15 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
         @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
 @JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
     })
-    @ManyToOne
-    @XmlTransient
-    @ICAT(merge=false)
-    private Parameter parameter;
+            @ManyToOne
+            @XmlTransient
+            @ICAT(merge=false)
+            private Parameter parameter;
+    
+    @Transient
+    @ICAT(merge=false, nullable=true)
+    protected transient boolean numeric;   
+    
     
     /** Creates a new instance of DatafileParameter */
     public DatafileParameter() {
@@ -260,6 +266,24 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
     }
     
     /**
+     * Gets the numeric of this DatafileParameter.
+     * @return the parameter
+     */
+    public boolean isNumeric() {
+        if(stringValue != null && numericValue == null) return false;
+        else if(numericValue != null && stringValue == null) return true;
+        else return false;
+    }
+    
+    /**
+     * Sets the numeric of this DatafileParameter to the specified value.
+     * @param numeric the new parameter
+     */
+    public void setNumeric(boolean numeric) {
+        //this.numeric = numeric;
+    }
+    
+    /**
      * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
@@ -299,7 +323,7 @@ public class DatafileParameter extends EntityBaseBean implements Serializable {
     public String toString() {
         return "uk.icat3.entity.DatafileParameter[datafileParameterPK=" + datafileParameterPK + "]";
     }
-      
+    
     
     /**
      * Overrides the isValid function, checks that the parameters and valid for the datafile and is set to numeric or string

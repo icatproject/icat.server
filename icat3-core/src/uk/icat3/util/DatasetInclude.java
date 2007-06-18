@@ -24,7 +24,7 @@ public enum DatasetInclude {
     /**
      * list of data parameters
      */
-    DATASET_PARAMETERS_ONY,
+    DATASET_PARAMETERS_ONLY,
     /**
      *  both data files and data parameters, all
      */

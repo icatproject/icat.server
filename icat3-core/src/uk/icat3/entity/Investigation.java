@@ -461,6 +461,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
             return this.datasetCollection;
         } else if(investigationInclude.toString().equals(investigationInclude.ALL.toString())){
             return this.datasetCollection;
+        } else if(investigationInclude.toString().equals(investigationInclude.DATASETS_AND_DATAFILES.toString())){
+            return this.datasetCollection;
         }  else return null;
     }
     
@@ -693,7 +695,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         //investigators
         if(getInvestigatorCollection() != null){
             for(Investigator investigator : getInvestigatorCollection()){
-                if(type == Cascade.DELETE)  investigator.setDeleted(deleted);
+                if(type == Cascade.DELETE)  investigator.setMarkedDeleted(deleted);
                 else if(type == Cascade.MOD_ID) investigator.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     investigator.setModId(value.toString());
@@ -705,14 +707,14 @@ public class Investigation extends EntityBaseBean implements Serializable {
         //access groups
         if(getInvestigationLevelPermissionCollection() != null){
             for(InvestigationLevelPermission investigationLevelPermission : getInvestigationLevelPermissionCollection()){
-                if(type == Cascade.DELETE)  investigationLevelPermission.setDeleted(deleted);
+                if(type == Cascade.DELETE)  investigationLevelPermission.setMarkedDeleted(deleted);
                 else if(type == Cascade.MOD_ID) investigationLevelPermission.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     investigationLevelPermission.setModId(value.toString());
                     investigationLevelPermission.setCreateId(value.toString());
                 }
                 for(AccessGroupIlp agilp : investigationLevelPermission.getAccessGroupIlpCollection()){
-                    if(type == Cascade.DELETE)  agilp.setDeleted(deleted);
+                    if(type == Cascade.DELETE)  agilp.setMarkedDeleted(deleted);
                     else if(type == Cascade.MOD_ID) agilp.setModId(value.toString());
                     else if(type == Cascade.MOD_AND_CREATE_IDS) {
                         agilp.setModId(value.toString());
@@ -726,14 +728,14 @@ public class Investigation extends EntityBaseBean implements Serializable {
         if(getSampleCollection() != null){
             for(Sample sample : getSampleCollection()){
                 for(SampleParameter sp : sample.getSampleParameterCollection()){
-                    if(type == Cascade.DELETE)  sp.setDeleted(deleted);
+                    if(type == Cascade.DELETE)  sp.setMarkedDeleted(deleted);
                     else if(type == Cascade.MOD_ID) sp.setModId(value.toString());
                     else if(type == Cascade.MOD_AND_CREATE_IDS) {
                         sp.setModId(value.toString());
                         sp.setCreateId(value.toString());
                     }
                 }
-                if(type == Cascade.DELETE)  sample.setDeleted(deleted);
+                if(type == Cascade.DELETE)  sample.setMarkedDeleted(deleted);
                 else if(type == Cascade.MOD_ID) sample.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     sample.setModId(value.toString());
@@ -745,7 +747,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         //study
         if(getStudyInvestigationCollection() != null){
             for(StudyInvestigation study : getStudyInvestigationCollection()){
-                if(type == Cascade.DELETE)  study.setDeleted(deleted);
+                if(type == Cascade.DELETE)  study.setMarkedDeleted(deleted);
                 else if(type == Cascade.MOD_ID) study.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     study.setModId(value.toString());
@@ -757,7 +759,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         //shift
         if(getShiftCollection() != null){
             for(Shift shift : getShiftCollection()){
-                if(type == Cascade.DELETE)  shift.setDeleted(deleted);
+                if(type == Cascade.DELETE)  shift.setMarkedDeleted(deleted);
                 else if(type == Cascade.MOD_ID) shift.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     shift.setModId(value.toString());
@@ -769,7 +771,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         //publication
         if(getPublicationCollection() != null){
             for(Publication publication : getPublicationCollection()){
-                if(type == Cascade.DELETE)  publication.setDeleted(deleted);
+                if(type == Cascade.DELETE)  publication.setMarkedDeleted(deleted);
                 else if(type == Cascade.MOD_ID) publication.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     publication.setModId(value.toString());
@@ -781,7 +783,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         //keyword
         if(getKeywordCollection() != null){
             for(Keyword keyword : getKeywordCollection()){
-                if(type == Cascade.DELETE)  keyword.setDeleted(deleted);
+                if(type == Cascade.DELETE)  keyword.setMarkedDeleted(deleted);
                 else if(type == Cascade.MOD_ID) keyword.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     keyword.setModId(value.toString());
@@ -793,7 +795,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         //topicList parameter
         if(getTopicListCollection() != null){
             for(TopicList topicList : getTopicListCollection()){
-                if(type == Cascade.DELETE)  topicList.setDeleted(deleted);
+                if(type == Cascade.DELETE)  topicList.setMarkedDeleted(deleted);
                 else if(type == Cascade.MOD_ID) topicList.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     topicList.setModId(value.toString());
@@ -802,7 +804,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
             }
         }
         
-        if(type == Cascade.DELETE)  this.setDeleted(deleted);
+        if(type == Cascade.DELETE)  this.setMarkedDeleted(deleted);
         else if(type == Cascade.MOD_ID) this.setModId(value.toString());
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
             this.setModId(value.toString());

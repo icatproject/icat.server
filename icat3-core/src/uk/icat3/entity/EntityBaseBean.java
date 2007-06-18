@@ -59,21 +59,59 @@ public class EntityBaseBean {
     
     @Column(name = "DELETED", nullable = false )
     @ICAT(merge=false, nullable=true)
-    protected  String deleted;
-    
-    @ICAT(merge=false, nullable=true)
-    protected transient boolean deletedBoolean;
+    protected  String markedDeleted;
     
     @Column(name = "MOD_ID", nullable = false)
     @ICAT(merge=false, nullable=true)
     protected String modId;
     
+    /*@Column(name = "FACILITY_ACQUIRED", nullable = false)
+    @ICAT(merge=false, nullable=true)
+    protected String facilityAcquired;*/
+    
+    /**
+     * Gets the facilityAcquired of this entity.
+     * @return the facilityAcquired
+     */
+    /*public String getFacilityAcquired() {
+        return facilityAcquired;
+    }*/
+    
+    /**
+     * Sets the facilityAcquired of this entity to the specified value.
+     * @param facilityAcquired the new createId
+     */
+    /*public void setFacilityAcquired(String facilityAcquired) {
+        this.facilityAcquired = facilityAcquired;
+    }*/
+    
+    /**
+     * Field to check string value of deleted
+     */
     @Transient
+    @ICAT(merge=false, nullable=true)
+    protected transient boolean deletedBoolean;
+    
+    /**
+     * Field to allow users to add their own unique id, i.e. facility+id ?
+     */
+    @Transient
+    @ICAT(merge=false, nullable=true)
     protected transient String uniqueId;
     
+    /**
+     * Field to allow users change value of a selected item on web page
+     */
     @Transient
-    protected transient String selected;
+    @ICAT(merge=false, nullable=true)
+    protected transient boolean selected;
     
+    /**
+     * Field to put from which facility this came from
+     */
+    @Transient
+    @ICAT(merge=false, nullable=true)
+    protected transient String facility;
     
     /**
      * Gets the modTime of this entity.
@@ -171,13 +209,14 @@ public class EntityBaseBean {
         //this way better, so not changed if not modifiable
         if(isModifiable()) modTime = new Date();
     }
-   
+    
     /**
      * Automatically updates deleted, modTime, createTime and modId when entity is created
      */
     @PrePersist
     public void prePersist(){
-        deleted = "N";
+        markedDeleted = "N";
+        //TODO remove facilityAcquired = "N";
         if(modId != null){
             createId = modId;
         } else if(createId != null) modId = createId;
@@ -191,30 +230,37 @@ public class EntityBaseBean {
     }
     
     @XmlTransient
-    public String getDeleted() {
-        return deleted;
+    public String getMarkedDeleted() {
+        return markedDeleted;
     }
     
-    protected void setDeleted(String deleted) {
-        this.deleted = deleted;
+    protected void setMarkedDeleted(String deleted) {
+        this.markedDeleted = deleted;
         setDeleted(isDeleted());
     }
     
-    @XmlTransient
     public void setDeleted(boolean deletedBoolean) {
         this.deletedBoolean = deletedBoolean;
-        this.deleted = (deletedBoolean) ? "Y" : "N";
+        this.markedDeleted = (deletedBoolean) ? "Y" : "N";
     }
     
     public boolean isDeleted(){
-        if(getDeleted() != null && getDeleted().equalsIgnoreCase("Y")) return true;
+        if(getMarkedDeleted() != null && getMarkedDeleted().equalsIgnoreCase("Y")) return true;
         else return false;
     }
     
+    /**
+     * Gets the uniqueId of this entity.
+     * @return the uniqueId
+     */
     public String getUniqueId() {
         return uniqueId;
     }
     
+    /**
+     * Sets the uniqueId of this entity to the specified value.
+     * @param uniqueId the new modId
+     */
     public void setUniqueId(String uniqueId) {
         this.uniqueId = uniqueId;
     }
@@ -223,7 +269,7 @@ public class EntityBaseBean {
      * Gets the selected of this entity.
      * @return the selected
      */
-    public String getSelected() {
+    public boolean getSelected() {
         return selected;
     }
     
@@ -231,10 +277,25 @@ public class EntityBaseBean {
      * Sets the selected of this entity to the specified value.
      * @param selected the new modId
      */
-    public void setSelected(String selected) {
+    public void setSelected(boolean selected) {
         this.selected = selected;
     }
     
+    /**
+     * Gets the facility of this entity.
+     * @return the facility
+     */
+    public String getFacility() {
+        return facility;
+    }
+    
+    /**
+     * Sets the facility of this entity to the specified value.
+     * @param facility the new modId
+     */
+    public void setFacility(String facility) {
+        this.facility = facility;
+    }
     
     /**
      * Method to be overridden if needed to check if the data held in the entity is valid.
@@ -298,23 +359,28 @@ public class EntityBaseBean {
                         }
                     }
                     
-                    if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("max") ){
-                        log.trace("Checking maximum string length");
-                        try {
-                            //get value
-                            Object result = getProperty(fieldName, this);
-                            if(result instanceof String){
-                                int max = ((ICAT)a).max();
-                                if(((String)result).length() > max){
-                                    throw new ValidationException(getClass().getSimpleName()+": "+fieldName+" cannot be more than "+max+" in length.");
-                                }
+                    //check max value now of strings                    
+                    try {
+                        //get value
+                        Object result = getProperty(fieldName, this);
+                        if(result instanceof String){
+                            log.trace("Checking maximum string length of: "+fieldName);
+                            //set default max
+                            int max = 255;
+                            if(a.annotationType().getName().equals(ICAT.class.getName()) && a.toString().contains("max") ){
+                                max = ((ICAT)a).max();
+                                log.trace("Found ICAT(max="+max+") for "+fieldName);
                             }
-                        } catch (ValidationException ex) {
-                            throw ex;
-                        } catch (Exception ex) {
-                            log.warn(getClass().getSimpleName()+": "+fieldName+" cannot be accessed.",ex);
+                            if(((String)result).length() > max){
+                                throw new ValidationException(getClass().getSimpleName()+": "+fieldName+" cannot be more than "+max+" in length.");
+                            }
                         }
+                    } catch (ValidationException ex) {
+                        throw ex;
+                    } catch (Exception ex) {
+                        log.warn(getClass().getSimpleName()+": "+fieldName+" cannot be accessed.",ex);
                     }
+                    
                 }
             }
         return true;

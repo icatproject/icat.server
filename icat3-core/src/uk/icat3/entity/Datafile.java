@@ -470,7 +470,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
         //data file parameters
         if(getDatafileParameterCollection() != null){
             for(DatafileParameter datafileParameter : getDatafileParameterCollection()){
-                if(type == Cascade.DELETE) datafileParameter.setDeleted(deleted);
+                if(type == Cascade.DELETE) datafileParameter.setMarkedDeleted(deleted);
                 else if(type == Cascade.MOD_ID) datafileParameter.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     datafileParameter.setModId(value.toString());
@@ -482,7 +482,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
         //relatedDatafiles
         if(getRelatedDatafilesCollection() != null){
             for(RelatedDatafiles relatedDatafile : getRelatedDatafilesCollection()){
-                if(type == Cascade.DELETE) relatedDatafile.setDeleted(deleted);
+                if(type == Cascade.DELETE) relatedDatafile.setMarkedDeleted(deleted);
                 else if(type == Cascade.MOD_ID) relatedDatafile.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     relatedDatafile.setModId(value.toString());
@@ -492,7 +492,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
             }
         }
         
-        if(type == Cascade.DELETE) this.setDeleted(deleted);
+        if(type == Cascade.DELETE) this.setMarkedDeleted(deleted);
         else if(type == Cascade.MOD_ID) this.setModId(value.toString());
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
             this.setModId(value.toString());
