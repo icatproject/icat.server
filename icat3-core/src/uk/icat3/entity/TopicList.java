@@ -22,6 +22,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class TopicList
@@ -44,13 +45,13 @@ public class TopicList extends EntityBaseBean implements Serializable {
     @EmbeddedId
     protected TopicListPK topicListPK;
      
-    
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     private Investigation investigation;
     
     @JoinColumn(name = "TOPIC_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
+    @XmlTransient
     private Topic topic;
     
     /** Creates a new instance of TopicList */
@@ -105,6 +106,7 @@ public class TopicList extends EntityBaseBean implements Serializable {
      * Gets the investigation of this TopicList.
      * @return the investigation
      */
+    @XmlTransient
     public Investigation getInvestigation() {
         return this.investigation;
     }
@@ -121,6 +123,7 @@ public class TopicList extends EntityBaseBean implements Serializable {
      * Gets the topic of this TopicList.
      * @return the topic
      */
+    @XmlTransient
     public Topic getTopic() {
         return this.topic;
     }

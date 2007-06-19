@@ -195,7 +195,7 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.RelatedDatafiles[relatedDatafilesPK=" + relatedDatafilesPK + "]";
+        return "RelatedDatafiles[relatedDatafilesPK=" + relatedDatafilesPK + "]";
     }
     
 }

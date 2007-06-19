@@ -44,7 +44,7 @@ import uk.icat3.exceptions.ValidationException;
     @NamedQuery(name = "SampleParameter.findByModTime", query = "SELECT s FROM SampleParameter s WHERE s.modTime = :modTime"),
     @NamedQuery(name = "SampleParameter.findByModId", query = "SELECT s FROM SampleParameter s WHERE s.modId = :modId")
 })
-        public class SampleParameter extends EntityBaseBean implements Serializable {
+public class SampleParameter extends EntityBaseBean implements Serializable {
     
     /**
      * EmbeddedId primary key field
@@ -82,6 +82,7 @@ import uk.icat3.exceptions.ValidationException;
     @ICAT(merge=false, nullable=true)
     protected transient boolean numeric;
     
+    @XmlTransient
     @JoinColumn(name = "SAMPLE_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @ICAT(merge=false)
@@ -254,6 +255,7 @@ import uk.icat3.exceptions.ValidationException;
      * Gets the sample of this SampleParameter.
      * @return the sample
      */
+    @XmlTransient
     public Sample getSample() {
         return this.sample;
     }

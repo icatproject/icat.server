@@ -114,7 +114,7 @@ public class RelatedDatafilesPK implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.RelatedDatafilesPK[destDatafileId=" + destDatafileId + ", sourceDatafileId=" + sourceDatafileId + "]";
+        return "RelatedDatafilesPK[destDatafileId=" + destDatafileId + ", sourceDatafileId=" + sourceDatafileId + "]";
     }
     
 }

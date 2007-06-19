@@ -139,7 +139,7 @@ public class SampleParameterPK extends EntityPrimaryKeyBaseBean implements Seria
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.SampleParameterPK[units=" + units + ", name=" + name + ", sampleId=" + sampleId + "]";
+        return "SampleParameterPK[units=" + units + ", name=" + name + ", sampleId=" + sampleId + "]";
     }
     
    

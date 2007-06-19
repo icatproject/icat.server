@@ -50,8 +50,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
     private String role;
     
     @JoinColumn(name = "FACILITY_USER_ID", referencedColumnName = "FACILITY_USER_ID", insertable = false, updatable = false)
-    @ManyToOne
-    @XmlTransient
+    @ManyToOne  
     private FacilityUser facilityUser;
     
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
@@ -112,8 +111,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
     /**
      * Gets the facilityUser of this Investigator.
      * @return the facilityUser
-     */
-    @XmlTransient
+     */    
     public FacilityUser getFacilityUser() {
         return this.facilityUser;
     }
@@ -130,8 +128,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
      * Gets the role of this FacilityUser.
      * @return the role
      */
-    //TODO uncomment this
-     public String getRole() {
+    public String getRole() {
         return this.role;
      }
     

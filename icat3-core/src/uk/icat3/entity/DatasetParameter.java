@@ -316,7 +316,7 @@ import uk.icat3.exceptions.ValidationException;
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.DatasetParameter[datasetParameterPK=" + datasetParameterPK + "]";
+        return "DatasetParameter[datasetParameterPK=" + datasetParameterPK + "]";
     }
     
     /**

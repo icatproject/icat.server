@@ -178,7 +178,7 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.DatafileFormat[datafileFormatPK=" + datafileFormatPK + "]";
+        return "DatafileFormat[datafileFormatPK=" + datafileFormatPK + "]";
     }
     
 }

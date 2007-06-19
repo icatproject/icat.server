@@ -10,8 +10,6 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -538,7 +536,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.Datafile[id=" + id + "]";
+        return "Datafile[id=" + id + "]";
     }
     
    

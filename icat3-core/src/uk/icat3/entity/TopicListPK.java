@@ -114,7 +114,7 @@ public class TopicListPK implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.TopicListPK[topicId=" + topicId + ", investigationId=" + investigationId + "]";
+        return "TopicListPK[topicId=" + topicId + ", investigationId=" + investigationId + "]";
     }
     
 }

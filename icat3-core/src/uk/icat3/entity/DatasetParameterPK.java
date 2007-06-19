@@ -142,7 +142,7 @@ public class DatasetParameterPK extends EntityPrimaryKeyBaseBean implements Seri
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.DatasetParameterPK[units=" + units + ", name=" + name + ", datasetId=" + datasetId + "]";
+        return "DatasetParameterPK[units=" + units + ", name=" + name + ", datasetId=" + datasetId + "]";
     }
     
 }

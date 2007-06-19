@@ -149,7 +149,7 @@ public class DatasetStatus extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.DatasetStatus[name=" + name + "]";
+        return "DatasetStatus[name=" + name + "]";
     }
     
 }

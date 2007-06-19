@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class StudyStatus
@@ -52,6 +53,7 @@ public class StudyStatus implements Serializable {
     private String modId;
 
     @OneToMany(mappedBy = "status")
+    @XmlTransient
     private Collection<Study> studyCollection;
     
     /** Creates a new instance of StudyStatus */
@@ -148,6 +150,7 @@ public class StudyStatus implements Serializable {
      * Gets the studyCollection of this StudyStatus.
      * @return the studyCollection
      */
+    @XmlTransient
     public Collection<Study> getStudyCollection() {
         return this.studyCollection;
     }
@@ -198,7 +201,7 @@ public class StudyStatus implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.StudyStatus[name=" + name + "]";
+        return "StudyStatus[name=" + name + "]";
     }
     
 }

@@ -175,7 +175,7 @@ public class Shift extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.Shift[shiftPK=" + shiftPK + "]";
+        return "Shift[shiftPK=" + shiftPK + "]";
     }
     
 }

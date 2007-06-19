@@ -143,7 +143,7 @@ public class DatafileParameterPK extends EntityPrimaryKeyBaseBean implements Ser
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.DatafileParameterPK[units=" + units + ", name=" + name + ", datafileId=" + datafileId + "]";
+        return "DatafileParameterPK[units=" + units + ", name=" + name + ", datafileId=" + datafileId + "]";
     }
            
 }

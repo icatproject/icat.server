@@ -321,7 +321,7 @@ import uk.icat3.exceptions.ValidationException;
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.DatafileParameter[datafileParameterPK=" + datafileParameterPK + "]";
+        return "DatafileParameter[datafileParameterPK=" + datafileParameterPK + "]";
     }
     
     

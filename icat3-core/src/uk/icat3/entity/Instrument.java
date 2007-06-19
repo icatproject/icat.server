@@ -51,7 +51,7 @@ public class Instrument extends EntityBaseBean implements Serializable {
     private String description;
                
     @OneToMany(mappedBy = "instrument")
-     @XmlTransient
+    @XmlTransient
     private Collection<Investigation> investigationCollection;
     
     

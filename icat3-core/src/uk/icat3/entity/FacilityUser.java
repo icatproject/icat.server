@@ -20,65 +20,61 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class FacilityUser
- * 
+ *
  * @author gjd37
  */
 @Entity
 @Table(name = "FACILITY_USER")
 @NamedQueries( {
-        @NamedQuery(name = "FacilityUser.findByFacilityUserId", query = "SELECT f FROM FacilityUser f WHERE f.facilityUserId = :facilityUserId"),
-        @NamedQuery(name = "FacilityUser.findByFederalId", query = "SELECT f FROM FacilityUser f WHERE f.federalId = :federalId"),
-        @NamedQuery(name = "FacilityUser.findByTitle", query = "SELECT f FROM FacilityUser f WHERE f.title = :title"),
-        @NamedQuery(name = "FacilityUser.findByInitials", query = "SELECT f FROM FacilityUser f WHERE f.initials = :initials"),
-        @NamedQuery(name = "FacilityUser.findByFirstName", query = "SELECT f FROM FacilityUser f WHERE f.firstName = :firstName"),
-        @NamedQuery(name = "FacilityUser.findByMiddleName", query = "SELECT f FROM FacilityUser f WHERE f.middleName = :middleName"),
-        @NamedQuery(name = "FacilityUser.findByLastName", query = "SELECT f FROM FacilityUser f WHERE f.lastName = :lastName"),
-        @NamedQuery(name = "FacilityUser.findByModTime", query = "SELECT f FROM FacilityUser f WHERE f.modTime = :modTime"),
-        @NamedQuery(name = "FacilityUser.findByModId", query = "SELECT f FROM FacilityUser f WHERE f.modId = :modId")
-    })
-public class FacilityUser implements Serializable {
-
+    @NamedQuery(name = "FacilityUser.findByFacilityUserId", query = "SELECT f FROM FacilityUser f WHERE f.facilityUserId = :facilityUserId"),
+    @NamedQuery(name = "FacilityUser.findByFederalId", query = "SELECT f FROM FacilityUser f WHERE f.federalId = :federalId"),
+    @NamedQuery(name = "FacilityUser.findByTitle", query = "SELECT f FROM FacilityUser f WHERE f.title = :title"),
+    @NamedQuery(name = "FacilityUser.findByInitials", query = "SELECT f FROM FacilityUser f WHERE f.initials = :initials"),
+    @NamedQuery(name = "FacilityUser.findByFirstName", query = "SELECT f FROM FacilityUser f WHERE f.firstName = :firstName"),
+    @NamedQuery(name = "FacilityUser.findByMiddleName", query = "SELECT f FROM FacilityUser f WHERE f.middleName = :middleName"),
+    @NamedQuery(name = "FacilityUser.findByLastName", query = "SELECT f FROM FacilityUser f WHERE f.lastName = :lastName"),
+    @NamedQuery(name = "FacilityUser.findByModTime", query = "SELECT f FROM FacilityUser f WHERE f.modTime = :modTime"),
+    @NamedQuery(name = "FacilityUser.findByModId", query = "SELECT f FROM FacilityUser f WHERE f.modId = :modId")
+})
+@XmlRootElement
+public class FacilityUser extends EntityBaseBean implements Serializable {
+    
     @Id
+    @XmlTransient
     @Column(name = "FACILITY_USER_ID", nullable = false)
     private String facilityUserId;
-
+    
     @Column(name = "FEDERAL_ID")
     private String federalId;
-
+    
     @Column(name = "TITLE")
     private String title;
-
+    
     @Column(name = "INITIALS")
     private String initials;
-
+    
     @Column(name = "FIRST_NAME")
     private String firstName;
-
+    
     @Column(name = "MIDDLE_NAME")
     private String middleName;
-
+    
     @Column(name = "LAST_NAME")
     private String lastName;
-   
-    @Column(name = "MOD_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modTime;
-
-    @Column(name = "MOD_ID", nullable = false)
-    private String modId;
-
+    
+    @XmlTransient
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "facilityUser")
     private Collection<Investigator> investigatorCollection;
     
     /** Creates a new instance of FacilityUser */
     public FacilityUser() {
     }
-
+    
     /**
      * Creates a new instance of FacilityUser with the specified values.
      * @param facilityUserId the facilityUserId of the FacilityUser
@@ -86,7 +82,7 @@ public class FacilityUser implements Serializable {
     public FacilityUser(String facilityUserId) {
         this.facilityUserId = facilityUserId;
     }
-
+    
     /**
      * Creates a new instance of FacilityUser with the specified values.
      * @param facilityUserId the facilityUserId of the FacilityUser
@@ -98,7 +94,7 @@ public class FacilityUser implements Serializable {
         this.modTime = modTime;
         this.modId = modId;
     }
-
+    
     /**
      * Gets the facilityUserId of this FacilityUser.
      * @return the facilityUserId
@@ -106,7 +102,7 @@ public class FacilityUser implements Serializable {
     public String getFacilityUserId() {
         return this.facilityUserId;
     }
-
+    
     /**
      * Sets the facilityUserId of this FacilityUser to the specified value.
      * @param facilityUserId the new facilityUserId
@@ -114,7 +110,7 @@ public class FacilityUser implements Serializable {
     public void setFacilityUserId(String facilityUserId) {
         this.facilityUserId = facilityUserId;
     }
-
+    
     /**
      * Gets the federalId of this FacilityUser.
      * @return the federalId
@@ -122,7 +118,7 @@ public class FacilityUser implements Serializable {
     public String getFederalId() {
         return this.federalId;
     }
-
+    
     /**
      * Sets the federalId of this FacilityUser to the specified value.
      * @param federalId the new federalId
@@ -130,7 +126,7 @@ public class FacilityUser implements Serializable {
     public void setFederalId(String federalId) {
         this.federalId = federalId;
     }
-
+    
     /**
      * Gets the title of this FacilityUser.
      * @return the title
@@ -138,7 +134,7 @@ public class FacilityUser implements Serializable {
     public String getTitle() {
         return this.title;
     }
-
+    
     /**
      * Sets the title of this FacilityUser to the specified value.
      * @param title the new title
@@ -146,7 +142,7 @@ public class FacilityUser implements Serializable {
     public void setTitle(String title) {
         this.title = title;
     }
-
+    
     /**
      * Gets the initials of this FacilityUser.
      * @return the initials
@@ -154,7 +150,7 @@ public class FacilityUser implements Serializable {
     public String getInitials() {
         return this.initials;
     }
-
+    
     /**
      * Sets the initials of this FacilityUser to the specified value.
      * @param initials the new initials
@@ -162,7 +158,7 @@ public class FacilityUser implements Serializable {
     public void setInitials(String initials) {
         this.initials = initials;
     }
-
+    
     /**
      * Gets the firstName of this FacilityUser.
      * @return the firstName
@@ -170,7 +166,7 @@ public class FacilityUser implements Serializable {
     public String getFirstName() {
         return this.firstName;
     }
-
+    
     /**
      * Sets the firstName of this FacilityUser to the specified value.
      * @param firstName the new firstName
@@ -178,7 +174,7 @@ public class FacilityUser implements Serializable {
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-
+    
     /**
      * Gets the middleName of this FacilityUser.
      * @return the middleName
@@ -186,7 +182,7 @@ public class FacilityUser implements Serializable {
     public String getMiddleName() {
         return this.middleName;
     }
-
+    
     /**
      * Sets the middleName of this FacilityUser to the specified value.
      * @param middleName the new middleName
@@ -194,7 +190,7 @@ public class FacilityUser implements Serializable {
     public void setMiddleName(String middleName) {
         this.middleName = middleName;
     }
-
+    
     /**
      * Gets the lastName of this FacilityUser.
      * @return the lastName
@@ -202,7 +198,7 @@ public class FacilityUser implements Serializable {
     public String getLastName() {
         return this.lastName;
     }
-
+    
     /**
      * Sets the lastName of this FacilityUser to the specified value.
      * @param lastName the new lastName
@@ -210,47 +206,16 @@ public class FacilityUser implements Serializable {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
-   
-    /**
-     * Gets the modTime of this FacilityUser.
-     * @return the modTime
-     */
-    public Date getModTime() {
-        return this.modTime;
-    }
-
-    /**
-     * Sets the modTime of this FacilityUser to the specified value.
-     * @param modTime the new modTime
-     */
-    public void setModTime(Date modTime) {
-        this.modTime = modTime;
-    }
-
-    /**
-     * Gets the modId of this FacilityUser.
-     * @return the modId
-     */
-    public String getModId() {
-        return this.modId;
-    }
-
-    /**
-     * Sets the modId of this FacilityUser to the specified value.
-     * @param modId the new modId
-     */
-    public void setModId(String modId) {
-        this.modId = modId;
-    }
-
+    
     /**
      * Gets the investigatorCollection of this FacilityUser.
      * @return the investigatorCollection
      */
+    @XmlTransient
     public Collection<Investigator> getInvestigatorCollection() {
         return this.investigatorCollection;
     }
-
+    
     /**
      * Sets the investigatorCollection of this FacilityUser to the specified value.
      * @param investigatorCollection the new investigatorCollection
@@ -258,9 +223,9 @@ public class FacilityUser implements Serializable {
     public void setInvestigatorCollection(Collection<Investigator> investigatorCollection) {
         this.investigatorCollection = investigatorCollection;
     }
-
+    
     /**
-     * Returns a hash code value for the object.  This implementation computes 
+     * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
      */
@@ -270,10 +235,10 @@ public class FacilityUser implements Serializable {
         hash += (this.facilityUserId != null ? this.facilityUserId.hashCode() : 0);
         return hash;
     }
-
+    
     /**
-     * Determines whether another object is equal to this FacilityUser.  The result is 
-     * <code>true</code> if and only if the argument is not null and is a FacilityUser object that 
+     * Determines whether another object is equal to this FacilityUser.  The result is
+     * <code>true</code> if and only if the argument is not null and is a FacilityUser object that
      * has the same id field values as this object.
      * @param object the reference object with which to compare
      * @return <code>true</code> if this object is the same as the argument;
@@ -289,15 +254,15 @@ public class FacilityUser implements Serializable {
         if (this.facilityUserId != other.facilityUserId && (this.facilityUserId == null || !this.facilityUserId.equals(other.facilityUserId))) return false;
         return true;
     }
-
+    
     /**
-     * Returns a string representation of the object.  This implementation constructs 
+     * Returns a string representation of the object.  This implementation constructs
      * that representation based on the id fields.
      * @return a string representation of the object.
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.FacilityUser[facilityUserId=" + facilityUserId + "]";
+        return "FacilityUser[facilityUserId=" + facilityUserId + "]";
     }
     
 }

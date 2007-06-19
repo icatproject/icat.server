@@ -142,7 +142,7 @@ public class ShiftPK implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.ShiftPK[endDate=" + endDate + ", startDate=" + startDate + ", investigationId=" + investigationId + "]";
+        return "ShiftPK[endDate=" + endDate + ", startDate=" + startDate + ", investigationId=" + investigationId + "]";
     }
     
 }

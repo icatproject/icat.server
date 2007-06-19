@@ -113,7 +113,7 @@ public class ParameterPK implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.ParameterPK[units=" + units + ", name=" + name + "]";
+        return "ParameterPK[units=" + units + ", name=" + name + "]";
     }
     
 }

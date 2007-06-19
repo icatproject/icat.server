@@ -368,7 +368,7 @@ public class Parameter extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.Parameter[parameterPK=" + parameterPK + "]";
+        return "Parameter[parameterPK=" + parameterPK + "]";
     }
     
     /**

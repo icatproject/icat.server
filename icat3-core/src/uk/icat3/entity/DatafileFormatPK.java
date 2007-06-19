@@ -113,7 +113,7 @@ public class DatafileFormatPK implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.DatafileFormatPK[version=" + version + ", name=" + name + "]";
+        return "DatafileFormatPK[version=" + version + ", name=" + name + "]";
     }
     
 }

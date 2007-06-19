@@ -227,7 +227,7 @@ public class Publication extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.Publication[id=" + id + "]";
+        return "Publication[id=" + id + "]";
     }
     
 }

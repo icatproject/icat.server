@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Entity class FacilityCycle
@@ -54,6 +55,7 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
     @Column(name = "DESCRIPTION")
     private String description;
 
+    @XmlTransient
     @OneToMany(mappedBy = "facilityCycle")
     private Collection<Investigation> investigationCollection;
     
@@ -149,6 +151,7 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
      * Gets the investigationCollection of this FacilityCycle.
      * @return the investigationCollection
      */
+    @XmlTransient
     public Collection<Investigation> getInvestigationCollection() {
         return this.investigationCollection;
     }
@@ -199,7 +202,7 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.FacilityCycle[name=" + name + "]";
+        return "FacilityCycle[name=" + name + "]";
     }
     
 }
