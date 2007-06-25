@@ -458,8 +458,7 @@ import uk.icat3.util.DatasetInclude;
     @Override
     public boolean isValid(EntityManager manager, boolean deepValidation) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
-        
-        
+                
         //check sample info, sample id must be a part of in investigations aswell
         outer: if(sampleId != null){
             //check valid sample id

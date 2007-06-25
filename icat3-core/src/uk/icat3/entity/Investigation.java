@@ -80,8 +80,8 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = Queries.INVESTIGATIONS_FOR_USER_RTN_ID, query = Queries.INVESTIGATIONS_FOR_USER_RTN_ID_JPQL)
     
 })
-
-@NamedNativeQueries({
+        
+        @NamedNativeQueries({
     //Added searches for ICAT3 API
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_USERID,  query= Queries.INVESTIGATION_NATIVE_LIST_BY_USERID_SQL,resultSetMapping="investigationMapping"),
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_SQL, resultSetMapping="investigationMapping"),
@@ -90,13 +90,13 @@ import uk.icat3.util.Queries;
     @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_SQL, resultSetMapping="investigationMapping")
     
 })
-@SqlResultSetMappings({
+        @SqlResultSetMappings({
     @SqlResultSetMapping(name="investigationMapping",entities={@EntityResult(entityClass=Investigation.class)}),
     @SqlResultSetMapping(name="investigationIdMapping",columns={@ColumnResult(name="ID")})
 })
-@XmlRootElement
-@SequenceGenerator(name="INVESTIGATION_SEQ",sequenceName="INVESTIGATION_ID_SEQ",allocationSize=1)
-public class Investigation extends EntityBaseBean implements Serializable {
+        @XmlRootElement
+        @SequenceGenerator(name="INVESTIGATION_SEQ",sequenceName="INVESTIGATION_ID_SEQ",allocationSize=1)
+        public class Investigation extends EntityBaseBean implements Serializable {
     
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="INVESTIGATION_SEQ")
@@ -209,7 +209,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     /**
      * Sets the id of this Investigation to the specified value.
      * @param id the new id
-     */   
+     */
     public void setId(Long id) {
         this.id = id;
     }
@@ -351,6 +351,19 @@ public class Investigation extends EntityBaseBean implements Serializable {
         return this.publicationCollection;
     }
     
+     /**
+     * Adds a Publication to the investigation,
+     * also adds the investigation to the Publication.
+     */
+    public void addPublication(Publication publication){
+        publication.setInvestigationId(this);
+        
+        Collection<Publication> publications = this.getPublicationCollection();
+        publications.add(publication);
+        
+        this.setPublicationCollection(publications);
+    }
+    
     /**
      * Sets the publicationCollection of this Investigation to the specified value.
      * @param publicationCollection the new publicationCollection
@@ -366,6 +379,19 @@ public class Investigation extends EntityBaseBean implements Serializable {
     @XmlTransient
     public Collection<Sample> getSampleCollection() {
         return this.sampleCollection;
+    }
+    
+     /**
+     * Adds a Sample to the investigation,
+     * also adds the investigation to the Sample.
+     */
+    public void addSample(Sample sample){
+        sample.setInvestigationId(this);
+        
+        Collection<Sample> samples = this.getSampleCollection();
+        samples.add(sample);
+        
+        this.setSampleCollection(samples);
     }
     
     /**
@@ -489,8 +515,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         Collection<Dataset> datasets = this.getDatasetCollection();
         datasets.add(dataSet);
         
-        this.setDatasetCollection(datasets);
-        
+        this.setDatasetCollection(datasets);        
     }
     
     /**
@@ -853,7 +878,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public String toString() {
         return "Investigation[id=" + id + "]";
     }
-        
+    
     /**
      * Method to be overriding if needed to check if the data held in the entity is valid.
      * This method should be used for search DB for foreign key constraints etc
@@ -906,7 +931,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
         query = query.setParameter("facilityCycle",facilityCycle);
         query = query.setParameter("instrument",instrument);
         
-         try {
+        try {
             log.trace("Looking for: invNumber: "+ invNumber);
             log.trace("Looking for: visitId: "+ visitId);
             log.trace("Looking for: facilityCycle: "+facilityCycle);
