@@ -14,6 +14,7 @@ import java.util.Collection;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.EntityBaseBean;
+import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.Keyword;
@@ -259,18 +260,19 @@ public class InvestigationManager extends ManagerUtil {
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, investigation, AccessType.CREATE, manager);
-        String facilityUserId = getFacilityUserId(userId, manager);
+        FacilityUser facilityUser = getFacilityUser(userId, manager);
         
         //new dataset, set createid
         
-        investigation.setCascade(Cascade.MOD_AND_CREATE_IDS, facilityUserId);
+        investigation.setCascade(Cascade.MOD_AND_CREATE_IDS, facilityUser.getFacilityUserId());
         investigation.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
         manager.persist(investigation);
         
         
         //need to add this user to the list of investigators now
-        Investigator investigator = new Investigator(facilityUserId, investigation.getId());
-        investigator.setCreateId(facilityUserId);
+        Investigator investigator = new Investigator(facilityUser.getFacilityUserId(), investigation.getId());
+        investigator.setCreateId(facilityUser.getFacilityUserId());
+        investigator.setFacilityUser(facilityUser);
         investigator.setInvestigation(investigation);
         
         log.trace("Adding "+investigator+" to investigation "+investigation);

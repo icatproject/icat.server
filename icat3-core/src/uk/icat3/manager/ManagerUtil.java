@@ -239,11 +239,22 @@ public class ManagerUtil {
      * @return facilityUserId
      */
     public static String getFacilityUserId(String userId, EntityManager manager) {
-        FacilityUser facilityUser = null;
+       return getFacilityUser(userId, manager).getFacilityUserId();
+    }
+    
+    /**
+     * Gets the facilityUser of the user from the federalId
+     *
+     * @param userId federalId of user
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return facilityUser
+     */
+    public static FacilityUser getFacilityUser(String userId, EntityManager manager) {
+         FacilityUser facilityUser = null;
         try {
             facilityUser = (FacilityUser) manager.createQuery("SELECT f FROM FacilityUser f where f.federalId = :fedId").setParameter("fedId", userId).getSingleResult();
             log.trace(""+facilityUser.getFacilityUserId()+" corresponds to "+userId);
-            return facilityUser.getFacilityUserId();
+            return facilityUser;
         } catch(NoResultException nre) {
             log.warn("federalId:" +userId+" has no associated facility user");
             throw new RuntimeException("FederalId:" +userId+" has no associated facility user in DB.");
@@ -252,7 +263,7 @@ public class ManagerUtil {
             throw new RuntimeException("federalId:" +userId+" has more than one associated facility user.  DB should never allow this error to be thrown.");
         }
     }
-    
+      
     
     public static boolean isUnique(EntityBaseBean entityClass, EntityManager manager) {
         if(entityClass instanceof Dataset){
