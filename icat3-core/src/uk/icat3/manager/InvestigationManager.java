@@ -32,7 +32,7 @@ import uk.icat3.util.InvestigationInclude;
 
 /**
  * This is the manager class for all operations for investigations.
- * 
+ *
  * These are update, remove, delete, create on investigations investigation objects.
  * <br /><br />
  * Objects can be {@link Keyword}, {@link Sample}, {@link SampleParameter}, {@link Publication}, {@link Investigator}
@@ -311,10 +311,10 @@ public class InvestigationManager extends ManagerUtil {
         
     }
     
-///////////////   End of add/Update Commands    ///////////////////
+    ///////////////   End of add/Update Commands    ///////////////////
     
     
-/////////////////////   Util add commands /////////////////////////
+    /////////////////////   Util add commands /////////////////////////
     /**
      * Updates an investigation object, depending on whether the user has permission to update this Investigation object.
      * <br /><br />
@@ -595,7 +595,7 @@ public class InvestigationManager extends ManagerUtil {
             String facilityUserId = getFacilityUserId(userId, manager);
             
             try {
-                //check investigator not already added                
+                //check investigator not already added
                 Publication publicationManaged = findObject(Publication.class, publication.getId(), manager);
                 /*if(publicationManaged.isDeleted()){
                     publicationManaged.setDelete(false);
@@ -603,17 +603,18 @@ public class InvestigationManager extends ManagerUtil {
                     log.info(publicationManaged +" been deleted, undeleting now.");
                     return publicationManaged;
                 } else {*/
-                    //do nothing, throw exception
-                    log.warn(publicationManaged +" already added to investigation.");
-                    throw new ValidationException(publicationManaged+" is not unique");
+                //do nothing, throw exception
+                log.warn(publicationManaged +" already added to investigation.");
+                throw new ValidationException(publicationManaged+" is not unique");
                 //}
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
                 //sets modId for persist
                 publication.setCreateId(facilityUserId);
-                
                 manager.persist(publication);
+                
+                investigation.addPublication(publication);
                 return publication;
             }
             
@@ -637,16 +638,17 @@ public class InvestigationManager extends ManagerUtil {
                     log.info(sampleManaged +" been deleted, undeleting now.");
                     return sampleManaged;
                 } else {*/
-                    //do nothing, throw exception
-                    log.warn(sampleManaged +" already added to investigation.");
-                    throw new ValidationException(sampleManaged+" is not unique");
+                //do nothing, throw exception
+                log.warn(sampleManaged +" already added to investigation.");
+                throw new ValidationException(sampleManaged+" is not unique");
                 //}
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
                 sample.setCreateId(facilityUserId);
                 manager.persist(sample);
-                
+                //add sample to investigation
+                investigation.addSample(sample);
                 return sample;
             }
         } else if(object instanceof SampleParameter){
@@ -673,9 +675,9 @@ public class InvestigationManager extends ManagerUtil {
                     log.info(sampleManaged +" been deleted, undeleting now.");
                     return sampleManaged;
                 } else {*/
-                    //do nothing, throw exception
-                    log.warn(sampleManaged +" already added to investigation.");
-                    throw new ValidationException(sampleManaged+" is not unique");
+                //do nothing, throw exception
+                log.warn(sampleManaged +" already added to investigation.");
+                throw new ValidationException(sampleManaged+" is not unique");
                 //}
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
@@ -704,15 +706,16 @@ public class InvestigationManager extends ManagerUtil {
                     log.info(keywordManaged +" been deleted, undeleting now.");
                     return keywordManaged;
                 } else {*/
-                    //do nothing, throw exception
-                    log.warn(keywordManaged +" already added to investigation.");
-                    throw new ValidationException(keywordManaged+" is not unique");
+                //do nothing, throw exception
+                log.warn(keywordManaged +" already added to investigation.");
+                throw new ValidationException(keywordManaged+" is not unique");
                 //}
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
                 keyword.setCreateId(facilityUserId);
                 manager.persist(keyword);
+                investigation.addKeyword(keyword);
                 return keyword;
             }
         } else if(object instanceof Investigator){
@@ -734,15 +737,16 @@ public class InvestigationManager extends ManagerUtil {
                     log.info(investigatorManaged +" been deleted, undeleting now.");
                     return investigatorManaged;
                 } else {*/
-                    //do nothing, throw exception
-                    log.warn(investigatorManaged +" already added to investigation.");
-                    throw new ValidationException(investigatorManaged+" is not unique");
+                //do nothing, throw exception
+                log.warn(investigatorManaged +" already added to investigation.");
+                throw new ValidationException(investigatorManaged+" is not unique");
                 //}
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
                 investigator.setCreateId(facilityUserId);
                 manager.persist(investigator);
+                investigation.addInvestigator(investigator);
                 return investigator;
             }
         }  else throw new RuntimeException(object +" is not avaliable to be added");
