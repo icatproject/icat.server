@@ -52,8 +52,7 @@ public class InvestigationManager extends ManagerUtil {
      *
      * @param userId federalId of the user.
      * @param investigationIds Ids of investigations
-     * @param includes information that is needed to be returned with the investigation
-     * @param manager manager object that will facilitate interaction with underlying database
+     * @param includes information that is needed to be returned with the investigation    
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return collection of {@link Investigation} investigation objects
