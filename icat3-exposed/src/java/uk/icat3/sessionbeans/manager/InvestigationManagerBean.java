@@ -9,6 +9,7 @@
 
 package uk.icat3.sessionbeans.manager;
 
+import java.util.Collection;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -79,7 +80,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
     }
     
     /**
-     * Returns a {@link Investigation} investigation from a {@link Investigation} id
+     * Returns a {@link Investigation} from a {@link Investigation} id
      * if the user has access to the investigation.
      * Also gets extra information regarding the investigation.  See {@link InvestigationInclude}
      *
@@ -106,6 +107,36 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         ManagerUtil.getInvestigationInformation(investigation, includes);
         
         return investigation;
+    }
+    
+    /**
+     * Returns a Collection of {@link Investigation}s from a Collection of {@link Investigation} ids
+     * if the user has access to the investigations.
+     * Also gets extra information regarding the investigations.  See {@link InvestigationInclude}
+     *
+     * @param sessionId sessionid of the user.
+     * @param investigationIds Id of investigations
+     * @param includes information that is needed to be returned with the investigation
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return Collection<{@link Investigation}> object
+     */
+    @WebMethod(operationName="getInvestigationsIncludes")
+    @RequestWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationsIncludes")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationsIncludesResponse")
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public Collection<Investigation> getInvestigations(String sessionId, Collection<Long> investigationIds, InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        Collection<Investigation> investigations = InvestigationManager.getInvestigations(userId, investigationIds, manager);
+        
+        //now set the investigation includes for JAXB web service
+        ManagerUtil.getInvestigationInformation(investigations, includes);
+        
+        return investigations;
     }
     
     /**

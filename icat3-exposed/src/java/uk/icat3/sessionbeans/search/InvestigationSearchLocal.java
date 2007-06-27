@@ -6,6 +6,7 @@ import javax.ejb.Local;
 import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.SessionException;
+import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 
@@ -15,6 +16,8 @@ import uk.icat3.util.LogicalOperator;
  */
 @Local
 public interface InvestigationSearchLocal {
+    
+    public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch) throws SessionException ;
     
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy) throws SessionException ;
     

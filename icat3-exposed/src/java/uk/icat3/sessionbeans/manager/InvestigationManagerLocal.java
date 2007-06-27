@@ -1,6 +1,7 @@
 
 package uk.icat3.sessionbeans.manager;
 
+import java.util.Collection;
 import javax.ejb.Local;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
@@ -28,6 +29,8 @@ public interface InvestigationManagerLocal {
     
     public Investigation getInvestigation(String sessionId, Long investigationId, InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException ;
     
+     public Collection<Investigation> getInvestigations(String sessionId, Collection<Long> investigationIds, InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException ;
+            
     public Keyword addKeyword(String sessionId, Keyword keyword, Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException;
     
     public void removeKeyword(String sessionId, KeywordPK keywordPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException;

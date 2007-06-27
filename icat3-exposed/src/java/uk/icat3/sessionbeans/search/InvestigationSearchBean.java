@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.SessionException;
+import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.InvestigationSearch;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
@@ -47,12 +48,29 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
     }
     
     /**
+     * This searches all DB for investigations with the advanced search criteria
+     *
+     * @param sessionId session id of the user.
+     * @param advancedSearch advanced Search details to search with
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection of {@link Investigation} investigation objects
+     */
+    public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch) throws SessionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        //now do the search using the  API
+        return InvestigationSearch.searchByAdvanced(userId, advancedSearch, manager);
+    }
+    
+    /**
      * This searches all DB for investigations with all the keywords that the user can see
      *
      * @param sessionId session id of the user.
      * @param keywords Collection of keywords to search on
      * @param include Set of information to return with investigations, ie their keywords, investigators, datasets, default none.  Having more information returned means the query will take longer.
      * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of {@link Investigation} investigation objects
      */
     @WebMethod(operationName="searchByKeywordsFuzzy")
