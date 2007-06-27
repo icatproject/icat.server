@@ -114,6 +114,13 @@ public class ManagerUtil {
                     investigation.getKeywordCollection().size();
                     investigation.getInvestigatorCollection().size();
                 }
+            } else if(include.toString().equals(InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES.toString())){
+                for(Investigation investigation : investigations){
+                    //size invokes the JPA to get the information
+                    investigation.getKeywordCollection().size();
+                    investigation.getInvestigatorCollection().size();
+                    investigation.getSampleCollection().size();
+                }
             } else {
                 log.trace("No additional info requested.");
             }
@@ -123,7 +130,7 @@ public class ManagerUtil {
             // See in Investigation.getInvestigatorCollection_() method
             for(Investigation investigation : investigations){
                 investigation.setInvestigationInclude(include);
-                  log.trace("Setting investigation to include: "+include);
+                log.trace("Setting investigation to include: "+include);
                 if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString()) || include.toString().equals(InvestigationInclude.ALL.toString())){
                     for(Dataset dataset : investigation.getDatasetCollection()){
                         log.trace("Setting data sets to include: "+DatasetInclude.DATASET_FILES_AND_PARAMETERS);

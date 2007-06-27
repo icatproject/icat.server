@@ -48,6 +48,10 @@ public enum InvestigationInclude {
     /**
      * only the investigation object with no default lazy information.
      */
-    NONE;
+    NONE,
+    /**
+     * all information except datasets and datafiles, ie keywords, sample and investigators
+     */
+     ALL_EXCEPT_DATASETS_AND_DATAFILES;
     
 }

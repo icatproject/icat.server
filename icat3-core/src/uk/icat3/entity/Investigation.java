@@ -406,6 +406,8 @@ import uk.icat3.util.Queries;
             return this.sampleCollection;
         } else if(investigationInclude.toString().equals(investigationInclude.ALL.toString())){
             return this.sampleCollection;
+        } else if(investigationInclude.toString().equals(investigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES.toString())){
+            return this.sampleCollection;
         }  else return null;
     }
     
@@ -556,7 +558,9 @@ import uk.icat3.util.Queries;
             return this.keywordCollection;
         } else if(investigationInclude.toString().equals(investigationInclude.ALL.toString())){
             return this.keywordCollection;
-        } if(investigationInclude.toString().equals(investigationInclude.INVESTIGATORS_AND_KEYWORDS.toString())){
+        } else if(investigationInclude.toString().equals(investigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES.toString())){
+            return this.keywordCollection;
+        } else if(investigationInclude.toString().equals(investigationInclude.INVESTIGATORS_AND_KEYWORDS.toString())){
             return this.keywordCollection;
         }  else return null;
     }
@@ -643,7 +647,10 @@ import uk.icat3.util.Queries;
         } else if(investigationInclude.toString().equals(investigationInclude.ALL.toString())){
             return this.investigatorCollection;
             //return null;
-        } if(investigationInclude.toString().equals(investigationInclude.INVESTIGATORS_AND_KEYWORDS.toString())){
+        } else if(investigationInclude.toString().equals(investigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES.toString())){
+            return this.investigatorCollection;
+            //return null;
+        } else if(investigationInclude.toString().equals(investigationInclude.INVESTIGATORS_AND_KEYWORDS.toString())){
             return this.investigatorCollection;
             //return null;
         }  else return null;
