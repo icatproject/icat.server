@@ -35,6 +35,20 @@ public class KeywordSearch {
         return getKeywordsForUser(userId, null, -1, manager);
     }
     
+     /**
+     *  This gets all the keywords avaliable for that user, they can only see keywords associated with their
+     * investigations or public investigations
+     *
+     * @param userId federalId of the user.
+     * @param type ALL, ALPHA, ALPHA_NUMERIC, {@link KeywordType}
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return list of keywords
+     */
+    //TODO finish this and add type into it
+    public static Collection<String> getKeywordsForUser(String userId, KeywordType type, EntityManager manager){
+        return getKeywordsForUser(userId, null, -1, manager);
+    }
+    
     /**
      *  This gets all the keywords avaliable for that user, beginning with a keyword, they can only see keywords associated with their
      * investigations or public investigations
