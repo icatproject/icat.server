@@ -48,13 +48,16 @@ public class BaseTestClassTX extends BaseTest{
         // Commit the transaction
         log.debug("commiting transaction on entityManager");
         try {
-            em.getTransaction().commit();
+             if(em.getTransaction().isActive() && !em.getTransaction().getRollbackOnly()){
+                log.trace("commiting tx");
+                em.getTransaction().commit();
+            }
         } catch(RuntimeException t){
             log.error(t);
             throw t;
         } finally {
             log.debug("tearDown(), closing entityManager");
-            em.close();
+            if(em.isOpen()) em.close();
         }
     }
     

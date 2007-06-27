@@ -17,6 +17,7 @@ import uk.icat3.entity.InvestigationType;
 import uk.icat3.exceptions.ICATAPIException;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
@@ -26,6 +27,7 @@ import uk.icat3.exposed.util.BaseTestClassTX;
 import uk.icat3.exposed.util.TestUserLocal;
 import uk.icat3.sessionbeans.manager.InvestigationManagerBean;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
+import uk.icat3.util.InvestigationInclude;
 import static uk.icat3.exposed.util.TestConstants.*;
 
 /**
@@ -301,13 +303,77 @@ public class TestInvestigation extends BaseTestClassTX {
         
         Investigation investigation = icat.getInvestigation(VALID_SESSION, VALID_INVESTIGATION_ID);
         
-        //checkInvestigation(investigation);
+      //  checkInvestigation(investigation);
         assertEquals("investigation id is "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, investigation.getId());
         // assertFalse("Deleted must be false", investigation.isDeleted());
         assertNotNull("investigation title cannot be null", investigation.getTitle());
         assertNotNull("investigation InvNumber cannot be null", investigation.getInvNumber());
         assertNotNull("investigation id cannot be null", investigation.getId());
         //assertEquals("Number datasets must be 2", investigation.getDatasetCollection().size(),2);
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void getInvestigationIncludes() throws ICATAPIException {
+        log.info("Testing  session: "+ VALID_SESSION +"  for gettings investigation includes to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
+        Investigation investigation = icat.getInvestigation(VALID_SESSION, VALID_INVESTIGATION_ID, InvestigationInclude.DATASETS_ONLY);
+        
+          //close em     
+        em.getTransaction().commit();
+        em.close();
+        
+      //  checkInvestigation(investigation);
+        assertEquals("investigation id is "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, investigation.getId());
+        // assertFalse("Deleted must be false", investigation.isDeleted());
+        assertNotNull("investigation title cannot be null", investigation.getTitle());
+        assertNotNull("investigation InvNumber cannot be null", investigation.getInvNumber());
+        assertNotNull("investigation id cannot be null", investigation.getId());
+        //assertEquals("Number datasets must be 2", investigation.getDatasetCollection().size(),2);
+        assertNotNull("number of datasets cannot be null", investigation.getDatasetCollection());
+        
+        for (Dataset ds : investigation.getDatasetCollection()) {
+            log.info("Number of datafile is "+ds.getDatafileCollection().size());
+            //cannot check this as it fetches them even if i close the em on line 329???
+            //assertNull("number of datafiles must be null", ds.getDatafileCollection());
+        }
+        
+    }
+    
+     /**
+     * Tests creating a file
+     */
+    @Test
+    public void getInvestigationIncludes2() throws ICATAPIException {
+        log.info("Testing  session: "+ VALID_SESSION +"  for gettings investigation includes to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //set entitymanager for each new method
+        icat.setEntityManager(em);
+        icat.setUserSession(tul);
+        
+        Investigation investigation = icat.getInvestigation(VALID_SESSION, VALID_INVESTIGATION_ID, InvestigationInclude.DATASETS_AND_DATAFILES);
+        
+        //close em
+        em.close();
+        
+     //   checkInvestigation(investigation);
+        assertEquals("investigation id is "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, investigation.getId());
+        // assertFalse("Deleted must be false", investigation.isDeleted());
+        assertNotNull("investigation title cannot be null", investigation.getTitle());
+        assertNotNull("investigation InvNumber cannot be null", investigation.getInvNumber());
+        assertNotNull("investigation id cannot be null", investigation.getId());
+        //assertEquals("Number datasets must be 2", investigation.getDatasetCollection().size(),2);
+        assertNotNull("number of datasets cannot be null", investigation.getDatasetCollection());
+        for (Dataset ds : investigation.getDatasetCollection()) {
+            assertNotNull("number of datafiles cannot be null", ds.getDatafileCollection());
+        }
+        
     }
     
     
