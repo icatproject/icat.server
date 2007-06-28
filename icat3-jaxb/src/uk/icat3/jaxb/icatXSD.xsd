@@ -337,25 +337,28 @@
 	<!-- ================================================================-->
 	<xs:complexType name="Sample">
 		<xs:sequence>
+		
 			<xs:element name="name" type="str255"/>
 			<xs:element name="instance" type="str255" minOccurs="0"/>
 			<xs:element name="chemical_formula" type="str255" minOccurs="0"/>
-			<xs:element name="safety_information" type="str4000" minOccurs="0"/>
+			<xs:element name="safety_information" type="str4000" minOccurs="0" maxOccurs="1"/>
 			<xs:element name="parameter" type="Parameter" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 	</xs:complexType>
 	<!-- ================================================================-->
-	<xs:complexType name="Parameter">
-		<xs:all>
-			<xs:element name="name" type="str255"/>
-			<xs:element name="string_value" type="str4000" minOccurs="0"/>
-			<xs:element name="numeric_value" type="xs:double" minOccurs="0"/>
-			<xs:element name="units" type="str255" minOccurs="0"/>
+	<xs:complexType name="Parameter">		
+		<xs:sequence>
+			<xs:element name="name" type="str255" minOccurs="1"/>			
+			<xs:choice>
+				<xs:element name="string_value" type="str4000" />
+				<xs:element name="numeric_value" type="xs:double" />			
+			</xs:choice>
+			<xs:element name="units" type="str255" minOccurs="1"/>
 			<xs:element name="range_top" type="str255" minOccurs="0"/>
 			<xs:element name="range_bottom" type="str255" minOccurs="0"/>
 			<xs:element name="error" type="str255" minOccurs="0"/>
 			<xs:element name="description" type="str4000" minOccurs="0"/>
-		</xs:all>
+		</xs:sequence>
 	</xs:complexType>
 	<!-- ================================================================-->
 	<xs:complexType name="Datafile">
