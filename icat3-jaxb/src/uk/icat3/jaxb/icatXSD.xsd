@@ -400,7 +400,7 @@
 		</xs:annotation>
 		<xs:restriction base="xs:string">
 			<xs:maxLength value="255"/>
-			<xs:minLength value="0"/>
+			<xs:minLength value="1"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<!-- ================================================================-->
@@ -410,7 +410,7 @@
 		</xs:annotation>
 		<xs:restriction base="xs:string">
 			<xs:maxLength value="4000"/>
-			<xs:minLength value="0"/>
+			<xs:minLength value="1"/>
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>
