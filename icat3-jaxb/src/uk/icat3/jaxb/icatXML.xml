@@ -45,8 +45,6 @@
 			<keyword><name>icat</name></keyword>
 			<keyword><name>ingestion</name></keyword>
 			<keyword><name>0.1</name></keyword>
-			
-			
 				<topic>
 					<name>XML</name>
 					<topic_level>1</topic_level>
@@ -61,14 +59,7 @@
 				</topic>
 			
 			
-				<publication>
-					<full_reference>L. Lerusse &amp; al., &quot;XML schema as validation of XML input for ICAT ingestion&quot;, 2007.</full_reference>
-					<url> http://epubs.cclrc.ac.uk/0098374</url>
-				</publication>
-				<publication>
-					<full_reference>L. Lerusse &amp; al., &quot;XML schema as validation of XML export for ICAT&quot;, 2007.</full_reference>
-					<url> http://epubs.cclrc.ac.uk/0098344</url>
-				</publication>
+				
 			
 			<dataset>
 				<name>test-1</name>
@@ -90,25 +81,11 @@
 						<description>How much should we drink per day</description>
 					</parameter>
 					<parameter>
-						<name>colour</name>
-						<units>N/A</units>
+						<name>notes</name>
 						<string_value> transparent</string_value>
-						<description> color of the water</description>
-					</parameter>
-					<parameter>
-						<name>taste</name>
-						<string_value>neutral</string_value>
 						<units>N/A</units>
-					</parameter>
-					<parameter>
-						<name>alcohol_content</name>
-						<numeric_value>0</numeric_value>
-						<units>%</units>
-						<range_top>45</range_top>
-						<range_bottom>0</range_bottom>
-						<error>.1</error>
-						<description>blah</description>
-					</parameter>
+						<description> color of the water</description>
+					</parameter>					
 				</sample>
 				<datafile>
 					<name>file_01.nxs</name>
@@ -125,7 +102,7 @@
 						<units>pulses</units>
 					</parameter>
 					<parameter>
-						<name>run_title_arse</name>
+						<name>run_title</name>
 						<string_value>Nerds run riot at JavaOne</string_value>
 						<units>N/A</units>
 						<description>Compression parameter used in Photoshop.</description>
