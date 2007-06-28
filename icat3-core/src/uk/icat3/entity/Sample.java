@@ -67,7 +67,7 @@ public class Sample extends EntityBaseBean implements Serializable {
     @Column(name = "CHEMICAL_FORMULA")
     private String chemicalFormula;
     
-    @Column(name = "SAFETY_INFORMATION", nullable = false)
+    @Column(name = "SAFETY_INFORMATION")
     private String safetyInformation;
     
     @Column(name = "PROPOSAL_SAMPLE_ID")
