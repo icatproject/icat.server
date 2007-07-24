@@ -248,7 +248,7 @@ public class ManagerUtil {
     public static String getFacilityUserId(String userId, EntityManager manager) {
        return getFacilityUser(userId, manager).getFacilityUserId();
     }
-    
+           
     /**
      * Gets the facilityUser of the user from the federalId
      *

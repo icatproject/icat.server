@@ -263,14 +263,14 @@ public class InvestigationManager extends ManagerUtil {
         
         //new dataset, set createid
         
-        investigation.setCascade(Cascade.MOD_AND_CREATE_IDS, facilityUser.getFacilityUserId());
+        investigation.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
         investigation.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
         manager.persist(investigation);
         
         
         //need to add this user to the list of investigators now
         Investigator investigator = new Investigator(facilityUser.getFacilityUserId(), investigation.getId());
-        investigator.setCreateId(facilityUser.getFacilityUserId());
+        investigator.setCreateId(userId);
         investigator.setFacilityUser(facilityUser);
         investigator.setInvestigation(investigation);
         
@@ -298,9 +298,9 @@ public class InvestigationManager extends ManagerUtil {
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, investigationManaged, AccessType.UPDATE, manager);
-        String facilityUserId = getFacilityUserId(userId, manager);
+        //String facilityUserId = getFacilityUserId(userId, manager);
         
-        investigationManaged.setModId(facilityUserId);
+        investigationManaged.setModId(userId);
         investigationManaged.merge(investigation);
         
         //check if valid investigation
@@ -339,10 +339,10 @@ public class InvestigationManager extends ManagerUtil {
             
             //check user has update access
             GateKeeper.performAuthorisation(userId, sampleManaged, AccessType.UPDATE, manager);
-            String facilityUserId = getFacilityUserId(userId, manager);
+            //String facilityUserId = getFacilityUserId(userId, manager);
             
             sampleManaged.merge(sample);
-            sampleManaged.setModId(facilityUserId);
+            sampleManaged.setModId(userId);
             
             sampleManaged.isValid(manager, false);
             
@@ -354,10 +354,10 @@ public class InvestigationManager extends ManagerUtil {
             
             //check user has update access
             GateKeeper.performAuthorisation(userId, sampleParameterManaged, AccessType.UPDATE, manager);
-            String facilityUserId = getFacilityUserId(userId, manager);
+            //String facilityUserId = getFacilityUserId(userId, manager);
             
             sampleParameterManaged.merge(sampleParameter);
-            sampleParameterManaged.setModId(facilityUserId);
+            sampleParameterManaged.setModId(userId);
             
             sampleParameterManaged.isValid(manager, false);
             
@@ -369,10 +369,10 @@ public class InvestigationManager extends ManagerUtil {
             
             //check user has update access
             GateKeeper.performAuthorisation(userId, PublicationManaged, AccessType.UPDATE, manager);
-            String facilityUserId = getFacilityUserId(userId, manager);
+            //String facilityUserId = getFacilityUserId(userId, manager);
             
             PublicationManaged.merge(publication);
-            PublicationManaged.setModId(facilityUserId);
+            PublicationManaged.setModId(userId);
             
             PublicationManaged.isValid(manager, false);
             
@@ -384,10 +384,10 @@ public class InvestigationManager extends ManagerUtil {
             
             //check user has update access
             GateKeeper.performAuthorisation(userId, investigatorManaged, AccessType.UPDATE, manager);
-            String facilityUserId = getFacilityUserId(userId, manager);
+            //String facilityUserId = getFacilityUserId(userId, manager);
             
             investigatorManaged.merge(investigator);
-            investigatorManaged.setModId(facilityUserId);
+            investigatorManaged.setModId(userId);
             
             investigatorManaged.isValid(manager, false);
             
@@ -398,10 +398,10 @@ public class InvestigationManager extends ManagerUtil {
             
             //check user has update access
             GateKeeper.performAuthorisation(userId, investigationManaged, AccessType.UPDATE, manager);
-            String facilityUserId = getFacilityUserId(userId, manager);
+            //String facilityUserId = getFacilityUserId(userId, manager);
             
             investigationManaged.merge(investigation);
-            investigationManaged.setModId(facilityUserId);
+            investigationManaged.setModId(userId);
             
             investigationManaged.isValid(manager, false);
         } else throw new RuntimeException(object +" is not avaliable to be modified");
@@ -434,11 +434,11 @@ public class InvestigationManager extends ManagerUtil {
             if(type == AccessType.DELETE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, keywordManaged, AccessType.DELETE, manager);
-                String facilityUserId = getFacilityUserId(userId, manager);
+                //String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
                 keywordManaged.setDeleted(true);
-                keywordManaged.setModId(facilityUserId);
+                keywordManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, keywordManaged, AccessType.REMOVE, manager);
@@ -457,11 +457,11 @@ public class InvestigationManager extends ManagerUtil {
             if(type == AccessType.DELETE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, sampleManaged, AccessType.DELETE, manager);
-                String facilityUserId = getFacilityUserId(userId, manager);
+                //String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
                 sampleManaged.setDeleted(true);
-                sampleManaged.setModId(facilityUserId);
+                sampleManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, sampleManaged, AccessType.REMOVE, manager);
@@ -480,11 +480,11 @@ public class InvestigationManager extends ManagerUtil {
             if(type == AccessType.DELETE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, sampleParameterManaged, AccessType.DELETE, manager);
-                String facilityUserId = getFacilityUserId(userId, manager);
+                //String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
                 sampleParameterManaged.setDeleted(true);
-                sampleParameterManaged.setModId(facilityUserId);
+                sampleParameterManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, sampleParameterManaged, AccessType.REMOVE, manager);
@@ -503,11 +503,11 @@ public class InvestigationManager extends ManagerUtil {
             if(type == AccessType.DELETE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, PublicationManaged, AccessType.DELETE, manager);
-                String facilityUserId = getFacilityUserId(userId, manager);
+                //String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
                 PublicationManaged.setDeleted(true);
-                PublicationManaged.setModId(facilityUserId);
+                PublicationManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, PublicationManaged, AccessType.REMOVE, manager);
@@ -526,11 +526,11 @@ public class InvestigationManager extends ManagerUtil {
             if(type == AccessType.DELETE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, investigatorManaged, AccessType.DELETE, manager);
-                String facilityUserId = getFacilityUserId(userId, manager);
+                //String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
                 investigatorManaged.setDeleted(true);
-                investigatorManaged.setModId(facilityUserId);
+                investigatorManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, investigatorManaged, AccessType.REMOVE, manager);
@@ -548,11 +548,11 @@ public class InvestigationManager extends ManagerUtil {
             if(type == AccessType.DELETE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, investigationManaged, AccessType.DELETE, manager);
-                String facilityUserId = getFacilityUserId(userId, manager);
+                //String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
                 investigationManaged.setCascade(Cascade.DELETE, Boolean.TRUE);
-                investigationManaged.setModId(facilityUserId);
+                investigationManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, investigationManaged, AccessType.REMOVE, manager);
@@ -591,7 +591,7 @@ public class InvestigationManager extends ManagerUtil {
             
             //check user has delete access
             GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
-            String facilityUserId = getFacilityUserId(userId, manager);
+            //String facilityUserId = getFacilityUserId(userId, manager);
             
             try {
                 //check investigator not already added
@@ -610,7 +610,7 @@ public class InvestigationManager extends ManagerUtil {
                 //not already in DB so add
                 //sets modId for persist
                 //sets modId for persist
-                publication.setCreateId(facilityUserId);
+                publication.setCreateId(userId);
                 manager.persist(publication);
                 
                 investigation.addPublication(publication);
@@ -625,7 +625,7 @@ public class InvestigationManager extends ManagerUtil {
             
             //check user has delete access
             GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
-            String facilityUserId = getFacilityUserId(userId, manager);
+            //String facilityUserId = getFacilityUserId(userId, manager);
             
             //TODO check for primary key
             try {
@@ -644,7 +644,7 @@ public class InvestigationManager extends ManagerUtil {
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
-                sample.setCreateId(facilityUserId);
+                sample.setCreateId(userId);
                 manager.persist(sample);
                 //add sample to investigation
                 investigation.addSample(sample);
@@ -662,7 +662,7 @@ public class InvestigationManager extends ManagerUtil {
             
             //check user has delete access
             GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
-            String facilityUserId = getFacilityUserId(userId, manager);
+            //String facilityUserId = getFacilityUserId(userId, manager);
             
             //TODO check for primary key
             try {
@@ -681,7 +681,7 @@ public class InvestigationManager extends ManagerUtil {
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
-                sampleParamter.setCreateId(facilityUserId);
+                sampleParamter.setCreateId(userId);
                 manager.persist(sampleParamter);
                 return sampleParamter;
             }
@@ -693,7 +693,7 @@ public class InvestigationManager extends ManagerUtil {
             
             //check user has delete access
             GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
-            String facilityUserId = getFacilityUserId(userId, manager);
+            //String facilityUserId = getFacilityUserId(userId, manager);
             
             //TODO check for primary key
             try {
@@ -712,7 +712,7 @@ public class InvestigationManager extends ManagerUtil {
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
-                keyword.setCreateId(facilityUserId);
+                keyword.setCreateId(userId);
                 manager.persist(keyword);
                 investigation.addKeyword(keyword);
                 return keyword;
@@ -725,7 +725,7 @@ public class InvestigationManager extends ManagerUtil {
             
             //check user has delete access
             GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
-            String facilityUserId = getFacilityUserId(userId, manager);
+            //String facilityUserId = getFacilityUserId(userId, manager);
             
             try {
                 //check investigator not already added
@@ -743,7 +743,7 @@ public class InvestigationManager extends ManagerUtil {
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
-                investigator.setCreateId(facilityUserId);
+                investigator.setCreateId(userId);
                 manager.persist(investigator);
                 investigation.addInvestigator(investigator);
                 return investigator;

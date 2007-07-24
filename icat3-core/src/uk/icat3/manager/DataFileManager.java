@@ -66,9 +66,9 @@ public class DataFileManager extends ManagerUtil {
         
         //check user has delete access
         GateKeeper.performAuthorisation(userId, dataFile, AccessType.DELETE, manager);
-        String facilityUserId = getFacilityUserId(userId, manager);
+        //String facilityUserId = getFacilityUserId(userId, manager);
         
-        dataFile.setCascade(Cascade.MOD_ID, facilityUserId);
+        dataFile.setCascade(Cascade.MOD_ID, userId);
         dataFile.setCascade(Cascade.DELETE,Boolean.TRUE);
     }
     
@@ -166,9 +166,9 @@ public class DataFileManager extends ManagerUtil {
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, datafileManaged, AccessType.UPDATE, manager);
-        String facilityUserId = getFacilityUserId(userId, manager);
+        //String facilityUserId = getFacilityUserId(userId, manager);
         
-        datafileManaged.setModId(facilityUserId);
+        datafileManaged.setModId(userId);
         datafileManaged.merge(dataFile);
         
         return datafileManaged;
@@ -193,13 +193,13 @@ public class DataFileManager extends ManagerUtil {
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, dataFile, AccessType.CREATE, manager);
-        String facilityUserId = getFacilityUserId(userId, manager);
+        //String facilityUserId = getFacilityUserId(userId, manager);
         
         dataFile.isValid(manager);
         
         //new dataset, set createid, this sets mod id and modtime
         dataFile.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
-        dataFile.setCascade(Cascade.MOD_AND_CREATE_IDS, facilityUserId);
+        dataFile.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
         manager.persist(dataFile);
         
         return dataFile;
@@ -323,11 +323,11 @@ public class DataFileManager extends ManagerUtil {
         
         //ok, now check permissions on found data set
         GateKeeper.performAuthorisation(userId, datafileParameterFound, AccessType.UPDATE, manager);
-        String facilityUserId = getFacilityUserId(userId, manager);
+        //String facilityUserId = getFacilityUserId(userId, manager);
         
         //update model with changed wanted
         datafileParameterFound.merge(datafileParameter);
-        datafileParameterFound.setModId(facilityUserId);
+        datafileParameterFound.setModId(userId);
         
         datafileParameterFound.isValid(manager);
     }
@@ -361,7 +361,7 @@ public class DataFileManager extends ManagerUtil {
         
         //ok, now check permissions
         GateKeeper.performAuthorisation(userId, datafileParameter, AccessType.CREATE, manager);
-        String facilityUserId = getFacilityUserId(userId, manager);
+        //String facilityUserId = getFacilityUserId(userId, manager);
         
         try {
             //check dataSetParameterManaged not already added
@@ -379,7 +379,7 @@ public class DataFileManager extends ManagerUtil {
         } catch (NoSuchObjectFoundException ex) {
             //not already in DB so add
             //sets modId for persist
-            datafileParameter.setCreateId(facilityUserId);
+            datafileParameter.setCreateId(userId);
             manager.persist(datafileParameter);
             return datafileParameter;
         }
@@ -454,9 +454,9 @@ public class DataFileManager extends ManagerUtil {
         
         //ok, now check permissions
         GateKeeper.performAuthorisation(userId, datafileParameterManaged, AccessType.DELETE, manager);
-        String facilityUserId = getFacilityUserId(userId, manager);
+        //String facilityUserId = getFacilityUserId(userId, manager);
         
-        datafileParameterManaged.setModId(facilityUserId);
+        datafileParameterManaged.setModId(userId);
         datafileParameterManaged.setDeleted(true);
     }
 }
