@@ -60,27 +60,40 @@ public class GateKeeper {
         Investigation investigation = null;
         
         if(object instanceof Publication){
-            performAuthorisation(user, access, object, ElementType.PUBLICATION, manager);
-        } else if(object instanceof Investigation){   
-            performAuthorisation(user, access, object, ElementType.INVESTIGATION, manager);
+            investigation  = ((Publication)object).getInvestigationId();
+            performAuthorisation(user, investigation, access, object, ElementType.PUBLICATION, manager);
+        } else if(object instanceof Investigation){            
+            investigation  = (Investigation)object;
+            performAuthorisation(user, investigation, access, object, ElementType.INVESTIGATION, manager);
         } else if(object instanceof Keyword){
-            performAuthorisation(user, access, object, ElementType.KEYWORD, manager);
+            investigation  = ((Keyword)object).getInvestigation();
+            performAuthorisation(user, investigation, access, object, ElementType.KEYWORD, manager);
         } else if(object instanceof Dataset){
-            performAuthorisation(user, access, object, ElementType.DATASET, manager);
+            investigation  = ((Dataset)object).getInvestigationId();
+            performAuthorisation(user, investigation, access, object, ElementType.DATASET, manager);
         } else if(object instanceof Datafile){
-            performAuthorisation(user, access, object, ElementType.DATAFILE, manager);
+            investigation  = ((Datafile)object).getDatasetId().getInvestigationId();
+            performAuthorisation(user, investigation, access, object, ElementType.DATAFILE, manager);
         } else if(object instanceof DatasetParameter){
-            performAuthorisation(user, access, object, ElementType.DATASET_PARAMETER, manager);
+            investigation  = ((DatasetParameter)object).getDataset().getInvestigationId();
+            performAuthorisation(user, investigation, access, object, ElementType.DATASET_PARAMETER, manager);
         } else if(object instanceof DatafileParameter){
-            performAuthorisation(user, access, object, ElementType.DATAFILE_PARAMETER, manager);
+            investigation  = ((DatafileParameter)object).getDatafile().getDatasetId().getInvestigationId();
+            performAuthorisation(user, investigation, access, object, ElementType.DATAFILE_PARAMETER, manager);
         } else if(object instanceof SampleParameter){
-            performAuthorisation(user, access, object, ElementType.SAMPLE_PARAMETER, manager);
+            investigation  = ((SampleParameter)object).getSample().getInvestigationId();
+            performAuthorisation(user, investigation, access, object, ElementType.SAMPLE_PARAMETER, manager);
         } else if(object instanceof Sample){
-            performAuthorisation(user, access, object, ElementType.SAMPLE, manager);
+            investigation  = ((Sample)object).getInvestigationId();
+            performAuthorisation(user, investigation, access, object, ElementType.SAMPLE, manager);
         } else if(object instanceof Investigator){
-            performAuthorisation(user, access, object, ElementType.INVESTIGATOR, manager);
+            investigation  =((Investigator)object).getInvestigation();
+            performAuthorisation(user, investigation, access, object, ElementType.INVESTIGATOR, manager);
         } /* else if(object instanceof Study){
-            performAuthorisation(user, access, object, ElementType.STUDY, manager);
+            for (StudyInvestigation si :  ((Study)object).getStudyInvestigationCollection()) {
+                invList.add(si.getInvestigation());
+            }//end for
+            performAuthorisation(user, invList, access, ((DatafileParameter)object), manager);
         }*/ else throw new InsufficientPrivilegesException(object.getClass().getSimpleName()+" not supported for security check.");;
         
        
@@ -109,18 +122,18 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have
      *                          permission to perform operation.
      */
-    private static void performAuthorisation(String user, AccessType access, EntityBaseBean element, ElementType elementType, EntityManager manager) throws InsufficientPrivilegesException {
+    private static void performAuthorisation(String user, Investigation investigation, AccessType access, EntityBaseBean element, ElementType elementType, EntityManager manager) throws InsufficientPrivilegesException {
         IcatAuthorisation icatAuthorisation = null;
         boolean success = false;
         
         //get icat authroisation
         try{
             if(isInvestigationType(elementType)) {
-                icatAuthorisation = findIcatAuthorisation(user, ElementType.INVESTIGATION, ((Investigation)element).getId(), manager);
+                icatAuthorisation = findIcatAuthorisation(user, investigation, ElementType.INVESTIGATION, ((Investigation)element).getId(), manager);
             } else if(isDatasetType(elementType)) {
-                icatAuthorisation = findIcatAuthorisation(user, ElementType.DATASET, ((Dataset)element).getId(), manager);
+                icatAuthorisation = findIcatAuthorisation(user, investigation, ElementType.DATASET, ((Dataset)element).getId(), manager);
             } else if(isDatafileType(elementType)) {
-                icatAuthorisation = findIcatAuthorisation(user, ElementType.DATAFILE, ((Datafile)element).getId(), manager);
+                icatAuthorisation = findIcatAuthorisation(user, investigation, ElementType.DATAFILE, ((Datafile)element).getId(), manager);
             }
         } catch(InsufficientPrivilegesException ipe){
             log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
@@ -168,12 +181,13 @@ public class GateKeeper {
      * to the users fedId, if this is not found, it looks for the ANY as the fedId
      * 
      */
-    private static IcatAuthorisation findIcatAuthorisation(String userId, ElementType type, Long id, EntityManager manager) throws InsufficientPrivilegesException {
+    private static IcatAuthorisation findIcatAuthorisation(String userId, Investigation investigation, ElementType type, Long id, EntityManager manager) throws InsufficientPrivilegesException {
         if(type != ElementType.INVESTIGATION || type != ElementType.DATAFILE || type != ElementType.DATASET) throw new RuntimeException("ElementType: "+type+" not supported");
         
         Query query = manager.createNamedQuery("IcatAuthorisation.findById").
                 setParameter("elementType", type.toString()).
                 setParameter("elementId", id).
+                setParameter("investigationId", investigation.getId()).
                 setParameter("userId", userId);
         
         IcatAuthorisation icatAuthorisation = (IcatAuthorisation)query.getSingleResult();

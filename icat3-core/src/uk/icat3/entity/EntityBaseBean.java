@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.apache.log4j.Logger;
 import uk.icat3.exceptions.EntityNotModifiableError;
 import uk.icat3.exceptions.ValidationException;
-
+import static uk.icat3.util.Util.*;
 /**
  *
  * @author gjd37
@@ -171,11 +171,8 @@ public class EntityBaseBean {
     public boolean isModifiable(){
         //TODO will change to other colums here aswell as user supplied data and faility
         //at the moment if from props then cannot change
-        if(createId != null){
-            if(createId.contains("FROM SPREADSHEET") || createId.contains("PROPAGATION")){
-                //user cannot modify this
-                return false;
-            } else return true;
+        if(parseBoolean(facilityAcquired)){
+            return false;
         } else return true;
     }
     
@@ -216,7 +213,7 @@ public class EntityBaseBean {
     @PrePersist
     public void prePersist(){
         markedDeleted = "N";
-        //TODO remove facilityAcquired = "N";
+        facilityAcquired = "N";
         if(modId != null){
             createId = modId;
         } else if(createId != null) modId = createId;
@@ -245,8 +242,7 @@ public class EntityBaseBean {
     }
     
     public boolean isDeleted(){
-        if(getMarkedDeleted() != null && getMarkedDeleted().equalsIgnoreCase("Y")) return true;
-        else return false;
+        return parseBoolean(getMarkedDeleted());
     }
     
     /**
