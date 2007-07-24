@@ -20,9 +20,9 @@ public class TestConstants {
     
     public final static String VALID_SAMPLE_NAME = "SrF2 calibration  w=-25.3";
     
-     public final static String VALID_FEDID_FOR_INVESTIGATION =  "JAMES";  
-     public final static String VALID_SURNAME_FOR_INVESTIGATION =  "HEALY";
-     
+    public final static String VALID_FEDID_FOR_INVESTIGATION =  "JAMES";
+    public final static String VALID_SURNAME_FOR_INVESTIGATION =  "HEALY";
+    
     public final static String VALID_USER_FOR_INVESTIGATION =  "JAMES-JAMES";
     public final static String VALID_FACILITY_USER_FOR_INVESTIGATION =  "JAMES";
     public final static String VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION =  "FIRST PROPAGATION";

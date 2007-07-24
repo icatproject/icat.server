@@ -485,8 +485,8 @@ public class TestSampleParameter extends BaseTestClassTX {
         assertNotNull("PK units cannot be null", sampleParameter.getSampleParameterPK().getUnits());
         assertNotNull("PK name cannot be null", sampleParameter.getSampleParameterPK().getName());
         
-        assertEquals("Create id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, sampleParameter.getCreateId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
-        assertEquals("Mod id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, sampleParameter.getModId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
+        assertEquals("Create id must be "+VALID_USER_FOR_INVESTIGATION, sampleParameter.getCreateId(), VALID_USER_FOR_INVESTIGATION);
+        assertEquals("Mod id must be "+VALID_USER_FOR_INVESTIGATION, sampleParameter.getModId(), VALID_USER_FOR_INVESTIGATION);
         //assertEquals("Investigation id must be "+VALID_INVESTIGATION_ID, sampleParameter.getSampleParameterPK().getSampleId(), VALID_INVESTIGATION_ID);
         
     }

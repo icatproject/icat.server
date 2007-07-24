@@ -504,8 +504,8 @@ public class TestDatasetParameter extends BaseTestClassTX {
         assertNotNull("PK units cannot be null", datasetParameter.getDatasetParameterPK().getUnits());
         assertNotNull("PK name cannot be null", datasetParameter.getDatasetParameterPK().getName());
         
-        assertEquals("Create id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, datasetParameter.getCreateId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
-        assertEquals("Mod id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, datasetParameter.getModId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
+        assertEquals("Create id must be "+VALID_USER_FOR_INVESTIGATION, datasetParameter.getCreateId(), VALID_USER_FOR_INVESTIGATION);
+        assertEquals("Mod id must be "+VALID_USER_FOR_INVESTIGATION, datasetParameter.getModId(), VALID_USER_FOR_INVESTIGATION);
         //assertEquals("Dataset id must be "+VALID_INVESTIGATION_ID, datasetParameter.getDatasetParameterPK().getDatasetId(), VALID_INVESTIGATION_ID);
         
     }

@@ -365,8 +365,8 @@ public class TestSample extends BaseTestClassTX {
     private void checkSample(Sample sample){
         assertNotNull("Name cannot be null", sample.getName());
         assertNotNull("Safety cannot be null", sample.getSafetyInformation());
-        assertEquals("Create id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, sample.getCreateId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
-        assertEquals("Mod id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, sample.getModId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
+        assertEquals("Create id must be "+VALID_USER_FOR_INVESTIGATION, sample.getCreateId(), VALID_USER_FOR_INVESTIGATION);
+        assertEquals("Mod id must be "+VALID_USER_FOR_INVESTIGATION, sample.getModId(), VALID_USER_FOR_INVESTIGATION);
         assertEquals("Investigation id must be "+VALID_INVESTIGATION_ID, sample.getInvestigationId().getId(), VALID_INVESTIGATION_ID);
         
     }

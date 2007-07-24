@@ -423,8 +423,8 @@ public class TestInvestigation extends BaseTestClassTX {
         assertNotNull("investigation title cannot be null", investigation.getTitle());
         assertNotNull("investigation InvNumber cannot be null", investigation.getInvNumber());
         assertNotNull("investigation id cannot be null", investigation.getId());
-        assertEquals("Create id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, investigation.getCreateId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
-        assertEquals("Mod id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, investigation.getModId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
+        assertEquals("Create id must be "+VALID_USER_FOR_INVESTIGATION, investigation.getCreateId(), VALID_USER_FOR_INVESTIGATION);
+        assertEquals("Mod id must be "+VALID_USER_FOR_INVESTIGATION, investigation.getModId(), VALID_USER_FOR_INVESTIGATION);
     }
     
     public static junit.framework.Test suite(){

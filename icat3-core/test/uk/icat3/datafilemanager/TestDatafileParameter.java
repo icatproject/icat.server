@@ -523,8 +523,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
         assertNotNull("PK units cannot be null", datafileParameter.getDatafileParameterPK().getUnits());
         assertNotNull("PK name cannot be null", datafileParameter.getDatafileParameterPK().getName());
         
-        assertEquals("Create id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, datafileParameter.getCreateId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
-        assertEquals("Mod id must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, datafileParameter.getModId(), VALID_FACILITY_USER_FOR_INVESTIGATION);
+        assertEquals("Create id must be "+VALID_USER_FOR_INVESTIGATION, datafileParameter.getCreateId(), VALID_USER_FOR_INVESTIGATION);
+        assertEquals("Mod id must be "+VALID_USER_FOR_INVESTIGATION, datafileParameter.getModId(), VALID_USER_FOR_INVESTIGATION);
         //assertEquals("Datafile id must be "+VALID_INVESTIGATION_ID, datafileParameter.getDatafileParameterPK().getDatafileId(), VALID_INVESTIGATION_ID);
         
     }

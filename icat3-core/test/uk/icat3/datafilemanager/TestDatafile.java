@@ -432,10 +432,10 @@ public class TestDatafile extends BaseTestClassTX {
          assertNotNull("createTime must be not null", file.getCreateTime());
          
         assertNotNull("createId must be not null", file.getCreateId());
-        assertEquals("createId must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, file.getCreateId());
+        assertEquals("createId must be "+VALID_USER_FOR_INVESTIGATION, VALID_USER_FOR_INVESTIGATION, file.getCreateId());
         
         assertNotNull("modId must be not null", file.getModId());
-        assertEquals("modId must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, file.getModId());
+        assertEquals("modId must be "+VALID_USER_FOR_INVESTIGATION, VALID_USER_FOR_INVESTIGATION, file.getModId());
         
         assertNotNull("dataFile id must be not null", file.getId());
         assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, file.getDatasetId().getInvestigationId().getId());
