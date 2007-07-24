@@ -20,9 +20,12 @@ import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.FacilityUser;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.Investigation;
+import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.util.DatasetInclude;
+import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
 
 /**
@@ -246,9 +249,9 @@ public class ManagerUtil {
      * @return facilityUserId
      */
     public static String getFacilityUserId(String userId, EntityManager manager) {
-       return getFacilityUser(userId, manager).getFacilityUserId();
+        return getFacilityUser(userId, manager).getFacilityUserId();
     }
-           
+    
     /**
      * Gets the facilityUser of the user from the federalId
      *
@@ -257,7 +260,7 @@ public class ManagerUtil {
      * @return facilityUser
      */
     public static FacilityUser getFacilityUser(String userId, EntityManager manager) {
-         FacilityUser facilityUser = null;
+        FacilityUser facilityUser = null;
         try {
             facilityUser = (FacilityUser) manager.createQuery("SELECT f FROM FacilityUser f where f.federalId = :fedId").setParameter("fedId", userId).getSingleResult();
             log.trace(""+facilityUser.getFacilityUserId()+" corresponds to "+userId);
@@ -270,8 +273,7 @@ public class ManagerUtil {
             throw new RuntimeException("federalId:" +userId+" has more than one associated facility user.  DB should never allow this error to be thrown.");
         }
     }
-      
-    
+           
     public static boolean isUnique(EntityBaseBean entityClass, EntityManager manager) {
         if(entityClass instanceof Dataset){
             Dataset dataset = (Dataset)entityClass;

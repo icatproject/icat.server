@@ -15,5 +15,28 @@ package uk.icat3.util;
  * @version 1.0
  */
 public enum ElementType {
-    STUDY, INVESTIGATION, DATASET, DATAFILE, DATAFILE_PARAMETER, DATASET_PARAMETER, SAMPLE, SAMPLE_PARAMETER;
+    /**
+     * Investigation objects
+     */
+    STUDY, 
+    INVESTIGATION, 
+    INVESTIGATOR,
+    KEYWORD,
+    SAMPLE, 
+    SAMPLE_PARAMETER,
+    PUBLICATION,
+    
+    /**
+     * Dataset objects
+     */
+    DATASET, 
+    DATASET_PARAMETER,
+    
+    /**
+     * Datafile objects
+     */
+    DATAFILE,
+    DATAFILE_PARAMETER;
+    
+    
 }

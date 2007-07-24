@@ -228,7 +228,7 @@ public class EntityBaseBean {
     public void postLoad(){
         //setUniqueId(uniqueId);
     }
-    
+           
     @XmlTransient
     public String getMarkedDeleted() {
         return markedDeleted;

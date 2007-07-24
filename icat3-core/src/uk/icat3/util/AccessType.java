@@ -41,7 +41,11 @@ public enum AccessType {
      */
     ADMIN,
     /**
-     * Fine grained.
+     * Download from SRB
      */
-    FINE_GRAINED_ACCESS;
+    DOWNLOAD,
+    /**
+     * Set Facility acquired data.
+     */
+    SET_FA;
 }

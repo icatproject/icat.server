@@ -37,6 +37,10 @@ public class Util {
         Calendar cal = new GregorianCalendar();
         cal.setTime(dt);
         return DatatypeConverter.printDate(cal);
-    }
+    }    
     
+     public static boolean parseBoolean(String yes_no_string){
+        if(yes_no_string != null && yes_no_string.equalsIgnoreCase("Y")) return true;
+        else return false;
+    }
 }
