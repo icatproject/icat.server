@@ -93,9 +93,6 @@ import uk.icat3.util.DatasetInclude;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetId")
     private Collection<Datafile> datafileCollection;
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetId")
-    private Collection<DatasetLevelPermission> datasetLevelPermissionCollection;
-    
     private transient DatasetInclude datasetInclude = DatasetInclude.NONE;
     
     /** Creates a new instance of Dataset */
@@ -336,24 +333,7 @@ import uk.icat3.util.DatasetInclude;
         this.setDatafileCollection(datafiles);
     }
     
-    /**
-     * Gets the datasetLevelPermissionCollection of this Dataset.
-     * @return the datasetLevelPermissionCollection
-     */
-    @XmlTransient
-    public Collection<DatasetLevelPermission> getDatasetLevelPermissionCollection() {
-        return this.datasetLevelPermissionCollection;
-    }
-    
-    /**
-     * Sets the datasetLevelPermissionCollection of this Dataset to the specified value.
-     * @param datasetLevelPermissionCollection the new datasetLevelPermissionCollection
-     */
-    public void setDatasetLevelPermissionCollection(Collection<DatasetLevelPermission> datasetLevelPermissionCollection) {
-        this.datasetLevelPermissionCollection = datasetLevelPermissionCollection;
-    }
-    
-    /**
+           /**
      * Sets deleted flag on all items owned by this datasets
      *
      * @param isDeleted
@@ -389,8 +369,9 @@ import uk.icat3.util.DatasetInclude;
             }
         }
         
+        //TODO delete new access stuff
         //access groups
-        if(getDatasetLevelPermissionCollection() != null){
+       /* if(getDatasetLevelPermissionCollection() != null){
             for(DatasetLevelPermission datasetLevelPermission : getDatasetLevelPermissionCollection()){
                 datasetLevelPermission.setMarkedDeleted(deleted);
                 for(AccessGroupDlp agdlp : datasetLevelPermission.getAccessGroupDlpCollection()){
@@ -398,7 +379,7 @@ import uk.icat3.util.DatasetInclude;
                 }
             }
             
-        }
+        }*/
         
         if(type == Cascade.DELETE) this.setMarkedDeleted(deleted);
         else if(type == Cascade.MOD_ID) this.setModId(value.toString());

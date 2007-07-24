@@ -55,35 +55,19 @@ public class EntityBaseBean {
     
     @Column(name = "CREATE_ID", nullable = false)
     @ICAT(merge=false, nullable=true)
-    protected  String createId;
+    protected String createId;
     
-    @Column(name = "DELETED", nullable = false )
+    @Column(name = "DELETED", nullable = false)
     @ICAT(merge=false, nullable=true)
-    protected  String markedDeleted;
+    protected String markedDeleted;
     
     @Column(name = "MOD_ID", nullable = false)
     @ICAT(merge=false, nullable=true)
     protected String modId;
     
-    /*@Column(name = "FACILITY_ACQUIRED", nullable = false)
+    @Column(name = "FACILITY_AQUIRED", nullable = false)
     @ICAT(merge=false, nullable=true)
-    protected String facilityAcquired;*/
-    
-    /**
-     * Gets the facilityAcquired of this entity.
-     * @return the facilityAcquired
-     */
-    /*public String getFacilityAcquired() {
-        return facilityAcquired;
-    }*/
-    
-    /**
-     * Sets the facilityAcquired of this entity to the specified value.
-     * @param facilityAcquired the new createId
-     */
-    /*public void setFacilityAcquired(String facilityAcquired) {
-        this.facilityAcquired = facilityAcquired;
-    }*/
+    protected String facilityAcquired;
     
     /**
      * Field to check string value of deleted
@@ -109,9 +93,9 @@ public class EntityBaseBean {
     /**
      * Field to put from which facility this came from
      */
-    @Transient
+   /* @Transient
     @ICAT(merge=false, nullable=true)
-    protected transient String facility;
+    protected transient String facility;*/
     
     /**
      * Gets the modTime of this entity.
@@ -163,6 +147,22 @@ public class EntityBaseBean {
     public void setCreateId(String createId) {
         this.createId = createId;
         if(isModifiable()) modTime = new Date();
+    }
+    
+    /**
+     * Gets the facilityAcquired of this entity.
+     * @return the facilityAcquired
+     */
+    public String getFacilityAcquired() {
+        return facilityAcquired;
+    }
+    
+    /**
+     * Sets the facilityAcquired of this entity to the specified value.
+     * @param facilityAcquired the new createId
+     */
+    public void setFacilityAcquired(String facilityAcquired) {
+        this.facilityAcquired = facilityAcquired;
     }
     
     /**
@@ -285,17 +285,17 @@ public class EntityBaseBean {
      * Gets the facility of this entity.
      * @return the facility
      */
-    public String getFacility() {
+  /*  public String getFacility() {
         return facility;
-    }
+    }*/
     
     /**
      * Sets the facility of this entity to the specified value.
      * @param facility the new modId
      */
-    public void setFacility(String facility) {
+    /*public void setFacility(String facility) {
         this.facility = facility;
-    }
+    }*/
     
     /**
      * Method to be overridden if needed to check if the data held in the entity is valid.
@@ -359,7 +359,7 @@ public class EntityBaseBean {
                         }
                     }
                     
-                    //check max value now of strings                    
+                    //check max value now of strings
                     try {
                         //get value
                         Object result = getProperty(fieldName, this);

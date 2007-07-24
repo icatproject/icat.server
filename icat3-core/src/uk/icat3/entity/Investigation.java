@@ -147,6 +147,9 @@ import uk.icat3.util.Queries;
     @ManyToOne
     private InvestigationType invType;
     
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
+    private Collection<IcatAuthorisation> icatAuthorisationCollection;
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
     private Collection<Dataset> datasetCollection;
     
@@ -158,9 +161,6 @@ import uk.icat3.util.Queries;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<StudyInvestigation> studyInvestigationCollection;
-    
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
-    private Collection<InvestigationLevelPermission> investigationLevelPermissionCollection;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<Investigator> investigatorCollection;
@@ -351,7 +351,7 @@ import uk.icat3.util.Queries;
         return this.publicationCollection;
     }
     
-     /**
+    /**
      * Adds a Publication to the investigation,
      * also adds the investigation to the Publication.
      */
@@ -381,7 +381,7 @@ import uk.icat3.util.Queries;
         return this.sampleCollection;
     }
     
-     /**
+    /**
      * Adds a Sample to the investigation,
      * also adds the investigation to the Sample.
      */
@@ -517,7 +517,7 @@ import uk.icat3.util.Queries;
         Collection<Dataset> datasets = this.getDatasetCollection();
         datasets.add(dataSet);
         
-        this.setDatasetCollection(datasets);        
+        this.setDatasetCollection(datasets);
     }
     
     /**
@@ -608,23 +608,6 @@ import uk.icat3.util.Queries;
     }
     
     /**
-     * Gets the investigationLevelPermissionCollection of this Investigation.
-     * @return the investigationLevelPermissionCollection
-     */
-    @XmlTransient
-    public Collection<InvestigationLevelPermission> getInvestigationLevelPermissionCollection() {
-        return this.investigationLevelPermissionCollection;
-    }
-    
-    /**
-     * Sets the investigationLevelPermissionCollection of this Investigation to the specified value.
-     * @param investigationLevelPermissionCollection the new investigationLevelPermissionCollection
-     */
-    public void setInvestigationLevelPermissionCollection(Collection<InvestigationLevelPermission> investigationLevelPermissionCollection) {
-        this.investigationLevelPermissionCollection = investigationLevelPermissionCollection;
-    }
-    
-    /**
      * Gets the investigatorCollection of this Investigation.
      * @return the investigatorCollection
      */
@@ -699,6 +682,13 @@ import uk.icat3.util.Queries;
         this.topicListCollection = topicListCollection;
     }
     
+    public Collection<IcatAuthorisation> getIcatAuthorisationCollection() {
+        return icatAuthorisationCollection;
+    }
+    
+    public void setIcatAuthorisationCollection(Collection<IcatAuthorisation> icatAuthorisationCollection) {
+        this.icatAuthorisationCollection = icatAuthorisationCollection;
+    }
     /**
      * Sets deleted flag on all items owned by this datasets
      *
@@ -736,23 +726,16 @@ import uk.icat3.util.Queries;
             }
         }
         
+        //TODO delete new access tables, do we delete these cos need to be
         //access groups
-        if(getInvestigationLevelPermissionCollection() != null){
-            for(InvestigationLevelPermission investigationLevelPermission : getInvestigationLevelPermissionCollection()){
-                if(type == Cascade.DELETE)  investigationLevelPermission.setMarkedDeleted(deleted);
-                else if(type == Cascade.MOD_ID) investigationLevelPermission.setModId(value.toString());
+        if(getIcatAuthorisationCollection() != null){
+            for(IcatAuthorisation icatAuthorisation : getIcatAuthorisationCollection()){
+                if(type == Cascade.DELETE)  icatAuthorisation.setMarkedDeleted(deleted);
+                else if(type == Cascade.MOD_ID) icatAuthorisation.setModId(value.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
-                    investigationLevelPermission.setModId(value.toString());
-                    investigationLevelPermission.setCreateId(value.toString());
-                }
-                for(AccessGroupIlp agilp : investigationLevelPermission.getAccessGroupIlpCollection()){
-                    if(type == Cascade.DELETE)  agilp.setMarkedDeleted(deleted);
-                    else if(type == Cascade.MOD_ID) agilp.setModId(value.toString());
-                    else if(type == Cascade.MOD_AND_CREATE_IDS) {
-                        agilp.setModId(value.toString());
-                        agilp.setCreateId(value.toString());
-                    }
-                }
+                    icatAuthorisation.setModId(value.toString());
+                    icatAuthorisation.setCreateId(value.toString());
+                }               
             }
         }
         
