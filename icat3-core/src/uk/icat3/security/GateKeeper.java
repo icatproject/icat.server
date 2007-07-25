@@ -1,14 +1,11 @@
 package uk.icat3.security;
 
-import java.util.Collection;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
-import uk.icat3.manager.ManagerUtil;
 import uk.icat3.util.AccessType;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
@@ -34,7 +31,7 @@ public class GateKeeper {
     // Global class logger
     static Logger log = Logger.getLogger(GateKeeper.class);
     
-            /**
+    /**
      * Decides if a user has permission to perform an operation of type
      * {@link AccessType} on a {@link Study} element/entity.  If the
      * user does not have permission to perform aforementioned operation
@@ -62,7 +59,7 @@ public class GateKeeper {
         if(object instanceof Publication){
             investigation  = ((Publication)object).getInvestigationId();
             performAuthorisation(user, investigation, access, object, ElementType.PUBLICATION, manager);
-        } else if(object instanceof Investigation){            
+        } else if(object instanceof Investigation){
             investigation  = (Investigation)object;
             performAuthorisation(user, investigation, access, object, ElementType.INVESTIGATION, manager);
         } else if(object instanceof Keyword){
@@ -96,7 +93,7 @@ public class GateKeeper {
             performAuthorisation(user, invList, access, ((DatafileParameter)object), manager);
         }*/ else throw new InsufficientPrivilegesException(object.getClass().getSimpleName()+" not supported for security check.");;
         
-       
+        
         
     }//end method
     
@@ -128,11 +125,11 @@ public class GateKeeper {
         
         //get icat authroisation
         try{
-            if(isInvestigationType(elementType)) {
+            if(elementType.isInvestigationType()) {
                 icatAuthorisation = findIcatAuthorisation(user, investigation, ElementType.INVESTIGATION, ((Investigation)element).getId(), manager);
-            } else if(isDatasetType(elementType)) {
+            } else if(elementType.isDatasetType()) {
                 icatAuthorisation = findIcatAuthorisation(user, investigation, ElementType.DATASET, ((Dataset)element).getId(), manager);
-            } else if(isDatafileType(elementType)) {
+            } else if(elementType.isDatafileType()) {
                 icatAuthorisation = findIcatAuthorisation(user, investigation, ElementType.DATAFILE, ((Datafile)element).getId(), manager);
             }
         } catch(InsufficientPrivilegesException ipe){
@@ -145,14 +142,14 @@ public class GateKeeper {
             success = true; //user has access to read element
         } else if(access == AccessType.REMOVE){
             //check if element type is a root, if so check root remove permissions
-            if(isRootType(elementType) && parseBoolean(icatAuthorisation.getRole().getActionRootRemove())){
+            if(elementType.isRootType() && parseBoolean(icatAuthorisation.getRole().getActionRootRemove())){
                 success = true; //user has access to remove root element
             } else if(parseBoolean(icatAuthorisation.getRole().getActionRemove())){
                 success = true; //user has access to remove element
             }
         } else if(access == AccessType.CREATE){
             //check if element type is a root, if so check root insert permissions
-            if(isRootType(elementType) && parseBoolean(icatAuthorisation.getRole().getActionRootInsert())){
+            if(elementType.isRootType() && parseBoolean(icatAuthorisation.getRole().getActionRootInsert())){
                 success = true; //user has access to insert root root element
             } else if(parseBoolean(icatAuthorisation.getRole().getActionInsert())){
                 success = true; //user has access to insert element
@@ -168,8 +165,10 @@ public class GateKeeper {
         }
         
         //now check if has permission and if not throw exception
-        if(success){
-            log.debug("User: " + user + " granted " + access + " permission on " + element );
+        if(success){            
+            //now append the role to the investigation, dataset or datafile if it is a READ
+            if(access == AccessType.READ && elementType.isRootType()) element.setIcatRole(icatAuthorisation.getRole());
+            log.debug("User: " + user + " granted " + access + " permission on " + element +" with role "+icatAuthorisation.getRole());
         } else {
             log.warn("User: " + user + " does not have permission to perform '" + access + "' operation on " + element );
             throw new InsufficientPrivilegesException("User: " + user + " does not have permission to perform '" + access + "' operation on " + element.getClass().getSimpleName() );
@@ -179,10 +178,11 @@ public class GateKeeper {
     /**
      * This finds the IcatAuthorisation for the user, it first tries to find the one corresponding
      * to the users fedId, if this is not found, it looks for the ANY as the fedId
-     * 
+     *
      */
     private static IcatAuthorisation findIcatAuthorisation(String userId, Investigation investigation, ElementType type, Long id, EntityManager manager) throws InsufficientPrivilegesException {
         if(type != ElementType.INVESTIGATION || type != ElementType.DATAFILE || type != ElementType.DATASET) throw new RuntimeException("ElementType: "+type+" not supported");
+        log.trace("Looking for ICAT AUTHORISATION: UserId: "+userId+", elementId: "+id+", type: "+type+", investigationId: "+investigation.getId() );
         
         Query query = manager.createNamedQuery("IcatAuthorisation.findById").
                 setParameter("elementType", type.toString()).
@@ -193,51 +193,30 @@ public class GateKeeper {
         IcatAuthorisation icatAuthorisation = (IcatAuthorisation)query.getSingleResult();
         if(icatAuthorisation == null) {
             //try find ANY
+            log.trace("None found, searching for ANY in userId");
             query.setParameter("userId", "ANY");
             icatAuthorisation = (IcatAuthorisation)query.getSingleResult();
-            if(icatAuthorisation == null) throw new InsufficientPrivilegesException();
-            else return icatAuthorisation;
+            if(icatAuthorisation == null) {
+                log.trace("None found, searching for null investigationId");
+                
+                //try and find user with null as investigation
+                query.setParameter("userId", userId);
+                query.setParameter("investigationId", null);
+                icatAuthorisation = (IcatAuthorisation)query.getSingleResult();
+                if(icatAuthorisation == null) {
+                    log.debug("None found for : UserId: "+userId+", elementId: "+id+", type: "+type+", investigationId: "+investigation.getId()+", throwing exception");       
+                    throw new InsufficientPrivilegesException();
+                } else {
+                    log.debug("Found: "+icatAuthorisation);
+                }
+            } else {
+                log.debug("Found: "+icatAuthorisation);
+            }
         } else {
-            return icatAuthorisation;
+            log.debug("Found: "+icatAuthorisation);
         }
+        
+        //return the icat authoruisation
+        return icatAuthorisation;
     }
-    
-    /**
-     * Checks wheather this type of element belongs to an investigation
-     */
-    private static boolean isInvestigationType(ElementType elementType){
-        if(elementType == ElementType.INVESTIGATION ||
-                elementType == ElementType.SAMPLE || elementType == ElementType.SAMPLE_PARAMETER ||
-                elementType == ElementType.KEYWORD || elementType == ElementType.INVESTIGATOR ||
-                elementType == ElementType.SAMPLE_PARAMETER || elementType == ElementType.STUDY)
-            return true;
-        else return false;
-    }
-    
-    /**
-     * Checks wheather this type of element belongs to an dataset
-     */
-    private static boolean isDatasetType(ElementType elementType){
-        if(elementType == ElementType.DATASET || elementType == ElementType.DATASET_PARAMETER)
-            return true;
-        else return false;
-    }
-    
-    /**
-     * Checks wheather this type of element belongs to an datafile
-     */
-    private static boolean isDatafileType(ElementType elementType){
-        if(elementType == ElementType.DATAFILE || elementType == ElementType.DATAFILE_PARAMETER)
-            return true;
-        else return false;
-    }
-    
-    /**
-     * Checks wheather this type of element is a root element, ie inv, df, ds
-     */
-    private static boolean isRootType(ElementType elementType){
-        if(elementType == ElementType.DATAFILE || elementType == ElementType.INVESTIGATION || elementType == ElementType.DATASET)
-            return true;
-        else return false;
-    }   
 }

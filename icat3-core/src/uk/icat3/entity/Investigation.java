@@ -12,6 +12,7 @@ package uk.icat3.entity;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.CascadeType;
@@ -44,6 +45,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.search.InvestigationSearch;
+import uk.icat3.security.GateKeeper;
+import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.Queries;
@@ -94,9 +97,9 @@ import uk.icat3.util.Queries;
     @SqlResultSetMapping(name="investigationMapping",entities={@EntityResult(entityClass=Investigation.class)}),
     @SqlResultSetMapping(name="investigationIdMapping",columns={@ColumnResult(name="ID")})
 })
-        @XmlRootElement
-        @SequenceGenerator(name="INVESTIGATION_SEQ",sequenceName="INVESTIGATION_ID_SEQ",allocationSize=1)
-        public class Investigation extends EntityBaseBean implements Serializable {
+@XmlRootElement
+@SequenceGenerator(name="INVESTIGATION_SEQ",sequenceName="INVESTIGATION_ID_SEQ",allocationSize=1)
+public class Investigation extends EntityBaseBean implements Serializable {
     
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="INVESTIGATION_SEQ")
@@ -168,7 +171,11 @@ import uk.icat3.util.Queries;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<TopicList> topicListCollection;
     
+    /**
+     * InvestigationIncludes that needs to be added to the investigation
+     */
     private transient InvestigationInclude investigationInclude = InvestigationInclude.NONE;
+           
     
     /** Creates a new instance of Investigation */
     public Investigation() {
@@ -689,6 +696,7 @@ import uk.icat3.util.Queries;
     public void setIcatAuthorisationCollection(Collection<IcatAuthorisation> icatAuthorisationCollection) {
         this.icatAuthorisationCollection = icatAuthorisationCollection;
     }
+       
     /**
      * Sets deleted flag on all items owned by this datasets
      *

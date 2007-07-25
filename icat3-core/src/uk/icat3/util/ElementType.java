@@ -38,5 +38,42 @@ public enum ElementType {
     DATAFILE,
     DATAFILE_PARAMETER;
     
+    /**
+     * Checks wheather this type of element belongs to an datafile
+     */
+    public boolean isDatafileType(){
+        if(this == ElementType.DATAFILE || this == ElementType.DATAFILE_PARAMETER)
+            return true;
+        else return false;
+    }
     
+      /**
+     * Checks wheather this type of element belongs to an investigation
+     */
+    public boolean isInvestigationType(){
+        if(this == ElementType.INVESTIGATION ||
+                this == ElementType.SAMPLE || this == ElementType.SAMPLE_PARAMETER ||
+                this == ElementType.KEYWORD || this == ElementType.INVESTIGATOR ||
+                this == ElementType.SAMPLE_PARAMETER || this == ElementType.STUDY)
+            return true;
+        else return false;
+    }
+    
+    /**
+     * Checks wheather this type of element belongs to an dataset
+     */
+    public boolean isDatasetType(){
+        if(this == ElementType.DATASET || this == ElementType.DATASET_PARAMETER)
+            return true;
+        else return false;
+    }
+        
+    /**
+     * Checks wheather this type of element is a root element, ie inv, df, ds
+     */
+    public boolean isRootType(){
+        if(this == ElementType.DATAFILE || this == ElementType.INVESTIGATION || this == ElementType.DATASET)
+            return true;
+        else return false;
+    }   
 }

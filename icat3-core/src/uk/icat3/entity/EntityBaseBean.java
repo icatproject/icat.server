@@ -98,6 +98,11 @@ public class EntityBaseBean {
     protected transient String facility;*/
     
     /**
+     * The role of the user to the investigation
+     */
+    private transient IcatRole icatRole;
+    
+    /**
      * Gets the modTime of this entity.
      * @return the modTime
      */
@@ -194,6 +199,22 @@ public class EntityBaseBean {
         if(isModifiable()) modTime = new Date();
     }
     
+     /**
+     * Gets the role of the user for this investigation
+     * @return the icatRole for the user
+     */
+    public IcatRole getIcatRole() {
+        return icatRole;
+    }
+
+    /**
+     * Sets the role of the user for this investigation
+     * @param icatRole the icatRole for the user
+     */
+    public void setIcatRole(IcatRole icatRole) {
+        this.icatRole = icatRole;
+    }
+        
     /**
      * Automatically updates modTime when entity is persisted or merged
      * @throws uk.icat3.exceptions.EntityNotModifiableError

@@ -329,7 +329,7 @@ public class DataSetManager extends ManagerUtil {
         }
         
         //add include information
-        getDatasetInformation(datasets, includes);
+        getDatasetInformation(userId, datasets, includes, manager);
         
         return datasets;
     }

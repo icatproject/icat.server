@@ -168,7 +168,7 @@ public class InvestigationSearch extends ManagerUtil {
         }
         
         //add all the investigation information to the list of investigations
-        getInvestigationInformation(investigations,include);
+        getInvestigationInformation(userId, investigations,include, manager);
         
         
         return investigations;
@@ -456,7 +456,7 @@ public class InvestigationSearch extends ManagerUtil {
         }
         
         //add all the investigation information to the list of investigations
-        getInvestigationInformation(allowed,advanDTO.getInvestigationInclude());
+        getInvestigationInformation(userId, allowed,advanDTO.getInvestigationInclude(), manager);
         
         return allowed;
     }
@@ -509,7 +509,7 @@ public class InvestigationSearch extends ManagerUtil {
         }
         
         //add include information
-        ManagerUtil.getInvestigationInformation(investigations, include);
+        getInvestigationInformation(userId, investigations, include, manager);
         
         return investigations;
     }
@@ -647,7 +647,7 @@ public class InvestigationSearch extends ManagerUtil {
         
         log.trace("number of investigations returned is: "+investigations.size());
         //add all the investigation information to the list of investigations
-        getInvestigationInformation(investigations,include);
+        getInvestigationInformation(userId, investigations,include, manager);
         
         return investigations;
     }

@@ -24,6 +24,8 @@ import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.security.GateKeeper;
+import uk.icat3.util.AccessType;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
@@ -42,24 +44,28 @@ public class ManagerUtil {
      * Goes and collects the information associated with the investigation depending on the InvestigationInclude.
      *  See {@link InvestigationInclude}
      *
+     * @param userId federalId of the user.
      * @param investigation a investigation
      * @param include The information that is needed to be returned with the investigation
+     * @param manager manager object that will facilitate interaction with underlying database
      */
-    public static void getInvestigationInformation(Investigation investigation, InvestigationInclude include){
+    public static void getInvestigationInformation(String userId, Investigation investigation, InvestigationInclude include, EntityManager manager){
         Collection<Investigation> investigations = new ArrayList<Investigation>();
         investigations.add(investigation);
         
-        getInvestigationInformation(investigations, include);
+        getInvestigationInformation(userId, investigations, include, manager);
     }
     
     /**
      * Goes and collects the information associated with the investigation depending on the InvestigationInclude.
      *  See {@link InvestigationInclude}
      *
+     * @param userId federalId of the user.
      * @param investigations list of investigations
      * @param include The information that is needed to be returned with the investigation
+     * @param manager manager object that will facilitate interaction with underlying database
      */
-    public static void getInvestigationInformation(Collection<Investigation> investigations, InvestigationInclude include){
+    public static void getInvestigationInformation(String userId, Collection<Investigation> investigations, InvestigationInclude include, EntityManager manager){
         if(include != null){
             if(include.toString().equals(InvestigationInclude.NONE.toString())){
                 //do nothing
@@ -72,17 +78,24 @@ public class ManagerUtil {
                     
                     investigation.getKeywordCollection().size();
                     investigation.getInvestigatorCollection().size();
-                    investigation.getDatasetCollection().size();
                     investigation.getSampleCollection().size();
+                    
+                    investigation.getDatasetCollection().size();
+                    //now filter the datasets collection
+                    filterDatasetsByPermission(userId, investigation, manager);
                     
                     for(Dataset dataset : investigation.getDatasetCollection()){
                         dataset.getDatafileCollection().size();
+                        //now filter the datafiles collection
+                        filterDatafilesByPermission(userId, dataset, manager);
                     }
                 }
                 // return datasets with these investigations
             } else if(include.toString().equals(InvestigationInclude.DATASETS_ONLY.toString())){
                 for(Investigation investigation : investigations){
                     investigation.getDatasetCollection().size();
+                    //now filter the datasets collection
+                    filterDatasetsByPermission(userId, investigation, manager);
                 }
                 // return sample with these investigations
             } else if(include.toString().equals(InvestigationInclude.SAMPLES_ONLY.toString())){
@@ -93,9 +106,13 @@ public class ManagerUtil {
             } else if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString())){
                 for(Investigation investigation : investigations){
                     investigation.getDatasetCollection().size();
+                    //now filter the datasets collection
+                    filterDatasetsByPermission(userId, investigation, manager);
                     
                     for(Dataset dataset : investigation.getDatasetCollection()){
                         dataset.getDatafileCollection().size();
+                        //now filter the datafiles collection
+                        filterDatafilesByPermission(userId, dataset, manager);
                     }
                 }
                 // return keywords with these investigations
@@ -148,35 +165,44 @@ public class ManagerUtil {
      * Goes and collects the information associated with the dataset depending on the DatasetInclude.
      * See {@link DatasetInclude}
      *
+     * @param userId federalId of the user.
      * @param dataset a dataset for gettting more info about it
      * @param include include info
+     * @param manager manager object that will facilitate interaction with underlying database
      */
-    public static void getDatasetInformation(Dataset dataset, DatasetInclude include){
+    public static void getDatasetInformation(String userId, Dataset dataset, DatasetInclude include, EntityManager manager){
         Collection<Dataset> datasets = new ArrayList<Dataset>();
         datasets.add(dataset);
         
-        getDatasetInformation(datasets, include);
+        getDatasetInformation(userId, datasets, include, manager);
     }
     
     /**
      * Goes and collects the information associated with the dataset depending on the DatasetInclude.
      * See {@link DatasetInclude}
      *
+     * @param userId federalId of the user.
      * @param datasets collection of datasets for gettting more info about them
      * @param include include info
+     * @param manager manager object that will facilitate interaction with underlying database
      */
-    public static void getDatasetInformation(Collection<Dataset> datasets, DatasetInclude include){
+    public static void getDatasetInformation(String userId, Collection<Dataset> datasets, DatasetInclude include, EntityManager manager){
         
         // now collect the information associated with the investigations requested
         if(include.toString().equals(DatasetInclude.DATASET_FILES_ONLY.toString())){
             for(Dataset dataset : datasets){
                 //size invokes the JPA to get the information, other wise the collections are null
                 dataset.getDatafileCollection().size();
+                //now filter the datafiles collection
+                filterDatafilesByPermission(userId, dataset, manager);
             }
         } else  if(include.toString().equals(DatasetInclude.DATASET_FILES_AND_PARAMETERS.toString())){
             for(Dataset dataset : datasets){
                 //size invokes the JPA to get the information, other wise the collections are null
                 dataset.getDatafileCollection().size();
+                //now filter the datafiles collection
+                filterDatafilesByPermission(userId, dataset, manager);
+                
                 dataset.getDatasetParameterCollection().size();
             }
         } else  if(include.toString().equals(DatasetInclude.DATASET_PARAMETERS_ONLY.toString())){
@@ -193,6 +219,48 @@ public class ManagerUtil {
             dataset.setDatasetInclude(include);
             log.trace("Setting data sets to include: "+include);
         }
+    }
+    
+    /**
+     * Gets all the Datasets which the user can READ/SELECT depending on the roles in the DB
+     *
+     * @param userId federalId of the user.
+     * @param investigations
+     * @param manager manager object that will facilitate interaction with underlying database
+     */
+    private static void filterDatasetsByPermission(String userId, Investigation investigation, EntityManager manager){
+        Collection<Dataset> datasetsAllowed = new ArrayList<Dataset>();
+        for(Dataset dataset : investigation.getDatasetCollection()){
+            try{
+                GateKeeper.performAuthorisation(userId, dataset, AccessType.READ, manager);
+                datasetsAllowed.add(dataset);
+            } catch(Exception ignore){}
+        }
+        log.debug("Adding "+datasetsAllowed.size()+" datasets to "+investigation+" from a total of "+investigation.getDatasetCollection().size());
+        //now add the datasets to the investigation
+        investigation.setDatasetCollection(datasetsAllowed);
+        
+    }
+    
+    /**
+     * Gets all the Datafiles which the user can READ/SELECT depending on the roles in the DB
+     *
+     * @param userId federalId of the user.
+     * @param datasets
+     * @param manager manager object that will facilitate interaction with underlying database
+     */
+    private static void filterDatafilesByPermission(String userId, Dataset dataset, EntityManager manager){
+        Collection<Datafile> datafilesAllowed = new ArrayList<Datafile>();
+        for(Datafile datafile : dataset.getDatafileCollection()){
+            try{
+                GateKeeper.performAuthorisation(userId, datafile, AccessType.READ, manager);
+                datafilesAllowed.add(datafile);
+            } catch(Exception ignore){}
+        }
+        log.debug("Adding "+datafilesAllowed.size()+" datafiles to "+dataset+" from a total of "+dataset.getDatafileCollection().size());
+        //now add the datasets to the investigation
+        dataset.setDatafileCollection(datafilesAllowed);
+        
     }
     
     /**
@@ -273,7 +341,7 @@ public class ManagerUtil {
             throw new RuntimeException("federalId:" +userId+" has more than one associated facility user.  DB should never allow this error to be thrown.");
         }
     }
-           
+    
     public static boolean isUnique(EntityBaseBean entityClass, EntityManager manager) {
         if(entityClass instanceof Dataset){
             Dataset dataset = (Dataset)entityClass;
