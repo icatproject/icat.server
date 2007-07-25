@@ -32,6 +32,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.SqlResultSetMapping;
@@ -97,9 +98,9 @@ import uk.icat3.util.Queries;
     @SqlResultSetMapping(name="investigationMapping",entities={@EntityResult(entityClass=Investigation.class)}),
     @SqlResultSetMapping(name="investigationIdMapping",columns={@ColumnResult(name="ID")})
 })
-@XmlRootElement
-@SequenceGenerator(name="INVESTIGATION_SEQ",sequenceName="INVESTIGATION_ID_SEQ",allocationSize=1)
-public class Investigation extends EntityBaseBean implements Serializable {
+        @XmlRootElement
+        @SequenceGenerator(name="INVESTIGATION_SEQ",sequenceName="INVESTIGATION_ID_SEQ",allocationSize=1)
+        public class Investigation extends EntityBaseBean implements Serializable {
     
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="INVESTIGATION_SEQ")
@@ -175,7 +176,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
      * InvestigationIncludes that needs to be added to the investigation
      */
     private transient InvestigationInclude investigationInclude = InvestigationInclude.NONE;
-           
+    
     
     /** Creates a new instance of Investigation */
     public Investigation() {
@@ -481,9 +482,9 @@ public class Investigation extends EntityBaseBean implements Serializable {
      */
     @XmlTransient
     public Collection<Dataset> getDatasetCollection() {
-        return this.datasetCollection;
+        return this.datasetCollection;        
     }
-    
+        
     /**
      * This method is used by JAXWS to map to datasetCollection.  Depending on what the include is
      * set to depends on what is returned to JAXWS and serialised into XML.  This is because without
@@ -696,7 +697,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
     public void setIcatAuthorisationCollection(Collection<IcatAuthorisation> icatAuthorisationCollection) {
         this.icatAuthorisationCollection = icatAuthorisationCollection;
     }
-       
+    
     /**
      * Sets deleted flag on all items owned by this datasets
      *
@@ -743,7 +744,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     icatAuthorisation.setModId(value.toString());
                     icatAuthorisation.setCreateId(value.toString());
-                }               
+                }
             }
         }
         

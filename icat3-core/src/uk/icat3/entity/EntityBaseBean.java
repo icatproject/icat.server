@@ -315,6 +315,14 @@ public class EntityBaseBean {
     }*/
     
     /**
+     * Filters out all the items associated with the entity that are marked deleted.
+     * This method should be overridden by all the elements in ElementType enum.
+     */
+    public void filterDeletedEntries(){
+        
+    }
+    
+    /**
      * Method to be overridden if needed to check if the data held in the entity is valid.
      * This method checks whether all the fields which are marked as not null are not null
      *

@@ -28,7 +28,17 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @Entity
 @Table(name = "APPLICATIONS")
-@NamedQueries({@NamedQuery(name = "Applications.findByAppCode", query = "SELECT a FROM Applications a WHERE a.appCode = :appCode"), @NamedQuery(name = "Applications.findByAppName", query = "SELECT a FROM Applications a WHERE a.appName = :appName"), @NamedQuery(name = "Applications.findByAppDescription", query = "SELECT a FROM Applications a WHERE a.appDescription = :appDescription"), @NamedQuery(name = "Applications.findByModTime", query = "SELECT a FROM Applications a WHERE a.modTime = :modTime"), @NamedQuery(name = "Applications.findByModId", query = "SELECT a FROM Applications a WHERE a.modId = :modId"), @NamedQuery(name = "Applications.findByCreateTime", query = "SELECT a FROM Applications a WHERE a.createTime = :createTime"), @NamedQuery(name = "Applications.findByCreateId", query = "SELECT a FROM Applications a WHERE a.createId = :createId"), @NamedQuery(name = "Applications.findByFacilityAquired", query = "SELECT a FROM Applications a WHERE a.facilityAquired = :facilityAquired"), @NamedQuery(name = "Applications.findByDeleted", query = "SELECT a FROM Applications a WHERE a.deleted = :deleted")})
+@NamedQueries({
+    @NamedQuery(name = "Applications.findByAppCode", query = "SELECT a FROM Applications a WHERE a.appCode = :appCode"), 
+    @NamedQuery(name = "Applications.findByAppName", query = "SELECT a FROM Applications a WHERE a.appName = :appName"), 
+    @NamedQuery(name = "Applications.findByAppDescription", query = "SELECT a FROM Applications a WHERE a.appDescription = :appDescription"),
+    @NamedQuery(name = "Applications.findByModTime", query = "SELECT a FROM Applications a WHERE a.modTime = :modTime"), 
+    @NamedQuery(name = "Applications.findByModId", query = "SELECT a FROM Applications a WHERE a.modId = :modId"),
+    @NamedQuery(name = "Applications.findByCreateTime", query = "SELECT a FROM Applications a WHERE a.createTime = :createTime"), 
+    @NamedQuery(name = "Applications.findByCreateId", query = "SELECT a FROM Applications a WHERE a.createId = :createId"), 
+    @NamedQuery(name = "Applications.findByFacilityAquired", query = "SELECT a FROM Applications a WHERE a.facilityAcquired = :facilityAquired"), 
+    @NamedQuery(name = "Applications.findByDeleted", query = "SELECT a FROM Applications a WHERE a.markedDeleted = :deleted")
+})
 public class Applications extends EntityBaseBean implements Serializable {
 
     @Id

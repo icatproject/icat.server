@@ -51,9 +51,9 @@ public class TestSearch {
     
     protected static void setUp(){
         // emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
-        emf = Persistence.createEntityManagerFactory("icat3-isis");
+        emf = Persistence.createEntityManagerFactory("icat3-dls_dev_new");
         em = emf.createEntityManager();
-      
+        
         
         // Begin transaction
         //em.getTransaction().begin();
@@ -83,7 +83,7 @@ public class TestSearch {
         tearDown();
         
     }
-      public void getMyInvestigations(String userId) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+    public void getMyInvestigations(String userId) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         setUp();
         
         //test code here
@@ -387,25 +387,21 @@ public class TestSearch {
     
     public void test() throws Exception {
         
+        
         setUp();
+        String LIST_ALL = "SELECT DISTINCT d from Datafile d, IcatAuthorisation ia where d.datasetId.investigationId.id = ia.icatAuthorisationPK.investigationId AND (ia.icatAuthorisationPK.userId = :userId OR ia.icatAuthorisationPK.userId = 'ANY') AND ia.markedDeleted = 'N'";
+        String TEST_SQL = LIST_ALL+ "AND d.datasetId.investigationId.instrument.name IN('alf','lad') AND d.datafileParameterCollection.datafileParameterPK.name = 'run_number' AND d.datafileParameterCollection.datafileParameterPK.name BETWEEN 2620 AND 2631";
         
-        String INVESTIGATIONS_BY_USER_SQL = "SELECT d.id FROM Datafile d WHERE" +
-                " d.datasetId.investigationId.investigatorCollection.facilityUser.federalId = :userId OR d.datasetId.investigationId.investigatorCollection IS EMPTY" +
-                " AND d.datasetId.investigationId.instrument.name LIKE :instrument " +
-                "AND d.datafileParameterCollection.datafileParameterPK.name = 'run_number' " +
-                "AND d.datafileParameterCollection.numericValue < :upperRunNumber " +
-                "AND d.datafileParameterCollection.numericValue > :lowerRunNumber";
-        String INVESTIGATIONS_BY_USER_SQL2 = "SELECT d FROM Datafile d";
-        //  String INVESTIGATIONS_BY_USER_SQL = "SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
-              /*  "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  " +
-                "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE t2.facility_user_id = t1.facility_user_id " +
-                "AND t2.federal_id = ?1 AND t0.id = t1.investigation_id UNION " +
-                "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE id NOT IN (SELECT investigation_id from investigator)) WHERE LAST_NAME LIKE ?2";*/
-        
+        // String TEST_SQL =  "SELECT DISTINCT k.keywordPK.name from Keyword k, IcatAuthorisation ia WHERE" +
+        //    " k.investigation.id = ia.icatAuthorisationPK.investigationId AND " +
+        //  "(ia.icatAuthorisationPK.userId = :userId OR ia.icatAuthorisationPK.userId = 'ANY')" +
+        //" AND ia.markedDeleted = 'N' AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) ORDER BY k.keywordPK.name";
+        //     String TEST_SQL = "SELECT i from Investigation i WHERE i.id = '283'";
+        //String TEST_SQL = "SELECT i from Keyword i";
         //test code here
         // em.createQuery(INVESTIGATIONS_BY_USER_SQL2).setMaxResults(2).getResultList();
         
-        System.out.println(em.createNativeQuery("SELECT DISTINCT NAME FROM keyword WHERE regexp_like(NAME,'^[[:alpha:]]*$')").getResultList());
+        System.out.println(em.createQuery(TEST_SQL).setParameter("userId", "ab23").getResultList());
         //log.info("Testing");
         /*Collection<Long> investigations = em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES-JAMES").setParameter("instrument","alf").setParameter("lowerRunNumber",0).setParameter("upperRunNumber",10000).getResultList();
         log.info("Results: "+investigations.size());
@@ -465,10 +461,10 @@ public class TestSearch {
         
         
         //keywords.add("ccw");
-       // ts.seachByKeywords("JAMES-JAMES", keywords);
+        // ts.seachByKeywords("JAMES-JAMES", keywords);
         
         log.info("Hello");
-       // ts.getMyInvestigations("JAMES-JAMES");
+        // ts.getMyInvestigations("JAMES-JAMES");
         
         // ts.seachBySurname("JAMES", "HEALY");
         
@@ -513,7 +509,7 @@ public class TestSearch {
         
         // ts.getUserInvestigations("JAMES");
         
-        //    ts.test();
+        ts.test();
         
         
         //ts.test2();
