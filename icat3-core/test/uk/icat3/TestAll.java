@@ -38,7 +38,7 @@ import uk.icat3.util.ExecuteDatabaseScript;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    TestSample.class,
+   /* TestSample.class,
             TestKeyword.class,
             TestPublication.class,
             TestInvestigator.class,
@@ -57,7 +57,7 @@ import uk.icat3.util.ExecuteDatabaseScript;
             
             TestDatafileSearch.class,
             TestDatasetSearch.class,
-            TestInvestigationSearch.class
+            TestInvestigationSearch.class*/
 })
 public class TestAll {
     
@@ -65,7 +65,7 @@ public class TestAll {
     public static Test suite() {
         
         //icat unit test
-        //ExecuteDatabaseScript script = new ExecuteDatabaseScript("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))", "icat_apitest", "bb8isb4ck");
+       // ExecuteDatabaseScript script = new ExecuteDatabaseScript("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))", "icat_apitest", "bb8isb4ck");
         
         //icat scratch
         ExecuteDatabaseScript script = new ExecuteDatabaseScript("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))", "icat_scratch", "c1sco");
