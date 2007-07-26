@@ -87,7 +87,7 @@
 <parameter>
 <name>sample_temperature_setting</name>
 <numeric_value>320.000000</numeric_value>
-<units>Kelvin</units>
+<units>Kelvinsample</units>
 <description>Desired temperature</description></parameter>
 <parameter>
 <name>sample_magnetic_field_setting</name>

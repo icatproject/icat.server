@@ -33,7 +33,7 @@ public class TestMetadataIngest {
                 
 
 try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("src/uk/icat3/jaxb/icatXML.xml")));
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("src/uk/icat3/jaxb/EMU00001927.xml")));
             String line = "";
             String buffer = "";
             while((line = br.readLine()) != null) {
