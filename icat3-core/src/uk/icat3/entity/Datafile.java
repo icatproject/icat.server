@@ -29,6 +29,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
+import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.SqlResultSetMapping;
 import javax.persistence.SqlResultSetMappings;
@@ -39,6 +40,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.Cascade;
+import uk.icat3.util.ElementType;
 
 /**
  * Entity class Datafile
@@ -453,13 +455,26 @@ public class Datafile extends EntityBaseBean implements Serializable {
         this.setDatafileParameterCollection(datafileParameters);
     }
     
-    /**
-     * Sets deleted flag on all items owned by this datafiles
+  /**
+     * Sets type (see Cascade) flag on all items owned by this dataset
      *
-     * @param isDeleted
+     * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
+     * @param value value of the cascade type
      */
     public void setCascade(Cascade type, Object value){
-        log.trace("Setting: "+toString()+" from type: "+type+" to :"+value);
+        setCascade(type, value, null);
+    }
+    
+    /**
+     * Sets type (see Cascade) flag on all items owned by this dataset
+     *
+     * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
+     * @param value value of the cascade type
+     * @param manager entity manager to  connect to DB
+     */
+    public void setCascade(Cascade type, Object value, EntityManager manager){
+        log.trace("Setting: "+toString()+" from type: "+type+" to :"+value+" EntityManager: "+(manager == null ? "null" : "manager"));
+
         String deleted = "Y";
         if(type == Cascade.DELETE){
             deleted = (((Boolean)value).booleanValue()) ? "Y" : "N";
@@ -487,6 +502,22 @@ public class Datafile extends EntityBaseBean implements Serializable {
                     relatedDatafile.setCreateId(value.toString());
                 }
                 
+            }
+        }
+                
+        //TODO need to do it for the icat authorisation entires (delete)
+        //check if manager is null
+        if(manager != null && type == Cascade.DELETE){
+            Query query = manager.createNamedQuery("IcatAuthorisation.findByDatafileId").
+                    setParameter("elementType", ElementType.DATAFILE.toString()).
+                    setParameter("elementId", this.getId()).
+                    setParameter("investigationId", this.getDatasetId().getInvestigationId().getId());
+            Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
+            
+            //now mark them all as delete
+            for (IcatAuthorisation icatAuthorisation : icatAuthorisations) {
+                log.trace("Marking: "+icatAuthorisation+" as "+value);
+                icatAuthorisation.setMarkedDeleted(deleted);
             }
         }
         

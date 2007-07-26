@@ -37,6 +37,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
+import uk.icat3.util.ElementType;
 
 /**
  * Entity class Dataset
@@ -333,13 +334,25 @@ import uk.icat3.util.DatasetInclude;
         this.setDatafileCollection(datafiles);
     }
     
-           /**
-     * Sets deleted flag on all items owned by this datasets
+    /**
+     * Sets type (see Cascade) flag on all items owned by this dataset
      *
-     * @param isDeleted
+     * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
+     * @param value value of the cascade type
      */
     public void setCascade(Cascade type, Object value){
-        log.trace("Setting: "+toString()+" from type: "+type+" to :"+value);
+        setCascade(type, value, null);
+    }
+    
+    /**
+     * Sets type (see Cascade) flag on all items owned by this dataset
+     *
+     * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
+     * @param value value of the cascade type
+     * @param manager entity manager to  connect to DB
+     */
+    public void setCascade(Cascade type, Object value, EntityManager manager){
+        log.trace("Setting: "+toString()+" from type: "+type+" to :"+value+" EntityManager: "+(manager == null ? "null" : "manager"));
         String deleted = "Y";
         if(type == Cascade.DELETE){
             deleted = (((Boolean)value).booleanValue()) ? "Y" : "N";
@@ -359,27 +372,40 @@ import uk.icat3.util.DatasetInclude;
         
         //datafiles
         if(getDatafileCollection() != null){
+            //create new collection if remove deleted items
+            Collection<Datafile> datafiles = new ArrayList<Datafile>();
+            
             for(Datafile datafile : getDatafileCollection()){
-                if(type == Cascade.DELETE) datafile.setCascade(Cascade.DELETE, value);
-                else if(type == Cascade.MOD_ID) datafile.setModId(value.toString());
-                else if(type == Cascade.MOD_AND_CREATE_IDS) {
-                    datafile.setModId(value.toString());
-                    datafile.setCreateId(value.toString());
-                }
+                if(type == Cascade.REMOVE_DELETED_ITEMS){
+                    //remove all deleted items from the collection, ie only add ones that are not deleted
+                    if(!datafile.isDeleted()) {
+                        datafiles.add(datafile);
+                        //cascade to datafile items
+                        datafile.setCascade(Cascade.REMOVE_DELETED_ITEMS, value);
+                    }
+                } else datafile.setCascade(type, value);
             }
+            //now set the new dataset collection
+            log.trace("Setting new datafileCollection of size: "+datafiles.size()+" because of deleted items from original size: "+getDatafileCollection().size());
+            this.setDatafileCollection(datafiles);
+            
         }
         
-        //TODO delete new access stuff
-        //access groups
-       /* if(getDatasetLevelPermissionCollection() != null){
-            for(DatasetLevelPermission datasetLevelPermission : getDatasetLevelPermissionCollection()){
-                datasetLevelPermission.setMarkedDeleted(deleted);
-                for(AccessGroupDlp agdlp : datasetLevelPermission.getAccessGroupDlpCollection()){
-                    if(type == Cascade.DELETE) agdlp.setMarkedDeleted(deleted);
-                }
-            }
+        //TODO need to do it for the icat authorisation entires (delete)
+        //check if manager is null
+        if(manager != null && type == Cascade.DELETE){
+            Query query = manager.createNamedQuery("IcatAuthorisation.findByDatasetId").
+                    setParameter("elementType", ElementType.DATASET.toString()).
+                    setParameter("elementId", this.getId()).
+                    setParameter("investigationId", this.getInvestigationId().getId());
+            Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
             
-        }*/
+            //now mark them all as delete
+            for (IcatAuthorisation icatAuthorisation : icatAuthorisations) {
+                log.trace("Marking: "+icatAuthorisation+" as "+value);
+                icatAuthorisation.setMarkedDeleted(deleted);
+            }
+        }
         
         if(type == Cascade.DELETE) this.setMarkedDeleted(deleted);
         else if(type == Cascade.MOD_ID) this.setModId(value.toString());
@@ -439,7 +465,7 @@ import uk.icat3.util.DatasetInclude;
     @Override
     public boolean isValid(EntityManager manager, boolean deepValidation) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
-                
+        
         //check sample info, sample id must be a part of in investigations aswell
         outer: if(sampleId != null){
             //check valid sample id

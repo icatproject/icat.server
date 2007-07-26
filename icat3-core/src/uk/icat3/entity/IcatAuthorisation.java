@@ -32,9 +32,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "IcatAuthorisation.findByUserId", query = "SELECT i FROM IcatAuthorisation i WHERE i.icatAuthorisationPK.userId = :userId"),
     @NamedQuery(name = "IcatAuthorisation.findByElementType", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = :elementType"),
     @NamedQuery(name = "IcatAuthorisation.findByElementId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementId = :elementId"),
-    @NamedQuery(name = "IcatAuthorisation.findByInvestigationId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId AND i.elementType = 'INVESTIGATION' AND i.elementId = :elementId AND i.icatAuthorisationPK.userId = :userId AND i.markedDeleted = 'N'"),
-    @NamedQuery(name = "IcatAuthorisation.findByDatasetId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId  AND i.elementType = 'DATASET' AND i.elementId = :elementId AND i.icatAuthorisationPK.userId = :userId AND i.markedDeleted = 'N'"),
-    @NamedQuery(name = "IcatAuthorisation.findByDatafileId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId AND i.elementType = 'DATAFILE' AND i.elementId = :elementId AND i.icatAuthorisationPK.userId = :userId AND i.markedDeleted = 'N'"),
+    @NamedQuery(name = "IcatAuthorisation.findByInvestigationId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId AND i.elementType = 'INVESTIGATION' AND i.elementId = :elementId"),
+    @NamedQuery(name = "IcatAuthorisation.findByDatasetId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId  AND i.elementType = 'DATASET' AND i.elementId = :elementId"),
+    @NamedQuery(name = "IcatAuthorisation.findByDatafileId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId AND i.elementType = 'DATAFILE' AND i.elementId = :elementId"),
     @NamedQuery(name = "IcatAuthorisation.findById", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId AND i.elementType = :elementType AND i.elementId = :elementId AND i.icatAuthorisationPK.userId = :userId AND i.markedDeleted = 'N'")   
 })
 public class IcatAuthorisation extends EntityBaseBean implements Serializable {

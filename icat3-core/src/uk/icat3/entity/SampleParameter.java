@@ -24,6 +24,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.util.Cascade;
 
 /**
  * Entity class SampleParameter
@@ -44,7 +45,7 @@ import uk.icat3.exceptions.ValidationException;
     @NamedQuery(name = "SampleParameter.findByModTime", query = "SELECT s FROM SampleParameter s WHERE s.modTime = :modTime"),
     @NamedQuery(name = "SampleParameter.findByModId", query = "SELECT s FROM SampleParameter s WHERE s.modId = :modId")
 })
-public class SampleParameter extends EntityBaseBean implements Serializable {
+        public class SampleParameter extends EntityBaseBean implements Serializable {
     
     /**
      * EmbeddedId primary key field
@@ -69,14 +70,14 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     
     @Column(name = "DESCRIPTION")
     private String description;
-      
+    
     @JoinColumns(value =  {
         @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
-        @JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
+@JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
     })
-    @ManyToOne
-    @ICAT(merge=false)
-    private Parameter parameter;
+            @ManyToOne
+            @ICAT(merge=false)
+            private Parameter parameter;
     
     @Transient
     @ICAT(merge=false, nullable=true)
@@ -185,15 +186,15 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public void setError(String error) {
         this.error = error;
     }
-
+    
     /**
      * Gets the description of this SampleParameter.
      * @return the description
-     */ 
+     */
     public String getDescription() {
         return description;
     }
-
+    
     /**
      * Sets the description of this SampleParameter to the specified value.
      * @param description the new description
@@ -201,7 +202,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-
+    
     /**
      * Gets the rangeTop of this SampleParameter.
      * @return the rangeTop
@@ -268,7 +269,7 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
         this.sample = sample;
     }
     
-      /**
+    /**
      * Gets the numeric of this DatafileParameter.
      * @return the parameter
      */
@@ -381,5 +382,5 @@ public class SampleParameter extends EntityBaseBean implements Serializable {
         
         //once here then its valid
         return isValid();
-    }
+    }        
 }

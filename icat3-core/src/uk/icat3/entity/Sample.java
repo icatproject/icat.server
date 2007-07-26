@@ -31,6 +31,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.util.Cascade;
 
 /**
  * Entity class Sample
@@ -50,8 +51,8 @@ import uk.icat3.exceptions.ValidationException;
     @NamedQuery(name = "Sample.findByUnique", query = "SELECT s FROM Sample s WHERE s.name = :name AND s.instance = :instance AND s.investigationId = :investigationId"),
     @NamedQuery(name = "Sample.findByProposalSampleId", query = "SELECT s FROM Sample s WHERE s.proposalSampleId = :proposalSampleId")
 })
-@SequenceGenerator(name="SAMPLE_SEQ",sequenceName="SAMPLE_ID_SEQ",allocationSize=1)
-public class Sample extends EntityBaseBean implements Serializable {
+        @SequenceGenerator(name="SAMPLE_SEQ",sequenceName="SAMPLE_ID_SEQ",allocationSize=1)
+        public class Sample extends EntityBaseBean implements Serializable {
     
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="SAMPLE_SEQ")
@@ -286,6 +287,35 @@ public class Sample extends EntityBaseBean implements Serializable {
     }
     
     /**
+     * Sets deleted flag on all items owned by this datasets
+     *
+     * @param isDeleted
+     */
+    public void setCascade(Cascade type, Object value){
+        log.trace("Setting: "+toString()+" from type: "+type+" to : "+value);
+        String deleted = "Y";
+        if(type == Cascade.DELETE){
+            deleted = (((Boolean)value).booleanValue()) ? "Y" : "N";
+        }
+        
+        for(SampleParameter sp : getSampleParameterCollection()){
+            if(type == Cascade.DELETE)  sp.setMarkedDeleted(deleted);
+            else if(type == Cascade.MOD_ID) sp.setModId(value.toString());
+            else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                sp.setModId(value.toString());
+                sp.setCreateId(value.toString());
+            }
+        }
+             
+        if(type == Cascade.DELETE) this.setMarkedDeleted(deleted);
+        else if(type == Cascade.MOD_ID) this.setModId(value.toString());
+        else if(type == Cascade.MOD_AND_CREATE_IDS) {
+            this.setModId(value.toString());
+            this.setCreateId(value.toString());
+        }
+    }
+    
+    /**
      * Determines whether another object is equal to this Sample.  The result is
      * <code>true</code> if and only if the argument is not null and is a Sample object that
      * has the same id field values as this object.
@@ -309,7 +339,7 @@ public class Sample extends EntityBaseBean implements Serializable {
      * This is so you cannot attach an Id when creating a dataset
      * that is not valid, ie auto generated
      */
-   @PrePersist
+    @PrePersist
     @Override
     public void prePersist(){
         if(this.id != null){

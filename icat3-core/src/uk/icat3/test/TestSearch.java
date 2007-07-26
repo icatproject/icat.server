@@ -389,7 +389,7 @@ public class TestSearch {
         
         
         setUp();
-        String LIST_ALL = "SELECT DISTINCT d from Datafile d, IcatAuthorisation ia where d.datasetId.investigationId.id = ia.icatAuthorisationPK.investigationId AND (ia.icatAuthorisationPK.userId = :userId OR ia.icatAuthorisationPK.userId = 'ANY') AND ia.markedDeleted = 'N'";
+        String LIST_ALL = "SELECT DISTINCT i from Investigation i, IcatAuthorisation ia where i.id = ia.icatAuthorisationPK.investigationId AND (ia.icatAuthorisationPK.userId = :userId OR ia.icatAuthorisationPK.userId = 'ANY' AND ia.markedDeleted = 'N')";
         String TEST_SQL = LIST_ALL+ "AND d.datasetId.investigationId.instrument.name IN('alf','lad') AND d.datafileParameterCollection.datafileParameterPK.name = 'run_number' AND d.datafileParameterCollection.datafileParameterPK.name BETWEEN 2620 AND 2631";
         
         // String TEST_SQL =  "SELECT DISTINCT k.keywordPK.name from Keyword k, IcatAuthorisation ia WHERE" +
@@ -401,7 +401,7 @@ public class TestSearch {
         //test code here
         // em.createQuery(INVESTIGATIONS_BY_USER_SQL2).setMaxResults(2).getResultList();
         
-        System.out.println(em.createQuery(TEST_SQL).setParameter("userId", "ab23").getResultList());
+        System.out.println(em.createQuery(LIST_ALL).setParameter("userId", "ab23d").setParameter("userId", "ab23").getResultList());
         //log.info("Testing");
         /*Collection<Long> investigations = em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES-JAMES").setParameter("instrument","alf").setParameter("lowerRunNumber",0).setParameter("upperRunNumber",10000).getResultList();
         log.info("Results: "+investigations.size());

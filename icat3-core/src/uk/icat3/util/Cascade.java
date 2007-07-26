@@ -16,7 +16,7 @@ package uk.icat3.util;
  */
 public enum Cascade {
     /**
-     * Delete
+     * Delete (sets deleted column)
      */
     DELETE,
     /**
@@ -34,6 +34,10 @@ public enum Cascade {
     /**
      * Removes primary keys
      */
-    REMOVE_ID;
+    REMOVE_ID,
+    /**
+     * Removes all with deleted set as Y from the collections
+     */
+    REMOVE_DELETED_ITEMS; 
    
 }
