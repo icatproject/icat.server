@@ -69,7 +69,7 @@ public class DataFileManager extends ManagerUtil {
         //String facilityUserId = getFacilityUserId(userId, manager);
         
         dataFile.setCascade(Cascade.MOD_ID, userId);
-        dataFile.setCascade(Cascade.DELETE,Boolean.TRUE);
+        dataFile.setCascade(Cascade.DELETE,Boolean.TRUE, manager);
     }
     
     /**

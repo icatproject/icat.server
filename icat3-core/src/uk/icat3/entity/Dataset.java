@@ -381,7 +381,7 @@ import uk.icat3.util.ElementType;
                     if(!datafile.isDeleted()) {
                         datafiles.add(datafile);
                         //cascade to datafile items
-                        datafile.setCascade(Cascade.REMOVE_DELETED_ITEMS, value);
+                        if(((Boolean)value).booleanValue()) datafile.setCascade(Cascade.REMOVE_DELETED_ITEMS, value);
                     }
                 } else datafile.setCascade(type, value);
             }

@@ -401,7 +401,7 @@ public class TestSearch {
         //test code here
         // em.createQuery(INVESTIGATIONS_BY_USER_SQL2).setMaxResults(2).getResultList();
         
-        System.out.println(em.createQuery(LIST_ALL).setParameter("userId", "ab23d").setParameter("userId", "ab23").getResultList());
+       // System.out.println(em.createQuery(LIST_ALL).setParameter("userId", "ab23d").setParameter("userId", "ab23").getResultList());
         //log.info("Testing");
         /*Collection<Long> investigations = em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES-JAMES").setParameter("instrument","alf").setParameter("lowerRunNumber",0).setParameter("upperRunNumber",10000).getResultList();
         log.info("Results: "+investigations.size());

@@ -127,6 +127,9 @@ import uk.icat3.util.Queries;
     @Column(name = "GRANT_ID")
     private Long grantId;
     
+    @Column(name = "SRC_HASH")
+    private String srcHash;
+    
     @Column(name = "RELEASE_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date releaseDate;
@@ -423,6 +426,14 @@ import uk.icat3.util.Queries;
      */
     public void setSampleCollection(Collection<Sample> sampleCollection) {
         this.sampleCollection = sampleCollection;
+    }
+    
+    public String getSrcHash() {
+        return srcHash;
+    }
+
+    public void setSrcHash(String srcHash) {
+        this.srcHash = srcHash;
     }
     
     /**
@@ -731,8 +742,8 @@ import uk.icat3.util.Queries;
                     //remove all deleted items from the collection, ie only add ones that are not deleted
                     if(!dataset.isDeleted()) {
                         datasets.add(dataset);
-                        //cascade to datafile items
-                        dataset.setCascade(Cascade.REMOVE_DELETED_ITEMS, value);
+                        //cascade to datafile items if value is true, otherwise do not cascade
+                        if(((Boolean)value).booleanValue()) dataset.setCascade(Cascade.REMOVE_DELETED_ITEMS, value);
                     }
                 } else dataset.setCascade(type, value);
             }
@@ -766,8 +777,8 @@ import uk.icat3.util.Queries;
         //check if manager is null
         if(manager != null && type == Cascade.DELETE){
             Query query = manager.createNamedQuery("IcatAuthorisation.findByInvestigationId").
-                    setParameter("elementType", ElementType.INVESTIGATION.toString()).
-                    setParameter("elementId", this.getId()).
+                    setParameter("elementType", null).
+                    setParameter("elementId", null).
                     setParameter("investigationId", this.getId());
             Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
             
@@ -874,8 +885,7 @@ import uk.icat3.util.Queries;
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
             this.setModId(value.toString());
             this.setCreateId(value.toString());
-        }
-        
+        }        
     }
     
     /**

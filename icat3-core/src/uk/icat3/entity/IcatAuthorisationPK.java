@@ -17,8 +17,8 @@ import javax.persistence.Embeddable;
  *
  * @author gjd37
  */
-@Embeddable
-public class IcatAuthorisationPK extends EntityPrimaryKeyBaseBean implements Serializable {
+//@Embeddable
+/*public class IcatAuthorisationPK extends EntityPrimaryKeyBaseBean implements Serializable {
 
     @Column(name = "INVESTIGATION_ID", nullable = false)
     private Long investigationId;
@@ -79,4 +79,4 @@ public class IcatAuthorisationPK extends EntityPrimaryKeyBaseBean implements Ser
         return "IcatAuthorisationPK[investigationId=" + investigationId + ", userId=" + userId + "]";
     }
 
-}
+}*/

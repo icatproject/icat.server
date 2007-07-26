@@ -26,6 +26,7 @@ import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
+import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
@@ -82,20 +83,20 @@ public class ManagerUtil {
                     
                     investigation.getDatasetCollection().size();
                     //now filter the datasets collection
-                    filterDatasetsByPermission(userId, investigation, manager);
+                    filterDatasets(userId, investigation, true, manager); //this will fetch the datafiles aswell
                     
-                    for(Dataset dataset : investigation.getDatasetCollection()){
+                    /*for(Dataset dataset : investigation.getDatasetCollection()){
                         dataset.getDatafileCollection().size();
                         //now filter the datafiles collection
-                        filterDatafilesByPermission(userId, dataset, manager);
-                    }
+                        filterDatafiles(userId, dataset, true, manager);
+                    }*/
                 }
                 // return datasets with these investigations
             } else if(include.toString().equals(InvestigationInclude.DATASETS_ONLY.toString())){
                 for(Investigation investigation : investigations){
                     investigation.getDatasetCollection().size();
                     //now filter the datasets collection
-                    filterDatasetsByPermission(userId, investigation, manager);
+                    filterDatasets(userId, investigation, false, manager);
                 }
                 // return sample with these investigations
             } else if(include.toString().equals(InvestigationInclude.SAMPLES_ONLY.toString())){
@@ -107,13 +108,13 @@ public class ManagerUtil {
                 for(Investigation investigation : investigations){
                     investigation.getDatasetCollection().size();
                     //now filter the datasets collection
-                    filterDatasetsByPermission(userId, investigation, manager);
+                    filterDatasets(userId, investigation, true,manager); //this will fetch the datafiles aswell
                     
-                    for(Dataset dataset : investigation.getDatasetCollection()){
+                   /* for(Dataset dataset : investigation.getDatasetCollection()){
                         dataset.getDatafileCollection().size();
                         //now filter the datafiles collection
-                        filterDatafilesByPermission(userId, dataset, manager);
-                    }
+                        filterDatafiles(userId, dataset, true, manager);
+                    }*/
                 }
                 // return keywords with these investigations
             } else if(include.toString().equals(InvestigationInclude.KEYWORDS_ONLY.toString())){
@@ -194,14 +195,14 @@ public class ManagerUtil {
                 //size invokes the JPA to get the information, other wise the collections are null
                 dataset.getDatafileCollection().size();
                 //now filter the datafiles collection
-                filterDatafilesByPermission(userId, dataset, manager);
+                filterDatafiles(userId, dataset, true, manager);
             }
         } else  if(include.toString().equals(DatasetInclude.DATASET_FILES_AND_PARAMETERS.toString())){
             for(Dataset dataset : datasets){
                 //size invokes the JPA to get the information, other wise the collections are null
                 dataset.getDatafileCollection().size();
                 //now filter the datafiles collection
-                filterDatafilesByPermission(userId, dataset, manager);
+                filterDatafiles(userId, dataset, true, manager);
                 
                 dataset.getDatasetParameterCollection().size();
             }
@@ -223,12 +224,14 @@ public class ManagerUtil {
     
     /**
      * Gets all the Datasets which the user can READ/SELECT depending on the roles in the DB
-     *
+     * and by if they are deleted
+     * 
      * @param userId federalId of the user.
      * @param investigations
+     * @param cascade does this cascade to datafiles or not
      * @param manager manager object that will facilitate interaction with underlying database
      */
-    private static void filterDatasetsByPermission(String userId, Investigation investigation, EntityManager manager){
+    private static void filterDatasets(String userId, Investigation investigation, boolean cascade, EntityManager manager){
         Collection<Dataset> datasetsAllowed = new ArrayList<Dataset>();
         for(Dataset dataset : investigation.getDatasetCollection()){
             try{
@@ -240,16 +243,20 @@ public class ManagerUtil {
         //now add the datasets to the investigation
         investigation.setDatasetCollection(datasetsAllowed);
         
+        //now remove deleted items
+        investigation.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(cascade));
     }
     
     /**
      * Gets all the Datafiles which the user can READ/SELECT depending on the roles in the DB
+     * and by if they are deleted
      *
      * @param userId federalId of the user.
+     * @param cascade not needed
      * @param datasets
      * @param manager manager object that will facilitate interaction with underlying database
      */
-    private static void filterDatafilesByPermission(String userId, Dataset dataset, EntityManager manager){
+    private static void filterDatafiles(String userId, Dataset dataset, boolean cascade, EntityManager manager){
         Collection<Datafile> datafilesAllowed = new ArrayList<Datafile>();
         for(Datafile datafile : dataset.getDatafileCollection()){
             try{
@@ -261,6 +268,8 @@ public class ManagerUtil {
         //now add the datasets to the investigation
         dataset.setDatafileCollection(datafilesAllowed);
         
+        //now remove deleted items
+        dataset.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(cascade));
     }
     
     /**

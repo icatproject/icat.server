@@ -14,6 +14,7 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -28,20 +29,31 @@ import javax.xml.bind.annotation.XmlTransient;
 @Entity
 @Table(name = "ICAT_AUTHORISATION")
 @NamedQueries({
-    @NamedQuery(name = "IcatAuthorisation.findByInvestigationIdPK", query = "SELECT i FROM IcatAuthorisation i WHERE i.icatAuthorisationPK.investigationId = :investigationId"), 
-    @NamedQuery(name = "IcatAuthorisation.findByUserId", query = "SELECT i FROM IcatAuthorisation i WHERE i.icatAuthorisationPK.userId = :userId"),
+    @NamedQuery(name = "IcatAuthorisation.findByInvestigationIdPK", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigationId = :investigationId"), 
+    @NamedQuery(name = "IcatAuthorisation.findByUserId", query = "SELECT i FROM IcatAuthorisation i WHERE i.userId = :userId"),
     @NamedQuery(name = "IcatAuthorisation.findByElementType", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = :elementType"),
     @NamedQuery(name = "IcatAuthorisation.findByElementId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementId = :elementId"),
     @NamedQuery(name = "IcatAuthorisation.findByInvestigationId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId AND i.elementType = 'INVESTIGATION' AND i.elementId = :elementId"),
     @NamedQuery(name = "IcatAuthorisation.findByDatasetId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId  AND i.elementType = 'DATASET' AND i.elementId = :elementId"),
     @NamedQuery(name = "IcatAuthorisation.findByDatafileId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId AND i.elementType = 'DATAFILE' AND i.elementId = :elementId"),
-    @NamedQuery(name = "IcatAuthorisation.findById", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId AND i.elementType = :elementType AND i.elementId = :elementId AND i.icatAuthorisationPK.userId = :userId AND i.markedDeleted = 'N'")   
+    @NamedQuery(name = "IcatAuthorisation.findById", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId AND i.elementType = :elementType AND i.elementId = :elementId AND i.userId = :userId AND i.markedDeleted = 'N'"),
+    @NamedQuery(name = "IcatAuthorisation.findByIdNullInvestigationId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigationId IS null AND i.elementType = :elementType AND i.elementId IS null AND i.userId = :userId AND i.markedDeleted = 'N'")   
 })
 public class IcatAuthorisation extends EntityBaseBean implements Serializable {
 
-    @EmbeddedId
-    protected IcatAuthorisationPK icatAuthorisationPK;
+    @Id
+    @Column(name = "ID")
+    private String id;
+   
+    //@EmbeddedId
+    //protected IcatAuthorisationPK icatAuthorisationPK;
 
+    @Column(name = "INVESTIGATION_ID", nullable = false)
+    private Long investigationId;
+
+    @Column(name = "USER_ID", nullable = false)
+    private String userId;
+      
     @Column(name = "ELEMENT_TYPE")
     private String elementType;
 
@@ -59,7 +71,7 @@ public class IcatAuthorisation extends EntityBaseBean implements Serializable {
     public IcatAuthorisation() {
     }
 
-    public IcatAuthorisation(IcatAuthorisationPK icatAuthorisationPK) {
+  /*  public IcatAuthorisation(IcatAuthorisationPK icatAuthorisationPK) {
         this.icatAuthorisationPK = icatAuthorisationPK;
     }
 
@@ -71,20 +83,44 @@ public class IcatAuthorisation extends EntityBaseBean implements Serializable {
         this.createId = createId;
         this.facilityAcquired = facilityAcquired;
         this.markedDeleted = deleted;
+    }*/
+    
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public IcatAuthorisation(Long investigationId, String userId) {
-        this.icatAuthorisationPK = new IcatAuthorisationPK(investigationId, userId);
+        //this.icatAuthorisationPK = new IcatAuthorisationPK(investigationId, userId);
     }
 
-    public IcatAuthorisationPK getIcatAuthorisationPK() {
+   /* public IcatAuthorisationPK getIcatAuthorisationPK() {
         return icatAuthorisationPK;
     }
-
+    
     public void setIcatAuthorisationPK(IcatAuthorisationPK icatAuthorisationPK) {
         this.icatAuthorisationPK = icatAuthorisationPK;
+    }*/
+    
+    public Long getInvestigationId() {
+        return investigationId;
     }
 
+    public void setInvestigationId(Long investigationId) {
+        this.investigationId = investigationId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+    
     public String getElementType() {
         return elementType;
     }
@@ -121,7 +157,7 @@ public class IcatAuthorisation extends EntityBaseBean implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (icatAuthorisationPK != null ? icatAuthorisationPK.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
@@ -132,7 +168,7 @@ public class IcatAuthorisation extends EntityBaseBean implements Serializable {
             return false;
         }
         IcatAuthorisation other = (IcatAuthorisation) object;
-        if (this.icatAuthorisationPK != other.icatAuthorisationPK && (this.icatAuthorisationPK == null || !this.icatAuthorisationPK.equals(other.icatAuthorisationPK))) {
+        if (this.id != other.id && (this.id == null || !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -140,7 +176,7 @@ public class IcatAuthorisation extends EntityBaseBean implements Serializable {
 
     @Override
     public String toString() {
-        return "IcatAuthorisation[icatAuthorisationPK=" + icatAuthorisationPK + "]";
+        return "IcatAuthorisation[id="+id+"]";
     }
 
 }

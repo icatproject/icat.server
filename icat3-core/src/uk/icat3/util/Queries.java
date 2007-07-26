@@ -24,8 +24,8 @@ public class Queries {
      * Lists all the users investigations
      */
     public static final String LIST_ALL_USERS_INVESTIGATIONS_JPQL = "SELECT DISTINCT i from Investigation i, IcatAuthorisation ia WHERE" +
-            " i.id = ia.icatAuthorisationPK.investigationId AND " +
-            "(ia.icatAuthorisationPK.userId = :userId OR ia.icatAuthorisationPK.userId = 'ANY')" +
+            " i.id = ia.investigationId AND " +
+            "(ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N'";
     /**
      * Lists all the users investigations in SQL
@@ -99,8 +99,8 @@ public class Queries {
     
     //new for permissions
     public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID_JPQL = "SELECT DISTINCT i.id from Investigation i, IcatAuthorisation ia WHERE" +
-            " i.id = ia.icatAuthorisationPK.investigationId AND " +
-            "(ia.icatAuthorisationPK.userId = :userId OR ia.icatAuthorisationPK.userId = 'ANY')" +
+            " i.id = ia.investigationId AND " +
+            "(ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND i.keywordCollection.keywordPK.name LIKE :keyword";
     
     ////by keywrds
@@ -300,8 +300,8 @@ public class Queries {
     
     //new for permissions
     public static final String INVESTIGATIONS_FOR_USER_RTN_ID_JPQL = "SELECT DISTINCT i.id from Investigation i, IcatAuthorisation ia WHERE" +
-            " i.id = ia.icatAuthorisationPK.investigationId AND " +
-            "(ia.icatAuthorisationPK.userId = :userId OR ia.icatAuthorisationPK.userId = 'ANY')" +
+            " i.id = ia.investigationId AND " +
+            "(ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND i.investigatorCollection.facilityUser.federalId = :userId";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
@@ -404,8 +404,8 @@ public class Queries {
     // public static final String KEYWORDS_FOR_USER_JPQL = "SELECT DISTINCT k.keywordPK.name FROM Keyword k WHERE (k.investigation.investigatorCollection.investigatorPK.facilityUserId = :userId OR k.investigation.investigatorCollection IS EMPTY) AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) ORDER BY k.keywordPK.name";
     //new for permissions
     public static final String KEYWORDS_FOR_USER_JPQL = "SELECT DISTINCT k.keywordPK.name from Keyword k, IcatAuthorisation ia WHERE" +
-            " k.investigation.id = ia.icatAuthorisationPK.investigationId AND " +
-            "(ia.icatAuthorisationPK.userId = :userId OR ia.icatAuthorisationPK.userId = 'ANY')" +
+            " k.investigation.id = ia.investigationId AND " +
+            "(ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) ORDER BY k.keywordPK.name";
     public static final String KEYWORDS_NATIVE_FOR_USER = "Keywords.getAllKeywordsForUserNative";
     public static final String KEYWORDS_FOR_USER_SQL = "SELECT DISTINCT NAME FROM (SELECT DISTINCT t3.NAME  " +

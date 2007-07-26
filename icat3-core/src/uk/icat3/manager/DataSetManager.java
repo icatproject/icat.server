@@ -73,7 +73,7 @@ public class DataSetManager extends ManagerUtil {
         //check user has delete access
         GateKeeper.performAuthorisation(userId, dataset, AccessType.DELETE, manager);
         
-        dataset.setCascade(Cascade.DELETE, Boolean.TRUE);
+        dataset.setCascade(Cascade.DELETE, Boolean.TRUE, manager);
     }
     
     /**
