@@ -21,154 +21,147 @@ import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Keyword;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.util.AccessType;
-import uk.icat3.util.BaseTestClassTX;
 import static uk.icat3.util.TestConstants.*;
 
 /**
  *
  * @author gjd37
  */
-public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
+public class TestGateKeeperDownloaderInvestigation extends TestGateKeeperUtil {
     
     private static Logger log = Logger.getLogger(TestGateKeeperCreatorInvestigation.class);
     private Random random = new Random();
     
     /**
-     * Tests reader on valid investigation for read
+     * Tests downloader on valid investigation for read
      */
     @Test
-    public void testReaderReadOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+READER_USER+ " for reading investigation Id: "+VALID_INVESTIGATION_ID_FOR_READER);
+    public void testDownloaderReadOnInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+DOWNLOADER_USER+ " for reading investigation Id: "+VALID_INVESTIGATION_ID_FOR_DOWNLOADER);
         
         Investigation investigation = getInvestigation(true);
         
-        GateKeeper.performAuthorisation(READER_USER, investigation, AccessType.READ, em);
+        GateKeeper.performAuthorisation(DOWNLOADER_USER, investigation, AccessType.READ, em);
         
         //no exception
         assertTrue("This should be true", true);
     }
     
     /**
-     * Tests reader on valid investigation for delete
+     * Tests downloader on valid investigation for delete
      */
     @Test(expected=InsufficientPrivilegesException.class)
-    public void testReaderDeleteOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+READER_USER+ " for deleting investigation Id: "+VALID_INVESTIGATION_ID_FOR_READER);
+    public void testDownloaderDeleteOnInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+DOWNLOADER_USER+ " for deleting investigation Id: "+VALID_INVESTIGATION_ID_FOR_DOWNLOADER);
         
         Investigation investigation = getInvestigation(true);
         
-        
         try {
-            GateKeeper.performAuthorisation(READER_USER, investigation, AccessType.DELETE, em);
-            
+            GateKeeper.performAuthorisation(DOWNLOADER_USER, investigation, AccessType.DELETE, em);
         } catch (InsufficientPrivilegesException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
+        
     }
     
     /**
-     * Tests reader on valid investigation for download
-     */
-    @Test(expected=InsufficientPrivilegesException.class)
-    public void testReaderDownloadOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+READER_USER+ " for download investigation Id: "+VALID_INVESTIGATION_ID_FOR_READER);
-        
-        Investigation investigation = getInvestigation(true);
-        
-        
-        try {
-            GateKeeper.performAuthorisation(READER_USER, investigation, AccessType.DOWNLOAD, em);
-            
-        } catch (InsufficientPrivilegesException ex) {
-            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            throw ex;
-        }
-    }
-    
-    /**
-     * Tests reader on valid investigation for remove (cos investigation this test remove root)
-     */
-    @Test(expected=InsufficientPrivilegesException.class)
-    public void testReaderRemoveOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+READER_USER+ " for remove investigation Id: "+VALID_INVESTIGATION_ID_FOR_READER);
-        
-        Investigation investigation = getInvestigation(true);
-        
-        try {
-            GateKeeper.performAuthorisation(READER_USER, investigation, AccessType.REMOVE, em);
-        } catch (InsufficientPrivilegesException ex) {
-            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            throw ex;
-        }
-    }
-    
-    /**
-     * Tests reader on valid investigation for update
-     */
-    @Test(expected=InsufficientPrivilegesException.class)
-    public void testReaderUpdateOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+READER_USER+ " for update investigation Id: "+VALID_INVESTIGATION_ID_FOR_READER);
-        
-        Investigation investigation = getInvestigation(true);
-        
-        
-        try {
-            GateKeeper.performAuthorisation(READER_USER, investigation, AccessType.UPDATE, em);
-        } catch (InsufficientPrivilegesException ex) {
-            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            throw ex;
-        }
-    }
-    
-    /**
-     * Tests reader on valid investigation for insert (cos investigation this test insert root)
-     */
-    @Test(expected=InsufficientPrivilegesException.class)
-    public void testReaderInsertOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+READER_USER+ " for insert on investigation Id: "+VALID_INVESTIGATION_ID_FOR_READER);
-        
-        Investigation investigation = getInvestigation(true);
-        
-        try {
-            GateKeeper.performAuthorisation(READER_USER, investigation, AccessType.CREATE, em);
-        } catch (InsufficientPrivilegesException ex) {
-            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            throw ex;
-        }
-    }
-    
-    /**
-     * Tests reader on valid investigation for insert (cos investigation this test insert root)
+     * Tests downloader on valid investigation for download
      */
     @Test
-    public void testReaderInvestigationInsertOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+READER_USER+ " for insert on investigation Id: "+VALID_INVESTIGATION_ID_FOR_READER);
+    public void testDownloaderDownloadOnInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+DOWNLOADER_USER+ " for download investigation Id: "+VALID_INVESTIGATION_ID_FOR_DOWNLOADER);
+        
+        Investigation investigation = getInvestigation(true);
+        
+        GateKeeper.performAuthorisation(DOWNLOADER_USER, investigation, AccessType.DOWNLOAD, em);
+        
+        //no exception
+        assertTrue("This should be true", true);
+    }
+    
+    /**
+     * Tests downloader on valid investigation for remove (cos investigation this test remove root)
+     */
+    @Test(expected=InsufficientPrivilegesException.class)
+    public void testDownloaderRemoveOnInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+DOWNLOADER_USER+ " for remove investigation Id: "+VALID_INVESTIGATION_ID_FOR_DOWNLOADER);
+        
+        Investigation investigation = getInvestigation(true);
+        
+        try {
+            GateKeeper.performAuthorisation(DOWNLOADER_USER, investigation, AccessType.REMOVE, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests downloader on valid investigation for update
+     */
+    @Test(expected=InsufficientPrivilegesException.class)
+    public void testDownloaderUpdateOnInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+DOWNLOADER_USER+ " for update investigation Id: "+VALID_INVESTIGATION_ID_FOR_DOWNLOADER);
+        
+        Investigation investigation = getInvestigation(true);
+        
+        try {
+            GateKeeper.performAuthorisation(DOWNLOADER_USER, investigation, AccessType.UPDATE, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests downloader on valid investigation for insert (cos investigation this test insert root)
+     */
+    @Test(expected=InsufficientPrivilegesException.class)
+    public void testDownloaderInsertOnInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+DOWNLOADER_USER+ " for insert on investigation Id: "+VALID_INVESTIGATION_ID_FOR_DOWNLOADER);
+        
+        Investigation investigation = getInvestigation(true);
+        
+        try {
+            GateKeeper.performAuthorisation(DOWNLOADER_USER, investigation, AccessType.CREATE, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests downloader on valid investigation for insert (cos investigation this test insert root)
+     */
+    @Test
+    public void testDownloaderInvestigationInsertOnInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+DOWNLOADER_USER+ " for insert on investigation Id: "+VALID_INVESTIGATION_ID_FOR_DOWNLOADER);
         
         Investigation investigation = getInvestigation(false);
         
-        GateKeeper.performAuthorisation(READER_USER+"_investigation", investigation, AccessType.CREATE, em);
+        GateKeeper.performAuthorisation(DOWNLOADER_USER+"_investigation", investigation, AccessType.CREATE, em);
         
         //no exception
         assertTrue("This should be true", true);
+        
     }
     
     /**
-     * Tests reader on valid investigation for update
+     * Tests downloader on valid investigation for update
      */
     @Test(expected=InsufficientPrivilegesException.class)
-    public void testReaderSetFAOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+READER_USER+ " for set FA on investigation Id: "+VALID_INVESTIGATION_ID_FOR_READER);
+    public void testDownloaderSetFAOnInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+DOWNLOADER_USER+ " for set FA on investigation Id: "+VALID_INVESTIGATION_ID_FOR_DOWNLOADER);
         
         Investigation investigation = getInvestigation(true);
         
         try {
-            GateKeeper.performAuthorisation(READER_USER, investigation, AccessType.SET_FA, em);
+            GateKeeper.performAuthorisation(DOWNLOADER_USER, investigation, AccessType.SET_FA, em);
         } catch (InsufficientPrivilegesException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
@@ -178,39 +171,38 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
     
     //now try for insert and remove of none investigation objects to test insert and remove
     /**
-     * Tests reader on valid investigation for insert keyword
+     * Tests downloader on valid investigation for insert keyword
      */
     @Test(expected=InsufficientPrivilegesException.class)
-    public void testReaderInsertKeywordOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+READER_USER+ " for insert keyword on investigation Id: "+VALID_INVESTIGATION_ID_FOR_READER);
+    public void testDownloaderInsertKeywordOnInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+DOWNLOADER_USER+ " for insert keyword on investigation Id: "+VALID_INVESTIGATION_ID_FOR_DOWNLOADER);
         
         Investigation investigation = getInvestigation(true);
         Keyword keyword = new Keyword();
         keyword.setInvestigation(investigation);
         
         try {
-            GateKeeper.performAuthorisation(READER_USER, keyword, AccessType.CREATE, em);
+            GateKeeper.performAuthorisation(DOWNLOADER_USER, keyword, AccessType.CREATE, em);
         } catch (InsufficientPrivilegesException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
-        assertTrue("This should be true", true);
     }
     
     /**
-     * Tests reader on valid investigation for update keyword
+     * Tests downloader on valid investigation for update keyword
      */
     @Test(expected=InsufficientPrivilegesException.class)
-    public void testReaderUpdateKeywordOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+READER_USER+ " for update keyword on investigation Id: "+VALID_INVESTIGATION_ID_FOR_READER);
+    public void testDownloaderUpdateKeywordOnInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+DOWNLOADER_USER+ " for update keyword on investigation Id: "+VALID_INVESTIGATION_ID_FOR_DOWNLOADER);
         
         Investigation investigation = getInvestigation(true);
         Keyword keyword = new Keyword();
         keyword.setInvestigation(investigation);
         
         try {
-            GateKeeper.performAuthorisation(READER_USER, keyword, AccessType.UPDATE, em);
+            GateKeeper.performAuthorisation(DOWNLOADER_USER, keyword, AccessType.UPDATE, em);
         } catch (InsufficientPrivilegesException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
@@ -218,19 +210,19 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
         }
     }
     
-       /**
-     * Tests reader on valid investigation for update keyword
+    /**
+     * Tests downloader on valid investigation for update keyword
      */
     @Test(expected=InsufficientPrivilegesException.class)
-    public void testReaderRemoveKeywordOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+READER_USER+ " for remove keyword on investigation Id: "+VALID_INVESTIGATION_ID_FOR_READER);
+    public void testDownloaderRemoveKeywordOnInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+DOWNLOADER_USER+ " for remove keyword on investigation Id: "+VALID_INVESTIGATION_ID_FOR_DOWNLOADER);
         
         Investigation investigation = getInvestigation(true);
         Keyword keyword = new Keyword();
         keyword.setInvestigation(investigation);
         
         try {
-             GateKeeper.performAuthorisation(READER_USER, keyword, AccessType.REMOVE, em);      
+            GateKeeper.performAuthorisation(DOWNLOADER_USER, keyword, AccessType.REMOVE, em);
         } catch (InsufficientPrivilegesException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
@@ -240,6 +232,6 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
     
     
     public static junit.framework.Test suite(){
-        return new JUnit4TestAdapter(TestGateKeeperReaderInvestigation.class);
+        return new JUnit4TestAdapter(TestGateKeeperDownloaderInvestigation.class);
     }
 }

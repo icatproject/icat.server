@@ -41,10 +41,32 @@ public class TestConstants {
     //testing gatekeeper
     public final static String CREATOR_USER = "test_creator";
     public final static String READER_USER = "test_reader";
+    public final static String DOWNLOADER_USER = "test_downloader";
+    public final static String UPDATER_USER = "test_updater";
+    public final static String DELETER_USER = "test_deleter";
+    public final static String ADMIN_USER = "test_admin";
+    
+    public final static long VALID_DATA_SET_ID_FOR_ADMIN =  3;
+    public final static long VALID_DATA_FILE_ID_FOR_ADMIN =  3;
+    public final static long VALID_INVESTIGATION_ID_FOR_ADMIN =  3;
+    
     public final static long VALID_DATA_SET_ID_FOR_CREATOR =  3;
     public final static long VALID_DATA_FILE_ID_FOR_CREATOR =  3;
     public final static long VALID_INVESTIGATION_ID_FOR_CREATOR =  3;
+    
+    public final static long VALID_DATA_SET_ID_FOR_DELETER =  3;
+    public final static long VALID_DATA_FILE_ID_FOR_DELETER =  3;
+    public final static long VALID_INVESTIGATION_ID_FOR_DELETER =  3;
+    
     public final static long VALID_DATA_SET_ID_FOR_READER =  3;
     public final static long VALID_DATA_FILE_ID_FOR_READER =  3;
     public final static long VALID_INVESTIGATION_ID_FOR_READER =  3;
+    
+    public final static long VALID_DATA_SET_ID_FOR_DOWNLOADER =  3;
+    public final static long VALID_DATA_FILE_ID_FOR_DOWNLOADER=  3;
+    public final static long VALID_INVESTIGATION_ID_FOR_DOWNLOADER =  3;
+    
+    public final static long VALID_DATA_SET_ID_FOR_UPDATER =  3;
+    public final static long VALID_DATA_FILE_ID_FOR_UPDATER=  3;
+    public final static long VALID_INVESTIGATION_ID_FOR_UPDATER =  3;
 }

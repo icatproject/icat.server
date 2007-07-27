@@ -28,7 +28,7 @@ import static uk.icat3.util.TestConstants.*;
  *
  * @author gjd37
  */
-public class TestGateKeeperCreatorInvestigation extends BaseTestClassTX {
+public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
     
     private static Logger log = Logger.getLogger(TestGateKeeperCreatorInvestigation.class);
     private Random random = new Random();
@@ -197,20 +197,26 @@ public class TestGateKeeperCreatorInvestigation extends BaseTestClassTX {
         assertTrue("This should be true", true);
     }
     
-    
-    
-    private Investigation getInvestigation(boolean valid){
-        if(valid){
-            Investigation investigation = em.find(Investigation.class, VALID_INVESTIGATION_ID_FOR_CREATOR);
-            
-            return investigation;
-        } else {
-            //create invalid investigation
-            Investigation investigation = new Investigation();
-            return investigation;
+    /**
+     * Tests creator on valid investigation for update keyword
+     */
+    @Test(expected=InsufficientPrivilegesException.class)
+    public void testCreatorRemoveKeywordOnInvestigation() throws ICATAPIException {
+        log.info("Testing  user: "+CREATOR_USER+ " for remove keyword on investigation Id: "+VALID_INVESTIGATION_ID_FOR_CREATOR);
+        
+        Investigation investigation = getInvestigation(true);
+        Keyword keyword = new Keyword();
+        keyword.setInvestigation(investigation);
+        
+        try {
+             GateKeeper.performAuthorisation(CREATOR_USER, keyword, AccessType.REMOVE, em);      
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
         }
     }
-    
+                
     public static junit.framework.Test suite(){
         return new JUnit4TestAdapter(TestGateKeeperCreatorInvestigation.class);
     }
