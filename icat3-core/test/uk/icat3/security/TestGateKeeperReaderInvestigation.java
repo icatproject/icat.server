@@ -35,6 +35,8 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests reader on valid investigation for read
+     *
+     * ACTION_SELECT  - Y
      */
     @Test
     public void testReaderReadOnInvestigation() throws ICATAPIException {
@@ -50,6 +52,8 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests reader on valid investigation for delete
+     *
+     * ACTION_DELETE - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testReaderDeleteOnInvestigation() throws ICATAPIException {
@@ -70,6 +74,8 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests reader on valid investigation for download
+     *
+     * ACTION_DOWNLOAD - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testReaderDownloadOnInvestigation() throws ICATAPIException {
@@ -90,6 +96,8 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests reader on valid investigation for remove (cos investigation this test remove root)
+     *
+     * ACTION_REMOVE_ROOT - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testReaderRemoveOnInvestigation() throws ICATAPIException {
@@ -108,6 +116,8 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests reader on valid investigation for update
+     *
+     * ACTION_UPDATE - Y
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testReaderUpdateOnInvestigation() throws ICATAPIException {
@@ -127,6 +137,8 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests reader on valid investigation for insert (cos investigation this test insert root)
+     *
+     * ACTION_ROOT_INSERT - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testReaderInsertOnInvestigation() throws ICATAPIException {
@@ -145,6 +157,8 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests reader on valid investigation for insert (cos investigation this test insert root)
+     *
+     * ACTION_ROOT_INSERT - Y (set null in inv_id for ICAT_ADMIN_USER+"_investigation)
      */
     @Test
     public void testReaderInvestigationInsertOnInvestigation() throws ICATAPIException {
@@ -160,6 +174,8 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests reader on valid investigation for update
+     *
+     * ACTION_SET_FA - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testReaderSetFAOnInvestigation() throws ICATAPIException {
@@ -179,6 +195,8 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
     //now try for insert and remove of none investigation objects to test insert and remove
     /**
      * Tests reader on valid investigation for insert keyword
+     *
+     * ACTION_INSERT - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testReaderInsertKeywordOnInvestigation() throws ICATAPIException {
@@ -200,6 +218,8 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests reader on valid investigation for update keyword
+     *
+     * ACTION_UPDATE - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testReaderUpdateKeywordOnInvestigation() throws ICATAPIException {
@@ -218,8 +238,10 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
         }
     }
     
-       /**
+    /**
      * Tests reader on valid investigation for update keyword
+     *
+     * ACTION_REMOVE - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testReaderRemoveKeywordOnInvestigation() throws ICATAPIException {
@@ -230,7 +252,7 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
         keyword.setInvestigation(investigation);
         
         try {
-             GateKeeper.performAuthorisation(READER_USER, keyword, AccessType.REMOVE, em);      
+            GateKeeper.performAuthorisation(READER_USER, keyword, AccessType.REMOVE, em);
         } catch (InsufficientPrivilegesException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));

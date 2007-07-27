@@ -35,6 +35,8 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests creator on valid investigation for read
+     *
+     * ACTION_SELECT  - Y
      */
     @Test
     public void testCreatorReadOnInvestigation() throws ICATAPIException {
@@ -50,6 +52,8 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests creator on valid investigation for delete
+     *
+     * ACTION_DELETE - Y
      */
     @Test
     public void testCreatorDeleteOnInvestigation() throws ICATAPIException {
@@ -65,6 +69,8 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests creator on valid investigation for download
+     *
+     * ACTION_DOWNLOAD - Y
      */
     @Test
     public void testCreatorDownloadOnInvestigation() throws ICATAPIException {
@@ -80,6 +86,8 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests creator on valid investigation for remove (cos investigation this test remove root)
+     *
+     * ACTION_REMOVE_ROOT - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testCreatorRemoveOnInvestigation() throws ICATAPIException {
@@ -98,6 +106,8 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests creator on valid investigation for update
+     *
+     * ACTION_UPDATE - Y
      */
     @Test
     public void testCreatorUpdateOnInvestigation() throws ICATAPIException {
@@ -113,6 +123,8 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests creator on valid investigation for insert (cos investigation this test insert root)
+     *
+     * * ACTION_ROOT_INSERT - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testCreatorInsertOnInvestigation() throws ICATAPIException {
@@ -131,6 +143,8 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests creator on valid investigation for insert (cos investigation this test insert root)
+     *
+     * ACTION_ROOT_INSERT - Y (set null in inv_id for ICAT_ADMIN_USER+"_investigation)
      */
     @Test
     public void testCreatorInvestigationInsertOnInvestigation() throws ICATAPIException {
@@ -146,6 +160,8 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests creator on valid investigation for update
+     *
+     * ACTION_SET_FA - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testCreatorSetFAOnInvestigation() throws ICATAPIException {
@@ -165,6 +181,8 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
     //now try for insert and remove of none investigation objects to test insert and remove
     /**
      * Tests creator on valid investigation for insert keyword
+     *
+     * ACTION_INSERT - Y
      */
     @Test
     public void testCreatorInsertKeywordOnInvestigation() throws ICATAPIException {
@@ -180,8 +198,10 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
         assertTrue("This should be true", true);
     }
     
-     /**
+    /**
      * Tests creator on valid investigation for update keyword
+     *
+     * ACTION_UPDATE - Y
      */
     @Test
     public void testCreatorUpdateKeywordOnInvestigation() throws ICATAPIException {
@@ -199,6 +219,8 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests creator on valid investigation for update keyword
+     *
+     * ACTION_REMOVE - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testCreatorRemoveKeywordOnInvestigation() throws ICATAPIException {
@@ -209,14 +231,14 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
         keyword.setInvestigation(investigation);
         
         try {
-             GateKeeper.performAuthorisation(CREATOR_USER, keyword, AccessType.REMOVE, em);      
+            GateKeeper.performAuthorisation(CREATOR_USER, keyword, AccessType.REMOVE, em);
         } catch (InsufficientPrivilegesException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
-                
+    
     public static junit.framework.Test suite(){
         return new JUnit4TestAdapter(TestGateKeeperCreatorInvestigation.class);
     }

@@ -34,6 +34,8 @@ public class TestGateKeeperDownloaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests downloader on valid investigation for read
+     *
+     * ACTION_SELECT  - Y
      */
     @Test
     public void testDownloaderReadOnInvestigation() throws ICATAPIException {
@@ -49,6 +51,8 @@ public class TestGateKeeperDownloaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests downloader on valid investigation for delete
+     *
+     * ACTION_DELETE - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDownloaderDeleteOnInvestigation() throws ICATAPIException {
@@ -68,6 +72,8 @@ public class TestGateKeeperDownloaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests downloader on valid investigation for download
+     *
+     * ACTION_DOWNLOAD - Y
      */
     @Test
     public void testDownloaderDownloadOnInvestigation() throws ICATAPIException {
@@ -83,6 +89,8 @@ public class TestGateKeeperDownloaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests downloader on valid investigation for remove (cos investigation this test remove root)
+     *
+     * ACTION_REMOVE_ROOT - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDownloaderRemoveOnInvestigation() throws ICATAPIException {
@@ -101,6 +109,8 @@ public class TestGateKeeperDownloaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests downloader on valid investigation for update
+     *
+     * ACTION_UPDATE - Y
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDownloaderUpdateOnInvestigation() throws ICATAPIException {
@@ -119,6 +129,8 @@ public class TestGateKeeperDownloaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests downloader on valid investigation for insert (cos investigation this test insert root)
+     *
+     * ACTION_ROOT_INSERT - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDownloaderInsertOnInvestigation() throws ICATAPIException {
@@ -137,6 +149,8 @@ public class TestGateKeeperDownloaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests downloader on valid investigation for insert (cos investigation this test insert root)
+     *
+     * ACTION_ROOT_INSERT - Y (set null in inv_id for ICAT_ADMIN_USER+"_investigation)
      */
     @Test
     public void testDownloaderInvestigationInsertOnInvestigation() throws ICATAPIException {
@@ -153,6 +167,8 @@ public class TestGateKeeperDownloaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests downloader on valid investigation for update
+     *
+     * ACTION_SET_FA - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDownloaderSetFAOnInvestigation() throws ICATAPIException {
@@ -172,6 +188,8 @@ public class TestGateKeeperDownloaderInvestigation extends TestGateKeeperUtil {
     //now try for insert and remove of none investigation objects to test insert and remove
     /**
      * Tests downloader on valid investigation for insert keyword
+     *
+     * ACTION_INSERT - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDownloaderInsertKeywordOnInvestigation() throws ICATAPIException {
@@ -192,6 +210,8 @@ public class TestGateKeeperDownloaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests downloader on valid investigation for update keyword
+     *
+     * ACTION_UPDATE - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDownloaderUpdateKeywordOnInvestigation() throws ICATAPIException {
@@ -212,6 +232,8 @@ public class TestGateKeeperDownloaderInvestigation extends TestGateKeeperUtil {
     
     /**
      * Tests downloader on valid investigation for update keyword
+     *
+     * ACTION_REMOVE - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDownloaderRemoveKeywordOnInvestigation() throws ICATAPIException {
