@@ -165,7 +165,7 @@ public class GateKeeper {
             //check if element type is a root, if so check root insert permissions
             if(elementType.isRootType()){
                 //if null in investigation id then can create investigations
-                if(elementType == ElementType.INVESTIGATION && icatAuthorisation.getInvestigationId() == null){
+                if(elementType == ElementType.INVESTIGATION && icatAuthorisation.getInvestigationId() == null /*&& parseBoolean(icatAuthorisation.getRole().getActionRootInsert())*/){
                     success = true; //user has access to insert root root element
                 } else if(parseBoolean(icatAuthorisation.getRole().getActionRootInsert())){
                     success = true; //user has access to insert root root element
