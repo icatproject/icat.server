@@ -214,7 +214,7 @@ Insert into ICAT_AUTHORISATION
 Insert into ICAT_AUTHORISATION 
   (ID, INVESTIGATION_ID, USER_ID, ROLE, ELEMENT_TYPE, ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_AQUIRED)
  Values 
-    (31,3, 'test_downlaoder', 'DOWNLOADER', 'INVESTIGATION', 3, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+    (31,3, 'test_downloader', 'DOWNLOADER', 'INVESTIGATION', 3, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 Insert into ICAT_AUTHORISATION 
   (ID, INVESTIGATION_ID, USER_ID, ROLE, ELEMENT_TYPE, ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_AQUIRED)
  Values 
@@ -237,7 +237,18 @@ Insert into ICAT_AUTHORISATION
   (ID, INVESTIGATION_ID, USER_ID, ROLE, ELEMENT_TYPE, ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_AQUIRED)
  Values 
     (49, null, 'test_updater_investigation', 'UPDATER', 'INVESTIGATION', null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
+Insert into ICAT_AUTHORISATION 
+  (ID, INVESTIGATION_ID, USER_ID, ROLE, ELEMENT_TYPE, ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_AQUIRED)
+ Values 
+    (50, null, 'test_downloader_investigation', 'DOWNLOADER', 'INVESTIGATION', null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+Insert into ICAT_AUTHORISATION 
+  (ID, INVESTIGATION_ID, USER_ID, ROLE, ELEMENT_TYPE, ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_AQUIRED)
+ Values 
+    (51, null, 'test_admin_investigation', 'ADMIN', 'INVESTIGATION', null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+Insert into ICAT_AUTHORISATION 
+  (ID, INVESTIGATION_ID, USER_ID, ROLE, ELEMENT_TYPE, ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_AQUIRED)
+ Values 
+    (52, null, 'test_deleter_investigation', 'DELETER', 'INVESTIGATION', null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 
 
 
@@ -257,7 +268,7 @@ Insert into ICAT_AUTHORISATION
 Insert into ICAT_AUTHORISATION 
   (ID, INVESTIGATION_ID, USER_ID, ROLE, ELEMENT_TYPE, ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_AQUIRED)
  Values 
-    (36,3, 'test_downlaoder', 'DOWNLOADER', 'DATASET', 3, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+    (36,3, 'test_downloader', 'DOWNLOADER', 'DATASET', 3, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 Insert into ICAT_AUTHORISATION 
   (ID, INVESTIGATION_ID, USER_ID, ROLE, ELEMENT_TYPE, ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_AQUIRED)
  Values 
@@ -284,7 +295,7 @@ Insert into ICAT_AUTHORISATION
 Insert into ICAT_AUTHORISATION 
   (ID, INVESTIGATION_ID, USER_ID, ROLE, ELEMENT_TYPE, ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_AQUIRED)
  Values 
-    (41,3, 'test_downlaoder', 'DOWNLOADER', 'DATAFILE', 3, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+    (41,3, 'test_downloader', 'DOWNLOADER', 'DATAFILE', 3, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 Insert into ICAT_AUTHORISATION 
   (ID, INVESTIGATION_ID, USER_ID, ROLE, ELEMENT_TYPE, ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_AQUIRED)
  Values 
