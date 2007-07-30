@@ -552,7 +552,8 @@ public class InvestigationManager extends ManagerUtil {
                 //String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                investigationManaged.setCascade(Cascade.DELETE, Boolean.TRUE, manager);
+                investigationManaged.setCascade(Cascade.DELETE, Boolean.TRUE, manager, userId);
+                
                 investigationManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access

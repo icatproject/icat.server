@@ -67,9 +67,8 @@ public class DataFileManager extends ManagerUtil {
         //check user has delete access
         GateKeeper.performAuthorisation(userId, dataFile, AccessType.DELETE, manager);
         //String facilityUserId = getFacilityUserId(userId, manager);
-        
-        dataFile.setCascade(Cascade.MOD_ID, userId);
-        dataFile.setCascade(Cascade.DELETE,Boolean.TRUE, manager);
+      
+        dataFile.setCascade(Cascade.DELETE,Boolean.TRUE, manager, userId);
     }
     
     /**

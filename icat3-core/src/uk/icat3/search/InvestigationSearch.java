@@ -382,6 +382,7 @@ public class InvestigationSearch extends ManagerUtil {
         //sets the paramters
         query = query.setParameter("userId",userId);
         query = query.setParameter("inv_title",advanDTO.getInvestigationName());
+        query = query.setParameter("bcat_inv_str",advanDTO.getBackCatalogueInvestigatorString());
         query = query.setParameter("inv_number",advanDTO.getExperimentNumber());
         
         //set upper run number

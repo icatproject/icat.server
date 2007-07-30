@@ -24,6 +24,10 @@ public class AdvancedSearchDetails {
      */
     private String investigationName; //inv title
     /**
+     * Investigation Name
+     */
+    private String backCatalogueInvestigatorString; //back catalogue investigator string
+    /**
      * List of surnames
      */
     private Collection<String> investigators; //surname
@@ -73,7 +77,7 @@ public class AdvancedSearchDetails {
      */
     public AdvancedSearchDetails() {
     }
-       
+    
     public String getInvestigationName() {
         return investigationName;
     }
@@ -166,6 +170,14 @@ public class AdvancedSearchDetails {
         this.instruments = instruments;
     }
     
+    public String getBackCatalogueInvestigatorString() {
+        return backCatalogueInvestigatorString;
+    }
+    
+    public void setBackCatalogueInvestigatorString(String backCatalogueInvestigatorString) {
+        this.backCatalogueInvestigatorString = backCatalogueInvestigatorString;
+    }
+    
     /////////////  Util methods for AdvancedSearch creation in InvestigationSearch    /////////////////
     public boolean isOtherParameters(){
         if(investigators != null && investigators.size() != 0) return true;
@@ -200,6 +212,7 @@ public class AdvancedSearchDetails {
         if(yearRangeEnd != null || yearRangeStart != null || datafileName != null) return true;
         else return false;
     }
+        
     /////////////  End of methods    /////////////////
     
     public InvestigationInclude getInvestigationInclude() {

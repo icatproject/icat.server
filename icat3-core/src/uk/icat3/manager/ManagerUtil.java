@@ -225,7 +225,7 @@ public class ManagerUtil {
     /**
      * Gets all the Datasets which the user can READ/SELECT depending on the roles in the DB
      * and by if they are deleted
-     * 
+     *
      * @param userId federalId of the user.
      * @param investigations
      * @param cascade does this cascade to datafiles or not
@@ -244,7 +244,9 @@ public class ManagerUtil {
         investigation.setDatasetCollection(datasetsAllowed);
         
         //now remove deleted items
-        investigation.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(cascade));
+        try{
+            investigation.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(cascade));
+        } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}
     }
     
     /**
@@ -269,7 +271,9 @@ public class ManagerUtil {
         dataset.setDatafileCollection(datafilesAllowed);
         
         //now remove deleted items
-        dataset.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(cascade));
+        try{
+            dataset.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(cascade));
+        } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}
     }
     
     /**

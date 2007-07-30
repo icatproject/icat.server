@@ -34,7 +34,10 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.security.GateKeeper;
+import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
@@ -340,8 +343,8 @@ import uk.icat3.util.ElementType;
      * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
      * @param value value of the cascade type
      */
-    public void setCascade(Cascade type, Object value){
-        setCascade(type, value, null);
+    public void setCascade(Cascade type, Object value) throws InsufficientPrivilegesException{
+        setCascade(type, value, null, null);
     }
     
     /**
@@ -349,23 +352,37 @@ import uk.icat3.util.ElementType;
      *
      * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
      * @param value value of the cascade type
-     * @param manager entity manager to  connect to DB
      */
-    public void setCascade(Cascade type, Object value, EntityManager manager){
-        log.trace("Setting: "+toString()+" from type: "+type+" to :"+value+" EntityManager: "+(manager == null ? "null" : "manager"));
-        String deleted = "Y";
+    public void setCascade(Cascade type, Object value, EntityManager manager) throws InsufficientPrivilegesException{
+        setCascade(type, value, manager, null);
+    }
+    
+    /**
+     * Sets type (see Cascade) flag on all items owned by this dataset
+     *
+     * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
+     * @param cascadeValue value of the cascade type
+     * @param manager entity manager to  connect to DB
+     * @param managerValue value of the EntityManager value
+     */
+    public void setCascade(Cascade type, Object cascadeValue, EntityManager manager, Object managerValue) throws InsufficientPrivilegesException{
+     log.trace("Setting: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
+         String deleted = "Y";
         if(type == Cascade.DELETE){
-            deleted = (((Boolean)value).booleanValue()) ? "Y" : "N";
+            deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
         }
         
         //data set parameters
         if(getDatasetParameterCollection() != null){
             for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
-                if(type == Cascade.DELETE) datasetParameter.setMarkedDeleted(deleted);
-                else if(type == Cascade.MOD_ID) datasetParameter.setModId(value.toString());
+                if(type == Cascade.DELETE) {
+                    datasetParameter.setMarkedDeleted(deleted);
+                    datasetParameter.setModId(managerValue.toString());
+                }
+                else if(type == Cascade.MOD_ID) datasetParameter.setModId(cascadeValue.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
-                    datasetParameter.setModId(value.toString());
-                    datasetParameter.setCreateId(value.toString());
+                    datasetParameter.setModId(cascadeValue.toString());
+                    datasetParameter.setCreateId(cascadeValue.toString());
                 }
             }
         }
@@ -381,9 +398,9 @@ import uk.icat3.util.ElementType;
                     if(!datafile.isDeleted()) {
                         datafiles.add(datafile);
                         //cascade to datafile items
-                        if(((Boolean)value).booleanValue()) datafile.setCascade(Cascade.REMOVE_DELETED_ITEMS, value);
+                        if(((Boolean)cascadeValue).booleanValue()) datafile.setCascade(Cascade.REMOVE_DELETED_ITEMS, cascadeValue);
                     }
-                } else datafile.setCascade(type, value);
+                } else datafile.setCascade(type, cascadeValue, manager, managerValue);
             }
             //now set the new dataset collection
             log.trace("Setting new datafileCollection of size: "+datafiles.size()+" because of deleted items from original size: "+getDatafileCollection().size());
@@ -402,16 +419,24 @@ import uk.icat3.util.ElementType;
             
             //now mark them all as delete
             for (IcatAuthorisation icatAuthorisation : icatAuthorisations) {
-                log.trace("Marking: "+icatAuthorisation+" as "+value);
+                log.trace("Marking: "+icatAuthorisation+" as "+cascadeValue);
                 icatAuthorisation.setMarkedDeleted(deleted);
+                icatAuthorisation.setModId(managerValue.toString());
             }
         }
         
-        if(type == Cascade.DELETE) this.setMarkedDeleted(deleted);
-        else if(type == Cascade.MOD_ID) this.setModId(value.toString());
+        if(type == Cascade.DELETE) {
+            //need to check if use has permission to delete this
+            //only check if the value of deleted is different the one wanting to be changed to
+            if(this.isDeleted() != ((Boolean)cascadeValue).booleanValue()){
+                GateKeeper.performAuthorisation(managerValue.toString(), this, AccessType.DELETE, manager);
+                this.setMarkedDeleted(deleted);
+                this.setModId(managerValue.toString());
+            }
+        } else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
-            this.setModId(value.toString());
-            this.setCreateId(value.toString());
+            this.setModId(cascadeValue.toString());
+            this.setCreateId(cascadeValue.toString());
         }
     }
     

@@ -38,7 +38,10 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.security.GateKeeper;
+import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.ElementType;
 
@@ -455,14 +458,14 @@ public class Datafile extends EntityBaseBean implements Serializable {
         this.setDatafileParameterCollection(datafileParameters);
     }
     
-  /**
+   /**
      * Sets type (see Cascade) flag on all items owned by this dataset
      *
      * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
      * @param value value of the cascade type
      */
-    public void setCascade(Cascade type, Object value){
-        setCascade(type, value, null);
+    public void setCascade(Cascade type, Object value) throws InsufficientPrivilegesException{
+        setCascade(type, value, null, null);
     }
     
     /**
@@ -470,24 +473,39 @@ public class Datafile extends EntityBaseBean implements Serializable {
      *
      * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
      * @param value value of the cascade type
-     * @param manager entity manager to  connect to DB
      */
-    public void setCascade(Cascade type, Object value, EntityManager manager){
-        log.trace("Setting: "+toString()+" from type: "+type+" to :"+value+" EntityManager: "+(manager == null ? "null" : "manager"));
-
+    public void setCascade(Cascade type, Object value, EntityManager manager) throws InsufficientPrivilegesException{
+        setCascade(type, value, manager, null);
+    }
+    
+    
+    /**
+     * Sets type (see Cascade) flag on all items owned by this dataset
+     *
+     * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
+     * @param cascadeValue value of the cascade type
+     * @param manager entity manager to  connect to DB
+     * @param managerValue value of the EntityManager value
+     */
+    public void setCascade(Cascade type, Object cascadeValue, EntityManager manager, Object managerValue) throws InsufficientPrivilegesException{
+        log.trace("Setting: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
+    
         String deleted = "Y";
         if(type == Cascade.DELETE){
-            deleted = (((Boolean)value).booleanValue()) ? "Y" : "N";
+            deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
         }
         
         //data file parameters
         if(getDatafileParameterCollection() != null){
             for(DatafileParameter datafileParameter : getDatafileParameterCollection()){
-                if(type == Cascade.DELETE) datafileParameter.setMarkedDeleted(deleted);
-                else if(type == Cascade.MOD_ID) datafileParameter.setModId(value.toString());
+                if(type == Cascade.DELETE) {
+                    datafileParameter.setMarkedDeleted(deleted);
+                    datafileParameter.setModId(managerValue.toString());
+                }
+                else if(type == Cascade.MOD_ID) datafileParameter.setModId(cascadeValue.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
-                    datafileParameter.setModId(value.toString());
-                    datafileParameter.setCreateId(value.toString());
+                    datafileParameter.setModId(cascadeValue.toString());
+                    datafileParameter.setCreateId(cascadeValue.toString());
                 }
             }
         }
@@ -495,11 +513,14 @@ public class Datafile extends EntityBaseBean implements Serializable {
         //relatedDatafiles
         if(getRelatedDatafilesCollection() != null){
             for(RelatedDatafiles relatedDatafile : getRelatedDatafilesCollection()){
-                if(type == Cascade.DELETE) relatedDatafile.setMarkedDeleted(deleted);
-                else if(type == Cascade.MOD_ID) relatedDatafile.setModId(value.toString());
+                if(type == Cascade.DELETE) {
+                    relatedDatafile.setMarkedDeleted(deleted);
+                    relatedDatafile.setModId(managerValue.toString());
+                }
+                else if(type == Cascade.MOD_ID) relatedDatafile.setModId(cascadeValue.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
-                    relatedDatafile.setModId(value.toString());
-                    relatedDatafile.setCreateId(value.toString());
+                    relatedDatafile.setModId(cascadeValue.toString());
+                    relatedDatafile.setCreateId(cascadeValue.toString());
                 }
                 
             }
@@ -516,16 +537,25 @@ public class Datafile extends EntityBaseBean implements Serializable {
             
             //now mark them all as delete
             for (IcatAuthorisation icatAuthorisation : icatAuthorisations) {
-                log.trace("Marking: "+icatAuthorisation+" as "+value);
+                log.trace("Marking: "+icatAuthorisation+" as "+cascadeValue);
                 icatAuthorisation.setMarkedDeleted(deleted);
+                icatAuthorisation.setModId(managerValue.toString());
             }
         }
         
-        if(type == Cascade.DELETE) this.setMarkedDeleted(deleted);
-        else if(type == Cascade.MOD_ID) this.setModId(value.toString());
+        if(type == Cascade.DELETE) {
+           //need to check if use has permission to delete this
+            //only check if the value of deleted is different the one wanting to be changed to
+            if(this.isDeleted() != ((Boolean)cascadeValue).booleanValue()){
+                GateKeeper.performAuthorisation(managerValue.toString(), this, AccessType.DELETE, manager);
+                this.setMarkedDeleted(deleted);
+                this.setModId(managerValue.toString());
+            }
+        }
+        else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
-            this.setModId(value.toString());
-            this.setCreateId(value.toString());
+            this.setModId(cascadeValue.toString());
+            this.setCreateId(cascadeValue.toString());
         }
     }
     
