@@ -65,7 +65,7 @@ public class EntityBaseBean {
     @ICAT(merge=false, nullable=true)
     protected String modId;
     
-    @Column(name = "FACILITY_AQUIRED", nullable = false)
+    @Column(name = "FACILITY_ACQUIRED", nullable = false)
     @ICAT(merge=false, nullable=true)
     protected String facilityAcquired;
     

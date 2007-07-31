@@ -43,26 +43,26 @@ import uk.icat3.util.ElementType;
     @NamedQuery(name = "IcatAuthorisation.findAllByDatasetId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = 'DATASET' AND i.elementId = :id AND i.markedDeleted = 'N'"),
     @NamedQuery(name = "IcatAuthorisation.findAllByDatafileId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = 'DATAFILE' AND i.elementId = :id AND i.markedDeleted = 'N'")
 })
-public class IcatAuthorisation extends EntityBaseBean implements Serializable {
+        public class IcatAuthorisation extends EntityBaseBean implements Serializable {
     
     @Id
-    @Column(name = "ID")
-    private String id;
-    
-    //@EmbeddedId
-    //protected IcatAuthorisationPK icatAuthorisationPK;
-    
-    @Column(name = "INVESTIGATION_ID", nullable = false)
-    private Long investigationId;
+    @Column(name = "ID", nullable = false)
+    private Long id;
     
     @Column(name = "USER_ID", nullable = false)
     private String userId;
-    
-    @Column(name = "ELEMENT_TYPE")
+        
+        @Column(name = "ELEMENT_TYPE", nullable = false)
     private String elementType;
     
     @Column(name = "ELEMENT_ID")
     private Long elementId;
+    
+    @Column(name = "PARENT_ELEMENT_TYPE")
+    private String parentElementType;
+    
+    @Column(name = "PARENT_ELEMENT_ID")
+    private Long parentElementId;
     
     @JoinColumn(name = "ROLE", referencedColumnName = "ROLE")
     @ManyToOne
@@ -75,46 +75,12 @@ public class IcatAuthorisation extends EntityBaseBean implements Serializable {
     public IcatAuthorisation() {
     }
     
-  /*  public IcatAuthorisation(IcatAuthorisationPK icatAuthorisationPK) {
-        this.icatAuthorisationPK = icatAuthorisationPK;
-    }
-   
-    public IcatAuthorisation(IcatAuthorisationPK icatAuthorisationPK, Date modTime, String modId, Date createTime, String createId, String facilityAcquired, String deleted) {
-        this.icatAuthorisationPK = icatAuthorisationPK;
-        this.modTime = modTime;
-        this.modId = modId;
-        this.createTime = createTime;
-        this.createId = createId;
-        this.facilityAcquired = facilityAcquired;
-        this.markedDeleted = deleted;
-    }*/
-    
-    public String getId() {
+    public Long getId() {
         return id;
     }
     
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
-    }
-    
-    public IcatAuthorisation(Long investigationId, String userId) {
-        //this.icatAuthorisationPK = new IcatAuthorisationPK(investigationId, userId);
-    }
-    
-   /* public IcatAuthorisationPK getIcatAuthorisationPK() {
-        return icatAuthorisationPK;
-    }
-    
-    public void setIcatAuthorisationPK(IcatAuthorisationPK icatAuthorisationPK) {
-        this.icatAuthorisationPK = icatAuthorisationPK;
-    }*/
-    
-    public Long getInvestigationId() {
-        return investigationId;
-    }
-    
-    public void setInvestigationId(Long investigationId) {
-        this.investigationId = investigationId;
     }
     
     public String getUserId() {
@@ -123,6 +89,14 @@ public class IcatAuthorisation extends EntityBaseBean implements Serializable {
     
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+        
+    public IcatRole getRole() {
+        return role;
+    }
+
+    public void setRole(IcatRole role) {
+        this.role = role;
     }
     
     public String getElementType() {
@@ -141,22 +115,22 @@ public class IcatAuthorisation extends EntityBaseBean implements Serializable {
         this.elementId = elementId;
     }
     
-    public IcatRole getRole() {
-        return role;
+    public String getParentElementType() {
+        return parentElementType;
     }
     
-    public void setRole(IcatRole role) {
-        this.role = role;
+    public void setParentElementType(String parentElementType) {
+        this.parentElementType = parentElementType;
     }
     
-    @XmlTransient
-    public Investigation getInvestigation() {
-        return investigation;
+    public Long getParentElementId() {
+        return parentElementId;
     }
     
-    public void setInvestigation(Investigation investigation) {
-        this.investigation = investigation;
+    public void setParentElementId(Long parentElementId) {
+        this.parentElementId = parentElementId;
     }
+    
     
     @Override
     public int hashCode() {

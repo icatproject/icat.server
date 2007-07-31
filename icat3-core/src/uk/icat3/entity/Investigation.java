@@ -137,6 +137,10 @@ import uk.icat3.util.Queries;
     @Temporal(TemporalType.TIMESTAMP)
     private Date releaseDate;
     
+    @JoinColumn(name = "FACILITY", referencedColumnName = "FACILITY_SHORT_NAME")
+    @ManyToOne
+    private Facility facility;
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
     private Collection<Publication> publicationCollection;
     
@@ -634,6 +638,14 @@ import uk.icat3.util.Queries;
     @XmlTransient
     public Collection<Investigator> getInvestigatorCollection() {
         return this.investigatorCollection;
+    }
+    
+     public Facility getFacility() {
+        return facility;
+    }
+
+    public void setFacility(Facility facility) {
+        this.facility = facility;
     }
     
     /**
