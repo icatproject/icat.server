@@ -242,10 +242,10 @@ public class EntityBaseBean {
         createTime = modTime;
     }
     
-    @PostLoad
-    public void postLoad(){
+    //@PostLoad
+    /*public void postLoad(){
         //setUniqueId(uniqueId);
-    }
+    }*/
            
     @XmlTransient
     public String getMarkedDeleted() {
@@ -313,14 +313,7 @@ public class EntityBaseBean {
     /*public void setFacility(String facility) {
         this.facility = facility;
     }*/
-    
-    /**
-     * Filters out all the items associated with the entity that are marked deleted.
-     * This method should be overridden by all the elements in ElementType enum.
-     */
-    public void filterDeletedEntries(){
         
-    }
     
     /**
      * Method to be overridden if needed to check if the data held in the entity is valid.

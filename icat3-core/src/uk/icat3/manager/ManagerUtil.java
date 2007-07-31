@@ -30,6 +30,7 @@ import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
+import uk.icat3.util.Queries;
 
 /**
  *  Class to be extended to allow util methods for EJB3/JPA
@@ -358,15 +359,15 @@ public class ManagerUtil {
     public static boolean isUnique(EntityBaseBean entityClass, EntityManager manager) {
         if(entityClass instanceof Dataset){
             Dataset dataset = (Dataset)entityClass;
-            Query query =  (Query) manager.createNamedQuery("Dataset.findbyUnique");
+            Query query =  (Query) manager.createNamedQuery(Queries.DATASET_FINDBY_UNIQUE);
             query = query.setParameter("sampleId",dataset.getSampleId());
-            query = query.setParameter("investigationId", dataset.getInvestigationId());
+            query = query.setParameter("investigationId", dataset.getInvestigation());
             query = query.setParameter("datasetType",dataset.getDatasetType());
             query = query.setParameter("name",dataset.getName());
             
             try {
                 log.trace("Looking for: sampleId: "+ dataset.getSampleId());
-                log.trace("Looking for: investigationId: "+ dataset.getInvestigationId());
+                log.trace("Looking for: investigationId: "+ dataset.getInvestigation());
                 log.trace("Looking for: datasetType: "+dataset.getDatasetType());
                 log.trace("Looking for: name: "+dataset.getName());
                 

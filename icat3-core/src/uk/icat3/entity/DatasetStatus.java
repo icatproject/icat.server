@@ -22,6 +22,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.util.Queries;
 
 /**
  * Entity class DatasetStatus
@@ -34,7 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
         @NamedQuery(name = "DatasetStatus.findByName", query = "SELECT d FROM DatasetStatus d WHERE d.name = :name"),
         @NamedQuery(name = "DatasetStatus.findByDescription", query = "SELECT d FROM DatasetStatus d WHERE d.description = :description"),
         @NamedQuery(name = "DatasetStatus.findByModTime", query = "SELECT d FROM DatasetStatus d WHERE d.modTime = :modTime"),
-         @NamedQuery(name = "DatasetStatus.getAll", query = "SELECT d FROM DatasetStatus d"),
+        @NamedQuery(name = Queries.ALL_DATASET_STATUS, query = Queries.ALL_DATASET_STATUS_JPQL),
         @NamedQuery(name = "DatasetStatus.findByModId", query = "SELECT d FROM DatasetStatus d WHERE d.modId = :modId")
     })
 public class DatasetStatus extends EntityBaseBean implements Serializable {

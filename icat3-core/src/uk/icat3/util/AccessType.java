@@ -44,6 +44,10 @@ public enum AccessType {
      * Download from SRB
      */
     DOWNLOAD,
+     /**
+     * If user has options to modify and 
+     */
+    MANAGE_USERS,
     /**
      * Set Facility acquired data.
      */

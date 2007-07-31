@@ -780,4 +780,16 @@ public class InvestigationSearch extends ManagerUtil {
         log.trace("listAllInstruments(EntityManager)");
         return  manager.createNamedQuery(ALL_INSTRUMENTS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }
+    
+    /**
+     * Lists all the user roles in the database
+     *
+     * @param userId federalId of the user.
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return List of {@link IcatRole}s
+     */
+    public static Collection<String> listAllRoles(EntityManager manager){
+        log.trace("listAllRoles(EntityManager)");
+        return  manager.createNamedQuery(ALL_ROLES).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+    }
 }

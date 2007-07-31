@@ -21,6 +21,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.util.Queries;
 
 /**
  *
@@ -38,7 +39,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "IcatRole.findByActionRemove", query = "SELECT i FROM IcatRole i WHERE i.actionRemove = :actionRemove"), 
     @NamedQuery(name = "IcatRole.findByActionRootInsert", query = "SELECT i FROM IcatRole i WHERE i.actionRootInsert = :actionRootInsert"), 
     @NamedQuery(name = "IcatRole.findByActionRootRemove", query = "SELECT i FROM IcatRole i WHERE i.actionRootRemove = :actionRootRemove"),
-    @NamedQuery(name = "IcatRole.findByActionSetFa", query = "SELECT i FROM IcatRole i WHERE i.actionSetFa = :actionSetFa")
+    @NamedQuery(name = "IcatRole.findByActionSetFa", query = "SELECT i FROM IcatRole i WHERE i.actionSetFa = :actionSetFa"),
+    @NamedQuery(name = Queries.ALL_ROLES, query = Queries.ALL_ROLES_JPQL)
 })
 public class IcatRole extends EntityBaseBean implements Serializable {
 
@@ -110,6 +112,7 @@ public class IcatRole extends EntityBaseBean implements Serializable {
         this.role = role;
     }
 
+    @XmlTransient
     public String getActionInsert() {
         return actionInsert;
     }
@@ -118,6 +121,7 @@ public class IcatRole extends EntityBaseBean implements Serializable {
         this.actionInsert = actionInsert;
     }
 
+    @XmlTransient
     public String getActionSelect() {
         return actionSelect;
     }
@@ -126,6 +130,7 @@ public class IcatRole extends EntityBaseBean implements Serializable {
         this.actionSelect = actionSelect;
     }
 
+    @XmlTransient
     public String getActionDownload() {
         return actionDownload;
     }
@@ -134,6 +139,7 @@ public class IcatRole extends EntityBaseBean implements Serializable {
         this.actionDownload = actionDownload;
     }
 
+    @XmlTransient
     public String getActionUpdate() {
         return actionUpdate;
     }
@@ -142,6 +148,7 @@ public class IcatRole extends EntityBaseBean implements Serializable {
         this.actionUpdate = actionUpdate;
     }
 
+    @XmlTransient
     public String getActionDelete() {
         return actionDelete;
     }
@@ -150,6 +157,7 @@ public class IcatRole extends EntityBaseBean implements Serializable {
         this.actionDelete = actionDelete;
     }
 
+    @XmlTransient
     public String getActionRemove() {
         return actionRemove;
     }
@@ -158,6 +166,7 @@ public class IcatRole extends EntityBaseBean implements Serializable {
         this.actionRemove = actionRemove;
     }
 
+    @XmlTransient
     public String getActionRootInsert() {
         return actionRootInsert;
     }
@@ -166,6 +175,7 @@ public class IcatRole extends EntityBaseBean implements Serializable {
         this.actionRootInsert = actionRootInsert;
     }
 
+    @XmlTransient
     public String getActionRootRemove() {
         return actionRootRemove;
     }
@@ -174,6 +184,7 @@ public class IcatRole extends EntityBaseBean implements Serializable {
         this.actionRootRemove = actionRootRemove;
     }
 
+    @XmlTransient
     public String getActionSetFa() {
         return actionSetFa;
     }

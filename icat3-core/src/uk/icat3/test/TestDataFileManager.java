@@ -67,7 +67,7 @@ public class TestDataFileManager {
         file.setName("test name");
         
         Dataset dataset = em.find(Dataset.class, datasetId);
-        file.setDatasetId(dataset);
+        file.setDataset(dataset);
         file.setModId(userId);
         
         Collection<DatafileFormat> datafileFormats = (Collection<DatafileFormat>)em.createQuery("select d from DatafileFormat d").getResultList();

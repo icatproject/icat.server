@@ -13,10 +13,12 @@ package uk.icat3.manager;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -221,7 +223,7 @@ public class DataFileManager extends ManagerUtil {
         
         //check dataset exist
         Dataset dataset  = find(Dataset.class, datasetId, manager);
-        dataFile.setDatasetId(dataset);
+        dataFile.setDataset(dataset);
         dataFile.setId(null);
         
         return createDataFile(userId, dataFile, manager);
@@ -301,7 +303,7 @@ public class DataFileManager extends ManagerUtil {
         Collection<Datafile> datafiles =  getDataFiles(userId, dataFiles, manager);
         return datafiles.iterator().next();
     }
-    
+           
     /////////////////////   Util commands /////////////////////////
     
     

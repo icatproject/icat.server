@@ -28,6 +28,7 @@ import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
@@ -36,6 +37,7 @@ import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
@@ -143,8 +145,12 @@ public class Datafile extends EntityBaseBean implements Serializable {
     @ManyToOne
     @XmlTransient
     @ICAT(merge=false)
-    private Dataset datasetId;
+    private Dataset dataset;
     
+     @Transient
+    @ICAT(merge=false, nullable=true)
+    private transient Long datasetId;
+     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
     private Collection<DatafileParameter> datafileParameterCollection;
     
@@ -413,20 +419,20 @@ public class Datafile extends EntityBaseBean implements Serializable {
     }
     
     /**
-     * Gets the datasetId of this Datafile.
-     * @return the datasetId
+     * Gets the dataset of this Datafile.
+     * @return the dataset
      */
     @XmlTransient
-    public Dataset getDatasetId() {
-        return this.datasetId;
+    public Dataset getDataset() {
+        return this.dataset;
     }
     
     /**
-     * Sets the datasetId of this Datafile to the specified value.
-     * @param datasetId the new datasetId
+     * Sets the dataset of this Datafile to the specified value.
+     * @param dataset the new dataset
      */
-    public void setDatasetId(Dataset datasetId) {
-        this.datasetId = datasetId;
+    public void setDataset(Dataset dataset) {
+        this.dataset = dataset;
     }
     
     /**
@@ -532,7 +538,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
             Query query = manager.createNamedQuery("IcatAuthorisation.findByDatafileId").
                     setParameter("elementType", ElementType.DATAFILE.toString()).
                     setParameter("elementId", this.getId()).
-                    setParameter("investigationId", this.getDatasetId().getInvestigationId().getId());
+                    setParameter("investigationId",this.getDataset().getInvestigation().getId());
             Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
             
             //now mark them all as delete
@@ -643,5 +649,15 @@ public class Datafile extends EntityBaseBean implements Serializable {
             this.id = null;
         }
         super.prePersist();
+    }
+    
+    /**
+     * This loads the investigation id from the investigation
+     */
+    @PostLoad
+    //@Override
+    public void postLoad(){           
+       if(datasetId == null) datasetId = getDataset().getId();
+       // super.postLoad();
     }
 }

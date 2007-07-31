@@ -158,7 +158,7 @@ import uk.icat3.util.Queries;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<IcatAuthorisation> icatAuthorisationCollection;
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<Dataset> datasetCollection;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
@@ -532,7 +532,7 @@ import uk.icat3.util.Queries;
      * also adds the investigation to the DataSet.
      */
     public void addDataSet(Dataset dataSet){
-        dataSet.setInvestigationId(this);
+        dataSet.setInvestigation(this);
         
         Collection<Dataset> datasets = this.getDatasetCollection();
         datasets.add(dataSet);

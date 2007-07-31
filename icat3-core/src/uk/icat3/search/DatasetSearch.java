@@ -105,6 +105,17 @@ public class DatasetSearch {
         return datasetsPermission;
     }
     
+    
+    /**
+     * 
+     * 
+     */
+    public static Collection<Dataset> listMyDeletedDataSets(String userId, EntityManager manager){
+         log.trace("listAllDeletedDataSets(EntityManager)");
+         
+         return manager.createNamedQuery(ALL_DATASET_TYPE).getResultList();
+    }
+    
     /**
      *  List all the valid avaliable types' for datasets
      *
@@ -114,7 +125,7 @@ public class DatasetSearch {
     public static Collection<DatasetType> listDatasetTypes(EntityManager manager) {
         log.trace("listDatasetTypes(EntityManager)");
         
-        return manager.createNamedQuery("DatasetType.getAll").getResultList();
+        return manager.createNamedQuery(ALL_DATASET_TYPE).getResultList();
     }
     
     /**
@@ -126,7 +137,7 @@ public class DatasetSearch {
     public static Collection<DatasetStatus> listDatasetStatus(EntityManager manager) {
         log.trace("listDatasetStatus(EntityManager)");
         
-        return manager.createNamedQuery("DatasetStatus.getAll").getResultList();
+        return manager.createNamedQuery(ALL_DATASET_STATUS).getResultList();
     }
     
 }

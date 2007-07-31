@@ -71,19 +71,19 @@ public class GateKeeper {
              rootParentsId = investigation.getId();
             performAuthorisation(user, investigation, access, object, rootParentsId, ElementType.KEYWORD, manager);
         } else if(object instanceof Dataset){
-            investigation  = ((Dataset)object).getInvestigationId();
+            investigation  = ((Dataset)object).getInvestigation();
              rootParentsId = ((Dataset)object).getId();
             performAuthorisation(user, investigation, access, object, rootParentsId, ElementType.DATASET, manager);
         } else if(object instanceof Datafile){
-            investigation  = ((Datafile)object).getDatasetId().getInvestigationId();
+            investigation  = ((Datafile)object).getDataset().getInvestigation();
              rootParentsId = ((Datafile)object).getId();
             performAuthorisation(user, investigation, access, object, rootParentsId, ElementType.DATAFILE, manager);
         } else if(object instanceof DatasetParameter){
-            investigation  = ((DatasetParameter)object).getDataset().getInvestigationId();
+            investigation  = ((DatasetParameter)object).getDataset().getInvestigation();
              rootParentsId = ((DatasetParameter)object).getDataset().getId();
             performAuthorisation(user, investigation, access, object, rootParentsId, ElementType.DATASET_PARAMETER, manager);
         } else if(object instanceof DatafileParameter){
-            investigation  = ((DatafileParameter)object).getDatafile().getDatasetId().getInvestigationId();
+            investigation  = ((DatafileParameter)object).getDatafile().getDataset().getInvestigation();
              rootParentsId = ((DatafileParameter)object).getDatafile().getId();
             performAuthorisation(user, investigation, access, object, rootParentsId, ElementType.DATAFILE_PARAMETER, manager);
         } else if(object instanceof SampleParameter){

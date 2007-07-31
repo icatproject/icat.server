@@ -12,9 +12,11 @@ package uk.icat3.manager;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
@@ -198,9 +200,9 @@ public class DataSetManager extends ManagerUtil {
         log.trace("createDataSet("+userId+", "+dataSet+", EntityManager)");
         
         //check investigation exists
-        if(dataSet.getInvestigationId() == null) throw new NoSuchObjectFoundException(dataSet+" has no assoicated investigation");
-        Investigation investigation  = find(Investigation.class, dataSet.getInvestigationId().getId(), manager);
-        dataSet.setInvestigationId(investigation);
+        if(dataSet.getInvestigation() == null) throw new NoSuchObjectFoundException(dataSet+" has no assoicated investigation");
+        Investigation investigation  = find(Investigation.class, dataSet.getInvestigation().getId(), manager);
+        dataSet.setInvestigation(investigation);
         dataSet.setId(null);
         
         //check user has update access
@@ -262,7 +264,7 @@ public class DataSetManager extends ManagerUtil {
         
         //check investigation exists
         Investigation investigation  = find(Investigation.class, investigationId, manager);
-        dataSet.setInvestigationId(investigation);
+        dataSet.setInvestigation(investigation);
         dataSet.setId(null);
         
         return createDataSet(userId, dataSet, manager);
@@ -366,7 +368,7 @@ public class DataSetManager extends ManagerUtil {
         Collection<Dataset> datasetsReturned = getDataSets(userId, datasets, DatasetInclude.NONE, manager);
         return datasetsReturned.iterator().next();
     }
-    
+          
     ////////////////////    End of get Commands    /////////////////////////
     
     
@@ -393,7 +395,7 @@ public class DataSetManager extends ManagerUtil {
         Dataset datasetManaged = find(Dataset.class, datasetid, manager);
         
         outer: if(sampleId != null){
-            Collection<Sample> samples = datasetManaged.getInvestigationId().getSampleCollection();
+            Collection<Sample> samples = datasetManaged.getInvestigation().getSampleCollection();
             for(Sample sample : samples){
                 if(sample.getId().equals(sampleId)){
                     //invest has for this sample in

@@ -296,7 +296,7 @@ public class Queries {
      */
     public static final String INVESTIGATIONS_FOR_USER = "Investigation.findOfUser";
     //new for permissions
-    public static final String INVESTIGATIONS_FOR_USER_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL+ " AND i.investigatorCollection.facilityUser.federalId = :userId";
+    public static final String INVESTIGATIONS_FOR_USER_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL+ " AND i.investigatorCollection.facilityUser.federalId = :userId AND i.investigatorCollection.markedDeleted = 'N'";
     
     public static final String INVESTIGATIONS_FOR_USER_RTN_ID = "Investigation.findOfUser";
     //   public static final String INVESTIGATIONS_FOR_USER_RTN_ID_JPQL = "SELECT i.id FROM Investigation i WHERE" +
@@ -408,7 +408,7 @@ public class Queries {
     // public static final String KEYWORDS_FOR_USER_JPQL = "SELECT DISTINCT k.keywordPK.name FROM Keyword k WHERE (k.investigation.investigatorCollection.investigatorPK.facilityUserId = :userId OR k.investigation.investigatorCollection IS EMPTY) AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) ORDER BY k.keywordPK.name";
     //new for permissions
     public static final String KEYWORDS_FOR_USER_JPQL = "SELECT DISTINCT k.keywordPK.name from Keyword k, IcatAuthorisation ia WHERE" +
-            " k.investigation.id = ia.investigationId AND i.markedDeleted = 'N'" +
+            " k.investigation.id = ia.investigationId AND ia.markedDeleted = 'N'" +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) AND k.markedDeleted = 'N' ORDER BY k.keywordPK.name";
     public static final String KEYWORDS_NATIVE_FOR_USER = "Keywords.getAllKeywordsForUserNative";
@@ -427,8 +427,49 @@ public class Queries {
      *
      */
     public static final String ALL_INSTRUMENTS = "Instrument.listAll";
-    public static final String ALL_INSTRUMENTS_JPQL = "SELECT DISTINCT i FROM Instrument i";
+    public static final String ALL_INSTRUMENTS_JPQL = "SELECT DISTINCT i FROM Instrument i WHERE i.markedDeleted = 'N'";
+    
+    /*
+     * Find all roles list,
+     *
+     */
+    public static final String ALL_ROLES = "IcatRole.listAll";
+    public static final String ALL_ROLES_JPQL = "SELECT DISTINCT i FROM IcatRole i WHERE i.markedDeleted = 'N'";
+    
+     /*
+     * Find all dataset status list,
+     *
+     */
+    public static final String ALL_DATASET_STATUS = "DatasetStatus.listAll";
+    public static final String ALL_DATASET_STATUS_JPQL = "SELECT DISTINCT ds FROM DatasetStatus ds WHERE ds.markedDeleted = 'N'";
+    
+     /*
+     * Find all dataset type list,
+     *
+     */
+    public static final String ALL_DATASET_TYPE = "DatasetType.listAll";
+    public static final String ALL_DATASET_TYPE_JPQL = "SELECT DISTINCT ds FROM DatasetType ds WHERE ds.markedDeleted = 'N'";
+    
+    /*
+     * Find all dataset type list,
+     *
+     */
+    public static final String DATASET_FINDBY_UNIQUE = "Dataset.findbyUnique";
+    public static final String DATASET_FINDBY_UNIQUE_JPQL = "SELECT d FROM Dataset d WHERE (d.sampleId = :sampleId OR d.sampleId IS NULL) AND (d.name = :name OR d.name IS NULL) AND (d.investigation = :investigation OR d.investigation IS NULL)  AND (d.datasetType = :datasetType OR d.datasetType IS NULL)";
+    
+    
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    
+    //////////////////////// Deleted stuff  ///////////////////////////////////////////
+     /*
+     * Find all deleted datasets
+     *
+     */
+    public static final String LIST_ALL_DELETED_DATASETS = "Dataset.ListAllDeleted";
+    public static final String LIST_ALL_DELETED_DATASETS_JPQL = "SELECT d FROM Dataset d WHERE (d.sampleId = :sampleId OR d.sampleId IS NULL) AND (d.name = :name OR d.name IS NULL) AND (d.investigation = :investigation OR d.investigation IS NULL)  AND (d.datasetType = :datasetType OR d.datasetType IS NULL)";
+    
     
     
     

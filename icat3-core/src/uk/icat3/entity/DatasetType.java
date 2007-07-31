@@ -23,6 +23,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.util.Queries;
 
 /**
  * Entity class DatasetType
@@ -35,7 +36,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "DatasetType.findByName", query = "SELECT d FROM DatasetType d WHERE d.name = :name"),
     @NamedQuery(name = "DatasetType.findByDescription", query = "SELECT d FROM DatasetType d WHERE d.description = :description"),
     @NamedQuery(name = "DatasetType.findByModTime", query = "SELECT d FROM DatasetType d WHERE d.modTime = :modTime"),
-    @NamedQuery(name = "DatasetType.getAll", query = "SELECT d FROM DatasetType d"),
+    @NamedQuery(name = Queries.ALL_DATASET_TYPE, query = Queries.ALL_DATASET_TYPE_JPQL),
     @NamedQuery(name = "DatasetType.findByModId", query = "SELECT d FROM DatasetType d WHERE d.modId = :modId")
 })
 public class DatasetType extends EntityBaseBean implements Serializable {

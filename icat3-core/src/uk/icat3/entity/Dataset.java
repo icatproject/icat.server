@@ -26,10 +26,12 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -41,6 +43,7 @@ import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.Queries;
 
 /**
  * Entity class Dataset
@@ -57,7 +60,7 @@ import uk.icat3.util.ElementType;
     @NamedQuery(name = "Dataset.findByModTime", query = "SELECT d FROM Dataset d WHERE d.modTime = :modTime"),
     @NamedQuery(name = "Dataset.getBySampleId", query = "SELECT d FROM Dataset d where d.name = :sampleName"),
     @NamedQuery(name = "Dataset.findByModId", query = "SELECT d FROM Dataset d WHERE d.modId = :modId"),
-    @NamedQuery(name = "Dataset.findbyUnique", query = "SELECT d FROM Dataset d WHERE (d.sampleId = :sampleId OR d.sampleId IS NULL) AND (d.name = :name OR d.name IS NULL) AND (d.investigationId = :investigationId OR d.investigationId IS NULL)  AND (d.datasetType = :datasetType OR d.datasetType IS NULL)")
+    @NamedQuery(name = Queries.DATASET_FINDBY_UNIQUE, query = Queries.DATASET_FINDBY_UNIQUE_JPQL)
 })
         @XmlRootElement
         @SequenceGenerator(name="DATASET_SEQ",sequenceName="DATASET_ID_SEQ",allocationSize=1)
@@ -89,12 +92,16 @@ import uk.icat3.util.ElementType;
     @ManyToOne
     @XmlTransient
     @ICAT(merge=false)
-    private Investigation investigationId;
+    private Investigation investigation;
+    
+    @Transient
+    @ICAT(merge=false, nullable=true)
+    private transient Long investigationId;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
     private Collection<DatasetParameter> datasetParameterCollection;
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
     private Collection<Datafile> datafileCollection;
     
     private transient DatasetInclude datasetInclude = DatasetInclude.NONE;
@@ -225,17 +232,33 @@ import uk.icat3.util.ElementType;
      * Gets the investigationId of this Dataset.
      * @return the investigationId
      */
-    @XmlTransient
-    public Investigation getInvestigationId() {
-        return this.investigationId;
+    public Long getInvestigationId() {
+        return investigationId;
     }
     
     /**
      * Sets the investigationId of this Dataset to the specified value.
      * @param investigationId the new investigationId
      */
-    public void setInvestigationId(Investigation investigationId) {
+    public void setInvestigationId(Long investigationId) {
         this.investigationId = investigationId;
+    }
+    
+    /**
+     * Gets the investigation of this Dataset.
+     * @return the investigation
+     */
+    @XmlTransient
+    public Investigation getInvestigation() {
+        return this.investigation;
+    }
+    
+    /**
+     * Sets the investigation of this Dataset to the specified value.
+     * @param investigation the new investigation
+     */
+    public void setInvestigation(Investigation investigation) {
+        this.investigation = investigation;
     }
     
     /**
@@ -328,7 +351,7 @@ import uk.icat3.util.ElementType;
      * also adds the DataSet to the DataFile.
      */
     public void addDataFile(Datafile dataFile){
-        dataFile.setDatasetId(this);
+        dataFile.setDataset(this);
         
         Collection<Datafile> datafiles = this.getDatafileCollection();
         if(datafiles == null) datafiles = new ArrayList<Datafile>();
@@ -366,8 +389,8 @@ import uk.icat3.util.ElementType;
      * @param managerValue value of the EntityManager value
      */
     public void setCascade(Cascade type, Object cascadeValue, EntityManager manager, Object managerValue) throws InsufficientPrivilegesException{
-     log.trace("Setting: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
-         String deleted = "Y";
+        log.trace("Setting: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
+        String deleted = "Y";
         if(type == Cascade.DELETE){
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
         }
@@ -378,8 +401,7 @@ import uk.icat3.util.ElementType;
                 if(type == Cascade.DELETE) {
                     datasetParameter.setMarkedDeleted(deleted);
                     datasetParameter.setModId(managerValue.toString());
-                }
-                else if(type == Cascade.MOD_ID) datasetParameter.setModId(cascadeValue.toString());
+                } else if(type == Cascade.MOD_ID) datasetParameter.setModId(cascadeValue.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     datasetParameter.setModId(cascadeValue.toString());
                     datasetParameter.setCreateId(cascadeValue.toString());
@@ -414,7 +436,7 @@ import uk.icat3.util.ElementType;
             Query query = manager.createNamedQuery("IcatAuthorisation.findByDatasetId").
                     setParameter("elementType", ElementType.DATASET.toString()).
                     setParameter("elementId", this.getId()).
-                    setParameter("investigationId", this.getInvestigationId().getId());
+                    setParameter("investigationId",this.getInvestigation().getId());
             Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
             
             //now mark them all as delete
@@ -499,7 +521,7 @@ import uk.icat3.util.ElementType;
             if(sampleRef == null)
                 throw new ValidationException("Sample[id="+sampleId+"] is not a valid sample id");
             
-            Collection<Sample> samples = investigationId.getSampleCollection();
+            Collection<Sample> samples = investigation.getSampleCollection();
             for(Sample sample : samples){
                 if(sample.getId().equals(sampleId)){
                     //invest has for this sample in
@@ -557,13 +579,13 @@ import uk.icat3.util.ElementType;
         
         Query query =  manager.createNamedQuery("Dataset.findbyUnique");
         query = query.setParameter("sampleId",sampleId);
-        query = query.setParameter("investigationId", investigationId);
+        query = query.setParameter("investigation", investigation);
         query = query.setParameter("datasetType",datasetType);
         query = query.setParameter("name",name);
         
         try {
             log.trace("Looking for: sampleId: "+ sampleId);
-            log.trace("Looking for: investigationId: "+ investigationId);
+            log.trace("Looking for: investigation: "+ investigation);
             log.trace("Looking for: datasetType: "+datasetType);
             log.trace("Looking for: name: "+name);
             
@@ -600,6 +622,16 @@ import uk.icat3.util.ElementType;
             this.id = null;
         }
         super.prePersist();
+    }
+    
+    /**
+     * This loads the investigation id from the investigation
+     */
+    @PostLoad
+    //@Override
+    public void postLoad(){      
+       if(investigationId == null) investigationId = getInvestigation().getId();
+        //super.postLoad();
     }
     
     /**
