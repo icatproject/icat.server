@@ -30,15 +30,19 @@ import uk.icat3.util.ElementType;
 @Entity
 @Table(name = "ICAT_AUTHORISATION")
 @NamedQueries({
-    @NamedQuery(name = "IcatAuthorisation.findByInvestigationIdPK", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigationId = :investigationId"),
-    @NamedQuery(name = "IcatAuthorisation.findByUserId", query = "SELECT i FROM IcatAuthorisation i WHERE i.userId = :userId"),
+    @NamedQuery(name = "IcatAuthorisation.findById", query = "SELECT i FROM IcatAuthorisation i WHERE i.id = :id"),
+    @NamedQuery(name = "IcatAuthorisation.findByUserId", query = "SELECT i FROM IcatAuthorisation i WHERE i.userId = :userId"), 
     @NamedQuery(name = "IcatAuthorisation.findByElementType", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = :elementType"),
-    @NamedQuery(name = "IcatAuthorisation.findByElementId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementId = :elementId"),
-    @NamedQuery(name = "IcatAuthorisation.findByInvestigationId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId AND i.elementType = 'INVESTIGATION' AND i.elementId = :elementId"),
-    @NamedQuery(name = "IcatAuthorisation.findByDatasetId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId  AND i.elementType = 'DATASET' AND i.elementId = :elementId"),
-    @NamedQuery(name = "IcatAuthorisation.findByDatafileId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId AND i.elementType = 'DATAFILE' AND i.elementId = :elementId"),
-    @NamedQuery(name = "IcatAuthorisation.findById", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigation.id = :investigationId AND i.elementType = :elementType AND i.elementId = :elementId AND i.userId = :userId AND i.markedDeleted = 'N'"),
-    @NamedQuery(name = "IcatAuthorisation.findByIdNullInvestigationId", query = "SELECT i FROM IcatAuthorisation i WHERE i.investigationId IS null AND i.elementType = :elementType AND i.elementId IS null AND i.userId = :userId AND i.markedDeleted = 'N'"),
+    @NamedQuery(name = "IcatAuthorisation.findByElementId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementId = :elementId"), 
+    @NamedQuery(name = "IcatAuthorisation.findByParentElementType", query = "SELECT i FROM IcatAuthorisation i WHERE i.parentElementType = :parentElementType"), 
+    @NamedQuery(name = "IcatAuthorisation.findByParentElementId", query = "SELECT i FROM IcatAuthorisation i WHERE i.parentElementId = :parentElementId"),
+    @NamedQuery(name = "IcatAuthorisation.findByModTime", query = "SELECT i FROM IcatAuthorisation i WHERE i.modTime = :modTime"), 
+    @NamedQuery(name = "IcatAuthorisation.findByModId", query = "SELECT i FROM IcatAuthorisation i WHERE i.modId = :modId"), 
+    @NamedQuery(name = "IcatAuthorisation.findByCreateTime", query = "SELECT i FROM IcatAuthorisation i WHERE i.createTime = :createTime"),
+    @NamedQuery(name = "IcatAuthorisation.findByCreateId", query = "SELECT i FROM IcatAuthorisation i WHERE i.createId = :createId"),
+    @NamedQuery(name = "IcatAuthorisation.findByFacilityAcquired", query = "SELECT i FROM IcatAuthorisation i WHERE i.facilityAcquired = :facilityAcquired"), 
+    @NamedQuery(name = "IcatAuthorisation.findByDeleted", query = "SELECT i FROM IcatAuthorisation i WHERE i.markedDeleted = :deleted"),  
+    @NamedQuery(name = "IcatAuthorisation.findByIdNullInvestigationId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementId IS null AND i.elementType = :elementType AND i.userId = :userId AND i.markedDeleted = 'N'"),
     @NamedQuery(name = "IcatAuthorisation.findAllByInvestigationId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = 'INVESTIGATION' AND i.elementId = :id AND i.markedDeleted = 'N'"),
     @NamedQuery(name = "IcatAuthorisation.findAllByDatasetId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = 'DATASET' AND i.elementId = :id AND i.markedDeleted = 'N'"),
     @NamedQuery(name = "IcatAuthorisation.findAllByDatafileId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = 'DATAFILE' AND i.elementId = :id AND i.markedDeleted = 'N'")

@@ -104,8 +104,7 @@ public class DatasetSearch {
         
         return datasetsPermission;
     }
-    
-    
+        
     /**
      * 
      * 
@@ -113,9 +112,9 @@ public class DatasetSearch {
     public static Collection<Dataset> listMyDeletedDataSets(String userId, EntityManager manager){
          log.trace("listAllDeletedDataSets(EntityManager)");
          
-         return manager.createNamedQuery(ALL_DATASET_TYPE).getResultList();
+         return manager.createNamedQuery(LIST_MY_DELETED_DATASETS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }
-    
+            
     /**
      *  List all the valid avaliable types' for datasets
      *

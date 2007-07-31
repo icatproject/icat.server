@@ -28,7 +28,16 @@ import javax.xml.bind.annotation.XmlTransient;
 @Entity
 @Table(name = "THIS_ICAT")
 @NamedQueries({
-    @NamedQuery(name = "ThisIcat.findByFacilityShortName", query = "SELECT t FROM ThisIcat t WHERE t.facilityShortName = :facilityShortName"), @NamedQuery(name = "ThisIcat.findByFacilityLongName", query = "SELECT t FROM ThisIcat t WHERE t.facilityLongName = :facilityLongName"), @NamedQuery(name = "ThisIcat.findByFacilityUrl", query = "SELECT t FROM ThisIcat t WHERE t.facilityUrl = :facilityUrl"), @NamedQuery(name = "ThisIcat.findByFacilityDescription", query = "SELECT t FROM ThisIcat t WHERE t.facilityDescription = :facilityDescription"), @NamedQuery(name = "ThisIcat.findByModId", query = "SELECT t FROM ThisIcat t WHERE t.modId = :modId"), @NamedQuery(name = "ThisIcat.findByModTime", query = "SELECT t FROM ThisIcat t WHERE t.modTime = :modTime"), @NamedQuery(name = "ThisIcat.findByCreateId", query = "SELECT t FROM ThisIcat t WHERE t.createId = :createId"), @NamedQuery(name = "ThisIcat.findByCreateTime", query = "SELECT t FROM ThisIcat t WHERE t.createTime = :createTime"), @NamedQuery(name = "ThisIcat.findByDeleted", query = "SELECT t FROM ThisIcat t WHERE t.deleted = :deleted"), @NamedQuery(name = "ThisIcat.findByFacilityAcquired", query = "SELECT t FROM ThisIcat t WHERE t.facilityAcquired = :facilityAcquired")
+    @NamedQuery(name = "Facility.findByFacilityShortName", query = "SELECT t FROM Facility t WHERE t.facilityShortName = :facilityShortName"), 
+    @NamedQuery(name = "Facility.findByFacilityLongName", query = "SELECT t FROM Facility t WHERE t.facilityLongName = :facilityLongName"),
+    @NamedQuery(name = "Facility.findByFacilityUrl", query = "SELECT t FROM Facility t WHERE t.facilityUrl = :facilityUrl"), 
+    @NamedQuery(name = "Facility.findByFacilityDescription", query = "SELECT t FROM Facility t WHERE t.facilityDescription = :facilityDescription"), 
+    @NamedQuery(name = "Facility.findByModId", query = "SELECT t FROM Facility t WHERE t.modId = :modId"), 
+    @NamedQuery(name = "Facility.findByModTime", query = "SELECT t FROM Facility t WHERE t.modTime = :modTime"),
+    @NamedQuery(name = "Facility.findByCreateId", query = "SELECT t FROM Facility t WHERE t.createId = :createId"), 
+    @NamedQuery(name = "Facility.findByCreateTime", query = "SELECT t FROM Facility t WHERE t.createTime = :createTime"), 
+    @NamedQuery(name = "Facility.findByDeleted", query = "SELECT t FROM Facility t WHERE t.markedDeleted = :deleted"),
+    @NamedQuery(name = "Facility.findByFacilityAcquired", query = "SELECT t FROM Facility t WHERE t.facilityAcquired = :facilityAcquired")
 })
 public class Facility extends EntityBaseBean implements Serializable {
 

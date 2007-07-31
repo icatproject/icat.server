@@ -26,7 +26,7 @@ public class Queries {
      * icat_authorisation row is not marked deleted, the user id is their userId or ANY and the role has read permission 
      */
     public static final String LIST_ALL_USERS_INVESTIGATIONS_JPQL = "SELECT DISTINCT i from Investigation i, IcatAuthorisation ia WHERE" +
-            " i.id = ia.investigationId AND i.markedDeleted = 'N' " +
+            " i.id = ia.elementId AND ia.elementType = 'INVESTIGATION' AND i.markedDeleted = 'N' " +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y'";
     /**
@@ -101,7 +101,7 @@ public class Queries {
     
     //new for permissions
     public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID_JPQL = "SELECT DISTINCT i.id from Investigation i, IcatAuthorisation ia WHERE" +
-            " i.id = ia.investigationId AND i.markedDeleted = 'N' " +
+            " i.id = ia.elementId AND ia.elementType = 'INVESTIGATION' AND i.markedDeleted = 'N' " +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND i.keywordCollection.keywordPK.name LIKE :keyword AND i.keywordCollection.markedDeleted = 'N'";
     
@@ -304,7 +304,7 @@ public class Queries {
     
     //new for permissions
     public static final String INVESTIGATIONS_FOR_USER_RTN_ID_JPQL = "SELECT DISTINCT i.id from Investigation i, IcatAuthorisation ia WHERE" +
-            " i.id = ia.investigationId AND i.markedDeleted = 'N'" +
+            " i.id = ia.elementId AND ia.elementType = 'INVESTIGATION' AND i.markedDeleted = 'N'" +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND i.investigatorCollection.facilityUser.federalId = :userId AND i.investigatorCollection.markedDeleted = 'N'";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -408,7 +408,7 @@ public class Queries {
     // public static final String KEYWORDS_FOR_USER_JPQL = "SELECT DISTINCT k.keywordPK.name FROM Keyword k WHERE (k.investigation.investigatorCollection.investigatorPK.facilityUserId = :userId OR k.investigation.investigatorCollection IS EMPTY) AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) ORDER BY k.keywordPK.name";
     //new for permissions
     public static final String KEYWORDS_FOR_USER_JPQL = "SELECT DISTINCT k.keywordPK.name from Keyword k, IcatAuthorisation ia WHERE" +
-            " k.investigation.id = ia.investigationId AND ia.markedDeleted = 'N'" +
+            " k.investigation.id = ia.elementId AND ia.elementType = 'INVESTIGATION' AND ia.markedDeleted = 'N'" +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) AND k.markedDeleted = 'N' ORDER BY k.keywordPK.name";
     public static final String KEYWORDS_NATIVE_FOR_USER = "Keywords.getAllKeywordsForUserNative";
@@ -467,11 +467,15 @@ public class Queries {
      * Find all deleted datasets
      *
      */
-    public static final String LIST_ALL_DELETED_DATASETS = "Dataset.ListAllDeleted";
-    public static final String LIST_ALL_DELETED_DATASETS_JPQL = "SELECT d FROM Dataset d WHERE (d.sampleId = :sampleId OR d.sampleId IS NULL) AND (d.name = :name OR d.name IS NULL) AND (d.investigation = :investigation OR d.investigation IS NULL)  AND (d.datasetType = :datasetType OR d.datasetType IS NULL)";
+    public static final String LIST_MY_DELETED_DATASETS = "Dataset.ListAllDeleted";
+     
+   public static final String LIST_MY_DELETED_DATASETS_JPQL = "SELECT DISTINCT ds from Dataset ds, IcatAuthorisation ia WHERE" +
+            " ds.id = ia.elementId AND ia.elementType = 'DATASET' AND ds.markedDeleted = 'Y' " +
+            " AND ia.userId = :userId " +
+            " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y'";
     
-    
-    
-    
+    /**
+     * Max number of returned items in a collection
+     */
     public static int MAX_QUERY_RESULTSET = 500;
 }

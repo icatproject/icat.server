@@ -29,6 +29,7 @@ import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.InvestigationSearch;
 import uk.icat3.search.KeywordSearch;
+import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.KeywordType;
 import uk.icat3.util.LogicalOperator;
@@ -394,8 +395,11 @@ public class TestSearch {
             " i.id = ia.investigationId AND i.markedDeleted = 'N' " +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y'";*/
-        String LIST_ALL = "";
-        String TEST_SQL = LIST_ALL+ "AND d.datasetId.investigationId.instrument.name IN('alf','lad') AND d.datafileParameterCollection.datafileParameterPK.name = 'run_number' AND d.datafileParameterCollection.datafileParameterPK.name BETWEEN 2620 AND 2631";
+        String LIST_ALL = "SELECT DISTINCT ds from Dataset ds, IcatAuthorisation ia WHERE" +
+            " ds.id = ia.elementId AND ia.elementType = '"+ElementType.DATASET+"' AND ds.markedDeleted = 'Y' " +
+            " AND ia.userId = :userId " +
+            " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y'";
+        //String TEST_SQL = LIST_ALL+ "AND d.datasetId.investigationId.instrument.name IN('alf','lad') AND d.datafileParameterCollection.datafileParameterPK.name = 'run_number' AND d.datafileParameterCollection.datafileParameterPK.name BETWEEN 2620 AND 2631";
         
         // String TEST_SQL =  "SELECT DISTINCT k.keywordPK.name from Keyword k, IcatAuthorisation ia WHERE" +
         //    " k.investigation.id = ia.icatAuthorisationPK.investigationId AND " +
@@ -406,7 +410,7 @@ public class TestSearch {
         //test code here
         // em.createQuery(INVESTIGATIONS_BY_USER_SQL2).setMaxResults(2).getResultList();
         
-        //System.out.println(em.createQuery(LIST_ALL).setParameter("userId", "test").getResultList());
+        System.out.println(em.createQuery(LIST_ALL).setParameter("userId", "test").getResultList());
         //log.info("Testing");
         /*Collection<Long> investigations = em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES-JAMES").setParameter("instrument","alf").setParameter("lowerRunNumber",0).setParameter("upperRunNumber",10000).getResultList();
         log.info("Results: "+investigations.size());
@@ -424,7 +428,7 @@ public class TestSearch {
         
        /// Dataset dataset = em.find(Dataset.class, 2L);
         
-        Datafile datafile = em.find(Datafile.class, 2L);
+     //   Datafile datafile = em.find(Datafile.class, 2L);
         
         tearDown();
         
