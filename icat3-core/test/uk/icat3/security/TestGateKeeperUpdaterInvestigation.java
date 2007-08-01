@@ -59,12 +59,31 @@ public class TestGateKeeperUpdaterInvestigation extends TestGateKeeperUtil {
         log.info("Testing  user: "+UPDATER_USER+ " for deleting investigation Id: "+VALID_INVESTIGATION_ID_FOR_UPDATER);
         
         Investigation investigation = getInvestigation(true);
-        
-        
+                
         try {
             GateKeeper.performAuthorisation(UPDATER_USER, investigation, AccessType.DELETE, em);
             
         } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+     /**
+     * Tests updater on valid investigation for delete
+     *
+     * ACTION_DELETE - N (But no on SET_FA = 'Y')
+     */
+    @Test(expected=InsufficientPrivilegesException.class)
+    public void testUpdaterDeleteOnInvestigationNotFA() throws ICATAPIException {
+        log.info("Testing  user: "+UPDATER_USER+ " for deleting investigation not FA Id: "+VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED);
+        
+        Investigation investigation = getInvestigationNotFA_Acquired();
+                
+        try {
+           GateKeeper.performAuthorisation(UPDATER_USER, investigation, AccessType.DELETE, em);
+         } catch (InsufficientPrivilegesException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
@@ -111,13 +130,33 @@ public class TestGateKeeperUpdaterInvestigation extends TestGateKeeperUtil {
     /**
      * Tests updater on valid investigation for update
      *
-     * ACTION_UPDATE - Y
+     * ACTION_UPDATE - N  (But no on SET_FA = 'Y')
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void testUpdaterUpdateOnInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+UPDATER_USER+ " for update investigation Id: "+VALID_INVESTIGATION_ID_FOR_UPDATER);
         
         Investigation investigation = getInvestigation(true);
+                
+         try {
+         GateKeeper.performAuthorisation(UPDATER_USER, investigation, AccessType.UPDATE, em);
+       } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests admin on valid investigation for update
+     *
+     * ACTION_UPDATE - Y (But no on SET_FA = 'Y')
+     */
+    @Test
+    public void testUpdaterUpdateOnInvestigationNotFA() throws ICATAPIException {
+        log.info("Testing  user: "+UPDATER_USER+ " for update investigation not FA Id: "+VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED);
+        
+        Investigation investigation = getInvestigationNotFA_Acquired();
         
         GateKeeper.performAuthorisation(UPDATER_USER, investigation, AccessType.UPDATE, em);
         
@@ -150,17 +189,19 @@ public class TestGateKeeperUpdaterInvestigation extends TestGateKeeperUtil {
      *
      * ACTION_ROOT_INSERT - Y (set null in inv_id for ICAT_ADMIN_USER+"_investigation)
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void testUpdaterInvestigationInsertOnInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+UPDATER_USER+ " for insert on investigation Id: "+VALID_INVESTIGATION_ID_FOR_UPDATER);
         
         Investigation investigation = getInvestigation(false);
         
-        GateKeeper.performAuthorisation(UPDATER_USER+"_investigation", investigation, AccessType.CREATE, em);
-        
-        //no exception
-        assertTrue("This should be true", true);
-        
+         try {
+        GateKeeper.performAuthorisation(UPDATER_USER+"_investigation", investigation, AccessType.CREATE, em);        
+         } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
     }
     
     /**

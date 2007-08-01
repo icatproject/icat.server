@@ -66,7 +66,7 @@ public class TestDatafile extends BaseTestClassTX {
         Datafile duplicateDatafile = getDatafileDuplicate(true);
         
         Dataset ds = em.find(Dataset.class, VALID_INVESTIGATION_ID);
-        modifiedDatafile.setDatasetId(ds);
+        modifiedDatafile.setDataset(ds);
         modifiedDatafile.setDescription(modifiedDesc);
         modifiedDatafile.setId(duplicateDatafile.getId());
                
@@ -260,7 +260,7 @@ public class TestDatafile extends BaseTestClassTX {
             assertEquals("modId must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, datafileParameter.getModId());
             
             assertNotNull("dataFile id must be not null", datafileParameter.getDatafileParameterPK());
-            assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, datafileParameter.getDatafile().getDatasetId().getInvestigationId().getId());
+            assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, datafileParameter.getDatafile().getDataset().getInvestigation().getId());
         }
         
         em.remove(dataFile);
@@ -419,7 +419,7 @@ public class TestDatafile extends BaseTestClassTX {
         // assertEquals("modId must be "+VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION, VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION, file.getModId());
         
         assertNotNull("dataFile id must be not null", file.getId());
-        assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, file.getDatasetId().getInvestigationId().getId());
+        assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, file.getDataset().getInvestigation().getId());
         return true;
     }
     
@@ -438,7 +438,7 @@ public class TestDatafile extends BaseTestClassTX {
         assertEquals("modId must be "+VALID_USER_FOR_INVESTIGATION, VALID_USER_FOR_INVESTIGATION, file.getModId());
         
         assertNotNull("dataFile id must be not null", file.getId());
-        assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, file.getDatasetId().getInvestigationId().getId());
+        assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, file.getDataset().getInvestigation().getId());
         
         return true;
     }

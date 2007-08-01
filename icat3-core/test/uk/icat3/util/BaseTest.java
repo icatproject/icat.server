@@ -33,9 +33,9 @@ public class BaseTest {
         
         emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
         em = emf.createEntityManager();
+        log.trace("");
         log.debug("setUp(), creating entityManager");
-        
-       
+               
         
         // Begin transaction
         log.debug("beginning transaction on entityManager");
@@ -46,17 +46,17 @@ public class BaseTest {
     
     public static void setUpEntityManagerOnly(){
         
-        emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
+       // emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
         em = emf.createEntityManager();
+        log.trace("");
         log.debug("setUp(), creating entityManager");
-        
-      
-        
+                      
     }
     
     public static void tearDownEntityManagerOnly(){
         
         log.debug("tearDown(), closing entityManager");
+        log.trace("");
         em.close();
     }
     
@@ -77,6 +77,7 @@ public class BaseTest {
         log.debug("commiting transaction on entityManager");
         em.getTransaction().commit();
         log.debug("tearDown(), closing entityManager");
+        log.trace("");
         em.close();
     }
     

@@ -24,13 +24,14 @@ public class TestConstants {
     public final static String VALID_SURNAME_FOR_INVESTIGATION =  "HEALY";
     
     public final static String VALID_USER_FOR_INVESTIGATION =  "JAMES-JAMES";
-    public final static String VALID_FACILITY_USER_FOR_INVESTIGATION =  "JAMES";
+    public final static String VALID_FACILITY_USER_FOR_INVESTIGATION =  "test";
     public final static String VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION =  "FIRST PROPAGATION";
-    public final static long VALID_DATASET_ID_FOR_INVESTIGATION =  2;
-    public final static long VALID_INVESTIGATION_ID =  2;
-    public final static long VALID_DATA_SET_ID =  2;
-    public final static long VALID_DATA_FILE_ID =  2;
-    public final static long VALID_SAMPLE_ID_FOR_INVESTIGATION_ID =  2;
+    public final static long VALID_DATASET_ID_FOR_INVESTIGATION =  3;
+    public final static long VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED = 5;
+    public final static long VALID_INVESTIGATION_ID =  3;
+    public final static long VALID_DATA_SET_ID =  3;
+    public final static long VALID_DATA_FILE_ID =  3;
+    public final static long VALID_SAMPLE_ID_FOR_INVESTIGATION_ID =  3;
     
     public final static String INVALID_USER =  "invalidUser" +Math.random();
     public final static String VALID_INVESTIGATION_SURNAME  = "HEALY";
@@ -45,6 +46,11 @@ public class TestConstants {
     public final static String UPDATER_USER = "test_updater";
     public final static String DELETER_USER = "test_deleter";
     public final static String ADMIN_USER = "test_admin";
+    public final static String ICAT_ADMIN_USER = "test_icatadmin";
+        
+    public final static long VALID_DATA_SET_ID_FOR_ICAT_ADMIN =  3;
+    public final static long VALID_DATA_FILE_ID_FOR_ICAT_ADMIN  =  3;
+    public final static long VALID_INVESTIGATION_ID_FOR_ICAT_ADMIN  =  3;
     
     public final static long VALID_DATA_SET_ID_FOR_ADMIN =  3;
     public final static long VALID_DATA_FILE_ID_FOR_ADMIN =  3;

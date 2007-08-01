@@ -61,7 +61,6 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
         
         Investigation investigation = getInvestigation(true);
         
-        
         try {
             GateKeeper.performAuthorisation(READER_USER, investigation, AccessType.DELETE, em);
             
@@ -72,6 +71,25 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
         }
     }
     
+    /**
+     * Tests Reader on valid investigation for delete
+     *
+     * ACTION_DELETE - Y (But no on SET_FA = 'Y')
+     */
+    @Test(expected=InsufficientPrivilegesException.class)
+    public void testReaderDeleteOnInvestigationNotFA() throws ICATAPIException {
+        log.info("Testing  user: "+READER_USER+ " for deleting investigation not FA Id: "+VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED);
+        
+        Investigation investigation = getInvestigationNotFA_Acquired();
+        
+        try {
+            GateKeeper.performAuthorisation(READER_USER, investigation, AccessType.DELETE, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
     /**
      * Tests reader on valid investigation for download
      *
@@ -117,7 +135,7 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
     /**
      * Tests reader on valid investigation for update
      *
-     * ACTION_UPDATE - Y
+     * ACTION_UPDATE - N (But no on SET_FA = 'Y')
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testReaderUpdateOnInvestigation() throws ICATAPIException {
@@ -125,6 +143,25 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
         
         Investigation investigation = getInvestigation(true);
         
+        try {
+            GateKeeper.performAuthorisation(READER_USER, investigation, AccessType.UPDATE, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests admin on valid investigation for update
+     *
+     * ACTION_UPDATE - N (But no on SET_FA = 'Y')
+     */
+    @Test(expected=InsufficientPrivilegesException.class)
+    public void testAdminUpdateOnInvestigationNotFA() throws ICATAPIException {
+        log.info("Testing  user: "+READER_USER+ " for update investigation not FA Id: "+VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED);
+        
+        Investigation investigation = getInvestigationNotFA_Acquired();
         
         try {
             GateKeeper.performAuthorisation(READER_USER, investigation, AccessType.UPDATE, em);
@@ -160,16 +197,19 @@ public class TestGateKeeperReaderInvestigation extends TestGateKeeperUtil {
      *
      * ACTION_ROOT_INSERT - Y (set null in inv_id for ICAT_ADMIN_USER+"_investigation)
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void testReaderInvestigationInsertOnInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+READER_USER+ " for insert on investigation Id: "+VALID_INVESTIGATION_ID_FOR_READER);
         
         Investigation investigation = getInvestigation(false);
         
-        GateKeeper.performAuthorisation(READER_USER+"_investigation", investigation, AccessType.CREATE, em);
-        
-        //no exception
-        assertTrue("This should be true", true);
+        try {
+            GateKeeper.performAuthorisation(READER_USER+"_investigation", investigation, AccessType.CREATE, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
     }
     
     /**

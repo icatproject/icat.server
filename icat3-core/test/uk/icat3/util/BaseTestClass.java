@@ -9,9 +9,10 @@
 
 package uk.icat3.util;
 
-import javax.persistence.Persistence;
 import org.apache.log4j.Logger;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 
 /**
@@ -26,15 +27,24 @@ public class BaseTestClass extends BaseTest{
     
     private static Logger log = Logger.getLogger(BaseTestClass.class);
     
-    @BeforeClass
+    @Before
+    public void Before(){
+        setUpEntityManagerOnly();
+    }
+    
+    @After
+    public void After(){
+        tearDownEntityManagerOnly();
+    }
+    
+     @BeforeClass
     public static void BeforeClassSetUp(){
-        setUp();
+        setUpEntityManagerFactoryOnly();
     }
     
     @AfterClass
     public static void AfterClassTearDown(){
-        tearDown();
+        tearDownEntityManagerFactoryOnly();
     }
-    
     
 }

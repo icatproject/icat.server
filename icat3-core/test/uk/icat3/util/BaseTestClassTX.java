@@ -31,6 +31,7 @@ public class BaseTestClassTX extends BaseTest{
     
     @Before
     public void beginTX(){
+        log.debug("");
         log.debug("setUp(), creating entityManager");
         em = emf.createEntityManager();
         
@@ -55,6 +56,7 @@ public class BaseTestClassTX extends BaseTest{
             throw t;
         } finally {
             log.debug("tearDown(), closing entityManager");
+            log.debug("");
             em.close();
         }
     }

@@ -53,19 +53,40 @@ public class TestGateKeeperIcatAdminInvestigation extends TestGateKeeperUtil {
     /**
      * Tests icat admin on valid investigation for delete
      *
-     * ACTION_DELETE - Y
+     * ACTION_DELETE - N (But no on SET_FA = 'Y')
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void testIcatAdminDeleteOnInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+ICAT_ADMIN_USER+ " for deleting investigation Id: "+VALID_INVESTIGATION_ID_FOR_ICAT_ADMIN);
         
         Investigation investigation = getInvestigation(true);
+        
+        try {
+            GateKeeper.performAuthorisation(ICAT_ADMIN_USER, investigation, AccessType.DELETE, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests admin on valid investigation for delete
+     *
+     * ACTION_DELETE - Y (But no on SET_FA = 'Y')
+     */
+    @Test
+    public void testAdminDeleteOnInvestigationNotFA() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for deleting investigation not FA Id: "+VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED);
+        
+        Investigation investigation = getInvestigationNotFA_Acquired();
         
         GateKeeper.performAuthorisation(ICAT_ADMIN_USER, investigation, AccessType.DELETE, em);
         
         //no exception
         assertTrue("This should be true", true);
     }
+    
     
     /**
      * Tests icat admin on valid investigation for download
@@ -87,31 +108,92 @@ public class TestGateKeeperIcatAdminInvestigation extends TestGateKeeperUtil {
     /**
      * Tests icat admin on valid investigation for remove (cos investigation this test remove root)
      *
-     * ACTION_REMOVE_ROOT - Y
+     * ACTION_REMOVE_ROOT - N (FA = 'Y' so cannot delete)
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void testIcatAdminRemoveOnInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+ICAT_ADMIN_USER+ " for remove investigation Id: "+VALID_INVESTIGATION_ID_FOR_ICAT_ADMIN);
         
         Investigation investigation = getInvestigation(true);
         
+        try {
+            GateKeeper.performAuthorisation(ICAT_ADMIN_USER, investigation, AccessType.REMOVE, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests icat admin on valid investigation for remove (cos investigation this test remove root)
+     *
+     * ACTION_REMOVE_ROOT - N (FA = 'N' but create is not = user Id so cannot delete)
+     */
+    @Test(expected=InsufficientPrivilegesException.class)
+    public void testIcatAdminRemoveOnInvestigationNotFA() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for remove investigation Id: "+VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED);
+        
+        Investigation investigation = getInvestigationNotFA_Acquired();
+        
+        try {
+            GateKeeper.performAuthorisation(ICAT_ADMIN_USER, investigation, AccessType.REMOVE, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests icat admin on valid investigation for remove (cos investigation this test remove root)
+     *
+     * ACTION_REMOVE_ROOT - Y (FA = 'N' create = user Id so cannot delete)
+     */
+    @Test
+    public void testIcatAdminRemoveOnInvestigationNotFASameCreateId() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for remove investigation Id: "+VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED);
+        
+        Investigation investigation = getInvestigationNotFA_Acquired();
+        investigation.setCreateId(ICAT_ADMIN_USER);
+        
         GateKeeper.performAuthorisation(ICAT_ADMIN_USER, investigation, AccessType.REMOVE, em);
         
         //no exception
-        assertTrue("This should be true", true);
-        
+        assertTrue("This should be true", true);        
     }
+    
     
     /**
      * Tests icat admin on valid investigation for update
      *
-     * ACTION_UPDATE - Y
+     * ACTION_UPDATE - N (But no on SET_FA = 'Y')
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void testIcatAdminUpdateOnInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+ICAT_ADMIN_USER+ " for update investigation Id: "+VALID_INVESTIGATION_ID_FOR_ICAT_ADMIN);
         
         Investigation investigation = getInvestigation(true);
+        
+        try {
+            GateKeeper.performAuthorisation(ICAT_ADMIN_USER, investigation, AccessType.UPDATE, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests admin on valid investigation for update
+     *
+     * ACTION_UPDATE - Y (But no on SET_FA = 'Y')
+     */
+    @Test
+    public void testAdminUpdateOnInvestigationNotFA() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for update investigation not FA Id: "+VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED);
+        
+        Investigation investigation = getInvestigationNotFA_Acquired();
         
         GateKeeper.performAuthorisation(ICAT_ADMIN_USER, investigation, AccessType.UPDATE, em);
         

@@ -9,11 +9,8 @@
 
 package uk.icat3.security;
 
-import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
-import uk.icat3.util.AccessType;
 import uk.icat3.util.BaseTestClassTX;
-import uk.icat3.util.IcatRoles;
 import static uk.icat3.util.TestConstants.*;
 import static uk.icat3.util.Util.*;
 import static org.junit.Assert.*;
@@ -34,5 +31,13 @@ public class TestGateKeeperUtil extends BaseTestClassTX {
             Investigation investigation = new Investigation();
             return investigation;
         }
+    }
+    
+    protected Investigation getInvestigationNotFA_Acquired(){
+        
+        Investigation investigation = em.find(Investigation.class, VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED);
+        
+        return investigation;
+        
     }
 }

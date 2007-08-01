@@ -53,13 +53,33 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
     /**
      * Tests creator on valid investigation for delete
      *
-     * ACTION_DELETE - Y
+     * ACTION_DELETE - Y (But no on SET_FA = 'Y')
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void testCreatorDeleteOnInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+CREATOR_USER+ " for deleting investigation Id: "+VALID_INVESTIGATION_ID_FOR_CREATOR);
         
         Investigation investigation = getInvestigation(true);
+        
+        try {
+            GateKeeper.performAuthorisation(CREATOR_USER, investigation, AccessType.DELETE, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests admin on valid investigation for delete
+     *
+     * ACTION_DELETE - Y (But no on SET_FA = 'Y')
+     */
+    @Test
+    public void testcreatorDeleteOnInvestigationNotFA() throws ICATAPIException {
+        log.info("Testing  user: "+CREATOR_USER+ " for deleting investigation not FA Id: "+VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED);
+        
+        Investigation investigation = getInvestigationNotFA_Acquired();
         
         GateKeeper.performAuthorisation(CREATOR_USER, investigation, AccessType.DELETE, em);
         
@@ -107,13 +127,33 @@ public class TestGateKeeperCreatorInvestigation extends TestGateKeeperUtil {
     /**
      * Tests creator on valid investigation for update
      *
-     * ACTION_UPDATE - Y
+     * ACTION_UPDATE - N (But no on SET_FA = 'Y'
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void testCreatorUpdateOnInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+CREATOR_USER+ " for update investigation Id: "+VALID_INVESTIGATION_ID_FOR_CREATOR);
         
         Investigation investigation = getInvestigation(true);
+        
+        try {
+            GateKeeper.performAuthorisation(CREATOR_USER, investigation, AccessType.UPDATE, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creator on valid investigation for update
+     *
+     * ACTION_UPDATE - Y (But no on SET_FA = 'Y')
+     */
+    @Test
+    public void testCreatorUpdateOnInvestigationNotFA() throws ICATAPIException {
+        log.info("Testing  user: "+CREATOR_USER+ " for update investigation not FA Id: "+VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED);
+        
+        Investigation investigation = getInvestigationNotFA_Acquired();
         
         GateKeeper.performAuthorisation(CREATOR_USER, investigation, AccessType.UPDATE, em);
         
