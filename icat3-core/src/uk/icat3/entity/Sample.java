@@ -12,6 +12,7 @@ package uk.icat3.entity;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -30,6 +31,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.Cascade;
 
@@ -286,32 +288,68 @@ import uk.icat3.util.Cascade;
         return isValid();
     }
     
-    /**
-     * Sets deleted flag on all items owned by this datasets
+  /**
+     * Sets type (see Cascade) flag on all items owned by this dataset
      *
-     * @param isDeleted
+     * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
+     * @param value value of the cascade type
      */
-    public void setCascade(Cascade type, Object value){
-        log.trace("Setting: "+toString()+" from type: "+type+" to : "+value);
-        String deleted = "Y";
+    public void setCascade(Cascade type, Object value) throws InsufficientPrivilegesException{
+        setCascade(type, value, null, null);
+    }
+    
+    /**
+     * Sets type (see Cascade) flag on all items owned by this dataset
+     *
+     * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
+     * @param value value of the cascade type
+     */
+    public void setCascade(Cascade type, Object value, EntityManager manager) throws InsufficientPrivilegesException{
+        setCascade(type, value, manager, null);
+    }
+    
+    
+    /**
+     * Sets type (see Cascade) flag on all items owned by this dataset
+     *
+     * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
+     * @param cascadeValue value of the cascade type
+     * @param manager entity manager to  connect to DB
+     * @param managerValue value of the EntityManager value
+     */
+    public void setCascade(Cascade type, Object cascadeValue, EntityManager manager, Object managerValue) throws InsufficientPrivilegesException{
+        log.trace("Cascading: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
+             String deleted = "Y";
         if(type == Cascade.DELETE){
-            deleted = (((Boolean)value).booleanValue()) ? "Y" : "N";
+            deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
+            if(managerValue == null) throw new RuntimeException("Manager Value needs to be set aswell if Cascade.DELETE");            
         }
         
-        for(SampleParameter sp : getSampleParameterCollection()){
-            if(type == Cascade.DELETE)  sp.setMarkedDeleted(deleted);
-            else if(type == Cascade.MOD_ID) sp.setModId(value.toString());
-            else if(type == Cascade.MOD_AND_CREATE_IDS) {
-                sp.setModId(value.toString());
-                sp.setCreateId(value.toString());
+        if(getSampleParameterCollection() != null){
+            //create new collection if remove deleted items
+            Collection<SampleParameter> sampleParameters = new ArrayList<SampleParameter>();
+            
+            for(SampleParameter sp : getSampleParameterCollection()){
+                if(type == Cascade.DELETE)  sp.setMarkedDeleted(deleted);
+                else if(type == Cascade.MOD_ID) sp.setModId(cascadeValue.toString());
+                else if(type == Cascade.MOD_AND_CREATE_IDS) {
+                    sp.setModId(cascadeValue.toString());
+                    sp.setCreateId(cascadeValue.toString());
+                }  else if(type == Cascade.REMOVE_DELETED_ITEMS){
+                    //remove all deleted items from the collection, ie only add ones that are not deleted
+                    if(!sp.isDeleted()) sampleParameters.add(sp);
+                }
             }
+            //now set the new dataset collection
+            log.trace("Setting new sampleParameterCollection of size: "+sampleParameters.size()+" because of deleted items from original size: "+getSampleParameterCollection().size());
+            this.setSampleParameterCollection(sampleParameters);
         }
-             
+        
         if(type == Cascade.DELETE) this.setMarkedDeleted(deleted);
-        else if(type == Cascade.MOD_ID) this.setModId(value.toString());
+        else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
-            this.setModId(value.toString());
-            this.setCreateId(value.toString());
+            this.setModId(cascadeValue.toString());
+            this.setCreateId(cascadeValue.toString());
         }
     }
     

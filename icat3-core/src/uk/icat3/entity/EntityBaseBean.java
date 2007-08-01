@@ -23,6 +23,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import org.apache.log4j.Logger;
 import uk.icat3.exceptions.EntityNotModifiableError;
@@ -70,6 +71,13 @@ public class EntityBaseBean {
     protected String facilityAcquired;
     
     /**
+     * Field to check string value of facility acquired
+     */
+    @Transient
+    @ICAT(merge=false, nullable=true)
+    protected transient boolean facilityAcquiredSet;
+
+           /**
      * Field to check string value of deleted
      */
     @Transient
@@ -134,7 +142,7 @@ public class EntityBaseBean {
      */
     public void setCreateTime(Date createTime) {
         //not allowed to be set
-        // this.createTime = createTime;
+        this.createTime = createTime;
     }
     
     /**
@@ -151,7 +159,7 @@ public class EntityBaseBean {
      */
     public void setCreateId(String createId) {
         this.createId = createId;
-        if(isModifiable()) modTime = new Date();
+        modTime = new Date();
     }
     
     /**
@@ -173,13 +181,13 @@ public class EntityBaseBean {
     /**
      * To find out if they record can be modified
      */
-    public boolean isModifiable(){
+    /*public boolean isModifiable(){
         //TODO will change to other colums here aswell as user supplied data and faility
         //at the moment if from props then cannot change
         if(parseBoolean(facilityAcquired)){
             return false;
         } else return true;
-    }
+    }*/
     
     /**
      * Gets the modId of this entity.
@@ -196,13 +204,14 @@ public class EntityBaseBean {
      */
     public void setModId(String modId) {
         this.modId = modId;
-        if(isModifiable()) modTime = new Date();
+        modTime = new Date();
     }
     
      /**
      * Gets the role of the user for this investigation
      * @return the icatRole for the user
      */
+    @XmlElement(name="role")
     public IcatRole getIcatRole() {
         return icatRole;
     }
@@ -221,11 +230,7 @@ public class EntityBaseBean {
      */
     @PreUpdate
     public void preUpdate() throws EntityNotModifiableError {
-        //this runtime error should not happen, the application should check
-        //isModifibale before trying to change the state
-        //if(!isModifiable()) throw new EntityNotModifiableError(this +" cannot be modified");
-        //this way better, so not changed if not modifiable
-        if(isModifiable()) modTime = new Date();
+        modTime = new Date();
     }
     
     /**
@@ -246,7 +251,16 @@ public class EntityBaseBean {
     /*public void postLoad(){
         //setUniqueId(uniqueId);
     }*/
-           
+         
+    @XmlTransient
+     public boolean isFacilityAcquiredSet() {
+          return parseBoolean(getFacilityAcquired());
+    }
+
+    public void setFacilityAcquiredSet(boolean facilityAcquiredSet) {
+        this.facilityAcquiredSet = facilityAcquiredSet;
+    }
+    
     @XmlTransient
     public String getMarkedDeleted() {
         return markedDeleted;
@@ -298,23 +312,7 @@ public class EntityBaseBean {
         this.selected = selected;
     }
     
-    /**
-     * Gets the facility of this entity.
-     * @return the facility
-     */
-  /*  public String getFacility() {
-        return facility;
-    }*/
-    
-    /**
-     * Sets the facility of this entity to the specified value.
-     * @param facility the new modId
-     */
-    /*public void setFacility(String facility) {
-        this.facility = facility;
-    }*/
-        
-    
+                
     /**
      * Method to be overridden if needed to check if the data held in the entity is valid.
      * This method checks whether all the fields which are marked as not null are not null

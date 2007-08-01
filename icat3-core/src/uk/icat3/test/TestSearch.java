@@ -20,6 +20,8 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.Keyword;
+import uk.icat3.entity.KeywordPK;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.manager.DataFileManager;
@@ -33,6 +35,7 @@ import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.KeywordType;
 import uk.icat3.util.LogicalOperator;
+import uk.icat3.util.Queries;
 
 /**
  *
@@ -58,14 +61,14 @@ public class TestSearch {
         
         
         // Begin transaction
-        //em.getTransaction().begin();
+        em.getTransaction().begin();
         
         
     }
     
     protected static void tearDown(){
         // Commit the transaction
-        // em.getTransaction().commit();
+         em.getTransaction().commit();
         
         em.close();
     }
@@ -391,14 +394,10 @@ public class TestSearch {
         
         
         setUp();
-        /*String LIST_ALL = "SELECT DISTINCT i from Investigation i, IcatAuthorisation ia WHERE" +
-            " i.id = ia.investigationId AND i.markedDeleted = 'N' " +
-            " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-            " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y'";*/
-        String LIST_ALL = "SELECT DISTINCT ds from Dataset ds, IcatAuthorisation ia WHERE" +
-            " ds.id = ia.elementId AND ia.elementType = '"+ElementType.DATASET+"' AND ds.markedDeleted = 'Y' " +
-            " AND ia.userId = :userId " +
-            " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y'";
+        String LIST_ALL = Queries.LIST_ALL_USERS_INVESTIGATIONS_JPQL;
+        // String LIST_ALL_NATIVE = "SELECT i.ID FROM INVESTIGATION i WHERE Lower(TITLE) LIKE '%?t%'";
+        //   String LIST_ALL_NATIVE = "SELECT i.ID FROM INVESTIGATION i WHERE TITLE LIKE ?title";
+        
         //String TEST_SQL = LIST_ALL+ "AND d.datasetId.investigationId.instrument.name IN('alf','lad') AND d.datafileParameterCollection.datafileParameterPK.name = 'run_number' AND d.datafileParameterCollection.datafileParameterPK.name BETWEEN 2620 AND 2631";
         
         // String TEST_SQL =  "SELECT DISTINCT k.keywordPK.name from Keyword k, IcatAuthorisation ia WHERE" +
@@ -409,8 +408,9 @@ public class TestSearch {
         //String TEST_SQL = "SELECT i from Keyword i";
         //test code here
         // em.createQuery(INVESTIGATIONS_BY_USER_SQL2).setMaxResults(2).getResultList();
+        //System.out.println(em.createNativeQuery(LIST_ALL_NATIVE).setParameter("t", "fa").getResultList());
         
-        System.out.println(em.createQuery(LIST_ALL).setParameter("userId", "test").getResultList());
+        // System.out.println(em.createQuery(LIST_ALL).setParameter("userId", "test").getResultList());
         //log.info("Testing");
         /*Collection<Long> investigations = em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES-JAMES").setParameter("instrument","alf").setParameter("lowerRunNumber",0).setParameter("upperRunNumber",10000).getResultList();
         log.info("Results: "+investigations.size());
@@ -426,15 +426,25 @@ public class TestSearch {
         //log.info("Results: "+investigations.size());
         
         
-       /// Dataset dataset = em.find(Dataset.class, 2L);
+        //Dataset dataset = DataSetManager.getDataSet("test", 2L, em);
         
-     //   Datafile datafile = em.find(Datafile.class, 2L);
+        //   Datafile datafile = em.find(Datafile.class, 2L);
+        
+        Keyword kw=  new Keyword();
+        kw.setKeywordPK(new KeywordPK("sds",3L));
+        kw.setModId("sd");
+        
+        Investigation in = em.find(Investigation.class, 3L);
+        kw.setInvestigation(in);
+        
+        em.persist(kw);
         
         tearDown();
         
-      //  System.out.println(datafile.getId());
+        // System.out.println(datafile.getId());
         
-       // System.out.println(dataset.getInvestigationId());
+        //System.out.println(dataset.getInvestigationId());
+        //System.out.println(dataset.getIcatRole() +" "+dataset.getIcatRole().isDownload());
         
     }
     

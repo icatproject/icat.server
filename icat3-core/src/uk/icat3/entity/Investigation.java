@@ -41,6 +41,7 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Dataset;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
@@ -103,6 +104,11 @@ import uk.icat3.util.Queries;
         @SequenceGenerator(name="INVESTIGATION_SEQ",sequenceName="INVESTIGATION_ID_SEQ",allocationSize=1)
         public class Investigation extends EntityBaseBean implements Serializable {
     
+    /**
+     * Override logger
+     */
+    protected static Logger log = Logger.getLogger(Investigation.class);
+    
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="INVESTIGATION_SEQ")
     @Column(name = "ID", nullable = false)
@@ -130,9 +136,6 @@ import uk.icat3.util.Queries;
     @Column(name = "GRANT_ID")
     private Long grantId;
     
-    @Column(name = "SRC_HASH")
-    private String srcHash;
-    
     @Column(name = "RELEASE_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date releaseDate;
@@ -158,9 +161,6 @@ import uk.icat3.util.Queries;
     @JoinColumn(name = "INV_TYPE", referencedColumnName = "NAME", nullable= false)
     @ManyToOne
     private InvestigationType invType;
-    
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-    private Collection<IcatAuthorisation> icatAuthorisationCollection;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<Dataset> datasetCollection;
@@ -435,14 +435,6 @@ import uk.icat3.util.Queries;
         this.sampleCollection = sampleCollection;
     }
     
-    public String getSrcHash() {
-        return srcHash;
-    }
-
-    public void setSrcHash(String srcHash) {
-        this.srcHash = srcHash;
-    }
-    
     /**
      * Gets the facilityCycle of this Investigation.
      * @return the facilityCycle
@@ -640,10 +632,10 @@ import uk.icat3.util.Queries;
         return this.investigatorCollection;
     }
     
-     public Facility getFacility() {
+    public Facility getFacility() {
         return facility;
     }
-
+    
     public void setFacility(Facility facility) {
         this.facility = facility;
     }
@@ -714,15 +706,7 @@ import uk.icat3.util.Queries;
         this.topicListCollection = topicListCollection;
     }
     
-    public Collection<IcatAuthorisation> getIcatAuthorisationCollection() {
-        return icatAuthorisationCollection;
-    }
-    
-    public void setIcatAuthorisationCollection(Collection<IcatAuthorisation> icatAuthorisationCollection) {
-        this.icatAuthorisationCollection = icatAuthorisationCollection;
-    }
-    
-   /**
+    /**
      * Sets type (see Cascade) flag on all items owned by this dataset
      *
      * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
@@ -752,8 +736,8 @@ import uk.icat3.util.Queries;
      * @param managerValue value of the EntityManager value
      */
     public void setCascade(Cascade type, Object cascadeValue, EntityManager manager, Object managerValue) throws InsufficientPrivilegesException{
-        log.trace("Setting: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
-    
+        log.trace("Cascading: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
+        
         String deleted = "Y";
         if(type == Cascade.DELETE){
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
@@ -765,7 +749,7 @@ import uk.icat3.util.Queries;
             //create new collection if remove deleted items
             Collection<Dataset> datasets = new ArrayList<Dataset>();
             
-            for(Dataset dataset : getDatasetCollection()){                
+            for(Dataset dataset : getDatasetCollection()){
                 if(type == Cascade.REMOVE_DELETED_ITEMS){
                     //remove all deleted items from the collection, ie only add ones that are not deleted
                     if(!dataset.isDeleted()) {
@@ -789,8 +773,7 @@ import uk.icat3.util.Queries;
                 if(type == Cascade.DELETE) {
                     investigator.setMarkedDeleted(deleted);
                     investigator.setModId(managerValue.toString());
-                }
-                else if(type == Cascade.MOD_ID) investigator.setModId(cascadeValue.toString());
+                } else if(type == Cascade.MOD_ID) investigator.setModId(cascadeValue.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     investigator.setModId(cascadeValue.toString());
                     investigator.setCreateId(cascadeValue.toString());
@@ -804,22 +787,22 @@ import uk.icat3.util.Queries;
             this.setInvestigatorCollection(investigators);
         }
         
-       //TODO need to do it for the icat authorisation entires (delete)
+        //TODO do delete
         //check if manager is null
-        if(manager != null && type == Cascade.DELETE){
+        /*if(manager != null && type == Cascade.DELETE){
             Query query = manager.createNamedQuery("IcatAuthorisation.findByInvestigationId").
                     setParameter("elementType", null).
                     setParameter("elementId", null).
                     setParameter("investigationId", this.getId());
             Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
-            
+         
             //now mark them all as deleted
             for (IcatAuthorisation icatAuthorisation : icatAuthorisations) {
                 log.trace("Marking: "+icatAuthorisation+" as "+cascadeValue);
                 icatAuthorisation.setMarkedDeleted(deleted);
                 icatAuthorisation.setModId(managerValue.toString());
             }
-        }
+        }*/
         
         //sample
         if(getSampleCollection() != null){
@@ -827,44 +810,64 @@ import uk.icat3.util.Queries;
             Collection<Sample> samples = new ArrayList<Sample>();
             
             for(Sample sample : getSampleCollection()){
-                 if(type == Cascade.REMOVE_DELETED_ITEMS){
+                if(type == Cascade.REMOVE_DELETED_ITEMS){
                     //remove all deleted items from the collection, ie only add ones that are not deleted
-                    if(!sample.isDeleted()) samples.add(sample);
+                    if(!sample.isDeleted()) {
+                        samples.add(sample);
+                           //cascade to datafile items if value is true, otherwise do not cascade
+                        if(((Boolean)cascadeValue).booleanValue()) sample.setCascade(Cascade.REMOVE_DELETED_ITEMS, cascadeValue);          
+                    }
                 } else sample.setCascade(type, cascadeValue);
-                //now set the new dataset collection
-                log.trace("Setting new sampleCollection of size: "+samples.size()+" because of deleted items from original size: "+getSampleCollection().size());
-                this.setSampleCollection(samples);
             }
+            //now set the new dataset collection
+            log.trace("Setting new sampleCollection of size: "+samples.size()+" because of deleted items from original size: "+getSampleCollection().size());
+            this.setSampleCollection(samples);
         }
         
         //study
         if(getStudyInvestigationCollection() != null){
+            //create new collection if remove deleted items
+            Collection<StudyInvestigation> studyInvestigations = new ArrayList<StudyInvestigation>();
+            
             for(StudyInvestigation study : getStudyInvestigationCollection()){
                 if(type == Cascade.DELETE) {
                     study.setMarkedDeleted(deleted);
                     study.setModId(managerValue.toString());
-                }
-                else if(type == Cascade.MOD_ID) study.setModId(cascadeValue.toString());
+                } else if(type == Cascade.MOD_ID) study.setModId(cascadeValue.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     study.setModId(cascadeValue.toString());
                     study.setCreateId(cascadeValue.toString());
+                } else if(type == Cascade.REMOVE_DELETED_ITEMS){
+                    //remove all deleted items from the collection, ie only add ones that are not deleted
+                    if(!study.isDeleted()) studyInvestigations.add(study);
                 }
             }
+            //now set the new dataset collection
+            log.trace("Setting new studyInvestigationCollection of size: "+studyInvestigations.size()+" because of deleted items from original size: "+getStudyInvestigationCollection().size());
+            this.setStudyInvestigationCollection(studyInvestigations);
         }
         
         //shift
         if(getShiftCollection() != null){
+            //create new collection if remove deleted items
+            Collection<Shift> shifts = new ArrayList<Shift>();
+            
             for(Shift shift : getShiftCollection()){
                 if(type == Cascade.DELETE) {
                     shift.setMarkedDeleted(deleted);
                     shift.setModId(managerValue.toString());
-                }
-                else if(type == Cascade.MOD_ID) shift.setModId(cascadeValue.toString());
+                } else if(type == Cascade.MOD_ID) shift.setModId(cascadeValue.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     shift.setModId(cascadeValue.toString());
                     shift.setCreateId(cascadeValue.toString());
+                }  else if(type == Cascade.REMOVE_DELETED_ITEMS){
+                    //remove all deleted items from the collection, ie only add ones that are not deleted
+                    if(!shift.isDeleted()) shifts.add(shift);
                 }
             }
+            //now set the new dataset collection
+            log.trace("Setting new shiftCollection of size: "+shifts.size()+" because of deleted items from original size: "+getShiftCollection().size());
+            this.setShiftCollection(shifts);
         }
         
         //publication
@@ -876,8 +879,7 @@ import uk.icat3.util.Queries;
                 if(type == Cascade.DELETE) {
                     publication.setMarkedDeleted(deleted);
                     publication.setModId(managerValue.toString());
-                }
-                else if(type == Cascade.MOD_ID) publication.setModId(cascadeValue.toString());
+                } else if(type == Cascade.MOD_ID) publication.setModId(cascadeValue.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     publication.setModId(cascadeValue.toString());
                     publication.setCreateId(cascadeValue.toString());
@@ -900,8 +902,7 @@ import uk.icat3.util.Queries;
                 if(type == Cascade.DELETE) {
                     keyword.setMarkedDeleted(deleted);
                     keyword.setModId(managerValue.toString());
-                }
-                else if(type == Cascade.MOD_ID) keyword.setModId(cascadeValue.toString());
+                } else if(type == Cascade.MOD_ID) keyword.setModId(cascadeValue.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     keyword.setModId(cascadeValue.toString());
                     keyword.setCreateId(cascadeValue.toString());
@@ -910,37 +911,47 @@ import uk.icat3.util.Queries;
                     if(!keyword.isDeleted()) keywords.add(keyword);
                 }
             }
+            //now set the new dataset collection
+            log.trace("Setting new keywordCollection of size: "+keywords.size()+" because of deleted items from original size: "+getKeywordCollection().size());
+            this.setKeywordCollection(keywords);
         }
         
         //topicList parameter
         if(getTopicListCollection() != null){
+            //create new collection if remove deleted items
+            Collection<TopicList> topicLists = new ArrayList<TopicList>();
+            
             for(TopicList topicList : getTopicListCollection()){
                 if(type == Cascade.DELETE)  {
                     topicList.setMarkedDeleted(deleted);
                     topicList.setModId(managerValue.toString());
-                }
-                else if(type == Cascade.MOD_ID) topicList.setModId(cascadeValue.toString());
+                } else if(type == Cascade.MOD_ID) topicList.setModId(cascadeValue.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     topicList.setModId(cascadeValue.toString());
                     topicList.setCreateId(cascadeValue.toString());
+                } else if(type == Cascade.REMOVE_DELETED_ITEMS){
+                    //remove all deleted items from the collection, ie only add ones that are not deleted
+                    if(!topicList.isDeleted()) topicLists.add(topicList);
                 }
             }
+            //now set the new dataset collection
+            log.trace("Setting new keywordCollection of size: "+topicLists.size()+" because of deleted items from original size: "+getTopicListCollection().size());
+            this.setTopicListCollection(topicLists);
         }
         
         if(type == Cascade.DELETE) {
-           //need to check if use has permission to delete this
+            //need to check if use has permission to delete this
             //only check if the value of deleted is different the one wanting to be changed to
             if(this.isDeleted() != ((Boolean)cascadeValue).booleanValue()){
                 GateKeeper.performAuthorisation(managerValue.toString(), this, AccessType.DELETE, manager);
                 this.setMarkedDeleted(deleted);
                 this.setModId(managerValue.toString());
             }
-        }
-        else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
+        } else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
             this.setModId(cascadeValue.toString());
             this.setCreateId(cascadeValue.toString());
-        }        
+        }
     }
     
     /**

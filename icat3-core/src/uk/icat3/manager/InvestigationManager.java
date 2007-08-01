@@ -707,7 +707,7 @@ public class InvestigationManager extends ManagerUtil {
                 publication.setCreateId(userId);
                 manager.persist(publication);
                 
-                investigation.addPublication(publication);
+               // investigation.addPublication(publication);
                 return publication;
             }
             
@@ -741,7 +741,7 @@ public class InvestigationManager extends ManagerUtil {
                 sample.setCreateId(userId);
                 manager.persist(sample);
                 //add sample to investigation
-                investigation.addSample(sample);
+               // investigation.addSample(sample);
                 return sample;
             }
         } else if(object instanceof SampleParameter){
@@ -808,7 +808,7 @@ public class InvestigationManager extends ManagerUtil {
                 //sets modId for persist
                 keyword.setCreateId(userId);
                 manager.persist(keyword);
-                investigation.addKeyword(keyword);
+                //investigation.addKeyword(keyword);
                 return keyword;
             }
         } else if(object instanceof Investigator){
@@ -839,7 +839,7 @@ public class InvestigationManager extends ManagerUtil {
                 //sets modId for persist
                 investigator.setCreateId(userId);
                 manager.persist(investigator);
-                investigation.addInvestigator(investigator);
+              //  investigation.addInvestigator(investigator);
                 return investigator;
             }
         }  else throw new RuntimeException(object +" is not avaliable to be added");

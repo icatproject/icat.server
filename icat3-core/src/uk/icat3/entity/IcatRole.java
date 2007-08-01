@@ -21,7 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.util.Queries;
-
+import static uk.icat3.util.Util.*;
 /**
  *
  * @author gjd37
@@ -343,6 +343,59 @@ import uk.icat3.util.Queries;
         this.icatAuthorisationCollection = icatAuthorisationCollection;
     }
     
+    ///boolean getter methods for web services
+    public boolean isSelect(){
+        return parseBoolean(actionSelect);
+    }
+    
+    public boolean isInsert(){
+        return parseBoolean(actionInsert);
+    }
+    
+    public boolean isDownload(){
+        return parseBoolean(actionDownload);
+    }
+    
+    public boolean isUpdate(){
+        return parseBoolean(actionUpdate);
+    }
+    
+    public boolean isDelete(){
+        return parseBoolean(actionDelete);
+    }
+    
+    public boolean isRemove(){
+        return parseBoolean(actionRemove);
+    }
+    
+    public boolean isManageUsers(){
+        return parseBoolean(actionManageUsers);
+    }
+    
+    public boolean isRootRemove(){
+        return parseBoolean(actionRootRemove);
+    }
+    
+    public boolean isRootInsert(){
+        return parseBoolean(actionRootInsert);
+    }
+    
+    public boolean isFacilityAcquired(){
+        return parseBoolean(actionSetFa);
+    }
+    
+    //setters
+    public void setSelect(boolean ignore){}    
+    public void setInsert(boolean ignore){}  
+    public void setDownload(boolean ignore){}  
+    public void setUpdate(boolean ignore){}
+    public void setDelete(boolean ignore){} 
+    public void setRemove(boolean ignore){}  
+    public void setManageUsers(boolean ignore){}    
+    public void setRootRemove(boolean ignore){}  
+    public void setRootInsert(boolean ignore){}    
+    public void setFacilityAcquired(boolean ignore){}
+    
     @Override
     public int hashCode() {
         int hash = 0;
@@ -365,7 +418,7 @@ import uk.icat3.util.Queries;
     
     @Override
     public String toString() {
-        return "rr.IcatRole[role=" + role + "]";
+        return "IcatRole[role=" + role + "]";
     }
     
 }

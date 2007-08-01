@@ -22,6 +22,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.Queries;
 
 /**
  *
@@ -42,12 +43,13 @@ import uk.icat3.util.ElementType;
     @NamedQuery(name = "IcatAuthorisation.findByCreateId", query = "SELECT i FROM IcatAuthorisation i WHERE i.createId = :createId"),
     @NamedQuery(name = "IcatAuthorisation.findByFacilityAcquired", query = "SELECT i FROM IcatAuthorisation i WHERE i.facilityAcquired = :facilityAcquired"), 
     @NamedQuery(name = "IcatAuthorisation.findByDeleted", query = "SELECT i FROM IcatAuthorisation i WHERE i.markedDeleted = :deleted"),  
-    @NamedQuery(name = "IcatAuthorisation.findByIdNullInvestigationId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementId IS null AND i.elementType = :elementType AND i.userId = :userId AND i.markedDeleted = 'N'"),
+    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_NULL, query = Queries.ICAT_AUTHORISATION_FINDBY_NULL_JPQL),
     @NamedQuery(name = "IcatAuthorisation.findAllByInvestigationId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = 'INVESTIGATION' AND i.elementId = :id AND i.markedDeleted = 'N'"),
     @NamedQuery(name = "IcatAuthorisation.findAllByDatasetId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = 'DATASET' AND i.elementId = :id AND i.markedDeleted = 'N'"),
-    @NamedQuery(name = "IcatAuthorisation.findAllByDatafileId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = 'DATAFILE' AND i.elementId = :id AND i.markedDeleted = 'N'")
+    @NamedQuery(name = "IcatAuthorisation.findAllByDatafileId", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = 'DATAFILE' AND i.elementId = :id AND i.markedDeleted = 'N'"),
+    @NamedQuery(name =Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE, query = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE_JPQL)
 })
-        public class IcatAuthorisation extends EntityBaseBean implements Serializable {
+public class IcatAuthorisation extends EntityBaseBean implements Serializable {
     
     @Id
     @Column(name = "ID", nullable = false)
@@ -56,7 +58,7 @@ import uk.icat3.util.ElementType;
     @Column(name = "USER_ID", nullable = false)
     private String userId;
         
-        @Column(name = "ELEMENT_TYPE", nullable = false)
+    @Column(name = "ELEMENT_TYPE", nullable = false)
     private String elementType;
     
     @Column(name = "ELEMENT_ID")
@@ -72,9 +74,6 @@ import uk.icat3.util.ElementType;
     @ManyToOne
     private IcatRole role;
     
-    @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
-    @ManyToOne
-    private Investigation investigation;
     
     public IcatAuthorisation() {
     }
@@ -134,8 +133,7 @@ import uk.icat3.util.ElementType;
     public void setParentElementId(Long parentElementId) {
         this.parentElementId = parentElementId;
     }
-    
-    
+        
     @Override
     public int hashCode() {
         int hash = 0;

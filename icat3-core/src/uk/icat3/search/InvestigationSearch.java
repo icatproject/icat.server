@@ -384,6 +384,10 @@ public class InvestigationSearch extends ManagerUtil {
         query = query.setParameter("inv_title",advanDTO.getInvestigationName());
         query = query.setParameter("bcat_inv_str",advanDTO.getBackCatalogueInvestigatorString());
         query = query.setParameter("inv_number",advanDTO.getExperimentNumber());
+        query = query.setParameter("visit_id",advanDTO.getVisitId());
+        query = query.setParameter("inv_abstract","%"+advanDTO.getInvestigationAbstract()+"%");
+        query = query.setParameter("inv_type",advanDTO.getInvestigationType());
+        query = query.setParameter("grant_id",advanDTO.getGrantId());
         
         //set upper run number
         if(advanDTO.isRunNumber()){
@@ -779,6 +783,18 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Instrument> listAllInstruments(EntityManager manager)  {
         log.trace("listAllInstruments(EntityManager)");
         return  manager.createNamedQuery(ALL_INSTRUMENTS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+    }
+    
+    /**
+     * Lists all the investigation types  in the database
+     *
+     * @param userId federalId of the user.
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return List of types
+     */
+    public static Collection<Instrument> listAllInvestigationTypes(EntityManager manager)  {
+        log.trace("listAllInvestigationTypes(EntityManager)");
+        return  manager.createNamedQuery(ALL_INVESTIGATION_TYPES).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }
     
     /**

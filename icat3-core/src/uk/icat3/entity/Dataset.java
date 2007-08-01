@@ -36,6 +36,7 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.apache.log4j.Logger;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.security.GateKeeper;
@@ -62,9 +63,14 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = "Dataset.findByModId", query = "SELECT d FROM Dataset d WHERE d.modId = :modId"),
     @NamedQuery(name = Queries.DATASET_FINDBY_UNIQUE, query = Queries.DATASET_FINDBY_UNIQUE_JPQL)
 })
-        @XmlRootElement
-        @SequenceGenerator(name="DATASET_SEQ",sequenceName="DATASET_ID_SEQ",allocationSize=1)
-        public class Dataset extends EntityBaseBean implements Serializable {
+@XmlRootElement
+@SequenceGenerator(name="DATASET_SEQ",sequenceName="DATASET_ID_SEQ",allocationSize=1)
+public class Dataset extends EntityBaseBean implements Serializable {
+    
+    /**
+     * Override logger
+     */  
+    protected static Logger log = Logger.getLogger(Dataset.class);
     
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="DATASET_SEQ")
@@ -389,7 +395,7 @@ import uk.icat3.util.Queries;
      * @param managerValue value of the EntityManager value
      */
     public void setCascade(Cascade type, Object cascadeValue, EntityManager manager, Object managerValue) throws InsufficientPrivilegesException{
-        log.trace("Setting: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
+        log.trace("Cascading: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
         String deleted = "Y";
         if(type == Cascade.DELETE){
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
@@ -397,6 +403,9 @@ import uk.icat3.util.Queries;
         
         //data set parameters
         if(getDatasetParameterCollection() != null){
+            //create new collection if remove deleted items
+            Collection<DatasetParameter> datasetparameters = new ArrayList<DatasetParameter>();
+                        
             for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
                 if(type == Cascade.DELETE) {
                     datasetParameter.setMarkedDeleted(deleted);
@@ -405,8 +414,14 @@ import uk.icat3.util.Queries;
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     datasetParameter.setModId(cascadeValue.toString());
                     datasetParameter.setCreateId(cascadeValue.toString());
+                }else if(type == Cascade.REMOVE_DELETED_ITEMS){
+                    //remove all deleted items from the collection, ie only add ones that are not deleted
+                    if(!datasetParameter.isDeleted()) datasetparameters.add(datasetParameter);
                 }
             }
+            //now set the new dataset collection
+            log.trace("Setting new investigatorCollection of size: "+datasetparameters.size()+" because of deleted items from original size: "+getDatasetParameterCollection().size());
+            this.setDatasetParameterCollection(datasetparameters);
         }
         
         //datafiles
@@ -432,7 +447,7 @@ import uk.icat3.util.Queries;
         
         //TODO need to do it for the icat authorisation entires (delete)
         //check if manager is null
-        if(manager != null && type == Cascade.DELETE){
+        /*if(manager != null && type == Cascade.DELETE){
             Query query = manager.createNamedQuery("IcatAuthorisation.findByDatasetId").
                     setParameter("elementType", ElementType.DATASET.toString()).
                     setParameter("elementId", this.getId()).
@@ -445,7 +460,7 @@ import uk.icat3.util.Queries;
                 icatAuthorisation.setMarkedDeleted(deleted);
                 icatAuthorisation.setModId(managerValue.toString());
             }
-        }
+        }*/
         
         if(type == Cascade.DELETE) {
             //need to check if use has permission to delete this

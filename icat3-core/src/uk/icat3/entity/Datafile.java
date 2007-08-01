@@ -40,6 +40,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.apache.log4j.Logger;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.security.GateKeeper;
@@ -87,6 +88,11 @@ import uk.icat3.util.ElementType;
 @XmlRootElement
 @SequenceGenerator(name="DATAFILE_SEQ",sequenceName="DATAFILE_ID_SEQ",allocationSize=1)
 public class Datafile extends EntityBaseBean implements Serializable {
+    
+    /**
+     * Override logger
+     */  
+    protected static Logger log = Logger.getLogger(Datafile.class);
     
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="DATAFILE_SEQ")
@@ -436,6 +442,23 @@ public class Datafile extends EntityBaseBean implements Serializable {
     }
     
     /**
+     * Gets the datasetId of this Datafile.
+     * @return the datasetId
+     */
+    @XmlTransient
+    public Long getDatasetId() {
+        return this.datasetId;
+    }
+    
+    /**
+     * Sets the datasetId of this Datafile to the specified value.
+     * @param datasetId the new datasetId
+     */
+    public void setDatasetId(Long datasetId) {
+        this.datasetId = datasetId;
+    }
+    
+    /**
      * Gets the datafileParameterCollection of this Datafile.
      * @return the datafileParameterCollection
      */
@@ -494,7 +517,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
      * @param managerValue value of the EntityManager value
      */
     public void setCascade(Cascade type, Object cascadeValue, EntityManager manager, Object managerValue) throws InsufficientPrivilegesException{
-        log.trace("Setting: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
+        log.trace("Cascading: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
     
         String deleted = "Y";
         if(type == Cascade.DELETE){
@@ -503,6 +526,9 @@ public class Datafile extends EntityBaseBean implements Serializable {
         
         //data file parameters
         if(getDatafileParameterCollection() != null){
+              //create new collection if remove deleted items
+            Collection<DatafileParameter> datafileparameters = new ArrayList<DatafileParameter>();
+            
             for(DatafileParameter datafileParameter : getDatafileParameterCollection()){
                 if(type == Cascade.DELETE) {
                     datafileParameter.setMarkedDeleted(deleted);
@@ -512,12 +538,21 @@ public class Datafile extends EntityBaseBean implements Serializable {
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     datafileParameter.setModId(cascadeValue.toString());
                     datafileParameter.setCreateId(cascadeValue.toString());
+                } else if(type == Cascade.REMOVE_DELETED_ITEMS){
+                    //remove all deleted items from the collection, ie only add ones that are not deleted
+                    if(!datafileParameter.isDeleted()) datafileparameters.add(datafileParameter);
                 }
             }
+            //now set the new dataset collection
+            log.trace("Setting new investigatorCollection of size: "+datafileparameters.size()+" because of deleted items from original size: "+getDatafileParameterCollection().size());
+            this.setDatafileParameterCollection(datafileparameters);
         }
         
         //relatedDatafiles
         if(getRelatedDatafilesCollection() != null){
+              //create new collection if remove deleted items
+            Collection<RelatedDatafiles> relatedDatafiles = new ArrayList<RelatedDatafiles>();
+            
             for(RelatedDatafiles relatedDatafile : getRelatedDatafilesCollection()){
                 if(type == Cascade.DELETE) {
                     relatedDatafile.setMarkedDeleted(deleted);
@@ -527,14 +562,19 @@ public class Datafile extends EntityBaseBean implements Serializable {
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     relatedDatafile.setModId(cascadeValue.toString());
                     relatedDatafile.setCreateId(cascadeValue.toString());
+                }else if(type == Cascade.REMOVE_DELETED_ITEMS){
+                    //remove all deleted items from the collection, ie only add ones that are not deleted
+                    if(!relatedDatafile.isDeleted()) relatedDatafiles.add(relatedDatafile);
                 }
-                
             }
+            //now set the new dataset collection
+            log.trace("Setting new investigatorCollection of size: "+relatedDatafiles.size()+" because of deleted items from original size: "+getRelatedDatafilesCollection().size());
+            this.setRelatedDatafilesCollection(relatedDatafiles);
         }
                 
         //TODO need to do it for the icat authorisation entires (delete)
         //check if manager is null
-        if(manager != null && type == Cascade.DELETE){
+        /*if(manager != null && type == Cascade.DELETE){
             Query query = manager.createNamedQuery("IcatAuthorisation.findByDatafileId").
                     setParameter("elementType", ElementType.DATAFILE.toString()).
                     setParameter("elementId", this.getId()).
@@ -547,7 +587,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
                 icatAuthorisation.setMarkedDeleted(deleted);
                 icatAuthorisation.setModId(managerValue.toString());
             }
-        }
+        }*/
         
         if(type == Cascade.DELETE) {
            //need to check if use has permission to delete this

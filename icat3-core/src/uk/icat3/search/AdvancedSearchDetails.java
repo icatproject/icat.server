@@ -24,7 +24,23 @@ public class AdvancedSearchDetails {
      */
     private String investigationName; //inv title
     /**
-     * Investigation Name
+     * Visit Id
+     */
+    private String visitId; //visit id 
+    /**
+     * Investigation abstract
+     */
+    private String investigationAbstract;    
+    /**
+     * Investigation type
+     */
+    private String investigationType;
+    /**
+     * Investigation grant Id
+     */
+    private Long grantId;
+    /**
+     * Investigator Name
      */
     private String backCatalogueInvestigatorString; //back catalogue investigator string
     /**
@@ -176,6 +192,38 @@ public class AdvancedSearchDetails {
     
     public void setBackCatalogueInvestigatorString(String backCatalogueInvestigatorString) {
         this.backCatalogueInvestigatorString = backCatalogueInvestigatorString;
+    }
+    
+     public String getVisitId() {
+        return visitId;
+    }
+
+    public void setVisitId(String visitId) {
+        this.visitId = visitId;
+    }
+    
+    public String getInvestigationAbstract() {
+        return investigationAbstract;
+    }
+
+    public void setInvestigationAbstract(String investigationAbstract) {
+        this.investigationAbstract = investigationAbstract;
+    }
+        
+    public String getInvestigationType() {
+        return investigationType;
+    }
+
+    public void setInvestigationType(String investigationType) {
+        this.investigationType = investigationType;
+    }
+        
+    public Long getGrantId() {
+        return grantId;
+    }
+
+    public void setGrantId(Long grantId) {
+        this.grantId = grantId;
     }
     
     /////////////  Util methods for AdvancedSearch creation in InvestigationSearch    /////////////////

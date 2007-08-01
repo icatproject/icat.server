@@ -34,7 +34,9 @@ public class Queries {
      */
     public static final String LIST_ALL_USERS_INVESTIGATIONS_SQL = "SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.RELEASE_DATE, t0.CREATE_ID, t0.TITLE, t0.MOD_ID, t0.INV_ABSTRACT, t0.PREV_INV_NUMBER, t0.VISIT_ID, t0.BCAT_INV_STR, t0.INV_NUMBER, t0.CREATE_TIME, t0.FACILITY_AQUIRED, t0.DELETED, t0.INSTRUMENT, t0.FACILITY_CYCLE, t0.INV_TYPE " +
             "FROM INVESTIGATION t0, ICAT_AUTHORISATION t1, ICAT_ROLE t2 WHERE " +
-            "((((((t0.ID = t1.INVESTIGATION_ID) AND (t0.DELETED = 'N')) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N')) AND (t2.ACTION_SELECT = 'Y')) AND (t2.ROLE = t1.ROLE))";
+            "(((((((t0.ID = t1.ELEMENT_ID) AND (t1.ELEMENT_TYPE = 'INVESTIGATION')) AND (t0.DELETED = 'N')) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N')) AND (t2.ACTION_SELECT = 'Y')) AND (t2.ROLE = t1.ROLE))";
+          
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /*
      * This searches the investigations that the user can view by a suranme
@@ -176,22 +178,22 @@ public class Queries {
      */
     public static final String ADVANCED_SEARCH = "Investigation.findByAdvancedSearch";
     
-    public static final String ADVANCED_SEARCH_SQL_1 = "SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, "+
-            "t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, "+
-            "t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE "+
-            "FROM INVESTIGATION t0, ICAT_AUTHORISATION t1, ICAT_ROLE t2 "+
-            "WHERE ((((((t0.ID = t1.INVESTIGATION_ID) AND (t0.DELETED = 'N')) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N')) AND (t2.ACTION_SELECT = 'Y')) AND (t2.ROLE = t1.ROLE)) " +
+    public static final String ADVANCED_SEARCH_SQL_1 = LIST_ALL_USERS_INVESTIGATIONS_SQL +
             "AND (inv_number = ?inv_number OR ?inv_number IS NULL) "+
             "AND (bcat_inv_str = ?bcat_inv_str OR ?bcat_inv_str IS NULL) "+
             "AND (Lower(title) LIKE '%'||Lower(?inv_title)||'%' OR ?inv_title IS NULL) ";
     
     public static final String ADVANCED_SEARCH_SQL_BASE = "";
-            /*SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID,
-            t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME,
-            t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE
-            FROM INVESTIGATION t0
-            WHERE  (((t0.ID = t1.INVESTIGATION_ID) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N'))" +
+           
+            /*"SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.RELEASE_DATE, t0.CREATE_ID, t0.TITLE, t0.MOD_ID, t0.INV_ABSTRACT, t0.PREV_INV_NUMBER, t0.VISIT_ID, t0.BCAT_INV_STR, t0.INV_NUMBER, t0.CREATE_TIME, t0.FACILITY_AQUIRED, t0.DELETED, t0.INSTRUMENT, t0.FACILITY_CYCLE, t0.INV_TYPE 
+            FROM INVESTIGATION t0, ICAT_AUTHORISATION t1, ICAT_ROLE t2 WHERE 
+            (((((((t0.ID = t1.ELEMENT_ID) AND (t1.ELEMENT_TYPE = 'INVESTIGATION')) AND (t0.DELETED = 'N')) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N')) AND (t2.ACTION_SELECT = 'Y')) AND (t2.ROLE = t1.ROLE))
+            WHERE  (((t0.ID = t1.INVESTIGATION_ID) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N'))
             AND (inv_number = ? OR ? IS NULL)
+            AND (visit_id = ? OR ? IS NULL)
+            AND (inv_abstract LIKE ? OR ? IS NULL)
+            AND (inv_type = ? OR ? IS NULL)
+            AND (grant_id = ? OR ? IS NULL)
             AND (bcat_inv_str = ? OR ? IS NULL)
             AND Lower(title) LIKE '%'||Lower(?)||'%' OR ? IS NULL
              *
@@ -429,6 +431,14 @@ public class Queries {
     public static final String ALL_INSTRUMENTS = "Instrument.listAll";
     public static final String ALL_INSTRUMENTS_JPQL = "SELECT DISTINCT i FROM Instrument i WHERE i.markedDeleted = 'N'";
     
+     /*
+     * Find all investigation types,
+     *
+     */
+    public static final String ALL_INVESTIGATION_TYPES = "InvestigationType.listAll";
+    public static final String ALL_INVESTIGATION_TYPES_JPQL = "SELECT DISTINCT i FROM InvestigationType i WHERE i.markedDeleted = 'N'";
+    
+    
     /*
      * Find all roles list,
      *
@@ -456,6 +466,20 @@ public class Queries {
      */
     public static final String DATASET_FINDBY_UNIQUE = "Dataset.findbyUnique";
     public static final String DATASET_FINDBY_UNIQUE_JPQL = "SELECT d FROM Dataset d WHERE (d.sampleId = :sampleId OR d.sampleId IS NULL) AND (d.name = :name OR d.name IS NULL) AND (d.investigation = :investigation OR d.investigation IS NULL)  AND (d.datasetType = :datasetType OR d.datasetType IS NULL)";
+    
+    /*
+     * Find ICAT AUTHORISATION by user and element id 
+     *
+     */
+    public static final String ICAT_AUTHORISATION_FINDBY_UNIQUE = "IcatAuthorisation.findByUnique"; 
+    public static final String ICAT_AUTHORISATION_FINDBY_UNIQUE_JPQL = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = :elementType AND i.elementId = :elementId AND i.userId = :userId AND i.markedDeleted = 'N'";
+    
+    /*
+     * Find ICAT AUTHORISATION by user and element id null, ie creating a inv, df, ds 
+     *
+     */
+    public static final String ICAT_AUTHORISATION_FINDBY_NULL = "IcatAuthorisation.findByIdNullElementId";
+    public static final String ICAT_AUTHORISATION_FINDBY_NULL_JPQL = "SELECT i FROM IcatAuthorisation i WHERE i.elementId IS null AND i.elementType = :elementType AND i.userId = :userId AND i.markedDeleted = 'N'";
     
     
     
