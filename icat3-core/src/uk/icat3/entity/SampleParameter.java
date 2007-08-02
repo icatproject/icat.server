@@ -25,6 +25,7 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.Cascade;
+import uk.icat3.util.ElementType;
 
 /**
  * Entity class SampleParameter
@@ -285,6 +286,13 @@ import uk.icat3.util.Cascade;
      */
     public void setNumeric(boolean numeric) {
         //this.numeric = numeric;
+    }
+    
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.INVESTIGATION;
     }
     
     /**

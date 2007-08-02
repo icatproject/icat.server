@@ -23,6 +23,7 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.util.ElementType;
 
 /**
  * Entity class Investigator
@@ -155,6 +156,13 @@ public class Investigator extends EntityBaseBean implements Serializable {
      */
     public void setInvestigation(Investigation investigation) {
         this.investigation = investigation;
+    }
+    
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.INVESTIGATION;
     }
     
     /**

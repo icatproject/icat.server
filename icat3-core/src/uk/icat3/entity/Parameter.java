@@ -24,6 +24,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.util.ElementType;
 
 /**
  * Entity class Parameter
@@ -328,6 +329,13 @@ public class Parameter extends EntityBaseBean implements Serializable {
         this.datafileParameterCollection = datafileParameterCollection;
     }
 
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.INVESTIGATION;
+    }
+    
     /**
      * Returns a hash code value for the object.  This implementation computes 
      * a hash code value based on the id fields in this object.

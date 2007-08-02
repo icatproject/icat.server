@@ -28,6 +28,7 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.util.ElementType;
 
 /**
  * Entity class DatafileParameter
@@ -281,6 +282,13 @@ import uk.icat3.exceptions.ValidationException;
      */
     public void setNumeric(boolean numeric) {
         //this.numeric = numeric;
+    }
+    
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.DATAFILE;
     }
     
     /**

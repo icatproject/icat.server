@@ -34,6 +34,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.Cascade;
+import uk.icat3.util.ElementType;
 
 /**
  * Entity class Sample
@@ -229,6 +230,13 @@ import uk.icat3.util.Cascade;
      */
     public void setSampleParameterCollection(Collection<SampleParameter> sampleParameterCollection) {
         this.sampleParameterCollection = sampleParameterCollection;
+    }
+    
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.INVESTIGATION;
     }
     
     /**

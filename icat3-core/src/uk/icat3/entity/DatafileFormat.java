@@ -20,6 +20,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.util.ElementType;
 
 /**
  * Entity class DatafileFormat
@@ -140,6 +141,13 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
         this.datafileCollection = datafileCollection;
     }
 
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.DATAFILE;
+    }
+    
     /**
      * Returns a hash code value for the object.  This implementation computes 
      * a hash code value based on the id fields in this object.

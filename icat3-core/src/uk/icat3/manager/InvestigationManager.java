@@ -11,6 +11,7 @@ package uk.icat3.manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Random;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
@@ -19,6 +20,7 @@ import uk.icat3.entity.Dataset;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.IcatAuthorisation;
+import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.Keyword;
@@ -33,6 +35,7 @@ import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.IcatRoles;
 import uk.icat3.util.InvestigationInclude;
 
 /**
@@ -118,48 +121,10 @@ public class InvestigationManager extends ManagerUtil {
         return getInvestigations(userId, investigationIds, InvestigationInclude.NONE, manager);
     }
     
-    public static Collection<IcatAuthorisation> getInvestigationAuthorisations(String userId, Long id, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public static Collection<IcatAuthorisation> getAuthorisations(String userId, Long id, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         return getAuthorisations(userId, id, ElementType.INVESTIGATION, manager);
     }
-    
-    public static Collection<IcatAuthorisation> getDatasetAuthorisations(String userId, Long id, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
-        return getAuthorisations(userId, id, ElementType.DATASET, manager);
-    }
-    
-    public static Collection<IcatAuthorisation> getDatafileAuthorisations(String userId, Long id, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
-        return getAuthorisations(userId, id, ElementType.DATAFILE, manager);
-    }
-    
-    /**
-     * Gets all the IcatAuthorisations for a investigation/dataset/datafile if the user has manager users action on that investigation
-     *
-     */
-    private static Collection<IcatAuthorisation> getAuthorisations(String userId, Long id, ElementType type, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
-        EntityBaseBean entityObject = null;
-        Query query = null;
-        
-        if(type == ElementType.INVESTIGATION){
-            entityObject = find(Investigation.class, id, manager);
-            manager.createQuery("IcatAuthorisation.findAllByInvestigationId");
-        } else if(type == ElementType.DATASET){
-            entityObject = find(Dataset.class, id, manager);
-            manager.createQuery("IcatAuthorisation.findAllByDatasetId");
-        } else if(type == ElementType.DATAFILE){
-            entityObject = find(Datafile.class, id, manager);
-            manager.createQuery("IcatAuthorisation.findAllByDatafileId");
-        }
-        
-        GateKeeper.performAuthorisation(userId, entityObject, AccessType.MANAGE_USERS, manager);
-        
-        //user has access to read all the rols etc
-        query.setParameter("elementId", id);
-        
-        Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
-        
-        log.debug("Found "+icatAuthorisations.size()+" for "+id+" for "+type);
-        return icatAuthorisations;
-    }
-    ////////////////////    End of get Commands    /////////////////////////
+          ////////////////////    End of get Commands    /////////////////////////
     
     
     
@@ -282,97 +247,11 @@ public class InvestigationManager extends ManagerUtil {
         return true;
     }
     
-    /**
-     * Deletes / Removes a entry in the icat authorisation table
-     *
-     * @param userId federalId of the user.
-     * @param id PK of icatAuthorisation
-     * @param type {@link AccessType} object, either REMOVE or DELETE
-     * @param manager manager object that will facilitate interaction with underlying database
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     */
-    public static void deleteAuthorisation(String userId, Long id, AccessType type, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
-        log.trace("deleteAuthorisation("+userId+", "+id+", EntityManager)");
-        
-        IcatAuthorisation icatAuthorisation = find(IcatAuthorisation.class, id, manager);
-        
-        if(type == AccessType.DELETE){
-            //check user has delete access
-            GateKeeper.performAuthorisation(userId, icatAuthorisation, AccessType.DELETE, manager);
-            //String facilityUserId = getFacilityUserId(userId, manager);
-            
-            //ok here fo delete
-            icatAuthorisation.setDeleted(true);
-            icatAuthorisation.setModId(userId);
-        } else if(type == AccessType.REMOVE){
-            manager.remove(icatAuthorisation);
-        }
-    }
     ////////////////////        End of Delete Commands           /////////////////////////
     
     
     
     ////////////////////     Add/Update Commands    ///////////////////
-    /**
-     * Adds a new IcatAuthorisation to the DB, depending on the permissions the level they are wanting to add to the DB
-     *
-     * @param userId
-     * @param toAddUserId
-     * @param toAddRole
-     * @param investigationId
-     * @param manager
-     * @return
-     */
-    public static IcatAuthorisation addAuthorisation(String userId, String toAddUserId, String toAddRole, Long investigationId, EntityManager manager){
-        //add in role to db
-        //TODO add this
-        //the weight of users role cannot add higher ranking, then all is good.
-        return  new IcatAuthorisation();
-    }
-    
-    /**
-     * Creates a investigation, depending if the user has create permission to create the investigation
-     *
-     * @param userId federalId of the user.
-     * @param investigation objects to be created
-     * @param manager manager object that will facilitate interaction with underlying database
-     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
-     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
-     * @throws uk.icat3.exceptions.ValidationException if the investigation is invalid
-     * @return created investigation
-     */
-    public static Investigation createInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-        log.trace("createInvestigation("+userId+", "+investigation+", EntityManager)");
-        
-        investigation.setId(null); //should never be null at this point but check
-        
-        //check if valid investigation
-        investigation.isValid(manager);
-        
-        //check user has update access
-        GateKeeper.performAuthorisation(userId, investigation, AccessType.CREATE, manager);
-        FacilityUser facilityUser = getFacilityUser(userId, manager);
-        
-        //new dataset, set createid
-        
-        investigation.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
-        investigation.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
-        manager.persist(investigation);
-        
-        
-        //need to add this user to the list of investigators now
-        Investigator investigator = new Investigator(facilityUser.getFacilityUserId(), investigation.getId());
-        investigator.setCreateId(userId);
-        investigator.setFacilityUser(facilityUser);
-        investigator.setInvestigation(investigation);
-        
-        log.trace("Adding "+investigator+" to investigation "+investigation);
-        investigation.addInvestigator(investigator);
-        
-        return investigation;
-    }
-    
     /**
      * Updates a Investigation depending on whether the user has permission to update this Investigation
      *
@@ -403,6 +282,47 @@ public class InvestigationManager extends ManagerUtil {
         
     }
     
+    /**
+     * Creates a investigation, depending if the user has create permission to create the investigation
+     *
+     * @param userId federalId of the user.
+     * @param investigation objects to be created
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the investigation is invalid
+     * @return created investigation
+     */
+    public static Investigation createInvestigation(String userId, Investigation investigation, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        log.trace("createInvestigation("+userId+", "+investigation+", EntityManager)");
+        
+        investigation.setId(null); //should never be null at this point but check
+        
+        //check if valid investigation
+        investigation.isValid(manager);
+        investigation.setFacility(getFacility(manager));
+        
+        //check user has update access
+        GateKeeper.performAuthorisation(userId, investigation, AccessType.CREATE, manager);
+        FacilityUser facilityUser = getFacilityUser(userId, manager);
+        
+        //new dataset, set createid
+        
+        investigation.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
+        investigation.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
+        manager.persist(investigation);
+        
+        //need to add a another row for creating datasets for this investigation
+        IcatAuthorisation IcatAuthorisationChild = persistAuthorisation(userId, getRole(IcatRoles.CREATOR.toString(), manager),
+                ElementType.DATASET, null,
+                ElementType.INVESTIGATION, investigation.getId(), null, manager);
+        //add new creator role to investigation for the user creating the investigation
+        persistAuthorisation(userId, getRole(IcatRoles.CREATOR.toString(), manager),
+                ElementType.INVESTIGATION, investigation.getId(),
+                null, null, IcatAuthorisationChild.getId(), manager);
+        
+        return investigation;
+    }
     ///////////////   End of add/Update Commands    ///////////////////
     
     
@@ -707,7 +627,7 @@ public class InvestigationManager extends ManagerUtil {
                 publication.setCreateId(userId);
                 manager.persist(publication);
                 
-               // investigation.addPublication(publication);
+                // investigation.addPublication(publication);
                 return publication;
             }
             
@@ -741,7 +661,7 @@ public class InvestigationManager extends ManagerUtil {
                 sample.setCreateId(userId);
                 manager.persist(sample);
                 //add sample to investigation
-               // investigation.addSample(sample);
+                // investigation.addSample(sample);
                 return sample;
             }
         } else if(object instanceof SampleParameter){
@@ -839,7 +759,7 @@ public class InvestigationManager extends ManagerUtil {
                 //sets modId for persist
                 investigator.setCreateId(userId);
                 manager.persist(investigator);
-              //  investigation.addInvestigator(investigator);
+                //  investigation.addInvestigator(investigator);
                 return investigator;
             }
         }  else throw new RuntimeException(object +" is not avaliable to be added");

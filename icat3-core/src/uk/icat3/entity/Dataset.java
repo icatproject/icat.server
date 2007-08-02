@@ -367,6 +367,13 @@ public class Dataset extends EntityBaseBean implements Serializable {
     }
     
     /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.DATASET;
+    }
+    
+    /**
      * Sets type (see Cascade) flag on all items owned by this dataset
      *
      * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS

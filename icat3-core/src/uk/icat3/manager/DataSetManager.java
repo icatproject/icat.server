@@ -26,6 +26,7 @@ import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
+import uk.icat3.util.ElementType;
 
 /**
  * This is the manager class for all operations for data sets.
@@ -299,7 +300,10 @@ public class DataSetManager extends ManagerUtil {
     
     
     ////////////////////    Get Commands    /////////////////////////
-    
+     public static Collection<IcatAuthorisation> getAuthorisations(String userId, Long id, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
+        return getAuthorisations(userId, id, ElementType.DATASET, manager);
+    }
+   
     /**
      * Gets the data sets objects from a list of data set ids, depending if the users has access to read the data sets.
      * Also gets extra information regarding the data set.  See {@link DatasetInclude}

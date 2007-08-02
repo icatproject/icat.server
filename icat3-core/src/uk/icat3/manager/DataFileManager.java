@@ -25,6 +25,7 @@ import uk.icat3.exceptions.ValidationException;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
+import uk.icat3.util.ElementType;
 
 /**
  * This is the manager class for all operations for data files.
@@ -255,6 +256,10 @@ public class DataFileManager extends ManagerUtil {
     ///////////////   End of add/Update Commands    ///////////////////
     
     
+     public static Collection<IcatAuthorisation> getAuthorisations(String userId, Long id, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
+        return getAuthorisations(userId, id, ElementType.DATAFILE, manager);
+    }
+     
     /**
      * Gets the data file objects from a list of data file ids, depending if the user has access to read the data files.
      *

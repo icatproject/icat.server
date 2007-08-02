@@ -23,6 +23,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.util.ElementType;
 import uk.icat3.util.Queries;
 
 /**
@@ -111,6 +112,13 @@ public class DatasetType extends EntityBaseBean implements Serializable {
      */
     public void setDatasetCollection(Collection<Dataset> datasetCollection) {
         this.datasetCollection = datasetCollection;
+    }
+    
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.DATASET;
     }
     
     /**

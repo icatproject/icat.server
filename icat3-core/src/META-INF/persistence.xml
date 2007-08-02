@@ -4,7 +4,7 @@
     <persistence-unit name="icat3-scratch-testing-PU" transaction-type="RESOURCE_LOCAL">
         <provider>oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider</provider>
         <class>uk.icat3.entity.Publication</class>
-         <class>uk.icat3.entity.Facility</class>
+        <class>uk.icat3.entity.Facility</class>
         <class>uk.icat3.entity.Sample</class>
         <class>uk.icat3.entity.Investigation</class>
         <class>uk.icat3.entity.Dataset</class>
@@ -30,9 +30,7 @@
         <class>uk.icat3.entity.Study</class>
         <class>uk.icat3.entity.DatafileParameter</class>
         <class>uk.icat3.entity.IcatAuthorisation</class>
-        <class>uk.icat3.entity.IcatRole</class>
-        <class>uk.icat3.entity.UserRoles</class>
-        <class>uk.icat3.entity.Applications</class>
+        <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicList</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
@@ -53,7 +51,7 @@
     <persistence-unit name="icat3-unit-testing-PU" transaction-type="RESOURCE_LOCAL">
         <provider>oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider</provider>      
         <class>uk.icat3.entity.Publication</class>
-           <class>uk.icat3.entity.Facility</class>
+        <class>uk.icat3.entity.Facility</class>
         <class>uk.icat3.entity.Sample</class>
         <class>uk.icat3.entity.Investigation</class>
         <class>uk.icat3.entity.Dataset</class>
@@ -79,9 +77,7 @@
         <class>uk.icat3.entity.Study</class>
         <class>uk.icat3.entity.DatafileParameter</class>
         <class>uk.icat3.entity.IcatAuthorisation</class>
-        <class>uk.icat3.entity.IcatRole</class>
-        <class>uk.icat3.entity.UserRoles</class>
-        <class>uk.icat3.entity.Applications</class>
+        <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicList</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
@@ -101,8 +97,8 @@
     
     <persistence-unit name="icat3-isis" transaction-type="RESOURCE_LOCAL">
         <provider>oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider</provider>
-           <class>uk.icat3.entity.Facility</class>
         <class>uk.icat3.entity.Publication</class>
+        <class>uk.icat3.entity.Facility</class>
         <class>uk.icat3.entity.Sample</class>
         <class>uk.icat3.entity.Investigation</class>
         <class>uk.icat3.entity.Dataset</class>
@@ -128,9 +124,7 @@
         <class>uk.icat3.entity.Study</class>
         <class>uk.icat3.entity.DatafileParameter</class>
         <class>uk.icat3.entity.IcatAuthorisation</class>
-        <class>uk.icat3.entity.IcatRole</class>
-        <class>uk.icat3.entity.UserRoles</class>
-        <class>uk.icat3.entity.Applications</class>
+        <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicList</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
@@ -149,8 +143,8 @@
     
     <persistence-unit name="icat3-dls_dev_new" transaction-type="RESOURCE_LOCAL">
         <provider>oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider</provider>
-           <class>uk.icat3.entity.Facility</class>
         <class>uk.icat3.entity.Publication</class>
+        <class>uk.icat3.entity.Facility</class>
         <class>uk.icat3.entity.Sample</class>
         <class>uk.icat3.entity.Investigation</class>
         <class>uk.icat3.entity.Dataset</class>
@@ -176,9 +170,7 @@
         <class>uk.icat3.entity.Study</class>
         <class>uk.icat3.entity.DatafileParameter</class>
         <class>uk.icat3.entity.IcatAuthorisation</class>
-        <class>uk.icat3.entity.IcatRole</class>
-        <class>uk.icat3.entity.UserRoles</class>
-        <class>uk.icat3.entity.Applications</class>
+        <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicList</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>

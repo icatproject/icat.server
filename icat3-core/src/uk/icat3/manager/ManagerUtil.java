@@ -11,6 +11,7 @@ package uk.icat3.manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Random;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -19,16 +20,20 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.EntityBaseBean;
+import uk.icat3.entity.Facility;
 import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.IcatAuthorisation;
+import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.IcatRoles;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.Queries;
 
@@ -41,6 +46,8 @@ public class ManagerUtil {
     
     // Global class logger
     static Logger log = Logger.getLogger(ManagerUtil.class);
+    
+    /////////////////////////////  Getting / Filtering element collections /////////////////////////////
     
     /**
      * Goes and collects the information associated with the investigation depending on the InvestigationInclude.
@@ -277,9 +284,14 @@ public class ManagerUtil {
         } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}
     }
     
+    /////////////////////////////  End of Getting / Filtering element collections /////////////////////////////
+    
+    
+    /////////////////////////////  Finding Objects  /////////////////////////////
+    
     /**
      * Checks that the object with primary key exists in the database, if so
-     * is returned
+     * is returned, does not find deleted objects
      *
      * @param entityClass entity class that you are looking for
      * @param primaryKey primary key of object wanting to find
@@ -294,17 +306,17 @@ public class ManagerUtil {
     
     private static <T> T findObject(Class<T> entityClass, Object primaryKey, EntityManager manager, boolean findDeleted) throws NoSuchObjectFoundException{
         
-        if(primaryKey == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+": id: "+primaryKey+" not found.");
+        if(primaryKey == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+"[id:"+primaryKey+"] not found.");
         
         T object = manager.find(entityClass, primaryKey);
         
-        if(object == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+": id: "+primaryKey+" not found.");
+        if(object == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+"[id:"+primaryKey+"] not found.");
         //if dont want to find deleted items and it is deleted then throw exception
         if(((EntityBaseBean)object).isDeleted() && !findDeleted){
-            log.trace(entityClass.getSimpleName()+": id: "+primaryKey+" exists in the database but is deleted.");
-            throw new NoSuchObjectFoundException(entityClass.getSimpleName()+": id: "+primaryKey+" not found.");
+            log.trace(entityClass.getSimpleName()+"[id: "+primaryKey+"] exists in the database but is deleted.");
+            throw new NoSuchObjectFoundException(entityClass.getSimpleName()+"[id:"+primaryKey+"] not found.");
         }
-        log.trace(entityClass.getSimpleName()+": id: "+primaryKey+" exists in the database");
+        log.trace(entityClass.getSimpleName()+"[id:"+primaryKey+"] exists in the database");
         
         return object;
     }
@@ -348,14 +360,300 @@ public class ManagerUtil {
             log.trace(""+facilityUser.getFacilityUserId()+" corresponds to "+userId);
             return facilityUser;
         } catch(NoResultException nre) {
-            log.warn("federalId:" +userId+" has no associated facility user");
+            log.warn("federalId: " +userId+" has no associated facility user");
             throw new RuntimeException("FederalId:" +userId+" has no associated facility user in DB.");
         } catch(NonUniqueResultException nonue){
-            log.warn("federalId:" +userId+" has more than one associated facility user.");
+            log.warn("federalId: " +userId+" has more than one associated facility user.");
             throw new RuntimeException("federalId:" +userId+" has more than one associated facility user.  DB should never allow this error to be thrown.");
         }
     }
     
+    /////////////////////////////  End of Finding Objects  /////////////////////////////
+    
+    
+    /**
+     * Gets the facility this icat table
+     *
+     * @param manager
+     * @return
+     */
+    public static Facility getFacility(EntityManager manager) {
+        try{
+            Collection<Facility> facilities = (Collection<Facility>)manager.createQuery("SELECT f from Facility f").getResultList();
+            if(facilities == null || facilities.size() == 0) throw new RuntimeException("This Icat table set up incorrectly");
+            return facilities.iterator().next();
+        } catch(Exception r){
+            log.warn("This Icat table set up incorrectly",r);
+            throw new RuntimeException("This Icat table set up incorrectly");
+        }
+    }
+    
+    
+    ////////////////////////////////////  ICAT AUTHORISATION METHODS //////////////////////////////////////////////
+     /**
+     * Gets all the IcatAuthorisations for a investigation/dataset/datafile if the user has manager users action on that investigation
+     *
+     */
+    protected static Collection<IcatAuthorisation> getAuthorisations(String userId, Long id, ElementType type, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
+        EntityBaseBean entityObject = null;
+        Query query = null;
+        
+        if(type == ElementType.INVESTIGATION){
+            entityObject = find(Investigation.class, id, manager);
+            query = manager.createNamedQuery("IcatAuthorisation.findAllById");
+        } else if(type == ElementType.DATASET){
+            entityObject = find(Dataset.class, id, manager);
+            query = manager.createNamedQuery("IcatAuthorisation.findAllById");
+        } else if(type == ElementType.DATAFILE){
+            entityObject = find(Datafile.class, id, manager);
+            query = manager.createNamedQuery("IcatAuthorisation.findAllById");
+        }
+        
+        GateKeeper.performAuthorisation(userId, entityObject, AccessType.MANAGE_USERS, manager);
+        
+        //user has access to read all the roles etc
+        query.setParameter("id", id);
+        query.setParameter("elementType", type);
+        
+        Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
+        
+        log.debug("Found "+icatAuthorisations.size()+" authorisation(s) for "+id+" for "+type);
+        return icatAuthorisations;
+    }
+    
+    /**
+     * Deletes / Removes a entry in the icat authorisation table
+     *
+     * @param userId federalId of the user.
+     * @param id PK of icatAuthorisation
+     * @param type {@link AccessType} object, either REMOVE or DELETE
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     */
+    public static void deleteAuthorisation(String userId, Long id, AccessType type, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+        log.trace("deleteAuthorisation("+userId+", "+id+", "+type+", EntityManager)");
+        
+        IcatAuthorisation icatAuthorisation = find(IcatAuthorisation.class, id, manager);
+        
+        //if elementId is null, then not there
+        if(icatAuthorisation.getElementId() == null) throw new NoSuchObjectFoundException(icatAuthorisation+" not found.");
+       
+        if(type == AccessType.DELETE){
+            //check user has delete access
+            GateKeeper.performAuthorisation(userId, getRootElement(icatAuthorisation, manager), AccessType.MANAGE_USERS, manager);
+            
+            //ok here fo delete
+            icatAuthorisation.setDeleted(true);
+            icatAuthorisation.setModId(userId);
+            
+            //delete child record if there
+            if(icatAuthorisation.getUserChildRecord() != null){
+                IcatAuthorisation icatAuthorisationChild = findObject(IcatAuthorisation.class, icatAuthorisation.getUserChildRecord(), manager);
+                //ok here fo delete
+                icatAuthorisationChild.setDeleted(true);
+                icatAuthorisationChild.setModId(userId);
+            }
+        } else if(type == AccessType.REMOVE){
+            //check user has delete access
+            GateKeeper.performAuthorisation(userId, getRootElement(icatAuthorisation, manager), AccessType.MANAGE_USERS, manager);
+            manager.remove(icatAuthorisation);
+            
+            //remove child record if there
+            if(icatAuthorisation.getUserChildRecord() != null){
+                IcatAuthorisation icatAuthorisationChild = findObject(IcatAuthorisation.class, icatAuthorisation.getUserChildRecord(), manager);
+                //ok here fo delete
+                manager.remove(icatAuthorisationChild);
+            }
+        }
+    }
+    
+    /**
+     * Adds a new IcatAuthorisation to the DB, depending on the permissions the level they are wanting to add to the DB
+     *
+     * @param userId
+     * @param toAddUserId
+     * @param toAddRole
+     * @param id
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     */
+    public static IcatAuthorisation addAuthorisation(String userId, String toAddUserId, String toAddRole, Long id, ElementType type, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        log.trace("addAuthorisation("+userId+", adding "+toAddUserId+" as role: "+toAddRole+" to investigation:"+id+", EntityManager)");
+        
+        EntityBaseBean rootElement = null;
+        
+        //check id is a valid element
+        if(type == ElementType.INVESTIGATION){
+            rootElement = find(Investigation.class, id, manager);
+        } else if(type == ElementType.DATASET){
+            rootElement = find(Dataset.class, id, manager);
+        } else if(type == ElementType.DATAFILE){
+            rootElement = find(Datafile.class, id, manager);
+        }
+        
+        //check permissions on investigation
+        GateKeeper.performAuthorisation(userId, rootElement, AccessType.MANAGE_USERS, manager);
+        
+        //the weight of users role cannot add higher ranking, then all is good.
+        IcatRole userIdsRole = rootElement.getIcatRole();
+        IcatRole toBeAddedRole = getRole(toAddRole, manager);
+        
+        //user cannot add a higher role than themeselves
+        if(userIdsRole.isGreaterEqualTo(toBeAddedRole)){
+            IcatAuthorisation icatAuthorisationChild = null;
+            
+            if(type == ElementType.INVESTIGATION){
+                if(toBeAddedRole.isRootInsert()){
+                    //need to add a another row for creating datasets for this investigation
+                    log.trace("Adding "+toAddUserId+" to create datasets on "+rootElement);
+                    icatAuthorisationChild = persistAuthorisation(userId, toBeAddedRole, ElementType.DATASET, null,
+                            type,  ((Investigation)rootElement).getId(), null, manager);
+                }
+                return persistAuthorisation(userId, toBeAddedRole, type, ((Investigation)rootElement).getId(),
+                        null,  null, icatAuthorisationChild.getId(), manager);
+                
+            } else if(type == ElementType.DATASET){
+                if(toBeAddedRole.isRootInsert()){
+                    //need to add a another row for creating datafiles for this dataset
+                    log.trace("Adding "+toAddUserId+" to create datafile on "+rootElement);
+                    icatAuthorisationChild = persistAuthorisation(userId, toBeAddedRole,  ElementType.DATAFILE, null,
+                            type,  ((Investigation)rootElement).getId(), null,  manager);
+                }
+                return persistAuthorisation(userId, toBeAddedRole,
+                        type,  ((Dataset)rootElement).getId(),
+                        ElementType.INVESTIGATION,  ((Dataset)rootElement).getInvestigationId(), icatAuthorisationChild.getId(), manager);
+                
+            } else if(type == ElementType.DATAFILE){
+                return persistAuthorisation(userId, toBeAddedRole, type, ((Datafile)rootElement).getId(),
+                        ElementType.DATASET, ((Datafile)rootElement).getDatasetId(), null, manager);
+            } else {
+                throw new RuntimeException("Element type not supported: "+type);
+            }
+        } else {
+            throw new ValidationException("Cannot add a higher role "+toAddRole+", than yours "+userIdsRole.getRole()+" for "+rootElement);
+        }
+    }
+    
+    
+    
+    /**
+     * Changes a role for IcatAuthorisation to the DB, depending on the permissions the level they are wanting to add to the DB
+     *
+     * @param userId
+     * @param toChangetoRole
+     * @param authorisationId
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException
+     */
+    public static void updateAuthorisation(String userId, String toChangetoRole, Long authorisationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        log.trace("updateAuthorisation("+userId+", "+toChangetoRole+", "+authorisationId+", EntityManager)");
+        
+        IcatAuthorisation icatAuthorisation = find(IcatAuthorisation.class, authorisationId, manager);
+        
+        //if elementId is null, then not there
+        if(icatAuthorisation.getElementId() == null) throw new NoSuchObjectFoundException(icatAuthorisation+" not found.");
+        
+        //check investigationId is a valid investigation
+        EntityBaseBean rootElement = getRootElement(icatAuthorisation, manager);
+        
+        GateKeeper.performAuthorisation(userId, rootElement, AccessType.MANAGE_USERS, manager);
+        
+        IcatRole userIdsRole = rootElement.getIcatRole();
+        IcatRole newRole = getRole(toChangetoRole, manager);
+        
+        log.trace("Users role: " +userIdsRole+" wants to change : "+authorisationId+" to: "+newRole);
+        //user cannot add a higher role than themeselves
+        if(userIdsRole.isGreaterEqualTo(newRole)){
+            log.debug("Changing "+icatAuthorisation+" to new role "+newRole);
+            icatAuthorisation.setRole(newRole);
+            
+            //need to check if new role has root insert, if not, check if row in DB with create Root (ie elementId null)
+            //and delete it so they dont have create ds, df actions
+            if(!newRole.isRootInsert() && icatAuthorisation.getUserChildRecord() != null){
+                
+                IcatAuthorisation icatAuthorisationChild = findObject(IcatAuthorisation.class, icatAuthorisation.getUserChildRecord(), manager);
+                
+                log.debug("Removing: "+icatAuthorisationChild+" for user "+userId);
+                manager.remove(icatAuthorisationChild);
+                //removing child
+                icatAuthorisation.setUserChildRecord(null);
+                
+            } else if(newRole.isRootInsert() && icatAuthorisation.getUserChildRecord() == null) {
+                //if new role is creator then add a record
+                if(rootElement.getRootElementType() == ElementType.INVESTIGATION){
+                    IcatAuthorisation icatAuthorisationChild = persistAuthorisation(userId, newRole,
+                            ElementType.DATASET, null, ElementType.INVESTIGATION, ((Investigation)rootElement).getId(), null, manager);
+                    
+                    icatAuthorisation.setUserChildRecord(icatAuthorisationChild.getId());
+                } else if(rootElement.getRootElementType() == ElementType.DATASET){
+                    IcatAuthorisation icatAuthorisationChild = persistAuthorisation(userId, newRole,
+                            ElementType.DATAFILE, null, ElementType.DATASET, ((Dataset)rootElement).getId(), null, manager);
+                    
+                    icatAuthorisation.setUserChildRecord(icatAuthorisationChild.getId());
+                }
+            }
+        }  else {
+            throw new ValidationException("Cannot change to a higher role "+newRole+", than yours "+userIdsRole.getRole()+" for "+rootElement);
+        }
+    }
+    
+    /**
+     * Gets the role out of the ICAT_ROLE table
+     *
+     * @param role
+     * @param manager
+     * @return
+     * @throws uk.icat3.exceptions.ValidationException
+     */
+    public static IcatRole getRole(String role, EntityManager manager) throws ValidationException{
+        IcatRole icatRole = manager.find(IcatRole.class, role);
+        if(icatRole == null) throw new ValidationException(role+" is not a valid role.");
+        else return icatRole;
+    }
+    
+    /**
+     * Gets the inv, ds, or df associated with the icatAuthorisation
+     */
+    public static EntityBaseBean getRootElement(IcatAuthorisation icatAuthorisation, EntityManager manager) throws NoSuchObjectFoundException{
+        if(icatAuthorisation.getElementType() == ElementType.INVESTIGATION){
+            return  find(Investigation.class, icatAuthorisation.getElementId(), manager);
+        } else if(icatAuthorisation.getElementType() == ElementType.DATASET){
+            return  find(Dataset.class, icatAuthorisation.getElementId(), manager);
+        } else if(icatAuthorisation.getElementType() == ElementType.DATAFILE){
+            return  find(Datafile.class, icatAuthorisation.getElementId(), manager);
+        } else throw new NoSuchObjectFoundException("No entity found for "+icatAuthorisation.getElementType()+" "+icatAuthorisation.getElementId());
+    }
+    
+    /**
+     * Adds an authorisation to a inv, ds, df
+     */
+    public static IcatAuthorisation persistAuthorisation(String userId, IcatRole role, ElementType elementType, Long id, ElementType parentElementType,  Long parentId, Long usercChildRecord, EntityManager manager){
+        //now add authorisation
+        IcatAuthorisation icatAuthorisation = new IcatAuthorisation();
+        
+        icatAuthorisation.setUserId(userId);
+        icatAuthorisation.setElementType(elementType);
+        icatAuthorisation.setElementId(id);
+        icatAuthorisation.setParentElementType(parentElementType);
+        icatAuthorisation.setParentElementId(parentId);
+        icatAuthorisation.setUserChildRecord(usercChildRecord);
+        icatAuthorisation.setCreateId(userId);
+        icatAuthorisation.setRole(role);
+        
+        log.debug("Adding: "+role+" to "+elementType+": "+id+" with parent "+parentElementType+": "+parentId+" with userChildRecord: "+usercChildRecord+" for user "+userId);
+        manager.persist(icatAuthorisation);
+        
+        return icatAuthorisation;
+    }
+    
+    /////////////////////////////////// END OF ICAT AUTHRORISATION METHODs /////////////////////////////////
+    
+    
+    //TODO is this used??
     public static boolean isUnique(EntityBaseBean entityClass, EntityManager manager) {
         if(entityClass instanceof Dataset){
             Dataset dataset = (Dataset)entityClass;

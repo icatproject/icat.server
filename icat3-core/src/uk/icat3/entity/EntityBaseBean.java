@@ -17,7 +17,6 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
@@ -28,13 +27,16 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.apache.log4j.Logger;
 import uk.icat3.exceptions.EntityNotModifiableError;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.util.ElementType;
+import uk.icat3.util.IcatRoles;
 import static uk.icat3.util.Util.*;
+
 /**
  *
  * @author gjd37
  */
-@MappedSuperclass
-public class EntityBaseBean {
+@MappedSuperclass()
+public abstract class EntityBaseBean {
     /**
      * global static logger
      */
@@ -239,7 +241,9 @@ public class EntityBaseBean {
     @PrePersist
     public void prePersist(){
         markedDeleted = "N";
-        facilityAcquired = "N";
+        //set facility acquired if role is ICAT_ADMIN
+        if(getIcatRole() != null && getIcatRole().getRole().equals(IcatRoles.ICAT_ADMIN.toString())) facilityAcquired = "Y";
+        else facilityAcquired = "N";
         if(modId != null){
             createId = modId;
         } else if(createId != null) modId = createId;
@@ -257,7 +261,7 @@ public class EntityBaseBean {
           return parseBoolean(getFacilityAcquired());
     }
 
-    public void setFacilityAcquiredSet(boolean facilityAcquiredSet) {
+    public void setFacilityAcquiredSet(boolean facilityAcquiredSet) {        
         this.facilityAcquiredSet = facilityAcquiredSet;
     }
     
@@ -312,7 +316,11 @@ public class EntityBaseBean {
         this.selected = selected;
     }
     
-                
+    /**
+     * Gets the root element type of the bean
+     */
+    public abstract ElementType getRootElementType();      
+                    
     /**
      * Method to be overridden if needed to check if the data held in the entity is valid.
      * This method checks whether all the fields which are marked as not null are not null

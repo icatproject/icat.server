@@ -20,6 +20,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import uk.icat3.util.ElementType;
 
 /**
  * Entity class Topic
@@ -158,6 +159,13 @@ public class Topic extends EntityBaseBean implements Serializable {
         this.topicListCollection = topicListCollection;
     }
 
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.INVESTIGATION;
+    }
+    
     /**
      * Returns a hash code value for the object.  This implementation computes 
      * a hash code value based on the id fields in this object.

@@ -20,6 +20,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.util.ElementType;
 
 /**
  *
@@ -105,6 +106,13 @@ public class Facility extends EntityBaseBean implements Serializable {
         this.investigationCollection = investigationCollection;
     }
 
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.INVESTIGATION;
+    }
+    
     @Override
     public int hashCode() {
         int hash = 0;

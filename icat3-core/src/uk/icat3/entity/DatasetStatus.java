@@ -22,6 +22,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.util.ElementType;
 import uk.icat3.util.Queries;
 
 /**
@@ -112,6 +113,13 @@ public class DatasetStatus extends EntityBaseBean implements Serializable {
         this.datasetCollection = datasetCollection;
     }
 
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.DATASET;
+    }
+    
     /**
      * Returns a hash code value for the object.  This implementation computes 
      * a hash code value based on the id fields in this object.

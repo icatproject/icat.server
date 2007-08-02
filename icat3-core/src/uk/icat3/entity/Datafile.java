@@ -487,6 +487,14 @@ public class Datafile extends EntityBaseBean implements Serializable {
         this.setDatafileParameterCollection(datafileParameters);
     }
     
+    
+     /**
+     * Gets the root element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.DATAFILE;
+    }
+    
    /**
      * Sets type (see Cascade) flag on all items owned by this dataset
      *

@@ -23,6 +23,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.util.ElementType;
 
 /**
  * Entity class TopicList
@@ -134,6 +135,13 @@ public class TopicList extends EntityBaseBean implements Serializable {
      */
     public void setTopic(Topic topic) {
         this.topic = topic;
+    }
+    
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.INVESTIGATION;
     }
     
     /**

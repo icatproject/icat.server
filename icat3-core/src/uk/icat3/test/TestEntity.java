@@ -18,6 +18,7 @@ import javax.persistence.Id;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.ICAT;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.util.ElementType;
 
 /**
  *
@@ -29,6 +30,14 @@ public class TestEntity extends EntityBaseBean {
     public TestEntity(String purpose) {
         this.setPurposeSeen(purpose);
     }
+    
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.INVESTIGATION;
+    }
+    
     @Id
     @GeneratedValue()
     @Column(name = "PURPOSE",nullable=   false)

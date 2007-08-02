@@ -24,6 +24,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.util.ElementType;
 
 /**
  * Entity class Publication
@@ -189,6 +190,13 @@ public class Publication extends EntityBaseBean implements Serializable {
         this.investigationId = investigationId;
     }
 
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.INVESTIGATION;
+    }
+    
     /**
      * Returns a hash code value for the object.  This implementation computes 
      * a hash code value based on the id fields in this object.

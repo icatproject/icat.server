@@ -27,6 +27,7 @@ import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.util.ElementType;
 import uk.icat3.util.Queries;
 
 /**
@@ -138,6 +139,13 @@ public class Keyword extends EntityBaseBean implements Serializable {
      */
     public void setInvestigation(Investigation investigation) {
         this.investigation = investigation;
+    }
+    
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.INVESTIGATION;
     }
     
     /**

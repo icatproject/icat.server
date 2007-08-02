@@ -20,6 +20,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.util.ElementType;
 import uk.icat3.util.Queries;
 import static uk.icat3.util.Util.*;
 /**
@@ -396,6 +397,13 @@ import static uk.icat3.util.Util.*;
     public void setRootInsert(boolean ignore){}    
     public void setFacilityAcquired(boolean ignore){}
     
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.INVESTIGATION;
+    }
+    
     @Override
     public int hashCode() {
         int hash = 0;
@@ -414,6 +422,17 @@ import static uk.icat3.util.Util.*;
             return false;
         }
         return true;
+    }
+    
+    /**
+     * To check weather passed in role is greater than this role.  This needs to be false
+     * as the added role to a Root element cannot be greater than the users role been added.
+     * @param role role to be matched
+     * @return true is passed in role is less
+     */
+    public boolean isGreaterEqualTo(IcatRole role){
+        if(this.getRoleWeight() >= role.getRoleWeight()) return true;
+        else return false;
     }
     
     @Override

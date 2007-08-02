@@ -22,6 +22,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.util.ElementType;
 
 /**
  * Entity class FacilityUser
@@ -222,6 +223,13 @@ public class FacilityUser extends EntityBaseBean implements Serializable {
      */
     public void setInvestigatorCollection(Collection<Investigator> investigatorCollection) {
         this.investigatorCollection = investigatorCollection;
+    }
+    
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.INVESTIGATION;
     }
     
     /**

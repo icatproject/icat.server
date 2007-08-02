@@ -20,6 +20,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.util.ElementType;
 import uk.icat3.util.Queries;
 /**
  * Entity class Instrument
@@ -144,6 +145,12 @@ public class Instrument extends EntityBaseBean implements Serializable {
         this.investigationCollection = investigationCollection;
     }
     
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.INVESTIGATION;
+    }
     
     /**
      * Returns a hash code value for the object.  This implementation computes

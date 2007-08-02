@@ -479,8 +479,12 @@ public class Queries {
      *
      */
     public static final String ICAT_AUTHORISATION_FINDBY_NULL = "IcatAuthorisation.findByIdNullElementId";
-    public static final String ICAT_AUTHORISATION_FINDBY_NULL_JPQL = "SELECT i FROM IcatAuthorisation i WHERE i.elementId IS null AND i.elementType = :elementType AND i.userId = :userId AND i.markedDeleted = 'N'";
-    
+    public static final String ICAT_AUTHORISATION_FINDBY_NULL_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
+            "i.elementType = :elementType AND i.elementId IS NULL AND " +
+            "(i.parentElementType = :parentElementType OR :parentElementType IS NULL) AND " +
+            "(i.parentElementId = :parentElementId OR :parentElementId IS NULL ) AND " +
+            "i.userId = :userId AND i.markedDeleted = 'N'";
+  
     
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////

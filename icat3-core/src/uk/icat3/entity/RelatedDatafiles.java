@@ -20,6 +20,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.util.ElementType;
 
 /**
  * Entity class RelatedDatafiles
@@ -155,6 +156,13 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
      */
     public void setDatafile1(Datafile datafile1) {
         this.datafile1 = datafile1;
+    }
+    
+    /**
+     * Gets the element type of the bean
+     */
+    public ElementType getRootElementType(){
+        return ElementType.DATAFILE;
     }
     
     /**

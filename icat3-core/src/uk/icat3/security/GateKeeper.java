@@ -1,8 +1,10 @@
 package uk.icat3.security;
 
+import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.util.AccessType;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -18,6 +20,7 @@ import uk.icat3.entity.Keyword;
 import uk.icat3.entity.Publication;
 import uk.icat3.entity.Sample;
 import uk.icat3.entity.SampleParameter;
+import uk.icat3.manager.ManagerUtil;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.Queries;
 import static uk.icat3.util.Util.*;
@@ -132,23 +135,23 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have
      *                          permission to perform operation.
      */
-    private static void performAuthorisation(String userId, Investigation investigation, AccessType access, EntityBaseBean element, Long rootParentsId, ElementType elementType, EntityManager manager) throws InsufficientPrivilegesException {
-        log.trace("performAuthorisation(): "+userId+", AccessType: "+access+", "+element+", parentId: "+rootParentsId);
+    private static void performAuthorisation(String userId, Investigation investigation, AccessType access, EntityBaseBean object, Long rootParentsId, ElementType elementType, EntityManager manager) throws InsufficientPrivilegesException {
+        log.trace("performAuthorisation(): "+userId+", AccessType: "+access+", "+object+", parentId: "+rootParentsId);
         IcatAuthorisation icatAuthorisation = null;
         boolean success = false;
         
         //get icat authroisation
         try{
             if(elementType.isInvestigationType()) {
-                icatAuthorisation = findIcatAuthorisation(userId, investigation, ElementType.INVESTIGATION, rootParentsId, manager);
+                icatAuthorisation = findIcatAuthorisation(userId, investigation, ElementType.INVESTIGATION, rootParentsId, rootParentsId, manager);
             } else if(elementType.isDatasetType()) {
-                icatAuthorisation = findIcatAuthorisation(userId, investigation, ElementType.DATASET, rootParentsId, manager);
+                icatAuthorisation = findIcatAuthorisation(userId, investigation, ElementType.DATASET, rootParentsId, ((Dataset)object).getInvestigationId(), manager);
             } else if(elementType.isDatafileType()) {
-                icatAuthorisation = findIcatAuthorisation(userId, investigation, ElementType.DATAFILE, rootParentsId, manager);
+                icatAuthorisation = findIcatAuthorisation(userId, investigation, ElementType.DATAFILE, rootParentsId, ((Datafile)object).getDatasetId(), manager);
             }
         } catch(InsufficientPrivilegesException ipe){
-            log.warn("User: " + userId + " does not have permission to perform '" + access + "' operation on " + element );
-            throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform '" + access + "' operation on " + element);
+            log.warn("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object );
+            throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object);
         }
         
         //now check the access permission from the icat authroisation
@@ -156,15 +159,15 @@ public class GateKeeper {
             if(parseBoolean(icatAuthorisation.getRole().getActionSelect())) success = true; //user has access to read element
         } else if(access == AccessType.REMOVE){
             //cannot do if facility acquired
-            if(!element.isFacilityAcquiredSet()){               
+            if(!object.isFacilityAcquiredSet()){
                 //check if element type is a root, if so check root remove permissions
                 if(elementType.isRootType()){
-                     log.trace("Create ID: "+element.getCreateId()+" "+userId.equals(element.getCreateId()));
+                    log.trace("Create ID: "+object.getCreateId()+" "+userId.equals(object.getCreateId()));
                     // to remove something, create Id must also be the same as your Id.
-                    if(parseBoolean(icatAuthorisation.getRole().getActionRootRemove()) && userId.equals(element.getCreateId())) {
+                    if(parseBoolean(icatAuthorisation.getRole().getActionRootRemove()) && userId.equals(object.getCreateId())) {
                         success = true; //user has access to remove root element
                     }
-                } else if(parseBoolean(icatAuthorisation.getRole().getActionRemove()) && userId.equals(element.getCreateId())) {
+                } else if(parseBoolean(icatAuthorisation.getRole().getActionRemove()) && userId.equals(object.getCreateId())) {
                     success = true; //user has access to remove element
                 }
             }
@@ -178,25 +181,25 @@ public class GateKeeper {
                 } else if(elementType == ElementType.DATASET &&
                         icatAuthorisation.getElementId() == null &&
                         icatAuthorisation.getParentElementType().equals(ElementType.DATASET.toString()) &&
-                        icatAuthorisation.getParentElementId().equals(((Dataset)element).getInvestigationId()) &&
+                        icatAuthorisation.getParentElementId().equals(((Dataset)object).getInvestigationId()) &&
                         parseBoolean(icatAuthorisation.getRole().getActionRootInsert())){
                     success = true; //user has access to insert root root element
                 } else if(elementType == ElementType.DATAFILE &&
                         icatAuthorisation.getElementId() == null &&
                         icatAuthorisation.getParentElementType().equals(ElementType.DATAFILE.toString()) &&
-                        icatAuthorisation.getParentElementId().equals(((Datafile)element).getDatasetId()) &&
+                        icatAuthorisation.getParentElementId().equals(((Datafile)object).getDatasetId()) &&
                         parseBoolean(icatAuthorisation.getRole().getActionRootInsert())){
                     success = true; //user has access to insert root root element
-                } 
+                }
             } else if(parseBoolean(icatAuthorisation.getRole().getActionInsert())){
                 success = true; //user has access to insert element
             }
         } else if(access == AccessType.UPDATE){
             //cannot do if facility acquired
-            if(parseBoolean(icatAuthorisation.getRole().getActionUpdate()) && !element.isFacilityAcquiredSet()) success = true; //user has access to update element
+            if(parseBoolean(icatAuthorisation.getRole().getActionUpdate()) && !object.isFacilityAcquiredSet()) success = true; //user has access to update element
         } else if(access == AccessType.DELETE){
-             //cannot do if facility acquired
-            if(parseBoolean(icatAuthorisation.getRole().getActionDelete()) && !element.isFacilityAcquiredSet()) success = true; //user has access to delete element
+            //cannot do if facility acquired
+            if(parseBoolean(icatAuthorisation.getRole().getActionDelete()) && !object.isFacilityAcquiredSet()) success = true; //user has access to delete element
         } else if(access == AccessType.DOWNLOAD){
             if(parseBoolean(icatAuthorisation.getRole().getActionDownload())) success = true; //user has access to download element
         } else if(access == AccessType.SET_FA){
@@ -207,12 +210,12 @@ public class GateKeeper {
         
         //now check if has permission and if not throw exception
         if(success){
-            //now append the role to the investigation, dataset or datafile if it is a READ
-            if(access == AccessType.READ && elementType.isRootType()) element.setIcatRole(icatAuthorisation.getRole());
-            log.debug("User: " + userId + " granted " + access + " permission on " + element +" with role "+icatAuthorisation.getRole());
+            //now append the role to the investigation, dataset or datafile 
+            if(elementType.isRootType()) object.setIcatRole(icatAuthorisation.getRole());
+            log.debug("User: " + userId + " granted " + access + " permission on " + object +" with role "+icatAuthorisation.getRole());
         } else {
-            log.warn("User: " + userId + " does not have permission to perform '" + access + "' operation on " + element );
-            throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform '" + access + "' operation on " + element );
+            log.warn("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object );
+            throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object );
         }
     }
     
@@ -221,20 +224,29 @@ public class GateKeeper {
      * to the users fedId, if this is not found, it looks for the ANY as the fedId
      *
      */
-    private static IcatAuthorisation findIcatAuthorisation(String userId, Investigation investigation, ElementType type, Long id, EntityManager manager) throws InsufficientPrivilegesException {
-        if(type != ElementType.INVESTIGATION && type != ElementType.DATAFILE && type != ElementType.DATASET) throw new RuntimeException("ElementType: "+type+" not supported");
+    private static IcatAuthorisation findIcatAuthorisation(String userId, Investigation investigation, ElementType type, Long id, Long parentId, EntityManager manager) throws InsufficientPrivilegesException {
+        if(!type.isRootType()) throw new RuntimeException("ElementType: "+type+" not supported");
         log.trace("Looking for ICAT AUTHORISATION: UserId: "+userId+", elementId: "+id+", type: "+type+", investigationId: "+investigation.getId() );
         
         IcatAuthorisation icatAuthorisation = null;
-        
-        //check if id is null then its creating a element type , inv, ds, df
         if(id == null){
             log.trace("user "+ userId+" trying to create a "+type);
             Query nullQuery = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_NULL);
             
             //try and find user with null as investigation
-            nullQuery.setParameter("elementType", type.toString()).
+            nullQuery.setParameter("elementType", type).
                     setParameter("userId", userId);
+            
+            if(type == ElementType.INVESTIGATION){
+                nullQuery.setParameter("parentElementId", null);
+                nullQuery.setParameter("parentElementType", null);
+            } else if(type == ElementType.DATASET){
+                nullQuery.setParameter("parentElementType", ElementType.DATASET);
+                nullQuery.setParameter("parentElementId", parentId);
+            } else if(type == ElementType.DATAFILE){
+                nullQuery.setParameter("parentElementType", ElementType.DATAFILE);
+                nullQuery.setParameter("parentElementId", parentId);
+            }
             
             try{
                 icatAuthorisation = (IcatAuthorisation)nullQuery.getSingleResult();
@@ -245,7 +257,7 @@ public class GateKeeper {
             }
         } else {
             Query query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE);
-            query.setParameter("elementType", type.toString()).
+            query.setParameter("elementType", type).
                     setParameter("elementId", id).
                     setParameter("userId", userId);
             
@@ -262,13 +274,14 @@ public class GateKeeper {
                     icatAuthorisation = (IcatAuthorisation)query.getSingleResult();
                     log.trace("Found stage 2 (ANY): "+icatAuthorisation);
                 } catch(NoResultException nre2){
-                    log.debug("None found for : UserId: "+userId+", elementId: null, type: "+type+", elementId: "+id+", throwing exception");
+                    log.debug("None found for : UserId: "+userId+", type: "+type+", elementId: "+id+", throwing exception");
                     throw new InsufficientPrivilegesException();
                 }
             }
         }
-        
+               
         //return the icat authoruisation
         return icatAuthorisation;
+        
     }
 }
