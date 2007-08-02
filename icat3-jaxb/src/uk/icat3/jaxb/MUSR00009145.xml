@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<icat version="1.0 RC6" xsi:noNamespaceSchemaLocation="../icatXSD/icatXSD.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<icat version="1.0 RC6" xsi:noNamespaceSchemaLocation="icatXSD.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <study>
 <name>MUSR_2006</name>
 <purpose>Group all Investigation per instrument and per year.</purpose>
 <status>ONGOING</status>
-<study_creation_date>2007-07-02T10:36:17</study_creation_date>
+<study_creation_date>2007-08-02T13:53:09</study_creation_date>
 <investigation>
 <inv_number>-1000</inv_number>
 <visit_id>1</visit_id>
@@ -28,11 +28,11 @@
 <parameter>
 <name>sample_state</name>
 <string_value>pow</string_value>
-<units>N/A</units></parameter>
+<units>n/a</units></parameter>
 <parameter>
 <name>sample_situation</name>
 <string_value>CCR</string_value>
-<units>N/A</units></parameter></sample>
+<units>n/a</units></parameter></sample>
 <datafile>
 <name>MUSR00009145.nxs</name>
 <location>test_data/Muon/MUSR00009145.nxs</location>
@@ -45,34 +45,39 @@
 <datafile_modify_time>2006-04-04T23:36:07</datafile_modify_time>
 <file_size>0</file_size>
 <parameter>
+<name>run_number</name>
+<numeric_value>9145</numeric_value>
+<units>n/a</units>
+<description>Run Number</description></parameter>
+<parameter>
 <name>nexus_version</name>
 <string_value>2.1.0</string_value>
-<units>N/A</units>
+<units>n/a</units>
 <description>NeXus version used to create the file.</description></parameter>
 <parameter>
 <name>hdf_version</name>
 <string_value>NCSA HDF Version 4.1 Release 5, November 5, 2001</string_value>
-<units>N/A</units>
+<units>n/a</units>
 <description>HDF Version used to create the file.</description></parameter>
 <parameter>
 <name>program_name</name>
 <string_value>ICP</string_value>
-<units>N/A</units>
+<units>n/a</units>
 <description>Name of creating program.</description></parameter>
 <parameter>
 <name>program_version</name>
 <string_value>v1</string_value>
-<units>N/A</units>
+<units>n/a</units>
 <description>version of creating program.</description></parameter></datafile>
 <parameter>
 <name>start_time</name>
 <string_value>2006-04-04T23:15:29</string_value>
-<units>yyyy-MM-ddTHH:mm:ss.S</units>
+<units>n/a</units>
 <description>Start Time of the dataset.</description></parameter>
 <parameter>
 <name>end_time</name>
 <string_value>2006-04-04T23:36:07</string_value>
-<units>yyyy-MM-ddTHH:mm:ss.S</units>
+<units>n/a</units>
 <description>Start Time of the dataset.</description></parameter>
 <parameter>
 <name>duration</name>
@@ -82,7 +87,7 @@
 <parameter>
 <name>switching_states</name>
 <string_value>1</string_value>
-<units>N/A</units>
+<units>n/a</units>
 <description>1 = Normal data collection, 2 = Red/Green mode</description></parameter>
 <parameter>
 <name>sample_temperature_setting</name>
@@ -97,17 +102,17 @@
 <parameter>
 <name>sample_magnetic_field_state</name>
 <string_value>TF</string_value>
-<units>N/A</units>
+<units>n/a</units>
 <description>Magnetic field mode, e.g. TF</description></parameter>
 <parameter>
 <name>detector_orientation</name>
 <string_value>l</string_value>
-<units>N/A</units>
+<units>n/a</units>
 <description>Detector arrangement. longitudinal 'l' or Transverse 't'</description></parameter>
 <parameter>
 <name>collimator_type</name>
 <string_value>Slits</string_value>
-<units>N/A</units>
+<units>n/a</units>
 <description>Collimator type. e.g. slits</description></parameter>
 <parameter>
 <name>source_total_count</name>
@@ -117,12 +122,12 @@
 <parameter>
 <name>source_daereads</name>
 <numeric_value>1</numeric_value>
-<units>N/A</units>
+<units>n/a</units>
 <description>number of readout from the DAE.</description></parameter>
 <parameter>
 <name>source_frames</name>
 <numeric_value>61828</numeric_value>
-<units>N/A</units>
+<units>n/a</units>
 <description>ISIS frames collected on each DAE read.</description></parameter>
 <parameter>
 <name>data_avg_counts</name>
@@ -147,10 +152,10 @@
 <parameter>
 <name>temperature_avg</name>
 <numeric_value>91.413582</numeric_value>
-<units>Kelvin</units>
+<units>K</units>
 <description> Average of :Temp_Sample</description></parameter>
 <parameter>
 <name>temperature_std</name>
 <numeric_value>2.21598</numeric_value>
-<units>Kelvin</units>
+<units>K</units>
 <description> Standard deviation of :Temp_Sample</description></parameter></dataset></investigation></study></icat>
