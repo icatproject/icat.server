@@ -9,6 +9,7 @@
 
 package uk.icat3.test;
 
+import java.util.Collection;
 import java.util.Random;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -18,6 +19,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileFormat;
 import uk.icat3.entity.DatafileFormatPK;
+import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetType;
 import uk.icat3.entity.Investigation;
@@ -118,18 +120,45 @@ public class TestJPA {
     public void testJPA() throws Exception {
         setUp();
         
-        Query nullQuery = em.createQuery( "SELECT i FROM IcatAuthorisation i WHERE " +
-                "i.parentElementType = :parentElementType OR :parentElementType IS NULL");
+        long time = System.currentTimeMillis();
+        String QUERY = Queries.LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND (i.keywordCollection.keywordPK.name LIKE '%ccw%' OR i.keywordCollection.keywordPK.name LIKE '%orbita%') AND i.keywordCollection.markedDeleted = 'N'";
+        
+        QUERY = "SELECT i FROM Datafile i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :dataFileType AND i.markedDeleted = 'N' " +
+                " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+                " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' AND "+
+                " i.datafileParameterCollection.markedDeleted = 'N' AND i.datafileParameterCollection.datafileParameterPK.name = 'run_number' AND" +
+                " i.datafileParameterCollection.numericValue BETWEEN :lower AND :upper AND i.dataset.investigation.instrument.name = 'SXD'";
+        
+        
+        Query nullQuery = em.createQuery(QUERY);
+        
+        //  QUERY = "SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.RELEASE_DATE, t0.CREATE_ID, t0.TITLE, t0.MOD_ID, t0.INV_ABSTRACT, t0.PREV_INV_NUMBER, t0.VISIT_ID, t0.BCAT_INV_STR, t0.INV_NUMBER, t0.CREATE_TIME, t0.FACILITY_ACQUIRED, t0.DELETED, t0.FACILITY_CYCLE, t0.INSTRUMENT, t0.INV_TYPE, t0.FACILITY FROM KEYWORD t5, KEYWORD t4, KEYWORD t3, ICAT_ROLE t2, ICAT_AUTHORISATION t1, INVESTIGATION t0 WHERE (((((((((t0.ID = t1.ELEMENT_ID) AND (t1.ELEMENT_TYPE = 'INVESTIGATION')) AND (t0.DELETED = 'N')) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N')) AND (t2.ACTION_SELECT = 'Y')) AND ((t3.NAME LIKE '%ccw%') OR (t4.NAME LIKE '%shu%'))) AND (t5.DELETED = 'N')) AND ((((t2.ROLE = t1.ROLE) AND (t3.INVESTIGATION_ID = t0.ID)) AND (t4.INVESTIGATION_ID = t0.ID)) AND (t5.INVESTIGATION_ID = t0.ID)))";
+        
+        // Query nullQuery = em.createNativeQuery(QUERY);
+        
         
         //try and find user with null as investigation
-        //nullQuery.setParameter("elementType", ElementType.DATASET).
-        //  nullQuery.setParameter("userId", "test_admin_investigation");
+        //nullQuery.setParameter("keyword1", "%shull%");
+        //nullQuery.setParameter("keyword2", "%ral%");
+        //  nullQuery.setParameter("keyword3", "%ccwi%");
+        nullQuery.setParameter("upper", 1250f);
+        nullQuery.setParameter("lower", 100f);
+        nullQuery.setParameter("userId", "test");
+        nullQuery.setParameter("dataFileType", ElementType.DATAFILE);
         
-        
-        nullQuery.setParameter("parentElementType", ElementType.DATASET);
+        //  nullQuery.setParameter("parentElementType", ElementType.DATASET);
         // nullQuery.setParameter("parentElementId", null);
         
-        System.out.println(nullQuery.getResultList());
+        
+        Collection<Datafile> dfs = nullQuery.getResultList();
+        for (Datafile object : dfs) {
+            for(DatafileParameter dfp : object.getDatafileParameterCollection()){
+               if(dfp.getDatafileParameterPK().getName().equals("run_number")) System.out.println(dfp.getNumericValue());
+            }
+        }
+
+        
+        System.out.println((System.currentTimeMillis() - time)/6000f+" seconds");
         //System.out.println(em.createQuery("SELECT i FROM IcatAuthorisation i WHERE i.elementType = :type1  AND (i.parentElementType = :type OR :type IS NULL)").setParameter("type1", ElementType.INVESTIGATION).setParameter("type", null).getResultList());
         tearDown();
     }
@@ -150,6 +179,31 @@ public class TestJPA {
         tearDown();
     }
     
+      public void testP() throws Exception {
+        setUp();
+        
+          String QUERY = Queries.LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND (i.keywordCollection.keywordPK.name LIKE '%ccw%' OR i.keywordCollection.keywordPK.name LIKE '%orbita%') AND i.keywordCollection.markedDeleted = 'N'";
+        
+        QUERY = "SELECT i FROM Datafile i WHERE i.datafileParameterCollection.numericValue BETWEEN :lower AND :upper";
+        
+        
+        Query nullQuery = em.createQuery(QUERY);
+              
+        nullQuery.setParameter("upper", 1250f);
+        nullQuery.setParameter("lower", 100f);
+        
+        
+        Collection<Datafile> dfs = nullQuery.getResultList();
+        for (Datafile object : dfs) {
+            for(DatafileParameter dfp : object.getDatafileParameterCollection()){
+               if(dfp.getDatafileParameterPK().getName().equals("run_number")) System.out.println(object+ " " +dfp.getNumericValue());
+               
+            }
+        } 
+        tearDown();
+    }
+    
+    
     /**
      * @param args the command line arguments
      */
@@ -158,13 +212,15 @@ public class TestJPA {
         
         TestJPA ts = new TestJPA();
         
-       // ts.createDF();
+        // ts.createDF();
         // ts.createDS();
-        ts.addRole();
+        //ts.addRole();
         // ts.getRoles();
         //  ts.createInv();
-        // ts.testJPA();
+        //ts.testJPA();
         //  ts.changeRole();
+        
+        ts.testP();
     }
     
     

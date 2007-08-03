@@ -25,6 +25,7 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.Queries;
 
 /**
  * Entity class Parameter
@@ -45,7 +46,9 @@ import uk.icat3.util.ElementType;
         @NamedQuery(name = "Parameter.findByIsDatafileParameter", query = "SELECT p FROM Parameter p WHERE p.isDatafileParameter = :isDatafileParameter"),
         @NamedQuery(name = "Parameter.findByDescription", query = "SELECT p FROM Parameter p WHERE p.description = :description"),
         @NamedQuery(name = "Parameter.findByModId", query = "SELECT p FROM Parameter p WHERE p.modId = :modId"),
-        @NamedQuery(name = "Parameter.findByModTime", query = "SELECT p FROM Parameter p WHERE p.modTime = :modTime")
+        @NamedQuery(name = "Parameter.findByModTime", query = "SELECT p FROM Parameter p WHERE p.modTime = :modTime"),
+        
+          @NamedQuery(name = Queries.ALL_PARAMETERS, query = Queries.ALL_PARAMETERS_JPQL)
     })
 public class Parameter extends EntityBaseBean implements Serializable {
 

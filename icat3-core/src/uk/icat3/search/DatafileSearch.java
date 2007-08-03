@@ -14,6 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
+import uk.icat3.util.ElementType;
 import static uk.icat3.util.Queries.*;
 /**
  * Searchs on the datafiles for run number on the datafile parameter table.
@@ -38,32 +39,29 @@ public class DatafileSearch {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of datafiles returned from search
      */
-    private static Collection<Datafile> searchByRunNumberImpl(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
+    private static Collection<Datafile> searchByRunNumberImpl(String userId, Collection<String> instruments, float startRun, float endRun, int startIndex, int number_results, EntityManager manager){
         if(instruments == null || instruments.isEmpty()) throw new IllegalArgumentException("Instrument collection cannot be null or empty");
         log.trace("searchByRunNumber("+userId+", "+instruments+", "+startRun+", "+endRun+", EntityManager)");
         
         Collection<Datafile> datafiles = null;
         
-        //dynamically create the SQL
-        String SQL = DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_1;
+        //dynamically create the JPQL
+        String JPQL = DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL;
         
-        //add in the instruments in the IN() cause of SQL
+        //add in the instruments, i.dataset.investigation.instrument.name = 'SXD' AND i.dataset.investigation.instrument.name = 'FUD'
         int i = 1;
         for(String instrument : instruments){
-            if(i == instruments.size()) SQL += "?instrument"+(i++)+"";
-            else  SQL += "?instrument"+(i++)+" , ";
-            
+            JPQL += " AND i.dataset.investigation.instrument.name = :instrument"+(i++);
         }
         
-        SQL += DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL_2;
-        
         //set query with datafile as entity object
-        Query query = manager.createNativeQuery(SQL,Datafile.class);
+        Query query = manager.createQuery(JPQL);
         
         //sets the paramters
         query = query.setParameter("userId",userId);
         query = query.setParameter("lower",startRun);
         query = query.setParameter("upper",endRun);
+        query = query.setParameter("objectType",ElementType.DATAFILE);
         
         //set instruments
         int j = 1;
@@ -71,7 +69,7 @@ public class DatafileSearch {
             query = query.setParameter("instrument"+j++,instrument);
         }
         
-        log.trace("DYNAMIC SQL: "+SQL);
+        log.trace("DYNAMIC JPQL: "+JPQL);
         
         if(number_results < 0){
             //get all, maybe should limit this to 500?
@@ -94,7 +92,7 @@ public class DatafileSearch {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of datafiles returned from search
      */
-    public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun, EntityManager manager){
+    public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, float startRun, float endRun, EntityManager manager){
         return searchByRunNumberImpl(userId, instruments, startRun, endRun, -1,-1, manager);
     }
     
@@ -111,7 +109,7 @@ public class DatafileSearch {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of datafiles returned from search
      */
-    public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, Long startRun, Long endRun, int startIndex, int number_results, EntityManager manager){
+    public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, float startRun, float endRun, int startIndex, int number_results, EntityManager manager){
         return searchByRunNumberImpl(userId, instruments, startRun, endRun, startIndex, number_results, manager);
     }
     

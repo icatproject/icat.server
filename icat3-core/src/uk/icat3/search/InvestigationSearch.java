@@ -17,10 +17,13 @@ import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.InvestigationType;
+import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.manager.ManagerUtil;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
+import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 import static uk.icat3.util.Queries.*;
@@ -56,10 +59,16 @@ public class InvestigationSearch extends ManagerUtil {
         Collection<BigDecimal> investigationsId = null;
         if(number_results < 0){
             //get all, maybe should limit this to 500?
-            investigationsId = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID).setParameter(1,userId).setParameter(2,"%"+keyword+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+            investigationsId = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD_RTN_ID).
+                    setParameter("objectType",ElementType.INVESTIGATION).
+                    setParameter(1,userId).setParameter(2,"%"+keyword+"%").
+                    setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
             //list all Investigation ids that the users has access to
-            investigationsId = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID).setParameter(1,userId).setParameter(2,"%"+keyword+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+            investigationsId = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD_RTN_ID).
+                    setParameter("objectType",ElementType.INVESTIGATION).
+                    setParameter(1,userId).setParameter(2,"%"+keyword+"%").
+                    setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         //turn into longs
         Collection<Long> investigationsIds = new ArrayList<Long>();
@@ -98,10 +107,16 @@ public class InvestigationSearch extends ManagerUtil {
         Collection<Investigation> investigations = null;
         if(number_results < 0){
             //get all, maybe should limit this to 500?
-            investigations = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_KEYWORD).setParameter(1,userId).setParameter(2,"%"+keyword+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+            investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD).
+                    setParameter("objectType",ElementType.INVESTIGATION).
+                    setParameter("userId",userId).setParameter("keyword","%"+keyword+"%").
+                    setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
             //list all Investigation ids that the users has access to
-            investigations = manager.createNamedQuery(INVESTIGATION_NATIVE_LIST_BY_KEYWORD).setParameter(1,userId).setParameter(2,"%"+keyword+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+            investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD).
+                    setParameter("objectType",ElementType.INVESTIGATION).
+                    setParameter("userId",userId).setParameter("keyword","%"+keyword+"%").
+                    setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         return investigations;
     }
@@ -151,19 +166,35 @@ public class InvestigationSearch extends ManagerUtil {
             //get all, maybe should limit this to 500?
             if(searchType == searchType.SURNAME){
                 log.trace("Searching by SURNAME");
-                investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).setParameter("userId",userId).setParameter("surname","%"+searchString+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+                investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).
+                        setParameter("objectType",ElementType.INVESTIGATION).
+                        setParameter("userId",userId).
+                        setParameter("surname","%"+searchString+"%").
+                        setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             } else {
                 log.trace("Searching by USERID");
-                investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).setParameter("userId",userId).setParameter("userIdSearched","%"+searchString+"%").setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+                investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).
+                        setParameter("objectType",ElementType.INVESTIGATION).
+                        setParameter("userId",userId).
+                        setParameter("federalId","%"+searchString+"%").
+                        setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             }
         } else {
             if(searchType == searchType.SURNAME){
                 //list all Investigation ids that the users has access to
                 log.trace("Searching by SURNAME");
-                investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).setParameter("userId",userId).setParameter("surname","%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+                investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).
+                        setParameter("objectType",ElementType.INVESTIGATION).
+                        setParameter("userId",userId).
+                        setParameter("surname","%"+searchString+"%").
+                        setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             } else {
                 log.trace("Searching by USERID");
-                investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).setParameter("userId",userId).setParameter("userIdSearched","%"+searchString+"%").setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+                investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).
+                        setParameter("objectType",ElementType.INVESTIGATION).
+                        setParameter("userId",userId).
+                        setParameter("federalId","%"+searchString+"%").
+                        setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             }
         }
         
@@ -508,9 +539,9 @@ public class InvestigationSearch extends ManagerUtil {
         Collection<Investigation> investigations = null;
         if(number_results < 0){
             //get all, maybe should limit this to 500?
-            investigations = manager.createNamedQuery(INVESTIGATIONS_FOR_USER).setParameter("userId",userId).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+            investigations = manager.createNamedQuery(INVESTIGATIONS_FOR_USER).setParameter("objectType",ElementType.INVESTIGATION).setParameter("userId",userId).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
-            investigations = manager.createNamedQuery(INVESTIGATIONS_FOR_USER).setParameter("userId",userId).setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+            investigations = manager.createNamedQuery(INVESTIGATIONS_FOR_USER).setParameter("objectType",ElementType.INVESTIGATION).setParameter("userId",userId).setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         
         //add include information
@@ -565,7 +596,7 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Long> getUsersInvestigationsRtnId(String userId, EntityManager manager){
         log.trace("getUsersInvestigationsRtnId("+userId+", EnitiyManager)");
         
-        return  manager.createNamedQuery(INVESTIGATIONS_FOR_USER_RTN_ID).setParameter("userId",userId).getResultList();
+        return  manager.createNamedQuery(INVESTIGATIONS_FOR_USER_RTN_ID).setParameter("objectType",ElementType.INVESTIGATION).setParameter("userId",userId).getResultList();
     }
     
     /**
@@ -583,65 +614,57 @@ public class InvestigationSearch extends ManagerUtil {
      * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator,  InvestigationInclude include, boolean fuzzy, boolean use_security, int startIndex, int number_results, EntityManager manager)  {
-        log.trace("searchByKeywords("+userId+", "+keywords+", "+operator +", "+include+", "+fuzzy+", "+use_security+", "+startIndex+", "+number_results+", EntityManager)");
+        log.trace("searchByKeywords("+userId+", "+keywords+", "+operator +", "+include+", fuzzy? "+fuzzy+", secure? "+use_security+", "+startIndex+", "+number_results+", EntityManager)");
         
         Collection<Investigation> investigations = null;
-        String SQL = null;
+        String JPQL = null;
         
         //dynamically create the SQL
-        if(use_security)  SQL = INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL;
-        else  SQL = INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL_NOSECURITY;
+        if(use_security)  JPQL = INVESTIGATION_LIST_BY_KEYWORDS_JPQL;
+        else  JPQL = INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY;
         
+        
+        //Need to generate this
+        //  (i.keywordCollection.keywordPK.name LIKE '%or%' AND i.keywordCollection.keywordPK.name LIKE '%orbita%')
+                
         int i  = 2;
         //check if fuzzy
         if(fuzzy){
             //fuzzy so LIKE
             for(String keyword : keywords){
-                if(i == 2) SQL = SQL + "NAME LIKE ?"+(i++);
-                else  SQL = SQL +" OR NAME LIKE ?"+(i++);
+                if(i == 2) JPQL = JPQL + "( i.keywordCollection.keywordPK.name LIKE ?"+(i++)+" ";
+                else  JPQL = JPQL +" "+operator+" i.keywordCollection.keywordPK.name LIKE ?"+(i++)+" ";
                 
             }
         } else {
             //none fuzzy, =
             for(String keyword : keywords){
-                if(i == 2) SQL = SQL + "NAME = ?"+(i++);
-                else  SQL = SQL +" OR NAME = ?"+(i++);
+                if(i == 2) JPQL = JPQL + "( i.keywordCollection.keywordPK.name = ?"+(i++)+" ";
+                else  JPQL = JPQL +" "+operator+" i.keywordCollection.keywordPK.name = ?"+(i++)+" ";
             }
         }
+                        
+        JPQL = JPQL +")";
         
-        //TODO: this section only works for one fuzzy keyword (AND)
-        //need to do this if used a EJB cos of the hashcode difference if LogicalOperator is serialized
-        //so == and equals do not work, only on string of object
-        if(operator.toString().equals(LogicalOperator.AND.toString())) {
-            SQL = SQL +" GROUP BY ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT," +
-                    " RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, ";
-            
-            //TODO put in check that works with one fuzy keyword
-            if(fuzzy) SQL = SQL +"FACILITY_CYCLE HAVING Count(*) >= ?number_keywords";
-            else SQL = SQL + "FACILITY_CYCLE HAVING Count(*) = ?number_keywords";
-        }
-        
-        SQL = SQL +" ORDER BY TITLE ASC";
-        
-        log.info("DYNAMIC SQL GENERATED: "+SQL);
+        log.info("DYNAMIC JPQL GENERATED: "+JPQL);
         
         //set query with investigation as entity object
-        Query query = manager.createNativeQuery(SQL, Investigation.class);
-        
+        Query query = manager.createQuery(JPQL);
+               
         //use security??
-        if(use_security) query = query.setParameter("userId",userId);
-        else query = query.setParameter("userId","%");
+        if(use_security) {
+            query.setParameter("objectType",ElementType.INVESTIGATION);
+            query.setParameter("userId",userId);
+        }
+        //else query = query.setParameter("userId","%");
         
         //set keywords
         int j = 2;
         for(String keyword : keywords){
             if(fuzzy) query = query.setParameter(j++,"%"+keyword+"%");
             else query.setParameter(j++,keyword);
-        }
-        
-        //add in the number of keywords
-        query.setParameter("number_keywords",keywords.size());
-        
+        }        
+               
         //run query
         if(number_results < 0){
             //get all, maybe should limit this to 500?
@@ -792,7 +815,7 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return List of types
      */
-    public static Collection<Instrument> listAllInvestigationTypes(EntityManager manager)  {
+    public static Collection<InvestigationType> listAllInvestigationTypes(EntityManager manager)  {
         log.trace("listAllInvestigationTypes(EntityManager)");
         return  manager.createNamedQuery(ALL_INVESTIGATION_TYPES).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }
@@ -807,5 +830,17 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<String> listAllRoles(EntityManager manager){
         log.trace("listAllRoles(EntityManager)");
         return  manager.createNamedQuery(ALL_ROLES).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+    }
+    
+     /**
+     * Lists all the user roles in the database
+     *
+     * @param userId federalId of the user.
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return List of {@link IcatRole}s
+     */
+    public static Collection<Parameter> listAllParameters(EntityManager manager){
+        log.trace("listAllParameters(EntityManager)");
+        return  manager.createNamedQuery(ALL_PARAMETERS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }
 }

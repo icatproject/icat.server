@@ -84,8 +84,8 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = Queries.INVESTIGATIONS_FOR_USER_RTN_ID, query = Queries.INVESTIGATIONS_FOR_USER_RTN_ID_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID,  query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_JPQL),
-    @NamedQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID_JPQL),
-    @NamedQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_JPQL)
+    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_KEYWORD_RTN_ID, query= Queries.INVESTIGATION_LIST_BY_KEYWORD_RTN_ID_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_LIST_BY_KEYWORD_JPQL)
 })
         
         @SqlResultSetMappings({

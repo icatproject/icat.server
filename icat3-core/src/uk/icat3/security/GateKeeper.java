@@ -259,6 +259,8 @@ public class GateKeeper {
                 throw new InsufficientPrivilegesException();
             }
         } else {
+            
+            //Find users one first as it takes prefs over the ANY row.
             Query query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE);
             query.setParameter("elementType", type).
                     setParameter("elementId", id).

@@ -24,37 +24,41 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.Queries;
 
 /**
  * Entity class InvestigationType
- * 
+ *
  * @author gjd37
  */
 @Entity
 @Table(name = "INVESTIGATION_TYPE")
 @NamedQueries( {
-        @NamedQuery(name = "InvestigationType.findByName", query = "SELECT i FROM InvestigationType i WHERE i.name = :name"),
-        @NamedQuery(name = "InvestigationType.findByDescription", query = "SELECT i FROM InvestigationType i WHERE i.description = :description"),
-        @NamedQuery(name = "InvestigationType.findByModTime", query = "SELECT i FROM InvestigationType i WHERE i.modTime = :modTime"),
-        @NamedQuery(name = "InvestigationType.findByModId", query = "SELECT i FROM InvestigationType i WHERE i.modId = :modId")
-    })
-public class InvestigationType extends EntityBaseBean implements Serializable {
-
+    @NamedQuery(name = "InvestigationType.findByName", query = "SELECT i FROM InvestigationType i WHERE i.name = :name"),
+    @NamedQuery(name = "InvestigationType.findByDescription", query = "SELECT i FROM InvestigationType i WHERE i.description = :description"),
+    @NamedQuery(name = "InvestigationType.findByModTime", query = "SELECT i FROM InvestigationType i WHERE i.modTime = :modTime"),
+    @NamedQuery(name = "InvestigationType.findByModId", query = "SELECT i FROM InvestigationType i WHERE i.modId = :modId"),
+    
+    @NamedQuery(name = Queries.ALL_INVESTIGATION_TYPES, query = Queries.ALL_INVESTIGATION_TYPES_JPQL)
+    
+})
+        public class InvestigationType extends EntityBaseBean implements Serializable {
+    
     @Id
     @Column(name = "NAME", nullable = false)
     private String name;
-
+    
     @Column(name = "DESCRIPTION")
     private String description;
-  
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "invType")
-     @XmlTransient
+    @XmlTransient
     private Collection<Investigation> investigationCollection;
     
     /** Creates a new instance of InvestigationType */
     public InvestigationType() {
     }
-
+    
     /**
      * Creates a new instance of InvestigationType with the specified values.
      * @param name the name of the InvestigationType
@@ -62,7 +66,7 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
     public InvestigationType(String name) {
         this.name = name;
     }
-
+    
     /**
      * Creates a new instance of InvestigationType with the specified values.
      * @param name the name of the InvestigationType
@@ -74,7 +78,7 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
         this.modTime = modTime;
         this.modId = modId;
     }
-
+    
     /**
      * Gets the name of this InvestigationType.
      * @return the name
@@ -82,7 +86,7 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
     public String getName() {
         return this.name;
     }
-
+    
     /**
      * Sets the name of this InvestigationType to the specified value.
      * @param name the new name
@@ -90,7 +94,7 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
+    
     /**
      * Gets the description of this InvestigationType.
      * @return the description
@@ -98,7 +102,7 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
     public String getDescription() {
         return this.description;
     }
-
+    
     /**
      * Sets the description of this InvestigationType to the specified value.
      * @param description the new description
@@ -106,16 +110,16 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-
+    
     /**
      * Gets the investigationCollection of this InvestigationType.
      * @return the investigationCollection
      */
-     @XmlTransient
+    @XmlTransient
     public Collection<Investigation> getInvestigationCollection() {
         return this.investigationCollection;
     }
-
+    
     /**
      * Sets the investigationCollection of this InvestigationType to the specified value.
      * @param investigationCollection the new investigationCollection
@@ -123,7 +127,7 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
     public void setInvestigationCollection(Collection<Investigation> investigationCollection) {
         this.investigationCollection = investigationCollection;
     }
-/**
+    /**
      * Gets the element type of the bean
      */
     public ElementType getRootElementType(){
@@ -131,7 +135,7 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
     }
     
     /**
-     * Returns a hash code value for the object.  This implementation computes 
+     * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
      */
@@ -141,10 +145,10 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
         hash += (this.name != null ? this.name.hashCode() : 0);
         return hash;
     }
-
+    
     /**
-     * Determines whether another object is equal to this InvestigationType.  The result is 
-     * <code>true</code> if and only if the argument is not null and is a InvestigationType object that 
+     * Determines whether another object is equal to this InvestigationType.  The result is
+     * <code>true</code> if and only if the argument is not null and is a InvestigationType object that
      * has the same id field values as this object.
      * @param object the reference object with which to compare
      * @return <code>true</code> if this object is the same as the argument;
@@ -160,9 +164,9 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
         if (this.name != other.name && (this.name == null || !this.name.equals(other.name))) return false;
         return true;
     }
-
+    
     /**
-     * Returns a string representation of the object.  This implementation constructs 
+     * Returns a string representation of the object.  This implementation constructs
      * that representation based on the id fields.
      * @return a string representation of the object.
      */
