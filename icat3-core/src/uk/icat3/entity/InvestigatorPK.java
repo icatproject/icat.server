@@ -10,12 +10,9 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import org.apache.log4j.Logger;
-import uk.icat3.exceptions.ValidationException;
 
 /**
  * Primary Key class InvestigatorPK for entity class Investigator

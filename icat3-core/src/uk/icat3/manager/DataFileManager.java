@@ -26,6 +26,7 @@ import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.IcatRoles;
 
 /**
  * This is the manager class for all operations for data files.
@@ -149,7 +150,22 @@ public class DataFileManager extends ManagerUtil {
     public static void removeDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         removeDataFile(userId, dataFile.getId(), manager);
     }
+        ////////////////   End of delete commands       ///////////////////////////
     
+    
+     ////////////////////     Add/Update Commands    ///////////////////
+    
+     /**
+     * Adds a role for a user to an datafile.
+     * 
+     * @param userId 
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * @param manager 
+     */
+     public static IcatAuthorisation addAuthorisation(String userId, String toAddUserId, String toAddRole, Long id, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+         return addAuthorisation(userId, toAddUserId, toAddRole, id, ElementType.DATAFILE,  manager);
+     }
+     
     /**
      * Updates data file depending on whether the user has permission to update this data file.
      *
@@ -203,6 +219,11 @@ public class DataFileManager extends ManagerUtil {
         dataFile.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
         dataFile.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
         manager.persist(dataFile);
+             
+        //add new creator role to investigation for the user creating the df
+        persistAuthorisation(userId, userId, getRole(IcatRoles.CREATOR.toString(), manager),
+                ElementType.DATAFILE, dataFile.getId(),
+                null, null, null, manager);
         
         return dataFile;
     }

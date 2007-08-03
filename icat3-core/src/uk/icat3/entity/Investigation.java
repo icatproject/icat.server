@@ -77,25 +77,17 @@ import uk.icat3.util.Queries;
     
     
     //Added searches for ICAT3 API
-    // @NamedQuery(name = Queries.INVESTIGATIONS_BY_KEYWORD, query ="SELECT  FROM  (SELECT Investigation i FROM i WHERE i.investigatorCollection.investigatorPK.facilityUserId = :userId) ")
-    // @NamedQuery(name = Queries.ADVANCED_SEARCH, query = Queries.ADVANCED_SEARCH_JPQL),
     @NamedQuery(name = Queries.INVESTIGATIONS_BY_USER, query = Queries.INVESTIGATIONS_BY_USER_JPQL),
-    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_SURNAME_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID, query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),
     @NamedQuery(name = Queries.INVESTIGATIONS_FOR_USER, query = Queries.INVESTIGATIONS_FOR_USER_JPQL),
-    @NamedQuery(name = Queries.INVESTIGATIONS_FOR_USER_RTN_ID, query = Queries.INVESTIGATIONS_FOR_USER_RTN_ID_JPQL)
-    
+    @NamedQuery(name = Queries.INVESTIGATIONS_FOR_USER_RTN_ID, query = Queries.INVESTIGATIONS_FOR_USER_RTN_ID_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID,  query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_JPQL)
 })
         
-        @NamedNativeQueries({
-    //Added searches for ICAT3 API
-    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_USERID,  query= Queries.INVESTIGATION_NATIVE_LIST_BY_USERID_SQL,resultSetMapping="investigationMapping"),
-    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_SQL, resultSetMapping="investigationMapping"),
-    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID_SQL, resultSetMapping="investigationIdMapping"),
-    //@NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD+"test", query= "SELECT DISTINCT ID, FROM INVESTIGATION where ID = 11915480", resultSetMapping="investigationMapping"),
-    @NamedNativeQuery(name = Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_NATIVE_LIST_BY_KEYWORD_SQL, resultSetMapping="investigationMapping")
-    
-})
         @SqlResultSetMappings({
     @SqlResultSetMapping(name="investigationMapping",entities={@EntityResult(entityClass=Investigation.class)}),
     @SqlResultSetMapping(name="investigationIdMapping",columns={@ColumnResult(name="ID")})
@@ -814,8 +806,8 @@ import uk.icat3.util.Queries;
                     //remove all deleted items from the collection, ie only add ones that are not deleted
                     if(!sample.isDeleted()) {
                         samples.add(sample);
-                           //cascade to datafile items if value is true, otherwise do not cascade
-                        if(((Boolean)cascadeValue).booleanValue()) sample.setCascade(Cascade.REMOVE_DELETED_ITEMS, cascadeValue);          
+                        //cascade to datafile items if value is true, otherwise do not cascade
+                        if(((Boolean)cascadeValue).booleanValue()) sample.setCascade(Cascade.REMOVE_DELETED_ITEMS, cascadeValue);
                     }
                 } else sample.setCascade(type, cascadeValue);
             }
@@ -1035,10 +1027,8 @@ import uk.icat3.util.Queries;
                 }
             }
         }
-        //check if unique
-        boolean isUnique = isUnique(manager);
-        log.trace(isUnique);
-        if(!isUnique) throw new ValidationException(this+" is not unique.");
+        //test is unique
+        isUnique(manager);
         
         return isValid();
     }
@@ -1046,7 +1036,7 @@ import uk.icat3.util.Queries;
     /**
      * Checks weather the investigation is unique in the database.
      */
-    private boolean isUnique(EntityManager manager){
+    private boolean isUnique(EntityManager manager) throws ValidationException{
         log.trace("isUnique?");
         Query query =  manager.createNamedQuery("Investigation.findByUnique");
         query = query.setParameter("invNumber",invNumber);
@@ -1067,7 +1057,7 @@ import uk.icat3.util.Queries;
                 return true;
             } else {
                 log.trace("investigation found is not this investigation, so no unique");
-                return false;
+                throw new ValidationException(this+" is not unique.  Same unique key as "+investigationFound);
             }
         } catch(NoResultException nre) {
             log.trace("No results so unique");
@@ -1076,7 +1066,7 @@ import uk.icat3.util.Queries;
         } catch(Throwable ex) {
             log.warn(ex);
             //means it is unique
-            return false;
+            throw new ValidationException(this+" is not unique.");
         }
     }
     

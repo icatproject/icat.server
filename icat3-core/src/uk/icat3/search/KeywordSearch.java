@@ -76,9 +76,9 @@ public class KeywordSearch {
         else startKeyword = "%";
         
         if(numberReturned < 0){
-            return  (Collection<String>)manager.createNamedQuery(KEYWORDS_NATIVE_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).getResultList();
+            return  (Collection<String>)manager.createNamedQuery(KEYWORDS_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).getResultList();
         } else {
-            return  (Collection<String>)manager.createNamedQuery(KEYWORDS_NATIVE_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).setMaxResults(numberReturned).getResultList();
+            return  (Collection<String>)manager.createNamedQuery(KEYWORDS_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).setMaxResults(numberReturned).getResultList();
         }
     }
     

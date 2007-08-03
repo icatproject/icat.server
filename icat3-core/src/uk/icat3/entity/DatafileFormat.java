@@ -15,11 +15,13 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.ElementType;
 
 /**
@@ -177,6 +179,23 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
         DatafileFormat other = (DatafileFormat)object;
         if (this.datafileFormatPK != other.datafileFormatPK && (this.datafileFormatPK == null || !this.datafileFormatPK.equals(other.datafileFormatPK))) return false;
         return true;
+    }
+    
+      /**
+     * Overrides the isValid function,
+     * @throws ValidationException
+     * @return
+     */
+    @Override
+    public boolean isValid(EntityManager manager) throws ValidationException {
+        if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
+        
+        if(datafileFormatPK == null) throw new ValidationException(this +" primary key cannot be null");
+        
+        datafileFormatPK.isValid();
+        
+        return true;
+        
     }
 
     /**

@@ -45,30 +45,28 @@ import uk.icat3.util.Queries;
     
     //ICAT 3 queries
     @NamedQuery(name = Queries.ALLKEYWORDS, query = Queries.ALLKEYWORDS_JPQL),
-    @NamedQuery(name = Queries.KEYWORDS_FOR_USER, query = Queries.KEYWORDS_FOR_USER_JPQL)
-    
+    @NamedQuery(name = Queries.KEYWORDS_FOR_USER, query = Queries.KEYWORDS_FOR_USER_JPQL)   
 })
-
-@NamedNativeQueries({
+        
+        @NamedNativeQueries({
     //Added searches for ICAT3 API
-    @NamedNativeQuery(name = Queries.KEYWORDS_NATIVE_FOR_USER, query= Queries.KEYWORDS_FOR_USER_SQL, resultSetMapping="keywordsNameMapping"),
     @NamedNativeQuery(name = Queries.ALLKEYWORDS_NATIVE_ALPHA, query= Queries.ALLKEYWORDS_ALPHA_SQL, resultSetMapping="keywordsNameMapping"),
     @NamedNativeQuery(name = Queries.ALLKEYWORDS_NATIVE_ALPHA_NUMERIC, query= Queries.ALLKEYWORDS_ALPHA_NUMERIC_SQL)
     
 })
-@SqlResultSetMappings({
+        @SqlResultSetMappings({
     @SqlResultSetMapping(name="keywordsNameMapping",columns={@ColumnResult(name="NAME")}),
     @SqlResultSetMapping(name="keywordsMapping",entities={@EntityResult(entityClass=String.class)})
     
 })
-public class Keyword extends EntityBaseBean implements Serializable {
+        public class Keyword extends EntityBaseBean implements Serializable {
     
     /**
      * EmbeddedId primary key field
      */
     @EmbeddedId
     protected KeywordPK keywordPK;
-            
+    
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
@@ -123,12 +121,12 @@ public class Keyword extends EntityBaseBean implements Serializable {
     public void setKeywordPK(KeywordPK keywordPK) {
         this.keywordPK = keywordPK;
     }
-          
+    
     /**
      * Gets the investigation of this Keyword.
      * @return the investigation
      */
-     @XmlTransient
+    @XmlTransient
     public Investigation getInvestigation() {
         return this.investigation;
     }
@@ -160,7 +158,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
         return hash;
     }
     
-     /**
+    /**
      * Overrides the isValid function, checks each of the datafiles and datafile parameters are valid
      *
      * @throws ValidationException
@@ -170,7 +168,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
     public boolean isValid(EntityManager manager) throws ValidationException {
         if(keywordPK == null) throw new ValidationException(this +" private key cannot be null");
         return keywordPK.isValid();
-           
+        
     }
     
     /**

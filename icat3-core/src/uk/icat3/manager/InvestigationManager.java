@@ -11,16 +11,11 @@ package uk.icat3.manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Random;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import org.apache.log4j.Logger;
-import uk.icat3.entity.Datafile;
-import uk.icat3.entity.Dataset;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.IcatAuthorisation;
-import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.Keyword;
@@ -121,6 +116,9 @@ public class InvestigationManager extends ManagerUtil {
         return getInvestigations(userId, investigationIds, InvestigationInclude.NONE, manager);
     }
     
+    /**
+     * 
+     */
     public static Collection<IcatAuthorisation> getAuthorisations(String userId, Long id, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         return getAuthorisations(userId, id, ElementType.INVESTIGATION, manager);
     }
@@ -253,6 +251,13 @@ public class InvestigationManager extends ManagerUtil {
     
     ////////////////////     Add/Update Commands    ///////////////////
     /**
+     * Adds a role for a user to an investigation.
+     */
+     public static IcatAuthorisation addAuthorisation(String userId, String toAddUserId, String toAddRole, Long id, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+         return addAuthorisation(userId, toAddUserId, toAddRole, id, ElementType.INVESTIGATION, manager);
+     }
+    
+    /**
      * Updates a Investigation depending on whether the user has permission to update this Investigation
      *
      * @param userId federalId of the user.
@@ -313,11 +318,11 @@ public class InvestigationManager extends ManagerUtil {
         manager.persist(investigation);
         
         //need to add a another row for creating datasets for this investigation
-        IcatAuthorisation IcatAuthorisationChild = persistAuthorisation(userId, getRole(IcatRoles.CREATOR.toString(), manager),
+        IcatAuthorisation IcatAuthorisationChild = persistAuthorisation(userId, userId, getRole(IcatRoles.CREATOR.toString(), manager),
                 ElementType.DATASET, null,
                 ElementType.INVESTIGATION, investigation.getId(), null, manager);
         //add new creator role to investigation for the user creating the investigation
-        persistAuthorisation(userId, getRole(IcatRoles.CREATOR.toString(), manager),
+        persistAuthorisation(userId, userId, getRole(IcatRoles.CREATOR.toString(), manager),
                 ElementType.INVESTIGATION, investigation.getId(),
                 null, null, IcatAuthorisationChild.getId(), manager);
         

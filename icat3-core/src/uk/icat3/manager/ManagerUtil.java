@@ -400,24 +400,25 @@ public class ManagerUtil {
         
         if(type == ElementType.INVESTIGATION){
             entityObject = find(Investigation.class, id, manager);
-            query = manager.createNamedQuery("IcatAuthorisation.findAllById");
+            query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE);
         } else if(type == ElementType.DATASET){
             entityObject = find(Dataset.class, id, manager);
-            query = manager.createNamedQuery("IcatAuthorisation.findAllById");
+            query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE);
         } else if(type == ElementType.DATAFILE){
             entityObject = find(Datafile.class, id, manager);
-            query = manager.createNamedQuery("IcatAuthorisation.findAllById");
+            query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE);
         }
         
         GateKeeper.performAuthorisation(userId, entityObject, AccessType.MANAGE_USERS, manager);
         
         //user has access to read all the roles etc
-        query.setParameter("id", id);
+        query.setParameter("elementId", id);
+        query.setParameter("userId", null); //not searching by userId
         query.setParameter("elementType", type);
         
         Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
         
-        log.debug("Found "+icatAuthorisations.size()+" authorisation(s) for "+id+" for "+type);
+        log.debug("Found "+icatAuthorisations.size()+" authorisation(s) for "+type+"[id:"+id+"]");
         return icatAuthorisations;
     }
     
@@ -480,7 +481,7 @@ public class ManagerUtil {
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
-    public static IcatAuthorisation addAuthorisation(String userId, String toAddUserId, String toAddRole, Long id, ElementType type, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+    protected static IcatAuthorisation addAuthorisation(String userId, String toAddUserId, String toAddRole, Long id, ElementType type, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("addAuthorisation("+userId+", adding "+toAddUserId+" as role: "+toAddRole+" to investigation:"+id+", EntityManager)");
         
         EntityBaseBean rootElement = null;
@@ -509,25 +510,25 @@ public class ManagerUtil {
                 if(toBeAddedRole.isRootInsert()){
                     //need to add a another row for creating datasets for this investigation
                     log.trace("Adding "+toAddUserId+" to create datasets on "+rootElement);
-                    icatAuthorisationChild = persistAuthorisation(userId, toBeAddedRole, ElementType.DATASET, null,
+                    icatAuthorisationChild = persistAuthorisation(userId, toAddUserId, toBeAddedRole, ElementType.DATASET, null,
                             type,  ((Investigation)rootElement).getId(), null, manager);
                 }
-                return persistAuthorisation(userId, toBeAddedRole, type, ((Investigation)rootElement).getId(),
+                return persistAuthorisation(userId, toAddUserId, toBeAddedRole, type, ((Investigation)rootElement).getId(),
                         null,  null, icatAuthorisationChild.getId(), manager);
                 
             } else if(type == ElementType.DATASET){
                 if(toBeAddedRole.isRootInsert()){
                     //need to add a another row for creating datafiles for this dataset
-                    log.trace("Adding "+toAddUserId+" to create datafile on "+rootElement);
-                    icatAuthorisationChild = persistAuthorisation(userId, toBeAddedRole,  ElementType.DATAFILE, null,
-                            type,  ((Investigation)rootElement).getId(), null,  manager);
+                    log.trace("Adding "+toAddUserId+" to create datafiles on "+rootElement);
+                    icatAuthorisationChild = persistAuthorisation(userId, toAddUserId, toBeAddedRole,  ElementType.DATAFILE, null,
+                            type,  ((Dataset)rootElement).getId(), null,  manager);
                 }
-                return persistAuthorisation(userId, toBeAddedRole,
+                return persistAuthorisation(userId, toAddUserId, toBeAddedRole,
                         type,  ((Dataset)rootElement).getId(),
                         ElementType.INVESTIGATION,  ((Dataset)rootElement).getInvestigationId(), icatAuthorisationChild.getId(), manager);
                 
             } else if(type == ElementType.DATAFILE){
-                return persistAuthorisation(userId, toBeAddedRole, type, ((Datafile)rootElement).getId(),
+                return persistAuthorisation(userId, toAddUserId, toBeAddedRole, type, ((Datafile)rootElement).getId(),
                         ElementType.DATASET, ((Datafile)rootElement).getDatasetId(), null, manager);
             } else {
                 throw new RuntimeException("Element type not supported: "+type);
@@ -585,12 +586,12 @@ public class ManagerUtil {
             } else if(newRole.isRootInsert() && icatAuthorisation.getUserChildRecord() == null) {
                 //if new role is creator then add a record
                 if(rootElement.getRootElementType() == ElementType.INVESTIGATION){
-                    IcatAuthorisation icatAuthorisationChild = persistAuthorisation(userId, newRole,
+                    IcatAuthorisation icatAuthorisationChild = persistAuthorisation(userId, icatAuthorisation.getUserId(), newRole,
                             ElementType.DATASET, null, ElementType.INVESTIGATION, ((Investigation)rootElement).getId(), null, manager);
                     
                     icatAuthorisation.setUserChildRecord(icatAuthorisationChild.getId());
                 } else if(rootElement.getRootElementType() == ElementType.DATASET){
-                    IcatAuthorisation icatAuthorisationChild = persistAuthorisation(userId, newRole,
+                    IcatAuthorisation icatAuthorisationChild = persistAuthorisation(userId, icatAuthorisation.getUserId(), newRole,
                             ElementType.DATAFILE, null, ElementType.DATASET, ((Dataset)rootElement).getId(), null, manager);
                     
                     icatAuthorisation.setUserChildRecord(icatAuthorisationChild.getId());
@@ -631,11 +632,11 @@ public class ManagerUtil {
     /**
      * Adds an authorisation to a inv, ds, df
      */
-    public static IcatAuthorisation persistAuthorisation(String userId, IcatRole role, ElementType elementType, Long id, ElementType parentElementType,  Long parentId, Long usercChildRecord, EntityManager manager){
+    public static IcatAuthorisation persistAuthorisation(String userId, String addedId, IcatRole role, ElementType elementType, Long id, ElementType parentElementType,  Long parentId, Long usercChildRecord, EntityManager manager) throws ValidationException{
         //now add authorisation
         IcatAuthorisation icatAuthorisation = new IcatAuthorisation();
         
-        icatAuthorisation.setUserId(userId);
+        icatAuthorisation.setUserId(addedId);
         icatAuthorisation.setElementType(elementType);
         icatAuthorisation.setElementId(id);
         icatAuthorisation.setParentElementType(parentElementType);
@@ -644,7 +645,10 @@ public class ManagerUtil {
         icatAuthorisation.setCreateId(userId);
         icatAuthorisation.setRole(role);
         
-        log.debug("Adding: "+role+" to "+elementType+": "+id+" with parent "+parentElementType+": "+parentId+" with userChildRecord: "+usercChildRecord+" for user "+userId);
+        //check if this is Valid
+        icatAuthorisation.isValid(manager);
+        
+        log.debug("Adding: "+role+" to "+elementType+": "+id+" with parent "+parentElementType+": "+parentId+" with userChildRecord: "+usercChildRecord+" for user "+addedId);
         manager.persist(icatAuthorisation);
         
         return icatAuthorisation;

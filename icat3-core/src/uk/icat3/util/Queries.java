@@ -15,165 +15,92 @@ package uk.icat3.util;
  */
 public class Queries {
     
-    /**
-     * Lists all the investigations without security
-     */
-    public static final String LIST_ALL_INVESTIGATIONS_JPQL = "SELECT DISTINCT i from Investigation i WHERE ";
     
-    /**
-     * Lists all the users investigations
-     * 
-     * icat_authorisation row is not marked deleted, the user id is their userId or ANY and the role has read permission 
-     */
-    public static final String LIST_ALL_USERS_INVESTIGATIONS_JPQL = "SELECT DISTINCT i from Investigation i, IcatAuthorisation ia WHERE" +
+    /////////////////////////////////////    These are to be added together to form queries  ///////////////////////
+    //Returns all of investigation
+    public static final String RETURN_ALL_INVESTIGATIONS_JPQL = "SELECT DISTINCT i from Investigation i ";
+    //Returns investigation id
+    public static final String RETURN_ALL_INVESTIGATION_IDS_JPQL = "SELECT DISTINCT i.id from Investigation i ";
+    
+    public static final String QUERY_USERS_INVESTIGATIONS_JPQL = ", IcatAuthorisation ia WHERE" +
             " i.id = ia.elementId AND ia.elementType = 'INVESTIGATION' AND i.markedDeleted = 'N' " +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y'";
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    
     /**
-     * Lists all the users investigations in SQL
+     * Lists all the users investigations
+     *
+     * icat_authorisation row is not marked deleted, the user id is their userId or ANY and the role has read permission
+     */
+    public static final String LIST_ALL_USERS_INVESTIGATIONS_JPQL = RETURN_ALL_INVESTIGATIONS_JPQL + QUERY_USERS_INVESTIGATIONS_JPQL;
+    public static final String LIST_ALL_USERS_INVESTIGATION_IDS_JPQL = RETURN_ALL_INVESTIGATION_IDS_JPQL + QUERY_USERS_INVESTIGATIONS_JPQL;
+    
+    /**
+     * Lists all the users investigations in SQL (genreated from above JPQL)
      */
     public static final String LIST_ALL_USERS_INVESTIGATIONS_SQL = "SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.RELEASE_DATE, t0.CREATE_ID, t0.TITLE, t0.MOD_ID, t0.INV_ABSTRACT, t0.PREV_INV_NUMBER, t0.VISIT_ID, t0.BCAT_INV_STR, t0.INV_NUMBER, t0.CREATE_TIME, t0.FACILITY_AQUIRED, t0.DELETED, t0.INSTRUMENT, t0.FACILITY_CYCLE, t0.INV_TYPE " +
             "FROM INVESTIGATION t0, ICAT_AUTHORISATION t1, ICAT_ROLE t2 WHERE " +
             "(((((((t0.ID = t1.ELEMENT_ID) AND (t1.ELEMENT_TYPE = 'INVESTIGATION')) AND (t0.DELETED = 'N')) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N')) AND (t2.ACTION_SELECT = 'Y')) AND (t2.ROLE = t1.ROLE))";
-          
-
+    
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /*
+    /**
      * This searches the investigations that the user can view by a suranme
      *
      */
     public static final String INVESTIGATION_LIST_BY_SURNAME = "Investigation.findByUserSurname";
-    public static final String INVESTIGATION_NATIVE_LIST_BY_SURNAME = "Investigation.findBySurnameNative";
-    
-    //public static final String INVESTIGATIONS_LIST_BY_USER_SURNAME_SQL = "SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
-    //      "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME " +
-    //    "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE ((t1.FACILITY_USER_ID = ?1) AND (t1.INVESTIGATION_ID = t0.ID) OR (((SELECT COUNT(*) FROM INVESTIGATOR t1 WHERE (t1.INVESTIGATION_ID = t0.ID)) = 0))) " +
-    //  "AND t2.LAST_NAME LIKE ?2)";
-    
-    public static final String INVESTIGATIONS_LIST_BY_SURNAME_JPQL = "SELECT i FROM Investigation i WHERE i.investigatorCollection.facilityUser.federalId  = :userId " +
-            "AND i.investigatorCollection.facilityUser.lastName LIKE :surname";
-    //faster
-    public static final String INVESTIGATIONS_LIST_BY_USER_SURNAME_SQL ="SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
-            // public static final String INVESTIGATIONS_LIST_BY_USER_SURNAME_SQL ="SELECT ID " +
-            "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.LAST_NAME  " +
-            "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE t2.facility_user_id = t1.facility_user_id " +
-            "AND t2.federal_id = ?1 AND t0.id = t1.investigation_id UNION " +
-            "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, NULL AS LAST_NAME  FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE id NOT IN (SELECT investigation_id from investigator)) WHERE LAST_NAME LIKE ?2";
-    
-    //new for permissions
     public static final String INVESTIGATIONS_LIST_BY_USER_SURNAME_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND i.investigatorCollection.facilityUser.lastName = :lastName AND i.investigatorCollection.markedDeleted = 'N'";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
-    
-    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /*
+    /**
      * This searches the investigations that the user can view by one keyword
      * TODO needs to be multipe keywords
      */
     public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORD = "Investigation.findByKewordNative";
-    /*  public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORD_SQL = "SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
-            "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.NAME " +
-            "FROM INVESTIGATION t0, INVESTIGATOR t1, c t2 " +
-            "WHERE ((t1.FACILITY_USER_ID = ?1) AND (t1.INVESTIGATION_ID = t0.ID) OR (((SELECT COUNT(*) FROM INVESTIGATOR t1 WHERE (t1.INVESTIGATION_ID = t0.ID)) = 0))) " +
-            "AND t2.NAME LIKE ?2)";*/
-    
-    //faster
-    public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORD_SQL = "SELECT DISTINCT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
-            "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t3.NAME  " +
-            "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2, KEYWORD t3 WHERE t2.facility_user_id = t1.facility_user_id " +
-            "AND t2.federal_id = ?1 AND t0.id = t1.investigation_id AND t3.INVESTIGATION_ID = t0.ID UNION " +
-            "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t3.NAME  FROM INVESTIGATION t0, KEYWORD t3 " +
-            "WHERE t3.INVESTIGATION_ID = t0.ID AND id NOT IN (SELECT investigation_id from investigator)) WHERE NAME LIKE ?2";
-    
-    //new for permissions
     public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORD_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND i.keywordCollection.keywordPK.name LIKE :keyword AND i.keywordCollection.markedDeleted = 'N'";
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     
-    /*
+    /**
      * Same but returning investigation Ids
      */
     public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID = "Investigation.findByKewordRtnIdNative";
-    public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID_SQL = "SELECT DISTINCT ID " +
-            "FROM (SELECT DISTINCT t0.ID, t3.NAME " +
-            "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2, KEYWORD t3 WHERE t2.facility_user_id = t1.facility_user_id " +
-            "AND t2.federal_id = ?1 AND t0.id = t1.investigation_id AND t3.INVESTIGATION_ID = t0.ID UNION " +
-            "SELECT t0.ID, t3.NAME  FROM INVESTIGATION t0, KEYWORD t3 " +
-            "WHERE t3.INVESTIGATION_ID = t0.ID AND id NOT IN (SELECT investigation_id from investigator)) WHERE NAME LIKE ?2";
+    public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID_JPQL = RETURN_ALL_INVESTIGATION_IDS_JPQL +
+            QUERY_USERS_INVESTIGATIONS_JPQL +" AND i.keywordCollection.keywordPK.name LIKE :keyword AND i.keywordCollection.markedDeleted = 'N'";
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     
-    //new for permissions
-    public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORD_RTN_ID_JPQL = "SELECT DISTINCT i.id from Investigation i, IcatAuthorisation ia WHERE" +
-            " i.id = ia.elementId AND ia.elementType = 'INVESTIGATION' AND i.markedDeleted = 'N' " +
-            " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-            " AND ia.markedDeleted = 'N' AND i.keywordCollection.keywordPK.name LIKE :keyword AND i.keywordCollection.markedDeleted = 'N'";
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     
-    ////by keywrds
+    /**
+     * Search my keywords (AND and OR and fuzzy)
+     */
     public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS = "Investigation.findByKewordsNative";
     
-    /*public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL = "SELECT DISTINCT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
-            "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t3.NAME  " +
-            "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2, KEYWORD t3 WHERE t2.facility_user_id = t1.facility_user_id " +
-            "AND t2.federal_id = ?userId AND t0.id = t1.investigation_id AND t3.INVESTIGATION_ID = t0.ID UNION " +
-            "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t3.NAME  FROM INVESTIGATION t0, KEYWORD t3 " +
-            "WHERE t3.INVESTIGATION_ID = t0.ID AND id NOT IN (SELECT investigation_id from investigator)) WHERE ";
-     */
-    public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL = "SELECT DISTINCT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID,  FACILITY_CYCLE " +
-            "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t3.NAME  " +
-            "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2, KEYWORD t3 WHERE t2.facility_user_id = t1.facility_user_id " +
-            "AND t2.federal_id = ?userId AND t0.id = t1.investigation_id AND t3.INVESTIGATION_ID = t0.ID UNION " +
-            "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t3.NAME  FROM INVESTIGATION t0, KEYWORD t3 " +
-            "WHERE t3.INVESTIGATION_ID = t0.ID AND id NOT IN (SELECT investigation_id from investigator)) WHERE ";
+    // Query =  LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND (i.keywordCollection.keywordPK.name LIKE '%or%' AND i.keywordCollection.keywordPK.name LIKE '%orbita%')";;
+    public static final String INVESTIGATION_LIST_BY_KEYWORDS_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL +" AND ";
+    // QUERY =  RETURN_ALL_INVESTIGATIONS_JPQL +" WHERE (i.keywordCollection.keywordPK.name LIKE '%or%' AND i.keywordCollection.keywordPK.name LIKE '%orbita%')";
+    public static final String INVESTIGATION_IST_BY_KEYWORDS_JPQL_NOSECURITY = RETURN_ALL_INVESTIGATIONS_JPQL +" WHERE ";
     
-    //changed to LIKE for fed id search
-    public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL_NOSECURITY = "SELECT DISTINCT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID,  FACILITY_CYCLE " +
-            "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t3.NAME  " +
-            "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2, KEYWORD t3 WHERE t2.facility_user_id = t1.facility_user_id " +
-            "AND t2.federal_id LIKE ?userId AND t0.id = t1.investigation_id AND t3.INVESTIGATION_ID = t0.ID UNION " +
-            "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t3.NAME  FROM INVESTIGATION t0, KEYWORD t3 " +
-            "WHERE t3.INVESTIGATION_ID = t0.ID AND id NOT IN (SELECT investigation_id from investigator)) WHERE ";
-    
-    //new for permissions
-    // TEST public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_JPQL = LIST_ALL_INVESTIGATIONS_JPQL +"AND (i.keywordCollection.keywordPK.name LIKE '%or%' AND i.keywordCollection.keywordPK.name LIKE '%orbita%')";;
-    public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL +"AND ";
-    //TEST public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_JPQL_NOSECURITY = LIST_ALL_INVESTIGATIONS_JPQL +" (i.keywordCollection.keywordPK.name LIKE '%or%' AND i.keywordCollection.keywordPK.name LIKE '%orbita%')";
-    public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_JPQL_NOSECURITY = LIST_ALL_INVESTIGATIONS_JPQL +" ";
+    public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL = "";
+    public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL_NOSECURITY = "";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
-    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /*
+    /**
      * This searches the investigations that the user can view by userid
      *
      */
-    public static final String INVESTIGATION_NATIVE_LIST_BY_USERID = "Investigation.findByUserIDNative";
     public static final String INVESTIGATION_LIST_BY_USERID = "Investigation.findByUserID";
-    
-    
-    /* public static final String INVESTIGATION_NATIVE_LIST_BY_USERID_SQL = "SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
-            "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.FEDERAL_ID " +
-            "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE ((t1.FACILITY_USER_ID = ?1) AND (t1.INVESTIGATION_ID = t0.ID) OR (((SELECT COUNT(*) FROM INVESTIGATOR t1 WHERE (t1.INVESTIGATION_ID = t0.ID)) = 0)))" +
-            " AND t2.FEDERAL_ID LIKE ?2)";*/
-    
-    // public static final String INVESTIGATION_LIST_BY_USERID_JPQL = "SELECT i FROM Investigation i WHERE i.investigatorCollection.facilityUser.federalId = :userId " +
-    //          "AND i.investigatorCollection.investigatorPK.facilityUserId LIKE :userIdSearched";
-    
-    public static final String INVESTIGATION_NATIVE_LIST_BY_USERID_SQL = "SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE " +
-            // public static final String INVESTIGATIONS_LIST_BY_USER_SURNAME_SQL ="SELECT ID " +
-            "FROM (SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, t2.FEDERAL_ID  " +
-            "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE t2.facility_user_id = t1.facility_user_id " +
-            "AND t2.federal_id = ?1 AND t0.id = t1.investigation_id UNION " +
-            "SELECT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE, NULL AS FEDERAL_ID  FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE id NOT IN (SELECT investigation_id from investigator)) WHERE FEDERAL_ID LIKE ?2";
-    
-    //new for permissions
     public static final String INVESTIGATION_LIST_BY_USERID_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL +" AND i.investigatorCollection.facilityUser.federalId = :federalId AND i.keywordCollection.markedDeleted = 'N'";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
-    
-    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /*
+    /**
      * This is the search for the advanced search
      */
     public static final String ADVANCED_SEARCH = "Investigation.findByAdvancedSearch";
@@ -184,9 +111,9 @@ public class Queries {
             "AND (Lower(title) LIKE '%'||Lower(?inv_title)||'%' OR ?inv_title IS NULL) ";
     
     public static final String ADVANCED_SEARCH_SQL_BASE = "";
-           
-            /*"SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.RELEASE_DATE, t0.CREATE_ID, t0.TITLE, t0.MOD_ID, t0.INV_ABSTRACT, t0.PREV_INV_NUMBER, t0.VISIT_ID, t0.BCAT_INV_STR, t0.INV_NUMBER, t0.CREATE_TIME, t0.FACILITY_AQUIRED, t0.DELETED, t0.INSTRUMENT, t0.FACILITY_CYCLE, t0.INV_TYPE 
-            FROM INVESTIGATION t0, ICAT_AUTHORISATION t1, ICAT_ROLE t2 WHERE 
+    
+            /*"SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.RELEASE_DATE, t0.CREATE_ID, t0.TITLE, t0.MOD_ID, t0.INV_ABSTRACT, t0.PREV_INV_NUMBER, t0.VISIT_ID, t0.BCAT_INV_STR, t0.INV_NUMBER, t0.CREATE_TIME, t0.FACILITY_AQUIRED, t0.DELETED, t0.INSTRUMENT, t0.FACILITY_CYCLE, t0.INV_TYPE
+            FROM INVESTIGATION t0, ICAT_AUTHORISATION t1, ICAT_ROLE t2 WHERE
             (((((((t0.ID = t1.ELEMENT_ID) AND (t1.ELEMENT_TYPE = 'INVESTIGATION')) AND (t0.DELETED = 'N')) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N')) AND (t2.ACTION_SELECT = 'Y')) AND (t2.ROLE = t1.ROLE))
             WHERE  (((t0.ID = t1.INVESTIGATION_ID) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N'))
             AND (inv_number = ? OR ? IS NULL)
@@ -262,63 +189,40 @@ public class Queries {
     
     
     
-    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /*
+    /**
      *
      * All the investigations that a user can view.  Ie their ones and the global ones (at the moment
      * these are ones with no ionvestigators
      *
      */
     public static final String INVESTIGATIONS_BY_USER = "Investigation.findByUser";
-    
-    //Slow!  and incorrect, OR needs to be a UNION
-    // public static final String INVESTIGATIONS_BY_USER_JPQL = "SELECT i FROM Investigation i WHERE" +
-    //       " (i.investigatorCollection.facilityUser.federalId = :userId OR i.investigatorCollection IS EMPTY)";
-    
-    //much faster, second version for JPQL, but JPQL does not have UNION, OR does not work!!!!
-    //String INVESTIGATIONS_BY_USER_JPQL = "SELECT count(i) FROM Investigation i  WHERE i.investigatorCollection.investigatorPK.facilityUserId = 'JAMES' UNION i.id NOT IN (SELECT j.investigatorPK.investigationId  FROM Investigator j)";
-    
-    //Much faster
-    public static final String INVESTIGATIONS_BY_USER_SQL = "SELECT DISTINCT t0.ID, t0.PREV_INV_NUMBER, t0.BCAT_INV_STR, t0.VISIT_ID, t0.GRANT_ID, t0.INV_ABSTRACT, t0.RELEASE_DATE, t0.TITLE, t0.MOD_TIME, t0.INV_NUMBER, t0.MOD_ID, t0.INV_TYPE, t0.INSTRUMENT, t0.FACILITY_CYCLE  " +
-            "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2 WHERE t2.facility_user_id = t1.facility_user_id " +
-            "AND t2.federal_id = ?1 AND t0.id = t1.investigation_id UNION " +
-            "SELECT ID, PREV_INV_NUMBER, BCAT_INV_STR, VISIT_ID, GRANT_ID, INV_ABSTRACT, RELEASE_DATE, TITLE, MOD_TIME, INV_NUMBER, MOD_ID, INV_TYPE, INSTRUMENT, FACILITY_CYCLE  FROM INVESTIGATION t0 WHERE id NOT IN (SELECT investigation_id from investigator)";
-    
-    //new for permissions
     public static final String INVESTIGATIONS_BY_USER_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /*
+    /**
      *
-     * All the investigations of the user.
+     * All the investigations of the user. (ie an investigator of)
      *
      */
     public static final String INVESTIGATIONS_FOR_USER = "Investigation.findOfUser";
-    //new for permissions
     public static final String INVESTIGATIONS_FOR_USER_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL+ " AND i.investigatorCollection.facilityUser.federalId = :userId AND i.investigatorCollection.markedDeleted = 'N'";
     
     public static final String INVESTIGATIONS_FOR_USER_RTN_ID = "Investigation.findOfUser";
-    //   public static final String INVESTIGATIONS_FOR_USER_RTN_ID_JPQL = "SELECT i.id FROM Investigation i WHERE" +
-    //         " i.investigatorCollection.facilityUser.federalId = :userId";
-    
-    //new for permissions
-    public static final String INVESTIGATIONS_FOR_USER_RTN_ID_JPQL = "SELECT DISTINCT i.id from Investigation i, IcatAuthorisation ia WHERE" +
-            " i.id = ia.elementId AND ia.elementType = 'INVESTIGATION' AND i.markedDeleted = 'N'" +
-            " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+    public static final String INVESTIGATIONS_FOR_USER_RTN_ID_JPQL = LIST_ALL_USERS_INVESTIGATION_IDS_JPQL +
             " AND ia.markedDeleted = 'N' AND i.investigatorCollection.facilityUser.federalId = :userId AND i.investigatorCollection.markedDeleted = 'N'";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-         /*
-          *
-          * Data files by instrument and run number
-          *
-          */
+    /**
+     *
+     * Data files by instrument and run number
+     *
+     */
     public static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER = "Datafile.findByRunNumberNative";
     public static final String DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER = "Datafile.findByRunNumber";
     
@@ -367,24 +271,11 @@ public class Queries {
             "AND dp.NAME = 'run_number' "+
             "AND dp.numeric_value BETWEEN ?lower AND ?upper";
     
-    //new for permissions
-    // TEST public static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_1 = LIST_ALL_USERS_INVESTIGATIONS_JPQL+" " +
-    //  "AND d.datasetId.investigationId.instrument.name IN('alf','lad') " +
-    // "AND d.datafileParameterCollection.datafileParameterPK.name = 'run_number' " +
-    //"AND d.datafileParameterCollection.datafileParameterPK.name BETWEEN 2620 AND 2631";
-    
-    //new for permissions
-    public static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_1 = LIST_ALL_USERS_INVESTIGATIONS_JPQL+" " +
-            "AND d.datasetId.investigationId.instrument.name IN(";  //dynamically adding this here: IN(  'alf','lad'   )
-    public static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_2=") AND d.datafileParameterCollection.datafileParameterPK.name = 'run_number' " +
-            "AND d.datafileParameterCollection.datafileParameterPK.name BETWEEN :lower AND :upper";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
-    
-    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /*
+    /**
      * Find all keywords
      *
      */
@@ -392,6 +283,7 @@ public class Queries {
     public static final String ALLKEYWORDS_NATIVE_ALPHA_NUMERIC = "Investigation.getAllKeywordsNativeAplhaNumeric";
     public static final String ALLKEYWORDS_NATIVE_ALPHA = "Investigation.getAllKeywordsNativeAlpha";
     public static final String ALLKEYWORDS_JPQL = "SELECT DISTINCT k.keywordPK.name FROM Keyword k WHERE k.markedDeleted = 'N'";
+    
     //TODO these are ORACLE queries only
     //all alpha numeric
     public static final String ALLKEYWORDS_ALPHA_NUMERIC_SQL = "SELECT DISTINCT NAME FROM keyword WHERE regexp_like(NAME,'^[[:alnum:]]*$') AND DELETED = 'N'";
@@ -402,102 +294,111 @@ public class Queries {
     
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /*
-     * Find all keywords for user,
-     * //TODO wrong query
+    /**
+     * Find all keywords for user    
      */
-    public static final String KEYWORDS_FOR_USER = "Keywords.getAllKeywordsForUser";
-    // public static final String KEYWORDS_FOR_USER_JPQL = "SELECT DISTINCT k.keywordPK.name FROM Keyword k WHERE (k.investigation.investigatorCollection.investigatorPK.facilityUserId = :userId OR k.investigation.investigatorCollection IS EMPTY) AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) ORDER BY k.keywordPK.name";
-    //new for permissions
+    public static final String KEYWORDS_FOR_USER = "Keywords.getAllKeywordsForUser";    
     public static final String KEYWORDS_FOR_USER_JPQL = "SELECT DISTINCT k.keywordPK.name from Keyword k, IcatAuthorisation ia WHERE" +
             " k.investigation.id = ia.elementId AND ia.elementType = 'INVESTIGATION' AND ia.markedDeleted = 'N'" +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) AND k.markedDeleted = 'N' ORDER BY k.keywordPK.name";
-    public static final String KEYWORDS_NATIVE_FOR_USER = "Keywords.getAllKeywordsForUserNative";
-    public static final String KEYWORDS_FOR_USER_SQL = "SELECT DISTINCT NAME FROM (SELECT DISTINCT t3.NAME  " +
-            "FROM INVESTIGATION t0, INVESTIGATOR t1, FACILITY_USER t2, KEYWORD t3 WHERE t2.facility_user_id = t1.facility_user_id " +
-            "AND t2.federal_id = ?userId AND t0.id = t1.investigation_id AND t3.INVESTIGATION_ID = t0.ID UNION " +
-            "SELECT t3.NAME  FROM INVESTIGATION t0, KEYWORD t3 " +
-            "WHERE t3.INVESTIGATION_ID = t0.ID AND id NOT IN (SELECT investigation_id from investigator)) WHERE NAME LIKE ?startKeyword";
-    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /*
+    /**
      * Find all instruments list,
      *
      */
     public static final String ALL_INSTRUMENTS = "Instrument.listAll";
     public static final String ALL_INSTRUMENTS_JPQL = "SELECT DISTINCT i FROM Instrument i WHERE i.markedDeleted = 'N'";
     
-     /*
+    /**
      * Find all investigation types,
      *
      */
     public static final String ALL_INVESTIGATION_TYPES = "InvestigationType.listAll";
     public static final String ALL_INVESTIGATION_TYPES_JPQL = "SELECT DISTINCT i FROM InvestigationType i WHERE i.markedDeleted = 'N'";
     
-    
-    /*
+    /**
      * Find all roles list,
      *
      */
     public static final String ALL_ROLES = "IcatRole.listAll";
     public static final String ALL_ROLES_JPQL = "SELECT DISTINCT i FROM IcatRole i WHERE i.markedDeleted = 'N'";
     
-     /*
+    /**
      * Find all dataset status list,
      *
      */
     public static final String ALL_DATASET_STATUS = "DatasetStatus.listAll";
     public static final String ALL_DATASET_STATUS_JPQL = "SELECT DISTINCT ds FROM DatasetStatus ds WHERE ds.markedDeleted = 'N'";
     
-     /*
+    /**
      * Find all dataset type list,
      *
      */
     public static final String ALL_DATASET_TYPE = "DatasetType.listAll";
     public static final String ALL_DATASET_TYPE_JPQL = "SELECT DISTINCT ds FROM DatasetType ds WHERE ds.markedDeleted = 'N'";
     
-    /*
+    /**
      * Find all dataset type list,
      *
      */
     public static final String DATASET_FINDBY_UNIQUE = "Dataset.findbyUnique";
-    public static final String DATASET_FINDBY_UNIQUE_JPQL = "SELECT d FROM Dataset d WHERE (d.sampleId = :sampleId OR d.sampleId IS NULL) AND (d.name = :name OR d.name IS NULL) AND (d.investigation = :investigation OR d.investigation IS NULL)  AND (d.datasetType = :datasetType OR d.datasetType IS NULL)";
+    public static final String DATASET_FINDBY_UNIQUE_JPQL = "SELECT d FROM Dataset d WHERE " +
+            "(d.sampleId = :sampleId OR d.sampleId IS NULL) AND " +
+            "(d.name = :name OR d.name IS NULL) AND (d.investigation = :investigation OR d.investigation IS NULL) AND " +
+            "(d.datasetType = :datasetType OR d.datasetType IS NULL)";
     
-    /*
-     * Find ICAT AUTHORISATION by user and element id 
+    /**
+     * Find ICAT AUTHORISATION by UNIQUE KEY (user, element id and type, parent type and id
      *
      */
-    public static final String ICAT_AUTHORISATION_FINDBY_UNIQUE = "IcatAuthorisation.findByUnique"; 
-    public static final String ICAT_AUTHORISATION_FINDBY_UNIQUE_JPQL = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = :elementType AND i.elementId = :elementId AND i.userId = :userId AND i.markedDeleted = 'N'";
+    public static final String ICAT_AUTHORISATION_FINDBY_UNIQUE_KEY = "IcatAuthorisation.findByUniqueKey";
+    public static final String ICAT_AUTHORISATION_FINDBY_UNIQUE_KEY_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
+            "i.elementType = :elementType AND i.elementId = :elementId AND " +
+            "i.userId = :userId AND i.parentElementType = :parentElementType AND " +
+            "i.parentElementId = :parentElementId";
     
-    /*
-     * Find ICAT AUTHORISATION by user and element id null, ie creating a inv, df, ds 
+    /**
+     * Find ICAT AUTHORISATION by user and element id
      *
      */
-    public static final String ICAT_AUTHORISATION_FINDBY_NULL = "IcatAuthorisation.findByIdNullElementId";
-    public static final String ICAT_AUTHORISATION_FINDBY_NULL_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
+    public static final String ICAT_AUTHORISATION_FINDBY_UNIQUE = "IcatAuthorisation.findByUnique";
+    public static final String ICAT_AUTHORISATION_FINDBY_UNIQUE_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
+            "i.elementType = :elementType AND i.elementId = :elementId AND " +
+            "(i.userId = :userId OR :userId IS NULL) AND i.markedDeleted = 'N'";
+    
+    /**
+     * Find ICAT AUTHORISATION by user and element id null, ie creating a inv
+     *
+     */
+    public static final String ICAT_AUTHORISATION_FINDBY_NULL_INVESTIGATION = "IcatAuthorisation.findByIdNullInvestigationId";
+    public static final String ICAT_AUTHORISATION_FINDBY_NULL_INVESTIGATION_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
             "i.elementType = :elementType AND i.elementId IS NULL AND " +
-            "(i.parentElementType = :parentElementType OR :parentElementType IS NULL) AND " +
-            "(i.parentElementId = :parentElementId OR :parentElementId IS NULL ) AND " +
             "i.userId = :userId AND i.markedDeleted = 'N'";
-  
-    
+    /**
+     * Find ICAT AUTHORISATION by user and element id null, ie creating a  df, ds
+     *
+     */
+    public static final String ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE = "IcatAuthorisation.findByIdNullDataset_fileId";
+    public static final String ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
+            "i.elementType = :elementType AND i.elementId IS NULL AND " +
+            "i.parentElementType = :parentElementType AND " +
+            "i.parentElementId = :parentElementId AND " +
+            "i.userId = :userId AND i.markedDeleted = 'N'";
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
     //////////////////////// Deleted stuff  ///////////////////////////////////////////
-     /*
+    /**
      * Find all deleted datasets
      *
      */
     public static final String LIST_MY_DELETED_DATASETS = "Dataset.ListAllDeleted";
-     
-   public static final String LIST_MY_DELETED_DATASETS_JPQL = "SELECT DISTINCT ds from Dataset ds, IcatAuthorisation ia WHERE" +
+    public static final String LIST_MY_DELETED_DATASETS_JPQL = "SELECT DISTINCT ds from Dataset ds, IcatAuthorisation ia WHERE" +
             " ds.id = ia.elementId AND ia.elementType = 'DATASET' AND ds.markedDeleted = 'Y' " +
             " AND ia.userId = :userId " +
             " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y'";

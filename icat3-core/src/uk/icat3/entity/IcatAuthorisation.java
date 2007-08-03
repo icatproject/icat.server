@@ -10,10 +10,9 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.util.Date;
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -23,9 +22,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
+import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.Queries;
 
@@ -48,9 +50,10 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = "IcatAuthorisation.findByCreateId", query = "SELECT i FROM IcatAuthorisation i WHERE i.createId = :createId"),
     @NamedQuery(name = "IcatAuthorisation.findByFacilityAcquired", query = "SELECT i FROM IcatAuthorisation i WHERE i.facilityAcquired = :facilityAcquired"),
     @NamedQuery(name = "IcatAuthorisation.findByDeleted", query = "SELECT i FROM IcatAuthorisation i WHERE i.markedDeleted = :deleted"),
-    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_NULL, query = Queries.ICAT_AUTHORISATION_FINDBY_NULL_JPQL),
-    @NamedQuery(name = "IcatAuthorisation.findAllById", query = "SELECT i FROM IcatAuthorisation i WHERE i.elementType = :elementType AND i.elementId = :id AND i.markedDeleted = 'N'"),
-     @NamedQuery(name =Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE, query = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE_JPQL)
+    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_NULL_INVESTIGATION, query = Queries.ICAT_AUTHORISATION_FINDBY_NULL_INVESTIGATION_JPQL),
+    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE, query = Queries.ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE_JPQL),
+    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE_KEY, query = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE_KEY_JPQL),
+    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE, query = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE_JPQL)
 })
         @SequenceGenerator(name="ICAT_AUTHORISATION_SEQ",sequenceName="ICAT_AUTHORISATION_ID_SEQ",allocationSize=1)
         public class IcatAuthorisation extends EntityBaseBean implements Serializable {
@@ -79,7 +82,7 @@ import uk.icat3.util.Queries;
     
     @Column(name = "USER_CHILD_RECORD")
     private Long userChildRecord;
-
+    
     @JoinColumn(name = "ROLE", referencedColumnName = "ROLE")
     @ManyToOne
     private IcatRole role;
@@ -159,6 +162,43 @@ import uk.icat3.util.Queries;
      */
     public ElementType getRootElementType(){
         return ElementType.INVESTIGATION;
+    }
+    
+    /**
+     * Checks weather the sample is unique in the database.
+     */
+    private boolean isUnique(EntityManager manager) throws ValidationException {
+        try {
+            Query query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE_KEY);
+            query.setParameter("userId", userId).
+                    setParameter("elementId", elementId).
+                    setParameter("elementType", elementType).
+                    setParameter("parentElementId", parentElementId).
+                    setParameter("parentElementType", parentElementType);
+            IcatAuthorisation icatAuthorisation = (IcatAuthorisation) query.getSingleResult();
+            
+            if(id != null && icatAuthorisation.getId().equals(id)) return true;
+            throw new ValidationException(this+" is not unique.  Same unique key as "+icatAuthorisation);
+        } catch(NoResultException nre) {
+            return true;
+        }
+    }
+    
+    /**
+     * Overrides the isValid function,
+     *
+     * @throws ValidationException
+     * @return
+     */
+    @Override
+    public boolean isValid(EntityManager manager) throws ValidationException {
+        if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
+        
+        //check if unique
+        isUnique(manager);
+        
+        //once here then its valid
+        return isValid();
     }
     
     @Override

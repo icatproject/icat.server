@@ -13,11 +13,20 @@ import java.util.Random;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.Datafile;
+import uk.icat3.entity.DatafileFormat;
+import uk.icat3.entity.DatafileFormatPK;
+import uk.icat3.entity.Dataset;
+import uk.icat3.entity.DatasetType;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.InvestigationType;
+import uk.icat3.manager.DataFileManager;
+import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.InvestigationManager;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.Queries;
 
 /**
  *
@@ -53,7 +62,7 @@ public class TestJPA {
     }
     
     
-    public void test() throws Exception{
+    public void createInv() throws Exception{
         setUp();
         
         Investigation investigation = new Investigation();
@@ -67,20 +76,61 @@ public class TestJPA {
         tearDown();
     }
     
+    public void createDS() throws Exception{
+        setUp();
+        
+        Dataset ds = new Dataset();
+        DatasetType type = new DatasetType();
+        type.setName("analyzed");
+        type.setDescription("Analyzed data");
+        ds.setDatasetType(type);
+        ds.setName("unit test create data set");
+        
+        DataSetManager.createDataSet("test_admin_investigation", ds, 100L, em);
+        
+        tearDown();
+    }
+    
+    public void createDF() throws Exception{
+        setUp();
+        
+        Datafile df = new Datafile();
+        DatafileFormat type = new DatafileFormat();
+        DatafileFormatPK pk = new DatafileFormatPK("3.0.0", "nexus");
+        type.setDatafileFormatPK(pk);
+        
+        df.setDatafileFormat(type);
+        df.setName("name of df");
+        
+        DataFileManager.createDataFile("test_admin_investigation", df, 100L, em);
+        
+        tearDown();
+    }
+    
     public void changeRole() throws Exception {
         setUp();
         
-        InvestigationManager.updateAuthorisation("test_admin_investigation", "DOWNLOADER", 101L, em);
+        InvestigationManager.updateAuthorisation("test_admin_investigation", "CREATOR", 103L, em);
         
         tearDown();
     }
     
     public void testJPA() throws Exception {
         setUp();
-        String JPA ="SELECT i FROM IcatAuthorisation i WHERE i.elementType = :elementType AND i.elementId IS NULL AND (i.parentElementType = :parentElementType) AND (i.parentElementId = :parentElementId) AND i.userId = :userId AND i.markedDeleted = 'N'";
         
-        System.out.println(em.createQuery(JPA).getResultList());
+        Query nullQuery = em.createQuery( "SELECT i FROM IcatAuthorisation i WHERE " +
+                "i.parentElementType = :parentElementType OR :parentElementType IS NULL");
         
+        //try and find user with null as investigation
+        //nullQuery.setParameter("elementType", ElementType.DATASET).
+        //  nullQuery.setParameter("userId", "test_admin_investigation");
+        
+        
+        nullQuery.setParameter("parentElementType", ElementType.DATASET);
+        // nullQuery.setParameter("parentElementId", null);
+        
+        System.out.println(nullQuery.getResultList());
+        //System.out.println(em.createQuery("SELECT i FROM IcatAuthorisation i WHERE i.elementType = :type1  AND (i.parentElementType = :type OR :type IS NULL)").setParameter("type1", ElementType.INVESTIGATION).setParameter("type", null).getResultList());
         tearDown();
     }
     
@@ -88,6 +138,14 @@ public class TestJPA {
         setUp();
         
         System.out.println(InvestigationManager.getAuthorisations("test_admin_investigation", 100L, em));
+        
+        tearDown();
+    }
+    
+    public void addRole() throws Exception {
+        setUp();
+        
+        System.out.println(DataFileManager.addAuthorisation("test_admin_investigation","addedDatafileUser", "CREATOR", 100L, em));
         
         tearDown();
     }
@@ -100,10 +158,13 @@ public class TestJPA {
         
         TestJPA ts = new TestJPA();
         
-        ts.getRoles();
-        // ts.test();
+       // ts.createDF();
+        // ts.createDS();
+        ts.addRole();
+        // ts.getRoles();
+        //  ts.createInv();
         // ts.testJPA();
-        // ts.changeRole();
+        //  ts.changeRole();
     }
     
     

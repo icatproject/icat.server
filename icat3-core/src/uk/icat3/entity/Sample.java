@@ -261,11 +261,11 @@ import uk.icat3.util.ElementType;
     /**
      * Checks weather the sample is unique in the database.
      */
-    private boolean isUnique(EntityManager manager){
+    private boolean isUnique(EntityManager manager) throws ValidationException{
         try {
             Sample sample = (Sample)manager.createNamedQuery("Sample.findByUnique").setParameter("name", name).setParameter("instance", instance).setParameter("investigationId", investigationId).getSingleResult();
             if(id != null && sample.getId().equals(id)) return true;
-            return false;
+            throw new ValidationException(this+" is not unique. Same unique key as "+sample);
         } catch(NoResultException nre) {
             return true;
         }
@@ -289,7 +289,7 @@ import uk.icat3.util.ElementType;
             }
         }
         //check if unique
-        if(!isUnique(manager)) throw new ValidationException(this+" is not unique.");
+        isUnique(manager);
         
         
         //once here then its valid

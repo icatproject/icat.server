@@ -136,7 +136,7 @@ public class GateKeeper {
      *                          permission to perform operation.
      */
     private static void performAuthorisation(String userId, Investigation investigation, AccessType access, EntityBaseBean object, Long rootParentsId, ElementType elementType, EntityManager manager) throws InsufficientPrivilegesException {
-        log.trace("performAuthorisation(): "+userId+", AccessType: "+access+", "+object+", parentId: "+rootParentsId);
+        log.trace("performAuthorisation(): "+userId+", AccessType: "+access+", "+object+", rootId: "+rootParentsId);
         IcatAuthorisation icatAuthorisation = null;
         boolean success = false;
         
@@ -145,9 +145,9 @@ public class GateKeeper {
             if(elementType.isInvestigationType()) {
                 icatAuthorisation = findIcatAuthorisation(userId, investigation, ElementType.INVESTIGATION, rootParentsId, rootParentsId, manager);
             } else if(elementType.isDatasetType()) {
-                icatAuthorisation = findIcatAuthorisation(userId, investigation, ElementType.DATASET, rootParentsId, ((Dataset)object).getInvestigationId(), manager);
+                icatAuthorisation = findIcatAuthorisation(userId, investigation, ElementType.DATASET, rootParentsId, ((Dataset)object).getInvestigation().getId(), manager);
             } else if(elementType.isDatafileType()) {
-                icatAuthorisation = findIcatAuthorisation(userId, investigation, ElementType.DATAFILE, rootParentsId, ((Datafile)object).getDatasetId(), manager);
+                icatAuthorisation = findIcatAuthorisation(userId, investigation, ElementType.DATAFILE, rootParentsId, ((Datafile)object).getDataset().getId(), manager);
             }
         } catch(InsufficientPrivilegesException ipe){
             log.warn("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object );
@@ -175,19 +175,20 @@ public class GateKeeper {
             //check if element type is a root, if so check root insert permissions
             if(elementType.isRootType()){
                 log.trace("Trying to create a root type: "+elementType);
+                
                 //if null in investigation id then can create investigations
                 if(elementType == ElementType.INVESTIGATION && icatAuthorisation.getElementId() == null && parseBoolean(icatAuthorisation.getRole().getActionRootInsert())){
                     success = true; //user has access to insert root root element
                 } else if(elementType == ElementType.DATASET &&
                         icatAuthorisation.getElementId() == null &&
-                        icatAuthorisation.getParentElementType().equals(ElementType.DATASET.toString()) &&
-                        icatAuthorisation.getParentElementId().equals(((Dataset)object).getInvestigationId()) &&
+                        icatAuthorisation.getParentElementType()==ElementType.INVESTIGATION &&
+                        icatAuthorisation.getParentElementId().equals(((Dataset)object).getInvestigation().getId()) &&
                         parseBoolean(icatAuthorisation.getRole().getActionRootInsert())){
                     success = true; //user has access to insert root root element
                 } else if(elementType == ElementType.DATAFILE &&
                         icatAuthorisation.getElementId() == null &&
-                        icatAuthorisation.getParentElementType().equals(ElementType.DATAFILE.toString()) &&
-                        icatAuthorisation.getParentElementId().equals(((Datafile)object).getDatasetId()) &&
+                        icatAuthorisation.getParentElementType() == ElementType.DATASET &&
+                        icatAuthorisation.getParentElementId().equals(((Datafile)object).getDataset().getId()) &&
                         parseBoolean(icatAuthorisation.getRole().getActionRootInsert())){
                     success = true; //user has access to insert root root element
                 }
@@ -210,7 +211,7 @@ public class GateKeeper {
         
         //now check if has permission and if not throw exception
         if(success){
-            //now append the role to the investigation, dataset or datafile 
+            //now append the role to the investigation, dataset or datafile
             if(elementType.isRootType()) object.setIcatRole(icatAuthorisation.getRole());
             log.debug("User: " + userId + " granted " + access + " permission on " + object +" with role "+icatAuthorisation.getRole());
         } else {
@@ -226,30 +227,32 @@ public class GateKeeper {
      */
     private static IcatAuthorisation findIcatAuthorisation(String userId, Investigation investigation, ElementType type, Long id, Long parentId, EntityManager manager) throws InsufficientPrivilegesException {
         if(!type.isRootType()) throw new RuntimeException("ElementType: "+type+" not supported");
-        log.trace("Looking for ICAT AUTHORISATION: UserId: "+userId+", elementId: "+id+", type: "+type+", investigationId: "+investigation.getId() );
+        log.trace("Looking for ICAT AUTHORISATION: UserId: "+userId+", elementId: "+id+", type: "+type+", parentId: "+parentId+", investigationId: "+investigation.getId() );
         
         IcatAuthorisation icatAuthorisation = null;
+        Query nullSearchQuery = null;
+        
         if(id == null){
             log.trace("user "+ userId+" trying to create a "+type);
-            Query nullQuery = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_NULL);
-            
-            //try and find user with null as investigation
-            nullQuery.setParameter("elementType", type).
-                    setParameter("userId", userId);
             
             if(type == ElementType.INVESTIGATION){
-                nullQuery.setParameter("parentElementId", null);
-                nullQuery.setParameter("parentElementType", null);
+                nullSearchQuery = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_NULL_INVESTIGATION);
             } else if(type == ElementType.DATASET){
-                nullQuery.setParameter("parentElementType", ElementType.DATASET);
-                nullQuery.setParameter("parentElementId", parentId);
+                nullSearchQuery = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE);
+                nullSearchQuery.setParameter("parentElementType", ElementType.INVESTIGATION);
+                nullSearchQuery.setParameter("parentElementId", parentId);
             } else if(type == ElementType.DATAFILE){
-                nullQuery.setParameter("parentElementType", ElementType.DATAFILE);
-                nullQuery.setParameter("parentElementId", parentId);
+                nullSearchQuery = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE);
+                nullSearchQuery.setParameter("parentElementType", ElementType.DATASET);
+                nullSearchQuery.setParameter("parentElementId", parentId);
             }
             
+            //try and find user with null as investigation
+            nullSearchQuery.setParameter("elementType", type).
+                    setParameter("userId", userId);
+            
             try{
-                icatAuthorisation = (IcatAuthorisation)nullQuery.getSingleResult();
+                icatAuthorisation = (IcatAuthorisation)nullSearchQuery.getSingleResult();
                 log.trace("Found stage 3 (nulls): "+icatAuthorisation);
             } catch(NoResultException nre3){
                 log.debug("None found for : UserId: "+userId+", elementId: null, type: "+type+", elementId: null, throwing exception");
@@ -279,7 +282,7 @@ public class GateKeeper {
                 }
             }
         }
-               
+        
         //return the icat authoruisation
         return icatAuthorisation;
         

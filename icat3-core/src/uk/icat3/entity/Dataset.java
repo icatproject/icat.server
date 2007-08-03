@@ -597,7 +597,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
     /**
      * Checks weather the dataset is unique in the database.
      */
-    private boolean isUnique(EntityManager manager){
+    private boolean isUnique(EntityManager manager) throws ValidationException{
         
         Query query =  manager.createNamedQuery("Dataset.findbyUnique");
         query = query.setParameter("sampleId",sampleId);
@@ -617,8 +617,8 @@ public class Dataset extends EntityBaseBean implements Serializable {
                 log.trace("Dataset found is this dataset");
                 return true;
             } else {
-                log.trace("Dataset found is not this dataset, so no unique");
-                return false;
+                log.trace("Dataset found is not this dataset, so not unique");
+                throw new ValidationException(this+" is not unique. Same uniuq key as "+datasetFound);
             }
         } catch(NoResultException nre) {
             log.trace("No results so unique");
@@ -627,7 +627,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
         } catch(Throwable ex) {
             log.warn(ex);
             //means it is unique
-            return false;
+          throw new ValidationException(this+" is not unique.");
         }
     }
     

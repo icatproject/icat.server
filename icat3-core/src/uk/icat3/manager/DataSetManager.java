@@ -27,6 +27,7 @@ import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.IcatRoles;
 
 /**
  * This is the manager class for all operations for data sets.
@@ -187,6 +188,17 @@ public class DataSetManager extends ManagerUtil {
     
     ////////////////////     Add/Update Commands    ///////////////////
     /**
+     * Adds a role for a user to an dataset.
+     * 
+     * @param userId 
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException 
+     * @param manager 
+     */
+     public static IcatAuthorisation addAuthorisation(String userId, String toAddUserId, String toAddRole, Long id, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+         return addAuthorisation(userId, toAddUserId, toAddRole, id, ElementType.DATASET, manager);
+     }
+     
+    /**
      * Creates a data set, depending if the user has create permission on the data set associated with the investigation
      *
      * @param userId federalId of the user.
@@ -217,6 +229,16 @@ public class DataSetManager extends ManagerUtil {
         dataSet.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
         
         manager.persist(dataSet);
+        
+          //need to add a another row for creating datasets for this ds
+        IcatAuthorisation IcatAuthorisationChild = persistAuthorisation(userId, userId, getRole(IcatRoles.CREATOR.toString(), manager),
+                ElementType.DATAFILE, null,
+                ElementType.DATASET, dataSet.getId(), null, manager);
+        //add new creator role to investigation for the user creating the ds
+        persistAuthorisation(userId, userId, getRole(IcatRoles.CREATOR.toString(), manager),
+                ElementType.DATASET, dataSet.getId(),
+                null, null, IcatAuthorisationChild.getId(), manager);
+        
         return dataSet;
     }
     
