@@ -153,10 +153,10 @@ public class TestJPA {
         Collection<Datafile> dfs = nullQuery.getResultList();
         for (Datafile object : dfs) {
             for(DatafileParameter dfp : object.getDatafileParameterCollection()){
-               if(dfp.getDatafileParameterPK().getName().equals("run_number")) System.out.println(dfp.getNumericValue());
+                if(dfp.getDatafileParameterPK().getName().equals("run_number")) System.out.println(dfp.getNumericValue());
             }
         }
-
+        
         
         System.out.println((System.currentTimeMillis() - time)/6000f+" seconds");
         //System.out.println(em.createQuery("SELECT i FROM IcatAuthorisation i WHERE i.elementType = :type1  AND (i.parentElementType = :type OR :type IS NULL)").setParameter("type1", ElementType.INVESTIGATION).setParameter("type", null).getResultList());
@@ -179,27 +179,57 @@ public class TestJPA {
         tearDown();
     }
     
-      public void testP() throws Exception {
+    public void testP() throws Exception {
         setUp();
         
-          String QUERY = Queries.LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND (i.keywordCollection.keywordPK.name LIKE '%ccw%' OR i.keywordCollection.keywordPK.name LIKE '%orbita%') AND i.keywordCollection.markedDeleted = 'N'";
+        String QUERY = Queries.LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND (i.keywordCollection.keywordPK.name LIKE '%ccw%' OR i.keywordCollection.keywordPK.name LIKE '%orbita%') AND i.keywordCollection.markedDeleted = 'N'";
         
-        QUERY = "SELECT i FROM Datafile i WHERE i.datafileParameterCollection.numericValue BETWEEN :lower AND :upper";
+        // QUERY = "SELECT i FROM Datafile i WHERE i.datafileParameterCollection.numericValue BETWEEN :lower AND :upper";
+/*     QUERY = "SELECT i FROM Datafile i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :dataFileType AND i.markedDeleted = 'N' " +
+                " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+                " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' AND "+
+                " AND i.dataset.investigation.instrument.name = 'SXD' AND " +
+                "EXISTS (SELECT dfp FROM i.datafileParameterCollection dfp" +
+                " WHERE dfp.numericValue BETWEEN :lower AND :upper AND " +
+                "dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')";
+ */
+        
+        QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :dataFileType AND i.markedDeleted = 'N' " +
+                " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+                " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' AND "+
+                " i.instrument.name IN(:instrument) AND" + //expand IN, remove this if instrument null
+                " (i.visitId = :visitId OR  :visitId IS NULL) AND" +
+                " (i.invType = :invType  OR :invType IS NULL) AND " +
+                " (i.abstract LIKE :abstract OR :invType IS NULL) AND" +
+                " (i.grantId = :grantId OR :invType IS NULL) AND" +
+                " (i.title = :title OR :invType IS NULL) AND" +
+                " (i.bcatInvStr = :bcatInvStr OR :invType IS NULL) AND " +
+                " (i.invNumber :invNumber ) OR :invType IS NULL) AND " +
+                " (i.sampleCollection.name :sampleName OR :sampleName IS NULL) AND" +
+                " (i.datasetCollection.datafileCollection.name = :datafileName OR :datafileName IS NULL) AND " +
+                " (i.datasetCollection.datafileCollection.createTime > :lowerTime OR :lowerTime IS NULL) AND " +
+                " (i.datasetCollection.datafileCollection.createTime < :upperTime OR :upper IS NULL) AND " +
+                " i.keyword.keywordPK.name = :keyword AND i.keyword.markedDeleted = 'N' AND " + //remove if no keyword is null
+                " i.investigatorCollection.facilityUser.lastName LIKE :surname AND i.investigatorCollection.markedDeleted = 'N' AND "+ //iterate, remove this if instrument null
+                "EXISTS (SELECT dfp FROM i.datasetCollection.datafileCollection.datafileParameterCollection dfp" +
+                " WHERE dfp.numericValue BETWEEN :lower AND :upper AND " +
+                "dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null
+        
+        ////QUERY = "SELECT i FROM Datafile i WHERE EXISTS (SELECT dfp FROM i.datafileParameterCollection dfp" +
+        //         " WHERE dfp.numericValue BETWEEN :lower AND :upper AND " +
+        //       "dfp.datafileParameterPK.name = 'run_number')";
         
         
         Query nullQuery = em.createQuery(QUERY);
-              
-        nullQuery.setParameter("upper", 1250f);
+        nullQuery.setParameter("dataFileType", ElementType.DATAFILE);
+        nullQuery.setParameter("userId", "test");
+        
+        
+        nullQuery.setParameter("upper", 1257f);
         nullQuery.setParameter("lower", 100f);
         
         
-        Collection<Datafile> dfs = nullQuery.getResultList();
-        for (Datafile object : dfs) {
-            for(DatafileParameter dfp : object.getDatafileParameterCollection()){
-               if(dfp.getDatafileParameterPK().getName().equals("run_number")) System.out.println(object+ " " +dfp.getNumericValue());
-               
-            }
-        } 
+        System.out.println(nullQuery.getResultList());
         tearDown();
     }
     
