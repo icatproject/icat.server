@@ -10,6 +10,7 @@
 package uk.icat3.test;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Random;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -185,21 +186,21 @@ public class TestJPA {
         String QUERY = Queries.LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND (i.keywordCollection.keywordPK.name LIKE '%ccw%' OR i.keywordCollection.keywordPK.name LIKE '%orbita%') AND i.keywordCollection.markedDeleted = 'N'";
         
         // QUERY = "SELECT i FROM Datafile i WHERE i.datafileParameterCollection.numericValue BETWEEN :lower AND :upper";
-/*     QUERY = "SELECT i FROM Datafile i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :dataFileType AND i.markedDeleted = 'N' " +
+   QUERY = "SELECT i FROM Datafile i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :dataFileType AND i.markedDeleted = 'N' " +
                 " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-                " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' AND "+
+                " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' "+
                 " AND i.dataset.investigation.instrument.name = 'SXD' AND " +
                 "EXISTS (SELECT dfp FROM i.datafileParameterCollection dfp" +
                 " WHERE dfp.numericValue BETWEEN :lower AND :upper AND " +
                 "dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')";
- */
+
         
-        QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :dataFileType AND i.markedDeleted = 'N' " +
+       QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :dataFileType AND i.markedDeleted = 'N' " +
                 " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
                 " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' AND "+
                 " i.instrument.name IN(:instrument) AND" + //expand IN, remove this if instrument null
                 " (i.visitId = :visitId OR  :visitId IS NULL) AND" +
-                " (i.invType = :invType  OR :invType IS NULL) AND " +
+                " (i.invType.name = :invType  OR :invType IS NULL) AND " +
                 " (i.invAbstract LIKE :invAbstract OR :invAbstract IS NULL) AND" +
                 " (i.grantId = :grantId OR :grantId IS NULL) AND" +
                 " (i.title = :title OR :title IS NULL) AND" +
@@ -208,7 +209,7 @@ public class TestJPA {
                 " (i.sampleCollection.name = :sampleName OR :sampleName IS NULL) AND" +
                 " (i.datasetCollection.datafileCollection.name = :datafileName OR :datafileName IS NULL) AND " +
                 " (i.datasetCollection.datafileCollection.createTime > :lowerTime OR :lowerTime IS NULL) AND " +
-                " (i.datasetCollection.datafileCollection.createTime < :upperTime OR :upper IS NULL) AND " +
+                " (i.datasetCollection.datafileCollection.createTime < :upperTime OR :upperTime IS NULL) AND " +
                 " i.keywordCollection.keywordPK.name = :keyword AND i.keywordCollection.markedDeleted = 'N' AND " + //remove if no keyword is null
                 " i.investigatorCollection.facilityUser.lastName LIKE :surname AND i.investigatorCollection.markedDeleted = 'N' AND "+ //iterate, remove this if instrument null
                 "EXISTS (SELECT dfp FROM i.datasetCollection.datafileCollection.datafileParameterCollection dfp" +
@@ -221,25 +222,30 @@ public class TestJPA {
         
         
         Query nullQuery = em.createQuery(QUERY);
+        
+       /* nullQuery.setParameter("dataFileType", ElementType.DATAFILE);
+        nullQuery.setParameter("userId", "test");
+        nullQuery.setParameter("upper", 1257f);
+        nullQuery.setParameter("lower", 100f);*/
+        
         nullQuery.setParameter("dataFileType", ElementType.DATAFILE);
         nullQuery.setParameter("userId", "test");
         nullQuery.setParameter("surname", "test");
         nullQuery.setParameter("keyword", "test");
         nullQuery.setParameter("datafileName", "test");
         nullQuery.setParameter("sampleName", "test");
-        
         nullQuery.setParameter("invAbstract", "test");
+        nullQuery.setParameter("upperTime", new Date());
+        nullQuery.setParameter("lowerTime", new Date());
         nullQuery.setParameter("invType", "test");
         nullQuery.setParameter("visitId", "test");
-        nullQuery.setParameter("instrument", "test");
-        
+        nullQuery.setParameter("instrument", "test");        
         nullQuery.setParameter("invNumber", "test");
         nullQuery.setParameter("bcatInvStr", "test");
         nullQuery.setParameter("title", "test");
-        nullQuery.setParameter("grantId", "test");
-        
+        nullQuery.setParameter("grantId", 4l);        
         nullQuery.setParameter("upper", 1257f);
-        nullQuery.setParameter("lower", 100f);
+       nullQuery.setParameter("lower", 100f);
         
         
         System.out.println(nullQuery.getResultList());
