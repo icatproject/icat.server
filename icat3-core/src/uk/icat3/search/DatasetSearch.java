@@ -14,14 +14,17 @@ import java.util.Collection;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
+import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetStatus;
 import uk.icat3.entity.DatasetType;
+import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.manager.ManagerUtil;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
+import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
 import static uk.icat3.util.Queries.*;
 /**
@@ -46,7 +49,7 @@ public class DatasetSearch {
         log.trace("getSamplesBySampleName("+userId+", "+sampleName+", EntityManager)");
         
         //get the sample id from sample name
-        Collection<Sample> samples = (Collection<Sample>)manager.createNamedQuery("Sample.findByName").setParameter("name", sampleName).getResultList();
+        Collection<Sample> samples = (Collection<Sample>)manager.createNamedQuery(SAMPLES_BY_NAME).setParameter("name", sampleName).getResultList();
         
         //now see which investigations they can see from these samples.
         Collection<Sample> samplesPermssion = new ArrayList<Sample>();
@@ -88,33 +91,42 @@ public class DatasetSearch {
         //check read permission
         GateKeeper.performAuthorisation(userId, sampleFound, AccessType.READ, manager);
         
-        Collection<Dataset> datasets = sampleFound.getInvestigationId().getDatasetCollection();
+        Investigation investigation = sampleFound.getInvestigationId();
+        
+        try{
+            investigation.setCascade(Cascade.REMOVE_DELETED_ITEMS, true);
+        } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}
+        
+        Collection<Dataset> datasets = investigation.getDatasetCollection();
         
         Collection<Dataset> datasetsPermission = new ArrayList<Dataset>();
         
-        for (Dataset dataset : datasets) {
-            
+        for (Dataset dataset : datasets) {            
             if(sampleFound.getId().equals(dataset.getSampleId())){
-                datasetsPermission.add(dataset);
-                log.trace("Adding "+ dataset+" to returned list");
-                //add the DataSetInclude for JAXB
-                dataset.setDatasetInclude(DatasetInclude.DATASET_FILES_ONLY);
+                //check read permission
+                try{
+                    GateKeeper.performAuthorisation(userId, dataset, AccessType.READ, manager);
+                    datasetsPermission.add(dataset);
+                    log.trace("Adding "+ dataset+" to returned list");
+                    //add the DataSetInclude for JAXB
+                    dataset.setDatasetInclude(DatasetInclude.DATASET_FILES_ONLY);
+                } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}                
             }
         }
         
         return datasetsPermission;
     }
-        
+    
     /**
-     * 
-     * 
+     *
+     *
      */
     public static Collection<Dataset> listMyDeletedDataSets(String userId, EntityManager manager){
-         log.trace("listAllDeletedDataSets(EntityManager)");
-         
-         return manager.createNamedQuery(LIST_MY_DELETED_DATASETS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+        log.trace("listAllDeletedDataSets(EntityManager)");
+        
+        return manager.createNamedQuery(LIST_MY_DELETED_DATASETS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }
-            
+    
     /**
      *  List all the valid avaliable types' for datasets
      *

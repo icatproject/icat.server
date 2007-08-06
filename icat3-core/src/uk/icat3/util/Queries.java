@@ -56,8 +56,8 @@ public class Queries {
      */
     public static final String INVESTIGATION_LIST_BY_SURNAME = "Investigation.findByUserSurname";
     public static final String INVESTIGATIONS_LIST_BY_USER_SURNAME_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL +
-            " AND i.investigatorCollection.facilityUser.lastName LIKE :surname AND " +
-            "i.investigatorCollection.markedDeleted = 'N'";
+          "AND EXISTS (SELECT inv FROM i.investigatorCollection inv WHERE inv.facilityUser.lastName LIKE :surname AND " +
+            "inv.markedDeleted = 'N')";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
@@ -67,7 +67,9 @@ public class Queries {
      * TODO needs to be multipe keywords
      */
     public static final String INVESTIGATION_LIST_BY_KEYWORD = "Investigation.findByKewordNative";
-    public static final String INVESTIGATION_LIST_BY_KEYWORD_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND i.keywordCollection.keywordPK.name LIKE :keyword AND i.keywordCollection.markedDeleted = 'N'";
+    public static final String INVESTIGATION_LIST_BY_KEYWORD_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL + 
+            "AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword AND " +
+            "kw.markedDeleted = 'N')";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     /**
@@ -75,7 +77,9 @@ public class Queries {
      */
     public static final String INVESTIGATION_LIST_BY_KEYWORD_RTN_ID = "Investigation.findByKewordRtnIdNative";
     public static final String INVESTIGATION_LIST_BY_KEYWORD_RTN_ID_JPQL = RETURN_ALL_INVESTIGATION_IDS_JPQL +
-            QUERY_USERS_ENTITYOBJECTS_JPQL +" AND i.keywordCollection.keywordPK.name LIKE :keyword AND i.keywordCollection.markedDeleted = 'N'";
+            QUERY_USERS_ENTITYOBJECTS_JPQL +
+            "AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword AND " +
+            "kw.markedDeleted = 'N')";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,7 +87,7 @@ public class Queries {
     /**
      * Search my keywords (AND and OR and fuzzy)
      *
-     * Did try with SQL but too difficult, so doing with dynamic JPQL, this is slightyl slower as the SQL needs to be
+     * Did try with SQL but too difficult, so doing with dynamic JPQL, this is slightly slower as the SQL needs to be
      * generated everytime from the JPQL but its much simplier.
      *
      *  (t3.NAME LIKE ?keyword1) OR (t3.NAME LIKE ?keyword2) OR (t3.NAME LIKE ?keyword3)  this worked for dynamic SQL
@@ -92,30 +96,12 @@ public class Queries {
      */
     public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS = "Investigation.findByKewordsNative";
     
-    // Query =  LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND (i.keywordCollection.keywordPK.name LIKE '%or%' AND i.keywordCollection.keywordPK.name LIKE '%orbita%') AND i.keywordCollection.markedDeleted = 'N'";;
-    public static final String INVESTIGATION_LIST_BY_KEYWORDS_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL +" AND i.keywordCollection.markedDeleted = 'N' AND ";
+   // Query =  LIST_ALL_USERS_INVESTIGATIONS_JPQL " + AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword1 AND kw.markedDeleted = 'N') AND EXISTS (SELECT kw2 FROM i.keywordCollection kw2 WHERE kw2.keywordPK.name LIKE :keyword1 AND kw2.markedDeleted = 'N')";
+    public static final String INVESTIGATION_LIST_BY_KEYWORDS_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL ;
+           // " AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND "; //kw.keywordPK.name LIKE :keyword1 OR/AND kw.keywordPK.name LIKE :keyword2 ) 
     
-    // QUERY = INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY = "SELECT i from Investigation i WHERE i.markedDeleted = 'N' AND (i.keywordCollection.keywordPK.name LIKE '%shull%' AND i.keywordCollection.keywordPK.name LIKE '%ccw%') AND i.keywordCollection.markedDeleted = 'N'";
-    public static final String INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY = "SELECT i from Investigation i WHERE i.markedDeleted = 'N' AND ";
-    
-    /***   OLD SQL STYLE
-     * // Query =  LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND (i.keywordCollection.keywordPK.name LIKE '%or%' AND i.keywordCollection.keywordPK.name LIKE '%orbita%') AND i.keywordCollection.markedDeleted = 'N'";;
-     * // SQL to generate from Query above: INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL = SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.RELEASE_DATE, t0.CREATE_ID, t0.TITLE, t0.MOD_ID, t0.INV_ABSTRACT, t0.PREV_INV_NUMBER, t0.VISIT_ID, t0.BCAT_INV_STR, t0.INV_NUMBER, t0.CREATE_TIME, t0.FACILITY_ACQUIRED, t0.DELETED, t0.FACILITY_CYCLE, t0.INSTRUMENT, t0.INV_TYPE, t0.FACILITY FROM KEYWORD t5, KEYWORD t3, ICAT_ROLE t2, ICAT_AUTHORISATION t1, INVESTIGATION t0 WHERE
-     * //           (((((((((t0.ID = t1.ELEMENT_ID) AND (t1.ELEMENT_TYPE = ?)) AND (t0.DELETED = ?)) AND ((t1.USER_ID = ?) OR (t1.USER_ID = ?))) AND (t1.DELETED = ?)) AND (t2.ACTION_SELECT = ?)) AND ((t3.NAME LIKE ?) AND (t4.NAME LIKE ?))) AND (t5.DELETED = ?)) AND ((((t2.ROLE = t1.ROLE) AND (t3.INVESTIGATION_ID = t0.ID)) AND (t4.INVESTIGATION_ID = t0.ID))))
-     *
-     *
-     * public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL_START = "SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.RELEASE_DATE, t0.CREATE_ID, t0.TITLE, t0.MOD_ID, t0.INV_ABSTRACT, t0.PREV_INV_NUMBER, t0.VISIT_ID, t0.BCAT_INV_STR, t0.INV_NUMBER, t0.CREATE_TIME, t0.FACILITY_ACQUIRED, t0.DELETED, t0.FACILITY_CYCLE, t0.INSTRUMENT, t0.INV_TYPE, t0.FACILITY FROM  KEYWORD t3, ICAT_ROLE t2, ICAT_AUTHORISATION t1, INVESTIGATION t0 WHERE "+
-     * " (((((((((t0.ID = t1.ELEMENT_ID) AND (t1.ELEMENT_TYPE = 'INVESTIGATION')) AND (t0.DELETED = 'N')) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N')) AND (t2.ACTION_SELECT = 'Y')) AND ("; //insert this programatically  (t3.NAME LIKE ?keyword1) OR (t3.NAME LIKE ?keyword2) OR (t3.NAME LIKE ?keyword3)
-     * public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL_END = ")) AND (t3.DELETED = 'N')) AND ((((t2.ROLE = t1.ROLE) AND (t3.INVESTIGATION_ID = t0.ID)) AND (t3.INVESTIGATION_ID = t0.ID))))";
-     *
-     * // QUERY = INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY = "SELECT i from Investigation i WHERE i.markedDeleted = 'N' AND (i.keywordCollection.keywordPK.name LIKE '%shull%' AND i.keywordCollection.keywordPK.name LIKE '%ccw%') AND i.keywordCollection.markedDeleted = 'N'";
-     * // SQL to generate from Query above: INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL_NOSECURITY = SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.RELEASE_DATE, t0.CREATE_ID, t0.TITLE, t0.MOD_ID, t0.INV_ABSTRACT, t0.PREV_INV_NUMBER, t0.VISIT_ID, t0.BCAT_INV_STR, t0.INV_NUMBER, t0.CREATE_TIME, t0.FACILITY_ACQUIRED, t0.DELETED, t0.FACILITY_CYCLE, t0.INSTRUMENT, t0.INV_TYPE, t0.FACILITY FROM KEYWORD t3, KEYWORD t2, KEYWORD t1, INVESTIGATION t0 WHERE
-     * //          ((((t0.DELETED = ?) AND ( (t1.NAME LIKE ?) AND (t2.NAME LIKE ?) )) AND (t3.DELETED = ?)) AND (((t1.INVESTIGATION_ID = t0.ID) AND (t2.INVESTIGATION_ID = t0.ID)) AND (t3.INVESTIGATION_ID = t0.ID)))
-     *
-     * public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL_NOSECURITY_START = "SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.RELEASE_DATE, t0.CREATE_ID, t0.TITLE, t0.MOD_ID, t0.INV_ABSTRACT, t0.PREV_INV_NUMBER, t0.VISIT_ID, t0.BCAT_INV_STR, t0.INV_NUMBER, t0.CREATE_TIME, t0.FACILITY_ACQUIRED, t0.DELETED, t0.FACILITY_CYCLE, t0.INSTRUMENT, t0.INV_TYPE, t0.FACILITY FROM KEYWORD t3, INVESTIGATION t0 WHERE "+
-     * "((((t0.DELETED = 'N') AND ( ";  //insert this programatically  (t3.NAME LIKE ?keyword1) OR (t3.NAME LIKE ?keyword2) OR (t3.NAME LIKE ?keyword3)
-     * public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS_SQL_NOSECURITY_END =  ")) AND (t3.DELETED = 'N')) AND (((t3.INVESTIGATION_ID = t0.ID) AND (t3.INVESTIGATION_ID = t0.ID)) AND (t3.INVESTIGATION_ID = t0.ID)))";
-     * */
+    // QUERY = INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY = "SELECT i from Investigation i WHERE i.markedDeleted = 'N' AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword1 OR/AND kw.keywordPK.name LIKE :keyword2 AND kw.markedDeleted = 'N')";
+    public static final String INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY = "SELECT i from Investigation i WHERE i.markedDeleted = 'N' ";// AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND ";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
@@ -125,7 +111,14 @@ public class Queries {
      *
      */
     public static final String INVESTIGATION_LIST_BY_USERID = "Investigation.findByUserID";
-    public static final String INVESTIGATION_LIST_BY_USERID_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL +" AND i.investigatorCollection.facilityUser.federalId LIKE :federalId AND i.investigatorCollection.markedDeleted = 'N'";
+    public static final String INVESTIGATION_LIST_BY_USERID_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL +
+            " AND EXISTS ( SELECT inv FROM i.investigatorCollection inv WHERE inv.facilityUser.federalId LIKE :federalId AND inv.markedDeleted = 'N')";
+   
+    public static final String INVESTIGATION_LIST_BY_USERID_RTID = "Investigation.findByUserIDRtId";
+    public static final String INVESTIGATION_LIST_BY_USERID_RTID_JPQL = LIST_ALL_USERS_INVESTIGATION_IDS_JPQL +
+            " AND EXISTS ( SELECT inv FROM i.investigatorCollection inv WHERE inv.facilityUser.federalId LIKE :federalId AND inv.markedDeleted = 'N')";
+   
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
@@ -195,22 +188,7 @@ public class Queries {
     public static final String INVESTIGATIONS_BY_USER = "Investigation.findByUser";
     public static final String INVESTIGATIONS_BY_USER_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /**
-     *
-     * All the investigations of the user. (ie an investigator of)
-     *
-     */
-    public static final String INVESTIGATIONS_FOR_USER = "Investigation.findOfUser";
-    public static final String INVESTIGATIONS_FOR_USER_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL+ " AND i.investigatorCollection.facilityUser.federalId = :userId AND i.investigatorCollection.markedDeleted = 'N'";
-    
-    public static final String INVESTIGATIONS_FOR_USER_RTN_ID = "Investigation.findOfUser";
-    public static final String INVESTIGATIONS_FOR_USER_RTN_ID_JPQL = LIST_ALL_USERS_INVESTIGATION_IDS_JPQL +
-            " AND ia.markedDeleted = 'N' AND i.investigatorCollection.facilityUser.federalId = :userId AND i.investigatorCollection.markedDeleted = 'N'";
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    
+            
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -274,6 +252,15 @@ public class Queries {
     
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+            /**
+     * Find all instruments list,
+     *
+     */
+    public static final String SAMPLES_BY_NAME = "Sample.findByName";
+    public static final String SAMPLES_BY_NAME_JPQL = "SELECT s FROM Sample s WHERE s.name = :name AND s.markedDeleted = 'N'";
+    
+    
     /**
      * Find all instruments list,
      *

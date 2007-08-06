@@ -199,7 +199,7 @@ public class TestJPA {
         
         
         
-     System.out.println(QUERY);
+        System.out.println(QUERY);
         
         nullQuery.setParameter("objectType", ElementType.INVESTIGATION);
         nullQuery.setParameter("userId", "test");
@@ -232,7 +232,7 @@ public class TestJPA {
         nullQuery.setParameter("lower", 100f);
         nullQuery.setParameter("surname", "Drinkwater");
         nullQuery.setParameter("instrument", "SXD");
-       *  nullQuery.setParameter("dataFileType", ElementType.DATAFILE);
+          *  nullQuery.setParameter("dataFileType", ElementType.DATAFILE);
          nullQuery.setParameter("keyword", "shull");*/
         
         
@@ -319,6 +319,23 @@ public class TestJPA {
         tearDown();
     }
     
+    public void testSurname(){
+        setUp();
+         String QUERY = "SELECT DISTINCT k.keywordPK.name from Keyword k, IcatAuthorisation ia WHERE" +
+            " k.investigation.id = ia.elementId AND ia.elementType = :objectType AND ia.markedDeleted = 'N'" +
+            " AND (ia.userId = 'test' OR ia.userId = 'ANY')" +
+            " AND ia.markedDeleted = 'N' AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) AND k.markedDeleted = 'N' ORDER BY k.keywordPK.name";   
+         Query query = em.createQuery(QUERY).
+                 setParameter("startKeyword","%%").
+                 setParameter("objectType",ElementType.INVESTIGATION);
+               
+                //setParameter("objectType",ElementType.INVESTIGATION).
+                //setParameter("userId","test").
+                
+        System.out.println(query.getResultList());
+        
+        tearDown();
+    }
     
     /**
      * @param args the command line arguments
@@ -336,7 +353,7 @@ public class TestJPA {
         //ts.testJPA();
         //  ts.changeRole();
         //    ts.testP();
-        ts.testP1();
+        ts.testSurname();
     }
     
     

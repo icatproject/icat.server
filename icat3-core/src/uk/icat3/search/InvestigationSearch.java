@@ -339,19 +339,19 @@ public class InvestigationSearch extends ManagerUtil {
         query = query.setParameter("bcatInvStr",advanDTO.getBackCatalogueInvestigatorString());
         query = query.setParameter("invNumber",advanDTO.getExperimentNumber());
         query = query.setParameter("visitId",advanDTO.getVisitId());
-       
+        
         query = query.setParameter("invType",advanDTO.getInvestigationType());
         query = query.setParameter("grantId",advanDTO.getGrantId());
-        query = query.setParameter("objectType", ElementType.INVESTIGATION);        
+        query = query.setParameter("objectType", ElementType.INVESTIGATION);
         query = query.setParameter("upperTime", advanDTO.getYearRangeEnd());
         query = query.setParameter("lowerTime", advanDTO.getYearRangeStart());
         query = query.setParameter("datafileName",advanDTO.getDatafileName());
         query = query.setParameter("sampleName",advanDTO.getSampleName());
         
         if(advanDTO.isAbstract()){
-             query = query.setParameter("invAbstract","%"+advanDTO.getInvestigationAbstract()+"%");
+            query = query.setParameter("invAbstract","%"+advanDTO.getInvestigationAbstract()+"%");
         } else {
-             query = query.setParameter("invAbstract",null);
+            query = query.setParameter("invAbstract",null);
         }
         
         //set upper run number
@@ -442,9 +442,15 @@ public class InvestigationSearch extends ManagerUtil {
         Collection<Investigation> investigations = null;
         if(number_results < 0){
             //get all, maybe should limit this to 500?
-            investigations = manager.createNamedQuery(INVESTIGATIONS_FOR_USER).setParameter("objectType",ElementType.INVESTIGATION).setParameter("userId",userId).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+            investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).
+                    setParameter("objectType",ElementType.INVESTIGATION).
+                    setParameter("federalId",userId).
+                    setParameter("userId",userId).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
-            investigations = manager.createNamedQuery(INVESTIGATIONS_FOR_USER).setParameter("objectType",ElementType.INVESTIGATION).setParameter("userId",userId).setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+            investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).
+                    setParameter("objectType",ElementType.INVESTIGATION).
+                    setParameter("federalId",userId).
+                    setParameter("userId",userId).setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         
         //add include information
@@ -499,7 +505,10 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Long> getUsersInvestigationsRtnId(String userId, EntityManager manager){
         log.trace("getUsersInvestigationsRtnId("+userId+", EnitiyManager)");
         
-        return  manager.createNamedQuery(INVESTIGATIONS_FOR_USER_RTN_ID).setParameter("objectType",ElementType.INVESTIGATION).setParameter("userId",userId).getResultList();
+        return  manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID_RTID).
+                setParameter("objectType",ElementType.INVESTIGATION).
+                setParameter("userId",userId).
+                setParameter("federalId",userId).getResultList();
     }
     
     /**
@@ -526,28 +535,26 @@ public class InvestigationSearch extends ManagerUtil {
         if(use_security)  JPQL = INVESTIGATION_LIST_BY_KEYWORDS_JPQL;
         else  JPQL = INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY;
         
-        
-        //Need to generate this
-        //  (i.keywordCollection.keywordPK.name LIKE '%or%' AND i.keywordCollection.keywordPK.name LIKE '%orbita%')
+        // String KEYWORDSEARCH = " EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND kw.keywordPK.name ";
+        // Need to generate this
+        // AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND kw.keywordPK.name LIKE :keyword1)
         
         int i  = 2;
         //check if fuzzy
         if(fuzzy){
             //fuzzy so LIKE
             for(String keyword : keywords){
-                if(i == 2) JPQL = JPQL + "( i.keywordCollection.keywordPK.name LIKE ?"+(i++)+" ";
-                else  JPQL = JPQL +" "+operator+" i.keywordCollection.keywordPK.name LIKE ?"+(i++)+" ";
+                if(i == 2) JPQL += " AND EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name  LIKE ?"+(i++)+") ";
+                else  JPQL += " "+operator+" EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name  LIKE ?"+(i++)+") ";
                 
             }
         } else {
             //none fuzzy, =
             for(String keyword : keywords){
-                if(i == 2) JPQL = JPQL + "( i.keywordCollection.keywordPK.name = ?"+(i++)+" ";
-                else  JPQL = JPQL +" "+operator+" i.keywordCollection.keywordPK.name = ?"+(i++)+" ";
+                if(i == 2) JPQL += " AND EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name = ?"+(i++)+") ";
+                else  JPQL += " "+operator+" EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name = ?"+(i++)+") ";
             }
         }
-        
-        JPQL = JPQL +")";
         
         log.info("DYNAMIC JPQL GENERATED: "+JPQL);
         

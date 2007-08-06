@@ -79,10 +79,8 @@ import uk.icat3.util.Queries;
     //Added searches for ICAT3 API
     @NamedQuery(name = Queries.INVESTIGATIONS_BY_USER, query = Queries.INVESTIGATIONS_BY_USER_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_JPQL),
-    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID, query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),
-    @NamedQuery(name = Queries.INVESTIGATIONS_FOR_USER, query = Queries.INVESTIGATIONS_FOR_USER_JPQL),
-    @NamedQuery(name = Queries.INVESTIGATIONS_FOR_USER_RTN_ID, query = Queries.INVESTIGATIONS_FOR_USER_RTN_ID_JPQL),
-    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID,  query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID, query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),   
+       @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID,  query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_KEYWORD_RTN_ID, query= Queries.INVESTIGATION_LIST_BY_KEYWORD_RTN_ID_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_LIST_BY_KEYWORD_JPQL)
@@ -134,6 +132,7 @@ import uk.icat3.util.Queries;
     
     @JoinColumn(name = "FACILITY", referencedColumnName = "FACILITY_SHORT_NAME")
     @ManyToOne
+    @ICAT(merge=false)
     private Facility facility;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")

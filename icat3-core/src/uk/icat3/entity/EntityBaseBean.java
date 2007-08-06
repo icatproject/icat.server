@@ -527,6 +527,7 @@ public abstract class EntityBaseBean {
      */
     @SuppressWarnings("all")
     private void swapProperty(String name, Object from, Object to) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, NoSuchFieldException {
+        
         String prop = Character.toUpperCase(name.charAt(0)) +
                 name.substring(1);
         String mname = "get" + prop;
@@ -535,6 +536,7 @@ public abstract class EntityBaseBean {
         Method method = from.getClass().getMethod(mname, types);
         Object result = method.invoke(from, (Object[])types);
         
+        log.trace("Swapping: "+name+", setting to: "+result);
         
         mname = "set" + prop;
         types = new Class[] { from.getClass().getDeclaredField(name).getType() };

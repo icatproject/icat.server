@@ -12,6 +12,7 @@ package uk.icat3.search;
 import java.util.Collection;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
+import uk.icat3.util.ElementType;
 import uk.icat3.util.KeywordType;
 import static uk.icat3.util.Queries.*;
 /**
@@ -76,9 +77,16 @@ public class KeywordSearch {
         else startKeyword = "%";
         
         if(numberReturned < 0){
-            return  (Collection<String>)manager.createNamedQuery(KEYWORDS_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).getResultList();
+            return  (Collection<String>)manager.createNamedQuery(KEYWORDS_FOR_USER).
+                    setParameter("objectType", ElementType.INVESTIGATION).
+                    setParameter("userId",userId).
+                    setParameter("startKeyword", startKeyword).getResultList();
         } else {
-            return  (Collection<String>)manager.createNamedQuery(KEYWORDS_FOR_USER).setParameter("userId",userId).setParameter("startKeyword", startKeyword).setMaxResults(numberReturned).getResultList();
+            return  (Collection<String>)manager.createNamedQuery(KEYWORDS_FOR_USER).
+                    setParameter("objectType", ElementType.INVESTIGATION).
+                    setParameter("userId",userId).
+                    setParameter("startKeyword", startKeyword).
+                    setMaxResults(numberReturned).getResultList();
         }
     }
     
