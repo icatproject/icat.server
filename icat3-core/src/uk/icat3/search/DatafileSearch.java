@@ -46,13 +46,16 @@ public class DatafileSearch {
         Collection<Datafile> datafiles = null;
         
         //dynamically create the JPQL
-        String JPQL = DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL;
+        String JPQL = DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_START;
         
-        //add in the instruments, i.dataset.investigation.instrument.name = 'SXD' AND i.dataset.investigation.instrument.name = 'FUD'
+        //add in the instruments,  AND i.dataset.investigation.instrument.name IN ('SXD') AND
         int i = 1;
+        JPQL += " AND i.dataset.investigation.instrument.name IN (";
         for(String instrument : instruments){
-            JPQL += " AND i.dataset.investigation.instrument.name = :instrument"+(i++);
+            if(i == instruments.size())  JPQL += ":instrument"+(i++);
+            else JPQL += ":instrument"+(i++)+", ";
         }
+        JPQL += ") AND "+DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_END;
         
         //set query with datafile as entity object
         Query query = manager.createQuery(JPQL);

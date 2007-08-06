@@ -276,170 +276,89 @@ public class InvestigationSearch extends ManagerUtil {
         Collection<Investigation> investigations = null;
         
         //dynamically create the query
-        String SQL = ADVANCED_SEARCH_SQL_1;
+        String JPQL = ADVANCED_SEARCH_JPQL_START;
         
         if(advanDTO.isInstruments()){
-            //add insturments section: AND instrument IN(?,?,?,etc)
-            SQL += "AND instrument IN(";
-            //add in the instruments in the IN() cause of SQL
+            //add insturments section: i.instrument.name IN(:instrument) AND
+            JPQL += " AND i.instrument.name IN(";
+            //add in the instruments in the IN() cause of JPQL
             int i = 1;
             for(String instrument : advanDTO.getInstruments()){
-                if(i == advanDTO.getInstruments().size()) SQL += "?instrument"+(i++)+"";
-                else  SQL += "?instrument"+(i++)+" , ";
+                if(i == advanDTO.getInstruments().size()) JPQL += ":instrument"+(i++)+"";
+                else  JPQL += ":instrument"+(i++)+" , ";
             }
-            SQL += ")";
+            JPQL += ") ";
         }
         
-        //check for other parameters now
-        if(advanDTO.isOtherParameters()){
+        if(advanDTO.isKeywords()){
+            //add keywords section:
+            //" i.keywordCollection.keywordPK.name = :keyword AND i.keywordCollection.markedDeleted = 'N' AND " + //remove if no keyword is null
             
-            SQL += " AND id IN(";
-            boolean firstSearch = false;
-            
-            if(advanDTO.isInvestigators()){
-                //add investigator section:
-                /* SELECT i.investigation_id
-                    FROM investigator i, facility_user fu
-                    WHERE i.facility_user_id = fu.facility_user_id
-                    AND (Lower(fu.last_name) LIKE '%'||Lower(?)||'%'
-                    OR Lower(fu.last_name) LIKE '%'||Lower(?)||'%')
-                 */
-                
-                SQL += "SELECT i.investigation_id "+
-                        "FROM investigator i, facility_user fu "+
-                        "WHERE i.facility_user_id = fu.facility_user_id "+
-                        "AND (";
-                
-                int i = 1;
-                for(String investigators : advanDTO.getInvestigators()){
-                    if(i == 1) SQL += "Lower(fu.last_name) LIKE '%'||Lower(?investigator"+(i++)+")||'%'";
-                    else  SQL += "OR Lower(fu.last_name) LIKE '%'||Lower(?investigator"+(i++)+")||'%'";
-                }
-                SQL += ")";
-                
-                firstSearch = true;
+            JPQL += " AND (i.keywordCollection.markedDeleted = 'N' AND ";
+            int i = 1;
+            for(String keyword : advanDTO.getKeywords()){
+                if(i == 1) JPQL += " i.keywordCollection.keywordPK.name LIKE :keyword"+(i++);
+                else  JPQL += " OR i.keywordCollection.keywordPK.name LIKE :keyword"+(i++);
             }
+            JPQL += ") ";
+        }
+        
+        if(advanDTO.isInvestigators()){
+            //add investigator section:
+            //   " i.investigatorCollection.facilityUser.lastName LIKE :surname AND i.investigatorCollection.markedDeleted = 'N' AND "+ //iterate, remove this if instrument null
             
-            if(advanDTO.isKeywords()){
-                //add keywords section:
-                /*
-                    SELECT investigation_id
-                    FROM keyword
-                    WHERE Lower(name) LIKE '%'||Lower(?)||'%'
-                    OR Lower(name) LIKE '%'||Lower(?)||'%'
-                    OR Lower(name) LIKE '%'||Lower(?)||'%'
-                 */
-                if(firstSearch) SQL += " INTERSECT ";
-                firstSearch = true;
-                
-                SQL += "SELECT investigation_id FROM keyword WHERE ";
-                int i = 1;
-                for(String keyword : advanDTO.getKeywords()){
-                    if(i == 1) SQL += "Lower(name) LIKE '%'||Lower(?keyword"+(i++)+")||'%'";
-                    else  SQL += "OR Lower(name) LIKE '%'||Lower(?keyword"+(i++)+")||'%'";
-                }
+            JPQL += " AND (i.investigatorCollection.markedDeleted = 'N' AND ";
+            
+            int i = 1;
+            for(String investigators : advanDTO.getInvestigators()){
+                if(i == 1) JPQL += "i.investigatorCollection.facilityUser.lastName LIKE :surname"+(i++);
+                else  JPQL += " OR i.investigatorCollection.facilityUser.lastName LIKE :surname"+(i++);
             }
+            JPQL += ") ";
+        }
+        
+        if(advanDTO.isRunNumber()){
+            log.trace("Searching run number");
+            //add data file and run number section
+            //    "EXISTS (SELECT dfp FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
+            //    " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
+            //    " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
+            //    " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
+            //    "dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null
             
-            if(advanDTO.getSampleName() != null){
-                //add sample section
-                 /*
-                    SELECT investigation_id
-                    FROM sample
-                    WHERE Lower(name) LIKE '%'||Lower(?)||'%'
-                  **/
-                
-                if(firstSearch) SQL += " INTERSECT ";
-                firstSearch = true;
-                
-                SQL += "SELECT investigation_id FROM sample WHERE Lower(name) LIKE '%'||Lower(?sampleName)||'%' ";
-            }
-            
-            //is run number
-            if(advanDTO.isRunNumber()){
-                log.trace("Searching data file name, run number and create time only");
-                //add data file and run number section
-                /*
-                    SELECT ds.investigation_id
-                    FROM dataset ds, DATAFILE df, datafile_parameter dfp
-                    WHERE df.dataset_id = ds.id
-                    AND (InStr(Lower(df.name),Lower(?)) > 0 OR ? IS NULL)
-                    AND ((df.datafile_create_time >= ?date1 AND df.datafile_create_time < (?date2-1))
-                    OR ?date1 IS NULL)
-                    AND dfp.datafile_id = df.id
-                    AND dfp.NAME = 'run_number'
-                    AND dfp.numeric_value BETWEEN ?1 AND ?2
-                 */
-                if(firstSearch) SQL += " INTERSECT ";
-                firstSearch = true;
-                
-                SQL += "SELECT ds.investigation_id "+
-                        "FROM dataset ds, DATAFILE df, DATAFILE_PARAMETER dfp "+ //partitioned tabel instaed of datafile_parameter
-                        "WHERE df.dataset_id = ds.id "+
-                        "AND (Lower(df.name) LIKE '%'||Lower(?datafile_name)||'%' OR ?datafile_name IS NULL) "+
-                        "AND (( (df.datafile_create_time >= ?startDate AND df.datafile_create_time < (?endDate))) "+
-                        "OR df.datafile_create_time IS NULL) "+
-                        "AND dfp.datafile_id = df.id "+
-                        "AND dfp.NAME = 'run_number' "+
-                        "AND dfp.numeric_value BETWEEN ?lower AND ?upper ";
-                
-            } else if(advanDTO.isDatFileParameters()){
-                log.trace("Searching data file name and create time only");
-                //add datafile only section
-                /*
-                    SELECT ds.investigation_id
-                    FROM dataset ds, DATAFILE df
-                    WHERE df.dataset_id = ds.id
-                    AND (InStr(Lower(df.name),Lower(?)) > 0 OR ? IS NULL)
-                    AND ((df.datafile_create_time >= ?date1 AND df.datafile_create_time < (?date2-1))
-                    OR ?date1 IS NULL)
-                 */
-                if(firstSearch) SQL += " INTERSECT ";
-                firstSearch = true;
-                
-                SQL += " SELECT ds.investigation_id "+
-                        "FROM dataset ds, DATAFILE df "+
-                        "WHERE df.dataset_id = ds.id "+
-                        "AND (Lower(df.name) LIKE '%'||Lower(?datafile_name)||'%' OR ?datafile_name IS NULL) "+
-                        "AND (( (df.datafile_create_time >= ?startDate AND df.datafile_create_time < (?endDate))) OR df.datafile_create_time IS NULL)";
-            }
-            
-            SQL += ")";
+            JPQL += ADVANCED_SEARCH_JPQL_END;
         }
         
         //set all the paramaters now
         //set query with datafile as entity object
-        Query query = manager.createNativeQuery(SQL,Investigation.class);
+        Query query = manager.createQuery(JPQL);
         
         //sets the paramters
         query = query.setParameter("userId",userId);
-        query = query.setParameter("inv_title",advanDTO.getInvestigationName());
-        query = query.setParameter("bcat_inv_str",advanDTO.getBackCatalogueInvestigatorString());
-        query = query.setParameter("inv_number",advanDTO.getExperimentNumber());
-        query = query.setParameter("visit_id",advanDTO.getVisitId());
-        query = query.setParameter("inv_abstract","%"+advanDTO.getInvestigationAbstract()+"%");
-        query = query.setParameter("inv_type",advanDTO.getInvestigationType());
-        query = query.setParameter("grant_id",advanDTO.getGrantId());
+        query = query.setParameter("invTitle",advanDTO.getInvestigationName());
+        query = query.setParameter("bcatInvStr",advanDTO.getBackCatalogueInvestigatorString());
+        query = query.setParameter("invNumber",advanDTO.getExperimentNumber());
+        query = query.setParameter("visitId",advanDTO.getVisitId());
+       
+        query = query.setParameter("invType",advanDTO.getInvestigationType());
+        query = query.setParameter("grantId",advanDTO.getGrantId());
+        query = query.setParameter("objectType", ElementType.INVESTIGATION);        
+        query = query.setParameter("upperTime", advanDTO.getYearRangeEnd());
+        query = query.setParameter("lowerTime", advanDTO.getYearRangeStart());
+        query = query.setParameter("datafileName",advanDTO.getDatafileName());
+        query = query.setParameter("sampleName",advanDTO.getSampleName());
+        
+        if(advanDTO.isAbstract()){
+             query = query.setParameter("invAbstract","%"+advanDTO.getInvestigationAbstract()+"%");
+        } else {
+             query = query.setParameter("invAbstract",null);
+        }
         
         //set upper run number
         if(advanDTO.isRunNumber()){
-            if(advanDTO.getRunEnd() != null) query = query.setParameter("upper",advanDTO.getRunEnd());
-            else query = query.setParameter("upper",1000000000L);
-            
-            //set lower run number
-            if(advanDTO.getRunStart() != null) query = query.setParameter("lower",advanDTO.getRunStart());
-            else query = query.setParameter("lower",0L);
-            
-            //dates need to be added
-            query.setParameter("startDate",advanDTO.getYearRangeStart());
-            query.setParameter("endDate",advanDTO.getYearRangeEnd());
-            query.setParameter("datafile_name",advanDTO.getDatafileName());
-        }
-        //set data file name
-        if(advanDTO.isDatFileParameters()){
-            //dates need to be added
-            query.setParameter("startDate",advanDTO.getYearRangeStart());
-            query.setParameter("endDate",advanDTO.getYearRangeEnd());
-            query.setParameter("datafile_name",advanDTO.getDatafileName());
+            query = query.setParameter("upper",advanDTO.getRunEnd());
+            query = query.setParameter("lower",advanDTO.getRunStart());
+            query = query.setParameter("dataFileType", ElementType.DATAFILE);
         }
         
         //set instruments
@@ -454,7 +373,7 @@ public class InvestigationSearch extends ManagerUtil {
         if(advanDTO.isKeywords()){
             int j = 1;
             for(String keyword : advanDTO.getKeywords()){
-                query = query.setParameter("keyword"+j++,keyword);
+                query = query.setParameter("keyword"+j++,"%"+keyword+"%");
             }
         }
         
@@ -462,16 +381,11 @@ public class InvestigationSearch extends ManagerUtil {
         if(advanDTO.isInvestigators()){
             int j = 1;
             for(String investigator : advanDTO.getInvestigators()){
-                query = query.setParameter("investigator"+j++,investigator);
+                query = query.setParameter("surname"+j++,"%"+investigator+"%");
             }
         }
         
-        //set sample name
-        if(advanDTO.getSampleName() != null){
-            query.setParameter("sampleName",advanDTO.getSampleName());
-        }
-        
-        log.trace("DYNAMIC SQL: "+SQL);
+        log.trace("DYNAMIC JPQL: "+JPQL);
         
         if(number_results < 0){
             //get all, maybe should limit this to 500?
@@ -480,21 +394,10 @@ public class InvestigationSearch extends ManagerUtil {
             investigations = query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         
-        Collection<Investigation> allowed = new ArrayList<Investigation>();
-        //TODO no security on this search so done at the end
-        for (Investigation investigation : investigations) {
-            try {
-                GateKeeper.performAuthorisation(userId, investigation, AccessType.READ, manager);
-                allowed.add(investigation);
-            } catch (InsufficientPrivilegesException ex) {
-                //ignore
-            }
-        }
-        
         //add all the investigation information to the list of investigations
-        getInvestigationInformation(userId, allowed,advanDTO.getInvestigationInclude(), manager);
+        getInvestigationInformation(userId, investigations, advanDTO.getInvestigationInclude(), manager);
         
-        return allowed;
+        return investigations;
     }
     
     /**
@@ -626,7 +529,7 @@ public class InvestigationSearch extends ManagerUtil {
         
         //Need to generate this
         //  (i.keywordCollection.keywordPK.name LIKE '%or%' AND i.keywordCollection.keywordPK.name LIKE '%orbita%')
-                
+        
         int i  = 2;
         //check if fuzzy
         if(fuzzy){
@@ -643,14 +546,14 @@ public class InvestigationSearch extends ManagerUtil {
                 else  JPQL = JPQL +" "+operator+" i.keywordCollection.keywordPK.name = ?"+(i++)+" ";
             }
         }
-                        
+        
         JPQL = JPQL +")";
         
         log.info("DYNAMIC JPQL GENERATED: "+JPQL);
         
         //set query with investigation as entity object
         Query query = manager.createQuery(JPQL);
-               
+        
         //use security??
         if(use_security) {
             query.setParameter("objectType",ElementType.INVESTIGATION);
@@ -663,8 +566,8 @@ public class InvestigationSearch extends ManagerUtil {
         for(String keyword : keywords){
             if(fuzzy) query = query.setParameter(j++,"%"+keyword+"%");
             else query.setParameter(j++,keyword);
-        }        
-               
+        }
+        
         //run query
         if(number_results < 0){
             //get all, maybe should limit this to 500?
@@ -832,7 +735,7 @@ public class InvestigationSearch extends ManagerUtil {
         return  manager.createNamedQuery(ALL_ROLES).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }
     
-     /**
+    /**
      * Lists all the user roles in the database
      *
      * @param userId federalId of the user.

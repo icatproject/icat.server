@@ -58,11 +58,11 @@ public class AdvancedSearchDetails {
     /**
      * Long value of start date in datafile parameter
      */
-    private Long runStart; // data file parameter,  run_number datafile_parameter
+    private float runStart; // data file parameter,  run_number datafile_parameter
     /**
      * Long value of start end in datafile parameter
      */
-    private Long runEnd;// data file parameter, run_number datafile_parameter
+    private float runEnd = 90000000000f;// data file parameter, run_number datafile_parameter
     /**
      * Sample name
      */
@@ -118,7 +118,7 @@ public class AdvancedSearchDetails {
         this.experimentNumber = experimentNumber;
     }
     
-    public Long getRunStart() {
+    public float getRunStart() {
         return runStart;
     }
     
@@ -126,11 +126,11 @@ public class AdvancedSearchDetails {
         this.runStart = runStart;
     }
     
-    public Long getRunEnd() {
+    public float getRunEnd() {
         return runEnd;
     }
     
-    public void setRunEnd(Long runEnd) {
+    public void setRunEnd(Long runEnd) {        
         this.runEnd = runEnd;
     }
     
@@ -232,7 +232,7 @@ public class AdvancedSearchDetails {
         if(keywords != null && keywords.size() != 0) return true;
         if(sampleName != null) return true;
         if(datafileName != null) return true;
-        if(runEnd != null || runEnd != null) return true;
+        if(runEnd != 90000000000f || runStart != 0f) return true;
         else return false;
     }
     
@@ -251,8 +251,13 @@ public class AdvancedSearchDetails {
         else return false;
     }
     
+      public boolean isAbstract(){
+        if(getInvestigationAbstract() != null && getInvestigationAbstract().length() != 0) return true;
+        else return false;
+    }
+    
     public boolean isRunNumber(){
-        if(runEnd != null || runEnd != null) return true;
+        if(runEnd != 90000000000f || runStart != 0f) return true;
         else return false;
     }
     
