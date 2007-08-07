@@ -78,7 +78,7 @@ public class TestEntityBaseBean  extends BaseTestClass {
         
         assertEquals("Datasets number must be 2", in.getDatasetCollection().size(), 2);
         assertEquals("Keywords number must be 2", in.getKeywordCollection().size(), 2);
-        assertEquals("Investigators number must be 1", in.getInvestigatorCollection().size(), 1);
+        assertEquals("Investigators number must be 2", in.getInvestigatorCollection().size(), 2);
         assertEquals("Publications number must be 1", in.getPublicationCollection().size(), 1);
         assertEquals("Sample number must be 2", in.getSampleCollection().size(), 2);
         for (Sample sample : in.getSampleCollection()) {
@@ -90,7 +90,7 @@ public class TestEntityBaseBean  extends BaseTestClass {
         
         assertEquals("Datasets number must be 1 after removing deleted items", in.getDatasetCollection().size(), 1);
         assertEquals("Keywords number must be 1 after removing deleted items", in.getKeywordCollection().size(), 1);
-        assertEquals("Investigators number must be 0 after removing deleted items", in.getInvestigatorCollection().size(), 0);
+        assertEquals("Investigators number must be 0 after removing deleted items", in.getInvestigatorCollection().size(), 1);
         assertEquals("Publications number must be 0 after removing deleted items", in.getPublicationCollection().size(), 0);
         assertEquals("Sample number must be 1 after removing deleted items", in.getSampleCollection().size(), 1);
         for (Sample sample : in.getSampleCollection()) {

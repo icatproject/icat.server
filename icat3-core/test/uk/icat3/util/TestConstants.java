@@ -21,7 +21,7 @@ public class TestConstants {
     public final static String VALID_SAMPLE_NAME = "SrF2 calibration  w=-25.3";
     
     public final static String VALID_FEDID_FOR_INVESTIGATION =  "gjd37";
-    public final static String VALID_SURNAME_FOR_INVESTIGATION =  "Drinkwater";
+    public final static String VALID_SURNAME_FOR_INVESTIGATION =  "User"; //from test user
    
     public final static String VALID_FACILITY_USER_FOR_INVESTIGATION =  "test";
     public final static String VALID_USER_FOR_INVESTIGATION =  VALID_FACILITY_USER_FOR_INVESTIGATION;
@@ -35,9 +35,7 @@ public class TestConstants {
     
     public final static String INVALID_USER =  "invalidUser" +Math.random();
     public final static String VALID_INVESTIGATION_SURNAME  = "HEALY";
-    
-    
-    
+            
     
     //testing gatekeeper
     public final static String CREATOR_USER = "test_creator";

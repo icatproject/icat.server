@@ -10,6 +10,7 @@
 package uk.icat3.investigationmanager;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Random;
 import junit.framework.JUnit4TestAdapter;
 
@@ -17,6 +18,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.ICATAPIException;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
@@ -25,6 +27,7 @@ import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.InvestigationManager;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.BaseTestClassTX;
+import uk.icat3.util.IcatRoles;
 import static uk.icat3.util.TestConstants.*;
 
 /**
@@ -144,7 +147,7 @@ public class TestInvestigator extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void removeInvestigator() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving investigator to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -152,11 +155,33 @@ public class TestInvestigator extends BaseTestClassTX {
         Investigator duplicateInvestigator = getInvestigatorDuplicate(true);
         duplicateInvestigator.setDeleted(false);
         
-        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateInvestigator, AccessType.REMOVE, em);
+        try {
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateInvestigator, AccessType.REMOVE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void removeActualInvestigator() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving investigator to investigation Id: "+VALID_INVESTIGATION_ID);
         
-        Investigator modified = em.find(Investigator.class,duplicateInvestigator.getInvestigatorPK() );
+        //create invalid investigator, no name
+        Investigator duplicateInvestigator = getInvestigatorDuplicate(true);
+        duplicateInvestigator.setDeleted(false);
+        duplicateInvestigator.setCreateId(ICAT_ADMIN_USER);
+                
+        InvestigationManager.deleteInvestigationObject(ICAT_ADMIN_USER, duplicateInvestigator, AccessType.REMOVE, em);
         
+        Investigator modified = em.find(Investigator.class,duplicateInvestigator.getInvestigatorPK() );        
         assertNull("Investigator must not be found in DB "+duplicateInvestigator, modified);
+                
     }
     
     /**
@@ -230,7 +255,7 @@ public class TestInvestigator extends BaseTestClassTX {
             InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsInvestigator, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -249,7 +274,7 @@ public class TestInvestigator extends BaseTestClassTX {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsInvestigator, AccessType.DELETE, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -268,7 +293,7 @@ public class TestInvestigator extends BaseTestClassTX {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsInvestigator, AccessType.REMOVE, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -334,10 +359,10 @@ public class TestInvestigator extends BaseTestClassTX {
     private Investigator getInvestigatorDuplicate(boolean last){
         Investigator investigator = null;
         if(!last){
-            Collection<Investigator> investigators = (Collection<Investigator>)executeListResultCmd("select d from Investigator d where d.createId LIKE '%PROP%'");
+            Collection<Investigator> investigators = (Collection<Investigator>)executeListResultCmd("select d from Investigator d where d.facilityAcquired = 'Y'");
             investigator = investigators.iterator().next();
         } else {
-            Collection<Investigator> investigators = (Collection<Investigator>)executeListResultCmd("select d from Investigator d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+            Collection<Investigator> investigators = (Collection<Investigator>)executeListResultCmd("select d from Investigator d where d.facilityAcquired = 'N' order by d.modTime desc");
             investigator = investigators.iterator().next();
         }
         log.trace(investigator);
