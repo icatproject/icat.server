@@ -56,7 +56,7 @@ public class Queries {
      */
     public static final String INVESTIGATION_LIST_BY_SURNAME = "Investigation.findByUserSurname";
     public static final String INVESTIGATIONS_LIST_BY_USER_SURNAME_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL +
-          "AND EXISTS (SELECT inv FROM i.investigatorCollection inv WHERE inv.facilityUser.lastName LIKE :surname AND " +
+            "AND EXISTS (SELECT inv FROM i.investigatorCollection inv WHERE LOWER(inv.facilityUser.lastName) LIKE :surname AND " +
             "inv.markedDeleted = 'N')";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
@@ -67,7 +67,7 @@ public class Queries {
      * TODO needs to be multipe keywords
      */
     public static final String INVESTIGATION_LIST_BY_KEYWORD = "Investigation.findByKewordNative";
-    public static final String INVESTIGATION_LIST_BY_KEYWORD_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL + 
+    public static final String INVESTIGATION_LIST_BY_KEYWORD_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL +
             "AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword AND " +
             "kw.markedDeleted = 'N')";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,9 +96,9 @@ public class Queries {
      */
     public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS = "Investigation.findByKewordsNative";
     
-   // Query =  LIST_ALL_USERS_INVESTIGATIONS_JPQL " + AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword1 AND kw.markedDeleted = 'N') AND EXISTS (SELECT kw2 FROM i.keywordCollection kw2 WHERE kw2.keywordPK.name LIKE :keyword1 AND kw2.markedDeleted = 'N')";
+    // Query =  LIST_ALL_USERS_INVESTIGATIONS_JPQL " + AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword1 AND kw.markedDeleted = 'N') AND EXISTS (SELECT kw2 FROM i.keywordCollection kw2 WHERE kw2.keywordPK.name LIKE :keyword1 AND kw2.markedDeleted = 'N')";
     public static final String INVESTIGATION_LIST_BY_KEYWORDS_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL ;
-           // " AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND "; //kw.keywordPK.name LIKE :keyword1 OR/AND kw.keywordPK.name LIKE :keyword2 ) 
+    // " AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND "; //kw.keywordPK.name LIKE :keyword1 OR/AND kw.keywordPK.name LIKE :keyword2 )
     
     // QUERY = INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY = "SELECT i from Investigation i WHERE i.markedDeleted = 'N' AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword1 OR/AND kw.keywordPK.name LIKE :keyword2 AND kw.markedDeleted = 'N')";
     public static final String INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY = "SELECT i from Investigation i WHERE i.markedDeleted = 'N' ";// AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND ";
@@ -113,11 +113,11 @@ public class Queries {
     public static final String INVESTIGATION_LIST_BY_USERID = "Investigation.findByUserID";
     public static final String INVESTIGATION_LIST_BY_USERID_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL +
             " AND EXISTS ( SELECT inv FROM i.investigatorCollection inv WHERE inv.facilityUser.federalId LIKE :federalId AND inv.markedDeleted = 'N')";
-   
+    
     public static final String INVESTIGATION_LIST_BY_USERID_RTID = "Investigation.findByUserIDRtId";
     public static final String INVESTIGATION_LIST_BY_USERID_RTID_JPQL = LIST_ALL_USERS_INVESTIGATION_IDS_JPQL +
             " AND EXISTS ( SELECT inv FROM i.investigatorCollection inv WHERE inv.facilityUser.federalId LIKE :federalId AND inv.markedDeleted = 'N')";
-   
+    
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
@@ -127,48 +127,61 @@ public class Queries {
      * This is the search for the advanced search
      */
     public static final String ADVANCED_SEARCH = "Investigation.findByAdvancedSearch";
-    //    QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :investigationType AND i.markedDeleted = 'N' " +
-    //        " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-    //        " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' AND "+
+    // String QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :investigationType AND i.markedDeleted = 'N' " +
+    //            " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+    //            " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' AND "+
     //
-    //        " (i.visitId = :visitId OR  :visitId IS NULL) AND" +
-    //        " (i.invType.name = :invType  OR :invType IS NULL) AND " +
-    //        " (i.invAbstract LIKE :invAbstract OR :invAbstract IS NULL) AND" +
-    //        " (i.grantId = :grantId OR :grantId IS NULL) AND" +
-    //        " (i.title = :title OR :title IS NULL) AND" +
-    //        " (i.bcatInvStr = :bcatInvStr OR :bcatInvStr IS NULL) AND " +
-    //        " (i.invNumber = :invNumber  OR :invNumber IS NULL) AND " +
-    //        " (i.sampleCollection.name = :sampleName OR :sampleName IS NULL) AND" +
-    //        " (i.datasetCollection.datafileCollection.name = :datafileName OR :datafileName IS NULL) AND " +
-    //        " (i.datasetCollection.datafileCollection.createTime > :lowerTime OR :lowerTime IS NULL) AND " +
-    //        " (i.datasetCollection.datafileCollection.createTime < :upperTime OR :upperTime IS NULL) AND " +
-    
-    //        " i.instrument.name IN(:instrument) AND" + //expand IN, remove this if instrument null
-    //        " i.keywordCollection.keywordPK.name = :keyword AND i.keywordCollection.markedDeleted = 'N' AND " + //remove if no keyword is null
-    //        " i.investigatorCollection.facilityUser.lastName LIKE :surname AND i.investigatorCollection.markedDeleted = 'N' AND "+ //iterate, remove this if instrument null
-    
-    //        "EXISTS (SELECT dfp FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
-    //        " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
-    //        " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
-    //        " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
-    //        "dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null
+    //            " (i.visitId = :visitId OR  :visitId IS NULL) AND" +
+    //            " (i.invType.name = :invType  OR :invType IS NULL) AND " +
+    //            " (i.invAbstract LIKE :invAbstract OR :invAbstract IS NULL) AND" +
+    //            " (i.grantId = :grantId OR :grantId IS NULL) AND" +
+    //            " (i.title = :title OR :title IS NULL) AND" +
+    //            " (i.bcatInvStr = :bcatInvStr OR :bcatInvStr IS NULL) AND " +
+    //            " (i.invNumber = :invNumber  OR :invNumber IS NULL) " +
+    //
+    //            " AND i.instrument.name IN(:instrument)  AND i.instrument.markedDeleted = 'N' "+ //expand IN, remove this if instrument null
+    //
+    //            " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
+    //            "sample.markedDeleted = 'N') "+//iterate, remove if no sample is null
+    //
+    //            " AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword AND " +
+    //            " kw.markedDeleted = 'N')  "+ //iterate, remove if no keyword is null
+    //
+    //            " AND EXISTS ( SELECT inv FROM i.investigatorCollection inv WHERE " +
+    //            "LOWER(inv.facilityUser.lastName) LIKE :surname AND inv.markedDeleted = 'N')  "+ //iterate, remove this if instrument null
+    //
+    //            " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
+    //            " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
+    //            " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY')" +
+    //            " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionSelect = 'Y' " +
+    //            " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
+    //            " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " + //remove if all are null
+    //
+    //            " AND EXISTS (SELECT dfp FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
+    //            " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
+    //            " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
+    //            " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
+    //            " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null
     
     public static final String ADVANCED_SEARCH_JPQL_START = LIST_ALL_USERS_INVESTIGATIONS_JPQL +
             " AND (i.visitId = :visitId OR  :visitId IS NULL) AND" +
             " (i.invType.name = :invType  OR :invType IS NULL) AND " +
             " (i.invAbstract LIKE :invAbstract OR :invAbstract IS NULL) AND" +
-            " (i.grantId = :grantId OR :grantId IS NULL) AND " +
-            " (i.title = :invTitle OR :invTitle IS NULL) AND " +
+            " (i.grantId = :grantId OR :grantId IS NULL) AND" +
+            " (i.title = :invTitle OR :invTitle IS NULL) AND" +
             " (i.bcatInvStr = :bcatInvStr OR :bcatInvStr IS NULL) AND " +
-            " (i.invNumber = :invNumber  OR :invNumber IS NULL) AND " +
-            " (i.sampleCollection.name = :sampleName OR :sampleName IS NULL) AND " +
-            " (i.datasetCollection.datafileCollection.name = :datafileName OR :datafileName IS NULL) AND " +
-            " (i.datasetCollection.datafileCollection.createTime > :lowerTime OR :lowerTime IS NULL) AND " +
-            " (i.datasetCollection.datafileCollection.createTime < :upperTime OR :upperTime IS NULL) ";
+            " (i.invNumber = :invNumber  OR :invNumber IS NULL) ";
     
+    //public static final String ADVANCED_SEARCH_JPQL_INSTRUMENT =  " AND i.instrument.name IN(:instrument)  AND i.instrument.markedDeleted = 'N' ";//expand IN, remove this if instrument null
     
-    public static final String ADVANCED_SEARCH_JPQL_END = "" +
-            " AND EXISTS (SELECT dfp.datafileParameterPK.datafileId FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
+    public static final String ADVANCED_SEARCH_JPQL_DATAFILE = " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
+            " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
+            " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY')" +
+            " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionSelect = 'Y' " +
+            " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
+            " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " ; //remove if all are null
+        
+    public static final String ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER = " AND EXISTS (SELECT dfp.datafileParameterPK.datafileId FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
             " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
             " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
             " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
@@ -188,7 +201,7 @@ public class Queries {
     public static final String INVESTIGATIONS_BY_USER = "Investigation.findByUser";
     public static final String INVESTIGATIONS_BY_USER_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL;
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-            
+    
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -215,7 +228,7 @@ public class Queries {
             " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :objectType AND dfp.markedDeleted = 'N' " +
             " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
             " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionSelect = 'Y' AND dfp.numericValue BETWEEN :lower AND :upper AND " +
-            "dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')";//  add this in here for all instruments: i.dataset.investigation.instrument.name = 'SXD'";
+            " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')";//  add this in here for all instruments: i.dataset.investigation.instrument.name = 'SXD'";
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
@@ -253,7 +266,7 @@ public class Queries {
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
-            /**
+    /**
      * Find all instruments list,
      *
      */

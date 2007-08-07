@@ -16,6 +16,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileFormat;
@@ -244,21 +245,7 @@ public class TestJPA {
     public void testP() throws Exception {
         setUp();
         
-        String QUERY = Queries.LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND (i.keywordCollection.keywordPK.name LIKE '%ccw%' OR i.keywordCollection.keywordPK.name LIKE '%orbita%') AND i.keywordCollection.markedDeleted = 'N'";
-        
-        // QUERY = "SELECT i FROM Datafile i WHERE i.datafileParameterCollection.numericValue BETWEEN :lower AND :upper";
-        QUERY = "SELECT i FROM Datafile i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :dataFileType " +
-                " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-                " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' "+
-                " AND i.dataset.investigation.instrument.name = 'SXD' AND " +
-                "EXISTS (SELECT dfp FROM i.datafileParameterCollection dfp, IcatAuthorisation ia2" +
-                " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
-                " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
-                " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionSelect = 'Y' AND dfp.numericValue BETWEEN :lower AND :upper AND " +
-                "dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')";
-        
-        
-        QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :investigationType AND i.markedDeleted = 'N' " +
+        String QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :investigationType AND i.markedDeleted = 'N' " +
                 " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
                 " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' AND "+
                 
@@ -268,49 +255,61 @@ public class TestJPA {
                 " (i.grantId = :grantId OR :grantId IS NULL) AND" +
                 " (i.title = :title OR :title IS NULL) AND" +
                 " (i.bcatInvStr = :bcatInvStr OR :bcatInvStr IS NULL) AND " +
-                " (i.invNumber = :invNumber  OR :invNumber IS NULL) AND " +
+                " (i.invNumber = :invNumber  OR :invNumber IS NULL) " +
                 
-                " i.instrument.name IN(:instrument) AND" + //expand IN, remove this if instrument null
-                " (i.sampleCollection.name = :sampleName OR :sampleName IS NULL) AND" +
-                " (i.datasetCollection.datafileCollection.name = :datafileName OR :datafileName IS NULL) AND " +
-                " (i.datasetCollection.datafileCollection.createTime > :lowerTime OR :lowerTime IS NULL) AND " +
-                " (i.datasetCollection.datafileCollection.createTime < :upperTime OR :upperTime IS NULL) AND " +
-                " i.keywordCollection.keywordPK.name = :keyword AND i.keywordCollection.markedDeleted = 'N' AND " + //remove if no keyword is null
-                " i.investigatorCollection.facilityUser.lastName LIKE :surname AND i.investigatorCollection.markedDeleted = 'N' AND "+ //iterate, remove this if instrument null
-                "EXISTS (SELECT dfp FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
+                " AND i.instrument.name IN(:instrument)  AND i.instrument.markedDeleted = 'N' "+ //expand IN, remove this if instrument null
+                
+                " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
+                "sample.markedDeleted = 'N') "+//iterate, remove if no sample is null
+                          
+                " AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword AND " +
+                " kw.markedDeleted = 'N')  "+ //iterate, remove if no keyword is null
+                
+                " AND EXISTS ( SELECT inv FROM i.investigatorCollection inv WHERE " +
+                "LOWER(inv.facilityUser.lastName) LIKE :surname AND inv.markedDeleted = 'N')  "+ //iterate, remove this if instrument null
+                
+                 " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
+                " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
+                " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY')" +
+                " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionSelect = 'Y' " +
+                " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
+                " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " + //remove if all are null
+                             
+                " AND EXISTS (SELECT dfp FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
                 " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
                 " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
                 " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
-                "dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null
-        
-        ////QUERY = "SELECT i FROM Datafile i WHERE EXISTS (SELECT dfp FROM i.datafileParameterCollection dfp" +
-        //         " WHERE dfp.numericValue BETWEEN :lower AND :upper AND " +
-        //       "dfp.datafileParameterPK.name = 'run_number')";
+                " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null
+              
         
         
         Query nullQuery = em.createQuery(QUERY);
         
-        nullQuery.setParameter("dataFileType", ElementType.DATAFILE);
+        
         nullQuery.setParameter("userId", "test");
-        nullQuery.setParameter("upper", 1257f);
-        nullQuery.setParameter("lower", 100f);
         nullQuery.setParameter("investigationType", ElementType.INVESTIGATION);
-        nullQuery.setParameter("dataFileType", ElementType.DATAFILE);
-        nullQuery.setParameter("userId", "test");
-        nullQuery.setParameter("surname", "Drinkwater");
-        nullQuery.setParameter("keyword", "shull");
-        nullQuery.setParameter("datafileName", "SXD015554.RAW");
-        nullQuery.setParameter("sampleName", "SrF2 calibration  w=-25.3");
-        nullQuery.setParameter("invAbstract", null);
-        nullQuery.setParameter("upperTime", new Date());
-        nullQuery.setParameter("lowerTime", new Date(System.currentTimeMillis()-900000000));
         nullQuery.setParameter("invType", "experiment");
         nullQuery.setParameter("visitId", "12");
-        nullQuery.setParameter("instrument", "SXD");
         nullQuery.setParameter("invNumber", "12345");
         nullQuery.setParameter("bcatInvStr", "damian");
         nullQuery.setParameter("title", "Investigation without any investigators");
         nullQuery.setParameter("grantId", null);
+        nullQuery.setParameter("invAbstract", null);
+        
+        nullQuery.setParameter("instrument", "SXD");
+        
+        nullQuery.setParameter("surname", "user");
+        
+        nullQuery.setParameter("keyword", "shull");
+        
+        nullQuery.setParameter("sampleName", "SrF2 calibration  w=-25.3");
+        
+        nullQuery.setParameter("dataFileType", ElementType.DATAFILE);
+        nullQuery.setParameter("datafileName", "SXD015554.RAW");
+        nullQuery.setParameter("upperTime", new Date());
+        nullQuery.setParameter("lowerTime", new Date(System.currentTimeMillis()-900000000));
+
+        nullQuery.setParameter("dataFileType", ElementType.DATAFILE);
         nullQuery.setParameter("upper", 11257f);
         nullQuery.setParameter("lower", 100f);
         
@@ -321,17 +320,16 @@ public class TestJPA {
     
     public void testSurname(){
         setUp();
-         String QUERY = "SELECT DISTINCT k.keywordPK.name from Keyword k, IcatAuthorisation ia WHERE" +
-            " k.investigation.id = ia.elementId AND ia.elementType = :objectType AND ia.markedDeleted = 'N'" +
-            " AND (ia.userId = 'test' OR ia.userId = 'ANY')" +
-            " AND ia.markedDeleted = 'N' AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) AND k.markedDeleted = 'N' ORDER BY k.keywordPK.name";   
-         Query query = em.createQuery(QUERY).
-                 setParameter("startKeyword","%%").
-                 setParameter("objectType",ElementType.INVESTIGATION);
-               
-                //setParameter("objectType",ElementType.INVESTIGATION).
-                //setParameter("userId","test").
-                
+        String QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :investigationType AND i.markedDeleted = 'N' " +
+                " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+                " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' ";
+                  Query query = em.createQuery(QUERY).
+                setParameter("userId","test").
+                setParameter("investigationType",ElementType.INVESTIGATION);
+        
+        //setParameter("objectType",ElementType.INVESTIGATION).
+        //setParameter("userId","test").
+        
         System.out.println(query.getResultList());
         
         tearDown();
@@ -352,8 +350,8 @@ public class TestJPA {
         //  ts.createInv();
         //ts.testJPA();
         //  ts.changeRole();
-        //    ts.testP();
-        ts.testSurname();
+      //  ts.testP();
+          ts.testSurname();
     }
     
     

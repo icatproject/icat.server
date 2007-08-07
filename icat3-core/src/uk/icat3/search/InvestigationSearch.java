@@ -169,7 +169,7 @@ public class InvestigationSearch extends ManagerUtil {
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).
                         setParameter("objectType",ElementType.INVESTIGATION).
                         setParameter("userId",userId).
-                        setParameter("surname","%"+searchString+"%").
+                        setParameter("surname","%"+searchString.toLowerCase()+"%").
                         setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             } else {
                 log.trace("Searching by USERID");
@@ -186,7 +186,7 @@ public class InvestigationSearch extends ManagerUtil {
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).
                         setParameter("objectType",ElementType.INVESTIGATION).
                         setParameter("userId",userId).
-                        setParameter("surname","%"+searchString+"%").
+                        setParameter("surname","%"+searchString.toLowerCase()+"%").
                         setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             } else {
                 log.trace("Searching by USERID");
@@ -278,8 +278,16 @@ public class InvestigationSearch extends ManagerUtil {
         //dynamically create the query
         String JPQL = ADVANCED_SEARCH_JPQL_START;
         
+        if(advanDTO.isSample()){
+            //  " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
+            //  " sample.markedDeleted = 'N') "+//iterate, remove if no sample is null
+            JPQL += "AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
+              " sample.markedDeleted = 'N') ";
+        }
+        
         if(advanDTO.isInstruments()){
-            //add insturments section: i.instrument.name IN(:instrument) AND
+            //add insturments section:
+            //" AND i.instrument.name IN(:instrument)  AND i.instrument.markedDeleted = 'N' "+ //expand IN, remove this if instrument null
             JPQL += " AND i.instrument.name IN(";
             //add in the instruments in the IN() cause of JPQL
             int i = 1;
@@ -287,34 +295,43 @@ public class InvestigationSearch extends ManagerUtil {
                 if(i == advanDTO.getInstruments().size()) JPQL += ":instrument"+(i++)+"";
                 else  JPQL += ":instrument"+(i++)+" , ";
             }
-            JPQL += ") ";
+            JPQL += ") AND i.instrument.markedDeleted = 'N' ";
         }
         
         if(advanDTO.isKeywords()){
             //add keywords section:
-            //" i.keywordCollection.keywordPK.name = :keyword AND i.keywordCollection.markedDeleted = 'N' AND " + //remove if no keyword is null
+            // AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND kw.keywordPK.name LIKE :keyword1)
             
-            JPQL += " AND (i.keywordCollection.markedDeleted = 'N' AND ";
             int i = 1;
             for(String keyword : advanDTO.getKeywords()){
-                if(i == 1) JPQL += " i.keywordCollection.keywordPK.name LIKE :keyword"+(i++);
-                else  JPQL += " OR i.keywordCollection.keywordPK.name LIKE :keyword"+(i++);
+                JPQL += " AND EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name LIKE :keyword"+(i++)+") ";
             }
-            JPQL += ") ";
+            JPQL += " ";
         }
         
         if(advanDTO.isInvestigators()){
             //add investigator section:
-            //   " i.investigatorCollection.facilityUser.lastName LIKE :surname AND i.investigatorCollection.markedDeleted = 'N' AND "+ //iterate, remove this if instrument null
-            
-            JPQL += " AND (i.investigatorCollection.markedDeleted = 'N' AND ";
+            //" AND EXISTS ( SELECT inv FROM i.investigatorCollection inv WHERE " +
+            //   "LOWER(inv.facilityUser.lastName) LIKE :surname AND inv.markedDeleted = 'N')  "+ //iterate, remove this if investigator null
             
             int i = 1;
             for(String investigators : advanDTO.getInvestigators()){
-                if(i == 1) JPQL += "i.investigatorCollection.facilityUser.lastName LIKE :surname"+(i++);
-                else  JPQL += " OR i.investigatorCollection.facilityUser.lastName LIKE :surname"+(i++);
+                JPQL += " AND EXISTS (SELECT inv"+i+" FROM i.investigatorCollection inv"+i+" WHERE inv"+i+".markedDeleted = 'N' AND LOWER(inv"+i+".facilityUser.lastName) LIKE :surname"+(i++)+") ";
             }
-            JPQL += ") ";
+            JPQL += " ";
+        }
+        
+        if(advanDTO.isDataFileParameters()){
+            log.trace("Searching data file info");
+            //add data file and run number section
+            //             " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
+            //            " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
+            //            " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY')" +
+            //            " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionSelect = 'Y' " +
+            //            " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
+            //            " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " ; //remove if all are null
+            //
+            JPQL += ADVANCED_SEARCH_JPQL_DATAFILE;
         }
         
         if(advanDTO.isRunNumber()){
@@ -326,7 +343,7 @@ public class InvestigationSearch extends ManagerUtil {
             //    " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
             //    "dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null
             
-            JPQL += ADVANCED_SEARCH_JPQL_END;
+            JPQL += ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER;
         }
         
         //set all the paramaters now
@@ -335,18 +352,14 @@ public class InvestigationSearch extends ManagerUtil {
         
         //sets the paramters
         query = query.setParameter("userId",userId);
-        query = query.setParameter("invTitle",advanDTO.getInvestigationName());
-        query = query.setParameter("bcatInvStr",advanDTO.getBackCatalogueInvestigatorString());
-        query = query.setParameter("invNumber",advanDTO.getExperimentNumber());
-        query = query.setParameter("visitId",advanDTO.getVisitId());
-        
-        query = query.setParameter("invType",advanDTO.getInvestigationType());
-        query = query.setParameter("grantId",advanDTO.getGrantId());
+        query = query.setParameter("invTitle", advanDTO.getInvestigationName());
+        query = query.setParameter("bcatInvStr", advanDTO.getBackCatalogueInvestigatorString());
+        query = query.setParameter("invNumber", advanDTO.getExperimentNumber());
+        query = query.setParameter("visitId", advanDTO.getVisitId());
+        query = query.setParameter("invType", advanDTO.getInvestigationType());
+        query = query.setParameter("grantId", advanDTO.getGrantId());
         query = query.setParameter("objectType", ElementType.INVESTIGATION);
-        query = query.setParameter("upperTime", advanDTO.getYearRangeEnd());
-        query = query.setParameter("lowerTime", advanDTO.getYearRangeStart());
-        query = query.setParameter("datafileName",advanDTO.getDatafileName());
-        query = query.setParameter("sampleName",advanDTO.getSampleName());
+        
         
         if(advanDTO.isAbstract()){
             query = query.setParameter("invAbstract","%"+advanDTO.getInvestigationAbstract()+"%");
@@ -354,10 +367,21 @@ public class InvestigationSearch extends ManagerUtil {
             query = query.setParameter("invAbstract",null);
         }
         
+        if(advanDTO.isSample()){
+            query = query.setParameter("sampleName", advanDTO.getSampleName());
+        }
+        
+        if(advanDTO.isDataFileParameters()){
+            query = query.setParameter("datafileName", advanDTO.getDatafileName());
+            query = query.setParameter("dataFileType", ElementType.DATAFILE);
+            query = query.setParameter("upperTime", advanDTO.getYearRangeEnd());
+            query = query.setParameter("lowerTime", advanDTO.getYearRangeStart());
+        }
+        
         //set upper run number
         if(advanDTO.isRunNumber()){
-            query = query.setParameter("upper",advanDTO.getRunEnd());
-            query = query.setParameter("lower",advanDTO.getRunStart());
+            query = query.setParameter("upper", advanDTO.getRunEnd());
+            query = query.setParameter("lower", advanDTO.getRunStart());
             query = query.setParameter("dataFileType", ElementType.DATAFILE);
         }
         
@@ -381,7 +405,7 @@ public class InvestigationSearch extends ManagerUtil {
         if(advanDTO.isInvestigators()){
             int j = 1;
             for(String investigator : advanDTO.getInvestigators()){
-                query = query.setParameter("surname"+j++,"%"+investigator+"%");
+                query = query.setParameter("surname"+j++,"%"+investigator.toLowerCase()+"%");
             }
         }
         
@@ -544,8 +568,8 @@ public class InvestigationSearch extends ManagerUtil {
         if(fuzzy){
             //fuzzy so LIKE
             for(String keyword : keywords){
-                if(i == 2) JPQL += " AND EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name  LIKE ?"+(i++)+") ";
-                else  JPQL += " "+operator+" EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name  LIKE ?"+(i++)+") ";
+                if(i == 2) JPQL += " AND EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name  LIKE :"+(i++)+") ";
+                else  JPQL += " "+operator+" EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name  LIKE :"+(i++)+") ";
                 
             }
         } else {

@@ -261,7 +261,12 @@ public class AdvancedSearchDetails {
         else return false;
     }
     
-    public boolean isDatFileParameters(){
+    public boolean isSample(){     
+        if(sampleName != null && getSampleName().length() != 0) return true;
+        else return false;
+    }
+    
+    public boolean isDataFileParameters(){
         if(yearRangeEnd != null || yearRangeStart != null || datafileName != null) return true;
         else return false;
     }
