@@ -24,6 +24,7 @@ import uk.icat3.entity.DatafileFormatPK;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetType;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.InvestigationType;
 import uk.icat3.manager.DataFileManager;
@@ -31,6 +32,7 @@ import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.InvestigationManager;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.Queries;
+import uk.icat3.util.Util;
 
 /**
  *
@@ -335,6 +337,18 @@ public class TestJPA {
         tearDown();
     }
     
+     public void testAuth(){
+        setUp();
+       
+        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class, 108L);
+        
+        System.out.println(icatAuth.getRole().getActionRootRemove());
+        System.out.println(""+icatAuth.getRole().isRootRemove());
+        System.out.println(Util.parseBoolean(icatAuth.getRole().getActionRootRemove()));
+        tearDown();
+    }
+    
+    
     /**
      * @param args the command line arguments
      */
@@ -351,7 +365,10 @@ public class TestJPA {
         //ts.testJPA();
         //  ts.changeRole();
       //  ts.testP();
-          ts.testSurname();
+       //   ts.testSurname();
+        
+        ts.testAuth();
+        
     }
     
     

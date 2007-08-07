@@ -1065,7 +1065,8 @@ import uk.icat3.util.Queries;
         } catch(Throwable ex) {
             log.warn(ex);
             //means it is unique
-            throw new ValidationException(this+" is not unique.");
+            if(ex instanceof ValidationException) throw (ValidationException)ex;
+            else throw new ValidationException(this+" is not unique.");
         }
     }
     

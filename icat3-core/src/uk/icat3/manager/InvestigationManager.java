@@ -441,7 +441,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
     public static void deleteInvestigationObject(String userId, EntityBaseBean object, AccessType type, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException{
-        log.trace("modifyInvestigationObject("+userId+", "+object+", "+type+", EntityManager)");
+        log.trace("deleteInvestigationObject("+userId+", "+object+", "+type+", EntityManager)");
         
         if(object instanceof Keyword){
             Keyword keyword = (Keyword)object;
@@ -575,6 +575,9 @@ public class InvestigationManager extends ManagerUtil {
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, investigationManaged, AccessType.REMOVE, manager);
+                
+                //remove all entries for all of the inv, ds, df from the table
+                removeElementAuthorisations(investigationManaged.getId(), ElementType.INVESTIGATION, manager);
                 
                 manager.remove(investigationManaged);
             }

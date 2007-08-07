@@ -390,7 +390,7 @@ public class ManagerUtil {
     
     
     ////////////////////////////////////  ICAT AUTHORISATION METHODS //////////////////////////////////////////////
-     /**
+    /**
      * Gets all the IcatAuthorisations for a investigation/dataset/datafile if the user has manager users action on that investigation
      *
      */
@@ -423,6 +423,61 @@ public class ManagerUtil {
     }
     
     /**
+     * Gets all the IcatAuthorisations for a investigation/dataset/datafile and removes them
+     *
+     */
+    protected static boolean removeElementAuthorisations(Long id, ElementType type, EntityManager manager) throws NoSuchObjectFoundException {
+        EntityBaseBean entityObject = null;
+        Query query = null;
+        
+        if(type == ElementType.INVESTIGATION){
+            entityObject = find(Investigation.class, id, manager);
+            query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID);
+        } else if(type == ElementType.DATASET){
+            entityObject = find(Dataset.class, id, manager);
+            query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID);
+        } else if(type == ElementType.DATAFILE){
+            entityObject = find(Datafile.class, id, manager);
+            query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID);
+        }
+        
+        //user has access to read all the roles etc
+        query.setParameter("elementId", id);
+        query.setParameter("elementType", type);
+        
+        Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
+        
+        log.debug("Found "+icatAuthorisations.size()+" authorisation(s) for "+type+"[id:"+id+"]");
+        
+        if(type == ElementType.INVESTIGATION){
+            Investigation investigation  = findObject(Investigation.class, id, manager);
+            for (Dataset ds : investigation.getDatasetCollection()) {
+                return removeElementAuthorisations(ds.getId(), ElementType.DATASET, manager);
+            }
+        } else if(type == ElementType.DATASET){
+            Dataset ds  = findObject(Dataset.class, id, manager);
+            for (Datafile df : ds.getDatafileCollection()) {
+                return removeElementAuthorisations(df.getId(), ElementType.DATAFILE, manager);
+            }
+        } else if(type == ElementType.DATAFILE){
+            //do nothing, deleted below
+        }
+        
+        //remove root one
+        for (IcatAuthorisation icatAuthorisation : icatAuthorisations) {
+            log.trace("Removing: "+icatAuthorisation);
+            if(icatAuthorisation.getUserChildRecord() != null){
+                IcatAuthorisation child  = findObject(IcatAuthorisation.class, icatAuthorisation.getUserChildRecord(), manager);
+                log.trace("Removing child to: "+icatAuthorisation+ ", :" +child);
+                manager.remove(child);
+            }
+            manager.remove(icatAuthorisation);
+        }
+        
+        return true;
+    }
+    
+    /**
      * Deletes / Removes a entry in the icat authorisation table
      *
      * @param userId federalId of the user.
@@ -439,7 +494,7 @@ public class ManagerUtil {
         
         //if elementId is null, then not there
         if(icatAuthorisation.getElementId() == null) throw new NoSuchObjectFoundException(icatAuthorisation+" not found.");
-       
+        
         if(type == AccessType.DELETE){
             //check user has delete access
             GateKeeper.performAuthorisation(userId, getRootElement(icatAuthorisation, manager), AccessType.MANAGE_USERS, manager);

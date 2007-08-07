@@ -346,6 +346,14 @@ public class Queries {
             "i.elementType = :elementType AND i.elementId = :elementId AND " +
             "(i.userId = :userId OR :userId IS NULL) AND i.markedDeleted = 'N'";
     
+     /**
+     * Find ICAT AUTHORISATION by element id
+     *
+     */
+    public static final String ICAT_AUTHORISATION_FINDBY_ELEMENTID = "IcatAuthorisation.findByElementIdOnly";
+    public static final String ICAT_AUTHORISATION_FINDBY_ELEMENTID_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
+            "i.elementType = :elementType AND i.elementId = :elementId";
+    
     /**
      * Find ICAT AUTHORISATION by user and element id null, ie creating a inv
      *

@@ -53,7 +53,8 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_NULL_INVESTIGATION, query = Queries.ICAT_AUTHORISATION_FINDBY_NULL_INVESTIGATION_JPQL),
     @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE, query = Queries.ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE_JPQL),
     @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE_KEY, query = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE_KEY_JPQL),
-    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE, query = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE_JPQL)
+     @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID, query = Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID_JPQL),
+  @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE, query = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE_JPQL)
 })
         @SequenceGenerator(name="ICAT_AUTHORISATION_SEQ",sequenceName="ICAT_AUTHORISATION_ID_SEQ",allocationSize=1)
         public class IcatAuthorisation extends EntityBaseBean implements Serializable {
