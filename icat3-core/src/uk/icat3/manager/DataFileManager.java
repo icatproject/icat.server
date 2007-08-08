@@ -66,13 +66,13 @@ public class DataFileManager extends ManagerUtil {
     public static void deleteDataFile(String userId, Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataFile("+userId+", "+dataFileId+", EntityManager)");
         
-        Datafile dataFile = find(Datafile.class, dataFileId, manager);
+        Datafile dataFile = findObject(Datafile.class, dataFileId, manager);
         
         //check user has delete access
         GateKeeper.performAuthorisation(userId, dataFile, AccessType.DELETE, manager);
         //String facilityUserId = getFacilityUserId(userId, manager);
         
-        dataFile.setCascade(Cascade.DELETE,Boolean.TRUE, manager, userId);
+        dataFile.setCascade(Cascade.DELETE, new Boolean(!dataFile.isDeleted()), manager, userId);
     }
     
     /**
@@ -129,7 +129,7 @@ public class DataFileManager extends ManagerUtil {
     public static void removeDataFile(String userId, Long dataFileId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("removeDataFile("+userId+", "+dataFileId+", EntityManager)");
         
-        Datafile dataFile = find(Datafile.class, dataFileId, manager);
+        Datafile dataFile = findObject(Datafile.class, dataFileId, manager);
         
         //check user has delete access
         GateKeeper.performAuthorisation(userId, dataFile, AccessType.REMOVE, manager);

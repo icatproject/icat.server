@@ -454,15 +454,14 @@ public class InvestigationManager extends ManagerUtil {
             Keyword keyword = (Keyword)object;
             
             //check keyword
-            Keyword keywordManaged = find(Keyword.class, keyword.getKeywordPK(), manager);
+            Keyword keywordManaged = findObject(Keyword.class, keyword.getKeywordPK(), manager);
             
             if(type == AccessType.DELETE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, keywordManaged, AccessType.DELETE, manager);
-                //String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                keywordManaged.setDeleted(true);
+                keywordManaged.setDeleted(!keywordManaged.isDeleted());
                 keywordManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
@@ -477,7 +476,7 @@ public class InvestigationManager extends ManagerUtil {
             Sample sample = (Sample)object;
             
             //check keyword
-            Sample sampleManaged = find(Sample.class, sample.getId(), manager);
+            Sample sampleManaged = findObject(Sample.class, sample.getId(), manager);
             
             if(type == AccessType.DELETE){
                 //check user has delete access
@@ -487,7 +486,7 @@ public class InvestigationManager extends ManagerUtil {
                 sampleManaged.isLinked(manager);
                 
                 //ok here fo delete
-                sampleManaged.setDeleted(true);
+                sampleManaged.setDeleted(!sampleManaged.isDeleted());
                 sampleManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
@@ -505,7 +504,7 @@ public class InvestigationManager extends ManagerUtil {
             SampleParameter sampleParameter = (SampleParameter)object;
             
             //check keyword
-            SampleParameter sampleParameterManaged = find(SampleParameter.class, sampleParameter.getSampleParameterPK(), manager);
+            SampleParameter sampleParameterManaged = findObject(SampleParameter.class, sampleParameter.getSampleParameterPK(), manager);
             
             if(type == AccessType.DELETE){
                 //check user has delete access
@@ -513,7 +512,7 @@ public class InvestigationManager extends ManagerUtil {
                 //String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                sampleParameterManaged.setDeleted(true);
+                sampleParameterManaged.setDeleted(!sampleParameterManaged.isDeleted());
                 sampleParameterManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
@@ -528,30 +527,30 @@ public class InvestigationManager extends ManagerUtil {
             Publication publication = (Publication)object;
             
             //check keyword
-            Publication PublicationManaged = find(Publication.class, publication.getId(), manager);
+            Publication publicationManaged = findObject(Publication.class, publication.getId(), manager);
             
             if(type == AccessType.DELETE){
                 //check user has delete access
-                GateKeeper.performAuthorisation(userId, PublicationManaged, AccessType.DELETE, manager);
+                GateKeeper.performAuthorisation(userId, publicationManaged, AccessType.DELETE, manager);
                 //String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                PublicationManaged.setDeleted(true);
-                PublicationManaged.setModId(userId);
+                publicationManaged.setDeleted(!publicationManaged.isDeleted());
+                publicationManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
-                GateKeeper.performAuthorisation(userId, PublicationManaged, AccessType.REMOVE, manager);
+                GateKeeper.performAuthorisation(userId, publicationManaged, AccessType.REMOVE, manager);
                 
                 //ok here fo delete
                 //PublicationManaged.setInvestigationId(null);
                 
-                manager.remove(PublicationManaged);
+                manager.remove(publicationManaged);
             }
         } else if(object instanceof Investigator){
             Investigator investigator = (Investigator)object;
             
             //check keyword
-            Investigator investigatorManaged = find(Investigator.class, investigator.getInvestigatorPK(), manager);
+            Investigator investigatorManaged = findObject(Investigator.class, investigator.getInvestigatorPK(), manager);
             
             if(type == AccessType.DELETE){
                 //check user has delete access
@@ -559,7 +558,7 @@ public class InvestigationManager extends ManagerUtil {
                 //String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                investigatorManaged.setDeleted(true);
+                investigatorManaged.setDeleted(!investigatorManaged.isDeleted());
                 investigatorManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){
                 //check user has delete access
@@ -573,7 +572,7 @@ public class InvestigationManager extends ManagerUtil {
         } else if(object instanceof Investigation){
             Investigation investigation = (Investigation)object;
             //check investigation
-            Investigation investigationManaged = find(Investigation.class, investigation.getId(), manager);
+            Investigation investigationManaged = findObject(Investigation.class, investigation.getId(), manager);
             
             if(type == AccessType.DELETE){
                 //check user has delete access
@@ -581,7 +580,7 @@ public class InvestigationManager extends ManagerUtil {
                 //String facilityUserId = getFacilityUserId(userId, manager);
                 
                 //ok here fo delete
-                investigationManaged.setCascade(Cascade.DELETE, Boolean.TRUE, manager, userId);
+                investigationManaged.setCascade(Cascade.DELETE, new Boolean(!investigationManaged.isDeleted()) , manager, userId);
                 
                 investigationManaged.setModId(userId);
             } else if(type == AccessType.REMOVE){

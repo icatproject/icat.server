@@ -73,11 +73,11 @@ public class DataSetManager extends ManagerUtil {
     public static void deleteDataSet(String userId, Long dataSetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteDataSet("+userId+", "+dataSetId+", EntityManager)");
         
-        Dataset dataset = find(Dataset.class, dataSetId, manager);
+        Dataset dataset = findObject(Dataset.class, dataSetId, manager);
         
         //check user has delete access
         GateKeeper.performAuthorisation(userId, dataset, AccessType.DELETE, manager);
-        dataset.setCascade(Cascade.DELETE, Boolean.TRUE, manager, userId);
+        dataset.setCascade(Cascade.DELETE, new Boolean(!dataset.isDeleted()), manager, userId);
     }
     
     /**
@@ -93,7 +93,7 @@ public class DataSetManager extends ManagerUtil {
     public static void removeDataSet(String userId, Long dataSetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("removeDataSet("+userId+", "+dataSetId+", EntityManager)");
         
-        Dataset dataset = find(Dataset.class, dataSetId, manager);
+        Dataset dataset = findObject(Dataset.class, dataSetId, manager);
         
         //check user has delete access
         GateKeeper.performAuthorisation(userId, dataset, AccessType.REMOVE, manager);

@@ -12,6 +12,7 @@ package uk.icat3.test;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Random;
+import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -27,9 +28,14 @@ import uk.icat3.entity.DatasetType;
 import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.InvestigationType;
+import uk.icat3.entity.Keyword;
+import uk.icat3.entity.KeywordPK;
+import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.manager.DataFileManager;
 import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.InvestigationManager;
+import uk.icat3.util.AccessType;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.Queries;
 import uk.icat3.util.Util;
@@ -337,15 +343,38 @@ public class TestJPA {
         tearDown();
     }
     
-     public void testAuth(){
-        setUp();
-       
-        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class, 108L);
-        
-        System.out.println(icatAuth.getRole().getActionRootRemove());
-        System.out.println(""+icatAuth.getRole().isRootRemove());
-        System.out.println(Util.parseBoolean(icatAuth.getRole().getActionRootRemove()));
-        tearDown();
+    public void testDelete(){
+        try {
+            setUp();
+            Datafile kw = em.find(Datafile.class, 2L);
+            
+            kw.setCreateId("test");
+            kw.setFacilityAcquired("N");
+            
+            DataFileManager.deleteDataFile("test", kw, em);
+            tearDown();
+        } catch (InsufficientPrivilegesException ex) {
+            java.util.logging.Logger.getLogger("global").log(Level.SEVERE, null, ex);
+        } catch (NoSuchObjectFoundException ex) {
+            java.util.logging.Logger.getLogger("global").log(Level.SEVERE, null, ex);
+        }
+    }
+    
+     public void testDeleteKeyword(){
+        try {
+            setUp();
+            uk.icat3.entity.Keyword kw = em.find(uk.icat3.entity.Keyword.class, new uk.icat3.entity.KeywordPK("shull", 3L));
+            
+            kw.setCreateId("test");
+            kw.setFacilityAcquired("N");
+            
+            uk.icat3.manager.InvestigationManager.deleteInvestigationObject("test", kw, uk.icat3.util.AccessType.DELETE, em);
+            tearDown();
+        } catch (InsufficientPrivilegesException ex) {
+            java.util.logging.Logger.getLogger("global").log(Level.SEVERE, null, ex);
+        } catch (NoSuchObjectFoundException ex) {
+            java.util.logging.Logger.getLogger("global").log(Level.SEVERE, null, ex);
+        }
     }
     
     
@@ -367,7 +396,7 @@ public class TestJPA {
       //  ts.testP();
        //   ts.testSurname();
         
-        ts.testAuth();
+        ts.testDelete();
         
     }
     
