@@ -79,8 +79,8 @@ import uk.icat3.util.Queries;
     //Added searches for ICAT3 API
     @NamedQuery(name = Queries.INVESTIGATIONS_BY_USER, query = Queries.INVESTIGATIONS_BY_USER_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_JPQL),
-    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID, query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),   
-       @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID,  query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID, query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID,  query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_KEYWORD_RTN_ID, query= Queries.INVESTIGATION_LIST_BY_KEYWORD_RTN_ID_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_LIST_BY_KEYWORD_JPQL)
@@ -522,6 +522,7 @@ import uk.icat3.util.Queries;
         dataSet.setInvestigation(this);
         
         Collection<Dataset> datasets = this.getDatasetCollection();
+        if(datasets == null) datasets = new ArrayList<Dataset>();
         datasets.add(dataSet);
         
         this.setDatasetCollection(datasets);
@@ -750,9 +751,11 @@ import uk.icat3.util.Queries;
                     }
                 } else dataset.setCascade(type, cascadeValue, manager, managerValue);
             }
-            //now set the new dataset collection
-            log.trace("Setting new datasetCollection of size: "+datasets.size()+" because of deleted items from original size: "+getDatasetCollection().size());
-            this.setDatasetCollection(datasets);
+            if(type == Cascade.REMOVE_DELETED_ITEMS){
+                //now set the new dataset collection
+                log.trace("Setting new datasetCollection of size: "+datasets.size()+" because of deleted items from original size: "+getDatasetCollection().size());
+                this.setDatasetCollection(datasets);
+            }
         }
         
         //investigators
@@ -773,9 +776,11 @@ import uk.icat3.util.Queries;
                     if(!investigator.isDeleted()) investigators.add(investigator);
                 }
             }
-            //now set the new dataset collection
-            log.trace("Setting new investigatorCollection of size: "+investigators.size()+" because of deleted items from original size: "+getInvestigatorCollection().size());
-            this.setInvestigatorCollection(investigators);
+            if(type == Cascade.REMOVE_DELETED_ITEMS){
+                //now set the new dataset collection
+                log.trace("Setting new investigatorCollection of size: "+investigators.size()+" because of deleted items from original size: "+getInvestigatorCollection().size());
+                this.setInvestigatorCollection(investigators);
+            }
         }
         
         //TODO do delete
@@ -810,9 +815,11 @@ import uk.icat3.util.Queries;
                     }
                 } else sample.setCascade(type, cascadeValue);
             }
-            //now set the new dataset collection
-            log.trace("Setting new sampleCollection of size: "+samples.size()+" because of deleted items from original size: "+getSampleCollection().size());
-            this.setSampleCollection(samples);
+            if(type == Cascade.REMOVE_DELETED_ITEMS){
+                //now set the new dataset collection
+                log.trace("Setting new sampleCollection of size: "+samples.size()+" because of deleted items from original size: "+getSampleCollection().size());
+                this.setSampleCollection(samples);
+            }
         }
         
         //study
@@ -833,9 +840,11 @@ import uk.icat3.util.Queries;
                     if(!study.isDeleted()) studyInvestigations.add(study);
                 }
             }
-            //now set the new dataset collection
-            log.trace("Setting new studyInvestigationCollection of size: "+studyInvestigations.size()+" because of deleted items from original size: "+getStudyInvestigationCollection().size());
-            this.setStudyInvestigationCollection(studyInvestigations);
+            if(type == Cascade.REMOVE_DELETED_ITEMS){
+                //now set the new dataset collection
+                log.trace("Setting new studyInvestigationCollection of size: "+studyInvestigations.size()+" because of deleted items from original size: "+getStudyInvestigationCollection().size());
+                this.setStudyInvestigationCollection(studyInvestigations);
+            }
         }
         
         //shift
@@ -856,9 +865,11 @@ import uk.icat3.util.Queries;
                     if(!shift.isDeleted()) shifts.add(shift);
                 }
             }
-            //now set the new dataset collection
-            log.trace("Setting new shiftCollection of size: "+shifts.size()+" because of deleted items from original size: "+getShiftCollection().size());
-            this.setShiftCollection(shifts);
+            if(type == Cascade.REMOVE_DELETED_ITEMS){
+                //now set the new dataset collection
+                log.trace("Setting new shiftCollection of size: "+shifts.size()+" because of deleted items from original size: "+getShiftCollection().size());
+                this.setShiftCollection(shifts);
+            }
         }
         
         //publication
@@ -879,9 +890,11 @@ import uk.icat3.util.Queries;
                     if(!publication.isDeleted()) publications.add(publication);
                 }
             }
-            //now set the new dataset collection
-            log.trace("Setting new publicationCollection of size: "+publications.size()+" because of deleted items from original size: "+getPublicationCollection().size());
-            this.setPublicationCollection(publications);
+            if(type == Cascade.REMOVE_DELETED_ITEMS){
+                //now set the new dataset collection
+                log.trace("Setting new publicationCollection of size: "+publications.size()+" because of deleted items from original size: "+getPublicationCollection().size());
+                this.setPublicationCollection(publications);
+            }
         }
         
         //keyword
@@ -902,9 +915,11 @@ import uk.icat3.util.Queries;
                     if(!keyword.isDeleted()) keywords.add(keyword);
                 }
             }
-            //now set the new dataset collection
-            log.trace("Setting new keywordCollection of size: "+keywords.size()+" because of deleted items from original size: "+getKeywordCollection().size());
-            this.setKeywordCollection(keywords);
+            if(type == Cascade.REMOVE_DELETED_ITEMS){
+                //now set the new dataset collection
+                log.trace("Setting new keywordCollection of size: "+keywords.size()+" because of deleted items from original size: "+getKeywordCollection().size());
+                this.setKeywordCollection(keywords);
+            }
         }
         
         //topicList parameter
@@ -925,9 +940,11 @@ import uk.icat3.util.Queries;
                     if(!topicList.isDeleted()) topicLists.add(topicList);
                 }
             }
-            //now set the new dataset collection
-            log.trace("Setting new keywordCollection of size: "+topicLists.size()+" because of deleted items from original size: "+getTopicListCollection().size());
-            this.setTopicListCollection(topicLists);
+            if(type == Cascade.REMOVE_DELETED_ITEMS){
+                //now set the new dataset collection
+                log.trace("Setting new keywordCollection of size: "+topicLists.size()+" because of deleted items from original size: "+getTopicListCollection().size());
+                this.setTopicListCollection(topicLists);
+            }
         }
         
         if(type == Cascade.DELETE) {

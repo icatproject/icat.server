@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.Dataset;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.IcatAuthorisation;
@@ -117,12 +118,12 @@ public class InvestigationManager extends ManagerUtil {
     }
     
     /**
-     * 
+     *
      */
     public static Collection<IcatAuthorisation> getAuthorisations(String userId, Long id, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         return getAuthorisations(userId, id, ElementType.INVESTIGATION, manager);
     }
-          ////////////////////    End of get Commands    /////////////////////////
+    ////////////////////    End of get Commands    /////////////////////////
     
     
     
@@ -253,9 +254,9 @@ public class InvestigationManager extends ManagerUtil {
     /**
      * Adds a role for a user to an investigation.
      */
-     public static IcatAuthorisation addAuthorisation(String userId, String toAddUserId, String toAddRole, Long id, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-         return addAuthorisation(userId, toAddUserId, toAddRole, id, ElementType.INVESTIGATION, manager);
-     }
+    public static IcatAuthorisation addAuthorisation(String userId, String toAddUserId, String toAddRole, Long id, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        return addAuthorisation(userId, toAddUserId, toAddRole, id, ElementType.INVESTIGATION, manager);
+    }
     
     /**
      * Updates a Investigation depending on whether the user has permission to update this Investigation
@@ -309,12 +310,15 @@ public class InvestigationManager extends ManagerUtil {
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, investigation, AccessType.CREATE, manager);
-        FacilityUser facilityUser = getFacilityUser(userId, manager);
         
         //new dataset, set createid
-        
         investigation.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
         investigation.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
+        
+        //iterate over datasets and create them manually and then remove them before creating investigation
+        Collection<Dataset> datasets = investigation.getDatasetCollection();
+        //dont let JPA create datasets
+        investigation.setDatasetCollection(null);
         manager.persist(investigation);
         
         //need to add a another row for creating datasets for this investigation
@@ -325,6 +329,9 @@ public class InvestigationManager extends ManagerUtil {
         persistAuthorisation(userId, userId, getRole(IcatRoles.CREATOR.toString(), manager),
                 ElementType.INVESTIGATION, investigation.getId(),
                 null, null, IcatAuthorisationChild.getId(), manager);
+        
+        //now manually create the datasets
+        if(datasets != null) DataSetManager.createDataSets(userId, datasets, investigation.getId(), manager);
         
         return investigation;
     }
@@ -475,7 +482,9 @@ public class InvestigationManager extends ManagerUtil {
             if(type == AccessType.DELETE){
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, sampleManaged, AccessType.DELETE, manager);
-                //String facilityUserId = getFacilityUserId(userId, manager);
+                
+                //need to check if this sample is associated with any datasets, this throwe exception if it is
+                sampleManaged.isLinked(manager);
                 
                 //ok here fo delete
                 sampleManaged.setDeleted(true);
@@ -484,8 +493,11 @@ public class InvestigationManager extends ManagerUtil {
                 //check user has delete access
                 GateKeeper.performAuthorisation(userId, sampleManaged, AccessType.REMOVE, manager);
                 
+                //need to check if this sample is associated with any datasets, this throwe exception if it is
+                sampleManaged.isLinked(manager);
+                
                 //ok here fo delete
-                // sampleManaged.setInvestigationId(null);
+                //sampleManaged.setInvestigationId(null);
                 
                 manager.remove(sampleManaged);
             }

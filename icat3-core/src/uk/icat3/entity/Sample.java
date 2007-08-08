@@ -35,6 +35,7 @@ import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.Queries;
 
 /**
  * Entity class Sample
@@ -270,6 +271,21 @@ import uk.icat3.util.ElementType;
             return true;
         }
     }
+    
+    /**
+     * Checks weather the sample is linked to any datasets
+     */
+    public boolean isLinked(EntityManager manager) throws InsufficientPrivilegesException{
+        try {
+            Collection<Dataset> datasets = (Collection<Dataset>)manager.createNamedQuery(Queries.DATASETS_BY_SAMPLES).setParameter("sampleId", this.id).getResultList();
+            if(datasets != null && datasets.size() == 0) return true;
+            else throw new InsufficientPrivilegesException(this+" is linked to "+datasets+" and therefore you cannot REMOVE/DELETE it.");
+        } catch(NoResultException nre) {
+            return false;
+        }
+    }
+    
+    
     
     /**
      * Overrides the isValid function, checks each of the sampleparameters are valid

@@ -61,15 +61,16 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = "Dataset.findByModTime", query = "SELECT d FROM Dataset d WHERE d.modTime = :modTime"),
     @NamedQuery(name = "Dataset.getBySampleId", query = "SELECT d FROM Dataset d where d.name = :sampleName"),
     @NamedQuery(name = "Dataset.findByModId", query = "SELECT d FROM Dataset d WHERE d.modId = :modId"),
-    @NamedQuery(name = Queries.DATASET_FINDBY_UNIQUE, query = Queries.DATASET_FINDBY_UNIQUE_JPQL)
+    @NamedQuery(name = Queries.DATASET_FINDBY_UNIQUE, query = Queries.DATASET_FINDBY_UNIQUE_JPQL),
+    @NamedQuery(name = Queries.DATASETS_BY_SAMPLES, query = Queries.DATASETS_BY_SAMPLES_JPQL)
 })
-@XmlRootElement
-@SequenceGenerator(name="DATASET_SEQ",sequenceName="DATASET_ID_SEQ",allocationSize=1)
-public class Dataset extends EntityBaseBean implements Serializable {
+        @XmlRootElement
+        @SequenceGenerator(name="DATASET_SEQ",sequenceName="DATASET_ID_SEQ",allocationSize=1)
+        public class Dataset extends EntityBaseBean implements Serializable {
     
     /**
      * Override logger
-     */  
+     */
     protected static Logger log = Logger.getLogger(Dataset.class);
     
     @Id
@@ -412,7 +413,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
         if(getDatasetParameterCollection() != null){
             //create new collection if remove deleted items
             Collection<DatasetParameter> datasetparameters = new ArrayList<DatasetParameter>();
-                        
+            
             for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
                 if(type == Cascade.DELETE) {
                     datasetParameter.setMarkedDeleted(deleted);
@@ -426,9 +427,11 @@ public class Dataset extends EntityBaseBean implements Serializable {
                     if(!datasetParameter.isDeleted()) datasetparameters.add(datasetParameter);
                 }
             }
-            //now set the new dataset collection
-            log.trace("Setting new investigatorCollection of size: "+datasetparameters.size()+" because of deleted items from original size: "+getDatasetParameterCollection().size());
-            this.setDatasetParameterCollection(datasetparameters);
+            if(type == Cascade.REMOVE_DELETED_ITEMS){
+                //now set the new dataset collection
+                log.trace("Setting new investigatorCollection of size: "+datasetparameters.size()+" because of deleted items from original size: "+getDatasetParameterCollection().size());
+                this.setDatasetParameterCollection(datasetparameters);
+            }
         }
         
         //datafiles
@@ -446,10 +449,11 @@ public class Dataset extends EntityBaseBean implements Serializable {
                     }
                 } else datafile.setCascade(type, cascadeValue, manager, managerValue);
             }
-            //now set the new dataset collection
-            log.trace("Setting new datafileCollection of size: "+datafiles.size()+" because of deleted items from original size: "+getDatafileCollection().size());
-            this.setDatafileCollection(datafiles);
-            
+            if(type == Cascade.REMOVE_DELETED_ITEMS){
+                //now set the new dataset collection
+                log.trace("Setting new datafileCollection of size: "+datafiles.size()+" because of deleted items from original size: "+getDatafileCollection().size());
+                this.setDatafileCollection(datafiles);
+            }
         }
         
         //TODO need to do it for the icat authorisation entires (delete)
@@ -460,7 +464,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
                     setParameter("elementId", this.getId()).
                     setParameter("investigationId",this.getInvestigation().getId());
             Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
-            
+         
             //now mark them all as delete
             for (IcatAuthorisation icatAuthorisation : icatAuthorisations) {
                 log.trace("Marking: "+icatAuthorisation+" as "+cascadeValue);
@@ -627,7 +631,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
         } catch(Throwable ex) {
             log.warn(ex);
             //means it is unique
-          throw new ValidationException(this+" is not unique.");
+            throw new ValidationException(this+" is not unique.");
         }
     }
     
@@ -651,8 +655,8 @@ public class Dataset extends EntityBaseBean implements Serializable {
      */
     @PostLoad
     //@Override
-    public void postLoad(){      
-       if(investigationId == null) investigationId = getInvestigation().getId();
+    public void postLoad(){
+        if(investigationId == null) investigationId = getInvestigation().getId();
         //super.postLoad();
     }
     

@@ -76,22 +76,22 @@ import uk.icat3.util.ElementType;
     //@NamedQuery(name = "Datafile.findByRunNumber", query = "SELECT d FROM Datafile d WHERE d.datasetId.investigationId.investigatorCollection.investigatorPK.facilityUserId = :userId AND d.datasetId.investigationId.instrument.name = :instrument AND d.datafileParameterCollection.stringValue = 'run_number' AND d.datafileParameterCollection.numericValue BETWEEN :lower AND :upper")
     @NamedQuery(name = "Datafile.findByRunNumber", query = "SELECT d FROM Datafile d WHERE   d.datafileParameterCollection.stringValue = 'run_number' AND d.datafileParameterCollection.numericValue BETWEEN :lower AND :upper")
 })
-@NamedNativeQueries({
+        @NamedNativeQueries({
     //Added searches for ICAT3 API
     //@NamedNativeQuery(name = Queries.DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER, query= Queries.DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL, resultSetMapping="dataFileMapping")
     
 })
-@SqlResultSetMappings({
+        @SqlResultSetMappings({
     @SqlResultSetMapping(name="dataFileMapping",entities={@EntityResult(entityClass=Datafile.class)})
     
 })
-@XmlRootElement
-@SequenceGenerator(name="DATAFILE_SEQ",sequenceName="DATAFILE_ID_SEQ",allocationSize=1)
-public class Datafile extends EntityBaseBean implements Serializable {
+        @XmlRootElement
+        @SequenceGenerator(name="DATAFILE_SEQ",sequenceName="DATAFILE_ID_SEQ",allocationSize=1)
+        public class Datafile extends EntityBaseBean implements Serializable {
     
     /**
      * Override logger
-     */  
+     */
     protected static Logger log = Logger.getLogger(Datafile.class);
     
     @Id
@@ -144,8 +144,8 @@ public class Datafile extends EntityBaseBean implements Serializable {
         @JoinColumn(name = "DATAFILE_FORMAT", referencedColumnName = "NAME"),
 @JoinColumn(name = "DATAFILE_FORMAT_VERSION", referencedColumnName = "VERSION")
     })
-    @ManyToOne
-    private DatafileFormat datafileFormat;
+            @ManyToOne
+            private DatafileFormat datafileFormat;
     
     @JoinColumn(name = "DATASET_ID", referencedColumnName = "ID")
     @ManyToOne
@@ -153,10 +153,10 @@ public class Datafile extends EntityBaseBean implements Serializable {
     @ICAT(merge=false)
     private Dataset dataset;
     
-     @Transient
+    @Transient
     @ICAT(merge=false, nullable=true)
     private transient Long datasetId;
-     
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
     private Collection<DatafileParameter> datafileParameterCollection;
     
@@ -488,14 +488,14 @@ public class Datafile extends EntityBaseBean implements Serializable {
     }
     
     
-     /**
+    /**
      * Gets the root element type of the bean
      */
     public ElementType getRootElementType(){
         return ElementType.DATAFILE;
     }
     
-   /**
+    /**
      * Sets type (see Cascade) flag on all items owned by this dataset
      *
      * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
@@ -526,7 +526,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
      */
     public void setCascade(Cascade type, Object cascadeValue, EntityManager manager, Object managerValue) throws InsufficientPrivilegesException{
         log.trace("Cascading: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
-    
+        
         String deleted = "Y";
         if(type == Cascade.DELETE){
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
@@ -534,15 +534,14 @@ public class Datafile extends EntityBaseBean implements Serializable {
         
         //data file parameters
         if(getDatafileParameterCollection() != null){
-              //create new collection if remove deleted items
+            //create new collection if remove deleted items
             Collection<DatafileParameter> datafileparameters = new ArrayList<DatafileParameter>();
             
             for(DatafileParameter datafileParameter : getDatafileParameterCollection()){
                 if(type == Cascade.DELETE) {
                     datafileParameter.setMarkedDeleted(deleted);
                     datafileParameter.setModId(managerValue.toString());
-                }
-                else if(type == Cascade.MOD_ID) datafileParameter.setModId(cascadeValue.toString());
+                } else if(type == Cascade.MOD_ID) datafileParameter.setModId(cascadeValue.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     datafileParameter.setModId(cascadeValue.toString());
                     datafileParameter.setCreateId(cascadeValue.toString());
@@ -551,22 +550,23 @@ public class Datafile extends EntityBaseBean implements Serializable {
                     if(!datafileParameter.isDeleted()) datafileparameters.add(datafileParameter);
                 }
             }
-            //now set the new dataset collection
-            log.trace("Setting new investigatorCollection of size: "+datafileparameters.size()+" because of deleted items from original size: "+getDatafileParameterCollection().size());
-            this.setDatafileParameterCollection(datafileparameters);
+            if(type == Cascade.REMOVE_DELETED_ITEMS){
+                //now set the new dataset collection
+                log.trace("Setting new investigatorCollection of size: "+datafileparameters.size()+" because of deleted items from original size: "+getDatafileParameterCollection().size());
+                this.setDatafileParameterCollection(datafileparameters);
+            }
         }
         
         //relatedDatafiles
         if(getRelatedDatafilesCollection() != null){
-              //create new collection if remove deleted items
+            //create new collection if remove deleted items
             Collection<RelatedDatafiles> relatedDatafiles = new ArrayList<RelatedDatafiles>();
             
             for(RelatedDatafiles relatedDatafile : getRelatedDatafilesCollection()){
                 if(type == Cascade.DELETE) {
                     relatedDatafile.setMarkedDeleted(deleted);
                     relatedDatafile.setModId(managerValue.toString());
-                }
-                else if(type == Cascade.MOD_ID) relatedDatafile.setModId(cascadeValue.toString());
+                } else if(type == Cascade.MOD_ID) relatedDatafile.setModId(cascadeValue.toString());
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     relatedDatafile.setModId(cascadeValue.toString());
                     relatedDatafile.setCreateId(cascadeValue.toString());
@@ -575,11 +575,13 @@ public class Datafile extends EntityBaseBean implements Serializable {
                     if(!relatedDatafile.isDeleted()) relatedDatafiles.add(relatedDatafile);
                 }
             }
-            //now set the new dataset collection
-            log.trace("Setting new investigatorCollection of size: "+relatedDatafiles.size()+" because of deleted items from original size: "+getRelatedDatafilesCollection().size());
-            this.setRelatedDatafilesCollection(relatedDatafiles);
+            if(type == Cascade.REMOVE_DELETED_ITEMS){
+                //now set the new dataset collection
+                log.trace("Setting new investigatorCollection of size: "+relatedDatafiles.size()+" because of deleted items from original size: "+getRelatedDatafilesCollection().size());
+                this.setRelatedDatafilesCollection(relatedDatafiles);
+            }
         }
-                
+        
         //TODO need to do it for the icat authorisation entires (delete)
         //check if manager is null
         /*if(manager != null && type == Cascade.DELETE){
@@ -588,7 +590,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
                     setParameter("elementId", this.getId()).
                     setParameter("investigationId",this.getDataset().getInvestigation().getId());
             Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
-            
+         
             //now mark them all as delete
             for (IcatAuthorisation icatAuthorisation : icatAuthorisations) {
                 log.trace("Marking: "+icatAuthorisation+" as "+cascadeValue);
@@ -598,15 +600,14 @@ public class Datafile extends EntityBaseBean implements Serializable {
         }*/
         
         if(type == Cascade.DELETE) {
-           //need to check if use has permission to delete this
+            //need to check if use has permission to delete this
             //only check if the value of deleted is different the one wanting to be changed to
             if(this.isDeleted() != ((Boolean)cascadeValue).booleanValue()){
                 GateKeeper.performAuthorisation(managerValue.toString(), this, AccessType.DELETE, manager);
                 this.setMarkedDeleted(deleted);
                 this.setModId(managerValue.toString());
             }
-        }
-        else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
+        } else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
             this.setModId(cascadeValue.toString());
             this.setCreateId(cascadeValue.toString());
@@ -654,7 +655,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
         return "Datafile[id=" + id + "]";
     }
     
-   
+    
     
     /**
      * Overrides the isValid function, checks each of the datafiles and datafile parameters are valid
@@ -682,7 +683,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
         }
         
         return isValid();
-    }        
+    }
     
     /**
      * This method removes all the ids when persist is called.
@@ -704,8 +705,8 @@ public class Datafile extends EntityBaseBean implements Serializable {
      */
     @PostLoad
     //@Override
-    public void postLoad(){           
-       if(datasetId == null) datasetId = getDataset().getId();
-       // super.postLoad();
+    public void postLoad(){
+        if(datasetId == null) datasetId = getDataset().getId();
+        // super.postLoad();
     }
 }

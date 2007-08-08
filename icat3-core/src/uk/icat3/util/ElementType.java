@@ -54,7 +54,7 @@ public enum ElementType {
         if(this == ElementType.INVESTIGATION ||
                 this == ElementType.SAMPLE || this == ElementType.SAMPLE_PARAMETER ||
                 this == ElementType.KEYWORD || this == ElementType.INVESTIGATOR ||
-                this == ElementType.SAMPLE_PARAMETER || this == ElementType.STUDY)
+                this == ElementType.SAMPLE_PARAMETER || this == ElementType.STUDY || this == ElementType.PUBLICATION)
             return true;
         else return false;
     }

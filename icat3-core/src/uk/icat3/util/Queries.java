@@ -267,11 +267,19 @@ public class Queries {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     /**
-     * Find all instruments list,
+     * Find all sample list,
      *
      */
     public static final String SAMPLES_BY_NAME = "Sample.findByName";
     public static final String SAMPLES_BY_NAME_JPQL = "SELECT s FROM Sample s WHERE s.name = :name AND s.markedDeleted = 'N'";
+    
+    
+     /**
+     * Find all datasets by sample id
+     *
+     */
+    public static final String DATASETS_BY_SAMPLES = "Sample.findByDataset";
+    public static final String DATASETS_BY_SAMPLES_JPQL = "SELECT ds FROM Dataset ds WHERE ds.sampleId = :sampleId";
     
     
     /**

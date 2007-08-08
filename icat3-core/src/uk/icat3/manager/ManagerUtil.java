@@ -452,12 +452,12 @@ public class ManagerUtil {
         if(type == ElementType.INVESTIGATION){
             Investigation investigation  = findObject(Investigation.class, id, manager);
             for (Dataset ds : investigation.getDatasetCollection()) {
-                return removeElementAuthorisations(ds.getId(), ElementType.DATASET, manager);
+                removeElementAuthorisations(ds.getId(), ElementType.DATASET, manager);
             }
         } else if(type == ElementType.DATASET){
             Dataset ds  = findObject(Dataset.class, id, manager);
             for (Datafile df : ds.getDatafileCollection()) {
-                return removeElementAuthorisations(df.getId(), ElementType.DATAFILE, manager);
+                removeElementAuthorisations(df.getId(), ElementType.DATAFILE, manager);
             }
         } else if(type == ElementType.DATAFILE){
             //do nothing, deleted below
