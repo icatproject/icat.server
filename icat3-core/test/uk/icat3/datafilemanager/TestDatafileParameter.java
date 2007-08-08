@@ -10,6 +10,7 @@
 package uk.icat3.datafilemanager;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Random;
 import junit.framework.JUnit4TestAdapter;
 
@@ -20,11 +21,14 @@ import org.junit.Test;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.DatafileParameter;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataFileManager;
 import uk.icat3.util.BaseTestClassTX;
+import uk.icat3.util.ElementType;
+import uk.icat3.util.IcatRoles;
 import static uk.icat3.util.TestConstants.*;
 
 /**
@@ -146,7 +150,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
     /**
      * Tests removing data file parameter from the DB
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void removeDatafileParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
@@ -155,11 +159,46 @@ public class TestDatafileParameter extends BaseTestClassTX {
         
         duplicateDatafileParameter.setDeleted(false);
         
-        DataFileManager.removeDatafileParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatafileParameter, em);
+        try{
+            DataFileManager.removeDatafileParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatafileParameter, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests removing data file parameter from the DB
+     */
+    @Test
+    public void removeActualDatafileParameter() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
+        
+        //create invalid datafileParameter, no name
+        DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
+        
+        duplicateDatafileParameter.setDeleted(false);
+        duplicateDatafileParameter.setCreateId(ICAT_ADMIN_USER);
+        
+        Collection<Long> longs =  addAuthorisation(duplicateDatafileParameter.getDatafile().getId(), ICAT_ADMIN_USER, ElementType.DATAFILE, IcatRoles.ICAT_ADMIN);
+        Iterator it = longs.iterator();
+        
+        DataFileManager.removeDatafileParameter(ICAT_ADMIN_USER, duplicateDatafileParameter, em);
         
         DatafileParameter modified = em.find(DatafileParameter.class,duplicateDatafileParameter.getDatafileParameterPK() );
-        
         assertNull("DatafileParameter must not be found in DB "+duplicateDatafileParameter, modified);
+        
+        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
+        em.remove(icatAuth);
+        
+        it = longs.iterator();
+        icatAuth = em.find(IcatAuthorisation.class,it.next());
+        
+        it = longs.iterator();
+        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);
+        
     }
     
     /**
@@ -303,8 +342,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
             DataFileManager.updateDatafileParameter(VALID_USER_FOR_INVESTIGATION, propsDatafileParameter, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+             throw ex;
         }
     }
     
@@ -322,8 +361,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
             DataFileManager.deleteDatafileParameter(VALID_USER_FOR_INVESTIGATION, propsDatafileParameter, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+             throw ex;
         }
     }
     
@@ -341,8 +380,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
             DataFileManager.removeDatafileParameter(VALID_USER_FOR_INVESTIGATION, propsDatafileParameter, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+          assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+             throw ex;
         }
     }
     

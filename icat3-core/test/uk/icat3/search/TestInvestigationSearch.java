@@ -11,7 +11,6 @@ package uk.icat3.search;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import junit.framework.JUnit4TestAdapter;
@@ -43,9 +42,8 @@ public class TestInvestigationSearch extends BaseTestClass{
     
     
     //@Test
-    public void testGetALLUsersInvestigationsUser(){
+    public void testGetAllUsersInvestigationsUser(){
         log.info("Testing valid user, getAllInvestigations: "+VALID_USER_FOR_INVESTIGATION);
-        
         
         log.debug("Testing user investigations: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -56,7 +54,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         log.trace("Investigations for user "+VALID_USER_FOR_INVESTIGATION+" is "+invs.size());
         
         assertNotNull("Must not be an empty collection", invs);
-        assertEquals("Collection 'all Investigations' should be zero size", 3 , invs.size());
+        assertEquals("Collection 'all Investigations' should be 3", 3 , invs.size());
     }
     
     
@@ -183,6 +181,18 @@ public class TestInvestigationSearch extends BaseTestClass{
     ////////////////////////////////////////////////////////////////////////////////////
     
     //@Test
+    public void testSearchByDeletedKeyword() throws ICATAPIException {
+        log.info("Testing valid user, keyword: "+VALID_USER_FOR_INVESTIGATION);
+        
+        Collection<Investigation> investigations = InvestigationSearch.searchByKeyword(VALID_USER_FOR_INVESTIGATION, "deleted keyword" ,em);
+        log.trace("Investigations found with 'deleted keyword': " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be 0", 0, investigations.size());
+        checkInvestigations(investigations);
+    }
+    
+    //@Test
     public void testSearchByKeyword() throws ICATAPIException {
         log.info("Testing valid user, keyword: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -229,6 +239,20 @@ public class TestInvestigationSearch extends BaseTestClass{
     }
     
     ///////////////////////////////////  Keywords fuzzy etc    ////////////////////////////////////////////////////
+    //@Test
+    public void testSearchByDeletedKeywords() throws ICATAPIException {
+        log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
+        Collection<String> keywords = new ArrayList<String>();
+        keywords.add("deleted");
+        
+        Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(VALID_USER_FOR_INVESTIGATION, keywords , true, em);
+        log.trace("Investigations found with 'deleted' : " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 0, investigations.size());
+        checkInvestigations(investigations);
+    }
+    
     //@Test
     public void testSearchByKeywords() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
@@ -348,7 +372,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Size should be one", 1, investigations.size());
         checkInvestigations(investigations);
         
-        keywords.add("z");
+        keywords.add("x");
         
         //fuzzy false
         investigations = InvestigationSearch.searchByKeywords(VALID_USER_FOR_INVESTIGATION, keywords , InvestigationInclude.DATASETS_AND_DATAFILES, false , em);
@@ -598,7 +622,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         log.trace("Investigations found with "+VALID_FEDID_FOR_INVESTIGATION+ ": " +investigations.size());
         
         assertNotNull("Must not be an empty collection", investigations);
-        assertEquals("Size should be one",1 ,investigations.size());
+        assertEquals("Size should be one", 1 ,investigations.size());
         checkInvestigations(investigations);
     }
     
@@ -624,6 +648,18 @@ public class TestInvestigationSearch extends BaseTestClass{
         
         Collection<Investigation> investigations = InvestigationSearch.searchByUserSurname(VALID_USER_FOR_INVESTIGATION, VALID_SURNAME_FOR_INVESTIGATION , em);
         log.trace("Investigations found with "+VALID_SURNAME_FOR_INVESTIGATION+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+    }
+    
+    //@Test
+    public void testSearchBySurnameLower() throws ICATAPIException {
+        log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
+        
+        Collection<Investigation> investigations = InvestigationSearch.searchByUserSurname(VALID_USER_FOR_INVESTIGATION, VALID_SURNAME_FOR_INVESTIGATION.toLowerCase() , em);
+        log.trace("Investigations found with "+VALID_SURNAME_FOR_INVESTIGATION.toLowerCase()+ ": " +investigations.size());
         
         assertNotNull("Must not be an empty collection", investigations);
         assertEquals("Size should be one", 1, investigations.size());
@@ -735,6 +771,23 @@ public class TestInvestigationSearch extends BaseTestClass{
     /////////////////////////////////////////////////////////////////////////////
     
     ////////////////////////// Advanced ///////////////////////////////////////////////////
+    
+    //@Test
+    public void testAdvancedDeleted() throws ICATAPIException {
+        log.info("Testing invalid user, : "+VALID_USER_FOR_INVESTIGATION);
+        
+        AdvancedSearchDetails asd = new AdvancedSearchDetails();
+        Collection<String> keywords = new ArrayList<String>();
+        keywords.add("deleted keyword");
+        
+        Collection<Investigation> investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an null collection", investigations);
+        assertEquals("Size should be 0", 0, investigations.size());
+        checkInvestigations(investigations);
+    }
+    
     @Test
     public void testAdvanced() throws ICATAPIException {
         log.info("Testing invalid user, My Investigations: "+VALID_USER_FOR_INVESTIGATION);
@@ -745,7 +798,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
         
         assertNotNull("Must not be an empty collection", investigations);
-        assertEquals("Size should be one", 2, investigations.size());
+        assertEquals("Size should be one", 3, investigations.size());
         checkInvestigations(investigations);
         
         //test with name
@@ -768,7 +821,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Size should be one", 1, investigations.size());
         checkInvestigations(investigations);
         
-         //add visit id
+        //add visit id
         asd.setVisitId("12");
         investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -777,7 +830,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Size should be one", 1, investigations.size());
         checkInvestigations(investigations);
         
-          //add grant id
+        //add grant id
         asd.setGrantId(15L);
         investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -804,7 +857,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Size should be one", 1, investigations.size());
         checkInvestigations(investigations);
         
-                         //add bcatInvStr
+        //add bcatInvStr
         asd.setBackCatalogueInvestigatorString("false name");
         investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -813,7 +866,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Size should be one", 0, investigations.size());
         checkInvestigations(investigations);
         
-          //add bcatInvStr
+        //add bcatInvStr
         asd.setBackCatalogueInvestigatorString("damian");
         investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -824,7 +877,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         
         Collection<String> keywords = new ArrayList<String>();
         keywords.add("shull");
-        keywords.add("sdsdsdsds");
+        
         
         asd.setKeywords(keywords);
         //add keywords
@@ -836,7 +889,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
         
         keywords.clear();
-        keywords.add("sdsdsdsdsds");
+        keywords.add("deleted");
         //add invalid keyword
         investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -844,13 +897,24 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertNotNull("Must not be an empty collection", investigations);
         assertEquals("Size should be zero", 0, investigations.size());
         
+        keywords.clear();
+        keywords.add("deleted");
+        keywords.add("dvveletedddddd");
+        //add invalid keyword
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be zero", 0, investigations.size());
+        
+        
         Collection<String> instruments = new ArrayList<String>();
         instruments.add("SXD");
         asd.setInstruments(instruments);
         //reset keywords
         keywords.clear();
         keywords.add("shull");
-        keywords.add("sdsdsdsds");
+        
         //add instruments
         investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -858,6 +922,22 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertNotNull("Must not be an empty collection", investigations);
         assertEquals("Size should be one", 1, investigations.size());
         checkInvestigations(investigations);
+        
+        instruments.add("false");
+        instruments.add("SXD");
+        asd.setInstruments(instruments);
+        //reset keywords
+        keywords.clear();
+        keywords.add("shull");
+        
+        //add instruments
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
         
         asd.setDatafileName("asknfasopfosdmfsdf");
         //add datafile name
@@ -893,8 +973,19 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Size should be one", 1, investigations.size());
         checkInvestigations(investigations);
         
-        
         Collection<String> investigators = new ArrayList<String>();
+        investigators.add("djdjdjdjkdjdjdjd");
+        asd.setInvestigators(investigators);
+        //add investigators
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be zero", 0, investigations.size());
+        checkInvestigations(investigations);
+        
+        
+        investigators.clear();
         investigators.add(VALID_SURNAME_FOR_INVESTIGATION);
         asd.setInvestigators(investigators);
         //add investigators
@@ -1074,7 +1165,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     /////////////////////////////////////////////////////////////////////////////
     //@Test(expected=ICATAPIException.class)
     public void testCheckInvestigation() throws ICATAPIException{
-        Investigation inv = em.find(Investigation.class, 5L);
+        Investigation inv = em.find(Investigation.class, 6L);
         
         Collection<Investigation> invs = new ArrayList<Investigation>();
         invs.add(inv);

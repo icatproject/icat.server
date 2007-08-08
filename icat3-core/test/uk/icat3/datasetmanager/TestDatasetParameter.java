@@ -10,6 +10,7 @@
 package uk.icat3.datasetmanager;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Random;
 import junit.framework.JUnit4TestAdapter;
 
@@ -20,12 +21,15 @@ import org.junit.Test;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataSetManager;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.BaseTestClassTX;
+import uk.icat3.util.ElementType;
+import uk.icat3.util.IcatRoles;
 import static uk.icat3.util.TestConstants.*;
 
 /**
@@ -65,13 +69,13 @@ public class TestDatasetParameter extends BaseTestClassTX {
         
         String modifiedError = "unit test error "+random.nextInt();
         //create invalid datasetParameter, no name
-          DatasetParameter modifiedDatasetParameter = getDatasetParameter(true, true);
+        DatasetParameter modifiedDatasetParameter = getDatasetParameter(true, true);
         DatasetParameter duplicateDatasetParameter = getDatasetParameterDuplicate(true);
         Dataset ds  =em.find(Dataset.class, VALID_DATA_SET_ID);
         modifiedDatasetParameter.setError(modifiedError);
         modifiedDatasetParameter.setDataset(ds);
         modifiedDatasetParameter.setDatasetParameterPK(duplicateDatasetParameter.getDatasetParameterPK());
-                
+        
         DataSetManager.updateDataSetParameter(VALID_USER_FOR_INVESTIGATION, modifiedDatasetParameter, em);
         
         DatasetParameter modified = em.find(DatasetParameter.class, duplicateDatasetParameter.getDatasetParameterPK() );
@@ -144,7 +148,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void removeDatasetParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -154,11 +158,50 @@ public class TestDatasetParameter extends BaseTestClassTX {
         //TODO remove
         duplicateDatasetParameter.setDeleted(false);
         
-        DataSetManager.removeDataSetParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatasetParameter, em);
+        try {
+            DataSetManager.removeDataSetParameter(VALID_USER_FOR_INVESTIGATION, duplicateDatasetParameter, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void removeActualDatasetParameter() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid datasetParameter, no name
+        DatasetParameter duplicateDatasetParameter = getDatasetParameterDuplicate(true);
+        
+        //TODO remove
+        duplicateDatasetParameter.setDeleted(false);
+        duplicateDatasetParameter.setCreateId(ICAT_ADMIN_USER);
+        
+        Collection<Long> longs =  addAuthorisation(duplicateDatasetParameter.getDataset().getId(), ICAT_ADMIN_USER, ElementType.DATASET, IcatRoles.ICAT_ADMIN);
+        Iterator it = longs.iterator();
+        
+        DataSetManager.removeDataSetParameter(ICAT_ADMIN_USER, duplicateDatasetParameter, em);
         
         DatasetParameter modified = em.find(DatasetParameter.class,duplicateDatasetParameter.getDatasetParameterPK() );
-        
         assertNull("DatasetParameter must not be found in DB "+duplicateDatasetParameter, modified);
+        
+        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
+        IcatAuthorisation childIcatAuth = em.find(IcatAuthorisation.class,it.next());
+        em.remove(icatAuth);
+        em.remove(childIcatAuth);
+        
+         it = longs.iterator();
+        icatAuth = em.find(IcatAuthorisation.class,it.next());
+        childIcatAuth = em.find(IcatAuthorisation.class,it.next());
+        
+        it = longs.iterator();
+        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);
+        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", childIcatAuth);
     }
     
     /**
@@ -296,7 +339,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
             DataSetManager.updateDataSetParameter(VALID_USER_FOR_INVESTIGATION, propsDatasetParameter, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -315,7 +358,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
             DataSetManager.deleteDataSetParameter(VALID_USER_FOR_INVESTIGATION, propsDatasetParameter, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -334,7 +377,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
             DataSetManager.removeDataSetParameter(VALID_USER_FOR_INVESTIGATION, propsDatasetParameter, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }

@@ -116,7 +116,7 @@ public class TestKeyword extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void removeKeyword() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving keyword to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -124,7 +124,29 @@ public class TestKeyword extends BaseTestClassTX {
         Keyword duplicateKeyword = getKeywordDuplicate(true);
         duplicateKeyword.setDeleted(false);
         
-        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateKeyword, AccessType.REMOVE, em);
+        try {
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateKeyword, AccessType.REMOVE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void removeActualKeyword() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving keyword to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid keyword, no name
+        Keyword duplicateKeyword = getKeywordDuplicate(true);
+        duplicateKeyword.setDeleted(false);
+        duplicateKeyword.setCreateId(ICAT_ADMIN_USER);
+                
+        InvestigationManager.deleteInvestigationObject(ICAT_ADMIN_USER, duplicateKeyword, AccessType.REMOVE, em);
         
         Keyword modified = em.find(Keyword.class,duplicateKeyword.getKeywordPK() );
         
@@ -203,7 +225,7 @@ public class TestKeyword extends BaseTestClassTX {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsKeyword, AccessType.DELETE, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -222,7 +244,7 @@ public class TestKeyword extends BaseTestClassTX {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsKeyword, AccessType.REMOVE, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -268,10 +290,10 @@ public class TestKeyword extends BaseTestClassTX {
     private Keyword getKeywordDuplicate(boolean last){
         Keyword keyword = null;
         if(!last){
-            Collection<Keyword> keywords = (Collection<Keyword>)executeListResultCmd("select d from Keyword d where d.createId LIKE '%PROP%'");
+            Collection<Keyword> keywords = (Collection<Keyword>)executeListResultCmd("select d from Keyword d where d.facilityAcquired = 'Y'");
             keyword = keywords.iterator().next();
         } else {
-            Collection<Keyword> keywords = (Collection<Keyword>)executeListResultCmd("select d from Keyword d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+            Collection<Keyword> keywords = (Collection<Keyword>)executeListResultCmd("select d from Keyword d where d.facilityAcquired = 'N' order by d.modTime desc");
             keyword = keywords.iterator().next();
         }
         log.trace(keyword);

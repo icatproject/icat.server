@@ -23,7 +23,7 @@ import static uk.icat3.util.TestConstants.*;
  */
 public class TestAuthorisation  extends BaseTestClass {
     
-    private static Logger log = Logger.getLogger(TestEntityBaseBean.class);
+    private static Logger log = Logger.getLogger(TestAuthorisation.class);
     private Random random = new Random();
     
    

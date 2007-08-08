@@ -148,7 +148,7 @@ public class TestPublication extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    // @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void removePublication() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -156,12 +156,34 @@ public class TestPublication extends BaseTestClassTX {
         Publication duplicatePublication = getPublicationDuplicate(true);
         duplicatePublication.setDeleted(false);
         
-        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicatePublication, AccessType.REMOVE, em);
+        try{
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicatePublication, AccessType.REMOVE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void removeActualPublication() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving publication to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid publication, no name
+        Publication duplicatePublication = getPublicationDuplicate(true);
+        duplicatePublication.setDeleted(false);
+        duplicatePublication.setCreateId(ICAT_ADMIN_USER);
+        
+        InvestigationManager.deleteInvestigationObject(ICAT_ADMIN_USER, duplicatePublication, AccessType.REMOVE, em);
         
         Publication modified = em.find(Publication.class,duplicatePublication.getId() );
         
         assertNull("Publication must not be found in DB "+duplicatePublication, modified);
     }
+    
     
     /**
      * Tests creating a file
@@ -280,7 +302,7 @@ public class TestPublication extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //  @Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void modifyPublicationProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying a props publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -291,7 +313,7 @@ public class TestPublication extends BaseTestClassTX {
             InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsPublication, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -299,7 +321,7 @@ public class TestPublication extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    // @Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void deletePublicationProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a props publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -310,7 +332,7 @@ public class TestPublication extends BaseTestClassTX {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsPublication, AccessType.DELETE, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -318,7 +340,7 @@ public class TestPublication extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //   @Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void removePublicationProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a props publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -329,7 +351,7 @@ public class TestPublication extends BaseTestClassTX {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsPublication, AccessType.REMOVE, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -339,11 +361,11 @@ public class TestPublication extends BaseTestClassTX {
     private Publication getPublicationDuplicate(boolean last){
         Publication publication = null;
         if(!last){
-            Collection<Publication> publications = (Collection<Publication>)executeListResultCmd("select d from Publication d where d.createId LIKE '%PROP%'");
+            Collection<Publication> publications = (Collection<Publication>)executeListResultCmd("select d from Publication d where d.facilityAcquired = 'Y' AND d.markedDeleted = 'N'");
             if(publications.size() == 0) throw new RuntimeException("No propergated publications");
             publication = publications.iterator().next();
         } else {
-            Collection<Publication> publications = (Collection<Publication>)executeListResultCmd("select d from Publication d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+            Collection<Publication> publications = (Collection<Publication>)executeListResultCmd("select d from Publication d where d.facilityAcquired = 'N' order by d.modTime desc");
             publication = publications.iterator().next();
         }
         log.trace(publication);

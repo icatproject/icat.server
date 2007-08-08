@@ -133,7 +133,6 @@ public class TestSample extends BaseTestClassTX {
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
-            
             throw ex;
         }
        /* Sample modified = em.find(Sample.class,sampleInserted.getId() );
@@ -145,7 +144,7 @@ public class TestSample extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void removeSample() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving sample to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -153,11 +152,54 @@ public class TestSample extends BaseTestClassTX {
         Sample duplicateSample = getSampleDuplicate(true);
         duplicateSample.setDeleted(false);
         
-        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSample, AccessType.REMOVE, em);
+        try{
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSample, AccessType.REMOVE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void removeActualSample() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for removing actual sample to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid sample, no name
+        Sample duplicateSample = getSampleDuplicate(true);
+        duplicateSample.setDeleted(false);
+        duplicateSample.setCreateId(ICAT_ADMIN_USER);
+        
+        InvestigationManager.deleteInvestigationObject(ICAT_ADMIN_USER, duplicateSample, AccessType.REMOVE, em);
         
         Sample modified = em.find(Sample.class,duplicateSample.getId() );
         
         assertNull("Sample must not be found in DB "+duplicateSample, modified);
+    }
+    
+    
+    /**
+     * Tests creating a file
+     */
+    @Test(expected=InsufficientPrivilegesException.class)
+    public void removeLinkedSample() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for removing linked sample to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid sample, no name
+        Sample duplicateSample = em.find(Sample.class, 3L);
+        duplicateSample.setDeleted(false);
+        duplicateSample.setCreateId(ICAT_ADMIN_USER);
+        
+        try{
+            InvestigationManager.deleteInvestigationObject(ICAT_ADMIN_USER, duplicateSample, AccessType.REMOVE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'linked'", ex.getMessage().contains("linked"));
+            throw ex;
+        }
     }
     
     /**
@@ -231,7 +273,7 @@ public class TestSample extends BaseTestClassTX {
             InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsSample, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -250,7 +292,7 @@ public class TestSample extends BaseTestClassTX {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsSample, AccessType.DELETE, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -269,7 +311,7 @@ public class TestSample extends BaseTestClassTX {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsSample, AccessType.REMOVE, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -334,11 +376,11 @@ public class TestSample extends BaseTestClassTX {
     static Sample getSampleDuplicate(boolean last){
         Sample sample = null;
         if(!last){
-            Collection<Sample> samples = (Collection<Sample>)executeListResultCmd("select d from Sample d where d.createId LIKE '%PROP%'");
+            Collection<Sample> samples = (Collection<Sample>)executeListResultCmd("select d from Sample d where d.facilityAcquired = 'Y' AND d.markedDeleted = 'N'");
             if(samples.isEmpty()) throw new RuntimeException("No props samples found in DB");
             sample = samples.iterator().next();
         } else {
-            Collection<Sample> samples = (Collection<Sample>)executeListResultCmd("select d from Sample d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+            Collection<Sample> samples = (Collection<Sample>)executeListResultCmd("select d from Sample d where d.facilityAcquired = 'N' order by d.modTime desc");
             if(samples.isEmpty()) throw new RuntimeException("No none props samples found in DB");
             sample = samples.iterator().next();
         }

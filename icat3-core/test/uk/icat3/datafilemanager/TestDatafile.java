@@ -11,6 +11,7 @@ package uk.icat3.datafilemanager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Random;
 import junit.framework.JUnit4TestAdapter;
 
@@ -22,11 +23,14 @@ import org.junit.Test;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataFileManager;
 import uk.icat3.util.BaseTestClassTX;
+import uk.icat3.util.ElementType;
+import uk.icat3.util.IcatRoles;
 import static uk.icat3.util.TestConstants.*;
 
 /**
@@ -39,7 +43,7 @@ public class TestDatafile extends BaseTestClassTX {
     
     private static Logger log = Logger.getLogger(TestDatafile.class);
     private static Random random = new Random();
-            
+    
     /**
      * Tests creating a file
      */
@@ -56,7 +60,7 @@ public class TestDatafile extends BaseTestClassTX {
         assertNotNull("Format cannot be null", dataFileInserted.getDatafileFormat());
     }
     
-     @Test
+    @Test
     public void modifyDatafile() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying a datafile for datafile id: "+VALID_INVESTIGATION_ID);
         
@@ -69,7 +73,7 @@ public class TestDatafile extends BaseTestClassTX {
         modifiedDatafile.setDataset(ds);
         modifiedDatafile.setDescription(modifiedDesc);
         modifiedDatafile.setId(duplicateDatafile.getId());
-               
+        
         Datafile datafileInserted = DataFileManager.updateDataFile(VALID_USER_FOR_INVESTIGATION, modifiedDatafile, em);
         assertEquals("Desc must be "+modifiedDesc+" and not "+datafileInserted.getDescription(), datafileInserted.getDescription(), modifiedDesc);
         
@@ -77,7 +81,7 @@ public class TestDatafile extends BaseTestClassTX {
         checkDatafile(datafileInserted);
         assertFalse("Deleted must be false", datafileInserted.isDeleted());
     }
-     
+    
     /**
      * Tests deleting a file, marks it as deleted Y
      */
@@ -96,14 +100,14 @@ public class TestDatafile extends BaseTestClassTX {
         
         //check deep delete
         for(DatafileParameter param : modified.getDatafileParameterCollection()){
-          assertTrue("investigator must be deleted", param.isDeleted());
+            assertTrue("investigator must be deleted", param.isDeleted());
         }
     }
     
-        /**
+    /**
      * Tests removing a file, removes it from DB
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void removeDatafile() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving dataFile to dataFile Id: "+VALID_INVESTIGATION_ID);
         
@@ -113,11 +117,41 @@ public class TestDatafile extends BaseTestClassTX {
         //TODO remove
         duplicateDatafile.setDeleted(false);
         
-        DataFileManager.removeDataFile(VALID_USER_FOR_INVESTIGATION, duplicateDatafile, em);
+        try {
+            DataFileManager.removeDataFile(VALID_USER_FOR_INVESTIGATION, duplicateDatafile, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests removing a file, removes it from DB
+     */
+    @Test
+    public void removeActualDatafile() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving dataFile to dataFile Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid dataFile, no name
+        Datafile duplicateDatafile = getDatafileDuplicate(true);
+        
+        //TODO remove
+        duplicateDatafile.setDeleted(false);
+        duplicateDatafile.setCreateId(ICAT_ADMIN_USER);
+        
+        Collection<Long> longs =  addAuthorisation(duplicateDatafile.getId(), ICAT_ADMIN_USER, ElementType.DATAFILE, IcatRoles.ICAT_ADMIN);
+        Iterator it = longs.iterator();
+        
+        DataFileManager.removeDataFile(ICAT_ADMIN_USER, duplicateDatafile, em);
         
         Datafile modified = em.find(Datafile.class,duplicateDatafile.getId() );
-        
         assertNull("Datafile must not be found in DB "+duplicateDatafile, modified);
+        
+        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
+        
+        it = longs.iterator();
+        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);     
     }
     
     /**
@@ -177,7 +211,7 @@ public class TestDatafile extends BaseTestClassTX {
             DataFileManager.deleteDataFile(VALID_USER_FOR_INVESTIGATION, propsDatafile, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -197,7 +231,7 @@ public class TestDatafile extends BaseTestClassTX {
             DataFileManager.deleteDataFile(VALID_USER_FOR_INVESTIGATION, propsDatafile, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -429,8 +463,8 @@ public class TestDatafile extends BaseTestClassTX {
     private boolean checkDatafile(Datafile file){
         assertTrue("dataFile must be in db", em.contains(file));
         
-         assertNotNull("createTime must be not null", file.getCreateTime());
-         
+        assertNotNull("createTime must be not null", file.getCreateTime());
+        
         assertNotNull("createId must be not null", file.getCreateId());
         assertEquals("createId must be "+VALID_USER_FOR_INVESTIGATION, VALID_USER_FOR_INVESTIGATION, file.getCreateId());
         

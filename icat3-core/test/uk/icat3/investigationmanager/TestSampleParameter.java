@@ -150,7 +150,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    @Test(expected=InsufficientPrivilegesException.class)
     public void removeSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -158,7 +158,30 @@ public class TestSampleParameter extends BaseTestClassTX {
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
         duplicateSampleParameter.setDeleted(false);
         
-        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, AccessType.REMOVE, em);
+        try {
+            InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, AccessType.REMOVE, em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void removeActualSampleParameter() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid sampleParameter, no name
+        SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
+        duplicateSampleParameter.setDeleted(false);
+        duplicateSampleParameter.setCreateId(ICAT_ADMIN_USER);
+        
+        
+        InvestigationManager.deleteInvestigationObject(ICAT_ADMIN_USER, duplicateSampleParameter, AccessType.REMOVE, em);
         
         SampleParameter modified = em.find(SampleParameter.class,duplicateSampleParameter.getSampleParameterPK()  );
         
@@ -354,7 +377,7 @@ public class TestSampleParameter extends BaseTestClassTX {
             InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsSampleParameter, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -373,7 +396,7 @@ public class TestSampleParameter extends BaseTestClassTX {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsSampleParameter, AccessType.DELETE, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -392,14 +415,14 @@ public class TestSampleParameter extends BaseTestClassTX {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsSampleParameter, AccessType.REMOVE, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
     
     @Test
     public void removeParameter(){
-        Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+        Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.facilityAcquired = 'N' order by d.modTime desc");
         for(Parameter  parameter : parameters){
             if(parameter.getCreateId().equals("SAMPLE_PARAMETER_ADDED")){
                 log.info("Removing added parameter: "+parameter );
@@ -450,10 +473,10 @@ public class TestSampleParameter extends BaseTestClassTX {
     static SampleParameter getSampleParameterDuplicate(boolean last){
         SampleParameter sampleParameter = null;
         if(!last){
-            Collection<SampleParameter> sampleParameters = (Collection<SampleParameter>)executeListResultCmd("select d from SampleParameter d where d.createId LIKE '%PROP%'");
+            Collection<SampleParameter> sampleParameters = (Collection<SampleParameter>)executeListResultCmd("select d from SampleParameter d where d.facilityAcquired = 'Y' AND d.markedDeleted = 'N'");
             sampleParameter = sampleParameters.iterator().next();
         } else {
-            Collection<SampleParameter> sampleParameters = (Collection<SampleParameter>)executeListResultCmd("select d from SampleParameter d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+            Collection<SampleParameter> sampleParameters = (Collection<SampleParameter>)executeListResultCmd("select d from SampleParameter d where d.facilityAcquired = 'N' order by d.modTime desc");
             sampleParameter = sampleParameters.iterator().next();
         }
         log.trace(sampleParameter);

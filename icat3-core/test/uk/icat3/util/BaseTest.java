@@ -84,11 +84,13 @@ public class BaseTest {
         em.close();
     }
     
-    protected Collection<Long> addInvestigationAuthorisation(Long id, String user, IcatRoles role){
+    protected Collection<Long> addAuthorisation(Long id, String user, ElementType type , IcatRoles role){
         //add entry for a user who can delete this
         IcatAuthorisation icat = new IcatAuthorisation();
+        IcatAuthorisation child = new IcatAuthorisation();
+        
         icat.setElementId(id);
-        icat.setElementType(ElementType.INVESTIGATION);
+        icat.setElementType(type);
         icat.setUserId(user);
         icat.setModId(user);
         IcatRole icatRole =  new IcatRole(role.toString());
@@ -97,26 +99,36 @@ public class BaseTest {
         icat.setRole(icatRole);
         
         //add child
-        IcatAuthorisation child = new IcatAuthorisation();
-        child.setElementId(null);
-        child.setElementType(ElementType.DATASET);
-        child.setParentElementId(id);
-        child.setParentElementType(ElementType.INVESTIGATION);
-        child.setUserId(user);
-        child.setModId(user);
-        IcatRole role2 =  new IcatRole(role.toString());
-        role2.setActionRootRemove("Y");
-        child.setRole(role2);
-        em.persist(child);
-        log.trace("Saving: "+child);
+        if(type != ElementType.DATAFILE){
+            
+            if(type != ElementType.INVESTIGATION){
+                child.setElementType(ElementType.DATASET);
+                child.setParentElementType(ElementType.INVESTIGATION);
+            } else {
+                child.setElementType(ElementType.DATAFILE);
+                child.setParentElementType(ElementType.DATASET);
+            }
+            child.setElementId(null);
+            child.setParentElementId(id);
+            child.setUserId(user);
+            child.setModId(user);
+            IcatRole role2 =  new IcatRole(role.toString());
+            role2.setActionRootRemove("Y");
+            child.setRole(role2);
+            em.persist(child);
+            log.trace("Saving: "+child);
+            
+            icat.setUserChildRecord(child.getId());
+        }
         
-        icat.setUserChildRecord(child.getId());
         em.persist(icat);
         log.trace("Saving: "+icat);
         
         Collection longs = new ArrayList<Long>();
         longs.add(icat.getId());
-        longs.add(child.getId());
+        if(type != ElementType.DATAFILE){
+            longs.add(child.getId());
+        }
         
         return longs;
     }

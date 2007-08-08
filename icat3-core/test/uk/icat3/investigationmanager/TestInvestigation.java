@@ -21,6 +21,10 @@ import uk.icat3.entity.InvestigationType;
 import uk.icat3.exceptions.ICATAPIException;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import uk.icat3.entity.Datafile;
+import uk.icat3.entity.DatafileFormat;
+import uk.icat3.entity.Dataset;
+import uk.icat3.entity.DatasetType;
 import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
@@ -75,7 +79,7 @@ public class TestInvestigation extends BaseTestClassTX {
         }
     }
     
-    //@Test
+    @Test
     public void modifyInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying investigation");
         
@@ -107,7 +111,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=ValidationException.class)
+    @Test(expected=ValidationException.class)
     public void addDuplicateInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -126,7 +130,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test
+    @Test
     public void deleteInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -148,7 +152,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=NoSuchObjectFoundException.class)
+    @Test(expected=NoSuchObjectFoundException.class)
     public void getDeletedInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for gettings deleted investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -164,7 +168,7 @@ public class TestInvestigation extends BaseTestClassTX {
     }
     
     //TODO add deleted investigation here
-    //@Test(expected=ValidationException.class)
+    @Test(expected=ValidationException.class)
     public void addDeletedInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -183,7 +187,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void removeInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -209,7 +213,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+   @Test
     public void removeActualInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -219,7 +223,7 @@ public class TestInvestigation extends BaseTestClassTX {
         duplicateInvestigation.setDeleted(false);
         duplicateInvestigation.setCreateId(ICAT_ADMIN_USER);
         
-        Collection<Long> longs =  addInvestigationAuthorisation(duplicateInvestigation.getId(), ICAT_ADMIN_USER, IcatRoles.ICAT_ADMIN);
+        Collection<Long> longs =  addAuthorisation(duplicateInvestigation.getId(), ICAT_ADMIN_USER, ElementType.INVESTIGATION, IcatRoles.ICAT_ADMIN);
         Iterator it = longs.iterator();
         InvestigationManager.removeInvestigation(ICAT_ADMIN_USER, duplicateInvestigation, em);
         
@@ -236,7 +240,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void addInvestigationInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for adding investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -254,7 +258,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=ValidationException.class)
+    @Test(expected=ValidationException.class)
     public void addInvalidInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -273,7 +277,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=ValidationException.class)
+    @Test(expected=ValidationException.class)
     public void addValidInvestigationInvalidAbstract() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding valid investigation with too big abstract to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -298,7 +302,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void deleteInvestigationProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a props investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -317,7 +321,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void removeInvestigationProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a props investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -336,7 +340,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test
+    @Test
     public void getInvestigations() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for gettings investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         Collection<Long> investigations = new ArrayList<Long>();
@@ -359,7 +363,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test
+    @Test
     public void getInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for gettings investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -378,7 +382,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests deleting a investigation, no id
      */
-    //@Test(expected=NoSuchObjectFoundException.class)
+    @Test(expected=NoSuchObjectFoundException.class)
     public void deleteInvestigationNoId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -397,7 +401,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests remove a investigation, no id
      */
-    //@Test(expected=NoSuchObjectFoundException.class)
+    @Test(expected=NoSuchObjectFoundException.class)
     public void removeInvestigationNoId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -416,7 +420,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests update a investigation, no id
      */
-    //@Test(expected=NoSuchObjectFoundException.class)
+    @Test(expected=NoSuchObjectFoundException.class)
     public void updateInvestigationNoId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for updating investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -430,6 +434,69 @@ public class TestInvestigation extends BaseTestClassTX {
             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
             throw ex;
         }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void addInvestigationWithDatasetAndDatafile() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding investigation");
+        
+        Investigation validInvestigation  = getInvestigation(true);
+        validInvestigation.setInvAbstract("Valid length");
+        
+        Dataset ds = new Dataset();
+        Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
+        ds.setDatasetType(datasetType.iterator().next());
+        ds.setName("unit test create data set");
+                
+        Datafile file = new Datafile();
+        Collection<DatafileFormat> datafileFormat = (Collection<DatafileFormat>)executeListResultCmd("select d from DatafileFormat d");
+        file.setDatafileFormat(datafileFormat.iterator().next());
+        file.setName("unit test create data set");
+        
+        ds.addDataFile(file);
+        validInvestigation.addDataSet(ds);
+        
+        Investigation investigationInserted = (Investigation)InvestigationManager.createInvestigation(VALID_USER_FOR_INVESTIGATION, validInvestigation, em);
+        
+        Investigation modified = em.find(Investigation.class,investigationInserted.getId());
+        
+        checkInvestigation(modified);
+        checkInvestigationPermissions(modified);
+        assertFalse("Deleted must be false", modified.isDeleted());
+        assertFalse("FA must be false", modified.isFacilityAcquiredSet());
+        
+        //check that icat authorisation is there
+        for(Dataset ds2 : modified.getDatasetCollection()){
+            assertFalse("Dataset must not be deleted", ds2.isDeleted());
+            assertEquals("Dataset must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, ds2.getModId());
+        }
+    }
+    
+    @Test
+    public void removeActualInvestigationWithDataset() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving investigation to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid investigation, no name
+        Investigation duplicateInvestigation = getInvestigationDuplicate(true);
+        //change so can delete
+        duplicateInvestigation.setDeleted(false);
+        duplicateInvestigation.setCreateId(ICAT_ADMIN_USER);
+        
+        Collection<Long> longs =  addAuthorisation(duplicateInvestigation.getId(), ICAT_ADMIN_USER, ElementType.INVESTIGATION, IcatRoles.ICAT_ADMIN);
+        Iterator it = longs.iterator();
+        InvestigationManager.removeInvestigation(ICAT_ADMIN_USER, duplicateInvestigation, em);
+        
+        Investigation modified = em.find(Investigation.class,duplicateInvestigation.getId());
+        
+        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
+        IcatAuthorisation childIcatAuth = em.find(IcatAuthorisation.class,it.next());
+        
+        assertNull("Investigation must not be found in DB ", modified);
+        assertNull("IcatAuthorisation[main] must not be found in DB ", icatAuth);
+        assertNull("IcatAuthorisation[child] must not be found in DB ", childIcatAuth);
     }
     
     private Investigation getInvestigationDuplicate(boolean last){

@@ -123,7 +123,7 @@ public class TestKeywordSearch extends BaseTestClass {
         if(valid){
             assertTrue("Number of user keywords searched for user is different to number in DB", keywordsForUser.size() > 0);
         } else {
-            assertSame("Number of user keywords searched for user is different to number in DB", 1 , keywordsForUser.size());
+            assertSame("Number of user keywords searched for user is different to number in DB", 0 , keywordsForUser.size());
             
         }
         
@@ -150,7 +150,7 @@ public class TestKeywordSearch extends BaseTestClass {
         log.trace("Investigations for user "+INVALID_USER+" is "+searchedInvestigations.size());
         
         assertNotNull("Must not be an null collection", searchedInvestigations);
-        assertEquals("Collection 'searchByKeyword()' should be 1", investigations.size() , searchedInvestigations.size());
+        assertEquals("Collection 'searchByKeyword()' should be zero", 0 , searchedInvestigations.size());
         
         //search by user id
         /*Collection<Investigation> searchedUserIdInvestigations = InvestigationSearch.searchByUserID(INVALID_USER,"JAMES-JAMES", em);
