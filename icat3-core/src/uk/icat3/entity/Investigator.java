@@ -230,7 +230,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.Investigator[investigatorPK=" + investigatorPK + "]";
+        return "Investigator[investigatorPK=" + investigatorPK + "]";
     }
     
 }

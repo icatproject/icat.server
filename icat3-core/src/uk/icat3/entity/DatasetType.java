@@ -159,7 +159,7 @@ public class DatasetType extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.DatasetType[name=" + name + "]";
+        return "DatasetType[name=" + name + "]";
     }
     
 }

@@ -256,7 +256,7 @@ public class SoftwareVersion implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.SoftwareVersion[id=" + id + "]";
+        return "SoftwareVersion[id=" + id + "]";
     }
     
 }

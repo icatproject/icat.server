@@ -116,7 +116,7 @@ public class InvestigatorPK extends EntityPrimaryKeyBaseBean implements Serializ
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.InvestigatorPK[facilityUserId=" + facilityUserId + ", investigationId=" + investigationId + "]";
+        return "InvestigatorPK[facilityUserId=" + facilityUserId + ", investigationId=" + investigationId + "]";
     }
     
 }

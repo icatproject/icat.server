@@ -165,7 +165,7 @@ public class GateKeeper {
             //cannot do if facility acquired
             if(!object.isFacilityAcquiredSet()){
                 //check if element type is a root, if so check root remove permissions
-                if(elementType.isRootType()){                  
+                if(elementType.isRootType()){
                     log.trace("Create ID: "+object.getCreateId()+" "+userId.equals(object.getCreateId())+" "+icatAuthorisation.getRole());
                     // to remove something, create Id must also be the same as your Id.
                     if(role.isRootRemove() && userId.equals(object.getCreateId())) {
@@ -175,11 +175,11 @@ public class GateKeeper {
                     success = true; //user has access to remove element
                 }
             }
-        } else if(access == AccessType.CREATE){
+        } else if(access == AccessType.CREATE){ //ie INSERT
             //check if element type is a root, if so check root insert permissions
             if(elementType.isRootType()){
                 log.trace("Trying to create a root type: "+elementType);
-              
+                log.trace("Element Type: "+elementType );
                 //if null in investigation id then can create investigations
                 if(elementType == ElementType.INVESTIGATION && icatAuthorisation.getElementId() == null && role.isRootInsert()){
                     success = true; //user has access to insert root root element
@@ -240,13 +240,13 @@ public class GateKeeper {
             log.trace("user "+ userId+" trying to create a "+type);
             
             if(type == ElementType.INVESTIGATION){
-                nullSearchQuery = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_NULL_INVESTIGATION);
+                nullSearchQuery = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_CREATE_INVESTIGATION);
             } else if(type == ElementType.DATASET){
-                nullSearchQuery = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE);
+                nullSearchQuery = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_CREATE_DATAFILE_DATASET);
                 nullSearchQuery.setParameter("parentElementType", ElementType.INVESTIGATION);
                 nullSearchQuery.setParameter("parentElementId", parentId);
             } else if(type == ElementType.DATAFILE){
-                nullSearchQuery = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE);
+                nullSearchQuery = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_CREATE_DATAFILE_DATASET);
                 nullSearchQuery.setParameter("parentElementType", ElementType.DATASET);
                 nullSearchQuery.setParameter("parentElementId", parentId);
             }
@@ -265,7 +265,20 @@ public class GateKeeper {
         } else {
             
             //Find users one first as it takes prefs over the ANY row.
-            Query query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE);
+            Query query = null;
+            
+            if(type == ElementType.INVESTIGATION){
+                query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_INVESTIGATION);             
+            } else if(type == ElementType.DATASET){
+                 query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_DATAFILE_DATASET);
+                query.setParameter("parentElementType", ElementType.INVESTIGATION);
+                query.setParameter("parentElementId", parentId);
+            } else if(type == ElementType.DATAFILE){
+                 query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_DATAFILE_DATASET);
+                query.setParameter("parentElementType", ElementType.DATASET);
+                query.setParameter("parentElementId", parentId);
+            }
+            
             query.setParameter("elementType", type).
                     setParameter("elementId", id).
                     setParameter("userId", userId);

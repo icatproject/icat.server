@@ -39,6 +39,10 @@ public enum ElementType {
     DATAFILE_PARAMETER;
     
     /**
+     * 
+     */
+    
+    /**
      * Checks wheather this type of element belongs to an datafile
      */
     public boolean isDatafileType(){

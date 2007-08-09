@@ -201,7 +201,7 @@ public class StudyInvestigation extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.StudyInvestigation[studyInvestigationPK=" + studyInvestigationPK + "]";
+        return "StudyInvestigation[studyInvestigationPK=" + studyInvestigationPK + "]";
     }
     
 }

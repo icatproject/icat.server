@@ -182,7 +182,7 @@ public class TopicList extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.TopicList[topicListPK=" + topicListPK + "]";
+        return "TopicList[topicListPK=" + topicListPK + "]";
     }
     
 }

@@ -122,7 +122,7 @@ public class KeywordPK extends EntityPrimaryKeyBaseBean implements Serializable 
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.KeywordPK[name=" + name + ", investigationId=" + investigationId + "]";
+        return "KeywordPK[name=" + name + ", investigationId=" + investigationId + "]";
     }
     
 }

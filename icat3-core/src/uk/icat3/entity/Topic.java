@@ -204,7 +204,7 @@ public class Topic extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.Topic[id=" + id + "]";
+        return "Topic[id=" + id + "]";
     }
     
 }

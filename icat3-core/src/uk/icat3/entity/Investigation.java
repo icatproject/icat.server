@@ -813,7 +813,7 @@ import uk.icat3.util.Queries;
                         //cascade to datafile items if value is true, otherwise do not cascade
                         if(((Boolean)cascadeValue).booleanValue()) sample.setCascade(Cascade.REMOVE_DELETED_ITEMS, cascadeValue);
                     }
-                } else sample.setCascade(type, cascadeValue);
+                } else sample.setCascade(type, cascadeValue, manager, managerValue);
             }
             if(type == Cascade.REMOVE_DELETED_ITEMS){
                 //now set the new dataset collection

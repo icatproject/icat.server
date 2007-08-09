@@ -604,7 +604,7 @@ import uk.icat3.util.ElementType;
             //only check if the value of deleted is different the one wanting to be changed to
             if(this.isDeleted() != ((Boolean)cascadeValue).booleanValue()){
                 GateKeeper.performAuthorisation(managerValue.toString(), this, AccessType.DELETE, manager);
-                this.setMarkedDeleted(deleted);
+                this.setMarkedDeleted(deleted);               
                 this.setModId(managerValue.toString());
             }
         } else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());

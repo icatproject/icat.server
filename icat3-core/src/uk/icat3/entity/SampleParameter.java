@@ -333,7 +333,7 @@ import uk.icat3.util.ElementType;
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.SampleParameter[sampleParameterPK=" + sampleParameterPK + "]";
+        return "SampleParameter[sampleParameterPK=" + sampleParameterPK + "]";
     }
     
     

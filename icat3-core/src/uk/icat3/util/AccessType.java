@@ -33,7 +33,7 @@ public enum AccessType {
      */
     REMOVE,
     /**
-     *  Creates new
+     *  Creates new (INSERT)
      */
     CREATE,
     /**

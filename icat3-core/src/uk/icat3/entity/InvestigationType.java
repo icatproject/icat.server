@@ -172,7 +172,7 @@ import uk.icat3.util.Queries;
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.InvestigationType[name=" + name + "]";
+        return "InvestigationType[name=" + name + "]";
     }
     
 }

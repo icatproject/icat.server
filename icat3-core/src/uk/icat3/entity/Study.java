@@ -281,7 +281,7 @@ public class Study extends EntityBaseBean implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.Study[id=" + id + "]";
+        return "Study[id=" + id + "]";
     }
     
 }

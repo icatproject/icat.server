@@ -114,7 +114,7 @@ public class StudyInvestigationPK implements Serializable {
      */
     @Override
     public String toString() {
-        return "uk.icat3.entity.StudyInvestigationPK[investigationId=" + investigationId + ", studyId=" + studyId + "]";
+        return "StudyInvestigationPK[investigationId=" + investigationId + ", studyId=" + studyId + "]";
     }
     
 }

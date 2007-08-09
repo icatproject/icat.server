@@ -245,6 +245,9 @@ public class ManagerUtil {
             try{
                 GateKeeper.performAuthorisation(userId, dataset, AccessType.READ, manager);
                 datasetsAllowed.add(dataset);
+                
+                //now filter datafiles
+                if(cascade) filterDatafiles(userId, dataset, cascade, manager);
             } catch(Exception ignore){}
         }
         log.debug("Adding "+datasetsAllowed.size()+" datasets to "+investigation+" from a total of "+investigation.getDatasetCollection().size());
@@ -280,7 +283,7 @@ public class ManagerUtil {
         
         //now remove deleted items
         try{
-            dataset.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(cascade));
+             dataset.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(cascade));
         } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}
     }
     
@@ -400,13 +403,13 @@ public class ManagerUtil {
         
         if(type == ElementType.INVESTIGATION){
             entityObject = find(Investigation.class, id, manager);
-            query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE);
+            query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDALL_FOR_ELEMENTTYPE);
         } else if(type == ElementType.DATASET){
             entityObject = find(Dataset.class, id, manager);
-            query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE);
+            query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDALL_FOR_ELEMENTTYPE);
         } else if(type == ElementType.DATAFILE){
             entityObject = find(Datafile.class, id, manager);
-            query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE);
+            query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDALL_FOR_ELEMENTTYPE);
         }
         
         GateKeeper.performAuthorisation(userId, entityObject, AccessType.MANAGE_USERS, manager);

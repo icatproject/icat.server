@@ -50,11 +50,13 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = "IcatAuthorisation.findByCreateId", query = "SELECT i FROM IcatAuthorisation i WHERE i.createId = :createId"),
     @NamedQuery(name = "IcatAuthorisation.findByFacilityAcquired", query = "SELECT i FROM IcatAuthorisation i WHERE i.facilityAcquired = :facilityAcquired"),
     @NamedQuery(name = "IcatAuthorisation.findByDeleted", query = "SELECT i FROM IcatAuthorisation i WHERE i.markedDeleted = :deleted"),
-    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_NULL_INVESTIGATION, query = Queries.ICAT_AUTHORISATION_FINDBY_NULL_INVESTIGATION_JPQL),
-    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE, query = Queries.ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE_JPQL),
     @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE_KEY, query = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE_KEY_JPQL),
-     @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID, query = Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID_JPQL),
-  @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE, query = Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE_JPQL)
+    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDALL_FOR_ELEMENTTYPE, query = Queries.ICAT_AUTHORISATION_FINDALL_FOR_ELEMENTTYPE_JPQL),
+    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID, query = Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID_JPQL),
+    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_CREATE_DATAFILE_DATASET, query = Queries.ICAT_AUTHORISATION_FINDBY_CREATE_DATAFILE_DATASET_JPQL),
+    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_CREATE_INVESTIGATION, query = Queries.ICAT_AUTHORISATION_FINDBY_CREATE_INVESTIGATION_JPQL),
+    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_INVESTIGATION, query = Queries.ICAT_AUTHORISATION_FINDBY_INVESTIGATION_JPQL),
+    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_DATAFILE_DATASET, query = Queries.ICAT_AUTHORISATION_FINDBY_DATAFILE_DATASET_JPQL)       
 })
         @SequenceGenerator(name="ICAT_AUTHORISATION_SEQ",sequenceName="ICAT_AUTHORISATION_ID_SEQ",allocationSize=1)
         public class IcatAuthorisation extends EntityBaseBean implements Serializable {

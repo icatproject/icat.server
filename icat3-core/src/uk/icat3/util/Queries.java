@@ -335,8 +335,12 @@ public class Queries {
             "(d.name = :name OR d.name IS NULL) AND (d.investigation = :investigation OR d.investigation IS NULL) AND " +
             "(d.datasetType = :datasetType OR d.datasetType IS NULL)";
     
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     /**
      * Find ICAT AUTHORISATION by UNIQUE KEY (user, element id and type, parent type and id
+     * 
+     * find if inseted is unique
      *
      */
     public static final String ICAT_AUTHORISATION_FINDBY_UNIQUE_KEY = "IcatAuthorisation.findByUniqueKey";
@@ -344,43 +348,68 @@ public class Queries {
             "i.elementType = :elementType AND i.elementId = :elementId AND " +
             "i.userId = :userId AND i.parentElementType = :parentElementType AND " +
             "i.parentElementId = :parentElementId";
-    
-    /**
-     * Find ICAT AUTHORISATION by user and element id
-     *
-     */
-    public static final String ICAT_AUTHORISATION_FINDBY_UNIQUE = "IcatAuthorisation.findByUnique";
-    public static final String ICAT_AUTHORISATION_FINDBY_UNIQUE_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
-            "i.elementType = :elementType AND i.elementId = :elementId AND " +
-            "(i.userId = :userId OR :userId IS NULL) AND i.markedDeleted = 'N'";
+       
     
      /**
-     * Find ICAT AUTHORISATION by element id
+     * Find ICAT AUTHORISATION by element id, used to remove all when inv, ds,df is removed
      *
      */
     public static final String ICAT_AUTHORISATION_FINDBY_ELEMENTID = "IcatAuthorisation.findByElementIdOnly";
     public static final String ICAT_AUTHORISATION_FINDBY_ELEMENTID_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
             "i.elementType = :elementType AND i.elementId = :elementId";
     
-    /**
-     * Find ICAT AUTHORISATION by user and element id null, ie creating a inv
+      /**
+     * Find ICAT AUTHORISATION by user and element id, used to get all icat auths for a element type
      *
      */
-    public static final String ICAT_AUTHORISATION_FINDBY_NULL_INVESTIGATION = "IcatAuthorisation.findByIdNullInvestigationId";
-    public static final String ICAT_AUTHORISATION_FINDBY_NULL_INVESTIGATION_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
-            "i.elementType = :elementType AND i.elementId IS NULL AND " +
-            "i.userId = :userId AND i.markedDeleted = 'N'";
-    /**
-     * Find ICAT AUTHORISATION by user and element id null, ie creating a  df, ds
+    public static final String ICAT_AUTHORISATION_FINDALL_FOR_ELEMENTTYPE = "IcatAuthorisation.findAllForElementType";
+    public static final String ICAT_AUTHORISATION_FINDALL_FOR_ELEMENTTYPE_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
+            "i.elementType = :elementType AND i.elementId = :elementId AND " +
+            "(i.userId = :userId OR :userId IS NULL) AND i.markedDeleted = 'N'";
+           
+     /**
+     * Find ICAT AUTHORISATION by UNIQUE KEY (user, element id and type, parent type and id and not deleted
+      * 
+      * Finds a auth for creating a ds, or ds
      *
      */
-    public static final String ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE = "IcatAuthorisation.findByIdNullDataset_fileId";
-    public static final String ICAT_AUTHORISATION_FINDBY_NULL_DATASET_FILE_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
+    public static final String ICAT_AUTHORISATION_FINDBY_CREATE_DATAFILE_DATASET = "IcatAuthorisation.findByCreateDFDS";
+    public static final String ICAT_AUTHORISATION_FINDBY_CREATE_DATAFILE_DATASET_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
             "i.elementType = :elementType AND i.elementId IS NULL AND " +
-            "i.parentElementType = :parentElementType AND " +
-            "i.parentElementId = :parentElementId AND " +
-            "i.userId = :userId AND i.markedDeleted = 'N'";
+            "i.userId = :userId AND i.parentElementType = :parentElementType AND " +
+            "i.parentElementId = :parentElementId AND i.markedDeleted = 'N'";
     
+     /**
+     * Find ICAT AUTHORISATION by UNIQUE KEY (user, element id and type, parent type and id and not deleted
+      * 
+      * Finds a auth for creating a inv
+     *
+     */
+    public static final String ICAT_AUTHORISATION_FINDBY_CREATE_INVESTIGATION = "IcatAuthorisation.findByCreateINV";
+    public static final String ICAT_AUTHORISATION_FINDBY_CREATE_INVESTIGATION_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
+            "i.elementType = :elementType AND i.elementId IS NULL AND " +
+            "i.userId = :userId AND i.parentElementType IS NULL AND " +
+            "i.parentElementId IS NULL AND i.markedDeleted = 'N'";
+    
+    /**
+     * Find ICAT AUTHORISATION by UNIQUE KEY (user, element id and type, parent type and id and not deleted
+     *
+     */
+    public static final String ICAT_AUTHORISATION_FINDBY_INVESTIGATION = "IcatAuthorisation.findByInvestigation";
+    public static final String ICAT_AUTHORISATION_FINDBY_INVESTIGATION_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
+            "i.elementType = :elementType AND i.elementId = :elementId AND " +
+            "i.userId = :userId AND i.parentElementType IS NULL AND " +
+            "i.parentElementId IS NULL AND i.markedDeleted = 'N'";
+    
+       /**
+     * Find ICAT AUTHORISATION by UNIQUE KEY (user, element id and type, parent type and id and not deleted
+     *
+     */
+    public static final String ICAT_AUTHORISATION_FINDBY_DATAFILE_DATASET = "IcatAuthorisation.findByDFDS";
+    public static final String ICAT_AUTHORISATION_FINDBY_DATAFILE_DATASET_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
+            "i.elementType = :elementType AND i.elementId = :elementId AND " +
+            "i.userId = :userId AND i.parentElementType = :parentElementType AND " +
+            "i.parentElementId = :parentElementId AND i.markedDeleted = 'N'";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     

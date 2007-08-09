@@ -100,8 +100,9 @@ public class DatasetSearch {
         Collection<Dataset> datasets = investigation.getDatasetCollection();
         
         Collection<Dataset> datasetsPermission = new ArrayList<Dataset>();
-        
-        for (Dataset dataset : datasets) {            
+     
+        for (Dataset dataset : datasets) {           
+           
             if(sampleFound.getId().equals(dataset.getSampleId())){
                 //check read permission
                 try{
@@ -110,7 +111,7 @@ public class DatasetSearch {
                     log.trace("Adding "+ dataset+" to returned list");
                     //add the DataSetInclude for JAXB
                     dataset.setDatasetInclude(DatasetInclude.DATASET_FILES_ONLY);
-                } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}                
+                } catch(InsufficientPrivilegesException ignore){}                
             }
         }
         
