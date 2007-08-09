@@ -48,7 +48,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void createDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a dataset for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -60,7 +60,7 @@ public class TestDataset extends BaseTestClassTX {
         assertFalse("Deleted must be false", datasetInserted.isDeleted());
     }
     
-    @Test
+    //@Test
     public void modifyDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying a dataset for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -85,7 +85,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=NoSuchObjectFoundException.class)
+    //@Test(expected=NoSuchObjectFoundException.class)
     public void setDatasetInvalidSampleId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for setting invalid sample id to dataset Id: ");
         
@@ -105,7 +105,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void setDatasetSample() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for setting sample to dataset Id: ");
         
@@ -125,7 +125,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=ValidationException.class)
+    //@Test(expected=ValidationException.class)
     public void addDuplicateDataset() throws ICATAPIException, Exception {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -144,7 +144,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void deleteDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -169,7 +169,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=NoSuchObjectFoundException.class)
+    //@Test(expected=NoSuchObjectFoundException.class)
     public void getDeletedDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a deleted dataset for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -188,7 +188,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=ValidationException.class)
+    //@Test(expected=ValidationException.class)
     public void createDeletedDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a dataset for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -207,7 +207,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void removeDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -229,7 +229,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void removeActualDataset() throws ICATAPIException {
         log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -240,7 +240,7 @@ public class TestDataset extends BaseTestClassTX {
         duplicateDataset.setDeleted(false);
         duplicateDataset.setCreateId(ICAT_ADMIN_USER);
         
-        Collection<Long> longs =  addAuthorisation(duplicateDataset.getId(), ICAT_ADMIN_USER, ElementType.DATASET, IcatRoles.ICAT_ADMIN);
+        Collection<Long> longs =  addAuthorisation(duplicateDataset.getId(),duplicateDataset.getInvestigation().getId(), ICAT_ADMIN_USER, ElementType.DATASET, IcatRoles.ICAT_ADMIN);
         Iterator it = longs.iterator();
         
         DataSetManager.removeDataSet(ICAT_ADMIN_USER, duplicateDataset, em);
@@ -250,7 +250,7 @@ public class TestDataset extends BaseTestClassTX {
         
         IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
         IcatAuthorisation childIcatAuth = em.find(IcatAuthorisation.class,it.next());
-          it = longs.iterator();
+        it = longs.iterator();
         assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);
         assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", childIcatAuth);
     }
@@ -258,7 +258,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void addDatasetInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for adding dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -276,7 +276,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=ValidationException.class)
+    //@Test(expected=ValidationException.class)
     public void addInvalidDataset() throws ICATAPIException, Exception {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -298,7 +298,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void deleteDatasetProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a props dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -317,7 +317,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void removeDatasetProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a props dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -336,7 +336,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void setDatasetSampleProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for setting sample to dataset Id: "+VALID_DATA_SET_ID);
         
@@ -345,7 +345,7 @@ public class TestDataset extends BaseTestClassTX {
         assertTrue("No exception", true);
     }
     
-    @Test
+    //@Test
     public void createWholeValidDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a whole data set for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -389,357 +389,335 @@ public class TestDataset extends BaseTestClassTX {
         }
     }
     
+    //@Test
+    public void removeActualDataset2() throws ICATAPIException{
+        removeActualDataset();
+    }
     
     /**
      * Tests creating a file
      */
     @Test
-    public void removeWholeDataset() throws ICATAPIException {
-        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving dataset to dataset Id: "+VALID_INVESTIGATION_ID);
+    public void testAddValidDatafiles() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for add a files for datset Id: "+VALID_INVESTIGATION_ID);
         
-        //create invalid dataset, no name
-        Dataset duplicateDataset = getDatasetDuplicate(true);
         
-        //TODO remove this
-        duplicateDataset.setDeleted(false);
-        duplicateDataset.setCreateId(ICAT_ADMIN_USER);
+        //create valid file
+        Dataset file1 = new Dataset();
+        Dataset file2 = new Dataset();
+        Random ram = new Random();
+        file1.setName("unit test create data set not allowed "+ram.nextLong());
+        file2.setName("unit test create data set not allowed "+ram.nextLong());
         
-        Collection<Long> longs =  addAuthorisation(duplicateDataset.getId(), ICAT_ADMIN_USER, ElementType.DATASET, IcatRoles.ICAT_ADMIN);
-        Iterator it = longs.iterator();
+        //find dataset type
+        Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
         
-        DataSetManager.removeDataSet(ICAT_ADMIN_USER, duplicateDataset, em);
+        DatasetType added =  datasetType.iterator().next();
+        file1.setDatasetType(added);
+        file2.setDatasetType(added);
         
-        Dataset modified = em.find(Dataset.class,duplicateDataset.getId() );
-        assertNull("Dataset must not be found in DB "+duplicateDataset, modified);
+        Collection<Dataset> datasets = new ArrayList<Dataset>();
+        datasets.add(file1);
+        datasets.add(file2);
         
-        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
-        IcatAuthorisation childIcatAuth = em.find(IcatAuthorisation.class,it.next());
+        Collection<Dataset> datasetsCreated =  DataSetManager.createDataSets(VALID_USER_FOR_INVESTIGATION, datasets, VALID_INVESTIGATION_ID, em);
         
-        assertNull("IcatAuthorisation[main] must not be found in DB ", icatAuth);
-        assertNull("IcatAuthorisation[child] must not be found in DB ", childIcatAuth);
-        
+        for(Dataset file  : datasetsCreated){
+            Dataset modified = em.find(Dataset.class, file.getId());
+            checkDataset(modified);
+        }
+    }
+    
+    @Test
+    public void removeActualDataset3() throws ICATAPIException{
+        removeActualDataset();
+        removeActualDataset();
     }
     
     /**
      * Tests creating a file
-     */     
-     @Test
-     public void testAddValidDatafiles() throws ICATAPIException {
-         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for add a files for datset Id: "+VALID_INVESTIGATION_ID);
-         
-         
-         //create valid file
-         Dataset file1 = new Dataset();
-         Dataset file2 = new Dataset();
-         Random ram = new Random();
-         file1.setName("unit test create data set not allowed "+ram.nextLong());
-         file2.setName("unit test create data set not allowed "+ram.nextLong());
-         
-         //find dataset type
-         Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
-         
-         DatasetType added =  datasetType.iterator().next();
-         file1.setDatasetType(added);
-         file2.setDatasetType(added);
-         
-         Collection<Dataset> datasets = new ArrayList<Dataset>();
-         datasets.add(file1);
-         datasets.add(file2);
-         
-         Collection<Dataset> datasetsCreated =  DataSetManager.createDataSets(VALID_USER_FOR_INVESTIGATION, datasets, VALID_INVESTIGATION_ID, em);
-         
-         for(Dataset file  : datasetsCreated){
-             Dataset modified = em.find(Dataset.class, file.getId());
-             checkDataset(modified);
-             
-             em.remove(file);
-         }
-     }
-     
-     /**
-      * Tests creating a file
-      */
-     @Test
-     public void getDataset() throws ICATAPIException {
-         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
-         
-         
-         Dataset datasetGot = DataSetManager.getDataSet(VALID_USER_FOR_INVESTIGATION, VALID_DATA_SET_ID,  em);
-         
-         checkDatasetProps(datasetGot);
-         assertFalse("Deleted must be false", datasetGot.isDeleted());
-     }
-     
-     /**
-      * Tests creating a file
-      */
-     @Test(expected=InsufficientPrivilegesException.class)
-     public void getDatasetInvalidUser() throws ICATAPIException {
-         log.info("Testing  user: "+INVALID_USER+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
-         
-         try {
-             Dataset datasetGot = DataSetManager.getDataSet(INVALID_USER, VALID_DATA_SET_ID,  em);
-         } catch (ICATAPIException ex) {
-             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-             throw ex;
-         }
-     }
-     
-     /**
-      * Tests creating a file
-      */
-     @Test
-     public void getDatasets() throws ICATAPIException {
-         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
-         Collection<Long> dsIds = new ArrayList<Long>();
-         dsIds.add(VALID_DATA_SET_ID);
-         
-         Collection<Dataset> datasetsGot = DataSetManager.getDataSets(VALID_USER_FOR_INVESTIGATION, dsIds,  em);
-         
-         for(Dataset set : datasetsGot){
-             checkDatasetProps(set);
-             assertFalse("Deleted must be false", set.isDeleted());
-         }
-     }
-     
-     
-     /**
-      * Tests remove a file, no Id
-      */
-     @Test(expected=NoSuchObjectFoundException.class)
-     public void removeDatasetNoId() throws ICATAPIException {
-         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
-         
-         //create invalid dataset, no name
-         Dataset validDataset = getDataset(true);
-         validDataset.setId(null);
-         
-         try {
-             DataSetManager.removeDataSet(VALID_USER_FOR_INVESTIGATION, validDataset,  em);
-         } catch (ICATAPIException ex) {
-             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
-             throw ex;
-         }
-     }
-     
-     /**
-      * Tests delete a file, no Id
-      */
-     @Test(expected=NoSuchObjectFoundException.class)
-     public void deleteDatasetNoId() throws ICATAPIException {
-         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
-         
-         //create invalid dataset, no name
-         Dataset validDataset = getDataset(true);
-         validDataset.setId(null);
-         
-         try {
-             DataSetManager.deleteDataSet(VALID_USER_FOR_INVESTIGATION, validDataset,  em);
-         } catch (ICATAPIException ex) {
-             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
-             throw ex;
-         }
-     }
-     
-     /**
-      * Tests update a file, no Id
-      */
-     @Test(expected=NoSuchObjectFoundException.class)
-     public void updateDatasetNoId() throws ICATAPIException {
-         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
-         
-         //create invalid dataset, no name
-         Dataset validDataset = getDataset(true);
-         validDataset.setId(null);
-         
-         try {
-             DataSetManager.updateDataSet(VALID_USER_FOR_INVESTIGATION, validDataset,  em);
-         } catch (ICATAPIException ex) {
-             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
-             throw ex;
-         }
-     }
-     
-     
-     private boolean checkDatasetProps(Dataset file){
-         assertTrue("dataset must be in db", em.contains(file));
-         
-         assertNotNull("createId must be not null", file.getCreateId());
-         
-         assertNotNull("createTime must be not null", file.getCreateTime());
-         
-         assertNotNull("modId must be not null", file.getModId());
-          
-         assertNotNull("dataset id must be not null", file.getId());
-         return true;
-     }
-     
-     private boolean checkDataset(Dataset file){
-         assertTrue("dataset must be in db", em.contains(file));
-         
-         assertNotNull("createTime must be not null", file.getCreateTime());
-         
-         assertNotNull("createId must be not null", file.getCreateId());
-         assertEquals("createId must be "+VALID_USER_FOR_INVESTIGATION, VALID_USER_FOR_INVESTIGATION, file.getCreateId());
-         
-         assertNotNull("modId must be not null", file.getModId());
-         assertEquals("modId must be "+VALID_USER_FOR_INVESTIGATION, VALID_USER_FOR_INVESTIGATION, file.getModId());
-         
-         assertNotNull("dataset id must be not null", file.getId());
-         assertEquals("dataset must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, file.getInvestigation().getId());
-         
-         return true;
-     }
-     
-     /**
-      * Tests creating a invalid file, no anme and type
-      */
-     @Test(expected=ValidationException.class)
-     public void testCreateInValidDataset() throws ICATAPIException {
-         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file");
-         
-         //create invalid file, no name
-         Dataset file = new Dataset();
-         try {
-             Dataset dataset = DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
-         }  catch (ICATAPIException ex) {
-             log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
-             throw ex;
-         }
-     }
-     
-     /**
-      * Tests creating a invalid file, name but no type
-      */
-     @Test(expected=ValidationException.class)
-     public void testCreateInValidDataset2() throws ICATAPIException {
-         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file");
-         
-         //create invalid file, no name
-         Dataset file = new Dataset();
-         file.setName("test name");
-         try {
-             Dataset dataset = DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
-         }  catch (ICATAPIException ex) {
-             log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
-             throw ex;
-         }
-     }
-     
-     /**
-      * Tests creating a file
-      */
-     @Test(expected=InsufficientPrivilegesException.class)
-     public void testAddInValidDatasetInvalidUser() throws ICATAPIException {
-         log.info("Testing  user: "+INVALID_USER+ " for creating a file");
-         
-         //create invalid file, no name
-         Dataset file = new Dataset();
-         Random ram = new Random();
-         file.setName("unit test not allowed in "+ram.nextLong());
-         //find dataset type
-         Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
-         
-         file.setDatasetType(datasetType.iterator().next());
-         
-         try {
-             DataSetManager.createDataSet(INVALID_USER, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
-         }  catch (ICATAPIException ex) {
-             log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
-             throw ex;
-         }
-     }
-     
-     /**
-      * Tests creating a file
-      */
-     @Test(expected=InsufficientPrivilegesException.class)
-     public void testCreateInValidDatasetInvalidUser() throws ICATAPIException {
-         log.info("Testing  user: "+INVALID_USER+ " for creating a file");
-         
-         //create invalid file, no name
-         Dataset file = new Dataset();
-         Random ram = new Random();
-         file.setName("unit test not allowed in "+ram.nextLong());
-         //find dataset type
-         Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
-         
-         file.setDatasetType(datasetType.iterator().next());
-         
-         try {
-             DataSetManager.createDataSet(INVALID_USER, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
-         }  catch (ICATAPIException ex) {
-             log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
-             throw ex;
-         }
-     }
-     
-     /**
-      * Tests creating a file
-      */
-     @Test
-     public void testAddValidSampleToDatasetValidUser() throws ICATAPIException {
-         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sample");
-         
-         //update this, this also checks permissions, no need to validate cos just loaded from DB
-         DataSetManager.setDataSetSample(VALID_USER_FOR_INVESTIGATION, VALID_SAMPLE_ID_FOR_INVESTIGATION_ID, VALID_DATA_SET_ID, em);
-     }
-     
-     /**
-      * Tests creating a file
-      */
-     @Test(expected=NoSuchObjectFoundException.class)
-     public void testAddInValidSampleToDatasetValidUser() throws ICATAPIException {
-         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sample");
-         
-         try {
-             DataSetManager.setDataSetSample(VALID_USER_FOR_INVESTIGATION, 3045395454L,VALID_SAMPLE_ID_FOR_INVESTIGATION_ID, em);
-             
-         }  catch (ICATAPIException ex) {
-             log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
-             throw ex;
-         }
-     }
-     
-     
-     private Dataset getDataset(boolean valid){
-         if(valid){
-             //create valid dataset
-             //create valid file
-             Dataset file = new Dataset();
-             Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
-             file.setDatasetType(datasetType.iterator().next());
-             file.setName("unit test create data set");
-             return file;
-         } else {
-             //create invalid dataset
-             Dataset file = new Dataset();
-             return file;
-         }
-     }
-     
-     private Dataset getDatasetDuplicate(boolean last){
-         Dataset dataset = null;
-         if(!last){
-             Collection<Dataset> datasets = (Collection<Dataset>)executeListResultCmd("select d from Dataset d where d.facilityAcquired = 'Y'");
-             dataset = datasets.iterator().next();
-         } else {
-             Collection<Dataset> datasets = (Collection<Dataset>)executeListResultCmd("select d from Dataset d where d.facilityAcquired = 'N' order by d.modTime desc");
-             dataset = datasets.iterator().next();
-             if(dataset == null) throw new RuntimeException("No dataset found");
-         }
-         log.trace(dataset);
-         return dataset;
-     }
-     
-     
-     
-     public static junit.framework.Test suite(){
-         return new JUnit4TestAdapter(TestDataset.class);
-     }
-     
+     */
+    //@Test
+    public void getDataset() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        
+        
+        Dataset datasetGot = DataSetManager.getDataSet(VALID_USER_FOR_INVESTIGATION, VALID_DATA_SET_ID,  em);
+        
+        checkDatasetProps(datasetGot);
+        assertFalse("Deleted must be false", datasetGot.isDeleted());
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    //@Test(expected=InsufficientPrivilegesException.class)
+    public void getDatasetInvalidUser() throws ICATAPIException {
+        log.info("Testing  user: "+INVALID_USER+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        
+        try {
+            Dataset datasetGot = DataSetManager.getDataSet(INVALID_USER, VALID_DATA_SET_ID,  em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    //@Test
+    public void getDatasets() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        Collection<Long> dsIds = new ArrayList<Long>();
+        dsIds.add(VALID_DATA_SET_ID);
+        
+        Collection<Dataset> datasetsGot = DataSetManager.getDataSets(VALID_USER_FOR_INVESTIGATION, dsIds,  em);
+        
+        for(Dataset set : datasetsGot){
+            checkDatasetProps(set);
+            assertFalse("Deleted must be false", set.isDeleted());
+        }
+    }
+    
+    
+    /**
+     * Tests remove a file, no Id
+     */
+    //@Test(expected=NoSuchObjectFoundException.class)
+    public void removeDatasetNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid dataset, no name
+        Dataset validDataset = getDataset(true);
+        validDataset.setId(null);
+        
+        try {
+            DataSetManager.removeDataSet(VALID_USER_FOR_INVESTIGATION, validDataset,  em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests delete a file, no Id
+     */
+    //@Test(expected=NoSuchObjectFoundException.class)
+    public void deleteDatasetNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid dataset, no name
+        Dataset validDataset = getDataset(true);
+        validDataset.setId(null);
+        
+        try {
+            DataSetManager.deleteDataSet(VALID_USER_FOR_INVESTIGATION, validDataset,  em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests update a file, no Id
+     */
+    //@Test(expected=NoSuchObjectFoundException.class)
+    public void updateDatasetNoId() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid dataset, no name
+        Dataset validDataset = getDataset(true);
+        validDataset.setId(null);
+        
+        try {
+            DataSetManager.updateDataSet(VALID_USER_FOR_INVESTIGATION, validDataset,  em);
+        } catch (ICATAPIException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            throw ex;
+        }
+    }
+    
+    
+    private boolean checkDatasetProps(Dataset file){
+        assertTrue("dataset must be in db", em.contains(file));
+        
+        assertNotNull("createId must be not null", file.getCreateId());
+        
+        assertNotNull("createTime must be not null", file.getCreateTime());
+        
+        assertNotNull("modId must be not null", file.getModId());
+        
+        assertNotNull("dataset id must be not null", file.getId());
+        return true;
+    }
+    
+    private boolean checkDataset(Dataset file){
+        assertTrue("dataset must be in db", em.contains(file));
+        
+        assertNotNull("createTime must be not null", file.getCreateTime());
+        
+        assertNotNull("createId must be not null", file.getCreateId());
+        assertEquals("createId must be "+VALID_USER_FOR_INVESTIGATION, VALID_USER_FOR_INVESTIGATION, file.getCreateId());
+        
+        assertNotNull("modId must be not null", file.getModId());
+        assertEquals("modId must be "+VALID_USER_FOR_INVESTIGATION, VALID_USER_FOR_INVESTIGATION, file.getModId());
+        
+        assertNotNull("dataset id must be not null", file.getId());
+        assertEquals("dataset must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, file.getInvestigation().getId());
+        
+        return true;
+    }
+    
+    /**
+     * Tests creating a invalid file, no anme and type
+     */
+    //@Test(expected=ValidationException.class)
+    public void testCreateInValidDataset() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file");
+        
+        //create invalid file, no name
+        Dataset file = new Dataset();
+        try {
+            Dataset dataset = DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        }  catch (ICATAPIException ex) {
+            log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a invalid file, name but no type
+     */
+    //@Test(expected=ValidationException.class)
+    public void testCreateInValidDataset2() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file");
+        
+        //create invalid file, no name
+        Dataset file = new Dataset();
+        file.setName("test name");
+        try {
+            Dataset dataset = DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        }  catch (ICATAPIException ex) {
+            log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    //@Test(expected=InsufficientPrivilegesException.class)
+    public void testAddInValidDatasetInvalidUser() throws ICATAPIException {
+        log.info("Testing  user: "+INVALID_USER+ " for creating a file");
+        
+        //create invalid file, no name
+        Dataset file = new Dataset();
+        Random ram = new Random();
+        file.setName("unit test not allowed in "+ram.nextLong());
+        //find dataset type
+        Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
+        
+        file.setDatasetType(datasetType.iterator().next());
+        
+        try {
+            DataSetManager.createDataSet(INVALID_USER, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        }  catch (ICATAPIException ex) {
+            log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    //@Test(expected=InsufficientPrivilegesException.class)
+    public void testCreateInValidDatasetInvalidUser() throws ICATAPIException {
+        log.info("Testing  user: "+INVALID_USER+ " for creating a file");
+        
+        //create invalid file, no name
+        Dataset file = new Dataset();
+        Random ram = new Random();
+        file.setName("unit test not allowed in "+ram.nextLong());
+        //find dataset type
+        Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
+        
+        file.setDatasetType(datasetType.iterator().next());
+        
+        try {
+            DataSetManager.createDataSet(INVALID_USER, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        }  catch (ICATAPIException ex) {
+            log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
+            throw ex;
+        }
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    //@Test
+    public void testAddValidSampleToDatasetValidUser() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sample");
+        
+        //update this, this also checks permissions, no need to validate cos just loaded from DB
+        DataSetManager.setDataSetSample(VALID_USER_FOR_INVESTIGATION, VALID_SAMPLE_ID_FOR_INVESTIGATION_ID, VALID_DATA_SET_ID, em);
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    //@Test(expected=NoSuchObjectFoundException.class)
+    public void testAddInValidSampleToDatasetValidUser() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sample");
+        
+        try {
+            DataSetManager.setDataSetSample(VALID_USER_FOR_INVESTIGATION, 3045395454L,VALID_SAMPLE_ID_FOR_INVESTIGATION_ID, em);
+            
+        }  catch (ICATAPIException ex) {
+            log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
+            throw ex;
+        }
+    }
+    
+    
+    private Dataset getDataset(boolean valid){
+        if(valid){
+            //create valid dataset
+            //create valid file
+            Dataset file = new Dataset();
+            Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
+            file.setDatasetType(datasetType.iterator().next());
+            file.setName("unit test create data set");
+            return file;
+        } else {
+            //create invalid dataset
+            Dataset file = new Dataset();
+            return file;
+        }
+    }
+    
+    private Dataset getDatasetDuplicate(boolean last){
+        Dataset dataset = null;
+        if(!last){
+            Collection<Dataset> datasets = (Collection<Dataset>)executeListResultCmd("select d from Dataset d where d.facilityAcquired = 'Y'");
+            dataset = datasets.iterator().next();
+        } else {
+            Collection<Dataset> datasets = (Collection<Dataset>)executeListResultCmd("select d from Dataset d where d.facilityAcquired = 'N' order by d.modTime desc");
+            dataset = datasets.iterator().next();
+            if(dataset == null) throw new RuntimeException("No dataset found");
+        }
+        log.trace(dataset);
+        return dataset;
+    }
+    
+    
+    
+    public static junit.framework.Test suite(){
+        return new JUnit4TestAdapter(TestDataset.class);
+    }
+    
 }

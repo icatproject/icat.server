@@ -1181,7 +1181,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         for (Investigation investigation : investigations) {
             boolean found = false;
             
-            Query query = em.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE);
+            Query query = em.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_INVESTIGATION);
             query.setParameter("elementType", ElementType.INVESTIGATION).
                     setParameter("elementId", investigation.getId()).
                     setParameter("userId", VALID_USER_FOR_INVESTIGATION);

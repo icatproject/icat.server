@@ -84,7 +84,7 @@ public class BaseTest {
         em.close();
     }
     
-    protected Collection<Long> addAuthorisation(Long id, String user, ElementType type , IcatRoles role){
+    protected Collection<Long> addAuthorisation(Long id, Long parent, String user, ElementType type , IcatRoles role){
         //add entry for a user who can delete this
         IcatAuthorisation icat = new IcatAuthorisation();
         IcatAuthorisation child = new IcatAuthorisation();
@@ -98,10 +98,21 @@ public class BaseTest {
         icatRole.setActionRemove("Y");
         icat.setRole(icatRole);
         
+        if(type == ElementType.INVESTIGATION){
+            icat.setParentElementId(null);
+            icat.setParentElementType(null);
+        } else if(type == ElementType.DATASET){
+             icat.setParentElementId(parent);
+            icat.setParentElementType(ElementType.INVESTIGATION);
+        } else if(type == ElementType.DATAFILE){
+             icat.setParentElementId(parent);
+            icat.setParentElementType(ElementType.DATASET);
+        }
+        
         //add child
         if(type != ElementType.DATAFILE){
             
-            if(type != ElementType.INVESTIGATION){
+            if(type == ElementType.INVESTIGATION){
                 child.setElementType(ElementType.DATASET);
                 child.setParentElementType(ElementType.INVESTIGATION);
             } else {

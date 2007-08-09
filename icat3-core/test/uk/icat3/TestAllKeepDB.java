@@ -36,12 +36,14 @@ import uk.icat3.search.TestKeywordSearch;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+                               
             TestSample.class,
             TestKeyword.class,
             TestPublication.class,
             TestInvestigator.class,
             TestInvestigation.class,
             TestSampleParameter.class,
+           // TestManagerUtil.class,
             
             TestDataset.class,
             TestDatasetParameter.class,
@@ -51,10 +53,18 @@ import uk.icat3.search.TestKeywordSearch;
             
             TestKeywordSearch.class,
             TestInvalidUser.class,
-                    
+            
             TestDatafileSearch.class,
             TestDatasetSearch.class,
-            TestInvestigationSearch.class
+            TestInvestigationSearch.class,
+            
+            TestGateKeeperAdminInvestigation.class,
+            TestGateKeeperCreatorInvestigation.class,
+            TestGateKeeperDeleterInvestigation.class,
+            TestGateKeeperDownloaderInvestigation.class,
+            TestGateKeeperIcatAdminInvestigation.class,
+            TestGateKeeperReaderInvestigation.class,
+            TestGateKeeperUpdaterInvestigation.class
 })
 public class TestAllKeepDB {
     

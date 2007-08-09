@@ -223,7 +223,7 @@ public class TestInvestigation extends BaseTestClassTX {
         duplicateInvestigation.setDeleted(false);
         duplicateInvestigation.setCreateId(ICAT_ADMIN_USER);
         
-        Collection<Long> longs =  addAuthorisation(duplicateInvestigation.getId(), ICAT_ADMIN_USER, ElementType.INVESTIGATION, IcatRoles.ICAT_ADMIN);
+        Collection<Long> longs =  addAuthorisation(duplicateInvestigation.getId(), null, ICAT_ADMIN_USER, ElementType.INVESTIGATION, IcatRoles.ICAT_ADMIN);
         Iterator it = longs.iterator();
         InvestigationManager.removeInvestigation(ICAT_ADMIN_USER, duplicateInvestigation, em);
         
@@ -485,7 +485,7 @@ public class TestInvestigation extends BaseTestClassTX {
         duplicateInvestigation.setDeleted(false);
         duplicateInvestigation.setCreateId(ICAT_ADMIN_USER);
         
-        Collection<Long> longs =  addAuthorisation(duplicateInvestigation.getId(), ICAT_ADMIN_USER, ElementType.INVESTIGATION, IcatRoles.ICAT_ADMIN);
+        Collection<Long> longs =  addAuthorisation(duplicateInvestigation.getId(), null, ICAT_ADMIN_USER, ElementType.INVESTIGATION, IcatRoles.ICAT_ADMIN);
         Iterator it = longs.iterator();
         InvestigationManager.removeInvestigation(ICAT_ADMIN_USER, duplicateInvestigation, em);
         
@@ -538,9 +538,9 @@ public class TestInvestigation extends BaseTestClassTX {
         
         boolean found = false;
         
-        Query query = em.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_UNIQUE);
+        Query query = em.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_INVESTIGATION);
         query.setParameter("elementType", ElementType.INVESTIGATION).
-                setParameter("elementId", investigation.getId()).
+                setParameter("elementId", investigation.getId()).               
                 setParameter("userId", VALID_USER_FOR_INVESTIGATION);
         
         try{

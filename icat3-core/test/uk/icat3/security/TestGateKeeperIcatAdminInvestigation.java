@@ -224,7 +224,7 @@ public class TestGateKeeperIcatAdminInvestigation extends TestGateKeeperUtil {
     /**
      * Tests icat admin on valid investigation for insert (cos investigation this test insert root)
      *
-     * ACTION_ROOT_INSERT - Y (set null in inv_id for ICAT_ADMIN_USER+"_investigation)
+     * ACTION_ROOT_INSERT - Y (set null in inv_id for ICAT_ADMIN_USER)
      */
     @Test
     public void testIcatAdminInvestigationInsertOnInvestigation() throws ICATAPIException {
@@ -232,7 +232,7 @@ public class TestGateKeeperIcatAdminInvestigation extends TestGateKeeperUtil {
         
         Investigation investigation = getInvestigation(false);
         
-        GateKeeper.performAuthorisation(ICAT_ADMIN_USER+"_investigation", investigation, AccessType.CREATE, em);
+        GateKeeper.performAuthorisation(ICAT_ADMIN_USER, investigation, AccessType.CREATE, em);
         
         //no exception
         assertTrue("This should be true", true);

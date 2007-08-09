@@ -116,6 +116,7 @@ public class TestDatasetSearch extends BaseTestClassTX {
         
         Sample sample = ManagerUtil.find(Sample.class, VALID_SAMPLE_ID_FOR_INVESTIGATION_ID, em);
         
+        
         try {
             Collection<Dataset> datasets = DatasetSearch.getDatasetsBySample(INVALID_USER, sample, em);
         } catch (ICATAPIException ex) {

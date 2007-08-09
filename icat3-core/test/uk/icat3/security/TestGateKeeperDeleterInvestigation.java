@@ -40,7 +40,7 @@ public class TestGateKeeperDeleterInvestigation extends TestGateKeeperUtil {
      */
     @Test
     public void testDeleterReadOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+DELETER_USER+ " for reading investigation Id: "+VALID_INVESTIGATION_ID_FOR_DELETER);
+        log.info("Testing  user: "+DELETER_USER+ " for reading investigation Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
         
         Investigation investigation = getInvestigation(true);
         
@@ -57,7 +57,7 @@ public class TestGateKeeperDeleterInvestigation extends TestGateKeeperUtil {
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDeleterDeleteOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+DELETER_USER+ " for deleting investigation Id: "+VALID_INVESTIGATION_ID_FOR_DELETER);
+        log.info("Testing  user: "+DELETER_USER+ " for deleting investigation Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
         
         Investigation investigation = getInvestigation(true);
         
@@ -94,7 +94,7 @@ public class TestGateKeeperDeleterInvestigation extends TestGateKeeperUtil {
      */
     @Test
     public void testDeleterDownloadOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+DELETER_USER+ " for download investigation Id: "+VALID_INVESTIGATION_ID_FOR_DELETER);
+        log.info("Testing  user: "+DELETER_USER+ " for download investigation Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
         
         Investigation investigation = getInvestigation(true);
         
@@ -111,7 +111,7 @@ public class TestGateKeeperDeleterInvestigation extends TestGateKeeperUtil {
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDeleterRemoveOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+DELETER_USER+ " for remove investigation Id: "+VALID_INVESTIGATION_ID_FOR_DELETER);
+        log.info("Testing  user: "+DELETER_USER+ " for remove investigation Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
         
         Investigation investigation = getInvestigation(true);
         
@@ -131,7 +131,7 @@ public class TestGateKeeperDeleterInvestigation extends TestGateKeeperUtil {
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDeleterUpdateOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+DELETER_USER+ " for update investigation Id: "+VALID_INVESTIGATION_ID_FOR_DELETER);
+        log.info("Testing  user: "+DELETER_USER+ " for update investigation Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
         
         Investigation investigation = getInvestigation(true);
         
@@ -168,7 +168,7 @@ public class TestGateKeeperDeleterInvestigation extends TestGateKeeperUtil {
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDeleterInsertOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+DELETER_USER+ " for insert on investigation Id: "+VALID_INVESTIGATION_ID_FOR_DELETER);
+        log.info("Testing  user: "+DELETER_USER+ " for insert on investigation Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
         
         Investigation investigation = getInvestigation(true);
         
@@ -184,16 +184,16 @@ public class TestGateKeeperDeleterInvestigation extends TestGateKeeperUtil {
     /**
      * Tests deleter on valid investigation for insert (cos investigation this test insert root)
      *
-     * ACTION_ROOT_INSERT - N (set null in inv_id for ICAT_ADMIN_USER+"_investigation, but still does not have root insert action)
+     * ACTION_ROOT_INSERT - N (set null in inv_id for ICAT_ADMIN_USER, but still does not have root insert action)
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDeleterInvestigationInsertOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+DELETER_USER+ " for insert on investigation Id: "+VALID_INVESTIGATION_ID_FOR_DELETER);
+        log.info("Testing  user: "+DELETER_USER+ " for insert on investigation Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
         
         Investigation investigation = getInvestigation(false);
         
         try {
-            GateKeeper.performAuthorisation(DELETER_USER+"_investigation", investigation, AccessType.CREATE, em);
+            GateKeeper.performAuthorisation(DELETER_USER, investigation, AccessType.CREATE, em);
         } catch (InsufficientPrivilegesException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
@@ -208,7 +208,7 @@ public class TestGateKeeperDeleterInvestigation extends TestGateKeeperUtil {
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDeleterSetFAOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+DELETER_USER+ " for set FA on investigation Id: "+VALID_INVESTIGATION_ID_FOR_DELETER);
+        log.info("Testing  user: "+DELETER_USER+ " for set FA on investigation Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
         
         Investigation investigation = getInvestigation(true);
         
@@ -229,7 +229,7 @@ public class TestGateKeeperDeleterInvestigation extends TestGateKeeperUtil {
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testDeleterInsertKeywordOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+DELETER_USER+ " for insert keyword on investigation Id: "+VALID_INVESTIGATION_ID_FOR_DELETER);
+        log.info("Testing  user: "+DELETER_USER+ " for insert keyword on investigation Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
         
         Investigation investigation = getInvestigation(true);
         Keyword keyword = new Keyword();
@@ -252,7 +252,7 @@ public class TestGateKeeperDeleterInvestigation extends TestGateKeeperUtil {
      */
     @Test
     public void testDeleterUpdateKeywordOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+DELETER_USER+ " for update keyword on investigation Id: "+VALID_INVESTIGATION_ID_FOR_DELETER);
+        log.info("Testing  user: "+DELETER_USER+ " for update keyword on investigation Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
         
         Investigation investigation = getInvestigation(true);
         Keyword keyword = new Keyword();
@@ -265,13 +265,33 @@ public class TestGateKeeperDeleterInvestigation extends TestGateKeeperUtil {
     }
     
     /**
+     * Tests creator on valid Dataset for update keyword
+     *
+     * MANAGE_USERS - N
+     */
+    @Test(expected=InsufficientPrivilegesException.class)
+    public void testDeleterManageUsersOnDataset() throws ICATAPIException {
+        log.info("Testing  user: "+DELETER_USER+ " for ManageUsers on Dataset Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
+        
+        Investigation investigation = getInvestigation(true);
+        
+        try {
+            GateKeeper.performAuthorisation(DELETER_USER, investigation, AccessType.MANAGE_USERS, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+    /**
      * Tests deleter on valid investigation for update keyword
      *
      * ACTION_REMOVE - N
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void testtDeleterRemoveKeywordOnInvestigation() throws ICATAPIException {
-        log.info("Testing  user: "+DELETER_USER+ " for remove keyword on investigation Id: "+VALID_INVESTIGATION_ID_FOR_DELETER);
+        log.info("Testing  user: "+DELETER_USER+ " for remove keyword on investigation Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
         
         Investigation investigation = getInvestigation(true);
         Keyword keyword = new Keyword();
@@ -279,6 +299,29 @@ public class TestGateKeeperDeleterInvestigation extends TestGateKeeperUtil {
         
         try {
             GateKeeper.performAuthorisation(DELETER_USER, keyword, AccessType.REMOVE, em);
+        } catch (InsufficientPrivilegesException ex) {
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
+        }
+    }
+    
+     /**
+     * Tests admin on valid Dataset for update keyword
+     *
+     * ACTION_REMOVE - N is same create id as user
+     */
+    @Test(expected=InsufficientPrivilegesException.class)
+    public void testAdminRemoveDatasetParameterOnDataset2() throws ICATAPIException {
+        log.info("Testing  user: "+DELETER_USER+ " for remove DatasetParameter on Dataset Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
+                
+        Investigation investigation = getInvestigation(true);
+        Keyword keyword = new Keyword();
+        keyword.setCreateId(DELETER_USER);
+        keyword.setInvestigation(investigation);
+                
+        try {
+        GateKeeper.performAuthorisation(DELETER_USER, keyword, AccessType.REMOVE, em);
         } catch (InsufficientPrivilegesException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));

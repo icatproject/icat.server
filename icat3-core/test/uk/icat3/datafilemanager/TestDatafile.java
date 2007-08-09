@@ -28,6 +28,7 @@ import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataFileManager;
+import uk.icat3.manager.ManagerUtil;
 import uk.icat3.util.BaseTestClassTX;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.IcatRoles;
@@ -140,7 +141,7 @@ public class TestDatafile extends BaseTestClassTX {
         duplicateDatafile.setDeleted(false);
         duplicateDatafile.setCreateId(ICAT_ADMIN_USER);
         
-        Collection<Long> longs =  addAuthorisation(duplicateDatafile.getId(), ICAT_ADMIN_USER, ElementType.DATAFILE, IcatRoles.ICAT_ADMIN);
+        Collection<Long> longs =  addAuthorisation(duplicateDatafile.getId(), duplicateDatafile.getDataset().getId(), ICAT_ADMIN_USER, ElementType.DATAFILE, IcatRoles.ICAT_ADMIN);
         Iterator it = longs.iterator();
         
         DataFileManager.removeDataFile(ICAT_ADMIN_USER, duplicateDatafile, em);
@@ -151,7 +152,7 @@ public class TestDatafile extends BaseTestClassTX {
         IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
         
         it = longs.iterator();
-        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);     
+        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);
     }
     
     /**
@@ -297,9 +298,7 @@ public class TestDatafile extends BaseTestClassTX {
             assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, datafileParameter.getDatafile().getDataset().getInvestigation().getId());
         }
         
-        em.remove(dataFile);
-        
-        assertFalse("file must be deleted "+dataFile.getId(), em.contains(dataFile));
+        removeActualDatafile();
     }
     
     /**
@@ -325,9 +324,9 @@ public class TestDatafile extends BaseTestClassTX {
             checkDatafile(modified);
             assertNotNull("Format cannot be null", modified.getDatafileFormat());
             
-            em.remove(file);
-            assertFalse("file must be deleted "+file.getId(), em.contains(file));
         }
+        
+        removeActualDatafile();
     }
     
     /**

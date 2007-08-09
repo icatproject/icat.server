@@ -181,24 +181,12 @@ public class TestDatafileParameter extends BaseTestClassTX {
         
         duplicateDatafileParameter.setDeleted(false);
         duplicateDatafileParameter.setCreateId(ICAT_ADMIN_USER);
-        
-        Collection<Long> longs =  addAuthorisation(duplicateDatafileParameter.getDatafile().getId(), ICAT_ADMIN_USER, ElementType.DATAFILE, IcatRoles.ICAT_ADMIN);
-        Iterator it = longs.iterator();
-        
+                      
         DataFileManager.removeDatafileParameter(ICAT_ADMIN_USER, duplicateDatafileParameter, em);
         
         DatafileParameter modified = em.find(DatafileParameter.class,duplicateDatafileParameter.getDatafileParameterPK() );
         assertNull("DatafileParameter must not be found in DB "+duplicateDatafileParameter, modified);
-        
-        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
-        em.remove(icatAuth);
-        
-        it = longs.iterator();
-        icatAuth = em.find(IcatAuthorisation.class,it.next());
-        
-        it = longs.iterator();
-        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);
-        
+      
     }
     
     /**

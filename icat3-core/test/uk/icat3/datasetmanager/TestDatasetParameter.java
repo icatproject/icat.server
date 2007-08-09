@@ -182,15 +182,15 @@ public class TestDatasetParameter extends BaseTestClassTX {
         duplicateDatasetParameter.setDeleted(false);
         duplicateDatasetParameter.setCreateId(ICAT_ADMIN_USER);
         
-        Collection<Long> longs =  addAuthorisation(duplicateDatasetParameter.getDataset().getId(), ICAT_ADMIN_USER, ElementType.DATASET, IcatRoles.ICAT_ADMIN);
-        Iterator it = longs.iterator();
+       /* Collection<Long> longs =  addAuthorisation(duplicateDatasetParameter.getDataset().getId(), duplicateDatasetParameter.getDataset().getInvestigation().getId(), ICAT_ADMIN_USER, ElementType.DATASET, IcatRoles.ICAT_ADMIN);
+        Iterator it = longs.iterator();*/
         
         DataSetManager.removeDataSetParameter(ICAT_ADMIN_USER, duplicateDatasetParameter, em);
         
         DatasetParameter modified = em.find(DatasetParameter.class,duplicateDatasetParameter.getDatasetParameterPK() );
         assertNull("DatasetParameter must not be found in DB "+duplicateDatasetParameter, modified);
         
-        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
+       /* IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
         IcatAuthorisation childIcatAuth = em.find(IcatAuthorisation.class,it.next());
         em.remove(icatAuth);
         em.remove(childIcatAuth);
@@ -202,6 +202,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         it = longs.iterator();
         assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);
         assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", childIcatAuth);
+        * */
     }
     
     /**

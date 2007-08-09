@@ -22,6 +22,7 @@ import uk.icat3.datafilemanager.TestDatafile;
 import uk.icat3.datafilemanager.TestDatafileParameter;
 import uk.icat3.datasetmanager.TestDataset;
 import uk.icat3.datasetmanager.TestDatasetParameter;
+import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.investigationmanager.TestInvestigation;
 import uk.icat3.investigationmanager.TestInvestigator;
 import uk.icat3.investigationmanager.TestKeyword;
@@ -34,10 +35,15 @@ import uk.icat3.search.TestDatasetSearch;
 import uk.icat3.search.TestInvalidUser;
 import uk.icat3.search.TestInvestigationSearch;
 import uk.icat3.search.TestKeywordSearch;
+import uk.icat3.security.TestGateKeeperAdminDataset;
 import uk.icat3.security.TestGateKeeperAdminInvestigation;
+import uk.icat3.security.TestGateKeeperCreatorDataset;
 import uk.icat3.security.TestGateKeeperCreatorInvestigation;
+import uk.icat3.security.TestGateKeeperDeleterDataset;
 import uk.icat3.security.TestGateKeeperDeleterInvestigation;
+import uk.icat3.security.TestGateKeeperDownloaderDataset;
 import uk.icat3.security.TestGateKeeperDownloaderInvestigation;
+import uk.icat3.security.TestGateKeeperIcatAdminDataset;
 import uk.icat3.security.TestGateKeeperIcatAdminInvestigation;
 import uk.icat3.security.TestGateKeeperReaderInvestigation;
 import uk.icat3.security.TestGateKeeperUpdaterInvestigation;
@@ -45,8 +51,9 @@ import uk.icat3.util.ExecuteDatabaseScript;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    
-               
+                   
+      
+                    
             TestSample.class,
             TestKeyword.class,
             TestPublication.class,
@@ -54,7 +61,8 @@ import uk.icat3.util.ExecuteDatabaseScript;
             TestInvestigation.class,
             TestSampleParameter.class,
            // TestManagerUtil.class,
-            
+             //  EntityBaseBean.class,
+               
             TestDataset.class,
             TestDatasetParameter.class,
             
@@ -74,7 +82,13 @@ import uk.icat3.util.ExecuteDatabaseScript;
             TestGateKeeperDownloaderInvestigation.class,
             TestGateKeeperIcatAdminInvestigation.class,
             TestGateKeeperReaderInvestigation.class,
-            TestGateKeeperUpdaterInvestigation.class
+            TestGateKeeperUpdaterInvestigation.class,
+                    
+            TestGateKeeperAdminDataset.class,
+            TestGateKeeperCreatorDataset.class,
+            TestGateKeeperDeleterDataset.class,
+            TestGateKeeperDownloaderDataset.class,
+            TestGateKeeperIcatAdminDataset.class
 })
         public class TestAll {
     
