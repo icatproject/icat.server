@@ -245,7 +245,7 @@ public class InvestigationManager extends ManagerUtil {
         
         return true;
     }
-    
+           
     ////////////////////        End of Delete Commands           /////////////////////////
     
     
@@ -254,8 +254,8 @@ public class InvestigationManager extends ManagerUtil {
     /**
      * Adds a role for a user to an investigation.
      */
-    public static IcatAuthorisation addAuthorisation(String userId, String toAddUserId, String toAddRole, Long id, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-        return addAuthorisation(userId, toAddUserId, toAddRole, id, ElementType.INVESTIGATION, manager);
+    public static IcatAuthorisation addAuthorisation(String userId, String toAddUserId, String toAddRole, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        return addAuthorisation(userId, toAddUserId, toAddRole, investigationId, ElementType.INVESTIGATION, manager);
     }
     
     /**

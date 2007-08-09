@@ -15,6 +15,7 @@ import java.util.Collection;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.InvestigationType;
@@ -761,7 +762,7 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return List of {@link IcatRole}s
      */
-    public static Collection<String> listAllRoles(EntityManager manager){
+    public static Collection<IcatRole> listAllRoles(EntityManager manager){
         log.trace("listAllRoles(EntityManager)");
         return  manager.createNamedQuery(ALL_ROLES).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }

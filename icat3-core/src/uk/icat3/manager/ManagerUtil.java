@@ -397,31 +397,31 @@ public class ManagerUtil {
      * Gets all the IcatAuthorisations for a investigation/dataset/datafile if the user has manager users action on that investigation
      *
      */
-    protected static Collection<IcatAuthorisation> getAuthorisations(String userId, Long id, ElementType type, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
+    protected static Collection<IcatAuthorisation> getAuthorisations(String userId, Long elementId, ElementType type, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
         EntityBaseBean entityObject = null;
         Query query = null;
         
         if(type == ElementType.INVESTIGATION){
-            entityObject = find(Investigation.class, id, manager);
+            entityObject = find(Investigation.class, elementId, manager);
             query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDALL_FOR_ELEMENTTYPE);
         } else if(type == ElementType.DATASET){
-            entityObject = find(Dataset.class, id, manager);
+            entityObject = find(Dataset.class, elementId, manager);
             query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDALL_FOR_ELEMENTTYPE);
         } else if(type == ElementType.DATAFILE){
-            entityObject = find(Datafile.class, id, manager);
+            entityObject = find(Datafile.class, elementId, manager);
             query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDALL_FOR_ELEMENTTYPE);
         }
         
         GateKeeper.performAuthorisation(userId, entityObject, AccessType.MANAGE_USERS, manager);
         
         //user has access to read all the roles etc
-        query.setParameter("elementId", id);
+        query.setParameter("elementId", elementId);
         query.setParameter("userId", null); //not searching by userId
         query.setParameter("elementType", type);
         
         Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
         
-        log.debug("Found "+icatAuthorisations.size()+" authorisation(s) for "+type+"[id:"+id+"]");
+        log.debug("Found "+icatAuthorisations.size()+" authorisation(s) for "+type+"[id:"+elementId+"]");
         return icatAuthorisations;
     }
     
@@ -429,36 +429,36 @@ public class ManagerUtil {
      * Gets all the IcatAuthorisations for a investigation/dataset/datafile and removes them
      *
      */
-    protected static boolean removeElementAuthorisations(Long id, ElementType type, EntityManager manager) throws NoSuchObjectFoundException {
+    protected static boolean removeElementAuthorisations(Long authorisationId, ElementType type, EntityManager manager) throws NoSuchObjectFoundException {
         EntityBaseBean entityObject = null;
         Query query = null;
         
         if(type == ElementType.INVESTIGATION){
-            entityObject = find(Investigation.class, id, manager);
+            entityObject = find(Investigation.class, authorisationId, manager);
             query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID);
         } else if(type == ElementType.DATASET){
-            entityObject = find(Dataset.class, id, manager);
+            entityObject = find(Dataset.class, authorisationId, manager);
             query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID);
         } else if(type == ElementType.DATAFILE){
-            entityObject = find(Datafile.class, id, manager);
+            entityObject = find(Datafile.class, authorisationId, manager);
             query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID);
         }
         
         //user has access to read all the roles etc
-        query.setParameter("elementId", id);
+        query.setParameter("elementId", authorisationId);
         query.setParameter("elementType", type);
         
         Collection<IcatAuthorisation> icatAuthorisations = (Collection<IcatAuthorisation>)query.getResultList();
         
-        log.debug("Found "+icatAuthorisations.size()+" authorisation(s) for "+type+"[id:"+id+"]");
+        log.debug("Found "+icatAuthorisations.size()+" authorisation(s) for "+type+"[id:"+authorisationId+"]");
         
         if(type == ElementType.INVESTIGATION){
-            Investigation investigation  = findObject(Investigation.class, id, manager);
+            Investigation investigation  = findObject(Investigation.class, authorisationId, manager);
             for (Dataset ds : investigation.getDatasetCollection()) {
                 removeElementAuthorisations(ds.getId(), ElementType.DATASET, manager);
             }
         } else if(type == ElementType.DATASET){
-            Dataset ds  = findObject(Dataset.class, id, manager);
+            Dataset ds  = findObject(Dataset.class, authorisationId, manager);
             for (Datafile df : ds.getDatafileCollection()) {
                 removeElementAuthorisations(df.getId(), ElementType.DATAFILE, manager);
             }
@@ -480,6 +480,20 @@ public class ManagerUtil {
         return true;
     }
     
+     /**
+     * Deletes Authorisation
+     */
+    public static void deleteAuthorisation(String userId, Long authorisationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+        deleteAuthorisation(userId, authorisationId, AccessType.DELETE, manager);
+        
+    }
+    /**
+     * Removes Authorisation
+     */
+    public static void removeAuthorisation(String userId, Long authorisationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+        deleteAuthorisation(userId, authorisationId, AccessType.REMOVE, manager);
+    }
+    
     /**
      * Deletes / Removes a entry in the icat authorisation table
      *
@@ -490,10 +504,10 @@ public class ManagerUtil {
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void deleteAuthorisation(String userId, Long id, AccessType type, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
-        log.trace("deleteAuthorisation("+userId+", "+id+", "+type+", EntityManager)");
+    protected static void deleteAuthorisation(String userId, Long authorisationId, AccessType type, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+        log.trace("deleteAuthorisation("+userId+", "+authorisationId+", "+type+", EntityManager)");
         
-        IcatAuthorisation icatAuthorisation = find(IcatAuthorisation.class, id, manager);
+        IcatAuthorisation icatAuthorisation = find(IcatAuthorisation.class, authorisationId, manager);
         
         //if elementId is null, then not there
         if(icatAuthorisation.getElementId() == null) throw new NoSuchObjectFoundException(icatAuthorisation+" not found.");
@@ -539,18 +553,18 @@ public class ManagerUtil {
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      */
-    protected static IcatAuthorisation addAuthorisation(String userId, String toAddUserId, String toAddRole, Long id, ElementType type, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
-        log.trace("addAuthorisation("+userId+", adding "+toAddUserId+" as role: "+toAddRole+" to investigation:"+id+", EntityManager)");
+    protected static IcatAuthorisation addAuthorisation(String userId, String toAddUserId, String toAddRole, Long elementId, ElementType type, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
+        log.trace("addAuthorisation("+userId+", adding "+toAddUserId+" as role: "+toAddRole+" to investigation:"+elementId+", EntityManager)");
         
         EntityBaseBean rootElement = null;
         
         //check id is a valid element
         if(type == ElementType.INVESTIGATION){
-            rootElement = find(Investigation.class, id, manager);
+            rootElement = find(Investigation.class, elementId, manager);
         } else if(type == ElementType.DATASET){
-            rootElement = find(Dataset.class, id, manager);
+            rootElement = find(Dataset.class, elementId, manager);
         } else if(type == ElementType.DATAFILE){
-            rootElement = find(Datafile.class, id, manager);
+            rootElement = find(Datafile.class, elementId, manager);
         }
         
         //check permissions on investigation
@@ -668,7 +682,7 @@ public class ManagerUtil {
      * @return
      * @throws uk.icat3.exceptions.ValidationException
      */
-    public static IcatRole getRole(String role, EntityManager manager) throws ValidationException{
+    protected static IcatRole getRole(String role, EntityManager manager) throws ValidationException{
         IcatRole icatRole = manager.find(IcatRole.class, role);
         if(icatRole == null) throw new ValidationException(role+" is not a valid role.");
         else return icatRole;
@@ -677,7 +691,7 @@ public class ManagerUtil {
     /**
      * Gets the inv, ds, or df associated with the icatAuthorisation
      */
-    public static EntityBaseBean getRootElement(IcatAuthorisation icatAuthorisation, EntityManager manager) throws NoSuchObjectFoundException{
+    protected static EntityBaseBean getRootElement(IcatAuthorisation icatAuthorisation, EntityManager manager) throws NoSuchObjectFoundException{
         if(icatAuthorisation.getElementType() == ElementType.INVESTIGATION){
             return  find(Investigation.class, icatAuthorisation.getElementId(), manager);
         } else if(icatAuthorisation.getElementType() == ElementType.DATASET){
@@ -690,7 +704,7 @@ public class ManagerUtil {
     /**
      * Adds an authorisation to a inv, ds, df
      */
-    public static IcatAuthorisation persistAuthorisation(String userId, String addedId, IcatRole role, ElementType elementType, Long id, ElementType parentElementType,  Long parentId, Long usercChildRecord, EntityManager manager) throws ValidationException{
+    protected static IcatAuthorisation persistAuthorisation(String userId, String addedId, IcatRole role, ElementType elementType, Long id, ElementType parentElementType,  Long parentId, Long usercChildRecord, EntityManager manager) throws ValidationException{
         //now add authorisation
         IcatAuthorisation icatAuthorisation = new IcatAuthorisation();
         

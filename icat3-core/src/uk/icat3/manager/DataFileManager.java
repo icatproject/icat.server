@@ -484,13 +484,13 @@ public class DataFileManager extends ManagerUtil {
         //  Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
         
         //find the dataset
-        DatafileParameter datafileParameterManaged = find(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);
+        DatafileParameter datafileParameterManaged = findObject(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);
         
         //ok, now check permissions
         GateKeeper.performAuthorisation(userId, datafileParameterManaged, AccessType.DELETE, manager);
         //String facilityUserId = getFacilityUserId(userId, manager);
         
         datafileParameterManaged.setModId(userId);
-        datafileParameterManaged.setDeleted(true);
+        datafileParameterManaged.setDeleted(!datafileParameterManaged.isDeleted());
     }
 }

@@ -571,14 +571,14 @@ public class DataSetManager extends ManagerUtil {
         // Long datasetId = dataSetParameter.getDatasetParameterPK().getDatasetId();
         
         //find the dataset
-        DatasetParameter dataSetParameterManaged = find(DatasetParameter.class, dataSetParameter.getDatasetParameterPK(), manager);
+        DatasetParameter dataSetParameterManaged = findObject(DatasetParameter.class, dataSetParameter.getDatasetParameterPK(), manager);
         
         //ok, now check permissions
         GateKeeper.performAuthorisation(userId, dataSetParameterManaged, AccessType.DELETE, manager);
         //String facilityUserId = getFacilityUserId(userId, manager);
         
         dataSetParameterManaged.setModId(userId);
-        dataSetParameterManaged.setDeleted(true);
+        dataSetParameterManaged.setDeleted(!dataSetParameterManaged.isDeleted());
     }
     
     /**
