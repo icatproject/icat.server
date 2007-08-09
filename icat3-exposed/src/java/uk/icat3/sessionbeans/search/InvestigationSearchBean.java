@@ -9,6 +9,7 @@
 
 package uk.icat3.sessionbeans.search;
 
+import java.security.Policy.Parameters;
 import java.util.Collection;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -19,8 +20,11 @@ import javax.jws.WebService;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.InvestigationType;
+import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.InvestigationSearch;
@@ -330,11 +334,11 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
     }
     
     /**
+     *  Lists all the instruments in the DB
      *
      * @param sessionId
-     * @throws uk.icat3.exceptions.SessionException
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
-     * @return collection
+     * @return collection of instruments
      */
     @WebMethod()
     public Collection<Instrument> listInstruments(String sessionId) throws SessionException {
@@ -342,6 +346,52 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
         String userId = user.getUserIdFromSessionId(sessionId);
         
         return InvestigationSearch.listAllInstruments(manager);
+    }
+    
+    /**
+     *  Lists all the rols in the DB
+     *
+     * @param sessionId
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection of rols
+     */
+    @WebMethod()
+    public Collection<IcatRole> listRoles(String sessionId) throws SessionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return InvestigationSearch.listAllRoles(manager);
+    }
+    
+    
+    /**
+     *  Lists all the inv types in the DB
+     *
+     * @param sessionId
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection of rols
+     */
+    @WebMethod()
+    public Collection<InvestigationType> listInvestigationTypes(String sessionId) throws SessionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return InvestigationSearch.listAllInvestigationTypes(manager);
+    }
+    
+    /**
+     *  Lists all the parameters in the DB
+     *
+     * @param sessionId
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection of rols
+     */
+    @WebMethod()
+    public Collection<Parameter> listParameters(String sessionId) throws SessionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return InvestigationSearch.listAllParameters(manager);
     }
     
 }

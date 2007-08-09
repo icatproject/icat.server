@@ -7,6 +7,7 @@ import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.DatafileParameterPK;
 import uk.icat3.entity.DatasetParameterPK;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
@@ -45,5 +46,15 @@ public interface DatafileManagerLocal {
     
     public void deleteDataFileParameter(String sessionId, DatafileParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException ;
     
-     
+       //auth bit
+    public Collection<IcatAuthorisation> getAuthorisations(String sessionId, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException ;
+    
+    public IcatAuthorisation addAuthorisation(String sessionId, String toAddUserId, String toAddRole, Long datafileId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException;
+    
+    public void deleteAuthorisation(String sessionId, Long authorisationId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException;
+    
+    public void removeAuthorisation(String sessionId, Long authorisationId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException;
+    
+    public void updateAuthorisation(String sessionId, String toChangetoRole, Long authorisationId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException;
+
 }

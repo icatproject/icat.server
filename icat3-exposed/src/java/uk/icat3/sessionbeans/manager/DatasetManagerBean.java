@@ -23,11 +23,13 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.DatasetParameterPK;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataSetManager;
+import uk.icat3.manager.InvestigationManager;
 import uk.icat3.manager.ManagerUtil;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
@@ -113,7 +115,7 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
         Dataset dataSet = DataSetManager.getDataSet(userId, datasetId, manager);
         
         //now set the investigation includes for JAXB web service
-        ManagerUtil.getDatasetInformation(dataSet, includes);
+        ManagerUtil.getDatasetInformation(userId, dataSet, includes, manager);
         
         return dataSet;
     }
@@ -322,4 +324,47 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
         
         DataSetManager.setDataSetSample(userId, sampleId, datasetId, manager);
     }
+    
+     ////////////////////////////////////   Authorisation Section //////////////////////////////////////////////
+    @WebMethod()
+    public Collection<IcatAuthorisation> getAuthorisations(String sessionId, Long dataSetId) throws InsufficientPrivilegesException, NoSuchObjectFoundException, SessionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return DataSetManager.getAuthorisations(userId, dataSetId, manager);
+    }
+    
+    @WebMethod()
+    public IcatAuthorisation addAuthorisation(String sessionId, String toAddUserId, String toAddRole, Long dataSetId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return DataSetManager.addAuthorisation(userId, toAddUserId, toAddRole, dataSetId, manager);
+    }
+    
+    @WebMethod()
+    public void deleteAuthorisation(String sessionId, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        DataSetManager.deleteAuthorisation(userId, authorisationId, manager);
+    }
+    
+    @WebMethod()
+    public void removeAuthorisation(String sessionId, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        DataSetManager.removeAuthorisation(userId, authorisationId, manager);
+    }
+    
+    @WebMethod()
+    public void updateAuthorisation(String sessionId, String toChangetoRole, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        DataSetManager.updateAuthorisation(userId, toChangetoRole, authorisationId, manager);
+    }    
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
 }

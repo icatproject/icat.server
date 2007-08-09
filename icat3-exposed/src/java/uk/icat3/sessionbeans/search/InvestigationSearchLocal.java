@@ -3,8 +3,11 @@ package uk.icat3.sessionbeans.search;
 
 import java.util.Collection;
 import javax.ejb.Local;
+import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.InvestigationType;
+import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.util.InvestigationInclude;
@@ -47,4 +50,10 @@ public interface InvestigationSearchLocal {
     
     public Collection<Instrument> listInstruments(String sessionId) throws SessionException ;
     
-}
+    public Collection<IcatRole> listRoles(String sessionId) throws SessionException ;
+    
+    public Collection<Parameter> listParameters(String sessionId) throws SessionException ;
+    
+    public Collection<InvestigationType> listInvestigationTypes(String sessionId) throws SessionException ;
+        
+    }

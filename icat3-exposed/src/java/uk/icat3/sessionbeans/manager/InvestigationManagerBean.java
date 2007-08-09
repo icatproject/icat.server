@@ -19,6 +19,7 @@ import javax.jws.WebService;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.InvestigatorPK;
@@ -104,7 +105,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         Investigation investigation = InvestigationManager.getInvestigation(userId, investigationId, manager);
         
         //now set the investigation includes for JAXB web service
-        ManagerUtil.getInvestigationInformation(investigation, includes);
+        ManagerUtil.getInvestigationInformation(userId, investigation, includes, manager);
         
         return investigation;
     }
@@ -134,7 +135,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         Collection<Investigation> investigations = InvestigationManager.getInvestigations(userId, investigationIds, manager);
         
         //now set the investigation includes for JAXB web service
-        ManagerUtil.getInvestigationInformation(investigations, includes);
+        ManagerUtil.getInvestigationInformation(userId, investigations, includes, manager);
         
         return investigations;
     }
@@ -608,4 +609,48 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         
         return (SampleParameter) InvestigationManager.addInvestigationObject(userId, sampleParameter, investigationId, manager);
     }
+    
+    
+    ////////////////////////////////////   Authorisation Section //////////////////////////////////////////////
+    @WebMethod()
+    public Collection<IcatAuthorisation> getAuthorisations(String sessionId, Long investigationId) throws InsufficientPrivilegesException, NoSuchObjectFoundException, SessionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return InvestigationManager.getAuthorisations(userId, investigationId, manager);
+    }
+    
+    @WebMethod()
+    public IcatAuthorisation addAuthorisation(String sessionId, String toAddUserId, String toAddRole, Long investigationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return InvestigationManager.addAuthorisation(userId, toAddUserId, toAddRole, investigationId, manager);
+    }
+    
+    @WebMethod()
+    public void deleteAuthorisation(String sessionId, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        InvestigationManager.deleteAuthorisation(userId, authorisationId, manager);
+    }
+    
+    @WebMethod()
+    public void removeAuthorisation(String sessionId, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        InvestigationManager.removeAuthorisation(userId, authorisationId, manager);
+    }
+    
+    @WebMethod()
+    public void updateAuthorisation(String sessionId, String toChangetoRole, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        InvestigationManager.updateAuthorisation(userId, toChangetoRole, authorisationId, manager);
+    }    
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
 }

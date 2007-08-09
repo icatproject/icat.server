@@ -24,6 +24,7 @@ import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.DatafileParameterPK;
 import uk.icat3.entity.DatasetParameterPK;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
@@ -329,4 +330,48 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         
         DataFileManager.deleteDatafileParameter(userId, datafileParameter, manager);
     }    
+    
+    
+      ////////////////////////////////////   Authorisation Section //////////////////////////////////////////////
+    @WebMethod()
+    public Collection<IcatAuthorisation> getAuthorisations(String sessionId, Long dataFileId) throws InsufficientPrivilegesException, NoSuchObjectFoundException, SessionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return DataFileManager.getAuthorisations(userId, dataFileId, manager);
+    }
+    
+    @WebMethod()
+    public IcatAuthorisation addAuthorisation(String sessionId, String toAddUserId, String toAddRole, Long dataFileId ) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return DataFileManager.addAuthorisation(userId, toAddUserId, toAddRole, dataFileId, manager);
+    }
+    
+    @WebMethod()
+    public void deleteAuthorisation(String sessionId, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        DataFileManager.deleteAuthorisation(userId, authorisationId, manager);
+    }
+    
+    @WebMethod()
+    public void removeAuthorisation(String sessionId, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        DataFileManager.removeAuthorisation(userId, authorisationId, manager);
+    }
+    
+    @WebMethod()
+    public void updateAuthorisation(String sessionId, String toChangetoRole, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        DataFileManager.updateAuthorisation(userId, toChangetoRole, authorisationId, manager);
+    }    
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
 }

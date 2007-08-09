@@ -30,12 +30,15 @@ import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.DatasetParameterPK;
 import uk.icat3.entity.DatasetStatus;
 import uk.icat3.entity.DatasetType;
+import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.InvestigationType;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.InvestigatorPK;
 import uk.icat3.entity.Keyword;
 import uk.icat3.entity.KeywordPK;
+import uk.icat3.entity.Parameter;
 import uk.icat3.entity.Publication;
 import uk.icat3.entity.Sample;
 import uk.icat3.entity.SampleParameter;
@@ -268,6 +271,21 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection<Instrument> listInstruments(@WebParam(name="sessionId") String sessionId) throws SessionException {
         return investigationSearchLocal.listInstruments(sessionId);
     }
+    
+    @WebMethod()
+    public Collection<IcatRole> listRoles(@WebParam(name="sessionId") String sessionId) throws SessionException {
+        return investigationSearchLocal.listRoles(sessionId);
+    }
+    
+    @WebMethod()
+    public Collection<Parameter> listParameters(@WebParam(name="sessionId") String sessionId) throws SessionException {
+        return investigationSearchLocal.listParameters(sessionId);
+    }
+    
+    @WebMethod()
+    public Collection<InvestigationType> listInvestigationTypes(@WebParam(name="sessionId") String sessionId) throws SessionException {
+        return investigationSearchLocal.listInvestigationTypes(sessionId);
+    }
     ///////////////////////////     End of Investigation Search methods  /////////////////////////////////////////
     
     
@@ -446,7 +464,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     
     /**
-     * Deletes the investigator from investigation, depending on whether the user has permission to remove this Investigation object.
+     * Deletes/Undeletes the investigator from investigation, depending on whether the user has permission to remove this Investigation object.
      *
      * @param sessionId sessionid of the user.
      * @param investigatorPK {@link InvestigatorPK} object to be deleted
@@ -460,7 +478,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     
     /**
-     * Deletes the keyword from investigation, depending on whether the user has permission to delete this Investigation object.
+     * Deletes/Undeletes the keyword from investigation, depending on whether the user has permission to delete this Investigation object.
      *
      * @param sessionId sessionid of the user.
      * @param keywordPK {@link KeywordPK} object to be deleted
@@ -474,7 +492,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     
     /**
-     * Deleted the publication from investigation, depending on whether the user has permission to remove this Investigation object.
+     * Deletes/Undeletes the publication from investigation, depending on whether the user has permission to remove this Investigation object.
      *
      * @param sessionId sessionid of the user.
      * @param publicationId ID of object to be deleted
@@ -488,7 +506,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     
     /**
-     * Deletes the sample from the investigation, depending on whether the user has permission to remove this Investigation object.
+     * Deletes/Undeletes the sample from the investigation, depending on whether the user has permission to remove this Investigation object.
      *
      * @param sessionId sessionid of the user.
      * @param sampleId primary key object to be deleted
@@ -732,7 +750,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     
     /**
-     * Deletes the data set for a user depending if the users id has delete permissions to delete the data set from the
+     * Deletes/Undeletes the data set for a user depending if the users id has delete permissions to delete the data set from the
      * data set ID. Deleting the set marks it, and all of its paramters and data files as deleted but does not remove it from the database.
      *
      * @param sessionId session id of the user.
@@ -747,7 +765,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     
     /**
-     * Deleted the data set paramter, depending if the users has access to remove the data set paramter
+     * Deletes/Undeletes the data set paramter, depending if the users has access to remove the data set paramter
      *
      * @param sessionId session id of the user.
      * @param datasetParameterPK {@link DatasetParameterPK} object to be deleted
@@ -919,7 +937,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     
     /**
-     * Deletes a data file for a users depending if the users id has delete permissions to
+     * Deletes/Undeletes a data file for a users depending if the users id has delete permissions to
      * delete the data file. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
      *
      * @param sessionId session id of the user.
@@ -934,7 +952,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     
     /**
-     * Deletes a data file for a users depending if the users id has delete permissions to
+     * Deletes/Undeletes a data file for a users depending if the users id has delete permissions to
      * delete the data file. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
      *
      * @param sessionId session id of the user.
@@ -999,7 +1017,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     
     /**
-     * Deletes a data file paramter object, depending if the user has access to remove the data file parameter from
+     * Deletes/Undeletes a data file paramter object, depending if the user has access to remove the data file parameter from
      * the associated data file id.
      *
      * @param sessionId session id of the user.
