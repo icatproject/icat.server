@@ -121,7 +121,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
-     * @return Collection<{@link Investigation}> object
+     * @return Collection of {@link Investigation} objects
      */
     @WebMethod(operationName="getInvestigationsIncludes")
     @RequestWrapper(className="uk.icat3.sessionbeans.manager.getInvestigationsIncludes")
@@ -612,6 +612,16 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
     
     
     ////////////////////////////////////   Authorisation Section //////////////////////////////////////////////
+     /**
+     * Gets all the IcatAuthorisations for a investigationId of all of the users
+     *
+     * @param sessionId session id of the user.
+     * @param investigationId investigation id of the authorisations you want
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid     * 
+     * @return Collection of {@link IcatAuthorisation}>s of the datafile id
+     */
     @WebMethod()
     public Collection<IcatAuthorisation> getAuthorisations(String sessionId, Long investigationId) throws InsufficientPrivilegesException, NoSuchObjectFoundException, SessionException {
         //for user bean get userId
@@ -620,6 +630,19 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         return InvestigationManager.getAuthorisations(userId, investigationId, manager);
     }
     
+    /**
+     * Adds a role to a investigationIdfor a user (fedId) depending weather user  from session id has permission to do it
+     *
+     * @param sessionId session id of the user.    
+     * @param toAddUserId federal Id of user to add
+     * @param toAddRole new role for federal Id
+     * @param investigationId investigation Id of the item to add the role to
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid      
+     * @throws uk.icat3.exceptions.ValidationException if the added role is higher than the persons role adding 
+     * @return {@link IcatAuthorisation}s of the datafile id
+     */
     @WebMethod()
     public IcatAuthorisation addAuthorisation(String sessionId, String toAddUserId, String toAddRole, Long investigationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
         //for user bean get userId
@@ -628,6 +651,15 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         return InvestigationManager.addAuthorisation(userId, toAddUserId, toAddRole, investigationId, manager);
     }
     
+    /**
+     * Deletes a IcatAuthorisation 
+     *
+     * @param sessionId session id of the user.     
+     * @param authorisationId id of the authorisation to delete
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid         
+     */
     @WebMethod()
     public void deleteAuthorisation(String sessionId, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
         //for user bean get userId
@@ -636,6 +668,15 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         InvestigationManager.deleteAuthorisation(userId, authorisationId, manager);
     }
     
+    /**
+     * Removes a IcatAuthorisation 
+     *
+     * @param sessionId session id of the user.     
+     * @param authorisationId id of the authorisation to remove
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid         
+     */
     @WebMethod()
     public void removeAuthorisation(String sessionId, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
         //for user bean get userId
@@ -643,6 +684,18 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         
         InvestigationManager.removeAuthorisation(userId, authorisationId, manager);
     }
+    
+     /**
+     * Changes a IcatAuthorisation role for a authorisation id
+     *
+     * @param sessionId session id of the user.     
+     * @param toChangetoRole role to change to
+     * @param authorisationId id of the authorisation to remove
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid         
+     * @throws uk.icat3.exceptions.ValidationException if the added role is higher than the persons role adding     
+     */
     
     @WebMethod()
     public void updateAuthorisation(String sessionId, String toChangetoRole, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{

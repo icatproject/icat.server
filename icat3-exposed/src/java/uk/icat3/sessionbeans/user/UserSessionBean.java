@@ -16,7 +16,6 @@ import javax.ejb.TransactionAttributeType;
 import javax.interceptor.ExcludeClassInterceptors;
 import javax.interceptor.Interceptors;
 import javax.jws.WebMethod;
-import javax.jws.WebService;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.xml.ws.RequestWrapper;
@@ -28,7 +27,7 @@ import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.user.UserDetails;
 import uk.icat3.user.UserManager;
-import static uk.icat3.util.Constants.*;
+import static uk.icat3.sessionbeans.util.Constants.*;
 /**
  *
  * @author gjd37

@@ -45,9 +45,11 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
     }
     
     /**
+     * This gets all the keywords avaliable for that user, they can only see keywords associated with their
+     * investigations or public investigations
      *
-     * @param sessionId     
-     * @return collection
+     * @param sessionId sessionId of the user.
+     * @return list of keywords
      */
     @WebMethod()
     public Collection<String> getKeywordsForUser(String sessionId) throws SessionException{
@@ -59,11 +61,14 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
     }
     
     /**
+     * This gets all the keywords avaliable for that user, beginning with a keyword, they can only see keywords associated with their
+     * investigations or public investigations
      *
-     * @param sessionId
-     * @param startKeyword
-     * @param numberReturned
-     * @return collection
+     * @param sessionId session id of the user.
+     * @param startIndex start index of the results found, default 0
+     * @param number_results number of results found from the start index, default {@link Queries}.MAX_QUERY_RESULTSET
+     * @throws uk.icat3.exceptions.SessionException
+     * @return list of keywords
      */
     @WebMethod(operationName="getKeywordsForUserMax")
     @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserMax")
@@ -79,7 +84,7 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
     /**
      *
      * @param sessionId
-     * @param type
+     * @param type ALL, ALPHA, ALPHA_NUMERIC, {@link KeywordType}
      * @return collection
      */
     @WebMethod()

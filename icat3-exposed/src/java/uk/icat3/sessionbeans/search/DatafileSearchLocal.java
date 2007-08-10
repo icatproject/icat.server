@@ -12,5 +12,8 @@ import uk.icat3.exceptions.SessionException;
  */
 @Local
 public interface DatafileSearchLocal {
-    public Collection<Datafile> searchByRunNumber(String sessionId, Collection<String> instruments, Long startRun, Long endRun) throws SessionException ;    
+    public Collection<Datafile> searchByRunNumber(String sessionId, Collection<String> instruments, float startRun, float endRun) throws SessionException ;    
+    
+    public Collection<Datafile> searchByRunNumber(String sessionId, Collection<String> instruments, float startRun, float endRun, int startIndex, int number_results) throws SessionException ;    
+
 }

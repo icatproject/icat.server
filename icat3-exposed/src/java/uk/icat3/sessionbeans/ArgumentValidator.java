@@ -44,6 +44,9 @@ public class ArgumentValidator {
             if(arg == null){
                 log.trace("Cannot pass null into argument "+i+" into: "+className+"."+methodName+"() method.");
                 throw new SessionException("Cannot pass null into argument #"+i+" for this method.");
+            } else if(arg instanceof String && ((String)arg).length() == 0){
+                log.trace("Cannot pass empty string into argument "+i+" into: "+className+"."+methodName+"() method.");
+                throw new SessionException("Cannot pass empty string into argument #"+i+" for this method.");
             }
             if(i == args.length) builder.append(arg+")");
             else builder.append(arg+", ");

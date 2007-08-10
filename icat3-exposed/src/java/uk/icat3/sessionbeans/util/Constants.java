@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package uk.icat3.util;
+package uk.icat3.sessionbeans.util;
 
 /**
  *

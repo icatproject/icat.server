@@ -89,7 +89,7 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         
         return DataFileManager.getDataFiles(userId, datafileIds, manager);
     }
-        
+    
     /**
      * Creates a data file, depending if the user has update permission on the data set associated with the data file
      *
@@ -269,7 +269,7 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         
         //get file, checks read access
         return DataFileManager.addDataFileParameter(userId, dataFileParameter, datafileId, manager);
-    }    
+    }
     
     /**
      * Updates the data file paramter object, depending if the user has access to update the data file parameter.
@@ -329,10 +329,20 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         DatafileParameter datafileParameter = ManagerUtil.find(DatafileParameter.class, datafileParameterPK, manager);
         
         DataFileManager.deleteDatafileParameter(userId, datafileParameter, manager);
-    }    
+    }
     
     
-      ////////////////////////////////////   Authorisation Section //////////////////////////////////////////////
+    ////////////////////////////////////   Authorisation Section //////////////////////////////////////////////
+    /**
+     * Gets all the IcatAuthorisations for a dataFile id of all of the users
+     *
+     * @param sessionId session id of the user.
+     * @param dataFileId Datafile id of the authorisations you want
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid     * 
+     * @return Collection of {@link IcatAuthorisation}>s of the datafile id
+     */
     @WebMethod()
     public Collection<IcatAuthorisation> getAuthorisations(String sessionId, Long dataFileId) throws InsufficientPrivilegesException, NoSuchObjectFoundException, SessionException {
         //for user bean get userId
@@ -341,6 +351,19 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         return DataFileManager.getAuthorisations(userId, dataFileId, manager);
     }
     
+    /**
+     * Adds a role to a datafile Id for a user (fedId) depending weather user  from session id has permission to do it
+     *
+     * @param sessionId session id of the user.    
+     * @param toAddUserId federal Id of user to add
+     * @param toAddRole new role for federal Id
+     * @param dataFileId datafile Id of the item to add the role to
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid      
+     * @throws uk.icat3.exceptions.ValidationException if the added role is higher than the persons role adding 
+     * @return {@link IcatAuthorisation}s of the datafile id
+     */
     @WebMethod()
     public IcatAuthorisation addAuthorisation(String sessionId, String toAddUserId, String toAddRole, Long dataFileId ) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
         //for user bean get userId
@@ -349,6 +372,15 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         return DataFileManager.addAuthorisation(userId, toAddUserId, toAddRole, dataFileId, manager);
     }
     
+    /**
+     * Deletes a IcatAuthorisation 
+     *
+     * @param sessionId session id of the user.     
+     * @param authorisationId id of the authorisation to delete
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid         
+     */
     @WebMethod()
     public void deleteAuthorisation(String sessionId, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
         //for user bean get userId
@@ -357,7 +389,16 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         DataFileManager.deleteAuthorisation(userId, authorisationId, manager);
     }
     
-    @WebMethod()
+    /**
+     * Removes a IcatAuthorisation 
+     *
+     * @param sessionId session id of the user.     
+     * @param authorisationId id of the authorisation to remove
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid         
+     */
+    @WebMethod()   
     public void removeAuthorisation(String sessionId, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -365,13 +406,24 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         DataFileManager.removeAuthorisation(userId, authorisationId, manager);
     }
     
+    /**
+     * Changes a IcatAuthorisation role for a authorisation id
+     *
+     * @param sessionId session id of the user.     
+     * @param toChangetoRole role to change to
+     * @param authorisationId id of the authorisation to remove
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid         
+     * @throws uk.icat3.exceptions.ValidationException if the added role is higher than the persons role adding     
+     */
     @WebMethod()
     public void updateAuthorisation(String sessionId, String toChangetoRole, Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
         DataFileManager.updateAuthorisation(userId, toChangetoRole, authorisationId, manager);
-    }    
+    }
     
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 }

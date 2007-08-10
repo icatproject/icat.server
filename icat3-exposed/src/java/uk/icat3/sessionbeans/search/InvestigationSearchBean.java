@@ -9,7 +9,6 @@
 
 package uk.icat3.sessionbeans.search;
 
-import java.security.Policy.Parameters;
 import java.util.Collection;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;

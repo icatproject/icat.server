@@ -16,7 +16,7 @@ import javax.persistence.PersistenceContext;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
-import uk.icat3.util.Constants;
+import uk.icat3.sessionbeans.util.Constants;
 
 /**
  *
