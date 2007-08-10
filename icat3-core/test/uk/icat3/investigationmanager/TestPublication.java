@@ -125,6 +125,26 @@ public class TestPublication extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
+    @Test
+    public void undeletePublication() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for undeleting publication to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Publication validPublication  = getPublicationDuplicate(true);
+        
+        
+        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validPublication,  AccessType.DELETE, em);
+        
+        Publication modified = em.find(Publication.class,validPublication.getId() );
+        
+        checkPublication(modified);
+        assertTrue("Deleted must be false", !modified.isDeleted());
+        
+        deletePublication();
+    }
+    
+    /**
+     * Tests creating a file
+     */
     @Test(expected=ValidationException.class)
     public void addDeletedPublication() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted publication to investigation Id: "+VALID_INVESTIGATION_ID);

@@ -28,6 +28,7 @@ public class TestConstants {
     public final static String VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION =  "FIRST PROPAGATION";
     public final static long VALID_DATASET_ID_FOR_INVESTIGATION =  3;
     public final static long VALID_DATASET_ID_FOR_INVESTIGATION_FOR_NOT_FACILITY_ACQURED =  3;
+    public final static long VALID_DATAFILE_ID_FOR_INVESTIGATION_FOR_NOT_FACILITY_ACQURED =  3;
     public final static long VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED = 5;
     public final static long VALID_INVESTIGATION_ID =  3;
     public final static long VALID_DATA_SET_ID =  3;
@@ -52,7 +53,7 @@ public class TestConstants {
     public final static long VALID_INVESTIGATION_ID_FOR_ICAT_ADMIN  =  3;
     
     public final static long VALID_DATA_SET_ID_GATEKEEPER_TEST =  5;
-    public final static long VALID_DATA_FILE_ID_GATEKEEPER_TEST =  3;
+    public final static long VALID_DATA_FILE_ID_GATEKEEPER_TEST =  57;
     public final static long VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST =  3;
     
    

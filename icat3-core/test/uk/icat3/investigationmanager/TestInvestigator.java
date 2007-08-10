@@ -107,7 +107,7 @@ public class TestInvestigator extends BaseTestClassTX {
      */
     @Test
     public void deleteInvestigator() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving investigator to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting investigator to investigation Id: "+VALID_INVESTIGATION_ID);
         
         Investigator validInvestigator  = getInvestigatorDuplicate(true);
         
@@ -118,6 +118,28 @@ public class TestInvestigator extends BaseTestClassTX {
         
         checkInvestigator(modified);
         assertTrue("Deleted must be true", modified.isDeleted());
+        
+      
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void undeleteInvestigator() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for undeleting investigator to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Investigator validInvestigator  = getInvestigatorDuplicate(true);
+        
+        
+        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validInvestigator,  AccessType.DELETE, em);
+        
+        Investigator modified = em.find(Investigator.class,validInvestigator.getInvestigatorPK() );
+        
+        checkInvestigator(modified);
+        assertTrue("Deleted must be false", !modified.isDeleted());
+        
+          deleteInvestigator();
     }
     
     /**

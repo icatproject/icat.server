@@ -122,6 +122,26 @@ public class TestSample extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
+    @Test
+    public void undeleteSample() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for undeleting sample to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Sample validSample  = getSampleDuplicate(true);
+        
+        
+        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSample,  AccessType.DELETE, em);
+        
+        Sample modified = em.find(Sample.class,validSample.getId() );
+        
+        checkSample(modified);
+        assertTrue("Deleted must be false", !modified.isDeleted());
+        
+        deleteSample();
+    }
+    
+    /**
+     * Tests creating a file
+     */
     @Test(expected=ValidationException.class)
     public void addDeletedSample() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted sample to investigation Id: "+VALID_INVESTIGATION_ID);

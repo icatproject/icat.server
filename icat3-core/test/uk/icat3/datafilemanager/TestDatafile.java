@@ -105,6 +105,28 @@ public class TestDatafile extends BaseTestClassTX {
         }
     }
     
+     /**
+     * Tests deleting a file, marks it as deleted Y
+     */
+    @Test
+    public void undeleteDatafile() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for undeleting dataFile to dataFile Id: "+VALID_INVESTIGATION_ID);
+        
+        Datafile validDatafile  = getDatafileDuplicate(true);
+        
+        DataFileManager.deleteDataFile(VALID_USER_FOR_INVESTIGATION, validDatafile, em);
+        
+        Datafile modified = em.find(Datafile.class,validDatafile.getId() );
+        
+        checkDatafile(modified);
+        assertTrue("Deleted must be false", !modified.isDeleted());
+        
+        //check deep delete
+        for(DatafileParameter param : modified.getDatafileParameterCollection()){
+            assertTrue("investigator must be undeleted", !param.isDeleted());
+        }
+    }
+    
     /**
      * Tests removing a file, removes it from DB
      */

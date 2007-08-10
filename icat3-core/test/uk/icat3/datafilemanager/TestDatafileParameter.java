@@ -123,6 +123,25 @@ public class TestDatafileParameter extends BaseTestClassTX {
         assertTrue("Deleted must be true", modified.isDeleted());
     }
     
+      /**
+     * Tests deleting a data file parameter, marking as deleted Y
+     */
+    @Test
+    public void undeleteDatafileParameter() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for undeleting datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
+        
+        DatafileParameter validDatafileParameter  = getDatafileParameterDuplicate(true);
+        
+        DataFileManager.deleteDatafileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter,  em);
+        
+        DatafileParameter modified = em.find(DatafileParameter.class,validDatafileParameter.getDatafileParameterPK());
+        
+        checkDatafileParameter(modified);
+        assertTrue("Deleted must be false", !modified.isDeleted());
+        
+        deleteDatafileParameter();
+    }
+    
     /**
      * Tests creating a data file parameter that has been marked as deleted, should undelete it
      */

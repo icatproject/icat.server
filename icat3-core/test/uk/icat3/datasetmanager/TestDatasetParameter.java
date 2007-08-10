@@ -122,6 +122,25 @@ public class TestDatasetParameter extends BaseTestClassTX {
         assertTrue("Deleted must be true", modified.isDeleted());
     }
     
+     /**
+     * Tests creating a file
+     */
+    @Test
+    public void undeleteDatasetParameter() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for undeleting datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        DatasetParameter validDatasetParameter  = getDatasetParameterDuplicate(true);
+        
+        DataSetManager.deleteDataSetParameter(VALID_USER_FOR_INVESTIGATION, validDatasetParameter,  em);
+        
+        DatasetParameter modified = em.find(DatasetParameter.class,validDatasetParameter.getDatasetParameterPK());
+        
+        checkDatasetParameter(modified);
+        assertTrue("Deleted must be false", !modified.isDeleted());
+        
+        deleteDatasetParameter();
+    }
+    
     /**
      * Tests creating a file
      */

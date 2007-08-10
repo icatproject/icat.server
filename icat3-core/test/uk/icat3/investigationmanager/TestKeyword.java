@@ -89,6 +89,27 @@ public class TestKeyword extends BaseTestClassTX {
         assertTrue("Deleted must be true", modified.isDeleted());
     }
     
+     /**
+     * Tests creating a file
+     */
+    @Test
+    public void undeleteKeyword() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for undeleting keyword to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        Keyword validKeyword  = getKeywordDuplicate(true);
+        
+        
+        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validKeyword,  AccessType.DELETE, em);
+        
+        Keyword modified = em.find(Keyword.class,validKeyword.getKeywordPK() );
+        
+        checkKeyword(modified);
+        assertTrue("Deleted must be false", !modified.isDeleted());
+        
+        deleteKeyword();
+                
+    }
+    
     /**
      * Tests creating a file
      */

@@ -122,6 +122,26 @@ public class TestSampleParameter extends BaseTestClassTX {
         assertTrue("Deleted must be true", modified.isDeleted());
     }
     
+     /**
+     * Tests creating a file
+     */
+    @Test
+    public void undeleteSampleParameter() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for undeelting sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        SampleParameter validSampleParameter  = getSampleParameterDuplicate(true);
+        
+        
+        InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter,  AccessType.DELETE, em);
+        
+        SampleParameter modified = em.find(SampleParameter.class,validSampleParameter.getSampleParameterPK());
+        
+        checkSampleParameter(modified);
+        assertTrue("Deleted must be false", !modified.isDeleted());
+        
+        deleteSampleParameter();
+    }
+    
     /**
      * Tests creating a file
      */
