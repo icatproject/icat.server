@@ -36,7 +36,7 @@ public class KeywordSearch {
         return getKeywordsForUser(userId, null, -1, manager);
     }
     
-     /**
+    /**
      *  This gets all the keywords avaliable for that user, they can only see keywords associated with their
      * investigations or public investigations
      *
@@ -67,6 +67,8 @@ public class KeywordSearch {
      * investigations or public investigations
      *
      * @param userId federalId of the user.
+     * @param startKeyword start keyword to search
+     * @param numberReturned number of results returned
      * @param manager manager object that will facilitate interaction with underlying database
      * @return list of keywords
      */
