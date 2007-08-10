@@ -17,6 +17,7 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.IcatAuthorisation;
+import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Instrument;
 import uk.icat3.util.BaseTestClass;
 import static org.junit.Assert.*;
@@ -143,7 +144,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         Collection<Instrument> rolesInDB = (Collection<Instrument>)executeListResultCmd("SELECT DISTINCT i FROM IcatRole i WHERE i.markedDeleted = 'N'");
         
         
-        Collection<String> roles = InvestigationSearch.listAllRoles(em);
+        Collection<IcatRole> roles = InvestigationSearch.listAllRoles(em);
         log.trace("Roles are "+roles.size());
         
         assertNotNull("Must not be an empty collection", roles);
