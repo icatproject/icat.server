@@ -524,10 +524,10 @@ public class TestDatafileParameter extends BaseTestClassTX {
     static DatafileParameter getDatafileParameterDuplicate(boolean last){
         DatafileParameter datafileParameter = null;
         if(!last){
-            Collection<DatafileParameter> datafileParameters = (Collection<DatafileParameter>)executeListResultCmd("select d from DatafileParameter d where d.createId LIKE '%PROP%'");
+            Collection<DatafileParameter> datafileParameters = (Collection<DatafileParameter>)executeListResultCmd("select d from DatafileParameter d where d.facilityAcquired = 'Y'");
             datafileParameter = datafileParameters.iterator().next();
         } else {
-            Collection<DatafileParameter> datafileParameters = (Collection<DatafileParameter>)executeListResultCmd("select d from DatafileParameter d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+            Collection<DatafileParameter> datafileParameters = (Collection<DatafileParameter>)executeListResultCmd("select d from DatafileParameter d where d.facilityAcquired = 'Y' order by d.modTime desc");
             datafileParameter = datafileParameters.iterator().next();
         }
         log.trace(datafileParameter);

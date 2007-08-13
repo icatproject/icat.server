@@ -15,6 +15,7 @@ package uk.icat3.util;
  */
 public class TestConstants {
  
+    
     //searching
     public final static String VALID_KEYWORD = "calibration";
     public final static String VALID_KEYWORD2 = "ccwilson";
@@ -59,5 +60,6 @@ public class TestConstants {
     public final static long VALID_DATA_FILE_ID_GATEKEEPER_TEST =  57;
     public final static long VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST =  3;
     
-   
+       public final static String PERSISTENCE_UNIT = "icat3-scratch-testing-PU";
+     //public final static String PERSISTENCE_UNIT = "icat3-unit-testing-PU";
 }

@@ -274,7 +274,8 @@ public class TestDatafile extends BaseTestClassTX {
         DatafileParameter param = TestDatafileParameter.getDatafileParameter(true, true);
         param.setDatafile(file);
         
-        file.addDataFileParamaeter(param);
+        file.addDataFileParameter(param);
+        
         try {
             Datafile dataFile = DataFileManager.createDataFile(VALID_USER_FOR_INVESTIGATION, file, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
@@ -563,10 +564,10 @@ public class TestDatafile extends BaseTestClassTX {
     private Datafile getDatafileDuplicate(boolean last){
         Datafile dataFile = null;
         if(!last){
-            Collection<Datafile> dataFiles = (Collection<Datafile>)executeListResultCmd("select d from Datafile d where d.createId LIKE '%PROP%'");
+            Collection<Datafile> dataFiles = (Collection<Datafile>)executeListResultCmd("select d from Datafile d where d.facilityAcquired = 'Y'");
             dataFile = dataFiles.iterator().next();
         } else {
-            Collection<Datafile> dataFiles = (Collection<Datafile>)executeListResultCmd("select d from Datafile d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+            Collection<Datafile> dataFiles = (Collection<Datafile>)executeListResultCmd("select d from Datafile d where d.facilityAcquired = 'Y' order by d.modTime desc");
             dataFile = dataFiles.iterator().next();
             if(dataFile == null) throw new RuntimeException("No dataFile found");
         }

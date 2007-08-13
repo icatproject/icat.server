@@ -111,15 +111,12 @@ public class TestInvestigator extends BaseTestClassTX {
         
         Investigator validInvestigator  = getInvestigatorDuplicate(true);
         
-        
         InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validInvestigator,  AccessType.DELETE, em);
         
         Investigator modified = em.find(Investigator.class,validInvestigator.getInvestigatorPK() );
         
         checkInvestigator(modified);
         assertTrue("Deleted must be true", modified.isDeleted());
-        
-      
     }
     
     /**
@@ -131,7 +128,6 @@ public class TestInvestigator extends BaseTestClassTX {
         
         Investigator validInvestigator  = getInvestigatorDuplicate(true);
         
-        
         InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validInvestigator,  AccessType.DELETE, em);
         
         Investigator modified = em.find(Investigator.class,validInvestigator.getInvestigatorPK() );
@@ -139,7 +135,7 @@ public class TestInvestigator extends BaseTestClassTX {
         checkInvestigator(modified);
         assertTrue("Deleted must be false", !modified.isDeleted());
         
-          deleteInvestigator();
+        deleteInvestigator();
     }
     
     /**
@@ -198,12 +194,12 @@ public class TestInvestigator extends BaseTestClassTX {
         Investigator duplicateInvestigator = getInvestigatorDuplicate(true);
         duplicateInvestigator.setDeleted(false);
         duplicateInvestigator.setCreateId(ICAT_ADMIN_USER);
-                
+        
         InvestigationManager.deleteInvestigationObject(ICAT_ADMIN_USER, duplicateInvestigator, AccessType.REMOVE, em);
         
-        Investigator modified = em.find(Investigator.class,duplicateInvestigator.getInvestigatorPK() );        
+        Investigator modified = em.find(Investigator.class,duplicateInvestigator.getInvestigatorPK() );
         assertNull("Investigator must not be found in DB "+duplicateInvestigator, modified);
-                
+        
     }
     
     /**
