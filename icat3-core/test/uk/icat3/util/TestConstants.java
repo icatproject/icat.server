@@ -14,6 +14,7 @@ package uk.icat3.util;
  * @author gjd37
  */
 public class TestConstants {
+ 
     //searching
     public final static String VALID_KEYWORD = "calibration";
     public final static String VALID_KEYWORD2 = "ccwilson";
