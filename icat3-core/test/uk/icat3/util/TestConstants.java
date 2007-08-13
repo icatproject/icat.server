@@ -31,6 +31,8 @@ public class TestConstants {
     public final static long VALID_DATAFILE_ID_FOR_INVESTIGATION_FOR_NOT_FACILITY_ACQURED =  3;
     public final static long VALID_INVESTIGATION_ID_FOR_NOT_FACILITY_ACQURED = 5;
     public final static long VALID_INVESTIGATION_ID =  3;
+     public final static long VALID_INVESTIGATION_ID_TO_DE_DELETED =  7;
+      public final static long VALID_DATASET_ID_TO_DE_DELETED =  6;
     public final static long VALID_DATA_SET_ID =  3;
     public final static long VALID_DATA_FILE_ID =  3;
     public final static long VALID_SAMPLE_ID_FOR_INVESTIGATION_ID =  3;
