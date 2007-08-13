@@ -477,7 +477,7 @@ import uk.icat3.util.ElementType;
     /**
      * Adds a datafile parameter to the data file in both directions for model
      */
-    public void addDataFileParamaeter(DatafileParameter dataFileParameter){
+    public void addDataFileParameter(DatafileParameter dataFileParameter){
         dataFileParameter.setDatafile(this);
         
         Collection<DatafileParameter> datafileParameters = this.getDatafileParameterCollection();
