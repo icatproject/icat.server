@@ -49,7 +49,7 @@ public class DatasetSearch {
         log.trace("getSamplesBySampleName("+userId+", "+sampleName+", EntityManager)");
         
         //get the sample id from sample name
-        Collection<Sample> samples = (Collection<Sample>)manager.createNamedQuery(SAMPLES_BY_NAME).setParameter("name", sampleName).getResultList();
+        Collection<Sample> samples = (Collection<Sample>)manager.createNamedQuery(SAMPLES_BY_NAME).setParameter("name", "%"+sampleName+"%").getResultList();
         
         //now see which investigations they can see from these samples.
         Collection<Sample> samplesPermssion = new ArrayList<Sample>();
@@ -100,18 +100,20 @@ public class DatasetSearch {
         Collection<Dataset> datasets = investigation.getDatasetCollection();
         
         Collection<Dataset> datasetsPermission = new ArrayList<Dataset>();
-     
-        for (Dataset dataset : datasets) {           
-           
+        
+        for (Dataset dataset : datasets) {
+            
             if(sampleFound.getId().equals(dataset.getSampleId())){
                 //check read permission
                 try{
                     GateKeeper.performAuthorisation(userId, dataset, AccessType.READ, manager);
                     datasetsPermission.add(dataset);
                     log.trace("Adding "+ dataset+" to returned list");
-                    //add the DataSetInclude for JAXB
-                    dataset.setDatasetInclude(DatasetInclude.DATASET_FILES_ONLY);
-                } catch(InsufficientPrivilegesException ignore){}                
+                    
+                    //need to filter out datafiles
+                    ManagerUtil.getDatasetInformation(userId, datasets, DatasetInclude.DATASET_FILES_AND_PARAMETERS, manager);
+                    
+                } catch(InsufficientPrivilegesException ignore){}
             }
         }
         

@@ -282,7 +282,7 @@ public class TestSearch {
         Collection<String> keywords =  KeywordSearch.getKeywordsForUser(userId,startkeyword,300, em);
         log.info("Results: "+keywords.size());
         for(String keyword : keywords){
-          //  log.info(keyword);
+            //  log.info(keyword);
         }
         
         tearDown();
@@ -301,6 +301,26 @@ public class TestSearch {
             log.info(investigation.getId()+" "+investigation.getTitle());
         }
         log.info("Results: "+investigations.size());
+        
+        tearDown();
+        
+    }
+    
+    public void getAllInvestigations(String userId) throws Exception {
+        
+        setUp();
+        
+        long time  = System.currentTimeMillis();
+        
+        //test code here
+        log.info("Testing");
+        Collection<Long> investigations =  em.createQuery(Queries.LIST_ALL_USERS_INVESTIGATION_IDS_JPQL).
+                setParameter("objectType", ElementType.INVESTIGATION). setParameter("userId", userId).getResultList();
+        
+        log.info("Results: "+investigations.size());
+        
+        System.out.println((System.currentTimeMillis() -time)/1000f +" seconds");
+        
         tearDown();
         
     }
@@ -483,7 +503,7 @@ public class TestSearch {
         
         keywords.add("calibration");
         // ts.seachByKeywords("gjd37", keywords, LogicalOperator.AND, false, InvestigationUtil.ALL);
-        // ts.seachByKeywords("JAMES-JAMES", keywords);
+       //  ts.seachByKeywords("gjd37", keywords);
         ///  get Investigations ////
         
         Collection<Long> ids  =   new ArrayList<Long>();
@@ -496,7 +516,7 @@ public class TestSearch {
         
         
         //keywords.add("ccw");
-      //  ts.seachByKeywords("gjd37", keywords);
+        //  ts.seachByKeywords("gjd37", keywords);
         // ts.seachByKeywords("gjd37", keywords);
         
         //log.info("Hello");
@@ -510,41 +530,41 @@ public class TestSearch {
         
         
         Collection<String> ins  =   new ArrayList<String>();
-        ins.add("scan");
+        // ins.add("scan");
         ins.add("crisp");
         
-        //   ts.seachByRunNumber("JAMES-JAMES", ins, 2620L,2631L);
+        // ts.seachByRunNumber("gjd37", ins, 11757L,11759L);
         
         AdvancedSearchDetails dto = new AdvancedSearchDetails();
         
-        /*dto.setInvestigationName("angle scan 0.44");
-        Collection<String> inv  =   new ArrayList<String>();
-        //inv.add("JAMES-JAMES");
-        dto.setInvestigators(inv);
-        dto.setYearRangeStart(new Date(1,1,1));  //120 = 2020
+        dto.setInvestigationName("multidetector");
+        /*Collection<String> inv  =   new ArrayList<String>();
+        inv.add("JAMES-JAMES");*/
+        //  dto.setInvestigators(inv);
+        dto.setYearRangeStart(new Date(1,1,1/*System.currentTimeMillis()-900000000)*/));  //120 = 2020
         dto.setYearRangeEnd(new Date());
-        dto.setSampleName("angle scan 0.44");
+        dto.setSampleName("multidetector");
         dto.setInstruments(ins);
-        dto.setExperimentNumber("0");
+        dto.setExperimentNumber("3684");
         //
-        dto.setDatafileName("a");
+        //dto.setDatafileName("a");
         Collection<String> keywords2  =   new ArrayList<String>();
-         
+        
         //isis
-        keywords2.add("angle");
-         
+        keywords2.add("multidetector");
+        
         dto.setKeywords(keywords2);
-         */
-        dto.setRunEnd(19624L);
-        dto.setRunStart(19622L);
+        dto.setDatafileName("CSP11758.RAW");
+        dto.setRunEnd(11759L);
+        dto.setRunStart(11757L);
         
-        //  ts.seachByAdvanced("gjd37",dto);
+       // ts.seachByAdvanced("gjd37",dto);
         
-          //     ts.getAllKeywords("gjd37");
+             ts.getAllKeywords("gjd37");
         //
-            ts.getUserKeywords("gjd37", null);
-        
-        // ts.getUserInvestigations("JAMES");
+        //   ts.getUserKeywords("gjd37", null);
+        // ts.getAllInvestigations("gjd37");
+        //ts.getUserInvestigations("gjd37");
         
         // ts.test();
         

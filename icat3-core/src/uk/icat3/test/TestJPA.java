@@ -58,8 +58,8 @@ public class TestJPA {
     }
     
     protected static void setUp(){
-      //  emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
-        emf = Persistence.createEntityManagerFactory("icatisis_dev");
+        emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
+      //  emf = Persistence.createEntityManagerFactory("icatisis_dev");
         em = emf.createEntityManager();
         // Begin transaction
         em.getTransaction().begin();
@@ -192,16 +192,7 @@ public class TestJPA {
     public void testP1() throws Exception {
         setUp();
         String QUERY  = Queries.LIST_ALL_USERS_INVESTIGATIONS_JPQL +
-                " AND (i.visitId = :visitId OR  :visitId IS NULL) AND" +
-                " (i.invType.name = :invType  OR :invType IS NULL) AND " +
-                " (i.invAbstract LIKE :invAbstract OR :invAbstract IS NULL) AND" +
-                " (i.grantId = :grantId OR :grantId IS NULL) AND " +
-                " (i.title = :title OR :title IS NULL) AND " +
-                " (i.bcatInvStr = :bcatInvStr OR :bcatInvStr IS NULL) AND " +
-                " (i.invNumber = :invNumber  OR :invNumber IS NULL) AND " +
-                " (i.sampleCollection.name = :sampleName OR :sampleName IS NULL) AND " +
-                " (i.datasetCollection.datafileCollection.name = :datafileName OR :datafileName IS NULL) AND " +
-                " (i.datasetCollection.datafileCollection.createTime > :lowerTime OR :lowerTime IS NULL) AND " +
+                " AND  (i.datasetCollection.datafileCollection.createTime > :lowerTime OR :lowerTime IS NULL) AND " +
                 " (i.datasetCollection.datafileCollection.createTime < :upperTime OR :upperTime IS NULL) ";
         
         Query nullQuery = em.createQuery(QUERY);
@@ -212,38 +203,10 @@ public class TestJPA {
         
         nullQuery.setParameter("objectType", ElementType.INVESTIGATION);
         nullQuery.setParameter("userId", "test");
-        nullQuery.setParameter("datafileName", null);
-        nullQuery.setParameter("sampleName", null);
-        nullQuery.setParameter("invAbstract", null);
+     
         nullQuery.setParameter("upperTime", new Date());
-        nullQuery.setParameter("lowerTime", new Date(System.currentTimeMillis()-900000000));
-        nullQuery.setParameter("invType", null);
-        nullQuery.setParameter("visitId", null);
-        nullQuery.setParameter("invNumber", null);
-        nullQuery.setParameter("bcatInvStr", null);
-        nullQuery.setParameter("title", "Investigation without any investigators");
-        nullQuery.setParameter("grantId", null);
-        
-      /*   nullQuery.setParameter("objectType", ElementType.INVESTIGATION);
-        nullQuery.setParameter("userId", "test");
-        nullQuery.setParameter("datafileName", "SXD015554.RAW");
-        nullQuery.setParameter("sampleName", "SrF2 calibration  w=-25.3");
-        nullQuery.setParameter("invAbstract", null);
-        nullQuery.setParameter("upperTime", new Date());
-        nullQuery.setParameter("lowerTime", new Date(System.currentTimeMillis()-900000000));
-        nullQuery.setParameter("invType", "experiment");
-        nullQuery.setParameter("visitId", "12");
-        nullQuery.setParameter("invNumber", "12345");
-        nullQuery.setParameter("bcatInvStr", "damian");
-        nullQuery.setParameter("title", "Investigation without any investigators");
-        nullQuery.setParameter("grantId", null);*/
-         /*  nullQuery.setParameter("upper", 1257f);
-        nullQuery.setParameter("lower", 100f);
-        nullQuery.setParameter("surname", "Drinkwater");
-        nullQuery.setParameter("instrument", "SXD");
-          *  nullQuery.setParameter("dataFileType", ElementType.DATAFILE);
-         nullQuery.setParameter("keyword", "shull");*/
-        
+        nullQuery.setParameter("lowerTime", new Date(System.currentTimeMillis()-900));
+ 
         
         System.out.println(nullQuery.getResultList());
         
@@ -393,10 +356,10 @@ public class TestJPA {
         //  ts.createInv();
         //ts.testJPA();
         //  ts.changeRole();
-      //  ts.testP();
+        ts.testP1();
        //   ts.testSurname();
         
-        ts.testDelete();
+      //  ts.testDelete();
         
     }
     

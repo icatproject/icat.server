@@ -271,7 +271,7 @@ public class Queries {
      *
      */
     public static final String SAMPLES_BY_NAME = "Sample.findByName";
-    public static final String SAMPLES_BY_NAME_JPQL = "SELECT s FROM Sample s WHERE s.name = :name AND s.markedDeleted = 'N'";
+    public static final String SAMPLES_BY_NAME_JPQL = "SELECT s FROM Sample s WHERE s.name LIKE :name AND s.markedDeleted = 'N'";
     
     
      /**
