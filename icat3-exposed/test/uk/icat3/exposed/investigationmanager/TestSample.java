@@ -159,17 +159,18 @@ public class TestSample extends BaseTestClassTX {
      */
     @Test
     public void removeSample() throws ICATAPIException {
-        log.info("Testing session: "+VALID_SESSION+ " for rmeoving sample to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing session: "+VALID_SESSION_ICAT_ADMIN+ " for rmeoving sample to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid sample, no name
         Sample duplicateSample = getSampleDuplicate(true);
          duplicateSample.setDeleted(false);
+         duplicateSample.setCreateId(VALID_ICAT_ADMIN_FOR_INVESTIGATION);
          
         //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        icat.removeSample(VALID_SESSION, duplicateSample.getId());
+        icat.removeSample(VALID_SESSION_ICAT_ADMIN, duplicateSample.getId());
         
         Sample modified = em.find(Sample.class,duplicateSample.getId() );
         
@@ -263,8 +264,8 @@ public class TestSample extends BaseTestClassTX {
             icat.modifySample(VALID_SESSION, propsSample);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+         assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+               throw ex;
         }
     }
     
@@ -286,8 +287,8 @@ public class TestSample extends BaseTestClassTX {
             icat.deleteSample(VALID_SESSION, propsSample.getId());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+        assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+                throw ex;
         }
     }
     
@@ -309,8 +310,8 @@ public class TestSample extends BaseTestClassTX {
             icat.removeSample(VALID_SESSION, propsSample.getId());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+        assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+                 throw ex;
         }
     }
     

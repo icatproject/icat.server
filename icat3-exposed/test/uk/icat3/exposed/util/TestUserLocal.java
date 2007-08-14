@@ -12,7 +12,6 @@ package uk.icat3.exposed.util;
 import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
-import uk.icat3.user.User;
 import uk.icat3.user.UserDetails;
 
 /**
@@ -25,8 +24,9 @@ public class TestUserLocal implements UserSessionLocal{
     }
     
     public String getUserIdFromSessionId(String sessionId) throws SessionException{
-        if(sessionId.equals("validSession")) return  "JAMES-JAMES";
-        else if (sessionId.equals("invalidSession")) return  "invalidUser:"+Math.random();
+        if(sessionId.equals(TestConstants.VALID_SESSION)) return  TestConstants.VALID_USER_FOR_INVESTIGATION;
+        else if (sessionId.equals(TestConstants.VALID_SESSION_ICAT_ADMIN)) return  TestConstants.VALID_ICAT_ADMIN_FOR_INVESTIGATION;
+        else if (sessionId.equals(TestConstants.INVALID_SESSION)) return  TestConstants.INVALID_USER;
         else throw new SessionException("Invalid sessionId: "+sessionId);
     }
     
@@ -58,7 +58,7 @@ public class TestUserLocal implements UserSessionLocal{
     
     
     public UserDetails getUserDetails(String sessionId, String user) throws SessionException, NoSuchUserException{
-         throw new SessionException("Invalid getUserDetails");
+        throw new SessionException("Invalid getUserDetails");
     }
 }
 

@@ -164,17 +164,18 @@ public class TestPublication extends BaseTestClassTX {
      */
     @Test
     public void removePublication() throws ICATAPIException {
-        log.info("Testing  session: "+VALID_SESSION+ "  for rmeoving publication to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+VALID_SESSION_ICAT_ADMIN+ "  for rmeoving publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid publication, no name
         Publication duplicatePublication = getPublicationDuplicate(true);
         duplicatePublication.setDeleted(false);
+        duplicatePublication.setCreateId(VALID_ICAT_ADMIN_FOR_INVESTIGATION);
                 
         //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        icat.removePublication(VALID_SESSION, duplicatePublication.getId());
+        icat.removePublication(VALID_SESSION_ICAT_ADMIN, duplicatePublication.getId());
         
         Publication modified = em.find(Publication.class,duplicatePublication.getId() );
         
@@ -278,17 +279,18 @@ public class TestPublication extends BaseTestClassTX {
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void removePublicationNoId() throws ICATAPIException {
-        log.info("Testing  session: "+VALID_SESSION+ " for delete publication to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+VALID_SESSION_ICAT_ADMIN+ " for delete publication to investigation Id: "+VALID_INVESTIGATION_ID);
         
         Publication validPublication  = getPublication(true);
         validPublication.setId(null);
+        validPublication.setCreateId(VALID_ICAT_ADMIN_FOR_INVESTIGATION);
         
           //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
         try {
-            icat.deletePublication(VALID_SESSION, validPublication.getId());
+            icat.deletePublication(VALID_SESSION_ICAT_ADMIN, validPublication.getId());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
@@ -337,8 +339,8 @@ public class TestPublication extends BaseTestClassTX {
             icat.modifyPublication(VALID_SESSION, propsPublication);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+           assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+             throw ex;
         }
     }
     
@@ -360,8 +362,8 @@ public class TestPublication extends BaseTestClassTX {
             icat.deletePublication(VALID_SESSION, propsPublication.getId());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+          assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+              throw ex;
         }
     }
     
@@ -383,7 +385,7 @@ public class TestPublication extends BaseTestClassTX {
             icat.removePublication(VALID_SESSION, propsPublication.getId());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+           assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }

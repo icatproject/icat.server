@@ -10,6 +10,7 @@
 package uk.icat3.exposed.datafilemanager;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Random;
 import junit.framework.JUnit4TestAdapter;
 
@@ -19,6 +20,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.DatafileParameter;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -26,6 +28,8 @@ import uk.icat3.exposed.util.BaseTestClassTX;
 import uk.icat3.exposed.util.TestUserLocal;
 import uk.icat3.sessionbeans.manager.DatafileManagerBean;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
+import uk.icat3.util.ElementType;
+import uk.icat3.util.IcatRoles;
 import static uk.icat3.exposed.util.TestConstants.*;
 
 /**
@@ -52,7 +56,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         
         DatafileParameter validDatafileParameter  = getDatafileParameter(true, true);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
@@ -78,7 +82,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
         duplicateDatafileParameter.setError(modifiedError);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
@@ -102,7 +106,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
@@ -124,7 +128,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         
         DatafileParameter validDatafileParameter  = getDatafileParameterDuplicate(true);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
@@ -146,13 +150,13 @@ public class TestDatafileParameter extends BaseTestClassTX {
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-          
-          try {
-        DatafileParameter datafileParameterInserted = icat.addDataFileParameter(VALID_SESSION, duplicateDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
+        
+        try {
+            DatafileParameter datafileParameterInserted = icat.addDataFileParameter(VALID_SESSION, duplicateDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
@@ -166,21 +170,23 @@ public class TestDatafileParameter extends BaseTestClassTX {
      */
     @Test
     public void removeDatafileParameter() throws ICATAPIException {
-        log.info("Testing  session: "+ VALID_SESSION +"  for rmeoving datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_ICAT_ADMIN_FOR_INVESTIGATION +"  for rmeoving datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datafileParameter, no name
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
         duplicateDatafileParameter.setDeleted(false);
-                
-          //set entitymanager for each new method
+        duplicateDatafileParameter.setCreateId(VALID_ICAT_ADMIN_FOR_INVESTIGATION);
+        
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        icat.removeDataFileParameter(VALID_SESSION, duplicateDatafileParameter.getDatafileParameterPK());
+        icat.removeDataFileParameter(VALID_SESSION_ICAT_ADMIN, duplicateDatafileParameter.getDatafileParameterPK());
         
         DatafileParameter modified = em.find(DatafileParameter.class,duplicateDatafileParameter.getDatafileParameterPK() );
         
         assertNull("DatafileParameter must not be found in DB "+duplicateDatafileParameter, modified);
+        
     }
     
     /**
@@ -193,7 +199,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         
         DatafileParameter validDatafileParameter  = getDatafileParameter(true, true);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
@@ -217,18 +223,18 @@ public class TestDatafileParameter extends BaseTestClassTX {
         
         DatafileParameter validDatafileParameter  = getDatafileParameter(true,true);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
         try {
-            DatafileParameter datafileParameterInserted = icat.addDataFileParameter(VALID_SESSION, validDatafileParameter, random.nextLong());    
+            DatafileParameter datafileParameterInserted = icat.addDataFileParameter(VALID_SESSION, validDatafileParameter, random.nextLong());
         } catch (ICATAPIException ex) {
-                log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-                assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
-                
-                throw ex;
-            }
+            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
+            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+            
+            throw ex;
+        }
     }
     
     /**
@@ -242,7 +248,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         DatafileParameter validDatafileParameter  = getDatafileParameter(true,true);
         validDatafileParameter.getDatafileParameterPK().setDatafileId(456787L);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
@@ -296,7 +302,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         //string value only allowed
         invalidDatafileParameter.setNumericValue(45d);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
@@ -321,7 +327,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         DatafileParameter invalidDatafileParameter = getDatafileParameter(true, true);
         //string value only allowed
         invalidDatafileParameter.setStringValue("45d");
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
@@ -344,7 +350,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         //create invalid datafileParameter, no name
         DatafileParameter propsDatafileParameter = getDatafileParameterDuplicate(false);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
@@ -367,13 +373,13 @@ public class TestDatafileParameter extends BaseTestClassTX {
         //create invalid datafileParameter, no name
         DatafileParameter propsDatafileParameter = getDatafileParameterDuplicate(false);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
         try {
             icat.deleteDataFileParameter(VALID_SESSION, propsDatafileParameter.getDatafileParameterPK());
-          } catch (ICATAPIException ex) {
+        } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
             throw ex;
@@ -390,7 +396,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         //create invalid datafileParameter, no name
         DatafileParameter propsDatafileParameter = getDatafileParameterDuplicate(false);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
@@ -414,7 +420,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         DatafileParameter datafileParameter = getDatafileParameter(true, true);
         datafileParameter.setDatafileParameterPK(null);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
@@ -438,7 +444,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         DatafileParameter datafileParameter = getDatafileParameter(true, true);
         datafileParameter.setDatafileParameterPK(null);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
@@ -462,7 +468,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         DatafileParameter datafileParameter = getDatafileParameter(true, true);
         datafileParameter.setDatafileParameterPK(null);
         
-          //set entitymanager for each new method
+        //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
@@ -547,10 +553,10 @@ public class TestDatafileParameter extends BaseTestClassTX {
     static DatafileParameter getDatafileParameterDuplicate(boolean last){
         DatafileParameter datafileParameter = null;
         if(!last){
-            Collection<DatafileParameter> datafileParameters = (Collection<DatafileParameter>)executeListResultCmd("select d from DatafileParameter d where d.createId LIKE '%PROP%'");
+            Collection<DatafileParameter> datafileParameters = (Collection<DatafileParameter>)executeListResultCmd("select d from DatafileParameter d where d.facilityAcquired = 'Y'");
             datafileParameter = datafileParameters.iterator().next();
         } else {
-            Collection<DatafileParameter> datafileParameters = (Collection<DatafileParameter>)executeListResultCmd("select d from DatafileParameter d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+            Collection<DatafileParameter> datafileParameters = (Collection<DatafileParameter>)executeListResultCmd("select d from DatafileParameter d where d.facilityAcquired = 'N' order by d.modTime desc");
             datafileParameter = datafileParameters.iterator().next();
         }
         log.trace(datafileParameter);

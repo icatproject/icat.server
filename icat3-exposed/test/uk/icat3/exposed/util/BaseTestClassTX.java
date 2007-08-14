@@ -29,10 +29,9 @@ public class BaseTestClassTX extends BaseTest{
     
     private static Logger log = Logger.getLogger(BaseTestClassTX.class);
     
-    protected String sessionId;
-    
     @Before
     public void beginTX(){
+        log.debug("");
         log.debug("setUp(), creating entityManager");
         em = emf.createEntityManager();
         
@@ -48,7 +47,7 @@ public class BaseTestClassTX extends BaseTest{
         // Commit the transaction
         log.debug("commiting transaction on entityManager");
         try {
-             if(em.getTransaction().isActive() && !em.getTransaction().getRollbackOnly()){
+            if(!em.getTransaction().getRollbackOnly()){
                 log.trace("commiting tx");
                 em.getTransaction().commit();
             }
@@ -57,13 +56,14 @@ public class BaseTestClassTX extends BaseTest{
             throw t;
         } finally {
             log.debug("tearDown(), closing entityManager");
+            log.debug("");
             if(em.isOpen()) em.close();
         }
     }
     
     @BeforeClass
     public static void BeforeClassSetUp(){
-        setUpEntityManagerFactoryOnly();        
+        setUpEntityManagerFactoryOnly();
     }
     
     @AfterClass

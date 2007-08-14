@@ -11,6 +11,7 @@ package uk.icat3.exposed.datafilemanager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Random;
 import junit.framework.JUnit4TestAdapter;
 
@@ -21,6 +22,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -29,6 +31,8 @@ import uk.icat3.exposed.util.BaseTestClassTX;
 import uk.icat3.exposed.util.TestUserLocal;
 import uk.icat3.sessionbeans.manager.DatafileManagerBean;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
+import uk.icat3.util.ElementType;
+import uk.icat3.util.IcatRoles;
 import static uk.icat3.exposed.util.TestConstants.*;
 
 /**
@@ -98,21 +102,29 @@ public class TestDatafile extends BaseTestClassTX {
      */
     @Test
     public void removeDatafile() throws ICATAPIException {
-        log.info("Testing  session: "+ VALID_SESSION +"  for rmeoving dataFile to dataFile Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION_ICAT_ADMIN +"  for rmeoving dataFile to dataFile Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid dataFile, no name
         Datafile duplicateDatafile = getDatafileDuplicate(true);
         duplicateDatafile.setDeleted(false);
-                
+        duplicateDatafile.setCreateId(VALID_ICAT_ADMIN_FOR_INVESTIGATION);
+        
+        Collection<Long> longs =  addAuthorisation(duplicateDatafile.getId(), duplicateDatafile.getDataset().getId(), VALID_ICAT_ADMIN_FOR_INVESTIGATION, ElementType.DATAFILE, IcatRoles.ICAT_ADMIN);
+        Iterator it = longs.iterator();
+        
         //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        icat.removeDataFile(VALID_SESSION, duplicateDatafile.getId());
+        icat.removeDataFile(VALID_SESSION_ICAT_ADMIN, duplicateDatafile.getId());
         
         Datafile modified = em.find(Datafile.class,duplicateDatafile.getId() );
-        
         assertNull("Datafile must not be found in DB "+duplicateDatafile, modified);
+        
+        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
+        
+        it = longs.iterator();
+        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);
     }
     
     /**
@@ -184,7 +196,7 @@ public class TestDatafile extends BaseTestClassTX {
             icat.deleteDataFile(VALID_SESSION, propsDatafile.getId());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -209,7 +221,7 @@ public class TestDatafile extends BaseTestClassTX {
             icat.deleteDataFile(VALID_SESSION, propsDatafile.getId());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -233,7 +245,8 @@ public class TestDatafile extends BaseTestClassTX {
         DatafileParameter param = TestDatafileParameter.getDatafileParameter(true, true);
         param.setDatafile(file);
         
-        file.addDataFileParamaeter(param);
+        file.addDataFileParameter(param);
+        
         try {
             Datafile dataFile = icat.createDataFile(VALID_SESSION, file, VALID_INVESTIGATION_ID);
         } catch (ICATAPIException ex) {
@@ -280,12 +293,10 @@ public class TestDatafile extends BaseTestClassTX {
             assertEquals("modId must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, datafileParameter.getModId());
             
             assertNotNull("dataFile id must be not null", datafileParameter.getDatafileParameterPK());
-            assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, datafileParameter.getDatafile().getDatasetId().getInvestigationId().getId());
+            assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, datafileParameter.getDatafile().getDataset().getInvestigation().getId());
         }
         
-        em.remove(dataFile);
-        
-        assertFalse("file must be deleted "+dataFile.getId(), em.contains(dataFile));
+        removeDatafile();
     }
     
     /**
@@ -293,8 +304,7 @@ public class TestDatafile extends BaseTestClassTX {
      */
     @Test
     public void testAddValidDatafiles() throws ICATAPIException {
-        log.info("Testing  session: "+ VALID_SESSION +"  for add a files for datset Id: "+VALID_INVESTIGATION_ID);
-        
+        log.info("Testing session: "+ VALID_SESSION +" for add a files for datset Id: "+VALID_INVESTIGATION_ID);
         
         //create valid file
         Datafile file1 = getDatafile(true);
@@ -308,17 +318,16 @@ public class TestDatafile extends BaseTestClassTX {
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        
         Collection<Datafile> dataFilesCreated =  icat.createDataFiles(VALID_SESSION, dataFiles, VALID_INVESTIGATION_ID);
         
         for(Datafile file  : dataFilesCreated){
             Datafile modified = em.find(Datafile.class, file.getId());
             checkDatafile(modified);
             assertNotNull("Format cannot be null", modified.getDatafileFormat());
-            
-            em.remove(file);
-            assertFalse("file must be deleted "+file.getId(), em.contains(file));
+            assertFalse("Deleted must be false", modified.isDeleted());
         }
+        
+        removeDatafile();
     }
     
     /**
@@ -467,7 +476,7 @@ public class TestDatafile extends BaseTestClassTX {
         // assertEquals("modId must be "+VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION, VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION, file.getModId());
         
         assertNotNull("dataFile id must be not null", file.getId());
-        assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, file.getDatasetId().getInvestigationId().getId());
+        assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, file.getDataset().getInvestigation().getId());
         return true;
     }
     
@@ -484,7 +493,7 @@ public class TestDatafile extends BaseTestClassTX {
         assertEquals("modId must be "+VALID_FACILITY_USER_FOR_INVESTIGATION, VALID_FACILITY_USER_FOR_INVESTIGATION, file.getModId());
         
         assertNotNull("dataFile id must be not null", file.getId());
-        assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, file.getDatasetId().getInvestigationId().getId());
+        assertEquals("dataFile must be "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, file.getDataset().getInvestigation().getId());
         
         return true;
     }
@@ -493,7 +502,7 @@ public class TestDatafile extends BaseTestClassTX {
      * Tests creating a invalid file for valid user, should throw ValidationException that contains
      * message with 'cannot be null' in it
      */
-    @Test(expected=ValidationException.class)
+    //@Test(expected=ValidationException.class)
     public void testCreateInValidDatafile() throws ICATAPIException {
         log.info("Testing  session: "+ VALID_SESSION +"  for creating a file");
         
@@ -513,7 +522,7 @@ public class TestDatafile extends BaseTestClassTX {
      * Tests creating a invalid file for invalid user, should throw ValidationException that contains
      * message with 'cannot be null' in it
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void testCreateInValidDatafileInvalidUser() throws ICATAPIException {
         log.info("Testing  session: "+ VALID_SESSION +"  for creating a file");
         
@@ -554,10 +563,10 @@ public class TestDatafile extends BaseTestClassTX {
     private Datafile getDatafileDuplicate(boolean last){
         Datafile dataFile = null;
         if(!last){
-            Collection<Datafile> dataFiles = (Collection<Datafile>)executeListResultCmd("select d from Datafile d where d.createId LIKE '%PROP%'");
+            Collection<Datafile> dataFiles = (Collection<Datafile>)executeListResultCmd("select d from Datafile d where d.facilityAcquired = 'Y'");
             dataFile = dataFiles.iterator().next();
         } else {
-            Collection<Datafile> dataFiles = (Collection<Datafile>)executeListResultCmd("select d from Datafile d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+            Collection<Datafile> dataFiles = (Collection<Datafile>)executeListResultCmd("select d from Datafile d where d.facilityAcquired = 'N' order by d.modTime desc");
             dataFile = dataFiles.iterator().next();
             if(dataFile == null) throw new RuntimeException("No dataFile found");
         }

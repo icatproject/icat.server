@@ -133,17 +133,18 @@ public class TestKeyword extends BaseTestClassTX {
      */
     @Test
     public void removeKeyword() throws ICATAPIException {
-        log.info("Testing  session: "+VALID_SESSION+ " for rmeoving keyword to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+VALID_SESSION_ICAT_ADMIN+ " for rmeoving keyword to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid keyword, no name
         Keyword duplicateKeyword = getKeywordDuplicate(true);
         duplicateKeyword.setDeleted(false);
+        duplicateKeyword.setCreateId(VALID_ICAT_ADMIN_FOR_INVESTIGATION);
         
         //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        icat.removeKeyword(VALID_SESSION, duplicateKeyword.getKeywordPK());
+        icat.removeKeyword(VALID_SESSION_ICAT_ADMIN, duplicateKeyword.getKeywordPK());
         
         Keyword modified = em.find(Keyword.class,duplicateKeyword.getKeywordPK() );
         
@@ -238,8 +239,8 @@ public class TestKeyword extends BaseTestClassTX {
             icat.deleteKeyword(VALID_SESSION, propsKeyword.getKeywordPK());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+              throw ex;
         }
     }
     
@@ -262,8 +263,8 @@ public class TestKeyword extends BaseTestClassTX {
             icat.removeKeyword(VALID_SESSION, propsKeyword.getKeywordPK());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+        assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+                throw ex;
         }
     }
     

@@ -10,6 +10,7 @@
 package uk.icat3.exposed.investigationmanager;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Random;
 import junit.framework.JUnit4TestAdapter;
 import org.apache.log4j.Logger;
@@ -18,6 +19,7 @@ import uk.icat3.exceptions.ICATAPIException;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import uk.icat3.entity.Dataset;
+import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
@@ -27,6 +29,8 @@ import uk.icat3.exposed.util.BaseTestClassTX;
 import uk.icat3.exposed.util.TestUserLocal;
 import uk.icat3.sessionbeans.manager.InvestigationManagerBean;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
+import uk.icat3.util.ElementType;
+import uk.icat3.util.IcatRoles;
 import uk.icat3.util.InvestigationInclude;
 import static uk.icat3.exposed.util.TestConstants.*;
 
@@ -127,21 +131,30 @@ public class TestInvestigation extends BaseTestClassTX {
      */
     @Test
     public void removeInvestigation() throws ICATAPIException {
-        log.info("Testing  session: "+ VALID_SESSION +"  for rmeoving investigation to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION_ICAT_ADMIN +"  for rmeoving investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid investigation, no name
         Investigation duplicateInvestigation = getInvestigationDuplicate(true);
         duplicateInvestigation.setDeleted(false);
+        duplicateInvestigation.setCreateId(VALID_ICAT_ADMIN_FOR_INVESTIGATION);
+        
+        Collection<Long> longs =  addAuthorisation(duplicateInvestigation.getId(), null, VALID_ICAT_ADMIN_FOR_INVESTIGATION, ElementType.INVESTIGATION, IcatRoles.ICAT_ADMIN);
+        Iterator it = longs.iterator();
         
         //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        icat.removeInvestigation(VALID_SESSION, duplicateInvestigation.getId());
+        icat.removeInvestigation(VALID_SESSION_ICAT_ADMIN, duplicateInvestigation.getId());
         
         Investigation modified = em.find(Investigation.class,duplicateInvestigation.getId() );
-        
         assertNull("Investigation must not be found in DB "+duplicateInvestigation, modified);
+        
+        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
+        IcatAuthorisation childIcatAuth = em.find(IcatAuthorisation.class,it.next());
+                
+        assertNull("IcatAuthorisation[main] must not be found in DB ", icatAuth);
+        assertNull("IcatAuthorisation[child] must not be found in DB ", childIcatAuth);
     }
     
     /**
@@ -237,8 +250,8 @@ public class TestInvestigation extends BaseTestClassTX {
             icat.deleteInvestigation(VALID_SESSION, propsInvestigation.getId());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+          assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+               throw ex;
         }
     }
     
@@ -260,7 +273,7 @@ public class TestInvestigation extends BaseTestClassTX {
             icat.removeInvestigation(VALID_SESSION, propsInvestigation.getId());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+           assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -303,7 +316,7 @@ public class TestInvestigation extends BaseTestClassTX {
         
         Investigation investigation = icat.getInvestigation(VALID_SESSION, VALID_INVESTIGATION_ID);
         
-      //  checkInvestigation(investigation);
+        //  checkInvestigation(investigation);
         assertEquals("investigation id is "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, investigation.getId());
         // assertFalse("Deleted must be false", investigation.isDeleted());
         assertNotNull("investigation title cannot be null", investigation.getTitle());
@@ -325,11 +338,11 @@ public class TestInvestigation extends BaseTestClassTX {
         
         Investigation investigation = icat.getInvestigation(VALID_SESSION, VALID_INVESTIGATION_ID, InvestigationInclude.DATASETS_ONLY);
         
-          //close em     
-        em.getTransaction().commit();
-        em.close();
+        //close em
+        //em.getTransaction().commit();
+        //em.close();
         
-      //  checkInvestigation(investigation);
+        //  checkInvestigation(investigation);
         assertEquals("investigation id is "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, investigation.getId());
         // assertFalse("Deleted must be false", investigation.isDeleted());
         assertNotNull("investigation title cannot be null", investigation.getTitle());
@@ -346,7 +359,7 @@ public class TestInvestigation extends BaseTestClassTX {
         
     }
     
-     /**
+    /**
      * Tests creating a file
      */
     @Test
@@ -360,9 +373,9 @@ public class TestInvestigation extends BaseTestClassTX {
         Investigation investigation = icat.getInvestigation(VALID_SESSION, VALID_INVESTIGATION_ID, InvestigationInclude.DATASETS_AND_DATAFILES);
         
         //close em
-        em.close();
+        //em.close();
         
-     //   checkInvestigation(investigation);
+        //   checkInvestigation(investigation);
         assertEquals("investigation id is "+VALID_INVESTIGATION_ID, VALID_INVESTIGATION_ID, investigation.getId());
         // assertFalse("Deleted must be false", investigation.isDeleted());
         assertNotNull("investigation title cannot be null", investigation.getTitle());

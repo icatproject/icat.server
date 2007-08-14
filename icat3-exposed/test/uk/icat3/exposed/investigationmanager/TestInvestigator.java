@@ -164,17 +164,19 @@ public class TestInvestigator extends BaseTestClassTX {
      */
     @Test
     public void removeInvestigator() throws ICATAPIException {
-        log.info("Testing  session: "+ VALID_SESSION +"  for rmeoving investigator to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION_ICAT_ADMIN +"  for rmeoving investigator to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid investigator, no name
         Investigator duplicateInvestigator = getInvestigatorDuplicate(true);
         duplicateInvestigator.setDeleted(false);
+        duplicateInvestigator.setCreateId(VALID_ICAT_ADMIN_FOR_INVESTIGATION);
+        
         
         //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        icat.removeInvestigator(VALID_SESSION, duplicateInvestigator.getInvestigatorPK());
+        icat.removeInvestigator(VALID_SESSION_ICAT_ADMIN, duplicateInvestigator.getInvestigatorPK());
         
         Investigator modified = em.find(Investigator.class,duplicateInvestigator.getInvestigatorPK() );
         
@@ -269,8 +271,8 @@ public class TestInvestigator extends BaseTestClassTX {
             
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+          assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+               throw ex;
         }
     }
     
@@ -293,8 +295,8 @@ public class TestInvestigator extends BaseTestClassTX {
             
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+           assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+             throw ex;
         }
     }
     
@@ -316,8 +318,8 @@ public class TestInvestigator extends BaseTestClassTX {
             icat.removeInvestigator(VALID_SESSION, propsInvestigator.getInvestigatorPK());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+          assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+             throw ex;
         }
     }
     

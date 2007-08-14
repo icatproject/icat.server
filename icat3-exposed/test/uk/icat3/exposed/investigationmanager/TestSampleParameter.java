@@ -165,17 +165,18 @@ public class TestSampleParameter extends BaseTestClassTX {
      */
     @Test
     public void removeSampleParameter() throws ICATAPIException {
-        log.info("Testing session: "+VALID_SESSION+ " for removing sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing session: "+VALID_SESSION_ICAT_ADMIN+ " for removing sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid sampleParameter, no name
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
-         duplicateSampleParameter.setDeleted(false);
-         
+        duplicateSampleParameter.setDeleted(false);
+        duplicateSampleParameter.setCreateId(VALID_ICAT_ADMIN_FOR_INVESTIGATION);
+        
         //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        icat.removeSampleParameter(VALID_SESSION, duplicateSampleParameter.getSampleParameterPK());
+        icat.removeSampleParameter(VALID_SESSION_ICAT_ADMIN, duplicateSampleParameter.getSampleParameterPK());
         
         SampleParameter modified = em.find(SampleParameter.class,duplicateSampleParameter.getSampleParameterPK()  );
         
@@ -413,7 +414,7 @@ public class TestSampleParameter extends BaseTestClassTX {
             icat.modifySampleParameter(VALID_SESSION, propsSampleParameter);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -436,7 +437,7 @@ public class TestSampleParameter extends BaseTestClassTX {
             icat.deleteSampleParameter(VALID_SESSION, propsSampleParameter.getSampleParameterPK());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -459,7 +460,7 @@ public class TestSampleParameter extends BaseTestClassTX {
             icat.removeSampleParameter(VALID_SESSION, propsSampleParameter.getSampleParameterPK());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
     }
@@ -518,11 +519,11 @@ public class TestSampleParameter extends BaseTestClassTX {
         SampleParameter sampleParameter = null;
         if(!last){
             Collection<SampleParameter> sampleParameters = (Collection<SampleParameter>)executeListResultCmd("select d from SampleParameter d where d.createId LIKE '%PROP%'");
-            if(sampleParameters.isEmpty()) throw new RuntimeException("No props samples found in DB");            
+            if(sampleParameters.isEmpty()) throw new RuntimeException("No props samples found in DB");
             sampleParameter = sampleParameters.iterator().next();
         } else {
             Collection<SampleParameter> sampleParameters = (Collection<SampleParameter>)executeListResultCmd("select d from SampleParameter d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
-            if(sampleParameters.isEmpty()) throw new RuntimeException("No none props samples found in DB");            
+            if(sampleParameters.isEmpty()) throw new RuntimeException("No none props samples found in DB");
             sampleParameter = sampleParameters.iterator().next();
         }
         log.trace(sampleParameter);

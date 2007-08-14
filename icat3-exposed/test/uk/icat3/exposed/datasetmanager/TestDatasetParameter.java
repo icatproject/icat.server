@@ -165,17 +165,20 @@ public class TestDatasetParameter extends BaseTestClassTX {
      */
     @Test
     public void removeDatasetParameter() throws ICATAPIException {
-        log.info("Testing  session: "+ VALID_SESSION +"  for rmeoving datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        log.info("Testing  session: "+ VALID_SESSION_ICAT_ADMIN +"  for rmeoving datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datasetParameter, no name
         DatasetParameter duplicateDatasetParameter = getDatasetParameterDuplicate(true);
         duplicateDatasetParameter.setDeleted(false);
         
+          duplicateDatasetParameter.setCreateId(VALID_ICAT_ADMIN_FOR_INVESTIGATION);
+      
+          
         //set entitymanager for each new method
         icat.setEntityManager(em);
         icat.setUserSession(tul);
         
-        icat.removeDataSetParameter(VALID_SESSION, duplicateDatasetParameter.getDatasetParameterPK());
+        icat.removeDataSetParameter(VALID_SESSION_ICAT_ADMIN, duplicateDatasetParameter.getDatasetParameterPK());
         
         DatasetParameter modified = em.find(DatasetParameter.class,duplicateDatasetParameter.getDatasetParameterPK() );
         
@@ -346,8 +349,8 @@ public class TestDatasetParameter extends BaseTestClassTX {
             icat.modifyDataSetParameter(VALID_SESSION, propsDatasetParameter);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+             throw ex;
         }
     }
     
@@ -369,8 +372,8 @@ public class TestDatasetParameter extends BaseTestClassTX {
             icat.deleteDataSetParameter(VALID_SESSION, propsDatasetParameter.getDatasetParameterPK());
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+           assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+              throw ex;
         }
     }
     
@@ -392,8 +395,8 @@ public class TestDatasetParameter extends BaseTestClassTX {
             DataSetManager.removeDataSetParameter(VALID_SESSION, propsDatasetParameter, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'cannot be modified'", ex.getMessage().contains("cannot be modified"));
-            throw ex;
+       assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+                 throw ex;
         }
     }
     
@@ -472,7 +475,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
     @Test
     public void removeParameter(){
         log.info("Removing parameters");
-        Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+        Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.facilityAcquired = 'Y' order by d.modTime desc");
         log.info("Found: "+parameters.size());
         for(Parameter  parameter : parameters){
             if(parameter.getCreateId().equals("DATASET_PARAMETER_ADDED")){
@@ -484,7 +487,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
     
     @Test //TODO the last method would not execute in TestingAll so added this dummy, seems to work
     public void dummy(){
-        Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+        Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.facilityAcquired = 'N' order by d.modTime desc");
         for(Parameter  parameter : parameters){
             if(parameter.getCreateId().equals("DATASET_PARAMETER_ADDED")){
                 log.info("Removing added parameter: "+parameter );
