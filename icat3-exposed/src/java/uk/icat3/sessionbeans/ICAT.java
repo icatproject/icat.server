@@ -57,8 +57,8 @@ import uk.icat3.sessionbeans.search.DatafileSearchLocal;
 import uk.icat3.sessionbeans.search.DatasetSearchLocal;
 import uk.icat3.sessionbeans.search.InvestigationSearchLocal;
 import uk.icat3.sessionbeans.search.KeywordSearchLocal;
-import uk.icat3.sessionbeans.util.ElementType;
 import uk.icat3.util.DatasetInclude;
+import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.KeywordType;
 import uk.icat3.util.LogicalOperator;
@@ -72,7 +72,7 @@ import uk.icat3.util.LogicalOperator;
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-public class ICAT extends EJBObject implements ICATLocal {
+public class ICAT extends EJBObject /*implements ICATLocal*/ {
     
     static Logger log = Logger.getLogger(ICAT.class);
     
@@ -1328,7 +1328,7 @@ public class ICAT extends EJBObject implements ICATLocal {
             return datasetManagerLocal.getAuthorisations(sessionId, elementId);
         } else if(elementType == ElementType.INVESTIGATION){
             return datafileManagerLocal.getAuthorisations(sessionId, elementId);
-        } else throw new SessionException("ElementType "+elementType+" not supported"); //should never be thrown
+        } else throw new SessionException("ElementType "+elementType+" not supported. Only INVESTIGATION, DATASET and DATAFILE ElementTypes supported."); 
     }
     
     /**
