@@ -76,7 +76,7 @@ public class KeywordSearch {
         log.trace("getKeywordsForUser("+userId+", EntityManager)");
         
         if(startKeyword != null) startKeyword = startKeyword+"%";
-        else startKeyword = "%";
+        //startKeyword = "%";
         
         if(numberReturned < 0){
             return  (Collection<String>)manager.createNamedQuery(KEYWORDS_FOR_USER).

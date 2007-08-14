@@ -12,6 +12,7 @@ package uk.icat3.manager;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
+import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -74,7 +75,7 @@ public class ManagerUtil {
      * @param include The information that is needed to be returned with the investigation
      * @param manager manager object that will facilitate interaction with underlying database
      */
-    public static void getInvestigationInformation(String userId, Collection<Investigation> investigations, InvestigationInclude include, EntityManager manager){
+    public static void getInvestigationInformation(String userId, Collection<Investigation> investigations, InvestigationInclude include, EntityManager manager) {
         if(include != null){
             if(include.toString().equals(InvestigationInclude.NONE.toString())){
                 //do nothing
@@ -83,21 +84,18 @@ public class ManagerUtil {
             // now collect the information associated with the investigations requested
             else if(include.toString().equals(InvestigationInclude.ALL.toString())){
                 for(Investigation investigation : investigations){
-                    //size invokes the JPA to get the information, other wise the collections are null
                     
                     investigation.getKeywordCollection().size();
                     investigation.getInvestigatorCollection().size();
                     investigation.getSampleCollection().size();
-                    
                     investigation.getDatasetCollection().size();
-                    //now filter the datasets collection
-                    filterDatasets(userId, investigation, true, manager); //this will fetch the datafiles aswell
+                    filterDatasets(userId, investigation, true, manager);
                     
-                    /*for(Dataset dataset : investigation.getDatasetCollection()){
-                        dataset.getDatafileCollection().size();
-                        //now filter the datafiles collection
-                        filterDatafiles(userId, dataset, true, manager);
-                    }*/
+                    try {
+                        GateKeeper.performAuthorisation(userId, investigation, AccessType.READ, manager);
+                    } catch (InsufficientPrivilegesException ex) {
+                        log.fatal("User has not got access to investigation that search has returned", ex);
+                    }
                 }
                 // return datasets with these investigations
             } else if(include.toString().equals(InvestigationInclude.DATASETS_ONLY.toString())){
@@ -131,7 +129,16 @@ public class ManagerUtil {
                     investigation.getKeywordCollection().size();
                 }
                 // return c with these investigations
-            } else if(include.toString().equals(InvestigationInclude.INVESTIGATORS_ONLY.toString())){
+            } else if(include.toString().equals(InvestigationInclude.ROLE_ONLY.toString())){
+                for(Investigation investigation : investigations){
+                    //get role (this adds the role
+                    try {
+                        GateKeeper.performAuthorisation(userId, investigation, AccessType.READ, manager);
+                    } catch (InsufficientPrivilegesException ex) {
+                        log.fatal("User has not got access to investigation that search has returned", ex);
+                    }   }
+                // return c with these investigations
+            }else if(include.toString().equals(InvestigationInclude.INVESTIGATORS_ONLY.toString())){
                 for(Investigation investigation : investigations){
                     //size invokes teh JPA to get the information
                     investigation.getInvestigatorCollection().size();
@@ -149,8 +156,21 @@ public class ManagerUtil {
                     investigation.getKeywordCollection().size();
                     investigation.getInvestigatorCollection().size();
                     investigation.getSampleCollection().size();
+                    //get role (this adds the role
+                    try {
+                        GateKeeper.performAuthorisation(userId, investigation, AccessType.READ, manager);
+                    } catch (InsufficientPrivilegesException ex) {
+                        log.fatal("User has not got access to investigation that search has returned", ex);
+                    }
                 }
-            } else {
+            } else if(include.toString().equals(InvestigationInclude.ALL_EXCEPT_DATASETS_DATAFILES_AND_ROLES.toString())){
+                for(Investigation investigation : investigations){
+                    //size invokes the JPA to get the information
+                    investigation.getKeywordCollection().size();
+                    investigation.getInvestigatorCollection().size();
+                    investigation.getSampleCollection().size();                    
+                }
+            }else {
                 log.trace("No additional info requested.");
             }
             
@@ -283,7 +303,7 @@ public class ManagerUtil {
         
         //now remove deleted items
         try{
-             dataset.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(cascade));
+            dataset.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(cascade));
         } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}
     }
     
@@ -480,7 +500,7 @@ public class ManagerUtil {
         return true;
     }
     
-     /**
+    /**
      * Deletes Authorisation
      */
     public static void deleteAuthorisation(String userId, Long authorisationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
@@ -579,7 +599,7 @@ public class ManagerUtil {
             IcatAuthorisation icatAuthorisationChild = null;
             
             if(type == ElementType.INVESTIGATION){
-                if(toBeAddedRole.isRootInsert()){
+                if(toBeAddedRole.isActionRootInsert()){
                     //need to add a another row for creating datasets for this investigation
                     log.trace("Adding "+toAddUserId+" to create datasets on "+rootElement);
                     icatAuthorisationChild = persistAuthorisation(userId, toAddUserId, toBeAddedRole, ElementType.DATASET, null,
@@ -589,7 +609,7 @@ public class ManagerUtil {
                         null,  null, icatAuthorisationChild.getId(), manager);
                 
             } else if(type == ElementType.DATASET){
-                if(toBeAddedRole.isRootInsert()){
+                if(toBeAddedRole.isActionRootInsert()){
                     //need to add a another row for creating datafiles for this dataset
                     log.trace("Adding "+toAddUserId+" to create datafiles on "+rootElement);
                     icatAuthorisationChild = persistAuthorisation(userId, toAddUserId, toBeAddedRole,  ElementType.DATAFILE, null,
@@ -646,7 +666,7 @@ public class ManagerUtil {
             
             //need to check if new role has root insert, if not, check if row in DB with create Root (ie elementId null)
             //and delete it so they dont have create ds, df actions
-            if(!newRole.isRootInsert() && icatAuthorisation.getUserChildRecord() != null){
+            if(!newRole.isActionRootInsert() && icatAuthorisation.getUserChildRecord() != null){
                 
                 IcatAuthorisation icatAuthorisationChild = findObject(IcatAuthorisation.class, icatAuthorisation.getUserChildRecord(), manager);
                 
@@ -655,7 +675,7 @@ public class ManagerUtil {
                 //removing child
                 icatAuthorisation.setUserChildRecord(null);
                 
-            } else if(newRole.isRootInsert() && icatAuthorisation.getUserChildRecord() == null) {
+            } else if(newRole.isActionRootInsert() && icatAuthorisation.getUserChildRecord() == null) {
                 //if new role is creator then add a record
                 if(rootElement.getRootElementType() == ElementType.INVESTIGATION){
                     IcatAuthorisation icatAuthorisationChild = persistAuthorisation(userId, icatAuthorisation.getUserId(), newRole,

@@ -58,8 +58,8 @@ public class TestJPA {
     }
     
     protected static void setUp(){
-        emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
-        //emf = Persistence.createEntityManagerFactory("icat3-dls_dev_new");
+      //  emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
+        emf = Persistence.createEntityManagerFactory("icatisis_dev");
         em = emf.createEntityManager();
         // Begin transaction
         em.getTransaction().begin();
@@ -135,7 +135,7 @@ public class TestJPA {
         
         QUERY = "SELECT i FROM Datafile i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :dataFileType AND i.markedDeleted = 'N' " +
                 " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-                " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' AND "+
+                " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y' AND "+
                 " i.datafileParameterCollection.markedDeleted = 'N' AND i.datafileParameterCollection.datafileParameterPK.name = 'run_number' AND" +
                 " i.datafileParameterCollection.numericValue BETWEEN :lower AND :upper AND i.dataset.investigation.instrument.name = 'SXD'";
         
@@ -255,7 +255,7 @@ public class TestJPA {
         
         String QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :investigationType AND i.markedDeleted = 'N' " +
                 " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-                " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' AND "+
+                " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y' AND "+
                 
                 " (i.visitId = :visitId OR  :visitId IS NULL) AND" +
                 " (i.invType.name = :invType  OR :invType IS NULL) AND " +
@@ -279,14 +279,14 @@ public class TestJPA {
                  " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
                 " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
                 " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY')" +
-                " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionSelect = 'Y' " +
+                " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y' " +
                 " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
                 " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " + //remove if all are null
                              
                 " AND EXISTS (SELECT dfp FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
                 " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
                 " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
-                " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
+                " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionCanSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
                 " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null
               
         
@@ -330,7 +330,7 @@ public class TestJPA {
         setUp();
         String QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :investigationType AND i.markedDeleted = 'N' " +
                 " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-                " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' ";
+                " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y' ";
                   Query query = em.createQuery(QUERY).
                 setParameter("userId","test").
                 setParameter("investigationType",ElementType.INVESTIGATION);

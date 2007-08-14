@@ -160,7 +160,7 @@ public class GateKeeper {
         
         //now check the access permission from the icat authroisation
         if(access == AccessType.READ){
-            if(role.isSelect()) success = true; //user has access to read element
+            if(role.isActionSelect()) success = true; //user has access to read element
         } else if(access == AccessType.REMOVE){
             //cannot do if facility acquired
             if(!object.isFacilityAcquiredSet()){
@@ -168,10 +168,10 @@ public class GateKeeper {
                 if(elementType.isRootType()){
                     log.trace("Create ID: "+object.getCreateId()+" "+userId.equals(object.getCreateId())+" "+icatAuthorisation.getRole());
                     // to remove something, create Id must also be the same as your Id.
-                    if(role.isRootRemove() && userId.equals(object.getCreateId())) {
+                    if(role.isActionRootRemove() && userId.equals(object.getCreateId())) {
                         success = true; //user has access to remove root element
                     }
-                } else if(role.isRemove() && userId.equals(object.getCreateId())) {
+                } else if(role.isActionRemove() && userId.equals(object.getCreateId())) {
                     success = true; //user has access to remove element
                 }
             }
@@ -181,36 +181,36 @@ public class GateKeeper {
                 log.trace("Trying to create a root type: "+elementType);
                 log.trace("Element Type: "+elementType );
                 //if null in investigation id then can create investigations
-                if(elementType == ElementType.INVESTIGATION && icatAuthorisation.getElementId() == null && role.isRootInsert()){
+                if(elementType == ElementType.INVESTIGATION && icatAuthorisation.getElementId() == null && role.isActionRootInsert()){
                     success = true; //user has access to insert root root element
                 } else if(elementType == ElementType.DATASET &&
                         icatAuthorisation.getElementId() == null &&
                         icatAuthorisation.getParentElementType()==ElementType.INVESTIGATION &&
                         icatAuthorisation.getParentElementId().equals(((Dataset)object).getInvestigation().getId()) &&
-                        role.isRootInsert()){
+                        role.isActionRootInsert()){
                     success = true; //user has access to insert root root element
                 } else if(elementType == ElementType.DATAFILE &&
                         icatAuthorisation.getElementId() == null &&
                         icatAuthorisation.getParentElementType() == ElementType.DATASET &&
                         icatAuthorisation.getParentElementId().equals(((Datafile)object).getDataset().getId()) &&
-                        role.isRootInsert()){
+                        role.isActionRootInsert()){
                     success = true; //user has access to insert root root element
                 }
-            } else if(role.isInsert()){
+            } else if(role.isActionInsert()){
                 success = true; //user has access to insert element
             }
         } else if(access == AccessType.UPDATE){
             //cannot do if facility acquired
-            if(role.isUpdate() && !object.isFacilityAcquiredSet()) success = true; //user has access to update element
+            if(role.isActionUpdate() && !object.isFacilityAcquiredSet()) success = true; //user has access to update element
         } else if(access == AccessType.DELETE){
             //cannot do if facility acquired
-            if(role.isDelete() && !object.isFacilityAcquiredSet()) success = true; //user has access to delete element
+            if(role.isActionDelete() && !object.isFacilityAcquiredSet()) success = true; //user has access to delete element
         } else if(access == AccessType.DOWNLOAD){
-            if(role.isDownload()) success = true; //user has access to download element
+            if(role.isActionDownload()) success = true; //user has access to download element
         } else if(access == AccessType.SET_FA){
-            if(role.isFacilityAcquired()) success = true; //user has access to set FA element
+            if(role.isActionFacilityAcquired()) success = true; //user has access to set FA element
         } else if(access == AccessType.MANAGE_USERS){
-            if(role.isManageUsers()) success = true; //user has access to set manage users
+            if(role.isActionManageUsers()) success = true; //user has access to set manage users
         }
         
         //now check if has permission and if not throw exception

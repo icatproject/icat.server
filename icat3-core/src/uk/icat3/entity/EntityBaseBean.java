@@ -78,8 +78,8 @@ public abstract class EntityBaseBean {
     @Transient
     @ICAT(merge=false, nullable=true)
     protected transient boolean facilityAcquiredSet;
-
-           /**
+    
+    /**
      * Field to check string value of deleted
      */
     @Transient
@@ -168,6 +168,7 @@ public abstract class EntityBaseBean {
      * Gets the facilityAcquired of this entity.
      * @return the facilityAcquired
      */
+    @XmlTransient
     public String getFacilityAcquired() {
         return facilityAcquired;
     }
@@ -209,15 +210,15 @@ public abstract class EntityBaseBean {
         modTime = new Date();
     }
     
-     /**
+    /**
      * Gets the role of the user for this investigation
      * @return the icatRole for the user
      */
-    @XmlElement(name="role")
+    //@XmlElement(name="role")
     public IcatRole getIcatRole() {
         return icatRole;
     }
-
+    
     /**
      * Sets the role of the user for this investigation
      * @param icatRole the icatRole for the user
@@ -225,7 +226,7 @@ public abstract class EntityBaseBean {
     public void setIcatRole(IcatRole icatRole) {
         this.icatRole = icatRole;
     }
-        
+    
     /**
      * Automatically updates modTime when entity is persisted or merged
      * @throws uk.icat3.exceptions.EntityNotModifiableError
@@ -255,13 +256,13 @@ public abstract class EntityBaseBean {
     /*public void postLoad(){
         //setUniqueId(uniqueId);
     }*/
-         
-    @XmlTransient
-     public boolean isFacilityAcquiredSet() {
-          return parseBoolean(getFacilityAcquired());
+    
+    @XmlElement(name="facilityAcquiredData")
+    public boolean isFacilityAcquiredSet() {
+        return parseBoolean(getFacilityAcquired());
     }
-
-    public void setFacilityAcquiredSet(boolean facilityAcquiredSet) {        
+    
+    public void setFacilityAcquiredSet(boolean facilityAcquiredSet) {
         this.facilityAcquiredSet = facilityAcquiredSet;
     }
     
@@ -280,6 +281,7 @@ public abstract class EntityBaseBean {
         this.markedDeleted = (deletedBoolean) ? "Y" : "N";
     }
     
+    @XmlTransient
     public boolean isDeleted(){
         return parseBoolean(getMarkedDeleted());
     }
@@ -319,8 +321,8 @@ public abstract class EntityBaseBean {
     /**
      * Gets the root element type of the bean
      */
-    public abstract ElementType getRootElementType();      
-                    
+    public abstract ElementType getRootElementType();
+    
     /**
      * Method to be overridden if needed to check if the data held in the entity is valid.
      * This method checks whether all the fields which are marked as not null are not null

@@ -42,7 +42,11 @@ public enum InvestigationInclude {
      */
     SAMPLES_ONLY,
     /**
-     * all, datasets with files, keywords, sample and investigators
+     * The investigation role
+     */
+    ROLE_ONLY,
+    /**
+     * all, datasets with files, keywords, sample and investigators, icatrole
      */
     ALL,
     /**
@@ -52,6 +56,10 @@ public enum InvestigationInclude {
     /**
      * all information except datasets and datafiles, ie keywords, sample and investigators
      */
-     ALL_EXCEPT_DATASETS_AND_DATAFILES;
+     ALL_EXCEPT_DATASETS_AND_DATAFILES,
+    /**
+     * all information except datasets, datafiles and icatroles, ie keywords, sample and investigators
+     */
+     ALL_EXCEPT_DATASETS_DATAFILES_AND_ROLES;
     
 }

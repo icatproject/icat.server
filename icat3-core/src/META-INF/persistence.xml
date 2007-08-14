@@ -95,7 +95,7 @@
         
     </persistence-unit>
     
-    <persistence-unit name="icat3-isis" transaction-type="RESOURCE_LOCAL">
+    <persistence-unit name="icatisis_dev" transaction-type="RESOURCE_LOCAL">
         <provider>oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider</provider>
         <class>uk.icat3.entity.Publication</class>
         <class>uk.icat3.entity.Facility</class>
@@ -129,7 +129,7 @@
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))"/>
-            <property name="toplink.jdbc.user" value="icatisis"/>
+            <property name="toplink.jdbc.user" value="icatisis_dev"/>
             <property name="toplink.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
             <property name="toplink.jdbc.password" value="ihave4name"/>
             <!-- Prints out SQL generated from EJBQL -->

@@ -31,33 +31,7 @@ import static uk.icat3.util.Util.*;
 @Table(name = "ICAT_ROLE")
 @NamedQueries({
     @NamedQuery(name = "IcatRole.findByRole", query = "SELECT i FROM IcatRole i WHERE i.role = :role"),
-    @NamedQuery(name = "IcatRole.findByActionInsert", query = "SELECT i FROM IcatRole i WHERE i.actionInsert = :actionInsert"),
-    @NamedQuery(name = "IcatRole.findByActionInsertWeight", query = "SELECT i FROM IcatRole i WHERE i.actionInsertWeight = :actionInsertWeight"),
-    @NamedQuery(name = "IcatRole.findByActionSelect", query = "SELECT i FROM IcatRole i WHERE i.actionSelect = :actionSelect"),
-    @NamedQuery(name = "IcatRole.findByActionSelectWeight", query = "SELECT i FROM IcatRole i WHERE i.actionSelectWeight = :actionSelectWeight"),
-    @NamedQuery(name = "IcatRole.findByActionDownload", query = "SELECT i FROM IcatRole i WHERE i.actionDownload = :actionDownload"),
-    @NamedQuery(name = "IcatRole.findByActionDownloadWeight", query = "SELECT i FROM IcatRole i WHERE i.actionDownloadWeight = :actionDownloadWeight"),
-    @NamedQuery(name = "IcatRole.findByActionUpdate", query = "SELECT i FROM IcatRole i WHERE i.actionUpdate = :actionUpdate"),
-    @NamedQuery(name = "IcatRole.findByActionUpdateWeight", query = "SELECT i FROM IcatRole i WHERE i.actionUpdateWeight = :actionUpdateWeight"),
-    @NamedQuery(name = "IcatRole.findByActionDelete", query = "SELECT i FROM IcatRole i WHERE i.actionDelete = :actionDelete"),
-    @NamedQuery(name = "IcatRole.findByActionDeleteWeight", query = "SELECT i FROM IcatRole i WHERE i.actionDeleteWeight = :actionDeleteWeight"),
-    @NamedQuery(name = "IcatRole.findByActionRemove", query = "SELECT i FROM IcatRole i WHERE i.actionRemove = :actionRemove"),
-    @NamedQuery(name = "IcatRole.findByActionRemoveWeight", query = "SELECT i FROM IcatRole i WHERE i.actionRemoveWeight = :actionRemoveWeight"),
-    @NamedQuery(name = "IcatRole.findByActionRootInsert", query = "SELECT i FROM IcatRole i WHERE i.actionRootInsert = :actionRootInsert"),
-    @NamedQuery(name = "IcatRole.findByActionRootInsertWeight", query = "SELECT i FROM IcatRole i WHERE i.actionRootInsertWeight = :actionRootInsertWeight"),
-    @NamedQuery(name = "IcatRole.findByActionRootRemove", query = "SELECT i FROM IcatRole i WHERE i.actionRootRemove = :actionRootRemove"),
-    @NamedQuery(name = "IcatRole.findByActionRootRemoveWeight", query = "SELECT i FROM IcatRole i WHERE i.actionRootRemoveWeight = :actionRootRemoveWeight"),
-    @NamedQuery(name = "IcatRole.findByActionSetFa", query = "SELECT i FROM IcatRole i WHERE i.actionSetFa = :actionSetFa"),
-    @NamedQuery(name = "IcatRole.findByActionSetFaWeight", query = "SELECT i FROM IcatRole i WHERE i.actionSetFaWeight = :actionSetFaWeight"),
-    @NamedQuery(name = "IcatRole.findByActionManageUsers", query = "SELECT i FROM IcatRole i WHERE i.actionManageUsers = :actionManageUsers"),
-    @NamedQuery(name = "IcatRole.findByActionManageUsersWeight", query = "SELECT i FROM IcatRole i WHERE i.actionManageUsersWeight = :actionManageUsersWeight"),
-    @NamedQuery(name = "IcatRole.findByModTime", query = "SELECT i FROM IcatRole i WHERE i.modTime = :modTime"),
-    @NamedQuery(name = "IcatRole.findByModId", query = "SELECT i FROM IcatRole i WHERE i.modId = :modId"),
-    @NamedQuery(name = "IcatRole.findByCreateTime", query = "SELECT i FROM IcatRole i WHERE i.createTime = :createTime"),
-    @NamedQuery(name = "IcatRole.findByCreateId", query = "SELECT i FROM IcatRole i WHERE i.createId = :createId"),
-    @NamedQuery(name = "IcatRole.findByFacilityAcquired", query = "SELECT i FROM IcatRole i WHERE i.facilityAcquired = :facilityAcquired"),
-    @NamedQuery(name = "IcatRole.findByDeleted", query = "SELECT i FROM IcatRole i WHERE i.markedDeleted = :deleted"),
-    @NamedQuery(name = Queries.ALL_ROLES, query = Queries.ALL_ROLES_JPQL)
+     @NamedQuery(name = Queries.ALL_ROLES, query = Queries.ALL_ROLES_JPQL)
 })
         public class IcatRole extends EntityBaseBean implements Serializable {
     
@@ -69,64 +43,64 @@ import static uk.icat3.util.Util.*;
     private Long roleWeight;
     
     @Column(name = "ACTION_INSERT", nullable = false)
-    private String actionInsert;
+    private String actionCanInsert;
     
     @Column(name = "ACTION_INSERT_WEIGHT", nullable = false)
-    private Long actionInsertWeight;
+    private Long actionCanInsertWeight;
     
     @Column(name = "ACTION_SELECT", nullable = false)
-    private String actionSelect;
+    private String actionCanSelect;
     
     @Column(name = "ACTION_SELECT_WEIGHT", nullable = false)
-    private Long actionSelectWeight;
+    private Long actionCanSelectWeight;
     
     @Column(name = "ACTION_DOWNLOAD", nullable = false)
-    private String actionDownload;
+    private String actionCanDownload;
     
     @Column(name = "ACTION_DOWNLOAD_WEIGHT", nullable = false)
-    private Long actionDownloadWeight;
+    private Long actionCanDownloadWeight;
     
     @Column(name = "ACTION_UPDATE", nullable = false)
-    private String actionUpdate;
+    private String actionCanUpdate;
     
     @Column(name = "ACTION_UPDATE_WEIGHT", nullable = false)
-    private Long actionUpdateWeight;
+    private Long actionCanUpdateWeight;
     
     @Column(name = "ACTION_DELETE", nullable = false)
-    private String actionDelete;
+    private String actionCanDelete;
     
     @Column(name = "ACTION_DELETE_WEIGHT", nullable = false)
-    private Long actionDeleteWeight;
+    private Long actionCanDeleteWeight;
     
     @Column(name = "ACTION_REMOVE", nullable = false)
-    private String actionRemove;
+    private String actionCanRemove;
     
     @Column(name = "ACTION_REMOVE_WEIGHT", nullable = false)
-    private Long actionRemoveWeight;
+    private Long actionCanRemoveWeight;
     
     @Column(name = "ACTION_ROOT_INSERT", nullable = false)
-    private String actionRootInsert;
+    private String actionCanRootInsert;
     
     @Column(name = "ACTION_ROOT_INSERT_WEIGHT", nullable = false)
-    private Long actionRootInsertWeight;
+    private Long actionCanRootInsertWeight;
     
     @Column(name = "ACTION_ROOT_REMOVE", nullable = false)
-    private String actionRootRemove;
+    private String actionCanRootRemove;
     
     @Column(name = "ACTION_ROOT_REMOVE_WEIGHT", nullable = false)
-    private Long actionRootRemoveWeight;
+    private Long actionCanRootRemoveWeight;
     
     @Column(name = "ACTION_SET_FA", nullable = false)
-    private String actionSetFa;
+    private String actionCanSetFa;
     
     @Column(name = "ACTION_SET_FA_WEIGHT", nullable = false)
-    private Long actionSetFaWeight;
+    private Long actionCanSetFaWeight;
     
     @Column(name = "ACTION_MANAGE_USERS", nullable = false)
-    private String actionManageUsers;
+    private String actionCanManageUsers;
     
     @Column(name = "ACTION_MANAGE_USERS_WEIGHT", nullable = false)
-    private Long actionManageUsersWeight;
+    private Long actionCanManageUsersWeight;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
     private Collection<IcatAuthorisation> icatAuthorisationCollection;
@@ -156,183 +130,183 @@ import static uk.icat3.util.Util.*;
     }
     
     @XmlTransient
-    public String getActionInsert() {
-        return actionInsert;
+    public String getActionCanInsert() {
+        return actionCanInsert;
     }
     
-    public void setActionInsert(String actionInsert) {
-        this.actionInsert = actionInsert;
-    }
-    
-    @XmlTransient
-    public Long getActionInsertWeight() {
-        return actionInsertWeight;
-    }
-    
-    public void setActionInsertWeight(Long actionInsertWeight) {
-        this.actionInsertWeight = actionInsertWeight;
+    public void setActionCanInsert(String actionInsert) {
+        this.actionCanInsert = actionInsert;
     }
     
     @XmlTransient
-    public String getActionSelect() {
-        return actionSelect;
+    public Long getActionCanInsertWeight() {
+        return actionCanInsertWeight;
     }
     
-    public void setActionSelect(String actionSelect) {
-        this.actionSelect = actionSelect;
-    }
-    
-    @XmlTransient
-    public Long getActionSelectWeight() {
-        return actionSelectWeight;
-    }
-    
-    public void setActionSelectWeight(Long actionSelectWeight) {
-        this.actionSelectWeight = actionSelectWeight;
+    public void setActionCanInsertWeight(Long actionInsertWeight) {
+        this.actionCanInsertWeight = actionInsertWeight;
     }
     
     @XmlTransient
-    public String getActionDownload() {
-        return actionDownload;
+    public String getActionCanSelect() {
+        return actionCanSelect;
     }
     
-    public void setActionDownload(String actionDownload) {
-        this.actionDownload = actionDownload;
-    }
-    
-    @XmlTransient
-    public Long getActionDownloadWeight() {
-        return actionDownloadWeight;
-    }
-    
-    public void setActionDownloadWeight(Long actionDownloadWeight) {
-        this.actionDownloadWeight = actionDownloadWeight;
+    public void setActionCanSelect(String actionCanSelect) {
+        this.actionCanSelect = actionCanSelect;
     }
     
     @XmlTransient
-    public String getActionUpdate() {
-        return actionUpdate;
+    public Long getActionCanSelectWeight() {
+        return actionCanSelectWeight;
     }
     
-    public void setActionUpdate(String actionUpdate) {
-        this.actionUpdate = actionUpdate;
-    }
-    
-    @XmlTransient
-    public Long getActionUpdateWeight() {
-        return actionUpdateWeight;
-    }
-    
-    public void setActionUpdateWeight(Long actionUpdateWeight) {
-        this.actionUpdateWeight = actionUpdateWeight;
+    public void setActionCanSelectWeight(Long actionSelectWeight) {
+        this.actionCanSelectWeight = actionSelectWeight;
     }
     
     @XmlTransient
-    public String getActionDelete() {
-        return actionDelete;
+    public String getActionCanDownload() {
+        return actionCanDownload;
     }
     
-    public void setActionDelete(String actionDelete) {
-        this.actionDelete = actionDelete;
-    }
-    
-    @XmlTransient
-    public Long getActionDeleteWeight() {
-        return actionDeleteWeight;
-    }
-    
-    public void setActionDeleteWeight(Long actionDeleteWeight) {
-        this.actionDeleteWeight = actionDeleteWeight;
+    public void setActionCanDownload(String actionDownload) {
+        this.actionCanDownload = actionDownload;
     }
     
     @XmlTransient
-    public String getActionRemove() {
-        return actionRemove;
+    public Long getActionCanDownloadWeight() {
+        return actionCanDownloadWeight;
     }
     
-    public void setActionRemove(String actionRemove) {
-        this.actionRemove = actionRemove;
-    }
-    
-    @XmlTransient
-    public Long getActionRemoveWeight() {
-        return actionRemoveWeight;
-    }
-    
-    public void setActionRemoveWeight(Long actionRemoveWeight) {
-        this.actionRemoveWeight = actionRemoveWeight;
+    public void setActionCanDownloadWeight(Long actionDownloadWeight) {
+        this.actionCanDownloadWeight = actionDownloadWeight;
     }
     
     @XmlTransient
-    public String getActionRootInsert() {
-        return actionRootInsert;
+    public String getActionCanUpdate() {
+        return actionCanUpdate;
     }
     
-    public void setActionRootInsert(String actionRootInsert) {
-        this.actionRootInsert = actionRootInsert;
-    }
-    
-    @XmlTransient
-    public Long getActionRootInsertWeight() {
-        return actionRootInsertWeight;
-    }
-    
-    public void setActionRootInsertWeight(Long actionRootInsertWeight) {
-        this.actionRootInsertWeight = actionRootInsertWeight;
+    public void setActionCanUpdate(String actionUpdate) {
+        this.actionCanUpdate = actionUpdate;
     }
     
     @XmlTransient
-    public String getActionRootRemove() {
-        return actionRootRemove;
+    public Long getActionCanUpdateWeight() {
+        return actionCanUpdateWeight;
     }
     
-    public void setActionRootRemove(String actionRootRemove) {
-        this.actionRootRemove = actionRootRemove;
-    }
-    
-    @XmlTransient
-    public Long getActionRootRemoveWeight() {
-        return actionRootRemoveWeight;
-    }
-    
-    public void setActionRootRemoveWeight(Long actionRootRemoveWeight) {
-        this.actionRootRemoveWeight = actionRootRemoveWeight;
+    public void setActionCanUpdateWeight(Long actionUpdateWeight) {
+        this.actionCanUpdateWeight = actionUpdateWeight;
     }
     
     @XmlTransient
-    public String getActionSetFa() {
-        return actionSetFa;
+    public String getActionCanDelete() {
+        return actionCanDelete;
     }
     
-    public void setActionSetFa(String actionSetFa) {
-        this.actionSetFa = actionSetFa;
-    }
-    
-    @XmlTransient
-    public Long getActionSetFaWeight() {
-        return actionSetFaWeight;
-    }
-    
-    public void setActionSetFaWeight(Long actionSetFaWeight) {
-        this.actionSetFaWeight = actionSetFaWeight;
+    public void setActionCanDelete(String actionDelete) {
+        this.actionCanDelete = actionDelete;
     }
     
     @XmlTransient
-    public String getActionManageUsers() {
-        return actionManageUsers;
+    public Long getActionCanDeleteWeight() {
+        return actionCanDeleteWeight;
     }
     
-    public void setActionManageUsers(String actionManageUsers) {
-        this.actionManageUsers = actionManageUsers;
+    public void setActionCanDeleteWeight(Long actionDeleteWeight) {
+        this.actionCanDeleteWeight = actionDeleteWeight;
     }
     
     @XmlTransient
-    public Long getActionManageUsersWeight() {
-        return actionManageUsersWeight;
+    public String getActionCanRemove() {
+        return actionCanRemove;
     }
     
-    public void setActionManageUsersWeight(Long actionManageUsersWeight) {
-        this.actionManageUsersWeight = actionManageUsersWeight;
+    public void setActionCanRemove(String actionRemove) {
+        this.actionCanRemove = actionRemove;
+    }
+    
+    @XmlTransient
+    public Long getActionCanRemoveWeight() {
+        return actionCanRemoveWeight;
+    }
+    
+    public void setActionCanRemoveWeight(Long actionRemoveWeight) {
+        this.actionCanRemoveWeight = actionRemoveWeight;
+    }
+    
+    @XmlTransient
+    public String getActionCanRootInsert() {
+        return actionCanRootInsert;
+    }
+    
+    public void setActionCanRootInsert(String actionRootInsert) {
+        this.actionCanRootInsert = actionRootInsert;
+    }
+    
+    @XmlTransient
+    public Long getActionCanRootInsertWeight() {
+        return actionCanRootInsertWeight;
+    }
+    
+    public void setActionCanRootInsertWeight(Long actionRootInsertWeight) {
+        this.actionCanRootInsertWeight = actionRootInsertWeight;
+    }
+    
+    @XmlTransient
+    public String getActionCanRootRemove() {
+        return actionCanRootRemove;
+    }
+    
+    public void setActionCanRootRemove(String actionRootRemove) {
+        this.actionCanRootRemove = actionRootRemove;
+    }
+    
+    @XmlTransient
+    public Long getActionCanRootRemoveWeight() {
+        return actionCanRootRemoveWeight;
+    }
+    
+    public void setActionCanRootRemoveWeight(Long actionRootRemoveWeight) {
+        this.actionCanRootRemoveWeight = actionRootRemoveWeight;
+    }
+    
+    @XmlTransient
+    public String getActionCanSetFa() {
+        return actionCanSetFa;
+    }
+    
+    public void setActionCanSetFa(String actionSetFa) {
+        this.actionCanSetFa = actionSetFa;
+    }
+    
+    @XmlTransient
+    public Long getActionCanSetFaWeight() {
+        return actionCanSetFaWeight;
+    }
+    
+    public void setActionCanSetFaWeight(Long actionSetFaWeight) {
+        this.actionCanSetFaWeight = actionSetFaWeight;
+    }
+    
+    @XmlTransient
+    public String getActionCanManageUsers() {
+        return actionCanManageUsers;
+    }
+    
+    public void setActionCanManageUsers(String actionManageUsers) {
+        this.actionCanManageUsers = actionManageUsers;
+    }
+    
+    @XmlTransient
+    public Long getActionCanManageUsersWeight() {
+        return actionCanManageUsersWeight;
+    }
+    
+    public void setActionCanManageUsersWeight(Long actionManageUsersWeight) {
+        this.actionCanManageUsersWeight = actionManageUsersWeight;
     }
     
     @XmlTransient
@@ -345,57 +319,57 @@ import static uk.icat3.util.Util.*;
     }
     
     ///boolean getter methods for web services
-    public boolean isSelect(){
-        return parseBoolean(actionSelect);
+    public boolean isActionSelect(){
+        return parseBoolean(actionCanSelect);
     }
     
-    public boolean isInsert(){
-        return parseBoolean(actionInsert);
+    public boolean isActionInsert(){
+        return parseBoolean(actionCanInsert);
     }
     
-    public boolean isDownload(){
-        return parseBoolean(actionDownload);
+    public boolean isActionDownload(){
+        return parseBoolean(actionCanDownload);
     }
     
-    public boolean isUpdate(){
-        return parseBoolean(actionUpdate);
+    public boolean isActionUpdate(){
+        return parseBoolean(actionCanUpdate);
     }
     
-    public boolean isDelete(){
-        return parseBoolean(actionDelete);
+    public boolean isActionDelete(){
+        return parseBoolean(actionCanDelete);
     }
     
-    public boolean isRemove(){
-        return parseBoolean(actionRemove);
+    public boolean isActionRemove(){
+        return parseBoolean(actionCanRemove);
     }
     
-    public boolean isManageUsers(){
-        return parseBoolean(actionManageUsers);
+    public boolean isActionManageUsers(){
+        return parseBoolean(actionCanManageUsers);
     }
     
-    public boolean isRootRemove(){
-        return parseBoolean(actionRootRemove);
+    public boolean isActionRootRemove(){
+        return parseBoolean(actionCanRootRemove);
     }
     
-    public boolean isRootInsert(){
-        return parseBoolean(actionRootInsert);
+    public boolean isActionRootInsert(){
+        return parseBoolean(actionCanRootInsert);
     }
     
-    public boolean isFacilityAcquired(){
-        return parseBoolean(actionSetFa);
+    public boolean isActionFacilityAcquired(){
+        return parseBoolean(actionCanSetFa);
     }
     
     //setters
-    public void setSelect(boolean ignore){}    
-    public void setInsert(boolean ignore){}  
-    public void setDownload(boolean ignore){}  
-    public void setUpdate(boolean ignore){}
-    public void setDelete(boolean ignore){} 
-    public void setRemove(boolean ignore){}  
-    public void setManageUsers(boolean ignore){}    
-    public void setRootRemove(boolean ignore){}  
-    public void setRootInsert(boolean ignore){}    
-    public void setFacilityAcquired(boolean ignore){}
+    public void setActionSelect(boolean ignore){}    
+    public void setActionInsert(boolean ignore){}  
+    public void setActionDownload(boolean ignore){}  
+    public void setActionUpdate(boolean ignore){}
+    public void setActionDelete(boolean ignore){} 
+    public void setActionRemove(boolean ignore){}  
+    public void setActionManageUsers(boolean ignore){}    
+    public void setActionRootRemove(boolean ignore){}  
+    public void setActionRootInsert(boolean ignore){}    
+    public void setActionFacilityAcquired(boolean ignore){}
     
     /**
      * Gets the element type of the bean

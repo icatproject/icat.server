@@ -29,7 +29,7 @@ public class Queries {
     public static final String QUERY_USERS_ENTITYOBJECTS_JPQL = ", IcatAuthorisation ia WHERE" +
             " i.id = ia.elementId AND ia.elementType = :objectType AND i.markedDeleted = 'N' " +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-            " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' ";
+            " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y' ";
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     
     
@@ -129,7 +129,7 @@ public class Queries {
     public static final String ADVANCED_SEARCH = "Investigation.findByAdvancedSearch";
     // String QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :investigationType AND i.markedDeleted = 'N' " +
     //            " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-    //            " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' AND "+
+    //            " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y' AND "+
     //
     //            " (i.visitId = :visitId OR  :visitId IS NULL) AND" +
     //            " (i.invType.name = :invType  OR :invType IS NULL) AND " +
@@ -153,14 +153,14 @@ public class Queries {
     //            " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
     //            " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
     //            " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY')" +
-    //            " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionSelect = 'Y' " +
+    //            " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y' " +
     //            " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
     //            " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " + //remove if all are null
     //
     //            " AND EXISTS (SELECT dfp FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
     //            " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
     //            " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
-    //            " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
+    //            " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionCanSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
     //            " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null
     
     public static final String ADVANCED_SEARCH_JPQL_START = LIST_ALL_USERS_INVESTIGATIONS_JPQL +
@@ -177,14 +177,14 @@ public class Queries {
     public static final String ADVANCED_SEARCH_JPQL_DATAFILE = " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
             " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
             " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY')" +
-            " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionSelect = 'Y' " +
+            " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y' " +
             " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
             " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " ; //remove if all are null
         
     public static final String ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER = " AND EXISTS (SELECT dfp.datafileParameterPK.datafileId FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
             " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
             " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
-            " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
+            " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionCanSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
             " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null"
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -214,12 +214,12 @@ public class Queries {
     
     //   QUERY = "SELECT i FROM Datafile i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :dataFileType " +
     //                " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-    //                " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y' "+
+    //                " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y' "+
     //                " AND i.dataset.investigation.instrument.name IN ('SXD') AND " + //this bit dynamically create
     //                "EXISTS (SELECT dfp FROM i.datafileParameterCollection dfp, IcatAuthorisation ia2" +
     //                " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
     //                " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
-    //                " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionSelect = 'Y' AND dfp.numericValue BETWEEN :lower AND :upper AND " +
+    //                " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionCanSelect = 'Y' AND dfp.numericValue BETWEEN :lower AND :upper AND " +
     //                "dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')";
     public static final String DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_START = RETURN_ALL_DATAFILES_JPQL + QUERY_USERS_ENTITYOBJECTS_JPQL;
     
@@ -227,7 +227,7 @@ public class Queries {
             " EXISTS (SELECT dfp FROM i.datafileParameterCollection dfp, IcatAuthorisation ia2" +
             " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :objectType AND dfp.markedDeleted = 'N' " +
             " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
-            " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionSelect = 'Y' AND dfp.numericValue BETWEEN :lower AND :upper AND " +
+            " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionCanSelect = 'Y' AND dfp.numericValue BETWEEN :lower AND :upper AND " +
             " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')";//  add this in here for all instruments: i.dataset.investigation.instrument.name = 'SXD'";
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -260,7 +260,7 @@ public class Queries {
     public static final String KEYWORDS_FOR_USER_JPQL = "SELECT DISTINCT k.keywordPK.name from Keyword k, IcatAuthorisation ia WHERE" +
             " k.investigation.id = ia.elementId AND ia.elementType = :objectType AND ia.markedDeleted = 'N'" +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-            " AND ia.markedDeleted = 'N' AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) AND k.markedDeleted = 'N' ORDER BY k.keywordPK.name";
+            " AND ia.markedDeleted = 'N' AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) AND k.markedDeleted = 'N'";// ORDER BY k.keywordPK.name";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
@@ -422,7 +422,7 @@ public class Queries {
     public static final String LIST_MY_DELETED_DATASETS_JPQL = "SELECT DISTINCT ds from Dataset ds, IcatAuthorisation ia WHERE" +
             " ds.id = ia.elementId AND ia.elementType = :objectType AND ds.markedDeleted = 'Y' " +
             " AND ia.userId = :userId " +
-            " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y'";
+            " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y'";
     
     /**
      * Find all deleted datasets
@@ -432,7 +432,7 @@ public class Queries {
     public static final String LIST_MY_DELETED_DATAFILE_JPQL = "SELECT DISTINCT df from Datafile df, IcatAuthorisation ia WHERE" +
             " df.id = ia.elementId AND ia.elementType = :objectType AND df.markedDeleted = 'Y' " +
             " AND ia.userId = :userId " +
-            " AND ia.markedDeleted = 'N' AND ia.role.actionSelect = 'Y'";
+            " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y'";
     
     /**
      * Max number of returned items in a collection

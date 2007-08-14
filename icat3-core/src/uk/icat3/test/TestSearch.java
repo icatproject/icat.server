@@ -55,8 +55,8 @@ public class TestSearch {
     }
     
     protected static void setUp(){
-        emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
-        //emf = Persistence.createEntityManagerFactory("icat3-dls_dev_new");
+        //emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
+        emf = Persistence.createEntityManagerFactory("icatisis_dev");
         em = emf.createEntityManager();
         
         
@@ -68,7 +68,7 @@ public class TestSearch {
     
     protected static void tearDown(){
         // Commit the transaction
-         em.getTransaction().commit();
+        em.getTransaction().commit();
         
         em.close();
     }
@@ -171,6 +171,7 @@ public class TestSearch {
         
         setUp();
         
+        long time = System.currentTimeMillis();
         //test code here
         log.info("Testing");
         Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(userId, keywords,LogicalOperator.AND, InvestigationInclude.NONE, false, true, 0, 500, em);
@@ -181,6 +182,9 @@ public class TestSearch {
             log.info(investigation.getId()+" "+investigation.getTitle());
         }
         log.info("Results: "+investigations.size());
+        
+        System.out.println((System.currentTimeMillis() -time)/1000f +" seconds");
+        
         tearDown();
         
     }
@@ -188,7 +192,7 @@ public class TestSearch {
     public  void seachBySurname(String userId, String surname) throws Exception {
         
         setUp();
-        
+        long time = System.currentTimeMillis();
         //test code here
         log.info("Testing");
         Collection<Investigation> investigations = InvestigationSearch.searchByUserSurname(userId,surname,em);
@@ -196,6 +200,7 @@ public class TestSearch {
         for(Investigation investigation : investigations){
             log.info(investigation.getId());
         }
+        System.out.println((System.currentTimeMillis() -time)/1000f +" seconds");
         
         tearDown();
         
@@ -236,7 +241,7 @@ public class TestSearch {
     public void seachByAdvanced(String userId, AdvancedSearchDetails dto) throws Exception {
         
         setUp();
-        
+        long time  = System.currentTimeMillis();
         //test code here
         log.info("Testing");
         Collection<Investigation> investigations =  InvestigationSearch.searchByAdvanced(userId,dto, 0,300,em);
@@ -245,6 +250,7 @@ public class TestSearch {
             log.info(investigation.getId()+" "+investigation.getTitle()+" "+investigation.getInstrument());
         }
         
+        System.out.println((System.currentTimeMillis() -time)/1000f +" seconds");
         
         tearDown();
         
@@ -276,7 +282,7 @@ public class TestSearch {
         Collection<String> keywords =  KeywordSearch.getKeywordsForUser(userId,startkeyword,300, em);
         log.info("Results: "+keywords.size());
         for(String keyword : keywords){
-            log.info(keyword);
+          //  log.info(keyword);
         }
         
         tearDown();
@@ -464,6 +470,7 @@ public class TestSearch {
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
         
+        
         TestSearch ts = new TestSearch();
         
         //  ts.seachByKeyword("JAMES", "ccw");
@@ -472,7 +479,7 @@ public class TestSearch {
         Collection<String> keywords  =   new ArrayList<String>();
         
         //isis
-        keywords.add("isis");
+        // keywords.add("isis");
         
         keywords.add("calibration");
         // ts.seachByKeywords("gjd37", keywords, LogicalOperator.AND, false, InvestigationUtil.ALL);
@@ -488,14 +495,14 @@ public class TestSearch {
         //////////////////////////
         
         
-        
         //keywords.add("ccw");
-        // ts.seachByKeywords("JAMES-JAMES", keywords);
+      //  ts.seachByKeywords("gjd37", keywords);
+        // ts.seachByKeywords("gjd37", keywords);
         
-        log.info("Hello");
-        // ts.getMyInvestigations("JAMES-JAMES");
+        //log.info("Hello");
+        //  ts.getMyInvestigations("gjd37");
         
-        // ts.seachBySurname("JAMES", "HEALY");
+        //  ts.seachBySurname("gjd37", "Shankland");
         
         //ts.seachByUserID("JAMES", "JAMES");
         
@@ -510,7 +517,7 @@ public class TestSearch {
         
         AdvancedSearchDetails dto = new AdvancedSearchDetails();
         
-        dto.setInvestigationName("angle scan 0.44");
+        /*dto.setInvestigationName("angle scan 0.44");
         Collection<String> inv  =   new ArrayList<String>();
         //inv.add("JAMES-JAMES");
         dto.setInvestigators(inv);
@@ -522,29 +529,32 @@ public class TestSearch {
         //
         dto.setDatafileName("a");
         Collection<String> keywords2  =   new ArrayList<String>();
-        
+         
         //isis
         keywords2.add("angle");
-        
+         
         dto.setKeywords(keywords2);
+         */
         dto.setRunEnd(19624L);
         dto.setRunStart(19622L);
         
-        //  ts.seachByAdvanced("JAMES-JAMES",dto);
+        //  ts.seachByAdvanced("gjd37",dto);
         
-        //       ts.getAllKeywords("JAMES");
+          //     ts.getAllKeywords("gjd37");
         //
-        //    ts.getUserKeywords("JAMES-JAMES", "alf");
+            ts.getUserKeywords("gjd37", null);
         
         // ts.getUserInvestigations("JAMES");
         
-        ts.test();
+        // ts.test();
         
         
         //ts.test2();
         //  ts.testModify();
         
         //  ts.testDelete();
+        
+        
     }
     
     
