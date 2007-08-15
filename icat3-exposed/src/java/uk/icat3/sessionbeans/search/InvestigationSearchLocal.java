@@ -22,6 +22,8 @@ public interface InvestigationSearchLocal {
     
     public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch) throws SessionException ;
     
+    public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch, int startIndex, int numberOfResults) throws SessionException ;
+        
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy) throws SessionException ;
     
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords) throws SessionException ;

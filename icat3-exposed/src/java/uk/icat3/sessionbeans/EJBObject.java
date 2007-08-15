@@ -15,6 +15,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import uk.icat3.exceptions.SessionException;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
 import uk.icat3.sessionbeans.util.Constants;
 
@@ -103,6 +104,8 @@ public abstract class EJBObject {
         log.debug("Invoking " + target);
         try {
             return ctx.proceed();
+        } catch(IllegalArgumentException e) {
+            throw new SessionException(e.getMessage());
         } catch(Exception e) {
             throw e;
         } finally {

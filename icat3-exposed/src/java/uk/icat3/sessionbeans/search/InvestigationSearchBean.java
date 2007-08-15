@@ -55,6 +55,24 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      *
      * @param sessionId session id of the user.
      * @param advancedSearch advanced Search details to search with
+     * @param startIndex start index of the results found
+     * @param number_results number of results found from the start index
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection of {@link Investigation} investigation objects
+     */
+    public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch, int startIndex, int numberOfResults) throws SessionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        //now do the search using the  API
+        return InvestigationSearch.searchByAdvanced(userId, advancedSearch, startIndex, numberOfResults, manager);
+    }
+    
+    /**
+     * This searches all DB for investigations with the advanced search criteria
+     *
+     * @param sessionId session id of the user.
+     * @param advancedSearch advanced Search details to search with
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of {@link Investigation} investigation objects
      */
@@ -63,7 +81,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
         String userId = user.getUserIdFromSessionId(sessionId);
         
         //now do the search using the  API
-        return InvestigationSearch.searchByAdvanced(userId, advancedSearch, manager);
+        return InvestigationSearch.searchByAdvanced(userId, advancedSearch, -1, -1, manager);
     }
     
     /**

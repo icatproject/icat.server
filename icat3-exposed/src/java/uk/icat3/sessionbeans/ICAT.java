@@ -53,6 +53,7 @@ import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.sessionbeans.manager.DatafileManagerLocal;
 import uk.icat3.sessionbeans.manager.DatasetManagerLocal;
 import uk.icat3.sessionbeans.manager.InvestigationManagerLocal;
+import uk.icat3.sessionbeans.manager.XMLIngestionManagerLocal;
 import uk.icat3.sessionbeans.search.DatafileSearchLocal;
 import uk.icat3.sessionbeans.search.DatasetSearchLocal;
 import uk.icat3.sessionbeans.search.InvestigationSearchLocal;
@@ -97,6 +98,9 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
     
     @EJB
     protected KeywordSearchLocal keywordSearchLocal;
+    
+    @EJB
+    protected XMLIngestionManagerLocal xmlIngestionManagerLocal;
     ///////////////////////  End of Inject all the EJBs   ///////////////////////
     
     
@@ -197,8 +201,26 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of {@link Investigation} investigation objects
      */
+    @WebMethod()
     public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch) throws SessionException {
         return investigationSearchLocal.searchByAdvanced(sessionId, advancedSearch);
+    }
+    
+    /**
+     * This searches all DB for investigations with the advanced search criteria
+     *
+     * @param sessionId session id of the user.
+     * @param advancedSearch advanced Search details to search with
+     * @param startIndex start index of the results found, default 0
+     * @param numberOfResults number of results found from the start index, default {@link Queries}.MAX_QUERY_RESULTSET
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection of {@link Investigation} investigation objects
+     */
+    @WebMethod(operationName="searchByAdvancedPagination")
+    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByAdvancedPagination")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByAdvancedPaginationResponse")
+    public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch, @WebParam(name="startIndex") int startIndex, @WebParam(name="numberOfResults") int numberOfResults) throws SessionException {
+        return investigationSearchLocal.searchByAdvanced(sessionId, advancedSearch, startIndex, numberOfResults);
     }
     
     /**
@@ -538,7 +560,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      */
     @WebMethod(operationName="searchByRunNumberPagination")
     @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByRunNumberPagination")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByRunNumberPaginationResponse")    
+    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByRunNumberPaginationResponse")
     public Collection<Datafile> searchByRunNumber(@WebParam(name="sessionId") String sessionId, @WebParam(name="instruments") Collection<String> instruments, @WebParam(name="startRun") float startRun, @WebParam(name="endRun") float endRun, @WebParam(name="startIndex") int startIndex, @WebParam(name="number_results") int number_results) throws SessionException {
         return datafileSearchLocal.searchByRunNumber(sessionId, instruments, startRun, endRun, startIndex, number_results);
     }
@@ -704,7 +726,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
     }
     
     /**
-         * Deletes/Undeletess/Undeletes the keyword from investigation, depending on whether the user has permission to delete this Investigation object.
+     * Deletes/Undeletess/Undeletes the keyword from investigation, depending on whether the user has permission to delete this Investigation object.
      *
      * @param sessionId sessionid of the user.
      * @param keywordPK {@link KeywordPK} object to be deleted
@@ -1328,7 +1350,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
             return datasetManagerLocal.getAuthorisations(sessionId, elementId);
         } else if(elementType == ElementType.INVESTIGATION){
             return datafileManagerLocal.getAuthorisations(sessionId, elementId);
-        } else throw new SessionException("ElementType "+elementType+" not supported. Only INVESTIGATION, DATASET and DATAFILE ElementTypes supported."); 
+        } else throw new SessionException("ElementType "+elementType+" not supported. Only INVESTIGATION, DATASET and DATAFILE ElementTypes supported.");
     }
     
     /**
@@ -1422,4 +1444,11 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
     }
     
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    
+    /////////////////////     XML Ingest //////////////////////////
+    @WebMethod
+    public void ingestXML(){
+        xmlIngestionManagerLocal.ingestXML();
+    }
 }
