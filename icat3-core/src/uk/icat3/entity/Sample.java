@@ -53,7 +53,10 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = "Sample.findByModTime", query = "SELECT s FROM Sample s WHERE s.modTime = :modTime"),
     @NamedQuery(name = "Sample.findByModId", query = "SELECT s FROM Sample s WHERE s.modId = :modId"),
     @NamedQuery(name = "Sample.findByUnique", query = "SELECT s FROM Sample s WHERE s.name = :name AND s.instance = :instance AND s.investigationId = :investigationId"),
-    @NamedQuery(name = "Sample.findByProposalSampleId", query = "SELECT s FROM Sample s WHERE s.proposalSampleId = :proposalSampleId")
+    @NamedQuery(name = "Sample.findByProposalSampleId", query = "SELECT s FROM Sample s WHERE s.proposalSampleId = :proposalSampleId"),
+    @NamedQuery(name = Queries.SAMPLES_BY_NAME, query = Queries.SAMPLES_BY_NAME_JPQL),
+    @NamedQuery(name = Queries.DATASETS_BY_SAMPLES, query = Queries.DATASETS_BY_SAMPLES_JPQL)
+    
 })
         @SequenceGenerator(name="SAMPLE_SEQ",sequenceName="SAMPLE_ID_SEQ",allocationSize=1)
         public class Sample extends EntityBaseBean implements Serializable {
@@ -312,7 +315,7 @@ import uk.icat3.util.Queries;
         return isValid();
     }
     
-  /**
+    /**
      * Sets type (see Cascade) flag on all items owned by this dataset
      *
      * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
@@ -343,10 +346,10 @@ import uk.icat3.util.Queries;
      */
     public void setCascade(Cascade type, Object cascadeValue, EntityManager manager, Object managerValue) throws InsufficientPrivilegesException{
         log.trace("Cascading: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
-             String deleted = "Y";
+        String deleted = "Y";
         if(type == Cascade.DELETE){
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
-            if(managerValue == null) throw new RuntimeException("Manager Value needs to be set aswell if Cascade.DELETE");            
+            if(managerValue == null) throw new RuntimeException("Manager Value needs to be set aswell if Cascade.DELETE");
         }
         
         if(getSampleParameterCollection() != null){

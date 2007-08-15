@@ -168,8 +168,8 @@ public class Queries {
             " (i.invType.name = :invType  OR :invType IS NULL) AND " +
             " (i.invAbstract LIKE :invAbstract OR :invAbstract IS NULL) AND" +
             " (i.grantId = :grantId OR :grantId IS NULL) AND" +
-            " (i.title = :invTitle OR :invTitle IS NULL) AND" +
-            " (i.bcatInvStr = :bcatInvStr OR :bcatInvStr IS NULL) AND " +
+            " (i.title LIKE :invTitle OR :invTitle IS NULL) AND" +
+            " (i.bcatInvStr LIKE :bcatInvStr OR :bcatInvStr IS NULL) AND " +
             " (i.invNumber = :invNumber  OR :invNumber IS NULL) ";
     
     //public static final String ADVANCED_SEARCH_JPQL_INSTRUMENT =  " AND i.instrument.name IN(:instrument)  AND i.instrument.markedDeleted = 'N' ";//expand IN, remove this if instrument null
@@ -179,7 +179,7 @@ public class Queries {
             " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY')" +
             " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y' " +
             " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
-            " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " ; //remove if all are null
+            " df.markedDeleted = 'N' AND (df.name LIKE :datafileName OR :datafileName IS NULL))  " ; //remove if all are null
         
     public static final String ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER = " AND EXISTS (SELECT dfp.datafileParameterPK.datafileId FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
             " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
@@ -270,7 +270,7 @@ public class Queries {
      * Find all sample list,
      *
      */
-    public static final String SAMPLES_BY_NAME = "Sample.findByName";
+    public static final String SAMPLES_BY_NAME = "Sample.findBySampleName";
     public static final String SAMPLES_BY_NAME_JPQL = "SELECT s FROM Sample s WHERE s.name LIKE :name AND s.markedDeleted = 'N'";
     
     

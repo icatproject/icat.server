@@ -271,7 +271,7 @@ public class InvestigationSearch extends ManagerUtil {
      * @return collection of {@link Investigation} investigation objects
      */
     private static Collection<Investigation> searchByAdvancedImpl(String userId, AdvancedSearchDetails advanDTO, int startIndex, int number_results, EntityManager manager){
-        if(advanDTO == null) throw new IllegalArgumentException("AdvancedSearchDTO cannot be null");
+        if(advanDTO == null || !advanDTO.isValid()) throw new IllegalArgumentException("AdvancedSearchDTO cannot be null");
         log.trace("searchByAdvancedImpl("+userId+", "+advanDTO);
         
         Collection<Investigation> investigations = null;
@@ -279,14 +279,16 @@ public class InvestigationSearch extends ManagerUtil {
         //dynamically create the query
         String JPQL = ADVANCED_SEARCH_JPQL_START;
         
-        if(advanDTO.isSample()){
+        if(advanDTO.hasSample()){
+            log.trace("Searching sample info");
             //  " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
             //  " sample.markedDeleted = 'N') "+//iterate, remove if no sample is null
             JPQL += "AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
-              " sample.markedDeleted = 'N') ";
+                    " sample.markedDeleted = 'N') ";
         }
         
-        if(advanDTO.isInstruments()){
+        if(advanDTO.hasInstruments()){
+            log.trace("Searching instruments info");
             //add insturments section:
             //" AND i.instrument.name IN(:instrument)  AND i.instrument.markedDeleted = 'N' "+ //expand IN, remove this if instrument null
             JPQL += " AND i.instrument.name IN(";
@@ -299,7 +301,8 @@ public class InvestigationSearch extends ManagerUtil {
             JPQL += ") AND i.instrument.markedDeleted = 'N' ";
         }
         
-        if(advanDTO.isKeywords()){
+        if(advanDTO.hasKeywords()){
+            log.trace("Searching keywords info");
             //add keywords section:
             // AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND kw.keywordPK.name LIKE :keyword1)
             
@@ -310,7 +313,8 @@ public class InvestigationSearch extends ManagerUtil {
             JPQL += " ";
         }
         
-        if(advanDTO.isInvestigators()){
+        if(advanDTO.hasInvestigators()){
+            log.trace("Searching investigators info");
             //add investigator section:
             //" AND EXISTS ( SELECT inv FROM i.investigatorCollection inv WHERE " +
             //   "LOWER(inv.facilityUser.lastName) LIKE :surname AND inv.markedDeleted = 'N')  "+ //iterate, remove this if investigator null
@@ -322,7 +326,7 @@ public class InvestigationSearch extends ManagerUtil {
             JPQL += " ";
         }
         
-        if(advanDTO.isDataFileParameters()){
+        if(advanDTO.hasDataFileParameters()){
             log.trace("Searching data file info");
             //add data file and run number section
             //             " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
@@ -335,7 +339,7 @@ public class InvestigationSearch extends ManagerUtil {
             JPQL += ADVANCED_SEARCH_JPQL_DATAFILE;
         }
         
-        if(advanDTO.isRunNumber()){
+        if(advanDTO.hasRunNumber()){
             log.trace("Searching run number");
             //add data file and run number section
             //    "EXISTS (SELECT dfp FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
@@ -360,19 +364,13 @@ public class InvestigationSearch extends ManagerUtil {
         query = query.setParameter("invType", advanDTO.getInvestigationType());
         query = query.setParameter("grantId", advanDTO.getGrantId());
         query = query.setParameter("objectType", ElementType.INVESTIGATION);
+        query = query.setParameter("invAbstract",advanDTO.getInvestigationAbstract());
         
-        
-        if(advanDTO.isAbstract()){
-            query = query.setParameter("invAbstract","%"+advanDTO.getInvestigationAbstract()+"%");
-        } else {
-            query = query.setParameter("invAbstract",null);
-        }
-        
-        if(advanDTO.isSample()){
+        if(advanDTO.hasSample()){
             query = query.setParameter("sampleName", advanDTO.getSampleName());
         }
         
-        if(advanDTO.isDataFileParameters()){
+        if(advanDTO.hasDataFileParameters()){
             query = query.setParameter("datafileName", advanDTO.getDatafileName());
             query = query.setParameter("dataFileType", ElementType.DATAFILE);
             query = query.setParameter("upperTime", advanDTO.getYearRangeEnd());
@@ -380,14 +378,14 @@ public class InvestigationSearch extends ManagerUtil {
         }
         
         //set upper run number
-        if(advanDTO.isRunNumber()){
+        if(advanDTO.hasRunNumber()){
             query = query.setParameter("upper", advanDTO.getRunEnd());
             query = query.setParameter("lower", advanDTO.getRunStart());
             query = query.setParameter("dataFileType", ElementType.DATAFILE);
         }
         
         //set instruments
-        if(advanDTO.isInstruments()){
+        if(advanDTO.hasInstruments()){
             int j = 1;
             for(String instrument : advanDTO.getInstruments()){
                 query = query.setParameter("instrument"+j++,instrument);
@@ -395,18 +393,20 @@ public class InvestigationSearch extends ManagerUtil {
         }
         
         //set instruments
-        if(advanDTO.isKeywords()){
+        if(advanDTO.hasKeywords()){
             int j = 1;
             for(String keyword : advanDTO.getKeywords()){
-                query = query.setParameter("keyword"+j++,"%"+keyword+"%");
+                if(advanDTO.isFuzzy()) query = query.setParameter("keyword"+j++,"%"+keyword+"%");
+                else query = query.setParameter("keyword"+j++,keyword);
             }
         }
         
         //set investigators
-        if(advanDTO.isInvestigators()){
+        if(advanDTO.hasInvestigators()){
             int j = 1;
             for(String investigator : advanDTO.getInvestigators()){
-                query = query.setParameter("surname"+j++,"%"+investigator.toLowerCase()+"%");
+                if(advanDTO.isFuzzy()) query = query.setParameter("surname"+j++,"%"+investigator.toLowerCase()+"%");
+                else query = query.setParameter("surname"+j++,investigator.toLowerCase());
             }
         }
         

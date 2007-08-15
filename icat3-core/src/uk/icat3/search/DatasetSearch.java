@@ -97,8 +97,7 @@ public class DatasetSearch {
             investigation.setCascade(Cascade.REMOVE_DELETED_ITEMS, true);
         } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}
         
-        Collection<Dataset> datasets = investigation.getDatasetCollection();
-        
+        Collection<Dataset> datasets = investigation.getDatasetCollection();        
         Collection<Dataset> datasetsPermission = new ArrayList<Dataset>();
         
         for (Dataset dataset : datasets) {
@@ -110,19 +109,22 @@ public class DatasetSearch {
                     datasetsPermission.add(dataset);
                     log.trace("Adding "+ dataset+" to returned list");
                     
-                    //need to filter out datafiles
-                    ManagerUtil.getDatasetInformation(userId, datasets, DatasetInclude.DATASET_FILES_AND_PARAMETERS, manager);
-                    
                 } catch(InsufficientPrivilegesException ignore){}
             }
         }
         
+        //need to filter out datafiles
+        ManagerUtil.getDatasetInformation(userId, datasetsPermission, DatasetInclude.DATASET_FILES_AND_PARAMETERS, manager);
+                
         return datasetsPermission;
     }
     
     /**
      *
      *
+     * @param userId
+     * @param manager
+     * @return
      */
     public static Collection<Dataset> listMyDeletedDataSets(String userId, EntityManager manager){
         log.trace("listAllDeletedDataSets(EntityManager)");
@@ -131,10 +133,10 @@ public class DatasetSearch {
     }
     
     /**
-     *  List all the valid avaliable types' for datasets
+     *  List all the valid avaliable types for datasets
      *
      * @param manager manager object that will facilitate interaction with underlying database
-     * @return collection of types'
+     * @return collection of types
      */
     public static Collection<DatasetType> listDatasetTypes(EntityManager manager) {
         log.trace("listDatasetTypes(EntityManager)");
@@ -143,7 +145,7 @@ public class DatasetSearch {
     }
     
     /**
-     * List all the valid avaliable status' for datasets
+     * List all the valid avaliable status for datasets
      *
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of status'

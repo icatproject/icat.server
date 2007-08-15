@@ -379,7 +379,7 @@ public class ManagerUtil {
     public static FacilityUser getFacilityUser(String userId, EntityManager manager) {
         FacilityUser facilityUser = null;
         try {
-            facilityUser = (FacilityUser) manager.createQuery("SELECT f FROM FacilityUser f where f.federalId = :fedId").setParameter("fedId", userId).getSingleResult();
+            facilityUser = (FacilityUser) manager.createNamedQuery("FacilityUser.findByFederalId").setParameter("fedId", userId).getSingleResult();
             log.trace(""+facilityUser.getFacilityUserId()+" corresponds to "+userId);
             return facilityUser;
         } catch(NoResultException nre) {
@@ -402,7 +402,7 @@ public class ManagerUtil {
      */
     public static Facility getFacility(EntityManager manager) {
         try{
-            Collection<Facility> facilities = (Collection<Facility>)manager.createQuery("SELECT f from Facility f").getResultList();
+            Collection<Facility> facilities = (Collection<Facility>)manager.createNamedQuery("FacilityUser.findAll").getResultList();
             if(facilities == null || facilities.size() == 0) throw new RuntimeException("This Icat table set up incorrectly");
             return facilities.iterator().next();
         } catch(Exception r){

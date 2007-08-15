@@ -23,6 +23,7 @@ import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileFormat;
 import uk.icat3.entity.DatafileFormatPK;
 import uk.icat3.entity.DatafileParameter;
+import uk.icat3.entity.DatafileParameterPK;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetType;
 import uk.icat3.entity.IcatAuthorisation;
@@ -59,7 +60,7 @@ public class TestJPA {
     
     protected static void setUp(){
         emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
-      //  emf = Persistence.createEntityManagerFactory("icatisis_dev");
+        //  emf = Persistence.createEntityManagerFactory("icatisis_dev");
         em = emf.createEntityManager();
         // Begin transaction
         em.getTransaction().begin();
@@ -113,6 +114,13 @@ public class TestJPA {
         
         df.setDatafileFormat(type);
         df.setName("name of df");
+        
+        //create datafile parameter
+        
+       /* DatafileParameterPK dfppk = new DatafileParameterPK("uAmp hours","good_proton_charge", null);
+        DatafileParameter dfp = new DatafileParameter(dfppk);
+        
+        df.addDataFileParameter(dfp);*/
         
         DataFileManager.createDataFile("test_admin_investigation", df, 100L, em);
         
@@ -203,10 +211,10 @@ public class TestJPA {
         
         nullQuery.setParameter("objectType", ElementType.INVESTIGATION);
         nullQuery.setParameter("userId", "test");
-     
+        
         nullQuery.setParameter("upperTime", new Date());
         nullQuery.setParameter("lowerTime", new Date(System.currentTimeMillis()-900));
- 
+        
         
         System.out.println(nullQuery.getResultList());
         
@@ -232,26 +240,26 @@ public class TestJPA {
                 
                 " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
                 "sample.markedDeleted = 'N') "+//iterate, remove if no sample is null
-                          
+                
                 " AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword AND " +
                 " kw.markedDeleted = 'N')  "+ //iterate, remove if no keyword is null
                 
                 " AND EXISTS ( SELECT inv FROM i.investigatorCollection inv WHERE " +
                 "LOWER(inv.facilityUser.lastName) LIKE :surname AND inv.markedDeleted = 'N')  "+ //iterate, remove this if instrument null
                 
-                 " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
+                " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
                 " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
                 " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY')" +
                 " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y' " +
                 " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
                 " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " + //remove if all are null
-                             
+                
                 " AND EXISTS (SELECT dfp FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
                 " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
                 " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
                 " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionCanSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
                 " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null
-              
+        
         
         
         Query nullQuery = em.createQuery(QUERY);
@@ -279,7 +287,7 @@ public class TestJPA {
         nullQuery.setParameter("datafileName", "SXD015554.RAW");
         nullQuery.setParameter("upperTime", new Date());
         nullQuery.setParameter("lowerTime", new Date(System.currentTimeMillis()-900000000));
-
+        
         nullQuery.setParameter("dataFileType", ElementType.DATAFILE);
         nullQuery.setParameter("upper", 11257f);
         nullQuery.setParameter("lower", 100f);
@@ -294,7 +302,7 @@ public class TestJPA {
         String QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :investigationType AND i.markedDeleted = 'N' " +
                 " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
                 " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y' ";
-                  Query query = em.createQuery(QUERY).
+        Query query = em.createQuery(QUERY).
                 setParameter("userId","test").
                 setParameter("investigationType",ElementType.INVESTIGATION);
         
@@ -323,7 +331,7 @@ public class TestJPA {
         }
     }
     
-     public void testDeleteKeyword(){
+    public void testDeleteKeyword(){
         try {
             setUp();
             uk.icat3.entity.Keyword kw = em.find(uk.icat3.entity.Keyword.class, new uk.icat3.entity.KeywordPK("shull", 3L));
@@ -349,17 +357,17 @@ public class TestJPA {
         
         TestJPA ts = new TestJPA();
         
-        // ts.createDF();
+        ts.createDF();
         // ts.createDS();
         //ts.addRole();
         // ts.getRoles();
         //  ts.createInv();
         //ts.testJPA();
         //  ts.changeRole();
-        ts.testP1();
-       //   ts.testSurname();
+         ts.testP1();
+        //   ts.testSurname();
         
-      //  ts.testDelete();
+        //  ts.testDelete();
         
     }
     

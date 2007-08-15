@@ -241,7 +241,9 @@ public class TestSearch {
     public void seachByAdvanced(String userId, AdvancedSearchDetails dto) throws Exception {
         
         setUp();
+        
         long time  = System.currentTimeMillis();
+        
         //test code here
         log.info("Testing");
         Collection<Investigation> investigations =  InvestigationSearch.searchByAdvanced(userId,dto, 0,300,em);
@@ -252,8 +254,7 @@ public class TestSearch {
         
         System.out.println((System.currentTimeMillis() -time)/1000f +" seconds");
         
-        tearDown();
-        
+        tearDown();        
     }
     
     public void getAllKeywords(String userId) throws Exception {
@@ -537,32 +538,35 @@ public class TestSearch {
         
         AdvancedSearchDetails dto = new AdvancedSearchDetails();
         
-        dto.setInvestigationName("multidetector");
+       // dto.setInvestigationName("multidetector");
         /*Collection<String> inv  =   new ArrayList<String>();
         inv.add("JAMES-JAMES");*/
         //  dto.setInvestigators(inv);
         dto.setYearRangeStart(new Date(1,1,1/*System.currentTimeMillis()-900000000)*/));  //120 = 2020
-        dto.setYearRangeEnd(new Date());
-        dto.setSampleName("multidetector");
-        dto.setInstruments(ins);
-        dto.setExperimentNumber("3684");
+        //dto.setYearRangeEnd(new Date());
+        dto.setSampleName("multidetecto");
+       // dto.setInstruments(ins);
+        //dto.setExperimentNumber("3684");
+       //  dto.setVisitId("40");
+      //  dto.setInvestigationType("experi");
+        //dto.setBackCatalogueInvestigatorString("ab etc - oxford,");
         //
         //dto.setDatafileName("a");
         Collection<String> keywords2  =   new ArrayList<String>();
         
         //isis
-        keywords2.add("multidetector");
+        keywords2.add("multidetecto");
         
-        dto.setKeywords(keywords2);
-        dto.setDatafileName("CSP11758.RAW");
-        dto.setRunEnd(11759L);
-        dto.setRunStart(11757L);
+      //  dto.setKeywords(keywords2);
+       // dto.setDatafileName("CSP11758.");
+       // dto.setRunEnd(11759L);
+       // dto.setRunStart(11757L);
+       // dto.setFuzzy(false);
+        ts.seachByAdvanced("gjd37",dto);
         
-       // ts.seachByAdvanced("gjd37",dto);
-        
-             ts.getAllKeywords("gjd37");
+       //  ts.getAllKeywords("gjd37");
         //
-        //   ts.getUserKeywords("gjd37", null);
+        // ts.getUserKeywords("gjd37", null);
         // ts.getAllInvestigations("gjd37");
         //ts.getUserInvestigations("gjd37");
         

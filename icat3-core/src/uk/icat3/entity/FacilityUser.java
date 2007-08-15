@@ -33,17 +33,18 @@ import uk.icat3.util.ElementType;
 @Table(name = "FACILITY_USER")
 @NamedQueries( {
     @NamedQuery(name = "FacilityUser.findByFacilityUserId", query = "SELECT f FROM FacilityUser f WHERE f.facilityUserId = :facilityUserId"),
-    @NamedQuery(name = "FacilityUser.findByFederalId", query = "SELECT f FROM FacilityUser f WHERE f.federalId = :federalId"),
+    @NamedQuery(name = "FacilityUser.findByFederalId", query = "SELECT f FROM FacilityUser f WHERE f.federalId = :fedId"),
     @NamedQuery(name = "FacilityUser.findByTitle", query = "SELECT f FROM FacilityUser f WHERE f.title = :title"),
     @NamedQuery(name = "FacilityUser.findByInitials", query = "SELECT f FROM FacilityUser f WHERE f.initials = :initials"),
     @NamedQuery(name = "FacilityUser.findByFirstName", query = "SELECT f FROM FacilityUser f WHERE f.firstName = :firstName"),
     @NamedQuery(name = "FacilityUser.findByMiddleName", query = "SELECT f FROM FacilityUser f WHERE f.middleName = :middleName"),
     @NamedQuery(name = "FacilityUser.findByLastName", query = "SELECT f FROM FacilityUser f WHERE f.lastName = :lastName"),
     @NamedQuery(name = "FacilityUser.findByModTime", query = "SELECT f FROM FacilityUser f WHERE f.modTime = :modTime"),
-    @NamedQuery(name = "FacilityUser.findByModId", query = "SELECT f FROM FacilityUser f WHERE f.modId = :modId")
+    @NamedQuery(name = "FacilityUser.findByModId", query = "SELECT f FROM FacilityUser f WHERE f.modId = :modId"),
+    @NamedQuery(name = "FacilityUser.findAll" , query = "SELECT f from Facility f")
 })
-@XmlRootElement
-public class FacilityUser extends EntityBaseBean implements Serializable {
+        @XmlRootElement
+        public class FacilityUser extends EntityBaseBean implements Serializable {
     
     @Id
     @XmlTransient
