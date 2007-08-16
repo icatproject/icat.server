@@ -239,7 +239,7 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
-    public void updateDataFile(String sessionId, Datafile dataFile) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public void modifyDataFile(String sessionId, Datafile dataFile) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);

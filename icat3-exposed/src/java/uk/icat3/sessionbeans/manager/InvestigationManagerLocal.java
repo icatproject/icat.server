@@ -31,7 +31,9 @@ public interface InvestigationManagerLocal {
     public Investigation getInvestigation(String sessionId, Long investigationId, InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException ;
     
     public Collection<Investigation> getInvestigations(String sessionId, Collection<Long> investigationIds, InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException ;
-    
+       
+    public void modifyInvestigation(String sessionId, Investigation investigation) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException;
+        
     public Keyword addKeyword(String sessionId, Keyword keyword, Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException;
     
     public void removeKeyword(String sessionId, KeywordPK keywordPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException;
