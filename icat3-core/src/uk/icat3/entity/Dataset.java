@@ -429,7 +429,7 @@ import uk.icat3.util.Queries;
             }
             if(type == Cascade.REMOVE_DELETED_ITEMS){
                 //now set the new dataset collection
-                log.trace("Setting new investigatorCollection of size: "+datasetparameters.size()+" because of deleted items from original size: "+getDatasetParameterCollection().size());
+                log.trace("Setting new datasetparameters of size: "+datasetparameters.size()+" because of deleted items from original size: "+getDatasetParameterCollection().size());
                 this.setDatasetParameterCollection(datasetparameters);
             }
         }

@@ -552,7 +552,7 @@ import uk.icat3.util.ElementType;
             }
             if(type == Cascade.REMOVE_DELETED_ITEMS){
                 //now set the new dataset collection
-                log.trace("Setting new investigatorCollection of size: "+datafileparameters.size()+" because of deleted items from original size: "+getDatafileParameterCollection().size());
+                log.trace("Setting new datafileparameters of size: "+datafileparameters.size()+" because of deleted items from original size: "+getDatafileParameterCollection().size());
                 this.setDatafileParameterCollection(datafileparameters);
             }
         }
@@ -577,7 +577,7 @@ import uk.icat3.util.ElementType;
             }
             if(type == Cascade.REMOVE_DELETED_ITEMS){
                 //now set the new dataset collection
-                log.trace("Setting new investigatorCollection of size: "+relatedDatafiles.size()+" because of deleted items from original size: "+getRelatedDatafilesCollection().size());
+                log.trace("Setting new relatedDatafiles of size: "+relatedDatafiles.size()+" because of deleted items from original size: "+getRelatedDatafilesCollection().size());
                 this.setRelatedDatafilesCollection(relatedDatafiles);
             }
         }

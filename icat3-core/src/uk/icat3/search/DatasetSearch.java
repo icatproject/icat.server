@@ -26,6 +26,7 @@ import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
+import uk.icat3.util.ElementType;
 import static uk.icat3.util.Queries.*;
 /**
  * Searchs on the datasets for samples and list types and status' of datasets.
@@ -49,7 +50,10 @@ public class DatasetSearch {
         log.trace("getSamplesBySampleName("+userId+", "+sampleName+", EntityManager)");
         
         //get the sample id from sample name
-        Collection<Sample> samples = (Collection<Sample>)manager.createNamedQuery(SAMPLES_BY_NAME).setParameter("name", "%"+sampleName+"%").getResultList();
+        Collection<Sample> samples = (Collection<Sample>)manager.createNamedQuery(SAMPLES_BY_NAME).
+                setParameter("objectType", ElementType.INVESTIGATION).
+                setParameter("userId", userId).
+                setParameter("name", "%"+sampleName+"%").getResultList();
         
         //now see which investigations they can see from these samples.
         Collection<Sample> samplesPermssion = new ArrayList<Sample>();
@@ -93,16 +97,11 @@ public class DatasetSearch {
         
         Investigation investigation = sampleFound.getInvestigationId();
         
-        try{
-            investigation.setCascade(Cascade.REMOVE_DELETED_ITEMS, true);
-        } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}
-        
-        Collection<Dataset> datasets = investigation.getDatasetCollection();        
+        Collection<Dataset> datasets = investigation.getDatasetCollection();
         Collection<Dataset> datasetsPermission = new ArrayList<Dataset>();
         
         for (Dataset dataset : datasets) {
-            
-            if(sampleFound.getId().equals(dataset.getSampleId())){
+            if(!dataset.isDeleted() && sampleFound.getId().equals(dataset.getSampleId())){
                 //check read permission
                 try{
                     GateKeeper.performAuthorisation(userId, dataset, AccessType.READ, manager);
@@ -115,7 +114,7 @@ public class DatasetSearch {
         
         //need to filter out datafiles
         ManagerUtil.getDatasetInformation(userId, datasetsPermission, DatasetInclude.DATASET_FILES_AND_PARAMETERS, manager);
-                
+        
         return datasetsPermission;
     }
     

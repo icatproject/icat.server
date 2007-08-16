@@ -20,8 +20,8 @@ import uk.icat3.util.InvestigationInclude;
  */
 public class AdvancedSearchDetails {
     
-      static Logger log = Logger.getLogger(AdvancedSearchDetails.class);
-      
+    static Logger log = Logger.getLogger(AdvancedSearchDetails.class);
+    
     /**
      * Investigation Name
      */
@@ -61,11 +61,11 @@ public class AdvancedSearchDetails {
     /**
      * Long value of start date in datafile parameter
      */
-    private float runStart  = 0.0f; // data file parameter,  run_number datafile_parameter
+    private Double runStart; // data file parameter,  run_number datafile_parameter
     /**
      * Long value of start end in datafile parameter
      */
-    private float runEnd = 0.0f;// data file parameter, run_number datafile_parameter
+    private Double runEnd;// data file parameter, run_number datafile_parameter
     /**
      * Sample name
      */
@@ -128,20 +128,20 @@ public class AdvancedSearchDetails {
         this.experimentNumber = experimentNumber;
     }
     
-    public float getRunStart() {
+    public Double getRunStart() {
         return runStart;
     }
     
-    public void setRunStart(float runStart) {
+    public void setRunStart(Double runStart) {
         this.runStart = runStart;
     }
     
-    public float getRunEnd() {
-        if(runEnd == 0.0) return 9000000000000000.0f;
+    public Double getRunEnd() {
+        if(runEnd == null) return new Double(Double.MAX_VALUE);
         else return runEnd;
     }
     
-    public void setRunEnd(float runEnd) {
+    public void setRunEnd(Double runEnd) {
         this.runEnd = runEnd;
     }
     
@@ -263,7 +263,7 @@ public class AdvancedSearchDetails {
         if(keywords != null && keywords.size() != 0) return true;
         if(sampleName != null) return true;
         if(datafileName != null) return true;
-        if(runEnd != 90000000000f || runStart != 0f) return true;
+        if(runEnd != null || runStart != null) return true;
         else return false;
     }
     
@@ -288,7 +288,9 @@ public class AdvancedSearchDetails {
     }
     
     public boolean hasRunNumber(){
-        if(runEnd != 0.0f || runStart != 0.0f) return true;
+        if(runEnd == null && runStart == null) return false;
+        else if(runEnd != null && runEnd != 0.0) return true;
+        else if(runStart != null && runStart != 0.0) return true;
         else return false;
     }
     
@@ -343,8 +345,8 @@ public class AdvancedSearchDetails {
      * start year and sample 2mins OK!
      */
     public boolean isValid(){
-         log.trace(hasRunNumber()+" "+runEnd);
-        if(hasRunNumber()){                
+        //log.trace(" "+hasRunNumber() +"  "+runEnd);
+        if(hasRunNumber()){
             //so they have set run number, check something on investigation is set)
             if(hasInvestigationParameters() || getDatafileName() != null || hasInstruments()) return true;
             else throw new IllegalArgumentException("Must search investigation information, instruments or datafile name if searching with run numbers");

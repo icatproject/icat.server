@@ -23,6 +23,9 @@ public class Queries {
     //Returns all of datafiles
     public static final String RETURN_ALL_DATAFILES_JPQL = "SELECT DISTINCT i from Datafile i ";
     
+    //Returns all of samples
+    public static final String RETURN_ALL_SAMPLES_JPQL = "SELECT DISTINCT i.sampleCollection from Investigation i ";
+    
     //Returns investigation id
     public static final String RETURN_ALL_INVESTIGATION_IDS_JPQL = "SELECT DISTINCT i.id from Investigation i ";
     
@@ -180,7 +183,7 @@ public class Queries {
             " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y' " +
             " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
             " df.markedDeleted = 'N' AND (df.name LIKE :datafileName OR :datafileName IS NULL))  " ; //remove if all are null
-        
+    
     public static final String ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER = " AND EXISTS (SELECT dfp.datafileParameterPK.datafileId FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
             " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
             " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
@@ -271,10 +274,13 @@ public class Queries {
      *
      */
     public static final String SAMPLES_BY_NAME = "Sample.findBySampleName";
-    public static final String SAMPLES_BY_NAME_JPQL = "SELECT s FROM Sample s WHERE s.name LIKE :name AND s.markedDeleted = 'N'";
+    // public static final String SAMPLES_BY_NAME_JPQL = "SELECT s FROM Sample s WHERE s.name LIKE :name AND s.markedDeleted = 'N'";
+    public static final String SAMPLES_BY_NAME_JPQL = "SELECT DISTINCT s from Sample s, IcatAuthorisation ia WHERE" +
+            " s.investigationId.id = ia.elementId AND ia.elementType = :objectType AND ia.markedDeleted = 'N'" +
+            " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+            " AND ia.markedDeleted = 'N' AND s.name LIKE :name AND s.markedDeleted = 'N'";
     
-    
-     /**
+    /**
      * Find all datasets by sample id
      *
      */
@@ -339,7 +345,7 @@ public class Queries {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     /**
      * Find ICAT AUTHORISATION by UNIQUE KEY (user, element id and type, parent type and id
-     * 
+     *
      * find if inseted is unique
      *
      */
@@ -348,9 +354,9 @@ public class Queries {
             "i.elementType = :elementType AND i.elementId = :elementId AND " +
             "i.userId = :userId AND i.parentElementType = :parentElementType AND " +
             "i.parentElementId = :parentElementId";
-       
     
-     /**
+    
+    /**
      * Find ICAT AUTHORISATION by element id, used to remove all when inv, ds,df is removed
      *
      */
@@ -358,7 +364,7 @@ public class Queries {
     public static final String ICAT_AUTHORISATION_FINDBY_ELEMENTID_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
             "i.elementType = :elementType AND i.elementId = :elementId";
     
-      /**
+    /**
      * Find ICAT AUTHORISATION by user and element id, used to get all icat auths for a element type
      *
      */
@@ -366,11 +372,11 @@ public class Queries {
     public static final String ICAT_AUTHORISATION_FINDALL_FOR_ELEMENTTYPE_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
             "i.elementType = :elementType AND i.elementId = :elementId AND " +
             "(i.userId = :userId OR :userId IS NULL) AND i.markedDeleted = 'N'";
-           
-     /**
+    
+    /**
      * Find ICAT AUTHORISATION by UNIQUE KEY (user, element id and type, parent type and id and not deleted
-      * 
-      * Finds a auth for creating a ds, or ds
+     *
+     * Finds a auth for creating a ds, or ds
      *
      */
     public static final String ICAT_AUTHORISATION_FINDBY_CREATE_DATAFILE_DATASET = "IcatAuthorisation.findByCreateDFDS";
@@ -379,10 +385,10 @@ public class Queries {
             "i.userId = :userId AND i.parentElementType = :parentElementType AND " +
             "i.parentElementId = :parentElementId AND i.markedDeleted = 'N'";
     
-     /**
+    /**
      * Find ICAT AUTHORISATION by UNIQUE KEY (user, element id and type, parent type and id and not deleted
-      * 
-      * Finds a auth for creating a inv
+     *
+     * Finds a auth for creating a inv
      *
      */
     public static final String ICAT_AUTHORISATION_FINDBY_CREATE_INVESTIGATION = "IcatAuthorisation.findByCreateINV";
@@ -401,7 +407,7 @@ public class Queries {
             "i.userId = :userId AND i.parentElementType IS NULL AND " +
             "i.parentElementId IS NULL AND i.markedDeleted = 'N'";
     
-       /**
+    /**
      * Find ICAT AUTHORISATION by UNIQUE KEY (user, element id and type, parent type and id and not deleted
      *
      */

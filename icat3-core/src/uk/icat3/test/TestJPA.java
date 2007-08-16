@@ -299,12 +299,12 @@ public class TestJPA {
     
     public void testSurname(){
         setUp();
-        String QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :investigationType AND i.markedDeleted = 'N' " +
-                " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-                " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y' ";
-        Query query = em.createQuery(QUERY).
+        String SAMPLES_BY_NAME_JPQL = Queries.SAMPLES_BY_NAME_JPQL;
+        
+        Query query = em.createQuery(SAMPLES_BY_NAME_JPQL).
                 setParameter("userId","test").
-                setParameter("investigationType",ElementType.INVESTIGATION);
+                setParameter("name","%calibration%").
+                setParameter("objectType",ElementType.INVESTIGATION);
         
         //setParameter("objectType",ElementType.INVESTIGATION).
         //setParameter("userId","test").
@@ -357,15 +357,15 @@ public class TestJPA {
         
         TestJPA ts = new TestJPA();
         
-        ts.createDF();
+        //ts.createDF();
         // ts.createDS();
         //ts.addRole();
         // ts.getRoles();
         //  ts.createInv();
         //ts.testJPA();
         //  ts.changeRole();
-         ts.testP1();
-        //   ts.testSurname();
+       // ts.testP1();
+           ts.testSurname();
         
         //  ts.testDelete();
         

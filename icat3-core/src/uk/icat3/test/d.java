@@ -22,10 +22,12 @@ public class d {
     /** Creates a new instance of d */
     public d() {
           AdvancedSearchDetails asd = new AdvancedSearchDetails();
+          asd.setRunEnd(9.9);
+          asd.setRunStart(null);
           Collection<String> k = new ArrayList<String>();
           k.add("edf");
         System.out.println(asd.hasRunNumber());
-        System.out.println(asd.isValid());
+        //System.out.println(asd.isValid());
     }
 
     /**
