@@ -36,8 +36,10 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.manager.DataFileManager;
 import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.InvestigationManager;
+import uk.icat3.search.KeywordSearch;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.KeywordType;
 import uk.icat3.util.Queries;
 import uk.icat3.util.Util;
 
@@ -77,14 +79,8 @@ public class TestJPA {
     
     public void createInv() throws Exception{
         setUp();
-        
-        Investigation investigation = new Investigation();
-        
-        investigation.setTitle("investigation "+new Random().nextInt());
-        investigation.setInvNumber(""+new Random().nextInt());
-        investigation.setInvType(new InvestigationType("experiment"));
-        
-        InvestigationManager.createInvestigation("test_admin_investigation", investigation, em);
+                
+        System.out.println(KeywordSearch.getAllKeywords("gjd37", KeywordType.ALPHA, em));
         
         tearDown();
     }
@@ -356,7 +352,7 @@ public class TestJPA {
         // TODO code application logic here
         
         TestJPA ts = new TestJPA();
-        
+        ts.createInv();
         //ts.createDF();
         // ts.createDS();
         //ts.addRole();
@@ -364,8 +360,8 @@ public class TestJPA {
         //  ts.createInv();
         //ts.testJPA();
         //  ts.changeRole();
-       // ts.testP1();
-           ts.testSurname();
+        // ts.testP1();
+       // ts.testSurname();
         
         //  ts.testDelete();
         

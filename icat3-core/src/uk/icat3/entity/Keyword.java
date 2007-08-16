@@ -45,13 +45,13 @@ import uk.icat3.util.Queries;
     
     //ICAT 3 queries
     @NamedQuery(name = Queries.ALLKEYWORDS, query = Queries.ALLKEYWORDS_JPQL),
-    @NamedQuery(name = Queries.KEYWORDS_FOR_USER, query = Queries.KEYWORDS_FOR_USER_JPQL)   
+    @NamedQuery(name = Queries.KEYWORDS_FOR_USER, query = Queries.KEYWORDS_FOR_USER_JPQL)
 })
         
         @NamedNativeQueries({
     //Added searches for ICAT3 API
-    @NamedNativeQuery(name = Queries.ALLKEYWORDS_NATIVE_ALPHA, query= Queries.ALLKEYWORDS_ALPHA_SQL, resultSetMapping="keywordsNameMapping"),
-    @NamedNativeQuery(name = Queries.ALLKEYWORDS_NATIVE_ALPHA_NUMERIC, query= Queries.ALLKEYWORDS_ALPHA_NUMERIC_SQL)
+    @NamedNativeQuery(name = Queries.ALLKEYWORDS_NATIVE_ALPHA, query = Queries.ALLKEYWORDS_ALPHA_SQL, resultSetMapping="keywordsNameMapping"),
+    @NamedNativeQuery(name = Queries.ALLKEYWORDS_NATIVE_ALPHA_NUMERIC, query = Queries.ALLKEYWORDS_ALPHA_NUMERIC_SQL, resultSetMapping="keywordsNameMapping")
     
 })
         @SqlResultSetMappings({
