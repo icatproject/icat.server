@@ -94,8 +94,8 @@ public class BaseTest {
         icat.setUserId(user);
         icat.setModId(user);
         IcatRole icatRole =  new IcatRole(role.toString());
-        icatRole.setActionRootRemove("Y");
-        icatRole.setActionRemove("Y");
+        icatRole.setActionCanRootRemove("Y");
+        icatRole.setActionCanRemove("Y");
         icat.setRole(icatRole);
         
         if(type == ElementType.INVESTIGATION){
@@ -124,7 +124,7 @@ public class BaseTest {
             child.setUserId(user);
             child.setModId(user);
             IcatRole role2 =  new IcatRole(role.toString());
-            role2.setActionRootRemove("Y");
+            role2.setActionCanRootRemove("Y");
             child.setRole(role2);
             em.persist(child);
             log.trace("Saving: "+child);

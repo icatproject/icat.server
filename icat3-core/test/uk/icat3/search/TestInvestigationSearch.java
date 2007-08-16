@@ -11,6 +11,7 @@ package uk.icat3.search;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import junit.framework.JUnit4TestAdapter;
@@ -998,7 +999,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
         
         
-        asd.setRunStart(1000L);
+        asd.setRunStart(1000d);
         //add investigators
         investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -1007,7 +1008,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Size should be one", 1, investigations.size());
         checkInvestigations(investigations);
         
-        asd.setRunEnd(2000L);
+        asd.setRunEnd(2000.0);
         //add investigators
         investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -1016,7 +1017,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Size should be one", 1, investigations.size());
         checkInvestigations(investigations);
         
-        asd.setRunEnd(1001L);
+        asd.setRunEnd(1001.0);
         //add investigators
         investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -1024,6 +1025,24 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertNotNull("Must not be an empty collection", investigations);
         assertEquals("Size should be zero", 0, investigations.size());
         checkInvestigations(investigations);
+    }
+    
+    @Test
+    public void testAdvancedCreateTime() throws ICATAPIException {
+        log.info("Testing invalid user, My Investigations: "+VALID_USER_FOR_INVESTIGATION);
+        
+        AdvancedSearchDetails asd = new AdvancedSearchDetails();
+        asd.setYearRangeStart(new Date(1,1,1));  //120 = 2020
+        asd.setYearRangeEnd(new Date());
+        
+        //test with name
+        Collection<Investigation> investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be zero", 2, investigations.size());
+        checkInvestigations(investigations);
+        
     }
     
     //@Test
@@ -1134,7 +1153,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
         
         
-        asd.setRunStart(1000L);
+        asd.setRunStart(1000d);
         //add investigators
         investigations = InvestigationSearch.searchByAdvanced(INVALID_USER, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -1143,7 +1162,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Size should be zero", 0, investigations.size());
         checkInvestigations(investigations);
         
-        asd.setRunEnd(2000L);
+        asd.setRunEnd(2000d);
         //add investigators
         investigations = InvestigationSearch.searchByAdvanced(INVALID_USER, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -1152,7 +1171,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Size should be zero", 0, investigations.size());
         checkInvestigations(investigations);
         
-        asd.setRunEnd(1001L);
+        asd.setRunEnd(1001d);
         //add investigators
         investigations = InvestigationSearch.searchByAdvanced(INVALID_USER, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -1212,7 +1231,7 @@ public class TestInvestigationSearch extends BaseTestClass{
                 throw new ICATAPIException(VALID_USER_FOR_INVESTIGATION+" is not a part of this investigation and should not have been found");
             } else {
                 //found but check role
-                if(!parseBoolean(icatAuthorisation.getRole().getActionSelect())) {
+                if(!parseBoolean(icatAuthorisation.getRole().getActionCanSelect())) {
                     //if gets here throw exception
                     throw new ICATAPIException(VALID_USER_FOR_INVESTIGATION+" is not a part of this investigation and should not have been found");
                 }
