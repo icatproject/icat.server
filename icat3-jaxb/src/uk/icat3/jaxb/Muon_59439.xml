@@ -4,7 +4,7 @@
 <name>EMU_2004</name>
 <purpose>Group all Investigation per instrument and per year.</purpose>
 <status>ONGOING</status>
-<study_creation_date>2007-08-02T13:58:48</study_creation_date>
+<study_creation_date>2007-08-16T16:29:35</study_creation_date>
 <investigation>
 <inv_number>n/a</inv_number>
 <visit_id>1</visit_id>
@@ -15,8 +15,9 @@
 <role>experimenter</role>
 <initials>n/a</initials></investigator>
 <inv_type>EXPERIMENT</inv_type>
+<bcat_inv_str>n/a</bcat_inv_str>
 <dataset>
-<name>59439.nxs</name>
+<name>test_data/Muon/59439.nxs</name>
 <dataset_type>EXPERIMENT_RAW</dataset_type>
 <dataset_status>COMPLETE</dataset_status>
 <description> Title =Temperature = 200 K, Magnetic Field = 0 Gauss, Sample = TIV Note =Slits: 12</description>
@@ -34,13 +35,13 @@
 <string_value>CCR</string_value>
 <units>N/A</units></parameter></sample>
 <datafile>
-<name>59439.nxs</name>
-<location>59439.nxs</location>
+<name>test_data/Muon/59439.nxs</name>
+<location>test_data/Muon/59439.nxs</location>
 <description>Temperature = 200 K, Magnetic Field = 0 Gauss, Sample = TIV</description>
 <datafile_version>1.0</datafile_version>
 <datafile_version_comment>First version</datafile_version_comment>
 <datafile_format>NeXus - HDF5</datafile_format>
-<datafile_format_version>/.NeXus_version</datafile_format_version>
+<datafile_format_version>1.3.2</datafile_format_version>
 <datafile_create_time>2004-01-15T00:06:22</datafile_create_time>
 <datafile_modify_time>2004-01-15T00:06:22</datafile_modify_time>
 <file_size>0</file_size>
@@ -63,7 +64,7 @@
 <name>program_version</name>
 <string_value>RD</string_value>
 <units>N/A</units>
-<description>version of creating program.</description></parameter></datafile>
+<description>version of creating program.</description></parameter>
 <parameter>
 <name>start_time</name>
 <string_value>2004-01-14T23:15:05</string_value>
@@ -76,7 +77,7 @@
 <description>Start Time of the dataset.</description></parameter>
 <parameter>
 <name>duration</name>
-<string_value>3014</string_value>
+<numeric_value>3014</numeric_value>
 <units>N/A</units>
 <description>Calculated duration.</description></parameter>
 <parameter>
@@ -87,7 +88,7 @@
 <parameter>
 <name>sample_temperature_setting</name>
 <numeric_value>200.000000</numeric_value>
-<units>kelvin</units>
+<units>Kelvin</units>
 <description>Desired temperature</description></parameter>
 <parameter>
 <name>sample_magnetic_field_setting</name>
@@ -147,10 +148,10 @@
 <parameter>
 <name>temperature_avg</name>
 <numeric_value>198.386993</numeric_value>
-<units>kelvin</units>
+<units>Kelvin</units>
 <description> Average of :sample temperature</description></parameter>
 <parameter>
 <name>temperature_std</name>
 <numeric_value>12.1649</numeric_value>
-<units>kelvin</units>
-<description> Standard deviation of :sample temperature</description></parameter></dataset></investigation></study></icat>
+<units>Kelvin</units>
+<description> Standard deviation of :sample temperature</description></parameter></datafile></dataset></investigation></study></icat>
