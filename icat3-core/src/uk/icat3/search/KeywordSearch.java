@@ -62,7 +62,7 @@ public class KeywordSearch {
         return getKeywordsForUser(userId, startKeyword, -1, manager);
     }
     
-    /**
+            /**
      * This gets all the keywords avaliable for that user, beginning with a keyword, they can only see keywords associated with their
      * investigations or public investigations
      *

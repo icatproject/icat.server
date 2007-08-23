@@ -539,7 +539,7 @@ import uk.icat3.util.Queries;
     public boolean isValid(EntityManager manager, boolean deepValidation) throws ValidationException {
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
         
-        //check sample info, sample id must be a part of in investigations aswell
+        //check sample info, sample id must be a part of an investigations aswell
         outer: if(sampleId != null){
             //check valid sample id
             
@@ -549,13 +549,14 @@ import uk.icat3.util.Queries;
             
             Collection<Sample> samples = investigation.getSampleCollection();
             for(Sample sample : samples){
-                if(sample.getId().equals(sampleId)){
+                log.trace("Sample for Investigation is: "+sample);
+                if(sample.getId().equals(sampleId) && !sample.isDeleted()){
                     //invest has for this sample in
                     break outer;
                 }
             }
             //if here not got sample in
-            throw new ValidationException("Sample[id="+sampleId+"] is not associated with Dataset[id="+id+ "]'s invesigation.");
+            throw new ValidationException("Sample[id="+sampleId+"] is not associated with Dataset[id="+id+ "]'s investigation.");
         }
         
         if(deepValidation){
