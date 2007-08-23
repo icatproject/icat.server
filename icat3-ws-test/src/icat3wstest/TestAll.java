@@ -11,7 +11,6 @@ package icat3wstest;
 import client.AdvancedSearchDetails;
 import client.KeywordType;
 import client.*;
-import java.util.ArrayList;
 import java.util.Collection;
 import static icat3wstest.Constants.*;
 /**
@@ -24,7 +23,7 @@ public class TestAll {
     public TestAll() throws Exception {
         
         //Login
-        //SessionUtil.login("gjd37", System.getProperty("user.password"));
+        //SessionUtil.login(System.getProperty("user.name"), System.getProperty("user.password"));
         
         //Investiagtion searches
         InvestigationSearch.searchKeyword(SID,KEYWORD);

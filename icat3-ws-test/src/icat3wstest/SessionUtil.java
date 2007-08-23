@@ -51,7 +51,7 @@ public class SessionUtil {
      */
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
-        login("gjd37",System.getProperty("user.password"));
+        login(System.getProperty("user.name"), System.getProperty("user.password"));
     }
     
 }

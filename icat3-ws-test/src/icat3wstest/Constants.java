@@ -16,7 +16,7 @@ package icat3wstest;
 public class Constants {
     
     public static String END_POINT_ADDRESS = "http://localhost:8081/ICATService/ICAT";
-    public static String SID = "b8a0003e-b446-4fbf-aeaf-e5141cfc671b";
+    public static String SID = "a831c8f0-3a4a-4327-9d7a-959bcb5909a3";
     public static String KEYWORD = "calibration";
     public static String USER_ID = "gjd37";
     public static String SURNAME = "Drinkwater";
@@ -30,6 +30,7 @@ public class Constants {
     public static Long INVESTIGATION_ID = 2L;
     public static Long DATASET_ID = 2L;
     public static Long DATAFILE_ID = 2L;
+    public static Long SAMPLE_ID = 2L;
     
     
 }
