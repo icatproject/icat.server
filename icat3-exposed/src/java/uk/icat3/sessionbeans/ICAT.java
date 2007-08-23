@@ -104,8 +104,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
     protected XMLIngestionManagerLocal xmlIngestionManagerLocal;
     ///////////////////////  End of Inject all the EJBs   ///////////////////////
     
-    
-    
+        
     /** Creates a new instance of AllOperationsBean */
     public ICAT() {
     }
@@ -684,6 +683,52 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
     }
     
     /**
+     * Creates a {@link Investigation} investigation from a {@link Investigation} object.
+     *
+     * @param sessionId sessionid of the user.
+     * @param investigation object to be created
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
+     * @return {@link Investigation} object created
+     */
+    @WebMethod(/*operationName="createInvestigation"*/)
+    public Investigation createInvestigation(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigation") Investigation investigation) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        return investigationManagerLocal.createInvestigation(sessionId, investigation);
+    }
+    
+    /**
+     * Deletes a {@link Investigation} investigation from a {@link Investigation} object
+     * if the user has access to delete the investigation.
+     *
+     * @param sessionId sessionid of the user.
+     * @param investigationId id of investigation
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void deleteInvestigation(String sessionId, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        investigationManagerLocal.deleteInvestigation(sessionId, investigationId);
+    }
+    
+     /**
+     * Removes a {@link Investigation} investigation from a {@link Investigation} object.
+     * if the user has access to remove the investigation.
+     *
+     * @param sessionId sessionid of the user.
+     * @param investigationId id of investigation
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     */
+    @WebMethod()
+    public void removeInvestigation(String sessionId, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+       investigationManagerLocal.removeInvestigation(sessionId, investigationId);
+    }
+    
+    /**
      * Adds keyword to investigation, depending on whether the user has permission to update this Investigation object.
      *
      * @param sessionId sessionid of the user.
@@ -693,10 +738,11 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return keyword
      */
     @WebMethod()
-    public void addKeyword(@WebParam(name="sessionId") String sessionId, @WebParam(name="keyword") Keyword keyword, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
-        investigationManagerLocal.addKeyword(sessionId, keyword, investigationId);
+    public Keyword addKeyword(@WebParam(name="sessionId") String sessionId, @WebParam(name="keyword") Keyword keyword, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        return investigationManagerLocal.addKeyword(sessionId, keyword, investigationId);
     }
     
     /**
@@ -709,10 +755,11 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return investigator
      */
     @WebMethod()
-    public void addInvestigator(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigator") Investigator investigator, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
-        investigationManagerLocal.addInvestigator(sessionId, investigator, investigationId);
+    public Investigator addInvestigator(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigator") Investigator investigator, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        return investigationManagerLocal.addInvestigator(sessionId, investigator, investigationId);
     }
     
     /**
@@ -720,15 +767,16 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      *
      * @param sessionId sessionid of the user.
      * @param sample {@link Sample} object to be updated
-     * @param investigationId id of the investigation
+     * @param investigationId id of the investigation    
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+      * @return sample
      */
     @WebMethod()
-    public void addSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sample") Sample sample, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
-        investigationManagerLocal.addSample(sessionId, sample, investigationId);
+    public Sample addSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sample") Sample sample, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+        return investigationManagerLocal.addSample(sessionId, sample, investigationId);
     }
     
     /**
@@ -761,7 +809,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return sampleparameter that was added
      */
     @WebMethod()
-    public SampleParameter addSampleParamater(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleParameter") SampleParameter sampleParameter, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    public SampleParameter addSampleParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleParameter") SampleParameter sampleParameter, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
         return investigationManagerLocal.addSampleParameter(sessionId, sampleParameter, investigationId);
     }
     
@@ -950,7 +998,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      */
     @WebMethod()
     public void removePublication(@WebParam(name="sessionId") String sessionId, @WebParam(name="publicationId")  Long publicationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
-        investigationManagerLocal.deletePublication(sessionId, publicationId);
+        investigationManagerLocal.removePublication(sessionId, publicationId);
     }
     
     /**

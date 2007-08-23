@@ -320,7 +320,7 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        DatasetParameter datasetParameter = ManagerUtil.find(DatasetParameter.class, datasetParameterPK, manager);
+        DatasetParameter datasetParameter = ManagerUtil.findObject(DatasetParameter.class, datasetParameterPK, manager);
         
         DataSetManager.deleteDataSetParameter(userId, datasetParameter, manager);
     }

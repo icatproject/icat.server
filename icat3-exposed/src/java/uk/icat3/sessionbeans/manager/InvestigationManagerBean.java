@@ -172,7 +172,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod(/*operationName="createInvestigation"*/)
+    @WebMethod()
     public void removeInvestigation(String sessionId, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
         //for user bean get userId
@@ -191,7 +191,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod(/*operationName="createInvestigation"*/)
+    @WebMethod()
     public void deleteInvestigation(String sessionId, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         
         //for user bean get userId
@@ -211,7 +211,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      */
-    @WebMethod(/*operationName="investigation"*/)
+    @WebMethod()
     public void modifyInvestigation(String sessionId, Investigation investigation) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         
         //for user bean get userId
@@ -276,7 +276,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         String userId = user.getUserIdFromSessionId(sessionId);
         
         //find investigator
-        Keyword keyword = ManagerUtil.find(Keyword.class, keywordPK, manager);
+        Keyword keyword = ManagerUtil.findObject(Keyword.class, keywordPK, manager);
         
         // remove/delete investigator
         InvestigationManager.deleteInvestigationObject(userId, keyword, type, manager);
@@ -338,7 +338,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         String userId = user.getUserIdFromSessionId(sessionId);
         
         //find publication
-        Publication publication = ManagerUtil.find(Publication.class, publicationId, manager);
+        Publication publication = ManagerUtil.findObject(Publication.class, publicationId, manager);
         
         // remove/delete publication
         InvestigationManager.deleteInvestigationObject(userId, publication, type, manager);
@@ -440,7 +440,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         String userId = user.getUserIdFromSessionId(sessionId);
         
         //find investigator
-        Investigator investigator = ManagerUtil.find(Investigator.class, investigatorPK, manager);
+        Investigator investigator = ManagerUtil.findObject(Investigator.class, investigatorPK, manager);
         
         // remove/delete investigator
         InvestigationManager.deleteInvestigationObject(userId, investigator, type, manager);
@@ -502,7 +502,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         String userId = user.getUserIdFromSessionId(sessionId);
         
         //find sample
-        Sample sample = ManagerUtil.find(Sample.class, sampleId, manager);
+        Sample sample = ManagerUtil.findObject(Sample.class, sampleId, manager);
         
         // remove/delete sample
         InvestigationManager.deleteInvestigationObject(userId, sample, type, manager);
@@ -563,7 +563,7 @@ public class InvestigationManagerBean extends EJBObject implements Investigation
         String userId = user.getUserIdFromSessionId(sessionId);
         
         //find sample
-        SampleParameter sampleParameter = ManagerUtil.find(SampleParameter.class, sampleParameterPK, manager);
+        SampleParameter sampleParameter = ManagerUtil.findObject(SampleParameter.class, sampleParameterPK, manager);
         
         // remove/delete sample
         InvestigationManager.deleteInvestigationObject(userId, sampleParameter, type, manager);
