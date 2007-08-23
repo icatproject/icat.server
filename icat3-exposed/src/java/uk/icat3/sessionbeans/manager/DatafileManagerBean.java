@@ -272,6 +272,30 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
     }
     
     /**
+     * Adds a collection of data file paramter objects to a data file, depending if the user has access to create the data file parameter from
+     * the associated data file id.
+     *
+     * @param sessionId session id of the user.
+     * @param dataFileParameters object to be added
+     * @param datafileId the data file id that you want a add the paramter to
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return {@link DatafileParameter} created
+     */
+    @WebMethod()
+    public Collection<DatafileParameter> addDataFileParameters(String sessionId, Collection<DatafileParameter> dataFileParameters, Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        //get file, checks read access
+        return DataFileManager.addDataFileParameters(userId, dataFileParameters, datafileId, manager);
+    }
+    
+    
+    /**
      * Updates the data file paramter object, depending if the user has access to update the data file parameter.
      *
      * @param sessionId session id of the user.
@@ -326,7 +350,7 @@ public class DatafileManagerBean extends EJBObject implements DatafileManagerLoc
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        DatafileParameter datafileParameter = ManagerUtil.find(DatafileParameter.class, datafileParameterPK, manager);
+        DatafileParameter datafileParameter = ManagerUtil.findObject(DatafileParameter.class, datafileParameterPK, manager);
         
         DataFileManager.deleteDatafileParameter(userId, datafileParameter, manager);
     }

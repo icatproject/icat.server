@@ -88,7 +88,7 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
      * @return collection
      */
     @WebMethod()
-    //TODO: this should not be here but in glassfish UR1 it throws a
+    //TODO: this should not be here but in glassfish UR1 and V2 RC1 it throws a
     //Caused by: Exception [TOPLINK-23005] (Oracle TopLink Essentials - 2006.8 (Build 060830)): oracle.toplink.essentials.exceptions.TransactionException
     //Exception Description: Error binding to externally managed transaction
     //Internal Exception: java.lang.IllegalStateException: Operation not allowed    

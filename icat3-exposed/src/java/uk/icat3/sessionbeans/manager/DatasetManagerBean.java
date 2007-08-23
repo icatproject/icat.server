@@ -247,6 +247,26 @@ public class DatasetManagerBean extends EJBObject implements DatasetManagerLocal
         return DataSetManager.addDataSetParameter(userId, dataSetParameter, datasetId, manager);
     }
     
+     /**
+     * Adds a collection of data set paramters to a dataset, depending if the users has access to create the data set paramter
+     *
+     * @param sessionId session id of the user.
+     * @param dataSetParameters object to be created
+     * @param datasetId id of dataset to add to    
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return {@link DatasetParameter} that was created
+     */
+    @WebMethod
+    public Collection<DatasetParameter> addDataSetParameters(String sessionId, Collection<DatasetParameter> dataSetParameters, Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return DataSetManager.addDataSetParameters(userId, dataSetParameters, datasetId, manager);
+    }
+    
     /**
      * Modifies a data set paramter, depending if the users has access to update the data set paramter
      *

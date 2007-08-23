@@ -19,6 +19,7 @@ import javax.jws.WebService;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import uk.icat3.entity.Datafile;
+import uk.icat3.entity.DatafileFormat;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.DatafileSearch;
 import uk.icat3.sessionbeans.ArgumentValidator;
@@ -79,5 +80,20 @@ public class DatafileSearchBean extends EJBObject implements DatafileSearchLocal
         String userId = user.getUserIdFromSessionId(sessionId);
         
         return DatafileSearch.searchByRunNumber(userId, instruments, startRun, endRun, startIndex, number_results, manager);
+    }
+    
+    /**
+     *  List all the valid avaliable formats for datafiles
+     *
+     * @param sessionId
+     * @return collection of types
+     * @throws uk.icat3.exceptions.SessionException 
+     */
+    @WebMethod()
+    public Collection<DatafileFormat> listDatafileFormats(String sessionId) throws SessionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return DatafileSearch.listDatafileFormats(manager);
     }
 }

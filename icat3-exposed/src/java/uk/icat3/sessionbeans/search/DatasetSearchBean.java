@@ -82,10 +82,10 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
     }
     
     /**
-     *  List all the valid avaliable types' for datasets
+     *  List all the valid avaliable types for datasets
      *
      * @param sessionId
-     * @return collection of types'
+     * @return collection of types
      * @throws uk.icat3.exceptions.SessionException 
      */
     @WebMethod()
@@ -97,10 +97,10 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
     }
     
     /**
-     * List all the valid avaliable status' for datasets
+     * List all the valid avaliable status for datasets
      *
      * @param sessionId
-     * @return collection of status'
+     * @return collection of status
      */
     @WebMethod()
     public Collection<DatasetStatus> listDatasetStatus(String sessionId) throws SessionException {
