@@ -1,5 +1,5 @@
 /*
- * SearchSample.java
+ * SearchInvestigator.java
  *
  * Created on 15-Aug-2007, 12:57:17
  *
@@ -20,65 +20,66 @@ import static icat3wstest.Constants.*;
  *
  * @author gjd37
  */
-public class InvestigationSampleManager {
+public class InvestigationInvestigatorManager {
     
     
-    public static Sample addSample(String sid, String instance, String name, Long investigationid) throws Exception {
+    public static Investigator addInvestigator(String sid,  String name, Long investigationid) throws Exception {
         
         try { // Call Web Service Operation
             client.ICATService service = new client.ICATService();
             client.ICAT port = service.getICATPort();
             // TODO initialize WS operation arguments here
             
-            Sample sample = new Sample();
-            sample.setInstance(instance);
-            sample.setName(name);
-            sample.setSafetyInformation("safety first");
+            Investigator investigator = new Investigator();
+            InvestigatorPK investigatorPK = new InvestigatorPK();
+            investigatorPK.setFacilityUserId(name);
+            investigatorPK.setInvestigationId(investigationid);
+            investigator.setInvestigatorPK(investigatorPK);
             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            Sample sampleCreated = port.addSample(sid, sample, investigationid);
+            Investigator investigatorCreated = port.addInvestigator(sid, investigator, investigationid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
-            System.out.println("Result: addSample : "+sampleCreated.getId());
+            System.out.println("Result: addInvestigator : "+investigatorCreated.getInvestigatorPK().getFacilityUserId());
             
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");
             assert true;
-            return sampleCreated;
+            return investigatorCreated;
         } catch (Exception ex) {
-            System.out.println("Unable to addSample with SID "+sid);
+            System.out.println("Unable to addInvestigator with SID "+sid);
             System.out.println(ex);
             assert false;
             return null;
         }
     }
     
-    public static void updateSample(String sid, Sample sample, String newSafetyInformation) throws Exception {
+    public static void updateInvestigator(String sid, Investigator investigator, String newRole) throws Exception {
         
         try { // Call Web Service Operation
             client.ICATService service = new client.ICATService();
             client.ICAT port = service.getICATPort();
             // TODO initialize WS operation arguments here
             
-            sample.setSafetyInformation(newSafetyInformation);
+            investigator.setRole(newRole);
             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.modifySample(sid, sample);
+            port.modifyInvestigator(sid, investigator);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
-            System.out.println("Result: updateSample");
+            System.out.println("Result: updateInvestigator");
             
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");
             assert true;
         } catch (Exception ex) {
-            System.out.println("Unable to updateSample with SID "+sid);
+            System.out.println("Unable to updateInvestigator with SID "+sid);
             System.out.println(ex);
             assert false;
             
@@ -87,7 +88,7 @@ public class InvestigationSampleManager {
     }
     
     
-    public static void delete_undeleteSample(String sid, Long sampleId) throws Exception {
+    public static void delete_undeleteInvestigator(String sid, InvestigatorPK investigatorPK) throws Exception {
         
         try { // Call Web Service Operation
             client.ICATService service = new client.ICATService();
@@ -97,17 +98,17 @@ public class InvestigationSampleManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.deleteSample(sid, sampleId);
+            port.deleteInvestigator(sid, investigatorPK);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
-            System.out.println("Result: delete_undeleteSample");
+            System.out.println("Result: delete_undeleteInvestigator");
             
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");
             assert true;
         } catch (Exception ex) {
-            System.out.println("Unable to delete_undeleteSample with SID "+sid);
+            System.out.println("Unable to delete_undeleteInvestigator with SID "+sid);
             System.out.println(ex);
             assert false;
             
@@ -115,7 +116,7 @@ public class InvestigationSampleManager {
         }
     }
     
-    public static void removeSample(String sid, Long sampleId) throws Exception {
+    public static void removeInvestigator(String sid, InvestigatorPK investigatorPK) throws Exception {
         
         try { // Call Web Service Operation
             client.ICATService service = new client.ICATService();
@@ -125,17 +126,17 @@ public class InvestigationSampleManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.removeSample(sid, sampleId);
+            port.removeInvestigator(sid, investigatorPK);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
-            System.out.println("Result: removeSample");
+            System.out.println("Result: removeInvestigator");
             
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");
             assert true;
         } catch (Exception ex) {
-            System.out.println("Unable to removeSample with SID "+sid);
+            System.out.println("Unable to removeInvestigator with SID "+sid);
             System.out.println(ex);
             assert false;
             
@@ -148,12 +149,12 @@ public class InvestigationSampleManager {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        Sample sample = addSample(SID, PARAMETER_NAME, PARAMETER_UNITS+new Random().nextInt(), INVESTIGATION_ID);
-        if(sample !=null){
-            updateSample(SID, sample, "new safety");
-            delete_undeleteSample(SID, sample.getId()); //deleted Sample
-            delete_undeleteSample(SID, sample.getId()); //undeleted Sample
-            removeSample(SID, sample.getId());
+        Investigator investigator = addInvestigator(SID, INVESTIGATOR, INVESTIGATION_ID);
+        if(investigator !=null){
+            updateInvestigator(SID, investigator, "new role");
+            delete_undeleteInvestigator(SID, investigator.getInvestigatorPK()); //deleted Investigator
+            delete_undeleteInvestigator(SID, investigator.getInvestigatorPK()); //undeleted Investigator
+            removeInvestigator(SID, investigator.getInvestigatorPK());
         }
     }
     

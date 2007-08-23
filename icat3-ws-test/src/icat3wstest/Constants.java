@@ -16,7 +16,8 @@ package icat3wstest;
 public class Constants {
     
     public static String END_POINT_ADDRESS = "http://localhost:8081/ICATService/ICAT";
-    public static String SID = "a831c8f0-3a4a-4327-9d7a-959bcb5909a3";
+    public static String SID = "e3876fe3-6de3-4908-92ac-8668b26d68e7";
+    
     public static String KEYWORD = "calibration";
     public static String USER_ID = "gjd37";
     public static String SURNAME = "Drinkwater";
@@ -26,6 +27,8 @@ public class Constants {
     public static String PARAMETER_UNITS = "yyyy-MM-dd HH:mm:ss";
     
     public static String DATAFILE_FORMAT = "nexus";
+    
+    public static String INVESTIGATOR = "test_creator_investigation_facility_user";
     
     public static Long INVESTIGATION_ID = 2L;
     public static Long DATASET_ID = 2L;
