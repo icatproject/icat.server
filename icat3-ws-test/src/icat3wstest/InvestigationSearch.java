@@ -10,6 +10,7 @@
 package icat3wstest;
 import client.AdvancedSearchDetails;
 import client.Investigation;
+import client.InvestigationInclude;
 import java.util.ArrayList;
 import static icat3wstest.Constants.*;
 /**
@@ -28,9 +29,11 @@ public class InvestigationSearch {
             
             long time = System.currentTimeMillis();
             
-            
             // TODO process result here
-            java.util.List<client.Investigation> result = port.getMyInvestigations(sid);
+            java.util.List<client.Investigation> result = port.getMyInvestigations(sid); //get my investigations, default limit to 500, include no other info
+            //java.util.List<client.Investigation> result =
+            //      port.getMyInvestigationsIncludesPagination(sid, InvestigationInclude.ALL, 3, 10);
+            // Find my investigations, include all info, bring back 3 to 10
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -61,7 +64,8 @@ public class InvestigationSearch {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Investigation> result = port.searchByAdvancedPagination(sid, asd, 0, 440);
+            java.util.List<client.Investigation> result =
+                    port.searchByAdvancedPagination(sid, asd, 0, 440); //bring back first 440 results
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -96,6 +100,11 @@ public class InvestigationSearch {
             
             // TODO process result here
             java.util.List<client.Investigation> result = port.searchByKeywords(sid, keywords);
+            //java.util.List<client.Investigation> result =
+            //      port.searchByKeywordsPaginationFuzzyAndInclude(sid, keywords,
+            //    InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES, true, 0, 20);
+            // Search by keywords, include only investigation info (ie, investigators, keywords etc not datasets/datafiles)
+            // using LIKE operator on keywords, bring back first 20 results
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

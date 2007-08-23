@@ -12,6 +12,7 @@ import client.AdvancedSearchDetails;
 import client.KeywordType;
 import client.*;
 import java.util.Collection;
+import java.util.Random;
 import static icat3wstest.Constants.*;
 /**
  *
@@ -23,7 +24,7 @@ public class TestAll {
     public TestAll() throws Exception {
         
         //Login
-        //SessionUtil.login(System.getProperty("user.name"), System.getProperty("user.password"));
+        SessionUtil.login(System.getProperty("user.name"), System.getProperty("user.password"));
         
         //Investiagtion searches
         InvestigationSearch.searchKeyword(SID,KEYWORD);
@@ -106,6 +107,58 @@ public class TestAll {
         InvestigationManager.getInvestigation(SID, INVESTIGATION_ID);
         InvestigationManager.getInvestigations(SID, INVESTIGATION_ID);
         
+        
+        Investigation investigation = InvestigationManager.createInvestigation(SID, "investigation for "+SID);
+        if(investigation != null) {
+            InvestigationManager.updateInvestigation(SID, investigation, "new investigation for "+SID);
+            InvestigationManager.delete_undeleteInvestigation(SID, investigation.getId()); //deletes investigation
+            InvestigationManager.delete_undeleteInvestigation(SID, investigation.getId()); //undeletes investigation
+            InvestigationManager.removeInvestigation(SID, investigation.getId());
+        }
+        
+        //Investigation keyword
+        Keyword keyword = InvestigationKeywordManager.addKeyword(SID, "new keyword "+new Random().nextInt(), INVESTIGATION_ID);
+        if(keyword !=null){
+            InvestigationKeywordManager.delete_undeleteKeyword(SID, keyword.getKeywordPK()); //deleted keyword
+            InvestigationKeywordManager.delete_undeleteKeyword(SID, keyword.getKeywordPK()); //undeleted keyword
+            InvestigationKeywordManager.removeKeyword(SID, keyword.getKeywordPK());
+        }
+        
+        //Investigation publication
+        Publication publication = InvestigationPublicationManager.addPublication(SID, "new Publication "+new Random().nextInt(), INVESTIGATION_ID);
+        if(publication !=null){
+            InvestigationPublicationManager.updatePublication(SID, publication, "http://newUrl.com");
+            InvestigationPublicationManager.delete_undeletePublication(SID, publication.getId()); //deleted Publication
+            InvestigationPublicationManager.delete_undeletePublication(SID, publication.getId()); //undeleted Publication
+            InvestigationPublicationManager.removePublication(SID, publication.getId());
+        }
+        
+        //Investigation investigator
+        Investigator investigator = InvestigationInvestigatorManager.addInvestigator(SID, INVESTIGATOR, INVESTIGATION_ID);
+        if(investigator !=null){
+            InvestigationInvestigatorManager.updateInvestigator(SID, investigator, "new role");
+            InvestigationInvestigatorManager.delete_undeleteInvestigator(SID, investigator.getInvestigatorPK()); //deleted Investigator
+            InvestigationInvestigatorManager.delete_undeleteInvestigator(SID, investigator.getInvestigatorPK()); //undeleted Investigator
+            InvestigationInvestigatorManager.removeInvestigator(SID, investigator.getInvestigatorPK());
+        }
+        
+        //Investigation sample
+        Sample sample = InvestigationSampleManager.addSample(SID, PARAMETER_NAME, PARAMETER_UNITS+new Random().nextInt(), INVESTIGATION_ID);
+        if(sample !=null){
+            InvestigationSampleManager.updateSample(SID, sample, "new safety");
+            InvestigationSampleManager.delete_undeleteSample(SID, sample.getId()); //deleted Sample
+            InvestigationSampleManager.delete_undeleteSample(SID, sample.getId()); //undeleted Sample
+            InvestigationSampleManager.removeSample(SID, sample.getId());
+        }
+        
+        //Investigation sample parameter
+        SampleParameter sampleParameter = InvestigationSampleParameterManager.addSampleParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, SAMPLE_ID);
+        if(sampleParameter !=null){
+            InvestigationSampleParameterManager.updateSampleParameter(SID, sampleParameter, "new description");
+            InvestigationSampleParameterManager.delete_undeleteSampleParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, SAMPLE_ID); //deleted SampleParameter
+            InvestigationSampleParameterManager.delete_undeleteSampleParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, SAMPLE_ID); //undeleted SampleParameter
+            InvestigationSampleParameterManager.removeSampleParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, SAMPLE_ID);
+        }
     }
     
     /**
