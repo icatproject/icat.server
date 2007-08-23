@@ -8,10 +8,12 @@
  */
 package icat3wstest;
 
+import client.Datafile;
 import client.Dataset;
 import client.Investigation;
 import client.InvestigationType;
 import client.Investigator;
+import client.Keyword;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -73,15 +75,34 @@ public class InvestigationManager {
             System.out.println("Results:");
             for (Investigation investigation : investigations) {
                 System.out.println("  ID: "+investigation.getId()+", TITLE: "+investigation.getTitle());
-                System.out.println("    Investigators: "+investigation.getInvestigatorCollection().size());
-                System.out.println("    ----------------");
+                System.out.println("     ------------");
+                System.out.println("     My Role for investigation: "+ investigation.getIcatRole().getRole());
+                System.out.println("     ----------------");
+                System.out.println("     Investigators: "+investigation.getInvestigatorCollection().size());
+                System.out.println("     ----------------");
                 for (Investigator investigator : investigation.getInvestigatorCollection()) {
                     System.out.println("       "+investigator.getFacilityUser().getLastName());
                 }
-                System.out.println("     Datasets: "+ investigation.getDatasetCollection().size());
-                System.out.println("     ------------");
+                System.out.println("      Datasets: "+ investigation.getDatasetCollection().size());
+                System.out.println("      ------------");
                 for (Dataset ds : investigation.getDatasetCollection()) {
-                    System.out.println("       "+ds.getName());
+                    System.out.println("         "+ds.getName());
+                    System.out.println("         ------------");
+                    System.out.println("           My Role for dataset: "+ ds.getIcatRole().getRole());
+                    System.out.println("           ------------");
+                    System.out.println("              Datafiles: "+ ds.getDatafileCollection().size());
+                    System.out.println("              ------------");
+                    for (Datafile df : ds.getDatafileCollection()) {
+                        System.out.println("              "+df.getName());
+                        System.out.println("              ------------");
+                        System.out.println("                 My Role for datafile: "+ df.getIcatRole().getRole());
+                    }
+                }
+                System.out.println("      ------------");
+                System.out.println("      Keywords: "+ investigation.getKeywordCollection().size());
+                System.out.println("      ------------");
+                for (Keyword kw : investigation.getKeywordCollection()) {
+                    System.out.println("         "+kw.getKeywordPK().getName());
                 }
             }
             System.out.println("\nTime taken: "+totalTime+" seconds");
@@ -224,15 +245,15 @@ public class InvestigationManager {
      */
     public static void main(String[] args) throws Exception {
         //getInvestigation(SID, INVESTIGATION_ID);
-        //getInvestigations(SID, INVESTIGATION_ID);
+        getInvestigations(SID, INVESTIGATION_ID);
         
-        Investigation investigation = createInvestigation(SID, "investigation for "+SID);
+       /* Investigation investigation = createInvestigation(SID, "investigation for "+SID);
         if(investigation != null) {
             updateInvestigation(SID, investigation, "new investigation for "+SID);
             delete_undeleteInvestigation(SID, investigation.getId()); //deletes investigation
             delete_undeleteInvestigation(SID, investigation.getId()); //undeletes investigation
             removeInvestigation(SID, investigation.getId());
-        }
+        }*/
     }
     
 }
