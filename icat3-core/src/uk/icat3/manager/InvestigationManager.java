@@ -245,7 +245,7 @@ public class InvestigationManager extends ManagerUtil {
         
         return true;
     }
-           
+    
     ////////////////////        End of Delete Commands           /////////////////////////
     
     
@@ -303,7 +303,7 @@ public class InvestigationManager extends ManagerUtil {
         log.trace("createInvestigation("+userId+", "+investigation+", EntityManager)");
         
         investigation.setId(null); //should never be null at this point but check
-               
+        
         investigation.setFacility(getFacility(manager));
         
         //check user has update access
@@ -313,7 +313,7 @@ public class InvestigationManager extends ManagerUtil {
         investigation.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
         investigation.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
         
-         //check if valid investigation
+        //check if valid investigation
         investigation.isValid(manager);
         
         //iterate over datasets and create them manually and then remove them before creating investigation
@@ -691,8 +691,8 @@ public class InvestigationManager extends ManagerUtil {
             
             Sample sample = find(Sample.class, sampleParamter.getSampleParameterPK().getSampleId(),  manager);
             sampleParamter.setSample(sample);
-             sampleParamter.setCreateId(userId);
-             
+            sampleParamter.setCreateId(userId);
+            
             sampleParamter.isValid(manager);
             
             //check user has delete access

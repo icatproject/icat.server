@@ -55,6 +55,7 @@ public class StudyInvestigation extends EntityBaseBean implements Serializable {
 
     @JoinColumn(name = "STUDY_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
+     @ICAT(merge=false)
     private Study study;
     
     /** Creates a new instance of StudyInvestigation */

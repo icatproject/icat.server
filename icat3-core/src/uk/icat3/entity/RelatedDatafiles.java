@@ -50,11 +50,13 @@ public class RelatedDatafiles extends EntityBaseBean implements Serializable {
     @JoinColumn(name = "DEST_DATAFILE_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
+     @ICAT(merge=false)
     private Datafile datafile;
     
     @JoinColumn(name = "SOURCE_DATAFILE_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
+     @ICAT(merge=false)
     private Datafile datafile1;
     
     /** Creates a new instance of RelatedDatafiles */

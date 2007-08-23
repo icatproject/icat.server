@@ -53,6 +53,7 @@ public class Shift extends EntityBaseBean implements Serializable {
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
+     @ICAT(merge=false)
     private Investigation investigation;
     
     /** Creates a new instance of Shift */

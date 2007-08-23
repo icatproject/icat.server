@@ -99,7 +99,7 @@ import uk.icat3.util.Queries;
     protected static Logger log = Logger.getLogger(Investigation.class);
     
     @Id
-    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="INVESTIGATION_SEQ")
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="INVESTIGATION_SEQ")
     @Column(name = "ID", nullable = false)
     private Long id;
     
@@ -129,7 +129,7 @@ import uk.icat3.util.Queries;
     @Temporal(TemporalType.TIMESTAMP)
     private Date releaseDate;
     
-    @JoinColumn(name = "FACILITY", referencedColumnName = "FACILITY_SHORT_NAME")
+    @JoinColumn(name = "FACILITY", referencedColumnName = "FACILITY_SHORT_NAME", nullable= false)
     @ManyToOne
     @ICAT(merge=false)
     private Facility facility;

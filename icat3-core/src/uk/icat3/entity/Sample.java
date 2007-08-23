@@ -75,7 +75,7 @@ import uk.icat3.util.Queries;
     @Column(name = "CHEMICAL_FORMULA")
     private String chemicalFormula;
     
-    @Column(name = "SAFETY_INFORMATION")
+    @Column(name = "SAFETY_INFORMATION", nullable = false)
     private String safetyInformation;
     
     @Column(name = "PROPOSAL_SAMPLE_ID")

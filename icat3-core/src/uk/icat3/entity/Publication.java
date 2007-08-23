@@ -62,9 +62,10 @@ public class Publication extends EntityBaseBean implements Serializable {
     @Column(name = "REPOSITORY")
     private String repository;
     
-    @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID")
+    @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", nullable = false)
     @ManyToOne
     @XmlTransient
+     @ICAT(merge=false)
     private Investigation investigationId;
     
     /** Creates a new instance of Publication */
