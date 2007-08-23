@@ -209,21 +209,22 @@ public class DataFileManager extends ManagerUtil {
     public static Datafile createDataFile(String userId, Datafile dataFile, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException{
         log.trace("createDataFile("+userId+", "+dataFile+", EntityManager)");
         
-         //check investigation exists
+        //check investigation exists
         if(dataFile.getDataset() == null) throw new NoSuchObjectFoundException(dataFile+" has no assoicated dataset.");
         Dataset dataset  = find(Dataset.class, dataFile.getDataset().getId(), manager);
-        dataFile.setDataset(dataset);        
+        dataFile.setDataset(dataset);
         //check id is null
         dataFile.setId(null);
         
         //check user has update access
         GateKeeper.performAuthorisation(userId, dataFile, AccessType.CREATE, manager);
-                
-        dataFile.isValid(manager);
         
         //new dataset, set createid, this sets mod id and modtime
         dataFile.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
         dataFile.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
+        
+        dataFile.isValid(manager);
+        
         manager.persist(dataFile);
         
         //add new creator role to investigation for the user creating the df
@@ -388,27 +389,23 @@ public class DataFileManager extends ManagerUtil {
         
         //set id for datafileParameter
         datafileParameter.setDatafile(datafile);
-        
-        //check is valid, check parent datafile is in the private key
+                 
+         //check is valid, check parent datafile is in the private key
+        datafileParameter.setCreateId(userId);
         datafileParameter.isValid(manager);
         
+        datafileParameter.getDatafileParameterPK().setDatafileId(datafileId);
+                
         //ok, now check permissions
         GateKeeper.performAuthorisation(userId, datafileParameter, AccessType.CREATE, manager);
-        //String facilityUserId = getFacilityUserId(userId, manager);
-        
+                      
         try {
             //check dataSetParameterManaged not already added
             DatafileParameter dataFileParameterManaged = findObject(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);
-            /*if(dataFileParameterManaged.isDeleted()){
-                dataFileParameterManaged.setDelete(false);
-                dataFileParameterManaged.setModId(facilityUserId);
-                log.info(dataFileParameterManaged +" been deleted, undeleting now.");
-                return dataFileParameterManaged;
-            } else {*/
-            //do nothing, throw exception
+           
             log.warn(dataFileParameterManaged +" already added to dataset.");
             throw new ValidationException(dataFileParameterManaged+" is not unique");
-            //}
+          
         } catch (NoSuchObjectFoundException ex) {
             //not already in DB so add
             //sets modId for persist
@@ -438,6 +435,34 @@ public class DataFileManager extends ManagerUtil {
         
         Long datafileId = datafileParameter.getDatafileParameterPK().getDatafileId();
         return  addDataFileParameter(userId, datafileParameter, datafileId, manager);
+    }
+    
+    /**
+     * Adds a collection of data file paramter objects to a data file, depending if the user has access to create the data file parameter from
+     * the associated data file id.
+     *
+     * If the paramter is marked as deleted then it will be undeleted, if not present a new paramter is added.
+     *
+     * @param userId federalId of the user.
+     * @param datafileParameters collection of objects to be added
+     * @param datafileId the data file id that you want a add the paramter to
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
+     * @return the added collection of {@link DatafileParameter} objects
+     */
+    public static Collection<DatafileParameter> addDataFileParameters(String userId, Collection<DatafileParameter> datafileParameters, Long dataFileId,   EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        log.trace("addDataFileParameters("+userId+", "+datafileParameters+", "+dataFileId+", EntityManager)");
+        
+        Collection<DatafileParameter> datafileParametersCreated = new ArrayList<DatafileParameter>();
+        for(DatafileParameter datafileParameter : datafileParameters){
+            datafileParameter.getDatafileParameterPK().setDatafileId(dataFileId);
+            DatafileParameter datafileParameterCreated = addDataFileParameter(userId, datafileParameter, dataFileId, manager);
+            datafileParametersCreated.add(datafileParameterCreated);
+        }
+        
+        return datafileParametersCreated;
     }
     
     /**

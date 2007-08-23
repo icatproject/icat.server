@@ -24,6 +24,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.manager.ManagerUtil;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.ElementType;
 
@@ -359,7 +360,16 @@ import uk.icat3.util.ElementType;
         Parameter parameterDB = manager.find(Parameter.class, paramPK);
         
         //check paramPK is in the parameter table
-        if(parameterDB == null) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" is not a valid parameter.");
+        if(parameterDB == null) {
+            log.info(sampleParameterPK+" is not in the parameter table as a sample parameter so been marked as unverified and inserting new row in Parameter table");
+            //add new parameter into database
+            parameterDB = ManagerUtil.addParameter(this.createId, manager, paramName, paramUnits, isNumeric());
+            if(parameterDB == null) throw new ValidationException("Parameter: "+paramName+" with units: "+paramUnits+" cannot be inserted into the Parameter table.");
+        } else if(parameterDB.isDeleted()){
+            log.info("Undeleting "+parameterDB);
+            parameterDB.setDeleted(false);
+            parameterDB.setVerified(false);
+        }
         
         //check that it is a dataset parameter
         if(!parameterDB.isSampleParameter()) throw new ValidationException("SampleParameter: "+paramName+" with units: "+paramUnits+" is not a sample parameter.");
@@ -390,5 +400,5 @@ import uk.icat3.util.ElementType;
         
         //once here then its valid
         return isValid();
-    }        
+    }
 }

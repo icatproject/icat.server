@@ -36,6 +36,7 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.manager.DataFileManager;
 import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.InvestigationManager;
+import uk.icat3.manager.ManagerUtil;
 import uk.icat3.search.KeywordSearch;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.ElementType;
@@ -79,7 +80,7 @@ public class TestJPA {
     
     public void createInv() throws Exception{
         setUp();
-                
+        
         System.out.println(KeywordSearch.getAllKeywords("gjd37", KeywordType.ALPHA, em));
         
         tearDown();
@@ -344,6 +345,20 @@ public class TestJPA {
         }
     }
     
+    public void addParameter() throws Exception{
+        
+        setUp();
+        
+        DatafileParameterPK PK = new DatafileParameterPK("newffy", "newffy", 2L);
+        DatafileParameter pa = new DatafileParameter(PK);
+        pa.setNumericValue(3d);
+        
+        DataFileManager.addDataFileParameter("test", pa, 2L, em);
+        
+        tearDown();
+        
+    }
+    
     
     /**
      * @param args the command line arguments
@@ -352,8 +367,8 @@ public class TestJPA {
         // TODO code application logic here
         
         TestJPA ts = new TestJPA();
-        ts.createInv();
-        //ts.createDF();
+        // ts.createInv();
+     //   ts.createDF();
         // ts.createDS();
         //ts.addRole();
         // ts.getRoles();
@@ -361,9 +376,10 @@ public class TestJPA {
         //ts.testJPA();
         //  ts.changeRole();
         // ts.testP1();
-       // ts.testSurname();
+        // ts.testSurname();
         
-        //  ts.testDelete();
+         ts.testDelete();
+      //  ts.addParameter();
         
     }
     

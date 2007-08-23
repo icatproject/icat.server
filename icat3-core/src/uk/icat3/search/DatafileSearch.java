@@ -14,6 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
+import uk.icat3.entity.DatafileFormat;
 import uk.icat3.util.ElementType;
 import static uk.icat3.util.Queries.*;
 /**
@@ -114,6 +115,18 @@ public class DatafileSearch {
      */
     public static Collection<Datafile> searchByRunNumber(String userId, Collection<String> instruments, float startRun, float endRun, int startIndex, int number_results, EntityManager manager){
         return searchByRunNumberImpl(userId, instruments, startRun, endRun, startIndex, number_results, manager);
+    }
+    
+    /**
+     *  List all the valid avaliable formats for datafiles
+     *
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of types
+     */
+    public static Collection<DatafileFormat> listDatafileFormats(EntityManager manager) {
+        log.trace("listDatafileFormats(EntityManager)");
+        
+        return manager.createNamedQuery(ALL_DATAFILE_FORMAT).getResultList();
     }
     
 }

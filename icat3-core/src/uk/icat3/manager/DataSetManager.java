@@ -223,13 +223,13 @@ public class DataSetManager extends ManagerUtil {
         //check user has update access
         GateKeeper.performAuthorisation(userId, dataSet, AccessType.CREATE, manager);
         
-        dataSet.isValid(manager);
-        
         //new dataset, set createid, this sets mod id and modtime
         dataSet.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
         dataSet.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
         
-         //iterate over datafiles and create them manually and then remove them before creating dataset
+        dataSet.isValid(manager);
+        
+        //iterate over datafiles and create them manually and then remove them before creating dataset
         Collection<Datafile> datafiles = dataSet.getDatafileCollection();
         //dont let JPA create datasets
         dataSet.setDatafileCollection(null);
@@ -472,10 +472,13 @@ public class DataSetManager extends ManagerUtil {
         
         //set id for dataSetParameter
         dataSetParameter.setDataset(dataset);
-        
+              
         //check is valid, check parent dataset is in the private key
+        dataSetParameter.setCreateId(userId);
         dataSetParameter.isValid(manager);
         
+        dataSetParameter.getDatasetParameterPK().setDatasetId(datasetId);
+          
         //ok, now check permissions
         GateKeeper.performAuthorisation(userId, dataSetParameter, AccessType.CREATE, manager);
         //String facilityUserId = getFacilityUserId(userId, manager);
@@ -521,7 +524,32 @@ public class DataSetManager extends ManagerUtil {
         if(dataSetParameter.getDatasetParameterPK() == null) throw new ValidationException(dataSetParameter+" has no assoicated primary key.");
         
         Long datasetId = dataSetParameter.getDatasetParameterPK().getDatasetId();
-        return  addDataSetParameter(userId, dataSetParameter, datasetId, manager);
+        return addDataSetParameter(userId, dataSetParameter, datasetId, manager);
+    }
+    
+    /**
+     * Adds a collection of data set paramters to a dataset, depending if the users has access to create the data set paramter
+     *
+     * @param userId federalId of the user.
+     * @param dataSetParameters object to be created
+     * @param dataSetId id of data set
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @throws uk.icat3.exceptions.ValidationException if the data set is invalid
+     * @return created {@link DatasetParameter}
+     */
+    public static Collection<DatasetParameter> addDataSetParameters(String userId, Collection<DatasetParameter> dataSetParameters, Long dataSetId, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        log.trace("addDataSetParameters("+userId+", "+dataSetParameters+", "+dataSetId+", EntityManager)");
+        
+        Collection<DatasetParameter> datasetParametersCreated = new ArrayList<DatasetParameter>();
+        for(DatasetParameter dataSetParameter : dataSetParameters){
+            dataSetParameter.getDatasetParameterPK().setDatasetId(dataSetId);
+            DatasetParameter datafileParameterCreated = addDataSetParameter(userId, dataSetParameter, dataSetId, manager);
+            datasetParametersCreated.add(datafileParameterCreated);
+        }
+        
+        return datasetParametersCreated;
     }
     
     /**

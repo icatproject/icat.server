@@ -10,10 +10,6 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.util.Date;
-import javax.jws.WebParam;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -27,6 +23,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.manager.ManagerUtil;
 import uk.icat3.util.ElementType;
 
 /**
@@ -85,10 +82,10 @@ import uk.icat3.util.ElementType;
         @JoinColumn(name = "NAME", referencedColumnName = "NAME", insertable = false, updatable = false),
 @JoinColumn(name = "UNITS", referencedColumnName = "UNITS", insertable = false, updatable = false)
     })
-    @ICAT(merge=false)
-    @ManyToOne
-    @XmlTransient
-    private Parameter parameter;
+            @ICAT(merge=false)
+            @ManyToOne
+            @XmlTransient
+            private Parameter parameter;
     
     @Transient
     @ICAT(merge=false, nullable=true)
@@ -337,6 +334,9 @@ import uk.icat3.util.ElementType;
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
         if(datasetParameterPK == null) throw new ValidationException(this +" primary key cannot be null");
         
+        //check embedded primary key
+        datasetParameterPK.isValid();
+        
         //check valid
         String paramName = this.getDatasetParameterPK().getName();
         String paramUnits = this.getDatasetParameterPK().getUnits();
@@ -347,7 +347,16 @@ import uk.icat3.util.ElementType;
         Parameter parameterDB = manager.find(Parameter.class, paramPK);
         
         //check paramPK is in the parameter table
-        if(parameterDB == null) throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" is not a valid parameter.");
+        if(parameterDB == null) {
+            log.info(datasetParameterPK+" is not in the parameter table as a data set parameter so been marked as unverified and inserting new row in Parameter table");
+            //add new parameter into database
+            parameterDB = ManagerUtil.addParameter(this.createId, manager, paramName, paramUnits, isNumeric());
+            if(parameterDB == null) throw new ValidationException("Parameter: "+paramName+" with units: "+paramUnits+" cannot be inserted into the Parameter table.");
+        } else if(parameterDB.isDeleted()){
+            log.info("Undeleting "+parameterDB);
+            parameterDB.setDeleted(false);
+            parameterDB.setVerified(false);
+        }
         
         //check that it is a dataset parameter
         if(!parameterDB.isDataSetParameter()) throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" is not a data set parameter.");
@@ -377,9 +386,6 @@ import uk.icat3.util.ElementType;
                 throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" has dataset id: "+datasetParameterPK.getDatasetId()+ " that does not corresponds to its parent dataset id: "+getDataset().getId());
             }
         } //else //throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" has not dataset id");
-        
-        //check embedded primary key
-        datasetParameterPK.isValid();
         
         //once here then its valid
         return isValid();

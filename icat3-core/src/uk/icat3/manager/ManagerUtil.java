@@ -26,6 +26,8 @@ import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.Parameter;
+import uk.icat3.entity.ParameterPK;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -168,7 +170,7 @@ public class ManagerUtil {
                     //size invokes the JPA to get the information
                     investigation.getKeywordCollection().size();
                     investigation.getInvestigatorCollection().size();
-                    investigation.getSampleCollection().size();                    
+                    investigation.getSampleCollection().size();
                 }
             }else {
                 log.trace("No additional info requested.");
@@ -746,8 +748,34 @@ public class ManagerUtil {
         return icatAuthorisation;
     }
     
-    /////////////////////////////////// END OF ICAT AUTHRORISATION METHODs /////////////////////////////////
+    /////////////////////////////////// END OF ICAT AUTHRORISATION METHODS /////////////////////////////////
     
+    public static Parameter addParameter(String userId, EntityManager manager, String name, String units, boolean numeric){
+        log.trace("Adding '"+name+"', '"+units+"' to the parameter table");
+        
+        if(userId == null) throw new RuntimeException("UserId should not be null for adding parameter");
+        
+        ParameterPK PK = new ParameterPK(units, name);
+        Parameter parameter = new Parameter(PK);
+        parameter.setNumeric(numeric);
+        
+        parameter.setDatasetParameter(true);
+        parameter.setDatafileParameter(true);
+        parameter.setSampleParameter(true);
+        parameter.setDescription("Added by ICAT API as an unverified parameter.");
+        parameter.setUnitsLongVersion(units);
+        parameter.setVerified(false);
+        parameter.setSearchable("Y");
+        parameter.setCreateId(userId);
+        
+        try{
+            manager.persist(parameter);
+            return parameter;
+        }catch(Exception ex){
+            log.error("Unable to insert new unverified parameter: "+parameter+" into parameter table.", ex);
+            return null;
+        }
+    }
     
     //TODO is this used??
     public static boolean isUnique(EntityBaseBean entityClass, EntityManager manager) {

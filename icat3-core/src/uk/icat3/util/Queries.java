@@ -332,6 +332,13 @@ public class Queries {
     public static final String ALL_DATASET_TYPE_JPQL = "SELECT DISTINCT ds FROM DatasetType ds WHERE ds.markedDeleted = 'N'";
     
     /**
+     * Find all datafile format list,
+     *
+     */
+    public static final String ALL_DATAFILE_FORMAT = "DatafileFormat.listAll";
+    public static final String ALL_DATAFILE_FORMAT_JPQL = "SELECT DISTINCT dff FROM DatafileFormat dff WHERE dff.markedDeleted = 'N'";
+    
+    /**
      * Find all dataset type list,
      *
      */

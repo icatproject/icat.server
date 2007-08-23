@@ -163,7 +163,7 @@ public class InvestigationManager extends ManagerUtil {
     public static void deleteInvestigation(String userId, Long investigationId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteInvestigation("+userId+", "+investigationId+", EntityManager)");
         
-        Investigation investigation = find(Investigation.class, investigationId, manager);
+        Investigation investigation = findObject(Investigation.class, investigationId, manager);
         deleteInvestigationObject(userId, investigation, AccessType.DELETE, manager);
         
     }
@@ -303,9 +303,7 @@ public class InvestigationManager extends ManagerUtil {
         log.trace("createInvestigation("+userId+", "+investigation+", EntityManager)");
         
         investigation.setId(null); //should never be null at this point but check
-        
-        //check if valid investigation
-        investigation.isValid(manager);
+               
         investigation.setFacility(getFacility(manager));
         
         //check user has update access
@@ -314,6 +312,9 @@ public class InvestigationManager extends ManagerUtil {
         //new dataset, set createid
         investigation.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
         investigation.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
+        
+         //check if valid investigation
+        investigation.isValid(manager);
         
         //iterate over datasets and create them manually and then remove them before creating investigation
         Collection<Dataset> datasets = investigation.getDatasetCollection();
@@ -690,7 +691,8 @@ public class InvestigationManager extends ManagerUtil {
             
             Sample sample = find(Sample.class, sampleParamter.getSampleParameterPK().getSampleId(),  manager);
             sampleParamter.setSample(sample);
-            
+             sampleParamter.setCreateId(userId);
+             
             sampleParamter.isValid(manager);
             
             //check user has delete access

@@ -137,7 +137,7 @@ public class GateKeeper {
      *                          permission to perform operation.
      */
     private static void performAuthorisation(String userId, Long rootElementsParentId, AccessType access, EntityBaseBean object, Long rootParentsId, ElementType elementType, EntityManager manager) throws InsufficientPrivilegesException {
-        log.trace("performAuthorisation(): "+userId+", AccessType: "+access+", "+object+", rootElementId: "+rootParentsId+", rootElementsParent: "+rootElementsParentId);
+        log.debug("performAuthorisation(): "+userId+", AccessType: "+access+", "+object+", rootElementId: "+rootParentsId+", rootElementsParent: "+rootElementsParentId);
         IcatAuthorisation icatAuthorisation = null;
         boolean success = false;
         IcatRole role = null;
@@ -217,7 +217,7 @@ public class GateKeeper {
         if(success){
             //now append the role to the investigation, dataset or datafile
             if(elementType.isRootType()) object.setIcatRole(icatAuthorisation.getRole());
-            log.debug("User: " + userId + " granted " + access + " permission on " + object +" with role "+icatAuthorisation.getRole());
+            log.info("User: " + userId + " granted " + access + " permission on " + object +" with role "+icatAuthorisation.getRole());
         } else {
             log.warn("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object );
             throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object );
@@ -257,7 +257,7 @@ public class GateKeeper {
             
             try{
                 icatAuthorisation = (IcatAuthorisation)nullSearchQuery.getSingleResult();
-                log.trace("Found stage 3 (nulls): "+icatAuthorisation);
+                log.debug("Found stage 3 (nulls): "+icatAuthorisation);
             } catch(NoResultException nre3){
                 log.debug("None found for : UserId: "+userId+", elementId: null, type: "+type+", elementId: null, throwing exception");
                 throw new InsufficientPrivilegesException();
@@ -285,7 +285,7 @@ public class GateKeeper {
             
             try{
                 icatAuthorisation = (IcatAuthorisation)query.getSingleResult();
-                log.trace("Found stage 1 (normal): "+icatAuthorisation);
+                log.debug("Found stage 1 (normal): "+icatAuthorisation);
             } catch(NoResultException nre){
                 
                 //try find ANY
@@ -294,7 +294,7 @@ public class GateKeeper {
                 
                 try{
                     icatAuthorisation = (IcatAuthorisation)query.getSingleResult();
-                    log.trace("Found stage 2 (ANY): "+icatAuthorisation);
+                    log.debug("Found stage 2 (ANY): "+icatAuthorisation);
                 } catch(NoResultException nre2){
                     log.debug("None found for : UserId: "+userId+", type: "+type+", elementId: "+id+", throwing exception");
                     throw new InsufficientPrivilegesException();
