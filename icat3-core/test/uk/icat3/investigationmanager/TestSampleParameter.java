@@ -21,6 +21,7 @@ import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.Sample;
 import uk.icat3.entity.SampleParameter;
+import uk.icat3.entity.SampleParameterPK;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -56,7 +57,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         assertNotNull("Must be numeric value", modified.getNumericValue());
         assertNull("String value must be null", modified.getStringValue());
     }
-    
+        
     /**
      * Tests creating a file
      */
@@ -122,7 +123,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         assertTrue("Deleted must be true", modified.isDeleted());
     }
     
-     /**
+    /**
      * Tests creating a file
      */
     @Test
@@ -206,6 +207,29 @@ public class TestSampleParameter extends BaseTestClassTX {
         SampleParameter modified = em.find(SampleParameter.class,duplicateSampleParameter.getSampleParameterPK()  );
         
         assertNull("SampleParameter must not be found in DB "+duplicateSampleParameter, modified);
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void addSampleParameterNew() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding new sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+        
+        SampleParameterPK PK = new SampleParameterPK("silly sample units", "silly sample name", VALID_INVESTIGATION_ID);
+        SampleParameter validSampleParameter = new SampleParameter(PK);
+        validSampleParameter.setNumericValue(3d);
+        
+        SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter, VALID_INVESTIGATION_ID, em);
+        
+        SampleParameter modified = em.find(SampleParameter.class,sampleParameterInserted.getSampleParameterPK()  );
+        
+        checkSampleParameter(modified);
+        assertFalse("Deleted must be false", modified.isDeleted());
+        assertNotNull("Must be numeric value", modified.getNumericValue());
+        assertNull("String value must be null", modified.getStringValue());
+        
+        removeActualSampleParameter();
     }
     
     /**

@@ -21,6 +21,7 @@ import org.junit.Test;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.DatafileParameter;
+import uk.icat3.entity.DatafileParameterPK;
 import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
@@ -60,6 +61,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         assertNotNull("Must be numeric value", modified.getNumericValue());
         assertNull("String value must be null", modified.getStringValue());
     }
+    
     
     /**
      * Tests modifying a data file parameter
@@ -123,7 +125,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         assertTrue("Deleted must be true", modified.isDeleted());
     }
     
-      /**
+    /**
      * Tests deleting a data file parameter, marking as deleted Y
      */
     @Test
@@ -200,12 +202,36 @@ public class TestDatafileParameter extends BaseTestClassTX {
         
         duplicateDatafileParameter.setDeleted(false);
         duplicateDatafileParameter.setCreateId(ICAT_ADMIN_USER);
-                      
+        
         DataFileManager.removeDatafileParameter(ICAT_ADMIN_USER, duplicateDatafileParameter, em);
         
         DatafileParameter modified = em.find(DatafileParameter.class,duplicateDatafileParameter.getDatafileParameterPK() );
         assertNull("DatafileParameter must not be found in DB "+duplicateDatafileParameter, modified);
-      
+        
+    }
+    
+    /**
+     * Tests creating a file paramter
+     */
+    @Test
+    public void addDatafileParameterNew() throws Exception {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding new datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
+        
+        DatafileParameterPK PK = new DatafileParameterPK("silly file units", "silly file name", VALID_DATA_FILE_ID);
+        DatafileParameter validDatafileParameter = new DatafileParameter(PK);
+        validDatafileParameter.setNumericValue(3d);
+        
+        
+        DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, VALID_DATA_FILE_ID, em);
+        
+        DatafileParameter modified = em.find(DatafileParameter.class,datafileParameterInserted.getDatafileParameterPK() );
+        
+        checkDatafileParameter(modified);
+        assertFalse("Deleted must be false", modified.isDeleted());
+        assertNotNull("Must be numeric value", modified.getNumericValue());
+        assertNull("String value must be null", modified.getStringValue());
+        
+        removeActualDatafileParameter();
     }
     
     /**
@@ -338,7 +364,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void modifyDatafileParameterProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying a props datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
@@ -350,14 +376,14 @@ public class TestDatafileParameter extends BaseTestClassTX {
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-             throw ex;
+            throw ex;
         }
     }
     
     /**
      * Tests creating a file
      */
-    //  @Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void deleteDatafileParameterProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a props datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
@@ -368,15 +394,15 @@ public class TestDatafileParameter extends BaseTestClassTX {
             DataFileManager.deleteDatafileParameter(VALID_USER_FOR_INVESTIGATION, propsDatafileParameter, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-             throw ex;
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
         }
     }
     
     /**
      * Tests creating a file
      */
-    //  @Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void removeDatafileParameterProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a props datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
@@ -387,8 +413,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
             DataFileManager.removeDatafileParameter(VALID_USER_FOR_INVESTIGATION, propsDatafileParameter, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-          assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-             throw ex;
+            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
+            throw ex;
         }
     }
     
@@ -527,7 +553,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
             Collection<DatafileParameter> datafileParameters = (Collection<DatafileParameter>)executeListResultCmd("select d from DatafileParameter d where d.facilityAcquired = 'Y'");
             datafileParameter = datafileParameters.iterator().next();
         } else {
-            Collection<DatafileParameter> datafileParameters = (Collection<DatafileParameter>)executeListResultCmd("select d from DatafileParameter d where d.facilityAcquired = 'Y' order by d.modTime desc");
+            Collection<DatafileParameter> datafileParameters = (Collection<DatafileParameter>)executeListResultCmd("select d from DatafileParameter d where d.facilityAcquired = 'N' order by d.modTime desc");
             datafileParameter = datafileParameters.iterator().next();
         }
         log.trace(datafileParameter);

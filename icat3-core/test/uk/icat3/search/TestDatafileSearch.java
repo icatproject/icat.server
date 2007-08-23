@@ -135,7 +135,19 @@ public class TestDatafileSearch extends BaseTestClassTX {
         }
     }
     
-    
+     /**
+     * Tests dataset types
+     */
+    //@Test
+    public void testlistDatafileFormats(){
+        log.info("Testing valid user for all DatafileFormats: "+VALID_USER_FOR_INVESTIGATION);
+        Collection<DatafileFormat> types = DatafileSearch.listDatafileFormats(em);
+        
+        Collection<DatafileFormat> typesInDB = (Collection<DatafileFormat>)executeListResultCmd("SELECT d FROM DatafileFormat d where d.markedDeleted = 'N'");
+        
+        assertNotNull("Must not be an null collection of types ", types);
+        assertEquals("Number of DatafileFormats searched is different to number in DB",typesInDB.size(),types.size());
+    }
     
     public static junit.framework.Test suite(){
         return new JUnit4TestAdapter(TestDatafileSearch.class);

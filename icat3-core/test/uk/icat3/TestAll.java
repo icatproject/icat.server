@@ -74,7 +74,7 @@ import uk.icat3.util.ExecuteDatabaseScript;
             TestDataset.class,
             TestDatasetParameter.class,
             
-            TestDatafile.class,
+           // TestDatafile.class,
             TestDatafileParameter.class,
             
             TestKeywordSearch.class,

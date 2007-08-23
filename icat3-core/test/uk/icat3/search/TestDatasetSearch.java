@@ -40,7 +40,7 @@ public class TestDatasetSearch extends BaseTestClassTX {
         log.info("Testing valid user for all dataset types: "+VALID_USER_FOR_INVESTIGATION);
         Collection<DatasetType> types = DatasetSearch.listDatasetTypes(em);
         
-        Collection<DatasetType> typesInDB = (Collection<DatasetType>)executeListResultCmd("SELECT d FROM DatasetType d");
+        Collection<DatasetType> typesInDB = (Collection<DatasetType>)executeListResultCmd("SELECT d FROM DatasetType d where d.markedDeleted = 'N'");
         
         assertNotNull("Must not be an null collection of types ", types);
         assertEquals("Number of datasettypes searched is different to number in DB",typesInDB.size(),types.size());
@@ -54,7 +54,7 @@ public class TestDatasetSearch extends BaseTestClassTX {
         log.info("Testing valid user for all dataset status: "+VALID_USER_FOR_INVESTIGATION);
         Collection<DatasetStatus> status = DatasetSearch.listDatasetStatus(em);
         
-        Collection<DatasetStatus> statusInDB = (Collection<DatasetStatus>)executeListResultCmd("SELECT d FROM DatasetStatus d");
+        Collection<DatasetStatus> statusInDB = (Collection<DatasetStatus>)executeListResultCmd("SELECT d FROM DatasetStatus d where d.markedDeleted = 'N'");
         
         assertNotNull("Must not be an null collection of DatasetStatus ", status);
         assertEquals("Number of DatasetStatus searched is different to number in DB",statusInDB.size(),status.size());

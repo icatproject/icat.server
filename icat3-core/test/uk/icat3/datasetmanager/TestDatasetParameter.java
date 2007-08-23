@@ -21,6 +21,7 @@ import org.junit.Test;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
+import uk.icat3.entity.DatasetParameterPK;
 import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
@@ -59,7 +60,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         assertNotNull("Must be numeric value", modified.getNumericValue());
         assertNull("String value must be null", modified.getStringValue());
     }
-    
+            
     /**
      * Tests creating a file
      */
@@ -122,7 +123,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         assertTrue("Deleted must be true", modified.isDeleted());
     }
     
-     /**
+    /**
      * Tests creating a file
      */
     @Test
@@ -209,19 +210,29 @@ public class TestDatasetParameter extends BaseTestClassTX {
         DatasetParameter modified = em.find(DatasetParameter.class,duplicateDatasetParameter.getDatasetParameterPK() );
         assertNull("DatasetParameter must not be found in DB "+duplicateDatasetParameter, modified);
         
-       /* IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
-        IcatAuthorisation childIcatAuth = em.find(IcatAuthorisation.class,it.next());
-        em.remove(icatAuth);
-        em.remove(childIcatAuth);
+    }
+    
+    /**
+     * Tests creating a file
+     */
+    @Test
+    public void addDatasetParameterNew() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding new datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
-         it = longs.iterator();
-        icatAuth = em.find(IcatAuthorisation.class,it.next());
-        childIcatAuth = em.find(IcatAuthorisation.class,it.next());
+        DatasetParameterPK PK = new DatasetParameterPK("silly file units", "silly file name", VALID_DATASET_ID_FOR_INVESTIGATION);
+        DatasetParameter validDatasetParameter = new DatasetParameter(PK);
+        validDatasetParameter.setNumericValue(3d);
         
-        it = longs.iterator();
-        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);
-        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", childIcatAuth);
-        * */
+        DatasetParameter datasetParameterInserted = (DatasetParameter)DataSetManager.addDataSetParameter(VALID_USER_FOR_INVESTIGATION, validDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        
+        DatasetParameter modified = em.find(DatasetParameter.class,datasetParameterInserted.getDatasetParameterPK() );
+        
+        checkDatasetParameter(modified);
+        assertFalse("Deleted must be false", modified.isDeleted());
+        assertNotNull("Must be numeric value", modified.getNumericValue());
+        assertNull("String value must be null", modified.getStringValue());
+        
+        removeActualDatasetParameter();
     }
     
     /**
@@ -503,6 +514,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
                 param.setIsDatasetParameter("Y");
                 param.setIsDatafileParameter("N");
                 param.setCreateId("DATASET_PARAMETER_ADDED");
+                param.setVerified(true);
                 em.persist(param);
                 parameter =  param;
             } else {
@@ -532,10 +544,10 @@ public class TestDatasetParameter extends BaseTestClassTX {
     static DatasetParameter getDatasetParameterDuplicate(boolean last){
         DatasetParameter datasetParameter = null;
         if(!last){
-            Collection<DatasetParameter> datasetParameters = (Collection<DatasetParameter>)executeListResultCmd("select d from DatasetParameter d where d.createId LIKE '%PROP%'");
+            Collection<DatasetParameter> datasetParameters = (Collection<DatasetParameter>)executeListResultCmd("select d from DatasetParameter d where d.facilityAcquired = 'Y'");
             datasetParameter = datasetParameters.iterator().next();
         } else {
-            Collection<DatasetParameter> datasetParameters = (Collection<DatasetParameter>)executeListResultCmd("select d from DatasetParameter d where d.createId NOT LIKE '%PROP%' order by d.modTime desc");
+            Collection<DatasetParameter> datasetParameters = (Collection<DatasetParameter>)executeListResultCmd("select d from DatasetParameter d where d.facilityAcquired = 'N' order by d.modTime desc");
             datasetParameter = datasetParameters.iterator().next();
         }
         log.trace(datasetParameter);

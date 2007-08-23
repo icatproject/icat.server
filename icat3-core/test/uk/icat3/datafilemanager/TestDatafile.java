@@ -58,6 +58,7 @@ public class TestDatafile extends BaseTestClassTX {
         
         checkDatafile(dataFileInserted);
         assertFalse("Deleted must be false", dataFileInserted.isDeleted());
+        assertFalse("facility acquired must be false", dataFileInserted.isFacilityAcquiredSet())
         assertNotNull("Format cannot be null", dataFileInserted.getDatafileFormat());
     }
     
@@ -484,7 +485,7 @@ public class TestDatafile extends BaseTestClassTX {
      */
     private boolean checkDatafile(Datafile file){
         assertTrue("dataFile must be in db", em.contains(file));
-        
+               
         assertNotNull("createTime must be not null", file.getCreateTime());
         
         assertNotNull("createId must be not null", file.getCreateId());
