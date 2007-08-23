@@ -217,6 +217,7 @@ public class DataSetManager extends ManagerUtil {
         //check investigation exists
         if(dataSet.getInvestigation() == null) throw new NoSuchObjectFoundException(dataSet+" has no assoicated investigation");
         Investigation investigation  = find(Investigation.class, dataSet.getInvestigation().getId(), manager);
+       
         dataSet.setInvestigation(investigation);
         dataSet.setId(null);
         

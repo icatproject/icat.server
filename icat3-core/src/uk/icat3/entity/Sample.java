@@ -237,6 +237,20 @@ import uk.icat3.util.Queries;
     }
     
     /**
+     * Adds a SampleParameter to the sample,
+     * also adds the sample to the SampleParameter.
+     */
+    public void addSampleParameter(SampleParameter sampleParameter){
+        sampleParameter.setSample(this);
+        
+        Collection<SampleParameter> sampleParameters = this.getSampleParameterCollection();
+        if(sampleParameters == null) sampleParameters = new ArrayList<SampleParameter>();
+        sampleParameters.add(sampleParameter);
+        
+        this.setSampleParameterCollection(sampleParameters);
+    }
+    
+    /**
      * Gets the element type of the bean
      */
     public ElementType getRootElementType(){

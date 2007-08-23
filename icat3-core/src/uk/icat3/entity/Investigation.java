@@ -365,6 +365,7 @@ import uk.icat3.util.Queries;
         publication.setInvestigationId(this);
         
         Collection<Publication> publications = this.getPublicationCollection();
+        if(publications == null) publications = new ArrayList<Publication>();
         publications.add(publication);
         
         this.setPublicationCollection(publications);
@@ -395,6 +396,8 @@ import uk.icat3.util.Queries;
         sample.setInvestigationId(this);
         
         Collection<Sample> samples = this.getSampleCollection();
+        if(samples == null) samples = new ArrayList<Sample>();
+        
         samples.add(sample);
         
         this.setSampleCollection(samples);
@@ -592,6 +595,7 @@ import uk.icat3.util.Queries;
         keyword.setInvestigation(this);
         
         Collection<Keyword> keywords = this.getKeywordCollection();
+        if(keywords == null) keywords = new ArrayList<Keyword>();
         keywords.add(keyword);
         
         this.setKeywordCollection(keywords);
@@ -666,6 +670,7 @@ import uk.icat3.util.Queries;
         investigator.setInvestigation(this);
         
         Collection<Investigator> investigators = this.getInvestigatorCollection();
+        if(investigators == null) investigators = new ArrayList<Investigator>();
         investigators.add(investigator);
         
         this.setInvestigatorCollection(investigators);
