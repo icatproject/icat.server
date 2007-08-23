@@ -65,6 +65,8 @@ public class TestPublication extends BaseTestClassTX {
         String modifiedURL = "http://"+random.nextInt();
         //create invalid publication, no name
         Publication modifiedInvestigation = getPublication(true);
+        modifiedInvestigation.setInvestigationId(null);
+        
         Publication duplicatePubilication = getPublicationDuplicate(true);
         //set investigation id
         Investigation in = em.find(Investigation.class, VALID_INVESTIGATION_ID);
