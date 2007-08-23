@@ -350,15 +350,15 @@ public class DatasetManager {
         // getDataset(SID, DATASET_ID);
         // getDatasets(SID, DATASET_ID);
         
-      /*  Dataset df = createDataset(SID, "name for sid "+SID);
-        updateDataset(SID, df, "new name of "+SID);  //this should fail with ICAT_ADMIN user
-        delete_undeleteDataset(SID, df.getId());
-        delete_undeleteDataset(SID, df.getId());
-        removeDataset(SID, df.getId()); //should be false for none ICAT_ADMIN user*/
+        Dataset ds = createDataset(SID, "name for sid "+SID);
+        updateDataset(SID, ds, "new name of "+SID);  //this should fail with ICAT_ADMIN user
+        delete_undeleteDataset(SID, ds.getId());
+        delete_undeleteDataset(SID, ds.getId());
+        removeDataset(SID, ds.getId()); //should be false for none ICAT_ADMIN user
         
-        DatasetParameter dfp = addParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATASET_ID);
-        if(dfp != null) {
-            updateDatasetParameter(SID, dfp, "new description for dfp");
+        DatasetParameter dsp = addParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATASET_ID);
+        if(dsp != null) {
+            updateDatasetParameter(SID, dsp, "new description for dfp");
             delete_undeleteParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATASET_ID); //delete it
             delete_undeleteParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATASET_ID); //un delete it
             removeDatasetParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATASET_ID);  //should be false for none ICAT_ADMIN user

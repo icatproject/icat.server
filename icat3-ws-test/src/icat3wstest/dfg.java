@@ -24,9 +24,10 @@ static  Float f ;
      */
     public static void main(String[] args) {
         System.out.println(f);
-        assert false;
-        assert true;
+        //assert false;
+        //assert true;
         System.out.println("passed");
+        System.out.println(System.getProperty("user.password"));
         // TODO code application logic here
     }
 
