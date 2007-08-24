@@ -104,7 +104,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
     protected XMLIngestionManagerLocal xmlIngestionManagerLocal;
     ///////////////////////  End of Inject all the EJBs   ///////////////////////
     
-        
+    
     /** Creates a new instance of AllOperationsBean */
     public ICAT() {
     }
@@ -185,11 +185,27 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return list of keywords
      * @throws uk.icat3.exceptions.SessionException
      */
+    @WebMethod(operationName="getKeywordsForUserStartWithMax")
+    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.getKeywordsForUserStartWithMax")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.getKeywordsForUserStartWithMaxResponse")
+    public Collection<String> getKeywordsForUser(@WebParam(name="sessionId") String sessionId, @WebParam(name="startKeyword") String startKeyword, @WebParam(name="numberReturned") int numberReturned) throws SessionException{
+        return keywordSearchLocal.getKeywordsForUser(sessionId, startKeyword, numberReturned);
+    }
+    
+    /**
+     * This gets all the keywords avaliable for that user that they can only see keywords associated with their
+     * investigations or public investigations
+     *
+     * @param sessionId federalId of the user.
+     * @param numberReturned number of results found returned
+     * @return list of keywords
+     * @throws uk.icat3.exceptions.SessionException
+     */
     @WebMethod(operationName="getKeywordsForUserMax")
     @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.getKeywordsForUserMax")
     @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.getKeywordsForUserMaxResponse")
-    public Collection<String> getKeywordsForUser(@WebParam(name="sessionId") String sessionId, @WebParam(name="startKeyword") String startKeyword, @WebParam(name="numberReturned") int numberReturned) throws SessionException{
-        return keywordSearchLocal.getKeywordsForUser(sessionId, startKeyword, numberReturned);
+    public Collection<String> getKeywordsForUser(@WebParam(name="sessionId") String sessionId, @WebParam(name="numberReturned") int numberReturned) throws SessionException{
+        return keywordSearchLocal.getKeywordsForUser(sessionId, numberReturned);
     }
     
     /**
@@ -713,7 +729,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
         investigationManagerLocal.deleteInvestigation(sessionId, investigationId);
     }
     
-     /**
+    /**
      * Removes a {@link Investigation} investigation from a {@link Investigation} object.
      * if the user has access to remove the investigation.
      *
@@ -725,7 +741,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      */
     @WebMethod()
     public void removeInvestigation(String sessionId, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
-       investigationManagerLocal.removeInvestigation(sessionId, investigationId);
+        investigationManagerLocal.removeInvestigation(sessionId, investigationId);
     }
     
     /**
@@ -767,12 +783,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      *
      * @param sessionId sessionid of the user.
      * @param sample {@link Sample} object to be updated
-     * @param investigationId id of the investigation    
+     * @param investigationId id of the investigation
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
-      * @return sample
+     * @return sample
      */
     @WebMethod()
     public Sample addSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sample") Sample sample, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
@@ -1461,13 +1477,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return Collection of {@link IcatAuthorisation}>s of the datafile id
      */
     @WebMethod()
-    public Collection<IcatAuthorisation> getAuthorisations(String sessionId, Long elementId, ElementType elementType) throws InsufficientPrivilegesException, NoSuchObjectFoundException, SessionException {
+    public Collection<IcatAuthorisation> getAuthorisations(@WebParam(name="sessionId") String sessionId, @WebParam(name="elementId") Long elementId, @WebParam(name="elementType") ElementType elementType) throws InsufficientPrivilegesException, NoSuchObjectFoundException, SessionException {
         
         if(elementType == ElementType.INVESTIGATION){
             return investigationManagerLocal.getAuthorisations(sessionId, elementId);
-        } else if(elementType == ElementType.INVESTIGATION){
+        } else if(elementType == ElementType.DATASET){
             return datasetManagerLocal.getAuthorisations(sessionId, elementId);
-        } else if(elementType == ElementType.INVESTIGATION){
+        } else if(elementType == ElementType.DATAFILE){
             return datafileManagerLocal.getAuthorisations(sessionId, elementId);
         } else throw new SessionException("ElementType "+elementType+" not supported. Only INVESTIGATION, DATASET and DATAFILE ElementTypes supported.");
     }
@@ -1487,12 +1503,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return {@link IcatAuthorisation}s of the datafile id
      */
     @WebMethod()
-    public IcatAuthorisation addAuthorisation(String sessionId, String toAddUserId, String toAddRole, Long elementId , ElementType elementType) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
+    public IcatAuthorisation addAuthorisation(@WebParam(name="sessionId") String sessionId, @WebParam(name="toAddFedId") String toAddUserId, @WebParam(name="toAddRole") String toAddRole, @WebParam(name="elementId") Long elementId , @WebParam(name="elementType") ElementType elementType) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
         if(elementType == ElementType.INVESTIGATION){
             return investigationManagerLocal.addAuthorisation(sessionId, toAddUserId, toAddRole, elementId);
-        } else if(elementType == ElementType.INVESTIGATION){
+        } else if(elementType == ElementType.DATASET){
             return datasetManagerLocal.addAuthorisation(sessionId, toAddUserId, toAddRole, elementId);
-        } else if(elementType == ElementType.INVESTIGATION){
+        } else if(elementType == ElementType.DATAFILE){
             return datafileManagerLocal.addAuthorisation(sessionId, toAddUserId, toAddRole, elementId);
         } else throw new SessionException("ElementType "+elementType+" not supported"); //should never be thrown
     }
@@ -1508,14 +1524,8 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
-    public void deleteAuthorisation(String sessionId, Long authorisationId, ElementType elementType) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
-        if(elementType == ElementType.INVESTIGATION){
-            investigationManagerLocal.deleteAuthorisation(sessionId, authorisationId);
-        } else if(elementType == ElementType.INVESTIGATION){
-            datasetManagerLocal.deleteAuthorisation(sessionId, authorisationId);
-        } else if(elementType == ElementType.INVESTIGATION){
-            datafileManagerLocal.deleteAuthorisation(sessionId, authorisationId);
-        } else throw new SessionException("ElementType "+elementType+" not supported"); //should never be thrown
+    public void deleteAuthorisation(@WebParam(name="sessionId") String sessionId, @WebParam(name="authorisationId") Long authorisationId /*, @WebParam(name="elementType") ElementType elementType*/) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
+        investigationManagerLocal.deleteAuthorisation(sessionId, authorisationId);
     }
     
     /**
@@ -1529,14 +1539,8 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod()
-    public void removeAuthorisation(String sessionId, Long authorisationId, ElementType elementType) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
-        if(elementType == ElementType.INVESTIGATION){
-            investigationManagerLocal.removeAuthorisation(sessionId, authorisationId);
-        } else if(elementType == ElementType.INVESTIGATION){
-            datasetManagerLocal.removeAuthorisation(sessionId, authorisationId);
-        } else if(elementType == ElementType.INVESTIGATION){
-            datafileManagerLocal.removeAuthorisation(sessionId, authorisationId);
-        } else throw new SessionException("ElementType "+elementType+" not supported"); //should never be thrown
+    public void removeAuthorisation(@WebParam(name="sessionId") String sessionId, @WebParam(name="authorisationId") Long authorisationId /*, @WebParam(name="elementType") ElementType elementType*/) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
+        investigationManagerLocal.removeAuthorisation(sessionId, authorisationId);
     }
     
     /**
@@ -1552,14 +1556,8 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.ValidationException if the added role is higher than the persons role adding
      */
     @WebMethod()
-    public void updateAuthorisation(String sessionId, String toChangetoRole, Long authorisationId, ElementType elementType) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
-        if(elementType == ElementType.INVESTIGATION){
-            investigationManagerLocal.updateAuthorisation(sessionId, toChangetoRole, authorisationId);
-        } else if(elementType == ElementType.INVESTIGATION){
-            datasetManagerLocal.updateAuthorisation(sessionId, toChangetoRole, authorisationId);
-        } else if(elementType == ElementType.INVESTIGATION){
-            datafileManagerLocal.updateAuthorisation(sessionId, toChangetoRole, authorisationId);
-        } else throw new SessionException("ElementType "+elementType+" not supported"); //should never be thrown
+    public void updateAuthorisation(@WebParam(name="sessionId") String sessionId, @WebParam(name="toChangetoRole") String toChangetoRole, @WebParam(name="authorisationId") Long authorisationId /*, @WebParam(name="elementType") ElementType elementType*/) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
+        investigationManagerLocal.updateAuthorisation(sessionId, toChangetoRole, authorisationId);
     }
     
     //////////////////////////////////////////////////////////////////////////////////////////////////////////

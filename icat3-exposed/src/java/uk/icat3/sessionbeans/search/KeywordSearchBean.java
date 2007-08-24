@@ -70,14 +70,35 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
      * @throws uk.icat3.exceptions.SessionException
      * @return list of keywords
      */
-    @WebMethod(operationName="getKeywordsForUserMax")
-    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserMax")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserMaxResponse")
+    @WebMethod(operationName="getKeywordsForUserStartWithMax")
+    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserStartWithMax")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserStartWithMaxResponse")
     public Collection<String> getKeywordsForUser(String sessionId, String startKeyword, int numberReturned) throws SessionException{
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
         return KeywordSearch.getKeywordsForUser(userId, startKeyword, numberReturned, manager);
+        
+    }
+    
+    /**
+     * This gets all the keywords avaliable for that user, beginning with a keyword, they can only see keywords associated with their
+     * investigations or public investigations
+     *
+     * @param sessionId session id of the user.
+     * @param startIndex start index of the results found, default 0
+     * @param number_results number of results found from the start index, default {@link Queries}.MAX_QUERY_RESULTSET
+     * @throws uk.icat3.exceptions.SessionException
+     * @return list of keywords
+     */
+    @WebMethod(operationName="getKeywordsForUserMax")
+    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserMax")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserMaxResponse")
+    public Collection<String> getKeywordsForUser(String sessionId, int numberReturned) throws SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return KeywordSearch.getKeywordsForUser(userId, null, numberReturned, manager);
         
     }
     
