@@ -105,13 +105,15 @@ public class TestJPA {
         setUp();
         
         Datafile df = new Datafile();
+        df.setDatafileVersion("1");
         DatafileFormat type = new DatafileFormat();
-        DatafileFormatPK pk = new DatafileFormatPK("3.0.0", "nexus");
+        DatafileFormatPK pk = new DatafileFormatPK("3.0.0", "nexus2");
         type.setDatafileFormatPK(pk);
         
         df.setDatafileFormat(type);
         df.setName("name of df");
         
+        df.isValid(em);
         //create datafile parameter
         
        /* DatafileParameterPK dfppk = new DatafileParameterPK("uAmp hours","good_proton_charge", null);
@@ -119,7 +121,8 @@ public class TestJPA {
         
         df.addDataFileParameter(dfp);*/
         
-        DataFileManager.createDataFile("test_admin_investigation", df, 100L, em);
+        //
+        //DataFileManager.createDataFile("test_admin_investigation", df, 2L, em);
         
         tearDown();
     }
@@ -368,7 +371,7 @@ public class TestJPA {
         
         TestJPA ts = new TestJPA();
         // ts.createInv();
-     //   ts.createDF();
+        ts.createDF();
         // ts.createDS();
         //ts.addRole();
         // ts.getRoles();
@@ -378,7 +381,7 @@ public class TestJPA {
         // ts.testP1();
         // ts.testSurname();
         
-         ts.testDelete();
+       //  ts.testDelete();
       //  ts.addParameter();
         
     }

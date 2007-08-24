@@ -529,7 +529,7 @@ public class ManagerUtil {
     protected static void deleteAuthorisation(String userId, Long authorisationId, AccessType type, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
         log.trace("deleteAuthorisation("+userId+", "+authorisationId+", "+type+", EntityManager)");
         
-        IcatAuthorisation icatAuthorisation = find(IcatAuthorisation.class, authorisationId, manager);
+        IcatAuthorisation icatAuthorisation = findObject(IcatAuthorisation.class, authorisationId, manager);
         
         //if elementId is null, then not there
         if(icatAuthorisation.getElementId() == null) throw new NoSuchObjectFoundException(icatAuthorisation+" not found.");
@@ -539,14 +539,14 @@ public class ManagerUtil {
             GateKeeper.performAuthorisation(userId, getRootElement(icatAuthorisation, manager), AccessType.MANAGE_USERS, manager);
             
             //ok here fo delete
-            icatAuthorisation.setDeleted(true);
+            icatAuthorisation.setDeleted(!icatAuthorisation.isDeleted());
             icatAuthorisation.setModId(userId);
             
             //delete child record if there
             if(icatAuthorisation.getUserChildRecord() != null){
                 IcatAuthorisation icatAuthorisationChild = findObject(IcatAuthorisation.class, icatAuthorisation.getUserChildRecord(), manager);
                 //ok here fo delete
-                icatAuthorisationChild.setDeleted(true);
+                icatAuthorisationChild.setDeleted(!icatAuthorisation.isDeleted());
                 icatAuthorisationChild.setModId(userId);
             }
         } else if(type == AccessType.REMOVE){
@@ -599,6 +599,7 @@ public class ManagerUtil {
         //user cannot add a higher role than themeselves
         if(userIdsRole.isGreaterEqualTo(toBeAddedRole)){
             IcatAuthorisation icatAuthorisationChild = null;
+            Long childId = null;
             
             if(type == ElementType.INVESTIGATION){
                 if(toBeAddedRole.isActionRootInsert()){
@@ -607,8 +608,9 @@ public class ManagerUtil {
                     icatAuthorisationChild = persistAuthorisation(userId, toAddUserId, toBeAddedRole, ElementType.DATASET, null,
                             type,  ((Investigation)rootElement).getId(), null, manager);
                 }
+                if(icatAuthorisationChild != null) childId = icatAuthorisationChild.getId();
                 return persistAuthorisation(userId, toAddUserId, toBeAddedRole, type, ((Investigation)rootElement).getId(),
-                        null,  null, icatAuthorisationChild.getId(), manager);
+                        null,  null, childId, manager);
                 
             } else if(type == ElementType.DATASET){
                 if(toBeAddedRole.isActionRootInsert()){
@@ -617,9 +619,10 @@ public class ManagerUtil {
                     icatAuthorisationChild = persistAuthorisation(userId, toAddUserId, toBeAddedRole,  ElementType.DATAFILE, null,
                             type,  ((Dataset)rootElement).getId(), null,  manager);
                 }
+                if(icatAuthorisationChild != null) childId = icatAuthorisationChild.getId();
                 return persistAuthorisation(userId, toAddUserId, toBeAddedRole,
                         type,  ((Dataset)rootElement).getId(),
-                        ElementType.INVESTIGATION,  ((Dataset)rootElement).getInvestigationId(), icatAuthorisationChild.getId(), manager);
+                        ElementType.INVESTIGATION,  ((Dataset)rootElement).getInvestigationId(), childId, manager);
                 
             } else if(type == ElementType.DATAFILE){
                 return persistAuthorisation(userId, toAddUserId, toBeAddedRole, type, ((Datafile)rootElement).getId(),

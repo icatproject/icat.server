@@ -639,7 +639,7 @@ public class InvestigationManager extends ManagerUtil {
                 publication.setCreateId(userId);
                 manager.persist(publication);
                 
-                investigation.addPublication(publication);
+                investigation.addPublication(publication);//for XML Injest (multipe additions in one EM)
                 return publication;
             }
             
@@ -667,7 +667,7 @@ public class InvestigationManager extends ManagerUtil {
                 manager.persist(sample);
                 
                 //add sample to investigation
-                investigation.addSample(sample);
+                investigation.addSample(sample);//for XML Injest (multipe additions in one EM)
                 return sample;
             }
         } else if(object instanceof SampleParameter){
@@ -698,7 +698,7 @@ public class InvestigationManager extends ManagerUtil {
                 sampleParamter.setCreateId(userId);
                 manager.persist(sampleParamter);
                 
-                sample.addSampleParameter(sampleParamter);
+                sample.addSampleParameter(sampleParamter); //for XML Injest (multipe additions in one EM)
                 return sampleParamter;
             }
         } else if(object instanceof Keyword){
@@ -724,7 +724,7 @@ public class InvestigationManager extends ManagerUtil {
                 keyword.setCreateId(userId);
                 manager.persist(keyword);
                 
-                investigation.addKeyword(keyword);
+                investigation.addKeyword(keyword);//for XML Injest (multipe additions in one EM)
                 return keyword;
             }
         } else if(object instanceof Investigator){
@@ -749,7 +749,7 @@ public class InvestigationManager extends ManagerUtil {
                 investigator.setCreateId(userId);
                 manager.persist(investigator);
                
-                investigation.addInvestigator(investigator);
+                investigation.addInvestigator(investigator);//for XML Injest (multipe additions in one EM)
                 return investigator;
             }
         }  else throw new RuntimeException(object +" is not avaliable to be added");

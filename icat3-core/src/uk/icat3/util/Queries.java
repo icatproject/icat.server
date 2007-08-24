@@ -362,6 +362,13 @@ public class Queries {
             "i.userId = :userId AND i.parentElementType = :parentElementType AND " +
             "i.parentElementId = :parentElementId";
     
+    // Find unuqiue child record
+    public static final String ICAT_AUTHORISATION_FINDBY_UNIQUE_KEY_CREATE = "IcatAuthorisation.findByUniqueKeyCreate";
+    public static final String ICAT_AUTHORISATION_FINDBY_UNIQUE_KEY_CREATE_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
+            "i.elementType = :elementType AND i.elementId IS NULL AND " +
+            "i.userId = :userId AND i.parentElementType = :parentElementType AND " +
+            "i.parentElementId = :parentElementId";
+    
     
     /**
      * Find ICAT AUTHORISATION by element id, used to remove all when inv, ds,df is removed
