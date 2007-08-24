@@ -27,7 +27,7 @@ public class DatafileManager {
     /** Creates a new instance of SearchKeyword */
     public static void getDatafile(String sid, Long id) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
@@ -55,7 +55,7 @@ public class DatafileManager {
     
     public static void getDatafiles(String sid, Long id) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             List<Long> ids = new ArrayList<Long>();
@@ -87,7 +87,7 @@ public class DatafileManager {
     
     public static Datafile createDatafile(String sid, String name) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             Datafile df = new Datafile();
@@ -126,7 +126,7 @@ public class DatafileManager {
     }
     
     public static void delete_undeleteDatafile(String sid, Long id){
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
@@ -147,7 +147,7 @@ public class DatafileManager {
     }
     
     public static void removeDatafile(String sid, Long id){
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
@@ -169,7 +169,7 @@ public class DatafileManager {
     
     public static void updateDatafile(String sid, Datafile df, String newName) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             df.setName(newName);
@@ -195,7 +195,7 @@ public class DatafileManager {
     
     
     public static DatafileParameter addParameter(String sid, String name, String units, Long id){
-        try {             
+        try {
             DatafileParameterPK PK = new DatafileParameterPK();
             PK.setDatafileId(id);
             PK.setName(name);
@@ -226,7 +226,7 @@ public class DatafileManager {
     }
     
     public static void delete_undeleteParameter(String sid, String name, String units, Long id){
-        try {             
+        try {
             DatafileParameterPK PK = new DatafileParameterPK();
             PK.setDatafileId(id);
             PK.setName(name);
@@ -252,7 +252,7 @@ public class DatafileManager {
     }
     
     public static void removeDatafileParameter(String sid, String name, String units, Long id){
-        try {             
+        try {
             DatafileParameterPK PK = new DatafileParameterPK();
             PK.setDatafileId(id);
             PK.setName(name);
@@ -278,7 +278,7 @@ public class DatafileManager {
     }
     
     public static void updateDatafileParameter(String sid, DatafileParameter dfp, String newDesc){
-        try {             
+        try {
             dfp.setDescription(newDesc);
             
             long time = System.currentTimeMillis();
@@ -306,22 +306,23 @@ public class DatafileManager {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        getDatafile(SID, INVESTIGATION_ID);
-        getDatafiles(SID, INVESTIGATION_ID);
+        //getDatafile(SID, INVESTIGATION_ID);
+        //getDatafiles(SID, INVESTIGATION_ID);
         
         Datafile df = createDatafile(SID, "name for sid "+SID);
-        updateDatafile(SID, df, "new name of "+SID);  //this should fail with ICAT_ADMIN user
+      /*  updateDatafile(SID, df, "new name of "+SID);  //this should fail with ICAT_ADMIN user
         delete_undeleteDatafile(SID, df.getId());
         delete_undeleteDatafile(SID, df.getId());
         removeDatafile(SID, df.getId()); //should be false for none ICAT_ADMIN user
-        
+       
         DatafileParameter dfp = addParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATAFILE_ID);
-        if(dfp !=null) {updateDatafileParameter(SID, dfp, "new description for dfp");
+        if(dfp !=null) {
+       updateDatafileParameter(SID, dfp, "new description for dfp");
         delete_undeleteParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATAFILE_ID); //delete it
         delete_undeleteParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATAFILE_ID); //un delete it
         removeDatafileParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATAFILE_ID);  //should be false for none ICAT_ADMIN user
         }
-        
+       */
     }
     
 }
