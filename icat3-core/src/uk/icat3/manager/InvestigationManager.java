@@ -63,7 +63,7 @@ public class InvestigationManager extends ManagerUtil {
      * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds, InvestigationInclude includes, EntityManager manager) throws InsufficientPrivilegesException, NoSuchObjectFoundException {
-        log.trace("getInvestigations("+userId+", "+investigationIds+", EntityManager)");
+        log.trace("getInvestigations("+userId+", "+investigationIds+", "+includes+", EntityManager)");
         
         Collection<Investigation> investigations = new ArrayList<Investigation>();
         

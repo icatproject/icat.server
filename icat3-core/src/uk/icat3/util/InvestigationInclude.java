@@ -26,6 +26,10 @@ public enum InvestigationInclude {
      */
     KEYWORDS_ONLY,
     /**
+     * list of publications
+     */
+    PUBLICAIIONS_ONLY,
+    /**
      * all keywords and investigators.
      */
     INVESTIGATORS_AND_KEYWORDS,
@@ -61,5 +65,59 @@ public enum InvestigationInclude {
      * all information except datasets, datafiles and icatroles, ie keywords, sample and investigators
      */
      ALL_EXCEPT_DATASETS_DATAFILES_AND_ROLES;
+    
+    public boolean isDatasets(){
+        if(this == InvestigationInclude.DATASETS_AND_DATAFILES ||
+                this == InvestigationInclude.DATASETS_ONLY  || 
+                this == InvestigationInclude.ALL) return true;
+        else return false;
+    }
+    
+    public boolean isRoles(){
+        if(this == InvestigationInclude.ROLE_ONLY ||   
+                this == InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES ||                
+                this == InvestigationInclude.ALL) return true;
+        else return false;
+    }
+    
+    public boolean isDatasetsAndDatafiles(){
+        if(this == InvestigationInclude.DATASETS_AND_DATAFILES ||               
+                this == InvestigationInclude.ALL) return true;
+        else return false;
+    }
+    
+    public boolean isInvestigators(){
+        if(this == InvestigationInclude.INVESTIGATORS_AND_KEYWORDS ||
+                this == InvestigationInclude.INVESTIGATORS_ONLY  || 
+                this == InvestigationInclude.ALL || 
+                this == InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES ||
+                 this == InvestigationInclude.ALL_EXCEPT_DATASETS_DATAFILES_AND_ROLES) return true;
+        else return false;
+    }
+    
+     public boolean isKeywords(){
+        if(this == InvestigationInclude.INVESTIGATORS_AND_KEYWORDS ||
+                this == InvestigationInclude.KEYWORDS_ONLY  || 
+                this == InvestigationInclude.ALL || 
+                this == InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES ||
+                 this == InvestigationInclude.ALL_EXCEPT_DATASETS_DATAFILES_AND_ROLES) return true;
+        else return false;
+    }
+    
+     public boolean isPublications(){
+        if(this == InvestigationInclude.PUBLICAIIONS_ONLY ||             
+                this == InvestigationInclude.ALL || 
+                this == InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES ||
+                 this == InvestigationInclude.ALL_EXCEPT_DATASETS_DATAFILES_AND_ROLES) return true;
+        else return false;
+    }
+    
+    public boolean isSamples(){
+        if(this == InvestigationInclude.SAMPLES_ONLY ||             
+                this == InvestigationInclude.ALL || 
+                this == InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES ||
+                 this == InvestigationInclude.ALL_EXCEPT_DATASETS_DATAFILES_AND_ROLES) return true;
+        else return false;
+    }
     
 }

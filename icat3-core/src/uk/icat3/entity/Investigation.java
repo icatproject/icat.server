@@ -372,6 +372,19 @@ import uk.icat3.util.Queries;
     }
     
     /**
+     * This method is used by JAXWS to map to datasetCollection.  Depending on what the include is
+     * set to depends on what is returned to JAXWS and serialised into XML.  This is because without
+     * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+     * DB hits and serialisation).
+     */
+    @XmlElement(name="publicationCollection")
+    private Collection<Publication> getPublicationCollection_() {
+        if(investigationInclude.isPublications()){
+            return this.publicationCollection;
+        } else return null;
+    }
+    
+    /**
      * Sets the publicationCollection of this Investigation to the specified value.
      * @param publicationCollection the new publicationCollection
      */
@@ -411,13 +424,9 @@ import uk.icat3.util.Queries;
      */
     @XmlElement(name="sampleCollection")
     private Collection<Sample> getSampleCollection_() {
-        if(investigationInclude.toString().equals(investigationInclude.SAMPLES_ONLY.toString())){
+        if(investigationInclude.isSamples()){
             return this.sampleCollection;
-        } else if(investigationInclude.toString().equals(investigationInclude.ALL.toString())){
-            return this.sampleCollection;
-        } else if(investigationInclude.toString().equals(investigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES.toString())){
-            return this.sampleCollection;
-        }  else return null;
+        } else return null;
     }
     
     /**
@@ -494,13 +503,9 @@ import uk.icat3.util.Queries;
      */
     @XmlElement(name="datasetCollection")
     private Collection<Dataset> getDatasetCollection_() {
-        if(investigationInclude.toString().equals(investigationInclude.DATASETS_ONLY.toString())){
+        if(investigationInclude.isDatasets()){
             return this.datasetCollection;
-        } else if(investigationInclude.toString().equals(investigationInclude.ALL.toString())){
-            return this.datasetCollection;
-        } else if(investigationInclude.toString().equals(investigationInclude.DATASETS_AND_DATAFILES.toString())){
-            return this.datasetCollection;
-        }  else return null;
+        } else return null;
     }
     
     private void setDatasetCollection_(Collection<Dataset> datasetCollection) {
@@ -564,15 +569,9 @@ import uk.icat3.util.Queries;
      */
     @XmlElement(name="keywordCollection")
     private Collection<Keyword> getKeywordCollection_() {
-        if(investigationInclude.toString().equals(investigationInclude.KEYWORDS_ONLY.toString())){
+        if(investigationInclude.isKeywords()){
             return this.keywordCollection;
-        } else if(investigationInclude.toString().equals(investigationInclude.ALL.toString())){
-            return this.keywordCollection;
-        } else if(investigationInclude.toString().equals(investigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES.toString())){
-            return this.keywordCollection;
-        } else if(investigationInclude.toString().equals(investigationInclude.INVESTIGATORS_AND_KEYWORDS.toString())){
-            return this.keywordCollection;
-        }  else return null;
+        } else return null;
     }
     
     private void setKeywordCollection_(Collection<Keyword> keywordCollection) {
@@ -643,16 +642,7 @@ import uk.icat3.util.Queries;
      */
     @XmlElement(name="investigatorCollection")
     private Collection<Investigator> getInvestigatorCollection_() {
-        if(investigationInclude.toString().equals(investigationInclude.INVESTIGATORS_ONLY.toString())){
-            return this.investigatorCollection;
-            //return null;
-        } else if(investigationInclude.toString().equals(investigationInclude.ALL.toString())){
-            return this.investigatorCollection;
-            //return null;
-        } else if(investigationInclude.toString().equals(investigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES.toString())){
-            return this.investigatorCollection;
-            //return null;
-        } else if(investigationInclude.toString().equals(investigationInclude.INVESTIGATORS_AND_KEYWORDS.toString())){
+        if(investigationInclude.isInvestigators()){
             return this.investigatorCollection;
             //return null;
         }  else return null;
@@ -740,32 +730,53 @@ import uk.icat3.util.Queries;
             if(managerValue == null) throw new RuntimeException("Manager Value needs to be set aswell if Cascade.DELETE");
         }
         
+        if(type == Cascade.REMOVE_DELETED_ITEMS){
+            log.trace("Remove from: ");
+            log.trace("Datasets? "+investigationInclude.isDatasets());
+            log.trace("Datasets and datafiles? "+investigationInclude.isDatasetsAndDatafiles());
+            log.trace("Investigators? "+investigationInclude.isInvestigators());
+            log.trace("Keywords? "+investigationInclude.isKeywords());
+            log.trace("Publications? "+investigationInclude.isPublications());
+            log.trace("Roles? "+investigationInclude.isRoles());
+            log.trace("Samples? "+investigationInclude.isSamples());
+        }
+        
         //datafiles
-        if(getDatasetCollection() != null){
-            //create new collection if remove deleted items
+        if(type == Cascade.REMOVE_DELETED_ITEMS &&  investigationInclude.isDatasets() ){
             Collection<Dataset> datasets = new ArrayList<Dataset>();
             
             for(Dataset dataset : getDatasetCollection()){
-                if(type == Cascade.REMOVE_DELETED_ITEMS){
-                    //remove all deleted items from the collection, ie only add ones that are not deleted
-                    if(!dataset.isDeleted()) {
-                        datasets.add(dataset);
-                        //cascade to datafile items if value is true, otherwise do not cascade
-                        if(((Boolean)cascadeValue).booleanValue()) dataset.setCascade(Cascade.REMOVE_DELETED_ITEMS, cascadeValue);
-                    }
-                } else dataset.setCascade(type, cascadeValue, manager, managerValue);
+                if(!dataset.isDeleted()) {
+                    datasets.add(dataset);
+                    if(((Boolean)cascadeValue).booleanValue()) dataset.setCascade(Cascade.REMOVE_DELETED_ITEMS, cascadeValue);
+                }
             }
-            if(type == Cascade.REMOVE_DELETED_ITEMS){
-                //now set the new dataset collection
-                log.trace("Setting new datasetCollection of size: "+datasets.size()+" because of deleted items from original size: "+getDatasetCollection().size());
-                this.setDatasetCollection(datasets);
+            
+            //now set the new dataset collection
+            log.trace("Setting new datasetCollection of size: "+datasets.size()+" because of deleted items from original size: "+getDatasetCollection().size());
+            this.setDatasetCollection(datasets);
+        } else if(type != Cascade.REMOVE_DELETED_ITEMS && getDatasetCollection() != null){
+            
+            for(Dataset dataset : getDatasetCollection()){
+                dataset.setCascade(type, cascadeValue, manager, managerValue);
             }
         }
         
         //investigators
-        if(getInvestigatorCollection() != null){
+        //if REMOVE_DELETED_ITEMS, check if investigationInclude wants keywords
+        if(type == Cascade.REMOVE_DELETED_ITEMS && investigationInclude.isInvestigators()){
             //create new collection if remove deleted items
             Collection<Investigator> investigators = new ArrayList<Investigator>();
+            
+            for(Investigator investigator : getInvestigatorCollection()){
+                if(!investigator.isDeleted()) investigators.add(investigator);
+            }
+            
+            //now set the new dataset collection
+            log.trace("Setting new investigatorCollection of size: "+investigators.size()+" because of deleted items from original size: "+getInvestigatorCollection().size());
+            this.setInvestigatorCollection(investigators);
+            
+        } else if(type != Cascade.REMOVE_DELETED_ITEMS && getInvestigatorCollection() != null){
             
             for(Investigator investigator : getInvestigatorCollection()){
                 if(type == Cascade.DELETE) {
@@ -775,15 +786,7 @@ import uk.icat3.util.Queries;
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     investigator.setModId(cascadeValue.toString());
                     investigator.setCreateId(cascadeValue.toString());
-                } else if(type == Cascade.REMOVE_DELETED_ITEMS){
-                    //remove all deleted items from the collection, ie only add ones that are not deleted
-                    if(!investigator.isDeleted()) investigators.add(investigator);
                 }
-            }
-            if(type == Cascade.REMOVE_DELETED_ITEMS){
-                //now set the new dataset collection
-                log.trace("Setting new investigatorCollection of size: "+investigators.size()+" because of deleted items from original size: "+getInvestigatorCollection().size());
-                this.setInvestigatorCollection(investigators);
             }
         }
         
@@ -805,32 +808,36 @@ import uk.icat3.util.Queries;
         }*/
         
         //sample
-        if(getSampleCollection() != null){
+        //if REMOVE_DELETED_ITEMS, check if investigationInclude wants keywords
+        if(type == Cascade.REMOVE_DELETED_ITEMS && investigationInclude.isSamples() ){
             //create new collection if remove deleted items
             Collection<Sample> samples = new ArrayList<Sample>();
             
             for(Sample sample : getSampleCollection()){
-                if(type == Cascade.REMOVE_DELETED_ITEMS){
-                    //remove all deleted items from the collection, ie only add ones that are not deleted
-                    if(!sample.isDeleted()) {
-                        samples.add(sample);
-                        //cascade to datafile items if value is true, otherwise do not cascade
-                        if(((Boolean)cascadeValue).booleanValue()) sample.setCascade(Cascade.REMOVE_DELETED_ITEMS, cascadeValue);
-                    }
-                } else sample.setCascade(type, cascadeValue, manager, managerValue);
+                if(!sample.isDeleted()) {
+                    samples.add(sample);
+                    //always cascade this
+                    sample.setCascade(Cascade.REMOVE_DELETED_ITEMS, true);
+                }
             }
-            if(type == Cascade.REMOVE_DELETED_ITEMS){
-                //now set the new dataset collection
-                log.trace("Setting new sampleCollection of size: "+samples.size()+" because of deleted items from original size: "+getSampleCollection().size());
-                this.setSampleCollection(samples);
+            
+            //now set the new dataset collection
+            log.trace("Setting new sampleCollection of size: "+samples.size()+" because of deleted items from original size: "+getSampleCollection().size());
+            this.setSampleCollection(samples);
+        } else if(type != Cascade.REMOVE_DELETED_ITEMS && getSampleCollection() != null){
+            //create new collection if remove deleted items
+            Collection<Sample> samples = new ArrayList<Sample>();
+            
+            for(Sample sample : getSampleCollection()){
+                sample.setCascade(type, cascadeValue, manager, managerValue);
             }
         }
         
         //study
-        if(getStudyInvestigationCollection() != null){
+        /*if(getStudyInvestigationCollection() != null){
             //create new collection if remove deleted items
             Collection<StudyInvestigation> studyInvestigations = new ArrayList<StudyInvestigation>();
-            
+         
             for(StudyInvestigation study : getStudyInvestigationCollection()){
                 if(type == Cascade.DELETE) {
                     study.setMarkedDeleted(deleted);
@@ -849,13 +856,13 @@ import uk.icat3.util.Queries;
                 log.trace("Setting new studyInvestigationCollection of size: "+studyInvestigations.size()+" because of deleted items from original size: "+getStudyInvestigationCollection().size());
                 this.setStudyInvestigationCollection(studyInvestigations);
             }
-        }
+        }*/
         
         //shift
-        if(getShiftCollection() != null){
+        /*if(getShiftCollection() != null){
             //create new collection if remove deleted items
             Collection<Shift> shifts = new ArrayList<Shift>();
-            
+         
             for(Shift shift : getShiftCollection()){
                 if(type == Cascade.DELETE) {
                     shift.setMarkedDeleted(deleted);
@@ -874,12 +881,23 @@ import uk.icat3.util.Queries;
                 log.trace("Setting new shiftCollection of size: "+shifts.size()+" because of deleted items from original size: "+getShiftCollection().size());
                 this.setShiftCollection(shifts);
             }
-        }
+        }*/
         
         //publication
-        if(getPublicationCollection() != null){
+        //if REMOVE_DELETED_ITEMS, check if investigationInclude wants keywords
+        if(type == Cascade.REMOVE_DELETED_ITEMS && investigationInclude.isPublications() ){
             //create new collection if remove deleted items
             Collection<Publication> publications = new ArrayList<Publication>();
+            
+            for(Publication publication : getPublicationCollection()){
+                if(!publication.isDeleted()) publications.add(publication);
+            }
+            
+            //now set the new dataset collection
+            log.trace("Setting new publicationCollection of size: "+publications.size()+" because of deleted items from original size: "+getPublicationCollection().size());
+            this.setPublicationCollection(publications);
+            
+        } else if(type != Cascade.REMOVE_DELETED_ITEMS && getPublicationCollection() != null){
             
             for(Publication publication : getPublicationCollection()){
                 if(type == Cascade.DELETE) {
@@ -889,22 +907,25 @@ import uk.icat3.util.Queries;
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     publication.setModId(cascadeValue.toString());
                     publication.setCreateId(cascadeValue.toString());
-                } else if(type == Cascade.REMOVE_DELETED_ITEMS){
-                    //remove all deleted items from the collection, ie only add ones that are not deleted
-                    if(!publication.isDeleted()) publications.add(publication);
                 }
-            }
-            if(type == Cascade.REMOVE_DELETED_ITEMS){
-                //now set the new dataset collection
-                log.trace("Setting new publicationCollection of size: "+publications.size()+" because of deleted items from original size: "+getPublicationCollection().size());
-                this.setPublicationCollection(publications);
             }
         }
         
         //keyword
-        if(getKeywordCollection() != null){
+        //if REMOVE_DELETED_ITEMS, check if investigationInclude wants keywords
+        if(type == Cascade.REMOVE_DELETED_ITEMS &&  investigationInclude.isKeywords() ){
             //create new collection if remove deleted items
             Collection<Keyword> keywords = new ArrayList<Keyword>();
+            
+            for(Keyword keyword : getKeywordCollection()){
+                if(!keyword.isDeleted()) keywords.add(keyword);
+            }
+            
+            //now set the new dataset collection
+            log.trace("Setting new keywordCollection of size: "+keywords.size()+" because of deleted items from original size: "+getKeywordCollection().size());
+            this.setKeywordCollection(keywords);
+            
+        } else if(type != Cascade.REMOVE_DELETED_ITEMS && getKeywordCollection() != null){
             
             for(Keyword keyword : getKeywordCollection()){
                 if(type == Cascade.DELETE) {
@@ -914,23 +935,15 @@ import uk.icat3.util.Queries;
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     keyword.setModId(cascadeValue.toString());
                     keyword.setCreateId(cascadeValue.toString());
-                } else if(type == Cascade.REMOVE_DELETED_ITEMS){
-                    //remove all deleted items from the collection, ie only add ones that are not deleted
-                    if(!keyword.isDeleted()) keywords.add(keyword);
                 }
-            }
-            if(type == Cascade.REMOVE_DELETED_ITEMS){
-                //now set the new dataset collection
-                log.trace("Setting new keywordCollection of size: "+keywords.size()+" because of deleted items from original size: "+getKeywordCollection().size());
-                this.setKeywordCollection(keywords);
             }
         }
         
         //topicList parameter
-        if(getTopicListCollection() != null){
+        /*if(getTopicListCollection() != null){
             //create new collection if remove deleted items
             Collection<TopicList> topicLists = new ArrayList<TopicList>();
-            
+         
             for(TopicList topicList : getTopicListCollection()){
                 if(type == Cascade.DELETE)  {
                     topicList.setMarkedDeleted(deleted);
@@ -949,7 +962,7 @@ import uk.icat3.util.Queries;
                 log.trace("Setting new keywordCollection of size: "+topicLists.size()+" because of deleted items from original size: "+getTopicListCollection().size());
                 this.setTopicListCollection(topicLists);
             }
-        }
+        }*/
         
         if(type == Cascade.DELETE) {
             //need to check if use has permission to delete this

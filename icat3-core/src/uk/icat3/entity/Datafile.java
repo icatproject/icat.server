@@ -532,7 +532,7 @@ import uk.icat3.util.ElementType;
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
         }
         
-        //data file parameters
+        //data file parameters         
         if(getDatafileParameterCollection() != null){
             //create new collection if remove deleted items
             Collection<DatafileParameter> datafileparameters = new ArrayList<DatafileParameter>();

@@ -34,4 +34,16 @@ public enum DatasetInclude {
      */
     NONE;
     
+    public boolean isDatafiles(){
+        if(this == DatasetInclude.DATASET_FILES_ONLY ||
+                this == DatasetInclude.DATASET_FILES_AND_PARAMETERS) return true;
+        else return false;
+    }
+    
+    public boolean isDatasetParameters(){
+        if(this == DatasetInclude.DATASET_PARAMETERS_ONLY ||
+                this == DatasetInclude.DATASET_FILES_AND_PARAMETERS  ) return true;
+        else return false;
+    }    
+  
 }

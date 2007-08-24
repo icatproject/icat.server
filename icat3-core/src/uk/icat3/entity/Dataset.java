@@ -409,10 +409,25 @@ import uk.icat3.util.Queries;
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
         }
         
+         if(type == Cascade.REMOVE_DELETED_ITEMS){
+            log.trace("Remove from: ");
+            log.trace("Datafiles? "+datasetInclude.isDatafiles());
+            log.trace("Datasets parameters? "+datasetInclude.isDatasetParameters());            
+        }
+        
         //data set parameters
-        if(getDatasetParameterCollection() != null){
+        //if REMOVE_DELETED_ITEMS, check if investigationInclude wants keywords
+        if(type == Cascade.REMOVE_DELETED_ITEMS && datasetInclude.isDatasetParameters() ){
             //create new collection if remove deleted items
             Collection<DatasetParameter> datasetparameters = new ArrayList<DatasetParameter>();
+            
+            for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
+                if(!datasetParameter.isDeleted()) datasetparameters.add(datasetParameter);
+            }
+            
+            log.trace("Setting new datasetparameters of size: "+datasetparameters.size()+" because of deleted items from original size: "+getDatasetParameterCollection().size());
+            this.setDatasetParameterCollection(datasetparameters);
+        }  else  if(type != Cascade.REMOVE_DELETED_ITEMS &&  getDatasetParameterCollection() != null){
             
             for(DatasetParameter datasetParameter : getDatasetParameterCollection()){
                 if(type == Cascade.DELETE) {
@@ -422,37 +437,29 @@ import uk.icat3.util.Queries;
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     datasetParameter.setModId(cascadeValue.toString());
                     datasetParameter.setCreateId(cascadeValue.toString());
-                }else if(type == Cascade.REMOVE_DELETED_ITEMS){
-                    //remove all deleted items from the collection, ie only add ones that are not deleted
-                    if(!datasetParameter.isDeleted()) datasetparameters.add(datasetParameter);
                 }
-            }
-            if(type == Cascade.REMOVE_DELETED_ITEMS){
-                //now set the new dataset collection
-                log.trace("Setting new datasetparameters of size: "+datasetparameters.size()+" because of deleted items from original size: "+getDatasetParameterCollection().size());
-                this.setDatasetParameterCollection(datasetparameters);
             }
         }
         
         //datafiles
-        if(getDatafileCollection() != null){
+        if(type == Cascade.REMOVE_DELETED_ITEMS && datasetInclude.isDatasetParameters() ){
             //create new collection if remove deleted items
             Collection<Datafile> datafiles = new ArrayList<Datafile>();
             
             for(Datafile datafile : getDatafileCollection()){
-                if(type == Cascade.REMOVE_DELETED_ITEMS){
-                    //remove all deleted items from the collection, ie only add ones that are not deleted
-                    if(!datafile.isDeleted()) {
-                        datafiles.add(datafile);
-                        //cascade to datafile items
-                        if(((Boolean)cascadeValue).booleanValue()) datafile.setCascade(Cascade.REMOVE_DELETED_ITEMS, cascadeValue);
-                    }
-                } else datafile.setCascade(type, cascadeValue, manager, managerValue);
+                if(!datafile.isDeleted()) {
+                    datafiles.add(datafile);
+                    //cascade to datafile items
+                    if(((Boolean)cascadeValue).booleanValue()) datafile.setCascade(Cascade.REMOVE_DELETED_ITEMS, cascadeValue);
+                }
             }
-            if(type == Cascade.REMOVE_DELETED_ITEMS){
-                //now set the new dataset collection
-                log.trace("Setting new datafileCollection of size: "+datafiles.size()+" because of deleted items from original size: "+getDatafileCollection().size());
-                this.setDatafileCollection(datafiles);
+            
+            log.trace("Setting new datafileCollection of size: "+datafiles.size()+" because of deleted items from original size: "+getDatafileCollection().size());
+            this.setDatafileCollection(datafiles);
+        } else  if(type != Cascade.REMOVE_DELETED_ITEMS && getDatafileCollection() != null){
+            
+            for(Datafile datafile : getDatafileCollection()){
+                datafile.setCascade(type, cascadeValue, manager, managerValue);
             }
         }
         

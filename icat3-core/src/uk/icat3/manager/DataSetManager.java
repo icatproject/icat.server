@@ -348,7 +348,7 @@ public class DataSetManager extends ManagerUtil {
      * @return collection of {@link Dataset}s
      */
     public static Collection<Dataset> getDataSets(String userId, Collection<Long> dataSetIds, DatasetInclude includes,  EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
-        log.trace("getDataSet("+userId+", "+dataSetIds+" EntityManager)");
+        log.trace("getDataSets("+userId+", "+dataSetIds+", "+includes+", EntityManager)");
         
         Collection<Dataset> datasets = new ArrayList<Dataset>();
         
@@ -401,6 +401,27 @@ public class DataSetManager extends ManagerUtil {
         datasets.add(dataSetId);
         
         Collection<Dataset> datasetsReturned = getDataSets(userId, datasets, DatasetInclude.NONE, manager);
+        return datasetsReturned.iterator().next();
+    }
+    
+     /**
+     * Gets the data set object from a data set id, depending if the user has access to read the data set.
+     *
+     * @param userId federalId of the user.
+     * @param dataSetId Id of object
+     * @param includes other information wanted with the data set
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @return {@link Dataset}
+     */
+    public static Dataset getDataSet(String userId, Long dataSetId, DatasetInclude includes, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException{
+        log.trace("getDataSet("+userId+", "+dataSetId+", "+includes+", EntityManager)");
+        
+        Collection<Long> datasets = new ArrayList<Long>();
+        datasets.add(dataSetId);
+        
+        Collection<Dataset> datasetsReturned = getDataSets(userId, datasets, includes, manager);
         return datasetsReturned.iterator().next();
     }
     

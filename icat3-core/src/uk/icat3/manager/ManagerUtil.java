@@ -26,8 +26,13 @@ import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.Investigator;
+import uk.icat3.entity.Keyword;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.ParameterPK;
+import uk.icat3.entity.Publication;
+import uk.icat3.entity.Sample;
+import uk.icat3.entity.SampleParameter;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -83,111 +88,63 @@ public class ManagerUtil {
                 //do nothing
                 return ;
             }
-            // now collect the information associated with the investigations requested
-            else if(include.toString().equals(InvestigationInclude.ALL.toString())){
-                for(Investigation investigation : investigations){
-                    
-                    investigation.getKeywordCollection().size();
+            for(Investigation investigation : investigations){
+                log.trace("Setting investigation to include: "+include);
+                investigation.setInvestigationInclude(include);
+                
+                if(include.isInvestigators()){
+                    log.trace("Including investigators");
                     investigation.getInvestigatorCollection().size();
+                }
+                if(include.isKeywords()){
+                    log.trace("Including keywords");
+                    investigation.getKeywordCollection().size();
+                }
+                if(include.isPublications()){
+                    log.trace("Including publications");
+                    investigation.getPublicationCollection().size();
+                }
+                if(include.isSamples()){
+                    log.trace("Including samples");
                     investigation.getSampleCollection().size();
+                }
+                if(include.isRoles()){
+                    log.trace("Including roles");
+                    //get role (this adds the role)
+                    try {
+                        GateKeeper.performAuthorisation(userId, investigation, AccessType.READ, manager);
+                    } catch (InsufficientPrivilegesException ex) {
+                        log.fatal("User has not got access to investigation that search has returned", ex);
+                    }
+                }
+                
+                boolean cascade = false; //do want to cascade to Dfs
+                if(include.isDatasetsAndDatafiles()){
+                    log.trace("Including Datasets And Datafiles");
                     investigation.getDatasetCollection().size();
                     filterDatasets(userId, investigation, true, manager);
-                    
-                    try {
-                        GateKeeper.performAuthorisation(userId, investigation, AccessType.READ, manager);
-                    } catch (InsufficientPrivilegesException ex) {
-                        log.fatal("User has not got access to investigation that search has returned", ex);
-                    }
-                }
-                // return datasets with these investigations
-            } else if(include.toString().equals(InvestigationInclude.DATASETS_ONLY.toString())){
-                for(Investigation investigation : investigations){
+                    cascade = true;
+                } else if(include.isDatasets()){
+                    log.trace("Including Datasets only");
                     investigation.getDatasetCollection().size();
-                    //now filter the datasets collection
                     filterDatasets(userId, investigation, false, manager);
                 }
-                // return sample with these investigations
-            } else if(include.toString().equals(InvestigationInclude.SAMPLES_ONLY.toString())){
-                for(Investigation investigation : investigations){
-                    investigation.getSampleCollection().size();
-                }
-                // return datasets and their datafiles with these investigations
-            } else if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString())){
-                for(Investigation investigation : investigations){
-                    investigation.getDatasetCollection().size();
-                    //now filter the datasets collection
-                    filterDatasets(userId, investigation, true,manager); //this will fetch the datafiles aswell
-                    
-                   /* for(Dataset dataset : investigation.getDatasetCollection()){
-                        dataset.getDatafileCollection().size();
-                        //now filter the datafiles collection
-                        filterDatafiles(userId, dataset, true, manager);
-                    }*/
-                }
-                // return keywords with these investigations
-            } else if(include.toString().equals(InvestigationInclude.KEYWORDS_ONLY.toString())){
-                for(Investigation investigation : investigations){
-                    //size invokes teh JPA to get the information
-                    investigation.getKeywordCollection().size();
-                }
-                // return c with these investigations
-            } else if(include.toString().equals(InvestigationInclude.ROLE_ONLY.toString())){
-                for(Investigation investigation : investigations){
-                    //get role (this adds the role
-                    try {
-                        GateKeeper.performAuthorisation(userId, investigation, AccessType.READ, manager);
-                    } catch (InsufficientPrivilegesException ex) {
-                        log.fatal("User has not got access to investigation that search has returned", ex);
-                    }   }
-                // return c with these investigations
-            }else if(include.toString().equals(InvestigationInclude.INVESTIGATORS_ONLY.toString())){
-                for(Investigation investigation : investigations){
-                    //size invokes teh JPA to get the information
-                    investigation.getInvestigatorCollection().size();
-                }
-                // return investigators and keywords with these investigations
-            } else if(include.toString().equals(InvestigationInclude.INVESTIGATORS_AND_KEYWORDS.toString())){
-                for(Investigation investigation : investigations){
-                    //size invokes the JPA to get the information
-                    investigation.getKeywordCollection().size();
-                    investigation.getInvestigatorCollection().size();
-                }
-            } else if(include.toString().equals(InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES.toString())){
-                for(Investigation investigation : investigations){
-                    //size invokes the JPA to get the information
-                    investigation.getKeywordCollection().size();
-                    investigation.getInvestigatorCollection().size();
-                    investigation.getSampleCollection().size();
-                    //get role (this adds the role
-                    try {
-                        GateKeeper.performAuthorisation(userId, investigation, AccessType.READ, manager);
-                    } catch (InsufficientPrivilegesException ex) {
-                        log.fatal("User has not got access to investigation that search has returned", ex);
-                    }
-                }
-            } else if(include.toString().equals(InvestigationInclude.ALL_EXCEPT_DATASETS_DATAFILES_AND_ROLES.toString())){
-                for(Investigation investigation : investigations){
-                    //size invokes the JPA to get the information
-                    investigation.getKeywordCollection().size();
-                    investigation.getInvestigatorCollection().size();
-                    investigation.getSampleCollection().size();
-                }
-            }else {
-                log.trace("No additional info requested.");
-            }
-            
-            //set the investigation includes in the class
-            //This is because of JAXWS, it would down load all of the relationships with out this workaround
-            // See in Investigation.getInvestigatorCollection_() method
-            for(Investigation investigation : investigations){
-                investigation.setInvestigationInclude(include);
-                log.trace("Setting investigation to include: "+include);
-                if(include.toString().equals(InvestigationInclude.DATASETS_AND_DATAFILES.toString()) || include.toString().equals(InvestigationInclude.ALL.toString())){
+                
+                //set the investigation includes in the class
+                //This is because of JAXWS, it would down load all of the relationships with out this workaround
+                // See in Investigation.getInvestigatorCollection_() method
+                if(include.isDatasetsAndDatafiles()){
                     for(Dataset dataset : investigation.getDatasetCollection()){
                         log.trace("Setting data sets to include: "+DatasetInclude.DATASET_FILES_AND_PARAMETERS);
                         dataset.setDatasetInclude(DatasetInclude.DATASET_FILES_AND_PARAMETERS);
                     }
                 }
+                
+                //now remove deleted items
+                try{
+                    investigation.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(cascade));
+                } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}
+                
             }
         }
     }
@@ -218,37 +175,32 @@ public class ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      */
     public static void getDatasetInformation(String userId, Collection<Dataset> datasets, DatasetInclude include, EntityManager manager){
-        
-        // now collect the information associated with the investigations requested
-        if(include.toString().equals(DatasetInclude.DATASET_FILES_ONLY.toString())){
-            for(Dataset dataset : datasets){
-                //size invokes the JPA to get the information, other wise the collections are null
-                dataset.getDatafileCollection().size();
-                //now filter the datafiles collection
-                filterDatafiles(userId, dataset, true, manager);
-            }
-        } else  if(include.toString().equals(DatasetInclude.DATASET_FILES_AND_PARAMETERS.toString())){
-            for(Dataset dataset : datasets){
-                //size invokes the JPA to get the information, other wise the collections are null
-                dataset.getDatafileCollection().size();
-                //now filter the datafiles collection
-                filterDatafiles(userId, dataset, true, manager);
-                
-                dataset.getDatasetParameterCollection().size();
-            }
-        } else  if(include.toString().equals(DatasetInclude.DATASET_PARAMETERS_ONLY.toString())){
-            for(Dataset dataset : datasets){
-                //size invokes the JPA to get the information, other wise the collections are null
-                dataset.getDatasetParameterCollection().size();
-            }
-        }
-        
-        //set the investigation includes in the class
-        //This is because of JAXWS, it would down load all of the relationships with out this workaround
-        // See in Dataset.getInvestigatorCollection_() method
         for(Dataset dataset : datasets){
+            //set the investigation includes in the class
+            //This is because of JAXWS, it would down load all of the relationships with out this workaround
+            // See in Dataset.getInvestigatorCollection_() method
             dataset.setDatasetInclude(include);
             log.trace("Setting data sets to include: "+include);
+            
+            // now collect the information associated with the investigations requested
+            if(include.isDatafiles()){                
+                 log.trace("Including datafiles");
+                 
+                //size invokes the JPA to get the information, other wise the collections are null
+                dataset.getDatafileCollection().size();
+                //now filter the datafiles collection
+                filterDatafiles(userId, dataset, true, manager);
+            }
+            if(include.isDatasetParameters()){
+                 log.trace("Including dataset parameters");
+                //size invokes the JPA to get the information, other wise the collections are null
+                dataset.getDatasetParameterCollection().size();
+            }
+            
+            //now remove deleted items
+            try{
+                dataset.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(true));
+            } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}
         }
     }
     
@@ -276,10 +228,6 @@ public class ManagerUtil {
         //now add the datasets to the investigation
         investigation.setDatasetCollection(datasetsAllowed);
         
-        //now remove deleted items
-        try{
-            investigation.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(cascade));
-        } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}
     }
     
     /**
@@ -299,14 +247,69 @@ public class ManagerUtil {
                 datafilesAllowed.add(datafile);
             } catch(Exception ignore){}
         }
-        log.debug("Adding "+datafilesAllowed.size()+" datafiles to "+dataset+" from a total of "+dataset.getDatafileCollection().size());
+        log.debug("Adding (allowed to read) "+datafilesAllowed.size()+" datafiles to "+dataset+" from a total of "+dataset.getDatafileCollection().size());
         //now add the datasets to the investigation
         dataset.setDatafileCollection(datafilesAllowed);
         
-        //now remove deleted items
-        try{
-            dataset.setCascade(Cascade.REMOVE_DELETED_ITEMS, Boolean.valueOf(cascade));
-        } catch(InsufficientPrivilegesException ignore){/**not going to thrown on Cascade.REMOVE_DELETED_ITEMS */}
+    }
+    
+    /**
+     * Filters stuff of deleted items
+     */
+    private static void filterKeywords(Investigation investigation){
+        log.trace("Filtering "+investigation+" of deleted keywords");
+        Collection<Keyword> noneDeleted = new ArrayList<Keyword>();
+        
+        for (Keyword keyword : noneDeleted) {
+            if(!keyword.isDeleted()) noneDeleted.add(keyword);
+        }
+        investigation.setKeywordCollection(noneDeleted);
+    }
+    
+    /**
+     * Filters stuff of deleted items
+     */
+    private static void filterPublications(Investigation investigation){
+        log.trace("Filtering "+investigation+" of deleted publications");
+        Collection<Publication> noneDeleted = new ArrayList<Publication>();
+        
+        for (Publication publication : noneDeleted) {
+            if(!publication.isDeleted()) noneDeleted.add(publication);
+        }
+        investigation.setPublicationCollection(noneDeleted);
+    }
+    
+    /**
+     * Filters stuff of deleted items
+     */
+    private static void filterInvestigators(Investigation investigation){
+        log.trace("Filtering "+investigation+" of deleted investigators");
+        Collection<Investigator> noneDeleted = new ArrayList<Investigator>();
+        
+        for (Investigator investigator : noneDeleted) {
+            if(!investigator.isDeleted()) noneDeleted.add(investigator);
+        }
+        investigation.setInvestigatorCollection(noneDeleted);
+    }
+    
+    /**
+     * Filters stuff of deleted items
+     */
+    private static void filterSamples(Investigation investigation){
+        log.trace("Filtering "+investigation+" of deleted samples");
+        Collection<Sample> noneDeleted = new ArrayList<Sample>();
+        
+        for (Sample sample : noneDeleted) {
+            if(!sample.isDeleted()) {
+                noneDeleted.add(sample);
+                Collection<SampleParameter> noneDeletedSP = new ArrayList<SampleParameter>();
+                for (SampleParameter sampleParameter : sample.getSampleParameterCollection()) {
+                    if(!sampleParameter.isDeleted()) noneDeletedSP.add(sampleParameter);
+                }
+                sample.setSampleParameterCollection(noneDeletedSP);
+            }
+        }
+        investigation.setSampleCollection(noneDeleted);
     }
     
     /////////////////////////////  End of Getting / Filtering element collections /////////////////////////////
