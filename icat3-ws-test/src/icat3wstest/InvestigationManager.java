@@ -27,15 +27,11 @@ public class InvestigationManager {
     /** Creates a new instance of SearchKeyword */
     public static void getInvestigation(String sid, Long id) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            Investigation investigation = port.getInvestigation(sid, id);
+            Investigation investigation = ICATSingleton.getInstance().getInvestigation(sid, id);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -55,11 +51,7 @@ public class InvestigationManager {
     
     public static void getInvestigations(String sid, Long id) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             List<Long> ids = new ArrayList<Long>();
@@ -67,7 +59,7 @@ public class InvestigationManager {
             //ids.add(id);
             
             // TODO process result here
-            List<Investigation> investigations = port.getInvestigationsIncludes(sid, ids, client.InvestigationInclude.ALL);
+            List<Investigation> investigations = ICATSingleton.getInstance().getInvestigationsIncludes(sid, ids, client.InvestigationInclude.ALL);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -119,22 +111,18 @@ public class InvestigationManager {
     
     public static Investigation createInvestigation(String sid, String name) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             Investigation investigation = new Investigation();
             investigation.setTitle(name);
             investigation.setInvNumber(""+new Random().nextInt());
             
-            List<InvestigationType> types = port.listInvestigationTypes(sid);
+            List<InvestigationType> types = ICATSingleton.getInstance().listInvestigationTypes(sid);
             investigation.setInvType(types.iterator().next());
             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            Investigation investigationCreated = port.createInvestigation(sid, investigation);
+            Investigation investigationCreated = ICATSingleton.getInstance().createInvestigation(sid, investigation);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -155,17 +143,13 @@ public class InvestigationManager {
     
     public static void updateInvestigation(String sid, Investigation investigation, String newName) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             investigation.setTitle(newName);
             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.modifyInvestigation(sid, investigation);
+            ICATSingleton.getInstance().modifyInvestigation(sid, investigation);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -185,15 +169,11 @@ public class InvestigationManager {
     
     public static void delete_undeleteInvestigation(String sid, Long id) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {            
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.deleteInvestigation(sid, id);
+            ICATSingleton.getInstance().deleteInvestigation(sid, id);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -213,15 +193,11 @@ public class InvestigationManager {
     
     public static void removeInvestigation(String sid, Long id) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.removeInvestigation(sid, id);
+            ICATSingleton.getInstance().removeInvestigation(sid, id);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

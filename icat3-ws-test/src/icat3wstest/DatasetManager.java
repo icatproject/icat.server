@@ -342,6 +342,31 @@ public class DatasetManager {
         }
     }
     
+    public static void setDatasetSample(String sid, Long datasetId , Long sampleId){
+        try { // Call Web Service Operation
+            client.ICATService service = new client.ICATService();
+            client.ICAT port = service.getICATPort();
+            // TODO initialize WS operation arguments here
+                      
+            long time = System.currentTimeMillis();
+            
+            // TODO process result here
+            port.setDataSetSample(sid, sampleId, datasetId);
+            
+            float totalTime = (System.currentTimeMillis() - time)/1000f;
+            
+            System.out.println("Result: setDatasetSample");
+            
+            System.out.println("\nTime taken: "+totalTime+" seconds");
+            System.out.println("--------------------------------------------------\n");
+            assert true;
+        } catch (Exception ex) {
+            System.out.println("Unable to setDatasetSample with SID "+sid);
+            System.out.println(ex);
+            assert false;
+        }
+    }
+    
     
     /**
      * @param args the command line arguments
@@ -350,7 +375,7 @@ public class DatasetManager {
         // getDataset(SID, DATASET_ID);
         // getDatasets(SID, DATASET_ID);
         
-        Dataset ds = createDataset(SID, "name for sid "+SID);
+      /*  Dataset ds = createDataset(SID, "name for sid "+SID);
         updateDataset(SID, ds, "new name of "+SID);  //this should fail with ICAT_ADMIN user
         delete_undeleteDataset(SID, ds.getId());
         delete_undeleteDataset(SID, ds.getId());
@@ -362,6 +387,8 @@ public class DatasetManager {
             delete_undeleteParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATASET_ID); //delete it
             delete_undeleteParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATASET_ID); //un delete it
             removeDatasetParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATASET_ID);  //should be false for none ICAT_ADMIN user
-        }        
+        }*/        
+        
+        setDatasetSample(SID, DATASET_ID, SAMPLE_ID); //false if facility acquired data
     }    
 }

@@ -26,15 +26,11 @@ public class ListSearch {
     /** Creates a new instance of SearchKeyword */
     public static void listDatasetStatus(String sid) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {                
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.DatasetStatus> result = port.listDatasetStatus(sid);
+            java.util.List<client.DatasetStatus> result = ICATSingleton.getInstance().listDatasetStatus(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -56,15 +52,11 @@ public class ListSearch {
     
     public static void listDatasetType(String sid) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.DatasetType> result = port.listDatasetTypes(sid);
+            java.util.List<client.DatasetType> result = ICATSingleton.getInstance().listDatasetTypes(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -86,15 +78,11 @@ public class ListSearch {
     
     public static void listInstruments(String sid) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Instrument> result = port.listInstruments(sid);
+            java.util.List<client.Instrument> result = ICATSingleton.getInstance().listInstruments(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -116,15 +104,11 @@ public class ListSearch {
     
     public static void listInvestigationTypes(String sid) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.InvestigationType> result = port.listInvestigationTypes(sid);
+            java.util.List<client.InvestigationType> result = ICATSingleton.getInstance().listInvestigationTypes(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -146,15 +130,11 @@ public class ListSearch {
     
     public static void listParameters(String sid) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Parameter> result = port.listParameters(sid);
+            java.util.List<client.Parameter> result = ICATSingleton.getInstance().listParameters(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -176,15 +156,11 @@ public class ListSearch {
     
     public static void listRoles(String sid) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.IcatRole> result = port.listRoles(sid);
+            java.util.List<client.IcatRole> result = ICATSingleton.getInstance().listRoles(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -206,15 +182,11 @@ public class ListSearch {
     
      public static void listDatafileFormats(String sid) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.DatafileFormat> result = port.listDatafileFormats(sid);
+            java.util.List<client.DatafileFormat> result = ICATSingleton.getInstance().listDatafileFormats(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

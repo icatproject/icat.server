@@ -25,18 +25,14 @@ public class InvestigationPublicationManager {
     
     public static Publication addPublication(String sid, String publicationName, Long investigationId) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             Publication publication = new Publication();
             publication.setFullReference("http://pub.com");
             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            Publication publicationAdded = port.addPublication(sid, publication, investigationId);
+            Publication publicationAdded = ICATSingleton.getInstance().addPublication(sid, publication, investigationId);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -56,18 +52,14 @@ public class InvestigationPublicationManager {
     
       public static void updatePublication(String sid, Publication publication, String newUrl) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             publication.setUrl(newUrl);
             publication.setFullReference(newUrl);
             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.modifyPublication(sid, publication);
+            ICATSingleton.getInstance().modifyPublication(sid, publication);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -88,15 +80,11 @@ public class InvestigationPublicationManager {
     
     public static void delete_undeletePublication(String sid, Long publicationId) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.deletePublication(sid, publicationId);
+            ICATSingleton.getInstance().deletePublication(sid, publicationId);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -116,15 +104,11 @@ public class InvestigationPublicationManager {
     
     public static void removePublication(String sid, Long publicationId) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.removePublication(sid, publicationId);
+            ICATSingleton.getInstance().removePublication(sid, publicationId);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

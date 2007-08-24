@@ -25,11 +25,7 @@ public class InvestigationKeywordManager {
     
     public static Keyword addKeyword(String sid, String keywordName, Long investigationId) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             Keyword keyword = new Keyword();
             KeywordPK keywordPK = new KeywordPK();
             keywordPK.setName(keywordName);
@@ -39,7 +35,7 @@ public class InvestigationKeywordManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.addKeyword(sid, keyword, investigationId);
+            ICATSingleton.getInstance().addKeyword(sid, keyword, investigationId);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -61,15 +57,11 @@ public class InvestigationKeywordManager {
     
     public static void delete_undeleteKeyword(String sid, KeywordPK PK) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.deleteKeyword(sid, PK);
+            ICATSingleton.getInstance().deleteKeyword(sid, PK);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -89,15 +81,11 @@ public class InvestigationKeywordManager {
     
     public static void removeKeyword(String sid, KeywordPK PK) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.removeKeyword(sid, PK);
+            ICATSingleton.getInstance().removeKeyword(sid, PK);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

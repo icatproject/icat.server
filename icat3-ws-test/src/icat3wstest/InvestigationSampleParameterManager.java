@@ -25,11 +25,7 @@ public class InvestigationSampleParameterManager {
     
     public static SampleParameter addSampleParameter(String sid, String name, String units, Long sampleId) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {            
             SampleParameterPK PK = new SampleParameterPK();
             PK.setSampleId(sampleId);
             PK.setName(name);
@@ -40,7 +36,7 @@ public class InvestigationSampleParameterManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            SampleParameter sampleParameterAdded = port.addSampleParameter(sid, sp, INVESTIGATION_ID);
+            SampleParameter sampleParameterAdded = ICATSingleton.getInstance().addSampleParameter(sid, sp, INVESTIGATION_ID);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -60,17 +56,13 @@ public class InvestigationSampleParameterManager {
     
       public static void updateSampleParameter(String sid, SampleParameter sampleParameter, String newDescription) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             sampleParameter.setDescription(newDescription);            
             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.modifySampleParameter(sid, sampleParameter);
+            ICATSingleton.getInstance().modifySampleParameter(sid, sampleParameter);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -91,11 +83,7 @@ public class InvestigationSampleParameterManager {
     
     public static void delete_undeleteSampleParameter(String sid, String name, String units, Long sampleId) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             SampleParameterPK PK = new SampleParameterPK();
             PK.setSampleId(sampleId);
             PK.setName(name);
@@ -104,7 +92,7 @@ public class InvestigationSampleParameterManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.deleteSampleParameter(sid, PK);
+            ICATSingleton.getInstance().deleteSampleParameter(sid, PK);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -124,11 +112,7 @@ public class InvestigationSampleParameterManager {
     
     public static void removeSampleParameter(String sid, String name, String units, Long sampleId) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
              SampleParameterPK PK = new SampleParameterPK();
             PK.setSampleId(sampleId);
             PK.setName(name);
@@ -137,7 +121,7 @@ public class InvestigationSampleParameterManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.removeSampleParameter(sid, PK);
+            ICATSingleton.getInstance().removeSampleParameter(sid, PK);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

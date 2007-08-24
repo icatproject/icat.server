@@ -25,18 +25,14 @@ public class DatafileSearch {
     /** Creates a new instance of SearchKeyword */
     public static void searchByRunNumber(String sid, String instrument, Float start, Float end) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             List<String> instruments = new ArrayList<String>();
             instruments.add(instrument);
             
             // TODO process result here
-            java.util.List<client.Datafile> result = port.searchByRunNumber(sid, instruments, start, end);
+            java.util.List<client.Datafile> result = ICATSingleton.getInstance().searchByRunNumber(sid, instruments, start, end);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

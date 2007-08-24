@@ -9,14 +9,9 @@
 
 package icat3wstest;
 
-import client.Datafile;
-import client.Dataset;
+
 import client.ElementType;
 import client.IcatAuthorisation;
-import client.Sample;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Random;
 import static icat3wstest.Constants.*;
 /**
@@ -28,15 +23,11 @@ public class ManagerUsers {
     /** Creates a new instance of SearchKeyword */
     public static void listInvestigationAuthorisations(String sid, Long investigationId) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // Get me all authorisation for investigation Id: investigationId
-            java.util.List<client.IcatAuthorisation> results = port.getAuthorisations(sid, investigationId, ElementType.INVESTIGATION);
+            java.util.List<client.IcatAuthorisation> results = ICATSingleton.getInstance().getAuthorisations(sid, investigationId, ElementType.INVESTIGATION);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -59,16 +50,13 @@ public class ManagerUsers {
     
     public static void listDatasetAuthorisations(String sid, Long datasetId) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
+        try { 
             
             long time = System.currentTimeMillis();
             
             // Get me all authorisation for dataset Id: datasetId
-            java.util.List<client.IcatAuthorisation> results = port.getAuthorisations(sid, datasetId, ElementType.DATASET);
-            //java.util.List<client.IcatAuthorisation> results = port.getAuthorisations(sid, datafileId, ElementType.DATAFILE); //or to list datafiles authorisations
+            java.util.List<client.IcatAuthorisation> results = ICATSingleton.getInstance().getAuthorisations(sid, datasetId, ElementType.DATASET);
+            //java.util.List<client.IcatAuthorisation> results = ICATSingleton.getInstance().getAuthorisations(sid, datafileId, ElementType.DATAFILE); //or to list datafiles authorisations
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -91,15 +79,11 @@ public class ManagerUsers {
     
     public static void listDatafileAuthorisations(String sid, Long datafileId) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {            
             long time = System.currentTimeMillis();
             
             // Get me all authorisation for dataset Id: datasetId
-            java.util.List<client.IcatAuthorisation> results = port.getAuthorisations(sid, datafileId, ElementType.DATAFILE);
+            java.util.List<client.IcatAuthorisation> results = ICATSingleton.getInstance().getAuthorisations(sid, datafileId, ElementType.DATAFILE);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -122,15 +106,11 @@ public class ManagerUsers {
     
     public static void addDatafileAuthorisations(String sid, Long datafileId, String userId, String role) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // Get me all authorisation for dataset Id: datasetId
-            port.addAuthorisation(sid, userId, role, datafileId, ElementType.DATAFILE);
+            ICATSingleton.getInstance().addAuthorisation(sid, userId, role, datafileId, ElementType.DATAFILE);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -150,15 +130,11 @@ public class ManagerUsers {
     
     public static IcatAuthorisation addDatasetAuthorisations(String sid, Long datasetId, String userId, String role) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {            
             long time = System.currentTimeMillis();
             
             // Get me all authorisation for dataset Id: datasetId
-            IcatAuthorisation icatAuthorisation  = port.addAuthorisation(sid, userId, role, datasetId, ElementType.DATASET);
+            IcatAuthorisation icatAuthorisation  = ICATSingleton.getInstance().addAuthorisation(sid, userId, role, datasetId, ElementType.DATASET);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -180,15 +156,11 @@ public class ManagerUsers {
     
     public static void removeDatasetAuthorisations(String sid, IcatAuthorisation icatAuthorisation) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // Get me all authorisation for dataset Id: datasetId
-            port.removeAuthorisation(sid, icatAuthorisation.getId());
+            ICATSingleton.getInstance().removeAuthorisation(sid, icatAuthorisation.getId());
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -208,15 +180,11 @@ public class ManagerUsers {
     
     public static void deleteDatasetAuthorisations(String sid, IcatAuthorisation icatAuthorisation) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // Get me all authorisation for dataset Id: datasetId
-            port.deleteAuthorisation(sid, icatAuthorisation.getId());
+            ICATSingleton.getInstance().deleteAuthorisation(sid, icatAuthorisation.getId());
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -236,15 +204,11 @@ public class ManagerUsers {
     
     public static void updateDatasetAuthorisations(String sid, IcatAuthorisation icatAuthorisation, String newRole) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // Get me all authorisation for dataset Id: datasetId
-            port.updateAuthorisation(sid, newRole, icatAuthorisation.getId());
+            ICATSingleton.getInstance().updateAuthorisation(sid, newRole, icatAuthorisation.getId());
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

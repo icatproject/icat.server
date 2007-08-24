@@ -20,16 +20,13 @@ public class KeywordSearch {
     /** Creates a new instance of SearchKeyword */
     public static void searchKeyword(String sid) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
+        try {
             
             long time = System.currentTimeMillis();
                         
             // TODO process result here
-            java.util.List<String> result = port.getKeywordsForUserMax(sid, 20); //search all users keywords, return max 20 results
-            //java.util.List<String> result = port.getKeywordsForUserStartWithMax(sid, "s", 20); 
+            java.util.List<String> result = ICATSingleton.getInstance().getKeywordsForUserMax(sid, 20); //search all users keywords, return max 20 results
+            //java.util.List<String> result = ICATSingleton.getInstance().getKeywordsForUserStartWithMax(sid, "s", 20); 
             // Search all users keywords that start with 's', return max 20 results
                        
             float totalTime = (System.currentTimeMillis() - time)/1000f;
@@ -53,16 +50,13 @@ public class KeywordSearch {
     
     public static void searchAllKeywords(String sid, KeywordType type) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
+        try {
             
             long time = System.currentTimeMillis();
             
             
             // TODO process result here
-            java.util.List<String> result = port.getAllKeywords(sid, type);
+            java.util.List<String> result = ICATSingleton.getInstance().getAllKeywords(sid, type);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

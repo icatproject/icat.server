@@ -27,15 +27,11 @@ public class DatafileManager {
     /** Creates a new instance of SearchKeyword */
     public static void getDatafile(String sid, Long id) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            Datafile datafile = port.getDatafile(sid, id);
+            Datafile datafile = ICATSingleton.getInstance().getDatafile(sid, id);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -59,11 +55,7 @@ public class DatafileManager {
     
     public static void getDatafiles(String sid, Long id) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             List<Long> ids = new ArrayList<Long>();
@@ -71,7 +63,7 @@ public class DatafileManager {
             //ids.add(id);
             
             // TODO process result here
-            List<Datafile> datafiles = port.getDatafiles(sid, ids);
+            List<Datafile> datafiles = ICATSingleton.getInstance().getDatafiles(sid, ids);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -95,11 +87,7 @@ public class DatafileManager {
     
     public static Datafile createDatafile(String sid, String name) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             Datafile df = new Datafile();
@@ -112,12 +100,12 @@ public class DatafileManager {
             df.setDatafileFormat(dff);*/
             
             //   Should be done with something like:
-            List<DatafileFormat> formats = port.listDatafileFormats(SID);
+            List<DatafileFormat> formats = ICATSingleton.getInstance().listDatafileFormats(SID);
             df.setDatafileFormat(formats.iterator().next());
             
             df.setName(name);
             
-            Datafile result = port.createDataFile(sid, df, DATASET_ID);
+            Datafile result = ICATSingleton.getInstance().createDataFile(sid, df, DATASET_ID);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -138,15 +126,11 @@ public class DatafileManager {
     }
     
     public static void delete_undeleteDatafile(String sid, Long id){
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.deleteDataFile(sid, id);
+            ICATSingleton.getInstance().deleteDataFile(sid, id);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -163,15 +147,11 @@ public class DatafileManager {
     }
     
     public static void removeDatafile(String sid, Long id){
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.removeDataFile(sid, id);
+            ICATSingleton.getInstance().removeDataFile(sid, id);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -189,16 +169,12 @@ public class DatafileManager {
     
     public static void updateDatafile(String sid, Datafile df, String newName) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             df.setName(newName);
             
-            port.modifyDataFile(sid, df);
+            ICATSingleton.getInstance().modifyDataFile(sid, df);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -219,11 +195,7 @@ public class DatafileManager {
     
     
     public static DatafileParameter addParameter(String sid, String name, String units, Long id){
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             DatafileParameterPK PK = new DatafileParameterPK();
             PK.setDatafileId(id);
             PK.setName(name);
@@ -234,7 +206,7 @@ public class DatafileManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            DatafileParameter dfpRetured = port.addDataFileParameter(sid, dfp, id);
+            DatafileParameter dfpRetured = ICATSingleton.getInstance().addDataFileParameter(sid, dfp, id);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -254,11 +226,7 @@ public class DatafileManager {
     }
     
     public static void delete_undeleteParameter(String sid, String name, String units, Long id){
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             DatafileParameterPK PK = new DatafileParameterPK();
             PK.setDatafileId(id);
             PK.setName(name);
@@ -267,7 +235,7 @@ public class DatafileManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.deleteDataFileParameter(sid, PK);
+            ICATSingleton.getInstance().deleteDataFileParameter(sid, PK);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -284,11 +252,7 @@ public class DatafileManager {
     }
     
     public static void removeDatafileParameter(String sid, String name, String units, Long id){
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             DatafileParameterPK PK = new DatafileParameterPK();
             PK.setDatafileId(id);
             PK.setName(name);
@@ -297,7 +261,7 @@ public class DatafileManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.removeDataFileParameter(sid, PK);
+            ICATSingleton.getInstance().removeDataFileParameter(sid, PK);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -314,17 +278,13 @@ public class DatafileManager {
     }
     
     public static void updateDatafileParameter(String sid, DatafileParameter dfp, String newDesc){
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             dfp.setDescription(newDesc);
             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.modifyDataFileParameter(sid, dfp);
+            ICATSingleton.getInstance().modifyDataFileParameter(sid, dfp);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

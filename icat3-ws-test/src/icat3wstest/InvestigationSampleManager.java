@@ -25,11 +25,7 @@ public class InvestigationSampleManager {
     
     public static Sample addSample(String sid, String instance, String name, Long investigationid) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             Sample sample = new Sample();
             sample.setInstance(instance);
             sample.setName(name);
@@ -38,7 +34,7 @@ public class InvestigationSampleManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            Sample sampleCreated = port.addSample(sid, sample, investigationid);
+            Sample sampleCreated = ICATSingleton.getInstance().addSample(sid, sample, investigationid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -58,17 +54,13 @@ public class InvestigationSampleManager {
     
     public static void updateSample(String sid, Sample sample, String newSafetyInformation) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             sample.setSafetyInformation(newSafetyInformation);
             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.modifySample(sid, sample);
+            ICATSingleton.getInstance().modifySample(sid, sample);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -89,15 +81,11 @@ public class InvestigationSampleManager {
     
     public static void delete_undeleteSample(String sid, Long sampleId) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.deleteSample(sid, sampleId);
+            ICATSingleton.getInstance().deleteSample(sid, sampleId);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -117,15 +105,11 @@ public class InvestigationSampleManager {
     
     public static void removeSample(String sid, Long sampleId) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.removeSample(sid, sampleId);
+            ICATSingleton.getInstance().removeSample(sid, sampleId);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

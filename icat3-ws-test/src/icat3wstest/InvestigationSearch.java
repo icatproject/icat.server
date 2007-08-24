@@ -22,17 +22,13 @@ public class InvestigationSearch {
     /** Creates a new instance of SearchKeyword */
     public static void searchMyInvestigations(String sid) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Investigation> result = port.getMyInvestigations(sid); //get my investigations, default limit to 500, include no other info
+            java.util.List<client.Investigation> result = ICATSingleton.getInstance().getMyInvestigations(sid); //get my investigations, default limit to 500, include no other info
             //java.util.List<client.Investigation> result =
-            //      port.getMyInvestigationsIncludesPagination(sid, InvestigationInclude.ALL, 3, 10);
+            //      ICATSingleton.getInstance().getMyInvestigationsIncludesPagination(sid, InvestigationInclude.ALL, 3, 10);
             // Find my investigations, include all info, bring back 3 to 10
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
@@ -56,16 +52,12 @@ public class InvestigationSearch {
     
     public static void searchAdvanced(String sid, AdvancedSearchDetails asd) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
             java.util.List<client.Investigation> result =
-                    port.searchByAdvancedPagination(sid, asd, 0, 440); //bring back first 440 results
+                    ICATSingleton.getInstance().searchByAdvancedPagination(sid, asd, 0, 440); //bring back first 440 results
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -88,20 +80,16 @@ public class InvestigationSearch {
     /** Creates a new instance of SearchKeyword */
     public static void searchKeyword(String sid, String keyword) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             java.util.List<java.lang.String> keywords = new ArrayList<String>();
             keywords.add(keyword);
             
             // TODO process result here
-            java.util.List<client.Investigation> result = port.searchByKeywords(sid, keywords);
+            java.util.List<client.Investigation> result = ICATSingleton.getInstance().searchByKeywords(sid, keywords);
             //java.util.List<client.Investigation> result =
-            //      port.searchByKeywordsPaginationFuzzyAndInclude(sid, keywords,
+            //      ICATSingleton.getInstance().searchByKeywordsPaginationFuzzyAndInclude(sid, keywords,
             //    InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES, true, 0, 20);
             // Search by keywords, include only investigation info (ie, investigators, keywords etc not datasets/datafiles)
             // using LIKE operator on keywords, bring back first 20 results
@@ -127,15 +115,11 @@ public class InvestigationSearch {
     /** Creates a new instance of SearchKeyword */
     public static void searchUserId(String sid, String userId) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Investigation> result = port.searchByUserID(sid, userId);
+            java.util.List<client.Investigation> result = ICATSingleton.getInstance().searchByUserID(sid, userId);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -159,15 +143,11 @@ public class InvestigationSearch {
     /** Creates a new instance of SearchKeyword */
     public static void searchSurname(String sid, String surname) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Investigation> result = port.searchByUserSurname(sid, surname);
+            java.util.List<client.Investigation> result = ICATSingleton.getInstance().searchByUserSurname(sid, surname);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

@@ -24,7 +24,7 @@ public class TestAll {
     public TestAll() throws Exception {
         
         //Login
-        SessionUtil.login(System.getProperty("user.name"), System.getProperty("user.password"));
+        String sid = SessionUtil.login(System.getProperty("user.name"), System.getProperty("user.password"));
         
         //Investiagtion searches
         InvestigationSearch.searchKeyword(SID,KEYWORD);
@@ -159,6 +159,21 @@ public class TestAll {
             InvestigationSampleParameterManager.delete_undeleteSampleParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, SAMPLE_ID); //undeleted SampleParameter
             InvestigationSampleParameterManager.removeSampleParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, SAMPLE_ID);
         }
+        
+        //Manager users
+        ManagerUsers.listInvestigationAuthorisations(SID, INVESTIGATION_ID);
+        ManagerUsers.listDatafileAuthorisations(SID, DATAFILE_ID);
+        
+        IcatAuthorisation icatAuthorisation = ManagerUsers.addDatasetAuthorisations(SID, DATASET_ID, "added"+new Random().nextInt(), "DOWNLOADER");
+        if(icatAuthorisation != null){
+            ManagerUsers.updateDatasetAuthorisations(SID, icatAuthorisation, "READER");
+            ManagerUsers.deleteDatasetAuthorisations(SID, icatAuthorisation); //delete
+            ManagerUsers.deleteDatasetAuthorisations(SID, icatAuthorisation); //undelete
+            ManagerUsers.listDatasetAuthorisations(SID, DATASET_ID);
+            ManagerUsers.removeDatasetAuthorisations(SID, icatAuthorisation);
+        }
+        
+        SessionUtil.logout(sid);
     }
     
     /**

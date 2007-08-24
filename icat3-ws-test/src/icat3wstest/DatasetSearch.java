@@ -22,15 +22,11 @@ public class DatasetSearch {
     /** Creates a new instance of SearchKeyword */
     public static Collection<Sample> searchBySampleName(String sid, String sampleName) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Sample> result = port.searchSamplesBySampleName(sid, sampleName);
+            java.util.List<client.Sample> result = ICATSingleton.getInstance().searchSamplesBySampleName(sid, sampleName);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -55,15 +51,11 @@ public class DatasetSearch {
     
     public static void searchDatasetsBySample(String sid, Sample sample) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Dataset> result = port.searchDatasetsBySample(sid, sample);
+            java.util.List<client.Dataset> result = ICATSingleton.getInstance().searchDatasetsBySample(sid, sample);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
