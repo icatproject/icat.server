@@ -24,7 +24,7 @@ public class TestAll {
     public TestAll() throws Exception {
         
         //Login
-        String sid = SessionUtil.login(System.getProperty("user.name"), System.getProperty("user.password"));
+        String sid = SessionUtil.login(System.getProperty("user.name"), System.getProperty("usersso.password"));
         
         //Investiagtion searches
         InvestigationSearch.searchKeyword(SID,KEYWORD);
