@@ -30,15 +30,11 @@ public class DatasetManager {
     /** Creates a new instance of SearchKeyword */
     public static void getDataset(String sid, Long id) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            Dataset dataset = port.getDatasetIncludes(sid, id, DatasetInclude.DATASET_FILES_AND_PARAMETERS);
+            Dataset dataset = ICATSingleton.getInstance().getDatasetIncludes(sid, id, DatasetInclude.DATASET_FILES_AND_PARAMETERS);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -67,11 +63,7 @@ public class DatasetManager {
     
     public static void getDatasets(String sid, Long id) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             List<Long> ids = new ArrayList<Long>();
@@ -79,7 +71,7 @@ public class DatasetManager {
             //ids.add(id);
             
             // TODO process result here
-            List<Dataset> datasets = port.getDatasets(sid, ids);
+            List<Dataset> datasets = ICATSingleton.getInstance().getDatasets(sid, ids);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -104,22 +96,18 @@ public class DatasetManager {
     
     public static Dataset createDataset(String sid, String name) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {            
             long time = System.currentTimeMillis();
             
             Dataset ds = new Dataset();
             
             //   Should be done with something like:
-            List<DatasetType> types = port.listDatasetTypes(SID);
+            List<DatasetType> types = ICATSingleton.getInstance().listDatasetTypes(SID);
             ds.setDatasetType(types.iterator().next());
             
             ds.setName(name);
             
-            Dataset result = port.createDataSet(sid, ds, INVESTIGATION_ID);
+            Dataset result = ICATSingleton.getInstance().createDataSet(sid, ds, INVESTIGATION_ID);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -140,15 +128,11 @@ public class DatasetManager {
     }
     
     public static void delete_undeleteDataset(String sid, Long id){
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.deleteDataSet(sid, id);
+            ICATSingleton.getInstance().deleteDataSet(sid, id);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -165,15 +149,11 @@ public class DatasetManager {
     }
     
     public static void removeDataset(String sid, Long id){
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.removeDataSet(sid, id);
+            ICATSingleton.getInstance().removeDataSet(sid, id);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -191,16 +171,12 @@ public class DatasetManager {
     
     public static void updateDataset(String sid, Dataset df, String newName) throws Exception {
         
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             long time = System.currentTimeMillis();
             
             df.setName(newName);
             
-            port.modifyDataSet(sid, df);
+            ICATSingleton.getInstance().modifyDataSet(sid, df);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -221,11 +197,7 @@ public class DatasetManager {
     
     
     public static DatasetParameter addParameter(String sid, String name, String units, Long id){
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             DatasetParameterPK PK = new DatasetParameterPK();
             PK.setDatasetId(id);
             PK.setName(name);
@@ -236,7 +208,7 @@ public class DatasetManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            DatasetParameter dfpRetured = port.addDataSetParameter(sid, dfp, id);
+            DatasetParameter dfpRetured = ICATSingleton.getInstance().addDataSetParameter(sid, dfp, id);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -256,11 +228,7 @@ public class DatasetManager {
     }
     
     public static void delete_undeleteParameter(String sid, String name, String units, Long id){
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             DatasetParameterPK PK = new DatasetParameterPK();
             PK.setDatasetId(id);
             PK.setName(name);
@@ -269,7 +237,7 @@ public class DatasetManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.deleteDataSetParameter(sid, PK);
+            ICATSingleton.getInstance().deleteDataSetParameter(sid, PK);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -286,11 +254,7 @@ public class DatasetManager {
     }
     
     public static void removeDatasetParameter(String sid, String name, String units, Long id){
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             DatasetParameterPK PK = new DatasetParameterPK();
             PK.setDatasetId(id);
             PK.setName(name);
@@ -299,7 +263,7 @@ public class DatasetManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.removeDataSetParameter(sid, PK);
+            ICATSingleton.getInstance().removeDataSetParameter(sid, PK);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -316,17 +280,13 @@ public class DatasetManager {
     }
     
     public static void updateDatasetParameter(String sid, DatasetParameter dfp, String newDesc){
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-            
+        try {             
             dfp.setDescription(newDesc);
             
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.modifyDataSetParameter(sid, dfp);
+            ICATSingleton.getInstance().modifyDataSetParameter(sid, dfp);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -343,15 +303,11 @@ public class DatasetManager {
     }
     
     public static void setDatasetSample(String sid, Long datasetId , Long sampleId){
-        try { // Call Web Service Operation
-            client.ICATService service = new client.ICATService();
-            client.ICAT port = service.getICATPort();
-            // TODO initialize WS operation arguments here
-                      
+        try {                       
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            port.setDataSetSample(sid, sampleId, datasetId);
+            ICATSingleton.getInstance().setDataSetSample(sid, sampleId, datasetId);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
