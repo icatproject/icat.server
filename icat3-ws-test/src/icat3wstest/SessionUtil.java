@@ -95,7 +95,7 @@ public class SessionUtil {
         // TODO code application logic here
         //login(System.getProperty("user.name"), System.getProperty("user.password"));
         String sid = loginLifetime(System.getProperty("user.name"), System.getProperty("usersso.password"), 2);
-        if(sid != null) logout(sid);
+       // if(sid != null) logout(sid);
     }
     
 }

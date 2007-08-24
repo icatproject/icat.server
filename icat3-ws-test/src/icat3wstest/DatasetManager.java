@@ -34,7 +34,8 @@ public class DatasetManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            Dataset dataset = ICATSingleton.getInstance().getDatasetIncludes(sid, id, DatasetInclude.DATASET_FILES_AND_PARAMETERS);
+            Dataset dataset = ICATSingleton.getInstance().getDatasetIncludes(sid, id, 
+                    DatasetInclude.DATASET_FILES_AND_PARAMETERS);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -328,7 +329,7 @@ public class DatasetManager {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        // getDataset(SID, DATASET_ID);
+         getDataset(SID, DATASET_ID);
         // getDatasets(SID, DATASET_ID);
         
       /*  Dataset ds = createDataset(SID, "name for sid "+SID);
@@ -345,6 +346,6 @@ public class DatasetManager {
             removeDatasetParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATASET_ID);  //should be false for none ICAT_ADMIN user
         }*/        
         
-        setDatasetSample(SID, DATASET_ID, SAMPLE_ID); //false if facility acquired data
+        //setDatasetSample(SID, DATASET_ID, SAMPLE_ID); //false if facility acquired data
     }    
 }

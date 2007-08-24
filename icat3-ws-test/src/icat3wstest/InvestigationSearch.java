@@ -26,7 +26,8 @@ public class InvestigationSearch {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Investigation> result = ICATSingleton.getInstance().getMyInvestigations(sid); //get my investigations, default limit to 500, include no other info
+            java.util.List<client.Investigation> result = ICATSingleton.getInstance().getMyInvestigationsIncludes(sid, 
+                    InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES); //get my investigations, default limit to 500, include no other info
             //java.util.List<client.Investigation> result =
             //      ICATSingleton.getInstance().getMyInvestigationsIncludesPagination(sid, InvestigationInclude.ALL, 3, 10);
             // Find my investigations, include all info, bring back 3 to 10
@@ -176,12 +177,12 @@ public class InvestigationSearch {
         // searchKeyword(SID, "calibration");
         // searchSurname(SID, "in");
         // searchUserId(SID, "gjd37");
+        searchMyInvestigations(SID);
+       // AdvancedSearchDetails asd = new AdvancedSearchDetails();
+       // asd.getKeywords().add(KEYWORD);
+       // asd.getInvestigators().add(SURNAME);
         
-        AdvancedSearchDetails asd = new AdvancedSearchDetails();
-        asd.getKeywords().add(KEYWORD);
-        asd.getInvestigators().add(SURNAME);
-        
-        InvestigationSearch.searchAdvanced(SID, asd);
+       // InvestigationSearch.searchAdvanced(SID, asd);
     }
     
 }

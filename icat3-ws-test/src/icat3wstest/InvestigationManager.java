@@ -11,6 +11,7 @@ package icat3wstest;
 import client.Datafile;
 import client.Dataset;
 import client.Investigation;
+import client.InvestigationInclude;
 import client.InvestigationType;
 import client.Investigator;
 import client.Keyword;
@@ -31,11 +32,12 @@ public class InvestigationManager {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            Investigation investigation = ICATSingleton.getInstance().getInvestigation(sid, id);
+            Investigation investigation = ICATSingleton.getInstance().getInvestigationIncludes(sid, id, 
+                    InvestigationInclude.ALL);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
-            System.out.println("  ID: "+investigation.getId()+", TITLE: "+investigation.getTitle());
+            System.out.println("  ID: "+investigation.getId()+", TITLE: "+investigation.getTitle()+" "+investigation.getIcatRole().getRole());
             
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");
@@ -94,7 +96,7 @@ public class InvestigationManager {
                 System.out.println("      Keywords: "+ investigation.getKeywordCollection().size());
                 System.out.println("      ------------");
                 for (Keyword kw : investigation.getKeywordCollection()) {
-                    System.out.println("         "+kw.getKeywordPK().getName());
+                    System.out.println("          "+kw.getKeywordPK().getName());
                 }
             }
             System.out.println("\nTime taken: "+totalTime+" seconds");
@@ -220,8 +222,8 @@ public class InvestigationManager {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        //getInvestigation(SID, INVESTIGATION_ID);
-        getInvestigations(SID, INVESTIGATION_ID);
+        getInvestigation(SID, INVESTIGATION_ID);
+        //getInvestigations(SID, INVESTIGATION_ID);
         
        /* Investigation investigation = createInvestigation(SID, "investigation for "+SID);
         if(investigation != null) {
