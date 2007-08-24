@@ -16,7 +16,7 @@ package icat3wstest;
 public class Constants {
     
     public static String END_POINT_ADDRESS = "http://localhost:8081/ICATService/ICAT";
-    public static String SID = "e3876fe3-6de3-4908-92ac-8668b26d68e7";
+    public static String SID = "907d8586-699e-48e8-a2b3-e5f83342937b";
     
     public static String KEYWORD = "calibration";
     public static String USER_ID = "gjd37";
