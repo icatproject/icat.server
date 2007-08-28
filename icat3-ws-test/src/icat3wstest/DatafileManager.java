@@ -310,6 +310,7 @@ public class DatafileManager {
         //getDatafiles(SID, INVESTIGATION_ID);
         
         Datafile df = createDatafile(SID, "name for sid "+SID);
+         delete_undeleteDatafile(SID, df.getId());
       /*  updateDatafile(SID, df, "new name of "+SID);  //this should fail with ICAT_ADMIN user
         delete_undeleteDatafile(SID, df.getId());
         delete_undeleteDatafile(SID, df.getId());

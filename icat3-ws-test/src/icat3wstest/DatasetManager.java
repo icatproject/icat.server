@@ -35,16 +35,16 @@ public class DatasetManager {
             
             // TODO process result here
             Dataset dataset = ICATSingleton.getInstance().getDatasetIncludes(sid, id, 
-                    DatasetInclude.DATASET_FILES_AND_PARAMETERS);
+                    DatasetInclude.DATASET_FILES_ONLY);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
             System.out.println("  ID: "+dataset.getId()+", TITLE: "+dataset.getName());
-            System.out.println("     Datasets: "+dataset.getDatafileCollection().size());
+            System.out.println("     Datafiles: "+dataset.getDatafileCollection().size());
             System.out.println("     -------------");
             for (Datafile datafile: dataset.getDatafileCollection()) {
                 System.out.println("       "+datafile.getName());
-                System.out.println("            Dataset parameters: "+datafile.getDatafileParameterCollection().size());
+                System.out.println("            Datafile parameters: "+datafile.getDatafileParameterCollection().size());
                 System.out.println("            ------------------------");
                 for (DatafileParameter datafileParameter : datafile.getDatafileParameterCollection()) {
                     System.out.println("               "+datafileParameter.getDatafileParameterPK().getName());
