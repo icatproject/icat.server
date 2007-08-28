@@ -58,7 +58,7 @@ public class TestDatafile extends BaseTestClassTX {
         
         checkDatafile(dataFileInserted);
         assertFalse("Deleted must be false", dataFileInserted.isDeleted());
-        assertFalse("facility acquired must be false", dataFileInserted.isFacilityAcquiredSet())
+        assertFalse("facility acquired must be false", dataFileInserted.isFacilityAcquiredSet());
         assertNotNull("Format cannot be null", dataFileInserted.getDatafileFormat());
     }
     
@@ -568,7 +568,7 @@ public class TestDatafile extends BaseTestClassTX {
             Collection<Datafile> dataFiles = (Collection<Datafile>)executeListResultCmd("select d from Datafile d where d.facilityAcquired = 'Y'");
             dataFile = dataFiles.iterator().next();
         } else {
-            Collection<Datafile> dataFiles = (Collection<Datafile>)executeListResultCmd("select d from Datafile d where d.facilityAcquired = 'Y' order by d.modTime desc");
+            Collection<Datafile> dataFiles = (Collection<Datafile>)executeListResultCmd("select d from Datafile d where d.facilityAcquired = 'N' order by d.modTime desc");
             dataFile = dataFiles.iterator().next();
             if(dataFile == null) throw new RuntimeException("No dataFile found");
         }

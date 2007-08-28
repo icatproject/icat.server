@@ -15,6 +15,7 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
+import uk.icat3.entity.DatafileFormat;
 import uk.icat3.entity.Instrument;
 import uk.icat3.util.BaseTestClassTX;
 import uk.icat3.exceptions.*;
