@@ -1582,7 +1582,7 @@ COMMENT ON TABLE ICAT_AUTHORISATION IS 'contains authorisation information perta
 COMMENT ON TABLE INVESTIGATOR IS 'A user can be in more than one investigation and and investigation can have more than one user. This is achieved by having facility_user_id and investigation_id as a composite primary key.'
 ;
 
-COMMENT ON TABLE PARAMETER IS 'This table contains information about the valid parameters that can be used to describe samples, datasets & datafiles.  puposefully this table has been setup such that a paramater is only stored using one unit systems (all conversion should occur elsewhere).'
+COMMENT ON TABLE PARAMETER IS 'This table contains information about the valid parameters that can be used to describe samples, datasets and datafiles.  puposefully this table has been setup such that a paramater is only stored using one unit systems (all conversion should occur elsewhere).'
 ;
 
 COMMENT ON TABLE PUBLICATION IS 'This can support pointing to supporting publications in any arbitary repository'
@@ -1717,7 +1717,7 @@ COMMENT ON COLUMN INVESTIGATION.INV_NUMBER IS 'this is the experiment number e.g
 COMMENT ON COLUMN INVESTIGATION.VISIT_ID IS 'Sometimes (e.g. in the case of DLS) investigation are consortium based i.e. carried out by a range of people from different institutions who manage their own time slot on the instrument. So in effect the investigation is multi-faceted where different groups should not have access to the data from other groups. In the case of ISIS and CLF this can be set to null or a constant value'
 ;
 
-COMMENT ON COLUMN INVESTIGATION.FACILITY_CYCLE IS 'facilities cycle - where this is defined as the time between two maintenance periods of the light/neutron/laser sources. this is usually a name - e.g. year & number'
+COMMENT ON COLUMN INVESTIGATION.FACILITY_CYCLE IS 'facilities cycle - where this is defined as the time between two maintenance periods of the light/neutron/laser sources. this is usually a name - e.g. year and number'
 ;
 
 COMMENT ON COLUMN INVESTIGATION.INSTRUMENT IS 'multimple instruments per approved proposal will now be different investigations with different instrument inside icat - this was requested by noth DLS and ISIS - rather than attach instrument at the dataset level. This is due in part to common searches being in terms of instrument and experiment number as oppose to title and drilling down..'
