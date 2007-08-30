@@ -9,6 +9,7 @@
 
 package uk.icat3.entity;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -36,7 +37,7 @@ import static uk.icat3.util.Util.*;
  * @author gjd37
  */
 @MappedSuperclass()
-public abstract class EntityBaseBean {
+public abstract class EntityBaseBean implements Serializable {
     /**
      * global static logger
      */

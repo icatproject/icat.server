@@ -373,8 +373,8 @@ public class InvestigationSearch extends ManagerUtil {
         if(advanDTO.hasDataFileParameters()){
             query = query.setParameter("datafileName", advanDTO.getDatafileName());
             query = query.setParameter("dataFileType", ElementType.DATAFILE);
-            query = query.setParameter("upperTime", advanDTO.getYearRangeEnd());
-            query = query.setParameter("lowerTime", advanDTO.getYearRangeStart());
+            query = query.setParameter("upperTime",advanDTO.getDateRangeEnd());
+            query = query.setParameter("lowerTime",advanDTO.getDateRangeStart());
         }
         
         //set upper run number

@@ -542,7 +542,7 @@ public class TestSearch {
         /*Collection<String> inv  =   new ArrayList<String>();
         inv.add("JAMES-JAMES");*/
         //  dto.setInvestigators(inv);
-        dto.setYearRangeStart(new Date(1,1,1/*System.currentTimeMillis()-900000000)*/));  //120 = 2020
+        dto.setDateRangeStart(new Date(1,1,1/*System.currentTimeMillis()-900000000)*/));  //120 = 2020
         //dto.setYearRangeEnd(new Date());
         dto.setSampleName("multidetecto");
        // dto.setInstruments(ins);

@@ -9,6 +9,7 @@
 
 package uk.icat3.entity;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -20,7 +21,7 @@ import uk.icat3.exceptions.ValidationException;
  *
  * @author gjd37
  */
-public class EntityPrimaryKeyBaseBean {
+public abstract class EntityPrimaryKeyBaseBean implements Serializable{
     
     protected static Logger log = Logger.getLogger(EntityPrimaryKeyBaseBean.class);
     

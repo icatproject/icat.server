@@ -9,6 +9,7 @@
 
 package uk.icat3.search;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import org.apache.log4j.Logger;
@@ -18,7 +19,7 @@ import uk.icat3.util.InvestigationInclude;
  *
  * @author gjd37
  */
-public class AdvancedSearchDetails {
+public class AdvancedSearchDetails implements Serializable{
     
     static Logger log = Logger.getLogger(AdvancedSearchDetails.class);
     
@@ -77,11 +78,11 @@ public class AdvancedSearchDetails {
     /**
      * datafile create date
      */
-    private Date yearRangeStart; // (datafile_CREATE_time)
+    private Date dateRangeStart; // (datafile_CREATE_time)
     /**
      * datafile create date
      */
-    private Date yearRangeEnd;// (datafile_CREATE_time)
+    private Date dateRangeEnd;// (datafile_CREATE_time)
     /**
      * List of keywords
      */
@@ -167,24 +168,24 @@ public class AdvancedSearchDetails {
         this.datafileName = datafileName;
     }
     
-    public Date getYearRangeStart() {
+    public Date getDateRangeStart() {
         //if null, pass in 1901
-        if(yearRangeStart == null) return new Date(1,1,1); // 1901/1/1
-        else return yearRangeStart;
+        if(dateRangeStart == null) return new Date(1,1,1); // 1901/1/1
+        else return dateRangeStart;
     }
     
-    public void setYearRangeStart(Date yearRangeStart) {
-        this.yearRangeStart = yearRangeStart;
+    public void setDateRangeStart(Date dateRangeStart) {
+        this.dateRangeStart = dateRangeStart;
     }
     
-    public Date getYearRangeEnd() {
+    public Date getDateRangeEnd() {
         //if null, pass in todays date
-        if(yearRangeEnd == null) return new Date();
-        return yearRangeEnd;
+        if(dateRangeEnd == null) return new Date();
+        return dateRangeEnd;
     }
     
-    public void setYearRangeEnd(Date yearRangeEnd) {
-        this.yearRangeEnd = yearRangeEnd;
+    public void setDateRangeEnd(Date dateRangeEnd) {
+        this.dateRangeEnd = dateRangeEnd;
     }
     
     public Collection<String> getKeywords() {
@@ -300,7 +301,7 @@ public class AdvancedSearchDetails {
     }
     
     public boolean hasDataFileParameters(){
-        if(yearRangeEnd != null || yearRangeStart != null || datafileName != null) return true;
+        if(dateRangeEnd != null || dateRangeStart != null || datafileName != null) return true;
         else return false;
     }
     
@@ -350,7 +351,7 @@ public class AdvancedSearchDetails {
             //so they have set run number, check something on investigation is set)
             if(hasInvestigationParameters() || getDatafileName() != null || hasInstruments()) return true;
             else throw new IllegalArgumentException("Must search investigation information, instruments or datafile name if searching with run numbers");
-        } else if(yearRangeEnd != null || yearRangeStart != null){
+        } else if(dateRangeEnd != null || dateRangeStart != null){
             //got to here run number is not set to check all others
             if(hasInvestigationParameters() || getDatafileName() != null || hasInstruments() ||
                     hasSample()) return true;
