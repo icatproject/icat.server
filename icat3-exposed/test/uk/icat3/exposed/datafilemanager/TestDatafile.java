@@ -428,7 +428,7 @@ public class TestDatafile extends BaseTestClassTX {
         icat.setUserSession(tul);
         
         try {
-            icat.updateDataFile(VALID_SESSION, validDatafile);
+            icat.modifyDataFile(VALID_SESSION, validDatafile);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'not found.'", ex.getMessage().contains("not found."));
