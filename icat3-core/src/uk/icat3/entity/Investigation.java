@@ -857,11 +857,21 @@ import uk.icat3.util.Queries;
             }
         }*/
         
-        //shift
-        /*if(getShiftCollection() != null){
+                 //if REMOVE_DELETED_ITEMS, check if investigationInclude wants keywords
+        if(type == Cascade.REMOVE_DELETED_ITEMS && investigationInclude.isShifts() ){
             //create new collection if remove deleted items
             Collection<Shift> shifts = new ArrayList<Shift>();
-         
+            
+            for(Shift shift : getShiftCollection()){
+                if(!shift.isDeleted()) shifts.add(shift);
+            }
+            
+            //now set the new dataset collection
+            log.trace("Setting new shiftCollection of size: "+shifts.size()+" because of deleted items from original size: "+getShiftCollection().size());
+            this.setShiftCollection(shifts);
+            
+        } else if(type != Cascade.REMOVE_DELETED_ITEMS && getShiftCollection() != null){
+            
             for(Shift shift : getShiftCollection()){
                 if(type == Cascade.DELETE) {
                     shift.setMarkedDeleted(deleted);
@@ -870,17 +880,9 @@ import uk.icat3.util.Queries;
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     shift.setModId(cascadeValue.toString());
                     shift.setCreateId(cascadeValue.toString());
-                }  else if(type == Cascade.REMOVE_DELETED_ITEMS){
-                    //remove all deleted items from the collection, ie only add ones that are not deleted
-                    if(!shift.isDeleted()) shifts.add(shift);
                 }
             }
-            if(type == Cascade.REMOVE_DELETED_ITEMS){
-                //now set the new dataset collection
-                log.trace("Setting new shiftCollection of size: "+shifts.size()+" because of deleted items from original size: "+getShiftCollection().size());
-                this.setShiftCollection(shifts);
-            }
-        }*/
+        }
         
         //publication
         //if REMOVE_DELETED_ITEMS, check if investigationInclude wants keywords

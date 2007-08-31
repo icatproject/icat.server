@@ -569,8 +569,8 @@ public class InvestigationSearch extends ManagerUtil {
         if(fuzzy){
             //fuzzy so LIKE
             for(String keyword : keywords){
-                if(i == 2) JPQL += " AND EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name  LIKE :"+(i++)+") ";
-                else  JPQL += " "+operator+" EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name  LIKE :"+(i++)+") ";
+                if(i == 2) JPQL += " AND EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name LIKE ?"+(i++)+") ";
+                else  JPQL += " "+operator+" EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name LIKE ?"+(i++)+") ";
                 
             }
         } else {

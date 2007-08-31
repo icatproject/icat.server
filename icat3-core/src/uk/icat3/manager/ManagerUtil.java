@@ -108,6 +108,10 @@ public class ManagerUtil {
                     log.trace("Including samples");
                     investigation.getSampleCollection().size();
                 }
+                if(include.isShifts()){
+                    log.trace("Including shifts");
+                    investigation.getShiftCollection().size();
+                }
                 if(include.isRoles()){
                     log.trace("Including roles");
                     //get role (this adds the role)
