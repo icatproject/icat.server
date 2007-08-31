@@ -99,9 +99,9 @@ public class Queries {
      */
     public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS = "Investigation.findByKewordsNative";
     
-    // Query =  LIST_ALL_USERS_INVESTIGATIONS_JPQL " + AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword1 AND kw.markedDeleted = 'N') AND EXISTS (SELECT kw2 FROM i.keywordCollection kw2 WHERE kw2.keywordPK.name LIKE :keyword1 AND kw2.markedDeleted = 'N')";
+    // Query =  LIST_ALL_USERS_INVESTIGATIONS_JPQL " + AND (EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword1 AND kw.markedDeleted = 'N') AND EXISTS (SELECT kw2 FROM i.keywordCollection kw2 WHERE kw2.keywordPK.name LIKE :keyword1 AND kw2.markedDeleted = 'N'))";
     public static final String INVESTIGATION_LIST_BY_KEYWORDS_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL ;
-    // " AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND "; //kw.keywordPK.name LIKE :keyword1 OR/AND kw.keywordPK.name LIKE :keyword2 )
+    // " AND (EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND "; //kw.keywordPK.name LIKE :keyword1 OR/AND kw.keywordPK.name LIKE :keyword2 ))
     
     // QUERY = INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY = "SELECT i from Investigation i WHERE i.markedDeleted = 'N' AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword1 OR/AND kw.keywordPK.name LIKE :keyword2 AND kw.markedDeleted = 'N')";
     public static final String INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY = "SELECT i from Investigation i WHERE i.markedDeleted = 'N' ";// AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND ";

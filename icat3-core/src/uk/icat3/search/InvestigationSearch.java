@@ -306,7 +306,7 @@ public class InvestigationSearch extends ManagerUtil {
             //add keywords section:
             // AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND kw.keywordPK.name LIKE :keyword1)
             
-            int i = 1;
+            int i = 1;             
             for(String keyword : advanDTO.getKeywords()){
                 JPQL += " AND EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name LIKE :keyword"+(i++)+") ";
             }
@@ -569,18 +569,18 @@ public class InvestigationSearch extends ManagerUtil {
         if(fuzzy){
             //fuzzy so LIKE
             for(String keyword : keywords){
-                if(i == 2) JPQL += " AND EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name LIKE ?"+(i++)+") ";
+                if(i == 2) JPQL += " AND (EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name LIKE ?"+(i++)+") ";
                 else  JPQL += " "+operator+" EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name LIKE ?"+(i++)+") ";
                 
             }
         } else {
             //none fuzzy, =
             for(String keyword : keywords){
-                if(i == 2) JPQL += " AND EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name = ?"+(i++)+") ";
+                if(i == 2) JPQL += " AND (EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name = ?"+(i++)+") ";
                 else  JPQL += " "+operator+" EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name = ?"+(i++)+") ";
             }
         }
-        
+        JPQL +=  ")"; //add final close braket
         log.info("DYNAMIC JPQL GENERATED: "+JPQL);
         
         //set query with investigation as entity object
