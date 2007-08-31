@@ -538,8 +538,7 @@ import uk.icat3.util.Queries;
     /**
      * Gets the shiftCollection of this Investigation.
      * @return the shiftCollection
-     */
-    @XmlTransient
+     */    
     public Collection<Shift> getShiftCollection() {
         return this.shiftCollection;
     }

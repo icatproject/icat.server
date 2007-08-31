@@ -152,7 +152,7 @@ import uk.icat3.util.ElementType;
     @XmlTransient
     @ICAT(merge=false)
     private Dataset dataset;
-    
+        
     @Transient
     @ICAT(merge=false, nullable=true)
     private transient Long datasetId;
@@ -444,8 +444,7 @@ import uk.icat3.util.ElementType;
     /**
      * Gets the datasetId of this Datafile.
      * @return the datasetId
-     */
-    @XmlTransient
+     */    
     public Long getDatasetId() {
         return this.datasetId;
     }
