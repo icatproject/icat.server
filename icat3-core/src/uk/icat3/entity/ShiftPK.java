@@ -23,7 +23,7 @@ import javax.persistence.TemporalType;
  * @author gjd37
  */
 @Embeddable
-public class ShiftPK implements Serializable {
+public class ShiftPK extends EntityPrimaryKeyBaseBean implements Serializable {
 
     @Column(name = "INVESTIGATION_ID", nullable = false)
     private Long investigationId;
