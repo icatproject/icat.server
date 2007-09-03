@@ -104,7 +104,7 @@ public abstract class EntityBaseBean implements Serializable {
     /**
      * Field to put from which facility this came from
      */
-   /* @Transient
+    /*@Transient
     @ICAT(merge=false, nullable=true)
     protected transient String facility;*/
     
