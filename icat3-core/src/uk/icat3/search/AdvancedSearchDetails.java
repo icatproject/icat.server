@@ -308,7 +308,7 @@ public class AdvancedSearchDetails implements Serializable{
     public boolean hasInvestigationParameters(){
         if(grantId  != null || backCatalogueInvestigatorString != null || experimentNumber != null ||
                 investigationAbstract != null || investigationName != null ||
-                investigationType != null || visitId != null) return true;
+                investigationType != null || visitId != null ) return true;
         else return false;
         
     }

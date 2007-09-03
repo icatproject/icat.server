@@ -20,7 +20,7 @@ import javax.persistence.Embeddable;
  * @author gjd37
  */
 @Embeddable
-public class StudyInvestigationPK implements Serializable {
+public class StudyInvestigationPK  extends EntityPrimaryKeyBaseBean implements Serializable {
 
     @Column(name = "STUDY_ID", nullable = false)
     private Long studyId;

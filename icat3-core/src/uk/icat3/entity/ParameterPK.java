@@ -19,7 +19,7 @@ import javax.persistence.Embeddable;
  * @author gjd37
  */
 @Embeddable
-public class ParameterPK implements Serializable {
+public class ParameterPK  extends EntityPrimaryKeyBaseBean implements Serializable {
 
     @Column(name = "NAME", nullable = false)
     private String name;

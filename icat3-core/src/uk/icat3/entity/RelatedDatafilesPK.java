@@ -20,7 +20,7 @@ import javax.persistence.Embeddable;
  * @author gjd37
  */
 @Embeddable
-public class RelatedDatafilesPK implements Serializable {
+public class RelatedDatafilesPK  extends EntityPrimaryKeyBaseBean implements Serializable {
 
     @Column(name = "SOURCE_DATAFILE_ID", nullable = false)
     private Long sourceDatafileId;
