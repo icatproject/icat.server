@@ -1032,8 +1032,8 @@ public class TestInvestigationSearch extends BaseTestClass{
         log.info("Testing invalid user, My Investigations: "+VALID_USER_FOR_INVESTIGATION);
         
         AdvancedSearchDetails asd = new AdvancedSearchDetails();
-        asd.setYearRangeStart(new Date(1,1,1));  //120 = 2020
-        asd.setYearRangeEnd(new Date());
+        asd.setDateRangeStart(new Date(1,1,1));  //120 = 2020
+        asd.setDateRangeEnd(new Date());
         
         //test with name
         Collection<Investigation> investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
