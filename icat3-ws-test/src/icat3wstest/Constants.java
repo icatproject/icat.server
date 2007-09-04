@@ -15,8 +15,9 @@ package icat3wstest;
  */
 public class Constants {
     
-    public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:8181/ICATService/ICAT";
-    public static String SID = "91fecdc5-bc92-46b8-b15a-a2408155c6ce";
+    //public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:8181/ICATService/ICAT";
+     public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:8181/ICATISISService/ICAT";
+    public static String SID = "79c14e19-bd9c-4e53-9b07-e174fced834f";
     
     public static String KEYWORD = "calibration";
     public static String USER_ID = "gjd37";

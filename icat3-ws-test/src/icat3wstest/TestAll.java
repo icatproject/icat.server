@@ -29,6 +29,8 @@ public class TestAll {
         //Investiagtion searches
         InvestigationSearch.searchKeyword(SID,KEYWORD);
         
+        InvestigationSearch.searchKeywordAll(SID,KEYWORD.substring(0, 4));
+        
         InvestigationSearch.searchUserId(SID,USER_ID);
         
         InvestigationSearch.searchSurname(SID,SURNAME);
@@ -63,6 +65,8 @@ public class TestAll {
         
         //keyword searches
         KeywordSearch.searchKeyword(SID);
+        KeywordSearch.searchKeywordType(SID, KeywordType.ALPHA);
+        KeywordSearch.searchKeywordType(SID, KeywordType.ALPHA_NUMERIC);
         KeywordSearch.searchAllKeywords(SID, KeywordType.ALL);
         KeywordSearch.searchAllKeywords(SID, KeywordType.ALPHA);
         KeywordSearch.searchAllKeywords(SID, KeywordType.ALPHA_NUMERIC);

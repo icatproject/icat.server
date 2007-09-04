@@ -48,6 +48,36 @@ public class KeywordSearch {
         }
     }
     
+      public static void searchKeywordType(String sid, KeywordType type) throws Exception {
+        
+        try {
+            
+            long time = System.currentTimeMillis();
+                        
+            // TODO process result here
+            java.util.List<String> result = ICATSingleton.getInstance().getKeywordsForUserType(sid, type); //search all users keywords, return max 20 results
+            //java.util.List<String> result = ICATSingleton.getInstance().getKeywordsForUserStartWithMax(sid, "s", 20); 
+            // Search all users keywords that start with 's', return max 20 results
+                       
+            float totalTime = (System.currentTimeMillis() - time)/1000f;
+            
+            System.out.println("Number of keywords for user "+type+" is "+result.size());
+            System.out.println("Results:");
+            for (String kw : result) {
+                System.out.println("    "+kw);
+            }
+            System.out.println("\nTime taken: "+totalTime+" seconds");
+            System.out.println("--------------------------------------------------\n");
+            assert true;
+        } catch (Exception ex) {
+            System.out.println("Unable to search user keywords "+type+" with SID "+sid);
+            System.out.println(ex);
+            assert false;
+            
+            // TODO handle custom exceptions here
+        }
+    }
+    
     public static void searchAllKeywords(String sid, KeywordType type) throws Exception {
         
         try {
@@ -79,9 +109,11 @@ public class KeywordSearch {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        searchKeyword(SID);
+        //searchKeyword(SID);
+        searchKeywordType(SID, KeywordType.ALL);
+        //searchKeywordType(SID, KeywordType.ALPHA_NUMERIC);
        // searchAllKeywords(SID, KeywordType.ALL);
-       // searchAllKeywords(SID, KeywordType.ALPHA);
+       // searchAllKeywords(SID, KeywordType.ALPHA );
        // searchAllKeywords(SID, KeywordType.ALPHA_NUMERIC);
     }
     

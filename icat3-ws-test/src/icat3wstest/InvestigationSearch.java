@@ -11,6 +11,7 @@ package icat3wstest;
 import client.AdvancedSearchDetails;
 import client.Investigation;
 import client.InvestigationInclude;
+import client.LogicalOperator;
 import java.util.ArrayList;
 import static icat3wstest.Constants.*;
 /**
@@ -37,7 +38,7 @@ public class InvestigationSearch {
             System.out.println("Number of MyInvestigations is "+result.size());
             System.out.println("Results:");
             for (Investigation investigation : result) {
-                System.out.println("  ID: "+investigation.getId()+", TITLE: "+investigation.getTitle());
+                System.out.println("  ID: "+investigation.getId()+", TITLE: "+investigation.getTitle() +" FACILITY: "+investigation.getFacility().getFacilityShortName());
             }
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");
@@ -113,6 +114,36 @@ public class InvestigationSearch {
         }
     }
     
+    public static void searchKeywordAll(String sid, String keyword) throws Exception {
+        
+        try {             
+            long time = System.currentTimeMillis();
+            
+            java.util.List<java.lang.String> keywords = new ArrayList<String>();
+            //keywords.add("fd");
+             keywords.add("shull");
+            // TODO process result here
+            java.util.List<client.Investigation> result = ICATSingleton.getInstance().searchByKeywordsAll
+                    (sid, keywords, LogicalOperator.OR, InvestigationInclude.INVESTIGATORS_AND_KEYWORDS, true, 0,100);
+           
+            float totalTime = (System.currentTimeMillis() - time)/1000f;
+            
+            System.out.println("Number of investigations with "+keyword+" as a keywordAll is "+result.size());
+            System.out.println("Results:");
+            for (Investigation investigation : result) {
+                System.out.println("  ID: "+investigation.getId()+", TITLE: "+investigation.getTitle());
+            }
+            System.out.println("\nTime taken: "+totalTime+" seconds");
+            System.out.println("--------------------------------------------------\n");
+            assert true;
+        } catch (Exception ex) {
+            System.out.println("Unable to search for keywordAll: "+keyword+" with SID "+sid);
+            System.out.println(ex);
+            assert false;
+            // TODO handle custom exceptions here
+        }
+    }
+    
     /** Creates a new instance of SearchKeyword */
     public static void searchUserId(String sid, String userId) throws Exception {
         
@@ -175,9 +206,10 @@ public class InvestigationSearch {
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
         // searchKeyword(SID, "calibration");
+       //   searchKeywordAll(SID, "cal");
         // searchSurname(SID, "in");
         // searchUserId(SID, "gjd37");
-        searchMyInvestigations(SID);
+       searchMyInvestigations(SID);
        // AdvancedSearchDetails asd = new AdvancedSearchDetails();
        // asd.getKeywords().add(KEYWORD);
        // asd.getInvestigators().add(SURNAME);
