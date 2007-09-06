@@ -20,29 +20,26 @@ public enum DatasetInclude {
     /**
      * list of data files
      */
-    DATASET_FILES_ONLY,
-    /**
-     * list of data parameters
-     */
+    
+    DATASET_AND_DATAFILES_ONLY,
     DATASET_PARAMETERS_ONLY,
-    /**
-     *  both data files and data parameters, all
-     */
-    DATASET_FILES_AND_PARAMETERS,
-    /**
-     * only the Dataset object with no default lazy information
-     */
+    DATASET_DATAFILES_AND_PARAMETERS,
     NONE;
     
     public boolean isDatafiles(){
-        if(this == DatasetInclude.DATASET_FILES_ONLY ||
-                this == DatasetInclude.DATASET_FILES_AND_PARAMETERS) return true;
+        if(this == DatasetInclude.DATASET_AND_DATAFILES_ONLY ||
+                this == DatasetInclude.DATASET_DATAFILES_AND_PARAMETERS) return true;
+        else return false;
+    }
+    
+    public boolean isDatafilesAndParameters(){
+        if(this == DatasetInclude.DATASET_DATAFILES_AND_PARAMETERS) return true;
         else return false;
     }
     
     public boolean isDatasetParameters(){
         if(this == DatasetInclude.DATASET_PARAMETERS_ONLY ||
-                this == DatasetInclude.DATASET_FILES_AND_PARAMETERS  ) return true;
+                this == DatasetInclude.DATASET_DATAFILES_AND_PARAMETERS  ) return true;
         else return false;
     }    
   

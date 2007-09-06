@@ -285,9 +285,7 @@ import uk.icat3.util.Queries;
      */
     @XmlElement(name="datasetParameterCollection")
     private Collection<DatasetParameter> getDatasetParameterCollection_() {
-        if(datasetInclude.toString().equals(DatasetInclude.DATASET_FILES_AND_PARAMETERS.toString())){
-            return this.datasetParameterCollection;
-        } else if(datasetInclude.toString().equals(DatasetInclude.DATASET_PARAMETERS_ONLY.toString())){
+        if(datasetInclude.isDatasetParameters()){
             return this.datasetParameterCollection;
         }  else return null;
     }
@@ -334,9 +332,7 @@ import uk.icat3.util.Queries;
      */
     @XmlElement(name="datafileCollection")
     private Collection<Datafile> getDatafileCollection_() {
-        if(datasetInclude.toString().equals(DatasetInclude.DATASET_FILES_AND_PARAMETERS.toString())){
-            return this.datafileCollection;
-        } else if(datasetInclude.toString().equals(DatasetInclude.DATASET_FILES_ONLY.toString())){
+        if(datasetInclude.isDatafiles()){
             return this.datafileCollection;
         }  else return null;
     }
@@ -445,7 +441,7 @@ import uk.icat3.util.Queries;
         }
         
         //datafiles
-        if(type == Cascade.REMOVE_DELETED_ITEMS && datasetInclude.isDatasetParameters() ){
+        if(type == Cascade.REMOVE_DELETED_ITEMS && datasetInclude.isDatafiles() ){
             //create new collection if remove deleted items
             Collection<Datafile> datafiles = new ArrayList<Datafile>();
             

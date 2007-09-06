@@ -38,6 +38,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import org.apache.log4j.Logger;
@@ -46,6 +47,7 @@ import uk.icat3.exceptions.ValidationException;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
+import uk.icat3.util.DatafileInclude;
 import uk.icat3.util.ElementType;
 
 /**
@@ -74,7 +76,7 @@ import uk.icat3.util.ElementType;
     
     ////Added searches for ICAT3 API
     //@NamedQuery(name = "Datafile.findByRunNumber", query = "SELECT d FROM Datafile d WHERE d.datasetId.investigationId.investigatorCollection.investigatorPK.facilityUserId = :userId AND d.datasetId.investigationId.instrument.name = :instrument AND d.datafileParameterCollection.stringValue = 'run_number' AND d.datafileParameterCollection.numericValue BETWEEN :lower AND :upper")
-//    @NamedQuery(name = "Datafile.findByRunNumber", query = "SELECT d FROM Datafile d WHERE   d.datafileParameterCollection.stringValue = 'run_number' AND d.datafileParameterCollection.numericValue BETWEEN :lower AND :upper")
+    //    @NamedQuery(name = "Datafile.findByRunNumber", query = "SELECT d FROM Datafile d WHERE   d.datafileParameterCollection.stringValue = 'run_number' AND d.datafileParameterCollection.numericValue BETWEEN :lower AND :upper")
 })
         @NamedNativeQueries({
     //Added searches for ICAT3 API
@@ -152,13 +154,16 @@ import uk.icat3.util.ElementType;
     @XmlTransient
     @ICAT(merge=false)
     private Dataset dataset;
-        
+    
     @Transient
     @ICAT(merge=false, nullable=true)
     private transient Long datasetId;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
     private Collection<DatafileParameter> datafileParameterCollection;
+    
+    private transient DatafileInclude datafileInclude = DatafileInclude.ALL;
+    
     
     /** Creates a new instance of Datafile */
     public Datafile() {
@@ -380,6 +385,7 @@ import uk.icat3.util.ElementType;
      * Gets the relatedDatafilesCollection of this Datafile.
      * @return the relatedDatafilesCollection
      */
+    @XmlTransient
     public Collection<RelatedDatafiles> getRelatedDatafilesCollection() {
         return this.relatedDatafilesCollection;
     }
@@ -389,6 +395,23 @@ import uk.icat3.util.ElementType;
      * @param relatedDatafilesCollection the new relatedDatafilesCollection
      */
     public void setRelatedDatafilesCollection(Collection<RelatedDatafiles> relatedDatafilesCollection) {
+        this.relatedDatafilesCollection = relatedDatafilesCollection;
+    }
+    
+    /**
+     * This method is used by JAXWS to map to datasetParameterCollection.  Depending on what the include is
+     * set to depends on what is returned to JAXWS and serialised into XML.  This is because without
+     * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+     * DB hits and serialisation).
+     */
+    @XmlElement(name="relatedDatafilesCollection")
+    private Collection<RelatedDatafiles> getRelatedDatafilesCollection_() {
+        if(datafileInclude.isRelatedDatafiles()){
+            return this.relatedDatafilesCollection;
+        }  else return null;
+    }
+    
+    private void setRelatedDatafilesCollection_(Collection<RelatedDatafiles> relatedDatafilesCollection) {
         this.relatedDatafilesCollection = relatedDatafilesCollection;
     }
     
@@ -444,7 +467,7 @@ import uk.icat3.util.ElementType;
     /**
      * Gets the datasetId of this Datafile.
      * @return the datasetId
-     */    
+     */
     public Long getDatasetId() {
         return this.datasetId;
     }
@@ -461,6 +484,7 @@ import uk.icat3.util.ElementType;
      * Gets the datafileParameterCollection of this Datafile.
      * @return the datafileParameterCollection
      */
+    @XmlTransient
     public Collection<DatafileParameter> getDatafileParameterCollection() {
         return this.datafileParameterCollection;
     }
@@ -470,6 +494,23 @@ import uk.icat3.util.ElementType;
      * @param datafileParameterCollection the new datafileParameterCollection
      */
     public void setDatafileParameterCollection(Collection<DatafileParameter> datafileParameterCollection) {
+        this.datafileParameterCollection = datafileParameterCollection;
+    }
+    
+    /**
+     * This method is used by JAXWS to map to datasetParameterCollection.  Depending on what the include is
+     * set to depends on what is returned to JAXWS and serialised into XML.  This is because without
+     * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+     * DB hits and serialisation).
+     */
+    @XmlElement(name="datafileParameterCollection")
+    private Collection<DatafileParameter> getDatafileParameterCollection_() {
+        if(datafileInclude.isDatafileParameters()){
+            return this.datafileParameterCollection;
+        }  else return null;
+    }
+    
+    private void setDatafileParameterCollection_(Collection<DatafileParameter> datafileParameterCollection) {
         this.datafileParameterCollection = datafileParameterCollection;
     }
     
@@ -532,10 +573,19 @@ import uk.icat3.util.ElementType;
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
         }
         
-        //data file parameters         
-        if(getDatafileParameterCollection() != null){
+        //data file parameters
+        if(type == Cascade.REMOVE_DELETED_ITEMS && datafileInclude.isDatafileParameters() ){
             //create new collection if remove deleted items
             Collection<DatafileParameter> datafileparameters = new ArrayList<DatafileParameter>();
+            
+            for(DatafileParameter datafileParameter : getDatafileParameterCollection()){
+                if(!datafileParameter.isDeleted()) datafileparameters.add(datafileParameter);
+            }
+            //now set the new dataset collection
+            log.trace("Setting new datafileparameters of size: "+datafileparameters.size()+" because of deleted items from original size: "+getDatafileParameterCollection().size());
+            this.setDatafileParameterCollection(datafileparameters);
+        }
+        if(type != Cascade.REMOVE_DELETED_ITEMS &&  getDatafileParameterCollection() != null){
             
             for(DatafileParameter datafileParameter : getDatafileParameterCollection()){
                 if(type == Cascade.DELETE) {
@@ -546,41 +596,36 @@ import uk.icat3.util.ElementType;
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     datafileParameter.setModId(cascadeValue.toString());
                     datafileParameter.setCreateId(cascadeValue.toString());
-                } else if(type == Cascade.REMOVE_DELETED_ITEMS){
-                    //remove all deleted items from the collection, ie only add ones that are not deleted
-                    if(!datafileParameter.isDeleted()) datafileparameters.add(datafileParameter);
                 }
-            }
-            if(type == Cascade.REMOVE_DELETED_ITEMS){
-                //now set the new dataset collection
-                log.trace("Setting new datafileparameters of size: "+datafileparameters.size()+" because of deleted items from original size: "+getDatafileParameterCollection().size());
-                this.setDatafileParameterCollection(datafileparameters);
             }
         }
         
         //relatedDatafiles
-        if(getRelatedDatafilesCollection() != null){
+        if(type == Cascade.REMOVE_DELETED_ITEMS && datafileInclude.isRelatedDatafiles() ){
+            
             //create new collection if remove deleted items
             Collection<RelatedDatafiles> relatedDatafiles = new ArrayList<RelatedDatafiles>();
+            
+            for(RelatedDatafiles relatedDatafile : getRelatedDatafilesCollection()){
+                //remove all deleted items from the collection, ie only add ones that are not deleted
+                if(!relatedDatafile.isDeleted()) relatedDatafiles.add(relatedDatafile);
+            }
+            //now set the new dataset collection
+            log.trace("Setting new relatedDatafiles of size: "+relatedDatafiles.size()+" because of deleted items from original size: "+getRelatedDatafilesCollection().size());
+            this.setRelatedDatafilesCollection(relatedDatafiles);            
+        }
+        if(type != Cascade.REMOVE_DELETED_ITEMS &&  getRelatedDatafilesCollection() != null){
             
             for(RelatedDatafiles relatedDatafile : getRelatedDatafilesCollection()){
                 if(type == Cascade.DELETE) {
                     relatedDatafile.setMarkedDeleted(deleted);
                     relatedDatafile.setModId(managerValue.toString());
                 } else if(type == Cascade.MOD_ID) relatedDatafile.setModId(cascadeValue.toString());
-                 else if(type == Cascade.FACILITY_ACQUIRED) relatedDatafile.setFacilityAcquired(facilityAcquired);              
+                else if(type == Cascade.FACILITY_ACQUIRED) relatedDatafile.setFacilityAcquired(facilityAcquired);
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     relatedDatafile.setModId(cascadeValue.toString());
                     relatedDatafile.setCreateId(cascadeValue.toString());
-                }else if(type == Cascade.REMOVE_DELETED_ITEMS){
-                    //remove all deleted items from the collection, ie only add ones that are not deleted
-                    if(!relatedDatafile.isDeleted()) relatedDatafiles.add(relatedDatafile);
                 }
-            }
-            if(type == Cascade.REMOVE_DELETED_ITEMS){
-                //now set the new dataset collection
-                log.trace("Setting new relatedDatafiles of size: "+relatedDatafiles.size()+" because of deleted items from original size: "+getRelatedDatafilesCollection().size());
-                this.setRelatedDatafilesCollection(relatedDatafiles);
             }
         }
         
@@ -606,11 +651,11 @@ import uk.icat3.util.ElementType;
             //only check if the value of deleted is different the one wanting to be changed to
             if(this.isDeleted() != ((Boolean)cascadeValue).booleanValue()){
                 GateKeeper.performAuthorisation(managerValue.toString(), this, AccessType.DELETE, manager);
-                this.setMarkedDeleted(deleted);               
+                this.setMarkedDeleted(deleted);
                 this.setModId(managerValue.toString());
             }
         } else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
-         else if(type == Cascade.FACILITY_ACQUIRED) this.setFacilityAcquired(facilityAcquired);            
+        else if(type == Cascade.FACILITY_ACQUIRED) this.setFacilityAcquired(facilityAcquired);
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
             this.setModId(cascadeValue.toString());
             this.setCreateId(cascadeValue.toString());
@@ -711,5 +756,13 @@ import uk.icat3.util.ElementType;
     public void postLoad(){
         if(datasetId == null) datasetId = getDataset().getId();
         // super.postLoad();
+    }
+    
+    public DatafileInclude getDatafileInclude() {
+        return datafileInclude;
+    }
+    
+    public void setDatafileInclude(DatafileInclude datafileInclude) {
+        this.datafileInclude = datafileInclude;
     }
 }

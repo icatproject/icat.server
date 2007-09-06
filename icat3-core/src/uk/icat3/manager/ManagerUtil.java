@@ -11,8 +11,6 @@ package uk.icat3.manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Random;
-import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -39,9 +37,9 @@ import uk.icat3.exceptions.ValidationException;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
+import uk.icat3.util.DatafileInclude;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
-import uk.icat3.util.IcatRoles;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.Queries;
 
@@ -137,10 +135,25 @@ public class ManagerUtil {
                 //set the investigation includes in the class
                 //This is because of JAXWS, it would down load all of the relationships with out this workaround
                 // See in Investigation.getInvestigatorCollection_() method
-                if(include.isDatasetsAndDatafiles()){
+                if(include.isDatasetsAndDatafiles() && !include.isDatasetsDatafilesAndParameters()){
                     for(Dataset dataset : investigation.getDatasetCollection()){
-                        log.trace("Setting data sets to include: "+DatasetInclude.DATASET_FILES_AND_PARAMETERS);
-                        dataset.setDatasetInclude(DatasetInclude.DATASET_FILES_AND_PARAMETERS);
+                        log.trace("Setting data sets to include: "+DatasetInclude.DATASET_AND_DATAFILES_ONLY);
+                        dataset.setDatasetInclude(DatasetInclude.DATASET_AND_DATAFILES_ONLY);
+                        for (Datafile datafile : dataset.getDatafileCollection()) {
+                            log.trace("Setting data file to include: "+DatafileInclude.NONE);
+                            datafile.setDatafileInclude(DatafileInclude.NONE);
+                        }
+                    }
+                }
+                //override above if only want datafiles and not its parameters
+                else {
+                    for(Dataset dataset : investigation.getDatasetCollection()){
+                        log.trace("Setting data sets to include: "+DatasetInclude.DATASET_DATAFILES_AND_PARAMETERS);
+                        dataset.setDatasetInclude(DatasetInclude.DATASET_DATAFILES_AND_PARAMETERS);
+                        for (Datafile datafile : dataset.getDatafileCollection()) {
+                            log.trace("Setting data file to include: "+DatafileInclude.ALL);
+                            datafile.setDatafileInclude(DatafileInclude.ALL);
+                        }
                     }
                 }
                 
@@ -187,18 +200,23 @@ public class ManagerUtil {
             log.trace("Setting data sets to include: "+include);
             
             // now collect the information associated with the investigations requested
-            if(include.isDatafiles()){                
-                 log.trace("Including datafiles");
-                 
+            if(include.isDatafiles()){
+                log.trace("Including datafiles");
+                
                 //size invokes the JPA to get the information, other wise the collections are null
                 dataset.getDatafileCollection().size();
                 //now filter the datafiles collection
                 filterDatafiles(userId, dataset, true, manager);
-            }
-            if(include.isDatasetParameters()){
-                 log.trace("Including dataset parameters");
-                //size invokes the JPA to get the information, other wise the collections are null
-                dataset.getDatasetParameterCollection().size();
+            }         
+            
+            for (Datafile datafile : dataset.getDatafileCollection()) {
+                if(include.isDatafilesAndParameters()){
+                    log.trace("Setting data file to include: "+DatafileInclude.ALL);
+                    datafile.setDatafileInclude(DatafileInclude.ALL);
+                } else {
+                    log.trace("Setting data file to include: "+DatafileInclude.NONE);
+                    datafile.setDatafileInclude(DatafileInclude.NONE);
+                }
             }
             
             //now remove deleted items
@@ -341,7 +359,7 @@ public class ManagerUtil {
         if(primaryKey == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+"[id:"+primaryKey+"] not found.");
         
         T object = manager.find(entityClass, primaryKey);
-      
+        
         if(object == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+"[id:"+primaryKey+"] not found.");
         //if dont want to find deleted items and it is deleted then throw exception
         if(((EntityBaseBean)object).isDeleted() && !findDeleted){

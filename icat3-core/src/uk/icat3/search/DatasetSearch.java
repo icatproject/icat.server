@@ -113,7 +113,7 @@ public class DatasetSearch {
         }
         
         //need to filter out datafiles
-        ManagerUtil.getDatasetInformation(userId, datasetsPermission, DatasetInclude.DATASET_FILES_AND_PARAMETERS, manager);
+        ManagerUtil.getDatasetInformation(userId, datasetsPermission,DatasetInclude.DATASET_DATAFILES_AND_PARAMETERS, manager);
         
         return datasetsPermission;
     }

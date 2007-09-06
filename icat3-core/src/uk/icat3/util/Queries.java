@@ -466,5 +466,5 @@ public class Queries {
     /**
      * Max number of returned items in a collection
      */
-    public static int MAX_QUERY_RESULTSET = 500;
+    public static int MAX_QUERY_RESULTSET = 200;
 }
