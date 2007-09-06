@@ -23,6 +23,10 @@ public enum Cascade {
      * Mod Id
      */
     MOD_ID,
+     /**
+     * Facility Acquired
+     */
+    FACILITY_ACQUIRED,
     /**
      * Create Id
      */

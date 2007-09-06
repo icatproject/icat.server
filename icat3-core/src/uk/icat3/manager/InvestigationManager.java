@@ -11,12 +11,14 @@ package uk.icat3.manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.IcatAuthorisation;
+import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.Keyword;
@@ -307,11 +309,17 @@ public class InvestigationManager extends ManagerUtil {
         investigation.setFacility(getFacility(manager));
         
         //check user has update access
-        GateKeeper.performAuthorisation(userId, investigation, AccessType.CREATE, manager);
+        IcatRole role = GateKeeper.performAuthorisation(userId, investigation, AccessType.CREATE, manager);
         
         //new dataset, set createid
         investigation.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
         investigation.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
+        
+        //now check for facility acquired, if user is icat_admin,set true, if not, its automatically set to false
+        if(role.isIcatAdminRole()){
+            log.info("Role for "+investigation+" is ICAT_ADMIN so setting to facility acquired true");
+            investigation.setCascade(Cascade.FACILITY_ACQUIRED, Boolean.TRUE);
+        }
         
         //check if valid investigation
         investigation.isValid(manager);
@@ -323,11 +331,11 @@ public class InvestigationManager extends ManagerUtil {
         manager.persist(investigation);
         
         //need to add a another row for creating datasets for this investigation
-        IcatAuthorisation IcatAuthorisationChild = persistAuthorisation(userId, userId, getRole(IcatRoles.CREATOR.toString(), manager),
+        IcatAuthorisation IcatAuthorisationChild = persistAuthorisation(userId, userId, role,
                 ElementType.DATASET, null,
                 ElementType.INVESTIGATION, investigation.getId(), null, manager);
         //add new creator role to investigation for the user creating the investigation
-        persistAuthorisation(userId, userId, getRole(IcatRoles.CREATOR.toString(), manager),
+        persistAuthorisation(userId, userId, role,
                 ElementType.INVESTIGATION, investigation.getId(),
                 null, null, IcatAuthorisationChild.getId(), manager);
         
@@ -624,8 +632,14 @@ public class InvestigationManager extends ManagerUtil {
             publication.isValid(manager);
             
             //check user has delete access
-            GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
-             
+            IcatRole role = GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
+            
+            //now check for facility acquired, if user is icat_admin,set true, if not, its automatically set to false
+            if(role.isIcatAdminRole()){
+                log.info("Role for "+object+" is ICAT_ADMIN so setting to facility acquired true");
+                object.setFacilityAcquiredSet(true);
+            }
+            
             try {
                 //check investigator not already added
                 Publication publicationManaged = findObject(Publication.class, publication.getId(), manager);
@@ -634,7 +648,7 @@ public class InvestigationManager extends ManagerUtil {
                 throw new ValidationException(publicationManaged+" is not unique");
                 //}
             } catch (NoSuchObjectFoundException ex) {
-                //not already in DB so add               
+                //not already in DB so add
                 //sets modId for persist
                 publication.setCreateId(userId);
                 manager.persist(publication);
@@ -650,16 +664,21 @@ public class InvestigationManager extends ManagerUtil {
             sample.isValid(manager);
             
             //check user has delete access
-            GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
+            IcatRole role = GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
             
+            //now check for facility acquired, if user is icat_admin,set true, if not, its automatically set to false
+            if(role.isIcatAdminRole()){
+                log.info("Role for "+object+" is ICAT_ADMIN so setting to facility acquired true");
+                sample.setCascade(Cascade.FACILITY_ACQUIRED, Boolean.TRUE);
+            }
             //TODO check for primary key
             try {
                 //check investigator not already added
                 Sample sampleManaged = findObject(Sample.class,sample.getId() ,manager);
-               
+                
                 //do nothing, throw exception
                 log.warn(sampleManaged +" already added to investigation.");
-                throw new ValidationException(sampleManaged+" is not unique");              
+                throw new ValidationException(sampleManaged+" is not unique");
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
@@ -682,16 +701,21 @@ public class InvestigationManager extends ManagerUtil {
             sampleParamter.isValid(manager);
             
             //check user has delete access
-            GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
+            IcatRole role = GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
             
+            //now check for facility acquired, if user is icat_admin,set true, if not, its automatically set to false
+            if(role.isIcatAdminRole()){
+                log.info("Role for "+object+" is ICAT_ADMIN so setting to facility acquired true");
+                object.setFacilityAcquiredSet(true);
+            }
             //TODO check for primary key
             try {
                 //check SampleParameter not already added
                 SampleParameter sampleManaged = findObject(SampleParameter.class, sampleParamter.getSampleParameterPK(), manager);
-              
+                
                 //do nothing, throw exception
                 log.warn(sampleManaged +" already added to investigation.");
-                throw new ValidationException(sampleManaged+" is not unique");               
+                throw new ValidationException(sampleManaged+" is not unique");
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
@@ -708,16 +732,21 @@ public class InvestigationManager extends ManagerUtil {
             keyword.isValid(manager);
             
             //check user has delete access
-            GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
+            IcatRole role = GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
             
+            //now check for facility acquired, if user is icat_admin,set true, if not, its automatically set to false
+            if(role.isIcatAdminRole()){
+                log.info("Role for "+object+" is ICAT_ADMIN so setting to facility acquired true");
+                object.setFacilityAcquiredSet(true);
+            }
             //TODO check for primary key
             try {
                 //check investigator not already added
                 Keyword keywordManaged = findObject(Keyword.class, keyword.getKeywordPK(), manager);
-               
+                
                 //do nothing, throw exception
                 log.warn(keywordManaged +" already added to investigation.");
-                throw new ValidationException(keywordManaged+" is not unique");              
+                throw new ValidationException(keywordManaged+" is not unique");
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
@@ -734,21 +763,26 @@ public class InvestigationManager extends ManagerUtil {
             investigator.isValid(manager);
             
             //check user has delete access
-            GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
-             
+            IcatRole role = GateKeeper.performAuthorisation(userId, object, AccessType.CREATE, manager);
+            
+            //now check for facility acquired, if user is icat_admin,set true, if not, its automatically set to false
+            if(role.isIcatAdminRole()){
+                log.info("Role for "+object+" is ICAT_ADMIN so setting to facility acquired true");
+                object.setFacilityAcquiredSet(true);
+            }
             try {
                 //check investigator not already added
                 Investigator investigatorManaged = findObject(Investigator.class, investigator.getInvestigatorPK(), manager);
-               
+                
                 //do nothing, throw exception
                 log.warn(investigatorManaged +" already added to investigation.");
-                throw new ValidationException(investigatorManaged+" is not unique");               
+                throw new ValidationException(investigatorManaged+" is not unique");
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist
                 investigator.setCreateId(userId);
                 manager.persist(investigator);
-               
+                
                 investigation.addInvestigator(investigator);//for XML Injest (multipe additions in one EM)
                 return investigator;
             }

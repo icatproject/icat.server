@@ -244,8 +244,7 @@ public abstract class EntityBaseBean implements Serializable {
     public void prePersist(){
         markedDeleted = "N";
         //set facility acquired if role is ICAT_ADMIN
-        if(getIcatRole() != null && getIcatRole().getRole().equals(IcatRoles.ICAT_ADMIN.toString())) facilityAcquired = "Y";
-        else facilityAcquired = "N";
+        if(facilityAcquired == null) facilityAcquired = "N";
         if(modId != null){
             createId = modId;
         } else if(createId != null) modId = createId;
@@ -265,6 +264,7 @@ public abstract class EntityBaseBean implements Serializable {
     
     public void setFacilityAcquiredSet(boolean facilityAcquiredSet) {
         this.facilityAcquiredSet = facilityAcquiredSet;
+        this.facilityAcquired = (facilityAcquiredSet) ? "Y" : "N";
     }
     
     @XmlTransient

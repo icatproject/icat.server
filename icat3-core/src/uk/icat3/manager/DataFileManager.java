@@ -19,6 +19,7 @@ import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.IcatAuthorisation;
+import uk.icat3.entity.IcatRole;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -217,7 +218,13 @@ public class DataFileManager extends ManagerUtil {
         dataFile.setId(null);
         
         //check user has update access
-        GateKeeper.performAuthorisation(userId, dataFile, AccessType.CREATE, manager);
+        IcatRole role = GateKeeper.performAuthorisation(userId, dataFile, AccessType.CREATE, manager);
+        
+         //now check for facility acquired, if user is icat_admin,set true, if not, its automatically set to false
+        if(role.isIcatAdminRole()){
+            log.info("Role for "+dataFile+" is ICAT_ADMIN so setting to facility acquired true");
+            dataFile.setCascade(Cascade.FACILITY_ACQUIRED, Boolean.TRUE);
+        }
         
         //new dataset, set createid, this sets mod id and modtime
         dataFile.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
@@ -228,7 +235,7 @@ public class DataFileManager extends ManagerUtil {
         manager.persist(dataFile);
         
         //add new creator role to investigation for the user creating the df
-        persistAuthorisation(userId, userId, getRole(IcatRoles.CREATOR.toString(), manager),
+        persistAuthorisation(userId, userId, role,
                 ElementType.DATAFILE, dataFile.getId(),
                 ElementType.DATASET, dataset.getId(), null, manager);
         
@@ -397,8 +404,14 @@ public class DataFileManager extends ManagerUtil {
         datafileParameter.getDatafileParameterPK().setDatafileId(datafileId);
                 
         //ok, now check permissions
-        GateKeeper.performAuthorisation(userId, datafileParameter, AccessType.CREATE, manager);
-                      
+        IcatRole role = GateKeeper.performAuthorisation(userId, datafileParameter, AccessType.CREATE, manager);
+            
+         //now check for facility acquired, if user is icat_admin,set true, if not, its automatically set to false
+        if(role.isIcatAdminRole()){
+            log.info("Role for "+datafileParameter+" is ICAT_ADMIN so setting to facility acquired true");
+            datafileParameter.setFacilityAcquiredSet(true);
+        }
+        
         try {
             //check dataSetParameterManaged not already added
             DatafileParameter dataFileParameterManaged = findObject(DatafileParameter.class, datafileParameter.getDatafileParameterPK(), manager);

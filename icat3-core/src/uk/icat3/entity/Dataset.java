@@ -404,8 +404,10 @@ import uk.icat3.util.Queries;
      */
     public void setCascade(Cascade type, Object cascadeValue, EntityManager manager, Object managerValue) throws InsufficientPrivilegesException{
         log.trace("Cascading: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
+        
         String deleted = "Y";
-        if(type == Cascade.DELETE){
+        String facilityAcquired = "Y";
+        if(type == Cascade.DELETE || type == Cascade.FACILITY_ACQUIRED){
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
         }
         
@@ -434,6 +436,7 @@ import uk.icat3.util.Queries;
                     datasetParameter.setMarkedDeleted(deleted);
                     datasetParameter.setModId(managerValue.toString());
                 } else if(type == Cascade.MOD_ID) datasetParameter.setModId(cascadeValue.toString());
+                  else if(type == Cascade.FACILITY_ACQUIRED) datasetParameter.setFacilityAcquired(facilityAcquired);              
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     datasetParameter.setModId(cascadeValue.toString());
                     datasetParameter.setCreateId(cascadeValue.toString());
@@ -489,6 +492,7 @@ import uk.icat3.util.Queries;
                 this.setModId(managerValue.toString());
             }
         } else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
+          else if(type == Cascade.FACILITY_ACQUIRED) this.setFacilityAcquired(facilityAcquired);              
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
             this.setModId(cascadeValue.toString());
             this.setCreateId(cascadeValue.toString());
@@ -630,7 +634,7 @@ import uk.icat3.util.Queries;
                 return true;
             } else {
                 log.trace("Dataset found is not this dataset, so not unique");
-                throw new ValidationException(this+" is not unique. Same uniuq key as "+datasetFound);
+                throw new ValidationException(this+" is not unique. Same unique key as "+datasetFound);
             }
         } catch(NoResultException nre) {
             log.trace("No results so unique");

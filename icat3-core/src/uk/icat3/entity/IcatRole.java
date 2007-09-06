@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.IcatRoles;
 import uk.icat3.util.Queries;
 import static uk.icat3.util.Util.*;
 /**
@@ -412,6 +413,11 @@ import static uk.icat3.util.Util.*;
     @Override
     public String toString() {
         return "IcatRole[role=" + role + "]";
+    }
+    
+    public boolean isIcatAdminRole(){
+        if(getRole() != null && getRole().equals(IcatRoles.ICAT_ADMIN.toString())) return true;
+        else return false;
     }
     
 }

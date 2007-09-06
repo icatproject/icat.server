@@ -360,10 +360,12 @@ import uk.icat3.util.Queries;
      */
     public void setCascade(Cascade type, Object cascadeValue, EntityManager manager, Object managerValue) throws InsufficientPrivilegesException{
         log.trace("Cascading: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
+        
         String deleted = "Y";
-        if(type == Cascade.DELETE){
+        String facilityAcquired = "Y";
+        if(type == Cascade.DELETE || type == Cascade.FACILITY_ACQUIRED){
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
-            if(managerValue == null) throw new RuntimeException("Manager Value needs to be set aswell if Cascade.DELETE");
+            if(managerValue == null && type == Cascade.DELETE) throw new RuntimeException("Manager Value needs to be set aswell if Cascade.DELETE");
         }
         
         if(getSampleParameterCollection() != null){
@@ -373,6 +375,7 @@ import uk.icat3.util.Queries;
             for(SampleParameter sp : getSampleParameterCollection()){
                 if(type == Cascade.DELETE)  sp.setMarkedDeleted(deleted);
                 else if(type == Cascade.MOD_ID) sp.setModId(cascadeValue.toString());
+                else if(type == Cascade.FACILITY_ACQUIRED) sp.setFacilityAcquired(facilityAcquired);
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     sp.setModId(cascadeValue.toString());
                     sp.setCreateId(cascadeValue.toString());
@@ -388,6 +391,7 @@ import uk.icat3.util.Queries;
         
         if(type == Cascade.DELETE) this.setMarkedDeleted(deleted);
         else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
+        else if(type == Cascade.FACILITY_ACQUIRED) this.setFacilityAcquired(facilityAcquired);
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
             this.setModId(cascadeValue.toString());
             this.setCreateId(cascadeValue.toString());

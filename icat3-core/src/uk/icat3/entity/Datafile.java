@@ -518,7 +518,7 @@ import uk.icat3.util.ElementType;
     /**
      * Sets type (see Cascade) flag on all items owned by this dataset
      *
-     * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS and REMOVE_DELETED_ITEMS
+     * @param type Cascade type, DELETE, MOD_ID, MOD_AND_CREATE_IDS, FACILITY_ACQUIRED and REMOVE_DELETED_ITEMS
      * @param cascadeValue value of the cascade type
      * @param manager entity manager to  connect to DB
      * @param managerValue value of the EntityManager value
@@ -527,7 +527,8 @@ import uk.icat3.util.ElementType;
         log.trace("Cascading: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
         
         String deleted = "Y";
-        if(type == Cascade.DELETE){
+        String facilityAcquired = "Y";
+        if(type == Cascade.DELETE || type == Cascade.FACILITY_ACQUIRED){
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
         }
         
@@ -541,6 +542,7 @@ import uk.icat3.util.ElementType;
                     datafileParameter.setMarkedDeleted(deleted);
                     datafileParameter.setModId(managerValue.toString());
                 } else if(type == Cascade.MOD_ID) datafileParameter.setModId(cascadeValue.toString());
+                else if(type == Cascade.FACILITY_ACQUIRED) datafileParameter.setFacilityAcquired(facilityAcquired);
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     datafileParameter.setModId(cascadeValue.toString());
                     datafileParameter.setCreateId(cascadeValue.toString());
@@ -566,6 +568,7 @@ import uk.icat3.util.ElementType;
                     relatedDatafile.setMarkedDeleted(deleted);
                     relatedDatafile.setModId(managerValue.toString());
                 } else if(type == Cascade.MOD_ID) relatedDatafile.setModId(cascadeValue.toString());
+                 else if(type == Cascade.FACILITY_ACQUIRED) relatedDatafile.setFacilityAcquired(facilityAcquired);              
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     relatedDatafile.setModId(cascadeValue.toString());
                     relatedDatafile.setCreateId(cascadeValue.toString());
@@ -607,6 +610,7 @@ import uk.icat3.util.ElementType;
                 this.setModId(managerValue.toString());
             }
         } else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
+         else if(type == Cascade.FACILITY_ACQUIRED) this.setFacilityAcquired(facilityAcquired);            
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
             this.setModId(cascadeValue.toString());
             this.setCreateId(cascadeValue.toString());

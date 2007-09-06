@@ -280,7 +280,7 @@ public class TestSearch {
         
         //test code here
         log.info("Testing");
-        Collection<String> keywords =  KeywordSearch.getKeywordsForUser(userId,startkeyword,300, em);
+        Collection<String> keywords =  KeywordSearch.getKeywordsForUser(userId, KeywordType.ALL, startkeyword,300, em);
         log.info("Results: "+keywords.size());
         for(String keyword : keywords){
             //  log.info(keyword);

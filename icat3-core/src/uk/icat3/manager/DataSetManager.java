@@ -18,6 +18,7 @@ import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.IcatAuthorisation;
+import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
@@ -217,12 +218,18 @@ public class DataSetManager extends ManagerUtil {
         //check investigation exists
         if(dataSet.getInvestigation() == null) throw new NoSuchObjectFoundException(dataSet+" has no assoicated investigation");
         Investigation investigation  = find(Investigation.class, dataSet.getInvestigation().getId(), manager);
-       
+        
         dataSet.setInvestigation(investigation);
         dataSet.setId(null);
         
         //check user has update access
-        GateKeeper.performAuthorisation(userId, dataSet, AccessType.CREATE, manager);
+        IcatRole role = GateKeeper.performAuthorisation(userId, dataSet, AccessType.CREATE, manager);
+        
+        //now check for facility acquired, if user is icat_admin,set true, if not, its automatically set to false
+        if(role.isIcatAdminRole()){
+            log.info("Role for "+dataSet+" is ICAT_ADMIN so setting to facility acquired true");
+            dataSet.setCascade(Cascade.FACILITY_ACQUIRED, Boolean.TRUE);
+        }
         
         //new dataset, set createid, this sets mod id and modtime
         dataSet.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
@@ -237,11 +244,11 @@ public class DataSetManager extends ManagerUtil {
         manager.persist(dataSet);
         
         //need to add a another row for creating datasets for this ds
-        IcatAuthorisation IcatAuthorisationChild = persistAuthorisation(userId, userId, getRole(IcatRoles.CREATOR.toString(), manager),
+        IcatAuthorisation IcatAuthorisationChild = persistAuthorisation(userId, userId, role,
                 ElementType.DATAFILE, null,
                 ElementType.DATASET, dataSet.getId(), null, manager);
         //add new creator role to ds for the user creating the ds
-        persistAuthorisation(userId, userId, getRole(IcatRoles.CREATOR.toString(), manager),
+        persistAuthorisation(userId, userId, role,
                 ElementType.DATASET, dataSet.getId(),
                 ElementType.INVESTIGATION, investigation.getId(), IcatAuthorisationChild.getId(), manager);
         
@@ -404,7 +411,7 @@ public class DataSetManager extends ManagerUtil {
         return datasetsReturned.iterator().next();
     }
     
-     /**
+    /**
      * Gets the data set object from a data set id, depending if the user has access to read the data set.
      *
      * @param userId federalId of the user.
@@ -494,16 +501,21 @@ public class DataSetManager extends ManagerUtil {
         
         //set id for dataSetParameter
         dataSetParameter.setDataset(dataset);
-              
+        
         //check is valid, check parent dataset is in the private key
         dataSetParameter.setCreateId(userId);
         dataSetParameter.isValid(manager);
         
         dataSetParameter.getDatasetParameterPK().setDatasetId(datasetId);
-          
+        
         //ok, now check permissions
-        GateKeeper.performAuthorisation(userId, dataSetParameter, AccessType.CREATE, manager);
-        //String facilityUserId = getFacilityUserId(userId, manager);
+        IcatRole role = GateKeeper.performAuthorisation(userId, dataSetParameter, AccessType.CREATE, manager);
+        
+         //now check for facility acquired, if user is icat_admin,set true, if not, its automatically set to false
+        if(role.isIcatAdminRole()){
+            log.info("Role for "+dataSetParameter+" is ICAT_ADMIN so setting to facility acquired true");
+            dataSetParameter.setFacilityAcquiredSet(true);
+        }
         
         try {
             //check dataSetParameterManaged not already added

@@ -58,7 +58,7 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have
      *                      permission to perform operation.
      */
-    public static void performAuthorisation(String user, EntityBaseBean object, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
+    public static IcatRole performAuthorisation(String user, EntityBaseBean object, AccessType access, EntityManager manager) throws InsufficientPrivilegesException {
         //this id of the root parent of object (ie parent of root element), ie inv, ds, df
         Long rootElementsParentsId = null;
         //this id of the root element of object, ie inv, ds, df
@@ -66,51 +66,50 @@ public class GateKeeper {
         if(object instanceof Publication){
             rootElementsParentsId  = ((Publication)object).getInvestigationId().getId();
             rootElementId = ((Publication)object).getInvestigationId().getId();
-            performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.PUBLICATION, manager);
+            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.PUBLICATION, manager);
         } else if(object instanceof Investigation){
             rootElementsParentsId  = ((Investigation)object).getId();
             rootElementId = ((Investigation)object).getId();
-            performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.INVESTIGATION, manager);
+            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.INVESTIGATION, manager);
         } else if(object instanceof Keyword){
             rootElementsParentsId  =  ((Keyword)object).getInvestigation().getId();
             rootElementId = ((Keyword)object).getInvestigation().getId();
-            performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.KEYWORD, manager);
+            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.KEYWORD, manager);
         } else if(object instanceof Dataset){
             rootElementsParentsId  = ((Dataset)object).getInvestigation().getId();
             rootElementId = ((Dataset)object).getId();
-            performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATASET, manager);
+            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATASET, manager);
         } else if(object instanceof Datafile){
             rootElementsParentsId  = ((Datafile)object).getDataset().getId();
             rootElementId = ((Datafile)object).getId();
-            performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATAFILE, manager);
+            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATAFILE, manager);
         } else if(object instanceof DatasetParameter){
             rootElementsParentsId  = ((DatasetParameter)object).getDataset().getInvestigation().getId();
             rootElementId = ((DatasetParameter)object).getDataset().getId();
-            performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATASET_PARAMETER, manager);
+            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATASET_PARAMETER, manager);
         } else if(object instanceof DatafileParameter){
             rootElementsParentsId  = ((DatafileParameter)object).getDatafile().getDataset().getId();
             rootElementId = ((DatafileParameter)object).getDatafile().getId();
-            performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATAFILE_PARAMETER, manager);
+            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATAFILE_PARAMETER, manager);
         } else if(object instanceof SampleParameter){
             rootElementsParentsId  = ((SampleParameter)object).getSample().getInvestigationId().getId();
             rootElementId = ((SampleParameter)object).getSample().getInvestigationId().getId();
-            performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.SAMPLE_PARAMETER, manager);
+            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.SAMPLE_PARAMETER, manager);
         } else if(object instanceof Sample){
             rootElementsParentsId  = ((Sample)object).getInvestigationId().getId();
             rootElementId = ((Sample)object).getInvestigationId().getId();
-            performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.SAMPLE, manager);
+            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.SAMPLE, manager);
         } else if(object instanceof Investigator){
             rootElementsParentsId  =((Investigator)object).getInvestigation().getId();
             rootElementId = ((Investigator)object).getInvestigation().getId();
-            performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.INVESTIGATOR, manager);
-        } /* else if(object instanceof Study){
-            for (StudyInvestigation si :  ((Study)object).getStudyInvestigationCollection()) {
-                invList.add(si.getInvestigation());
-            }//end for
-            performAuthorisation(user, invList, access, ((DatafileParameter)object), manager);
-        }*/ else throw new InsufficientPrivilegesException(object.getClass().getSimpleName()+" not supported for security check.");;
-        
-        
+            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.INVESTIGATOR, manager);
+        //}  else if(object instanceof Study){
+         //   for (StudyInvestigation si :  ((Study)object).getStudyInvestigationCollection()) {
+           //     invList.add(si.getInvestigation());
+            //}//end for
+            //performAuthorisation(user, invList, access, ((DatafileParameter)object), manager);
+        } else throw new InsufficientPrivilegesException(object.getClass().getSimpleName()+" not supported for security check.");
+                
         
     }//end method
     
@@ -136,7 +135,7 @@ public class GateKeeper {
      * @throws InsufficientPrivilegesException  if user does not have
      *                          permission to perform operation.
      */
-    private static void performAuthorisation(String userId, Long rootElementsParentId, AccessType access, EntityBaseBean object, Long rootParentsId, ElementType elementType, EntityManager manager) throws InsufficientPrivilegesException {
+    private static IcatRole performAuthorisation(String userId, Long rootElementsParentId, AccessType access, EntityBaseBean object, Long rootParentsId, ElementType elementType, EntityManager manager) throws InsufficientPrivilegesException {
         log.debug("performAuthorisation(): "+userId+", AccessType: "+access+", "+object+", rootElementId: "+rootParentsId+", rootElementsParent: "+rootElementsParentId);
         IcatAuthorisation icatAuthorisation = null;
         boolean success = false;
@@ -218,6 +217,7 @@ public class GateKeeper {
             //now append the role to the investigation, dataset or datafile
             if(elementType.isRootType()) object.setIcatRole(icatAuthorisation.getRole());
             log.info("User: " + userId + " granted " + access + " permission on " + object +" with role "+icatAuthorisation.getRole());
+            return role;
         } else {
             log.warn("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object );
             throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object );

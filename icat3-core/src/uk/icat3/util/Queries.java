@@ -264,6 +264,15 @@ public class Queries {
             " k.investigation.id = ia.elementId AND ia.elementType = :objectType AND ia.markedDeleted = 'N'" +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) AND k.markedDeleted = 'N'";// ORDER BY k.keywordPK.name";
+    
+    public static final String KEYWORDS_FOR_USER_ALPHA = "Keywords.getAllKeywordsForUserAlpha";
+    public static final String KEYWORDS_FOR_USER_ALPHA_SQL = "SELECT DISTINCT t0.NAME FROM KEYWORD t0, ICAT_AUTHORISATION t2, INVESTIGATION t1 " +
+            "WHERE ((((((((t1.ID = t2.ELEMENT_ID) AND (t2.ELEMENT_TYPE = 'INVESTIGATION')) AND (t2.DELETED = 'N')) AND ((t2.USER_ID = ?userId) OR (t2.USER_ID = 'ANY'))) AND (t2.DELETED = 'N')) AND ( (regexp_like(t0.NAME,'^[[:alpha:]]*$')) AND ((t0.NAME LIKE ?startKeyword) OR (?startKeyword IS NULL)) ) ) AND (t0.DELETED = 'N')) AND (t1.ID = t0.INVESTIGATION_ID))";
+    
+    public static final String KEYWORDS_FOR_USER_ALPHA_NUMERIC = "Keywords.getAllKeywordsForUserAlphaNumeric";
+    public static final String KEYWORDS_FOR_USER_ALPHA_NUMERIC_SQL = "SELECT DISTINCT t0.NAME FROM KEYWORD t0, ICAT_AUTHORISATION t2, INVESTIGATION t1 " +
+            "WHERE ((((((((t1.ID = t2.ELEMENT_ID) AND (t2.ELEMENT_TYPE = 'INVESTIGATION')) AND (t2.DELETED = 'N')) AND ((t2.USER_ID = ?userId) OR (t2.USER_ID = 'ANY'))) AND (t2.DELETED = 'N')) AND ( (regexp_like(t0.NAME,'^[[:alnum:]]*$')) AND ((t0.NAME LIKE ?startKeyword) OR (?startKeyword IS NULL)) ) ) AND (t0.DELETED = 'N')) AND (t1.ID = t0.INVESTIGATION_ID))";
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     

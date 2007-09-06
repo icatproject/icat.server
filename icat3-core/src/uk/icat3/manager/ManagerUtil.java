@@ -341,7 +341,7 @@ public class ManagerUtil {
         if(primaryKey == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+"[id:"+primaryKey+"] not found.");
         
         T object = manager.find(entityClass, primaryKey);
-        
+      
         if(object == null) throw new NoSuchObjectFoundException(entityClass.getSimpleName()+"[id:"+primaryKey+"] not found.");
         //if dont want to find deleted items and it is deleted then throw exception
         if(((EntityBaseBean)object).isDeleted() && !findDeleted){

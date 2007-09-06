@@ -62,7 +62,8 @@ public class TestJPA {
     }
     
     protected static void setUp(){
-        emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
+        //emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
+          emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
         //  emf = Persistence.createEntityManagerFactory("icatisis_dev");
         em = emf.createEntityManager();
         // Begin transaction
@@ -94,9 +95,9 @@ public class TestJPA {
         type.setName("analyzed");
         type.setDescription("Analyzed data");
         ds.setDatasetType(type);
-        ds.setName("unit test create data set");
+        ds.setName("unit test create data setds");
         
-        DataSetManager.createDataSet("test_admin_investigation", ds, 100L, em);
+        DataSetManager.createDataSet("test_icatadmin", ds, 3L, em);
         
         tearDown();
     }
@@ -107,11 +108,11 @@ public class TestJPA {
         Datafile df = new Datafile();
         df.setDatafileVersion("1");
         DatafileFormat type = new DatafileFormat();
-        DatafileFormatPK pk = new DatafileFormatPK("3.0.0", "nexus2");
+        DatafileFormatPK pk = new DatafileFormatPK("3.0.0", "nexus");
         type.setDatafileFormatPK(pk);
         
         df.setDatafileFormat(type);
-        df.setName("name of df");
+        df.setName("name of dffdf");
         
         df.isValid(em);
         //create datafile parameter
@@ -122,7 +123,7 @@ public class TestJPA {
         df.addDataFileParameter(dfp);*/
         
         //
-        //DataFileManager.createDataFile("test_admin_investigation", df, 2L, em);
+        DataFileManager.createDataFile("test_icatadmin", df, 3L, em);
         
         tearDown();
     }
@@ -352,7 +353,7 @@ public class TestJPA {
         DatafileParameter pa = new DatafileParameter(PK);
         pa.setNumericValue(3d);
         
-        DataFileManager.addDataFileParameter("test", pa, 2L, em);
+        DataFileManager.addDataFileParameter("test_icatadmin", pa, 105L, em);
         
         tearDown();
         
@@ -367,12 +368,12 @@ public class TestJPA {
         
         TestJPA ts = new TestJPA();
         // ts.createInv();
-       // ts.createDF();
-        // ts.createDS();
+        ts.createDF();
+     //    ts.createDS();
         //ts.addRole();
         // ts.getRoles();
         //  ts.createInv();
-        ts.testJPA();
+      //  ts.testJPA();
         //  ts.changeRole();
         // ts.testP1();
         // ts.testSurname();

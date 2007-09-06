@@ -535,7 +535,7 @@ import uk.icat3.util.Queries;
     /**
      * Gets the shiftCollection of this Investigation.
      * @return the shiftCollection
-     */    
+     */
     public Collection<Shift> getShiftCollection() {
         return this.shiftCollection;
     }
@@ -721,9 +721,10 @@ import uk.icat3.util.Queries;
         log.trace("Cascading: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
         
         String deleted = "Y";
-        if(type == Cascade.DELETE){
+        String facilityAcquired = "Y";
+        if(type == Cascade.DELETE || type == Cascade.FACILITY_ACQUIRED){
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
-            if(managerValue == null) throw new RuntimeException("Manager Value needs to be set aswell if Cascade.DELETE");
+            if(managerValue == null && type == Cascade.DELETE) throw new RuntimeException("Manager Value needs to be set aswell if Cascade.DELETE");
         }
         
         if(type == Cascade.REMOVE_DELETED_ITEMS){
@@ -779,6 +780,7 @@ import uk.icat3.util.Queries;
                     investigator.setMarkedDeleted(deleted);
                     investigator.setModId(managerValue.toString());
                 } else if(type == Cascade.MOD_ID) investigator.setModId(cascadeValue.toString());
+                   else if(type == Cascade.FACILITY_ACQUIRED) investigator.setFacilityAcquired(facilityAcquired);                           
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     investigator.setModId(cascadeValue.toString());
                     investigator.setCreateId(cascadeValue.toString());
@@ -854,7 +856,7 @@ import uk.icat3.util.Queries;
             }
         }*/
         
-                 //if REMOVE_DELETED_ITEMS, check if investigationInclude wants keywords
+        //if REMOVE_DELETED_ITEMS, check if investigationInclude wants keywords
         if(type == Cascade.REMOVE_DELETED_ITEMS && investigationInclude.isShifts() ){
             //create new collection if remove deleted items
             Collection<Shift> shifts = new ArrayList<Shift>();
@@ -874,6 +876,7 @@ import uk.icat3.util.Queries;
                     shift.setMarkedDeleted(deleted);
                     shift.setModId(managerValue.toString());
                 } else if(type == Cascade.MOD_ID) shift.setModId(cascadeValue.toString());
+                   else if(type == Cascade.FACILITY_ACQUIRED) shift.setFacilityAcquired(facilityAcquired);                           
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     shift.setModId(cascadeValue.toString());
                     shift.setCreateId(cascadeValue.toString());
@@ -902,6 +905,7 @@ import uk.icat3.util.Queries;
                     publication.setMarkedDeleted(deleted);
                     publication.setModId(managerValue.toString());
                 } else if(type == Cascade.MOD_ID) publication.setModId(cascadeValue.toString());
+                   else if(type == Cascade.FACILITY_ACQUIRED) publication.setFacilityAcquired(facilityAcquired);                           
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     publication.setModId(cascadeValue.toString());
                     publication.setCreateId(cascadeValue.toString());
@@ -930,6 +934,7 @@ import uk.icat3.util.Queries;
                     keyword.setMarkedDeleted(deleted);
                     keyword.setModId(managerValue.toString());
                 } else if(type == Cascade.MOD_ID) keyword.setModId(cascadeValue.toString());
+                   else if(type == Cascade.FACILITY_ACQUIRED) keyword.setFacilityAcquired(facilityAcquired);                           
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     keyword.setModId(cascadeValue.toString());
                     keyword.setCreateId(cascadeValue.toString());
@@ -971,6 +976,7 @@ import uk.icat3.util.Queries;
                 this.setModId(managerValue.toString());
             }
         } else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
+           else if(type == Cascade.FACILITY_ACQUIRED) this.setFacilityAcquired(facilityAcquired);                           
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
             this.setModId(cascadeValue.toString());
             this.setCreateId(cascadeValue.toString());
