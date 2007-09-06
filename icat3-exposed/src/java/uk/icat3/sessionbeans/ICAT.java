@@ -70,7 +70,7 @@ import uk.icat3.util.LogicalOperator;
  * @author gjd37
  */
 @Stateless()
-@WebService(/*serviceName="ICATService", name="ICATServices",*/ targetNamespace="client.icat3.uk")
+@WebService(/*serviceName="ICATISISNoPartService",/* name="ICATServices",*/ targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -206,6 +206,22 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
     @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.getKeywordsForUserMaxResponse")
     public Collection<String> getKeywordsForUser(@WebParam(name="sessionId") String sessionId, @WebParam(name="numberReturned") int numberReturned) throws SessionException{
         return keywordSearchLocal.getKeywordsForUser(sessionId, numberReturned);
+    }
+    
+    /**
+     * This gets all the keywords avaliable for that user, beginning with a keyword, they can only see keywords associated with their
+     * investigations or public investigations
+     *
+     * @param sessionId session id of the user.
+     * @param type ALL, ALPHA, ALPHA_NUMERIC, {@link KeywordType}
+     * @throws uk.icat3.exceptions.SessionException
+     * @return list of keywords
+     */
+    @WebMethod(operationName="getKeywordsForUserType")
+    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.getKeywordsForUserType")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.getKeywordsForUserTypeResponse")
+    public Collection<String> getKeywordsForUser(String sessionId, KeywordType type) throws SessionException{
+        return keywordSearchLocal.getKeywordsForUser(sessionId, type);
     }
     
     /**

@@ -14,9 +14,11 @@ public interface KeywordSearchLocal {
     
     public Collection<String> getKeywordsForUser(String sessionId) throws SessionException;
     
-     public Collection<String> getKeywordsForUser(String sessionId, int numberReturned) throws SessionException;
-   
+    public Collection<String> getKeywordsForUser(String sessionId, int numberReturned) throws SessionException;
+    
+    public Collection<String> getKeywordsForUser(String sessionId, KeywordType type) throws SessionException;
+    
     public Collection<String> getKeywordsForUser(String sessionId, String startKeyword, int numberReturned) throws SessionException;
-   
+    
     public Collection<String> getAllKeywords(String sessionId, KeywordType type) throws SessionException;
 }

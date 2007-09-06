@@ -57,7 +57,6 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
         String userId = user.getUserIdFromSessionId(sessionId);
         
         return KeywordSearch.getKeywordsForUser(userId, manager);
-        
     }
     
     /**
@@ -77,8 +76,7 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        return KeywordSearch.getKeywordsForUser(userId, startKeyword, numberReturned, manager);
-        
+        return KeywordSearch.getKeywordsForUser(userId, KeywordType.ALL, startKeyword, numberReturned, manager);
     }
     
     /**
@@ -98,8 +96,31 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        return KeywordSearch.getKeywordsForUser(userId, null, numberReturned, manager);
+        return KeywordSearch.getKeywordsForUser(userId, KeywordType.ALL, null, numberReturned, manager);
+    }
+    
+    /**
+     * This gets all the keywords avaliable for that user, beginning with a keyword, they can only see keywords associated with their
+     * investigations or public investigations
+     *
+     * @param sessionId session id of the user.
+     * @param type ALL, ALPHA, ALPHA_NUMERIC, {@link KeywordType}
+     * @throws uk.icat3.exceptions.SessionException
+     * @return list of keywords
+     */
+    @WebMethod(operationName="getKeywordsForUserType")
+    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserType")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.getKeywordsForUserMaxType")
+     //TODO: this should not be here but in glassfish UR1 and V2 RC1 it throws a
+    //Caused by: Exception [TOPLINK-23005] (Oracle TopLink Essentials - 2006.8 (Build 060830)): oracle.toplink.essentials.exceptions.TransactionException
+    //Exception Description: Error binding to externally managed transaction
+    //Internal Exception: java.lang.IllegalStateException: Operation not allowed
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public Collection<String> getKeywordsForUser(String sessionId, KeywordType type) throws SessionException{
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
         
+        return KeywordSearch.getKeywordsForUser(userId, type, manager);
     }
     
     /**
@@ -112,13 +133,12 @@ public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
     //TODO: this should not be here but in glassfish UR1 and V2 RC1 it throws a
     //Caused by: Exception [TOPLINK-23005] (Oracle TopLink Essentials - 2006.8 (Build 060830)): oracle.toplink.essentials.exceptions.TransactionException
     //Exception Description: Error binding to externally managed transaction
-    //Internal Exception: java.lang.IllegalStateException: Operation not allowed    
+    //Internal Exception: java.lang.IllegalStateException: Operation not allowed
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public Collection<String> getAllKeywords(String sessionId, KeywordType type) throws SessionException{
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
         return KeywordSearch.getAllKeywords(userId, type, manager);
-        
     }
 }
