@@ -29,8 +29,8 @@ public class Util {
         else return false;
     }
 
-    public static Date parseDate(String s) {
-        return DatatypeConverter.parseDate(s).getTime();
+    public static Date parseDate(String s) {                              
+        return DatatypeConverter.parseDateTime(s).getTime();
     }
   
     public static String printDate(Date dt) {
