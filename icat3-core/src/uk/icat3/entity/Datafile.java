@@ -115,11 +115,11 @@ import uk.icat3.util.ElementType;
     private String location;
     
     @Column(name = "DATAFILE_CREATE_TIME")
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date datafileCreateTime;
     
     @Column(name = "DATAFILE_MODIFY_TIME")
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date datafileModifyTime;
     
     @Column(name = "FILE_SIZE")
