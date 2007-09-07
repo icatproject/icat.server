@@ -36,7 +36,7 @@ import uk.icat3.util.Queries;
  * @author gjd37
  */
 @Entity
-@Table(name = "ICAT_AUTH2")
+@Table(name = "ICAT_AUTHORISATION")
 @NamedQueries({
     @NamedQuery(name = "IcatAuthorisation.findById", query = "SELECT i FROM IcatAuthorisation i WHERE i.id = :id"),
     @NamedQuery(name = "IcatAuthorisation.findByUserId", query = "SELECT i FROM IcatAuthorisation i WHERE i.userId = :userId"),
