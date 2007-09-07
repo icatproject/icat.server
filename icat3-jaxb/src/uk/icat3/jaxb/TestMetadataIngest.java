@@ -32,8 +32,9 @@ public class TestMetadataIngest {
         em.getTransaction().begin();
                 
 
-try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("src/uk/icat3/jaxb/EMU00001927.xml")));
+    try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("src/uk/icat3/jaxb/SXD19577.xml")));
+            //BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("c:/vms/nxingest-1.3/test_data/00018.xml")));
             String line = "";
             String buffer = "";
             while((line = br.readLine()) != null) {
