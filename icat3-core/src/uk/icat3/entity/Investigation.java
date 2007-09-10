@@ -126,11 +126,11 @@ import uk.icat3.util.Queries;
     
     /*@Column(name = "FACILITY")
     private String facilityString;
-    
+     
     public String getFacilityString() {
         return facilityString;
     }
-    
+     
     public void setFacilityString(String facilityString) {
         this.facilityString = facilityString;
     }*/
@@ -139,7 +139,7 @@ import uk.icat3.util.Queries;
     @Temporal(TemporalType.TIMESTAMP)
     private Date releaseDate;
     
-      @JoinColumn(name = "FACILITY", referencedColumnName = "FACILITY_SHORT_NAME", nullable= false)
+    @JoinColumn(name = "FACILITY", referencedColumnName = "FACILITY_SHORT_NAME", nullable= false)
     @ManyToOne()
     @ICAT(merge=false)
     private Facility facility;
@@ -1058,34 +1058,23 @@ import uk.icat3.util.Queries;
         if(manager == null) throw new IllegalArgumentException("EntityManager cannot be null");
         
         if(deepValidation){
-            boolean valid = false;
+            
             if(this.instrument != null){
                 this.instrument.isValid(manager);
                 //check instrument is correct.
-                Collection<Instrument> instruments = InvestigationSearch.listAllInstruments(manager);
-                
-                for(Instrument instrumentFound : instruments){
-                    //log.trace(instrument);
-                    if(this.instrument.getName().equals(instrumentFound.getName())) valid = true;
-                }
-            } else valid = true;
+                //check investigation type is correct.
+                Instrument instrument = manager.find(Instrument.class, this.invType.getName());
+                if(instrument == null)throw new ValidationException(this.instrument.getName()+" is not a valid instrument.");
+            }            
             
-            if(!valid) throw new ValidationException(this.instrument.getName()+" is not a valid instrument.");
-            
-             valid = false;
             if(this.invType != null){
                 this.invType.isValid(manager);
-                //check investigation type is correct.
-                Collection<InvestigationType> investigationTypes = InvestigationSearch.listAllInvestigationTypes(manager);
                 
-                for(InvestigationType investigationType : investigationTypes){
-                    //log.trace(instrument);
-                    if(this.invType.getName().equals(investigationType.getName())) valid = true;
-                }
-            } else valid = true;
+                //check investigation type is correct.
+                InvestigationType investigationType = manager.find(InvestigationType.class, this.invType.getName());
+                if(investigationType == null)throw new ValidationException(this.invType.getName()+" is not a valid investigation type.");
+            }
             
-            if(!valid) throw new ValidationException(this.invType.getName()+" is not a valid investigation type.");
-                        
             //check all datasets now
             if(getDatasetCollection() != null){
                 for(Dataset dataset : getDatasetCollection()){
