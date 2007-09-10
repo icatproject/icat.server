@@ -13,12 +13,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ColumnResult;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityResult;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -122,12 +124,23 @@ import uk.icat3.util.Queries;
     @Column(name = "GRANT_ID")
     private Long grantId;
     
+    /*@Column(name = "FACILITY")
+    private String facilityString;
+    
+    public String getFacilityString() {
+        return facilityString;
+    }
+    
+    public void setFacilityString(String facilityString) {
+        this.facilityString = facilityString;
+    }*/
+    
     @Column(name = "RELEASE_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date releaseDate;
     
-    @JoinColumn(name = "FACILITY", referencedColumnName = "FACILITY_SHORT_NAME", nullable= false)
-    @ManyToOne
+      @JoinColumn(name = "FACILITY", referencedColumnName = "FACILITY_SHORT_NAME", nullable= false)
+    @ManyToOne()
     @ICAT(merge=false)
     private Facility facility;
     
@@ -780,7 +793,7 @@ import uk.icat3.util.Queries;
                     investigator.setMarkedDeleted(deleted);
                     investigator.setModId(managerValue.toString());
                 } else if(type == Cascade.MOD_ID) investigator.setModId(cascadeValue.toString());
-                   else if(type == Cascade.FACILITY_ACQUIRED) investigator.setFacilityAcquired(facilityAcquired);                           
+                else if(type == Cascade.FACILITY_ACQUIRED) investigator.setFacilityAcquired(facilityAcquired);
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     investigator.setModId(cascadeValue.toString());
                     investigator.setCreateId(cascadeValue.toString());
@@ -876,7 +889,7 @@ import uk.icat3.util.Queries;
                     shift.setMarkedDeleted(deleted);
                     shift.setModId(managerValue.toString());
                 } else if(type == Cascade.MOD_ID) shift.setModId(cascadeValue.toString());
-                   else if(type == Cascade.FACILITY_ACQUIRED) shift.setFacilityAcquired(facilityAcquired);                           
+                else if(type == Cascade.FACILITY_ACQUIRED) shift.setFacilityAcquired(facilityAcquired);
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     shift.setModId(cascadeValue.toString());
                     shift.setCreateId(cascadeValue.toString());
@@ -905,7 +918,7 @@ import uk.icat3.util.Queries;
                     publication.setMarkedDeleted(deleted);
                     publication.setModId(managerValue.toString());
                 } else if(type == Cascade.MOD_ID) publication.setModId(cascadeValue.toString());
-                   else if(type == Cascade.FACILITY_ACQUIRED) publication.setFacilityAcquired(facilityAcquired);                           
+                else if(type == Cascade.FACILITY_ACQUIRED) publication.setFacilityAcquired(facilityAcquired);
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     publication.setModId(cascadeValue.toString());
                     publication.setCreateId(cascadeValue.toString());
@@ -934,7 +947,7 @@ import uk.icat3.util.Queries;
                     keyword.setMarkedDeleted(deleted);
                     keyword.setModId(managerValue.toString());
                 } else if(type == Cascade.MOD_ID) keyword.setModId(cascadeValue.toString());
-                   else if(type == Cascade.FACILITY_ACQUIRED) keyword.setFacilityAcquired(facilityAcquired);                           
+                else if(type == Cascade.FACILITY_ACQUIRED) keyword.setFacilityAcquired(facilityAcquired);
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     keyword.setModId(cascadeValue.toString());
                     keyword.setCreateId(cascadeValue.toString());
@@ -976,7 +989,7 @@ import uk.icat3.util.Queries;
                 this.setModId(managerValue.toString());
             }
         } else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
-           else if(type == Cascade.FACILITY_ACQUIRED) this.setFacilityAcquired(facilityAcquired);                           
+        else if(type == Cascade.FACILITY_ACQUIRED) this.setFacilityAcquired(facilityAcquired);
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
             this.setModId(cascadeValue.toString());
             this.setCreateId(cascadeValue.toString());
@@ -1046,17 +1059,31 @@ import uk.icat3.util.Queries;
         
         if(deepValidation){
             boolean valid = false;
-            if(instrument != null){
+            if(this.instrument != null){
                 //check instrument is correct.
                 Collection<Instrument> instruments = InvestigationSearch.listAllInstruments(manager);
                 
-                for(Instrument instrument : instruments){
+                for(Instrument instrumentFound : instruments){
                     //log.trace(instrument);
-                    if(instrument.getName().equals(getInstrument().getName())) valid = true;
+                    if(this.instrument.getName().equals(instrumentFound.getName())) valid = true;
                 }
             } else valid = true;
-            if(!valid) throw new ValidationException("Investigation: "+getInstrument().getName()+" is not a valid instrument.");
             
+            if(!valid) throw new ValidationException("Investigation: "+this.instrument.getName()+" is not a valid instrument.");
+            
+             valid = false;
+            if(this.invType != null){
+                //check investigation type is correct.
+                Collection<InvestigationType> investigationTypes = InvestigationSearch.listAllInvestigationTypes(manager);
+                
+                for(InvestigationType investigationType : investigationTypes){
+                    //log.trace(instrument);
+                    if(this.invType.getName().equals(investigationType.getName())) valid = true;
+                }
+            } else valid = true;
+            
+            if(!valid) throw new ValidationException("Investigation: "+this.invType.getName()+" is not a valid investigation type.");
+                        
             //check all datasets now
             if(getDatasetCollection() != null){
                 for(Dataset dataset : getDatasetCollection()){
