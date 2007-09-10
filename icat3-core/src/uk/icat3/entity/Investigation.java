@@ -1060,6 +1060,7 @@ import uk.icat3.util.Queries;
         if(deepValidation){
             boolean valid = false;
             if(this.instrument != null){
+                this.instrument.isValid(manager);
                 //check instrument is correct.
                 Collection<Instrument> instruments = InvestigationSearch.listAllInstruments(manager);
                 
@@ -1069,10 +1070,11 @@ import uk.icat3.util.Queries;
                 }
             } else valid = true;
             
-            if(!valid) throw new ValidationException("Investigation: "+this.instrument.getName()+" is not a valid instrument.");
+            if(!valid) throw new ValidationException(this.instrument.getName()+" is not a valid instrument.");
             
              valid = false;
             if(this.invType != null){
+                this.invType.isValid(manager);
                 //check investigation type is correct.
                 Collection<InvestigationType> investigationTypes = InvestigationSearch.listAllInvestigationTypes(manager);
                 
@@ -1082,7 +1084,7 @@ import uk.icat3.util.Queries;
                 }
             } else valid = true;
             
-            if(!valid) throw new ValidationException("Investigation: "+this.invType.getName()+" is not a valid investigation type.");
+            if(!valid) throw new ValidationException(this.invType.getName()+" is not a valid investigation type.");
                         
             //check all datasets now
             if(getDatasetCollection() != null){
