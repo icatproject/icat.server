@@ -79,6 +79,8 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = Queries.INVESTIGATIONS_BY_USER, query = Queries.INVESTIGATIONS_BY_USER_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID,  query= Queries.INVESTIGATION_LIST_BY_USERID_JPQL),
+    @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_USERID_RTID,  query= Queries.INVESTIGATION_LIST_BY_USERID_RTID_JPQL),
+    
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_SURNAME, query= Queries.INVESTIGATIONS_LIST_BY_USER_SURNAME_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_KEYWORD_RTN_ID, query= Queries.INVESTIGATION_LIST_BY_KEYWORD_RTN_ID_JPQL),
     @NamedQuery(name = Queries.INVESTIGATION_LIST_BY_KEYWORD, query= Queries.INVESTIGATION_LIST_BY_KEYWORD_JPQL)
@@ -124,25 +126,25 @@ import uk.icat3.util.Queries;
     @Column(name = "GRANT_ID")
     private Long grantId;
     
-    /*@Column(name = "FACILITY")
-    private String facilityString;
-     
-    public String getFacilityString() {
-        return facilityString;
+    @Column(name = "FACILITY", nullable = false)
+    private String facility;
+    
+    public String getFacility() {
+        return facility;
     }
-     
-    public void setFacilityString(String facilityString) {
-        this.facilityString = facilityString;
-    }*/
+    
+    public void setFacility(String facility) {
+        this.facility = facility;
+    }
     
     @Column(name = "RELEASE_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date releaseDate;
     
-    @JoinColumn(name = "FACILITY", referencedColumnName = "FACILITY_SHORT_NAME", nullable= false)
+    /*@JoinColumn(name = "FACILITY", referencedColumnName = "FACILITY_SHORT_NAME", nullable= false)
     @ManyToOne()
     @ICAT(merge=false)
-    private Facility facility;
+    private Facility facility;*/
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
     private Collection<Publication> publicationCollection;
@@ -154,13 +156,35 @@ import uk.icat3.util.Queries;
     @ManyToOne
     private FacilityCycle facilityCycle;
     
-    @JoinColumn(name = "INSTRUMENT", referencedColumnName = "NAME")
-    @ManyToOne
-    private Instrument instrument;
+    @Column(name = "INSTRUMENT")
+    private String instrument;
     
-    @JoinColumn(name = "INV_TYPE", referencedColumnName = "NAME", nullable= false)
+    public String getInstrument() {
+        return instrument;
+    }
+    
+    public void setInstrument(String instrument) {
+        this.instrument = instrument;
+    }
+    
+    /*@JoinColumn(name = "INSTRUMENT", referencedColumnName = "NAME")
     @ManyToOne
-    private InvestigationType invType;
+    private Instrument instrument;*/
+    
+    @Column(name = "INV_TYPE", nullable = false)
+    private String invType;
+    
+    public String getInvType() {
+        return invType;
+    }
+    
+    public void setInvType(String invType) {
+        this.invType = invType;
+    }
+    
+    /*@JoinColumn(name = "INV_TYPE", referencedColumnName = "NAME", nullable= false)
+    @ManyToOne
+    private InvestigationType invType;*/
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private Collection<Dataset> datasetCollection;
@@ -468,33 +492,33 @@ import uk.icat3.util.Queries;
      * Gets the instrument of this Investigation.
      * @return the instrument
      */
-    public Instrument getInstrument() {
+    /*public Instrument getInstrument() {
         return this.instrument;
-    }
+    }*/
     
     /**
      * Sets the instrument of this Investigation to the specified value.
      * @param instrument the new instrument
      */
-    public void setInstrument(Instrument instrument) {
+    /*public void setInstrument(Instrument instrument) {
         this.instrument = instrument;
-    }
+    }*/
     
     /**
      * Gets the invType of this Investigation.
      * @return the invType
      */
-    public InvestigationType getInvType() {
+    /*public InvestigationType getInvType() {
         return this.invType;
-    }
+    }*/
     
     /**
      * Sets the invType of this Investigation to the specified value.
      * @param invType the new invType
      */
-    public void setInvType(InvestigationType invType) {
+    /*public void setInvType(InvestigationType invType) {
         this.invType = invType;
-    }
+    }*/
     
     /**
      * Gets the datasetCollection of this Investigation.
@@ -635,13 +659,13 @@ import uk.icat3.util.Queries;
         return this.investigatorCollection;
     }
     
-    public Facility getFacility() {
+    /*public Facility getFacility() {
         return facility;
     }
-    
+     
     public void setFacility(Facility facility) {
         this.facility = facility;
-    }
+    }*/
     
     /**
      * This method is used by JAXWS to map to investigatorCollection.  Depending on what the include is
@@ -1060,19 +1084,19 @@ import uk.icat3.util.Queries;
         if(deepValidation){
             
             if(this.instrument != null){
-                this.instrument.isValid(manager);
+                //this.instrument.isValid(manager);
                 //check instrument is correct.
                 //check investigation type is correct.
-                Instrument instrument = manager.find(Instrument.class, this.invType.getName());
-                if(instrument == null)throw new ValidationException(this.instrument.getName()+" is not a valid instrument.");
-            }            
+                Instrument instrument = manager.find(Instrument.class, this.invType);
+                if(instrument == null)throw new ValidationException(this.instrument+" is not a valid instrument.");
+            }
             
             if(this.invType != null){
-                this.invType.isValid(manager);
+                //this.invType.isValid(manager);
                 
                 //check investigation type is correct.
-                InvestigationType investigationType = manager.find(InvestigationType.class, this.invType.getName());
-                if(investigationType == null)throw new ValidationException(this.invType.getName()+" is not a valid investigation type.");
+                InvestigationType investigationType = manager.find(InvestigationType.class, this.invType);
+                if(investigationType == null)throw new ValidationException(this.invType+" is not a valid investigation type.");
             }
             
             //check all datasets now

@@ -87,13 +87,35 @@ import uk.icat3.util.Queries;
     @Column(name = "DESCRIPTION")
     private String description;
     
-    @JoinColumn(name = "DATASET_STATUS", referencedColumnName = "NAME")
-    @ManyToOne
-    private DatasetStatus datasetStatus;
+    @Column(name = "DATASET_STATUS")
+    private String datasetStatus;
     
-    @JoinColumn(name = "DATASET_TYPE", referencedColumnName = "NAME", nullable=false)
+    public String getDatasetStatus() {
+        return datasetStatus;
+    }
+    
+    public void setDatasetStatus(String datasetStatus) {
+        this.datasetStatus = datasetStatus;
+    }
+    
+    /*@JoinColumn(name = "DATASET_STATUS", referencedColumnName = "NAME")
     @ManyToOne
-    private DatasetType datasetType;
+    private DatasetStatus datasetStatus;*/
+    
+    @Column(name = "DATASET_TYPE", nullable = false)
+    private String datasetType;
+    
+    public String getDatasetType() {
+        return datasetType;
+    }
+    
+    public void setDatasetType(String datasetType) {
+        this.datasetType = datasetType;
+    }
+    
+    /*@JoinColumn(name = "DATASET_TYPE", referencedColumnName = "NAME", nullable=false)
+    @ManyToOne
+    private DatasetType datasetType;*/
     
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID")
     @ManyToOne
@@ -207,33 +229,33 @@ import uk.icat3.util.Queries;
      * Gets the datasetStatus of this Dataset.
      * @return the datasetStatus
      */
-    public DatasetStatus getDatasetStatus() {
+    /*public DatasetStatus getDatasetStatus() {
         return this.datasetStatus;
-    }
+    }*/
     
     /**
      * Sets the datasetStatus of this Dataset to the specified value.
      * @param datasetStatus the new datasetStatus
      */
-    public void setDatasetStatus(DatasetStatus datasetStatus) {
+    /*public void setDatasetStatus(DatasetStatus datasetStatus) {
         this.datasetStatus = datasetStatus;
-    }
+    }*/
     
     /**
      * Gets the datasetType of this Dataset.
      * @return the datasetType
      */
-    public DatasetType getDatasetType() {
+    /*public DatasetType getDatasetType() {
         return this.datasetType;
-    }
+    }*/
     
     /**
      * Sets the datasetType of this Dataset to the specified value.
      * @param datasetType the new datasetType
      */
-    public void setDatasetType(DatasetType datasetType) {
+    /*public void setDatasetType(DatasetType datasetType) {
         this.datasetType = datasetType;
-    }
+    }*/
     
     /**
      * Gets the investigationId of this Dataset.
@@ -407,10 +429,10 @@ import uk.icat3.util.Queries;
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
         }
         
-         if(type == Cascade.REMOVE_DELETED_ITEMS){
+        if(type == Cascade.REMOVE_DELETED_ITEMS){
             log.trace("Remove from: ");
             log.trace("Datafiles? "+datasetInclude.isDatafiles());
-            log.trace("Datasets parameters? "+datasetInclude.isDatasetParameters());            
+            log.trace("Datasets parameters? "+datasetInclude.isDatasetParameters());
         }
         
         //data set parameters
@@ -432,7 +454,7 @@ import uk.icat3.util.Queries;
                     datasetParameter.setMarkedDeleted(deleted);
                     datasetParameter.setModId(managerValue.toString());
                 } else if(type == Cascade.MOD_ID) datasetParameter.setModId(cascadeValue.toString());
-                  else if(type == Cascade.FACILITY_ACQUIRED) datasetParameter.setFacilityAcquired(facilityAcquired);              
+                else if(type == Cascade.FACILITY_ACQUIRED) datasetParameter.setFacilityAcquired(facilityAcquired);
                 else if(type == Cascade.MOD_AND_CREATE_IDS) {
                     datasetParameter.setModId(cascadeValue.toString());
                     datasetParameter.setCreateId(cascadeValue.toString());
@@ -488,7 +510,7 @@ import uk.icat3.util.Queries;
                 this.setModId(managerValue.toString());
             }
         } else if(type == Cascade.MOD_ID) this.setModId(cascadeValue.toString());
-          else if(type == Cascade.FACILITY_ACQUIRED) this.setFacilityAcquired(facilityAcquired);              
+        else if(type == Cascade.FACILITY_ACQUIRED) this.setFacilityAcquired(facilityAcquired);
         else if(type == Cascade.MOD_AND_CREATE_IDS) {
             this.setModId(cascadeValue.toString());
             this.setCreateId(cascadeValue.toString());
@@ -584,19 +606,19 @@ import uk.icat3.util.Queries;
         
         //check is valid status
         if(datasetStatus != null){
-            datasetStatus.isValid(manager);
+            //datasetStatus.isValid(manager);
             
             //check datafile format is valid
-            DatasetStatus status = manager.find(DatasetStatus.class, datasetStatus.getName());
+            DatasetStatus status = manager.find(DatasetStatus.class, datasetStatus);
             if(status == null)  throw new ValidationException(datasetStatus+ " is not a valid DatasetStatus");
         }
         
         //check is valid status
         if(datasetType != null){
-            datasetType.isValid(manager);
+            //datasetType.isValid(manager);
             
             //check datafile format is valid
-            DatasetType type = manager.find(DatasetType.class, datasetType.getName());
+            DatasetType type = manager.find(DatasetType.class, datasetType);
             if(type == null)  throw new ValidationException(datasetType+ " is not a valid DatasetType");
         }
         

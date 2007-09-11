@@ -55,8 +55,8 @@ public class TestSearch {
     }
     
     protected static void setUp(){
-        //emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
-        emf = Persistence.createEntityManagerFactory("icatisis_dev");
+        emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
+        //emf = Persistence.createEntityManagerFactory("icatisis_dev");
         em = emf.createEntityManager();
         
         
@@ -179,7 +179,7 @@ public class TestSearch {
         //Collection<Investigation> investigations  = InvestigationSearch.searchByKeywords(userId,keywords,em);
         
         for(Investigation investigation : investigations){
-            log.info(investigation.getId()+" "+investigation.getTitle());
+            log.info(investigation.getId()+" "+investigation.getFacility());
         }
         log.info("Results: "+investigations.size());
         
@@ -502,7 +502,7 @@ public class TestSearch {
         //isis
         // keywords.add("isis");
         
-        keywords.add("calibration");
+      
         // ts.seachByKeywords("gjd37", keywords, LogicalOperator.AND, false, InvestigationUtil.ALL);
        //  ts.seachByKeywords("gjd37", keywords);
         ///  get Investigations ////
@@ -516,9 +516,10 @@ public class TestSearch {
         //////////////////////////
         
         
-        //keywords.add("ccw");
+        keywords.add("ccwilson");
+          keywords.add("calibration");
         //  ts.seachByKeywords("gjd37", keywords);
-        // ts.seachByKeywords("gjd37", keywords);
+         ts.seachByKeywords("gjd37", keywords);
         
         //log.info("Hello");
         //  ts.getMyInvestigations("gjd37");
@@ -562,7 +563,7 @@ public class TestSearch {
        // dto.setRunEnd(11759L);
        // dto.setRunStart(11757L);
        // dto.setFuzzy(false);
-        ts.seachByAdvanced("gjd37",dto);
+     //   ts.seachByAdvanced("gjd37",dto);
         
        //  ts.getAllKeywords("gjd37");
         //

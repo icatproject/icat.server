@@ -274,13 +274,48 @@ public class InvestigationSearch extends ManagerUtil {
         Collection<Investigation> investigations = null;
         
         //dynamically create the query
-        String JPQL = ADVANCED_SEARCH_JPQL_START;
+        String JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL;
+        
+        if(advanDTO.hasTitle()){
+            log.trace("Searching title info");
+            JPQL += " AND i.title LIKE :invTitle";
+        }
+        
+        if(advanDTO.hasVisitId()){
+            log.trace("Searching visitId info");
+            JPQL += " AND i.visitId = :visitId";
+        }
+        
+        if(advanDTO.hasInvestigationType()){
+            log.trace("Searching Investigation Type info");
+            JPQL += " AND i.invType.name = :invType";
+        }
+        
+        if(advanDTO.hasAbstract()){
+            log.trace("Searching Abstract info");
+            JPQL += " AND i.invAbstract LIKE :invAbstract";
+        }
+        
+        if(advanDTO.hasGrantId()){
+            log.trace("Searching visitId info");
+            JPQL += " AND i.grantId = :grantId";
+        }
+        
+        if(advanDTO.hasBackCatalogueInvestigatorString()){
+            log.trace("Searching bcatInvStr info");
+            JPQL += " AND i.bcatInvStr LIKE :bcatInvStr";
+        }
+        
+        if(advanDTO.hasExperimentNumber()){
+            log.trace("Searching invNumber info");
+            JPQL += " AND i.invNumber = :invNumber";
+        }
         
         if(advanDTO.hasSample()){
             log.trace("Searching sample info");
             //  " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
             //  " sample.markedDeleted = 'N') "+//iterate, remove if no sample is null
-            JPQL += "AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
+            JPQL += " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
                     " sample.markedDeleted = 'N') ";
         }
         
@@ -288,14 +323,14 @@ public class InvestigationSearch extends ManagerUtil {
             log.trace("Searching instruments info");
             //add insturments section:
             //" AND i.instrument.name IN(:instrument)  AND i.instrument.markedDeleted = 'N' "+ //expand IN, remove this if instrument null
-            JPQL += " AND i.instrument.name IN(";
+            JPQL += " AND i.instrument IN(";
             //add in the instruments in the IN() cause of JPQL
             int i = 1;
             for(String instrument : advanDTO.getInstruments()){
                 if(i == advanDTO.getInstruments().size()) JPQL += ":instrument"+(i++)+"";
                 else  JPQL += ":instrument"+(i++)+" , ";
             }
-            JPQL += ") AND i.instrument.markedDeleted = 'N' ";
+            JPQL += ") "; //TODO not checking if instrument is deleted now
         }
         
         if(advanDTO.hasKeywords()){
@@ -303,7 +338,7 @@ public class InvestigationSearch extends ManagerUtil {
             //add keywords section:
             // AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND kw.keywordPK.name LIKE :keyword1)
             
-            int i = 1;             
+            int i = 1;
             for(String keyword : advanDTO.getKeywords()){
                 JPQL += " AND EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name LIKE :keyword"+(i++)+") ";
             }
@@ -354,14 +389,35 @@ public class InvestigationSearch extends ManagerUtil {
         
         //sets the paramters
         query = query.setParameter("userId",userId);
-        query = query.setParameter("invTitle", advanDTO.getInvestigationName());
-        query = query.setParameter("bcatInvStr", advanDTO.getBackCatalogueInvestigatorString());
-        query = query.setParameter("invNumber", advanDTO.getExperimentNumber());
-        query = query.setParameter("visitId", advanDTO.getVisitId());
-        query = query.setParameter("invType", advanDTO.getInvestigationType());
-        query = query.setParameter("grantId", advanDTO.getGrantId());
         query = query.setParameter("objectType", ElementType.INVESTIGATION);
-        query = query.setParameter("invAbstract",advanDTO.getInvestigationAbstract());
+        
+        if(advanDTO.hasTitle()){
+            query = query.setParameter("invTitle", advanDTO.getInvestigationName());
+        }
+        
+        if(advanDTO.hasVisitId()){
+            query = query.setParameter("visitId", advanDTO.getVisitId());            
+        }
+        
+        if(advanDTO.hasInvestigationType()){
+            query = query.setParameter("invType", advanDTO.getInvestigationType());            
+        }
+        
+        if(advanDTO.hasAbstract()){
+            query = query.setParameter("invAbstract",advanDTO.getInvestigationAbstract());            
+        }
+        
+        if(advanDTO.hasGrantId()){
+            query = query.setParameter("grantId", advanDTO.getGrantId());            
+        }
+        
+        if(advanDTO.hasBackCatalogueInvestigatorString()){
+            query = query.setParameter("bcatInvStr", advanDTO.getBackCatalogueInvestigatorString());            
+        }
+        
+        if(advanDTO.hasExperimentNumber()){
+            query = query.setParameter("invNumber", advanDTO.getExperimentNumber());            
+        }        
         
         if(advanDTO.hasSample()){
             query = query.setParameter("sampleName", advanDTO.getSampleName());
@@ -735,9 +791,9 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return List of {@link Instrument}s
      */
-    public static Collection<Instrument> listAllInstruments(EntityManager manager)  {
+    public static Collection<String> listAllInstruments(EntityManager manager)  {
         log.trace("listAllInstruments(EntityManager)");
-        return  manager.createNamedQuery(ALL_INSTRUMENTS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+        return  manager.createNamedQuery(ALL_INSTRUMENTS)/*.setMaxResults(MAX_QUERY_RESULTSET)*/.getResultList();
     }
     
     /**
@@ -747,9 +803,9 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return List of types
      */
-    public static Collection<InvestigationType> listAllInvestigationTypes(EntityManager manager)  {
+    public static Collection<String> listAllInvestigationTypes(EntityManager manager)  {
         log.trace("listAllInvestigationTypes(EntityManager)");
-        return  manager.createNamedQuery(ALL_INVESTIGATION_TYPES).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+        return  manager.createNamedQuery(ALL_INVESTIGATION_TYPES)/*.setMaxResults(MAX_QUERY_RESULTSET)*/.getResultList();
     }
     
     /**

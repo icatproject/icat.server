@@ -94,7 +94,7 @@ public class TestJPA {
         DatasetType type = new DatasetType();
         type.setName("analyzed");
         type.setDescription("Analyzed data");
-        ds.setDatasetType(type);
+        ds.setDatasetType("analyzed");
         ds.setName("unit test create data setds");
         
         DataSetManager.createDataSet("test_icatadmin", ds, 3L, em);

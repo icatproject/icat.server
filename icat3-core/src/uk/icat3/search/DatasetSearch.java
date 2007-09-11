@@ -137,7 +137,7 @@ public class DatasetSearch {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of types
      */
-    public static Collection<DatasetType> listDatasetTypes(EntityManager manager) {
+    public static Collection<String> listDatasetTypes(EntityManager manager) {
         log.trace("listDatasetTypes(EntityManager)");
         
         return manager.createNamedQuery(ALL_DATASET_TYPE).getResultList();
@@ -147,9 +147,9 @@ public class DatasetSearch {
      * List all the valid avaliable status for datasets
      *
      * @param manager manager object that will facilitate interaction with underlying database
-     * @return collection of status'
+     * @return collection of status
      */
-    public static Collection<DatasetStatus> listDatasetStatus(EntityManager manager) {
+    public static Collection<String> listDatasetStatus(EntityManager manager) {
         log.trace("listDatasetStatus(EntityManager)");
         
         return manager.createNamedQuery(ALL_DATASET_STATUS).getResultList();

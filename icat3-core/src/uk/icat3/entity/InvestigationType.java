@@ -51,9 +51,9 @@ import uk.icat3.util.Queries;
     @Column(name = "DESCRIPTION")
     private String description;
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "invType")
+    /*@OneToMany(cascade = CascadeType.ALL, mappedBy = "invType")
     @XmlTransient
-    private Collection<Investigation> investigationCollection;
+    private Collection<Investigation> investigationCollection;*/
     
     /** Creates a new instance of InvestigationType */
     public InvestigationType() {
@@ -115,18 +115,19 @@ import uk.icat3.util.Queries;
      * Gets the investigationCollection of this InvestigationType.
      * @return the investigationCollection
      */
-    @XmlTransient
+    /*@XmlTransient
     public Collection<Investigation> getInvestigationCollection() {
         return this.investigationCollection;
-    }
+    }*/
     
     /**
      * Sets the investigationCollection of this InvestigationType to the specified value.
      * @param investigationCollection the new investigationCollection
      */
-    public void setInvestigationCollection(Collection<Investigation> investigationCollection) {
+    /*public void setInvestigationCollection(Collection<Investigation> investigationCollection) {
         this.investigationCollection = investigationCollection;
-    }
+    }*/
+    
     /**
      * Gets the element type of the bean
      */

@@ -55,8 +55,8 @@ public class Facility extends EntityBaseBean implements Serializable {
     @Column(name = "FACILITY_DESCRIPTION")
     private String facilityDescription;
    
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
-    private Collection<Investigation> investigationCollection;
+    /*@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
+    private Collection<Investigation> investigationCollection;*/
 
     public Facility() {
     }
@@ -97,14 +97,14 @@ public class Facility extends EntityBaseBean implements Serializable {
         this.facilityDescription = facilityDescription;
     }
   
-    @XmlTransient
+    /*@XmlTransient
     public Collection<Investigation> getInvestigationCollection() {
         return investigationCollection;
-    }
+    }*/
 
-    public void setInvestigationCollection(Collection<Investigation> investigationCollection) {
+    /*public void setInvestigationCollection(Collection<Investigation> investigationCollection) {
         this.investigationCollection = investigationCollection;
-    }
+    }*/
 
     /**
      * Gets the element type of the bean

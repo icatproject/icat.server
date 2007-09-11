@@ -138,7 +138,7 @@ public class AdvancedSearchDetails implements Serializable{
     }
     
     public Double getRunEnd() {
-        if(runEnd == null) return new Double(Double.MAX_VALUE);
+        if(runEnd == null) return new Double(Integer.MAX_VALUE-1);
         else return runEnd;
     }
     
@@ -285,6 +285,36 @@ public class AdvancedSearchDetails implements Serializable{
     
     public boolean hasAbstract(){
         if(investigationAbstract != null && investigationAbstract.length() != 0) return true;
+        else return false;
+    }
+    
+    public boolean hasTitle(){
+        if(investigationName != null && investigationName.length() != 0) return true;
+        else return false;
+    }
+    
+    public boolean hasGrantId(){
+        if(grantId != null) return true;
+        else return false;
+    }
+    
+    public boolean hasVisitId(){
+        if(visitId != null && visitId.length() != 0) return true;
+        else return false;
+    }
+    
+    public boolean hasBackCatalogueInvestigatorString(){
+        if(backCatalogueInvestigatorString != null && backCatalogueInvestigatorString.length() != 0) return true;
+        else return false;
+    }
+    
+    public boolean hasInvestigationType(){
+        if(investigationType != null && investigationType.length() != 0) return true;
+        else return false;
+    }
+    
+    public boolean hasExperimentNumber(){
+        if(experimentNumber != null && experimentNumber.length() != 0) return true;
         else return false;
     }
     

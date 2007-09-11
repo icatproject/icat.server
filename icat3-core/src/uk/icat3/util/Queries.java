@@ -302,14 +302,14 @@ public class Queries {
      *
      */
     public static final String ALL_INSTRUMENTS = "Instrument.listAll";
-    public static final String ALL_INSTRUMENTS_JPQL = "SELECT DISTINCT i FROM Instrument i WHERE i.markedDeleted = 'N'";
+    public static final String ALL_INSTRUMENTS_JPQL = "SELECT DISTINCT i.name FROM Instrument i WHERE i.markedDeleted = 'N'";
     
     /**
      * Find all investigation types,
      *
      */
     public static final String ALL_INVESTIGATION_TYPES = "InvestigationType.listAll";
-    public static final String ALL_INVESTIGATION_TYPES_JPQL = "SELECT DISTINCT i FROM InvestigationType i WHERE i.markedDeleted = 'N'";
+    public static final String ALL_INVESTIGATION_TYPES_JPQL = "SELECT DISTINCT i.name FROM InvestigationType i WHERE i.markedDeleted = 'N'";
     
     /**
      * Find all roles list,
@@ -331,14 +331,14 @@ public class Queries {
      *
      */
     public static final String ALL_DATASET_STATUS = "DatasetStatus.listAll";
-    public static final String ALL_DATASET_STATUS_JPQL = "SELECT DISTINCT ds FROM DatasetStatus ds WHERE ds.markedDeleted = 'N'";
+    public static final String ALL_DATASET_STATUS_JPQL = "SELECT DISTINCT ds.name FROM DatasetStatus ds WHERE ds.markedDeleted = 'N'";
     
     /**
      * Find all dataset type list,
      *
      */
     public static final String ALL_DATASET_TYPE = "DatasetType.listAll";
-    public static final String ALL_DATASET_TYPE_JPQL = "SELECT DISTINCT ds FROM DatasetType ds WHERE ds.markedDeleted = 'N'";
+    public static final String ALL_DATASET_TYPE_JPQL = "SELECT DISTINCT ds.name FROM DatasetType ds WHERE ds.markedDeleted = 'N'";
     
     /**
      * Find all datafile format list,

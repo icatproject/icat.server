@@ -51,9 +51,9 @@ public class Instrument extends EntityBaseBean implements Serializable {
     @Column(name = "DESCRIPTION")
     private String description;
                
-    @OneToMany(mappedBy = "instrument")
+    /*@OneToMany(mappedBy = "instrument")
     @XmlTransient
-    private Collection<Investigation> investigationCollection;
+    private Collection<Investigation> investigationCollection;*/
     
     
     /** Creates a new instance of Instrument */
@@ -132,18 +132,18 @@ public class Instrument extends EntityBaseBean implements Serializable {
      * Gets the investigationCollection of this Instrument.
      * @return the investigationCollection
      */
-     @XmlTransient
+    /* @XmlTransient
     public Collection<Investigation> getInvestigationCollection() {
         return this.investigationCollection;
-    }
+    }*/
     
     /**
      * Sets the investigationCollection of this Instrument to the specified value.
      * @param investigationCollection the new investigationCollection
      */
-    public void setInvestigationCollection(Collection<Investigation> investigationCollection) {
+    /*public void setInvestigationCollection(Collection<Investigation> investigationCollection) {
         this.investigationCollection = investigationCollection;
-    }
+    }*/
     
     /**
      * Gets the element type of the bean

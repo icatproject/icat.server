@@ -48,9 +48,9 @@ public class DatasetStatus extends EntityBaseBean implements Serializable {
     @Column(name = "DESCRIPTION")
     private String description;
    
-    @OneToMany(mappedBy = "datasetStatus")
+    /*@OneToMany(mappedBy = "datasetStatus")
     @XmlTransient
-    private Collection<Dataset> datasetCollection;
+    private Collection<Dataset> datasetCollection;*/
     
     /** Creates a new instance of DatasetStatus */
     public DatasetStatus() {
@@ -100,18 +100,18 @@ public class DatasetStatus extends EntityBaseBean implements Serializable {
      * Gets the datasetCollection of this DatasetStatus.
      * @return the datasetCollection
      */
-     @XmlTransient
+    /* @XmlTransient
     public Collection<Dataset> getDatasetCollection() {
         return this.datasetCollection;
-    }
+    }*/
 
     /**
      * Sets the datasetCollection of this DatasetStatus to the specified value.
      * @param datasetCollection the new datasetCollection
      */
-    public void setDatasetCollection(Collection<Dataset> datasetCollection) {
+    /*public void setDatasetCollection(Collection<Dataset> datasetCollection) {
         this.datasetCollection = datasetCollection;
-    }
+    }*/
 
     /**
      * Gets the element type of the bean

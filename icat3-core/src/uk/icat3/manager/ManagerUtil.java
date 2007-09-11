@@ -146,7 +146,7 @@ public class ManagerUtil {
                     }
                 }
                 //override above if only want datafiles and not its parameters
-                else {
+                else if(include.isDatasetsDatafilesAndParameters()){
                     for(Dataset dataset : investigation.getDatasetCollection()){
                         log.trace("Setting data sets to include: "+DatasetInclude.DATASET_DATAFILES_AND_PARAMETERS);
                         dataset.setDatasetInclude(DatasetInclude.DATASET_DATAFILES_AND_PARAMETERS);

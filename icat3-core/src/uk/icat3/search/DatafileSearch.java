@@ -51,7 +51,7 @@ public class DatafileSearch {
         
         //add in the instruments,  AND i.dataset.investigation.instrument.name IN ('SXD') AND
         int i = 1;
-        JPQL += " AND i.dataset.investigation.instrument.name IN (";
+        JPQL += " AND i.dataset.investigation.instrument IN (";
         for(String instrument : instruments){
             if(i == instruments.size())  JPQL += ":instrument"+(i++);
             else JPQL += ":instrument"+(i++)+", ";
