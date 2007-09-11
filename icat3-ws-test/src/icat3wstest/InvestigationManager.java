@@ -9,6 +9,7 @@
 package icat3wstest;
 
 import client.Datafile;
+import client.DatafileParameter;
 import client.Dataset;
 import client.Investigation;
 import client.InvestigationInclude;
@@ -28,11 +29,11 @@ public class InvestigationManager {
     /** Creates a new instance of SearchKeyword */
     public static void getInvestigation(String sid, Long id) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            Investigation investigation = ICATSingleton.getInstance().getInvestigationIncludes(sid, id, 
+            Investigation investigation = ICATSingleton.getInstance().getInvestigationIncludes(sid, id,
                     InvestigationInclude.ALL);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
@@ -53,7 +54,7 @@ public class InvestigationManager {
     
     public static void getInvestigations(String sid, Long id) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             List<Long> ids = new ArrayList<Long>();
@@ -61,7 +62,8 @@ public class InvestigationManager {
             //ids.add(id);
             
             // TODO process result here
-            List<Investigation> investigations = ICATSingleton.getInstance().getInvestigationsIncludes(sid, ids, client.InvestigationInclude.ALL);
+            List<Investigation> investigations = ICATSingleton.getInstance().getInvestigationsIncludes(
+                    sid, ids, client.InvestigationInclude.INVESTIGATORS_AND_SHIFTS);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -90,6 +92,14 @@ public class InvestigationManager {
                         System.out.println("              "+df.getName());
                         System.out.println("              ------------");
                         System.out.println("                 My Role for datafile: "+ df.getIcatRole().getRole());
+                        System.out.println("                 ------------");
+                        System.out.println("                   Parameters: " + df.getDatafileParameterCollection().size());
+                        for (DatafileParameter dfp : df.getDatafileParameterCollection()) {
+                            System.out.println("                    "+dfp.getDatafileParameterPK().getName());
+                            
+                        }
+                        System.out.println("                ------------");
+                        
                     }
                 }
                 System.out.println("      ------------");
@@ -113,12 +123,12 @@ public class InvestigationManager {
     
     public static Investigation createInvestigation(String sid, String name) throws Exception {
         
-        try {             
+        try {
             Investigation investigation = new Investigation();
             investigation.setTitle(name);
             investigation.setInvNumber(""+new Random().nextInt());
             
-            List<InvestigationType> types = ICATSingleton.getInstance().listInvestigationTypes(sid);
+            List<String> types = ICATSingleton.getInstance().listInvestigationTypes(sid);
             investigation.setInvType(types.iterator().next());
             
             long time = System.currentTimeMillis();
@@ -145,7 +155,7 @@ public class InvestigationManager {
     
     public static void updateInvestigation(String sid, Investigation investigation, String newName) throws Exception {
         
-        try {             
+        try {
             investigation.setTitle(newName);
             
             long time = System.currentTimeMillis();
@@ -171,7 +181,7 @@ public class InvestigationManager {
     
     public static void delete_undeleteInvestigation(String sid, Long id) throws Exception {
         
-        try {            
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
@@ -195,7 +205,7 @@ public class InvestigationManager {
     
     public static void removeInvestigation(String sid, Long id) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
@@ -222,8 +232,8 @@ public class InvestigationManager {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        getInvestigation(SID, INVESTIGATION_ID);
-        //getInvestigations(SID, INVESTIGATION_ID);
+        //  getInvestigation(SID, INVESTIGATION_ID);
+        getInvestigations(SID, INVESTIGATION_ID);
         
        /* Investigation investigation = createInvestigation(SID, "investigation for "+SID);
         if(investigation != null) {

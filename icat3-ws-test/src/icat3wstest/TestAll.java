@@ -29,7 +29,7 @@ public class TestAll {
         //Investiagtion searches
         InvestigationSearch.searchKeyword(SID,KEYWORD);
         
-        InvestigationSearch.searchKeywordAll(SID,KEYWORD.substring(0, 4));
+        //InvestigationSearch.searchKeywordAll(SID,KEYWORD.substring(0, 4));
         
         InvestigationSearch.searchUserId(SID,USER_ID);
         
@@ -46,8 +46,11 @@ public class TestAll {
         //Dataset searches
         Collection<Sample> samples = DatasetSearch.searchBySampleName(SID, KEYWORD);
         if(samples != null){
+            int i = 0;
             for (Sample sample : samples) {
                 DatasetSearch.searchDatasetsBySample(SID, sample);
+                i++;
+                if(i == 3) break;
             }
         }
         

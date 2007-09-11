@@ -30,14 +30,14 @@ public class ListSearch {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.DatasetStatus> result = ICATSingleton.getInstance().listDatasetStatus(sid);
+            java.util.List<String> result = ICATSingleton.getInstance().listDatasetStatus(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
             System.out.println("Number of dataset status is "+result.size());
             System.out.println("Results:");
-            for (DatasetStatus datasetStatus : result) {
-                System.out.println(" "+datasetStatus.getName());
+            for (String datasetStatus : result) {
+                System.out.println(" "+datasetStatus);
             }
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");
@@ -56,14 +56,14 @@ public class ListSearch {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.DatasetType> result = ICATSingleton.getInstance().listDatasetTypes(sid);
+            java.util.List<String> result = ICATSingleton.getInstance().listDatasetTypes(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
             System.out.println("Number of datasetType is "+result.size());
             System.out.println("Results:");
-            for (DatasetType datasetType : result) {
-                System.out.println(" "+datasetType.getName());
+            for (String datasetType : result) {
+                System.out.println(" "+datasetType);
             }
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");
@@ -82,14 +82,14 @@ public class ListSearch {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Instrument> result = ICATSingleton.getInstance().listInstruments(sid);
+            java.util.List<String> result = ICATSingleton.getInstance().listInstruments(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
             System.out.println("Number of Instruments status is "+result.size());
             System.out.println("Results:");
-            for (Instrument instrument : result) {
-                System.out.println(" "+instrument.getName());
+            for (String instrument : result) {
+                System.out.println(" "+instrument);
             }
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");
@@ -108,14 +108,14 @@ public class ListSearch {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.InvestigationType> result = ICATSingleton.getInstance().listInvestigationTypes(sid);
+            java.util.List<String> result = ICATSingleton.getInstance().listInvestigationTypes(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
             System.out.println("Number of investigationTypes is "+result.size());
             System.out.println("Results:");
-            for (InvestigationType investigationType : result) {
-                System.out.println(" "+investigationType.getName());
+            for (String investigationType : result) {
+                System.out.println(" "+investigationType);
             }
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");

@@ -35,7 +35,7 @@ public class DatasetManager {
             
             // TODO process result here
             Dataset dataset = ICATSingleton.getInstance().getDatasetIncludes(sid, id, 
-                    DatasetInclude.DATASET_FILES_ONLY);
+                    DatasetInclude.DATASET_AND_DATAFILES_ONLY);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -103,7 +103,7 @@ public class DatasetManager {
             Dataset ds = new Dataset();
             
             //   Should be done with something like:
-            List<DatasetType> types = ICATSingleton.getInstance().listDatasetTypes(SID);
+            List<String> types = ICATSingleton.getInstance().listDatasetTypes(SID);
             ds.setDatasetType(types.iterator().next());
             
             ds.setName(name);

@@ -15,10 +15,12 @@ package icat3wstest;
  */
 public class Constants {
     
-    //public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:8181/ICATService/ICAT";
-     public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:8181/ICATISISService/ICAT";
-    public static String SID = "79c14e19-bd9c-4e53-9b07-e174fced834f";
-    
+    public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:8181/ICATService/ICAT";
+   //  public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:8181/ICATISISNoPartService/ICAT";
+   //  public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:8181/ICATISISService/ICAT";
+    //public static String SID = "f20cb521-73cd-4f52-b379-f66ad8f9529f"; //auth2
+     public static String SID = "9c1c8695-7c97-43ff-989c-0a7214e45614";
+     
     public static String KEYWORD = "calibration";
     public static String USER_ID = "gjd37";
     public static String SURNAME = "Drinkwater";

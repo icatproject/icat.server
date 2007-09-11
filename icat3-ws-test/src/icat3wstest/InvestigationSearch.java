@@ -38,7 +38,7 @@ public class InvestigationSearch {
             System.out.println("Number of MyInvestigations is "+result.size());
             System.out.println("Results:");
             for (Investigation investigation : result) {
-                System.out.println("  ID: "+investigation.getId()+", TITLE: "+investigation.getTitle() +" FACILITY: "+investigation.getFacility().getFacilityShortName());
+                System.out.println("  ID: "+investigation.getId()+", TITLE: "+investigation.getTitle() +" FACILITY: "+investigation.getFacility());
             }
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");

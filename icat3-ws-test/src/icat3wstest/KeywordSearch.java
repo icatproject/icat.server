@@ -110,8 +110,8 @@ public class KeywordSearch {
      */
     public static void main(String[] args) throws Exception {
         //searchKeyword(SID);
-        searchKeywordType(SID, KeywordType.ALL);
-        //searchKeywordType(SID, KeywordType.ALPHA_NUMERIC);
+      //  searchKeywordType(SID, KeywordType.ALL);
+        searchKeywordType(SID, KeywordType.ALPHA_NUMERIC);
        // searchAllKeywords(SID, KeywordType.ALL);
        // searchAllKeywords(SID, KeywordType.ALPHA );
        // searchAllKeywords(SID, KeywordType.ALPHA_NUMERIC);

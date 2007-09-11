@@ -81,8 +81,11 @@ public class DatasetSearch {
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
         Collection<Sample> samples = searchBySampleName(SID, "calibration");
-        for (Sample sample : samples) {
+        int i = 0;
+        for (Sample sample : samples) {            
             searchDatasetsBySample(SID, sample);
+            i++;
+            if(i == 3) break;
         }
     }
 }
