@@ -358,7 +358,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @return collection of instruments
      */
     @WebMethod()
-    public Collection<Instrument> listInstruments(String sessionId) throws SessionException {
+    public Collection<String> listInstruments(String sessionId) throws SessionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
@@ -389,7 +389,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @return collection of rols
      */
     @WebMethod()
-    public Collection<InvestigationType> listInvestigationTypes(String sessionId) throws SessionException {
+    public Collection<String> listInvestigationTypes(String sessionId) throws SessionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         

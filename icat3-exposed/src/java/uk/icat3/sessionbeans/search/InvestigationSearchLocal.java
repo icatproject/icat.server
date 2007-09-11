@@ -50,12 +50,12 @@ public interface InvestigationSearchLocal {
     
     public Collection<Investigation> searchByUserSurname(String sessionId, String surname, int startIndex, int number_results) throws SessionException ;
     
-    public Collection<Instrument> listInstruments(String sessionId) throws SessionException ;
+    public Collection<String> listInstruments(String sessionId) throws SessionException ;
     
     public Collection<IcatRole> listRoles(String sessionId) throws SessionException ;
     
     public Collection<Parameter> listParameters(String sessionId) throws SessionException ;
     
-    public Collection<InvestigationType> listInvestigationTypes(String sessionId) throws SessionException ;
+    public Collection<String> listInvestigationTypes(String sessionId) throws SessionException ;
         
     }

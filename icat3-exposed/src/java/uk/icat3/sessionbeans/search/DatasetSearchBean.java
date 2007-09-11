@@ -89,7 +89,7 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
      * @throws uk.icat3.exceptions.SessionException 
      */
     @WebMethod()
-    public Collection<DatasetType> listDatasetTypes(String sessionId) throws SessionException {
+    public Collection<String> listDatasetTypes(String sessionId) throws SessionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
@@ -103,7 +103,7 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
      * @return collection of status
      */
     @WebMethod()
-    public Collection<DatasetStatus> listDatasetStatus(String sessionId) throws SessionException {
+    public Collection<String> listDatasetStatus(String sessionId) throws SessionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         

@@ -21,7 +21,7 @@ public interface DatasetSearchLocal {
     
     public Collection<Dataset> searchDataSetsBySample(String sessionId, Sample sample) throws SessionException, NoSuchObjectFoundException, NoSuchObjectFoundException, InsufficientPrivilegesException ;
     
-    public Collection<DatasetType> listDatasetTypes(String sessionId) throws SessionException ;
+    public Collection<String> listDatasetTypes(String sessionId) throws SessionException ;
     
-    public Collection<DatasetStatus> listDatasetStatus(String sessionId) throws SessionException ;
+    public Collection<String> listDatasetStatus(String sessionId) throws SessionException ;
 }

@@ -490,7 +490,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of instruments
      */
     @WebMethod()
-    public Collection<Instrument> listInstruments(@WebParam(name="sessionId") String sessionId) throws SessionException {
+    public Collection<String> listInstruments(@WebParam(name="sessionId") String sessionId) throws SessionException {
         return investigationSearchLocal.listInstruments(sessionId);
     }
     
@@ -526,7 +526,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of rols
      */
     @WebMethod()
-    public Collection<InvestigationType> listInvestigationTypes(@WebParam(name="sessionId") String sessionId) throws SessionException {
+    public Collection<String> listInvestigationTypes(@WebParam(name="sessionId") String sessionId) throws SessionException {
         return investigationSearchLocal.listInvestigationTypes(sessionId);
     }
     ///////////////////////////     End of Investigation Search methods  /////////////////////////////////////////
@@ -569,7 +569,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException
      */
     @WebMethod()
-    public Collection<DatasetType> listDatasetTypes(@WebParam(name="sessionId") String sessionId) throws SessionException {
+    public Collection<String> listDatasetTypes(@WebParam(name="sessionId") String sessionId) throws SessionException {
         return datasetSearchLocal.listDatasetTypes(sessionId);
     }
     
@@ -581,7 +581,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException
      */
     @WebMethod()
-    public Collection<DatasetStatus> listDatasetStatus(@WebParam(name="sessionId") String sessionId) throws SessionException {
+    public Collection<String> listDatasetStatus(@WebParam(name="sessionId") String sessionId) throws SessionException {
         return datasetSearchLocal.listDatasetStatus(sessionId);
     }
     ///////////////////////////     End of Dataset Search methods  /////////////////////////////////////////
