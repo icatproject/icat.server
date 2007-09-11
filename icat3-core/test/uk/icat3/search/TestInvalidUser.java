@@ -39,7 +39,7 @@ public class TestInvalidUser extends BaseTestClassTX {
         Collection<String> instrumentsInDB = (Collection<String>)executeListResultCmd("SELECT  DISTINCT i.name from Instrument i");
         
         //get all the instruments
-        Collection<Instrument> instruments = InvestigationSearch.listAllInstruments(em);
+        Collection<String> instruments = InvestigationSearch.listAllInstruments(em);
         
         log.trace("number searched is: "+instruments.size()+", number in DB: "+instrumentsInDB.size());
         assertNotNull("Must not be an null collection of instruments", instruments);

@@ -141,7 +141,7 @@ public class TestManagerUtil extends BaseTestClassTX {
             //create valid file
             Dataset file = new Dataset();
             Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
-            file.setDatasetType(datasetType.iterator().next());
+            file.setDatasetType(datasetType.iterator().next().getName());
             file.setName("unit test create data set");
             return file;
         } else {

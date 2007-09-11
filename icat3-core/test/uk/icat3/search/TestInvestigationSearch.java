@@ -43,7 +43,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     private static Logger log = Logger.getLogger(TestInvestigationSearch.class);
     
     
-    //@Test
+    @Test
     public void testGetAllUsersInvestigationsUser(){
         log.info("Testing valid user, getAllInvestigations: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -60,7 +60,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     }
     
     
-    //@Test
+    @Test
     public void testUsersInvestigationInvalidUser(){
         log.info("Testing invalid user, getUsersInvestigations: "+INVALID_USER);
         
@@ -73,7 +73,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Collection 'userInvestigations' should be zero size", 0 , userInvestigations.size());
     }
     
-    //@Test
+    @Test
     public void testUsersInvestigationLimitInvalidUser(){
         log.info("Testing invalid user, getUsersInvestigations: "+INVALID_USER);
         
@@ -87,7 +87,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         
     }
     
-    //@Test
+    @Test
     public void testUsersInvestigationInvalidUserRtnId(){
         log.info("Testing invalid user, getUsersInvestigations: "+INVALID_USER);
         
@@ -100,7 +100,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Collection 'userInvestigations' should be zero size", 0 , userInvestigations.size());
     }
     
-    //@Test
+    @Test
     public void testUsersInvestigationBySurnameInvalidUser(){
         log.info("Testing invalid user, getUsersInvestigations: "+INVALID_USER);
         
@@ -112,7 +112,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Collection 'investigationsUser' should be zero size", 0 , investigationsSurname.size());
     }
     
-    //@Test
+    @Test
     public void testUsersInvestigationBySurnameLimitInvalidUser(){
         log.info("Testing invalid user, getUsersInvestigations: "+INVALID_USER);
         
@@ -124,21 +124,21 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Collection 'investigationsUser' should be zero size", 0 , investigationsSurname.size());
     }
     
-    //@Test
+    @Test
     public void testListInstruments(){
         log.info("Testing invalid user, list all instruments:");
         
         Collection<Instrument> instrumentsInDB = (Collection<Instrument>)executeListResultCmd("SELECT DISTINCT i FROM Instrument i WHERE i.markedDeleted = 'N'");
         
         
-        Collection<Instrument> instruments = InvestigationSearch.listAllInstruments(em);
+        Collection<String> instruments = InvestigationSearch.listAllInstruments(em);
         log.trace("Instruments are "+instruments.size());
         
         assertNotNull("Must not be an empty collection", instruments);
         assertEquals("Collection 'instruments' should be size: "+instrumentsInDB.size(), instrumentsInDB.size(), instruments.size());
     }
     
-    //@Test
+    @Test
     public void testListRole(){
         log.info("Testing invalid user, list all roles:");
         
@@ -152,7 +152,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Collection 'roles' should be size: "+rolesInDB.size(), rolesInDB.size(), roles.size());
     }
     
-    //@Test
+    @Test
     public void testListParameters(){
         log.info("Testing invalid user, list all Parameters:");
         
@@ -166,14 +166,14 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Collection 'parameters' should be size: "+parametersInDB.size(), parametersInDB.size(), parameters.size());
     }
     
-    //@Test
+    @Test
     public void testListTypes(){
         log.info("Testing invalid user, list all investigation types:");
         
         Collection<Instrument> typesInDB = (Collection<Instrument>)executeListResultCmd("SELECT DISTINCT i FROM InvestigationType i WHERE i.markedDeleted = 'N'");
         
         
-        Collection<InvestigationType> types = InvestigationSearch.listAllInvestigationTypes(em);
+        Collection<String> types = InvestigationSearch.listAllInvestigationTypes(em);
         log.trace("InvestigationType are "+types.size());
         
         assertNotNull("Must not be an empty collection", types);
@@ -182,7 +182,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     
     ////////////////////////////////////////////////////////////////////////////////////
     
-    //@Test
+    @Test
     public void testSearchByDeletedKeyword() throws ICATAPIException {
         log.info("Testing valid user, keyword: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -194,7 +194,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testSearchByKeyword() throws ICATAPIException {
         log.info("Testing valid user, keyword: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -206,7 +206,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywordLimit() throws ICATAPIException {
         log.info("Testing valid user, keyword: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -218,7 +218,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywordInvalidUser() throws ICATAPIException {
         log.info("Testing invalid user, keyword: "+INVALID_USER);
         
@@ -229,7 +229,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Size should be zero",  investigations.size(), 0);
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywordInvalidUserLimit() throws ICATAPIException {
         log.info("Testing invalid user, keyword: "+INVALID_USER);
         
@@ -241,7 +241,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     }
     
     ///////////////////////////////////  Keywords fuzzy etc    ////////////////////////////////////////////////////
-    //@Test
+    @Test
     public void testSearchByDeletedKeywords() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         Collection<String> keywords = new ArrayList<String>();
@@ -255,7 +255,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywords() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         Collection<String> keywords = new ArrayList<String>();
@@ -270,7 +270,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywordsIncludes() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         Collection<String> keywords = new ArrayList<String>();
@@ -286,7 +286,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     }
     
     
-    //@Test
+    @Test
     public void testSearchByKeywordsMultipleFuzzy() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         Collection<String> keywords = new ArrayList<String>();
@@ -314,7 +314,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywordsFuzzy() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         Collection<String> keywords = new ArrayList<String>();
@@ -337,7 +337,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywordsFuzzyIncludes() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         Collection<String> keywords = new ArrayList<String>();
@@ -360,7 +360,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywordsMultipleFuzzyIncludes() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         Collection<String> keywords = new ArrayList<String>();
@@ -393,7 +393,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywordsLogical() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         Collection<String> keywords = new ArrayList<String>();
@@ -427,7 +427,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywordsLogicalIncludes() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         Collection<String> keywords = new ArrayList<String>();
@@ -462,7 +462,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywordsAll() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         Collection<String> keywords = new ArrayList<String>();
@@ -537,7 +537,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     }
     //////////////////////////////////////////////////////////////////////////
     
-    //@Test
+    @Test
     public void testSearchByKeywordsInvalidUser() throws ICATAPIException {
         log.info("Testing invalid user, keywords: "+INVALID_USER);
         Collection<String> keywords = new ArrayList<String>();
@@ -552,7 +552,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywordsInvalidUserIncludes() throws ICATAPIException {
         log.info("Testing invalid user, keywords: "+INVALID_USER);
         Collection<String> keywords = new ArrayList<String>();
@@ -567,7 +567,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywordsFuzzyInvalidUser() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+INVALID_USER);
         Collection<String> keywords = new ArrayList<String>();
@@ -590,7 +590,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         
     }
     
-    //@Test
+    @Test
     public void testSearchByKeywordsInvalidUserLogical() throws ICATAPIException {
         log.info("Testing invalid user, keywords: "+INVALID_USER);
         Collection<String> keywords = new ArrayList<String>();
@@ -616,7 +616,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     
     
     ///////////////////////////User ID /////////////////////////
-    //@Test
+    @Test
     public void testSearchByUserID() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -628,7 +628,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testSearchByInvalidUserID() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -644,7 +644,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     
     
     ///////////////////////////Surname /////////////////////////
-    //@Test
+    @Test
     public void testSearchBySurname() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -656,7 +656,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testSearchBySurnameLower() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -668,7 +668,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testSearchBySurnameLimit() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -680,7 +680,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testSearchByInvalidSurname() throws ICATAPIException {
         log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -697,10 +697,10 @@ public class TestInvestigationSearch extends BaseTestClass{
     /**
      * Tests instruments
      */
-    //@Test
+    @Test
     public void testlistInstruments(){
         log.info("Testing valid user for all instruments: "+VALID_USER_FOR_INVESTIGATION);
-        Collection<Instrument> instruments = InvestigationSearch.listAllInstruments(em);
+        Collection<String> instruments = InvestigationSearch.listAllInstruments(em);
         
         Collection<Instrument> instrumentsInDB = (Collection<Instrument>)executeListResultCmd("SELECT i FROM Instrument i");
         
@@ -710,7 +710,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     /////////////////////////////////////////////////////////////////////////////
     
     ////////////////////////// My Investigations ///////////////////////////////////////////////////
-    //@Test
+    @Test
     public void testMyInvestigations() throws ICATAPIException {
         log.info("Testing valid user, My Investigations: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -722,7 +722,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testMyInvestigationsIncludes() throws ICATAPIException {
         log.info("Testing valid user, My Investigations: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -734,7 +734,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testMyInvestigationsIncludesLimit() throws ICATAPIException {
         log.info("Testing valid user, My Investigations: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -746,7 +746,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testMyInvestigationsIncludesLimitInvalidUser() throws ICATAPIException {
         log.info("Testing valid user, My Investigations: "+INVALID_USER);
         
@@ -758,7 +758,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         
     }
     
-    //@Test
+    @Test
     public void testMyInvestigationsInvalidUser() throws ICATAPIException {
         log.info("Testing invalid user, My Investigations: "+INVALID_USER);
         
@@ -774,13 +774,14 @@ public class TestInvestigationSearch extends BaseTestClass{
     
     ////////////////////////// Advanced ///////////////////////////////////////////////////
     
-    //@Test
+    @Test
     public void testAdvancedDeleted() throws ICATAPIException {
         log.info("Testing invalid user, : "+VALID_USER_FOR_INVESTIGATION);
         
         AdvancedSearchDetails asd = new AdvancedSearchDetails();
         Collection<String> keywords = new ArrayList<String>();
         keywords.add("deleted keyword");
+        asd.setKeywords(keywords);
         
         Collection<Investigation> investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -1045,7 +1046,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         
     }
     
-    //@Test
+    @Test
     public void testAdvancedInvalidUser() throws ICATAPIException {
         log.info("Testing invalid user, My Investigations: "+INVALID_USER);
         
@@ -1183,7 +1184,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     
     
     /////////////////////////////////////////////////////////////////////////////
-    //@Test(expected=ICATAPIException.class)
+    @Test(expected=ICATAPIException.class)
     public void testCheckInvestigation() throws ICATAPIException{
         Investigation inv = em.find(Investigation.class, 6L);
         

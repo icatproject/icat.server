@@ -139,7 +139,7 @@ public class TestDatafileSearch extends BaseTestClassTX {
      /**
      * Tests dataset types
      */
-    //@Test
+    @Test
     public void testlistDatafileFormats(){
         log.info("Testing valid user for all DatafileFormats: "+VALID_USER_FOR_INVESTIGATION);
         Collection<DatafileFormat> types = DatafileSearch.listDatafileFormats(em);

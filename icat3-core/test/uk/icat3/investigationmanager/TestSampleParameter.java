@@ -410,7 +410,7 @@ public class TestSampleParameter extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=InsufficientPrivilegesException.class)
+   // @Test(expected=InsufficientPrivilegesException.class)
     public void modifySampleParameterProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying a props sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         

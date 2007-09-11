@@ -35,10 +35,10 @@ public class TestDatasetSearch extends BaseTestClassTX {
     /**
      * Tests dataset types
      */
-    //@Test
+    @Test
     public void testlistDatasetTypes(){
         log.info("Testing valid user for all dataset types: "+VALID_USER_FOR_INVESTIGATION);
-        Collection<DatasetType> types = DatasetSearch.listDatasetTypes(em);
+        Collection<String> types = DatasetSearch.listDatasetTypes(em);
         
         Collection<DatasetType> typesInDB = (Collection<DatasetType>)executeListResultCmd("SELECT d FROM DatasetType d where d.markedDeleted = 'N'");
         
@@ -49,10 +49,10 @@ public class TestDatasetSearch extends BaseTestClassTX {
     /**
      * Tests dataset status'
      */
-    // @Test
+     @Test
     public void testlistDatasetStatus(){
         log.info("Testing valid user for all dataset status: "+VALID_USER_FOR_INVESTIGATION);
-        Collection<DatasetStatus> status = DatasetSearch.listDatasetStatus(em);
+        Collection<String> status = DatasetSearch.listDatasetStatus(em);
         
         Collection<DatasetStatus> statusInDB = (Collection<DatasetStatus>)executeListResultCmd("SELECT d FROM DatasetStatus d where d.markedDeleted = 'N'");
         

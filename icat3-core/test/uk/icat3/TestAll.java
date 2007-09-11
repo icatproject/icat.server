@@ -61,8 +61,13 @@ import uk.icat3.util.ExecuteDatabaseScript;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     
-    
-    TestSample.class,
+    TestInvalidUser.class,
+            
+            TestDatafileSearch.class,
+            TestDatasetSearch.class,
+            TestInvestigationSearch.class,
+            
+            TestSample.class,
             TestKeyword.class,
             TestPublication.class,
             TestInvestigator.class,
@@ -78,11 +83,7 @@ import uk.icat3.util.ExecuteDatabaseScript;
             TestDatafileParameter.class,
             
             TestKeywordSearch.class,
-            TestInvalidUser.class,
             
-            TestDatafileSearch.class,
-            TestDatasetSearch.class,
-            TestInvestigationSearch.class,
             
             TestGateKeeperAdminInvestigation.class,
             TestGateKeeperCreatorInvestigation.class,

@@ -87,6 +87,8 @@ public class TestInvestigation extends BaseTestClassTX {
         Investigation validInvestigation  = getInvestigation(true);
         Investigation duplicateInvestigation  = getInvestigationDuplicate(true);
         validInvestigation.setInvAbstract(invAbstract);
+        validInvestigation.setVisitId(""+new Random().nextInt());
+        validInvestigation.setFacility("ISIS");
         validInvestigation.setId(duplicateInvestigation.getId());
         
         Investigation investigationInserted = (Investigation)InvestigationManager.updateInvestigation(VALID_USER_FOR_INVESTIGATION, validInvestigation, em);
@@ -116,7 +118,7 @@ public class TestInvestigation extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid investigation, no name
-        Investigation duplicateInvestigation = getInvestigation(true);
+        Investigation duplicateInvestigation = getInvestigationDuplicate(true);
         
         try {
             Investigation investigationInserted = (Investigation)InvestigationManager.createInvestigation(VALID_USER_FOR_INVESTIGATION, duplicateInvestigation,  em);
@@ -472,7 +474,7 @@ public class TestInvestigation extends BaseTestClassTX {
         
         Dataset ds = new Dataset();
         Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
-        ds.setDatasetType(datasetType.iterator().next());
+        ds.setDatasetType(datasetType.iterator().next().getName());
         ds.setName("unit test create data set");
                 
         Datafile file = new Datafile();
@@ -544,7 +546,7 @@ public class TestInvestigation extends BaseTestClassTX {
             
             investigation.setTitle("investigation "+random.nextInt());
             investigation.setInvNumber("11");
-            investigation.setInvType(new InvestigationType("experiment"));
+            investigation.setInvType("experiment");
             
             return investigation;
         } else {
