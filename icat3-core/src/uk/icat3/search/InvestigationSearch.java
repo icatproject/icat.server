@@ -288,7 +288,7 @@ public class InvestigationSearch extends ManagerUtil {
         
         if(advanDTO.hasInvestigationType()){
             log.trace("Searching Investigation Type info");
-            JPQL += " AND i.invType.name = :invType";
+            JPQL += " AND i.invType = :invType";
         }
         
         if(advanDTO.hasAbstract()){

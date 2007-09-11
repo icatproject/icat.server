@@ -519,7 +519,7 @@ public class TestSearch {
         keywords.add("ccwilson");
           keywords.add("calibration");
         //  ts.seachByKeywords("gjd37", keywords);
-         ts.seachByKeywords("gjd37", keywords);
+        // ts.seachByKeywords("gjd37", keywords);
         
         //log.info("Hello");
         //  ts.getMyInvestigations("gjd37");
@@ -543,13 +543,13 @@ public class TestSearch {
         /*Collection<String> inv  =   new ArrayList<String>();
         inv.add("JAMES-JAMES");*/
         //  dto.setInvestigators(inv);
-        dto.setDateRangeStart(new Date(1,1,1/*System.currentTimeMillis()-900000000)*/));  //120 = 2020
+        //dto.setDateRangeStart(new Date(1,1,1/*System.currentTimeMillis()-900000000)*/));  //120 = 2020
         //dto.setYearRangeEnd(new Date());
-        dto.setSampleName("multidetecto");
+       // dto.setSampleName("multidetecto");
        // dto.setInstruments(ins);
         //dto.setExperimentNumber("3684");
        //  dto.setVisitId("40");
-      //  dto.setInvestigationType("experi");
+       //dto.setInvestigationType("experiment");
         //dto.setBackCatalogueInvestigatorString("ab etc - oxford,");
         //
         //dto.setDatafileName("a");
@@ -557,13 +557,13 @@ public class TestSearch {
         
         //isis
         keywords2.add("multidetecto");
-        
+        dto.setInvestigationName("SrF2 calibration  w=-25.3");
       //  dto.setKeywords(keywords2);
        // dto.setDatafileName("CSP11758.");
        // dto.setRunEnd(11759L);
        // dto.setRunStart(11757L);
        // dto.setFuzzy(false);
-     //   ts.seachByAdvanced("gjd37",dto);
+        ts.seachByAdvanced("gjd37",dto);
         
        //  ts.getAllKeywords("gjd37");
         //
