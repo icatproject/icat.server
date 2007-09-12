@@ -125,12 +125,14 @@ public class DefaultUser implements User {
             return sid;
             
         } catch(NoResultException ex) {
+            log.warn("No MyProxy Server found in database, information set up incorrectly or not set.",ex);
             //no proxy in database or no proxy with active setup
             throw new SessionException("MyProxy server information set up incorrectly.");
         } catch (MyProxyException mex) {
             log.warn("Error from myproxy server: "+mex.getMessage(),mex);
             throw new SessionException(handleMyProxyException(mex));
         } catch (SessionException lex) {
+            log.warn("SessionException:",lex);
             throw lex;
         } catch (Exception e) {
             log.warn("Unexpected error from myproxy: "+e.getMessage(),e);
@@ -174,13 +176,13 @@ public class DefaultUser implements User {
     /**
      *
      * @param adminUsername
-     * @param AdminPassword
+     * @param adminPassword
      * @param runAsUser
      * @throws uk.icat3.exceptions.SessionException
      * @return
      */
-    public String login(String adminUsername, String AdminPassword, String runAsUser) throws SessionException {
-        log.trace("login("+adminUsername+", *********, "+runAsUser+")");
+    public String login(String adminUsername, String adminPassword, String runAsUser) throws SessionException {
+        log.trace("login(admin, *********, "+runAsUser+")");
         
         //find admin user first
         uk.icat3.userdefault.entity.User user =  null;
@@ -192,9 +194,10 @@ public class DefaultUser implements User {
         }
         
         //check that password is the same, should really hash it
-        if(!AdminPassword.equals(user.getPassword())){
-            log.warn("Invalid admin password: "+AdminPassword);
-        } else  log.info("Admin password correct");
+        //method protected by Glassfish basic authentication
+        /*if(!adminPassword.equals(user.getPassword())){
+            log.warn("Invalid admin password: "+adminPassword);
+        } else  log.info("Admin password correct");*/
         
         //create session
         //create UUID for session
