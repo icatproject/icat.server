@@ -79,11 +79,13 @@ public class TestAll {
         DatafileManager.getDatafiles(SID, DATAFILE_ID);
         
         Datafile df = DatafileManager.createDatafile(SID, "name for sid "+SID);
-        DatafileManager.updateDatafile(SID, df, "new name of "+SID);  //this should fail with ICAT_ADMIN user
-        DatafileManager.delete_undeleteDatafile(SID, df.getId());
-        DatafileManager.delete_undeleteDatafile(SID, df.getId());
-        DatafileManager.removeDatafile(SID, df.getId()); //should be false for none ICAT_ADMIN user
-        
+        if(df != null) {
+            DatafileManager.updateDatafile(SID, df, "new name of "+SID);  //this should fail with ICAT_ADMIN user
+            DatafileManager.delete_undeleteDatafile(SID, df.getId());
+            DatafileManager.delete_undeleteDatafile(SID, df.getId());
+            DatafileManager.removeDatafile(SID, df.getId()); //should be false for none ICAT_ADMIN user
+        }
+  
         DatafileParameter dfp = DatafileManager.addParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATAFILE_ID);
         if(dfp !=null) {
             DatafileManager.updateDatafileParameter(SID, dfp, "new description for dfp");
@@ -97,10 +99,12 @@ public class TestAll {
         DatasetManager.getDatasets(SID, DATASET_ID);
         
         Dataset ds = DatasetManager.createDataset(SID, "name for sid "+SID);
-        DatasetManager.updateDataset(SID, ds, "new name of "+SID);  //this should fail with ICAT_ADMIN user
-        DatasetManager.delete_undeleteDataset(SID, ds.getId());
-        DatasetManager.delete_undeleteDataset(SID, ds.getId());
-        DatasetManager.removeDataset(SID, ds.getId()); //should be false for none ICAT_ADMIN user
+        if(ds != null){
+            DatasetManager.updateDataset(SID, ds, "new name of "+SID);  //this should fail with ICAT_ADMIN user
+            DatasetManager.delete_undeleteDataset(SID, ds.getId());
+            DatasetManager.delete_undeleteDataset(SID, ds.getId());
+            DatasetManager.removeDataset(SID, ds.getId()); //should be false for none ICAT_ADMIN user
+        }
         
         DatasetParameter dsp = DatasetManager.addParameter(SID, PARAMETER_NAME, PARAMETER_UNITS, DATASET_ID);
         if(dsp != null) {

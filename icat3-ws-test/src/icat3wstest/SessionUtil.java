@@ -18,8 +18,8 @@ public class SessionUtil {
     
     /** Creates a new instance of Main */
     public static String login(String username, String password) throws Exception{
-        
-        try {            
+       
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
@@ -36,12 +36,12 @@ public class SessionUtil {
             assert false;
             throw ex;
             // TODO handle custom exceptions here
-        }        
+        }
     }
     
     public static String loginLifetime(String username, String password, int lifetime) throws Exception{
         
-        try { 
+        try {
             
             long time = System.currentTimeMillis();
             
@@ -65,7 +65,7 @@ public class SessionUtil {
     
     public static void logout(String sid) throws Exception{
         
-        try { 
+        try {
             
             long time = System.currentTimeMillis();
             
@@ -94,7 +94,7 @@ public class SessionUtil {
         // TODO code application logic here
         login(System.getProperty("user.name"), System.getProperty("usersso.password"));
         //String sid = loginLifetime(System.getProperty("user.name"), System.getProperty("usersso.password"), 2);
-       // if(sid != null) logout(sid);
+        // if(sid != null) logout(sid);
     }
     
 }

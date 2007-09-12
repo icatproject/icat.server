@@ -209,12 +209,12 @@ public class InvestigationSearch {
        //   searchKeywordAll(SID, "cal");
         // searchSurname(SID, "in");
         // searchUserId(SID, "gjd37");
-       searchMyInvestigations(SID);
-       // AdvancedSearchDetails asd = new AdvancedSearchDetails();
-       // asd.getKeywords().add(KEYWORD);
+     //  searchMyInvestigations(SID);
+        AdvancedSearchDetails asd = new AdvancedSearchDetails();
+       // asd.getKeywords().add("calibration");
        // asd.getInvestigators().add(SURNAME);
-        
-       // InvestigationSearch.searchAdvanced(SID, asd);
+        asd.setInvestigationName("SrF2 calibration  w=-25.3d");
+        InvestigationSearch.searchAdvanced(SID, asd);
     }
     
 }

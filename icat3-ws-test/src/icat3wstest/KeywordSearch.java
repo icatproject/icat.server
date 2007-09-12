@@ -63,8 +63,11 @@ public class KeywordSearch {
             
             System.out.println("Number of keywords for user "+type+" is "+result.size());
             System.out.println("Results:");
+            int i = 0;
             for (String kw : result) {
                 System.out.println("    "+kw);
+                i++;
+                if(i > 100) break;
             }
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");
@@ -92,8 +95,11 @@ public class KeywordSearch {
             
             System.out.println("Number of all "+type+" keywords is "+result.size());
             System.out.println("Results:");
+            int i = 0;
             for (String kw : result) {
                 System.out.println("    "+kw);
+                i++;
+                if(i > 100) break;
             }
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");

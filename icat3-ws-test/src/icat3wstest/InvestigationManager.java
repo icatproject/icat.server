@@ -63,7 +63,7 @@ public class InvestigationManager {
             
             // TODO process result here
             List<Investigation> investigations = ICATSingleton.getInstance().getInvestigationsIncludes(
-                    sid, ids, client.InvestigationInclude.INVESTIGATORS_AND_SHIFTS);
+                    sid, ids, client.InvestigationInclude.ALL);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
