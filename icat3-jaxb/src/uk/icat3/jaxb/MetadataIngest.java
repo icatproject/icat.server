@@ -11,6 +11,8 @@ import javax.persistence.EntityManager;
 import org.apache.commons.codec.language.Soundex;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.DatafileFormat;
+import uk.icat3.entity.IcatRole;
+import uk.icat3.entity.SampleParameter;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -21,6 +23,7 @@ import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.InvestigationManager;
 import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.InvestigationSearch;
+import uk.icat3.util.ElementType;
 import uk.icat3.util.Util;
 
 /**
@@ -37,7 +40,7 @@ import uk.icat3.util.Util;
  * into ICAT.  The database is queried to decipher where
  *
  *
- * isis will use this service at the end of each experimental run to submit metadata for a resulting raw / log / nexus file
+ * ISIS will use this service at the end of each experimental run to submit metadata for a resulting raw / log / nexus file
  * read xml into object tree
  * find related investigation
  * if related investigation found then place datafile within that investigation
@@ -52,7 +55,7 @@ public class MetadataIngest {
     static Logger log = Logger.getLogger(MetadataIngest.class);
     static String RUN_NUMBER = "RUN_NUMBER";
     static int RUN_NUMBER_THRESHOLD = 10;
-    static long DATE_THRESHOLD = 604800000;  //one week    
+    static long DATE_THRESHOLD = 604800000;  //one week in seconds    
     
     /**
      * Method that accepts XML document in the form of a String for ingestion into ICAT
@@ -95,9 +98,7 @@ public class MetadataIngest {
                         //may want to do extra checks here to make sure metadata is correct
                         //..
                         //.
-                    }//end if
-                    
-                    
+                    }//end if                                        
                     
                     //If datafile does not belong to existing investigation then ingest everything
                     if (investigationId == null) {
@@ -132,22 +133,48 @@ public class MetadataIngest {
                     ArrayList<uk.icat3.entity.Investigator> investigators = getInvestigators(_investigators, investigation.getId());
                     for (uk.icat3.entity.Investigator investigator : investigators) {
                         try {
-                            InvestigationManager.addInvestigationObject(userId, investigator, investigation.getId(), manager);
+                            InvestigationManager.addInvestigationObject(userId, investigator, investigation.getId(), manager);                            
                         } catch (ValidationException ve) {
+                            ve.printStackTrace();
                             //catch validation exception i.e. if duplicate investigator exists, allow ingestion of other investigators to continue
                         }//end try/catch
-                    }//end                    
+                    }//end    
+                                                       
+                    //add permissions for investigators to investigation
+                    for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
+                        if (!userId.equals(_investigator.getUserId()))
+                            InvestigationManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), investigation.getId(), manager);
+                    }//end for                    
+     
+                    //add Investigation Samples (used in experiment pre-population)                    
+                    List<uk.icat3.jaxb.gen.Sample> _samples = _inv.getSample();
+                    for (uk.icat3.jaxb.gen.Sample _sample : _samples) {                        
+                        uk.icat3.entity.Sample sample = getSample(userId, _sample, investigation, manager);
+                    }//end for
                     
                     List<Dataset> _datasets = _inv.getDataset();
                     for (Dataset _dataset : _datasets) {                        
                         uk.icat3.entity.Dataset dataset = getDataset(userId, _dataset, investigation, manager);
-                        
+
+                        //add permssions for investigators to dataset
+                        for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
+                            if (!userId.equals(_investigator.getUserId()))
+                                DataSetManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), dataset.getId(), manager);
+                        }//end for                    
+
                         List<Datafile> _datafiles = _dataset.getDatafile();
                         for (Datafile _datafile : _datafiles) {                            
                             uk.icat3.entity.Datafile datafile = getDatafile(userId, _datafile, dataset, manager);
-                        }//end for datafile
-                        
+                            
+                            //add permssions for investigators to datafile
+                            for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
+                                if (!userId.equals(_investigator.getUserId()))
+                                    DataFileManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), datafile.getId(), manager);
+                            }//end for                    
+
+                        }//end for datafile                        
                     }//end for
+                    
                     
                     
                 }//end for
@@ -319,16 +346,16 @@ public class MetadataIngest {
     private static ArrayList<uk.icat3.entity.Investigator> getInvestigators(List<uk.icat3.jaxb.gen.Investigator> _investigators, Long investigationId) {
         ArrayList<uk.icat3.entity.Investigator> investigators = new ArrayList<uk.icat3.entity.Investigator>();
         for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
-            uk.icat3.entity.InvestigatorPK pk = new uk.icat3.entity.InvestigatorPK(_investigator.getUserId(), investigationId);
+            uk.icat3.entity.InvestigatorPK pk = new uk.icat3.entity.InvestigatorPK(_investigator.getAffiliationId(), investigationId);
             uk.icat3.entity.Investigator investigator = new uk.icat3.entity.Investigator(pk);
-            investigator.setRole(_investigator.getRole());
+            investigator.setRole(_investigator.getRole());            
             investigators.add(investigator);
         }//end for
         
         return investigators;
     }
     
-    
+
     private static uk.icat3.entity.Dataset getDataset(String userId, uk.icat3.jaxb.gen.Dataset _dataset, uk.icat3.entity.Investigation investigation, EntityManager manager) throws Exception {
         
         //check to see if dataset exists in database

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<icat version="1.0 RC6" xsi:noNamespaceSchemaLocation="icatXSD.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<study>
+		<investigation>
+			<inv_number>0</inv_number>
+			<visit_id>1</visit_id>
+			<instrument>EMU</instrument>
+			<title>arse</title>
+			<investigator>
+				<user_id>tang76</user_id>
+				<role>experimenter</role>
+				<privilege>ADMIN</privilege>
+				<affiliation_id>Tom</affiliation_id>
+			</investigator>
+			<investigator>
+				<user_id>dwf64</user_id>
+				<role>experimenter</role>
+				<privilege>ADMIN</privilege>
+				<affiliation_id>9932</affiliation_id>
+			</investigator>
+			<inv_type>EXPERIMENT</inv_type>
+			<bcat_inv_str>MG/CLB - 6397 </bcat_inv_str>
+			<keyword>
+				<name>a</name>
+			</keyword>
+			<keyword>
+				<name>b</name>
+			</keyword>
+			<sample>
+				<name>ALUMINIUM</name>
+				<instance>0</instance>
+				<chemical_formula>ALUMINIUM</chemical_formula>
+				<safety_information>No information available.</safety_information>
+				<parameter>
+					<name>sample_state</name>
+					<string_value>n/a</string_value>
+					<units>N/A</units>
+				</parameter>
+				<parameter>
+					<name>sample_situation</name>
+					<string_value>n/a</string_value>
+					<units>N/A</units>
+				</parameter>
+			</sample>
+		</investigation>
+	</study>
+</icat>

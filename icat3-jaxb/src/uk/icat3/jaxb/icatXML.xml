@@ -107,6 +107,11 @@
 						<units>N/A</units>
 						<description>Compression parameter used in Photoshop.</description>
 					</parameter>
+                                        <parameter>
+						<name>run_number</name>
+						<numeric_value>1</numeric_value>
+						<units>N/A</units>						
+					</parameter>                                        
 				</datafile>				
 			</dataset>
 		</investigation>
