@@ -69,17 +69,20 @@ public class MetadataIngest {
      */
     public static void ingestMetadata(String userId, String xml, EntityManager manager) throws Exception {
         Icat icat = null;
-        Long investigationId = null;
-        uk.icat3.entity.Investigation investigation = null;
-                        
+                                
         //read xml file
         try {
             icat = MetadataParser.parseMetadata(userId, xml);
+            ingestMetadata(userId, icat, manager);
         } catch (Exception e) {
             throw new ValidationException("An error occurred while trying to parse metadata for ingestion into ICAT ", e);
-        }//end try/catch
-        
-        
+        }//end try/catch                       
+    }
+
+    public static void ingestMetadata(String userId, Icat icat, EntityManager manager) throws Exception {
+        Long investigationId = null;
+        uk.icat3.entity.Investigation investigation = null;
+
         try {
             
             List<Study> _studies = icat.getStudy();
@@ -139,11 +142,11 @@ public class MetadataIngest {
                             //catch validation exception i.e. if duplicate investigator exists, allow ingestion of other investigators to continue
                         }//end try/catch
                     }//end    
-                                                       
+                                                      
                     //add permissions for investigators to investigation
                     for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
                         if (!userId.equals(_investigator.getUserId()))
-                            InvestigationManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), investigation.getId(), manager);
+                            InvestigationManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege().value(), investigation.getId(), manager);
                     }//end for                    
      
                     //add Investigation Samples (used in experiment pre-population)                    
@@ -159,7 +162,7 @@ public class MetadataIngest {
                         //add permssions for investigators to dataset
                         for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
                             if (!userId.equals(_investigator.getUserId()))
-                                DataSetManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), dataset.getId(), manager);
+                                DataSetManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege().value(), dataset.getId(), manager);
                         }//end for                    
 
                         List<Datafile> _datafiles = _dataset.getDatafile();
@@ -169,18 +172,15 @@ public class MetadataIngest {
                             //add permssions for investigators to datafile
                             for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
                                 if (!userId.equals(_investigator.getUserId()))
-                                    DataFileManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), datafile.getId(), manager);
+                                    DataFileManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege().value(), datafile.getId(), manager);
                             }//end for                    
 
                         }//end for datafile                        
                     }//end for
-                    
-                    
-                    
+                                                            
                 }//end for
             }//end for
-            
-            
+                        
         } catch (NoSuchObjectFoundException ex) {
             java.util.logging.Logger.getLogger("global").log(Level.SEVERE, null, ex);
         } catch (InsufficientPrivilegesException ex) {

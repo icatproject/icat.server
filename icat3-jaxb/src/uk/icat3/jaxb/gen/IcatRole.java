@@ -13,32 +13,41 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for Status.
+ * <p>Java class for Icat_Role.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="Status">
+ * &lt;simpleType name="Icat_Role">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="ONGOING"/>
- *     &lt;enumeration value="CLOSED"/>
+ *     &lt;maxLength value="255"/>
+ *     &lt;enumeration value="ADMIN"/>
+ *     &lt;enumeration value="CREATOR"/>
+ *     &lt;enumeration value="DELETER"/>
+ *     &lt;enumeration value="DOWNLOADER"/>
+ *     &lt;enumeration value="READER"/>
+ *     &lt;enumeration value="UPDATER"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
  * 
  */
-@XmlType(name = "Status")
+@XmlType(name = "Icat_Role")
 @XmlEnum
-public enum Status {
+public enum IcatRole {
 
-    ONGOING,
-    CLOSED;
+    ADMIN,
+    CREATOR,
+    DELETER,
+    DOWNLOADER,
+    READER,
+    UPDATER;
 
     public String value() {
         return name();
     }
 
-    public static Status fromValue(String v) {
+    public static IcatRole fromValue(String v) {
         return valueOf(v);
     }
 
