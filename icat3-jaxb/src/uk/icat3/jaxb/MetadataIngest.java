@@ -301,18 +301,13 @@ public class MetadataIngest {
         inv.setInvNumber(investigation.getInvNumber());
         inv.setPrevInvNumber(investigation.getPrevInvNumber());
         inv.setTitle(investigation.getTitle());
-        
-        //if (investigation.getin)
-        
-        uk.icat3.entity.InvestigationType invType = new uk.icat3.entity.InvestigationType(investigation.getInvType().value().toLowerCase());
-        inv.setInvType(invType);
+                                
+        inv.setInvType(investigation.getInvType().value().toLowerCase());
         //inv.setInvestigationInclude(investigation.get); --what is this?
         //inv.setModId(user);
         //inv.setModTime(new Date());
-        inv.setVisitId(investigation.getVisitId());
-        
-        uk.icat3.entity.Instrument inst = new uk.icat3.entity.Instrument(investigation.getInstrument());
-        inv.setInstrument(inst);
+        inv.setVisitId(investigation.getVisitId());                
+        inv.setInstrument(investigation.getInstrument());
         
         return inv;
     }
@@ -378,14 +373,12 @@ public class MetadataIngest {
                 dataset.setSampleId(sample.getId());
             }//end if
             
-            if (_dataset.getDatasetStatus() != null) {
-                uk.icat3.entity.DatasetStatus status = new uk.icat3.entity.DatasetStatus(_dataset.getDatasetStatus().value().toLowerCase());
-                dataset.setDatasetStatus(status);
+            if (_dataset.getDatasetStatus() != null) {                
+                dataset.setDatasetStatus(_dataset.getDatasetStatus().value().toLowerCase());
             }//end if
             
-            if (_dataset.getDatasetType() != null) {
-                uk.icat3.entity.DatasetType type = new uk.icat3.entity.DatasetType(_dataset.getDatasetType().value().toLowerCase());
-                dataset.setDatasetType(type);
+            if (_dataset.getDatasetType() != null) {                
+                dataset.setDatasetType(_dataset.getDatasetType().value().toLowerCase());
             }//end if
             
             
