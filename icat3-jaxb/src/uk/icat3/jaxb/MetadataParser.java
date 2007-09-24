@@ -2,6 +2,7 @@ package uk.icat3.jaxb;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.net.URL;
 import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -27,8 +28,10 @@ public class MetadataParser {
        JAXBContext jaxbContext = JAXBContext.newInstance("uk.icat3.jaxb.gen");
        Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
 
-       SchemaFactory sf = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);
-       Schema schema = sf.newSchema(new File("src/uk/icat3/jaxb/icatXSD.xsd"));            
+       SchemaFactory sf = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);            
+       URL url = MetadataParser.class.getResource("icatXSD.xsd");       
+       if(url == null) throw new Exception("Unable to location icatXSD.xsd");
+       Schema schema = sf.newSchema(url);            
        unMarshaller.setSchema(schema);           
 
        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes("UTF-8"));
