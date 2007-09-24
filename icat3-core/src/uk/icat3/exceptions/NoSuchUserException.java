@@ -9,10 +9,13 @@
 
 package uk.icat3.exceptions;
 
+import javax.ejb.ApplicationException;
+
 /**
  *
  * @author df01
  */
+@ApplicationException(rollback=true)
 public class NoSuchUserException extends ICATAPIException {
     
     /**

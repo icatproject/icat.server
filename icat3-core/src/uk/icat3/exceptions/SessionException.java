@@ -1,6 +1,8 @@
 
 package uk.icat3.exceptions;
 
+import javax.ejb.ApplicationException;
+
 /*
  * SessionException.java
  *
@@ -12,6 +14,7 @@ package uk.icat3.exceptions;
  * @author df01
  * version 1.0
  */
+@ApplicationException(rollback=true)
 public class SessionException extends ICATAPIException {
     
     /**

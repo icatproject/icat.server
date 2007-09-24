@@ -1087,7 +1087,7 @@ import uk.icat3.util.Queries;
                 //this.instrument.isValid(manager);
                 //check instrument is correct.
                 //check investigation type is correct.
-                Instrument instrument = manager.find(Instrument.class, this.invType);
+                Instrument instrument = manager.find(Instrument.class, this.instrument);
                 if(instrument == null)throw new ValidationException(this.instrument+" is not a valid instrument.");
             }
             
