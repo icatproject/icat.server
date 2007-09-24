@@ -10,11 +10,7 @@
 package icat3wstest;
 
 import client.DatafileFormat;
-import client.DatasetStatus;
-import client.DatasetType;
 import client.IcatRole;
-import client.Instrument;
-import client.InvestigationType;
 import client.Parameter;
 import static icat3wstest.Constants.*;
 /**

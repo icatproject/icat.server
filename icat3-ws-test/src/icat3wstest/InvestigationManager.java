@@ -13,7 +13,7 @@ import client.DatafileParameter;
 import client.Dataset;
 import client.Investigation;
 import client.InvestigationInclude;
-import client.InvestigationType;
+
 import client.Investigator;
 import client.Keyword;
 import java.util.ArrayList;

@@ -10,7 +10,6 @@ package icat3wstest;
 
 import client.Dataset;
 import client.*;
-import client.InvestigationType;
 import client.Investigator;
 import java.util.ArrayList;
 import java.util.List;

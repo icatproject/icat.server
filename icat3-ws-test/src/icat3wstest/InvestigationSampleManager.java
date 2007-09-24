@@ -10,8 +10,6 @@ package icat3wstest;
 
 import client.Dataset;
 import client.*;
-import client.InvestigationType;
-import client.Investigator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -25,7 +23,7 @@ public class InvestigationSampleManager {
     
     public static Sample addSample(String sid, String instance, String name, Long investigationid) throws Exception {
         
-        try {             
+        try {
             Sample sample = new Sample();
             sample.setInstance(instance);
             sample.setName(name);
@@ -54,7 +52,7 @@ public class InvestigationSampleManager {
     
     public static void updateSample(String sid, Sample sample, String newSafetyInformation) throws Exception {
         
-        try {             
+        try {
             sample.setSafetyInformation(newSafetyInformation);
             
             long time = System.currentTimeMillis();
@@ -81,7 +79,7 @@ public class InvestigationSampleManager {
     
     public static void delete_undeleteSample(String sid, Long sampleId) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
@@ -105,7 +103,7 @@ public class InvestigationSampleManager {
     
     public static void removeSample(String sid, Long sampleId) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
