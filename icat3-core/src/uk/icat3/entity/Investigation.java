@@ -761,6 +761,7 @@ import uk.icat3.util.Queries;
         String facilityAcquired = "Y";
         if(type == Cascade.DELETE || type == Cascade.FACILITY_ACQUIRED){
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
+            facilityAcquired = deleted;
             if(managerValue == null && type == Cascade.DELETE) throw new RuntimeException("Manager Value needs to be set aswell if Cascade.DELETE");
         }
         

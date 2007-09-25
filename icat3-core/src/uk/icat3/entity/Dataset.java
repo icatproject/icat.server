@@ -427,6 +427,7 @@ import uk.icat3.util.Queries;
         String facilityAcquired = "Y";
         if(type == Cascade.DELETE || type == Cascade.FACILITY_ACQUIRED){
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
+            facilityAcquired = deleted;
         }
         
         if(type == Cascade.REMOVE_DELETED_ITEMS){

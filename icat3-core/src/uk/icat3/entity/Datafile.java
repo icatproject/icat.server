@@ -571,6 +571,7 @@ import uk.icat3.util.ElementType;
         String facilityAcquired = "Y";
         if(type == Cascade.DELETE || type == Cascade.FACILITY_ACQUIRED){
             deleted = (((Boolean)cascadeValue).booleanValue()) ? "Y" : "N";
+            facilityAcquired = deleted;
         }
         
         //data file parameters
