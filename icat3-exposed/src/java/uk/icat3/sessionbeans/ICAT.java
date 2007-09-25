@@ -1771,7 +1771,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
 
     /////////////////////     XML Ingest //////////////////////////
     @WebMethod
-    public void ingestMetadata(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "xml") String xml) throws SessionException, ValidationException, InsufficientPrivilegesException, ICATAPIException {
-        xmlIngestionManagerLocal.ingestMetadata(sessionId, xml);
+    public Long[] ingestMetadata(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "xml") String xml) throws SessionException, ValidationException, InsufficientPrivilegesException, ICATAPIException {
+        return xmlIngestionManagerLocal.ingestMetadata(sessionId, xml);
     }
 }

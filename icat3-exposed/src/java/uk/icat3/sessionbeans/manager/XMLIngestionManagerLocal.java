@@ -22,6 +22,6 @@ import uk.icat3.exceptions.ValidationException;
 @Local
 public interface XMLIngestionManagerLocal {
         
-    public void ingestMetadata(String sessionId, String xml) throws SessionException, ValidationException, InsufficientPrivilegesException, ICATAPIException ;
+    public Long[] ingestMetadata(String sessionId, String xml) throws SessionException, ValidationException, InsufficientPrivilegesException, ICATAPIException ;
   
 }

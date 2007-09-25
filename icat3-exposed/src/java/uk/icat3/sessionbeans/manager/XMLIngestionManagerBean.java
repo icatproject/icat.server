@@ -45,11 +45,11 @@ public class XMLIngestionManagerBean extends EJBObject implements XMLIngestionMa
      * @param xml   
      * @throws java.lang.Exception    
      */
-    public void ingestMetadata(String sessionId, String xml) throws SessionException, ValidationException, InsufficientPrivilegesException, ICATAPIException {
+    public Long[] ingestMetadata(String sessionId, String xml) throws SessionException, ValidationException, InsufficientPrivilegesException, ICATAPIException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        MetadataIngest.ingestMetadata(userId, xml, manager);
+        return MetadataIngest.ingestMetadata(userId, xml, manager);
     }
 }
