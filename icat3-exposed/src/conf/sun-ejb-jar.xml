@@ -1,6 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE sun-ejb-jar PUBLIC "-//Sun Microsystems, Inc.//DTD Application Server 9.0 EJB 3.0//EN" "http://www.sun.com/software/appserver/dtds/sun-ejb-jar_3_0-0.dtd">
 <sun-ejb-jar>
+   <!-- <security-role-mapping>
+        <role-name>glen</role-name>
+        <group-name>admin</group-name>
+    </security-role-mapping>
+ <security-role-mapping>
+        <role-name>admin</role-name>
+        <group-name>admin</group-name>
+    </security-role-mapping>-->
+<!-- <security-role-mapping>
+        <role-name>test</role-name>
+        <group-name>admin</group-name>
+    </security-role-mapping>
+ <security-role-mapping>
+        <role-name>gda</role-name>
+        <group-name>admin</group-name>
+    </security-role-mapping>-->
+
+   <!-- <security-role-mapping>
+        <role-name>isis</role-name>
+        <group-name>admin</group-name>
+    </security-role-mapping>
+ <security-role-mapping>
+        <role-name>diamond</role-name>
+        <group-name>admin</group-name>
+    </security-role-mapping>
+ <security-role-mapping>
+        <role-name>clf</role-name>
+        <group-name>admin</group-name>
+    </security-role-mapping>-->
+ 
   <enterprise-beans>
    <ejb>
       <ejb-name>ICAT</ejb-name>
@@ -12,9 +42,13 @@
     <ejb>
       <ejb-name>ICATAdmin</ejb-name>
       <webservice-endpoint>
-        <port-component-name>ICATAdmin</port-component-name>
-        <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        <port-component-name>ICATAdmin</port-component-name>        
+        <login-config>
+              <auth-method>BASIC</auth-method>
+              <realm>file</realm>
+        </login-config>         
+        <transport-guarantee>CONFIDENTIAL</transport-guarantee>      
       </webservice-endpoint>
-    </ejb>
+    </ejb>    
   </enterprise-beans>
 </sun-ejb-jar>
