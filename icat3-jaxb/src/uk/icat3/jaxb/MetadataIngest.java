@@ -485,9 +485,7 @@ public class MetadataIngest {
         
         datafile.setLocation(_datafile.getLocation());
         datafile.setName(_datafile.getName());
-        datafile.setSignature(_datafile.getSignature());
-        
-        datafile.setFacilityAcquired("Y");
+        datafile.setSignature(_datafile.getSignature());                
         
         //store in database
         datafile = DataFileManager.createDataFile(userId, datafile, dataset.getId(), manager);
