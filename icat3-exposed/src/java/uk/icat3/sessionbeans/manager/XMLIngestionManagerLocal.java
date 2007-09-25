@@ -10,6 +10,9 @@
 package uk.icat3.sessionbeans.manager;
 
 import javax.ejb.Local;
+import uk.icat3.exceptions.ICATAPIException;
+import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.ValidationException;
 
 /**
  *
@@ -17,7 +20,7 @@ import javax.ejb.Local;
  */
 @Local
 public interface XMLIngestionManagerLocal {
-    
-    //put method here
-    public void ingestXML();
+        
+    public void ingestMetadata(String sessionId, String xml) throws SessionException, ValidationException, InsufficientPrivilegesException, ICATAPIException ;
+  
 }

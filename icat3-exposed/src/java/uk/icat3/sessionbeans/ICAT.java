@@ -45,6 +45,7 @@ import uk.icat3.entity.Publication;
 import uk.icat3.entity.Sample;
 import uk.icat3.entity.SampleParameter;
 import uk.icat3.entity.SampleParameterPK;
+import uk.icat3.exceptions.ICATAPIException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
@@ -69,50 +70,39 @@ import uk.icat3.util.LogicalOperator;
  *
  * @author gjd37
  */
-@Stateless()
-@WebService(/*serviceName="ICATISISNoPartService",/* name="ICATServices",*/ targetNamespace="client.icat3.uk")
-//this interceptor check no nulls passed in and logs the method arguments
-@Interceptors(ArgumentValidator.class)
-@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+@Stateless
+@WebService(serviceName = "ICATService", targetNamespace = "client.icat3.uk")
+@Interceptors(value = ArgumentValidator.class)
+@TransactionAttribute(value = TransactionAttributeType.NOT_SUPPORTED)
 public class ICAT extends EJBObject /*implements ICATLocal*/ {
-    
+
     static Logger log = Logger.getLogger(ICAT.class);
-    
     ///////////////////////  Inject all the EJBs   //////////////////////////
     @EJB
     protected DatafileManagerLocal datafileManagerLocal;
-    
     @EJB
     protected DatasetManagerLocal datasetManagerLocal;
-    
     @EJB
     protected InvestigationManagerLocal investigationManagerLocal;
-    
     @EJB
     protected DatafileSearchLocal datafileSearchLocal;
-    
     @EJB
     protected DatasetSearchLocal datasetSearchLocal;
-    
     @EJB
     protected InvestigationSearchLocal investigationSearchLocal;
-    
     @EJB
     protected KeywordSearchLocal keywordSearchLocal;
-    
     @EJB
     protected XMLIngestionManagerLocal xmlIngestionManagerLocal;
     ///////////////////////  End of Inject all the EJBs   ///////////////////////
-    
-    
+
     /** Creates a new instance of AllOperationsBean */
     public ICAT() {
     }
-    
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////   Session  ///////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    
+
     ///////////////////////////     UserSession methods  /////////////////////////////////////////
     /**
      * Logs in, defaults to 2 hours
@@ -122,12 +112,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod()
+    @WebMethod
     @ExcludeClassInterceptors
-    public String login(@WebParam(name="username") String username, @WebParam(name="password") String password) throws SessionException{
+    public String login(@WebParam(name = "username")
+    String username, @WebParam(name = "password")
+    String password) throws SessionException {
         return user.login(username, password);
     }
-    
+
     /**
      * Logs in for a certain amount of time
      *
@@ -137,30 +129,33 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName="loginLifetime")
+    @WebMethod(operationName = "loginLifetime")
     @ExcludeClassInterceptors
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.loginLifetime")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.loginLifetimeResponse")
-    public String login(@WebParam(name="username") String username, @WebParam(name="password") String password, @WebParam(name="lifetime") int lifetime) throws SessionException{
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.loginLifetime")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.loginLifetimeResponse")
+    public String login(@WebParam(name = "username")
+    String username, @WebParam(name = "password")
+    String password, @WebParam(name = "lifetime")
+    int lifetime) throws SessionException {
         return user.login(username, password, lifetime);
     }
-    
+
     /**
      * Logs out
      *
      * @param sessionId
      * @return
      */
-    @WebMethod()
-    public boolean logout(@WebParam(name="sessionId") String sessionId){
+    @WebMethod
+    public boolean logout(@WebParam(name = "sessionId")
+    String sessionId) {
         return user.logout(sessionId);
     }
     ///////////////////////////     End of UserSession methods  //////////////////////////////////
-    
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////   All Searches  ///////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    
     ///////////////////////////     KeywordSearch methods  /////////////////////////////////////////
     /**
      *  This gets all the keywords avaliable for that user, they can only see keywords associated with their
@@ -170,11 +165,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return list of keywords
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod()
-    public Collection<String> getKeywordsForUser(@WebParam(name="sessionId") String sessionId) throws SessionException{
+    @WebMethod
+    public Collection<String> getKeywordsForUser(@WebParam(name = "sessionId")
+    String sessionId) throws SessionException {
         return keywordSearchLocal.getKeywordsForUser(sessionId);
     }
-    
+
     /**
      * This gets all the keywords avaliable for that user, beginning with a keyword, they can only see keywords associated with their
      * investigations or public investigations
@@ -185,13 +181,16 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return list of keywords
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName="getKeywordsForUserStartWithMax")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.getKeywordsForUserStartWithMax")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.getKeywordsForUserStartWithMaxResponse")
-    public Collection<String> getKeywordsForUser(@WebParam(name="sessionId") String sessionId, @WebParam(name="startKeyword") String startKeyword, @WebParam(name="numberReturned") int numberReturned) throws SessionException{
+    @WebMethod(operationName = "getKeywordsForUserStartWithMax")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.getKeywordsForUserStartWithMax")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.getKeywordsForUserStartWithMaxResponse")
+    public Collection<String> getKeywordsForUser(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "startKeyword")
+    String startKeyword, @WebParam(name = "numberReturned")
+    int numberReturned) throws SessionException {
         return keywordSearchLocal.getKeywordsForUser(sessionId, startKeyword, numberReturned);
     }
-    
+
     /**
      * This gets all the keywords avaliable for that user that they can only see keywords associated with their
      * investigations or public investigations
@@ -201,13 +200,15 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return list of keywords
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName="getKeywordsForUserMax")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.getKeywordsForUserMax")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.getKeywordsForUserMaxResponse")
-    public Collection<String> getKeywordsForUser(@WebParam(name="sessionId") String sessionId, @WebParam(name="numberReturned") int numberReturned) throws SessionException{
+    @WebMethod(operationName = "getKeywordsForUserMax")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.getKeywordsForUserMax")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.getKeywordsForUserMaxResponse")
+    public Collection<String> getKeywordsForUser(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "numberReturned")
+    int numberReturned) throws SessionException {
         return keywordSearchLocal.getKeywordsForUser(sessionId, numberReturned);
     }
-    
+
     /**
      * This gets all the keywords avaliable for that user, beginning with a keyword, they can only see keywords associated with their
      * investigations or public investigations
@@ -217,13 +218,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException
      * @return list of keywords
      */
-    @WebMethod(operationName="getKeywordsForUserType")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.getKeywordsForUserType")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.getKeywordsForUserTypeResponse")
-    public Collection<String> getKeywordsForUser(String sessionId, KeywordType type) throws SessionException{
+    @WebMethod(operationName = "getKeywordsForUserType")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.getKeywordsForUserType")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.getKeywordsForUserTypeResponse")
+    public Collection<String> getKeywordsForUser(String sessionId, KeywordType type) throws SessionException {
         return keywordSearchLocal.getKeywordsForUser(sessionId, type);
     }
-    
+
     /**
      * This gets all the unique keywords in the database
      *
@@ -234,13 +235,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return list of keywords
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod()
-    public Collection<String> getAllKeywords(@WebParam(name="sessionId") String sessionId, @WebParam(name="type") KeywordType type) throws SessionException{
+    @WebMethod
+    public Collection<String> getAllKeywords(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "type")
+    KeywordType type) throws SessionException {
         return keywordSearchLocal.getAllKeywords(sessionId, type);
     }
     ///////////////////////////     End of KeywordSearch methods  /////////////////////////////////////////
-    
-    
+
     ///////////////////////////     Investigation Search methods  /////////////////////////////////////////
     /**
      * This searches all DB for investigations with the advanced search criteria
@@ -250,11 +252,11 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of {@link Investigation} investigation objects
      */
-    @WebMethod()
+    @WebMethod
     public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch) throws SessionException {
         return investigationSearchLocal.searchByAdvanced(sessionId, advancedSearch);
     }
-    
+
     /**
      * This searches all DB for investigations with the advanced search criteria
      *
@@ -265,13 +267,15 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of {@link Investigation} investigation objects
      */
-    @WebMethod(operationName="searchByAdvancedPagination")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByAdvancedPagination")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByAdvancedPaginationResponse")
-    public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch, @WebParam(name="startIndex") int startIndex, @WebParam(name="numberOfResults") int numberOfResults) throws SessionException {
+    @WebMethod(operationName = "searchByAdvancedPagination")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByAdvancedPagination")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByAdvancedPaginationResponse")
+    public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch, @WebParam(name = "startIndex")
+    int startIndex, @WebParam(name = "numberOfResults")
+    int numberOfResults) throws SessionException {
         return investigationSearchLocal.searchByAdvanced(sessionId, advancedSearch, startIndex, numberOfResults);
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view, with AND been operator
      *
@@ -282,13 +286,17 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName="searchByKeywordsFuzzyAndInclude")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsFuzzyAndInclude")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsFuzzyAndIncludeResponse")
-    public Collection<Investigation> searchByKeywords(@WebParam(name="sessionId") String sessionId, @WebParam(name="keywords") Collection<String> keywords, @WebParam(name="include") InvestigationInclude include, @WebParam(name="fuzzy") boolean fuzzy) throws SessionException {
+    @WebMethod(operationName = "searchByKeywordsFuzzyAndInclude")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsFuzzyAndInclude")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsFuzzyAndIncludeResponse")
+    public Collection<Investigation> searchByKeywords(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "keywords")
+    Collection<String> keywords, @WebParam(name = "include")
+    InvestigationInclude include, @WebParam(name = "fuzzy")
+    boolean fuzzy) throws SessionException {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords, include, fuzzy);
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view, with AND been operator, fuzzy false, no includes
      *
@@ -297,13 +305,15 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName="searchByKeywords")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywords")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsResponse")
-    public Collection<Investigation> searchByKeywords(@WebParam(name="sessionId") String sessionId, @WebParam(name="keywords") Collection<String> keywords) throws SessionException {
+    @WebMethod(operationName = "searchByKeywords")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywords")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsResponse")
+    public Collection<Investigation> searchByKeywords(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "keywords")
+    Collection<String> keywords) throws SessionException {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords);
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view, with AND been operator, fuzzy false, no includes
      *
@@ -314,13 +324,17 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName="searchByKeywordsPagination")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPagination")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationResponse")
-    public Collection<Investigation> searchByKeywords(@WebParam(name="sessionId") String sessionId, @WebParam(name="keywords") Collection<String> keywords, @WebParam(name="startIndex") int startIndex, @WebParam(name="numberOfResults") int numberOfResults) throws SessionException {
+    @WebMethod(operationName = "searchByKeywordsPagination")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsPagination")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationResponse")
+    public Collection<Investigation> searchByKeywords(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "keywords")
+    Collection<String> keywords, @WebParam(name = "startIndex")
+    int startIndex, @WebParam(name = "numberOfResults")
+    int numberOfResults) throws SessionException {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords, startIndex, numberOfResults);
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view, with AND been operator
      *
@@ -333,13 +347,19 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName="searchByKeywordsPaginationFuzzyAndInclude")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationFuzzyAndInclude")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationFuzzyAndIncludeResponse")
-    public Collection<Investigation> searchByKeywords(@WebParam(name="sessionId") String sessionId, @WebParam(name="keywords") Collection<String> keywords, @WebParam(name="include") InvestigationInclude include,  @WebParam(name="fuzzy") boolean fuzzy, @WebParam(name="startIndex") int startIndex, @WebParam(name="numberOfResults") int numberOfResults) throws SessionException {
+    @WebMethod(operationName = "searchByKeywordsPaginationFuzzyAndInclude")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationFuzzyAndInclude")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationFuzzyAndIncludeResponse")
+    public Collection<Investigation> searchByKeywords(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "keywords")
+    Collection<String> keywords, @WebParam(name = "include")
+    InvestigationInclude include, @WebParam(name = "fuzzy")
+    boolean fuzzy, @WebParam(name = "startIndex")
+    int startIndex, @WebParam(name = "numberOfResults")
+    int numberOfResults) throws SessionException {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords, include, fuzzy, startIndex, numberOfResults);
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view, searching by fuzzy is true, with AND been operator
      *
@@ -351,13 +371,18 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName="searchByKeywordsPaginationInclude")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationInclude")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationIncludeResponse")
-    public Collection<Investigation> searchByKeywords(@WebParam(name="sessionId") String sessionId, @WebParam(name="keywords")  Collection<String> keywords, @WebParam(name="include") InvestigationInclude include, @WebParam(name="startIndex") int startIndex, @WebParam(name="numberOfResults") int numberOfResults) throws SessionException {
+    @WebMethod(operationName = "searchByKeywordsPaginationInclude")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationInclude")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationIncludeResponse")
+    public Collection<Investigation> searchByKeywords(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "keywords")
+    Collection<String> keywords, @WebParam(name = "include")
+    InvestigationInclude include, @WebParam(name = "startIndex")
+    int startIndex, @WebParam(name = "numberOfResults")
+    int numberOfResults) throws SessionException {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords, include, startIndex, numberOfResults);
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -371,13 +396,20 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName="searchByKeywordsAll")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsAll")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByKeywordsAllResponse")
-    public Collection<Investigation> searchByKeywords(@WebParam(name="sessionId") String sessionId, @WebParam(name="keywords") Collection<String> keywords, @WebParam(name="operator") LogicalOperator operator,@WebParam(name="include")  InvestigationInclude include, @WebParam(name="fuzzy") boolean fuzzy, @WebParam(name="startIndex") int startIndex, @WebParam(name="numberOfResults") int numberOfResults) throws SessionException {
+    @WebMethod(operationName = "searchByKeywordsAll")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsAll")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsAllResponse")
+    public Collection<Investigation> searchByKeywords(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "keywords")
+    Collection<String> keywords, @WebParam(name = "operator")
+    LogicalOperator operator, @WebParam(name = "include")
+    InvestigationInclude include, @WebParam(name = "fuzzy")
+    boolean fuzzy, @WebParam(name = "startIndex")
+    int startIndex, @WebParam(name = "numberOfResults")
+    int numberOfResults) throws SessionException {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords, operator, include, fuzzy, startIndex, numberOfResults);
     }
-    
+
     /**
      * Lists all the investigations for the current user, ie who he is an investigator of
      *
@@ -385,11 +417,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection
      */
-    @WebMethod()
-    public Collection<Investigation> getMyInvestigations(@WebParam(name="sessionId") String sessionId) throws SessionException {
+    @WebMethod
+    public Collection<Investigation> getMyInvestigations(@WebParam(name = "sessionId")
+    String sessionId) throws SessionException {
         return investigationSearchLocal.getMyInvestigations(sessionId);
     }
-    
+
     /**
      * Lists all the investigations for the current user, ie who he is an investigator of
      *
@@ -398,13 +431,15 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection
      */
-    @WebMethod(operationName="getMyInvestigationsIncludes")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludes")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesResponse")
-    public Collection<Investigation> getMyInvestigations(@WebParam(name="sessionId") String sessionId, @WebParam(name="include")  InvestigationInclude include) throws SessionException {
+    @WebMethod(operationName = "getMyInvestigationsIncludes")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludes")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesResponse")
+    public Collection<Investigation> getMyInvestigations(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "include")
+    InvestigationInclude include) throws SessionException {
         return investigationSearchLocal.getMyInvestigations(sessionId, include);
     }
-    
+
     /**
      * Lists all the investigations for the current user, ie who he is an investigator of
      *
@@ -415,13 +450,17 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection
      */
-    @WebMethod(operationName="getMyInvestigationsIncludesPagination")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesPagination")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesPaginationResponse")
-    public Collection<Investigation> getMyInvestigations(@WebParam(name="sessionId") String sessionId, @WebParam(name="include")  InvestigationInclude include, @WebParam(name="startIndex") int startIndex, @WebParam(name="number_results") int number_results) throws SessionException {
+    @WebMethod(operationName = "getMyInvestigationsIncludesPagination")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesPagination")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesPaginationResponse")
+    public Collection<Investigation> getMyInvestigations(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "include")
+    InvestigationInclude include, @WebParam(name = "startIndex")
+    int startIndex, @WebParam(name = "number_results")
+    int number_results) throws SessionException {
         return investigationSearchLocal.getMyInvestigations(sessionId, include, startIndex, number_results);
     }
-    
+
     /**
      * Searches the investigations the user has access to view by user id
      *
@@ -430,11 +469,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of {@link Investigation} investigation objects
      */
-    @WebMethod()
-    public Collection<Investigation> searchByUserID(@WebParam(name="sessionId") String sessionId, @WebParam(name="userSearch") String userSearch) throws SessionException {
+    @WebMethod
+    public Collection<Investigation> searchByUserID(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "userSearch")
+    String userSearch) throws SessionException {
         return investigationSearchLocal.searchByUserID(sessionId, userSearch);
     }
-    
+
     /**
      * Searches the investigations the user has access to view by user id
      *
@@ -445,13 +486,17 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of {@link Investigation} investigation objects
      */
-    @WebMethod(operationName="searchByUserIDPagination")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByUserIDPagination")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByUserIDPaginationResponse")
-    public Collection<Investigation> searchByUserID(@WebParam(name="sessionId") String sessionId, @WebParam(name="userSearch") String userSearch, @WebParam(name="startIndex") int startIndex, @WebParam(name="number_results") int number_results) throws SessionException {
+    @WebMethod(operationName = "searchByUserIDPagination")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByUserIDPagination")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByUserIDPaginationResponse")
+    public Collection<Investigation> searchByUserID(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "userSearch")
+    String userSearch, @WebParam(name = "startIndex")
+    int startIndex, @WebParam(name = "number_results")
+    int number_results) throws SessionException {
         return investigationSearchLocal.searchByUserID(sessionId, userSearch, startIndex, number_results);
     }
-    
+
     /**
      * Searches the investigations the user has access to view by surname
      *
@@ -460,11 +505,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of
      */
-    @WebMethod()
-    public Collection<Investigation> searchByUserSurname(@WebParam(name="sessionId") String sessionId, @WebParam(name="surname") String surname) throws SessionException {
+    @WebMethod
+    public Collection<Investigation> searchByUserSurname(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "surname")
+    String surname) throws SessionException {
         return investigationSearchLocal.searchByUserSurname(sessionId, surname);
     }
-    
+
     /**
      * Searches the investigations the user has access to view by surname
      *
@@ -475,13 +522,17 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of
      */
-    @WebMethod(operationName="searchByUserSurnamePagination")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByUserSurnamePagination")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByUserSurnamePaginationResponse")
-    public Collection<Investigation> searchByUserSurname(@WebParam(name="sessionId") String sessionId, @WebParam(name="surname") String surname, @WebParam(name="startIndex") int startIndex, @WebParam(name="number_results") int number_results) throws SessionException {
+    @WebMethod(operationName = "searchByUserSurnamePagination")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByUserSurnamePagination")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByUserSurnamePaginationResponse")
+    public Collection<Investigation> searchByUserSurname(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "surname")
+    String surname, @WebParam(name = "startIndex")
+    int startIndex, @WebParam(name = "number_results")
+    int number_results) throws SessionException {
         return investigationSearchLocal.searchByUserSurname(sessionId, surname, startIndex, number_results);
     }
-    
+
     /**
      *  Lists all the instruments in the DB
      *
@@ -489,11 +540,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of instruments
      */
-    @WebMethod()
-    public Collection<String> listInstruments(@WebParam(name="sessionId") String sessionId) throws SessionException {
+    @WebMethod
+    public Collection<String> listInstruments(@WebParam(name = "sessionId")
+    String sessionId) throws SessionException {
         return investigationSearchLocal.listInstruments(sessionId);
     }
-    
+
     /**
      *  Lists all the rols in the DB
      *
@@ -501,11 +553,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of rols
      */
-    @WebMethod()
-    public Collection<IcatRole> listRoles(@WebParam(name="sessionId") String sessionId) throws SessionException {
+    @WebMethod
+    public Collection<IcatRole> listRoles(@WebParam(name = "sessionId")
+    String sessionId) throws SessionException {
         return investigationSearchLocal.listRoles(sessionId);
     }
-    
+
     /**
      *  Lists all the parameters in the DB
      *
@@ -513,11 +566,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of rols
      */
-    @WebMethod()
-    public Collection<Parameter> listParameters(@WebParam(name="sessionId") String sessionId) throws SessionException {
+    @WebMethod
+    public Collection<Parameter> listParameters(@WebParam(name = "sessionId")
+    String sessionId) throws SessionException {
         return investigationSearchLocal.listParameters(sessionId);
     }
-    
+
     /**
      *  Lists all the inv types in the DB
      *
@@ -525,13 +579,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of rols
      */
-    @WebMethod()
-    public Collection<String> listInvestigationTypes(@WebParam(name="sessionId") String sessionId) throws SessionException {
+    @WebMethod
+    public Collection<String> listInvestigationTypes(@WebParam(name = "sessionId")
+    String sessionId) throws SessionException {
         return investigationSearchLocal.listInvestigationTypes(sessionId);
     }
     ///////////////////////////     End of Investigation Search methods  /////////////////////////////////////////
-    
-    
+
     ///////////////////////////     Dataset Search methods  /////////////////////////////////////////
     /**
      * From a sample name, return all the samples a user can view asscoiated with the sample name
@@ -541,11 +595,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException
      * @return collection of sample
      */
-    @WebMethod()
-    public Collection<Sample> searchSamplesBySampleName(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleName") String sampleName) throws SessionException {
+    @WebMethod
+    public Collection<Sample> searchSamplesBySampleName(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "sampleName")
+    String sampleName) throws SessionException {
         return datasetSearchLocal.searchSamplesBySampleName(sessionId, sampleName);
     }
-    
+
     /**
      * From a sample, return all the datafiles a user can view asscoiated with the sample name
      *
@@ -556,11 +612,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException
      * @return collection of Data sets
      */
-    @WebMethod()
-    public Collection<Dataset> searchDatasetsBySample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sample") Sample sample) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+    @WebMethod
+    public Collection<Dataset> searchDatasetsBySample(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "sample")
+    Sample sample) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
         return datasetSearchLocal.searchDataSetsBySample(sessionId, sample);
     }
-    
+
     /**
      *  List all the valid avaliable types for datasets
      *
@@ -568,11 +626,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of types
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod()
-    public Collection<String> listDatasetTypes(@WebParam(name="sessionId") String sessionId) throws SessionException {
+    @WebMethod
+    public Collection<String> listDatasetTypes(@WebParam(name = "sessionId")
+    String sessionId) throws SessionException {
         return datasetSearchLocal.listDatasetTypes(sessionId);
     }
-    
+
     /**
      * List all the valid avaliable status for datasets
      *
@@ -580,12 +639,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of status
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod()
-    public Collection<String> listDatasetStatus(@WebParam(name="sessionId") String sessionId) throws SessionException {
+    @WebMethod
+    public Collection<String> listDatasetStatus(@WebParam(name = "sessionId")
+    String sessionId) throws SessionException {
         return datasetSearchLocal.listDatasetStatus(sessionId);
     }
     ///////////////////////////     End of Dataset Search methods  /////////////////////////////////////////
-    
+
     ///////////////////////////     Datafile Search methods  /////////////////////////////////////////
     /**
      * Searchs database for data files from a start and end run on an instrument for which the userId has permission to read
@@ -598,11 +658,15 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of datafiles returned from search
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod()
-    public Collection<Datafile> searchByRunNumber(@WebParam(name="sessionId") String sessionId, @WebParam(name="instruments") Collection<String> instruments, @WebParam(name="startRun") float startRun, @WebParam(name="endRun") float endRun) throws SessionException {
+    @WebMethod
+    public Collection<Datafile> searchByRunNumber(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "instruments")
+    Collection<String> instruments, @WebParam(name = "startRun")
+    float startRun, @WebParam(name = "endRun")
+    float endRun) throws SessionException {
         return datafileSearchLocal.searchByRunNumber(sessionId, instruments, startRun, endRun);
     }
-    
+
     /**
      * Searchs database for data files from a start and end run on an instrument for which the userId has permission to read
      * the data files investigation
@@ -616,13 +680,19 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of datafiles returned from search
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName="searchByRunNumberPagination")
-    @RequestWrapper(className="uk.icat3.sessionbeans.jaxws.searchByRunNumberPagination")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.jaxws.searchByRunNumberPaginationResponse")
-    public Collection<Datafile> searchByRunNumber(@WebParam(name="sessionId") String sessionId, @WebParam(name="instruments") Collection<String> instruments, @WebParam(name="startRun") float startRun, @WebParam(name="endRun") float endRun, @WebParam(name="startIndex") int startIndex, @WebParam(name="number_results") int number_results) throws SessionException {
+    @WebMethod(operationName = "searchByRunNumberPagination")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByRunNumberPagination")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByRunNumberPaginationResponse")
+    public Collection<Datafile> searchByRunNumber(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "instruments")
+    Collection<String> instruments, @WebParam(name = "startRun")
+    float startRun, @WebParam(name = "endRun")
+    float endRun, @WebParam(name = "startIndex")
+    int startIndex, @WebParam(name = "number_results")
+    int number_results) throws SessionException {
         return datafileSearchLocal.searchByRunNumber(sessionId, instruments, startRun, endRun, startIndex, number_results);
     }
-    
+
     /**
      *  List all the valid avaliable formats for datafiles
      *
@@ -630,16 +700,16 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of types
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod()
-    public Collection<DatafileFormat> listDatafileFormats(@WebParam(name="sessionId") String sessionId) throws SessionException {
+    @WebMethod
+    public Collection<DatafileFormat> listDatafileFormats(@WebParam(name = "sessionId")
+    String sessionId) throws SessionException {
         return datafileSearchLocal.listDatafileFormats(sessionId);
     }
     ///////////////////////////     End of Datafile Search methods  /////////////////////////////////////////
-    
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////   All Manager   ///////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    
     ///////////////////////////     Investigation Manager methods  /////////////////////////////////////////
     /**
      * Returns a {@link Investigation} investigation from a {@link Investigation} id
@@ -652,13 +722,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return {@link Investigation} object
      */
-    @WebMethod(/*operationName="getInvestigation"*/)
-    // @RequestWrapper(className="uk.icat3.sessionbeans.getInvestigationDefault")
-    //@ResponseWrapper(className="uk.icat3.sessionbeans.getInvestigationDefaultResponse")
-    public Investigation getInvestigation(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigationId") Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
-        return investigationManagerLocal.getInvestigation(sessionId,investigationId);
+    @WebMethod
+    public Investigation getInvestigation(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "investigationId")
+    Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        return investigationManagerLocal.getInvestigation(sessionId, investigationId);
     }
-    
+
     /**
      * Returns a {@link Investigation} investigation from a {@link Investigation} id
      * if the user has access to the investigation.
@@ -672,13 +742,16 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return {@link Investigation} object
      */
-    @WebMethod(operationName="getInvestigationIncludes")
-    @RequestWrapper(className="uk.icat3.sessionbeans.getInvestigationIncludes")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.getInvestigationIncludesResponse")
-    public Investigation getInvestigation(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigationId") Long investigationId, @WebParam(name="includes") InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
-        return investigationManagerLocal.getInvestigation(sessionId,investigationId, includes);
+    @WebMethod(operationName = "getInvestigationIncludes")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.getInvestigationIncludes")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.getInvestigationIncludesResponse")
+    public Investigation getInvestigation(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "investigationId")
+    Long investigationId, @WebParam(name = "includes")
+    InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        return investigationManagerLocal.getInvestigation(sessionId, investigationId, includes);
     }
-    
+
     /**
      * Returns a list of {@link Investigation} investigations from a list of {@link Investigation} investigation ids
      * if the user has access to the investigations.
@@ -693,7 +766,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
     public Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return investigationManagerLocal.getInvestigations(userId, investigationIds, InvestigationInclude.NONE);
     }
-    
+
     /**
      * Returns a list of {@link Investigation} investigations from a list of {@link Investigation} investigation ids
      * if the user has access to the investigations.
@@ -707,13 +780,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return collection of {@link Investigation} investigation objects
      */
-    @WebMethod(operationName="getInvestigationsIncludes")
-    @RequestWrapper(className="uk.icat3.sessionbeans.getInvestigationsIncludes")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.getInvestigationsIncludesResponse")
+    @WebMethod(operationName = "getInvestigationsIncludes")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.getInvestigationsIncludes")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.getInvestigationsIncludesResponse")
     public Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds, InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return investigationManagerLocal.getInvestigations(userId, investigationIds, includes);
     }
-    
+
     /**
      * Creates a {@link Investigation} investigation from a {@link Investigation} object.
      *
@@ -725,11 +798,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @return {@link Investigation} object created
      */
-    @WebMethod(/*operationName="createInvestigation"*/)
-    public Investigation createInvestigation(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigation") Investigation investigation) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    @WebMethod
+    public Investigation createInvestigation(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "investigation")
+    Investigation investigation) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         return investigationManagerLocal.createInvestigation(sessionId, investigation);
     }
-    
+
     /**
      * Deletes a {@link Investigation} investigation from a {@link Investigation} object
      * if the user has access to delete the investigation.
@@ -740,11 +815,11 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
+    @WebMethod
     public void deleteInvestigation(String sessionId, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.deleteInvestigation(sessionId, investigationId);
     }
-    
+
     /**
      * Removes a {@link Investigation} investigation from a {@link Investigation} object.
      * if the user has access to remove the investigation.
@@ -755,11 +830,11 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
+    @WebMethod
     public void removeInvestigation(String sessionId, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.removeInvestigation(sessionId, investigationId);
     }
-    
+
     /**
      * Adds keyword to investigation, depending on whether the user has permission to update this Investigation object.
      *
@@ -772,11 +847,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return keyword
      */
-    @WebMethod()
-    public Keyword addKeyword(@WebParam(name="sessionId") String sessionId, @WebParam(name="keyword") Keyword keyword, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public Keyword addKeyword(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "keyword")
+    Keyword keyword, @WebParam(name = "investigationId")
+    Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return investigationManagerLocal.addKeyword(sessionId, keyword, investigationId);
     }
-    
+
     /**
      * Adds investigator to investigation, depending on whether the user has permission to update this Investigation object.
      *
@@ -789,11 +867,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return investigator
      */
-    @WebMethod()
-    public Investigator addInvestigator(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigator") Investigator investigator, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public Investigator addInvestigator(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "investigator")
+    Investigator investigator, @WebParam(name = "investigationId")
+    Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return investigationManagerLocal.addInvestigator(sessionId, investigator, investigationId);
     }
-    
+
     /**
      * Adds a sample to investigation, depending on whether the user has permission to update this Investigation object.
      *
@@ -806,11 +887,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return sample
      */
-    @WebMethod()
-    public Sample addSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sample") Sample sample, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public Sample addSample(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "sample")
+    Sample sample, @WebParam(name = "investigationId")
+    Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return investigationManagerLocal.addSample(sessionId, sample, investigationId);
     }
-    
+
     /**
      * Adds publication to investigation, depending on whether the user has permission to update this Investigation object.
      *
@@ -823,11 +907,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return publication that was added
      */
-    @WebMethod()
-    public Publication addPublication(@WebParam(name="sessionId") String sessionId, @WebParam(name="publication") Publication publication, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public Publication addPublication(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "publication")
+    Publication publication, @WebParam(name = "investigationId")
+    Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return investigationManagerLocal.addPublication(sessionId, publication, investigationId);
     }
-    
+
     /**
      * Adds a sample parameter to investigation, depending on whether the user has permission to update this Investigation object.
      *
@@ -840,11 +927,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return sampleparameter that was added
      */
-    @WebMethod()
-    public SampleParameter addSampleParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleParameter") SampleParameter sampleParameter, @WebParam(name="investigationId") Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public SampleParameter addSampleParameter(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "sampleParameter")
+    SampleParameter sampleParameter, @WebParam(name = "investigationId")
+    Long investigationId) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return investigationManagerLocal.addSampleParameter(sessionId, sampleParameter, investigationId);
     }
-    
+
     /**
      * Deletes/Undeletes the investigator from investigation, depending on whether the user has permission to remove this Investigation object.
      *
@@ -854,11 +944,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void deleteInvestigator(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigatorPK") InvestigatorPK investigatorPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void deleteInvestigator(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "investigatorPK")
+    InvestigatorPK investigatorPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.deleteInvestigator(sessionId, investigatorPK);
     }
-    
+
     /**
      * Deletes/Undeletess/Undeletes the keyword from investigation, depending on whether the user has permission to delete this Investigation object.
      *
@@ -868,11 +960,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void deleteKeyword(@WebParam(name="sessionId") String sessionId, @WebParam(name="keywordPK") KeywordPK keywordPK) throws SessionException,  InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void deleteKeyword(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "keywordPK")
+    KeywordPK keywordPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.deleteKeyword(sessionId, keywordPK);
     }
-    
+
     /**
      * Deletes/Undeletes the publication from investigation, depending on whether the user has permission to remove this Investigation object.
      *
@@ -882,11 +976,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void deletePublication(@WebParam(name="sessionId") String sessionId, @WebParam(name="publicationId") Long publicationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void deletePublication(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "publicationId")
+    Long publicationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.deletePublication(sessionId, publicationId);
     }
-    
+
     /**
      * Deletes/Undeletes the sample from the investigation, depending on whether the user has permission to remove this Investigation object.
      *
@@ -896,11 +992,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void deleteSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleId") Long sampleId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void deleteSample(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "sampleId")
+    Long sampleId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.deleteSample(sessionId, sampleId);
     }
-    
+
     /**
      * Removes the sample parameter from the investigation, depending on whether the user has permission to remove this Investigation object.
      *
@@ -910,11 +1008,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void deleteSampleParameter(@WebParam(name="sessionId") String sessionId,@WebParam(name="sampleParameterPK") SampleParameterPK sampleParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void deleteSampleParameter(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "sampleParameterPK")
+    SampleParameterPK sampleParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.deleteSampleParameter(sessionId, sampleParameterPK);
     }
-    
+
     /**
      * Modifies the investigation, depending on whether the user has permission to update this Investigation.
      *
@@ -925,12 +1025,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void modifyInvestigation(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigaion") Investigation investigaion) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void modifyInvestigation(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "investigaion")
+    Investigation investigaion) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.modifyInvestigation(sessionId, investigaion);
     }
-    
-    
+
     /**
      * Modifies the investigator of the investigation, depending on whether the user has permission to update this Investigation object.
      *
@@ -941,11 +1042,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void modifyInvestigator(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigator") Investigator investigator) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void modifyInvestigator(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "investigator")
+    Investigator investigator) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.modifyInvestigator(sessionId, investigator);
     }
-    
+
     /**
      * Modifies the sample from the investigation, depending on whether the user has permission to update this Investigation object.
      *
@@ -956,11 +1059,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void modifySample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sample") Sample sample) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void modifySample(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "sample")
+    Sample sample) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.modifySample(sessionId, sample);
     }
-    
+
     /**
      * Modifies the publication of the investigation, depending on whether the user has permission to update this Investigation object.
      *
@@ -971,11 +1076,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void modifyPublication(@WebParam(name="sessionId") String sessionId, @WebParam(name="publication") Publication publication) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void modifyPublication(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "publication")
+    Publication publication) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.modifyPublication(sessionId, publication);
     }
-    
+
     /**
      * Modifies the sample parameter from the investigation, depending on whether the user has permission to update this Investigation object.
      *
@@ -986,11 +1093,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void modifySampleParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleParameter") SampleParameter sampleParameter) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void modifySampleParameter(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "sampleParameter")
+    SampleParameter sampleParameter) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.modifySampleParameter(sessionId, sampleParameter);
     }
-    
+
     /**
      * Removes the keyword from investigation, depending on whether the user has permission to remove this Investigation object.
      *
@@ -1000,11 +1109,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void removeKeyword(@WebParam(name="sessionId") String sessionId, @WebParam(name="keywordPK") KeywordPK keywordPK) throws SessionException,  InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void removeKeyword(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "keywordPK")
+    KeywordPK keywordPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.removeKeyword(sessionId, keywordPK);
     }
-    
+
     /**
      * Removes the investigator from investigation, depending on whether the user has permission to remove this Investigation object.
      *
@@ -1014,11 +1125,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void removeInvestigator(@WebParam(name="sessionId") String sessionId, @WebParam(name="investigatorPK") InvestigatorPK investigatorPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void removeInvestigator(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "investigatorPK")
+    InvestigatorPK investigatorPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.removeInvestigator(sessionId, investigatorPK);
     }
-    
+
     /**
      * Removes the publication from investigation, depending on whether the user has permission to remove this Investigation object.
      *
@@ -1028,11 +1141,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void removePublication(@WebParam(name="sessionId") String sessionId, @WebParam(name="publicationId")  Long publicationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void removePublication(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "publicationId")
+    Long publicationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.removePublication(sessionId, publicationId);
     }
-    
+
     /**
      * Removes the sample from the investigation, depending on whether the user has permission to remove this Investigation object.
      *
@@ -1042,11 +1157,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void removeSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleId") Long sampleId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void removeSample(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "sampleId")
+    Long sampleId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.removeSample(sessionId, sampleId);
     }
-    
+
     /**
      * Deletes/Undeletes the sample parameter from the investigation, depending on whether the user has permission to remove this Investigation object.
      *
@@ -1056,13 +1173,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void removeSampleParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleParameterPK") SampleParameterPK sampleParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException{
+    @WebMethod
+    public void removeSampleParameter(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "sampleParameterPK")
+    SampleParameterPK sampleParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.removeSampleParameter(sessionId, sampleParameterPK);
     }
-    
     ///////////////////////////     End of Investigation Manager methods  /////////////////////////////////////////
-    
+
     ///////////////////////////     Dataset Manager methods  /////////////////////////////////////////
     /**
      * Gets the data set object from a data set id, depending if the user has access to read the data set.
@@ -1075,10 +1193,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return {@link Dataset}
      */
     @WebMethod
-    public Dataset getDataset(@WebParam(name="sessionId") String sessionId, @WebParam(name="datasetId") Long datasetId)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public Dataset getDataset(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "datasetId")
+    Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return datasetManagerLocal.getDataset(sessionId, datasetId);
     }
-    
+
     /**
      * Gets the data set object from a data set id, depending if the user has access to read the data set.
      * Also gets extra information regarding the data set.  See {@link DatasetInclude}
@@ -1091,13 +1211,16 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return {@link Dataset}
      */
-    @WebMethod(operationName="getDatasetIncludes")
-    @RequestWrapper(className="uk.icat3.sessionbeans.manager.getDatasetIncludes")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.manager.getDatasetIncludesResponse")
-    public Dataset getDataset(@WebParam(name="sessionId") String sessionId, @WebParam(name="datasetId")  Long datasetId, @WebParam(name="includes") DatasetInclude includes)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    @WebMethod(operationName = "getDatasetIncludes")
+    @RequestWrapper(className = "uk.icat3.sessionbeans.manager.getDatasetIncludes")
+    @ResponseWrapper(className = "uk.icat3.sessionbeans.manager.getDatasetIncludesResponse")
+    public Dataset getDataset(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "datasetId")
+    Long datasetId, @WebParam(name = "includes")
+    DatasetInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return datasetManagerLocal.getDataset(sessionId, datasetId, includes);
     }
-    
+
     /**
      * Gets the data set object from a from a list of data set ids, depending if the user has access to read the data sets.
      *
@@ -1109,10 +1232,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of {@link Dataset}s
      */
     @WebMethod
-    public Collection<Dataset> getDatasets(@WebParam(name="sessionId") String sessionId, @WebParam(name="datasetIds") Collection<Long> datasetIds)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public Collection<Dataset> getDatasets(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "datasetIds")
+    Collection<Long> datasetIds) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return datasetManagerLocal.getDatasets(sessionId, datasetIds);
     }
-    
+
     /**
      * Creates a data set, depending if the user has create permission on the data set associated with the investigation
      *
@@ -1126,10 +1251,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return {@link Dataset} that was created
      */
     @WebMethod
-    public Dataset createDataSet(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSet") Dataset dataSet, @WebParam(name="investigationId") Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public Dataset createDataSet(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataSet")
+    Dataset dataSet, @WebParam(name = "investigationId")
+    Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         return datasetManagerLocal.createDataSet(sessionId, dataSet, investigationId);
     }
-    
+
     /**
      * Creates a collection of data sets, depending if the user has update permission on the data set associated with the investigation
      *
@@ -1143,10 +1271,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of {@link Dataset}s that were created
      */
     @WebMethod
-    public Collection<Dataset> createDataSets(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSets") Collection<Dataset> dataSets, @WebParam(name="investigationId") Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public Collection<Dataset> createDataSets(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataSets")
+    Collection<Dataset> dataSets, @WebParam(name = "investigationId")
+    Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         return datasetManagerLocal.createDataSets(sessionId, dataSets, investigationId);
     }
-    
+
     /**
      * Deletes/Undeletes the data set for a user depending if the users id has delete permissions to delete the data set from the
      * data set ID. Deleting the set marks it, and all of its paramters and data files as deleted but does not remove it from the database.
@@ -1158,10 +1289,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void deleteDataSet(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSetId") Long dataSetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public void deleteDataSet(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataSetId")
+    Long dataSetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datasetManagerLocal.deleteDataSet(sessionId, dataSetId);
     }
-    
+
     /**
      * Deletes/Undeletes the data set paramter, depending if the users has access to remove the data set paramter
      *
@@ -1172,10 +1305,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void deleteDataSetParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="datasetParameterPK") DatasetParameterPK datasetParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public void deleteDataSetParameter(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "datasetParameterPK")
+    DatasetParameterPK datasetParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datasetManagerLocal.deleteDataSetParameter(sessionId, datasetParameterPK);
     }
-    
+
     /**
      * Updates a data set depending on whether the user has permission to update this data set or its investigation
      *
@@ -1187,10 +1322,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void modifyDataSet(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSet") Dataset dataSet) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public void modifyDataSet(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataSet")
+    Dataset dataSet) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         datasetManagerLocal.modifyDataSet(sessionId, dataSet);
     }
-    
+
     /**
      * Modifies a data set paramter, depending if the users has access to update the data set paramter
      *
@@ -1202,10 +1339,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void modifyDataSetParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSetParameter") DatasetParameter dataSetParameter) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public void modifyDataSetParameter(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataSetParameter")
+    DatasetParameter dataSetParameter) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         datasetManagerLocal.modifyDataSetParameter(sessionId, dataSetParameter);
     }
-    
+
     /**
      * Sets the dataset sample id, depending if the users has access to update the data set
      *
@@ -1218,10 +1357,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void setDataSetSample(@WebParam(name="sessionId") String sessionId, @WebParam(name="sampleId") Long sampleId, @WebParam(name="datafileId") Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public void setDataSetSample(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "sampleId")
+    Long sampleId, @WebParam(name = "datafileId")
+    Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         datasetManagerLocal.setDataSetSample(sessionId, sampleId, datasetId);
     }
-    
+
     /**
      * Adds a data set paramter to a dataset, depending if the users has access to create the data set paramter
      *
@@ -1235,10 +1377,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return DatasetParameter that was added
      */
     @WebMethod
-    public DatasetParameter addDataSetParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSetParameter") DatasetParameter dataSetParameter,@WebParam(name="datasetId")  Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public DatasetParameter addDataSetParameter(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataSetParameter")
+    DatasetParameter dataSetParameter, @WebParam(name = "datasetId")
+    Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         return datasetManagerLocal.addDataSetParameter(sessionId, dataSetParameter, datasetId);
     }
-    
+
     /**
      * Adds a collection of data set paramters to a dataset, depending if the users has access to create the data set paramter
      *
@@ -1252,10 +1397,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return DatasetParameter that was added
      */
     @WebMethod
-    public Collection<DatasetParameter> addDataSetParameters(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSetParameters") Collection<DatasetParameter> dataSetParameters, @WebParam(name="datasetId")  Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    public Collection<DatasetParameter> addDataSetParameters(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataSetParameters")
+    Collection<DatasetParameter> dataSetParameters, @WebParam(name = "datasetId")
+    Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         return datasetManagerLocal.addDataSetParameters(sessionId, dataSetParameters, datasetId);
     }
-    
+
     /**
      * Removes (from the database) the data set, and its dataset paramters and data files for a user depending if the
      * users id has remove permissions to delete the data set from the data set ID.
@@ -1267,10 +1415,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void removeDataSet(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataSetId") Long dataSetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public void removeDataSet(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataSetId")
+    Long dataSetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datasetManagerLocal.removeDataSet(sessionId, dataSetId);
     }
-    
+
     /**
      * Removes the data set paramter, depending if the users has access to delete the data set paramter
      *
@@ -1281,11 +1431,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void removeDataSetParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="datasetParameterPK") DatasetParameterPK datasetParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public void removeDataSetParameter(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "datasetParameterPK")
+    DatasetParameterPK datasetParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datasetManagerLocal.removeDataSetParameter(sessionId, datasetParameterPK);
     }
     ///////////////////////////     End of Dataset Manager methods  /////////////////////////////////////////
-    
+
     ///////////////////////////     Datafile Manager methods  /////////////////////////////////////////
     /**
      * Gets a data file object from a data file id, depending if the user has access to read the data file
@@ -1297,11 +1449,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return {@link Datafile}
      */
-    @WebMethod()
-    public Datafile getDatafile(@WebParam(name="sessionId") String sessionId, @WebParam(name="datafileId") Long datafileId)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    @WebMethod
+    public Datafile getDatafile(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "datafileId")
+    Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return datafileManagerLocal.getDatafile(sessionId, datafileId);
     }
-    
+
     /**
      * Gets a collection of data file object from a collection of data file ids, depending if the user has access to read the data file
      *
@@ -1312,11 +1466,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of {@link Datafile} objects
      */
-    @WebMethod()
-    public Collection<Datafile> getDatafiles(@WebParam(name="sessionId") String sessionId, @WebParam(name="datafileIds") Collection<Long> datafileIds)  throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    @WebMethod
+    public Collection<Datafile> getDatafiles(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "datafileIds")
+    Collection<Long> datafileIds) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return datafileManagerLocal.getDatafiles(sessionId, datafileIds);
     }
-    
+
     /**
      * Creates a data file, depending if the user has update permission on the data set associated with the data file
      *
@@ -1329,11 +1485,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return the created {@link Datafile} primary key
      */
-    @WebMethod()
-    public Datafile createDataFile(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataFile") Datafile dataFile, @WebParam(name="datasetId") Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    @WebMethod
+    public Datafile createDataFile(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataFile")
+    Datafile dataFile, @WebParam(name = "datasetId")
+    Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         return datafileManagerLocal.createDataFile(sessionId, dataFile, datasetId);
     }
-    
+
     /**
      * Creates a collection of data files, depending if the user has update permission on the data set associated with the data file
      *
@@ -1346,11 +1505,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return the collection of created {@link Datafile} primary keys
      */
-    @WebMethod()
-    public Collection<Datafile> createDataFiles(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataFiles") Collection<Datafile> dataFiles,  @WebParam(name="datasetId") Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    @WebMethod
+    public Collection<Datafile> createDataFiles(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataFiles")
+    Collection<Datafile> dataFiles, @WebParam(name = "datasetId")
+    Long datasetId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         return datafileManagerLocal.createDataFiles(sessionId, dataFiles, datasetId);
     }
-    
+
     /**
      * Deletes/Undeletes a data file for a users depending if the users id has delete permissions to
      * delete the data file. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
@@ -1361,11 +1523,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void deleteDataFile(@WebParam(name="sessionId") String sessionId, @WebParam(name="datafileId") Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    @WebMethod
+    public void deleteDataFile(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "datafileId")
+    Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datafileManagerLocal.deleteDataFile(sessionId, datafileId);
     }
-    
+
     /**
      * Updates data file depending on whether the user has permission to update this data file.
      *
@@ -1376,11 +1540,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void modifyDataFile(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataFile") Datafile dataFile) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    @WebMethod
+    public void modifyDataFile(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataFile")
+    Datafile dataFile) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         datafileManagerLocal.modifyDataFile(sessionId, dataFile);
     }
-    
+
     /**
      * Adds a data file paramter object to a data file, depending if the user has access to create the data file parameter from
      * the associated data file id.
@@ -1394,11 +1560,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return {@link DatafileParameter} created
      */
-    @WebMethod()
-    public DatafileParameter addDataFileParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataFileParameter") DatafileParameter dataFileParameter, @WebParam(name="datafileId") Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
-        return  datafileManagerLocal.addDataFileParameter(sessionId, dataFileParameter, datafileId);
+    @WebMethod
+    public DatafileParameter addDataFileParameter(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataFileParameter")
+    DatafileParameter dataFileParameter, @WebParam(name = "datafileId")
+    Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        return datafileManagerLocal.addDataFileParameter(sessionId, dataFileParameter, datafileId);
     }
-    
+
     /**
      * Adds a collection data file paramter objects to a data file, depending if the user has access to create the data file parameter from
      * the associated data file id.
@@ -1412,11 +1581,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return {@link DatafileParameter} created
      */
-    @WebMethod()
-    public Collection<DatafileParameter> addDataFileParameters(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataFileParameters") Collection<DatafileParameter> dataFileParameters, @WebParam(name="datafileId") Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
-        return  datafileManagerLocal.addDataFileParameters(sessionId, dataFileParameters, datafileId);
+    @WebMethod
+    public Collection<DatafileParameter> addDataFileParameters(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataFileParameters")
+    Collection<DatafileParameter> dataFileParameters, @WebParam(name = "datafileId")
+    Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+        return datafileManagerLocal.addDataFileParameters(sessionId, dataFileParameters, datafileId);
     }
-    
+
     /**
      * Updates the data file paramter object, depending if the user has access to update the data file parameter.
      *
@@ -1427,11 +1599,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.ValidationException if the data file is invalid
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void modifyDataFileParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="dataFileParameter") DatafileParameter dataFileParameter) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    @WebMethod
+    public void modifyDataFileParameter(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dataFileParameter")
+    DatafileParameter dataFileParameter) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         datafileManagerLocal.modifyDataFileParameter(sessionId, dataFileParameter);
     }
-    
+
     /**
      * Deletes/Undeletes a data file paramter object, depending if the user has access to remove the data file parameter from
      * the associated data file id.
@@ -1442,11 +1616,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void deleteDataFileParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="datafileParameterPK") DatafileParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    @WebMethod
+    public void deleteDataFileParameter(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "datafileParameterPK")
+    DatafileParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datafileManagerLocal.deleteDataFileParameter(sessionId, datafileParameterPK);
     }
-    
+
     /**
      * Removes (from the database) the data file with ID, for a users depending if the users id has remove permissions to remove the data file from
      * the ID.
@@ -1457,11 +1633,13 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void removeDataFile(@WebParam(name="sessionId") String sessionId, @WebParam(name="datafileId") Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    @WebMethod
+    public void removeDataFile(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "datafileId")
+    Long datafileId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datafileManagerLocal.removeDataFile(sessionId, datafileId);
     }
-    
+
     /**
      * Removes (from the database) a data file paramter object, depending if the user has access to remove the data file parameter from
      * the associated data file id.
@@ -1472,14 +1650,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void removeDataFileParameter(@WebParam(name="sessionId") String sessionId, @WebParam(name="datafileParameterPK") DatafileParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    @WebMethod
+    public void removeDataFileParameter(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "datafileParameterPK")
+    DatafileParameterPK datafileParameterPK) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         datafileManagerLocal.removeDataFileParameter(sessionId, datafileParameterPK);
     }
     ///////////////////////////     End of Datafile Manager methods  /////////////////////////////////////////
-    
-    
-    
+
     ////////////////////////////////////   Authorisation Section methods //////////////////////////////////////////////
     /**
      * Gets all the IcatAuthorisations for a dataFile id of all of the users
@@ -1492,18 +1670,23 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid     *
      * @return Collection of {@link IcatAuthorisation}>s of the datafile id
      */
-    @WebMethod()
-    public Collection<IcatAuthorisation> getAuthorisations(@WebParam(name="sessionId") String sessionId, @WebParam(name="elementId") Long elementId, @WebParam(name="elementType") ElementType elementType) throws InsufficientPrivilegesException, NoSuchObjectFoundException, SessionException {
-        
-        if(elementType == ElementType.INVESTIGATION){
+    @WebMethod
+    public Collection<IcatAuthorisation> getAuthorisations(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "elementId")
+    Long elementId, @WebParam(name = "elementType")
+    ElementType elementType) throws InsufficientPrivilegesException, NoSuchObjectFoundException, SessionException {
+
+        if (elementType == ElementType.INVESTIGATION) {
             return investigationManagerLocal.getAuthorisations(sessionId, elementId);
-        } else if(elementType == ElementType.DATASET){
+        } else if (elementType == ElementType.DATASET) {
             return datasetManagerLocal.getAuthorisations(sessionId, elementId);
-        } else if(elementType == ElementType.DATAFILE){
+        } else if (elementType == ElementType.DATAFILE) {
             return datafileManagerLocal.getAuthorisations(sessionId, elementId);
-        } else throw new SessionException("ElementType "+elementType+" not supported. Only INVESTIGATION, DATASET and DATAFILE ElementTypes supported.");
+        } else {
+            throw new SessionException("ElementType " + elementType + " not supported. Only INVESTIGATION, DATASET and DATAFILE ElementTypes supported.");
+        }
     }
-    
+
     /**
      * Adds a role to a datafile Id for a user (fedId) depending weather user  from session id has permission to do it
      *
@@ -1518,17 +1701,24 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.ValidationException if the added role is higher than the persons role adding
      * @return {@link IcatAuthorisation}s of the datafile id
      */
-    @WebMethod()
-    public IcatAuthorisation addAuthorisation(@WebParam(name="sessionId") String sessionId, @WebParam(name="toAddFedId") String toAddUserId, @WebParam(name="toAddRole") String toAddRole, @WebParam(name="elementId") Long elementId , @WebParam(name="elementType") ElementType elementType) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
-        if(elementType == ElementType.INVESTIGATION){
+    @WebMethod
+    public IcatAuthorisation addAuthorisation(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "toAddFedId")
+    String toAddUserId, @WebParam(name = "toAddRole")
+    String toAddRole, @WebParam(name = "elementId")
+    Long elementId, @WebParam(name = "elementType")
+    ElementType elementType) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException {
+        if (elementType == ElementType.INVESTIGATION) {
             return investigationManagerLocal.addAuthorisation(sessionId, toAddUserId, toAddRole, elementId);
-        } else if(elementType == ElementType.DATASET){
+        } else if (elementType == ElementType.DATASET) {
             return datasetManagerLocal.addAuthorisation(sessionId, toAddUserId, toAddRole, elementId);
-        } else if(elementType == ElementType.DATAFILE){
+        } else if (elementType == ElementType.DATAFILE) {
             return datafileManagerLocal.addAuthorisation(sessionId, toAddUserId, toAddRole, elementId);
-        } else throw new SessionException("ElementType "+elementType+" not supported"); //should never be thrown
+        } else {
+            throw new SessionException("ElementType " + elementType + " not supported"); //should never be thrown
+        }
     }
-    
+
     /**
      * Deletes/Undeletes a IcatAuthorisation
      *
@@ -1539,11 +1729,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void deleteAuthorisation(@WebParam(name="sessionId") String sessionId, @WebParam(name="authorisationId") Long authorisationId /*, @WebParam(name="elementType") ElementType elementType*/) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
+    @WebMethod
+    public void deleteAuthorisation(@WebParam(name = "sessionId")  String sessionId, @WebParam(name = "authorisationId")
+    Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException {
         investigationManagerLocal.deleteAuthorisation(sessionId, authorisationId);
     }
-    
+
     /**
      * Removes a IcatAuthorisation
      *
@@ -1554,11 +1745,11 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
-    @WebMethod()
-    public void removeAuthorisation(@WebParam(name="sessionId") String sessionId, @WebParam(name="authorisationId") Long authorisationId /*, @WebParam(name="elementType") ElementType elementType*/) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException{
+    @WebMethod
+    public void removeAuthorisation(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "authorisationId") Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, SessionException {
         investigationManagerLocal.removeAuthorisation(sessionId, authorisationId);
     }
-    
+
     /**
      * Changes a IcatAuthorisation role for a authorisation id
      *
@@ -1571,17 +1762,16 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @throws uk.icat3.exceptions.ValidationException if the added role is higher than the persons role adding
      */
-    @WebMethod()
-    public void updateAuthorisation(@WebParam(name="sessionId") String sessionId, @WebParam(name="toChangetoRole") String toChangetoRole, @WebParam(name="authorisationId") Long authorisationId /*, @WebParam(name="elementType") ElementType elementType*/) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException{
+    @WebMethod
+    public void updateAuthorisation(@WebParam(name = "sessionId")  String sessionId, @WebParam(name = "toChangetoRole") String toChangetoRole, @WebParam(name = "authorisationId")
+    Long authorisationId) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException, SessionException {
         investigationManagerLocal.updateAuthorisation(sessionId, toChangetoRole, authorisationId);
     }
-    
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    
+
     /////////////////////     XML Ingest //////////////////////////
     @WebMethod
-    public void ingestXML(){
-        xmlIngestionManagerLocal.ingestXML();
+    public void ingestMetadata(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "xml") String xml) throws SessionException, ValidationException, InsufficientPrivilegesException, ICATAPIException {
+        xmlIngestionManagerLocal.ingestMetadata(sessionId, xml);
     }
 }
