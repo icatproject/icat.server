@@ -12,6 +12,7 @@ package uk.icat3.sessionbeans.manager;
 import javax.ejb.Local;
 import uk.icat3.exceptions.ICATAPIException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
 
 /**
