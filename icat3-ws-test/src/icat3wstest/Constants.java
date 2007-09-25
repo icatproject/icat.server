@@ -15,6 +15,8 @@ package icat3wstest;
  */
 public class Constants {
     
+     public static String END_POINT_ADMIN_ADDRESS = "https://escvig6.dl.ac.uk:8181/ICATAdminService/ICATAdmin";
+     
   // public static String END_POINT_ADDRESS = "http://facilities01.esc.rl.ac.uk:8081/ICATISISService/ICAT";
   
     public static String END_POINT_ADDRESS = "https://escvig6.dl.ac.uk:8181/ICATService/ICAT";

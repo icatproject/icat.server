@@ -9,6 +9,7 @@
 package icat3wstestother;
 
 import icat3wstest.*;
+import client.*;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;

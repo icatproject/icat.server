@@ -7,60 +7,43 @@
  * and open the template in the editor.
  */
 
-package icat3wstest;
+package icat3wstestother;
+
+import ss.ICATAdmin;
+import ss.ICATAdminService;
+import icat3wstest.*;
 import javax.xml.ws.BindingProvider;
 import static icat3wstest.Constants.*;
 /**
  *
  * @author gjd37
  */
-public class SessionUtil {
+public class SessionAdminUtil {
     
     /** Creates a new instance of Main */
-    public static String login(String username, String password) throws Exception{
-       
+    public static String login(String username) throws Exception{
+        
         try {
+                        
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.lang.String result = ICATSingleton.getInstance().login(username, password);
+            java.lang.String result = ICATAdminSingleton.getInstance().loginAdmin(username);
             SID = result;
-            System.out.println(" Logged in successfully with SID = "+result);
+            System.out.println(" Logged in successfully with SID = "+result+" as user "+username);
             
             System.out.println("\nTime taken: "+(System.currentTimeMillis() - time)/1000f+" seconds");
             System.out.println("------------------------------------------------------------------\n");
             assert true;
             return result;
         } catch (Exception ex) {
-            System.out.println("Exception logging in\n"+ex);
+            System.out.println(ex);
             assert false;
-            throw ex;
+            
+          //  throw ex;
+            return null;
             // TODO handle custom exceptions here
         }
-    }
-    
-    public static String loginLifetime(String username, String password, int lifetime) throws Exception{
-        
-        try {
-            
-            long time = System.currentTimeMillis();
-            
-            // TODO process result here
-            java.lang.String result = ICATSingleton.getInstance().loginLifetime(username, password, lifetime);
-            SID = result;
-            System.out.println(" Logged in (lifetime) successfully with SID = "+result);
-            
-            System.out.println("\nTime taken: "+(System.currentTimeMillis() - time)/1000f+" seconds");
-            System.out.println("------------------------------------------------------------------\n");
-            assert true;
-            return result;
-        } catch (Exception ex) {
-            System.out.println("Exception logging in (lifetime)\n"+ex);
-            assert false;
-            throw ex;
-            // TODO handle custom exceptions here
-        }
-        
     }
     
     public static void logout(String sid) throws Exception{
@@ -92,7 +75,7 @@ public class SessionUtil {
      */
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
-        login(System.getProperty("user.name"), System.getProperty("user.password"));
+        login("bob");
         //String sid = loginLifetime(System.getProperty("user.name"), System.getProperty("usersso.password"), 2);
         // if(sid != null) logout(sid);
     }

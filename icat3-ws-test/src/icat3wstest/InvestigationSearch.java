@@ -209,7 +209,7 @@ public class InvestigationSearch {
        //   searchKeywordAll(SID, "cal");
         // searchSurname(SID, "in");
         // searchUserId(SID, "gjd37");
-     //  searchMyInvestigations(SID);
+       searchMyInvestigations(SID);
         AdvancedSearchDetails asd = new AdvancedSearchDetails();
        // asd.getKeywords().add("calibration");
        // asd.getInvestigators().add(SURNAME);

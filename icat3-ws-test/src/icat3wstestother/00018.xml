@@ -9,7 +9,7 @@
             <inv_number>19391</inv_number>
             <visit_id>16</visit_id>
             <instrument>GEM</instrument>
-            <title>Temperature = 295 K, Magnetic Field = 0 Gauss, Sample = ALUM</title>
+            <title>Temperature = 295 K</title>
             <investigator>    
                 <user_id>tang76</user_id>
                 <role>experimenter</role>
@@ -50,7 +50,7 @@
                 <name>default</name>
                 <dataset_type>EXPERIMENT_RAW</dataset_type>
                 <dataset_status>COMPLETE</dataset_status>
-                <description> Title =Temperature = 295 K, Magnetic Field = 0 Gauss, Sample = ALUM Note =First MCS run on DEVA  slits 20</description>
+                <description>Magnetic Field = 0 Gauss</description>
                 <sample>
                     <name>ALUMINIUM</name>
                     <instance>0</instance>
@@ -68,8 +68,8 @@
                 </sample>
                 <datafile>
                     <name>00018.nxs</name>
-                    <location>..\deva\1-9999\00018.nxs</location>
-                    <description>Temperature = 295 K, Magnetic Field = 0 Gauss, Sample = ALUM</description>
+                    <location>file://deva/1-9999/00018.nxs</location>
+                    <description>Temperature, Sample</description>
                     <datafile_version>1.0</datafile_version>
                     <datafile_version_comment>First version</datafile_version_comment>
                     <datafile_format>NeXus</datafile_format>

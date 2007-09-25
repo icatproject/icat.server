@@ -9,8 +9,7 @@
 
 package icat3wstest;
 
-import client.ICAT;
-import client.ICATService;
+import client.*;
 import javax.xml.ws.BindingProvider;
 import static icat3wstest.Constants.*;
 
