@@ -9,8 +9,7 @@
 
 package icat3wstestother;
 
-import ss.ICATAdmin;
-import ss.ICATAdminService;
+import clientadmin.*;
 import icat3wstest.*;
 import javax.xml.ws.BindingProvider;
 import static icat3wstest.Constants.*;
@@ -75,9 +74,9 @@ public class SessionAdminUtil {
      */
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
-        login("bob");
+        String sid = login("bob");
         //String sid = loginLifetime(System.getProperty("user.name"), System.getProperty("usersso.password"), 2);
-        // if(sid != null) logout(sid);
+         if(sid != null) logout(sid);
     }
     
 }

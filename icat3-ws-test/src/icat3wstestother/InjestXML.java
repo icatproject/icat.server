@@ -49,7 +49,7 @@ public class InjestXML {
     public static void main(String[] args) {
         // TODO code application logic here
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("src/icat3wstest/00018.xml")));
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("src/icat3wstestother/00018.xml")));
             //BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("c:/vms/nxingest-1.3/test_data/00018.xml")));
             String line = "";
             String  buffer = "";

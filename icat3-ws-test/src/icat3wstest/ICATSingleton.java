@@ -19,7 +19,7 @@ import static icat3wstest.Constants.*;
  */
 public class ICATSingleton {
     
-    private static ICAT icatPort = new ICATService().getICATPort();
+    private static ICAT icatPort = new ICATISISService().getICATPort();
     
     /** Creates a new instance of ICATSingleton */
     private ICATSingleton() {

@@ -23,11 +23,11 @@ public class InvestigationSearch {
     /** Creates a new instance of SearchKeyword */
     public static void searchMyInvestigations(String sid) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Investigation> result = ICATSingleton.getInstance().getMyInvestigationsIncludes(sid, 
+            java.util.List<client.Investigation> result = ICATSingleton.getInstance().getMyInvestigationsIncludes(sid,
                     InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES); //get my investigations, default limit to 500, include no other info
             //java.util.List<client.Investigation> result =
             //      ICATSingleton.getInstance().getMyInvestigationsIncludesPagination(sid, InvestigationInclude.ALL, 3, 10);
@@ -54,7 +54,7 @@ public class InvestigationSearch {
     
     public static void searchAdvanced(String sid, AdvancedSearchDetails asd) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
@@ -82,7 +82,7 @@ public class InvestigationSearch {
     /** Creates a new instance of SearchKeyword */
     public static void searchKeyword(String sid, String keyword) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             java.util.List<java.lang.String> keywords = new ArrayList<String>();
@@ -116,16 +116,16 @@ public class InvestigationSearch {
     
     public static void searchKeywordAll(String sid, String keyword) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             java.util.List<java.lang.String> keywords = new ArrayList<String>();
             //keywords.add("fd");
-             keywords.add("shull");
+            keywords.add("shull");
             // TODO process result here
             java.util.List<client.Investigation> result = ICATSingleton.getInstance().searchByKeywordsAll
                     (sid, keywords, LogicalOperator.OR, InvestigationInclude.INVESTIGATORS_AND_KEYWORDS, true, 0,100);
-           
+            
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
             System.out.println("Number of investigations with "+keyword+" as a keywordAll is "+result.size());
@@ -147,7 +147,7 @@ public class InvestigationSearch {
     /** Creates a new instance of SearchKeyword */
     public static void searchUserId(String sid, String userId) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
@@ -175,7 +175,7 @@ public class InvestigationSearch {
     /** Creates a new instance of SearchKeyword */
     public static void searchSurname(String sid, String surname) throws Exception {
         
-        try {             
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
@@ -206,13 +206,13 @@ public class InvestigationSearch {
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
         // searchKeyword(SID, "calibration");
-       //   searchKeywordAll(SID, "cal");
+        //   searchKeywordAll(SID, "cal");
         // searchSurname(SID, "in");
         // searchUserId(SID, "gjd37");
-       searchMyInvestigations(SID);
+        searchMyInvestigations(SID);
         AdvancedSearchDetails asd = new AdvancedSearchDetails();
-       // asd.getKeywords().add("calibration");
-       // asd.getInvestigators().add(SURNAME);
+        // asd.getKeywords().add("calibration");
+        // asd.getInvestigators().add(SURNAME);
         asd.setInvestigationName("SrF2 calibration  w=-25.3d");
         InvestigationSearch.searchAdvanced(SID, asd);
     }
