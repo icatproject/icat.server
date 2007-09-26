@@ -2,9 +2,15 @@
 <jax-ws xmlns="http://www.netbeans.org/ns/jax-ws/1">
   <services/>
   <clients>
+    <client name="ICATAdmin">
+      <wsdl-url>https://escvig6.dl.ac.uk:8181/ICATAdminService/ICATAdmin?wsdl</wsdl-url>
+      <local-wsdl-file>escvig6.dl.ac.uk_8181/ICATAdminService/ICATAdmin.wsdl</local-wsdl-file>
+      <package-name forceReplace="true">ss</package-name>
+      <catalog-file>catalog.xml</catalog-file>
+    </client>
     <client name="ICAT">
-      <wsdl-url>http://localhost:8081/ICATService/ICAT?WSDL</wsdl-url>
-      <local-wsdl-file>localhost_8081/ICATService/ICAT.wsdl</local-wsdl-file>
+      <wsdl-url>https://escvig6.dl.ac.uk:8181/ICATService/ICAT?wsdl</wsdl-url>
+      <local-wsdl-file>escvig6.dl.ac.uk_8181/ICATService/ICAT.wsdl</local-wsdl-file>
       <package-name forceReplace="true">client</package-name>
       <catalog-file>catalog.xml</catalog-file>
     </client>

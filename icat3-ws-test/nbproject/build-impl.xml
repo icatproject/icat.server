@@ -20,6 +20,7 @@ is divided into following sections:
 
         -->
 <project xmlns:j2seproject1="http://www.netbeans.org/ns/j2se-project/1" xmlns:j2seproject2="http://www.netbeans.org/ns/j2se-project/2" xmlns:j2seproject3="http://www.netbeans.org/ns/j2se-project/3" xmlns:jaxws="http://www.netbeans.org/ns/jax-ws/1" basedir=".." default="default" name="icat3-ws-test-impl">
+    <import file="jaxws-build.xml"/>
     <target depends="test,jar,javadoc" description="Build and test whole project." name="default"/>
     <!-- 
                 ======================
@@ -293,13 +294,29 @@ is divided into following sections:
             <classpath path="${libs.jaxws20.classpath}"/>
         </taskdef>
     </target>
+    <target depends="wsimport-init" name="wsimport-client-check-ICATAdmin">
+        <condition property="wsimport-client-ICATAdmin.notRequired">
+            <available file="${build.generated.dir}/wsimport/client/ss" type="dir"/>
+        </condition>
+    </target>
+    <target depends="wsimport-init,wsimport-client-check-ICATAdmin" name="wsimport-client-ICATAdmin" unless="wsimport-client-ICATAdmin.notRequired">
+        <wsimport catalog="catalog.xml" destdir="${build.generated.dir}/wsimport/binaries" extension="true" fork="true" package="ss" sourcedestdir="${build.generated.dir}/wsimport/client" wsdl="${basedir}/xml-resources/web-service-references/ICATAdmin/wsdl/escvig6.dl.ac.uk_8181/ICATAdminService/ICATAdmin.wsdl" wsdlLocation="https://escvig6.dl.ac.uk:8181/ICATAdminService/ICATAdmin?wsdl" xendorsed="true">
+            <jvmarg value="-Djava.endorsed.dirs=${jaxws.endorsed.dir}"/>
+        </wsimport>
+        <copy todir="${build.classes.dir}">
+            <fileset dir="${build.generated.dir}/wsimport/binaries" includes="**/*.xml"/>
+        </copy>
+    </target>
+    <target depends="-init-project" name="wsimport-client-clean-ICATAdmin">
+        <delete dir="${build.generated.dir}/wsimport/client/ss"/>
+    </target>
     <target depends="wsimport-init" name="wsimport-client-check-ICAT">
         <condition property="wsimport-client-ICAT.notRequired">
             <available file="${build.generated.dir}/wsimport/client/client" type="dir"/>
         </condition>
     </target>
     <target depends="wsimport-init,wsimport-client-check-ICAT" name="wsimport-client-ICAT" unless="wsimport-client-ICAT.notRequired">
-        <wsimport catalog="catalog.xml" destdir="${build.generated.dir}/wsimport/binaries" extension="true" fork="true" package="client" sourcedestdir="${build.generated.dir}/wsimport/client" wsdl="${basedir}/xml-resources/web-service-references/ICAT/wsdl/localhost_8081/ICATService/ICAT.wsdl" wsdlLocation="http://localhost:8081/ICATService/ICAT?WSDL" xendorsed="true">
+        <wsimport catalog="catalog.xml" destdir="${build.generated.dir}/wsimport/binaries" extension="true" fork="true" package="client" sourcedestdir="${build.generated.dir}/wsimport/client" wsdl="${basedir}/xml-resources/web-service-references/ICAT/wsdl/escvig6.dl.ac.uk_8181/ICATService/ICAT.wsdl" wsdlLocation="https://escvig6.dl.ac.uk:8181/ICATService/ICAT?wsdl" xendorsed="true">
             <jvmarg value="-Djava.endorsed.dirs=${jaxws.endorsed.dir}"/>
         </wsimport>
         <copy todir="${build.classes.dir}">
@@ -309,19 +326,19 @@ is divided into following sections:
     <target depends="-init-project" name="wsimport-client-clean-ICAT">
         <delete dir="${build.generated.dir}/wsimport/client/client"/>
     </target>
-    <target depends="wsimport-client-ICAT" name="wsimport-client-generate"/>
+    <target depends="wsimport-client-ICATAdmin, wsimport-client-ICAT" name="wsimport-client-generate"/>
     <target depends="-pre-pre-compile" name="wsimport-client-compile">
         <j2seproject3:depend classpath="${libs.jaxws20.classpath}:${javac.classpath}" destdir="${build.classes.dir}" srcdir="${build.generated.dir}/wsimport/client"/>
         <j2seproject3:javac classpath="${libs.jaxws20.classpath}:${javac.classpath}" destdir="${build.classes.dir}" srcdir="${build.generated.dir}/wsimport/client"/>
     </target>
-    <target depends="init,deps-jar,wsimport-client-generate" name="-pre-pre-compile">
+    <target depends="init,deps-jar,wsimport-client-generate,wsimport-client-generate" name="-pre-pre-compile">
         <mkdir dir="${build.classes.dir}"/>
     </target>
     <target name="-pre-compile">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
     </target>
-    <target depends="init,deps-jar,-pre-pre-compile,-pre-compile,wsimport-client-compile" if="have.sources" name="-do-compile">
+    <target depends="init,deps-jar,-pre-pre-compile,-pre-compile,wsimport-client-compile,wsimport-client-compile" if="have.sources" name="-do-compile">
         <j2seproject3:depend/>
         <j2seproject3:javac/>
         <copy todir="${build.classes.dir}">
@@ -337,7 +354,7 @@ is divided into following sections:
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
     </target>
-    <target depends="init,deps-jar,-pre-pre-compile,wsimport-client-compile" name="-do-compile-single">
+    <target depends="init,deps-jar,-pre-pre-compile,wsimport-client-compile,wsimport-client-compile" name="-do-compile-single">
         <fail unless="javac.includes">Must select some files in the IDE or set javac.includes</fail>
         <j2seproject3:force-recompile/>
         <j2seproject3:javac excludes="" includes="${javac.includes}"/>
