@@ -153,19 +153,19 @@
 	<xs:simpleType name="Icat_Role">
 		<xs:restriction base="xs:string">
 			<xs:maxLength value="255"/>
-			<xs:enumeration value="ADMIN"/>
+			<!--<xs:enumeration value="ADMIN"/>
 			<xs:enumeration value="CREATOR"/>
 			<xs:enumeration value="DELETER"/>
 			<xs:enumeration value="DOWNLOADER"/>
 			<xs:enumeration value="READER"/>						
-			<xs:enumeration value="UPDATER"/>
+			<xs:enumeration value="UPDATER"/>-->
 		</xs:restriction>
 	</xs:simpleType>
 	<!-- ................................................................-->
 	<xs:simpleType name="Instrument">
 		<xs:restriction base="xs:string">
 			<xs:maxLength value="255"/>
-			<xs:enumeration value="HRPD"/>
+			<!--<xs:enumeration value="HRPD"/>
 			<xs:enumeration value="POLARIS"/>
 			<xs:enumeration value="SXD"/>
 			<xs:enumeration value="PEARL (HiPr)"/>
@@ -237,7 +237,7 @@
 			<xs:enumeration value="B22-Infrared Microspectroscopy"/>
 			<xs:enumeration value="B23-Circular dichroism"/>
 			<xs:enumeration value="I24-Microfocus macromolecular crystallography"/>
-			<xs:enumeration value="gemini"/>
+			<xs:enumeration value="gemini"/>-->
 			<!-- ISIS instruments -->
 			<!-- CLF instrument -->
 			<!-- Diamond instrument -->
@@ -247,10 +247,10 @@
 	<xs:simpleType name="Inv_Type">
 		<xs:restriction base="xs:string">
 			<xs:maxLength value="255"/>
-			<xs:enumeration value="EXPERIMENT"/>
+			<!--<xs:enumeration value="EXPERIMENT"/>
 			<xs:enumeration value="CALIBRATION"/>
 			<xs:enumeration value="ENGINEERING"/>
-			<xs:enumeration value="TEST"/>
+			<xs:enumeration value="TEST"/>-->
 		</xs:restriction>
 	</xs:simpleType>
 	<!-- ................................................................-->
@@ -321,7 +321,7 @@
 	<xs:simpleType name="Dataset_Type">
 		<xs:restriction base="xs:string">
 			<xs:maxLength value="255"/>
-			<xs:enumeration value="EXPERIMENT_RAW"/>
+			<!--<xs:enumeration value="EXPERIMENT_RAW"/>
 			<xs:enumeration value="EXPERIMENT_CAL"/>
 			<xs:enumeration value="EXPERIMENT_ENG"/>
 			<xs:enumeration value="SOURCE_MONITORING"/>
@@ -333,16 +333,16 @@
 			<xs:enumeration value="SPECIAL_CAL"/>
 			<xs:enumeration value="SPECIAL_USER"/>
 			<xs:enumeration value="LASER_SHOT"/>
-			<xs:enumeration value="NOTES"/>
+			<xs:enumeration value="NOTES"/>-->
 		</xs:restriction>
 	</xs:simpleType>
 	<!-- ................................................................-->
 	<xs:simpleType name="Dataset_Status">
 		<xs:restriction base="xs:string">
 			<xs:maxLength value="255"/>
-			<xs:enumeration value="EMPTY"/>
+			<!--<xs:enumeration value="EMPTY"/>
 			<xs:enumeration value="MISSING_DATA"/>
-			<xs:enumeration value="COMPLETE"/>
+			<xs:enumeration value="COMPLETE"/>-->
 		</xs:restriction>
 	</xs:simpleType>
 	<!-- ================================================================-->
