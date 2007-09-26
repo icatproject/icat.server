@@ -28,8 +28,8 @@ public class ICATAdminSingleton {
     
     public static ICATAdmin getInstance(){
         ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, END_POINT_ADMIN_ADDRESS);        
-        ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "test");        
-        ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "test");        
+        ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "testing");        
+        ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "help");        
       
         return icatPort;
     }

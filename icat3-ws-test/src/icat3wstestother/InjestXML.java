@@ -13,6 +13,7 @@ import client.*;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.util.Collection;
 import static icat3wstest.Constants.*;
 
 /**
@@ -27,10 +28,11 @@ public class InjestXML {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            ICATSingleton.getInstance().ingestMetadata(sid, xml);
+            Collection<Long> ids = ICATSingleton.getInstance().ingestMetadata(sid, xml);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
+            System.out.println("Ids returned: "+ids);
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");
             assert true;
