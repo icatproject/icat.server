@@ -33,7 +33,7 @@ public class TestMetadataIngest {
                 
 
     try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("src/uk/icat3/jaxb/00018.xml")));
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("src/uk/icat3/jaxb/00019.xml")));
             //BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("c:/vms/nxingest-1.3/test_data/00018.xml")));
             String line = "";
             String buffer = "";
@@ -42,7 +42,10 @@ public class TestMetadataIngest {
             }
             System.out.println("buffer: " + buffer);           
         
-            MetadataIngest.ingestMetadata("dwf64", buffer, em);
+            Long[] ids = MetadataIngest.ingestMetadata("dwf64", buffer, em);
+            if ((ids != null) && (ids.length >0)) {
+                for (Long id : ids) System.out.println("____" + id);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

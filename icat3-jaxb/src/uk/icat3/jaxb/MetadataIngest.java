@@ -146,7 +146,7 @@ public class MetadataIngest {
                     //add permissions for investigators to investigation
                     for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
                         if (!userId.equals(_investigator.getUserId())) {
-                            InvestigationManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege().value(), investigation.getId(), manager);
+                            InvestigationManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), investigation.getId(), manager);
                         }
                     } //end for
                     //add Investigation Samples (used in experiment pre-population)
@@ -161,7 +161,7 @@ public class MetadataIngest {
                         //add permssions for investigators to dataset
                         for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
                             if (!userId.equals(_investigator.getUserId())) {
-                                DataSetManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege().value(), dataset.getId(), manager);
+                                DataSetManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), dataset.getId(), manager);
                             }
                         } //end for
                         List<Datafile> _datafiles = _dataset.getDatafile();
@@ -171,7 +171,7 @@ public class MetadataIngest {
                             //add permssions for investigators to datafile
                             for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
                                 if (!userId.equals(_investigator.getUserId())) {
-                                    DataFileManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege().value(), datafile.getId(), manager);
+                                    DataFileManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), datafile.getId(), manager);
                                 }
                             } //end for
                         } //end for datafile
@@ -289,7 +289,7 @@ public class MetadataIngest {
         inv.setPrevInvNumber(investigation.getPrevInvNumber());
         inv.setTitle(investigation.getTitle());
 
-        inv.setInvType(investigation.getInvType().value().toLowerCase());
+        inv.setInvType(investigation.getInvType().toLowerCase());
         //inv.setInvestigationInclude(investigation.get); --what is this?
         //inv.setModId(user);
         //inv.setModTime(new Date());
@@ -354,10 +354,10 @@ public class MetadataIngest {
                 dataset.setSampleId(sample.getId());
             } //end if
             if (_dataset.getDatasetStatus() != null) {
-                dataset.setDatasetStatus(_dataset.getDatasetStatus().value().toLowerCase());
+                dataset.setDatasetStatus(_dataset.getDatasetStatus().toLowerCase());
             } //end if
             if (_dataset.getDatasetType() != null) {
-                dataset.setDatasetType(_dataset.getDatasetType().value().toLowerCase());
+                dataset.setDatasetType(_dataset.getDatasetType().toLowerCase());
             } //end if
             dataset.setDescription(_dataset.getDescription());
             //dataset.setInvestigationId(investigation);
