@@ -203,6 +203,10 @@ public class MetadataIngest {
         //if experiment number found, try to find a match in the database
         if ((!Util.isEmpty(experimentNumber)) && (trusted)) {
             advanDTO.setExperimentNumber(experimentNumber);
+            
+            if ((_investigation.getVisitId() != null) && (_investigation.getVisitId().length() >0))
+                advanDTO.setVisitId(_investigation.getVisitId());
+            
             Collection<uk.icat3.entity.Investigation> investigations = InvestigationSearch.searchByAdvanced(userId, advanDTO, manager);
 
             //if there is no match return null
