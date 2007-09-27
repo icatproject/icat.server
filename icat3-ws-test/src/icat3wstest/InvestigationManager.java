@@ -34,7 +34,7 @@ public class InvestigationManager {
             
             // TODO process result here
             Investigation investigation = ICATSingleton.getInstance().getInvestigationIncludes(sid, id,
-                    InvestigationInclude.ALL);
+                    InvestigationInclude.DATASETS_ONLY);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -232,8 +232,8 @@ public class InvestigationManager {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        //  getInvestigation(SID, INVESTIGATION_ID);
-        getInvestigations(SID, INVESTIGATION_ID);
+          getInvestigation(SID, 6L);
+        //getInvestigations(SID, INVESTIGATION_ID);
         
        /* Investigation investigation = createInvestigation(SID, "investigation for "+SID);
         if(investigation != null) {

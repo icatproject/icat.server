@@ -205,16 +205,16 @@ public class InvestigationSearch {
      */
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
-        // searchKeyword(SID, "calibration");
+        searchKeyword(SID, "b");
         //   searchKeywordAll(SID, "cal");
         // searchSurname(SID, "in");
         // searchUserId(SID, "gjd37");
-        searchMyInvestigations(SID);
+        //searchMyInvestigations(SID);
         AdvancedSearchDetails asd = new AdvancedSearchDetails();
         // asd.getKeywords().add("calibration");
         // asd.getInvestigators().add(SURNAME);
         asd.setInvestigationName("SrF2 calibration  w=-25.3d");
-        InvestigationSearch.searchAdvanced(SID, asd);
+        //InvestigationSearch.searchAdvanced(SID, asd);
     }
     
 }
