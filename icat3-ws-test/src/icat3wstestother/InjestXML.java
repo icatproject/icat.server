@@ -49,8 +49,8 @@ public class InjestXML {
     public static void main(String[] args) {
         // TODO code application logic here
         try {
-            //BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("src/icat3wstestother/isis.xml")));
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("src/icat3wstestother/clf.xml")));
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("src/icat3wstestother/isis.xml")));
+            //BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("src/icat3wstestother/clf.xml")));
             String line = "";
             String  buffer = "";
             while((line = br.readLine()) != null) {
