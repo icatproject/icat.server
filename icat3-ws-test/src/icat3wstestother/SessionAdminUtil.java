@@ -65,8 +65,7 @@ public class SessionAdminUtil {
             assert false;
             throw ex;
             // TODO handle custom exceptions here
-        }
-        
+        }        
     }
     
     /**

@@ -28,7 +28,7 @@ public class ICATAdminSingleton {
     
     public static ICATAdmin getInstance(){
         ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, END_POINT_ADMIN_ADDRESS);        
-        ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "test");        
+        ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "isis_test");        
         ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, System.getProperty("glassfish.admin"));        
       
         return icatPort;
