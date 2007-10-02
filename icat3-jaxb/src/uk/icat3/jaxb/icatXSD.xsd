@@ -96,7 +96,7 @@
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="inv_abstract" type="str4000" minOccurs="0"/>
-			<xs:element name="inv_type" type="Inv_Type" minOccurs="0">
+			<xs:element name="inv_type" type="Inv_Type" minOccurs="1">
 				<xs:annotation>
 					<xs:documentation>Correspond to the lookup table INVESTIGATION_TYPE</xs:documentation>
 				</xs:annotation>
@@ -149,7 +149,7 @@
 			<xs:maxLength value="255"/>
 		</xs:restriction>
 	</xs:simpleType>
-		<!-- ................................................................-->
+	<!-- ................................................................-->
 	<xs:simpleType name="Icat_Role">
 		<xs:restriction base="xs:string">
 			<xs:maxLength value="255"/>
