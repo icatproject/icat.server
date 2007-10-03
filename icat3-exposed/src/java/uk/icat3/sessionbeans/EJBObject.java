@@ -6,6 +6,7 @@ package uk.icat3.sessionbeans;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.net.URL;
 import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -64,21 +65,32 @@ public abstract class EJBObject {
     
     @PostConstruct
     protected void init(){
-        //System.out.println("Post Construct: "+new File(System.getProperty("user.home")+File.separator+".log4j.properties").exists());
-        //load config from user.home
-        PropertyConfigurator.configure(System.getProperty("user.home")+File.separator+".log4j.properties");
-       // PropertyConfigurator.configure(ClassLoader.getSystemResource("log4j.properties"));
+       
+        //load resource bundle
+        URL url = this.getClass().getResource("facility.properties");
+        Properties props = new Properties();
+        String facilityLogFile = null;
+        try{
+            props.load(url.openStream());
+            facilityLogFile = props.getProperty("facility.name");
+        } catch(Exception mre){
+            facilityLogFile = "ISIS";
+            System.out.println("Unable to load props file, setting log as  "+facilityLogFile+"\n"+mre);                     
+        }
         
-        log.info("Loaded log4j properties from : "+System.getProperty("user.home")+File.separator+".log4j.properties");
+        //load config from user.home
+        PropertyConfigurator.configure(System.getProperty("user.home")+File.separator+"."+facilityLogFile+"-icatapi.properties");
+               
+        log.info("Loaded log4j properties from : "+System.getProperty("user.home")+File.separator+"."+facilityLogFile+"-icatapi.properties");
         
         //check if overrides default session implementation
         File sessionConf =  new File(System.getProperty("user.home")+File.separator+".session.conf");
         if(sessionConf.exists()){
             try {
-                Properties props = new Properties();
-                props.load(new FileInputStream(sessionConf));
+                Properties props2 = new Properties();
+                props2.load(new FileInputStream(sessionConf));
                 
-                String sessionImplementation = props.getProperty("session.impl.class");
+                String sessionImplementation = props2.getProperty("session.impl.class");
                 
                 log.info("Setting session implementation as: "+sessionImplementation);
                 Constants.DEFAULT_USER_IMPLEMENTATION = sessionImplementation;
