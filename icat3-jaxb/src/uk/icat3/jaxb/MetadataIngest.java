@@ -418,7 +418,7 @@ public class MetadataIngest {
             uk.icat3.entity.DatafileParameter parameter = new uk.icat3.entity.DatafileParameter(pk);
             parameter.setDescription(_parameter.getDescription());
             parameter.setError(_parameter.getError());
-            parameter.setNumericValue(parameter.getNumericValue());
+            parameter.setNumericValue(_parameter.getNumericValue());
             parameter.setRangeBottom(_parameter.getRangeBottom());
             parameter.setRangeTop(_parameter.getRangeTop());
             parameter.setStringValue(_parameter.getStringValue());
@@ -483,7 +483,7 @@ public class MetadataIngest {
             uk.icat3.entity.DatasetParameter parameter = new uk.icat3.entity.DatasetParameter(pk);
             parameter.setDescription(_parameter.getDescription());
             parameter.setError(_parameter.getError());
-            parameter.setNumericValue(parameter.getNumericValue());
+            parameter.setNumericValue(_parameter.getNumericValue());
             parameter.setRangeBottom(_parameter.getRangeBottom());
             parameter.setRangeTop(_parameter.getRangeTop());
             parameter.setStringValue(_parameter.getStringValue());
@@ -506,7 +506,7 @@ public class MetadataIngest {
             uk.icat3.entity.SampleParameter parameter = new uk.icat3.entity.SampleParameter(pk);
             //parameter.setDescription(_parameter.getDescription());
             parameter.setError(_parameter.getError());
-            parameter.setNumericValue(parameter.getNumericValue());
+            parameter.setNumericValue(_parameter.getNumericValue());
             parameter.setRangeBottom(_parameter.getRangeBottom());
             parameter.setRangeTop(_parameter.getRangeTop());
             parameter.setStringValue(_parameter.getStringValue());
