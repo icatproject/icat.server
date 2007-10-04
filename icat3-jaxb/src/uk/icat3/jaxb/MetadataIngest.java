@@ -17,6 +17,7 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.jaxb.MetadataParser;
 import uk.icat3.jaxb.gen.*;
+import uk.icat3.jaxb.helper.StringComparer;
 import uk.icat3.manager.DataFileManager;
 import uk.icat3.manager.DataSetManager;
 import uk.icat3.manager.InvestigationManager;
@@ -107,7 +108,7 @@ public class MetadataIngest {
                     } //end if
                     //If datafile does not belong to existing investigation then ingest everything
                     if (investigationId == null) {
-                        investigation = getInvestigation(_inv);
+                        investigation = getInvestigation(userId, _inv, manager);
                         investigation = InvestigationManager.createInvestigation(userId, investigation, manager);
                     } //end if
                     invIds.add(investigation.getId());
@@ -263,6 +264,7 @@ public class MetadataIngest {
         Collection<uk.icat3.entity.Investigation> investigations = InvestigationSearch.searchByAdvanced(userId, advanDTO, manager);
 
         //do soundex on results
+        /*
         Soundex soundex = new Soundex();
         if ((investigations != null) && (investigations.size() > 0)) {
             Iterator it = investigations.iterator();
@@ -279,25 +281,73 @@ public class MetadataIngest {
                 } //end try/catch
             } //end while
         } //end if
+        */
+        
+        if ((investigations != null) && (investigations.size() > 0)) {
+            Iterator it = investigations.iterator();
+            while (it.hasNext()) {
+                try {
+                    uk.icat3.entity.Investigation inv = (uk.icat3.entity.Investigation) it.next();
+                    //if we get a match of 4 (highest value) see apache codec package, then return match
+                    if (StringComparer.compareStrings(_investigation.getTitle(), inv.getTitle()) > .4) {                    
+                        log.debug("___****___ found match, title: " + inv.getTitle() + ", RB: " + inv.getInvNumber());
+                        return new Long(inv.getId());
+                    } //end if
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } //end try/catch
+            } //end while
+        } //end if 
+        
         //if we get here then no match was found, so return null
         return null;
     }
 
-    private static uk.icat3.entity.Investigation getInvestigation(uk.icat3.jaxb.gen.Investigation investigation) {
+    private static uk.icat3.entity.Investigation getInvestigation(String userId, uk.icat3.jaxb.gen.Investigation investigation, EntityManager manager) {
         uk.icat3.entity.Investigation inv = new uk.icat3.entity.Investigation();
         inv.setBcatInvStr(investigation.getBcatInvStr());
-        //inv.setFacilityCycle(facilityCycle);
-        //inv.setInstrument(investigation.getInstrument());
+        //inv.setFacilityCycle(investigation.getFacilityCycle());        
+        
         inv.setInvAbstract(investigation.getInvAbstract());
         inv.setInvNumber(investigation.getInvNumber());
         inv.setPrevInvNumber(investigation.getPrevInvNumber());
         inv.setTitle(investigation.getTitle());
-
-        inv.setInvType(investigation.getInvType().toLowerCase());
-        //inv.setInvestigationInclude(investigation.get); --what is this?
-        //inv.setModId(user);
-        //inv.setModTime(new Date());
-        inv.setVisitId(investigation.getVisitId());
+        inv.setInvType(investigation.getInvType().toLowerCase());                
+        
+        //check to see if visit id exists
+        //...
+        AdvancedSearchDetails advanDTO = new AdvancedSearchDetails();
+        advanDTO.setExperimentNumber(investigation.getInvNumber());
+        //advanDTO.setVisitId(investigation.getVisitId());
+        Collection<uk.icat3.entity.Investigation> investigations = InvestigationSearch.searchByAdvanced(userId, advanDTO, manager);
+          
+        int high = 0;
+        boolean exists = false;
+        if ((investigations != null) && (investigations.size() > 0)) {
+            Iterator it = investigations.iterator();
+            while (it.hasNext()) {                                    
+                    uk.icat3.entity.Investigation _inv = (uk.icat3.entity.Investigation) it.next();
+                    log.debug("______" + _inv.toString());
+                    if (_inv.getVisitId().equalsIgnoreCase(investigation.getVisitId())) exists = true;
+                    
+                    try {
+                        int vis = Integer.valueOf(_inv.getVisitId());
+                        if (vis > high) high = vis;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }//end try/catch
+            }//end while                             
+        }//end if 
+                
+        //if does NOT exist then set normally else find highest visit_id and increment by one
+        if (!exists) {
+            inv.setVisitId(investigation.getVisitId());
+            log.debug("______ setting visit id to same as xml file");
+        } else {
+            inv.setVisitId(new Integer(high+1).toString());
+            log.debug("______ setting visit id to high + 1" + high+1);
+        }//end if                                
+        
         inv.setInstrument(investigation.getInstrument());
 
         return inv;
