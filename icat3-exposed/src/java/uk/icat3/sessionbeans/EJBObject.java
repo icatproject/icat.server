@@ -67,7 +67,7 @@ public abstract class EJBObject {
     protected void init(){
        
         //load resource bundle
-        URL url = this.getClass().getResource("facility.properties");
+        URL url = this.getClass().getResource("/uk/icat3/sessionbeans/facility.properties");
         Properties props = new Properties();
         String facilityLogFile = null;
         try{
