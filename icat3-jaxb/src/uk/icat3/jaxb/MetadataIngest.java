@@ -326,8 +326,7 @@ public class MetadataIngest {
         if ((investigations != null) && (investigations.size() > 0)) {
             Iterator it = investigations.iterator();
             while (it.hasNext()) {                                    
-                    uk.icat3.entity.Investigation _inv = (uk.icat3.entity.Investigation) it.next();
-                    log.debug("______" + _inv.toString());
+                    uk.icat3.entity.Investigation _inv = (uk.icat3.entity.Investigation) it.next();                    
                     if (_inv.getVisitId().equalsIgnoreCase(investigation.getVisitId())) exists = true;
                     
                     try {
@@ -341,11 +340,9 @@ public class MetadataIngest {
                 
         //if does NOT exist then set normally else find highest visit_id and increment by one
         if (!exists) {
-            inv.setVisitId(investigation.getVisitId());
-            log.debug("______ setting visit id to same as xml file");
+            inv.setVisitId(investigation.getVisitId());            
         } else {
-            inv.setVisitId(new Integer(high+1).toString());
-            log.debug("______ setting visit id to high + 1" + high+1);
+            inv.setVisitId(new Integer(high+1).toString());            
         }//end if                                
         
         inv.setInstrument(investigation.getInstrument());
