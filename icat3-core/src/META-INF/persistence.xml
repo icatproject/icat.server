@@ -141,7 +141,7 @@
         </properties>
     </persistence-unit>
     
-    <persistence-unit name="icat3-dls_dev_new" transaction-type="RESOURCE_LOCAL">
+    <persistence-unit name="icat3-dls_pro" transaction-type="RESOURCE_LOCAL">
         <provider>oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider</provider>
         <class>uk.icat3.entity.Publication</class>
         <class>uk.icat3.entity.Facility</class>
@@ -174,10 +174,10 @@
         <class>uk.icat3.entity.TopicList</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
-            <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(LOAD_BALANCE=on)(ADDRESS=(PROTOCOL=TCP)(HOST=jinx.dl.ac.uk) (PORT=1521))(ADDRESS=(PROTOCOL=TCP)(HOST=elektra.dl.ac.uk)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=minerva.dl.ac.uk)))" />
-            <property name="toplink.jdbc.user" value="icatdls_dev_new"/>
+            <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION =  (LOAD_BALANCE = yes) (FAILOVER = ON) (ADDRESS = (PROTOCOL = TCP)(HOST = honey-vip.esc.rl.ac.uk)(PORT = 1521))  (ADDRESS = (PROTOCOL = TCP)(HOST = goodnight-vip.esc.rl.ac.uk)(PORT = 1521))   (ADDRESS = (PROTOCOL = TCP)(HOST = domino-vip.esc.rl.ac.uk)(PORT = 1521))  (ADDRESS = (PROTOCOL = TCP)(HOST = sapphire-vip.esc.rl.ac.uk)(PORT = 1521))  (CONNECT_DATA = (SERVICE_NAME = ICATCLF.ESC.RL.AC.UK) (FAILOVER_MODE =   (TYPE=SESSION)  (METHOD=BASIC)   )  ) )" />
+            <property name="toplink.jdbc.user" value="icatclf"/>
             <property name="toplink.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
-            <property name="toplink.jdbc.password" value="sheisapain"/>
+            <property name="toplink.jdbc.password" value="r1skjam3"/>
             <!-- Prints out SQL generated from EJBQL -->
             <property name="toplink.logging.level" value="FINE"/> 
             <!-- No caching of entity data -->

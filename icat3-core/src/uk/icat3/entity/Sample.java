@@ -54,8 +54,7 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = "Sample.findByModId", query = "SELECT s FROM Sample s WHERE s.modId = :modId"),
     @NamedQuery(name = "Sample.findByUnique", query = "SELECT s FROM Sample s WHERE s.name = :name AND s.instance = :instance AND s.investigationId = :investigationId"),
     @NamedQuery(name = "Sample.findByProposalSampleId", query = "SELECT s FROM Sample s WHERE s.proposalSampleId = :proposalSampleId"),
-    @NamedQuery(name = Queries.SAMPLES_BY_NAME, query = Queries.SAMPLES_BY_NAME_JPQL),
-    @NamedQuery(name = Queries.DATASETS_BY_SAMPLES, query = Queries.DATASETS_BY_SAMPLES_JPQL)
+    @NamedQuery(name = Queries.SAMPLES_BY_NAME, query = Queries.SAMPLES_BY_NAME_JPQL)
     
 })
         @SequenceGenerator(name="SAMPLE_SEQ",sequenceName="SAMPLE_ID_SEQ",allocationSize=1)

@@ -354,6 +354,8 @@ public class AdvancedSearchDetails implements Serializable{
     }
     
     /**
+     * 
+     * NEEDS to be updated since partitioning of ICAT_AUTHORISATION
      * This checks if the values give are valid in terms of the search on the DB
      *
      * For example, just searching on run number will create a very slow long search on say
@@ -370,10 +372,25 @@ public class AdvancedSearchDetails implements Serializable{
      * Just year start 7 mins (all years)
      * Just datafile name 57 secs
      *
+    
      * start year and instrument 10 secs
      * start year and datafile name  4 secs
      * start year and keywords 7 mins
      * start year and sample 2mins OK!
+     * 
+     * New Tests (returning 100)
+     * ==========================
+     * 
+     * start year and sample 18 secs
+     * start year and keywords 49 secs
+     * start year 42 sec 
+     * run number 30 secs
+     * run number instrument 15 secs
+     * run number keywords 3 secs
+     * run number end time 2 secs
+     * run number all time 1 secs
+     * datafilename 24s secs
+     * 
      */
     public boolean isValid(){
         //log.trace(" "+hasRunNumber() +"  "+runEnd);

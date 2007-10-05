@@ -56,7 +56,7 @@ public class TestSearch {
     
     protected static void setUp(){
         emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
-        //emf = Persistence.createEntityManagerFactory("icatisis_dev");
+        //emf = Persistence.createEntityManagerFactory("icat3-dls_pro");
         em = emf.createEntityManager();
         
         
@@ -418,61 +418,14 @@ public class TestSearch {
     }
     
     public void test() throws Exception {
-        
-        
+                
         setUp();
-        String LIST_ALL = Queries.LIST_ALL_USERS_INVESTIGATIONS_JPQL;
-        // String LIST_ALL_NATIVE = "SELECT i.ID FROM INVESTIGATION i WHERE Lower(TITLE) LIKE '%?t%'";
-        //   String LIST_ALL_NATIVE = "SELECT i.ID FROM INVESTIGATION i WHERE TITLE LIKE ?title";
         
-        //String TEST_SQL = LIST_ALL+ "AND d.datasetId.investigationId.instrument.name IN('alf','lad') AND d.datafileParameterCollection.datafileParameterPK.name = 'run_number' AND d.datafileParameterCollection.datafileParameterPK.name BETWEEN 2620 AND 2631";
+        String LIST_ALL = "SELECT k.keywordPK.name from Keyword k where LOWER(k.keywordPK.name) LIKE '%s%'";
+       
+        System.out.println(em.createQuery(LIST_ALL).getResultList());
         
-        // String TEST_SQL =  "SELECT DISTINCT k.keywordPK.name from Keyword k, IcatAuthorisation ia WHERE" +
-        //    " k.investigation.id = ia.icatAuthorisationPK.investigationId AND " +
-        //  "(ia.icatAuthorisationPK.userId = :userId OR ia.icatAuthorisationPK.userId = 'ANY')" +
-        //" AND ia.markedDeleted = 'N' AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) ORDER BY k.keywordPK.name";
-        //     String TEST_SQL = "SELECT i from Investigation i WHERE i.id = '283'";
-        //String TEST_SQL = "SELECT i from Keyword i";
-        //test code here
-        // em.createQuery(INVESTIGATIONS_BY_USER_SQL2).setMaxResults(2).getResultList();
-        //System.out.println(em.createNativeQuery(LIST_ALL_NATIVE).setParameter("t", "fa").getResultList());
-        
-        // System.out.println(em.createQuery(LIST_ALL).setParameter("userId", "test").getResultList());
-        //log.info("Testing");
-        /*Collection<Long> investigations = em.createQuery(INVESTIGATIONS_BY_USER_SQL).setParameter("userId","JAMES-JAMES").setParameter("instrument","alf").setParameter("lowerRunNumber",0).setParameter("upperRunNumber",10000).getResultList();
-        log.info("Results: "+investigations.size());
-        for(Long investigation : investigations){
-            log.info(investigation);
-        }*/
-        
-       /* Collection<Investigation> investigations =  em.createNativeQuery(INVESTIGATIONS_BY_USER_SQL,Investigation.class).setParameter(1,"JAMES").setMaxResults(100).getResultList();
-        
-        for(Investigation investigation : investigations){
-            log.info(investigation.getId()+" "+investigation.getTitle());
-        }*/
-        //log.info("Results: "+investigations.size());
-        
-        
-        //Dataset dataset = DataSetManager.getDataSet("test", 2L, em);
-        
-        //   Datafile datafile = em.find(Datafile.class, 2L);
-        
-        Keyword kw=  new Keyword();
-        kw.setKeywordPK(new KeywordPK("sds",3L));
-        kw.setModId("sd");
-        
-        Investigation in = em.find(Investigation.class, 3L);
-        kw.setInvestigation(in);
-        
-        em.persist(kw);
-        
-        tearDown();
-        
-        // System.out.println(datafile.getId());
-        
-        //System.out.println(dataset.getInvestigationId());
-        //System.out.println(dataset.getIcatRole() +" "+dataset.getIcatRole().isDownload());
-        
+        tearDown();        
     }
     
     
@@ -516,30 +469,30 @@ public class TestSearch {
         //////////////////////////
         
         
-        keywords.add("ccwilson");
-          keywords.add("calibration");
-        //  ts.seachByKeywords("gjd37", keywords);
+        keywords.add("a");
+        // keywords.add("calibration");
+        // ts.seachByKeywords("gjd37", keywords);
         // ts.seachByKeywords("gjd37", keywords);
         
-        //log.info("Hello");
-        //  ts.getMyInvestigations("gjd37");
+        // log.info("Hello");
+        // ts.getMyInvestigations("gjd37");
         
-        //  ts.seachBySurname("gjd37", "Shankland");
+        // ts.seachBySurname("gjd37", "Shankland");
         
-        //ts.seachByUserID("JAMES", "JAMES");
+        // ts.seachByUserID("JAMES", "JAMES");
         
         // ts.seachByUserID("JAMES", "JAMES");
         
         
         Collection<String> ins  =   new ArrayList<String>();
         // ins.add("scan");
-        ins.add("crisp");
+        //ins.add("crisp");
         
         // ts.seachByRunNumber("gjd37", ins, 11757L,11759L);
         
-        AdvancedSearchDetails dto = new AdvancedSearchDetails();
+        //  AdvancedSearchDetails dto = new AdvancedSearchDetails();
         
-       // dto.setInvestigationName("multidetector");
+        // dto.setInvestigationName("multidetector");
         /*Collection<String> inv  =   new ArrayList<String>();
         inv.add("JAMES-JAMES");*/
         //  dto.setInvestigators(inv);
@@ -557,13 +510,13 @@ public class TestSearch {
         
         //isis
         keywords2.add("multidetecto");
-        dto.setInvestigationName("SrF2 calibration  w=-25.3");
+       // dto.setInvestigationName("SrF2 calibration  w=-25.3");
       //  dto.setKeywords(keywords2);
        // dto.setDatafileName("CSP11758.");
        // dto.setRunEnd(11759L);
        // dto.setRunStart(11757L);
        // dto.setFuzzy(false);
-        ts.seachByAdvanced("gjd37",dto);
+        //ts.seachByAdvanced("gjd37",dto);
         
        //  ts.getAllKeywords("gjd37");
         //
@@ -571,7 +524,7 @@ public class TestSearch {
         // ts.getAllInvestigations("gjd37");
         //ts.getUserInvestigations("gjd37");
         
-        // ts.test();
+        ts.test();
         
         
         //ts.test2();
