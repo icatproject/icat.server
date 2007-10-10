@@ -182,8 +182,10 @@ public class MetadataIngest {
             //return invIds
         } catch (NoSuchObjectFoundException ex) {
             java.util.logging.Logger.getLogger("global").log(Level.SEVERE, null, ex);
+            throw(ex);
         } catch (InsufficientPrivilegesException ex) {
             java.util.logging.Logger.getLogger("global").log(Level.SEVERE, null, ex);
+            throw(ex);
         } //end try / catch#
         return (Long[]) invIds.toArray(new Long[0]);
     }
