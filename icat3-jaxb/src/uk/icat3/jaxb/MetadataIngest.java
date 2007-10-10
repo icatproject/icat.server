@@ -345,7 +345,8 @@ public class MetadataIngest {
             inv.setVisitId(new Integer(high+1).toString());            
         }//end if                                
         
-        inv.setInstrument(investigation.getInstrument());
+        if (investigation.getInstrument() != null)
+            inv.setInstrument(investigation.getInstrument().toLowerCase());
 
         return inv;
     }
