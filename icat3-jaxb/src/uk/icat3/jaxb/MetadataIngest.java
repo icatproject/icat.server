@@ -119,7 +119,7 @@ public class MetadataIngest {
                     for (uk.icat3.entity.Keyword keyword : keywords) {
                         try {
                             InvestigationManager.addInvestigationObject(userId, keyword, investigation.getId(), manager);
-                        } catch (ValidationException ve) {
+                        } catch (Exception ve) {
                             //catch validation exception i.e. if duplicate keyword exists, allow ingestion of other keywords to continue
                         } //end try/catch
                     } //end
