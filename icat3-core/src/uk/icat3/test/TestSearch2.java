@@ -15,6 +15,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import org.apache.log4j.Logger;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.Queries;
 
 /**
  *
@@ -34,8 +35,8 @@ public class TestSearch2 {
     }
     
     protected static void setUp(){
-        //    emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
-        emf = Persistence.createEntityManagerFactory("icatisis_dev");
+        emf = Persistence.createEntityManagerFactory("icat3-apitest");
+        // emf = Persistence.createEntityManagerFactory("icatisis_dev");
         em = emf.createEntityManager();
         
         
@@ -63,25 +64,25 @@ public class TestSearch2 {
                 " AND ia.userId IN('gjd37','ANY')" +
                 " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y' "+
                 
-              //  " AND i.instrument = 'mari' "+   //instrument
+                //  " AND i.instrument = 'mari' "+   //instrument
                 
                 " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE '%a%' AND " +
-                    " sample.markedDeleted = 'N') "+
-        
-              //  " AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE '%a%' AND " +
-              //  " kw.markedDeleted = 'N')  "+ //iterate, remove if no keyword is null
+                " sample.markedDeleted = 'N') "+
                 
-              //  " AND EXISTS (SELECT kw1 FROM i.keywordCollection kw1 WHERE kw1.keywordPK.name LIKE '%b%' AND " +
-              //  " kw1.markedDeleted = 'N')  "+ //iterate, remove if no keyword is null
+                //  " AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE '%a%' AND " +
+                //  " kw.markedDeleted = 'N')  "+ //iterate, remove if no keyword is null
                 
-                  " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
-                  " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
-                  " AND (iadf3.userId = 'gjd37' OR iadf3.userId = 'ANY')" +
-                  " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y' " +
-                  " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
-                  " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " + //remove if all are null
-            
-                   "";
+                //  " AND EXISTS (SELECT kw1 FROM i.keywordCollection kw1 WHERE kw1.keywordPK.name LIKE '%b%' AND " +
+                //  " kw1.markedDeleted = 'N')  "+ //iterate, remove if no keyword is null
+                
+                " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
+                " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
+                " AND (iadf3.userId = 'gjd37' OR iadf3.userId = 'ANY')" +
+                " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y' " +
+                " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
+                " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " + //remove if all are null
+                
+                "";
               /*  " AND  i.visitId = :visitId   AND" +
                   " i.invType.name = :invType    AND " +
                   " i.invAbstract LIKE :invAbstract   AND" +
@@ -89,13 +90,13 @@ public class TestSearch2 {
                   " i.title = :title   AND" +
                   " i.bcatInvStr = :bcatInvStr   AND " +
                   " i.invNumber = :invNumber  " +*/
-                
-                
-             //   " AND i.id IN (SELECT dfp.datafile.dataset.investigation.id FROM DatafileParameter dfp, IcatAuthorisation ia2  " +
-               // " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
-           //    " AND (ia2.userId = 'gjd37' OR ia2.userId = 'ANY')" +
-              //  " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionCanSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN 1398 AND 1400 AND " +
-             //   " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null
+        
+        
+        //   " AND i.id IN (SELECT dfp.datafile.dataset.investigation.id FROM DatafileParameter dfp, IcatAuthorisation ia2  " +
+        // " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
+        //    " AND (ia2.userId = 'gjd37' OR ia2.userId = 'ANY')" +
+        //  " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionCanSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN 1398 AND 1400 AND " +
+        //   " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null
         
         System.out.println(em.createQuery(LIST_ALL).setParameter("dataFileType", ElementType.DATAFILE).
                 setParameter("investigationType", ElementType.INVESTIGATION).setMaxResults(100)
@@ -106,11 +107,11 @@ public class TestSearch2 {
                 .setParameter("invNumber", null)
                 .setParameter("bcatInvStr", null)
                 .setParameter("title", null)*/
-              //  .setParameter("datafileName", "SXD01409.RAW")
-                  .setParameter("datafileName", null)
-               .setParameter("lowerTime", new Date(1,1,1))
-               // .setParameter("upperTime", new Date())
-             //    .setParameter("lowerTime", null)
+                //  .setParameter("datafileName", "SXD01409.RAW")
+                .setParameter("datafileName", null)
+                .setParameter("lowerTime", new Date(1,1,1))
+                // .setParameter("upperTime", new Date())
+                //    .setParameter("lowerTime", null)
                 .setParameter("upperTime", null)
                 .getResultList().size());
         
@@ -128,12 +129,22 @@ public class TestSearch2 {
         /// old way
         
         long time = System.currentTimeMillis();
-        String LIST_ALL = "SELECT DISTINCT dfp.datafile.dataset.investigation.id "+                
-                " FROM DatafileParameter dfp "+
-                " WHERE dfp.numericValue BETWEEN 0 AND 1400 AND " +
-                " dfp.datafileParameterPK.name = 'run_number'"; //remove this if run number null
+        String LIST_ALL =  "SELECT DISTINCT df.dataset.investigation FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
+                " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
+                " AND (iadf3.userId = 'gjd37' OR iadf3.userId = 'ANY')" +
+                " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y' " +
+                " AND ( df.datafileCreateTime BETWEEN :lowerTime AND  :upperTime  ) AND " +
+                " df.markedDeleted = 'N'  ";
         
-        System.out.println(em.createQuery(LIST_ALL)             
+        Date date = new Date();
+        date.setMonth(8);
+        date.setDate(1);
+        date.setYear(107);
+        System.out.println(date);
+        
+        System.out.println(em.createQuery(LIST_ALL).setParameter("dataFileType", ElementType.DATAFILE)
+                .setParameter("lowerTime", date)
+                .setParameter("upperTime", new Date())
                 .getResultList().size());
         
         System.out.println("This method takes " +(System.currentTimeMillis()-time)/1000f + "s to execute");
@@ -151,9 +162,9 @@ public class TestSearch2 {
         
         TestSearch2 ts = new TestSearch2();
         
-       ts.test();
+        ts.test2();
         
-      //   ts.test2();
+        //   ts.test2();
         
         
     }

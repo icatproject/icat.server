@@ -394,7 +394,7 @@ public class AdvancedSearchDetails implements Serializable{
      */
     public boolean isValid(){
         //log.trace(" "+hasRunNumber() +"  "+runEnd);
-        if(hasRunNumber()){
+        /*if(hasRunNumber()){
             //so they have set run number, check something on investigation is set)
             if(hasInvestigationParameters() || getDatafileName() != null || hasInstruments()) return true;
             else throw new IllegalArgumentException("Must search investigation information, instruments or datafile name if searching with run numbers");
@@ -403,7 +403,7 @@ public class AdvancedSearchDetails implements Serializable{
             if(hasInvestigationParameters() || getDatafileName() != null || hasInstruments() ||
                     hasSample()) return true;
             else throw new IllegalArgumentException("Must search investigation information, instruments, sample name or datafile name if searching with datafile date ranges");
-        } else return true;
+        } else*/ return true;
         
     }
 }
