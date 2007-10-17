@@ -58,7 +58,7 @@ public class DefaultUser implements User {
     public String getUserIdFromSessionId(String sessionId) throws SessionException {
         log.trace("getUserIdFromSessionId("+sessionId+")");
         if(sessionId == null || sessionId.equals("")) throw new SessionException("Session Id cannot be null or empty.");
-      
+        
         try {
             //find the user by session id, throws NoResultException if session not found
             Session session = (Session)manager.createNamedQuery("Session.findByUserSessionId").setParameter("userSessionId", sessionId).getSingleResult();
@@ -160,8 +160,8 @@ public class DefaultUser implements User {
     }
     
     /**
-     * To support all method in User interface, throws Runtime UnsupportedOperationException as this method
-     * is not support by the default implementation
+     * To support all method in User interface, used to get credential from session DB
+     * 
      *
      * @param sessionId
      * @param user
@@ -170,7 +170,29 @@ public class DefaultUser implements User {
      * @return UserDetails
      */
     public UserDetails getUserDetails(String sessionId, String user) throws SessionException, NoSuchUserException {
-        throw new UnsupportedOperationException("Method not supported.");
+        log.trace("getUserDetails("+sessionId+")");
+        if(sessionId == null || sessionId.equals("")) throw new SessionException("Session Id cannot be null or empty.");
+        
+        try {
+            //find the user by session id, throws NoResultException if session not found
+            Session session = (Session)manager.createNamedQuery("Session.findByUserSessionId").setParameter("userSessionId", sessionId).getSingleResult();
+            
+            //is valid
+            if(session.getExpireDateTime().before(new Date())) throw new SessionException("Session "+sessionId+" has expired");
+            
+            UserDetails userDetails = new UserDetails();
+            userDetails.setCredential(session.getCredential());
+            
+            return userDetails;           
+            
+        } catch(NoResultException ex) {
+            throw new SessionException("Invalid sessionid: "+sessionId);
+        } catch(SessionException ex) {
+            throw ex;
+        } catch(Exception ex) {
+            log.warn(ex.getMessage());
+            throw new SessionException("Unable to find user by sessionid: "+sessionId);
+        }
     }
     
     /**
