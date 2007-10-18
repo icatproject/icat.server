@@ -49,13 +49,15 @@ public class DownloadManager {
     private static SizeManager sizeManager = new SizeManager();
     
     public static DataHandler downloadDatafile(String userId, Long datafileId, String credential, EntityManager manager)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException, TotalSizeExceededException {
+        GSSCredential proxy = null;
         try {
-            GSSCredential proxy = CogUtil.loadProxy(credential);
-            return downloadDatafile(userId, datafileId, proxy, manager);
+            proxy = CogUtil.loadStringProxy(credential);
         } catch (Exception ex) {
             log.error("Unable to download data", ex);
-            throw new DownloadException("Unable to download data");
+            throw new DownloadException("Unable to download data, cause unknown");
         }
+        
+        return downloadDatafile(userId, datafileId, proxy, manager);
     }
     
     public static DataHandler downloadDatafile(String userId, Long datafileId, GSSCredential credential, EntityManager manager)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException, TotalSizeExceededException {
@@ -90,13 +92,15 @@ public class DownloadManager {
     }
     
     public static DataHandler downloadDataset(String userId, Long datasetId, String credential, EntityManager manager)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException, TotalSizeExceededException {
+        GSSCredential proxy = null;
         try {
-            GSSCredential proxy = CogUtil.loadProxy(credential);
-            return downloadDataset(userId, datasetId, proxy, manager);
+            proxy = CogUtil.loadStringProxy(credential);
+            
         } catch (Exception ex) {
             log.error("Unable to download data", ex);
-            throw new DownloadException("Unable to download data");
+            throw new DownloadException("Unable to download data, cause unknown");
         }
+        return downloadDataset(userId, datasetId, proxy, manager);
     }
     
     public static DataHandler downloadDataset(String userId, Long datasetId, GSSCredential credential, EntityManager manager)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException, TotalSizeExceededException {
@@ -107,11 +111,11 @@ public class DownloadManager {
         
         Collection<Url> urls = new ArrayList<Url>();
         long TOTAL = 0;
-              
+        
         for (Datafile df : dataSet.getDatafileCollection()) {
             try{
                 if(df.getFileSize() == null) throw new DownloadException("No file size for "+df+", not adding to lisr");
-                urls.add(new Url(df.getLocation()));                
+                urls.add(new Url(df.getLocation()));
                 TOTAL += df.getFileSize();
             } catch(Exception ex){
                 log.trace("Exception adding "+df+" to list to download, not adding",ex);
@@ -129,7 +133,7 @@ public class DownloadManager {
         
         //return new datahandler
         DataHandler handler = new DataHandler(new FileDataSource(downloaded));
-             
+        
         sizeManager.minus(TOTAL);
         
         return handler;
@@ -151,7 +155,7 @@ public class DownloadManager {
         
         SRBFileManagerThread th = new SRBFileManagerThread(fileUrls, credential, false);
         
-        //th.setIncludedErrors(new int[]{-2,-1});        
+        //th.setIncludedErrors(new int[]{-2,-1});
         th.start();
         
         log.trace("Percent complete...");
