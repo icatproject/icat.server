@@ -211,8 +211,8 @@ public class DefaultUser implements User {
         try{
             user = (uk.icat3.userdefault.entity.User)manager.createNamedQuery("User.findByUserId").setParameter("userId","admin").getSingleResult();
         } catch(NoResultException ex) {
-            log.warn("Admin user not set up in DB");
-            throw new SessionException("Admin user not set up in DB");
+            log.warn("Admin user account not set up in DB");
+            throw new SessionException("Admin user account not set up");
         }
         
         //check that password is the same, should really hash it
