@@ -16,6 +16,7 @@ import client.InvestigationInclude;
 
 import client.Investigator;
 import client.Keyword;
+import client.Publication;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -107,6 +108,12 @@ public class InvestigationManager {
                 System.out.println("      ------------");
                 for (Keyword kw : investigation.getKeywordCollection()) {
                     System.out.println("          "+kw.getKeywordPK().getName());
+                }
+                
+                System.out.println("      Publications: "+ investigation.getPublicationCollection().size());
+                System.out.println("      ------------");
+                for (Publication kw : investigation.getPublicationCollection()) {
+                    System.out.println("          "+kw.getFullReference());
                 }
             }
             System.out.println("\nTime taken: "+totalTime+" seconds");
@@ -232,8 +239,8 @@ public class InvestigationManager {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-          getInvestigation(SID, 6L);
-        //getInvestigations(SID, INVESTIGATION_ID);
+        //  getInvestigation(SID, 6L);
+        getInvestigations(SID, 2L);
         
        /* Investigation investigation = createInvestigation(SID, "investigation for "+SID);
         if(investigation != null) {

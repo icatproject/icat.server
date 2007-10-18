@@ -103,7 +103,7 @@ public class DatafileManager {
             List<DatafileFormat> formats = ICATSingleton.getInstance().listDatafileFormats(SID);
             df.setDatafileFormat(formats.iterator().next());
             
-            df.setName(name);
+            df.setName(name);          
             
             Datafile result = ICATSingleton.getInstance().createDataFile(sid, df, DATASET_ID);
             
@@ -309,8 +309,8 @@ public class DatafileManager {
         //getDatafile(SID, INVESTIGATION_ID);
         //getDatafiles(SID, INVESTIGATION_ID);
         
-        Datafile df = createDatafile(SID, "name for sid "+SID);
-         delete_undeleteDatafile(SID, df.getId());
+        Datafile df = createDatafile(SID, "nexus.w"+SID);
+      //   delete_undeleteDatafile(SID, df.getId());
       /*  updateDatafile(SID, df, "new name of "+SID);  //this should fail with ICAT_ADMIN user
         delete_undeleteDatafile(SID, df.getId());
         delete_undeleteDatafile(SID, df.getId());
