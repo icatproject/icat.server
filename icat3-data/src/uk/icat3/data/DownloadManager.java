@@ -63,31 +63,38 @@ public class DownloadManager {
     public static DataHandler downloadDatafile(String userId, Long datafileId, GSSCredential credential, EntityManager manager)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException, TotalSizeExceededException {
         log.trace("downloadDatafile("+userId+", "+datafileId+", credential, EntityManager)");
         
-        //get the datafile if has permissions to read file
-        Datafile dataFile = DataFileManager.getDataFile(userId, datafileId, manager);
-        
-        //check permission to download
-        GateKeeper.performAuthorisation(userId, dataFile, AccessType.DOWNLOAD, manager);
-        
-        Collection<Url> urls = new ArrayList<Url>();
-        if(dataFile.getFileSize() == null) throw new DownloadException("No file size for "+dataFile+", unable to download.");
-        if(dataFile.getLocation() == null) throw new MalformedURLException(dataFile+" has malformed URL: "+dataFile.getLocation());
-        urls.add(new Url(dataFile.getLocation()));
-        
-        while(!sizeManager.add(dataFile.getFileSize())){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
+        boolean sizeSet = false;
+        DataHandler handler = null;
+        Datafile dataFile = null;
+        try{
+            //get the datafile if has permissions to read file
+            dataFile = DataFileManager.getDataFile(userId, datafileId, manager);
+            
+            //check permission to download
+            GateKeeper.performAuthorisation(userId, dataFile, AccessType.DOWNLOAD, manager);
+            
+            Collection<Url> urls = new ArrayList<Url>();
+            if(dataFile.getFileSize() == null) throw new DownloadException("No file size for "+dataFile+", unable to download.");
+            if(dataFile.getLocation() == null) throw new MalformedURLException(dataFile+" has malformed URL: "+dataFile.getLocation());
+            urls.add(new Url(dataFile.getLocation()));
+            
+            while(!sizeManager.add(dataFile.getFileSize())){
+                log.trace("Too large, waiting for size to go down "+sizeManager.getCurrentSize()+" MAX: "+sizeManager.getMaximumSize());
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                }
             }
+            sizeSet = true; //make sure its removed
+            
+            File downloaded = DownloadManager.getData(urls, credential);
+            
+            //return new datahandler
+            handler =  new DataHandler(new FileDataSource(downloaded));
+            
+        } finally{
+            if(sizeSet) sizeManager.minus(dataFile.getFileSize());
         }
-        
-        File downloaded = DownloadManager.getData(urls, credential);
-        
-        //return new datahandler
-        DataHandler handler =  new DataHandler(new FileDataSource(downloaded));
-        
-        sizeManager.minus(dataFile.getFileSize());
-        
         return handler;
     }
     
@@ -106,35 +113,43 @@ public class DownloadManager {
     public static DataHandler downloadDataset(String userId, Long datasetId, GSSCredential credential, EntityManager manager)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException, TotalSizeExceededException {
         log.trace("downloadDataset("+userId+", "+datasetId+", credential, EntityManager)");
         
-        //get the datafile if has permissions
-        Dataset dataSet = DataSetManager.getDataSet(userId, datasetId, DatasetInclude.DATASET_AND_DATAFILES_ONLY, manager);
-        
-        Collection<Url> urls = new ArrayList<Url>();
+        boolean sizeSet = false;
+        DataHandler handler = null;
+        Dataset dataSet = null;
         long TOTAL = 0;
         
-        for (Datafile df : dataSet.getDatafileCollection()) {
-            try{
-                if(df.getFileSize() == null) throw new DownloadException("No file size for "+df+", not adding to lisr");
-                urls.add(new Url(df.getLocation()));
-                TOTAL += df.getFileSize();
-            } catch(Exception ex){
-                log.trace("Exception adding "+df+" to list to download, not adding",ex);
-            }
+        try{
+            //get the datafile if has permissions
+            dataSet = DataSetManager.getDataSet(userId, datasetId, DatasetInclude.DATASET_AND_DATAFILES_ONLY, manager);
             
-        }
-        if(urls.isEmpty()) throw new DownloadException(dataSet+" is emtpy, no files to download");
-        while(!sizeManager.add(TOTAL)){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
+            Collection<Url> urls = new ArrayList<Url>();
+            
+            for (Datafile df : dataSet.getDatafileCollection()) {
+                try{
+                    if(df.getFileSize() == null) throw new DownloadException("No file size for "+df+", not adding to lisr");
+                    urls.add(new Url(df.getLocation()));
+                    TOTAL += df.getFileSize();
+                } catch(Exception ex){
+                    log.trace("Exception adding "+df+" to list to download, not adding",ex);
+                }
             }
+            if(urls.isEmpty()) throw new DownloadException(dataSet+" is emtpy, no files to download");
+            while(!sizeManager.add(TOTAL)){
+                log.trace("Too large, waiting for size to go down "+sizeManager.getCurrentSize()+" MAX: "+sizeManager.getMaximumSize());
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                }
+            }
+            sizeSet = true; //make sure its removed
+            
+            File downloaded = DownloadManager.getData(urls, credential);
+            
+            //return new datahandler
+            handler = new DataHandler(new FileDataSource(downloaded));
+        } finally{
+            if(sizeSet) sizeManager.minus(TOTAL);
         }
-        File downloaded = DownloadManager.getData(urls, credential);
-        
-        //return new datahandler
-        DataHandler handler = new DataHandler(new FileDataSource(downloaded));
-        
-        sizeManager.minus(TOTAL);
         
         return handler;
     }
@@ -159,6 +174,7 @@ public class DownloadManager {
         th.start();
         
         log.trace("Percent complete...");
+        int i = 0;
         while(true){
             if(th.isFinished()){
                 
@@ -168,8 +184,11 @@ public class DownloadManager {
                 break;
             } else if(th.getException() == null){
                 System.out.println(""+th.getPercentageComplete()+" %");
+                i++;                
                 try {
-                    Thread.sleep(2000);
+                    //first ten seconds check every half second, after 2 seconds
+                    if(i < 20) Thread.sleep(500);
+                    else Thread.sleep(2000);
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
                 }
