@@ -78,9 +78,11 @@ public class DownloadManager {
             if(dataFile.getLocation() == null) throw new MalformedURLException(dataFile+" has malformed URL: "+dataFile.getLocation());
             urls.add(new Url(dataFile.getLocation()));
             
+            boolean waitingLogged = false;
             while(!sizeManager.add(dataFile.getFileSize())){
-                log.trace("Too large, waiting for size to go down "+sizeManager.getCurrentSize()+" MAX: "+sizeManager.getMaximumSize());
+                if(!waitingLogged) log.trace("Too large, waiting for size to go down "+sizeManager.getCurrentSize()+" MAX: "+sizeManager.getMaximumSize());
                 try {
+                    waitingLogged = true;
                     Thread.sleep(1000);
                 } catch (InterruptedException ex) {
                 }
@@ -134,9 +136,12 @@ public class DownloadManager {
                 }
             }
             if(urls.isEmpty()) throw new DownloadException(dataSet+" is emtpy, no files to download");
+            
+            boolean waitingLogged = false;
             while(!sizeManager.add(TOTAL)){
-                log.trace("Too large, waiting for size to go down "+sizeManager.getCurrentSize()+" MAX: "+sizeManager.getMaximumSize());
+                if(!waitingLogged) log.trace("Too large, waiting for size to go down "+sizeManager.getCurrentSize()+" MAX: "+sizeManager.getMaximumSize());
                 try {
+                    waitingLogged = true;
                     Thread.sleep(1000);
                 } catch (InterruptedException ex) {
                 }
@@ -184,7 +189,7 @@ public class DownloadManager {
                 break;
             } else if(th.getException() == null){
                 System.out.println(""+th.getPercentageComplete()+" %");
-                i++;                
+                i++;
                 try {
                     //first ten seconds check every half second, after 2 seconds
                     if(i < 20) Thread.sleep(500);

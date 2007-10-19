@@ -22,13 +22,13 @@ public class SizeManager {
     /**
      * Max size of any download
      */
-    private static final long MAXIMUM_SINGLE_SIZE = 1024*1024*10; // == 30M
+    private static final long MAXIMUM_SINGLE_SIZE = 1024*1024*30; // == 30M
     /**
      * Current running size;
      */
     private static long CURRENT_SIZE = 0;
     private static long CONCURRENT = 0;
-    private static long MAX_CONCURRENT = 0;    
+    private static long MAX_CONCURRENT = 0;
     private static long MAX_CONCURRENT_SIZE = 0;
     
     /**
@@ -40,7 +40,7 @@ public class SizeManager {
         return MAXIMUM_SINGLE_SIZE;
     }
     
-     public long getConcurrent() {
+    public long getConcurrent() {
         return CONCURRENT;
     }
     
@@ -69,7 +69,8 @@ public class SizeManager {
             CONCURRENT++;
             if(CONCURRENT > MAX_CONCURRENT) MAX_CONCURRENT = CONCURRENT;
             if(CURRENT_SIZE > MAX_CONCURRENT_SIZE) MAX_CONCURRENT_SIZE = CURRENT_SIZE;
-            log.info("Current download size is going up to: "+CURRENT_SIZE+" bytes, MAX SIZE "+MAXIMUM_SIZE+", number Concurent "+CONCURRENT+", MAX CONCURRENT "+MAX_CONCURRENT+", MAX CON SIZE "+MAX_CONCURRENT_SIZE);
+            log.info("Current download size is going up to: "+CURRENT_SIZE/(1024f*1024f)+" Mb, MAX SIZE "+MAXIMUM_SIZE/(1024f*1024f)+" Mb, MAX CON (RUNNING) SIZE "+MAX_CONCURRENT_SIZE/(1024f*1024f)+" Mb");
+            log.info("Concurent downloads "+CONCURRENT+", MAX CONCURRENT "+MAX_CONCURRENT);            
             return true;
         } else return false;
     }
