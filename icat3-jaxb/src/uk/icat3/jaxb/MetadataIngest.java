@@ -6,9 +6,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import javax.persistence.EntityManager;
-import org.apache.commons.codec.language.Soundex;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.DatafileFormat;
 import uk.icat3.exceptions.ICATAPIException;
@@ -181,10 +179,10 @@ public class MetadataIngest {
             } //end for
             //return invIds
         } catch (NoSuchObjectFoundException ex) {
-            java.util.logging.Logger.getLogger("global").log(Level.SEVERE, null, ex);
+            //java.util.logging.Logger.getLogger("global").log(Level.SEVERE, null, ex);
             throw(ex);
         } catch (InsufficientPrivilegesException ex) {
-            java.util.logging.Logger.getLogger("global").log(Level.SEVERE, null, ex);
+            //java.util.logging.Logger.getLogger("global").log(Level.SEVERE, null, ex);
             throw(ex);
         } //end try / catch#
         return (Long[]) invIds.toArray(new Long[0]);
