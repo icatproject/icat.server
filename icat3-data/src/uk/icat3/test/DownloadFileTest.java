@@ -68,7 +68,7 @@ public class DownloadFileTest {
         
         GSSCredential proxy = CogUtil.loadProxy(new File(System.getProperty("user.home")+File.separator+"sso.cert"));
         
-        DownloadManager.downloadDatafile("gjd37", 2L, proxy, em);
+        DownloadManager.downloadDatafile("gjd37", 2L, proxy, "ISIS", em);
         
         tearDown();
     }
@@ -81,7 +81,7 @@ public class DownloadFileTest {
         
         GSSCredential proxy = CogUtil.loadProxy(new File(System.getProperty("user.home")+File.separator+"sso.cert"));
         
-        File file = DownloadManager.downloadDataset("gjd37", 106L, proxy, em);
+        File file = DownloadManager.downloadDataset("gjd37", 106L, proxy, "ISIS", em);
                      
         System.out.println(file.getName()); 
         
