@@ -30,21 +30,7 @@ public class DownloadDatafile {
     public static void main(String[] args) {
         // TODO code application logic here
         
-        try { // Call Web Service Operation
-            data.ICATDataService service = new data.ICATDataService();
-            data.ICATData port = service.getICATDataPort();
-            // TODO initialize WS operation arguments here
-            java.lang.String sessionId = Constants.SID;
-            java.lang.Long datafileId = 2L;
-            // TODO process result here
-            for (int i = 0; i < 1; i++) {
-                String url = port.downloadDatafile(sessionId, datafileId);
-                System.out.println("Result = "+url);
-            }
-        } catch (Exception ex) {
-            System.out.println(ex);
-            // TODO handle custom exceptions here
-        }
+    
         
         //System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump","true");
         

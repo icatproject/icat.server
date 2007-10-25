@@ -32,23 +32,7 @@ public class DownloadDataset {
         
       
         
-       try { // Call Web Service Operation
-            data.ICATDataService service = new data.ICATDataService();
-            data.ICATData port = service.getICATDataPort();
-            SOAPBinding binding = (SOAPBinding)((BindingProvider)port).getBinding();
-       
-            System.out.println(binding.isMTOMEnabled());
-       
-            // TODO initialize WS operation arguments here
-            java.lang.String sessionId = Constants.SID;
-            java.lang.Long datasetId = 106L;
-            // TODO process result here
-            String result = port.downloadDataset(sessionId, datasetId);
-            System.out.println("Result = "+result);
-        } catch (Exception ex) {
-            System.out.println(ex);
-            // TODO handle custom exceptions here
-        }
+    
     }
     
 }

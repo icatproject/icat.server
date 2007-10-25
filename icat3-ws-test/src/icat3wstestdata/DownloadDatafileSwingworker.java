@@ -52,6 +52,7 @@ public class DownloadDatafileSwingworker {
                      int total = 0;
                      long timeTotal = 0;
                      float totalTime = 0;
+                     
                     @Override
                     public String doInBackground() {
                         long time = System.currentTimeMillis();

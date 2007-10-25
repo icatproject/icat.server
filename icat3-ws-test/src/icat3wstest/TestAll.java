@@ -23,6 +23,8 @@ public class TestAll {
     /** Creates a new instance of TestALl */
     public TestAll() throws Exception {
         
+        long time  = System.currentTimeMillis();
+         
         //Login
         String sid = SessionUtil.login(System.getProperty("user.name"), System.getProperty("usersso.password"));
         
@@ -185,6 +187,9 @@ public class TestAll {
         }
         
         SessionUtil.logout(sid);
+        
+        float totalTime = (System.currentTimeMillis() - time) / 1000f;
+        System.out.println("Time taken to do all tests: " + totalTime + " seconds");
     }
     
     /**

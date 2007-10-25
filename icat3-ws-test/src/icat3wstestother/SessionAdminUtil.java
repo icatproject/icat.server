@@ -9,7 +9,7 @@
 
 package icat3wstestother;
 
-import clientadmin.*;
+//import clientadmin.*;
 import icat3wstest.*;
 import javax.xml.ws.BindingProvider;
 import static icat3wstest.Constants.*;
@@ -20,9 +20,9 @@ import static icat3wstest.Constants.*;
 public class SessionAdminUtil {
     
     /** Creates a new instance of Main */
-    public static String login(String username) throws Exception{
+  //  public static String login(String username) throws Exception{
         
-        try {
+     /*  try {
                         
             long time = System.currentTimeMillis();
             
@@ -42,8 +42,8 @@ public class SessionAdminUtil {
           //  throw ex;
             return null;
             // TODO handle custom exceptions here
-        }
-    }
+        }*/
+  //  }
     
     public static void logout(String sid) throws Exception{
         
@@ -73,9 +73,9 @@ public class SessionAdminUtil {
      */
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
-        String sid = login("bob");
+       // String sid = login("bob");
         //String sid = loginLifetime(System.getProperty("user.name"), System.getProperty("usersso.password"), 2);
-         if(sid != null) logout(sid);
+       //  if(sid != null) logout(sid);
     }
     
 }
