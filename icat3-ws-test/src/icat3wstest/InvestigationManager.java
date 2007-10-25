@@ -48,8 +48,6 @@ public class InvestigationManager {
             System.out.println("Unable to getInvestigation with SID "+sid);
             System.out.println(ex);
             assert false;
-            
-            // TODO handle custom exceptions here
         }
     }
     

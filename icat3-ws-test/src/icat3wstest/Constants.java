@@ -20,19 +20,19 @@ public class Constants {
    // public static String END_POINT_ADMIN_ADDRESS = "https://facilities01.esc.rl.ac.uk:8182/ICATAdminCLFService/ICATAdmin?wsdl";
     
     //my machine
-    //public static String END_POINT_ADMIN_ADDRESS = "https://escvig6.dl.ac.uk:443/ICATAdminService/ICATAdmin";
-   // public static String END_POINT_ADDRESS = "https://escvig6.dl.ac.uk:443/ICATService/ICAT";
+    public static String END_POINT_ADMIN_ADDRESS = "https://escvig6.dl.ac.uk:8181/ICATAdminService/ICATAdmin";
+    public static String END_POINT_ADDRESS = "https://escvig6.dl.ac.uk:8181/ICATService/ICAT";
     
     // volga
-    public static String END_POINT_ADMIN_ADDRESS = "https://volga.dl.ac.uk:8181/ICATAdminService/ICATAdmin";
-    public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:8181/ICATService/ICAT";
+   // public static String END_POINT_ADMIN_ADDRESS = "https://volga.dl.ac.uk:8181/ICATAdminService/ICATAdmin";
+   // public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:8181/ICATService/ICAT";
         
     // ISIS
    // public static String END_POINT_ADDRESS = "https://facilities01.esc.rl.ac.uk:8182/ICATISISService/ICAT?wsdl";
    // public static String END_POINT_ADMIN_ADDRESS = "https://facilities01.esc.rl.ac.uk:8182/ICATAdminISISService/ICATAdmin?wsdl";
     
     //public static String SID = "64112098-db95-4b31-a0f9-efceb7c94132"; //isis
-    public static String SID = "1c2eb630-bad8-4714-b9ce-53d6b165bf73"; //clf
+    public static String SID = "a65c2afa-acc4-4ca0-b0c1-c02ffb310538"; //clf
     
     public static String KEYWORD = "calibration";
     public static String USER_ID = "gjd37";

@@ -6,8 +6,8 @@
         <status>ONGOING</status>
         <study_creation_date>2007-09-06T15:30:21</study_creation_date>
         <investigation trusted="true">
-            <inv_number>19391</inv_number>
-            <visit_id>16</visit_id>
+            <inv_number>194434961</inv_number>
+            <visit_id>164463</visit_id>
             <instrument>GEM</instrument>
             <title>Temperature = 295 K</title>
             <investigator>    
@@ -79,9 +79,14 @@
                     <file_size>43352</file_size>
                     <parameter>
                         <name>run_number</name>
-                        <numeric_value>0</numeric_value>
+                        <numeric_value>120</numeric_value>
                         <units>decimal</units>
                         <description>Run Number</description>
+                    </parameter>
+                    <parameter>
+                        <name>time_channel_parameters</name> 
+                        <string_value>100 360 10</string_value> 
+                        <units>N/A</units> 
                     </parameter>
                 </datafile>
             </dataset>

@@ -9,6 +9,7 @@
 
 package icat3wstestdata;
 
+import icat3wstest.Constants;
 import javax.activation.DataHandler;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.soap.SOAPBinding;
@@ -33,12 +34,12 @@ public class DownloadDatafile {
             data.ICATDataService service = new data.ICATDataService();
             data.ICATData port = service.getICATDataPort();
             // TODO initialize WS operation arguments here
-            java.lang.String sessionId = "421650c4-4f71-4001-867c-266687332ee3";
+            java.lang.String sessionId = Constants.SID;
             java.lang.Long datafileId = 2L;
             // TODO process result here
-            for (int i = 0; i < 50; i++) {
-                DataHandler result = port.downloadDatafile(sessionId, datafileId);
-                System.out.println("Result = "+result.getName()+" "+result.getContentType());
+            for (int i = 0; i < 1; i++) {
+                String url = port.downloadDatafile(sessionId, datafileId);
+                System.out.println("Result = "+url);
             }
         } catch (Exception ex) {
             System.out.println(ex);

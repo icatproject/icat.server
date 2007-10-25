@@ -29,6 +29,5 @@ public class ICATSingleton {
         ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, END_POINT_ADDRESS);        
         System.out.println("Using WSDL: "+((BindingProvider)icatPort).getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY));
         return icatPort;
-    }
-    
+    }    
 }

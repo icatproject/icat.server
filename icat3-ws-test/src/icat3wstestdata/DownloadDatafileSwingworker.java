@@ -9,22 +9,17 @@
 
 package icat3wstestdata;
 
-import data.DownloadException_Exception;
-import data.InsufficientPrivilegesException_Exception;
-import data.MalformedURLException_Exception;
-import data.NoSuchObjectFoundException_Exception;
-import data.NoSuchUserException_Exception;
-import data.SessionException_Exception;
-import data.TotalSizeExceededException_Exception;
+import client.ICAT;
+import icat3wstest.Constants;
+import icat3wstest.ICATSingleton;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.activation.DataHandler;
 import javax.swing.SwingWorker;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.soap.SOAPBinding;
 
 /**
  *
@@ -35,9 +30,10 @@ public class DownloadDatafileSwingworker {
     /** Creates a new instance of DownloadDatafile */
     public DownloadDatafileSwingworker() {
     }
-    static final data.ICATData port = new data.ICATDataService().getICATDataPort();
-    static java.lang.String sessionId = "b5c56210-557f-43cc-a327-8861b4c8ce3e";
-    static  java.lang.Long datafileId = 2L;
+    static final ICAT icat = ICATSingleton.getInstance();
+
+    static java.lang.String sessionId = Constants.SID;
+    static java.lang.Long datafileId = 2L;
     
     /**
      * @param args the command line arguments
@@ -49,26 +45,66 @@ public class DownloadDatafileSwingworker {
             
             Collection<SwingWorker> sws = new ArrayList<SwingWorker>();
             
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 1 ;i++) {
                 
                 SwingWorker sw = new SwingWorker<String, String>(){
+                    
+                     int total = 0;
+                     long timeTotal = 0;
+                     float totalTime = 0;
                     @Override
                     public String doInBackground() {
+                        long time = System.currentTimeMillis();
+                         timeTotal = System.currentTimeMillis();
                         try {
-                            javax.activation.DataHandler result = port.downloadDatafile(sessionId, datafileId);
-                            java.lang.System.out.println("Result = " + result.getName() + " " + result.getContentType());
+                             String result = icat.downloadDatafile(sessionId, datafileId);
+                             java.lang.System.out.println("Result = " + result);
                             
+                            totalTime = (System.currentTimeMillis() - time)/1000f;
+                            
+                            System.out.println("\nTime taken to get URL back: "+totalTime+" seconds");
+                            time = System.currentTimeMillis(); //reset time
+                           
+                          //  String result = "http://volga.dl.ac.uk:9080/icat-clf-download/DownloadServlet?sid=2259ce54-140f-45c6-929b-9c9504edffba&name=images.jpeg&file=large";
+                           // String result = "https://escvig6.dl.ac.uk:8181/icat-clf-download/DownloadServlet?sid=a65c2afa-acc4-4ca0-b0c1-c02ffb310538&name=images.jpeg&file=0.23202901090405093\\images.jpeg";
+                            
+                            URL url = new URL(result);
+                            InputStream is = null;
+                            DataInputStream dis;
+                            int s;
+                           
+                            try {            
+                                //System.out.println("opening");
+                                is = url.openStream();
+                                //System.out.println("open");
+                                byte[] buff = new byte[32*1024];
+                                while ((s = is.read(buff)) != -1) {
+                                    //System.out.println(s);
+                                    total += s;
+                                    //System.out.println(total);
+                                }
+                                totalTime = (System.currentTimeMillis() - time)/1000f;
+                                System.out.println("\nTime taken to download: "+totalTime+" seconds");
+                                
+                            } finally {
+                                try {
+                                    if(is != null) is.close();
+                                } catch (IOException ioe) {}
+                            }
+                          
                         } catch (Exception ex) {
                             System.out.println("Error with: "+ex);
+                            ex.printStackTrace();
                         }
-                        return "finsihed";
+                        return "finished";
                     }
                     
                     @Override
                     public void done() {
                         try {
                             get();
-                            System.out.println("finished "+finished[0]++);
+                            float totalTime = (System.currentTimeMillis() - timeTotal)/1000f;
+                            System.out.println("finished ok "+finished[0]++ +" : total "+total/1024f/1024f +" Mb, Total time: "+totalTime+" seconds");
                         } catch (Exception ex) {
                             finished[0]++;
                             System.out.println(ex.getMessage());
@@ -81,7 +117,9 @@ public class DownloadDatafileSwingworker {
             
             //now execute them
             int i = 0;
+            Thread.sleep(2000);
             for (SwingWorker swingWorker : sws) {
+                //Thread.sleep(2000);
                 System.out.println("Starting" +i++);
                 swingWorker.execute();
             }
@@ -92,3 +130,4 @@ public class DownloadDatafileSwingworker {
         }
     }
 }
+
