@@ -28,6 +28,8 @@ import uk.icat3.sessionbeans.util.Constants;
 public abstract class EJBObject {
     
     static Logger log = Logger.getLogger(EJBObject.class);
+    protected static String FACILITY;
+    protected static Properties facilityProps;
     
     @PersistenceContext(unitName="icat3-exposed")
     protected EntityManager manager;
@@ -68,15 +70,17 @@ public abstract class EJBObject {
        
         //load resource bundle
         URL url = this.getClass().getResource("/uk/icat3/sessionbeans/facility.properties");
-        Properties props = new Properties();
+        facilityProps = new Properties();
         String facilityLogFile = null;
         try{
-            props.load(url.openStream());
-            facilityLogFile = props.getProperty("facility.name");
+            facilityProps.load(url.openStream());
+            facilityLogFile = facilityProps.getProperty("facility.name");
         } catch(Exception mre){
             facilityLogFile = "ISIS";
             System.out.println("Unable to load props file, setting log as  "+facilityLogFile+"\n"+mre);                     
         }
+        
+        FACILITY = facilityLogFile;
         
         //load config from user.home
         PropertyConfigurator.configure(System.getProperty("user.home")+File.separator+"."+facilityLogFile+"-icatapi.properties");

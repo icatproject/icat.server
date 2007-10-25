@@ -9,9 +9,7 @@
 
 package uk.icat3.sessionbeans.data;
 
-import uk.icat3.data.exceptions.TotalSizeExceededException;
 import java.net.MalformedURLException;
-import javax.activation.DataHandler;
 import javax.ejb.Local;
 import uk.icat3.data.exceptions.DownloadException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
@@ -26,8 +24,8 @@ import uk.icat3.exceptions.SessionException;
 @Local
 public interface DownloadManagerLocal {
     
-    public DataHandler downloadDatafile(String sessionId, Long datafileId)  throws SessionException, NoSuchObjectFoundException, TotalSizeExceededException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException ;
+    public String downloadDatafile(String sessionId, Long datafileId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException ;
     
-    public DataHandler downloadDataset(String sessionId, Long datasetId)  throws SessionException, NoSuchObjectFoundException, TotalSizeExceededException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException ;
+    public String downloadDataset(String sessionId, Long datasetId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException ;
         
 }

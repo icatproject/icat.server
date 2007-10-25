@@ -9,15 +9,9 @@
 
 package uk.icat3.sessionbeans.data;
 
-
-import uk.icat3.data.exceptions.TotalSizeExceededException;
 import java.io.File;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
-import javax.ejb.EJB;
+import java.util.Date;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -26,23 +20,15 @@ import javax.xml.ws.soap.MTOM;
 import org.apache.log4j.Logger;
 import uk.icat3.data.DownloadManager;
 import uk.icat3.data.exceptions.DownloadException;
-import uk.icat3.entity.Datafile;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
-import uk.icat3.sessionbeans.manager.DatafileManagerLocal;
-import uk.icat3.sessionbeans.manager.DatasetManagerLocal;
-import uk.icat3.sessionbeans.manager.InvestigationManagerLocal;
 import uk.icat3.user.UserDetails;
 import uk.ac.dl.srbapi.srb.Url;
-import uk.icat3.entity.Dataset;
+import uk.ac.dl.srbapi.util.IOTools;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.manager.DataFileManager;
-import uk.icat3.security.GateKeeper;
-import uk.icat3.util.AccessType;
-import uk.icat3.util.DatasetInclude;
 
 /**
  *
@@ -54,10 +40,10 @@ import uk.icat3.util.DatasetInclude;
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class DownloadManagerBean extends EJBObject implements DownloadManagerLocal {
     
-   static Logger log = Logger.getLogger(DownloadManagerBean.class);
-       
-        
-    public DataHandler downloadDatafile(String sessionId, Long datafileId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException, TotalSizeExceededException {
+    static Logger log = Logger.getLogger(DownloadManagerBean.class);
+    
+    
+    public String downloadDatafile(String sessionId, Long datafileId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -65,11 +51,12 @@ public class DownloadManagerBean extends EJBObject implements DownloadManagerLoc
         //get users credential
         UserDetails userDetails = user.getUserDetails(sessionId, userId);
         
-       return DownloadManager.downloadDatafile(userId, datafileId, userDetails.getCredential(), manager);
+        File file = DownloadManager.downloadDatafile(userId, datafileId, userDetails.getCredential(), FACILITY, manager);
         
+        return  generateDownloadUrl(file, sessionId);
     }
     
-    public DataHandler downloadDataset(String sessionId, Long datasetId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException, TotalSizeExceededException {
+    public String downloadDataset(String sessionId, Long datasetId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -77,8 +64,22 @@ public class DownloadManagerBean extends EJBObject implements DownloadManagerLoc
         //get users credential
         UserDetails userDetails = user.getUserDetails(sessionId, userId);
         
-        return DownloadManager.downloadDataset(userId, datasetId, userDetails.getCredential(), manager);
-            
+        File file = DownloadManager.downloadDataset(userId, datasetId, userDetails.getCredential(), FACILITY,  manager);
+        
+        return generateDownloadUrl(file, sessionId);
     }
     
+    private String generateDownloadUrl(File file, String sessionId) throws DownloadException{
+        String hostUrl = facilityProps.getProperty("facility.host");
+        if(hostUrl == null) throw new DownloadException("Icat not configured correctly for download");
+                
+        int index = file.getAbsolutePath().lastIndexOf(FACILITY);
+        String fileReturned = file.getAbsolutePath().substring(index+FACILITY.length()+1, file.getAbsolutePath().length());
+        index = fileReturned.indexOf(File.separator);
+        fileReturned = fileReturned.substring(index +1 , fileReturned.length());
+                
+        StringBuilder builder = new StringBuilder(hostUrl);
+        builder.append("?sid="+sessionId+"&name="+file.getName()+"&file="+fileReturned);
+        return builder.toString();
+    }
 }
