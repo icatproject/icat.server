@@ -10,6 +10,7 @@
 package uk.icat3.test;
 
 import java.io.File;
+import javax.activation.DataHandler;
 
 /**
  *
@@ -26,8 +27,7 @@ public class NewMain {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        File file = new File("c:/d/d/d");
-        System.out.println(file.mkdir());
+      DataHandler df = new DataHandler()
     }
 
 }
