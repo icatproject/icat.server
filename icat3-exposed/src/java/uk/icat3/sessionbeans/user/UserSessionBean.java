@@ -32,14 +32,14 @@ import static uk.icat3.sessionbeans.util.Constants.*;
  *
  * @author gjd37
  */
-@Stateless()
+@Stateless(mappedName="UserSessionCLF")
 @PermitAll
 //@WebService(targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 //requires new transaction for each method call
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-public class UserSessionBean extends EJBObject implements UserSessionLocal {
+public class UserSessionBean extends EJBObject implements UserSessionLocal, UserSession {
     
     static Logger log = Logger.getLogger(UserSessionBean.class);
     

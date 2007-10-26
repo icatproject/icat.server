@@ -9,7 +9,9 @@
 package uk.icat3.sessionbeans;
 
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
+import javax.activation.DataHandler;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -21,6 +23,7 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.jws.WebResult;
+import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import javax.xml.ws.WebServiceContext;
@@ -80,7 +83,7 @@ import uk.icat3.util.LogicalOperator;
 
 
 
-@WebService(serviceName = "ICATService", targetNamespace = "client.icat3.uk")
+@WebService(serviceName = "ICATCLFService", targetNamespace = "client.icat3.uk")
 
 
 
@@ -2076,7 +2079,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
             @WebParam(name = "datafileId") Long datafileId) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException {
         return downloadManagerLocal.downloadDatafile(sessionId, datafileId);
     }
-
+        
     /**
      * Downloads a dataset
      *
@@ -2088,8 +2091,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
     public  @WebResult(name = "URL") String downloadDataset(@WebParam(name = "sessionId") String sessionId,            
             @WebParam(name = "datasetId") Long datasetId) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException {
         return downloadManagerLocal.downloadDataset(sessionId, datasetId);
-    }
-    
+    }             
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

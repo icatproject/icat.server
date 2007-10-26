@@ -40,7 +40,7 @@ import uk.icat3.sessionbeans.data.DownloadManagerLocal;
  */
 @MTOM(threshold=10000) //10KB (threshold to move to MTOM)
 @Stateless()
-@WebService(serviceName="ICATDataService", targetNamespace="client.icat3.uk")
+//@WebService(serviceName="ICATDataService", targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
