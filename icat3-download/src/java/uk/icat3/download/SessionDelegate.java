@@ -9,6 +9,7 @@
 
 package uk.icat3.download;
 
+import java.util.ResourceBundle;
 import javax.naming.NamingException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.sessionbeans.user.UserSession;
@@ -36,9 +37,16 @@ public class SessionDelegate {
     
     /** Creates a new instance of SessionDelegate */
     private  SessionDelegate() throws NamingException {
-        
+        ResourceBundle facilityResources = ResourceBundle.getBundle("uk.icat3.download.facility");
+
+        String facilityName = null;
+        try {
+            facilityName = facilityResources.getString("facility.name");
+        } catch (Exception mre) {
+            facilityName = "ISIS";
+        }
         CachingServiceLocator csl =  CachingServiceLocator.getInstance();
-        usr = (UserSession)csl.lookup("UserSessionEJB");
+        usr = (UserSession)csl.lookup("UserSession"+facilityName);
     }
     
     /*All SessionDelegate methods here*/
