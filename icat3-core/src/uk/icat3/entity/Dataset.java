@@ -17,6 +17,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -80,12 +81,24 @@ import uk.icat3.util.Queries;
     
     @Column(name = "SAMPLE_ID")
     private Long sampleId;
-    
+           
     @Column(name = "NAME", nullable = false)
     private String name;
     
     @Column(name = "DESCRIPTION")
     private String description;
+    
+   /* @JoinColumn(name = "SAMPLE_ID", referencedColumnName = "ID", insertable=false, updatable=false)
+    @ManyToOne
+    private Sample sample;*/
+     
+   /* public Sample getSample() {
+        return sample;
+    }
+
+    public void setSample(Sample sample) {
+        this.sample = sample;
+    }*/
     
     @Column(name = "DATASET_STATUS")
     private String datasetStatus;
@@ -118,7 +131,7 @@ import uk.icat3.util.Queries;
     private DatasetType datasetType;*/
     
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID")
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @XmlTransient
     @ICAT(merge=false)
     private Investigation investigation;
@@ -697,4 +710,6 @@ import uk.icat3.util.Queries;
     public void setDatasetInclude(DatasetInclude datasetInclude) {
         this.datasetInclude = datasetInclude;
     }
+
+    
 }

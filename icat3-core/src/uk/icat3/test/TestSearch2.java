@@ -14,6 +14,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.Dataset;
+import uk.icat3.entity.Investigation;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.Queries;
 
@@ -35,7 +37,7 @@ public class TestSearch2 {
     }
     
     protected static void setUp(){
-        emf = Persistence.createEntityManagerFactory("icat3-apitest");
+        emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
         // emf = Persistence.createEntityManagerFactory("icatisis_dev");
         em = emf.createEntityManager();
         
@@ -61,13 +63,13 @@ public class TestSearch2 {
         
         long time = System.currentTimeMillis();
         String LIST_ALL = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :investigationType AND i.markedDeleted = 'N' " +
-                " AND ia.userId IN('gjd37','ANY')" +
+                " AND ia.userId IN('test','ANY')" +
                 " AND ia.markedDeleted = 'N' AND i.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y' "+
                 
                 //  " AND i.instrument = 'mari' "+   //instrument
                 
-                " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE '%a%' AND " +
-                " sample.markedDeleted = 'N') "+
+              //  " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE '%a%' AND " +
+              //  " sample.markedDeleted = 'N') "+
                 
                 //  " AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE '%a%' AND " +
                 //  " kw.markedDeleted = 'N')  "+ //iterate, remove if no keyword is null
@@ -77,10 +79,10 @@ public class TestSearch2 {
                 
                 " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
                 " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
-                " AND (iadf3.userId = 'gjd37' OR iadf3.userId = 'ANY')" +
+                " AND (iadf3.userId = 'test' OR iadf3.userId = 'ANY')" +
                 " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y' " +
                 " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
-                " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " + //remove if all are null
+                " df.markedDeleted = 'N' AND (df.name LIKE :datafileName OR :datafileName IS NULL))  " + //remove if all are null
                 
                 "";
               /*  " AND  i.visitId = :visitId   AND" +
@@ -108,12 +110,12 @@ public class TestSearch2 {
                 .setParameter("bcatInvStr", null)
                 .setParameter("title", null)*/
                 //  .setParameter("datafileName", "SXD01409.RAW")
-                .setParameter("datafileName", null)
-                .setParameter("lowerTime", new Date(1,1,1))
+                .setParameter("datafileName", "%A%")
+               // .setParameter("lowerTime", new Date(1,1,1))
                 // .setParameter("upperTime", new Date())
-                //    .setParameter("lowerTime", null)
+                    .setParameter("lowerTime", null)
                 .setParameter("upperTime", null)
-                .getResultList().size());
+                .getResultList());
         
         System.out.println("This method takes " +(System.currentTimeMillis()-time)/1000f + "s to execute");
         
@@ -153,6 +155,45 @@ public class TestSearch2 {
         
     }
     
+    public void test3() throws Exception {
+        
+        
+        setUp();
+        /// old way
+        
+        long time = System.currentTimeMillis();
+        String LIST_ALL =  "SELECT DISTINCT k FROM Keyword k WHERE " +
+                " LOWER(k.keywordPK.name) LIKE '%a%'";
+       
+        
+        System.out.println(em.createQuery(LIST_ALL)
+                .getResultList());
+        
+        System.out.println("This method takes " +(System.currentTimeMillis()-time)/1000f + "s to execute");
+        
+        tearDown();
+        
+    }
+    
+     public void test4() throws Exception {
+        
+        
+        setUp();
+        /// old way
+        
+        long time = System.currentTimeMillis();
+        
+        //Dataset dataset = em.find(Dataset.class, 3L);
+        Investigation invest = em.find(Investigation.class,  3L);
+        //System.out.println(dataset.getSample().getName());
+        
+       System.out.println(invest.getDatasetCollection().size());
+        
+        tearDown();
+        
+    }
+    
+    
     
     /**
      * @param args the command line arguments
@@ -162,7 +203,7 @@ public class TestSearch2 {
         
         TestSearch2 ts = new TestSearch2();
         
-        ts.test2();
+        ts.test4();
         
         //   ts.test2();
         

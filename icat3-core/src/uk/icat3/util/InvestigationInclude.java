@@ -28,7 +28,7 @@ public enum InvestigationInclude {
     /**
      * list of publications
      */
-    PUBLICAIIONS_ONLY,
+    PUBLICATIONS_ONLY,
     /**
      * all keywords and investigators.
      */
@@ -38,6 +38,14 @@ public enum InvestigationInclude {
      * all shifts and investigators.
      */
     INVESTIGATORS_AND_SHIFTS,
+     /**
+     * all shifts, samples and investigators.
+     */
+    INVESTIGATORS_SHIFTS_AND_SAMPLES,
+    /**
+     * all shifts, samples and investigators.
+     */
+    INVESTIGATORS_SHIFTS_SAMPLES_AND_PUBLICATIONS,
     /**
      * list of datasets, without the list of data files.
      */
@@ -110,6 +118,8 @@ public enum InvestigationInclude {
     public boolean isInvestigators(){
         if(this == InvestigationInclude.INVESTIGATORS_AND_KEYWORDS ||
                 this == InvestigationInclude.INVESTIGATORS_ONLY  ||
+                this == InvestigationInclude.INVESTIGATORS_SHIFTS_AND_SAMPLES  ||
+                this == InvestigationInclude.INVESTIGATORS_SHIFTS_SAMPLES_AND_PUBLICATIONS  ||
                 this == InvestigationInclude.INVESTIGATORS_AND_SHIFTS  ||
                 this == InvestigationInclude.ALL ||
                 this == InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES ||
@@ -127,8 +137,9 @@ public enum InvestigationInclude {
     }
     
     public boolean isPublications(){
-        if(this == InvestigationInclude.PUBLICAIIONS_ONLY ||
+        if(this == InvestigationInclude.PUBLICATIONS_ONLY ||
                 this == InvestigationInclude.ALL ||
+                this == InvestigationInclude.INVESTIGATORS_SHIFTS_SAMPLES_AND_PUBLICATIONS ||
                 this == InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES ||
                 this == InvestigationInclude.ALL_EXCEPT_DATASETS_DATAFILES_AND_ROLES) return true;
         else return false;
@@ -137,6 +148,8 @@ public enum InvestigationInclude {
     public boolean isShifts(){
         if(this == InvestigationInclude.SHIFT_ONLY ||
                 this == InvestigationInclude.INVESTIGATORS_AND_SHIFTS  ||
+                this == InvestigationInclude.INVESTIGATORS_SHIFTS_AND_SAMPLES  ||
+                this == InvestigationInclude.INVESTIGATORS_SHIFTS_SAMPLES_AND_PUBLICATIONS  ||
                 this == InvestigationInclude.ALL ||
                 this == InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES ||
                 this == InvestigationInclude.ALL_EXCEPT_DATASETS_DATAFILES_AND_ROLES) return true;
@@ -146,6 +159,8 @@ public enum InvestigationInclude {
     public boolean isSamples(){
         if(this == InvestigationInclude.SAMPLES_ONLY ||
                 this == InvestigationInclude.ALL ||
+                  this == InvestigationInclude.INVESTIGATORS_SHIFTS_AND_SAMPLES  ||
+                this == InvestigationInclude.INVESTIGATORS_SHIFTS_SAMPLES_AND_PUBLICATIONS  ||
                 this == InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES ||
                 this == InvestigationInclude.ALL_EXCEPT_DATASETS_DATAFILES_AND_ROLES) return true;
         else return false;

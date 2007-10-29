@@ -18,6 +18,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -81,10 +82,13 @@ import uk.icat3.util.Queries;
     private Integer proposalSampleId;
     
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID")
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @XmlTransient
     @ICAT(merge=false)
     private Investigation investigationId;
+    
+    /*@Column(name = "INVESTIGATION_ID", nullable = false)
+    private Long investigationId;*/
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
     private Collection<SampleParameter> sampleParameterCollection;

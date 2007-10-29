@@ -85,8 +85,8 @@ import uk.icat3.util.Queries;
 })
         
         @SqlResultSetMappings({
-    @SqlResultSetMapping(name="investigationMapping",entities={@EntityResult(entityClass=Investigation.class)}),
-    @SqlResultSetMapping(name="investigationIdMapping",columns={@ColumnResult(name="ID")})
+ //   @SqlResultSetMapping(name="investigationMapping",entities={@EntityResult(entityClass=Investigation.class)}),
+  //  @SqlResultSetMapping(name="investigationIdMapping",columns={@ColumnResult(name="ID")})
 })
         @XmlRootElement
         @SequenceGenerator(name="INVESTIGATION_SEQ",sequenceName="INVESTIGATION_ID_SEQ",allocationSize=1)

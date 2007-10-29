@@ -6,7 +6,6 @@
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-
 package uk.icat3.search;
 
 import java.math.BigDecimal;
@@ -33,12 +32,20 @@ import static uk.icat3.util.Queries.*;
  * @author Glen Drinkwater
  */
 public class InvestigationSearch extends ManagerUtil {
-    
+
     // Global class logger
+
     static Logger log = Logger.getLogger(InvestigationSearch.class);
-    
+
     //used for type of user search
-    private enum SearchType { SURNAME, USERID };
+
+    private enum SearchType {
+
+        SURNAME, USERID
+    }
+    
+
+    ;
     
     
     /**
@@ -51,31 +58,31 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection investigation ids
      */
-    public static Collection<Long>  searchByKeywordRtnId(String userId, String keyword, int startIndex, int number_results, EntityManager manager)  {
-        log.trace("searchByKeyword("+userId+", "+keyword+", "+startIndex+", "+number_results+", EntityManager)");
-        
+    public static Collection<Long> searchByKeywordRtnId(String userId, String keyword, int startIndex, int number_results, EntityManager manager) {
+        log.trace("searchByKeyword(" + userId + ", " + keyword + ", " + startIndex + ", " + number_results + ", EntityManager)");
+
         Collection<BigDecimal> investigationsId = null;
-        if(number_results < 0){
+        if (number_results < 0) {
             //get all, maybe should limit this to 500?
             investigationsId = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD_RTN_ID).
-                    setParameter("objectType",ElementType.INVESTIGATION).
-                    setParameter(1,userId).setParameter(2,"%"+keyword+"%").
+                    setParameter("objectType", ElementType.INVESTIGATION).
+                    setParameter(1, userId).setParameter(2, "%" + keyword + "%").
                     setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
             //list all Investigation ids that the users has access to
             investigationsId = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD_RTN_ID).
-                    setParameter("objectType",ElementType.INVESTIGATION).
-                    setParameter(1,userId).setParameter(2,"%"+keyword+"%").
+                    setParameter("objectType", ElementType.INVESTIGATION).
+                    setParameter(1, userId).setParameter(2, "%" + keyword + "%").
                     setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         //turn into longs
         Collection<Long> investigationsIds = new ArrayList<Long>();
-        for(BigDecimal bd : investigationsId){
+        for (BigDecimal bd : investigationsId) {
             investigationsIds.add(bd.longValue());
         }
         return investigationsIds;
     }
-    
+
     /**
      * Searches a single keyword for a user and returns all the Id of the investigations
      *
@@ -84,11 +91,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of investigation ids
      */
-    public static Collection<Long> searchByKeywordRtnId(String userId, String keyword, EntityManager manager)  {
+    public static Collection<Long> searchByKeywordRtnId(String userId, String keyword, EntityManager manager) {
         //search and return all investigations
-        return  searchByKeywordRtnId(userId, keyword, -1, -1, manager);
+        return searchByKeywordRtnId(userId, keyword, -1, -1, manager);
     }
-    
+
     /**
      * Searches the investigations the user has access to view by keyword
      *
@@ -99,26 +106,26 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    private static Collection<Investigation>  searchByKeywordImpl(String userId, String keyword, int startIndex, int number_results, EntityManager manager)  {
-        log.trace("searchByKeyword("+userId+", "+keyword+", "+startIndex+", "+number_results+", EntityManager)");
-        
+    private static Collection<Investigation> searchByKeywordImpl(String userId, String keyword, int startIndex, int number_results, EntityManager manager) {
+        log.trace("searchByKeyword(" + userId + ", " + keyword + ", " + startIndex + ", " + number_results + ", EntityManager)");
+
         Collection<Investigation> investigations = null;
-        if(number_results < 0){
+        if (number_results < 0) {
             //get all, maybe should limit this to 500?
             investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD).
-                    setParameter("objectType",ElementType.INVESTIGATION).
-                    setParameter("userId",userId).setParameter("keyword","%"+keyword+"%").
+                    setParameter("objectType", ElementType.INVESTIGATION).
+                    setParameter("userId", userId).setParameter("keyword", "%" + keyword + "%").
                     setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
             //list all Investigation ids that the users has access to
             investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD).
-                    setParameter("objectType",ElementType.INVESTIGATION).
-                    setParameter("userId",userId).setParameter("keyword","%"+keyword+"%").
+                    setParameter("objectType", ElementType.INVESTIGATION).
+                    setParameter("userId", userId).setParameter("keyword", "%" + keyword + "%").
                     setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         return investigations;
     }
-    
+
     /**
      * Searches the investigations the user has access to view by keyword
      *
@@ -127,11 +134,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeyword(String userId, String keyword, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeyword(String userId, String keyword, EntityManager manager) {
         //search and return all investigations
-        return  searchByKeywordImpl(userId, keyword, -1, -1, manager);
+        return searchByKeywordImpl(userId, keyword, -1, -1, manager);
     }
-    
+
     /**
      * Searches the investigations the user has access to view by keyword
      *
@@ -143,9 +150,9 @@ public class InvestigationSearch extends ManagerUtil {
      * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByKeyword(String userId, String keyword, int startIndex, int number_results, EntityManager manager) {
-        return  searchByKeywordImpl(userId, keyword, startIndex, number_results, manager);
+        return searchByKeywordImpl(userId, keyword, startIndex, number_results, manager);
     }
-    
+
     /**
      * Searches the investigations the user has access to view federalId or surname
      *
@@ -156,53 +163,53 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    private  static Collection<Investigation> searchByUserSurnameImpl(String userId, String searchString, SearchType searchType, int startIndex, int number_results, InvestigationInclude include, EntityManager manager)  {
-        log.trace("searchByUserImpl("+userId+", "+searchType+", "+searchString+", "+startIndex+", "+number_results+", "+include+", EntityManager)");
+    private  static Collection<Investigation> searchByUserSurnameImpl(String userId, String searchString, SearchType searchType, int startIndex, int number_results, InvestigationInclude include, EntityManager manager) {
+        log.trace("searchByUserImpl(" + userId + ", " + searchType + ", " + searchString + ", " + startIndex + ", " + number_results + ", " + include + ", EntityManager)");
         Collection<Investigation> investigations = null;
-        if(number_results < 0){
-            
+        if (number_results < 0) {
+
             //get all, maybe should limit this to 500?
-            if(searchType == searchType.SURNAME){
+            if (searchType == searchType.SURNAME) {
                 log.trace("Searching by SURNAME");
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).
-                        setParameter("objectType",ElementType.INVESTIGATION).
-                        setParameter("userId",userId).
-                        setParameter("surname","%"+searchString.toLowerCase()+"%").
+                        setParameter("objectType", ElementType.INVESTIGATION).
+                        setParameter("userId", userId).
+                        setParameter("surname", "%" + searchString.toLowerCase() + "%").
                         setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             } else {
                 log.trace("Searching by USERID");
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).
-                        setParameter("objectType",ElementType.INVESTIGATION).
-                        setParameter("userId",userId).
-                        setParameter("federalId","%"+searchString+"%").
+                        setParameter("objectType", ElementType.INVESTIGATION).
+                        setParameter("userId", userId).
+                        setParameter("federalId", "%" + searchString + "%").
                         setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             }
         } else {
-            if(searchType == searchType.SURNAME){
+            if (searchType == searchType.SURNAME) {
                 //list all Investigation ids that the users has access to
                 log.trace("Searching by SURNAME");
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).
-                        setParameter("objectType",ElementType.INVESTIGATION).
-                        setParameter("userId",userId).
-                        setParameter("surname","%"+searchString.toLowerCase()+"%").
+                        setParameter("objectType", ElementType.INVESTIGATION).
+                        setParameter("userId", userId).
+                        setParameter("surname", "%" + searchString.toLowerCase() + "%").
                         setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             } else {
                 log.trace("Searching by USERID");
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).
-                        setParameter("objectType",ElementType.INVESTIGATION).
-                        setParameter("userId",userId).
-                        setParameter("federalId","%"+searchString+"%").
+                        setParameter("objectType", ElementType.INVESTIGATION).
+                        setParameter("userId", userId).
+                        setParameter("federalId", "%" + searchString + "%").
                         setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             }
         }
-        
+
         //add all the investigation information to the list of investigations
-        getInvestigationInformation(userId, investigations,include, manager);
-        
-        
+        getInvestigationInformation(userId, investigations, include, manager);
+
+
         return investigations;
     }
-    
+
     /**
      * Searches the investigations the user has access to view by investigator surname
      *
@@ -211,11 +218,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByUserSurname(String userId, String surname, EntityManager manager)  {
+    public static Collection<Investigation> searchByUserSurname(String userId, String surname, EntityManager manager) {
         //search and return all investigations
-        return  searchByUserSurnameImpl(userId, surname, SearchType.SURNAME, -1, -1, InvestigationInclude.NONE, manager);
+        return searchByUserSurnameImpl(userId, surname, SearchType.SURNAME, -1, -1, InvestigationInclude.NONE, manager);
     }
-    
+
     /**
      * Searches the investigations the user has access to view by investigator surname
      *
@@ -226,10 +233,10 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByUserSurname(String userId, String surname, int startIndex, int number_results, EntityManager manager)  {
-        return  searchByUserSurnameImpl(userId, surname, SearchType.SURNAME, startIndex, number_results, InvestigationInclude.NONE, manager);
+    public static Collection<Investigation> searchByUserSurname(String userId, String surname, int startIndex, int number_results, EntityManager manager) {
+        return searchByUserSurnameImpl(userId, surname, SearchType.SURNAME, startIndex, number_results, InvestigationInclude.NONE, manager);
     }
-    
+
     /**
      * Searches the investigations the user has access to view by federalId
      *
@@ -240,9 +247,9 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<Investigation> searchByUserID(String userId, String searchUserId, EntityManager manager) {
         //search and return all investigations
-        return  searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, -1, -1, InvestigationInclude.NONE, manager);
+        return searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, -1, -1, InvestigationInclude.NONE, manager);
     }
-    
+
     /**
      * Searches the investigations the user has access to view by federalId
      *
@@ -253,10 +260,10 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByUserID(String userId, String searchUserId, int startIndex, int number_results, EntityManager manager)  {
-        return  searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, startIndex, number_results,InvestigationInclude.NONE, manager);
+    public static Collection<Investigation> searchByUserID(String userId, String searchUserId, int startIndex, int number_results, EntityManager manager) {
+        return searchByUserSurnameImpl(userId, searchUserId, SearchType.USERID, startIndex, number_results, InvestigationInclude.NONE, manager);
     }
-    
+
     /**
      *  Searches investigations from the ones they can view by the advanced criteria
      *
@@ -267,98 +274,110 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    private static Collection<Investigation> searchByAdvancedImpl(String userId, AdvancedSearchDetails advanDTO, int startIndex, int number_results, EntityManager manager){
-        if(advanDTO == null || !advanDTO.isValid()) throw new IllegalArgumentException("AdvancedSearchDTO cannot be null");
-        log.trace("searchByAdvancedImpl("+userId+", "+advanDTO);
-        
+    private static Collection<Investigation> searchByAdvancedImpl(String userId, AdvancedSearchDetails advanDTO, int startIndex, int number_results, EntityManager manager) {
+        if (advanDTO == null || !advanDTO.isValid()) {
+            throw new IllegalArgumentException("AdvancedSearchDTO cannot be null");
+        }
+        log.trace("searchByAdvancedImpl(" + userId + ", " + advanDTO);
+
         Collection<Investigation> investigations = null;
-        
+
         //dynamically create the query
         String JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL;
-        
-        if(advanDTO.hasTitle()){
+
+        if (advanDTO.hasTitle()) {
             log.trace("Searching title info");
-            JPQL += " AND i.title LIKE :invTitle";
+            if(advanDTO.isCaseSensitive()) JPQL += " AND i.title LIKE :invTitle";
+            else JPQL += " AND LOWER(i.title) LIKE :invTitle";
         }
-        
-        if(advanDTO.hasVisitId()){
+
+        if (advanDTO.hasVisitId()) {
             log.trace("Searching visitId info");
             JPQL += " AND i.visitId = :visitId";
         }
-        
-        if(advanDTO.hasInvestigationType()){
+
+        if (advanDTO.hasInvestigationType()) {
             log.trace("Searching Investigation Type info");
             JPQL += " AND i.invType = :invType";
         }
-        
-        if(advanDTO.hasAbstract()){
+
+        if (advanDTO.hasAbstract()) {
             log.trace("Searching Abstract info");
-            JPQL += " AND i.invAbstract LIKE :invAbstract";
+            if(advanDTO.isCaseSensitive()) JPQL += " AND i.invAbstract LIKE :invAbstract";
+            else  JPQL += " AND LOWER(i.invAbstract) LIKE :invAbstract";
         }
-        
-        if(advanDTO.hasGrantId()){
+
+        if (advanDTO.hasGrantId()) {
             log.trace("Searching visitId info");
             JPQL += " AND i.grantId = :grantId";
         }
-        
-        if(advanDTO.hasBackCatalogueInvestigatorString()){
+
+        if (advanDTO.hasBackCatalogueInvestigatorString()) {
             log.trace("Searching bcatInvStr info");
-            JPQL += " AND i.bcatInvStr LIKE :bcatInvStr";
+            if(advanDTO.isCaseSensitive())  JPQL += " AND i.bcatInvStr LIKE :bcatInvStr";
+            else JPQL += " AND LOWER(i.bcatInvStr) LIKE :bcatInvStr";
         }
-        
-        if(advanDTO.hasExperimentNumber()){
+
+        if (advanDTO.hasExperimentNumber()) {
             log.trace("Searching invNumber info");
             JPQL += " AND i.invNumber = :invNumber";
         }
-        
-        if(advanDTO.hasSample()){
+
+        if (advanDTO.hasSample()) {
             log.trace("Searching sample info");
             //  " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
             //  " sample.markedDeleted = 'N') "+//iterate, remove if no sample is null
-            JPQL += " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
+            if(advanDTO.isCaseSensitive())  JPQL += " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
+                    " sample.markedDeleted = 'N') ";
+            else JPQL += " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE LOWER(sample.name) LIKE :sampleName AND " +
                     " sample.markedDeleted = 'N') ";
         }
-        
-        if(advanDTO.hasInstruments()){
+
+        if (advanDTO.hasInstruments()) {
             log.trace("Searching instruments info");
             //add insturments section:
             //" AND i.instrument.name IN(:instrument)  AND i.instrument.markedDeleted = 'N' "+ //expand IN, remove this if instrument null
             JPQL += " AND i.instrument IN(";
             //add in the instruments in the IN() cause of JPQL
             int i = 1;
-            for(String instrument : advanDTO.getInstruments()){
-                if(i == advanDTO.getInstruments().size()) JPQL += ":instrument"+(i++)+"";
-                else  JPQL += ":instrument"+(i++)+" , ";
+            for (String instrument : advanDTO.getInstruments()) {
+                if (i == advanDTO.getInstruments().size()) {
+                    JPQL += ":instrument" + (i++) + "";
+                } else {
+                    JPQL += ":instrument" + (i++) + " , ";
+                }
             }
             JPQL += ") "; //TODO not checking if instrument is deleted now
         }
-        
-        if(advanDTO.hasKeywords()){
+
+        if (advanDTO.hasKeywords()) {
             log.trace("Searching keywords info");
             //add keywords section:
             // AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND kw.keywordPK.name LIKE :keyword1)
-            
+
             int i = 1;
-            for(String keyword : advanDTO.getKeywords()){
-                JPQL += " AND EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name LIKE :keyword"+(i++)+") ";
+            for (String keyword : advanDTO.getKeywords()) {
+               if(advanDTO.isCaseSensitive())  JPQL += " AND EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND kw" + i + ".keywordPK.name LIKE :keyword" + (i++) + ") ";
+               else JPQL += " AND EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND LOWER(kw" + i + ".keywordPK.name) LIKE :keyword" + (i++) + ") ";
             }
             JPQL += " ";
         }
-        
-        if(advanDTO.hasInvestigators()){
+
+        if (advanDTO.hasInvestigators()) {
             log.trace("Searching investigators info");
             //add investigator section:
             //" AND EXISTS ( SELECT inv FROM i.investigatorCollection inv WHERE " +
             //   "LOWER(inv.facilityUser.lastName) LIKE :surname AND inv.markedDeleted = 'N')  "+ //iterate, remove this if investigator null
-            
+
             int i = 1;
-            for(String investigators : advanDTO.getInvestigators()){
-                JPQL += " AND EXISTS (SELECT inv"+i+" FROM i.investigatorCollection inv"+i+" WHERE inv"+i+".markedDeleted = 'N' AND LOWER(inv"+i+".facilityUser.lastName) LIKE :surname"+(i++)+") ";
+            for (String investigators : advanDTO.getInvestigators()) {
+               if(advanDTO.isCaseSensitive()) JPQL += " AND EXISTS (SELECT inv" + i + " FROM i.investigatorCollection inv" + i + " WHERE inv" + i + ".markedDeleted = 'N' AND inv" + i + ".facilityUser.lastName LIKE :surname" + (i++) + ") ";
+               else JPQL += " AND EXISTS (SELECT inv" + i + " FROM i.investigatorCollection inv" + i + " WHERE inv" + i + ".markedDeleted = 'N' AND LOWER(inv" + i + ".facilityUser.lastName) LIKE :surname" + (i++) + ") ";
             }
             JPQL += " ";
         }
-        
-        if(advanDTO.hasDataFileParameters()){
+
+        if (advanDTO.hasDataFileParameters()) {
             log.trace("Searching data file info");
             //add data file and run number section
             //             " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
@@ -368,10 +387,11 @@ public class InvestigationSearch extends ManagerUtil {
             //            " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
             //            " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " ; //remove if all are null
             //
-            JPQL += ADVANCED_SEARCH_JPQL_DATAFILE;
+           if(advanDTO.isCaseSensitive()) JPQL += ADVANCED_SEARCH_JPQL_DATAFILE;
+           else JPQL += ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE;
         }
-        
-        if(advanDTO.hasRunNumber()){
+
+        if (advanDTO.hasRunNumber()) {
             log.trace("Searching run number");
             //add data file and run number section
             //    "EXISTS (SELECT dfp FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
@@ -379,105 +399,103 @@ public class InvestigationSearch extends ManagerUtil {
             //    " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
             //    " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionCanSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
             //    "dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null
-            
+
             JPQL += ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER;
         }
-        
+
         //set all the paramaters now
         //set query with datafile as entity object
         Query query = manager.createQuery(JPQL);
-        
+
         //sets the paramters
-        query = query.setParameter("userId",userId);
+        query = query.setParameter("userId", userId);
         query = query.setParameter("objectType", ElementType.INVESTIGATION);
-        
-        if(advanDTO.hasTitle()){
+
+        if (advanDTO.hasTitle()) {
             query = query.setParameter("invTitle", advanDTO.getInvestigationName());
         }
-        
-        if(advanDTO.hasVisitId()){
-            query = query.setParameter("visitId", advanDTO.getVisitId());            
+
+        if (advanDTO.hasVisitId()) {
+            query = query.setParameter("visitId", advanDTO.getVisitId());
         }
-        
-        if(advanDTO.hasInvestigationType()){
-            query = query.setParameter("invType", advanDTO.getInvestigationType());            
+
+        if (advanDTO.hasInvestigationType()) {
+            query = query.setParameter("invType", advanDTO.getInvestigationType());
         }
-        
-        if(advanDTO.hasAbstract()){
-            query = query.setParameter("invAbstract",advanDTO.getInvestigationAbstract());            
+
+        if (advanDTO.hasAbstract()) {
+            query = query.setParameter("invAbstract", advanDTO.getInvestigationAbstract());
         }
-        
-        if(advanDTO.hasGrantId()){
-            query = query.setParameter("grantId", advanDTO.getGrantId());            
+
+        if (advanDTO.hasGrantId()) {
+            query = query.setParameter("grantId", advanDTO.getGrantId());
         }
-        
-        if(advanDTO.hasBackCatalogueInvestigatorString()){
-            query = query.setParameter("bcatInvStr", advanDTO.getBackCatalogueInvestigatorString());            
+
+        if (advanDTO.hasBackCatalogueInvestigatorString()) {
+            query = query.setParameter("bcatInvStr", advanDTO.getBackCatalogueInvestigatorString());
         }
-        
-        if(advanDTO.hasExperimentNumber()){
-            query = query.setParameter("invNumber", advanDTO.getExperimentNumber());            
-        }        
-        
-        if(advanDTO.hasSample()){
+
+        if (advanDTO.hasExperimentNumber()) {
+            query = query.setParameter("invNumber", advanDTO.getExperimentNumber());
+        }
+
+        if (advanDTO.hasSample()) {
             query = query.setParameter("sampleName", advanDTO.getSampleName());
         }
-        
-        if(advanDTO.hasDataFileParameters()){
+
+        if (advanDTO.hasDataFileParameters()) {
             query = query.setParameter("datafileName", advanDTO.getDatafileName());
             query = query.setParameter("dataFileType", ElementType.DATAFILE);
-            query = query.setParameter("upperTime",advanDTO.getDateRangeEnd());
-            query = query.setParameter("lowerTime",advanDTO.getDateRangeStart());
+            query = query.setParameter("upperTime", advanDTO.getDateRangeEnd());
+            query = query.setParameter("lowerTime", advanDTO.getDateRangeStart());
         }
-        
+
         //set upper run number
-        if(advanDTO.hasRunNumber()){
+        if (advanDTO.hasRunNumber()) {
             query = query.setParameter("upper", advanDTO.getRunEnd());
             query = query.setParameter("lower", advanDTO.getRunStart());
             query = query.setParameter("dataFileType", ElementType.DATAFILE);
         }
-        
+
         //set instruments
-        if(advanDTO.hasInstruments()){
+        if (advanDTO.hasInstruments()) {
             int j = 1;
-            for(String instrument : advanDTO.getInstruments()){
-                query = query.setParameter("instrument"+j++,instrument);
+            for (String instrument : advanDTO.getInstruments()) {
+                query = query.setParameter("instrument" + j++, instrument);
             }
         }
-        
+
         //set instruments
-        if(advanDTO.hasKeywords()){
+        if (advanDTO.hasKeywords()) {
             int j = 1;
-            for(String keyword : advanDTO.getKeywords()){
-                if(advanDTO.isFuzzy()) query = query.setParameter("keyword"+j++,"%"+keyword+"%");
-                else query = query.setParameter("keyword"+j++,keyword);
+            for (String keyword : advanDTO.getKeywords()) {               
+                    query = query.setParameter("keyword" + j++, keyword );               
             }
         }
-        
+
         //set investigators
-        if(advanDTO.hasInvestigators()){
+        if (advanDTO.hasInvestigators()) {
             int j = 1;
-            for(String investigator : advanDTO.getInvestigators()){
-                if(advanDTO.isFuzzy()) query = query.setParameter("surname"+j++,"%"+investigator.toLowerCase()+"%");
-                else query = query.setParameter("surname"+j++,investigator.toLowerCase());
+            for (String investigator : advanDTO.getInvestigators()) {                
+                    query = query.setParameter("surname" + j++, investigator);               
             }
         }
-        
-        log.trace("DYNAMIC JPQL: "+JPQL);
-        
-        if(number_results < 0){
+
+        log.trace("DYNAMIC JPQL: " + JPQL);
+
+        if (number_results < 0) {
             //get all, maybe should limit this to 500?
             investigations = query.setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
             investigations = query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
-        
+
         //add all the investigation information to the list of investigations
         getInvestigationInformation(userId, investigations, advanDTO.getInvestigationInclude(), manager);
-        
+
         return investigations;
     }
-    
+
     /**
      * Searches investigations from the ones they can view by the advanced criteria
      *
@@ -488,10 +506,10 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDetails advanDTO, int startIndex, int number_results, EntityManager manager){
+    public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDetails advanDTO, int startIndex, int number_results, EntityManager manager) {
         return searchByAdvancedImpl(userId, advanDTO, startIndex, number_results, manager);
     }
-    
+
     /**
      * Searches investigations from the ones they can view by the advanced criteria
      *
@@ -500,10 +518,10 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDetails advanDTO, EntityManager manager){
+    public static Collection<Investigation> searchByAdvanced(String userId, AdvancedSearchDetails advanDTO, EntityManager manager) {
         return searchByAdvancedImpl(userId, advanDTO, -1, -1, manager);
     }
-    
+
     /**
      *  Gets all the investigations associated with that user, ie. that they are investigator of.
      *
@@ -514,29 +532,29 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> getUsersInvestigations(String userId, InvestigationInclude include, int startIndex, int number_results, EntityManager manager){
-        log.trace("getUserInvestigations("+userId+", "+startIndex+", "+number_results+", EnitiyManager)");
-        
+    public static Collection<Investigation> getUsersInvestigations(String userId, InvestigationInclude include, int startIndex, int number_results, EntityManager manager) {
+        log.trace("getUserInvestigations(" + userId + ", " + startIndex + ", " + number_results + ", EnitiyManager)");
+
         Collection<Investigation> investigations = null;
-        if(number_results < 0){
+        if (number_results < 0) {
             //get all, maybe should limit this to 500?
             investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).
-                    setParameter("objectType",ElementType.INVESTIGATION).
-                    setParameter("federalId",userId).
-                    setParameter("userId",userId).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+                    setParameter("objectType", ElementType.INVESTIGATION).
+                    setParameter("federalId", userId).
+                    setParameter("userId", userId).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
             investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).
-                    setParameter("objectType",ElementType.INVESTIGATION).
-                    setParameter("federalId",userId).
-                    setParameter("userId",userId).setMaxResults(number_results).setFirstResult(startIndex).getResultList();
+                    setParameter("objectType", ElementType.INVESTIGATION).
+                    setParameter("federalId", userId).
+                    setParameter("userId", userId).setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
-        
+
         //add include information
         getInvestigationInformation(userId, investigations, include, manager);
-        
+
         return investigations;
     }
-    
+
     /**
      *  Gets all the investigations associated with that user, ie. that they are investigator of.
      *
@@ -544,10 +562,10 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> getUsersInvestigations(String userId, EntityManager manager){
+    public static Collection<Investigation> getUsersInvestigations(String userId, EntityManager manager) {
         return getUsersInvestigations(userId, InvestigationInclude.NONE, -1, -1, manager);
     }
-    
+
     /**
      *  Gets all the investigations associated with that user, ie. that they are investigator of.
      *
@@ -557,10 +575,10 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> getUsersInvestigations(String userId, int startIndex, int number_results, EntityManager manager){
+    public static Collection<Investigation> getUsersInvestigations(String userId, int startIndex, int number_results, EntityManager manager) {
         return getUsersInvestigations(userId, InvestigationInclude.NONE, startIndex, number_results, manager);
     }
-    
+
     /**
      *  Gets all the investigations associated with that user, ie. that they are investigator of.
      *
@@ -569,10 +587,10 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> getUsersInvestigations(String userId, InvestigationInclude include, EntityManager manager){
+    public static Collection<Investigation> getUsersInvestigations(String userId, InvestigationInclude include, EntityManager manager) {
         return getUsersInvestigations(userId, include, -1, -1, manager);
     }
-    
+
     /**
      *  Gets all the investigation ids associated with that user, ie. thart they are investigator of.
      *
@@ -580,15 +598,15 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation ids
      */
-    public static Collection<Long> getUsersInvestigationsRtnId(String userId, EntityManager manager){
-        log.trace("getUsersInvestigationsRtnId("+userId+", EnitiyManager)");
-        
-        return  manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID_RTID).
-                setParameter("objectType",ElementType.INVESTIGATION).
-                setParameter("userId",userId).
-                setParameter("federalId",userId).getResultList();
+    public static Collection<Long> getUsersInvestigationsRtnId(String userId, EntityManager manager) {
+        log.trace("getUsersInvestigationsRtnId(" + userId + ", EnitiyManager)");
+
+        return manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID_RTID).
+                setParameter("objectType", ElementType.INVESTIGATION).
+                setParameter("userId", userId).
+                setParameter("federalId", userId).getResultList();
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -603,71 +621,123 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator,  InvestigationInclude include, boolean fuzzy, boolean use_security, int startIndex, int number_results, EntityManager manager)  {
-        log.trace("searchByKeywords("+userId+", "+keywords+", "+operator +", "+include+", fuzzy? "+fuzzy+", secure? "+use_security+", "+startIndex+", "+number_results+", EntityManager)");
-        
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude include, boolean fuzzy, boolean use_security, int startIndex, int number_results, EntityManager manager) {
+        return searchByKeywords(userId, keywords, LogicalOperator.AND, include, fuzzy, true, true, -1, -1, manager);
+    }
+
+    /**
+     * Search by a collection of keywords for investigations that user has access to view
+     *
+     * @param userId federalId of the user.
+     * @param keywordsDetails details of search
+     * @param startIndex start index of the results found, default 0
+     * @param number_results number of results found from the start index, default {@link Queries}.MAX_QUERY_RESULTSET
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
+     */
+     public static Collection<Investigation> searchByKeywords(String userId, KeywordDetails keywordDetails, int startIndex, int number_results, EntityManager manager) {        
+         LogicalOperator operator = (keywordDetails.getOperator() == null) ? LogicalOperator.AND : keywordDetails.getOperator();
+         InvestigationInclude includes = (keywordDetails.getInvestigationIncludes() == null) ? InvestigationInclude.NONE : keywordDetails.getInvestigationIncludes() ;
+         
+         return searchByKeywords(userId, keywordDetails.getKeywords(), operator, includes , keywordDetails.isFuzzy(), true, keywordDetails.isCaseSensitve(), startIndex, number_results, manager);            
+     }
+      
+    /**
+     * Search by a collection of keywords for investigations that user has access to view
+     *
+     * @param userId federalId of the user.
+     * @param keywords Collection of keywords to search on
+     * @param operator {@link LogicalOperator}, either AND or OR, default AND
+     * @param include {@link InvestigationInclude}
+     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
+     * @param use_security search all investigations regardless of who owns it, default true
+     * @param caseSensitive are the keywords case sensitive
+     * @param startIndex start index of the results found, default 0
+     * @param number_results number of results found from the start index, default {@link Queries}.MAX_QUERY_RESULTSET
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return collection of {@link Investigation} investigation objects
+     */
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude include, boolean fuzzy, boolean use_security, boolean caseSensitive, int startIndex, int number_results, EntityManager manager) {
+        log.trace("searchByKeywords(" + userId + ", " + keywords + ", " + operator + ", " + include + ", fuzzy? " + fuzzy + ", secure? " + use_security + ", Case Sensitive? " + caseSensitive + ", " + startIndex + ", " + number_results + ", EntityManager)");
+
         Collection<Investigation> investigations = null;
         String JPQL = null;
-        
+
         //dynamically create the SQL
-        if(use_security)  JPQL = INVESTIGATION_LIST_BY_KEYWORDS_JPQL;
-        else  JPQL = INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY;
-        
+        if (use_security) {
+            JPQL = INVESTIGATION_LIST_BY_KEYWORDS_JPQL;
+        } else {
+            JPQL = INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY;
+        }
+
         // String KEYWORDSEARCH = " EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND kw.keywordPK.name ";
         // Need to generate this
         // AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND kw.keywordPK.name LIKE :keyword1)
-        
-        int i  = 2;
-        //check if fuzzy
-        if(fuzzy){
-            //fuzzy so LIKE
-            for(String keyword : keywords){
-                if(i == 2) JPQL += " AND (EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name LIKE ?"+(i++)+") ";
-                else  JPQL += " "+operator+" EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name LIKE ?"+(i++)+") ";
-                
-            }
-        } else {
-            //none fuzzy, =
-            for(String keyword : keywords){
-                if(i == 2) JPQL += " AND (EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name = ?"+(i++)+") ";
-                else  JPQL += " "+operator+" EXISTS (SELECT kw"+i+" FROM i.keywordCollection kw"+i+" WHERE kw"+i+".markedDeleted = 'N' AND kw"+i+".keywordPK.name = ?"+(i++)+") ";
+
+        int i = 2;
+        String SIGN = " = ";
+        if (fuzzy) {
+            SIGN = " LIKE ";
+        }
+
+        for (String keyword : keywords) {
+            if (i == 2) {
+                if (caseSensitive) {
+                    JPQL += " AND (EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND kw" + i + ".keywordPK.name LIKE ?" + (i++) + ") ";
+                } else {
+                    JPQL += " AND (EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND LOWER(kw" + i + ".keywordPK.name) LIKE ?" + (i++) + ") ";
+                }
+            } else {
+                if (caseSensitive) {
+                    JPQL += " " + operator + " EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND kw" + i + ".keywordPK.name LIKE ?" + (i++) + ") ";
+                } else {
+                    JPQL += " " + operator + " EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND LOWER(kw" + i + ".keywordPK.name) LIKE ?" + (i++) + ") ";
+                }
             }
         }
-        JPQL +=  ")"; //add final close braket
-        log.info("DYNAMIC JPQL GENERATED: "+JPQL);
-        
+        JPQL += ")"; //add final close braket
+
+        log.info("DYNAMIC JPQL GENERATED: " + JPQL);
+
         //set query with investigation as entity object
         Query query = manager.createQuery(JPQL);
-        
+
         //use security??
-        if(use_security) {
-            query.setParameter("objectType",ElementType.INVESTIGATION);
-            query.setParameter("userId",userId);
+        if (use_security) {
+            query.setParameter("objectType", ElementType.INVESTIGATION);
+            query.setParameter("userId", userId);
         }
         //else query = query.setParameter("userId","%");
-        
+
         //set keywords
         int j = 2;
-        for(String keyword : keywords){
-            if(fuzzy) query = query.setParameter(j++,"%"+keyword+"%");
-            else query.setParameter(j++,keyword);
+        for (String keyword : keywords) {
+            if (fuzzy) {
+                if(caseSensitive) query = query.setParameter(j++, "%" + keyword + "%");
+                else query = query.setParameter(j++, "%" + keyword.toLowerCase() + "%");
+            } else {
+               if(caseSensitive) query.setParameter(j++, keyword);
+               else query.setParameter(j++, keyword.toLowerCase());
+            }
+
         }
-        
+
         //run query
-        if(number_results < 0){
+        if (number_results <  0) {
             //get all, maybe should limit this to 500?
             investigations = query.setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
             investigations = query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
-        
-        log.trace("number of investigations returned is: "+investigations.size());
+
+        log.trace("number of investigations returned is: " + investigations.size());
         //add all the investigation information to the list of investigations
-        getInvestigationInformation(userId, investigations,include, manager);
-        
+        getInvestigationInformation(userId, investigations, include, manager);
+
+
         return investigations;
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -678,11 +748,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, boolean fuzzy, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, boolean fuzzy, EntityManager manager) {
         //secuirty on, AND
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, includes, fuzzy ,true , -1, -1, manager);
+        return searchByKeywords(userId, keywords, LogicalOperator.AND, includes, fuzzy, true, -1, -1, manager);
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -692,11 +762,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, boolean fuzzy, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, boolean fuzzy, EntityManager manager) {
         //secuirty on, AND, no includes
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationInclude.NONE, fuzzy ,true , -1, -1, manager);
+        return searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationInclude.NONE, fuzzy, true, -1, -1, manager);
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -705,11 +775,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, EntityManager manager) {
         //exact match, secuirty true, AND
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationInclude.NONE, false ,true ,-1 , -1,manager);
+        return searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationInclude.NONE, false, true, -1, -1, manager);
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -719,11 +789,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, EntityManager manager) {
         //exact match, secuirty true, AND
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, includes, false ,true ,-1 , -1,manager);
+        return searchByKeywords(userId, keywords, LogicalOperator.AND, includes, false, true, -1, -1, manager);
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -733,11 +803,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, EntityManager manager) {
         //exact match, secuirty true, AND
-        return searchByKeywords(userId, keywords, operator, InvestigationInclude.NONE, false ,true ,-1 , -1,manager);
+        return searchByKeywords(userId, keywords, operator, InvestigationInclude.NONE, false, true, -1, -1, manager);
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -748,11 +818,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, LogicalOperator operator, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, LogicalOperator operator, EntityManager manager) {
         //exact match, secuirty true, AND
-        return searchByKeywords(userId, keywords, operator, includes,  false ,true ,-1 , -1,manager);
+        return searchByKeywords(userId, keywords, operator, includes, false, true, -1, -1, manager);
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -763,11 +833,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, EntityManager manager) {
         //exact match, secuirty true,
-        return searchByKeywords(userId, keywords, operator, InvestigationInclude.NONE, fuzzy ,true ,-1 , -1,manager);
+        return searchByKeywords(userId, keywords, operator, InvestigationInclude.NONE, fuzzy, true, -1, -1, manager);
     }
-    
+
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -779,11 +849,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude includes, boolean fuzzy, EntityManager manager)  {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude includes, boolean fuzzy, EntityManager manager) {
         //exact match, secuirty true,
-        return searchByKeywords(userId, keywords, operator, includes, fuzzy ,true ,-1 , -1,manager);
+        return searchByKeywords(userId, keywords, operator, includes, fuzzy, true, -1, -1, manager);
     }
-    
+
     /**
      * Lists all the instruments in the database
      *
@@ -791,11 +861,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return List of {@link Instrument}s
      */
-    public static Collection<String> listAllInstruments(EntityManager manager)  {
+    public static Collection<String> listAllInstruments(EntityManager manager) {
         log.trace("listAllInstruments(EntityManager)");
-        return  manager.createNamedQuery(ALL_INSTRUMENTS)/*.setMaxResults(MAX_QUERY_RESULTSET)*/.getResultList();
+        return manager.createNamedQuery(ALL_INSTRUMENTS)/*.setMaxResults(MAX_QUERY_RESULTSET)*/.getResultList();
     }
-    
+
     /**
      * Lists all the investigation types  in the database
      *
@@ -803,11 +873,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return List of types
      */
-    public static Collection<String> listAllInvestigationTypes(EntityManager manager)  {
+    public static Collection<String> listAllInvestigationTypes(EntityManager manager) {
         log.trace("listAllInvestigationTypes(EntityManager)");
-        return  manager.createNamedQuery(ALL_INVESTIGATION_TYPES)/*.setMaxResults(MAX_QUERY_RESULTSET)*/.getResultList();
+        return manager.createNamedQuery(ALL_INVESTIGATION_TYPES)/*.setMaxResults(MAX_QUERY_RESULTSET)*/.getResultList();
     }
-    
+
     /**
      * Lists all the user roles in the database
      *
@@ -815,11 +885,11 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return List of {@link IcatRole}s
      */
-    public static Collection<IcatRole> listAllRoles(EntityManager manager){
+    public static Collection<IcatRole> listAllRoles(EntityManager manager) {
         log.trace("listAllRoles(EntityManager)");
-        return  manager.createNamedQuery(ALL_ROLES).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+        return manager.createNamedQuery(ALL_ROLES).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }
-    
+
     /**
      * Lists all the user roles in the database
      *
@@ -827,8 +897,8 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return List of {@link IcatRole}s
      */
-    public static Collection<Parameter> listAllParameters(EntityManager manager){
+    public static Collection<Parameter> listAllParameters(EntityManager manager) {
         log.trace("listAllParameters(EntityManager)");
-        return  manager.createNamedQuery(ALL_PARAMETERS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+        return manager.createNamedQuery(ALL_PARAMETERS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }
 }
