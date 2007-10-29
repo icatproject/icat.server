@@ -535,6 +535,30 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Size should be zero", 0, investigations.size());
         
     }
+    
+    @Test
+    public void testSearchByKeywordsCaseSensitive() throws ICATAPIException {
+        log.info("Testing valid user, keywords: "+VALID_USER_FOR_INVESTIGATION);
+        Collection<String> keywords = new ArrayList<String>();
+        keywords.add(VALID_KEYWORD.substring(1,2).toUpperCase());
+        
+        //AND fuzzy, case sensitive
+        Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(VALID_USER_FOR_INVESTIGATION, keywords , LogicalOperator.AND, InvestigationInclude.DATASETS_AND_DATAFILES, true , true, true, 0, 1000, em);
+        log.trace("Investigations found with "+keywords+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be zero", 0, investigations.size());
+        checkInvestigations(investigations);
+               
+        //AND fuzzy, case insensitive
+        investigations = InvestigationSearch.searchByKeywords(VALID_USER_FOR_INVESTIGATION, keywords , LogicalOperator.OR, InvestigationInclude.DATASETS_AND_DATAFILES, true , true, false, 0, 1000, em);
+        log.trace("Investigations found with "+keywords+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);                
+              
+    }
     //////////////////////////////////////////////////////////////////////////
     
     //@Test
@@ -793,7 +817,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     
     @Test
     public void testAdvanced() throws ICATAPIException {
-        log.info("Testing invalid user, My Investigations: "+VALID_USER_FOR_INVESTIGATION);
+        log.info("Testing valid user, My Investigations: "+VALID_USER_FOR_INVESTIGATION);
         
         AdvancedSearchDetails asd = new AdvancedSearchDetails();
         
@@ -946,7 +970,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         
         //add instruments
         investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
-        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        log.trace("Investigations found with "+asd+ ": " +investigations.size()+" : "+investigations);
         
         assertNotNull("Must not be an empty collection", investigations);
         assertEquals("Size should be one", 1, investigations.size());
@@ -962,6 +986,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertEquals("Size should be zero", 0, investigations.size());
         
         asd.setDatafileName("SXD015554.RAW");
+        
         //add datafile name
         investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
         log.trace("Investigations found with "+asd+ ": " +investigations.size());
@@ -1037,7 +1062,260 @@ public class TestInvestigationSearch extends BaseTestClass{
         assertNotNull("Must not be an empty collection", investigations);
         assertEquals("Size should be zero", 0, investigations.size());
         checkInvestigations(investigations);
+       
     }
+    
+    @Test
+    public void testAdvancedCaseInsensitive() throws ICATAPIException {
+        log.info("Testing valid user, My Investigations: "+VALID_USER_FOR_INVESTIGATION);
+        
+        AdvancedSearchDetails asd = new AdvancedSearchDetails();
+        asd.setCaseSensitive(false);
+        
+        Collection<Investigation> investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 3, investigations.size());
+        checkInvestigations(investigations);
+        
+         //test with name
+        asd.setInvestigationType("experiment");
+        
+        //test with name
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 3, investigations.size());
+        checkInvestigations(investigations);
+        
+        //test with name
+        asd.setInvestigationName("INVESTIGATION without any investigators");
+        
+        //test with name
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        //add sample name
+        asd.setSampleName("SrF2 CALIBRATION  w=-25.3");
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        //add visit id
+        asd.setVisitId("12");
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        //add grant id
+        asd.setGrantId(15L);
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        //add abstract
+        asd.setInvestigationAbstract("FALSE ab");
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 0, investigations.size());
+        checkInvestigations(investigations);
+        
+        //add abstract
+        asd.setInvestigationAbstract("ABSTRACT");
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        //add bcatInvStr
+        asd.setBackCatalogueInvestigatorString("FALSE name");
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 0, investigations.size());
+        checkInvestigations(investigations);
+        
+        //add bcatInvStr
+        asd.setBackCatalogueInvestigatorString("DAMIAN");
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        Collection<String> keywords = new ArrayList<String>();
+        keywords.add("SHULL");
+        
+        
+        asd.setKeywords(keywords);
+        //add keywords
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        keywords.clear();
+        keywords.add("DELETED");
+        //add invalid keyword
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be zero", 0, investigations.size());
+        
+        keywords.clear();
+        keywords.add("DELETED");
+        keywords.add("DELETEDdddddd");
+        //add invalid keyword
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be zero", 0, investigations.size());
+        
+        
+        Collection<String> instruments = new ArrayList<String>();
+        instruments.add("SXD");
+        asd.setInstruments(instruments);
+        //reset keywords
+        keywords.clear();
+        keywords.add("SHULL");
+        
+        //add instruments
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        instruments.add("false");
+        instruments.add("SXD");
+        asd.setInstruments(instruments);
+        //reset keywords
+        keywords.clear();
+        keywords.add("SHULL");
+        
+        //add instruments
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size()+" : "+investigations);
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        
+        asd.setDatafileName("ASKnfasopfosdmfsdf");
+        //add datafile name
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be zero", 0, investigations.size());
+        
+        asd.setDatafileName("sxd015554.raw");
+        
+        //add datafile name
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        asd.setExperimentNumber("3434343434");
+        //add ex number
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be zero", 0, investigations.size());
+        
+        asd.setExperimentNumber("12345");
+        //add ex number
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        Collection<String> investigators = new ArrayList<String>();
+        investigators.add("DJDJDjdjkdjdjdjd");
+        asd.setInvestigators(investigators);
+        //add investigators
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be zero", 0, investigations.size());
+        checkInvestigations(investigations);
+        
+        
+        investigators.clear();
+        investigators.add(VALID_SURNAME_FOR_INVESTIGATION.toUpperCase());
+        asd.setInvestigators(investigators);
+        //add investigators
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        
+        asd.setRunStart(1000d);
+        //add investigators
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        asd.setRunEnd(2000.0);
+        //add investigators
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be one", 1, investigations.size());
+        checkInvestigations(investigations);
+        
+        asd.setRunEnd(1001.0);
+        //add investigators
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be zero", 0, investigations.size());
+        checkInvestigations(investigations);
+       
+    }
+    
     
     //@Test
     public void testAdvancedCreateTime() throws ICATAPIException {
