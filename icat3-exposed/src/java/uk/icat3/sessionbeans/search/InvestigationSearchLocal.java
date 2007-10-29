@@ -10,6 +10,7 @@ import uk.icat3.entity.InvestigationType;
 import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.AdvancedSearchDetails;
+import uk.icat3.search.KeywordDetails;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 
@@ -24,17 +25,19 @@ public interface InvestigationSearchLocal {
     
     public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch, int startIndex, int numberOfResults) throws SessionException ;
         
-    public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy) throws SessionException ;
+    //public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy) throws SessionException ;
     
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords) throws SessionException ;
     
-    public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, int startIndex, int numberOfResults) throws SessionException ;
+    /*public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, int startIndex, int numberOfResults) throws SessionException ;
     
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy, int startIndex, int numberOfResults) throws SessionException ;
     
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include,  int startIndex, int numberOfResults) throws SessionException ;
     
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude include, boolean fuzzy, int startIndex, int numberOfResults) throws SessionException ;
+    */
+    public Collection<Investigation> searchByKeywords(String sessionId, KeywordDetails keywordDetails, int startIndex, int numberOfResults) throws SessionException ;
     
     public Collection<Investigation> getMyInvestigations(String sessionId) throws SessionException ;
     

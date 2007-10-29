@@ -60,6 +60,7 @@ import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.DataFileManager;
 import uk.icat3.search.AdvancedSearchDetails;
+import uk.icat3.search.KeywordDetails;
 import uk.icat3.sessionbeans.data.DownloadManagerLocal;
 import uk.icat3.sessionbeans.manager.DatafileManagerLocal;
 import uk.icat3.sessionbeans.manager.DatasetManagerLocal;
@@ -331,14 +332,8 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of {@link Investigation} investigation objects
      */
     @WebMethod(operationName = "searchByAdvancedPagination")
-    
-    
-    
-    @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByAdvancedPagination")
-    
-    
-    
-    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByAdvancedPaginationResponse")
+     @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByAdvancedPagination")
+     @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByAdvancedPaginationResponse")
     public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch,
             
             @WebParam(name = "startIndex") int startIndex,
@@ -357,14 +352,8 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName = "searchByKeywordsFuzzyAndInclude")
-    
-    
-    
+    /*@WebMethod(operationName = "searchByKeywordsFuzzyAndInclude")
     @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsFuzzyAndInclude")
-    
-    
-    
     @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsFuzzyAndIncludeResponse")
     public Collection<Investigation> searchByKeywords(
             @WebParam(name = "sessionId") String sessionId,
@@ -375,7 +364,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
             
             @WebParam(name = "fuzzy") boolean fuzzy) throws SessionException {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords, include, fuzzy);
-    }
+    }*/
 
     /**
      * Search by a collection of keywords for investigations that user has access to view, with AND been operator, fuzzy false, no includes
@@ -386,13 +375,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.SessionException
      */
     @WebMethod(operationName = "searchByKeywords")
-    
-    
-    
     @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywords")
-    
-    
-    
     @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsResponse")
     public Collection<Investigation> searchByKeywords(
             @WebParam(name = "sessionId") String sessionId,
@@ -411,14 +394,8 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName = "searchByKeywordsPagination")
-    
-    
-    
+   /* @WebMethod(operationName = "searchByKeywordsPagination")
     @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsPagination")
-    
-    
-    
     @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationResponse")
     public Collection<Investigation> searchByKeywords(
             @WebParam(name = "sessionId") String sessionId,
@@ -429,7 +406,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
             
             @WebParam(name = "numberOfResults") int numberOfResults) throws SessionException {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords, startIndex, numberOfResults);
-    }
+    }*/
 
     /**
      * Search by a collection of keywords for investigations that user has access to view, with AND been operator
@@ -443,14 +420,8 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName = "searchByKeywordsPaginationFuzzyAndInclude")
-    
-    
-    
+  /*  @WebMethod(operationName = "searchByKeywordsPaginationFuzzyAndInclude")
     @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationFuzzyAndInclude")
-    
-    
-    
     @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationFuzzyAndIncludeResponse")
     public Collection<Investigation> searchByKeywords(
             @WebParam(name = "sessionId") String sessionId,
@@ -465,7 +436,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
             
             @WebParam(name = "numberOfResults") int numberOfResults) throws SessionException {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords, include, fuzzy, startIndex, numberOfResults);
-    }
+    }*/
 
     /**
      * Search by a collection of keywords for investigations that user has access to view, searching by fuzzy is true, with AND been operator
@@ -478,15 +449,9 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.SessionException
      */
-    @WebMethod(operationName = "searchByKeywordsPaginationInclude")
-    
-    
-    
+  /*  @WebMethod(operationName = "searchByKeywordsPaginationInclude")
     @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationInclude")
-    
-    
-    
-    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationIncludeResponse")
+   @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsPaginationIncludeResponse")
     public Collection<Investigation> searchByKeywords(
             @WebParam(name = "sessionId") String sessionId,
             
@@ -498,7 +463,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
             
             @WebParam(name = "numberOfResults") int numberOfResults) throws SessionException {
         return investigationSearchLocal.searchByKeywords(sessionId, keywords, include, startIndex, numberOfResults);
-    }
+    }*/
 
     /**
      * Search by a collection of keywords for investigations that user has access to view
@@ -508,35 +473,30 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @param operator {@link LogicalOperator}, either AND or OR, default AND
      * @param include {@link InvestigationInclude}
      * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
+     * @param caseSensitive are the keywords caseSensitive
      * @param startIndex start index of the results found, default 0
      * @param numberOfResults number of results found from the start index, default {@link Queries}.MAX_QUERY_RESULTSET
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.SessionException
      */
     @WebMethod(operationName = "searchByKeywordsAll")
-    
-    
-    
     @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsAll")
-    
-    
-    
-    @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsAllResponse")
+     @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByKeywordsAllResponse")
     public Collection<Investigation> searchByKeywords(
             @WebParam(name = "sessionId") String sessionId,
             
-            @WebParam(name = "keywords") Collection<String> keywords,
+            @WebParam(name = "keywordDetails") KeywordDetails details,
             
             @WebParam(name = "operator") LogicalOperator operator,
             
             @WebParam(name = "include") InvestigationInclude include,
             
-            @WebParam(name = "fuzzy") boolean fuzzy,
+            @WebParam(name = "fuzzy") boolean fuzzy,            
             
             @WebParam(name = "startIndex") int startIndex,
             
             @WebParam(name = "numberOfResults") int numberOfResults) throws SessionException {
-        return investigationSearchLocal.searchByKeywords(sessionId, keywords, operator, include, fuzzy, startIndex, numberOfResults);
+        return investigationSearchLocal.searchByKeywords(sessionId, details, startIndex, numberOfResults);
     }
 
     /**

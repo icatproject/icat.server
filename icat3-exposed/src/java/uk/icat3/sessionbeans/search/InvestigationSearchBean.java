@@ -27,6 +27,7 @@ import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.InvestigationSearch;
+import uk.icat3.search.KeywordDetails;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.util.InvestigationInclude;
@@ -134,7 +135,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection
      */
-    @WebMethod(operationName="searchByKeywordsPagination")
+    /*@WebMethod(operationName="searchByKeywordsPagination")
     @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPagination")
     @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPaginationResponse")
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, int startIndex, int numberOfResults) throws SessionException {
@@ -144,7 +145,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
         
         //now do the search using the  API
         return InvestigationSearch.searchByKeywords(userId, keywords,LogicalOperator.AND, InvestigationInclude.NONE, false, SECURITY_ON, startIndex, numberOfResults, manager);
-    }
+    }*/
     
     /**
      *
@@ -157,7 +158,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection
      */
-    @WebMethod(operationName="searchByKeywordsPaginationAndFuzzy")
+    /*@WebMethod(operationName="searchByKeywordsPaginationAndFuzzy")
     @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPaginationAndFuzzy")
     @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPaginationAndFuzzyResponse")
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy, int startIndex, int numberOfResults) throws SessionException {
@@ -167,7 +168,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
         
         //now do the search using the  API, always use security
         return InvestigationSearch.searchByKeywords(userId, keywords,LogicalOperator.AND, include, fuzzy, SECURITY_ON, startIndex, numberOfResults, manager);
-    }
+    }*/
     
     /**
      *
@@ -179,7 +180,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection
      */
-    @WebMethod(operationName="searchByKeywordsPaginationFuzzyAndInclude")
+    /*@WebMethod(operationName="searchByKeywordsPaginationFuzzyAndInclude")
     @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPaginationFuzzyAndInclude")
     @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsPaginationFuzzyAndIncludeResponse")
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include,  int startIndex, int numberOfResults) throws SessionException {
@@ -189,7 +190,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
         
         //now do the search using the  API, always use security
         return InvestigationSearch.searchByKeywords(userId, keywords,LogicalOperator.AND, include, false, SECURITY_ON, startIndex, numberOfResults, manager);
-    }
+    }*/
     
     /**
      *
@@ -197,13 +198,13 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @param keywords
      * @param operator
      * @param include
-     * @param fuzzy
+     * @param fuzzy   
      * @param startIndex
      * @param numberOfResults
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection
      */
-    @WebMethod(operationName="searchByKeywordsAll")
+    /*@WebMethod(operationName="searchByKeywordsAll")
     @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsAll")
     @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsAllResponse")
     public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude include, boolean fuzzy, int startIndex, int numberOfResults) throws SessionException {
@@ -213,6 +214,30 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
         
         //now do the search using the  API, always use security
         return InvestigationSearch.searchByKeywords(userId, keywords, operator, include, fuzzy, SECURITY_ON, startIndex, numberOfResults, manager);
+    }*/
+    
+      /**
+     *
+     * @param sessionId
+     * @param keywords
+     * @param operator
+     * @param include
+     * @param fuzzy   
+     * @param startIndex
+     * @param numberOfResults
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection
+     */
+    @WebMethod(operationName="searchByKeywordsAll")
+    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsAll")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsAllResponse")
+    public Collection<Investigation> searchByKeywords(String sessionId, KeywordDetails keywordDetails, int startIndex, int numberOfResults) throws SessionException {
+        
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        //now do the search using the  API, always use security
+        return InvestigationSearch.searchByKeywords(userId, keywordDetails, startIndex, numberOfResults, manager);
     }
     
     /**

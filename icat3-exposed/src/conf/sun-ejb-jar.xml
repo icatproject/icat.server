@@ -39,6 +39,13 @@
         <transport-guarantee>CONFIDENTIAL</transport-guarantee>
       </webservice-endpoint>
     </ejb>
+     <ejb>
+      <ejb-name>ICATData</ejb-name>
+      <webservice-endpoint>
+        <port-component-name>ICATData</port-component-name>
+        <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+      </webservice-endpoint>
+    </ejb>
     <ejb>
       <ejb-name>ICATAdmin</ejb-name>
       <webservice-endpoint>
