@@ -216,7 +216,11 @@ public class MetadataIngest {
             }
             //if there is a match then return investigationId
             for (uk.icat3.entity.Investigation inv : investigations) {
-                investigationId = inv.getId();
+                
+                //check to make sure that given experiment number is 'believable' in comparison to returned result
+                if (_investigation.getInstrument().equalsIgnoreCase(inv.getInstrument()))
+                    investigationId = inv.getId();
+                                
             } //end for
             return investigationId;
         } //end if
@@ -319,14 +323,16 @@ public class MetadataIngest {
         AdvancedSearchDetails advanDTO = new AdvancedSearchDetails();
         advanDTO.setExperimentNumber(investigation.getInvNumber());
         //advanDTO.setVisitId(investigation.getVisitId());
-        Collection<uk.icat3.entity.Investigation> investigations = InvestigationSearch.searchByAdvanced(userId, advanDTO, manager);
+        Collection<uk.icat3.entity.Investigation> investigations = InvestigationSearch.searchByAdvanced(userId, advanDTO, 1, 100000, manager);
           
         int high = 0;
         boolean exists = false;
         if ((investigations != null) && (investigations.size() > 0)) {
+            log.debug("___________Found " + investigations.size() + " invs with same inv number and visit id");
             Iterator it = investigations.iterator();
             while (it.hasNext()) {                                    
                     uk.icat3.entity.Investigation _inv = (uk.icat3.entity.Investigation) it.next();                    
+                    log.debug("#___________" + _inv.getVisitId() + "------" + investigation.getVisitId());
                     if (_inv.getVisitId().equalsIgnoreCase(investigation.getVisitId())) exists = true;
                     
                     try {
@@ -342,6 +348,7 @@ public class MetadataIngest {
         if (!exists) {
             inv.setVisitId(investigation.getVisitId());            
         } else {
+            log.debug("___________Setting high+1 " + high+1);
             inv.setVisitId(new Integer(high+1).toString());            
         }//end if                                
         
