@@ -201,6 +201,16 @@ public class MetadataIngest {
         experimentNumber = _investigation.getInvNumber();
         trusted = _investigation.isTrusted();
 
+        //make sure investigation is not a calibration
+        if (_investigation.getInvNumber().equalsIgnoreCase("0")) {
+            trusted = false;
+            _investigation.setInvType("calibration");
+        }
+        if (_investigation.getInvNumber().equalsIgnoreCase("-1000")) {
+            trusted = false;
+            _investigation.setInvType("calibration");
+        }
+        
         //if experiment number found, try to find a match in the database
         if ((!Util.isEmpty(experimentNumber)) && (trusted)) {
             advanDTO.setExperimentNumber(experimentNumber);
@@ -218,8 +228,9 @@ public class MetadataIngest {
             for (uk.icat3.entity.Investigation inv : investigations) {
                 
                 //check to make sure that given experiment number is 'believable' in comparison to returned result
-                if (_investigation.getInstrument().equalsIgnoreCase(inv.getInstrument()))
-                    investigationId = inv.getId();
+                if (_investigation.getInstrument().equalsIgnoreCase(inv.getInstrument())) {                                        
+                        investigationId = inv.getId();
+                }//end if
                                 
             } //end for
             return investigationId;
@@ -233,6 +244,13 @@ public class MetadataIngest {
             instruments.add(_investigation.getInstrument());
             advanDTO.setInstruments(instruments);
         } //end if
+        
+        
+        //add investigation type to search criteria
+        if (!Util.isEmpty(_investigation.getInvType())) {
+            advanDTO.setInvestigationType(_investigation.getInvType().toLowerCase());
+        }
+        
         /* ISIS Specific - Have instead replaced with Date Range Search below
         //get run number
         Double runNumber = null;
@@ -266,27 +284,7 @@ public class MetadataIngest {
         advanDTO.setBackCatalogueInvestigatorString(_investigation.getBcatInvStr());
 
         Collection<uk.icat3.entity.Investigation> investigations = InvestigationSearch.searchByAdvanced(userId, advanDTO, manager);
-
-        //do soundex on results
-        /*
-        Soundex soundex = new Soundex();
-        if ((investigations != null) && (investigations.size() > 0)) {
-            Iterator it = investigations.iterator();
-            while (it.hasNext()) {
-                try {
-                    uk.icat3.entity.Investigation inv = (uk.icat3.entity.Investigation) it.next();
-                    //if we get a match of 4 (highest value) see apache codec package, then return match
-                    if (soundex.difference(_investigation.getTitle(), inv.getTitle()) == 4) {
-                        log.debug("___****___ found match, title: " + inv.getTitle() + ", RB: " + inv.getInvNumber());
-                        return new Long(inv.getId());
-                    } //end if
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } //end try/catch
-            } //end while
-        } //end if
-        */
-        
+      
         if ((investigations != null) && (investigations.size() > 0)) {
             Iterator it = investigations.iterator();
             while (it.hasNext()) {
@@ -302,6 +300,11 @@ public class MetadataIngest {
                 } //end try/catch
             } //end while
         } //end if 
+        
+        //if we get here and inv marked as calibration then assign unique inv number
+        if (_investigation.getInvType().equalsIgnoreCase("calibration")) {
+            _investigation.setInvNumber("CAL_" + _investigation.getInstrument() + "_" + createTime);
+        }
         
         //if we get here then no match was found, so return null
         return null;
