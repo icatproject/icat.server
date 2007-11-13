@@ -210,10 +210,26 @@ public class MetadataIngest {
             trusted = false;
             _investigation.setInvType("calibration");
         }
+        if (_investigation.getInvNumber().equalsIgnoreCase("1000")) {
+            trusted = false;
+            _investigation.setInvType("calibration");
+        }
+         if (_investigation.getInvNumber().equalsIgnoreCase("9999999")) {
+            trusted = false;
+            _investigation.setInvType("calibration");
+        }        
+        if (_investigation.getInvNumber().equalsIgnoreCase("999999")) {
+            trusted = false;
+            _investigation.setInvType("calibration");
+        }        
         if (_investigation.getInvNumber().equalsIgnoreCase("99999")) {
             trusted = false;
             _investigation.setInvType("calibration");
         }
+         if (_investigation.getInvNumber().equalsIgnoreCase("9999")) {
+            trusted = false;
+            _investigation.setInvType("calibration");
+        }        
         if (_investigation.getInvNumber().equalsIgnoreCase("1")) {
             trusted = false;
             _investigation.setInvType("calibration");
@@ -222,11 +238,18 @@ public class MetadataIngest {
             trusted = false;
             _investigation.setInvType("calibration");
         }
-        if (_investigation.getInvNumber().equalsIgnoreCase("9999")) {
+        if (_investigation.getInvNumber().equalsIgnoreCase("12345")) {
             trusted = false;
             _investigation.setInvType("calibration");
         }
-        
+        if (_investigation.getInvNumber().equalsIgnoreCase("123445")) {
+            trusted = false;
+            _investigation.setInvType("calibration");
+        }
+        if (_investigation.getInvNumber().equalsIgnoreCase("123456")) {
+            trusted = false;
+            _investigation.setInvType("calibration");
+        }
         
         //if experiment number found, try to find a match in the database
         if ((!Util.isEmpty(experimentNumber)) && (trusted)) {
