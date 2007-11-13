@@ -210,6 +210,19 @@ public class MetadataIngest {
             trusted = false;
             _investigation.setInvType("calibration");
         }
+        if (_investigation.getInvNumber().equalsIgnoreCase("99999")) {
+            trusted = false;
+            _investigation.setInvType("calibration");
+        }
+        if (_investigation.getInvNumber().equalsIgnoreCase("1")) {
+            trusted = false;
+            _investigation.setInvType("calibration");
+        }
+        if (_investigation.getInvNumber().equalsIgnoreCase("-1")) {
+            trusted = false;
+            _investigation.setInvType("calibration");
+        }
+        
         
         //if experiment number found, try to find a match in the database
         if ((!Util.isEmpty(experimentNumber)) && (trusted)) {
