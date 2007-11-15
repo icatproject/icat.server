@@ -100,7 +100,7 @@ public class ICATIngestClient {
         if (_instance.equalsIgnoreCase("CLF")) {
             clfIcatAdmin = new ICATAdminCLFService().getICATAdminPort();
             ((BindingProvider)clfIcatAdmin).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "clf_test");
-            ((BindingProvider)clfIcatAdmin).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "stup1dp4ss");  
+            ((BindingProvider)clfIcatAdmin).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "c1f4a91!");  
             clfService = new ICATCLFService();
             clfPort = clfService.getICATPort();
         }
