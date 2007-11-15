@@ -32,7 +32,7 @@ import static uk.icat3.sessionbeans.util.Constants.*;
  *
  * @author gjd37
  */
-@Stateless(mappedName="UserSessionCLF")
+@Stateless(mappedName="UserSessionISIS")
 @PermitAll
 //@WebService(targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments

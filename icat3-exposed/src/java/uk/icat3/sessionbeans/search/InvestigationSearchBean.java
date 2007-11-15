@@ -91,20 +91,19 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
      * @param sessionId session id of the user.
      * @param keywords Collection of keywords to search on
      * @param include Set of information to return with investigations, ie their keywords, investigators, datasets, default none.  Having more information returned means the query will take longer.
-     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection of {@link Investigation} investigation objects
      */
-    @WebMethod(operationName="searchByKeywordsFuzzy")
-    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsFuzzy")
-    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsFuzzyResponse")
-    public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include, boolean fuzzy) throws SessionException {
+    @WebMethod(operationName="searchByKeywordsInclude")
+    @RequestWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsInclude")
+    @ResponseWrapper(className="uk.icat3.sessionbeans.search.jaxws.searchByKeywordsIncludeResponse")
+    public Collection<Investigation> searchByKeywords(String sessionId, Collection<String> keywords, InvestigationInclude include) throws SessionException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
         //now do the search using the  API
-        return InvestigationSearch.searchByKeywords(userId, keywords,LogicalOperator.AND, include, fuzzy, manager);
+        return InvestigationSearch.searchByKeywords(userId, keywords,LogicalOperator.AND, include, manager);
     }
     
     /**

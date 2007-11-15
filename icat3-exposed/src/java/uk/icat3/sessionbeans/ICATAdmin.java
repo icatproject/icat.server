@@ -33,7 +33,7 @@ import uk.icat3.user.UserDetails;
 //this is proteted from normal use because it has admin functions in it
 //@DeclareRoles("admin")
 @RolesAllowed("admin")
-@WebService(serviceName="ICATAdminCLFService", targetNamespace="client.icat3.uk")
+@WebService(serviceName="ICATAdminISISService", targetNamespace="client.icat3.uk")
 //this interceptor check no nulls passed in and logs the method arguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
