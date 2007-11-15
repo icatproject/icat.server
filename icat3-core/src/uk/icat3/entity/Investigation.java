@@ -147,7 +147,7 @@ import uk.icat3.util.Queries;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
     private Collection<Publication> publicationCollection;
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
+    @OneToMany(cascade = CascadeType.ALL , mappedBy = "investigationId")
     private Collection<Sample> sampleCollection;
     
     @JoinColumn(name = "FACILITY_CYCLE", referencedColumnName = "NAME")

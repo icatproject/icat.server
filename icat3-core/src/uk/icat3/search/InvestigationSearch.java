@@ -43,11 +43,9 @@ public class InvestigationSearch extends ManagerUtil {
 
         SURNAME, USERID
     }
-    
 
     ;
-    
-    
+        
     /**
      * Searches a single keyword for a users and returns all the Id of the investigations
      *
@@ -62,17 +60,19 @@ public class InvestigationSearch extends ManagerUtil {
         log.trace("searchByKeyword(" + userId + ", " + keyword + ", " + startIndex + ", " + number_results + ", EntityManager)");
 
         Collection<BigDecimal> investigationsId = null;
+        String keywordFuzzy = keyword.replace("*", "%");
+         
         if (number_results < 0) {
             //get all, maybe should limit this to 500?
             investigationsId = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD_RTN_ID).
                     setParameter("objectType", ElementType.INVESTIGATION).
-                    setParameter(1, userId).setParameter(2, "%" + keyword + "%").
+                    setParameter(1, userId).setParameter(2, keywordFuzzy).
                     setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
             //list all Investigation ids that the users has access to
             investigationsId = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD_RTN_ID).
                     setParameter("objectType", ElementType.INVESTIGATION).
-                    setParameter(1, userId).setParameter(2, "%" + keyword + "%").
+                    setParameter(1, userId).setParameter(2, keywordFuzzy).
                     setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         //turn into longs
@@ -110,17 +110,18 @@ public class InvestigationSearch extends ManagerUtil {
         log.trace("searchByKeyword(" + userId + ", " + keyword + ", " + startIndex + ", " + number_results + ", EntityManager)");
 
         Collection<Investigation> investigations = null;
+        String keywordFuzzy = keyword.replace("*", "%");
         if (number_results < 0) {
             //get all, maybe should limit this to 500?
             investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD).
                     setParameter("objectType", ElementType.INVESTIGATION).
-                    setParameter("userId", userId).setParameter("keyword", "%" + keyword + "%").
+                    setParameter("userId", userId).setParameter("keyword", keywordFuzzy).
                     setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
             //list all Investigation ids that the users has access to
             investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD).
                     setParameter("objectType", ElementType.INVESTIGATION).
-                    setParameter("userId", userId).setParameter("keyword", "%" + keyword + "%").
+                    setParameter("userId", userId).setParameter("keyword", keywordFuzzy).
                     setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
         return investigations;
@@ -166,22 +167,24 @@ public class InvestigationSearch extends ManagerUtil {
     private  static Collection<Investigation> searchByUserSurnameImpl(String userId, String searchString, SearchType searchType, int startIndex, int number_results, InvestigationInclude include, EntityManager manager) {
         log.trace("searchByUserImpl(" + userId + ", " + searchType + ", " + searchString + ", " + startIndex + ", " + number_results + ", " + include + ", EntityManager)");
         Collection<Investigation> investigations = null;
+        String searchStringFuzzy = searchString.replace("*", "%");
+        
         if (number_results < 0) {
-
+            
             //get all, maybe should limit this to 500?
             if (searchType == searchType.SURNAME) {
                 log.trace("Searching by SURNAME");
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).
                         setParameter("objectType", ElementType.INVESTIGATION).
                         setParameter("userId", userId).
-                        setParameter("surname", "%" + searchString.toLowerCase() + "%").
+                        setParameter("surname", searchStringFuzzy.toLowerCase()).
                         setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             } else {
                 log.trace("Searching by USERID");
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).
                         setParameter("objectType", ElementType.INVESTIGATION).
                         setParameter("userId", userId).
-                        setParameter("federalId", "%" + searchString + "%").
+                        setParameter("federalId", searchStringFuzzy).
                         setMaxResults(MAX_QUERY_RESULTSET).getResultList();
             }
         } else {
@@ -191,14 +194,14 @@ public class InvestigationSearch extends ManagerUtil {
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_SURNAME).
                         setParameter("objectType", ElementType.INVESTIGATION).
                         setParameter("userId", userId).
-                        setParameter("surname", "%" + searchString.toLowerCase() + "%").
+                        setParameter("surname", searchStringFuzzy.toLowerCase()).
                         setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             } else {
                 log.trace("Searching by USERID");
                 investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_USERID).
                         setParameter("objectType", ElementType.INVESTIGATION).
                         setParameter("userId", userId).
-                        setParameter("federalId", "%" + searchString + "%").
+                        setParameter("federalId", searchStringFuzzy).
                         setMaxResults(number_results).setFirstResult(startIndex).getResultList();
             }
         }
@@ -287,8 +290,11 @@ public class InvestigationSearch extends ManagerUtil {
 
         if (advanDTO.hasTitle()) {
             log.trace("Searching title info");
-            if(advanDTO.isCaseSensitive()) JPQL += " AND i.title LIKE :invTitle";
-            else JPQL += " AND LOWER(i.title) LIKE :invTitle";
+            if (advanDTO.isCaseSensitive()) {
+                JPQL += " AND i.title LIKE :invTitle";
+            } else {
+                JPQL += " AND LOWER(i.title) LIKE :invTitle";
+            }
         }
 
         if (advanDTO.hasVisitId()) {
@@ -303,8 +309,11 @@ public class InvestigationSearch extends ManagerUtil {
 
         if (advanDTO.hasAbstract()) {
             log.trace("Searching Abstract info");
-            if(advanDTO.isCaseSensitive()) JPQL += " AND i.invAbstract LIKE :invAbstract";
-            else  JPQL += " AND LOWER(i.invAbstract) LIKE :invAbstract";
+            if (advanDTO.isCaseSensitive()) {
+                JPQL += " AND i.invAbstract LIKE :invAbstract";
+            } else {
+                JPQL += " AND LOWER(i.invAbstract) LIKE :invAbstract";
+            }
         }
 
         if (advanDTO.hasGrantId()) {
@@ -314,8 +323,11 @@ public class InvestigationSearch extends ManagerUtil {
 
         if (advanDTO.hasBackCatalogueInvestigatorString()) {
             log.trace("Searching bcatInvStr info");
-            if(advanDTO.isCaseSensitive())  JPQL += " AND i.bcatInvStr LIKE :bcatInvStr";
-            else JPQL += " AND LOWER(i.bcatInvStr) LIKE :bcatInvStr";
+            if (advanDTO.isCaseSensitive()) {
+                JPQL += " AND i.bcatInvStr LIKE :bcatInvStr";
+            } else {
+                JPQL += " AND LOWER(i.bcatInvStr) LIKE :bcatInvStr";
+            }
         }
 
         if (advanDTO.hasExperimentNumber()) {
@@ -327,10 +339,13 @@ public class InvestigationSearch extends ManagerUtil {
             log.trace("Searching sample info");
             //  " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
             //  " sample.markedDeleted = 'N') "+//iterate, remove if no sample is null
-            if(advanDTO.isCaseSensitive())  JPQL += " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
-                    " sample.markedDeleted = 'N') ";
-            else JPQL += " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE LOWER(sample.name) LIKE :sampleName AND " +
-                    " sample.markedDeleted = 'N') ";
+            if (advanDTO.isCaseSensitive()) {
+                JPQL += " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
+                        " sample.markedDeleted = 'N') ";
+            } else {
+                JPQL += " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE LOWER(sample.name) LIKE :sampleName AND " +
+                        " sample.markedDeleted = 'N') ";
+            }
         }
 
         if (advanDTO.hasInstruments()) {
@@ -357,8 +372,11 @@ public class InvestigationSearch extends ManagerUtil {
 
             int i = 1;
             for (String keyword : advanDTO.getKeywords()) {
-               if(advanDTO.isCaseSensitive())  JPQL += " AND EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND kw" + i + ".keywordPK.name LIKE :keyword" + (i++) + ") ";
-               else JPQL += " AND EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND LOWER(kw" + i + ".keywordPK.name) LIKE :keyword" + (i++) + ") ";
+                if (advanDTO.isCaseSensitive()) {
+                    JPQL += " AND EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND kw" + i + ".keywordPK.name LIKE :keyword" + (i++) + ") ";
+                } else {
+                    JPQL += " AND EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND LOWER(kw" + i + ".keywordPK.name) LIKE :keyword" + (i++) + ") ";
+                }
             }
             JPQL += " ";
         }
@@ -371,8 +389,11 @@ public class InvestigationSearch extends ManagerUtil {
 
             int i = 1;
             for (String investigators : advanDTO.getInvestigators()) {
-               if(advanDTO.isCaseSensitive()) JPQL += " AND EXISTS (SELECT inv" + i + " FROM i.investigatorCollection inv" + i + " WHERE inv" + i + ".markedDeleted = 'N' AND inv" + i + ".facilityUser.lastName LIKE :surname" + (i++) + ") ";
-               else JPQL += " AND EXISTS (SELECT inv" + i + " FROM i.investigatorCollection inv" + i + " WHERE inv" + i + ".markedDeleted = 'N' AND LOWER(inv" + i + ".facilityUser.lastName) LIKE :surname" + (i++) + ") ";
+                if (advanDTO.isCaseSensitive()) {
+                    JPQL += " AND EXISTS (SELECT inv" + i + " FROM i.investigatorCollection inv" + i + " WHERE inv" + i + ".markedDeleted = 'N' AND inv" + i + ".facilityUser.lastName LIKE :surname" + (i++) + ") ";
+                } else {
+                    JPQL += " AND EXISTS (SELECT inv" + i + " FROM i.investigatorCollection inv" + i + " WHERE inv" + i + ".markedDeleted = 'N' AND LOWER(inv" + i + ".facilityUser.lastName) LIKE :surname" + (i++) + ") ";
+                }
             }
             JPQL += " ";
         }
@@ -387,8 +408,11 @@ public class InvestigationSearch extends ManagerUtil {
             //            " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
             //            " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " ; //remove if all are null
             //
-           if(advanDTO.isCaseSensitive()) JPQL += ADVANCED_SEARCH_JPQL_DATAFILE;
-           else JPQL += ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE;
+            if (advanDTO.isCaseSensitive()) {
+                JPQL += ADVANCED_SEARCH_JPQL_DATAFILE;
+            } else {
+                JPQL += ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE;
+            }
         }
 
         if (advanDTO.hasRunNumber()) {
@@ -468,16 +492,16 @@ public class InvestigationSearch extends ManagerUtil {
         //set instruments
         if (advanDTO.hasKeywords()) {
             int j = 1;
-            for (String keyword : advanDTO.getKeywords()) {               
-                    query = query.setParameter("keyword" + j++, keyword );               
+            for (String keyword : advanDTO.getKeywords()) {
+                query = query.setParameter("keyword" + j++, keyword);
             }
         }
 
         //set investigators
         if (advanDTO.hasInvestigators()) {
             int j = 1;
-            for (String investigator : advanDTO.getInvestigators()) {                
-                    query = query.setParameter("surname" + j++, investigator);               
+            for (String investigator : advanDTO.getInvestigators()) {
+                query = query.setParameter("surname" + j++, investigator);
             }
         }
 
@@ -614,15 +638,14 @@ public class InvestigationSearch extends ManagerUtil {
      * @param keywords Collection of keywords to search on
      * @param operator {@link LogicalOperator}, either AND or OR, default AND
      * @param include {@link InvestigationInclude}
-     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
      * @param use_security search all investigations regardless of who owns it, default true
      * @param startIndex start index of the results found, default 0
      * @param number_results number of results found from the start index, default {@link Queries}.MAX_QUERY_RESULTSET
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude include, boolean fuzzy, boolean use_security, int startIndex, int number_results, EntityManager manager) {
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, include, fuzzy, true, true, -1, -1, manager);
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude include, boolean use_security, int startIndex, int number_results, EntityManager manager) {
+        return searchByKeywords(userId, keywords, operator, include, true, true, -1, -1, manager);
     }
 
     /**
@@ -635,13 +658,13 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-     public static Collection<Investigation> searchByKeywords(String userId, KeywordDetails keywordDetails, int startIndex, int number_results, EntityManager manager) {        
-         LogicalOperator operator = (keywordDetails.getOperator() == null) ? LogicalOperator.AND : keywordDetails.getOperator();
-         InvestigationInclude includes = (keywordDetails.getInvestigationIncludes() == null) ? InvestigationInclude.NONE : keywordDetails.getInvestigationIncludes() ;
-         
-         return searchByKeywords(userId, keywordDetails.getKeywords(), operator, includes , keywordDetails.isFuzzy(), true, keywordDetails.isCaseSensitve(), startIndex, number_results, manager);            
-     }
-      
+    public static Collection<Investigation> searchByKeywords(String userId, KeywordDetails keywordDetails, int startIndex, int number_results, EntityManager manager) {
+        LogicalOperator operator = (keywordDetails.getOperator() == null) ? LogicalOperator.AND : keywordDetails.getOperator();
+        InvestigationInclude includes = (keywordDetails.getInvestigationIncludes() == null) ? InvestigationInclude.NONE : keywordDetails.getInvestigationIncludes();
+
+        return searchByKeywords(userId, keywordDetails.getKeywords(), operator, includes, true, keywordDetails.isCaseSensitve(), startIndex, number_results, manager);
+    }
+
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -649,7 +672,6 @@ public class InvestigationSearch extends ManagerUtil {
      * @param keywords Collection of keywords to search on
      * @param operator {@link LogicalOperator}, either AND or OR, default AND
      * @param include {@link InvestigationInclude}
-     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
      * @param use_security search all investigations regardless of who owns it, default true
      * @param caseSensitive are the keywords case sensitive
      * @param startIndex start index of the results found, default 0
@@ -657,8 +679,8 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude include, boolean fuzzy, boolean use_security, boolean caseSensitive, int startIndex, int number_results, EntityManager manager) {
-        log.trace("searchByKeywords(" + userId + ", " + keywords + ", " + operator + ", " + include + ", fuzzy? " + fuzzy + ", secure? " + use_security + ", Case Sensitive? " + caseSensitive + ", " + startIndex + ", " + number_results + ", EntityManager)");
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude include, boolean use_security, boolean caseSensitive, int startIndex, int number_results, EntityManager manager) {
+        log.trace("searchByKeywords(" + userId + ", " + keywords + ", " + operator + ", " + include + ", secure? " + use_security + ", Case Sensitive? " + caseSensitive + ", " + startIndex + ", " + number_results + ", EntityManager)");
 
         Collection<Investigation> investigations = null;
         String JPQL = null;
@@ -675,12 +697,11 @@ public class InvestigationSearch extends ManagerUtil {
         // AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND kw.keywordPK.name LIKE :keyword1)
 
         int i = 2;
-        String SIGN = " = ";
-        if (fuzzy) {
-            SIGN = " LIKE ";
-        }
-
+       
         for (String keyword : keywords) {
+            if (keyword.trim().equals("") || keyword.trim().equalsIgnoreCase("AND")) {
+                continue;
+            }
             if (i == 2) {
                 if (caseSensitive) {
                     JPQL += " AND (EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND kw" + i + ".keywordPK.name LIKE ?" + (i++) + ") ";
@@ -712,18 +733,19 @@ public class InvestigationSearch extends ManagerUtil {
         //set keywords
         int j = 2;
         for (String keyword : keywords) {
-            if (fuzzy) {
-                if(caseSensitive) query = query.setParameter(j++, "%" + keyword + "%");
-                else query = query.setParameter(j++, "%" + keyword.toLowerCase() + "%");
-            } else {
-               if(caseSensitive) query.setParameter(j++, keyword);
-               else query.setParameter(j++, keyword.toLowerCase());
+            String keywordFuzzy = keyword.trim().replace("*", "%");
+            if (keywordFuzzy.equals("") || keywordFuzzy.trim().equalsIgnoreCase("AND")) {
+                continue;
             }
-
+            if (caseSensitive) {
+                query = query.setParameter(j++, keywordFuzzy);
+            } else {
+                query = query.setParameter(j++, keywordFuzzy.toLowerCase());
+            }
         }
 
         //run query
-        if (number_results <  0) {
+        if (number_results < 0) {
             //get all, maybe should limit this to 500?
             investigations = query.setMaxResults(MAX_QUERY_RESULTSET).getResultList();
         } else {
@@ -744,29 +766,14 @@ public class InvestigationSearch extends ManagerUtil {
      * @param userId federalId of the user.
      * @param keywords Collection of keywords to search on
      * @param includes {@link InvestigationInclude}
-     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, boolean fuzzy, EntityManager manager) {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, EntityManager manager) {
         //secuirty on, AND
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, includes, fuzzy, true, -1, -1, manager);
+        return searchByKeywords(userId, keywords, LogicalOperator.AND, includes, true, -1, -1, manager);
     }
-
-    /**
-     * Search by a collection of keywords for investigations that user has access to view
-     *
-     * @param userId federalId of the user.
-     * @param keywords Collection of keywords to search on
-     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
-     * @param manager manager object that will facilitate interaction with underlying database
-     * @return collection of {@link Investigation} investigation objects
-     */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, boolean fuzzy, EntityManager manager) {
-        //secuirty on, AND, no includes
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationInclude.NONE, fuzzy, true, -1, -1, manager);
-    }
-
+  
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -777,23 +784,9 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, EntityManager manager) {
         //exact match, secuirty true, AND
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationInclude.NONE, false, true, -1, -1, manager);
+        return searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationInclude.NONE,  true, -1, -1, manager);
     }
-
-    /**
-     * Search by a collection of keywords for investigations that user has access to view
-     *
-     * @param userId federalId of the user.
-     * @param keywords Collection of keywords to search on
-     * @param includes {@link InvestigationInclude}
-     * @param manager manager object that will facilitate interaction with underlying database
-     * @return collection of {@link Investigation} investigation objects
-     */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, EntityManager manager) {
-        //exact match, secuirty true, AND
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, includes, false, true, -1, -1, manager);
-    }
-
+   
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -805,7 +798,7 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, EntityManager manager) {
         //exact match, secuirty true, AND
-        return searchByKeywords(userId, keywords, operator, InvestigationInclude.NONE, false, true, -1, -1, manager);
+        return searchByKeywords(userId, keywords, operator, InvestigationInclude.NONE, true, -1, -1, manager);
     }
 
     /**
@@ -820,24 +813,10 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, InvestigationInclude includes, LogicalOperator operator, EntityManager manager) {
         //exact match, secuirty true, AND
-        return searchByKeywords(userId, keywords, operator, includes, false, true, -1, -1, manager);
+        return searchByKeywords(userId, keywords, operator, includes, true, -1, -1, manager);
     }
 
-    /**
-     * Search by a collection of keywords for investigations that user has access to view
-     *
-     * @param userId federalId of the user.
-     * @param keywords Collection of keywords to search on
-     * @param operator {@link LogicalOperator}, either AND or OR
-     * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
-     * @param manager manager object that will facilitate interaction with underlying database
-     * @return collection of {@link Investigation} investigation objects
-     */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, boolean fuzzy, EntityManager manager) {
-        //exact match, secuirty true,
-        return searchByKeywords(userId, keywords, operator, InvestigationInclude.NONE, fuzzy, true, -1, -1, manager);
-    }
-
+    
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -849,9 +828,9 @@ public class InvestigationSearch extends ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return collection of {@link Investigation} investigation objects
      */
-    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude includes, boolean fuzzy, EntityManager manager) {
+    public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude includes, EntityManager manager) {
         //exact match, secuirty true,
-        return searchByKeywords(userId, keywords, operator, includes, fuzzy, true, -1, -1, manager);
+        return searchByKeywords(userId, keywords, operator, includes,  true, -1, -1, manager);
     }
 
     /**

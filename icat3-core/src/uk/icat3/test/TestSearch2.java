@@ -187,7 +187,7 @@ public class TestSearch2 {
         Investigation invest = em.find(Investigation.class,  3L);
         //System.out.println(dataset.getSample().getName());
         
-       System.out.println(invest.getDatasetCollection().size());
+       System.out.println(invest.getSampleCollection().size());
         
         tearDown();
         

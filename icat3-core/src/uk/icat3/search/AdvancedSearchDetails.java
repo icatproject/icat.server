@@ -104,10 +104,6 @@ public class AdvancedSearchDetails implements Serializable {
     /**
      *
      */
-    private boolean fuzzy = true;
-    /**
-     *
-     */
     private boolean caseSensitive = true;
 
     /**
@@ -116,20 +112,13 @@ public class AdvancedSearchDetails implements Serializable {
     public AdvancedSearchDetails() {
     }
 
-    public String getInvestigationName() {
+    public String getInvestigationName() {        
         if (investigationName != null && investigationName.length() != 0) {
-            if (fuzzy) {
-                if (caseSensitive) {
-                    return "%" + investigationName + "%";
-                } else {
-                    return "%" + investigationName.toLowerCase() + "%";
-                }
+            String investigationNameFuzzy = investigationName.replace("*", "%");
+            if (caseSensitive) {
+                return investigationNameFuzzy;
             } else {
-                if (caseSensitive) {
-                    return investigationName;
-                } else {
-                    return investigationName.toLowerCase();
-                }
+                return investigationNameFuzzy.toLowerCase();
             }
         } else {
             return null;
@@ -146,18 +135,11 @@ public class AdvancedSearchDetails implements Serializable {
             return null;
         } else {
             for (String investigator : investigators) {
-                if (fuzzy) {
-                    if (caseSensitive) {
-                        investigatorsChanged.add("%" + investigator + "%");
-                    } else {
-                        investigatorsChanged.add("%" + investigator.toLowerCase() + "%");
-                    }
+                String investigatorFuzzy = investigator.replace("*", "%");
+                if (caseSensitive) {
+                    investigatorsChanged.add(investigatorFuzzy);
                 } else {
-                    if (caseSensitive) {
-                        investigatorsChanged.add(investigator);
-                    } else {
-                        investigatorsChanged.add(investigator.toLowerCase());
-                    }
+                    investigatorsChanged.add(investigatorFuzzy.toLowerCase());
                 }
             }
         }
@@ -196,20 +178,13 @@ public class AdvancedSearchDetails implements Serializable {
         this.runEnd = runEnd;
     }
 
-    public String getSampleName() {
+    public String getSampleName() {       
         if (sampleName != null && sampleName.length() != 0) {
-            if (fuzzy) {
-                if (caseSensitive) {
-                    return "%" + sampleName + "%";
-                } else {
-                    return "%" + sampleName.toLowerCase() + "%";
-                }
+             String sampleNameFuzzy = sampleName.replace("*", "%");
+            if (caseSensitive) {
+                return sampleNameFuzzy;
             } else {
-                if (caseSensitive) {
-                    return sampleName;
-                } else {
-                    return sampleName.toLowerCase();
-                }
+                return sampleNameFuzzy.toLowerCase();
             }
         } else {
             return null;
@@ -222,18 +197,11 @@ public class AdvancedSearchDetails implements Serializable {
 
     public String getDatafileName() {
         if (datafileName != null && datafileName.length() != 0) {
-            if (fuzzy) {
-                if (caseSensitive) {
-                    return "%" + datafileName + "%";
-                } else {
-                    return "%" + datafileName.toLowerCase() + "%";
-                }
+            String datafileNameFuzzy = datafileName.replace("*", "%");
+            if (caseSensitive) {
+                return datafileNameFuzzy;
             } else {
-                if (caseSensitive) {
-                    return datafileName;
-                } else {
-                    return datafileName.toLowerCase();
-                }
+                return datafileNameFuzzy.toLowerCase();
             }
         } else {
             return null;
@@ -277,18 +245,14 @@ public class AdvancedSearchDetails implements Serializable {
             return null;
         } else {
             for (String keyword : keywords) {
-                if (fuzzy) {
-                    if (caseSensitive) {
-                        keywordsChanged.add("%" + keyword + "%");
-                    } else {
-                        keywordsChanged.add("%" + keyword.toLowerCase() + "%");
-                    }
+                String keywordFuzzy = keyword.trim().replace("*", "%");
+                if (keywordFuzzy.equals("") || keywordFuzzy.equalsIgnoreCase("AND")) {
+                    continue;
+                } //if empty remove
+                if (caseSensitive) {
+                    keywordsChanged.add(keywordFuzzy);
                 } else {
-                    if (caseSensitive) {
-                        keywordsChanged.add(keyword);
-                    } else {
-                        keywordsChanged.add(keyword.toLowerCase());
-                    }
+                    keywordsChanged.add(keywordFuzzy.toLowerCase());
                 }
             }
         }
@@ -310,18 +274,11 @@ public class AdvancedSearchDetails implements Serializable {
 
     public String getBackCatalogueInvestigatorString() {
         if (backCatalogueInvestigatorString != null && backCatalogueInvestigatorString.length() != 0) {
-            if (fuzzy) {
-                if (caseSensitive) {
-                    return "%" + backCatalogueInvestigatorString + "%";
-                } else {
-                    return "%" + backCatalogueInvestigatorString.toLowerCase() + "%";
-                }
+            String backCatalogueInvestigatorStringFuzzy = backCatalogueInvestigatorString.replace("*", "%");        
+            if (caseSensitive) {
+                return backCatalogueInvestigatorStringFuzzy;
             } else {
-                if (caseSensitive) {
-                    return backCatalogueInvestigatorString;
-                } else {
-                    return backCatalogueInvestigatorString.toLowerCase();
-                }
+                return backCatalogueInvestigatorStringFuzzy.toLowerCase();
             }
         } else {
             return null;
@@ -340,20 +297,13 @@ public class AdvancedSearchDetails implements Serializable {
         this.visitId = visitId;
     }
 
-    public String getInvestigationAbstract() {
+    public String getInvestigationAbstract() {        
         if (investigationAbstract != null && investigationAbstract.length() != 0) {
-            if (fuzzy) {
-                if (caseSensitive) {
-                    return "%" + investigationAbstract + "%";
-                } else {
-                    return "%" + investigationAbstract.toLowerCase() + "%";
-                }
+            String investigationAbstractFuzzy = investigationAbstract.replace("*", "%");
+            if (caseSensitive) {
+                return investigationAbstractFuzzy;
             } else {
-                if (caseSensitive) {
-                    return investigationAbstract;
-                } else {
-                    return investigationAbstract.toLowerCase();
-                }
+                return investigationAbstractFuzzy.toLowerCase();
             }
         } else {
             return null;
@@ -380,19 +330,11 @@ public class AdvancedSearchDetails implements Serializable {
         this.grantId = grantId;
     }
 
-    public boolean isFuzzy() {
-        return fuzzy;
-    }
-
-    public void setFuzzy(boolean fuzzy) {
-        this.fuzzy = fuzzy;
-    }
-
     public boolean isCaseSensitive() {
         return caseSensitive;
     }
 
-     public void setCaseSensitive(boolean caseSensitive) {
+    public void setCaseSensitive(boolean caseSensitive) {
         this.caseSensitive = caseSensitive;
     }
     /////////////  Util methods for AdvancedSearch creation in InvestigationSearch    /////////////////
