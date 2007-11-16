@@ -81,7 +81,7 @@ import uk.icat3.util.LogicalOperator;
  * @author gjd37
  */
 @Stateless
-@WebService(serviceName = "ICATISISService", targetNamespace = "client.icat3.uk")
+@WebService(serviceName = "ICATService", targetNamespace = "client.icat3.uk")
 @Interceptors(value = ArgumentValidator.class)
 @TransactionAttribute(value = TransactionAttributeType.NOT_SUPPORTED)
 public class ICAT extends EJBObject /*implements ICATLocal*/ {

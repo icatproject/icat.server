@@ -9,7 +9,7 @@
 
 package uk.icat3.sessionbeans;
 
-import com.sun.xml.ws.transport.http.HttpAdapter;
+
 import java.net.MalformedURLException;
 import javax.activation.DataHandler;
 import javax.annotation.Resource;
@@ -49,7 +49,7 @@ public class ICATData extends EJBObject /*implements ICATLocal*/ {
     static Logger log = Logger.getLogger(ICATData.class);
     
     static {
-        HttpAdapter.dump=false; //dont log SOAP
+     //   HttpAdapter.dump=false; //dont log SOAP
     }
     
     @Resource
