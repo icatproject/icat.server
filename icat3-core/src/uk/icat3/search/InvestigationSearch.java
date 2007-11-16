@@ -43,6 +43,7 @@ public class InvestigationSearch extends ManagerUtil {
 
         SURNAME, USERID
     }
+    
 
     ;
         
@@ -61,7 +62,7 @@ public class InvestigationSearch extends ManagerUtil {
 
         Collection<BigDecimal> investigationsId = null;
         String keywordFuzzy = keyword.replace("*", "%");
-         
+
         if (number_results < 0) {
             //get all, maybe should limit this to 500?
             investigationsId = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD_RTN_ID).
@@ -168,9 +169,9 @@ public class InvestigationSearch extends ManagerUtil {
         log.trace("searchByUserImpl(" + userId + ", " + searchType + ", " + searchString + ", " + startIndex + ", " + number_results + ", " + include + ", EntityManager)");
         Collection<Investigation> investigations = null;
         String searchStringFuzzy = searchString.replace("*", "%");
-        
+
         if (number_results < 0) {
-            
+
             //get all, maybe should limit this to 500?
             if (searchType == searchType.SURNAME) {
                 log.trace("Searching by SURNAME");
@@ -290,10 +291,12 @@ public class InvestigationSearch extends ManagerUtil {
 
         if (advanDTO.hasTitle()) {
             log.trace("Searching title info");
+            boolean isFuzzy = advanDTO.getInvestigationName().contains("%");
+            String OPERATION = (isFuzzy) ? " LIKE " : " = ";
             if (advanDTO.isCaseSensitive()) {
-                JPQL += " AND i.title LIKE :invTitle";
+                JPQL += " AND i.title " + OPERATION + " :invTitle";
             } else {
-                JPQL += " AND LOWER(i.title) LIKE :invTitle";
+                JPQL += " AND LOWER(i.title) " + OPERATION + " :invTitle";
             }
         }
 
@@ -309,10 +312,12 @@ public class InvestigationSearch extends ManagerUtil {
 
         if (advanDTO.hasAbstract()) {
             log.trace("Searching Abstract info");
+            boolean isFuzzy = advanDTO.getInvestigationAbstract().contains("%");
+            String OPERATION = (isFuzzy) ? " LIKE " : " = ";
             if (advanDTO.isCaseSensitive()) {
-                JPQL += " AND i.invAbstract LIKE :invAbstract";
+                JPQL += " AND i.invAbstract " + OPERATION + " :invAbstract";
             } else {
-                JPQL += " AND LOWER(i.invAbstract) LIKE :invAbstract";
+                JPQL += " AND LOWER(i.invAbstract) " + OPERATION + " :invAbstract";
             }
         }
 
@@ -323,10 +328,12 @@ public class InvestigationSearch extends ManagerUtil {
 
         if (advanDTO.hasBackCatalogueInvestigatorString()) {
             log.trace("Searching bcatInvStr info");
+            boolean isFuzzy = advanDTO.getBackCatalogueInvestigatorString().contains("%");
+            String OPERATION = (isFuzzy) ? " LIKE " : " = ";
             if (advanDTO.isCaseSensitive()) {
-                JPQL += " AND i.bcatInvStr LIKE :bcatInvStr";
+                JPQL += " AND i.bcatInvStr " + OPERATION + " :bcatInvStr";
             } else {
-                JPQL += " AND LOWER(i.bcatInvStr) LIKE :bcatInvStr";
+                JPQL += " AND LOWER(i.bcatInvStr) " + OPERATION + " :bcatInvStr";
             }
         }
 
@@ -337,13 +344,15 @@ public class InvestigationSearch extends ManagerUtil {
 
         if (advanDTO.hasSample()) {
             log.trace("Searching sample info");
+            boolean isFuzzy = advanDTO.getSampleName().contains("%");
+            String OPERATION = (isFuzzy) ? " LIKE " : " = ";
             //  " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
             //  " sample.markedDeleted = 'N') "+//iterate, remove if no sample is null
             if (advanDTO.isCaseSensitive()) {
-                JPQL += " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name LIKE :sampleName AND " +
+                JPQL += " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE sample.name " + OPERATION + " :sampleName AND " +
                         " sample.markedDeleted = 'N') ";
             } else {
-                JPQL += " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE LOWER(sample.name) LIKE :sampleName AND " +
+                JPQL += " AND EXISTS (SELECT sample FROM i.sampleCollection sample WHERE LOWER(sample.name) " + OPERATION + " :sampleName AND " +
                         " sample.markedDeleted = 'N') ";
             }
         }
@@ -372,10 +381,12 @@ public class InvestigationSearch extends ManagerUtil {
 
             int i = 1;
             for (String keyword : advanDTO.getKeywords()) {
+                boolean isFuzzy = keyword.contains("%");
+                String OPERATION = (isFuzzy) ? " LIKE " : " = ";
                 if (advanDTO.isCaseSensitive()) {
-                    JPQL += " AND EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND kw" + i + ".keywordPK.name LIKE :keyword" + (i++) + ") ";
+                    JPQL += " AND EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND kw" + i + ".keywordPK.name " + OPERATION + " :keyword" + (i++) + ") ";
                 } else {
-                    JPQL += " AND EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND LOWER(kw" + i + ".keywordPK.name) LIKE :keyword" + (i++) + ") ";
+                    JPQL += " AND EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND LOWER(kw" + i + ".keywordPK.name) " + OPERATION + " :keyword" + (i++) + ") ";
                 }
             }
             JPQL += " ";
@@ -389,10 +400,12 @@ public class InvestigationSearch extends ManagerUtil {
 
             int i = 1;
             for (String investigators : advanDTO.getInvestigators()) {
+                boolean isFuzzy = investigators.contains("%");
+                String OPERATION = (isFuzzy) ? " LIKE " : " = ";
                 if (advanDTO.isCaseSensitive()) {
-                    JPQL += " AND EXISTS (SELECT inv" + i + " FROM i.investigatorCollection inv" + i + " WHERE inv" + i + ".markedDeleted = 'N' AND inv" + i + ".facilityUser.lastName LIKE :surname" + (i++) + ") ";
+                    JPQL += " AND EXISTS (SELECT inv" + i + " FROM i.investigatorCollection inv" + i + " WHERE inv" + i + ".markedDeleted = 'N' AND inv" + i + ".facilityUser.lastName " + OPERATION + " :surname" + (i++) + ") ";
                 } else {
-                    JPQL += " AND EXISTS (SELECT inv" + i + " FROM i.investigatorCollection inv" + i + " WHERE inv" + i + ".markedDeleted = 'N' AND LOWER(inv" + i + ".facilityUser.lastName) LIKE :surname" + (i++) + ") ";
+                    JPQL += " AND EXISTS (SELECT inv" + i + " FROM i.investigatorCollection inv" + i + " WHERE inv" + i + ".markedDeleted = 'N' AND LOWER(inv" + i + ".facilityUser.lastName) " + OPERATION + " :surname" + (i++) + ") ";
                 }
             }
             JPQL += " ";
@@ -408,10 +421,17 @@ public class InvestigationSearch extends ManagerUtil {
             //            " AND df.dataset.investigation = i AND (df.createTime > :lowerTime OR :lowerTime IS NULL AND df.createTime < :upperTime OR :upperTime IS NULL) AND " +
             //            " df.markedDeleted = 'N' AND (df.name = :datafileName OR :datafileName IS NULL))  " ; //remove if all are null
             //
+            String OPERATION = " = ";
+            if (advanDTO.getDatafileName() != null) {
+                boolean isFuzzy = advanDTO.getDatafileName().contains("%");
+                OPERATION = (isFuzzy) ? " LIKE " : " = ";
+            }
             if (advanDTO.isCaseSensitive()) {
-                JPQL += ADVANCED_SEARCH_JPQL_DATAFILE;
+                String JPQL_TO_ADD = ADVANCED_SEARCH_JPQL_DATAFILE.replace("OPERATION", OPERATION);
+                JPQL += JPQL_TO_ADD;
             } else {
-                JPQL += ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE;
+                String JPQL_TO_ADD = ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE.replace("OPERATION", OPERATION);
+                JPQL += JPQL_TO_ADD;
             }
         }
 
@@ -697,22 +717,25 @@ public class InvestigationSearch extends ManagerUtil {
         // AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.markedDeleted = 'N' AND kw.keywordPK.name LIKE :keyword1)
 
         int i = 2;
-       
+
         for (String keyword : keywords) {
             if (keyword.trim().equals("") || keyword.trim().equalsIgnoreCase("AND")) {
                 continue;
             }
+
+            boolean isFuzzy = keyword.contains("*");
+            String OPERATION = (isFuzzy) ? " LIKE " : " = ";
             if (i == 2) {
                 if (caseSensitive) {
-                    JPQL += " AND (EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND kw" + i + ".keywordPK.name LIKE ?" + (i++) + ") ";
+                    JPQL += " AND (EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND kw" + i + ".keywordPK.name "+OPERATION+" ?" + (i++) + ") ";
                 } else {
-                    JPQL += " AND (EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND LOWER(kw" + i + ".keywordPK.name) LIKE ?" + (i++) + ") ";
+                    JPQL += " AND (EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND LOWER(kw" + i + ".keywordPK.name) "+OPERATION+" ?" + (i++) + ") ";
                 }
             } else {
                 if (caseSensitive) {
-                    JPQL += " " + operator + " EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND kw" + i + ".keywordPK.name LIKE ?" + (i++) + ") ";
+                    JPQL += " " + operator + " EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND kw" + i + ".keywordPK.name "+OPERATION+" ?" + (i++) + ") ";
                 } else {
-                    JPQL += " " + operator + " EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND LOWER(kw" + i + ".keywordPK.name) LIKE ?" + (i++) + ") ";
+                    JPQL += " " + operator + " EXISTS (SELECT kw" + i + " FROM i.keywordCollection kw" + i + " WHERE kw" + i + ".markedDeleted = 'N' AND LOWER(kw" + i + ".keywordPK.name) "+OPERATION+" ?" + (i++) + ") ";
                 }
             }
         }
@@ -773,7 +796,7 @@ public class InvestigationSearch extends ManagerUtil {
         //secuirty on, AND
         return searchByKeywords(userId, keywords, LogicalOperator.AND, includes, true, -1, -1, manager);
     }
-  
+
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -784,9 +807,9 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, EntityManager manager) {
         //exact match, secuirty true, AND
-        return searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationInclude.NONE,  true, -1, -1, manager);
+        return searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationInclude.NONE, true, -1, -1, manager);
     }
-   
+
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -816,7 +839,6 @@ public class InvestigationSearch extends ManagerUtil {
         return searchByKeywords(userId, keywords, operator, includes, true, -1, -1, manager);
     }
 
-    
     /**
      * Search by a collection of keywords for investigations that user has access to view
      *
@@ -830,7 +852,7 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<Investigation> searchByKeywords(String userId, Collection<String> keywords, LogicalOperator operator, InvestigationInclude includes, EntityManager manager) {
         //exact match, secuirty true,
-        return searchByKeywords(userId, keywords, operator, includes,  true, -1, -1, manager);
+        return searchByKeywords(userId, keywords, operator, includes, true, -1, -1, manager);
     }
 
     /**

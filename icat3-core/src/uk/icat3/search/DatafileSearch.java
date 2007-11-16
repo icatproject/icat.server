@@ -23,11 +23,9 @@ import static uk.icat3.util.Queries.*;
  *
  * @author gjd37
  */
-
 public class DatafileSearch {
 
     // Global class logger
-
     static Logger log = Logger.getLogger(DatafileSearch.class);
 
     /**
