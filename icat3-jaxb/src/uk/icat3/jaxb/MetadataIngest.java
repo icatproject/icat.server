@@ -466,10 +466,8 @@ public class MetadataIngest {
             dataset.setInvestigation(investigation);
             dataset.setName(_dataset.getName());
 
-
-
             //store in database
-            DataSetManager.createDataSet(userId, dataset, manager);
+            dataset = DataSetManager.createDataSet(userId, dataset, manager);
 
             //store dataset parameters
             getDatasetParameters(userId, _dataset.getParameter(), dataset.getId(), manager);
