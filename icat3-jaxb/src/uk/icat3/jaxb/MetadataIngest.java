@@ -160,7 +160,7 @@ public class MetadataIngest {
                         //add permssions for investigators to dataset
                         for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
                             if (!userId.equals(_investigator.getUserId())) {
-                                DataSetManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), dataset.getId(), manager);
+                                try {DataSetManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), dataset.getId(), manager);} catch (Exception e) {};
                             }
                         } //end for
                         List<Datafile> _datafiles = _dataset.getDatafile();
@@ -170,7 +170,7 @@ public class MetadataIngest {
                             //add permssions for investigators to datafile
                             for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
                                 if (!userId.equals(_investigator.getUserId())) {
-                                    DataFileManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), datafile.getId(), manager);
+                                    try {DataFileManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), datafile.getId(), manager);} catch (Exception e) {};
                                 }
                             } //end for
                         } //end for datafile
