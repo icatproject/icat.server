@@ -9,10 +9,7 @@
 package uk.icat3.sessionbeans;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collection;
-import javax.activation.DataHandler;
-import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -23,10 +20,8 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.jws.WebResult;
-import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
-import javax.xml.ws.WebServiceContext;
 import org.apache.log4j.Logger;
 import uk.icat3.data.exceptions.DownloadException;
 import uk.icat3.entity.Datafile;
@@ -36,13 +31,9 @@ import uk.icat3.entity.DatafileParameterPK;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.DatasetParameterPK;
-import uk.icat3.entity.DatasetStatus;
-import uk.icat3.entity.DatasetType;
 import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.IcatRole;
-import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
-import uk.icat3.entity.InvestigationType;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.InvestigatorPK;
 import uk.icat3.entity.Keyword;
@@ -58,7 +49,6 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
-import uk.icat3.manager.DataFileManager;
 import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.KeywordDetails;
 import uk.icat3.sessionbeans.data.DownloadManagerLocal;
@@ -74,7 +64,6 @@ import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.KeywordType;
-import uk.icat3.util.LogicalOperator;
 
 /**
  *
@@ -129,8 +118,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
     @WebMethod
     @ExcludeClassInterceptors
     public String login(
-            @WebParam(name = "username") String username,
-            
+            @WebParam(name = "username") String username,            
             @WebParam(name = "password") String password) throws SessionException {
         return user.login(username, password);
     }
