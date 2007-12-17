@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.soap.MTOM;
 import org.apache.log4j.Logger;
-import uk.icat3.data.exceptions.DownloadException;
+//import uk.icat3.data.exceptions.DownloadException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.NoSuchUserException;
@@ -69,10 +69,10 @@ public class ICATData extends EJBObject /*implements ICATLocal*/ {
      * @param datafileId
      * @return DataHandler of the file
      */
-    @WebMethod
-    public @WebResult(name = "URL") String downloadDatafile(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "datafileId") Long datafileId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException{
+    //@WebMethod
+    /*public @WebResult(name = "URL") String downloadDatafile(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "datafileId") Long datafileId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException{
         return  downloadManagerLocal.downloadDatafile(sessionId, datafileId);
-    }
+    }*/
     
     /**
      * Downloads a dataset
@@ -81,8 +81,8 @@ public class ICATData extends EJBObject /*implements ICATLocal*/ {
      * @param datasetId
      * @return DataHandler of the zipped dataset
      */
-    @WebMethod
-    public @WebResult(name = "URL") String downloadDataset(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "datasetId") Long datasetId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException {
+    //@WebMethod
+  /*  public @WebResult(name = "URL") String downloadDataset(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "datasetId") Long datasetId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException {
         return downloadManagerLocal.downloadDataset(sessionId, datasetId);
-    }
+    }*/
 }

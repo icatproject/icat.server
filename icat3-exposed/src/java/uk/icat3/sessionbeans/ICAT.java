@@ -23,7 +23,7 @@ import javax.jws.WebResult;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
-import uk.icat3.data.exceptions.DownloadException;
+//import uk.icat3.data.exceptions.DownloadException;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileFormat;
 import uk.icat3.entity.DatafileParameter;
@@ -51,7 +51,7 @@ import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.KeywordDetails;
-import uk.icat3.sessionbeans.data.DownloadManagerLocal;
+//import uk.icat3.sessionbeans.data.DownloadManagerLocal;
 import uk.icat3.sessionbeans.manager.DatafileManagerLocal;
 import uk.icat3.sessionbeans.manager.DatasetManagerLocal;
 import uk.icat3.sessionbeans.manager.InvestigationManagerLocal;
@@ -94,8 +94,8 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
     protected KeywordSearchLocal keywordSearchLocal;
     @EJB
     protected XMLIngestionManagerLocal xmlIngestionManagerLocal;
-    @EJB
-    protected DownloadManagerLocal downloadManagerLocal;
+    //@EJB
+    //protected DownloadManagerLocal downloadManagerLocal;
     ///////////////////////  End of Inject all the EJBs   ///////////////////////
 
     /** Creates a new instance of AllOperationsBean */
@@ -1925,12 +1925,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      */
 
     //@WebMethod
-    public @WebResult(name = "URL")  String downloadDatafile(
+  /*  public @WebResult(name = "URL")  String downloadDatafile(
             @WebParam(name = "sessionId") String sessionId,
             
             @WebParam(name = "datafileId") Long datafileId) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException {
         return downloadManagerLocal.downloadDatafile(sessionId, datafileId);
-    }
+    }*/
 
     /**
      * Downloads a dataset
@@ -1940,12 +1940,12 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @return Url of the zipped dataset
      */
     //@WebMethod
-    public   @WebResult(name = "URL") String downloadDataset(
+    /*public   @WebResult(name = "URL") String downloadDataset(
             @WebParam(name = "sessionId") String sessionId,
             
             @WebParam(name = "datasetId") Long datasetId) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException {
         return downloadManagerLocal.downloadDataset(sessionId, datasetId);
-    }
+    }*/
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

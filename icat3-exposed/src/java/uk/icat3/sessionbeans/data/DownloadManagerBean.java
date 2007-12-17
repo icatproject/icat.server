@@ -9,7 +9,7 @@
 
 package uk.icat3.sessionbeans.data;
 
-import java.io.File;
+/*import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Date;
 import javax.ejb.Stateless;
@@ -28,22 +28,21 @@ import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.user.UserDetails;
 import uk.ac.dl.srbapi.srb.Url;
 import uk.ac.dl.srbapi.util.IOTools;
-import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;*/
 
 /**
  *
  * @author gjd37
  */
-@MTOM
-@Stateless
-@Interceptors(ArgumentValidator.class)
-@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-public class DownloadManagerBean extends EJBObject implements DownloadManagerLocal {
+//@Stateless
+//@Interceptors(ArgumentValidator.class)
+//@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+public class DownloadManagerBean /*extends EJBObject implements DownloadManagerLocal*/ {
     
-    static Logger log = Logger.getLogger(DownloadManagerBean.class);
+    //static Logger log = Logger.getLogger(DownloadManagerBean.class);
     
     
-    public String downloadDatafile(String sessionId, Long datafileId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException {
+   /* public String downloadDatafile(String sessionId, Long datafileId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException {
         
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -81,5 +80,5 @@ public class DownloadManagerBean extends EJBObject implements DownloadManagerLoc
         StringBuilder builder = new StringBuilder(hostUrl);
         builder.append("?sid="+sessionId+"&name="+file.getName()+"&file="+fileReturned);
         return builder.toString();
-    }
+    }*/
 }
