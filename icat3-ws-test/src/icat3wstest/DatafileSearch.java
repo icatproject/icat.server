@@ -24,7 +24,7 @@ public class DatafileSearch {
     
     /** Creates a new instance of SearchKeyword */
     public static void searchByRunNumber(String sid, String instrument, Float start, Float end) throws Exception {
-        
+        ICATSingleton.getInstance();
         try {             
             long time = System.currentTimeMillis();
             
@@ -39,7 +39,7 @@ public class DatafileSearch {
             System.out.println("Number of datafiles with '"+ instrument +"' is "+result.size());
             System.out.println("Results:");
             for (Datafile datafile : result) {
-                System.out.println("  ID: "+datafile.getId()+", NAME: "+datafile.getName());
+                System.out.println("  ID: "+datafile.getId()+", NAME: "+datafile.getIcatRole());
             }
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");     
@@ -60,7 +60,7 @@ public class DatafileSearch {
      */
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
-        searchByRunNumber(SID, "SXD", 0f, 1300f);       
+        searchByRunNumber(SID, "sxd", 8374f, 8400f);       
     }
     
 }

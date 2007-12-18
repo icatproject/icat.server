@@ -33,7 +33,7 @@ public class DownloadDatafileSwingworker {
     static final ICAT icat = ICATSingleton.getInstance();
 
     static java.lang.String sessionId = Constants.SID;
-    static java.lang.Long datafileId = 2L;
+    static java.lang.Long datafileId = 3L;
     
     /**
      * @param args the command line arguments

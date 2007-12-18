@@ -16,8 +16,8 @@ package icat3wstest;
 public class Constants {
     
     // CLF
-  // public static String END_POINT_ADDRESS =  "https://facilities01.esc.rl.ac.uk:8182/ICATCLFService/ICAT?wsdl";
-   // public static String END_POINT_ADMIN_ADDRESS = "https://facilities01.esc.rl.ac.uk:8182/ICATAdminCLFService/ICATAdmin?wsdl";
+   //public static String END_POINT_ADDRESS =  "https://facilities01.esc.rl.ac.uk:8182/ICATCLFService/ICAT?wsdl";
+    //public static String END_POINT_ADMIN_ADDRESS = "https://facilities01.esc.rl.ac.uk:8182/ICATAdminCLFService/ICATAdmin?wsdl";
     
     //my machine
    // public static String END_POINT_ADMIN_ADDRESS = "https://escvig6.dl.ac.uk:8181/ICATAdminService/ICATAdmin";
@@ -27,16 +27,19 @@ public class Constants {
    // public static String END_POINT_ADMIN_ADDRESS = "https://volga.dl.ac.uk:8181/ICATAdminService/ICATAdmin";
    // public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:8181/ICATService/ICAT";
     
-      public static String END_POINT_ADMIN_ADDRESS = "https://volga.dl.ac.uk:9181/ICATAdminService/ICATAdmin";
-    public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:9181/ICATService/ICAT";
+ //  public static String END_POINT_ADMIN_ADDRESS = "https://volga.dl.ac.uk:9181/ICATAdminService/ICATAdmin";
+  // public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:9181/ICATService/ICAT";
     
-    
-    // ISIS
+    /// ISIS NEW
+     public static String END_POINT_ADDRESS = "https://isras123.nd.rl.ac.uk:8181/ICATService/ICAT?wsdl";
+    public static String END_POINT_ADMIN_ADDRESS = "https://facilities01.esc.rl.ac.uk:8182/ICATAdminISISService/ICATAdmin?wsdl";
+   
+   // ISIS
    // public static String END_POINT_ADDRESS = "https://facilities01.esc.rl.ac.uk:8182/ICATISISService/ICAT?wsdl";
-   // public static String END_POINT_ADMIN_ADDRESS = "https://facilities01.esc.rl.ac.uk:8182/ICATAdminISISService/ICATAdmin?wsdl";
+    //public static String END_POINT_ADMIN_ADDRESS = "https://facilities01.esc.rl.ac.uk:8182/ICATAdminISISService/ICATAdmin?wsdl";
     
     //public static String SID = "64112098-db95-4b31-a0f9-efceb7c94132"; //isis
-    public static String SID = "aa7429ad-5779-4424-8fa3-e3236f802a39"; //clf
+    public static String SID = "41025f2e-31fd-43fb-b7be-999739b1a963"; //clf
     
     public static String KEYWORD = "calibration";
     public static String USER_ID = "gjd37";

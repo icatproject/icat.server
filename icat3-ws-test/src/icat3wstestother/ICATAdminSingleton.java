@@ -20,18 +20,17 @@ import static icat3wstest.Constants.*;
  */
 public class ICATAdminSingleton {
     
-  //  private static ICATAdmin icatPort = new ICATAdminISISService().getICATAdminPort();
+    private static ICATAdmin icatPort = new ICATAdminISISService().getICATAdminPort();
     
     /** Creates a new instance of ICATSingleton */
     private ICATAdminSingleton() {
     }
     
-  //  public static ICATAdmin getInstance(){
-  //      ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, END_POINT_ADMIN_ADDRESS);        
-  //      ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "isis_test");        
-  //      ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "d"+System.getProperty("glassfish.admin"));        
+    public static ICATAdmin getInstance(){
+        ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, END_POINT_ADMIN_ADDRESS);        
+        ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "clf_test");        
+       ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "c1f4a91!"/*System.getProperty("glassfish.admin")*/);        
       
-  //      return icatPort;
-  //  }
-    
+        return icatPort;
+   }    
 }
