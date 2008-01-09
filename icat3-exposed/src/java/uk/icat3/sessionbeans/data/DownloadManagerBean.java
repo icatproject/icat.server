@@ -6,12 +6,12 @@
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-
 package uk.icat3.sessionbeans.data;
 
-
-/*import java.io.File;
+import java.io.File;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -29,57 +29,70 @@ import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.user.UserDetails;
 import uk.ac.dl.srbapi.srb.Url;
 import uk.ac.dl.srbapi.util.IOTools;
-import uk.icat3.exceptions.NoSuchObjectFoundException;*/
+import uk.icat3.entity.Datafile;
+import uk.icat3.entity.Dataset;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.manager.DataFileManager;
+import uk.icat3.manager.DataSetManager;
+import uk.icat3.util.DatasetInclude;
 
 /**
  *
  * @author gjd37
  */
-//@Stateless
-//@Interceptors(ArgumentValidator.class)
-//@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-public class DownloadManagerBean /*extends EJBObject implements DownloadManagerLocal*/ {
-    
-    //static Logger log = Logger.getLogger(DownloadManagerBean.class);
-    
-    
-   /* public String downloadDatafile(String sessionId, Long datafileId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException {
-        
+@Stateless
+@Interceptors(ArgumentValidator.class)
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+public class DownloadManagerBean extends EJBObject implements DownloadManagerLocal {
+
+    static Logger log = Logger.getLogger(DownloadManagerBean.class);
+
+    public String downloadDatafile(String sessionId, Long datafileId) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException {
+
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
+
+        Datafile datafile = DataFileManager.getDataFile(userId, datafileId, manager);
+
+        Collection<Datafile> validDatafiles = new ArrayList<Datafile>();
+        validDatafiles.add(datafile);
         
-        //get users credential
-        UserDetails userDetails = user.getUserDetails(sessionId, userId);
-        
-        File file = DownloadManager.downloadDatafile(userId, datafileId, userDetails.getCredential(), FACILITY, manager);
-        
-        return  generateDownloadUrl(file, sessionId);
+        //check download
+        if (datafile.getIcatRole().isActionDownload()) {
+            return generateDownloadUrl(validDatafiles, sessionId);
+        } else {
+            throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform 'DOWNLOAD' operation on " + datafile);
+        }
     }
-    
-    public String downloadDataset(String sessionId, Long datasetId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException, DownloadException {
-        
+
+    public String downloadDataset(String sessionId, Long datasetId) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException {
+
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
-        
-        //get users credential
-        UserDetails userDetails = user.getUserDetails(sessionId, userId);
-        
-        File file = DownloadManager.downloadDataset(userId, datasetId, userDetails.getCredential(), FACILITY,  manager);
-        
-        return generateDownloadUrl(file, sessionId);
+
+        Dataset dataset = DataSetManager.getDataSet(userId, datasetId, DatasetInclude.DATASET_AND_DATAFILES_ONLY, manager);
+        Collection<Datafile> datafiles = dataset.getDatafileCollection();
+
+        Collection<Datafile> validDatafiles = new ArrayList<Datafile>();
+
+        for (Datafile datafile : datafiles) {
+            if (datafile.getIcatRole().isActionDownload()) {
+                validDatafiles.add(datafile);
+            }
+        }
+
+        //check download
+        if (dataset.getIcatRole().isActionDownload() && !validDatafiles.isEmpty()) {
+            return generateDownloadUrl(validDatafiles, sessionId);
+        } else {
+            throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform 'DOWNLOAD' operation on " + dataset);
+        }
     }
-    
-    private String generateDownloadUrl(File file, String sessionId) throws DownloadException{
-        String hostUrl = facilityProps.getProperty("facility.host");
-        if(hostUrl == null) throw new DownloadException("Icat not configured correctly for download");
-                
-        int index = file.getAbsolutePath().lastIndexOf(FACILITY);
-        String fileReturned = file.getAbsolutePath().substring(index+FACILITY.length()+1, file.getAbsolutePath().length());
-        index = fileReturned.indexOf(File.separator);
-        fileReturned = fileReturned.substring(index +1 , fileReturned.length());
-                
-        StringBuilder builder = new StringBuilder(hostUrl);
-        builder.append("?sid="+sessionId+"&name="+file.getName()+"&file="+fileReturned);
+
+    private String generateDownloadUrl(Collection<Datafile> datafiles, String sessionId) {
+
+        StringBuilder builder = new StringBuilder();
+        //builder.append("?sid="+sessionId+"&name="+file.getName()+"&file="+fileReturned);
         return builder.toString();
-    }*/
+    }
 }
