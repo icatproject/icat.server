@@ -9,20 +9,11 @@
 
 package uk.icat3.test;
 
-import java.io.File;
-import javax.activation.DataHandler;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.ietf.jgss.GSSCredential;
-import uk.ac.dl.srbapi.cog.CogUtil;
-import uk.icat3.data.DownloadManager;
-
-
-
 
 /**
  *
@@ -60,44 +51,15 @@ public class DownloadFileTest {
         em.close();
     }
     
-    public void testDownloadDatafile() throws Exception{
-        
-        setUp();
-        
-        System.out.println("Testing download datafile 2");
-        
-        GSSCredential proxy = CogUtil.loadProxy(new File(System.getProperty("user.home")+File.separator+"sso.cert"));
-        
-        DownloadManager.downloadDatafile("gjd37", 2L, proxy, "ISIS", em);
-        
-        tearDown();
-    }
+   
     
-    public void testDownloadDataset() throws Exception{
-        
-        setUp();
-        
-        System.out.println("Testing download datafile 2");
-        
-        GSSCredential proxy = CogUtil.loadProxy(new File(System.getProperty("user.home")+File.separator+"sso.cert"));
-        
-        File file = DownloadManager.downloadDataset("gjd37", 106L, proxy, "ISIS", em);
-                     
-        System.out.println(file.getName()); 
-        
-        tearDown();
-    }
+   
     
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        //
-        // TODO code application logic here
-        DownloadFileTest test  = new DownloadFileTest();
-       // test.testDownloadDatafile();
-        
-       test.testDownloadDataset();
+       
     }
     
 }

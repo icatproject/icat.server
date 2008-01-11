@@ -30,13 +30,13 @@ public class DownloadManager {
 
     static Logger log = Logger.getLogger(DownloadManager.class);
 
-    public String downloadDatafile(String userId, Long datafileId, EntityManager manager) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException {
+    public static String downloadDatafile(String userId, Long datafileId, EntityManager manager) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException {
         Collection<Long> datafileIds = new ArrayList<Long>();
         datafileIds.add(datafileId);
         return downloadDatafiles(userId, datafileIds, manager);
     }
 
-    public String downloadDatafiles(String userId, Collection<Long> datafileIds, EntityManager manager) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException {
+    public static String downloadDatafiles(String userId, Collection<Long> datafileIds, EntityManager manager) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException {
         log.trace("downloadDatafiles("+userId+", "+datafileIds+", EntityManager)");
 
         Collection<Datafile> datafiles = DataFileManager.getDataFiles(userId, datafileIds, manager);
@@ -61,7 +61,7 @@ public class DownloadManager {
         }
     }
 
-    public String downloadDataset(String userId, Long datasetId, EntityManager manager) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException {
+    public static String downloadDataset(String userId, Long datasetId, EntityManager manager) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException {
         log.trace("downloadDataset("+userId+", "+datasetId+", EntityManager)");
 
         Dataset dataset = DataSetManager.getDataSet(userId, datasetId, DatasetInclude.DATASET_AND_DATAFILES_ONLY, manager);
@@ -83,7 +83,7 @@ public class DownloadManager {
         }
     }
 
-    private String generateDownloadUrl(Collection<Datafile> datafiles, String userId) {
+    private static String generateDownloadUrl(Collection<Datafile> datafiles, String userId) {
 
         StringBuilder builder = new StringBuilder();
         //builder.append("?sid="+sessionId+"&name="+file.getName()+"&file="+fileReturned);
