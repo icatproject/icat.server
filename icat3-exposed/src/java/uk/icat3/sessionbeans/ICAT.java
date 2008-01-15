@@ -2030,7 +2030,8 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
     }
 
     /**
-     * Checks if user has access to download the files.
+     * Checks if user has access to download the files.  This will be called from the 
+     * data service to check that the request coming in is valid with ICAT
      *      
      * @param sessionId session id of the user.
      * @param fileNames names of the files that are to be downloaded 
