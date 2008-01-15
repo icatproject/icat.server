@@ -6,14 +6,12 @@
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-
 package uk.icat3.sessionbeans.data;
 
-import java.net.MalformedURLException;
+import java.util.Collection;
 import javax.ejb.Local;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
 
 /**
@@ -22,9 +20,12 @@ import uk.icat3.exceptions.SessionException;
  */
 @Local
 public interface DownloadManagerLocal {
-    
-    public String downloadDatafile(String sessionId, Long datafileId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException ;
-    
-    public String downloadDataset(String sessionId, Long datasetId)  throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, MalformedURLException ;
-        
+
+    String downloadDatafile(String sessionId, Long datafileId) throws SessionException, NoSuchObjectFoundException,  InsufficientPrivilegesException;
+
+    String downloadDataset(String sessionId, Long datasetId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException;
+
+    String downloadDatafiles(String sessionId, Collection<Long> datafileIds) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException;
+
+    String checkFileDownloadAccess(String sessionId, Collection<String> fileNames) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException;
 }

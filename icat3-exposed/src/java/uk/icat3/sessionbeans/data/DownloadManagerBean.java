@@ -8,33 +8,19 @@
  */
 package uk.icat3.sessionbeans.data;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
-import javax.xml.ws.soap.MTOM;
 import org.apache.log4j.Logger;
 import uk.icat3.data.DownloadManager;
-import uk.icat3.data.exceptions.DownloadException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
-import uk.icat3.user.UserDetails;
-import uk.ac.dl.srbapi.srb.Url;
-import uk.ac.dl.srbapi.util.IOTools;
-import uk.icat3.entity.Datafile;
-import uk.icat3.entity.Dataset;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.manager.DataFileManager;
-import uk.icat3.manager.DataSetManager;
-import uk.icat3.util.DatasetInclude;
 
 /**
  *
@@ -47,52 +33,79 @@ public class DownloadManagerBean extends EJBObject implements DownloadManagerLoc
 
     static Logger log = Logger.getLogger(DownloadManagerBean.class);
 
+    /**
+     * Generates the download URL for the download of a single file.  The method checks
+     * if the users has permission to download the file first
+     *
+     * @param sessionId session Id of the user.
+     * @param datafileId datafile id
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object     
+     * @return URL that will be used to download the data file
+     */
     public String downloadDatafile(String sessionId, Long datafileId) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException {
-
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
-        Datafile datafile = DataFileManager.getDataFile(userId, datafileId, manager);
-
-        Collection<Datafile> validDatafiles = new ArrayList<Datafile>();
-        validDatafiles.add(datafile);
-        
-        //check download
-        if (datafile.getIcatRole().isActionDownload()) {
-            return generateDownloadUrl(validDatafiles, sessionId);
-        } else {
-            throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform 'DOWNLOAD' operation on " + datafile);
-        }
+        return DownloadManager.downloadDatafile(userId, sessionId, datafileId, manager);
     }
 
-    public String downloadDataset(String sessionId, Long datasetId) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException {
-
+    /**
+     * Generates the download URL for the download of a collection of files. The method checks
+     * if the users has permission to download the files first
+     *
+     * @param sessionId session Id of the user.
+     * @param datafileIds collection of datafile ids
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object     
+     * @return URL that will be used to download the collection of data files
+     */
+    public String downloadDatafiles(String sessionId, Collection<Long> datafileIds) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
-        Dataset dataset = DataSetManager.getDataSet(userId, datasetId, DatasetInclude.DATASET_AND_DATAFILES_ONLY, manager);
-        Collection<Datafile> datafiles = dataset.getDatafileCollection();
-
-        Collection<Datafile> validDatafiles = new ArrayList<Datafile>();
-
-        for (Datafile datafile : datafiles) {
-            if (datafile.getIcatRole().isActionDownload()) {
-                validDatafiles.add(datafile);
-            }
-        }
-
-        //check download
-        if (dataset.getIcatRole().isActionDownload() && !validDatafiles.isEmpty()) {
-            return generateDownloadUrl(validDatafiles, sessionId);
-        } else {
-            throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform 'DOWNLOAD' operation on " + dataset);
-        }
+        return DownloadManager.downloadDatafiles(userId, sessionId, datafileIds, manager);
     }
 
-    private String generateDownloadUrl(Collection<Datafile> datafiles, String sessionId) {
+    /**
+     * Generates the download URL for the download of a data set. The method checks
+     * if the users has permission to download the dataset files first
+     *
+     * @param sessionId session Id of the user.
+     * @param datasetId dataset id
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object     
+     * @return URL that will be used to download the dataset
+     */
+    public String downloadDataset(String sessionId, Long datasetId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
 
-        StringBuilder builder = new StringBuilder();
-        //builder.append("?sid="+sessionId+"&name="+file.getName()+"&file="+fileReturned);
-        return builder.toString();
+        return DownloadManager.downloadDataset(userId, sessionId, datasetId, manager);
+    }
+
+    /**
+     * Checks if user has access to download the files.  Returns the federal Id if the user
+     * from the sessionId
+     *      
+     * @param sessionId session Id of the user.
+     * @param fileNames names of the files that are to be downloaded 
+     * @param manager Entity manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object             
+     * @return federalId of the user.
+     */
+    public String checkFileDownloadAccess(String sessionId, Collection<String> fileNames) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        boolean canDownload = DownloadManager.checkFileDownloadAccess(userId, fileNames, manager);
+
+        //if here, user has access, return federal Id
+        return userId;
     }
 }

@@ -6,7 +6,6 @@
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-
 package uk.icat3.sessionbeans.manager;
 
 import javax.ejb.Local;
@@ -21,7 +20,6 @@ import uk.icat3.exceptions.ValidationException;
  */
 @Local
 public interface XMLIngestionManagerLocal {
-        
-    public Long[] ingestMetadata(String sessionId, String xml) throws SessionException, ValidationException, InsufficientPrivilegesException, ICATAPIException ;
-  
+
+    Long[] ingestMetadata(String sessionId, String xml) throws SessionException, ValidationException, InsufficientPrivilegesException, ICATAPIException;
 }
