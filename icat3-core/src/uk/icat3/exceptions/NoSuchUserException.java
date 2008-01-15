@@ -16,7 +16,7 @@ import javax.ejb.ApplicationException;
  * @author df01
  */
 @ApplicationException(rollback=true)
-public class NoSuchUserException extends ICATAPIException {
+public class NoSuchUserException extends SessionException {
     
     /**
      * Creates a new instance of <code>NoSuchUserException</code> without detail message.

@@ -25,7 +25,8 @@ public class UserDetails implements Serializable {
     private String department;
     private String email;
     private String credential;
-
+    private String federalId;
+    
      /** Creates a new instance of UserDetails */
     public UserDetails() {
     }
@@ -102,5 +103,13 @@ public class UserDetails implements Serializable {
 
     public void setCredential(String credential) {
         this.credential = credential;
+    }
+    
+    public String getFederalId() {
+        return federalId;
+    }
+
+    public void setFederalId(String federalId) {
+        this.federalId = federalId;
     }
 }

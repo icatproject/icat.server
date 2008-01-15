@@ -28,6 +28,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
 import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
@@ -698,6 +699,7 @@ import uk.icat3.util.Queries;
      * This loads the investigation id from the investigation
      */
     @PostLoad
+    @PostPersist
     //@Override
     public void postLoad(){
         if(investigationId == null) investigationId = getInvestigation().getId();

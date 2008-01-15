@@ -51,6 +51,10 @@ public enum InvestigationInclude {
      */
     DATASETS_ONLY,
     /**
+     * list of datasets and datset parameters, without the list of data files.
+     */
+    DATASETS_AND_DATASET_PARAMETERS_ONLY,
+    /**
      * list of all datasets with their list of data file, without datafile parameters
      */
     DATASETS_AND_DATAFILES,
@@ -90,6 +94,14 @@ public enum InvestigationInclude {
     public boolean isDatasets(){
         if(this == InvestigationInclude.DATASETS_AND_DATAFILES ||
                 this == InvestigationInclude.DATASETS_ONLY  ||
+                this == InvestigationInclude.DATASETS_AND_DATASET_PARAMETERS_ONLY  ||
+                this == InvestigationInclude.ALL ||
+                this == InvestigationInclude.DATASETS_DATAFILES_AND_PARAMETERS) return true;
+        else return false;
+    }
+    
+     public boolean isDatasetsAndParameters(){
+        if(this == InvestigationInclude.DATASETS_AND_DATASET_PARAMETERS_ONLY  ||
                 this == InvestigationInclude.ALL ||
                 this == InvestigationInclude.DATASETS_DATAFILES_AND_PARAMETERS) return true;
         else return false;
