@@ -99,27 +99,28 @@ public class UtilOperations {
             Calendar cal =  GregorianCalendar.getInstance();
             cal.add(GregorianCalendar.HOUR,2); //add 5 hours, valid
             session.setExpireDateTime(cal.getTime());
-            session.setUserSessionId("testcorrectadminsid"+Math.random());
+            session.setUserSessionId("testcorrect"+runAs+"sid"+Math.random());
             
-            session.setCredential("testcorrectadminsid_CREDENTIAL");
+            session.setCredential("testcorrect"+runAs+"sid_CREDENTIAL");
             session.setRunAs(runAs);
             
             User adminUser = null;
             try {
-                adminUser = (User) em.createNamedQuery("User.findByUserId").setParameter("userId", "admin").getSingleResult();
+                log.trace("Finding user "+runAs+" in user tables");
+                adminUser = (User) em.createNamedQuery("User.findByUserId").setParameter("userId", runAs).getSingleResult();
                 
             } catch(NoResultException ex) {
-                log.info("Creating admin user");
+                log.info("Creating "+runAs+" user");
                 //create user
                 adminUser = new User();
-                adminUser.setDn("test correct admin dn");
-                adminUser.setUserId("admin");
-                adminUser.setPassword("adminpassword");
+                adminUser.setDn("test correct "+runAs+" dn");
+                adminUser.setUserId(runAs);
+                adminUser.setPassword(runAs+"password");
             }
             
             adminUser.addSession(session);
             
-            log.info("persisting admin session: "+session.getUserSessionId());
+            log.info("persisting "+runAs+" session: "+session.getUserSessionId());
             em.persist(adminUser);
             
             return session;
@@ -143,7 +144,6 @@ public class UtilOperations {
             em.persist(server);
             return server;
         }
-        return null;
-        
+        return null;        
     }
 }

@@ -17,4 +17,9 @@ public class TestConstants {
     
     public final static String INVALID_USER =  "invalidUser" +Math.random();
     public final static String VALID_INVESTIGATION_SURNAME  = "HEALY";
+    
+     //public final static String PERSISTENCE_UNIT = "icat3-scratch-testing-PU";
+    //My One
+    public final static String PERSISTENCE_UNIT = "icat3-defaultunit-testing-PU";       
+    //public final static String PERSISTENCE_UNIT = "icat3-apitest";
 }

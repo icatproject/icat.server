@@ -31,7 +31,7 @@ public class BaseTest {
     
     public static void setUp(){
         
-        emf = Persistence.createEntityManagerFactory("icat3-user-testing-defaultPU");
+        emf = Persistence.createEntityManagerFactory(TestConstants.PERSISTENCE_UNIT);
         em = emf.createEntityManager();
         log.debug("setUp(), creating entityManager");
         
@@ -46,7 +46,7 @@ public class BaseTest {
     
     public static void setUpEntityManagerOnly(){
         
-        emf = Persistence.createEntityManagerFactory("icat3-user-testing-defaultPU");
+        emf = Persistence.createEntityManagerFactory(TestConstants.PERSISTENCE_UNIT);
         em = emf.createEntityManager();
         log.debug("setUp(), creating entityManager");
         

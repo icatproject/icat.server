@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import uk.icat3.userdefault.operations.TestAdminUser;
 import uk.icat3.userdefault.operations.TestInvalidUser;
+import uk.icat3.userdefault.operations.TestSuperUser;
 import uk.icat3.userdefault.operations.TestValidUser;
 
 
@@ -22,7 +23,8 @@ import uk.icat3.userdefault.operations.TestValidUser;
 @Suite.SuiteClasses({
     TestInvalidUser.class,
     TestAdminUser.class,
-    TestValidUser.class
+    TestValidUser.class,
+    TestSuperUser.class
 })
 public class TestAll {
     

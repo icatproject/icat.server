@@ -17,6 +17,7 @@ import org.junit.Test;
 import uk.icat3.user.UserManager;
 import uk.icat3.userdefault.entity.Session;
 import uk.icat3.util.BaseTestClassTX;
+import uk.icat3.util.IcatRoles;
 import static uk.icat3.util.TestConstants.*;
 import uk.icat3.util.UtilOperations;
 
@@ -24,26 +25,26 @@ import uk.icat3.util.UtilOperations;
  *
  * @author gjd37
  */
-public class TestAdminUser extends BaseTestClassTX {
+public class TestSuperUser extends BaseTestClassTX {
     
-    private static Logger log = Logger.getLogger(TestAdminUser.class);
+    private static Logger log = Logger.getLogger(TestSuperUser.class);
     
-    private String correctUser = "admin";
-    private String correctAdminUser = "admin";
-    private String correctUserPassword = "admintestpassword"+Math.random();
+    private String correctUser = IcatRoles.SUPER_USER.toString(); //not checked now
+    private String correctSuperUser = IcatRoles.SUPER_USER.toString();
+    private String correctUserPassword = "supertestpassword"+Math.random();
     private String correctSid;
     
     @Test
-    public void testValidAdminUsernamePassword() throws Exception {
-        log.trace("testValidAdminUsernamePassword()");
+    public void testValidSuperUsernamePassword() throws Exception {
+        log.trace("testValidSuperUsernamePassword()");
         
-        Session validAdminSession = UtilOperations.putValidAdminSession(correctAdminUser,em);
+        Session validSuperSession = UtilOperations.putValidAdminSession(correctSuperUser,em);
         
         UserManager userManager = new UserManager(em);
         
         //password not checked now
-        String sessionId = userManager.login(correctUser,validAdminSession.getUserId().getPassword(), correctAdminUser);
-        sessionId = userManager.login(correctUser+"invalid",validAdminSession.getUserId().getPassword()+"invalid", correctAdminUser);
+        String sessionId = userManager.login(correctUser,validSuperSession.getUserId().getPassword(), correctSuperUser);
+        sessionId = userManager.login(correctUser+"invalid",validSuperSession.getUserId().getPassword()+"invalid", correctSuperUser);
        
         assertNotNull("Correct session id, cannot be null", sessionId);
         log.debug("SessionId returned: "+sessionId);
@@ -59,9 +60,9 @@ public class TestAdminUser extends BaseTestClassTX {
         assertEquals("User in DB must be "+correctUser, returnedSession.getUserId().getUserId(),correctUser);
         assertEquals("Sessionid in DB must be "+sessionId+", but was "+returnedSession.getUserSessionId(), returnedSession.getUserSessionId(),sessionId);
         
-        assertEquals("User runs as in DB must be "+correctAdminUser, returnedSession.getRunAs(),correctAdminUser);
+        assertEquals("User runs as in DB must be "+correctSuperUser, returnedSession.getRunAs(),correctSuperUser);
         
-        assertTrue("Session must be a admin session", returnedSession.isAdmin());
+        assertTrue("Session must be a super session", returnedSession.isSuper());
     }
     
     @Test
@@ -69,12 +70,12 @@ public class TestAdminUser extends BaseTestClassTX {
         log.trace("testValidSessionid()");
         UserManager userManager = new UserManager(em);
         
-        Session validAdminSession = UtilOperations.putValidAdminSession(correctAdminUser,em);
+        Session validSuperSession = UtilOperations.putValidAdminSession(correctSuperUser,em);
         
-        String userId = userManager.getUserIdFromSessionId(validAdminSession.getUserSessionId());
+        String userId = userManager.getUserIdFromSessionId(validSuperSession.getUserSessionId());
         
         assertNotNull("Correct user id, cannot be null", userId);
-        assertEquals("user id must be "+correctAdminUser+" but is "+userId, userId, correctAdminUser);
+        assertEquals("user id must be "+correctSuperUser+" but is "+userId, userId, correctSuperUser);
     }
     
     @Test(expected=SessionException.class)
@@ -83,16 +84,16 @@ public class TestAdminUser extends BaseTestClassTX {
         
         UserManager userManager = new UserManager(em);
         
-        Session validAdminSession = UtilOperations.putValidAdminSession(correctAdminUser,em);
+        Session validSuperSession = UtilOperations.putValidAdminSession(correctSuperUser,em);
         
-        boolean loggedOut = userManager.logout(validAdminSession.getUserSessionId());
+        boolean loggedOut = userManager.logout(validSuperSession.getUserSessionId());
         
         assertNotNull("Logged out cannot be null", loggedOut);
         assertTrue("logged out must be true", loggedOut);
         
         //check session id not there
         try{
-            UtilOperations.getSession(validAdminSession.getUserSessionId(),em);
+            UtilOperations.getSession(validSuperSession.getUserSessionId(),em);
         } catch (SessionException ex) {
             log.debug(ex.getMessage());
             assertTrue("SessionException must be invalid exception", ex.getMessage().contains("Invalid"));
@@ -114,7 +115,7 @@ public class TestAdminUser extends BaseTestClassTX {
     
     
     public static junit.framework.Test suite(){
-        return new JUnit4TestAdapter(TestAdminUser.class);
+        return new JUnit4TestAdapter(TestSuperUser.class);
     }
     
 }
