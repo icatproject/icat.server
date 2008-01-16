@@ -29,8 +29,8 @@ import uk.icat3.util.UtilOperations;
 public class TestValidUser extends BaseTestClassTX {
     
     private static Logger log = Logger.getLogger(TestValidUser.class);
-    private String correctUser = "glen";
-    private String correctUserPassword = "kkkkkk";
+    private String correctUser = System.getProperty("user.name");
+    private String correctUserPassword = System.getProperty("usersso.password");
     private String correctSid;
     
      @Test

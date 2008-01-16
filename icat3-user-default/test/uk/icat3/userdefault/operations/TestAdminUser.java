@@ -9,7 +9,6 @@
 
 package uk.icat3.userdefault.operations;
 
-import java.security.cert.CertificateException;
 import junit.framework.JUnit4TestAdapter;
 import org.apache.log4j.Logger;
 import uk.icat3.exceptions.SessionException;
@@ -17,7 +16,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import uk.icat3.user.UserManager;
 import uk.icat3.userdefault.entity.Session;
-import uk.icat3.userdefault.facility.Certificate;
 import uk.icat3.util.BaseTestClassTX;
 import static uk.icat3.util.TestConstants.*;
 import uk.icat3.util.UtilOperations;
