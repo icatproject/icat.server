@@ -28,6 +28,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import uk.icat3.util.IcatRoles;
 
 /**
  *
@@ -38,7 +39,7 @@ import javax.persistence.TemporalType;
 @NamedQueries( {
     @NamedQuery(name = "User.findById", query = "SELECT u FROM User u WHERE u.id = :id"),
     @NamedQuery(name = "User.findByDn", query = "SELECT u FROM User u WHERE u.dn = :dn"),
-    @NamedQuery(name = "User.findByUserId", query = "SELECT u FROM User u WHERE LOWER(u.userId) = :userId"),
+    @NamedQuery(name = "User.findByUserId", query = "SELECT u FROM User u WHERE u.userId = :userId"),
     @NamedQuery(name = "User.findByDnLike", query = "SELECT u FROM User u WHERE u.dn LIKE :dn"),
     @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
     @NamedQuery(name = "User.findByModTime", query = "SELECT u FROM User u WHERE u.modTime = :modTime")}
@@ -169,8 +170,13 @@ public class User implements Serializable {
     } 
     
     public boolean isAdmin(){
-        if(getUserId().equalsIgnoreCase("admin")) return true;
+        if(getUserId().equals(IcatRoles.ADMIN_USER.toString())) return true;
         else return false;                
+    }
+    
+    public boolean isSuper(){
+        if(getUserId().equals(IcatRoles.SUPER_USER.toString())) return true;
+        else return false;                 
     }
            
 }

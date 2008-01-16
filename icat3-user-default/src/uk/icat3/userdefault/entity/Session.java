@@ -27,6 +27,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import uk.icat3.exceptions.SessionException;
+import uk.icat3.util.IcatRoles;
 
 
 /**
@@ -165,8 +166,11 @@ public class Session implements Serializable {
     }
     
     public boolean isAdmin(){
-        if(getUserId().getUserId().equalsIgnoreCase("admin")) return true;
-        else return false;
+        return getUserId().isAdmin();        
+    }
+    
+    public boolean isSuper(){
+        return getUserId().isSuper();
     }
     
     public String getRunAs() {

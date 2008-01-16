@@ -45,7 +45,7 @@ public class DefaultUser implements User {
     private EntityManager manager;
     // Global class logger
     static Logger log = Logger.getLogger(DefaultUser.class);
-       
+
     /** Creates a new instance of DefaultUser */
     public DefaultUser(EntityManager manager) {
         this.manager = manager;
@@ -118,11 +118,16 @@ public class DefaultUser implements User {
         if (password == null || password.equals("")) {
             throw new IllegalArgumentException("Password cannot be null or empty.");
         }
-        if(IcatRoles.SUPER_USER.toString().equals(username)){
+        if (IcatRoles.SUPER_USER.toString().equals(username) || IcatRoles.ADMIN_USER.toString().equals(username)) {
             //ICAT keyword IcatRoles.SUPER_USER, cannot be used to log in this way, 
             //try login(String adminUsername, String adminPassword, String runAsUser)
-            throw new SessionException("Cannot login using username "+IcatRoles.SUPER_USER);
-        }        
+            throw new SessionException("Cannot login using username " + IcatRoles.SUPER_USER);
+        }
+        if (IcatRoles.ADMIN_USER.toString().equals(username)) {
+            //ICAT keyword IcatRoles.SUPER_USER, cannot be used to log in this way, 
+            //try login(String adminUsername, String adminPassword, String runAsUser)
+            throw new SessionException("Cannot login using username " + IcatRoles.ADMIN_USER);
+        }
 
         GSSCredential myproxy_proxy;
         try {
@@ -222,7 +227,7 @@ public class DefaultUser implements User {
      */
     public String login(String adminUsername, String adminPassword, String runAsUser) throws SessionException {
         log.trace("login(admin, *********, " + runAsUser + ")");
-        
+
         boolean isSuper = false;
 
         //find admin user first
@@ -240,7 +245,7 @@ public class DefaultUser implements User {
         } else {
             //check if trying to log on as admin, if admin in DB then this is enabled
             try {
-                user = (uk.icat3.userdefault.entity.User) manager.createNamedQuery("User.findByUserId").setParameter("userId", "admin").getSingleResult();
+                user = (uk.icat3.userdefault.entity.User) manager.createNamedQuery("User.findByUserId").setParameter("userId", IcatRoles.ADMIN_USER.toString()).getSingleResult();
             } catch (NoResultException ex) {
                 log.warn("Admin user account not set up in DB");
                 throw new SessionException("Admin user account not set up");
@@ -273,7 +278,7 @@ public class DefaultUser implements User {
         user.addSession(session);
         manager.persist(session);
 
-        log.info("Logged in for user: " + runAsUser + " running as "+ ((isSuper) ? "super" : "admin" ) + " with sessionid:" + sid);
+        log.info("Logged in for user: " + runAsUser + " running as " + ((isSuper) ? "super" : "admin") + " with sessionid:" + sid);
 
         return sid;
 
