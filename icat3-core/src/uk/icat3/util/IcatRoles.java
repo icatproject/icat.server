@@ -14,5 +14,5 @@ package uk.icat3.util;
  * @author gjd37
  */
 public enum IcatRoles {
-ICAT_ADMIN, CREATOR;
+ICAT_ADMIN, CREATOR, SUPER_USER, ADMIN_USER;
 }
