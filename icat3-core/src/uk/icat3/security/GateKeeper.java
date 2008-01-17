@@ -164,13 +164,16 @@ public class GateKeeper {
                 log.warn("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object);
                 throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object);
             }
+        } else {
+            //super user role
+            IcatRole superRole = manager.find(IcatRole.class, "SUPER");            
+            role = superRole;
         }
 
         //now check the access permission from the icat authroisation
         if (isSuperUser) {
             success = true; //user has access to do anything
-        }
-        else if (access == AccessType.READ) {
+        } else if (access == AccessType.READ) {
             if (role.isActionSelect()) {
                 success = true;  //user has access to read element
             }
@@ -239,15 +242,8 @@ public class GateKeeper {
         //now check if has permission and if not throw exception
         if (success) {
             //now append the role to the investigation, dataset or datafile
-            if (elementType.isRootType()) {
-                if(isSuperUser){
-                    IcatRole superRole = manager.find(IcatRole.class, "SUPER");
-                    object.setIcatRole(superRole); //add super user role to the object
-                    role = superRole;
-                } else  {
-                    role = icatAuthorisation.getRole();
-                    object.setIcatRole(role);
-                }
+            if (elementType.isRootType()) {                                 
+                    object.setIcatRole(role);               
             }
             log.info("User: " + userId + " granted " + access + " permission on " + object + " with role " + role);
             return role;
