@@ -51,6 +51,7 @@ public class TestConstants {
     public final static String DELETER_USER = "test_deleter";
     public final static String ADMIN_USER = "test_admin";
     public final static String ICAT_ADMIN_USER = "test_icatadmin";
+    public final static String SUPER_USER = IcatRoles.SUPER_USER.toString();
     
     public final static long VALID_DATA_SET_ID_FOR_ICAT_ADMIN =  3;
     public final static long VALID_DATA_FILE_ID_FOR_ICAT_ADMIN  =  3;
