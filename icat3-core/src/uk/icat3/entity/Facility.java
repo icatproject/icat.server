@@ -55,6 +55,9 @@ public class Facility extends EntityBaseBean implements Serializable {
     @Column(name = "FACILITY_DESCRIPTION")
     private String facilityDescription;
    
+    @Column(name = "DAYS_UNTIL_PUBLIC_RELEASE")
+    private Long daysUntilRelease;
+    
     /*@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
     private Collection<Investigation> investigationCollection;*/
 
@@ -136,6 +139,14 @@ public class Facility extends EntityBaseBean implements Serializable {
     @Override
     public String toString() {
         return "ThisIcat[facilityShortName=" + facilityShortName + "]";
+    }
+
+    public Long getDaysUntilRelease() {
+        return daysUntilRelease;
+    }
+
+    public void setDaysUntilRelease(Long daysUntilRelease) {
+        this.daysUntilRelease = daysUntilRelease;
     }
 
 }

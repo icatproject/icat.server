@@ -121,23 +121,29 @@ import uk.icat3.util.Queries;
     @Column(name = "BCAT_INV_STR")
     private String bcatInvStr;
     
+    @Column(name = "INV_PARAM_NAME")
+    private String invParamName;
+    
+    @Column(name = "INV_PARAM_VALUE")
+    private String invParamValue;
+    
     @Column(name = "GRANT_ID")
     private Long grantId;
     
     @Column(name = "FACILITY", nullable = false)
     private String facility;
-    
-    public String getFacility() {
-        return facility;
-    }
-    
-    public void setFacility(String facility) {
-        this.facility = facility;
-    }
-    
+       
     @Column(name = "RELEASE_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date releaseDate;
+    
+    @Column(name = "INV_START_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date invStartDate;
+    
+    @Column(name = "INV_END_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date invEndDate;
     
     /*@JoinColumn(name = "FACILITY", referencedColumnName = "FACILITY_SHORT_NAME", nullable= false)
     @ManyToOne()
@@ -629,6 +635,14 @@ import uk.icat3.util.Queries;
         keywords.add(keyword);
         
         this.setKeywordCollection(keywords);
+    }
+    
+    public String getFacility() {
+        return facility;
+    }
+    
+    public void setFacility(String facility) {
+        this.facility = facility;
     }
     
     /**
@@ -1154,5 +1168,37 @@ import uk.icat3.util.Queries;
      */
     public void setInvestigationInclude(InvestigationInclude investigationInclude) {
         this.investigationInclude = investigationInclude;
+    }
+
+    public Date getInvStartDate() {
+        return invStartDate;
+    }
+
+    public void setInvStartDate(Date invStartDate) {
+        this.invStartDate = invStartDate;
+    }
+
+    public Date getInvEndDate() {
+        return invEndDate;
+    }
+
+    public void setInvEndDate(Date invEndDate) {
+        this.invEndDate = invEndDate;
+    }
+
+    public String getInvParamName() {
+        return invParamName;
+    }
+
+    public void setInvParamName(String invParamName) {
+        this.invParamName = invParamName;
+    }
+
+    public String getInvParamValue() {
+        return invParamValue;
+    }
+
+    public void setInvParamValue(String invParamValue) {
+        this.invParamValue = invParamValue;
     }
 }
