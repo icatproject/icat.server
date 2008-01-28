@@ -30,10 +30,16 @@ public class Queries {
     //Returns investigation id
     public static final String RETURN_ALL_INVESTIGATION_IDS_JPQL = "SELECT DISTINCT i.id from Investigation i ";
     
-    public static final String QUERY_USERS_ENTITYOBJECTS_JPQL = ", IcatAuthorisation ia WHERE" +
-            " i.id = ia.elementId AND ia.elementType = :objectType AND i.markedDeleted = 'N' " +
-            " AND (:userId = '"+SUPER_USER+"' OR ia.userId = :userId OR ia.userId = 'ANY')" +
-            " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y' ";
+    // Search all investigations WHERE (investigation.instrument = facilityScientist AND facilityScientist fedid) OR
+    // OR (userId = SUPER) OR (userId is in icatAuthrosation table and role is select)   
+    public static final String QUERY_USERS_ENTITYOBJECTS_JPQL = ", IcatAuthorisation ia, FacilityInstrumentScientist fis WHERE" +
+            "  ((:userId = '"+SUPER_USER+"') OR " +
+            " (:userId = fis.facilityInstrumentScientistPK.federalId AND " +
+            " fis.facilityInstrumentScientistPK.instrumentName = i.instrument) OR " +
+            " (i.id = ia.elementId AND ia.elementType = :objectType AND i.markedDeleted = 'N' " +
+            " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+            " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y')) ";
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     
     
