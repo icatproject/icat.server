@@ -81,9 +81,12 @@ public class GateKeeper {
             rootElementId = ((Dataset) object).getId();
             return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATASET, manager);
         } else if (object instanceof Datafile) {
-            rootElementsParentsId = ((Datafile) object).getDataset().getId();
-            rootElementId = ((Datafile) object).getId();
-            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATAFILE, manager);
+            //Changed. Need to check the dataset parent for data file now.
+            //rootElementsParentsId = ((Datafile) object).getDataset().getId();
+            //rootElementId = ((Datafile) object).getId();
+            rootElementsParentsId = ((Datafile) object).getDataset().getInvestigation().getId();
+            rootElementId = ((Datafile) object).getDataset().getId();
+            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATASET, manager);
         } else if (object instanceof DatasetParameter) {
             rootElementsParentsId = ((DatasetParameter) object).getDataset().getInvestigation().getId();
             rootElementId = ((DatasetParameter) object).getDataset().getId();
