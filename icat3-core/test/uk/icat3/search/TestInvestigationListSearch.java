@@ -93,6 +93,22 @@ public class TestInvestigationListSearch extends BaseTestClass{
         assertNotNull("Must not be an empty collection", invs);
         assertEquals("Collection 'all Investigations' should be 5", 5 , invs.size());
     }    
+    
+    @Test
+    public void testGetAllDeletedScientistInvestigations(){
+        log.info("Testing deleted_facility_scientist, getAllInvestigations: deleted_facility_scientist");
+        
+        log.debug("Testing user investigations: deleted_facility_scientist");
+        
+        Collection<Investigation> invs = em.createQuery(Queries.INVESTIGATIONS_BY_USER_JPQL).
+                setParameter("objectType",ElementType.INVESTIGATION).
+                setParameter("userId","deleted_facility_scientist").getResultList();
+        
+        log.trace("Investigations for user deleted_facility_scientist is "+invs.size());
+        
+        assertNotNull("Must not be an empty collection", invs);
+        assertEquals("Collection 'all Investigations' should be 1", 1 , invs.size());
+    }    
              
     
     public static junit.framework.Test suite(){
