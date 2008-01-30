@@ -259,7 +259,7 @@ public class Queries {
             " fis2.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument) OR " +
             " (dfp.datafile.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
             " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
-            " AND iadf3.markedDeleted = 'N' AND dfp.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND dfp.datafile.dataset.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y')) " +
+            " AND iadf3.role.actionCanSelect = 'Y')) AND iadf3.markedDeleted = 'N' AND dfp.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND dfp.datafile.dataset.markedDeleted = 'N' " +
             " AND dfp.numericValue BETWEEN :lower AND :upper AND " +
             " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')";//  add this in here for all instruments: i.dataset.investigation.instrument.name = 'SXD'";
     
