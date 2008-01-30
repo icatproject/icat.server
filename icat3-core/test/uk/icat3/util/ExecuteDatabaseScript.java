@@ -25,12 +25,12 @@ import java.sql.PreparedStatement;
 import org.apache.log4j.Logger;
 
 public class ExecuteDatabaseScript {
-    
+
     private String jdbcURL = "";
     private String username = "";
     private String password = "";
     private static Logger log = Logger.getLogger(BaseTestMethod.class);
-    
+
     /** 
      * Creates a new instance of ExecuteDatabaseScript and sets up
      * database connection
@@ -39,12 +39,12 @@ public class ExecuteDatabaseScript {
      * @param username      username for database schema
      * @param password      password for user
      */
-    public ExecuteDatabaseScript(String jdbcURL, String username, String password) {        
+    public ExecuteDatabaseScript(String jdbcURL, String username, String password) {
         this.jdbcURL = jdbcURL;
         this.username = username;
         this.password = password;
     }
-    
+
     /**
      * Executes each statement in an sql script specified by <code>location</code>.
      * Script is parsed into individual statements separated by <code>terminator</code>.
@@ -56,40 +56,41 @@ public class ExecuteDatabaseScript {
      *     
      */
     public void execute(String location, String terminator) {
-        StringBuffer sb = new StringBuffer();                
+        StringBuffer sb = new StringBuffer();
         BufferedReader br = null;
-                
-        try {        
-            
+
+        try {
+
             //read entire sql script into StringBuffer
             br = new BufferedReader(new InputStreamReader(new FileInputStream(location)));
             String line = "";
             while ((line = br.readLine()) != null) {
-                sb.append(line );
+                String lineTrimmed = line.trim();
+                if (!lineTrimmed.startsWith("--")) {
+                    sb.append(line);
+                }
             }//end while
-        
+
             //split each statement as delimited by terminator
             String[] myCommands = sb.toString().split(terminator);
-            
+
             //Create connection to database with details that were passed into constructor
             DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
             Connection con = DriverManager.getConnection(jdbcURL, username, password);
-            
+
             //try to execute each statement whether pass or fail
-            for (int i=0; i<myCommands.length; i++) {
-               log.trace("-" + myCommands[i]);                                
+            for (int i = 0; i < myCommands.length; i++) {
+                log.trace("-" + myCommands[i]);
                 try {
-                    PreparedStatement updateSales = con.prepareStatement(myCommands[i]); 
+                    PreparedStatement updateSales = con.prepareStatement(myCommands[i]);
                     updateSales.execute();
                 } catch (Exception e) {
                     log.error("Failed to execute statement", e);
-                }//end try/catch
-            }//end for
-            
+                } //end try/catch
+            } //end for
+
         } catch (Exception e1) {
             log.fatal("Failed to read database script", e1);
-        }//end try/catch        
+        } //end try/catch        
     }
-    
-  
 }

@@ -33,6 +33,7 @@ import uk.icat3.investigationmanager.TestSampleParameter;
 import uk.icat3.search.TestDatafileSearch;
 import uk.icat3.search.TestDatasetSearch;
 import uk.icat3.search.TestInvalidUser;
+import uk.icat3.search.TestInvestigationListSearch;
 import uk.icat3.search.TestInvestigationSearch;
 import uk.icat3.search.TestKeywordSearch;
 import uk.icat3.security.TestGateKeeperAdminDatafile;
@@ -53,6 +54,7 @@ import uk.icat3.security.TestGateKeeperIcatAdminInvestigation;
 import uk.icat3.security.TestGateKeeperReaderDatafile;
 import uk.icat3.security.TestGateKeeperReaderDataset;
 import uk.icat3.security.TestGateKeeperReaderInvestigation;
+import uk.icat3.security.TestGateKeeperSuperUserInvestigation;
 import uk.icat3.security.TestGateKeeperUpdaterDatafile;
 import uk.icat3.security.TestGateKeeperUpdaterDataset;
 import uk.icat3.security.TestGateKeeperUpdaterInvestigation;
@@ -66,7 +68,8 @@ import uk.icat3.util.ExecuteDatabaseScript;
             TestDatafileSearch.class,
             TestDatasetSearch.class,
             TestInvestigationSearch.class,
-            
+            TestInvestigationListSearch.class,
+             
             TestSample.class,
             TestKeyword.class,
             TestPublication.class,
@@ -92,6 +95,7 @@ import uk.icat3.util.ExecuteDatabaseScript;
             TestGateKeeperIcatAdminInvestigation.class,
             TestGateKeeperReaderInvestigation.class,
             TestGateKeeperUpdaterInvestigation.class,
+            TestGateKeeperSuperUserInvestigation.class,
             
             TestGateKeeperAdminDataset.class,
             TestGateKeeperCreatorDataset.class,
