@@ -35,7 +35,7 @@ public class Queries {
     public static final String QUERY_USERS_ENTITYOBJECTS_JPQL = ", IcatAuthorisation ia, FacilityInstrumentScientist fis WHERE" +
             "  ((:userId = '"+SUPER_USER+"') OR " +
             " (:userId = fis.facilityInstrumentScientistPK.federalId AND " +
-            " fis.facilityInstrumentScientistPK.instrumentName = i.instrument) OR " +
+            " fis.facilityInstrumentScientistPK.instrumentName = i.instrument AND fis.markedDeleted = 'N') OR " +
             " (i.id = ia.elementId AND ia.elementType = :objectType " +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y')) AND i.markedDeleted = 'N' ";
@@ -187,7 +187,7 @@ public class Queries {
     public static final String ADVANCED_SEARCH_JPQL_DATAFILE = " AND EXISTS (SELECT df FROM Datafile df, FacilityInstrumentScientist fis2, IcatAuthorisation iadf3 WHERE " +
             " ((:userId = '"+SUPER_USER+"') OR " +
             " (:userId = fis2.facilityInstrumentScientistPK.federalId AND " +
-            " fis2.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument) OR " +
+            " fis2.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument AND fis2.markedDeleted = 'N') OR " +
             " (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
             " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
             " AND iadf3.role.actionCanSelect = 'Y')) AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' " +
@@ -197,7 +197,7 @@ public class Queries {
     public static final String ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE = " AND EXISTS (SELECT df FROM Datafile df, FacilityInstrumentScientist fis2, IcatAuthorisation iadf3 WHERE " +
             " ((:userId = '"+SUPER_USER+"') OR " +
             " (:userId = fis2.facilityInstrumentScientistPK.federalId AND " +
-            " fis2.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument) OR " +
+            " fis2.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument AND fis2.markedDeleted = 'N') OR " +
             " (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
             " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
             " AND iadf3.role.actionCanSelect = 'Y')) AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' " +
@@ -208,7 +208,7 @@ public class Queries {
     public static final String ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER = " AND EXISTS (SELECT dfp.datafileParameterPK.datafileId FROM DatafileParameter dfp, FacilityInstrumentScientist fis3, IcatAuthorisation iadf4 WHERE " +
             " ((:userId = '"+SUPER_USER+"') OR " +
             " (:userId = fis3.facilityInstrumentScientistPK.federalId AND " +
-            " fis3.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument) OR " +
+            " fis3.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument AND fis3.markedDeleted = 'N') OR " +
             " (df.dataset.id = iadf4.elementId AND iadf4.elementType = :dataSetType " +
             " AND (iadf4.userId = :userId OR iadf4.userId = 'ANY') " +
             " AND iadf4.role.actionCanSelect = 'Y')) AND iadf4.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' " +
@@ -256,7 +256,7 @@ public class Queries {
             " EXISTS (SELECT dfp FROM i.datafileParameterCollection dfp, IcatAuthorisation ia2, FacilityInstrumentScientist fis2, WHERE " +
             " ((:userId = '"+SUPER_USER+"') OR " +
             " (:userId = fis2.facilityInstrumentScientistPK.federalId AND " +
-            " fis2.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument) OR " +
+            " fis2.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument AND fis2.markedDeleted = 'N') OR " +
             " (dfp.datafile.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
             " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
             " AND iadf3.role.actionCanSelect = 'Y')) AND iadf3.markedDeleted = 'N' AND dfp.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND dfp.datafile.dataset.markedDeleted = 'N' " +
