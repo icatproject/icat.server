@@ -36,9 +36,9 @@ public class Queries {
             "  ((:userId = '"+SUPER_USER+"') OR " +
             " (:userId = fis.facilityInstrumentScientistPK.federalId AND " +
             " fis.facilityInstrumentScientistPK.instrumentName = i.instrument) OR " +
-            " (i.id = ia.elementId AND ia.elementType = :objectType AND i.markedDeleted = 'N' " +
+            " (i.id = ia.elementId AND ia.elementType = :objectType " +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-            " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y')) ";
+            " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y')) AND i.markedDeleted = 'N' ";
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     
@@ -54,9 +54,9 @@ public class Queries {
     /**
      * Lists all the users investigations in SQL (genreated from above JPQL)
      */
-    public static final String LIST_ALL_USERS_INVESTIGATIONS_SQL = "SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.RELEASE_DATE, t0.CREATE_ID, t0.TITLE, t0.MOD_ID, t0.INV_ABSTRACT, t0.PREV_INV_NUMBER, t0.VISIT_ID, t0.BCAT_INV_STR, t0.INV_NUMBER, t0.CREATE_TIME, t0.FACILITY_AQUIRED, t0.DELETED, t0.INSTRUMENT, t0.FACILITY_CYCLE, t0.INV_TYPE " +
-            "FROM INVESTIGATION t0, ICAT_AUTHORISATION t1, ICAT_ROLE t2 WHERE " +
-            "(((((((t0.ID = t1.ELEMENT_ID) AND (t1.ELEMENT_TYPE = 'INVESTIGATION')) AND (t0.DELETED = 'N')) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N')) AND (t2.ACTION_SELECT = 'Y')) AND (t2.ROLE = t1.ROLE))";
+    //public static final String LIST_ALL_USERS_INVESTIGATIONS_SQL = "SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.RELEASE_DATE, t0.CREATE_ID, t0.TITLE, t0.MOD_ID, t0.INV_ABSTRACT, t0.PREV_INV_NUMBER, t0.VISIT_ID, t0.BCAT_INV_STR, t0.INV_NUMBER, t0.CREATE_TIME, t0.FACILITY_AQUIRED, t0.DELETED, t0.INSTRUMENT, t0.FACILITY_CYCLE, t0.INV_TYPE " +
+    //        "FROM INVESTIGATION t0, ICAT_AUTHORISATION t1, ICAT_ROLE t2 WHERE " +
+    //       "(((((((t0.ID = t1.ELEMENT_ID) AND (t1.ELEMENT_TYPE = 'INVESTIGATION')) AND (t0.DELETED = 'N')) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N')) AND (t2.ACTION_SELECT = 'Y')) AND (t2.ROLE = t1.ROLE))";
     
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -184,25 +184,35 @@ public class Queries {
     
     //public static final String ADVANCED_SEARCH_JPQL_INSTRUMENT =  " AND i.instrument.name IN(:instrument)  AND i.instrument.markedDeleted = 'N' ";//expand IN, remove this if instrument null
     
-    public static final String ADVANCED_SEARCH_JPQL_DATAFILE = " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
-            " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
-            " AND (:userId = '"+SUPER_USER+"' OR iadf3.userId = :userId OR iadf3.userId = 'ANY')" +
-            " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y' " +
+    public static final String ADVANCED_SEARCH_JPQL_DATAFILE = " AND EXISTS (SELECT df FROM Datafile df, FacilityInstrumentScientist fis2, IcatAuthorisation iadf3 WHERE " +
+            " ((:userId = '"+SUPER_USER+"') OR " +
+            " (:userId = fis2.facilityInstrumentScientistPK.federalId AND " +
+            " fis2.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument) OR " +
+            " (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
+            " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
+            " AND iadf3.role.actionCanSelect = 'Y')) AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' " +
             " AND df.dataset.investigation = i AND (df.datafileCreateTime > :lowerTime OR :lowerTime IS NULL AND df.datafileCreateTime < :upperTime OR :upperTime IS NULL) AND " +
-            " df.markedDeleted = 'N' AND (df.name OPERATION :datafileName OR :datafileName IS NULL))  " ; //remove if all are null
+            " df.dataset.markedDeleted = 'N' AND df.markedDeleted = 'N' AND (df.name OPERATION :datafileName OR :datafileName IS NULL))  " ; //remove if all are null
     
-    public static final String ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE = " AND EXISTS (SELECT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
-            " df.id = iadf3.elementId AND iadf3.elementType = :dataFileType AND df.markedDeleted = 'N' " +
-            " AND (:userId = '"+SUPER_USER+"' OR iadf3.userId = :userId OR iadf3.userId = 'ANY')" +
-            " AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y' " +
+    public static final String ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE = " AND EXISTS (SELECT df FROM Datafile df, FacilityInstrumentScientist fis2, IcatAuthorisation iadf3 WHERE " +
+            " ((:userId = '"+SUPER_USER+"') OR " +
+            " (:userId = fis2.facilityInstrumentScientistPK.federalId AND " +
+            " fis2.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument) OR " +
+            " (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
+            " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
+            " AND iadf3.role.actionCanSelect = 'Y')) AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' " +
             " AND df.dataset.investigation = i AND (df.datafileCreateTime > :lowerTime OR :lowerTime IS NULL AND df.datafileCreateTime < :upperTime OR :upperTime IS NULL) AND " +
-            " df.markedDeleted = 'N' AND (LOWER(df.name) OPERATION :datafileName OR :datafileName IS NULL))  " ; //remove if all are null
+            " df.dataset.markedDeleted = 'N' AND df.markedDeleted = 'N' AND (LOWER(df.name) OPERATION :datafileName OR :datafileName IS NULL))  " ; //remove if all are null
     
     
-    public static final String ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER = " AND EXISTS (SELECT dfp.datafileParameterPK.datafileId FROM DatafileParameter dfp, IcatAuthorisation ia2 " +
-            " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
-            " AND (:userId = '"+SUPER_USER+"' OR ia2.userId = :userId OR ia2.userId = 'ANY')" +
-            " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionCanSelect = 'Y' AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
+    public static final String ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER = " AND EXISTS (SELECT dfp.datafileParameterPK.datafileId FROM DatafileParameter dfp, FacilityInstrumentScientist fis3, IcatAuthorisation iadf4 WHERE " +
+            " ((:userId = '"+SUPER_USER+"') OR " +
+            " (:userId = fis3.facilityInstrumentScientistPK.federalId AND " +
+            " fis3.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument) OR " +
+            " (df.dataset.id = iadf4.elementId AND iadf4.elementType = :dataSetType " +
+            " AND (iadf4.userId = :userId OR iadf4.userId = 'ANY') " +
+            " AND iadf4.role.actionCanSelect = 'Y')) AND iadf4.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' " +
+            " AND dfp.datafile.dataset.investigation = i AND dfp.numericValue BETWEEN :lower AND :upper AND " +
             " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')"; //remove this if run number null"
    
    
@@ -243,10 +253,14 @@ public class Queries {
     public static final String DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_START = RETURN_ALL_DATAFILES_JPQL + QUERY_USERS_ENTITYOBJECTS_JPQL;
     
     public static final String DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_END =
-            " EXISTS (SELECT dfp FROM i.datafileParameterCollection dfp, IcatAuthorisation ia2" +
-            " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :objectType AND dfp.markedDeleted = 'N' " +
-            " AND (:userId = '"+SUPER_USER+"' OR ia2.userId = :userId OR ia2.userId = 'ANY')" +
-            " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionCanSelect = 'Y' AND dfp.numericValue BETWEEN :lower AND :upper AND " +
+            " EXISTS (SELECT dfp FROM i.datafileParameterCollection dfp, IcatAuthorisation ia2, FacilityInstrumentScientist fis2, WHERE " +
+            " ((:userId = '"+SUPER_USER+"') OR " +
+            " (:userId = fis2.facilityInstrumentScientistPK.federalId AND " +
+            " fis2.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument) OR " +
+            " (dfp.datafile.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
+            " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
+            " AND iadf3.markedDeleted = 'N' AND dfp.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND dfp.datafile.dataset.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y')) " +
+            " AND dfp.numericValue BETWEEN :lower AND :upper AND " +
             " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')";//  add this in here for all instruments: i.dataset.investigation.instrument.name = 'SXD'";
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
