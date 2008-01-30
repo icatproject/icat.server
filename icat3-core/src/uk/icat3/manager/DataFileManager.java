@@ -234,7 +234,8 @@ public class DataFileManager extends ManagerUtil {
         manager.persist(dataFile);
 
         //add new creator role to investigation for the user creating the df
-        persistAuthorisation(userId, userId, role, ElementType.DATAFILE, dataFile.getId(), ElementType.DATASET, dataset.getId(), null, manager);
+        //Changed, do not need to add a row for datafile.
+        //persistAuthorisation(userId, userId, role, ElementType.DATAFILE, dataFile.getId(), ElementType.DATASET, dataset.getId(), null, manager);
 
         return dataFile;
     }
@@ -305,12 +306,12 @@ public class DataFileManager extends ManagerUtil {
         log.trace("getDataFile(" + userId + ", " + dataFileIds + " EntityManager)");
 
         Collection<Datafile> dataFiles = new ArrayList<Datafile>();
-
+      
         for (Long dataFileId : dataFileIds) {
 
             //check DataFile exist
             Datafile dataFile = find(Datafile.class, dataFileId, manager);
-
+                    
             //check user has read access
             GateKeeper.performAuthorisation(userId, dataFile, AccessType.READ, manager);
 

@@ -271,7 +271,19 @@ public class ManagerUtil {
      * @param manager manager object that will facilitate interaction with underlying database
      */
     private static void filterDatafiles(String userId, Dataset dataset, boolean cascade, EntityManager manager) {
-        Collection<Datafile> datafilesAllowed = new ArrayList<Datafile>();
+         //Changed, no need to check authorisation of single files, this is done  
+        //implicitily by the dataset authorisation
+        try{
+            GateKeeper.performAuthorisation(userId, dataset, AccessType.READ, manager);
+            dataset.getDatafileCollection();       
+            log.debug("Adding (allowed to read) " + dataset.getDatafileCollection().size() + " datafiles to " + dataset + " from a total of " + dataset.getDatafileCollection().size());        
+        } catch (Exception ignore) {
+            log.debug("Adding (allowed to read) 0 datafiles to " + dataset + " from a total of " + dataset.getDatafileCollection().size());        
+        }
+        
+        //Changed, no need to check authorisation of single files, this is done  
+        //implicitily by the dataset authorisation
+        /*Collection<Datafile> datafilesAllowed = new ArrayList<Datafile>();
         for (Datafile datafile : dataset.getDatafileCollection()) {
             try {
                 GateKeeper.performAuthorisation(userId, datafile, AccessType.READ, manager);
@@ -281,7 +293,7 @@ public class ManagerUtil {
         }
         log.debug("Adding (allowed to read) " + datafilesAllowed.size() + " datafiles to " + dataset + " from a total of " + dataset.getDatafileCollection().size());
         //now add the datasets to the investigation
-        dataset.setDatafileCollection(datafilesAllowed);
+        dataset.setDatafileCollection(datafilesAllowed);*/
 
     }
 
