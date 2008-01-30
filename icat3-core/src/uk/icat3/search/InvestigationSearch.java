@@ -489,7 +489,7 @@ public class InvestigationSearch extends ManagerUtil {
 
         if (advanDTO.hasDataFileParameters()) {
             query = query.setParameter("datafileName", advanDTO.getDatafileName());
-            query = query.setParameter("dataFileType", ElementType.DATAFILE);
+            query = query.setParameter("dataSetType", ElementType.DATASET);
             query = query.setParameter("upperTime", advanDTO.getDateRangeEnd());
             query = query.setParameter("lowerTime", advanDTO.getDateRangeStart());
         }
@@ -498,7 +498,7 @@ public class InvestigationSearch extends ManagerUtil {
         if (advanDTO.hasRunNumber()) {
             query = query.setParameter("upper", advanDTO.getRunEnd());
             query = query.setParameter("lower", advanDTO.getRunStart());
-            query = query.setParameter("dataFileType", ElementType.DATAFILE);
+            query = query.setParameter("dataSetType", ElementType.DATASET);
         }
 
         //set instruments
