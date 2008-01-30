@@ -63,8 +63,8 @@ public class TestJPA {
     
     protected static void setUp(){
         //emf = Persistence.createEntityManagerFactory("icat3-scratch-testing-PU");
-        //  emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
-        emf = Persistence.createEntityManagerFactory("icatisis_dev");
+          emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
+        //emf = Persistence.createEntityManagerFactory("icatisis_dev");
         em = emf.createEntityManager();
         // Begin transaction
         em.getTransaction().begin();
@@ -140,56 +140,34 @@ public class TestJPA {
         setUp();
         
         long time = System.currentTimeMillis();
-        String QUERY = Queries.LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND (i.keywordCollection.keywordPK.name LIKE '%ccw%' OR i.keywordCollection.keywordPK.name LIKE '%orbita%') AND i.keywordCollection.markedDeleted = 'N'";
+        String QUERY = Queries.LIST_ALL_USERS_INVESTIGATIONS_JPQL ;
         
-        //
-        QUERY = "SELECT DISTINCT i.id, i.invNumber, i.facilityString, i.title from Investigation i , IcatAuthorisation ia WHERE i.id = ia.elementId " +
-                "AND ia.elementType = :objectType AND i.markedDeleted = 'N'  AND " +
-                "(ia.userId = :userId OR ia.userId = 'ANY') AND ia.markedDeleted = 'N' AND" +
-                " ia.role.actionCanSelect = 'Y'  AND " +
-                " i.id IN(SELECT k.keywordPK.investigationId FROM Keyword k where k.markedDeleted = 'N' AND (k.keywordPK.name LIKE :key1 OR k.keywordPK.name LIKE :key2 ) )" ;//
-        //" (EXISTS (SELECT kw2 FROM i.keywordCollection kw2 WHERE kw2.markedDeleted = 'N' AND kw2.keywordPK.name LIKE :key1)  OR EXISTS (SELECT kw3 FROM i.keywordCollection kw3 WHERE kw3.markedDeleted = 'N' AND kw3.keywordPK.name LIKE :key2))";
-        
-         QUERY = "SELECT DISTINCT i.id, i.invNumber, i.facilityString, i.title  from Investigation i , IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :objectType AND i.markedDeleted = 'N'  AND (ia.userId = :userId OR ia.userId = 'ANY') AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y'  AND (EXISTS (SELECT kw2 FROM i.keywordCollection kw2 WHERE kw2.markedDeleted = 'N' AND kw2.keywordPK.name LIKE :key1)  OR EXISTS (SELECT kw3 FROM i.keywordCollection kw3 WHERE kw3.markedDeleted = 'N' AND kw3.keywordPK.name LIKE :key2))";
         
         Query nullQuery = em.createQuery(QUERY);
         
         //  QUERY = "SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.RELEASE_DATE, t0.CREATE_ID, t0.TITLE, t0.MOD_ID, t0.INV_ABSTRACT, t0.PREV_INV_NUMBER, t0.VISIT_ID, t0.BCAT_INV_STR, t0.INV_NUMBER, t0.CREATE_TIME, t0.FACILITY_ACQUIRED, t0.DELETED, t0.FACILITY_CYCLE, t0.INSTRUMENT, t0.INV_TYPE, t0.FACILITY FROM KEYWORD t5, KEYWORD t4, KEYWORD t3, ICAT_ROLE t2, ICAT_AUTHORISATION t1, INVESTIGATION t0 WHERE (((((((((t0.ID = t1.ELEMENT_ID) AND (t1.ELEMENT_TYPE = 'INVESTIGATION')) AND (t0.DELETED = 'N')) AND ((t1.USER_ID = ?userId) OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N')) AND (t2.ACTION_SELECT = 'Y')) AND ((t3.NAME LIKE '%ccw%') OR (t4.NAME LIKE '%shu%'))) AND (t5.DELETED = 'N')) AND ((((t2.ROLE = t1.ROLE) AND (t3.INVESTIGATION_ID = t0.ID)) AND (t4.INVESTIGATION_ID = t0.ID)) AND (t5.INVESTIGATION_ID = t0.ID)))";
         
         // Query nullQuery = em.createNativeQuery(QUERY);
-        nullQuery.setParameter("userId", "gjd37");
+        //nullQuery.setParameter("userId", "gjd37");
+        // nullQuery.setParameter("userId", "SUPER_USER");
+        //  nullQuery.setParameter("userId", "facility_scientist");
+        nullQuery.setParameter("userId", "none_facility_scientist");
         nullQuery.setParameter("objectType", ElementType.INVESTIGATION);
         //try and find user with null as investigation
-        nullQuery.setParameter("key1", "%is%");
-        nullQuery.setParameter("key2", "%ral%");
+        
         nullQuery.setMaxResults(50);
-        //  nullQuery.setParameter("keyword3", "%ccwi%");
-        /*nullQuery.setParameter("upper", 1250f);
-        nullQuery.setParameter("lower", 100f);
-        nullQuery.setParameter("userId", "test");
-        nullQuery.setParameter("dataFileType", ElementType.DATAFILE);*/
         
-        // nullQuery.setParameter("parentElementType", ElementType.DATASET);
-        // nullQuery.setParameter("parentElementId", null);
+                
         
-        /*
-        Collection<Datafile> dfs = nullQuery.getResultList();
-        for (Datafile object : dfs) {
-            for(DatafileParameter dfp : object.getDatafileParameterCollection()){
-                if(dfp.getDatafileParameterPK().getName().equals("run_number")) System.out.println(dfp.getNumericValue());
-            }
-        }
-         */
-        
-        
-        //System.out.println(nullQuery.getResultList());
         Collection<Investigation> invs = nullQuery.getResultList();
+                
         System.out.println((System.currentTimeMillis() - time)/1000f+" seconds for "+invs.size());
         
-        time = System.currentTimeMillis();
-        invs = nullQuery.getResultList();
-        System.out.println((System.currentTimeMillis() - time)/1000f+" seconds for "+invs.size());
-     
+        for (Investigation investigation : invs) {
+                 System.out.println(investigation.getInvStartDate());
+        }
+
+       
         tearDown();
     }
     
