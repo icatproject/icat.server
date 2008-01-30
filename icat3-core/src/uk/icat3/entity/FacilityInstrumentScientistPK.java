@@ -5,7 +5,6 @@
 
 package uk.icat3.entity;
 
-import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
@@ -18,6 +17,7 @@ public class FacilityInstrumentScientistPK extends EntityPrimaryKeyBaseBean {
    
     @Column(name = "INSTRUMENT_NAME", nullable = false)
     private String instrumentName;
+    
     @Column(name = "FEDERAL_ID", nullable = false)
     private String federalId;
 

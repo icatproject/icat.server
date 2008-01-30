@@ -27,15 +27,8 @@ import uk.icat3.util.ElementType;
 @Table(name = "FACILITY_INSTRUMENT_SCIENTIST")
 @NamedQueries({
     @NamedQuery(name = "FacilityInstrumentScientist.findByInstrumentName", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.facilityInstrumentScientistPK.instrumentName = :instrumentName"), 
-    @NamedQuery(name = "FacilityInstrumentScientist.findByFederalId", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.facilityInstrumentScientistPK.federalId = :federalId"), 
-    @NamedQuery(name = "FacilityInstrumentScientist.findBySeqNumber", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.seqNumber = :seqNumber"), 
-    @NamedQuery(name = "FacilityInstrumentScientist.findByModTime", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.modTime = :modTime"),
-    @NamedQuery(name = "FacilityInstrumentScientist.findByModId", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.modId = :modId"), 
-    @NamedQuery(name = "FacilityInstrumentScientist.findByCreateTime", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.createTime = :createTime"), 
-    @NamedQuery(name = "FacilityInstrumentScientist.findByCreateId", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.createId = :createId"), 
-    @NamedQuery(name = "FacilityInstrumentScientist.findByFacilityAcquired", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.facilityAcquired = :facilityAcquired"), 
-    @NamedQuery(name = "FacilityInstrumentScientist.findByDeleted", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.deleted = :deleted")
-})
+    @NamedQuery(name = "FacilityInstrumentScientist.findByFederalId", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.facilityInstrumentScientistPK.federalId = :federalId") 
+ })
 public class FacilityInstrumentScientist extends EntityBaseBean {
     
     /**
