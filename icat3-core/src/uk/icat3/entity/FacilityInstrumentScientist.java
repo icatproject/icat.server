@@ -26,6 +26,7 @@ import uk.icat3.util.ElementType;
 @Entity
 @Table(name = "FACILITY_INSTRUMENT_SCIENTIST")
 @NamedQueries({
+    @NamedQuery(name = "FacilityInstrumentScientist.findByUserAndInstrument", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.facilityInstrumentScientistPK.instrumentName = :instrumentName AND f.facilityInstrumentScientistPK.federalId = :federalId"),    
     @NamedQuery(name = "FacilityInstrumentScientist.findByInstrumentName", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.facilityInstrumentScientistPK.instrumentName = :instrumentName"), 
     @NamedQuery(name = "FacilityInstrumentScientist.findByFederalId", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.facilityInstrumentScientistPK.federalId = :federalId") 
  })
