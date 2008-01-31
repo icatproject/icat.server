@@ -189,25 +189,25 @@ public class TestJPA {
     
     public void testP1() throws Exception {
         setUp();
-        String QUERY  = Queries.LIST_ALL_USERS_INVESTIGATIONS_JPQL +
-                " AND  (i.datasetCollection.datafileCollection.createTime > :lowerTime OR :lowerTime IS NULL) AND " +
-                " (i.datasetCollection.datafileCollection.createTime < :upperTime OR :upperTime IS NULL) ";
-        
-        Query nullQuery = em.createQuery(QUERY);
-        
-        
-        
+        String QUERY  = Queries.RETURN_ALL_DATAFILES_JPQL + Queries.QUERY_USERS_DATAFILES_JPQL;
+               
         System.out.println(QUERY);
+               
+        Query nullQuery = em.createQuery(QUERY);
+                        
         
-        nullQuery.setParameter("objectType", ElementType.INVESTIGATION);
-        nullQuery.setParameter("userId", "test");
         
-        nullQuery.setParameter("upperTime", new Date());
-        nullQuery.setParameter("lowerTime", new Date(System.currentTimeMillis()-900));
+        nullQuery.setParameter("objectType", ElementType.DATASET);
+   
+        nullQuery.setParameter("userId", "SUPER_USER");
+        
+       // nullQuery.setParameter("instrument1", "SXD");
+       // nullQuery.setParameter("upper", 123419);
+       // nullQuery.setParameter("lower", 1000);
         
         
         System.out.println(nullQuery.getResultList());
-        
+        System.out.println("dfdf");
         tearDown();
     }
     
@@ -366,9 +366,9 @@ public class TestJPA {
         //ts.addRole();
         // ts.getRoles();
         //  ts.createInv();
-        ts.testJPA();
+        //ts.testJPA();
         //  ts.changeRole();
-        // ts.testP1();
+         ts.testP1();
         // ts.testSurname();
         
         //  ts.testDelete();
