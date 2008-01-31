@@ -13,6 +13,7 @@ import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
+import uk.icat3.entity.FacilityInstrumentScientist;
 import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
@@ -153,23 +154,27 @@ public class GateKeeper {
         if (!isSuperUser) {
             try {
                 if (elementType.isInvestigationType()) {
-                    icatAuthorisation = findIcatAuthorisation(userId, ElementType.INVESTIGATION, rootParentsId, rootElementsParentId, manager);
+                    role = findIcatAuthorisation(userId, ElementType.INVESTIGATION, rootParentsId, rootElementsParentId, object, manager);
                 } else if (elementType.isDatasetType()) {
-                    icatAuthorisation = findIcatAuthorisation(userId, ElementType.DATASET, rootParentsId, rootElementsParentId, manager);
+                    role = findIcatAuthorisation(userId, ElementType.DATASET, rootParentsId, rootElementsParentId, object, manager);
                 } else if (elementType.isDatafileType()) {
-                    icatAuthorisation = findIcatAuthorisation(userId, ElementType.DATAFILE, rootParentsId, rootElementsParentId, manager);
+                    role = findIcatAuthorisation(userId, ElementType.DATAFILE, rootParentsId, rootElementsParentId, object, manager);
                 } else {
                     throw new RuntimeException("Element Type: " + elementType + " not supported");
                 } //should never be thrown
 
-                role = icatAuthorisation.getRole();
+                //if role null, ie facility scientist then return super
+                if (role == null) {
+                    IcatRole superRole = manager.find(IcatRole.class, "SUPER");
+                    role = superRole;
+                }
             } catch (InsufficientPrivilegesException ipe) {
                 log.warn("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object);
                 throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object);
             }
         } else {
             //super user role
-            IcatRole superRole = manager.find(IcatRole.class, "SUPER");            
+            IcatRole superRole = manager.find(IcatRole.class, "SUPER");
             role = superRole;
         }
 
@@ -245,8 +250,8 @@ public class GateKeeper {
         //now check if has permission and if not throw exception
         if (success) {
             //now append the role to the investigation, dataset or datafile
-            if (elementType.isRootType()) {                                 
-                    object.setIcatRole(role);               
+            if (elementType.isRootType()) {
+                object.setIcatRole(role);
             }
             log.info("User: " + userId + " granted " + access + " permission on " + object + " with role " + role);
             return role;
@@ -261,7 +266,7 @@ public class GateKeeper {
      * to the users fedId, if this is not found, it looks for the ANY as the fedId
      *
      */
-    private static IcatAuthorisation findIcatAuthorisation(String userId, ElementType type, Long id, Long parentId, EntityManager manager) throws InsufficientPrivilegesException {
+    private static IcatRole findIcatAuthorisation(String userId, ElementType type, Long id, Long parentId, EntityBaseBean object, EntityManager manager) throws InsufficientPrivilegesException {
         if (!type.isRootType()) {
             throw new RuntimeException("ElementType: " + type + " not supported");
         }
@@ -330,14 +335,33 @@ public class GateKeeper {
                     icatAuthorisation = (IcatAuthorisation) query.getSingleResult();
                     log.debug("Found stage 2 (ANY): " + icatAuthorisation);
                 } catch (NoResultException nre2) {
-                    log.debug("None found for : UserId: " + userId + ", type: " + type + ", elementId: " + id + ", throwing exception");
-                    throw new InsufficientPrivilegesException();
+                    log.trace("None found, searching for FacilityScientist table in userId");
+                    
+                    String instrument = "";
+                    //now look in the facility scientist table
+                    if (object instanceof Datafile) {
+                        instrument = ((Datafile) object).getDataset().getInvestigation().getInstrument();
+                    } else if (object instanceof Datafile) {
+                        instrument = ((Dataset) object).getInvestigation().getInstrument();
+                    } else if (object instanceof Investigation) {
+                        instrument = ((Investigation) object).getInstrument();
+                    }
+
+                    FacilityInstrumentScientist facilityInstrumentScientist = (FacilityInstrumentScientist) manager.createNamedQuery("FacilityInstrumentScientist.findByUserAndInstrument").setParameter("federalId", userId).setParameter("instrumentName", instrument).getSingleResult();
+
+                    if (facilityInstrumentScientist == null) {
+                        log.debug("None found for : UserId: " + userId + ", type: " + type + ", elementId: " + id + ", throwing exception");
+                        throw new InsufficientPrivilegesException();
+                    } else {
+                        log.debug("Found stage 3 (facility scientist) for instrument "+instrument);
+                        return null;
+                    }
                 }
             }
         }
 
         //return the icat authoruisation
-        return icatAuthorisation;
+        return icatAuthorisation.getRole();
 
     }
 }
