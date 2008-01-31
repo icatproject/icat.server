@@ -64,6 +64,8 @@ public class DatafileSearch {
         }
         JPQL += ") AND " + DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_END;
 
+        log.trace("DYNAMIC JPQL: " + JPQL);
+        
         //set query with datafile as entity object
         Query query = manager.createQuery(JPQL);
 
@@ -71,16 +73,14 @@ public class DatafileSearch {
         query = query.setParameter("userId", userId);
         query = query.setParameter("lower", startRun);
         query = query.setParameter("upper", endRun);
-        query = query.setParameter("objectType", ElementType.DATAFILE);
+        query = query.setParameter("objectType", ElementType.DATASET);
 
         //set instruments
         int j = 1;
         for (String instrument : instruments) {
             query = query.setParameter("instrument" + j++, instrument);
         }
-
-        log.trace("DYNAMIC JPQL: " + JPQL);
-
+                
         if (number_results < 0) {
             //get all, maybe should limit this to 500?
             datafiles = query.setMaxResults(MAX_QUERY_RESULTSET).getResultList();
