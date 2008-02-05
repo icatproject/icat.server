@@ -148,7 +148,7 @@ public class DownloadManager {
     private static String generateDownloadUrl(Long datasetId, String sessionId) {
 
         StringBuilder builder = new StringBuilder();
-        builder.append("http://data.isis/download?sid=" + sessionId);
+        builder.append("http://data.isis/download?sessionid=" + sessionId);
         builder.append("&datasetId=" + datasetId);
 
         return builder.toString();
@@ -164,9 +164,9 @@ public class DownloadManager {
     private static String generateDownloadUrl(Collection<Long> datafileIds, String sessionId) {
 
         StringBuilder builder = new StringBuilder();
-        builder.append("http://data.isis/download?sid=" + sessionId);
+        builder.append("http://data.isis/download?sessionid=" + sessionId);
         for (Long datafileId : datafileIds) {
-            builder.append("&fileId=" + datafileId);
+            builder.append("&datafileId=" + datafileId);
         }
         return builder.toString();
     }
