@@ -23,6 +23,7 @@ import javax.jws.WebResult;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
+import uk.icat3.data.DownloadInfo;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileFormat;
 import uk.icat3.entity.DatafileParameter;
@@ -2034,20 +2035,41 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * data service to check that the request coming in is valid with ICAT
      *      
      * @param sessionId session id of the user.
-     * @param fileNames names of the files that are to be downloaded 
+     * @param datafileIds ids of the files that are to be downloaded 
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object             
-     * @return userId (federalId) of the user
+     * @return DownloadInfo downloadinfo 
      */
     public 
-    @WebResult(name = "userId")
-    String checkFileDownloadAccess(
+    @WebResult(name = "downloadInfo")
+    DownloadInfo checkDatafileDownloadAccess(
             
             @WebParam(name = "sessionId") String sessionId,
             
-            @WebParam(name = "fileNames") Collection<String> fileNames) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
-        return downloadManagerLocal.checkFileDownloadAccess(sessionId, fileNames);
+            @WebParam(name = "fileNames") Collection<Long> datafileIds) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+        return downloadManagerLocal.checkDatafileDownloadAccess(sessionId, datafileIds);
+    }
+    
+    /**
+     * Checks if user has access to download the dataset.  This will be called from the 
+     * data service to check that the request coming in is valid with ICAT
+     *      
+     * @param sessionId session id of the user.
+     * @param datasetId id of the dataset that are to be downloaded 
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object             
+     * @return DownloadInfo downloadinfo 
+     */
+    public 
+    @WebResult(name = "downloadInfo")
+    DownloadInfo checkDatasetDownloadAccess(
+            
+            @WebParam(name = "sessionId") String sessionId,
+            
+            @WebParam(name = "datasetId") Long datasetId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+        return downloadManagerLocal.checkDatasetDownloadAccess(sessionId, datasetId);
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 }
