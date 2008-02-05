@@ -10,7 +10,6 @@ package uk.icat3.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -74,18 +73,21 @@ public class DownloadManager {
         //collection of readable and downloadable files
         Collection<Datafile> validDatafiles = new ArrayList<Datafile>();
 
+        boolean canDownload = true;
+
         //loop and add downloadable to list
         for (Datafile datafile : datafiles) {
             if (datafile.getIcatRole().isActionDownload()) {
                 validDatafiles.add(datafile);
                 log.trace("User: " + userId + " granted access to 'DOWNLOAD' " + datafile);
             } else {
+                canDownload = false;
                 log.trace("User: " + userId + " does not have permission to perform 'DOWNLOAD' operation on " + datafile);
             }
         }
         //check download
-        if (!validDatafiles.isEmpty()) {
-            return generateDownloadUrl(validDatafiles, sessionId);
+        if (canDownload) {
+            return generateDownloadUrl(datafileIds, sessionId);
         } else {
             if (datafileIds.size() == 1) {
                 throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform 'DOWNLOAD' operation on " + datafiles.iterator().next());
@@ -111,27 +113,45 @@ public class DownloadManager {
 
         //get the dataset and its files.
         Dataset dataset = DataSetManager.getDataSet(userId, datasetId, DatasetInclude.DATASET_AND_DATAFILES_ONLY, manager);
-        Collection<Datafile> datafiles = dataset.getDatafileCollection();
+
+        //Changed to only check dataset access for all datafiles
+        //Collection<Datafile> datafiles = dataset.getDatafileCollection();
 
         //collection of readable and downloadable files
-        Collection<Datafile> validDatafiles = new ArrayList<Datafile>();
+        //Collection<Datafile> validDatafiles = new ArrayList<Datafile>();
 
         //loop and add downloadable to list
-        for (Datafile datafile : datafiles) {
-            if (datafile.getIcatRole().isActionDownload()) {
-                validDatafiles.add(datafile);
-                log.trace("User: " + userId + " had access to 'DOWNLOAD' " + datafile);
-            } else {
-                log.trace("User: " + userId + " does not have permission to perform 'DOWNLOAD' operation on " + datafile);
-            }
+        /*for (Datafile datafile : datafiles) {
+        if (datafile.getIcatRole().isActionDownload()) {
+        validDatafiles.add(datafile);
+        log.trace("User: " + userId + " had access to 'DOWNLOAD' " + datafile);
+        } else {
+        log.trace("User: " + userId + " does not have permission to perform 'DOWNLOAD' operation on " + datafile);
         }
+        }*/
 
         //check download
-        if (dataset.getIcatRole().isActionDownload() && !validDatafiles.isEmpty()) {
-            return generateDownloadUrl(validDatafiles, sessionId);
+        if (dataset.getIcatRole().isActionDownload() /*&& !validDatafiles.isEmpty()*/) {
+            return generateDownloadUrl(datasetId, sessionId);
         } else {
             throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform 'DOWNLOAD' operation on " + dataset);
         }
+    }
+
+    /**
+     * Generates the URL from the given dataset.
+     *  
+     * @param datasetId dataset Id of the dataset that is to be downloaded
+     * @param sessionId session id of the user for ICAT
+     * @return URL that will be used to download the datafiles
+     */
+    private static String generateDownloadUrl(Long datasetId, String sessionId) {
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("http://data.isis/download?sid=" + sessionId);
+        builder.append("&datasetId=" + datasetId);
+
+        return builder.toString();
     }
 
     /**
@@ -141,12 +161,12 @@ public class DownloadManager {
      * @param sessionId session id of the user for ICAT
      * @return URL that will be used to download the datafiles
      */
-    private static String generateDownloadUrl(Collection<Datafile> datafiles, String sessionId) {
+    private static String generateDownloadUrl(Collection<Long> datafileIds, String sessionId) {
 
         StringBuilder builder = new StringBuilder();
-        builder.append("http://data.isis/downloadFiles?sid=" + sessionId);
-        for (Datafile datafile : datafiles) {
-            builder.append("&name=" + datafile.getName());
+        builder.append("http://data.isis/download?sid=" + sessionId);
+        for (Long datafileId : datafileIds) {
+            builder.append("&fileId=" + datafileId);
         }
         return builder.toString();
     }
@@ -159,44 +179,62 @@ public class DownloadManager {
      * @param manager Entity manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object             
+     * @return DownloadInfo information about the download
      */
-    public static boolean checkFileDownloadAccess(String userId, Collection<String> fileNames, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException {
-        log.trace("checkFileDownloadAccess(" + userId + ", " + fileNames + ", EntityManager)");
-
-        //collection of readable and downloadable files
-        Collection<Long> validDatafilesIds = new ArrayList<Long>();
-
-        for (String fileName : fileNames) {
-            try {
-                Datafile datafile = (Datafile) manager.createNamedQuery("Datafile.findByName").setParameter("name", fileName).getSingleResult();
-                //check if deleted, if so act as if the file has not been found
-                if(datafile.isDeleted()){
-                    log.trace(datafile+" is deleted and therefore does not exist.");
-                    throw new NoResultException();
-                }
-                validDatafilesIds.add(datafile.getId());
-            } catch (NoResultException nre) {
-                log.warn("User: " + userId + " trying to download datafile: " + fileName + " that does not exist");
-                throw new NoSuchObjectFoundException(fileName + " does not exist.");
-            } catch (NonUniqueResultException nure) {
-                log.warn("User: " + userId + " trying to download datafile: " + fileName + " that is not unique");
-                throw new NoSuchObjectFoundException(fileName + " is not unique.");
-            }
-        }
+    public static DownloadInfo checkDatafileDownloadAccess(String userId, Collection<Long> datafileIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException {
+        log.trace("checkFileDownloadAccess(" + userId + ", " + datafileIds + ", EntityManager)");
 
         //now check that the user has access to read, download    
-        Collection<Datafile> datafiles = DataFileManager.getDataFiles(userId, validDatafilesIds, manager);
+        downloadDatafiles(userId, "sessionIdDummy", datafileIds, manager);
 
+        //this should be cached in single entity manager call
+        Collection<Datafile> datafiles = DataFileManager.getDataFiles(userId, datafileIds, manager);
+
+        Collection<String> fileNames = new ArrayList<String>();
         for (Datafile datafile : datafiles) {
-            if (datafile.getIcatRole().isActionDownload()) {
-                log.trace("User: " + userId + " granted access to 'DOWNLOAD' " + datafile);
-            } else {
-                log.trace("User: " + userId + " does not have permission to perform 'DOWNLOAD' operation on " + datafile);
-                throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform 'DOWNLOAD' operation on " + datafile);
-            }
+            fileNames.add(datafile.getName());
         }
-        
+
+        //create download info
+        DownloadInfo downloadInfo = new DownloadInfo();
+        downloadInfo.setDatafileNames(fileNames);
+        downloadInfo.setUserId(userId);
+
         //user had access
-        return true;
+        return downloadInfo;
+    }
+    
+     /**
+     * Checks if user has access to download the files.
+     *      
+     * @param userId federalId of the user.
+     * @param fileNames names of the files that are to be downloaded 
+     * @param manager Entity manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object             
+     * @return DownloadInfo information about the download
+     */
+    public static DownloadInfo checkDatasetDownloadAccess(String userId, Long datasetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException {
+        log.trace("checkFileDownloadAccess(" + userId + ", " + datasetId + ", EntityManager)");
+
+        //now check that the user has access to read, download    
+        downloadDataset(userId, "sessionIdDummy", datasetId, manager);
+
+        //this should be cached in single entity manager call
+        Dataset dataset = DataSetManager.getDataSet(userId, datasetId, DatasetInclude.DATASET_AND_DATAFILES_ONLY, manager);
+        Collection<Datafile> datafiles = dataset.getDatafileCollection();
+        
+        Collection<String> fileNames = new ArrayList<String>();
+        for (Datafile datafile : datafiles) {
+            if(!datafile.isDeleted()) fileNames.add(datafile.getName());
+        }
+
+        //create download info
+        DownloadInfo downloadInfo = new DownloadInfo();
+        downloadInfo.setDatafileNames(fileNames);
+        downloadInfo.setUserId(userId);
+
+        //user had access
+        return downloadInfo;
     }
 }
