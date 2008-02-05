@@ -14,6 +14,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
 import org.apache.log4j.Logger;
+import uk.icat3.data.DownloadInfo;
 import uk.icat3.data.DownloadManager;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchUserException;
@@ -88,24 +89,46 @@ public class DownloadManagerBean extends EJBObject implements DownloadManagerLoc
     }
 
     /**
-     * Checks if user has access to download the files.  Returns the federal Id if the user
-     * from the sessionId
+     * Checks if user has access to download the files.  Returns a DownloadInfo object with
+     * the federal Id if the user and the filenames of the download.
      *      
      * @param sessionId session Id of the user.
-     * @param fileNames names of the files that are to be downloaded 
+     * @param datafileIds ids of the files that are to be downloaded 
      * @param manager Entity manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object             
-     * @return federalId of the user.
+     * @return DownloadInfo download info
      */
-    public String checkFileDownloadAccess(String sessionId, Collection<String> fileNames) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+    public DownloadInfo checkDatafileDownloadAccess(String sessionId, Collection<Long> datafileIds) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
-        boolean canDownload = DownloadManager.checkFileDownloadAccess(userId, fileNames, manager);
+        DownloadInfo downloadInfo = DownloadManager.checkDatafileDownloadAccess(userId, datafileIds, manager);
 
-        //if here, user has access, return federal Id
-        return userId;
+        //if here, user has access, return downloadInfo
+        return downloadInfo;
+    }
+
+    /**
+     * Checks if user has access to download the dataset.  Returns a DownloadInfo object with
+     * the federal Id if the user and the filenames of the download.
+     *      
+     * @param sessionId session Id of the user.
+     * @param datafileIds ids of the files that are to be downloaded 
+     * @param manager Entity manager object that will facilitate interaction with underlying database
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object             
+     * @return DownloadInfo download info
+     */
+    public DownloadInfo checkDatasetDownloadAccess(String sessionId, Long datasetId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        DownloadInfo downloadInfo = DownloadManager.checkDatasetDownloadAccess(userId, datasetId, manager);
+
+        //if here, user has access, return downloadInfo
+        return downloadInfo;
     }
 }

@@ -10,6 +10,7 @@ package uk.icat3.sessionbeans.data;
 
 import java.util.Collection;
 import javax.ejb.Local;
+import uk.icat3.data.DownloadInfo;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.SessionException;
@@ -27,5 +28,7 @@ public interface DownloadManagerLocal {
 
     String downloadDatafiles(String sessionId, Collection<Long> datafileIds) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException;
 
-    String checkFileDownloadAccess(String sessionId, Collection<String> fileNames) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException;
+    DownloadInfo checkDatasetDownloadAccess(String sessionId, Long datasetId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException;
+
+    DownloadInfo checkDatafileDownloadAccess(String sessionId, Collection<Long> datafileIds) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException;
 }
