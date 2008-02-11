@@ -336,7 +336,7 @@ public class GateKeeper {
                     log.debug("Found stage 2 (ANY): " + icatAuthorisation);
                 } catch (NoResultException nre2) {
                     log.trace("None found, searching for FacilityScientist table in userId");
-                    
+
                     String instrument = "";
                     //now look in the facility scientist table
                     if (object instanceof Datafile) {
@@ -347,13 +347,16 @@ public class GateKeeper {
                         instrument = ((Investigation) object).getInstrument();
                     }
 
-                    FacilityInstrumentScientist facilityInstrumentScientist = (FacilityInstrumentScientist) manager.createNamedQuery("FacilityInstrumentScientist.findByUserAndInstrument").setParameter("federalId", userId).setParameter("instrumentName", instrument).getSingleResult();
-
+                    FacilityInstrumentScientist facilityInstrumentScientist = null;
+                    try {
+                        facilityInstrumentScientist = (FacilityInstrumentScientist) manager.createNamedQuery("FacilityInstrumentScientist.findByUserAndInstrument").setParameter("federalId", userId).setParameter("instrumentName", instrument).getSingleResult();
+                    } catch (NoResultException nre223) {}
+                    
                     if (facilityInstrumentScientist == null) {
                         log.debug("None found for : UserId: " + userId + ", type: " + type + ", elementId: " + id + ", throwing exception");
                         throw new InsufficientPrivilegesException();
                     } else {
-                        log.debug("Found stage 3 (facility scientist) for instrument "+instrument);
+                        log.debug("Found stage 3 (facility scientist) for instrument " + instrument);
                         return null;
                     }
                 }
