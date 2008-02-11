@@ -199,7 +199,7 @@ public class TestJPA {
         
         nullQuery.setParameter("objectType", ElementType.DATASET);
    
-        nullQuery.setParameter("userId", "SUPER_USER");
+        nullQuery.setParameter("userId", "test");
         
        // nullQuery.setParameter("instrument1", "SXD");
        // nullQuery.setParameter("upper", 123419);
