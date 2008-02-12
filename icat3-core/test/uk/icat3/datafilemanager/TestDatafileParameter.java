@@ -334,7 +334,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
             DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, invalidDatafileParameter, VALID_DATA_FILE_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'numeric value only'", ex.getMessage().contains("numeric value only"));
+            assertTrue("Exception must contain 'string value only'", ex.getMessage().contains("string value only"));
             throw ex;
         }
     }
@@ -349,7 +349,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         
         //create invalid datafileParameter, no name
         DatafileParameter invalidDatafileParameter = getDatafileParameter(true, true);
-        //string value only allowed
+        //numeric value only allowed
         invalidDatafileParameter.setStringValue("45d");
         
         try {
