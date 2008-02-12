@@ -49,7 +49,7 @@ public class TestDatasetSearch extends BaseTestClassTX {
     /**
      * Tests dataset status'
      */
-     @Test
+    @Test
     public void testlistDatasetStatus(){
         log.info("Testing valid user for all dataset status: "+VALID_USER_FOR_INVESTIGATION);
         Collection<String> status = DatasetSearch.listDatasetStatus(em);
@@ -78,7 +78,7 @@ public class TestDatasetSearch extends BaseTestClassTX {
     /**
      * Tests dataset getSamplesBySampleName
      */
-    //   @Test
+    @Test
     public void testgetSamplesBySampleNameInvalidUser(){
         log.info("Testing invalid user for get sample by sample name: "+INVALID_USER);
         
@@ -93,7 +93,7 @@ public class TestDatasetSearch extends BaseTestClassTX {
     /**
      * Tests dataset getDatasetsBySample
      */
-    //@Test
+    @Test
     public void testgetDatasetsBySample() throws ICATAPIException{
         log.info("Testing valid user for get datasets by sample : "+VALID_USER_FOR_INVESTIGATION);
         
@@ -110,7 +110,7 @@ public class TestDatasetSearch extends BaseTestClassTX {
     /**
      * Tests dataset getDatasetsBySample
      */
-    //  @Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void testgetDatasetsBySampleInvalidUser() throws ICATAPIException{
         log.info("Testing invalid user for get datasets by sample : "+INVALID_USER);
         

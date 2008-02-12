@@ -36,17 +36,67 @@ public class TestDatafileSearch extends BaseTestClassTX {
     @Test
     public void testsearchByRunNumber(){
         log.info("Testing valid user for search By Run Number: "+VALID_USER_FOR_INVESTIGATION);
+        try{
         Collection<String> instruments = new ArrayList<String>();
         instruments.add("SXD");
         Collection<Datafile> files = DatafileSearch.searchByRunNumber(VALID_USER_FOR_INVESTIGATION, instruments, 0L, 100000L, em);
         
         assertNotNull("Must not be an null collection of types ", files);
-        assertEquals("Number of datasettypes searched is different to number in DB", 3 , files.size());
+        assertEquals("Number of datasettypes searched is different to number in DB", 2 , files.size());
         
         log.trace("Number datafiles returned is "+files.size());
         for (Datafile datafile : files) {
-            log.trace(datafile + " "+datafile.getName());
+            log.trace(datafile + " "+datafile.getName());            
+        }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    
             
+    /**
+     * Tests datafiles
+     */
+    @Test
+    public void testsearchByRunNumberFacilityScientist(){
+        log.info("Testing valid user for search By Run Number: facility_scientist");
+        try{
+        Collection<String> instruments = new ArrayList<String>();
+        instruments.add("SXD");
+        Collection<Datafile> files = DatafileSearch.searchByRunNumber("facility_scientist", instruments, 0L, 100000L, em);
+        
+        assertNotNull("Must not be an null collection of types ", files);
+        assertEquals("Number of datasettypes searched is different to number in DB", 4 , files.size());
+        
+        log.trace("Number datafiles returned is "+files.size());
+        for (Datafile datafile : files) {
+            log.trace(datafile + " "+datafile.getName());            
+        }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    
+     /**
+     * Tests datafiles
+     */
+    @Test
+    public void testsearchByRunNumberSuper(){
+        log.info("Testing valid user for search By Run Number: SUPER_USER");
+        try{
+        Collection<String> instruments = new ArrayList<String>();
+        instruments.add("SXD");
+        Collection<Datafile> files = DatafileSearch.searchByRunNumber("SUPER_USER", instruments, 0L, 100000L, em);
+        
+        assertNotNull("Must not be an null collection of types ", files);
+        assertEquals("Number of datasettypes searched is different to number in DB", 4 , files.size());
+        
+        log.trace("Number datafiles returned is "+files.size());
+        for (Datafile datafile : files) {
+            log.trace(datafile + " "+datafile.getName());            
+        }
+        }catch(Exception e){
+            e.printStackTrace();
         }
     }
     
@@ -62,7 +112,7 @@ public class TestDatafileSearch extends BaseTestClassTX {
         Collection<Datafile> files = DatafileSearch.searchByRunNumber(VALID_USER_FOR_INVESTIGATION, instruments, 0L, 100000L, em);
         
         assertNotNull("Must not be an null collection of types ", files);
-        assertEquals("Number of datasettypes searched is different to number in DB", 3 , files.size());
+        assertEquals("Number of data files searched is different to number in DB", 2 , files.size());
         
         log.trace("Number datafiles returned is "+files.size());
         for (Datafile datafile : files) {
@@ -124,10 +174,10 @@ public class TestDatafileSearch extends BaseTestClassTX {
         instruments.add("SXD");
         
         //limit by 1200, miss one of the three out so only two returned
-        Collection<Datafile> files = DatafileSearch.searchByRunNumber(VALID_USER_FOR_INVESTIGATION, instruments, 1070f, 100000f, em);
+        Collection<Datafile> files = DatafileSearch.searchByRunNumber(VALID_USER_FOR_INVESTIGATION, instruments, 1063f, 1065f, em);
         
         assertNotNull("Must not be an null collection of types ", files);
-        assertEquals("Number of datasettypes searched is different to number in DB", 1 , files.size());
+        assertEquals("Number of datasettypes searched is different to number in DB", 2 , files.size());
         
         log.trace("Number datafiles returned is "+files.size());
         for (Datafile datafile : files) {
