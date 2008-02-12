@@ -166,21 +166,18 @@ public class TestGateKeeperCreatorDatafile extends TestGateKeeperUtil {
     /**
      * Tests creator on valid Datafile for insert (cos Datafile this test insert root)
      *
-     * ACTION_ROOT_INSERT - N
+     * ACTION_ROOT_INSERT - Y yes for datafile
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    @Test
     public void testCreatorInsertOnDatafile() throws ICATAPIException {
         log.info("Testing  user: "+CREATOR_USER+ " for insert on Datafile Id: "+VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST);
         
-        Datafile Datafile = getDatafile(true);
+        Datafile datafile = getDatafile(true);
         
-        try {
-            GateKeeper.performAuthorisation(CREATOR_USER, Datafile, AccessType.CREATE, em);
-        } catch (InsufficientPrivilegesException ex) {
-            log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
-            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            throw ex;
-        }
+        GateKeeper.performAuthorisation(CREATOR_USER, datafile, AccessType.CREATE, em);
+        
+        //no exception
+        assertTrue("This should be true", true);
     }
     
     /**
