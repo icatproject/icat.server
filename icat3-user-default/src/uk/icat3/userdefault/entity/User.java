@@ -51,10 +51,10 @@ public class User implements Serializable {
     @Column(name = "ID", nullable = false)
     private Long id;
     
-    @Column(name = "DN", nullable = false)
+    @Column(name = "DN", nullable = false, unique=true)
     private String dn;
     
-    @Column(name = "USER_ID", nullable = false, unique=true)
+    @Column(name = "USER_ID", nullable = false)
     private String userId;
     
     @Column(name = "PASSWORD")
@@ -177,6 +177,5 @@ public class User implements Serializable {
     public boolean isSuper(){
         if(getUserId().equals(IcatRoles.SUPER_USER.toString())) return true;
         else return false;                 
-    }
-           
+    }           
 }
