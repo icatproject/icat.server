@@ -87,15 +87,18 @@ public class GateKeeper {
             //rootElementId = ((Datafile) object).getId();
             rootElementsParentsId = ((Datafile) object).getDataset().getInvestigation().getId();
             rootElementId = ((Datafile) object).getDataset().getId();
-            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATASET, manager);
+            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATASET /* ElementType.DATAFILE*/, manager);
         } else if (object instanceof DatasetParameter) {
             rootElementsParentsId = ((DatasetParameter) object).getDataset().getInvestigation().getId();
             rootElementId = ((DatasetParameter) object).getDataset().getId();
             return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATASET_PARAMETER, manager);
         } else if (object instanceof DatafileParameter) {
-            rootElementsParentsId = ((DatafileParameter) object).getDatafile().getDataset().getId();
-            rootElementId = ((DatafileParameter) object).getDatafile().getId();
-            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATAFILE_PARAMETER, manager);
+            //Changed. Need to check the dataset parent for data file parameter now.
+            //rootElementsParentsId = ((DatafileParameter) object).getDatafile().getDataset().getId();
+            //rootElementId = ((DatafileParameter) object).getDatafile().getId();
+            rootElementsParentsId = ((DatafileParameter) object).getDatafile().getDataset().getInvestigation().getId();
+            rootElementId = ((DatafileParameter) object).getDatafile().getDataset().getId();
+            return performAuthorisation(user, rootElementsParentsId, access, object, rootElementId, ElementType.DATASET /* ElementType.DATAFILE_PARAMETER*/, manager);
         } else if (object instanceof SampleParameter) {
             rootElementsParentsId = ((SampleParameter) object).getSample().getInvestigationId().getId();
             rootElementId = ((SampleParameter) object).getSample().getInvestigationId().getId();
@@ -154,20 +157,26 @@ public class GateKeeper {
         if (!isSuperUser) {
             try {
                 if (elementType.isInvestigationType()) {
-                    role = findIcatAuthorisation(userId, ElementType.INVESTIGATION, rootParentsId, rootElementsParentId, object, manager);
+                    icatAuthorisation = findIcatAuthorisation(userId, ElementType.INVESTIGATION, rootParentsId, rootElementsParentId, object, manager);
                 } else if (elementType.isDatasetType()) {
-                    role = findIcatAuthorisation(userId, ElementType.DATASET, rootParentsId, rootElementsParentId, object, manager);
+                    icatAuthorisation = findIcatAuthorisation(userId, ElementType.DATASET, rootParentsId, rootElementsParentId, object, manager);
                 } else if (elementType.isDatafileType()) {
-                    role = findIcatAuthorisation(userId, ElementType.DATAFILE, rootParentsId, rootElementsParentId, object, manager);
+                    icatAuthorisation = findIcatAuthorisation(userId, ElementType.DATAFILE, rootParentsId, rootElementsParentId, object, manager);
                 } else {
                     throw new RuntimeException("Element Type: " + elementType + " not supported");
                 } //should never be thrown
 
                 //if role null, ie facility scientist then return super
-                if (role == null) {
+                if (icatAuthorisation == null) {
                     IcatRole superRole = manager.find(IcatRole.class, "SUPER");
                     role = superRole;
+                    icatAuthorisation = new IcatAuthorisation();
+                    icatAuthorisation.setRole(superRole);
                 }
+                else {
+                    role = icatAuthorisation.getRole();
+                }
+                log.debug("IcatAuthorisation "+icatAuthorisation+" with Role: "+icatAuthorisation.getRole());
             } catch (InsufficientPrivilegesException ipe) {
                 log.warn("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object);
                 throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform '" + access + "' operation on " + object);
@@ -176,6 +185,8 @@ public class GateKeeper {
             //super user role
             IcatRole superRole = manager.find(IcatRole.class, "SUPER");
             role = superRole;
+            icatAuthorisation = new IcatAuthorisation();
+            icatAuthorisation.setRole(superRole);
         }
 
         //now check the access permission from the icat authroisation
@@ -189,7 +200,7 @@ public class GateKeeper {
             //cannot do if facility acquired
             if (!object.isFacilityAcquiredSet()) {
                 //check if element type is a root, if so check root remove permissions
-                if (elementType.isRootType()) {
+                if (object instanceof Dataset || object instanceof Investigation && object instanceof Datafile) {
                     log.trace("Create ID: " + object.getCreateId() + " " + userId.equals(object.getCreateId()) + " " + icatAuthorisation.getRole());
                     // to remove something, create Id must also be the same as your Id.
                     if (role.isActionRootRemove() && userId.equals(object.getCreateId())) {
@@ -201,9 +212,9 @@ public class GateKeeper {
             }
         } else if (access == AccessType.CREATE) { //ie INSERT
             //check if element type is a root, if so check root insert permissions
-            if (elementType.isRootType()) {
+            if (object instanceof Dataset || object instanceof Investigation) {
                 log.trace("Trying to create a root type: " + elementType);
-                log.trace("Element Type: " + elementType);
+                log.trace("Element Type: " + elementType + ", AUTH: " + icatAuthorisation + " for " + object);
                 //if null in investigation id then can create investigations
                 if (elementType == ElementType.INVESTIGATION && icatAuthorisation.getElementId() == null && role.isActionRootInsert()) {
                     success = true; //user has access to insert root root element
@@ -220,7 +231,9 @@ public class GateKeeper {
                         role.isActionRootInsert()) {
                     success = true; //user has access to insert root root element
                 }
-            } else if (role.isActionInsert()) {
+            } else if(object instanceof Datafile && role.isActionRootInsert()){
+                success = true;  //user has access to insert root root element
+            } else if (role.isActionInsert()) {                          
                 success = true; //user has access to insert element
             }
         } else if (access == AccessType.UPDATE) {
@@ -266,7 +279,7 @@ public class GateKeeper {
      * to the users fedId, if this is not found, it looks for the ANY as the fedId
      *
      */
-    private static IcatRole findIcatAuthorisation(String userId, ElementType type, Long id, Long parentId, EntityBaseBean object, EntityManager manager) throws InsufficientPrivilegesException {
+    private static IcatAuthorisation findIcatAuthorisation(String userId, ElementType type, Long id, Long parentId, EntityBaseBean object, EntityManager manager) throws InsufficientPrivilegesException {
         if (!type.isRootType()) {
             throw new RuntimeException("ElementType: " + type + " not supported");
         }
@@ -350,8 +363,9 @@ public class GateKeeper {
                     FacilityInstrumentScientist facilityInstrumentScientist = null;
                     try {
                         facilityInstrumentScientist = (FacilityInstrumentScientist) manager.createNamedQuery("FacilityInstrumentScientist.findByUserAndInstrument").setParameter("federalId", userId).setParameter("instrumentName", instrument).getSingleResult();
-                    } catch (NoResultException nre223) {}
-                    
+                    } catch (NoResultException nre223) {
+                    }
+
                     if (facilityInstrumentScientist == null) {
                         log.debug("None found for : UserId: " + userId + ", type: " + type + ", elementId: " + id + ", throwing exception");
                         throw new InsufficientPrivilegesException();
@@ -364,7 +378,7 @@ public class GateKeeper {
         }
 
         //return the icat authoruisation
-        return icatAuthorisation.getRole();
+        return icatAuthorisation;
 
     }
 }

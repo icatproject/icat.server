@@ -32,6 +32,8 @@
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicList</class>
+        <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
+        <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))"/>
@@ -79,6 +81,8 @@
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicList</class>
+        <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
+        <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))"/>
@@ -126,6 +130,8 @@
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicList</class>
+        <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
+        <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
           <!--  <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))"/>
@@ -178,6 +184,8 @@
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicList</class>
+        <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
+        <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION =  (LOAD_BALANCE = yes) (FAILOVER = ON) (ADDRESS = (PROTOCOL = TCP)(HOST = honey-vip.esc.rl.ac.uk)(PORT = 1521))  (ADDRESS = (PROTOCOL = TCP)(HOST = goodnight-vip.esc.rl.ac.uk)(PORT = 1521))   (ADDRESS = (PROTOCOL = TCP)(HOST = domino-vip.esc.rl.ac.uk)(PORT = 1521))  (ADDRESS = (PROTOCOL = TCP)(HOST = sapphire-vip.esc.rl.ac.uk)(PORT = 1521))  (CONNECT_DATA = (SERVICE_NAME = ICATCLF.ESC.RL.AC.UK) (FAILOVER_MODE =   (TYPE=SESSION)  (METHOD=BASIC)   )  ) )" />
@@ -224,6 +232,8 @@
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicList</class>
+        <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
+        <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))" />

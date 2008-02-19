@@ -79,5 +79,14 @@ public enum ElementType {
         if(this == ElementType.DATAFILE || this == ElementType.INVESTIGATION || this == ElementType.DATASET)
             return true;
         else return false;
-    }   
+    }  
+    
+    /**
+     * Checks wheather this type of element is a root element, ie inv, ds, not df as this is changed for auth
+     */
+    public boolean isRootAuthType(){
+        if(this == ElementType.INVESTIGATION || this == ElementType.DATASET)
+            return true;
+        else return false;
+    }  
 }
