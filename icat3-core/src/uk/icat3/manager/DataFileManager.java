@@ -133,7 +133,8 @@ public class DataFileManager extends ManagerUtil {
         GateKeeper.performAuthorisation(userId, dataFile, AccessType.REMOVE, manager);
 
         //remove all entries for all of the inv, ds, df from the table
-        removeElementAuthorisations(dataFile.getId(), ElementType.DATAFILE, manager);
+        //Changed, do not need to remove this row for datafile.
+        //removeElementAuthorisations(dataFile.getId(), ElementType.DATAFILE, manager);
 
         manager.remove(dataFile);
     }

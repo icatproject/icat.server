@@ -275,7 +275,13 @@ public class ManagerUtil {
         //implicitily by the dataset authorisation
         try{
             GateKeeper.performAuthorisation(userId, dataset, AccessType.READ, manager);
-            dataset.getDatafileCollection();       
+            dataset.getDatafileCollection();  
+            
+            //need to add the icat role to each datafile
+            for (Datafile datafile :  dataset.getDatafileCollection()) {
+                datafile.setIcatRole(dataset.getIcatRole());
+            }
+            
             log.debug("Adding (allowed to read) " + dataset.getDatafileCollection().size() + " datafiles to " + dataset + " from a total of " + dataset.getDatafileCollection().size());        
         } catch (Exception ignore) {
             log.debug("Adding (allowed to read) 0 datafiles to " + dataset + " from a total of " + dataset.getDatafileCollection().size());        
@@ -643,7 +649,9 @@ public class ManagerUtil {
         } else if (type == ElementType.DATASET) {
             rootElement = find(Dataset.class, elementId, manager);
         } else if (type == ElementType.DATAFILE) {
-            rootElement = find(Datafile.class, elementId, manager);
+            //Changed, unable to add DataFile authorisation nows
+            throw new IllegalArgumentException("Unable to add authorisations for type: "+type);
+            //rootElement = find(Datafile.class, elementId, manager);
         }
 
         //check permissions on investigation
