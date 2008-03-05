@@ -18,7 +18,7 @@ import uk.icat3.util.BaseTestClassTX;
 import uk.icat3.exceptions.*;
 import static org.junit.Assert.*;
 import static uk.icat3.util.TestConstants.*;
-
+import static uk.icat3.data.DownloadConstants.*;
 /**
  *
  * @author gjd37
@@ -38,13 +38,14 @@ public class TestDatafileDownload extends BaseTestClassTX {
 
         log.trace("URL returned is " + url);
         assertNotNull("URL returned cannot be null", url);
-        assertTrue("URL contains sessionid", url.contains("sessionid"));
+        assertTrue("URL contains sessionid", url.contains(SESSIONID_NAME));
 
         //only contains one name parameter
-        int index = url.indexOf("datafileId");
+        int index = url.indexOf(DATAFILEID_NAME);
         String url2 = url.substring(index + 1, url.length());
         //int index2 = url2.indexOf("name");
-        assertTrue("URL contains oatleast one datafileId parameter", index != -1);
+
+        assertTrue("URL contains atleast one fileId parameter", index != -1);
 
     }
 
@@ -93,14 +94,15 @@ public class TestDatafileDownload extends BaseTestClassTX {
 
         log.trace("URL returned is " + url);
         assertNotNull("URL returned cannot be null", url);
-        assertTrue("URL contains sessionid", url.contains("sessionid"));
+        assertTrue("URL contains sessionid", url.contains(SESSIONID_NAME));
 
         //only contains 2 name parameters
-        int index = url.indexOf("datasetId");
+        int index = url.indexOf(DATASETID_NAME);
         String url2 = url.substring(index + 1, url.length());
-        int index2 = url2.indexOf("datasetId");
-      
-        assertTrue("URL contains 1 datasetId parameters", index2 == -1);
+        int index2 = url2.indexOf(DATASETID_NAME);
+
+        assertTrue("URL contains 1 "+DATASETID_NAME+" parameters", index != -1);
+        assertTrue("URL contains 1 "+DATASETID_NAME+" parameters", index2 == -1);
     }
 
     /**
@@ -152,15 +154,18 @@ public class TestDatafileDownload extends BaseTestClassTX {
 
         log.trace("URL returned is " + url);
         assertNotNull("URL returned cannot be null", url);
-        assertTrue("URL contains sessionid", url.contains("sessionid"));
+        assertTrue("URL contains sessionid", url.contains(SESSIONID_NAME));
 
         //only contains 2 name parameters
-        int index = url.indexOf("datafileId");
+        int index = url.indexOf(DATAFILEID_NAME);
         String url2 = url.substring(index + 1, url.length());
-        int index2 = url2.indexOf("datafileId");
+        int index2 = url2.indexOf(DATAFILEID_NAME);
         String url3 = url2.substring(index2 + 1, url2.length());
-        int index3 = url3.indexOf("datafileId");
-        assertTrue("URL contains 2 datafileId parameters", index3 == -1);
+        int index3 = url3.indexOf(DATAFILEID_NAME);
+        
+        assertTrue("URL contains 2 fileId parameters", index != -1);
+        assertTrue("URL contains 2 fileId parameters", index2 != -1);
+        assertTrue("URL contains 2 fileId parameters", index3 == -1);
     }
 
     /**
@@ -221,7 +226,7 @@ public class TestDatafileDownload extends BaseTestClassTX {
         assertNotNull("Access must be true", access);
         assertNotNull("Collection of file names must not be null", access.getDatafileNames());
         assertEquals("Collection size must be one", 1, access.getDatafileNames().size());
-        assertEquals("File name must be SXD015554.RAW", "SXD015554.RAW",  access.getDatafileNames().iterator().next());
+        assertEquals("File name must be SXD015554.RAW", "SXD015554.RAW", access.getDatafileNames().iterator().next());
         assertEquals("User id must be " + VALID_USER_FOR_INVESTIGATION, VALID_USER_FOR_INVESTIGATION, access.getUserId());
     }
 
@@ -298,7 +303,7 @@ public class TestDatafileDownload extends BaseTestClassTX {
      * Valid user check access for deleted test
      * 
      * @throws uk.icat3.exceptions.ICATAPIException
-     */    
+     */
     @Test(expected = NoSuchObjectFoundException.class)
     public void testAccessToDownloadDeletedFile() throws ICATAPIException {
         log.info("Testing download datafile 56 name deleted.RAW for user " + VALID_USER_FOR_INVESTIGATION);
