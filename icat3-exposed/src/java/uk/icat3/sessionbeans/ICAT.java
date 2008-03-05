@@ -1885,10 +1885,10 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
             return investigationManagerLocal.addAuthorisation(sessionId, toAddUserId, toAddRole, elementId);
         } else if (elementType == ElementType.DATASET) {
             return datasetManagerLocal.addAuthorisation(sessionId, toAddUserId, toAddRole, elementId);
-        } else if (elementType == ElementType.DATAFILE) {
-            return datafileManagerLocal.addAuthorisation(sessionId, toAddUserId, toAddRole, elementId);
-        } else {
-            throw new SessionException("ElementType " + elementType + " not supported"); //should never be thrown
+        } /*else if (elementType == ElementType.DATAFILE) {
+              return datafileManagerLocal.addAuthorisation(sessionId, toAddUserId, toAddRole, elementId);
+        }*/ else {
+            throw new SessionException("ElementType " + elementType + " not supported"); //should never be thrown //changed now, thrown for datafile
         }
     }
 
@@ -2041,13 +2041,14 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object             
      * @return DownloadInfo downloadinfo 
      */
+    @WebMethod    
     public 
     @WebResult(name = "downloadInfo")
     DownloadInfo checkDatafileDownloadAccess(
             
             @WebParam(name = "sessionId") String sessionId,
             
-            @WebParam(name = "fileNames") Collection<Long> datafileIds) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+            @WebParam(name = "datafileIds") Collection<Long> datafileIds) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
         return downloadManagerLocal.checkDatafileDownloadAccess(sessionId, datafileIds);
     }
     
@@ -2062,6 +2063,7 @@ public class ICAT extends EJBObject /*implements ICATLocal*/ {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object             
      * @return DownloadInfo downloadinfo 
      */
+    @WebMethod
     public 
     @WebResult(name = "downloadInfo")
     DownloadInfo checkDatasetDownloadAccess(
