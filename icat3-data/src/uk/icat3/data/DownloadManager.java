@@ -21,6 +21,7 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.manager.DataFileManager;
 import uk.icat3.manager.DataSetManager;
 import uk.icat3.util.DatasetInclude;
+import static uk.icat3.data.DownloadConstants.*;
 
 /**
  * All methods for downloading file (ie getting the URL of the download service and
@@ -148,8 +149,8 @@ public class DownloadManager {
     private static String generateDownloadUrl(Long datasetId, String sessionId) {
 
         StringBuilder builder = new StringBuilder();
-        builder.append("http://data.isis/download?sessionid=" + sessionId);
-        builder.append("&datasetId=" + datasetId);
+        builder.append(DOWNLOAD_SCHEME+"://"+HOST_NAME+"/"+CGI_NAME+"?"+SESSIONID_NAME+"=" + sessionId);
+        builder.append("&"+DATASETID_NAME+"=" + datasetId);
 
         return builder.toString();
     }
@@ -164,9 +165,9 @@ public class DownloadManager {
     private static String generateDownloadUrl(Collection<Long> datafileIds, String sessionId) {
 
         StringBuilder builder = new StringBuilder();
-        builder.append("http://data.isis/download?sessionid=" + sessionId);
+        builder.append(DOWNLOAD_SCHEME+"://"+HOST_NAME+"/"+CGI_NAME+"?"+SESSIONID_NAME+"=" + sessionId);
         for (Long datafileId : datafileIds) {
-            builder.append("&datafileId=" + datafileId);
+            builder.append("&"+DATAFILEID_NAME+"=" + datafileId);
         }
         return builder.toString();
     }
