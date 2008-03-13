@@ -112,28 +112,25 @@ public class DownloadManager {
     public static String downloadDataset(String userId, String sessionId, Long datasetId, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException {
         log.trace("downloadDataset(" + userId + ", " + sessionId + ", " + datasetId + ", EntityManager)");
 
+        boolean zip = true;
+        int numberFiles = 0;
+
         //get the dataset and its files.
         Dataset dataset = DataSetManager.getDataSet(userId, datasetId, DatasetInclude.DATASET_AND_DATAFILES_ONLY, manager);
 
-        //Changed to only check dataset access for all datafiles
-        //Collection<Datafile> datafiles = dataset.getDatafileCollection();
-
-        //collection of readable and downloadable files
-        //Collection<Datafile> validDatafiles = new ArrayList<Datafile>();
-
-        //loop and add downloadable to list
-        /*for (Datafile datafile : datafiles) {
-        if (datafile.getIcatRole().isActionDownload()) {
-        validDatafiles.add(datafile);
-        log.trace("User: " + userId + " had access to 'DOWNLOAD' " + datafile);
-        } else {
-        log.trace("User: " + userId + " does not have permission to perform 'DOWNLOAD' operation on " + datafile);
+        for (Datafile datafile : dataset.getDatafileCollection()) {
+            if (!datafile.isDeleted()) { //check if deleted, all deleted should have been removed anyway
+                numberFiles++;
+            }
         }
-        }*/
-
+        //if only one file, zip false
+        if (numberFiles == 1) {
+            zip = false; 
+        }
+        
         //check download
         if (dataset.getIcatRole().isActionDownload() /*&& !validDatafiles.isEmpty()*/) {
-            return generateDownloadUrl(datasetId, sessionId);
+            return generateDownloadUrl(datasetId, sessionId, zip);
         } else {
             throw new InsufficientPrivilegesException("User: " + userId + " does not have permission to perform 'DOWNLOAD' operation on " + dataset);
         }
@@ -146,11 +143,16 @@ public class DownloadManager {
      * @param sessionId session id of the user for ICAT
      * @return URL that will be used to download the datafiles
      */
-    private static String generateDownloadUrl(Long datasetId, String sessionId) {
+    private static String generateDownloadUrl(Long datasetId, String sessionId, boolean zip) {
 
         StringBuilder builder = new StringBuilder();
-        builder.append(DOWNLOAD_SCHEME+"://"+HOST_NAME+"/"+CGI_NAME+"?"+SESSIONID_NAME+"=" + sessionId);
-        builder.append("&"+DATASETID_NAME+"=" + datasetId);
+        String DOWNLOAD_ACTION = ACTION.ZIP.toString();
+        if (!zip) {
+            DOWNLOAD_ACTION = ACTION.NONE.toString();
+        }
+
+        builder.append(DOWNLOAD_SCHEME + "://" + HOST_NAME + "/" + CGI_NAME + "?" + SESSIONID_NAME + "=" + sessionId + "&action=" + DOWNLOAD_ACTION);
+        builder.append("&" + DATASETID_NAME + "=" + datasetId);
 
         return builder.toString();
     }
@@ -165,9 +167,14 @@ public class DownloadManager {
     private static String generateDownloadUrl(Collection<Long> datafileIds, String sessionId) {
 
         StringBuilder builder = new StringBuilder();
-        builder.append(DOWNLOAD_SCHEME+"://"+HOST_NAME+"/"+CGI_NAME+"?"+SESSIONID_NAME+"=" + sessionId);
+        String DOWNLOAD_ACTION = ACTION.ZIP.toString();
+        if (datafileIds.size() == 1) {
+            DOWNLOAD_ACTION = ACTION.NONE.toString();
+        }
+
+        builder.append(DOWNLOAD_SCHEME + "://" + HOST_NAME + "/" + CGI_NAME + "?" + SESSIONID_NAME + "=" + sessionId + "&action=" + DOWNLOAD_ACTION);
         for (Long datafileId : datafileIds) {
-            builder.append("&"+DATAFILEID_NAME+"=" + datafileId);
+            builder.append("&" + DATAFILEID_NAME + "=" + datafileId);
         }
         return builder.toString();
     }
@@ -192,20 +199,23 @@ public class DownloadManager {
         Collection<Datafile> datafiles = DataFileManager.getDataFiles(userId, datafileIds, manager);
 
         Collection<String> fileNames = new ArrayList<String>();
+        Collection<String> fileLocations = new ArrayList<String>();
         for (Datafile datafile : datafiles) {
             fileNames.add(datafile.getName());
+            fileLocations.add(datafile.getLocation());
         }
 
         //create download info
         DownloadInfo downloadInfo = new DownloadInfo();
         downloadInfo.setDatafileNames(fileNames);
+        downloadInfo.setDatafileLocations(fileLocations);
         downloadInfo.setUserId(userId);
 
         //user had access
         return downloadInfo;
     }
-    
-     /**
+
+    /**
      * Checks if user has access to download the files.
      *      
      * @param userId federalId of the user.
@@ -224,15 +234,20 @@ public class DownloadManager {
         //this should be cached in single entity manager call
         Dataset dataset = DataSetManager.getDataSet(userId, datasetId, DatasetInclude.DATASET_AND_DATAFILES_ONLY, manager);
         Collection<Datafile> datafiles = dataset.getDatafileCollection();
-        
+
         Collection<String> fileNames = new ArrayList<String>();
+        Collection<String> fileLocations = new ArrayList<String>();
         for (Datafile datafile : datafiles) {
-            if(!datafile.isDeleted()) fileNames.add(datafile.getName());
+            if (!datafile.isDeleted()) {
+                fileNames.add(datafile.getName());
+                fileLocations.add(datafile.getLocation());
+            }
         }
 
         //create download info
         DownloadInfo downloadInfo = new DownloadInfo();
         downloadInfo.setDatafileNames(fileNames);
+        downloadInfo.setDatafileLocations(fileLocations);
         downloadInfo.setUserId(userId);
 
         //user had access

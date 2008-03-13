@@ -14,6 +14,24 @@ public class DownloadInfo {
 
     private String userId;
     private Collection<String> datafileNames;
+    private Collection<String> datafileLocations;
+    private String credential;
+
+    public String getCredential() {
+        return credential;
+    }
+
+    public void setCredential(String credential) {
+        this.credential = credential;
+    }
+
+    public Collection<String> getDatafileLocations() {
+        return datafileLocations;
+    }
+
+    public void setDatafileLocations(Collection<String> datafileLocations) {
+        this.datafileLocations = datafileLocations;
+    }
 
     public Collection getDatafileNames() {
         return datafileNames;
