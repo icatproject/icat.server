@@ -44,6 +44,7 @@ NAME VARCHAR2(255) NOT NULL,
 VERSION VARCHAR2(255) NOT NULL,
 FORMAT_TYPE VARCHAR2(255),
 DESCRIPTION VARCHAR2(4000),
+SEQ_NUMBER NUMBER DEFAULT 999 NOT NULL,
 MOD_TIME TIMESTAMP(1) NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
 CREATE_TIME TIMESTAMP(1) NOT NULL,
@@ -81,6 +82,7 @@ INVESTIGATION_ID NUMBER NOT NULL,
 NAME VARCHAR2(255) NOT NULL,
 DATASET_TYPE VARCHAR2(255) NOT NULL,
 DATASET_STATUS VARCHAR2(255),
+LOCATION VARCHAR2(4000),
 DESCRIPTION VARCHAR2(4000),
 MOD_TIME TIMESTAMP(1) NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
@@ -115,6 +117,7 @@ CREATE TABLE DATASET_STATUS
 (
 NAME VARCHAR2(255) NOT NULL,
 DESCRIPTION VARCHAR2(4000),
+SEQ_NUMBER NUMBER DEFAULT 999 NOT NULL,
 MOD_TIME TIMESTAMP(1) NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
 CREATE_TIME TIMESTAMP(1) NOT NULL,
@@ -128,6 +131,7 @@ CREATE TABLE DATASET_TYPE
 (
 NAME VARCHAR2(255) NOT NULL,
 DESCRIPTION VARCHAR2(4000),
+SEQ_NUMBER NUMBER DEFAULT 999 NOT NULL,
 MOD_TIME TIMESTAMP(1) NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
 CREATE_TIME TIMESTAMP(1) NOT NULL,
@@ -143,6 +147,21 @@ NAME VARCHAR2(255) NOT NULL,
 START_DATE TIMESTAMP(1),
 FINISH_DATE TIMESTAMP(1),
 DESCRIPTION VARCHAR2(4000),
+SEQ_NUMBER NUMBER DEFAULT 999 NOT NULL,
+MOD_TIME TIMESTAMP(1) NOT NULL,
+MOD_ID VARCHAR2(255) NOT NULL,
+CREATE_TIME TIMESTAMP(1) NOT NULL,
+CREATE_ID VARCHAR2(255) NOT NULL,
+FACILITY_ACQUIRED VARCHAR2(1) NOT NULL,
+DELETED VARCHAR2(1) DEFAULT 'N' NOT NULL
+)
+;
+
+CREATE TABLE FACILITY_INSTRUMENT_SCIENTIST
+(
+INSTRUMENT_NAME VARCHAR2(255) NOT NULL,
+FEDERAL_ID VARCHAR2(255) NOT NULL,
+SEQ_NUMBER NUMBER DEFAULT 999 NOT NULL,
 MOD_TIME TIMESTAMP(1) NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
 CREATE_TIME TIMESTAMP(1) NOT NULL,
@@ -173,14 +192,13 @@ DELETED VARCHAR2(1) DEFAULT 'N' NOT NULL
 CREATE TABLE ICAT_AUTHORISATION
 (
 ID NUMBER NOT NULL,
-
 USER_ID VARCHAR2(255) NOT NULL,
 ROLE VARCHAR2(255) NOT NULL,
+USER_CHILD_RECORD NUMBER,
 ELEMENT_TYPE VARCHAR2(100) NOT NULL,
 ELEMENT_ID NUMBER,
 PARENT_ELEMENT_TYPE VARCHAR2(100),
 PARENT_ELEMENT_ID NUMBER,
-USER_CHILD_RECORD NUMBER,
 MOD_TIME TIMESTAMP(1) NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
 CREATE_TIME TIMESTAMP(1) NOT NULL,
@@ -214,6 +232,8 @@ ACTION_SET_FA VARCHAR2(1) DEFAULT 'N' NOT NULL,
 ACTION_SET_FA_WEIGHT NUMBER NOT NULL,
 ACTION_MANAGE_USERS VARCHAR2(1) DEFAULT 'N' NOT NULL,
 ACTION_MANAGE_USERS_WEIGHT NUMBER NOT NULL,
+ACTION_SUPER VARCHAR2(1) DEFAULT 'N' NOT NULL,
+ACTION_SUPER_WEIGHT NUMBER NOT NULL,
 MOD_TIME TIMESTAMP(1) NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
 CREATE_TIME TIMESTAMP(1) NOT NULL,
@@ -229,6 +249,7 @@ NAME VARCHAR2(255) NOT NULL,
 SHORT_NAME VARCHAR2(30) NOT NULL,
 TYPE VARCHAR2(255),
 DESCRIPTION VARCHAR2(4000),
+SEQ_NUMBER NUMBER DEFAULT 999 NOT NULL,
 MOD_TIME TIMESTAMP(1) NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
 CREATE_TIME TIMESTAMP(1) NOT NULL,
@@ -252,6 +273,10 @@ INV_ABSTRACT VARCHAR2(4000),
 PREV_INV_NUMBER VARCHAR2(255),
 BCAT_INV_STR VARCHAR2(255),
 GRANT_ID NUMBER,
+INV_PARAM_NAME VARCHAR2(255),
+INV_PARAM_VALUE VARCHAR2(4000),
+INV_START_DATE TIMESTAMP(1),
+INV_END_DATE TIMESTAMP(1),
 RELEASE_DATE TIMESTAMP(1),
 MOD_TIME TIMESTAMP(1) NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
@@ -267,6 +292,7 @@ CREATE TABLE INVESTIGATION_TYPE
 (
 NAME VARCHAR2(255) NOT NULL,
 DESCRIPTION VARCHAR2(4000),
+SEQ_NUMBER NUMBER DEFAULT 999 NOT NULL,
 MOD_TIME TIMESTAMP(1) NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
 CREATE_TIME TIMESTAMP(1) NOT NULL,
@@ -315,13 +341,14 @@ IS_SAMPLE_PARAMETER VARCHAR2(1) NOT NULL,
 IS_DATASET_PARAMETER VARCHAR2(1) NOT NULL,
 IS_DATAFILE_PARAMETER VARCHAR2(1) NOT NULL,
 DESCRIPTION VARCHAR2(4000),
+VERIFIED VARCHAR2(1) NOT NULL,
+SEQ_NUMBER NUMBER DEFAULT 999 NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
 MOD_TIME TIMESTAMP(1) NOT NULL,
 CREATE_TIME TIMESTAMP(1) NOT NULL,
 CREATE_ID VARCHAR2(255) NOT NULL,
 FACILITY_ACQUIRED VARCHAR2(1) NOT NULL,
-DELETED VARCHAR2(1) DEFAULT 'N' NOT NULL,
-VERIFIED VARCHAR2(1) DEFAULT 'Y' NOT NULL
+DELETED VARCHAR2(1) DEFAULT 'N' NOT NULL
 )
 ;
 
@@ -417,6 +444,7 @@ SW_VERSION VARCHAR2(255),
 FEATURES VARCHAR2(255),
 DESCRIPTION VARCHAR2(255),
 AUTHORS VARCHAR2(255),
+SEQ_NUMBER NUMBER DEFAULT 999 NOT NULL,
 MOD_TIME TIMESTAMP NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
 CREATE_TIME TIMESTAMP(1) NOT NULL,
@@ -462,6 +490,7 @@ CREATE TABLE STUDY_STATUS
 (
 NAME VARCHAR2(255) NOT NULL,
 DESCRIPTION VARCHAR2(4000) NOT NULL,
+SEQ_NUMBER NUMBER DEFAULT 999 NOT NULL,
 MOD_TIME TIMESTAMP NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
 CREATE_TIME TIMESTAMP(1) NOT NULL,
@@ -477,6 +506,8 @@ FACILITY_SHORT_NAME VARCHAR2(30) NOT NULL,
 FACILITY_LONG_NAME VARCHAR2(255),
 FACILITY_URL VARCHAR2(255),
 FACILITY_DESCRIPTION VARCHAR2(4000),
+DAYS_UNTIL_PUBLIC_RELEASE NUMBER(7, 0) DEFAULT 1095 NOT NULL,
+SEQ_NUMBER NUMBER DEFAULT 999 NOT NULL,
 MOD_ID VARCHAR2(255) NOT NULL,
 MOD_TIME TIMESTAMP(1) NOT NULL,
 CREATE_ID VARCHAR2(255) NOT NULL,
@@ -616,6 +647,15 @@ NAME
  ENABLE
 ;
 
+ALTER TABLE FACILITY_INSTRUMENT_SCIENTIST 
+ADD CONSTRAINT FACILITY_INSTRUMENT_SCIEN_PK PRIMARY KEY
+(
+INSTRUMENT_NAME,
+FEDERAL_ID
+)
+ ENABLE
+;
+
 ALTER TABLE FACILITY_USER 
 ADD CONSTRAINT FACILITY_USER_PK PRIMARY KEY
 (
@@ -631,7 +671,6 @@ ID
 )
  ENABLE
 ;
-
 
 ALTER TABLE ICAT_AUTHORISATION 
 ADD CONSTRAINT ICAT_AUTHORISATION_UK1 UNIQUE
@@ -653,7 +692,7 @@ ROLE
  ENABLE
 ;
 
-ALTER TABLE ICAT_ROLE 
+ALTER TABLE ICAT_ROLE  
 ADD CONSTRAINT ICAT_ROLE_UK1 UNIQUE
 (
 ACTION_INSERT,
@@ -665,7 +704,8 @@ ACTION_REMOVE,
 ACTION_ROOT_INSERT,
 ACTION_ROOT_REMOVE,
 ACTION_SET_FA,
-ACTION_MANAGE_USERS
+ACTION_MANAGE_USERS,
+ACTION_SUPER
 )
  ENABLE
 ;
@@ -811,7 +851,7 @@ ID
 )
  ENABLE
 ;
-
+ 
 ALTER TABLE STUDY 
 ADD CONSTRAINT PK_STU PRIMARY KEY
 (
@@ -869,7 +909,7 @@ TOPIC_ID
 )
  ENABLE
 ;
- 
+
 ALTER TABLE USER_ROLES 
 ADD CONSTRAINT USER_ROLES_PK PRIMARY KEY
 (
@@ -999,7 +1039,18 @@ UNITS
 ) ENABLE
 ;
 
-ALTER TABLE ICAT_AUTHORISATION 
+ALTER TABLE FACILITY_INSTRUMENT_SCIENTIST 
+ADD CONSTRAINT FACILITY_INSTRUMENT_SCIEN_FK1 FOREIGN KEY
+(
+INSTRUMENT_NAME
+)
+REFERENCES INSTRUMENT
+(
+NAME
+) ENABLE
+;
+
+ALTER TABLE ICAT_AUTHORISATION  
 ADD CONSTRAINT ICAT_AUTHORISATION_ICAT_R_FK1 FOREIGN KEY
 (
 ROLE
@@ -1010,7 +1061,7 @@ ROLE
 ) ENABLE
 ;
 
-ALTER TABLE INVESTIGATION 
+ALTER TABLE INVESTIGATION  
 ADD CONSTRAINT INVESTIGATION_INVESTIGATI_FK1 FOREIGN KEY
 (
 INV_TYPE
@@ -1043,17 +1094,6 @@ NAME
 ) ENABLE
 ;
 
-ALTER TABLE INVESTIGATOR 
-ADD CONSTRAINT INVESTIGATOR_FACILITY_USER_FK1 FOREIGN KEY
-(
-FACILITY_USER_ID
-)
-REFERENCES FACILITY_USER
-(
-FACILITY_USER_ID
-) ENABLE
-;
-
 ALTER TABLE INVESTIGATION 
 ADD CONSTRAINT INVESTIGATION_THIS_ICAT_FK1 FOREIGN KEY
 (
@@ -1062,6 +1102,17 @@ FACILITY
 REFERENCES THIS_ICAT
 (
 FACILITY_SHORT_NAME
+) ENABLE
+;
+
+ALTER TABLE INVESTIGATOR 
+ADD CONSTRAINT INVESTIGATOR_FACILITY_USER_FK1 FOREIGN KEY
+(
+FACILITY_USER_ID
+)
+REFERENCES FACILITY_USER
+(
+FACILITY_USER_ID
 ) ENABLE
 ;
 
@@ -1147,7 +1198,7 @@ ID
 ON DELETE CASCADE ENABLE
 ;
 
-ALTER TABLE SAMPLE_PARAMETER 
+ALTER TABLE SAMPLE_PARAMETER  
 ADD CONSTRAINT SAMPLE_PARAMETER_PARAMETE_FK1 FOREIGN KEY
 (
 NAME,
@@ -1335,7 +1386,7 @@ ADD CONSTRAINT FACILITY_CYCLE_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
- 
+
 ALTER TABLE FACILITY_CYCLE 
 ADD CONSTRAINT FACILITY_CYCLE_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
@@ -1347,7 +1398,7 @@ ADD CONSTRAINT FACILITY_USER_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
-
+ 
 ALTER TABLE FACILITY_USER 
 ADD CONSTRAINT FACILITY_USER_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
@@ -1373,151 +1424,151 @@ ADD CONSTRAINT INVESTIGATION_CHK1 CHECK
 ;
 
 ALTER TABLE INVESTIGATION 
-ADD CONSTRAINT INVESTIGATION_CHK4 CHECK 
+ADD CONSTRAINT INVESTIGATION_CHK4 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE INVESTIGATION_TYPE 
-ADD CONSTRAINT INVESTIGATION_TYPE_CHK1 CHECK 
+ADD CONSTRAINT INVESTIGATION_TYPE_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE INVESTIGATION_TYPE 
-ADD CONSTRAINT INVESTIGATION_TYPE_CHK2 CHECK 
+ADD CONSTRAINT INVESTIGATION_TYPE_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE INVESTIGATOR 
-ADD CONSTRAINT INVESTIGATOR_CHK1 CHECK 
+ADD CONSTRAINT INVESTIGATOR_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE INVESTIGATOR 
-ADD CONSTRAINT INVESTIGATOR_CHK2 CHECK 
+ADD CONSTRAINT INVESTIGATOR_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE KEYWORD 
-ADD CONSTRAINT KEYWORD_CHK1 CHECK 
+ADD CONSTRAINT KEYWORD_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE KEYWORD 
-ADD CONSTRAINT KEYWORD_CHK2 CHECK 
+ADD CONSTRAINT KEYWORD_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE PARAMETER 
-ADD CONSTRAINT PARAMETER_CHK1 CHECK 
+ADD CONSTRAINT PARAMETER_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE PARAMETER 
-ADD CONSTRAINT PARAMETER_CHK2 CHECK 
+ADD CONSTRAINT PARAMETER_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE PUBLICATION 
-ADD CONSTRAINT PUBLICATION_CHK1 CHECK 
+ADD CONSTRAINT PUBLICATION_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE PUBLICATION 
-ADD CONSTRAINT PUBLICATION_CHK2 CHECK 
+ADD CONSTRAINT PUBLICATION_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE RELATED_DATAFILES 
-ADD CONSTRAINT RELATED_DATAFILES_CHK1 CHECK 
+ADD CONSTRAINT RELATED_DATAFILES_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE RELATED_DATAFILES 
-ADD CONSTRAINT RELATED_DATAFILES_CHK2 CHECK 
+ADD CONSTRAINT RELATED_DATAFILES_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE SAMPLE 
-ADD CONSTRAINT SAMPLE_CHK1 CHECK 
+ADD CONSTRAINT SAMPLE_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE SAMPLE 
-ADD CONSTRAINT SAMPLE_CHK2 CHECK 
+ADD CONSTRAINT SAMPLE_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE SAMPLE_PARAMETER 
-ADD CONSTRAINT SAMPLE_PARAMETER_CHK1 CHECK 
+ADD CONSTRAINT SAMPLE_PARAMETER_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE SAMPLE_PARAMETER 
-ADD CONSTRAINT SAMPLE_PARAMETER_CHK2 CHECK 
+ADD CONSTRAINT SAMPLE_PARAMETER_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
- 
+
 ALTER TABLE SHIFT 
-ADD CONSTRAINT SHIFT_CHK1 CHECK 
+ADD CONSTRAINT SHIFT_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE SHIFT 
-ADD CONSTRAINT SHIFT_CHK2 CHECK 
+ADD CONSTRAINT SHIFT_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE STUDY 
-ADD CONSTRAINT STUDY_CHK1 CHECK 
+ADD CONSTRAINT STUDY_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE STUDY 
-ADD CONSTRAINT STUDY_CHK2 CHECK 
+ADD CONSTRAINT STUDY_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE STUDY_INVESTIGATION 
-ADD CONSTRAINT STUDY_INVESTIGATION_CHK1 CHECK 
+ADD CONSTRAINT STUDY_INVESTIGATION_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE STUDY_INVESTIGATION 
-ADD CONSTRAINT STUDY_INVESTIGATION_CHK2 CHECK 
+ADD CONSTRAINT STUDY_INVESTIGATION_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE STUDY_STATUS 
-ADD CONSTRAINT STUDY_STATUS_CHK1 CHECK 
+ADD CONSTRAINT STUDY_STATUS_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE STUDY_STATUS 
-ADD CONSTRAINT STUDY_STATUS_CHK2 CHECK 
+ADD CONSTRAINT STUDY_STATUS_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
@@ -1529,25 +1580,25 @@ ADD CONSTRAINT TOPIC_CHK1 CHECK
 ;
 
 ALTER TABLE TOPIC 
-ADD CONSTRAINT TOPIC_CHK2 CHECK 
+ADD CONSTRAINT TOPIC_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE TOPIC_LIST 
-ADD CONSTRAINT TOPIC_LIST_CHK1 CHECK 
+ADD CONSTRAINT TOPIC_LIST_CHK1 CHECK
 (deleted in('Y','N'))
  ENABLE
 ;
 
 ALTER TABLE TOPIC_LIST 
-ADD CONSTRAINT TOPIC_LIST_CHK2 CHECK 
+ADD CONSTRAINT TOPIC_LIST_CHK2 CHECK
 (Facility_Acquired in('Y','N'))
  ENABLE
 ;
-
+ 
 ALTER TABLE USER_ROLES 
-ADD CONSTRAINT USER_ROLES_CHK1 CHECK 
+ADD CONSTRAINT USER_ROLES_CHK1 CHECK
 (username = upper(username))
  ENABLE
 ;
@@ -1555,16 +1606,6 @@ ADD CONSTRAINT USER_ROLES_CHK1 CHECK
 CREATE INDEX DATAFILE_INDEX1 ON DATAFILE (dataset_id);
 
 CREATE INDEX KEYWORD_INDEX1 ON KEYWORD (INVESTIGATION_ID);
-
-CREATE SEQUENCE datafile_id_seq START WITH 100 NOCACHE;
-CREATE SEQUENCE dataset_id_seq START WITH 100 NOCACHE;
-CREATE SEQUENCE investigation_id_seq START WITH 100 NOCACHE;
-CREATE SEQUENCE publication_id_seq START WITH 100 NOCACHE;
-CREATE SEQUENCE sample_id_seq START WITH 100 NOCACHE;
-CREATE SEQUENCE software_version_id_seq START WITH 100 NOCACHE;
-CREATE SEQUENCE study_id_seq START WITH 100 NOCACHE;
-CREATE SEQUENCE topic_id_seq START WITH 100 NOCACHE;
-CREATE SEQUENCE ICAT_AUTHORISATION_ID_SEQ START WITH 300 NOCACHE;
 
 COMMENT ON TABLE APPLICATIONS IS 'Stores descriptions of the applications which use this schema.  This may not be a comprehensive list.'
 ;
@@ -1584,7 +1625,7 @@ COMMENT ON TABLE ICAT_AUTHORISATION IS 'contains authorisation information perta
 COMMENT ON TABLE INVESTIGATOR IS 'A user can be in more than one investigation and and investigation can have more than one user. This is achieved by having facility_user_id and investigation_id as a composite primary key.'
 ;
 
-COMMENT ON TABLE PARAMETER IS 'This table contains information about the valid parameters that can be used to describe samples, datasets and datafiles.  puposefully this table has been setup such that a paramater is only stored using one unit systems (all conversion should occur elsewhere).'
+COMMENT ON TABLE PARAMETER IS 'This table contains information about the valid parameters that can be used to describe samples, datasets & datafiles.  puposefully this table has been setup such that a paramater is only stored using one unit systems (all conversion should occur elsewhere).'
 ;
 
 COMMENT ON TABLE PUBLICATION IS 'This can support pointing to supporting publications in any arbitary repository'
@@ -1659,6 +1700,9 @@ COMMENT ON COLUMN DATASET.DATASET_TYPE IS 'if Investigation.inv_type == EXPERIME
 COMMENT ON COLUMN DATASET.DATASET_STATUS IS 'empty ongoing (e.g. clf waiting for the glass plate to be analysed) complete'
 ;
 
+COMMENT ON COLUMN DATASET.LOCATION IS 'This is the location or root designation of the dataset this is useful for specifying all the files in a directory or for giving a physical root designation to nested files locations specified in the flat datafile table to allow applications to display and download the nested structures.'
+;
+
 COMMENT ON COLUMN DATASET.DESCRIPTION IS 'most of the time this will be empty.  ------------  However a description of the RAW data should/could be filled by GDA e.g. important parameters (e.g. temp might change a few degrees but the angle of the sample might be very important so that this is a place to highlight such facts) e.g. this could be used to describe how the data was ''cut''. E.g. in CLF they cut by shot - i.e. one dataset per shot.  -----------  also when dataset_type is pre_experiment_data this could be really important to describe why certain files have been added and what their purpost is.'
 ;
 
@@ -1701,16 +1745,31 @@ COMMENT ON COLUMN FACILITY_USER.MIDDLE_NAME IS 'from user db or cdr'
 COMMENT ON COLUMN FACILITY_USER.LAST_NAME IS 'from user db or cdr'
 ;
 
+COMMENT ON COLUMN ICAT_AUTHORISATION.ID IS 'allow ORM systems (e.g. EJB3) layers to work effectively they don''t work well with unique keys only primary keys'
+;
+
 COMMENT ON COLUMN ICAT_AUTHORISATION.USER_ID IS 'this should be the user identifier - e.g. federal id or ''ANY'' for public or an application designation'
 ;
 
 COMMENT ON COLUMN ICAT_AUTHORISATION.ROLE IS 'ROLE from the icat_role table'
 ;
 
-COMMENT ON COLUMN ICAT_AUTHORISATION.ELEMENT_TYPE IS 'if this is empty then the authorisation relates to the investigation entity hierarchy otherwise dataset and datafile can be specified here.'
+COMMENT ON COLUMN ICAT_AUTHORISATION.USER_CHILD_RECORD IS 'if there any this_table.id fields for which this record is a parent - there will be one as this is based on the user'
 ;
 
-COMMENT ON COLUMN ICAT_AUTHORISATION.ELEMENT_ID IS 'should be filled in if element_type specified this is the .id field of the dataset or datafile eh'
+COMMENT ON COLUMN ICAT_AUTHORISATION.ELEMENT_TYPE IS 'can be investigation, dataset or datafile'
+;
+
+COMMENT ON COLUMN ICAT_AUTHORISATION.ELEMENT_ID IS 'if null then this has special meaning please see the authorisation specification for icat3'
+;
+
+COMMENT ON COLUMN ICAT_AUTHORISATION.PARENT_ELEMENT_TYPE IS 'needed if element_type is a dataset or datafile to give context'
+;
+
+COMMENT ON COLUMN ICAT_ROLE.ROLE_WEIGHT IS 'derived from the weight given for the actions a role can perform meant to allow an easy way of working out which roles are of equal or lower authority'
+;
+
+COMMENT ON COLUMN INSTRUMENT.SHORT_NAME IS 'Needed as often (e.g. ISIS)  instrument short names cannot be generated automatically from long names e.g. CRISP (CSP), HRPD (HRP), PRISMA (PRS).'
 ;
 
 COMMENT ON COLUMN INVESTIGATION.INV_NUMBER IS 'this is the experiment number e.g. the rb number from isis. In the case ISIS this is usually the proposal number but proposals can be split into separate experiments each with their own number - in which case it actuall maps to the approved proposal number'
@@ -1719,7 +1778,7 @@ COMMENT ON COLUMN INVESTIGATION.INV_NUMBER IS 'this is the experiment number e.g
 COMMENT ON COLUMN INVESTIGATION.VISIT_ID IS 'Sometimes (e.g. in the case of DLS) investigation are consortium based i.e. carried out by a range of people from different institutions who manage their own time slot on the instrument. So in effect the investigation is multi-faceted where different groups should not have access to the data from other groups. In the case of ISIS and CLF this can be set to null or a constant value'
 ;
 
-COMMENT ON COLUMN INVESTIGATION.FACILITY_CYCLE IS 'facilities cycle - where this is defined as the time between two maintenance periods of the light/neutron/laser sources. this is usually a name - e.g. year and number'
+COMMENT ON COLUMN INVESTIGATION.FACILITY_CYCLE IS 'facilities cycle - where this is defined as the time between two maintenance periods of the light/neutron/laser sources. this is usually a name - e.g. year & number'
 ;
 
 COMMENT ON COLUMN INVESTIGATION.INSTRUMENT IS 'multimple instruments per approved proposal will now be different investigations with different instrument inside icat - this was requested by noth DLS and ISIS - rather than attach instrument at the dataset level. This is due in part to common searches being in terms of instrument and experiment number as oppose to title and drilling down..'
@@ -1740,6 +1799,18 @@ COMMENT ON COLUMN INVESTIGATION.PREV_INV_NUMBER IS 'experiment number of a prece
 COMMENT ON COLUMN INVESTIGATION.GRANT_ID IS 'funding grant identification this is taken from the proposal system. in addition the person and their role in the funding institution need to be know to identify completely where the money for this investigation has come from e.g. EPSRC and the person who signed it off'
 ;
 
+COMMENT ON COLUMN INVESTIGATION.INV_PARAM_NAME IS 'defining parameter name for investigation based on the facility e.g. in the case of ISIS this maybe run number range for the experiment. this may later be removed and replaces with a investigation_parameter table in versions of icat after 3.3'
+;
+
+COMMENT ON COLUMN INVESTIGATION.INV_PARAM_VALUE IS 'the facility specific value of rhe inv_param_name e.g. the actual range of numbers in some specified format for the range of values designating the run numbers'
+;
+
+COMMENT ON COLUMN INVESTIGATION.INV_START_DATE IS 'The official start date-time of the experiment e.g. in isis as of the time of writing this could be derived from the date-time that the first raw datafile was read from the instrument.'
+;
+
+COMMENT ON COLUMN INVESTIGATION.INV_END_DATE IS 'The official end date-time of the experiment e.g. in isis as of the time of writing this could be derived from the date-time that the latest raw datafile was read from the instrument.'
+;
+
 COMMENT ON COLUMN INVESTIGATION.RELEASE_DATE IS 'This is the date in the future that the raw data will be made available to other users (or publically available) - this is informed by the data policy of the facility (e.g. 1 year or 2 years).'
 ;
 
@@ -1749,7 +1820,10 @@ COMMENT ON COLUMN INVESTIGATION.CREATE_ID IS 'Stores the id if the user who crea
 COMMENT ON COLUMN INVESTIGATION.DELETED IS 'Shows whether the record is viewable or not.'
 ;
 
-COMMENT ON COLUMN INVESTIGATION.SRC_HASH IS 'This stores a hash key to identify the records in a business system (e.g Duodesk) which are the source of approved proposals in ICAT ( the business system (e.g. Duodesk) primary key values are hashed together, this is needed as one icat record is ofton sourced from multiple records in the business system.'
+COMMENT ON COLUMN INVESTIGATION.SRC_HASH IS 'This stores a hash key to identify the records in a business system (e.g Duodesk) which are the source of approved proposals in ICAT ( the business system (e.g. Duodesk) primary key values are hashed together, this is needed as one icat record is often sourced from multiple records in the business system.'
+;
+
+COMMENT ON COLUMN INVESTIGATION_TYPE.SEQ_NUMBER IS 'Many times, you want to display options in a particular order of relevance (which is not likely to be alphabetical).  If you have a ‘seq_number’ column then you can add new options and adjust their order without code changes or having to reorder rows in the database'
 ;
 
 COMMENT ON COLUMN INVESTIGATOR.FACILITY_USER_ID IS 'facility_user_id should be self consistent across the database and usually refers to a user numbering system which is valid inside a particular facility in the case of ISIS and DLS this is a number based system but it need not be.'
@@ -1783,6 +1857,9 @@ COMMENT ON COLUMN PARAMETER.IS_DATAFILE_PARAMETER IS 'Y or y denote that the par
 ;
 
 COMMENT ON COLUMN PARAMETER.DESCRIPTION IS 'this describes the parameter'
+;
+
+COMMENT ON COLUMN PARAMETER.VERIFIED IS 'if Y this means that the parameter was loaded from the facility spreadsheet or list of approved values or that the parameter was unverified but has been checked and is now verified. N means that the parameter is not verified i.e. it has not been approved by the facility'
 ;
 
 COMMENT ON COLUMN PUBLICATION.REPOSITORY_ID IS 'this does no necessarily have to be a number'
@@ -1842,6 +1919,9 @@ COMMENT ON COLUMN STUDY.MOD_ID IS 'user.id of last modifying user'
 COMMENT ON COLUMN STUDY_STATUS.DESCRIPTION IS 'a description of what the study status actually means'
 ;
 
+COMMENT ON COLUMN THIS_ICAT.DAYS_UNTIL_PUBLIC_RELEASE IS 'The number of days until the raw data is made publically available for a given experiment - calculated from the investigation.create_time. a value of 0 means that the data should be made immediately available'
+;
+
 COMMENT ON COLUMN USER_ROLES.USERNAME IS 'The user''s single-sign-on username.  Must be upper case.'
 ;
 
@@ -1850,3 +1930,14 @@ COMMENT ON COLUMN USER_ROLES.FACILITY_ACQUIRED IS 'added to this table for consi
 
 COMMENT ON COLUMN USER_ROLES.DELETED IS 'added for consistency'
 ;
+
+CREATE SEQUENCE datafile_id_seq START WITH 100 NOCACHE;
+CREATE SEQUENCE dataset_id_seq START WITH 100 NOCACHE;
+CREATE SEQUENCE investigation_id_seq START WITH 100 NOCACHE;
+CREATE SEQUENCE publication_id_seq START WITH 100 NOCACHE;
+CREATE SEQUENCE sample_id_seq START WITH 100 NOCACHE;
+CREATE SEQUENCE software_version_id_seq START WITH 100 NOCACHE;
+CREATE SEQUENCE study_id_seq START WITH 100 NOCACHE;
+CREATE SEQUENCE topic_id_seq START WITH 100 NOCACHE;
+CREATE SEQUENCE ICAT_AUTHORISATION_ID_SEQ START WITH 300 NOCACHE;
+
