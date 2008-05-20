@@ -6,15 +6,10 @@
 
 package uk.icat3.userdefault.cog;
 
-import java.security.cert.CertificateExpiredException;
 import org.apache.log4j.Logger;
 import org.ietf.jgss.*;
-import org.globus.common.*;
-import org.gridforum.jgss.ExtendedGSSManager;
-import org.gridforum.jgss.ExtendedGSSCredential;
 import org.globus.myproxy.*;
 
-import javax.persistence.EntityManager;
 /**
  *
  * @author  gjd37
