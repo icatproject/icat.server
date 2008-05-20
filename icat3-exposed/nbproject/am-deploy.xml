@@ -56,7 +56,7 @@
             -->
     <target name="-am-deploy" if="libs.IdentityAntTasks.classpath" depends="-am-task-init" description="Deploy to Access Manager.">
         <echo message="am-deploy:"/>
-        <amdeploy amconfigfile="${am.config.file}" amconfigxmldir="${am.config.xml.dir}"/>
+        
     </target>
     <target name="-am-classpath-setup" if="libs.IdentityAntTasks.classpath" depends="-am-task-init" description="Set up Access Manager classpath">
         <echo message="am-classpath-setup:"/>
