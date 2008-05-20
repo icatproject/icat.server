@@ -295,24 +295,24 @@ or ant -Dj2ee.platform.classpath=&lt;server_classpath&gt; (where no properties f
     </target>
     <target depends="compile" name="library-inclusion-in-archive">
         <copy file="${reference.icat3-core.jar}" todir="${build.classes.dir}"/>
-        <copy file="${reference.icat3-user-default.jar}" todir="${build.classes.dir}"/>
         <copy file="${reference.icat3-jaxb.jar}" todir="${build.classes.dir}"/>
+        <copy file="${reference.icat3-user-default.jar}" todir="${build.classes.dir}"/>
         <copy file="${reference.icat3-data.jar}" todir="${build.classes.dir}"/>
         <copy file="${file.reference.log4j-1.2.14.jar}" todir="${build.classes.dir}"/>
     </target>
     <target depends="compile" name="library-inclusion-in-manifest">
         <basename file="${reference.icat3-core.jar}" property="included.lib.reference.icat3-core.jar"/>
         <copy file="${reference.icat3-core.jar}" todir="${dist.ear.dir}"/>
-        <basename file="${reference.icat3-user-default.jar}" property="included.lib.reference.icat3-user-default.jar"/>
-        <copy file="${reference.icat3-user-default.jar}" todir="${dist.ear.dir}"/>
         <basename file="${reference.icat3-jaxb.jar}" property="included.lib.reference.icat3-jaxb.jar"/>
         <copy file="${reference.icat3-jaxb.jar}" todir="${dist.ear.dir}"/>
+        <basename file="${reference.icat3-user-default.jar}" property="included.lib.reference.icat3-user-default.jar"/>
+        <copy file="${reference.icat3-user-default.jar}" todir="${dist.ear.dir}"/>
         <basename file="${reference.icat3-data.jar}" property="included.lib.reference.icat3-data.jar"/>
         <copy file="${reference.icat3-data.jar}" todir="${dist.ear.dir}"/>
         <basename file="${file.reference.log4j-1.2.14.jar}" property="included.lib.file.reference.log4j-1.2.14.jar"/>
         <copy file="${file.reference.log4j-1.2.14.jar}" todir="${dist.ear.dir}"/>
         <manifest file="${build.ear.classes.dir}/META-INF/MANIFEST.MF" mode="update">
-            <attribute name="Class-Path" value="${included.lib.reference.icat3-core.jar} ${included.lib.reference.icat3-user-default.jar} ${included.lib.reference.icat3-jaxb.jar} ${included.lib.reference.icat3-data.jar} ${included.lib.file.reference.log4j-1.2.14.jar} "/>
+            <attribute name="Class-Path" value="${included.lib.reference.icat3-core.jar} ${included.lib.reference.icat3-jaxb.jar} ${included.lib.reference.icat3-user-default.jar} ${included.lib.reference.icat3-data.jar} ${included.lib.file.reference.log4j-1.2.14.jar} "/>
         </manifest>
     </target>
     <target name="-copy-meta-inf">
