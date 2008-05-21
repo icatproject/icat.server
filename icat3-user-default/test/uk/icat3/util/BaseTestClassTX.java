@@ -1,4 +1,3 @@
-
 /*
  * BaseTestClass.java
  *
@@ -7,7 +6,6 @@
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-
 package uk.icat3.util;
 
 import org.apache.log4j.Logger;
@@ -52,7 +50,5 @@ public class BaseTestClassTX extends BaseTest{
     @AfterClass
     public static void AfterClassTearDown(){
         tearDownEntityManagerOnly();
-    }
-    
-    
+    }      
 }

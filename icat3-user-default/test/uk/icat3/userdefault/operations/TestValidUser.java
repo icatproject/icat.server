@@ -64,7 +64,7 @@ public class TestValidUser extends BaseTestClassTX {
         
     }
     
-    @Test
+    //@Test
     public void testValidSessionid() throws SessionException {
         log.trace("testValidSessionid()");
         UserManager userManager = new UserManager(em);
@@ -77,7 +77,7 @@ public class TestValidUser extends BaseTestClassTX {
         assertEquals("user id must be "+validSession.getUserId().getUserId()+" but is "+userId, userId, validSession.getUserId().getUserId());
     }
     
-    @Test(expected=SessionException.class)
+    //@Test(expected=SessionException.class)
     public void testRemoveValidSessionid() throws SessionException {
         log.trace("testRemoveValidSessionid()");
         
@@ -100,7 +100,7 @@ public class TestValidUser extends BaseTestClassTX {
         }
     }
     
-    @Test
+   // @Test
     public void testRemoveInvalidSessionid() throws SessionException {
         log.trace("testRemoveInvalidSessionid()");
         
