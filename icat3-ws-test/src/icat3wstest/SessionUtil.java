@@ -8,7 +8,7 @@
  */
 
 package icat3wstest;
-import javax.xml.ws.BindingProvider;
+
 import static icat3wstest.Constants.*;
 /**
  *
@@ -91,8 +91,10 @@ public class SessionUtil {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
+        
         // TODO code application logic here
         String sid = login(System.getProperty("user.name"), System.getProperty("usersso.password"));
+      
         //String sid = loginLifetime(System.getProperty("user.name"), System.getProperty("usersso.password"), 2);
         //if(sid != null) logout(sid);
     }

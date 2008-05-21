@@ -9,12 +9,7 @@
 
 package icat3wstest;
 
-import client.Datafile;
-import client.DatafileFormat;
-import client.DatafileFormatPK;
-import client.DatafileParameter;
-import client.DatafileParameterPK;
-import client.InvestigationInclude;
+import uk.icat3.client.*;
 import java.util.ArrayList;
 import java.util.List;
 import static icat3wstest.Constants.*;
@@ -34,7 +29,7 @@ public class StressTest {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Investigation> result = ICATSingleton.getInstance().getMyInvestigationsIncludes(sid,
+            java.util.List<uk.icat3.client.Investigation> result = ICATSingleton.getInstance().getMyInvestigationsIncludes(sid,
                     InvestigationInclude.KEYWORDS_ONLY); //get my investigations, default limit to 500, include no other info
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;

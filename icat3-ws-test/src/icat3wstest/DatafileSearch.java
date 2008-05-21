@@ -9,9 +9,7 @@
 
 package icat3wstest;
 
-import client.Datafile;
-import client.Dataset;
-import client.Sample;
+import uk.icat3.client.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -32,7 +30,7 @@ public class DatafileSearch {
             instruments.add(instrument);
             
             // TODO process result here
-            java.util.List<client.Datafile> result = ICATSingleton.getInstance().searchByRunNumber(sid, instruments, start, end);
+            java.util.List<uk.icat3.client.Datafile> result = ICATSingleton.getInstance().searchByRunNumber(sid, instruments, start, end);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

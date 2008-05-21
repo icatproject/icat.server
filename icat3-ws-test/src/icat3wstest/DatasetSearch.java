@@ -9,8 +9,7 @@
 
 package icat3wstest;
 
-import client.Dataset;
-import client.Sample;
+import uk.icat3.client.*;
 import java.util.Collection;
 import static icat3wstest.Constants.*;
 /**
@@ -26,7 +25,7 @@ public class DatasetSearch {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Sample> result = ICATSingleton.getInstance().searchSamplesBySampleName(sid, sampleName);
+            java.util.List<uk.icat3.client.Sample> result = ICATSingleton.getInstance().searchSamplesBySampleName(sid, sampleName);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -55,7 +54,7 @@ public class DatasetSearch {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Dataset> result = ICATSingleton.getInstance().searchDatasetsBySample(sid, sample);
+            java.util.List<uk.icat3.client.Dataset> result = ICATSingleton.getInstance().searchDatasetsBySample(sid, sample);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

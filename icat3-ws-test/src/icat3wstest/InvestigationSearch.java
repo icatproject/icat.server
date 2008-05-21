@@ -8,11 +8,7 @@
  */
 package icat3wstest;
 
-import client.AdvancedSearchDetails;
-import client.Investigation;
-import client.InvestigationInclude;
-import client.KeywordDetails;
-import client.LogicalOperator;
+import uk.icat3.client.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -34,7 +30,7 @@ public class InvestigationSearch {
             long time = System.currentTimeMillis();
 
             // TODO process result here
-            java.util.List<client.Investigation> result = ICATSingleton.getInstance().getMyInvestigationsIncludes(sid,
+            java.util.List<uk.icat3.client.Investigation> result = ICATSingleton.getInstance().getMyInvestigationsIncludes(sid,
                     InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES); //get my investigations, default limit to 500, include no other info
             //java.util.List<client.Investigation> result =
             //      ICATSingleton.getInstance().getMyInvestigationsIncludesPagination(sid, InvestigationInclude.ALL, 3, 10);
@@ -65,7 +61,7 @@ public class InvestigationSearch {
             long time = System.currentTimeMillis();
 
             // TODO process result here
-            java.util.List<client.Investigation> result =
+            java.util.List<uk.icat3.client.Investigation> result =
                     ICATSingleton.getInstance().searchByAdvancedPagination(sid, asd, 0, 440); //bring back first 440 results
 
             float totalTime = (System.currentTimeMillis() - time) / 1000f;
@@ -96,7 +92,7 @@ public class InvestigationSearch {
             keywords.add(keyword);
 
             // TODO process result here
-            java.util.List<client.Investigation> result = ICATSingleton.getInstance().searchByKeywords(sid, keywords);
+            java.util.List<uk.icat3.client.Investigation> result = ICATSingleton.getInstance().searchByKeywords(sid, keywords);
             //java.util.List<client.Investigation> result =
             //      ICATSingleton.getInstance().searchByKeywordsPaginationFuzzyAndInclude(sid, keywords,
             //    InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES, true, 0, 20);
@@ -136,7 +132,7 @@ public class InvestigationSearch {
             //details.setOperator(LogicalOperator.AND); //AND default
 
             // TODO process result here
-            java.util.List<client.Investigation> result = ICATSingleton.getInstance().searchByKeywordsAll(sid, details, 0, 100);
+            java.util.List<uk.icat3.client.Investigation> result = ICATSingleton.getInstance().searchByKeywordsAll(sid, details, 0, 100);
 
             float totalTime = (System.currentTimeMillis() - time) / 1000f;
 
@@ -163,7 +159,7 @@ public class InvestigationSearch {
             long time = System.currentTimeMillis();
 
             // TODO process result here
-            java.util.List<client.Investigation> result = ICATSingleton.getInstance().searchByUserID(sid, userId);
+            java.util.List<uk.icat3.client.Investigation> result = ICATSingleton.getInstance().searchByUserID(sid, userId);
 
             float totalTime = (System.currentTimeMillis() - time) / 1000f;
 
@@ -191,7 +187,7 @@ public class InvestigationSearch {
             long time = System.currentTimeMillis();
 
             // TODO process result here
-            java.util.List<client.Investigation> result = ICATSingleton.getInstance().searchByUserSurname(sid, surname);
+            java.util.List<uk.icat3.client.Investigation> result = ICATSingleton.getInstance().searchByUserSurname(sid, surname);
 
             float totalTime = (System.currentTimeMillis() - time) / 1000f;
 

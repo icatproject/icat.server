@@ -8,8 +8,7 @@
  */
 package icat3wstest;
 
-import client.Dataset;
-import client.*;
+import uk.icat3.client.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

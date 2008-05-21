@@ -9,7 +9,7 @@
 
 package icat3wstest;
 
-import client.*;
+import uk.icat3.client.*;
 import javax.xml.ws.BindingProvider;
 import static icat3wstest.Constants.*;
 
@@ -26,7 +26,7 @@ public class ICATSingleton {
     }
     
     public static ICAT getInstance(){
-        ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, END_POINT_ADDRESS);        
+        //((BindingProvider)icatPort).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, END_POINT_ADDRESS);        
         System.out.println("Using WSDL: "+((BindingProvider)icatPort).getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY));
         return icatPort;
     }    

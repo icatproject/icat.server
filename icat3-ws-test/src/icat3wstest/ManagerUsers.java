@@ -9,9 +9,7 @@
 
 package icat3wstest;
 
-
-import client.ElementType;
-import client.IcatAuthorisation;
+import uk.icat3.client.*;
 import java.util.Random;
 import static icat3wstest.Constants.*;
 /**
@@ -27,7 +25,7 @@ public class ManagerUsers {
             long time = System.currentTimeMillis();
             
             // Get me all authorisation for investigation Id: investigationId
-            java.util.List<client.IcatAuthorisation> results = ICATSingleton.getInstance().getAuthorisations(sid, investigationId, ElementType.INVESTIGATION);
+            java.util.List<uk.icat3.client.IcatAuthorisation> results = ICATSingleton.getInstance().getAuthorisations(sid, investigationId, ElementType.INVESTIGATION);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -55,7 +53,7 @@ public class ManagerUsers {
             long time = System.currentTimeMillis();
             
             // Get me all authorisation for dataset Id: datasetId
-            java.util.List<client.IcatAuthorisation> results = ICATSingleton.getInstance().getAuthorisations(sid, datasetId, ElementType.DATASET);
+            java.util.List<uk.icat3.client.IcatAuthorisation> results = ICATSingleton.getInstance().getAuthorisations(sid, datasetId, ElementType.DATASET);
             //java.util.List<client.IcatAuthorisation> results = ICATSingleton.getInstance().getAuthorisations(sid, datafileId, ElementType.DATAFILE); //or to list datafiles authorisations
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
@@ -83,7 +81,7 @@ public class ManagerUsers {
             long time = System.currentTimeMillis();
             
             // Get me all authorisation for dataset Id: datasetId
-            java.util.List<client.IcatAuthorisation> results = ICATSingleton.getInstance().getAuthorisations(sid, datafileId, ElementType.DATAFILE);
+            java.util.List<uk.icat3.client.IcatAuthorisation> results = ICATSingleton.getInstance().getAuthorisations(sid, datafileId, ElementType.DATAFILE);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

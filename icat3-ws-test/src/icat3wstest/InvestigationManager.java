@@ -8,15 +8,8 @@
  */
 package icat3wstest;
 
-import client.Datafile;
-import client.DatafileParameter;
-import client.Dataset;
-import client.Investigation;
-import client.InvestigationInclude;
+import uk.icat3.client.*;
 
-import client.Investigator;
-import client.Keyword;
-import client.Publication;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -62,7 +55,7 @@ public class InvestigationManager {
             
             // TODO process result here
             List<Investigation> investigations = ICATSingleton.getInstance().getInvestigationsIncludes(
-                    sid, ids, client.InvestigationInclude.ALL);
+                    sid, ids, uk.icat3.client.InvestigationInclude.ALL);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

@@ -9,9 +9,7 @@
 
 package icat3wstest;
 
-import client.DatafileFormat;
-import client.IcatRole;
-import client.Parameter;
+import uk.icat3.client.*;
 import static icat3wstest.Constants.*;
 /**
  *
@@ -130,7 +128,7 @@ public class ListSearch {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.Parameter> result = ICATSingleton.getInstance().listParameters(sid);
+            java.util.List<uk.icat3.client.Parameter> result = ICATSingleton.getInstance().listParameters(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -156,7 +154,7 @@ public class ListSearch {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.IcatRole> result = ICATSingleton.getInstance().listRoles(sid);
+            java.util.List<uk.icat3.client.IcatRole> result = ICATSingleton.getInstance().listRoles(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
@@ -182,7 +180,7 @@ public class ListSearch {
             long time = System.currentTimeMillis();
             
             // TODO process result here
-            java.util.List<client.DatafileFormat> result = ICATSingleton.getInstance().listDatafileFormats(sid);
+            java.util.List<uk.icat3.client.DatafileFormat> result = ICATSingleton.getInstance().listDatafileFormats(sid);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             

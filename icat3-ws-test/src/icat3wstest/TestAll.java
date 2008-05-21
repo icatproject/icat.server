@@ -8,9 +8,8 @@
  */
 
 package icat3wstest;
-import client.AdvancedSearchDetails;
-import client.KeywordType;
-import client.*;
+
+import uk.icat3.client.*;
 import java.util.Collection;
 import java.util.Random;
 import static icat3wstest.Constants.*;

@@ -9,13 +9,7 @@
 
 package icat3wstest;
 
-import client.Datafile;
-import client.DatafileParameter;
-import client.Dataset;
-import client.DatasetParameter;
-import client.Dataset;
-import client.DatasetInclude;
-import client.DatasetParameterPK;
+import uk.icat3.client.*;
 import java.util.ArrayList;
 import java.util.List;
 import static icat3wstest.Constants.*;

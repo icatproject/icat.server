@@ -9,7 +9,7 @@
 
 package icat3wstest;
 
-import client.KeywordType;
+import uk.icat3.client.*;
 import static icat3wstest.Constants.*;
 /**
  *
