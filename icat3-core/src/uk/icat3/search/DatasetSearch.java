@@ -51,8 +51,8 @@ public class DatasetSearch {
         
         //get the sample id from sample name
         Collection<Sample> samples = (Collection<Sample>)manager.createNamedQuery(SAMPLES_BY_NAME).
-                setParameter("objectType", ElementType.INVESTIGATION).
-                setParameter("userId", userId).
+                //setParameter("objectType", ElementType.INVESTIGATION).
+                //setParameter("userId", userId).
                 setParameter("name", "%"+sampleName+"%").getResultList();
         
         //now see which investigations they can see from these samples.

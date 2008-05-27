@@ -5,17 +5,11 @@
 
 package uk.icat3.entity;
 
-import java.io.Serializable;
-import java.math.BigInteger;
-import java.util.Date;
-import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.log4j.Logger;
 import uk.icat3.util.ElementType;
 

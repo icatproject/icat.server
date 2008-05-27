@@ -16,6 +16,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
@@ -54,8 +55,8 @@ public class TestSearch {
     }
 
     protected static void setUp() {
-        //emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
-        emf = Persistence.createEntityManagerFactory("icatisis");
+        emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
+        //emf = Persistence.createEntityManagerFactory("icatisis");
         em = emf.createEntityManager();
 
 
@@ -86,7 +87,7 @@ public class TestSearch {
         tearDown();
 
         for (Datafile datafile : files) {
-            System.out.println(datafile.getId()+" "+datafile.getIcatRole());
+            System.out.println(datafile.getId() + " " + datafile.getIcatRole());
         }
     }
 
@@ -271,12 +272,12 @@ public class TestSearch {
             for (Dataset dataset : dss) {
                 Collection<Datafile> dfs = dataset.getDatafileCollection();
                 for (Datafile datafile : dfs) {
-                        datafiles++;
+                    datafiles++;
                 }
             }
         }
-        
-        System.out.println("Files: "+datafiles);
+
+        System.out.println("Files: " + datafiles);
 
         System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
 
@@ -293,7 +294,7 @@ public class TestSearch {
         log.info("Results: " + keywords.size());
         log.info(keywords.getClass());
         for (String keyword : keywords) {
-        //     log.info(keyword);
+            //     log.info(keyword);
         }
 
         tearDown();
@@ -309,7 +310,7 @@ public class TestSearch {
         Collection<String> keywords = KeywordSearch.getKeywordsForUser(userId, KeywordType.ALL, startkeyword, 300, em);
         log.info("Results: " + keywords.size());
         for (String keyword : keywords) {
-        //  log.info(keyword);
+            //  log.info(keyword);
         }
 
         tearDown();
@@ -441,9 +442,23 @@ public class TestSearch {
 
         setUp();
 
-        String LIST_ALL = "SELECT k.keywordPK.name from Keyword k where LOWER(k.keywordPK.name) LIKE '%s%'";
+        long time = System.currentTimeMillis();
 
-        System.out.println(em.createQuery(LIST_ALL).getResultList());
+        String LIST_ALL = "SELECT DISTINCT i from Investigation i , IcatAuthorisation ia, FacilityInstrumentScientist fis WHERE" +
+                "  ((:userId = 'SUPER_USER')  OR " +
+                " (:userId = fis.facilityInstrumentScientistPK.federalId AND " +
+                " (fis.facilityInstrumentScientistPK.instrumentName = i.instrument) AND fis.markedDeleted = 'N') OR " +
+                " (i.id = ia.elementId AND ia.elementType = :objectType " +
+                " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+                " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y')) AND i.markedDeleted = 'N' ";
+
+        Query nullQuery = em.createQuery(LIST_ALL);
+        nullQuery.setParameter("objectType", ElementType.INVESTIGATION);
+        nullQuery.setParameter("userId", "SUPER_USER");
+
+        System.out.println(nullQuery.getResultList());
+
+        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
 
         tearDown();
     }
@@ -510,7 +525,7 @@ public class TestSearch {
         // ts.seachByRunNumber("gjd37", ins, 11757L,11759L);
 
         AdvancedSearchDetails dto = new AdvancedSearchDetails();
-       // dto.setInvestigationInclude(InvestigationInclude.)
+        // dto.setInvestigationInclude(InvestigationInclude.)
         // dto.setInvestigationName("multidetector");
         /*Collection<String> inv  =   new ArrayList<String>();
         inv.add("JAMES-JAMES");*/
@@ -539,17 +554,17 @@ public class TestSearch {
         //date range
         dto.setDateRangeStart(new Date(107, 10, 20));
         dto.setDateRangeEnd(new Date(107, 10, 21));
-      //  ts.seachByAdvanced("ISIS_GUARDIAN", dto);
+        //  ts.seachByAdvanced("ISIS_GUARDIAN", dto);
 
-    //  ts.getAllKeywords("gjd37");
-    //
-    // ts.getUserKeywords("gjd37", null);
-    // ts.getAllInvestigations("gjd37");
-    //ts.getUserInvestigations("gjd37");
+        //  ts.getAllKeywords("gjd37");
+        //
+        // ts.getUserKeywords("gjd37", null);
+        // ts.getAllInvestigations("gjd37");
+        //ts.getUserInvestigations("gjd37");
 
-    //ts.test();
+        ts.test();
 
-     ts.searchByRun();
+    //ts.searchByRun();
     // ts.searchByRun(); 
     // ts.searchByRun();
     //ts.test2();

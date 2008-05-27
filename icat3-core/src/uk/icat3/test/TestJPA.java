@@ -189,7 +189,22 @@ public class TestJPA {
     
     public void testP1() throws Exception {
         setUp();
-        String QUERY  = Queries.RETURN_ALL_DATAFILES_JPQL + Queries.QUERY_USERS_DATAFILES_JPQL;
+        String QUERY  = "SELECT DISTINCT i from Investigation i , IcatAuthorisation ia, FacilityInstrumentScientist fis WHERE  " +
+                "((:userId = 'SUPER_USER') OR  (:userId = fis.facilityInstrumentScientistPK.federalId AND " +
+                " (fis.facilityInstrumentScientistPK.instrumentName = i.instrument) AND fis.markedDeleted = 'N') OR  " +
+                "(i.id = ia.elementId AND ia.elementType = :objectType  AND (ia.userId = :userId OR ia.userId = 'ANY') " +
+                "AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y')) AND i.markedDeleted = 'N'  AND " +
+                "EXISTS (SELECT DISTINCT df FROM Datafile df, FacilityInstrumentScientist fis2, IcatAuthorisation iadf3 WHERE " +               
+                " df.dataset = i.datasetCollection AND (df.datafileCreateTime > :lowerTime OR :lowerTime IS NULL) " +
+                "AND (df.datafileCreateTime < :upperTime OR :upperTime IS NULL) AND  df.dataset.markedDeleted = 'N' " +
+                "AND df.markedDeleted = 'N' AND (df.name  =  :datafileName OR :datafileName IS NULL) AND" +
+                " iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N'  " +
+                "AND ((:userId = 'SUPER_USER') OR  (:userId = fis2.facilityInstrumentScientistPK.federalId AND " +
+                " fis2.facilityInstrumentScientistPK.instrumentName = i.instrument AND fis2.markedDeleted = 'N') " +
+                "OR  (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType  " +
+                "AND (iadf3.userId = :userId OR iadf3.userId = 'ANY')  AND iadf3.role.actionCanSelect = 'Y')))";
+                
+
                
         System.out.println(QUERY);
                
@@ -199,11 +214,14 @@ public class TestJPA {
         
         nullQuery.setParameter("objectType", ElementType.DATASET);
    
-        nullQuery.setParameter("userId", "test");
-        
-       // nullQuery.setParameter("instrument1", "SXD");
-       // nullQuery.setParameter("upper", 123419);
-       // nullQuery.setParameter("lower", 1000);
+        nullQuery.setParameter("userId", "ALL");       
+       
+
+        nullQuery.setParameter("dataSetType", ElementType.DATASET);
+        nullQuery.setParameter("lowerTime", new Date(1, 1, 1));
+        nullQuery.setParameter("upperTime", new Date());
+        nullQuery.setParameter("datafileName", null);
+
         
         
         System.out.println(nullQuery.getResultList());
