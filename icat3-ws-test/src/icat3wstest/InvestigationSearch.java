@@ -10,9 +10,6 @@ package icat3wstest;
 
 import uk.icat3.client.*;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import static icat3wstest.Constants.*;
