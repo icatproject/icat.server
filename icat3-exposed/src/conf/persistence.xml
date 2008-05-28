@@ -32,6 +32,8 @@
     <class>uk.icat3.entity.IcatAuthorisation</class>
     <class>uk.icat3.entity.IcatRole</class>
     <class>uk.icat3.entity.TopicList</class>
+     <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
+        <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <!-- Prints out SQL generated from EJBQL -->
