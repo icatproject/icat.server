@@ -25,7 +25,7 @@ public class TestAll {
         long time  = System.currentTimeMillis();
          
         //Login
-        //String sid = SessionUtil.login(System.getProperty("user.name"), System.getProperty("usersso.password"));
+        String sid = SessionUtil.login(System.getProperty("user.name"), System.getProperty("usersso.password"));
         
         //Investiagtion searches
         InvestigationSearch.searchKeyword(SID,KEYWORD);
@@ -185,7 +185,7 @@ public class TestAll {
             ManagerUsers.removeDatasetAuthorisations(SID, icatAuthorisation);
         }
         
-        //SessionUtil.logout(sid);
+        SessionUtil.logout(sid);
         
         float totalTime = (System.currentTimeMillis() - time) / 1000f;
         System.out.println("Time taken to do all tests: " + totalTime + " seconds");

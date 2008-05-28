@@ -22,7 +22,7 @@ public class SessionAdminUtil {
     /** Creates a new instance of Main */
     public static String login(String username) throws Exception{
         
-        try {
+     /*   try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
@@ -41,7 +41,8 @@ public class SessionAdminUtil {
             //  throw ex;
             return null;
             // TODO handle custom exceptions here
-        }
+        }*/
+        return null;
     }
     
     public static void logout(String sid) throws Exception{

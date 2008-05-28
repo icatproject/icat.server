@@ -39,7 +39,7 @@ public class Constants {
     //public static String END_POINT_ADMIN_ADDRESS = "https://facilities01.esc.rl.ac.uk:8182/ICATAdminISISService/ICATAdmin?wsdl";
     
     //public static String SID = "64112098-db95-4b31-a0f9-efceb7c94132"; //isis
-    public static String SID = "1035d545-e382-4ab0-a6d9-7c84d5dce0c0"; //clf
+    public static String SID = "59216ef0-dd7f-4703-91e6-b684055a9fc6"; //clf
     
     public static String KEYWORD = "calibration";
     public static String USER_ID = "gjd37";

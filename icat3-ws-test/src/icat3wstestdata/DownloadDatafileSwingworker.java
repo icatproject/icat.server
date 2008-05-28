@@ -9,7 +9,7 @@
 
 package icat3wstestdata;
 
-import client.ICAT;
+import uk.icat3.client.*;
 import icat3wstest.Constants;
 import icat3wstest.ICATSingleton;
 import java.io.BufferedInputStream;
