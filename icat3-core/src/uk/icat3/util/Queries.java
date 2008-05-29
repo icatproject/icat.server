@@ -256,28 +256,27 @@ public class Queries {
     public static final String DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER = "Datafile.findByRunNumberNative";
     public static final String DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER = "Datafile.findByRunNumber";
     
-    //   QUERY = "SELECT i FROM Datafile i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :dataFileType " +
-    //                " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-    //                " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y' "+
-    //                " AND i.dataset.investigation.instrument.name IN ('SXD') AND " + //this bit dynamically create
-    //                "EXISTS (SELECT dfp FROM i.datafileParameterCollection dfp, IcatAuthorisation ia2" +
-    //                " WHERE dfp.datafile.id = ia2.elementId AND ia2.elementType = :dataFileType AND dfp.markedDeleted = 'N' " +
-    //                " AND (ia2.userId = :userId OR ia2.userId = 'ANY')" +
-    //                " AND ia2.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND ia2.role.actionCanSelect = 'Y' AND dfp.numericValue BETWEEN :lower AND :upper AND " +
-    //                "dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N')";
-    public static final String DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_START = RETURN_ALL_DATAFILES_JPQL + QUERY_USERS_DATAFILES_JPQL;
+//     String QUERY = "SELECT DISTINCT i from Datafile i , DatafileParameter dfp,  IcatAuthorisation ia, FacilityInstrumentScientist fis " +
+//                "WHERE  " +
+//                "((:userId = 'SUPER_USER') OR (:userId = fis.facilityInstrumentScientistPK.federalId AND  fis.facilityInstrumentScientistPK.instrumentName = i.dataset.investigation.instrument AND fis.markedDeleted = 'N') " +
+//                "OR (i.id = ia.elementId AND ia.elementType = :objectType  " +
+//                "AND (ia.userId = :userId OR ia.userId = 'ANY') AND ia.markedDeleted = 'N' " +
+//                "AND ia.role.actionCanSelect = 'Y')) AND i = dfp.datafile " +
+//                "AND i.markedDeleted = 'N'  " +
+//                "AND i.dataset.investigation.instrument IN (:instrument1, :instrument2) " +
+//                "AND ((dfp.numericValue BETWEEN :lower AND :upper)) " +
+//                "AND (dfp.datafileParameterPK.name = 'run_number') " +
+//                "AND dfp.markedDeleted = 'N' AND dfp.markedDeleted = 'N' " +
+//                "AND i.dataset.markedDeleted = 'N'";
+     
+    public static final String DATAFILE_BY_INSTRUMENT_AND_RUN_NUMBER_JPQL_START = RETURN_ALL_DATAFILES_JPQL +", DatafileParameter dfp "+ QUERY_USERS_DATAFILES_JPQL;
     
-    public static final String DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_END =
-            " EXISTS (SELECT dfp FROM i.datafileParameterCollection dfp, IcatAuthorisation iadf3, FacilityInstrumentScientist fis2 WHERE " +
-            " dfp.numericValue BETWEEN :lower AND :upper AND " +
-            " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N' AND "+//  add this in here for all instruments: i.dataset.investigation.instrument.name = 'SXD'";
-            " iadf3.markedDeleted = 'N' AND dfp.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND dfp.datafile.dataset.markedDeleted = 'N' AND " +          
-            " (('"+SUPER_USER+"' = :userId ) OR " +
-            " (fis2.facilityInstrumentScientistPK.federalId = :userId AND " +
-            " fis2.facilityInstrumentScientistPK.instrumentName = dfp.datafile.dataset.investigation.instrument AND fis2.markedDeleted = 'N') OR " +
-            " (dfp.datafile.dataset.id = iadf3.elementId AND iadf3.elementType = :objectType " +
-            " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
-            " AND iadf3.role.actionCanSelect = 'Y')))";
+    public static final String DATAFILE_BY_INSTRUMENT_AND_RUN_NUMBER_JPQL_END =
+                " i = dfp.datafile AND i.markedDeleted = 'N'  " +                
+                "AND ((dfp.numericValue BETWEEN :lower AND :upper)) " +
+                "AND (dfp.datafileParameterPK.name = 'run_number') " +
+                "AND dfp.markedDeleted = 'N' AND dfp.markedDeleted = 'N' " +
+                "AND i.dataset.markedDeleted = 'N'";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     

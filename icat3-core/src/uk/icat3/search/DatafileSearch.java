@@ -50,7 +50,7 @@ public class DatafileSearch {
         Collection<Datafile> datafiles = null;
 
         //dynamically create the JPQL
-        String JPQL = DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_START;
+        String JPQL = DATAFILE_BY_INSTRUMENT_AND_RUN_NUMBER_JPQL_START;
 
         //add in the instruments,  AND i.dataset.investigation.instrument.name IN ('SXD') AND
         int i = 1;
@@ -62,7 +62,7 @@ public class DatafileSearch {
                 JPQL += ":instrument" + (i++) + ", ";
             }
         }
-        JPQL += ") AND " + DATAFILE_BY_INSTRUMANT_AND_RUN_NUMBER_JPQL_END;
+        JPQL += ") AND " + DATAFILE_BY_INSTRUMENT_AND_RUN_NUMBER_JPQL_END;
 
         log.trace("DYNAMIC JPQL: " + JPQL);
         
