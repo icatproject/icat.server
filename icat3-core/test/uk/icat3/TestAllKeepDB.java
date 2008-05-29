@@ -58,7 +58,7 @@ import uk.icat3.security.TestGateKeeperUpdaterInvestigation;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
                                
-               TestSample.class,
+           /*    TestSample.class,
             TestKeyword.class,
             TestPublication.class,
             TestInvestigator.class,
@@ -78,7 +78,7 @@ import uk.icat3.security.TestGateKeeperUpdaterInvestigation;
             
             TestDatafileSearch.class,
             TestDatasetSearch.class,
-            TestInvestigationSearch.class,
+            TestInvestigationSearch.class,*/
             
             TestGateKeeperAdminInvestigation.class,
             TestGateKeeperCreatorInvestigation.class,

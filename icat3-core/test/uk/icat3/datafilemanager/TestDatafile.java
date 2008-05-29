@@ -150,33 +150,7 @@ public class TestDatafile extends BaseTestClassTX {
         }
     }
     
-    /**
-     * Tests removing a file, removes it from DB
-     */
-    @Test
-    public void removeActualDatafile() throws ICATAPIException {
-        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving dataFile to dataFile Id: "+VALID_INVESTIGATION_ID);
-        
-        //create invalid dataFile, no name
-        Datafile duplicateDatafile = getDatafileDuplicate(true);
-        
-        //TODO remove
-        duplicateDatafile.setDeleted(false);
-        duplicateDatafile.setCreateId(ICAT_ADMIN_USER);
-        
-        Collection<Long> longs =  addAuthorisation(duplicateDatafile.getId(), duplicateDatafile.getDataset().getId(), ICAT_ADMIN_USER, ElementType.DATAFILE, IcatRoles.ICAT_ADMIN);
-        Iterator it = longs.iterator();
-        
-        DataFileManager.removeDataFile(ICAT_ADMIN_USER, duplicateDatafile, em);
-        
-        Datafile modified = em.find(Datafile.class,duplicateDatafile.getId() );
-        assertNull("Datafile must not be found in DB "+duplicateDatafile, modified);
-        
-        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
-        
-        it = longs.iterator();
-        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);
-    }
+    
     
     /**
      * Tests creating a file for invalid user, should throw InsufficientPrivilegesException that contains
@@ -296,10 +270,10 @@ public class TestDatafile extends BaseTestClassTX {
         
         //create valid file
         Datafile file = getDatafile(true);
-       /* DatafileParameter param = TestDatafileParameter.getDatafileParameter(true, true);
-        param.setDatafile(file);
-        
-        file.addDataFileParamaeter(param);*/
+//        DatafileParameter param = TestDatafileParameter.getDatafileParameter(true, true);
+//        param.setDatafile(file);
+//        
+//        file.addDataFileParamaeter(param);
         
         Datafile dataFile = DataFileManager.createDataFile(VALID_USER_FOR_INVESTIGATION, file, VALID_INVESTIGATION_ID, em);
         log.info("Datafile: "+dataFile);
@@ -356,7 +330,7 @@ public class TestDatafile extends BaseTestClassTX {
     /**
      * Tests getting a propagated file
      */
-    @Test
+   /* @Test
     public void getDatafile() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataFile for dataFile id: "+VALID_INVESTIGATION_ID);
         
@@ -365,7 +339,7 @@ public class TestDatafile extends BaseTestClassTX {
         
         checkDatafileProps(dataFileGot);
         assertFalse("Deleted must be false", dataFileGot.isDeleted());
-    }
+    }*/
     
     /**
      * Tests getting a file for invalid user, should throw InsufficientPrivilegesException will message containing 'does not have permission'
@@ -538,6 +512,37 @@ public class TestDatafile extends BaseTestClassTX {
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
             throw ex;
         }
+    }
+    
+    /**
+     * Tests removing a file, removes it from DB
+     */
+    
+    @Test
+    public void removeActualDatafile() throws ICATAPIException {
+        log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving dataFile to dataFile Id: "+VALID_INVESTIGATION_ID);
+        
+        //create invalid dataFile, no name
+        Datafile duplicateDatafile = getDatafileDuplicate(true);
+        
+        //TODO remove
+        duplicateDatafile.setDeleted(false);
+        duplicateDatafile.setCreateId(ICAT_ADMIN_USER);
+        
+        Collection<Long> longs =  addAuthorisation(duplicateDatafile.getId(), duplicateDatafile.getDataset().getId(), ICAT_ADMIN_USER, ElementType.DATAFILE, IcatRoles.ICAT_ADMIN);
+        Iterator it = longs.iterator();
+        
+        log.trace("Created two icat auths "+longs);
+        DataFileManager.removeDataFile(ICAT_ADMIN_USER, duplicateDatafile, em);
+        
+        Datafile modified = em.find(Datafile.class,duplicateDatafile.getId() );
+        assertNull("Datafile must not be found in DB "+duplicateDatafile, modified);
+        
+        //Not needed as removing a datafile does not remove icat auths now.
+//        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
+//        
+//        it = longs.iterator();
+//        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);
     }
     
     /**

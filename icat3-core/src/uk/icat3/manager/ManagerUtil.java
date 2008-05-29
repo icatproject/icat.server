@@ -861,13 +861,13 @@ public class ManagerUtil {
             Dataset dataset = (Dataset) entityClass;
             Query query = (Query) manager.createNamedQuery(Queries.DATASET_FINDBY_UNIQUE);
             query = query.setParameter("sampleId", dataset.getSampleId());
-            query = query.setParameter("investigationId", dataset.getInvestigation());
+            query = query.setParameter("investigation", dataset.getInvestigation());
             query = query.setParameter("datasetType", dataset.getDatasetType());
             query = query.setParameter("name", dataset.getName());
 
             try {
                 log.trace("Looking for: sampleId: " + dataset.getSampleId());
-                log.trace("Looking for: investigationId: " + dataset.getInvestigation());
+                log.trace("Looking for: investigation: " + dataset.getInvestigation());
                 log.trace("Looking for: datasetType: " + dataset.getDatasetType());
                 log.trace("Looking for: name: " + dataset.getName());
 

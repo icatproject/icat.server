@@ -29,6 +29,6 @@ public class TestAuthorisation  extends BaseTestClass {
    
     
     public static junit.framework.Test suite(){
-        return new JUnit4TestAdapter(TestEntityBaseBean.class);
+        return new JUnit4TestAdapter(TestAuthorisation.class);
     }
 }
