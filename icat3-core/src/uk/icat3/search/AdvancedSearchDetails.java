@@ -159,7 +159,11 @@ public class AdvancedSearchDetails implements Serializable {
     }
 
     public Double getRunStart() {
-        return runStart;
+        if (runStart == null) {
+            return new Double(0);
+        } else {
+            return runStart;
+        }
     }
 
     public void setRunStart(Double runStart) {

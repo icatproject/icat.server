@@ -447,6 +447,8 @@ public class InvestigationSearch extends ManagerUtil {
             JPQL += ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER;
         }
 
+        log.trace("DYNAMIC JPQL: " + JPQL);
+        
         //set all the paramaters now
         //set query with datafile as entity object
         Query query = manager.createQuery(JPQL);
@@ -524,9 +526,7 @@ public class InvestigationSearch extends ManagerUtil {
                 query = query.setParameter("surname" + j++, investigator);
             }
         }
-
-        log.trace("DYNAMIC JPQL: " + JPQL);
-
+       
         if (number_results < 0) {
             //get all, maybe should limit this to 500?
             investigations = query.setMaxResults(MAX_QUERY_RESULTSET).getResultList();

@@ -222,11 +222,11 @@ public class Queries {
     public static final String ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER = " AND EXISTS (SELECT dfp.datafileParameterPK.datafileId FROM DatafileParameter dfp, FacilityInstrumentScientist fis3, IcatAuthorisation iadf4 WHERE " +
             " dfp.datafile.dataset = i.datasetCollection AND dfp.numericValue BETWEEN :lower AND :upper AND " +
             " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N' AND " + //remove this if run number null"
-            " iadf4.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' AND " +            
+            " iadf4.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND dfp.datafile.dataset.markedDeleted = 'N' AND " +            
             " ((:userId = '"+SUPER_USER+"') OR " +
             " (:userId = fis3.facilityInstrumentScientistPK.federalId AND " +
             " fis3.facilityInstrumentScientistPK.instrumentName = i.instrument AND fis3.markedDeleted = 'N') OR " +
-            " (df.dataset.id = iadf4.elementId AND iadf4.elementType = :dataSetType " +
+            " (dfp.datafile.dataset.id = iadf4.elementId AND iadf4.elementType = :dataSetType " +
             " AND (iadf4.userId = :userId OR iadf4.userId = 'ANY') " +
             " AND iadf4.role.actionCanSelect = 'Y')))";
    

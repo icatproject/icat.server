@@ -1236,7 +1236,7 @@ public class TestInvestigationSearch extends BaseTestClass{
        
     }
     
-    @Test
+    //@Test
     public void testAdvancedCaseInsensitive() throws ICATAPIException {
         log.info("Testing valid user, My Investigations: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -1500,7 +1500,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     
     //@Test
     public void testAdvancedCreateTime() throws ICATAPIException {
-        log.info("Testing invalid user, My Investigations: "+VALID_USER_FOR_INVESTIGATION);
+        log.info("Testing valid user, create time: "+VALID_USER_FOR_INVESTIGATION);
         
         AdvancedSearchDetails asd = new AdvancedSearchDetails();
         asd.setDateRangeStart(new Date(1,1,1));  //120 = 2020
@@ -1521,7 +1521,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     
     //@Test
     public void testAdvancedCreateTimeSuperUser() throws ICATAPIException {
-        log.info("Testing super user, My Investigations: "+SUPER_USER);
+        log.info("Testing super user, create time: "+SUPER_USER);
         
         AdvancedSearchDetails asd = new AdvancedSearchDetails();
         asd.setDateRangeStart(new Date(1,1,1));  //120 = 2020
@@ -1541,7 +1541,7 @@ public class TestInvestigationSearch extends BaseTestClass{
     
     //@Test
     public void testAdvancedCreateTimeFacilityScientist() throws ICATAPIException {
-        log.info("Testing super user, My Investigations: facility_scientist");
+        log.info("Testing facility_scientist user, create time: facility_scientist");
         
         AdvancedSearchDetails asd = new AdvancedSearchDetails();
         asd.setDateRangeStart(new Date(1,1,1));  //120 = 2020
@@ -1557,6 +1557,28 @@ public class TestInvestigationSearch extends BaseTestClass{
         
         assertNotNull("Must not be an empty collection", investigations);
         assertEquals("Size should be one", 1, investigations.size());      
+    }
+    
+    @Test
+    public void testAdvancedRunNumber() throws ICATAPIException {
+        log.info("Testing valid user, run number: "+VALID_USER_FOR_INVESTIGATION);
+        
+        AdvancedSearchDetails asd = new AdvancedSearchDetails();
+        asd.setRunEnd(66660d); 
+       // asd.setRunStart(1d);
+        
+        log.trace("RunNumber? "+asd.hasRunNumber());
+        
+        long time = System.currentTimeMillis();
+        
+        //test with name
+        Collection<Investigation> investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with "+asd+ ": " +investigations.size());
+        log.trace(investigations);
+        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
+        
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be two", 2, investigations.size());      
     }
     
     //@Test
