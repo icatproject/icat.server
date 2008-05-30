@@ -84,7 +84,7 @@ public class TestDatafileDownload extends BaseTestClassTX {
     /**
      * Tests datafile download fo invalid user
      */
-    //@Test(expected = InsufficientPrivilegesException.class)
+    @Test(expected = InsufficientPrivilegesException.class)
     public void testDataFileDownloadInvalidUser() throws ICATAPIException {
         log.info("Testing download datafile " + VALID_DATA_FILE_ID + " for user " + INVALID_USER);
 
@@ -118,7 +118,7 @@ public class TestDatafileDownload extends BaseTestClassTX {
     /**
      * Tests dataset download
      */
-    //@Test
+    @Test
     public void testDataSetDownload() throws ICATAPIException {
         log.info("Testing download dataset " + VALID_DATA_SET_ID + " for user " + VALID_USER_FOR_INVESTIGATION);
 
