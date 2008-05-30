@@ -37,7 +37,7 @@ public class TestManagerUtil extends BaseTestClassTX {
     /**
      * Tests own dataset as unique
      */
-    //@Test
+    @Test
     public void datasetUnique() throws ICATAPIException {
         Dataset dataset = getDatasetDuplicate(false);
         
@@ -49,7 +49,7 @@ public class TestManagerUtil extends BaseTestClassTX {
     /**
      * Tests new dataset as unique
      */
-    //@Test
+    @Test
     public void datasetUnique2() throws ICATAPIException {
         Dataset dataset = getDatasetDuplicate(false);
         
@@ -89,7 +89,7 @@ public class TestManagerUtil extends BaseTestClassTX {
         assertFalse("This should not be unique", unique);
     }
     
-     //@Test
+     @Test
     public void addData() throws ICATAPIException {
            Dataset dataset = getDataset(true);
         
@@ -100,7 +100,7 @@ public class TestManagerUtil extends BaseTestClassTX {
     /**
      * Tests new dataset as unique
      */
-    //@Test
+    @Test
     public void datasetUnique4() throws ICATAPIException {
                       
         Dataset dataset_ = getDataset(true);
@@ -120,7 +120,7 @@ public class TestManagerUtil extends BaseTestClassTX {
         assertFalse("This should not be unique", unique);
     }
     
-    //@Test
+    @Test
     public void clearData() throws ICATAPIException {
       
         Collection<Dataset> datasets = (Collection<Dataset>)executeListResultCmd("select d from Dataset d");
