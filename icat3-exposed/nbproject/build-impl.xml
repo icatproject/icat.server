@@ -14,6 +14,7 @@ is divided into following sections:
   - javadoc
   - cleanup
 
+
         -->
 <project xmlns:ejbjarproject1="http://www.netbeans.org/ns/j2ee-ejbjarproject/1" xmlns:ejbjarproject2="http://www.netbeans.org/ns/j2ee-ejbjarproject/2" xmlns:ejbjarproject3="http://www.netbeans.org/ns/j2ee-ejbjarproject/3" basedir=".." default="default" name="icat3-exposed-impl">
     <import file="jaxws-build.xml"/>
