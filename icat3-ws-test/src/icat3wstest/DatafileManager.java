@@ -99,7 +99,7 @@ public class DatafileManager {
             List<DatafileFormat> formats = ICATSingleton.getInstance().listDatafileFormats(SID);
             df.setDatafileFormat(formats.iterator().next());
             
-            df.setName(name);          
+            df.setName(name);                                    
             
             Datafile result = ICATSingleton.getInstance().createDataFile(sid, df, DATASET_ID);
             
