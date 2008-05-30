@@ -11,6 +11,9 @@ package uk.icat3.test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Properties;
 import uk.icat3.search.AdvancedSearchDetails;
 
 /**
@@ -35,7 +38,17 @@ public class d {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        new d();
+      //  new d();
+        Properties props = System.getProperties();
+        for (Object string : props.values()) {
+            System.out.println(string);
+        }
+        Enumeration sd = props.keys();
+        while(sd.hasMoreElements()){
+            System.out.println(sd.nextElement());
+        }
+       
+        //System.out.println(System.getProperties("-CacheClassPath.keepJars"));
     }
 
 }
