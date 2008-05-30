@@ -21,7 +21,7 @@ public class Constants {
     
     //my machine
     public static String END_POINT_ADMIN_ADDRESS = "https://escvig6.dc.dl.ac.uk:8181/ICATAdminService/ICATAdmin";
-    public static String END_POINT_ADDRESS = "https://escvig6.dc.dl.ac.uk:8181/ICATService/ICAT";
+    public static String END_POINT_ADDRESS = "https://localhost:8181/ICATService/ICAT";
     
     // volga
    // public static String END_POINT_ADMIN_ADDRESS = "https://volga.dl.ac.uk:8181/ICATAdminService/ICATAdmin";
