@@ -624,6 +624,15 @@ Insert into ICAT_AUTHORISATION
  Values 
     (235,  'ALL', 'CREATOR', 'DATASET', 3, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 
+Insert into ICAT_AUTHORISATION 
+  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+ Values 
+    (236,  'ANY', 'READER', 'DATASET', 2, 'INVESTIGATION', 2,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+Insert into ICAT_AUTHORISATION 
+  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+ Values 
+    (237,  'ANY', 'READER', 'INVESTIGATION', 2, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+
 
 
 
