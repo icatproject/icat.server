@@ -66,4 +66,27 @@
     nbproject/build-impl.xml file. 
 
     -->
+    <!--                                            -->
+    <!--  Zips up the application for distribution  -->
+    <!--                                            -->
+    <target name="zip" description="Zips up the application for distribution">   
+    <!--  Copy Constants -->
+        <move file="${basedir}/src/icat3wstest/Constants.java" tofile="${basedir}/src/icat3wstest/Constants2.java" />
+        <copy file="${basedir}/src/icat3wstest/.Constants-dist.j" tofile="${basedir}/src/icat3wstest/Constants.java" />
+      
+       <!--  Copy Singleton -->
+        <move file="${basedir}/src/icat3wstest/ICATSingleton.java" tofile="${basedir}/src/icat3wstest/ICATSingleton2.java" />
+        <copy file="${basedir}/src/icat3wstest/.ICATSingleton-dist.j" tofile="${basedir}/src/icat3wstest/ICATSingleton.java" />
+        <!-- Zip -->
+        <delete file="${basedir}/dist/examples.zip" />
+        <zip basedir="${basedir}/src"  update="true"
+        excludes="icat3wstest/ICATSingleton2.java, icat3wstest/Constants2.java,
+        icat3wstest/.ICATSingleton-dist.j, icat3wstest/.Constants-dist.j, META-INF/*.*, **/META-INF, icat3wstestdata/*.*,
+        **/icat3wstestdata, icat3wstestother/*.*, **/icat3wstestother, icat3wstest/StressTest.java"
+        zipfile="${basedir}/dist/examples.zip" />
+        <!-- Copy back -->
+        <move file="${basedir}/src/icat3wstest/Constants2.java" tofile="${basedir}/src/icat3wstest/Constants.java" />
+        <move file="${basedir}/src/icat3wstest/ICATSingleton2.java" tofile="${basedir}/src/icat3wstest/ICATSingleton.java" />     
+        
+    </target>
 </project>
