@@ -5,7 +5,8 @@
 <project name="icat3-data" default="default" basedir=".">
     <description>Builds, tests, and runs the project icat3-data.</description>
     <import file="nbproject/build-impl.xml"/>
-    <!--
+    <property name="data.project.facility.name" value="ISIS" />
+     <!--
 
     There exist several targets which are by default empty and which can be 
     used for execution of your tasks. These targets are usually executed 
@@ -66,4 +67,18 @@
     nbproject/build-impl.xml file. 
 
     -->
+   <target name="-pre-compile">
+        <!-- Copy the facility.name download.properties file over -->
+        <!-- If facility.name not set in super ant build then set it to defaulrt ${data.project.facility.name}-->
+        <condition property="facility.name" value="${data.project.facility.name}">
+            <and>
+                <not>
+                    <isset property="facility.name"/>
+                </not>
+            </and>           
+        </condition>
+          <!--  Copy download config for ${facility.name} -->
+          <echo message="Using facility ${facility.name}" />
+        <copy overwrite="true" file="${basedir}/src/${facility.name}-download.properties" tofile="${basedir}/src/download.properties" />        
+    </target>
 </project>
