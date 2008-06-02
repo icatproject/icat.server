@@ -89,6 +89,9 @@ import uk.icat3.util.Queries;
     @Column(name = "DESCRIPTION")
     private String description;
     
+    @Column(name = "LOCATION")
+    private String location;
+    
    /* @JoinColumn(name = "SAMPLE_ID", referencedColumnName = "ID", insertable=false, updatable=false)
     @ManyToOne
     private Sample sample;*/
@@ -237,6 +240,22 @@ import uk.icat3.util.Queries;
      */
     public void setDescription(String description) {
         this.description = description;
+    }
+    
+    /**
+     * Gets the location of this Datafile.
+     * @return the location
+     */
+    public String getLocation() {
+        return this.location;
+    }
+    
+    /**
+     * Sets the location of this Datafile to the specified value.
+     * @param location the new location
+     */
+    public void setLocation(String location) {
+        this.location = location;
     }
     
     /**
