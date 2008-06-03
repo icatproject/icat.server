@@ -208,7 +208,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-    //@Test
+    @Test
     public void testSearchByKeyword() throws ICATAPIException {
         log.info("Testing valid user, keyword: "+VALID_USER_FOR_INVESTIGATION);
         

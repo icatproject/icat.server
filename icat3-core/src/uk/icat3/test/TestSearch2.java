@@ -14,10 +14,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
-import uk.icat3.entity.Dataset;
-import uk.icat3.entity.Investigation;
 import uk.icat3.util.ElementType;
-import uk.icat3.util.Queries;
 
 /**
  *
@@ -36,8 +33,8 @@ public class TestSearch2 {
     }
 
     protected static void setUp() {
-        emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
-        // emf = Persistence.createEntityManagerFactory("icatisis_dev");
+        //emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
+        emf = Persistence.createEntityManagerFactory("icatisis");
         em = emf.createEntityManager();
 
 
@@ -141,7 +138,7 @@ public class TestSearch2 {
                 "AND dfp.markedDeleted = 'N' AND dfp.markedDeleted = 'N' " +
                 "AND i.dataset.markedDeleted = 'N'  " +
                 "";
-        
+
         System.out.println(QUERY);
 
         Query nullQuery = em.createQuery(QUERY);
@@ -162,6 +159,47 @@ public class TestSearch2 {
         tearDown();
     }
 
+    public void testP4() throws Exception {
+        setUp();
+
+        long time = System.currentTimeMillis();
+        String QUERY = "SELECT DISTINCT i from Investigation i, IcatAuthorisation ia " +
+                "WHERE " +
+                " i.markedDeleted = 'N' AND "+ //(EXISTS (SELECT fis FROM FacilityInstrumentScientist fis " +
+                //" WHERE fis.facilityInstrumentScientistPK.federalId = :userId " +
+                //"AND fis.facilityInstrumentScientistPK.instrumentName = i.instrument AND fis.markedDeleted = 'N') " +
+                "  (i.id = ia.elementId AND ia.elementType = :objectType  AND (ia.userId = :userId OR ia.userId = 'ANY') AND " +
+                "ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y')  " +
+                "AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword AND kw.markedDeleted = 'N')";
+        
+         QUERY = "SELECT DISTINCT i from Investigation i, IcatAuthorisation ia  " +
+                "WHERE  (i.id = ia.elementId AND ia.elementType = :objectType  AND (ia.userId = :userId OR ia.userId = 'ANY') AND " +
+                "ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' " +
+                 " AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword AND kw.markedDeleted = 'N')";
+
+
+        System.out.println(QUERY);
+
+        Query nullQuery = em.createQuery(QUERY);
+
+        nullQuery.setParameter("objectType", ElementType.INVESTIGATION);
+        nullQuery.setParameter("userId", "rmi45"); 
+       
+        nullQuery.setParameter("keyword", "hrpd");
+        
+        System.out.println(nullQuery.getResultList());
+
+        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
+
+        time = System.currentTimeMillis();
+
+        System.out.println(nullQuery.getResultList());
+
+        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
+
+        tearDown();
+    }
+
     /**
      * @param args the command line arguments
      */
@@ -170,7 +208,7 @@ public class TestSearch2 {
 
         TestSearch2 ts = new TestSearch2();
 
-        ts.testP3();
+        ts.testP4();
 
     //   ts.test2();
 
