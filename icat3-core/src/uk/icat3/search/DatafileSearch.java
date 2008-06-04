@@ -88,6 +88,7 @@ public class DatafileSearch {
             datafiles = query.setMaxResults(number_results).setFirstResult(startIndex).getResultList();
         }
 
+        log.debug("number of datefiles found: "+datafiles.size()+" : "+datafiles);
         //now get the role to add to the file
         for (Datafile file : datafiles) {
             try {

@@ -42,7 +42,7 @@ public class Queries {
      * i.dataset.investigation.instrument is not working properly
      */
     public static final String QUERY_USERS_DATAFILES_JPQL = ", IcatAuthorisation ia WHERE" +
-            "  (i.id = ia.elementId AND ia.elementType = :objectType " +
+            "  (i.dataset.id = ia.elementId AND ia.elementType = :objectType " +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' ";
 

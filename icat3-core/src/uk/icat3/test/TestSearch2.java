@@ -33,8 +33,8 @@ public class TestSearch2 {
     }
 
     protected static void setUp() {
-        //emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
-        emf = Persistence.createEntityManagerFactory("icatisis");
+        emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
+        //emf = Persistence.createEntityManagerFactory("icatisis");
         em = emf.createEntityManager();
 
 
@@ -163,41 +163,28 @@ public class TestSearch2 {
         setUp();
 
         long time = System.currentTimeMillis();
-        String QUERY = "SELECT DISTINCT i from Investigation i, IcatAuthorisation ia " +
-                "WHERE " +
-                " i.markedDeleted = 'N' AND "+ //(EXISTS (SELECT fis FROM FacilityInstrumentScientist fis " +
-                //" WHERE fis.facilityInstrumentScientistPK.federalId = :userId " +
-                //"AND fis.facilityInstrumentScientistPK.instrumentName = i.instrument AND fis.markedDeleted = 'N') " +
-                "  (i.id = ia.elementId AND ia.elementType = :objectType  AND (ia.userId = :userId OR ia.userId = 'ANY') AND " +
-                "ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y')  " +
-                "AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword AND kw.markedDeleted = 'N')";
-        
-         QUERY = "SELECT DISTINCT i from Investigation i, IcatAuthorisation ia  " +
-                "WHERE  EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword AND kw.markedDeleted = 'N')" +
-                "AND ((i.id = ia.elementId AND ia.elementType = :objectType  AND (ia.userId = :userId OR ia.userId = 'ANY') AND " +
-                "ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') OR 'A' = 'A' ) AND i.markedDeleted = 'N' " +
-                 "  ";
-
+        String QUERY = "SELECT DISTINCT i from Datafile i , DatafileParameter dfp , IcatAuthorisation ia " +
+                "WHERE  (i.dataset.id = ia.elementId AND ia.elementType = :objectType  AND (ia.userId = :userId OR ia.userId = 'ANY') " +
+                "AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N'  " +
+                "AND i.dataset.investigation.instrument IN (:instrument1) AND  " +
+                "i = dfp.datafile AND i.markedDeleted = 'N'  AND ((dfp.numericValue BETWEEN :lower AND :upper)) " +
+                "AND (dfp.datafileParameterPK.name = 'run_number') AND dfp.markedDeleted = 'N' AND dfp.markedDeleted = 'N' " +
+                "AND i.dataset.markedDeleted = 'N'";
 
         System.out.println(QUERY);
 
         Query nullQuery = em.createQuery(QUERY);
 
-        nullQuery.setParameter("objectType", ElementType.INVESTIGATION);
-        nullQuery.setParameter("userId", "rmi45"); 
-       
-        nullQuery.setParameter("keyword", "hrpd");
-        
-        System.out.println(nullQuery.getResultList());
-
-        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
-
-        time = System.currentTimeMillis();
+        nullQuery.setParameter("objectType", ElementType.DATASET);
+        nullQuery.setParameter("userId", "SUPER_USER");
+        nullQuery.setParameter("lower", 0.0f);
+        nullQuery.setParameter("upper", 100000f);
+        nullQuery.setParameter("instrument1", "SXD");
 
         System.out.println(nullQuery.getResultList());
 
         System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
-
+      
         tearDown();
     }
 
