@@ -32,25 +32,19 @@ public class Queries {
     
     // Search all investigations WHERE (investigation.instrument = facilityScientist AND facilityScientist fedid) OR
     // OR (userId = SUPER) OR (userId is in icatAuthrosation table and role is select)   
-    public static final String QUERY_USERS_INVESTIGATIONS_JPQL = ", IcatAuthorisation ia, FacilityInstrumentScientist fis WHERE" +
-            "  ((:userId = '"+SUPER_USER+"') OR " +
-            " (:userId = fis.facilityInstrumentScientistPK.federalId AND " +
-            " (fis.facilityInstrumentScientistPK.instrumentName = i.instrument) AND fis.markedDeleted = 'N') OR " +
+    public static final String QUERY_USERS_INVESTIGATIONS_JPQL = ", IcatAuthorisation ia WHERE" +           
             " (i.id = ia.elementId AND ia.elementType = :objectType " +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-            " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y')) AND i.markedDeleted = 'N' ";
+            " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' ";
 
     /**
      * Error with this search, MERGE JOIN CARTESIAN for fis.facilityInstrumentScientistPK.instrumentName = i.dataset.investigation.instrument
      * i.dataset.investigation.instrument is not working properly
      */
-    public static final String QUERY_USERS_DATAFILES_JPQL = ", IcatAuthorisation ia, FacilityInstrumentScientist fis WHERE" +
-            "  ((:userId = '"+SUPER_USER+"') OR " +
-            " (:userId = fis.facilityInstrumentScientistPK.federalId AND " +
-            " fis.facilityInstrumentScientistPK.instrumentName = i.dataset.investigation.instrument AND fis.markedDeleted = 'N') OR " +
-            " (i.id = ia.elementId AND ia.elementType = :objectType " +
+    public static final String QUERY_USERS_DATAFILES_JPQL = ", IcatAuthorisation ia WHERE" +
+            "  (i.id = ia.elementId AND ia.elementType = :objectType " +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
-            " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y')) AND i.markedDeleted = 'N' ";
+            " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' ";
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     
@@ -196,39 +190,30 @@ public class Queries {
     
     //public static final String ADVANCED_SEARCH_JPQL_INSTRUMENT =  " AND i.instrument.name IN(:instrument)  AND i.instrument.markedDeleted = 'N' ";//expand IN, remove this if instrument null
     
-    public static final String ADVANCED_SEARCH_JPQL_DATAFILE = " AND EXISTS (SELECT DISTINCT df FROM Datafile df, FacilityInstrumentScientist fis2, IcatAuthorisation iadf3 WHERE " +
+    public static final String ADVANCED_SEARCH_JPQL_DATAFILE = " AND EXISTS (SELECT DISTINCT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
             " df.dataset = i.datasetCollection AND (df.datafileCreateTime > :lowerTime OR :lowerTime IS NULL) AND (df.datafileCreateTime < :upperTime OR :upperTime IS NULL) AND " +
             " df.dataset.markedDeleted = 'N' AND df.markedDeleted = 'N' AND (df.name OPERATION :datafileName OR :datafileName IS NULL) AND " + //remove if all are null
             " iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' AND " +           
-            " ((:userId = '"+SUPER_USER+"') OR " +
-            " (:userId = fis2.facilityInstrumentScientistPK.federalId AND " +
-            " fis2.facilityInstrumentScientistPK.instrumentName = i.instrument AND fis2.markedDeleted = 'N') OR " +
             " (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
             " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
-            " AND iadf3.role.actionCanSelect = 'Y')))";
+            " AND iadf3.role.actionCanSelect = 'Y'))";
     
-     public static final String ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE = " AND EXISTS (SELECT DISTINCT df FROM Datafile df, FacilityInstrumentScientist fis2, IcatAuthorisation iadf3 WHERE " +            
+     public static final String ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE = " AND EXISTS (SELECT DISTINCT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +            
             " df.dataset = i.datasetCollection AND (df.datafileCreateTime > :lowerTime OR :lowerTime IS NULL) AND (df.datafileCreateTime < :upperTime OR :upperTime IS NULL) AND " +
             " df.dataset.markedDeleted = 'N' AND df.markedDeleted = 'N' AND (LOWER(df.name) OPERATION :datafileName OR :datafileName IS NULL) AND  " + //remove if all are null
             " iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' AND " +
-            " ((:userId = '"+SUPER_USER+"') OR " +
-            " (:userId = fis2.facilityInstrumentScientistPK.federalId AND " +
-            " fis2.facilityInstrumentScientistPK.instrumentName = i.instrument AND fis2.markedDeleted = 'N') OR " +
             " (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
             " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
-            " AND iadf3.role.actionCanSelect = 'Y')))";
+            " AND iadf3.role.actionCanSelect = 'Y'))";
     
     
-    public static final String ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER = " AND EXISTS (SELECT dfp.datafileParameterPK.datafileId FROM DatafileParameter dfp, FacilityInstrumentScientist fis3, IcatAuthorisation iadf4 WHERE " +
+    public static final String ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER = " AND EXISTS (SELECT dfp.datafileParameterPK.datafileId FROM DatafileParameter dfp,  IcatAuthorisation iadf4 WHERE " +
             " dfp.datafile.dataset = i.datasetCollection AND dfp.numericValue BETWEEN :lower AND :upper AND " +
             " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N' AND " + //remove this if run number null"
             " iadf4.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND dfp.datafile.dataset.markedDeleted = 'N' AND " +            
-            " ((:userId = '"+SUPER_USER+"') OR " +
-            " (:userId = fis3.facilityInstrumentScientistPK.federalId AND " +
-            " fis3.facilityInstrumentScientistPK.instrumentName = i.instrument AND fis3.markedDeleted = 'N') OR " +
             " (dfp.datafile.dataset.id = iadf4.elementId AND iadf4.elementType = :dataSetType " +
             " AND (iadf4.userId = :userId OR iadf4.userId = 'ANY') " +
-            " AND iadf4.role.actionCanSelect = 'Y')))";
+            " AND iadf4.role.actionCanSelect = 'Y'))";
    
    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -306,16 +291,16 @@ public class Queries {
     public static final String KEYWORDS_FOR_USER = "Keywords.getAllKeywordsForUser";
     public static final String KEYWORDS_FOR_USER_JPQL = "SELECT DISTINCT k.keywordPK.name from Keyword k, IcatAuthorisation ia WHERE" +
             " k.investigation.id = ia.elementId AND ia.elementType = :objectType AND ia.markedDeleted = 'N'" +
-            " AND (:userId = '"+SUPER_USER+"' OR ia.userId = :userId OR ia.userId = 'ANY')" +
+            " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND (k.keywordPK.name LIKE :startKeyword OR :startKeyword IS NULL) AND k.markedDeleted = 'N'";// ORDER BY k.keywordPK.name";
     
     public static final String KEYWORDS_FOR_USER_ALPHA = "Keywords.getAllKeywordsForUserAlpha";
     public static final String KEYWORDS_FOR_USER_ALPHA_SQL = "SELECT DISTINCT t0.NAME FROM KEYWORD t0, ICAT_AUTHORISATION t2, INVESTIGATION t1 " +
-            "WHERE ((((((((t1.ID = t2.ELEMENT_ID) AND (t2.ELEMENT_TYPE = 'INVESTIGATION')) AND (t2.DELETED = 'N')) AND ((t2.USER_ID = ?userId) OR (?userId = '"+SUPER_USER+"') OR (t2.USER_ID = 'ANY'))) AND (t2.DELETED = 'N')) AND ( (regexp_like(t0.NAME,'^[[:alpha:]]*$')) AND ((t0.NAME LIKE ?startKeyword) OR (?startKeyword IS NULL)) ) ) AND (t0.DELETED = 'N')) AND (t1.ID = t0.INVESTIGATION_ID))";
+            "WHERE ((((((((t1.ID = t2.ELEMENT_ID) AND (t2.ELEMENT_TYPE = 'INVESTIGATION')) AND (t2.DELETED = 'N')) AND ((t2.USER_ID = ?userId) OR (t2.USER_ID = 'ANY'))) AND (t2.DELETED = 'N')) AND ( (regexp_like(t0.NAME,'^[[:alpha:]]*$')) AND ((t0.NAME LIKE ?startKeyword) OR (?startKeyword IS NULL)) ) ) AND (t0.DELETED = 'N')) AND (t1.ID = t0.INVESTIGATION_ID))";
     
     public static final String KEYWORDS_FOR_USER_ALPHA_NUMERIC = "Keywords.getAllKeywordsForUserAlphaNumeric";
     public static final String KEYWORDS_FOR_USER_ALPHA_NUMERIC_SQL = "SELECT DISTINCT t0.NAME FROM KEYWORD t0, ICAT_AUTHORISATION t2, INVESTIGATION t1 " +
-            "WHERE ((((((((t1.ID = t2.ELEMENT_ID) AND (t2.ELEMENT_TYPE = 'INVESTIGATION')) AND (t2.DELETED = 'N')) AND ((t2.USER_ID = ?userId) OR (?userId = '"+SUPER_USER+"') OR (t2.USER_ID = 'ANY'))) AND (t2.DELETED = 'N')) AND ( (regexp_like(t0.NAME,'^[[:alnum:]]*$')) AND ((t0.NAME LIKE ?startKeyword) OR (?startKeyword IS NULL)) ) ) AND (t0.DELETED = 'N')) AND (t1.ID = t0.INVESTIGATION_ID))";
+            "WHERE ((((((((t1.ID = t2.ELEMENT_ID) AND (t2.ELEMENT_TYPE = 'INVESTIGATION')) AND (t2.DELETED = 'N')) AND ((t2.USER_ID = ?userId) OR (t2.USER_ID = 'ANY'))) AND (t2.DELETED = 'N')) AND ( (regexp_like(t0.NAME,'^[[:alnum:]]*$')) AND ((t0.NAME LIKE ?startKeyword) OR (?startKeyword IS NULL)) ) ) AND (t0.DELETED = 'N')) AND (t1.ID = t0.INVESTIGATION_ID))";
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     

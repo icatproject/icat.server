@@ -173,9 +173,10 @@ public class TestSearch2 {
                 "AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword AND kw.markedDeleted = 'N')";
         
          QUERY = "SELECT DISTINCT i from Investigation i, IcatAuthorisation ia  " +
-                "WHERE  (i.id = ia.elementId AND ia.elementType = :objectType  AND (ia.userId = :userId OR ia.userId = 'ANY') AND " +
-                "ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' " +
-                 " AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword AND kw.markedDeleted = 'N')";
+                "WHERE  EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword AND kw.markedDeleted = 'N')" +
+                "AND ((i.id = ia.elementId AND ia.elementType = :objectType  AND (ia.userId = :userId OR ia.userId = 'ANY') AND " +
+                "ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') OR 'A' = 'A' ) AND i.markedDeleted = 'N' " +
+                 "  ";
 
 
         System.out.println(QUERY);
