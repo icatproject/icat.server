@@ -12,9 +12,6 @@
             <included-library files="1">reference.icat3-jaxb.jar</included-library>
             <included-library files="1">reference.icat3-user-default.jar</included-library>
             <included-library files="1">reference.icat3-data.jar</included-library>
-            <included-library files="1">file.reference.log4j-1.2.14.jar</included-library>
-            <included-library files="1">file.reference.cog-jglobus-kerberos.jar</included-library>
-            <included-library files="1">file.reference.commons-logging.jar</included-library>
             <source-roots>
                 <root id="src.dir"/>
             </source-roots>
