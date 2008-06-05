@@ -5,6 +5,7 @@
 <project name="icat3-exposed" default="default" basedir="." xmlns:ejbjarproject="http://www.netbeans.org/ns/j2ee-ejbjarproject/3">
     <description>Builds, tests, and runs the project icat3-exposed.</description>
     <import file="nbproject/build-impl.xml"/>
+   <!--<property name="facility.name" value="DLS" />-->
     <!--
 
     There exist several targets which are by default empty and which can be 
