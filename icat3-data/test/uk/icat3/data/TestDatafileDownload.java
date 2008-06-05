@@ -40,7 +40,7 @@ public class TestDatafileDownload extends BaseTestClassTX {
         assertNotNull("URL returned cannot be null", url);
         assertTrue("URL contains sessionid", url.contains(SESSIONID_NAME));
         assertTrue("URL contains action", url.contains("action"));
-        assertTrue("URL contains "+ACTION.NONE.toString(), url.contains(ACTION.NONE.toString()));
+        assertTrue("URL contains "+ACTION.DOWNLOAD.toString(), url.contains(ACTION.DOWNLOAD.toString()));
 
         //only contains one name parameter
         int index = url.indexOf(DATAFILEID_NAME);
@@ -67,7 +67,7 @@ public class TestDatafileDownload extends BaseTestClassTX {
         assertNotNull("URL returned cannot be null", url);
         assertTrue("URL contains sessionid", url.contains(SESSIONID_NAME));
         assertTrue("URL contains action", url.contains("action"));
-        assertTrue("URL contains "+ACTION.NONE.toString(), url.contains(ACTION.ZIP.toString()));
+        assertTrue("URL contains "+ACTION.ZIP.toString(), url.contains(ACTION.ZIP.toString()));
 
        //only contains 2 name parameters
         int index = url.indexOf(DATAFILEID_NAME);

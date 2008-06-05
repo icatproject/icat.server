@@ -24,7 +24,13 @@ public class DownloadConstants {
     public static String DOWNLOAD_SCHEME = "http";
 
     public static enum ACTION {
-        ZIP, NONE
+        ZIP, DOWNLOAD, ZIPCOMP, TAR ;
+        
+        @Override
+        public String toString(){
+            //action strings need to be lower case
+            return super.toString().toLowerCase();
+        }
     };
 
     //read in config

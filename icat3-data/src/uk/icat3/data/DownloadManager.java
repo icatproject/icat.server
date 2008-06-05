@@ -148,7 +148,7 @@ public class DownloadManager {
         StringBuilder builder = new StringBuilder();
         String DOWNLOAD_ACTION = ACTION.ZIP.toString();
         if (!zip) {
-            DOWNLOAD_ACTION = ACTION.NONE.toString();
+            DOWNLOAD_ACTION = ACTION.DOWNLOAD.toString();
         }
 
         builder.append(DOWNLOAD_SCHEME + "://" + HOST_NAME + "/" + CGI_NAME + "?" + SESSIONID_NAME + "=" + sessionId + "&action=" + DOWNLOAD_ACTION);
@@ -169,7 +169,7 @@ public class DownloadManager {
         StringBuilder builder = new StringBuilder();
         String DOWNLOAD_ACTION = ACTION.ZIP.toString();
         if (datafileIds.size() == 1) {
-            DOWNLOAD_ACTION = ACTION.NONE.toString();
+            DOWNLOAD_ACTION = ACTION.DOWNLOAD.toString();
         }
 
         builder.append(DOWNLOAD_SCHEME + "://" + HOST_NAME + "/" + CGI_NAME + "?" + SESSIONID_NAME + "=" + sessionId + "&action=" + DOWNLOAD_ACTION);
@@ -252,5 +252,9 @@ public class DownloadManager {
 
         //user had access
         return downloadInfo;
+    }
+    
+    public static void main(String[] args){
+        System.out.println(ACTION.DOWNLOAD);
     }
 }
