@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import javax.activation.DataHandler;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.soap.SOAPBinding;
 
 /**
  *

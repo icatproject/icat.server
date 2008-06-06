@@ -13,11 +13,11 @@ import java.util.ArrayList;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import static icat3wstest.Constants.*;
+
 /**
  *
  * @author gjd37
  */
-
 public class InvestigationSearch {
 
     /** Creates a new instance of SearchKeyword */
@@ -121,22 +121,22 @@ public class InvestigationSearch {
 
             KeywordDetails details = new KeywordDetails();
 
-            details.getKeywords().add("SHULL");
-
+            details.getKeywords().add(keyword);
+            
             //details.setCaseSensitve(false); //false default
             //details.setFuzzy(true); //false default
             //details.setInvestigationIncludes(InvestigationInclude.NONE); // NONE default
             //details.setOperator(LogicalOperator.AND); //AND default
 
             // TODO process result here
-            java.util.List<uk.icat3.client.Investigation> result = ICATSingleton.getInstance().searchByKeywordsAll(sid, details, 0, 100);
+            java.util.List<uk.icat3.client.Investigation> result = ICATSingleton.getInstance().searchByKeywordsAll(sid, details, 0, 200);
 
             float totalTime = (System.currentTimeMillis() - time) / 1000f;
 
             System.out.println("Number of investigations with " + keyword + " as a keywordAll is " + result.size());
             System.out.println("Results:");
             for (Investigation investigation : result) {
-                System.out.println("  ID: " + investigation.getId() + ", TITLE: " + investigation.getTitle());
+             //   System.out.println("  ID: " + investigation.getId() + ", TITLE: " + investigation.getTitle());
             }
             System.out.println("\nTime taken: " + totalTime + " seconds");
             System.out.println("--------------------------------------------------\n");
@@ -210,8 +210,12 @@ public class InvestigationSearch {
      */
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
-        //searchKeyword(SID, "isis");
-        //  searchKeywordAll(SID, "cal");
+        // searchKeyword(SID, "hrpd");
+        ICATSingleton.getInstance();
+        
+        searchKeywordAll(SID, "hrpd");
+        searchKeywordAll(SID, "hrpd");
+
         // searchSurname(SID, "in");
         // searchUserId(SID, "gjd37");
         //searchMyInvestigations(SID);
@@ -220,7 +224,7 @@ public class InvestigationSearch {
         // asd.getInvestigators().add(SURNAME);
         //asd.setInvestigationName("SrF2 calibration  w=-25.3d");
         //asd.getInstruments().add("sxd");
-       // asd.setRunStart(8374d);
+        // asd.setRunStart(8374d);
         //asd.setRunEnd(8400d);
         XMLGregorianCalendar xmlCal = null;
         XMLGregorianCalendar xmlCalEnd = null;
@@ -241,6 +245,6 @@ public class InvestigationSearch {
         asd.setDateRangeStart(xmlCal);
         asd.setDateRangeEnd(xmlCalEnd);
 
-        InvestigationSearch.searchAdvanced(SID, asd);
+    //InvestigationSearch.searchAdvanced(SID, asd);
     }
 }

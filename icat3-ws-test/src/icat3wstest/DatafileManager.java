@@ -31,7 +31,7 @@ public class DatafileManager {
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
-            System.out.println("  ID: "+ datafile.getId()+", TITLE: "+ datafile.getName());
+            System.out.println("  ID: "+ datafile.getId()+", TITLE: "+ datafile.getName() +", ds id "+datafile.getDatasetId());
             System.out.println("     Datafile Parameters: "+ datafile.getDatafileParameterCollection().size());
             System.out.println("     ----------------------");
             for (DatafileParameter datafileParameter :  datafile.getDatafileParameterCollection()) {
@@ -302,10 +302,10 @@ public class DatafileManager {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        //getDatafile(SID, INVESTIGATION_ID);
+        getDatafile(SID, INVESTIGATION_ID);
         //getDatafiles(SID, INVESTIGATION_ID);
         
-        Datafile df = createDatafile(SID, "nexus.w"+SID);
+       // Datafile df = createDatafile(SID, "nexus.w"+SID);
       //   delete_undeleteDatafile(SID, df.getId());
       /*  updateDatafile(SID, df, "new name of "+SID);  //this should fail with ICAT_ADMIN user
         delete_undeleteDatafile(SID, df.getId());
