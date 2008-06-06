@@ -213,7 +213,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    //@Test(expected=InsufficientPrivilegesException.class)
+   // @Test(expected=InsufficientPrivilegesException.class)
     public void removeInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
@@ -303,7 +303,7 @@ public class TestInvestigation extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=ValidationException.class)
+   // @Test(expected=ValidationException.class)
     public void addValidInvestigationInvalidAbstract() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding valid investigation with too big abstract to investigation Id: "+VALID_INVESTIGATION_ID);
         

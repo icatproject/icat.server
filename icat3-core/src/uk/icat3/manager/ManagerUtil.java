@@ -508,7 +508,7 @@ public class ManagerUtil {
     }
 
     /**
-     * Gets all the IcatAuthorisations for a investigation/dataset/datafile and removes them
+     * Gets all the IcatAuthorisations for a investigation/dataset/datafile (authorisationId) and removes them
      *
      */
     protected static boolean removeElementAuthorisations(Long authorisationId, ElementType type, EntityManager manager) throws NoSuchObjectFoundException {
@@ -545,7 +545,7 @@ public class ManagerUtil {
                 removeElementAuthorisations(df.getId(), ElementType.DATAFILE, manager);
             }
         } else if (type == ElementType.DATAFILE) {
-        //do nothing, deleted below
+            //do nothing, deleted below
         }
 
         //remove root one
@@ -803,7 +803,7 @@ public class ManagerUtil {
     /**
      * Adds an authorisation to a inv, ds, df
      */
-    protected static IcatAuthorisation persistAuthorisation(String userId, String addedId, IcatRole role, ElementType elementType, Long id, ElementType parentElementType, Long parentId, Long usercChildRecord, EntityManager manager) throws ValidationException {
+    protected static IcatAuthorisation persistAuthorisation(String userId, String addedId, IcatRole role, ElementType elementType, Long id, ElementType parentElementType, Long parentId, Long userChildRecord, EntityManager manager) throws ValidationException {
         //now add authorisation
         IcatAuthorisation icatAuthorisation = new IcatAuthorisation();
 
@@ -812,14 +812,14 @@ public class ManagerUtil {
         icatAuthorisation.setElementId(id);
         icatAuthorisation.setParentElementType(parentElementType);
         icatAuthorisation.setParentElementId(parentId);
-        icatAuthorisation.setUserChildRecord(usercChildRecord);
+        icatAuthorisation.setUserChildRecord(userChildRecord);
         icatAuthorisation.setCreateId(userId);
         icatAuthorisation.setRole(role);
 
         //check if this is Valid
         icatAuthorisation.isValid(manager);
 
-        log.debug("Adding: " + role + " to " + elementType + ": " + id + " with parent " + parentElementType + ": " + parentId + " with userChildRecord: " + usercChildRecord + " for user " + addedId);
+        log.debug("Adding: " + role + " to " + elementType + ": " + id + " with parent " + parentElementType + ": " + parentId + " with userChildRecord: " + userChildRecord + " for user " + addedId);
         manager.persist(icatAuthorisation);
 
         return icatAuthorisation;

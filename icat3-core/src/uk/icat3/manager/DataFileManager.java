@@ -12,7 +12,6 @@ package uk.icat3.manager;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileParameter;
@@ -26,7 +25,6 @@ import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
 import uk.icat3.util.ElementType;
-import uk.icat3.util.IcatRoles;
 
 /**
  * This is the manager class for all operations for data files.

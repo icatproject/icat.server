@@ -6,17 +6,14 @@
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-
 package uk.icat3.manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.EntityBaseBean;
-import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
@@ -320,6 +317,8 @@ public class InvestigationManager extends ManagerUtil {
         IcatAuthorisation IcatAuthorisationChild = persistAuthorisation(userId, userId, role, ElementType.DATASET, null, ElementType.INVESTIGATION, investigation.getId(), null, manager);
         //add new creator role to investigation for the user creating the investigation
         persistAuthorisation(userId, userId, role, ElementType.INVESTIGATION, investigation.getId(), null, null, IcatAuthorisationChild.getId(), manager);
+        //add SUPER_USER to investigation
+        persistAuthorisation(userId, IcatRoles.SUPER_USER.toString(), role, ElementType.INVESTIGATION, investigation.getId(), null, null, null , manager);
 
         //now manually create the datasets
         if (datasets != null) {
@@ -616,7 +615,7 @@ public class InvestigationManager extends ManagerUtil {
 
                 log.warn(publicationManaged + " already added to investigation.");
                 throw new ValidationException(publicationManaged + " is not unique");
-                //}
+            //}
             } catch (NoSuchObjectFoundException ex) {
                 //not already in DB so add
                 //sets modId for persist

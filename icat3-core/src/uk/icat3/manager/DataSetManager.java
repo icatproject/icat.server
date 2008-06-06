@@ -12,7 +12,6 @@ package uk.icat3.manager;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
@@ -246,7 +245,9 @@ public class DataSetManager extends ManagerUtil {
         IcatAuthorisation IcatAuthorisationChild = persistAuthorisation(userId, userId, role, ElementType.DATAFILE, null, ElementType.DATASET, dataSet.getId(), null, manager);
         //add new creator role to ds for the user creating the ds
         persistAuthorisation(userId, userId, role, ElementType.DATASET, dataSet.getId(), ElementType.INVESTIGATION, investigation.getId(), IcatAuthorisationChild.getId(), manager);
-
+        //add SUPER_USER to ds for the user creating the ds
+        persistAuthorisation(userId, IcatRoles.SUPER_USER.toString(), role, ElementType.DATASET, dataSet.getId(), ElementType.INVESTIGATION, investigation.getId(), null, manager);
+        
         //now manually create the data files
         if (datafiles != null) {
             DataFileManager.createDataFiles(userId, datafiles, dataSet.getId(), manager);

@@ -60,7 +60,7 @@ public class TestDataset extends BaseTestClassTX {
         assertFalse("Deleted must be false", datasetInserted.isDeleted());
     }
     
-    @Test
+    //@Test
     public void modifyDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying a dataset for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -85,7 +85,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=NoSuchObjectFoundException.class)
+    //@Test(expected=NoSuchObjectFoundException.class)
     public void setDatasetInvalidSampleId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for setting invalid sample id to dataset Id: ");
         
@@ -105,7 +105,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void setDatasetSample() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for setting sample to dataset Id: ");
         
@@ -125,7 +125,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=ValidationException.class)
+    //@Test(expected=ValidationException.class)
     public void addDuplicateDataset() throws ICATAPIException, Exception {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -144,7 +144,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void deleteDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -169,7 +169,7 @@ public class TestDataset extends BaseTestClassTX {
      /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void undeleteDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for undeleting dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -196,7 +196,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=NoSuchObjectFoundException.class)
+    //@Test(expected=NoSuchObjectFoundException.class)
     public void getDeletedDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a deleted dataset for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -215,7 +215,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=ValidationException.class)
+    //@Test(expected=ValidationException.class)
     public void createDeletedDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a dataset for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -234,7 +234,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void removeDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -256,7 +256,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void removeActualDataset() throws ICATAPIException {
         log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -285,7 +285,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void addDatasetInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for adding dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -303,7 +303,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=ValidationException.class)
+    //@Test(expected=ValidationException.class)
     public void addInvalidDataset() throws ICATAPIException, Exception {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -325,7 +325,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void deleteDatasetProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a props dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -344,7 +344,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void removeDatasetProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a props dataset to dataset Id: "+VALID_INVESTIGATION_ID);
         
@@ -363,7 +363,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void setDatasetSampleProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for setting sample to dataset Id: "+VALID_DATA_SET_ID);
         
@@ -372,7 +372,7 @@ public class TestDataset extends BaseTestClassTX {
         assertTrue("No exception", true);
     }
     
-    @Test
+    //@Test
     public void createWholeValidDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a whole data set for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -416,7 +416,7 @@ public class TestDataset extends BaseTestClassTX {
         }
     }
     
-    @Test
+    //@Test
     public void removeActualDataset2() throws ICATAPIException{
         removeActualDataset();
     }
@@ -424,7 +424,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void testAddValidDatafiles() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for add a files for datset Id: "+VALID_INVESTIGATION_ID);
         
@@ -455,7 +455,7 @@ public class TestDataset extends BaseTestClassTX {
         }
     }
     
-    @Test
+    //@Test
     public void removeActualDataset3() throws ICATAPIException{
         removeActualDataset();
         removeActualDataset();
@@ -464,7 +464,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void getDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -478,7 +478,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void getDatasetInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -494,7 +494,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void getDatasets() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
         Collection<Long> dsIds = new ArrayList<Long>();
@@ -512,7 +512,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests remove a file, no Id
      */
-    @Test(expected=NoSuchObjectFoundException.class)
+    //@Test(expected=NoSuchObjectFoundException.class)
     public void removeDatasetNoId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -532,7 +532,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests delete a file, no Id
      */
-    @Test(expected=NoSuchObjectFoundException.class)
+    //@Test(expected=NoSuchObjectFoundException.class)
     public void deleteDatasetNoId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -552,7 +552,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests update a file, no Id
      */
-    @Test(expected=NoSuchObjectFoundException.class)
+    //@Test(expected=NoSuchObjectFoundException.class)
     public void updateDatasetNoId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataset for dataset id: "+VALID_INVESTIGATION_ID);
         
@@ -603,7 +603,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a invalid file, no anme and type
      */
-    @Test(expected=ValidationException.class)
+    //@Test(expected=ValidationException.class)
     public void testCreateInValidDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file");
         
@@ -620,7 +620,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a invalid file, name but no type
      */
-    @Test(expected=ValidationException.class)
+    //@Test(expected=ValidationException.class)
     public void testCreateInValidDataset2() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for creating a file");
         
@@ -638,7 +638,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void testAddInValidDatasetInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for creating a file");
         
@@ -662,7 +662,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=InsufficientPrivilegesException.class)
+    //@Test(expected=InsufficientPrivilegesException.class)
     public void testCreateInValidDatasetInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for creating a file");
         
@@ -686,7 +686,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test
+    //@Test
     public void testAddValidSampleToDatasetValidUser() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sample");
         
@@ -697,7 +697,7 @@ public class TestDataset extends BaseTestClassTX {
     /**
      * Tests creating a file
      */
-    @Test(expected=NoSuchObjectFoundException.class)
+    //@Test(expected=NoSuchObjectFoundException.class)
     public void testAddInValidSampleToDatasetValidUser() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sample");
         

@@ -61,8 +61,8 @@ public class TestConstants {
     public final static long VALID_DATA_FILE_ID_GATEKEEPER_TEST =  57;
     public final static long VALID_INVESTIGATION_ID_FOR_GATEKEEPER_TEST =  3;
     
-    //public final static String PERSISTENCE_UNIT = "icat3-scratch-testing-PU";
-    public final static String PERSISTENCE_UNIT = "icat3-unit-testing-PU";
+    public final static String PERSISTENCE_UNIT = "icat3-scratch-testing-PU";
+    //public final static String PERSISTENCE_UNIT = "icat3-unit-testing-PU";
     //public final static String PERSISTENCE_UNIT = "icat3-apitest";
     
     //public final static String PERSISTENCE_UNIT = "icatisis";
