@@ -246,7 +246,9 @@ public class DataSetManager extends ManagerUtil {
         //add new creator role to ds for the user creating the ds
         persistAuthorisation(userId, userId, role, ElementType.DATASET, dataSet.getId(), ElementType.INVESTIGATION, investigation.getId(), IcatAuthorisationChild.getId(), manager);
         //add SUPER_USER to ds for the user creating the ds
-        persistAuthorisation(userId, IcatRoles.SUPER_USER.toString(), role, ElementType.DATASET, dataSet.getId(), ElementType.INVESTIGATION, investigation.getId(), null, manager);
+        IcatRole superRole = manager.find(IcatRole.class, "SUPER");
+        if(superRole == null) superRole = role;
+        persistAuthorisation(userId, IcatRoles.SUPER_USER.toString(), superRole, ElementType.DATASET, dataSet.getId(), ElementType.INVESTIGATION, investigation.getId(), null, manager);
         
         //now manually create the data files
         if (datafiles != null) {

@@ -318,7 +318,9 @@ public class InvestigationManager extends ManagerUtil {
         //add new creator role to investigation for the user creating the investigation
         persistAuthorisation(userId, userId, role, ElementType.INVESTIGATION, investigation.getId(), null, null, IcatAuthorisationChild.getId(), manager);
         //add SUPER_USER to investigation
-        persistAuthorisation(userId, IcatRoles.SUPER_USER.toString(), role, ElementType.INVESTIGATION, investigation.getId(), null, null, null , manager);
+        IcatRole superRole = manager.find(IcatRole.class, "SUPER");
+        if(superRole == null) superRole = role;
+        persistAuthorisation(userId, IcatRoles.SUPER_USER.toString(), superRole, ElementType.INVESTIGATION, investigation.getId(), null, null, null , manager);
 
         //now manually create the datasets
         if (datasets != null) {

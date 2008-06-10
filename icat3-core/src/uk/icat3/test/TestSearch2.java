@@ -54,51 +54,32 @@ public class TestSearch2 {
         setUp();
 
         long time = System.currentTimeMillis();
-        String QUERY = "SELECT DISTINCT i from Investigation i, FacilityInstrumentScientist fis, IcatAuthorisation ia WHERE " +
-                " ((:userId = 'SUPER_USER') OR  (i.id = ia.elementId AND ia.elementType = :objectType  " +
-                "AND (ia.userId = :userId OR ia.userId = 'ANY') AND ia.markedDeleted = 'N' " +
-                "AND ia.role.actionCanSelect = 'Y') OR " +
-                " (:userId = fis.facilityInstrumentScientistPK.federalId AND  fis.facilityInstrumentScientistPK.instrumentName = i.instrument AND fis.markedDeleted = 'N')) AND " +
-                " i.markedDeleted = 'N' AND " +
-                " EXISTS (SELECT DISTINCT ds FROM Datafile df, FacilityInstrumentScientist fis2, IcatAuthorisation iadf3  WHERE " +
-                "  (df.datafileCreateTime < :upperTime OR :upperTime IS NULL) " +
-                " AND (df.name = :datafileName OR :datafileName IS NULL)  " +
-                " AND (df.datafileCreateTime > :lowerTime OR :lowerTime IS NULL ) AND " +
-                " iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N'" +
-                " AND ((:userId = 'SUPER_USER') OR (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType  " +
-                "AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') AND iadf3.markedDeleted = 'N' AND iadf3.role.actionCanSelect = 'Y') OR " +
-                "(:userId = fis2.facilityInstrumentScientistPK.federalId AND " +
-                " fis2.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument AND fis2.markedDeleted = 'N'))) ";
-
-
-        /* QUERY = "SELECT DISTINCT i from Investigation i WHERE " +
-        "EXISTS (SELECT df FROM Datafile df WHERE " +                
-        " df.dataset = i.datasetCollection AND df.datafileCreateTime < :upperTime)";
-         */
-
-        /*String QUERY = "SELECT df FROM Datafile df, FacilityInstrumentScientist fis2, IcatAuthorisation iadf3 "+
-        " WHERE  ((:userId = 'SUPER_USER') OR " +
-        " (:userId = fis2.facilityInstrumentScientistPK.federalId AND  fis2.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument AND fis2.markedDeleted = 'N') OR " +
-        " (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType  AND (iadf3.userId = :userId OR iadf3.userId = 'ANY')  AND iadf3.role.actionCanSelect = 'Y')) AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N'  AND df.dataset.investigation = i AND (df.datafileCreateTime > :lowerTime OR :lowerTime IS NULL AND df.datafileCreateTime < :upperTime OR :upperTime IS NULL) AND  df.dataset.markedDeleted = 'N' AND df.markedDeleted = 'N' AND (df.name  =  :datafileName OR :datafileName IS NULL)";  
-         */
-        //SELECT DISTINCT i from Investigation i , IcatAuthorisation ia, FacilityInstrumentScientist fis WHERE  
-        //((:userId = 'SUPER_USER') OR  (:userId = fis.facilityInstrumentScientistPK.federalId 
-        //AND  (fis.facilityInstrumentScientistPK.instrumentName = i.instrument) AND fis.markedDeleted = 'N') OR  (i.id = ia.elementId AND ia.elementType = :objectType  AND (ia.userId = :userId OR ia.userId = 'ANY') AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y')) AND i.markedDeleted = 'N' 
-        //AND EXISTS 
-        //(SELECT df FROM Datafile df, FacilityInstrumentScientist fis2, IcatAuthorisation iadf3 
-        //WHERE  ((:userId = 'SUPER_USER') OR  (:userId = fis2.facilityInstrumentScientistPK.federalId AND  fis2.facilityInstrumentScientistPK.instrumentName = df.dataset.investigation.instrument AND fis2.markedDeleted = 'N') OR  (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType  AND (iadf3.userId = :userId OR iadf3.userId = 'ANY')  AND iadf3.role.actionCanSelect = 'Y')) AND iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N'  AND df.dataset.investigation = i AND (df.datafileCreateTime > :lowerTime OR :lowerTime IS NULL AND df.datafileCreateTime < :upperTime OR :upperTime IS NULL) AND  df.dataset.markedDeleted = 'N' AND df.markedDeleted = 'N' AND (df.name  =  :datafileName OR :datafileName IS NULL))  
+        String QUERY = "SELECT DISTINCT i from Investigation i , IcatAuthorisation ia " +
+                "WHERE (i.id = ia.elementId AND ia.elementType = :objectType  AND " +
+                "(ia.userId = :userId OR ia.userId = 'ANY') AND ia.markedDeleted = 'N'" +
+                " AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N'  AND " +
+                "EXISTS (SELECT DISTINCT df FROM Datafile df, IcatAuthorisation iadf3 WHERE  " +
+                "df.dataset = i.datasetCollection AND (df.datafileCreateTime > :lowerTime " +
+                "OR :lowerTime IS NULL) AND (df.datafileCreateTime < :upperTime " +
+                "OR :upperTime IS NULL) AND   (df.name  =  :datafileName OR :datafileName IS NULL) " +
+                "AND  iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' " +
+                "AND df.dataset.markedDeleted = 'N' AND  (df.dataset.id = iadf3.elementId " +
+                "AND iadf3.elementType = :dataSetType  AND (iadf3.userId = :userId" +
+                " OR iadf3.userId = 'ANY')  AND iadf3.role.actionCanSelect = 'Y'))";
 
         System.out.println(QUERY);
 
         Query nullQuery = em.createQuery(QUERY);
 
-        nullQuery.setParameter("objectType", ElementType.DATASET);
+        nullQuery.setParameter("objectType", ElementType.INVESTIGATION);
         nullQuery.setParameter("userId", "test");
-
-        nullQuery.setParameter("dataSetType", ElementType.DATASET);
         nullQuery.setParameter("lowerTime", new Date(1, 1, 1));
         nullQuery.setParameter("upperTime", new Date());
-        nullQuery.setParameter("datafileName", null);
+        nullQuery.setParameter("dataSetType", ElementType.DATASET);
+
+        nullQuery.setParameter("datafileName", "SXD01300.RAW");
+         nullQuery.setParameter("datafileName", "SXD015554.RAW");
+        
 
         System.out.println(nullQuery.getResultList());
 
@@ -106,17 +87,6 @@ public class TestSearch2 {
 
         time = System.currentTimeMillis();
 
-        nullQuery.setParameter("userId", "SUPER_USER");
-        System.out.println(nullQuery.getResultList());
-
-        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
-
-        time = System.currentTimeMillis();
-
-        nullQuery.setParameter("userId", "facility_scientist");
-        System.out.println(nullQuery.getResultList());
-
-        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
 
         tearDown();
     }
@@ -184,7 +154,7 @@ public class TestSearch2 {
         System.out.println(nullQuery.getResultList());
 
         System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
-      
+
         tearDown();
     }
 
@@ -196,7 +166,7 @@ public class TestSearch2 {
 
         TestSearch2 ts = new TestSearch2();
 
-        ts.testP4();
+        ts.testP1();
 
     //   ts.test2();
 

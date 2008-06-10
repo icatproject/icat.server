@@ -192,7 +192,7 @@ public class Queries {
     
     public static final String ADVANCED_SEARCH_JPQL_DATAFILE = " AND EXISTS (SELECT DISTINCT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
             " df.dataset = i.datasetCollection AND (df.datafileCreateTime > :lowerTime OR :lowerTime IS NULL) AND (df.datafileCreateTime < :upperTime OR :upperTime IS NULL) AND " +
-            " df.dataset.markedDeleted = 'N' AND df.markedDeleted = 'N' AND (df.name OPERATION :datafileName OR :datafileName IS NULL) AND " + //remove if all are null
+            "  (df.name OPERATION :datafileName OR :datafileName IS NULL) AND " + //remove if all are null
             " iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' AND " +           
             " (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
             " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
@@ -200,7 +200,7 @@ public class Queries {
     
      public static final String ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE = " AND EXISTS (SELECT DISTINCT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +            
             " df.dataset = i.datasetCollection AND (df.datafileCreateTime > :lowerTime OR :lowerTime IS NULL) AND (df.datafileCreateTime < :upperTime OR :upperTime IS NULL) AND " +
-            " df.dataset.markedDeleted = 'N' AND df.markedDeleted = 'N' AND (LOWER(df.name) OPERATION :datafileName OR :datafileName IS NULL) AND  " + //remove if all are null
+            "  (LOWER(df.name) OPERATION :datafileName OR :datafileName IS NULL) AND  " + //remove if all are null
             " iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' AND " +
             " (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
             " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
