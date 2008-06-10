@@ -33,7 +33,7 @@ public class DownloadConstants {
         }
     };
 
-    //read in config
+    //read in config 
     static {  
         try {            
             URL url = DownloadConstants.class.getResource("/download.properties");
