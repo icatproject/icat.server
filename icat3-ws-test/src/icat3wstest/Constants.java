@@ -21,11 +21,11 @@ public class Constants {
    
     
     //my machine
-    public static String END_POINT_ADMIN_ADDRESS = "https://escvig6.dc.dl.ac.uk:8181/ICATAdminService/ICATAdmin";
+    //public static String END_POINT_ADMIN_ADDRESS = "https://escvig6.dc.dl.ac.uk:8181/ICATAdminService/ICATAdmin";
     public static String END_POINT_ADDRESS = "https://localhost:8181/ICATService/ICAT";
     
     // volga
-   // public static String END_POINT_ADMIN_ADDRESS = "https://volga.dl.ac.uk:8181/ICATAdminService/ICATAdmin";
+    public static String END_POINT_ADMIN_ADDRESS = "https://volga.dl.ac.uk:8181/ICATAdminService/ICATAdmin";
    // public static String END_POINT_ADDRESS = "https://volga.dl.ac.uk:8181/ICATService/ICAT";
     
  //  public static String END_POINT_ADMIN_ADDRESS = "https://volga.dl.ac.uk:9181/ICATAdminService/ICATAdmin";
@@ -40,7 +40,7 @@ public class Constants {
     //public static String END_POINT_ADMIN_ADDRESS = "https://facilities01.esc.rl.ac.uk:8182/ICATAdminISISService/ICATAdmin?wsdl";
     
     //public static String SID = "64112098-db95-4b31-a0f9-efceb7c94132"; //isis
-    public static String SID = "2f0f3750-cb3b-430e-8687-5092b9f7f27c"; //clf
+    public static String SID = "6c9f2cf1-c472-46e0-b0eb-4a3c425694d8"; //clf
     
     public static String KEYWORD = "calibration";
     public static String USER_ID = "gjd37";

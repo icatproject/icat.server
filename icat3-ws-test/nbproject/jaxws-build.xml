@@ -28,7 +28,23 @@
     <target name="wsimport-client-clean-ICAT" depends="-init-project">
         <delete dir="${build.generated.dir}/wsimport/client/uk/icat3/client"/>
     </target>
-    <target name="wsimport-client-generate" depends="wsimport-client-ICAT"/>
+    <target name="wsimport-client-check-ICATAdmin" depends="wsimport-init">
+        <condition property="wsimport-client-ICATAdmin.notRequired">
+            <available file="${build.generated.dir}/wsimport/client/uk/icat3/client" type="dir"/>
+        </condition>
+    </target>
+    <target name="wsimport-client-ICATAdmin" depends="wsimport-init,wsimport-client-check-ICATAdmin" unless="wsimport-client-ICATAdmin.notRequired">
+        <wsimport fork="true" xendorsed="true" sourcedestdir="${build.generated.dir}/wsimport/client" extension="true" destdir="${build.generated.dir}/wsimport/binaries" wsdl="${basedir}/xml-resources/web-service-references/ICATAdmin/wsdl/escvig6.dc.dl.ac.uk_8181/ICATAdminService/ICATAdmin.wsdl" wsdlLocation="https://escvig6.dc.dl.ac.uk:8181/ICATAdminService/ICATAdmin?wsdl" catalog="catalog.xml">
+            <jvmarg value="-Djava.endorsed.dirs=${jaxws.endorsed.dir}"/>
+        </wsimport>
+        <copy todir="${build.classes.dir}">
+            <fileset dir="${build.generated.dir}/wsimport/binaries" includes="**/*.xml"/>
+        </copy>
+    </target>
+    <target name="wsimport-client-clean-ICATAdmin" depends="-init-project">
+        <delete dir="${build.generated.dir}/wsimport/client/uk/icat3/client"/>
+    </target>
+    <target name="wsimport-client-generate" depends="wsimport-client-ICAT, wsimport-client-ICATAdmin"/>
     <target name="wsimport-client-compile" depends="-pre-pre-compile">
         <j2seproject3:depend srcdir="${build.generated.dir}/wsimport/client" classpath="${libs.jaxws21.classpath}:${javac.classpath}" destdir="${build.classes.dir}"/>
         <j2seproject3:javac srcdir="${build.generated.dir}/wsimport/client" classpath="${libs.jaxws21.classpath}:${javac.classpath}" destdir="${build.classes.dir}"/>

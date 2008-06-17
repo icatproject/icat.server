@@ -1,17 +1,6 @@
-/*
- * Main.java
- *
- * Created on 15-Aug-2007, 12:49:36
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
 package icat3wstestother;
 
-//import clientadmin.*;
 import icat3wstest.*;
-import javax.xml.ws.BindingProvider;
 import static icat3wstest.Constants.*;
 /**
  *
@@ -22,7 +11,7 @@ public class SessionAdminUtil {
     /** Creates a new instance of Main */
     public static String login(String username) throws Exception{
         
-     /*   try {
+        try {
             long time = System.currentTimeMillis();
             
             // TODO process result here
@@ -38,11 +27,9 @@ public class SessionAdminUtil {
             System.out.println(ex);
             assert false;
             
-            //  throw ex;
-            return null;
-            // TODO handle custom exceptions here
-        }*/
-        return null;
+            // throw ex;
+            return null;            
+        }        
     }
     
     public static void logout(String sid) throws Exception{
@@ -63,8 +50,7 @@ public class SessionAdminUtil {
         } catch (Exception ex) {
             System.out.println("Exception logging out\n"+ex);
             assert false;
-            throw ex;
-            // TODO handle custom exceptions here
+            throw ex;            
         }
     }
     
@@ -76,6 +62,5 @@ public class SessionAdminUtil {
         String sid = login("bob");
         //    String sid = loginLifetime(System.getProperty("user.name"), System.getProperty("usersso.password"), 2);
         if(sid != null) logout(sid);
-    }
-    
+    }    
 }

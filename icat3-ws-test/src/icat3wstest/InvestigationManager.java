@@ -28,12 +28,13 @@ public class InvestigationManager {
             
             // TODO process result here
             Investigation investigation = ICATSingleton.getInstance().getInvestigationIncludes(sid, id,
-                    InvestigationInclude.DATASETS_ONLY);
+                    InvestigationInclude.SHIFT_ONLY);
             
             float totalTime = (System.currentTimeMillis() - time)/1000f;
             
             System.out.println("  ID: "+investigation.getId()+", TITLE: "+investigation.getTitle()+" "+investigation.getIcatRole().getRole());
-            
+              System.out.println(investigation.getShiftCollection().size());
+          
             System.out.println("\nTime taken: "+totalTime+" seconds");
             System.out.println("--------------------------------------------------\n");
             assert true;
@@ -105,6 +106,12 @@ public class InvestigationManager {
                 System.out.println("      ------------");
                 for (Publication kw : investigation.getPublicationCollection()) {
                     System.out.println("          "+kw.getFullReference());
+                }
+                
+                System.out.println("      Shifts: "+ investigation.getShiftCollection().size());
+                System.out.println("      ------------");
+                for (Shift sf : investigation.getShiftCollection()) {
+                    System.out.println("          "+sf.getShiftPK().getStartDate());
                 }
             }
             System.out.println("\nTime taken: "+totalTime+" seconds");
@@ -230,8 +237,8 @@ public class InvestigationManager {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        //  getInvestigation(SID, 6L);
-        getInvestigations(SID, 2L);
+          getInvestigation(SID, 2L);
+        //getInvestigations(SID, 2L);
         
        /* Investigation investigation = createInvestigation(SID, "investigation for "+SID);
         if(investigation != null) {

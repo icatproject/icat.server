@@ -577,6 +577,7 @@ import uk.icat3.util.Queries;
      * Gets the shiftCollection of this Investigation.
      * @return the shiftCollection
      */
+    @XmlTransient //do not turn into XML
     public Collection<Shift> getShiftCollection() {
         return this.shiftCollection;
     }
@@ -586,6 +587,23 @@ import uk.icat3.util.Queries;
      * @param shiftCollection the new shiftCollection
      */
     public void setShiftCollection(Collection<Shift> shiftCollection) {
+        this.shiftCollection = shiftCollection;
+    }
+    
+    /**
+     * This method is used by JAXWS to map to shiftCollection.  Depending on what the include is
+     * set to depends on what is returned to JAXWS and serialised into XML.  This is because without
+     * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+     * DB hits and serialisation).
+     */
+    @XmlElement(name="shiftCollection")
+    private Collection<Shift> getShiftCollection_() {
+        if(investigationInclude.isShifts()){
+            return this.shiftCollection;
+        } else return null;
+    }
+    
+    private void setShiftCollection_(Collection<Shift> shiftCollection) {
         this.shiftCollection = shiftCollection;
     }
     

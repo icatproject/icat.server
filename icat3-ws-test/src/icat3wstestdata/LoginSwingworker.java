@@ -9,13 +9,7 @@
 package icat3wstestdata;
 
 import uk.icat3.client.*;
-import icat3wstest.Constants;
 import icat3wstest.ICATSingleton;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.swing.SwingWorker;
@@ -43,7 +37,7 @@ public class LoginSwingworker {
 
             Collection<SwingWorker> sws = new ArrayList<SwingWorker>();
 
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 2; i++) {
 
                 SwingWorker sw = new SwingWorker<String, String>() {
 
@@ -56,7 +50,7 @@ public class LoginSwingworker {
                         long time = System.currentTimeMillis();
                         timeTotal = System.currentTimeMillis();
                         try {
-                            String sid = icat.login(System.getProperty("user.name"), "kkkkkk" /*System.getProperty("usersso.password")*/);
+                            String sid = icat.login(System.getProperty("user.name"), System.getProperty("usersso.password"));
 
                             java.lang.System.out.println("Result = " + sid);
 
@@ -93,7 +87,7 @@ public class LoginSwingworker {
             int i = 0;
             Thread.sleep(2000);
             for (SwingWorker swingWorker : sws) {
-                Thread.sleep(50);
+                Thread.sleep(150);
                 System.out.println("Starting" + i++);
                 swingWorker.execute();
             }
