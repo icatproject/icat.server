@@ -23,7 +23,7 @@ import uk.icat3.util.InvestigationInclude;
  */
 @Local
 public interface InvestigationManagerLocal {
-
+    
     Investigation getInvestigation(String sessionId, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException;
 
     Investigation getInvestigation(String sessionId, Long investigationId, InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException;
@@ -86,4 +86,5 @@ public interface InvestigationManagerLocal {
     void removeAuthorisation(String sessionId, Long authorisationId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException;
 
     void updateAuthorisation(String sessionId, String toChangetoRole, Long authorisationId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException;
+
 }
