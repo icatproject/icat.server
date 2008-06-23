@@ -480,7 +480,7 @@ public class TestInvestigation extends BaseTestClassTX {
             
             investigation.setTitle("investigation "+random.nextInt());
             investigation.setInvNumber("11");
-            investigation.setInvType(new InvestigationType("experiment"));
+            investigation.setInvType("experiment");
             
             return investigation;
         } else {
