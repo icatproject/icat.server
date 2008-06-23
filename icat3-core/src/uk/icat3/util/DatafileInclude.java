@@ -10,7 +10,7 @@
 package uk.icat3.util;
 
 /**
- * Set of information to return with datasets, ie their datafile and datafile parameters.
+ * Set of information to return with datafiles, ie their datafile and datafile parameters.
  * Having more information returned means the query will take longer.
  *
  * @author gjd37

@@ -29,7 +29,6 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.EntityNotModifiableError;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.ElementType;
-import uk.icat3.util.IcatRoles;
 import static uk.icat3.util.Util.*;
 
 /**

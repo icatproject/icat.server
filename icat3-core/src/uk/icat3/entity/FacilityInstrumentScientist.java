@@ -5,6 +5,7 @@
 
 package uk.icat3.entity;
 
+import java.io.Serializable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.NamedQueries;
@@ -24,7 +25,7 @@ import uk.icat3.util.ElementType;
     @NamedQuery(name = "FacilityInstrumentScientist.findByInstrumentName", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.facilityInstrumentScientistPK.instrumentName = :instrumentName"), 
     @NamedQuery(name = "FacilityInstrumentScientist.findByFederalId", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.facilityInstrumentScientistPK.federalId = :federalId") 
  })
-public class FacilityInstrumentScientist extends EntityBaseBean {
+public class FacilityInstrumentScientist extends EntityBaseBean implements Serializable {
     
     /**
      * Override logger
