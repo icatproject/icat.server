@@ -29,12 +29,10 @@ public class AdvancedSearchDetails implements Serializable {
     /**
      * Visit Id
      */
-
     private String visitId; //visit id
     /**
      * Investigation abstract
      */
-
     private String investigationAbstract;
     /**
      * Investigation type
@@ -51,17 +49,14 @@ public class AdvancedSearchDetails implements Serializable {
     /**
      * List of surnames
      */
-
     private Collection<String> investigators; //surname
     /**
      * Investigation number
      */
-
     private String experimentNumber; //inv_number
     /**
      * List of instruments
      */
-
     private Collection<String> instruments;
     /**
      * Long value of start date in datafile parameter
@@ -70,32 +65,26 @@ public class AdvancedSearchDetails implements Serializable {
     /**
      * Long value of start end in datafile parameter
      */
-
     private Double runEnd;// data file parameter, run_number datafile_parameter
     /**
      * Sample name
      */
-
     private String sampleName; // sample
     /**
      * Datafile name
      */
-
     private String datafileName; // data file name
     /**
      * datafile create date
      */
-
     private Date dateRangeStart; // (datafile_CREATE_time)
     /**
      * datafile create date
      */
-
     private Date dateRangeEnd;// (datafile_CREATE_time)
     /**
      * List of keywords
      */
-
     private Collection<String> keywords;
     /**
      * InvestigationInclude in the data returned. {@link InvestigationInclude}
@@ -112,7 +101,7 @@ public class AdvancedSearchDetails implements Serializable {
     public AdvancedSearchDetails() {
     }
 
-    public String getInvestigationName() {        
+    public String getInvestigationName() {
         if (investigationName != null && investigationName.length() != 0) {
             String investigationNameFuzzy = investigationName.replace("*", "%");
             if (caseSensitive) {
@@ -182,9 +171,9 @@ public class AdvancedSearchDetails implements Serializable {
         this.runEnd = runEnd;
     }
 
-    public String getSampleName() {       
+    public String getSampleName() {
         if (sampleName != null && sampleName.length() != 0) {
-             String sampleNameFuzzy = sampleName.replace("*", "%");
+            String sampleNameFuzzy = sampleName.replace("*", "%");
             if (caseSensitive) {
                 return sampleNameFuzzy;
             } else {
@@ -278,7 +267,7 @@ public class AdvancedSearchDetails implements Serializable {
 
     public String getBackCatalogueInvestigatorString() {
         if (backCatalogueInvestigatorString != null && backCatalogueInvestigatorString.length() != 0) {
-            String backCatalogueInvestigatorStringFuzzy = backCatalogueInvestigatorString.replace("*", "%");        
+            String backCatalogueInvestigatorStringFuzzy = backCatalogueInvestigatorString.replace("*", "%");
             if (caseSensitive) {
                 return backCatalogueInvestigatorStringFuzzy;
             } else {
@@ -301,7 +290,7 @@ public class AdvancedSearchDetails implements Serializable {
         this.visitId = visitId;
     }
 
-    public String getInvestigationAbstract() {        
+    public String getInvestigationAbstract() {
         if (investigationAbstract != null && investigationAbstract.length() != 0) {
             String investigationAbstractFuzzy = investigationAbstract.replace("*", "%");
             if (caseSensitive) {
@@ -342,7 +331,6 @@ public class AdvancedSearchDetails implements Serializable {
         this.caseSensitive = caseSensitive;
     }
     /////////////  Util methods for AdvancedSearch creation in InvestigationSearch    /////////////////
-
     public boolean hasOtherParameters() {
         if (investigators != null && investigators.size() != 0) {
             return true;
@@ -482,7 +470,6 @@ public class AdvancedSearchDetails implements Serializable {
 
     }
     /////////////  End of methods    /////////////////
-
     public InvestigationInclude getInvestigationInclude() {
         if (investigationInclude == null) {
             return InvestigationInclude.NONE;
@@ -536,14 +523,14 @@ public class AdvancedSearchDetails implements Serializable {
     public boolean isValid() {
         //log.trace(" "+hasRunNumber() +"  "+runEnd);
         /*if(hasRunNumber()){
-            //so they have set run number, check something on investigation is set)
-            if(hasInvestigationParameters() || getDatafileName() != null || hasInstruments()) return true;
-            else throw new IllegalArgumentException("Must search investigation information, instruments or datafile name if searching with run numbers");
+        //so they have set run number, check something on investigation is set)
+        if(hasInvestigationParameters() || getDatafileName() != null || hasInstruments()) return true;
+        else throw new IllegalArgumentException("Must search investigation information, instruments or datafile name if searching with run numbers");
         } else if(dateRangeEnd != null || dateRangeStart != null){
-            //got to here run number is not set to check all others
-            if(hasInvestigationParameters() || getDatafileName() != null || hasInstruments() ||
-                    hasSample()) return true;
-            else throw new IllegalArgumentException("Must search investigation information, instruments, sample name or datafile name if searching with datafile date ranges");
+        //got to here run number is not set to check all others
+        if(hasInvestigationParameters() || getDatafileName() != null || hasInstruments() ||
+        hasSample()) return true;
+        else throw new IllegalArgumentException("Must search investigation information, instruments, sample name or datafile name if searching with datafile date ranges");
         } else*/ return true;
 
     }

@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
-import uk.icat3.entity.InvestigationType;
 import uk.icat3.entity.Parameter;
 import uk.icat3.manager.ManagerUtil;
 import uk.icat3.util.ElementType;
@@ -679,10 +678,9 @@ public class InvestigationSearch extends ManagerUtil {
      * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByKeywords(String userId, KeywordDetails keywordDetails, int startIndex, int number_results, EntityManager manager) {
-        LogicalOperator operator = (keywordDetails.getOperator() == null) ? LogicalOperator.AND : keywordDetails.getOperator();
         InvestigationInclude includes = (keywordDetails.getInvestigationIncludes() == null) ? InvestigationInclude.NONE : keywordDetails.getInvestigationIncludes();
 
-        return searchByKeywords(userId, keywordDetails.getKeywords(), operator, includes, true, keywordDetails.isCaseSensitve(), startIndex, number_results, manager);
+        return searchByKeywords(userId, keywordDetails.getKeywords(), LogicalOperator.AND, includes, true, keywordDetails.isCaseSensitve(), startIndex, number_results, manager);
     }
 
     /**

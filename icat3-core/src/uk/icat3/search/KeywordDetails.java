@@ -17,8 +17,6 @@ public class KeywordDetails {
     private Collection<String> keywords;
     private InvestigationInclude investigationIncludes = InvestigationInclude.NONE;
     private boolean caseSensitve = true;
-   
-    private LogicalOperator operator = LogicalOperator.AND;
 
     public boolean isCaseSensitve() {
         return caseSensitve;
@@ -27,7 +25,7 @@ public class KeywordDetails {
     public void setCaseSensitve(boolean caseSensitve) {
         this.caseSensitve = caseSensitve;
     }
-    
+
     public InvestigationInclude getInvestigationIncludes() {
         return investigationIncludes;
     }
@@ -43,14 +41,4 @@ public class KeywordDetails {
     public void setKeywords(Collection<String> keywords) {
         this.keywords = keywords;
     }
-
-    public LogicalOperator getOperator() {
-        return operator;
-    }
-
-    public void setOperator(LogicalOperator operator) {
-        this.operator = operator;
-    }
-    
-    
 }
