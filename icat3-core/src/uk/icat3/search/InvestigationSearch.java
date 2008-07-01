@@ -111,6 +111,9 @@ public class InvestigationSearch extends ManagerUtil {
 
         Collection<Investigation> investigations = null;
         String keywordFuzzy = keyword.replace("*", "%");
+        
+        log.trace("STATIC JPA: "+INVESTIGATION_LIST_BY_KEYWORD_JPQL);
+        
         if (number_results < 0) {
             //get all, maybe should limit this to 500?
             investigations = manager.createNamedQuery(INVESTIGATION_LIST_BY_KEYWORD).

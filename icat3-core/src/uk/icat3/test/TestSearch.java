@@ -55,8 +55,8 @@ public class TestSearch {
     }
 
     protected static void setUp() {
-        emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
-        //emf = Persistence.createEntityManagerFactory("icatisis");
+        //emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
+        emf = Persistence.createEntityManagerFactory("icatisis");
         em = emf.createEntityManager();
 
 
@@ -140,14 +140,20 @@ public class TestSearch {
 
         setUp();
 
+        long time = System.currentTimeMillis();
+          
         //test code here
         log.info("Testing");
+        
         Collection<Investigation> investigations = InvestigationSearch.searchByKeyword(userId, keyword, em);
-
+        
+        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
+        
         for (Investigation investigation : investigations) {
-            log.info(investigation.getId());
+         //   log.info(investigation.getId());
         }
         log.info("Results: " + investigations.size());
+
         tearDown();
 
     }
@@ -172,9 +178,13 @@ public class TestSearch {
 
         setUp();
 
+        long time = System.currentTimeMillis();
+
         //test code here
         log.info("Testing");
         Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(userId, keywords, operator, includes, fuzzy, false, -1, -1, em);
+
+        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
 
         for (Investigation investigation : investigations) {
             log.info(investigation.getId() + " " + investigation.getTitle());
@@ -187,20 +197,22 @@ public class TestSearch {
     public void seachByKeywords(String userId, Collection<String> keywords) throws Exception {
 
         setUp();
-
+        
+        log.info("Testing");
+        
         long time = System.currentTimeMillis();
         //test code here
-        log.info("Testing");
+        
         // Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationInclude.NONE, false, true, 0, 500, em);
 
         Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(userId, keywords, em);
 
-        for (Investigation investigation : investigations) {
-            log.info(investigation.getId() + " " + investigation.getFacility());
-        }
-        log.info("Results: " + investigations.size());
-
         System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
+        
+        for (Investigation investigation : investigations) {
+           // log.info(investigation.getId() + " " + investigation.getFacility());
+        }
+        //log.info("Results: " + investigations.size());
 
         tearDown();
 
@@ -488,7 +500,7 @@ public class TestSearch {
 
         //isis
         //keywords.add("ccwilson");
-        keywords.add("*ccw*");
+        //keywords.add("*ccw*");
 
         // ts.seachByKeywords("gjd37", keywords, LogicalOperator.AND, false, InvestigationUtil.ALL);
         //  ts.seachByKeywords("gjd37", keywords);
@@ -502,11 +514,11 @@ public class TestSearch {
         //ts.getInvestigation("gjd37",9525454280L);
         //////////////////////////
 
-
-        keywords.add("a");
-        // keywords.add("calibration");
-        // ts.seachByKeywords("gjd37", keywords);
-        // ts.seachByKeywords("gjd37", keywords);
+"jdbc:oracle:thin:@(DESCRIPTION =  (LOAD_BALANCE = yes) (FAILOVER = ON) (ADDRESS = (PROTOCOL = TCP)(HOST = elektra.dl.ac.uk)(PORT = 1521))  (ADDRESS = (PROTOCOL = TCP)(HOST = jinx.dl.rl.ac.uk)(PORT = 1521))    (CONNECT_DATA = (SERVICE_NAME = minerva2.dl.AC.UK) (FAILOVER_MODE =   (TYPE=SESSION)  (METHOD=BASIC)   )  ) )"
+         keywords.add("a*");
+         keywords.add("calibration");
+         ts.seachByKeywords("gjd37", keywords);
+         ts.seachByKeywords("gjd37", keywords);
 
         // log.info("Hello");
         // ts.getMyInvestigations("gjd37");
@@ -562,7 +574,7 @@ public class TestSearch {
         // ts.getAllInvestigations("gjd37");
         //ts.getUserInvestigations("gjd37");
 
-        ts.test();
+       // ts.test();
 
     //ts.searchByRun();
     // ts.searchByRun(); 

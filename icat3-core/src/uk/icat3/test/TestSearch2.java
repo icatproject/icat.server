@@ -33,8 +33,8 @@ public class TestSearch2 {
     }
 
     protected static void setUp() {
-        emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
-        //emf = Persistence.createEntityManagerFactory("icatisis");
+        //emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
+        emf = Persistence.createEntityManagerFactory("icatisis");
         em = emf.createEntityManager();
 
 
@@ -56,30 +56,19 @@ public class TestSearch2 {
         long time = System.currentTimeMillis();
         String QUERY = "SELECT DISTINCT i from Investigation i , IcatAuthorisation ia " +
                 "WHERE (i.id = ia.elementId AND ia.elementType = :objectType  AND " +
-                "(ia.userId = :userId OR ia.userId = 'ANY') AND ia.markedDeleted = 'N'" +
-                " AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N'  AND " +
-                "EXISTS (SELECT DISTINCT df FROM Datafile df, IcatAuthorisation iadf3 WHERE  " +
-                "df.dataset = i.datasetCollection AND (df.datafileCreateTime > :lowerTime " +
-                "OR :lowerTime IS NULL) AND (df.datafileCreateTime < :upperTime " +
-                "OR :upperTime IS NULL) AND   (df.name  =  :datafileName OR :datafileName IS NULL) " +
-                "AND  iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' " +
-                "AND df.dataset.markedDeleted = 'N' AND  (df.dataset.id = iadf3.elementId " +
-                "AND iadf3.elementType = :dataSetType  AND (iadf3.userId = :userId" +
-                " OR iadf3.userId = 'ANY')  AND iadf3.role.actionCanSelect = 'Y'))";
-
+                "(ia.userId = :userId OR ia.userId = 'ANY') AND ia.markedDeleted = 'N' " +
+                "AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' AND " +
+                "EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name " +
+                "LIKE :keyword AND kw.markedDeleted = 'N')";
+        
         System.out.println(QUERY);
 
         Query nullQuery = em.createQuery(QUERY);
 
         nullQuery.setParameter("objectType", ElementType.INVESTIGATION);
-        nullQuery.setParameter("userId", "test");
-        nullQuery.setParameter("lowerTime", new Date(1, 1, 1));
-        nullQuery.setParameter("upperTime", new Date());
-        nullQuery.setParameter("dataSetType", ElementType.DATASET);
+        nullQuery.setParameter("userId", "gjd37");
+        nullQuery.setParameter("keyword", "calibration");
 
-        nullQuery.setParameter("datafileName", "SXD01300.RAW");
-         nullQuery.setParameter("datafileName", "SXD015554.RAW");
-        
 
         System.out.println(nullQuery.getResultList());
 
