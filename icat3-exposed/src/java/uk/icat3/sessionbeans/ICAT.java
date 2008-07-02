@@ -252,7 +252,8 @@ public class ICAT extends EJBObject implements ICATLocal {
      * @return collection of {@link Investigation} investigation objects
      */
     @WebMethod
-    public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch) throws SessionException {
+    public Collection<Investigation> searchByAdvanced(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "advancedSearchDetails") AdvancedSearchDetails advancedSearch) throws SessionException {
         return investigationSearchLocal.searchByAdvanced(sessionId, advancedSearch);
     }
 
@@ -752,7 +753,8 @@ public class ICAT extends EJBObject implements ICATLocal {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return collection of {@link Investigation} investigation objects
      */
-    public Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public Collection<Investigation> getInvestigations(@WebParam(name = "userId") String userId,
+            @WebParam(name = "investigationIds") Collection<Long> investigationIds) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return investigationManagerLocal.getInvestigations(userId, investigationIds, InvestigationInclude.NONE);
     }
 
@@ -772,7 +774,9 @@ public class ICAT extends EJBObject implements ICATLocal {
     @WebMethod(operationName = "getInvestigationsIncludes")
     @RequestWrapper(className = "uk.icat3.sessionbeans.getInvestigationsIncludes")
     @ResponseWrapper(className = "uk.icat3.sessionbeans.getInvestigationsIncludesResponse")
-    public Collection<Investigation> getInvestigations(String userId, Collection<Long> investigationIds, InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public Collection<Investigation> getInvestigations(@WebParam(name = "userId") String userId, 
+           @WebParam(name = "investigationIds") Collection<Long> investigationIds, 
+            @WebParam(name = "includes")  InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return investigationManagerLocal.getInvestigations(userId, investigationIds, includes);
     }
 
@@ -805,7 +809,8 @@ public class ICAT extends EJBObject implements ICATLocal {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void deleteInvestigation(String sessionId, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public void deleteInvestigation(@WebParam(name = "sessionId") String sessionId, 
+            @WebParam(name = "investigationId") Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.deleteInvestigation(sessionId, investigationId);
     }
 
@@ -820,7 +825,8 @@ public class ICAT extends EJBObject implements ICATLocal {
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      */
     @WebMethod
-    public void removeInvestigation(String sessionId, Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+    public void removeInvestigation(@WebParam(name = "sessionId") String sessionId, 
+           @WebParam(name = "investigationId") Long investigationId) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         investigationManagerLocal.removeInvestigation(sessionId, investigationId);
     }
 
