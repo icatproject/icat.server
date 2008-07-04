@@ -914,7 +914,7 @@ public class TestInvestigationSearch extends BaseTestClass{
         checkInvestigations(investigations);
     }
     
-  // @Test
+   @Test
     public void testAdvanced() throws ICATAPIException {
         log.info("Testing valid user, My Investigations: "+VALID_USER_FOR_INVESTIGATION);
         
@@ -1230,7 +1230,7 @@ public class TestInvestigationSearch extends BaseTestClass{
        
     }
     
-    //@Test
+    @Test
     public void testAdvancedCaseInsensitive() throws ICATAPIException {
         log.info("Testing valid user, My Investigations: "+VALID_USER_FOR_INVESTIGATION);
         
