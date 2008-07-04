@@ -56,6 +56,7 @@ public class TestSearch {
 
     protected static void setUp() {
         //emf = Persistence.createEntityManagerFactory("icat3-unit-testing-PU");
+        // emf = Persistence.createEntityManagerFactory("icatisis-pro");
         emf = Persistence.createEntityManagerFactory("icatisis");
         em = emf.createEntityManager();
 
@@ -141,16 +142,16 @@ public class TestSearch {
         setUp();
 
         long time = System.currentTimeMillis();
-          
+
         //test code here
         log.info("Testing");
-        
+
         Collection<Investigation> investigations = InvestigationSearch.searchByKeyword(userId, keyword, em);
-        
+
         System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
-        
+
         for (Investigation investigation : investigations) {
-         //   log.info(investigation.getId());
+            //   log.info(investigation.getId());
         }
         log.info("Results: " + investigations.size());
 
@@ -197,20 +198,20 @@ public class TestSearch {
     public void seachByKeywords(String userId, Collection<String> keywords) throws Exception {
 
         setUp();
-        
+
         log.info("Testing");
-        
+
         long time = System.currentTimeMillis();
         //test code here
-        
+
         // Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(userId, keywords, LogicalOperator.AND, InvestigationInclude.NONE, false, true, 0, 500, em);
 
         Collection<Investigation> investigations = InvestigationSearch.searchByKeywords(userId, keywords, em);
 
         System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
-        
+
         for (Investigation investigation : investigations) {
-           // log.info(investigation.getId() + " " + investigation.getFacility());
+            // log.info(investigation.getId() + " " + investigation.getFacility());
         }
         //log.info("Results: " + investigations.size());
 
@@ -255,6 +256,8 @@ public class TestSearch {
 
         setUp();
 
+        long time = System.currentTimeMillis();
+
         //test code here
         log.info("Testing");
         Collection<Datafile> datafiles = DatafileSearch.searchByRunNumber(userId, instruments, startRun, endRun, 0, 300, em);
@@ -262,6 +265,8 @@ public class TestSearch {
         for (Datafile datafile : datafiles) {
             log.info(datafile.getId());
         }
+
+        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
 
         tearDown();
 
@@ -272,24 +277,25 @@ public class TestSearch {
         setUp();
 
         long time = System.currentTimeMillis();
-
         //test code here
         log.info("Testing");
-        Collection<Investigation> investigations = InvestigationSearch.searchByAdvanced(userId, dto, 0, 300, em);
+        Collection<Investigation> investigations = InvestigationSearch.searchByAdvanced(userId, dto, 0, 1300, em);
+
         log.info("Results: " + investigations.size());
         int datafiles = 0;
+
         for (Investigation investigation : investigations) {
-            //    log.info(investigation.getId() + " " + investigation.getTitle() + " " + investigation.getInstrument());
-            Collection<Dataset> dss = investigation.getDatasetCollection();
-            for (Dataset dataset : dss) {
-                Collection<Datafile> dfs = dataset.getDatafileCollection();
-                for (Datafile datafile : dfs) {
-                    datafiles++;
-                }
-            }
+            log.info(investigation.getId() + " " + investigation.getInvParamValue() + " " + investigation.getInvType());
+//            Collection<Dataset> dss = investigation.getDatasetCollection();
+//            for (Dataset dataset : dss) {
+//                Collection<Datafile> dfs = dataset.getDatafileCollection();
+//                for (Datafile datafile : dfs) {
+//                    datafiles++;
+//                }
+//            }
         }
 
-        System.out.println("Files: " + datafiles);
+        //System.out.println("Files: " + datafiles);
 
         System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
 
@@ -300,14 +306,18 @@ public class TestSearch {
 
         setUp();
 
+        long time = System.currentTimeMillis();
+
         //test code here
         log.info("Testing");
-        Collection<String> keywords = KeywordSearch.getAllKeywords(userId, KeywordType.ALPHA, em);
+        Collection<String> keywords = KeywordSearch.getAllKeywords(userId, KeywordType.ALPHA_NUMERIC, em);
         log.info("Results: " + keywords.size());
         log.info(keywords.getClass());
         for (String keyword : keywords) {
             //     log.info(keyword);
         }
+
+        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
 
         tearDown();
 
@@ -514,11 +524,10 @@ public class TestSearch {
         //ts.getInvestigation("gjd37",9525454280L);
         //////////////////////////
 
-"jdbc:oracle:thin:@(DESCRIPTION =  (LOAD_BALANCE = yes) (FAILOVER = ON) (ADDRESS = (PROTOCOL = TCP)(HOST = elektra.dl.ac.uk)(PORT = 1521))  (ADDRESS = (PROTOCOL = TCP)(HOST = jinx.dl.rl.ac.uk)(PORT = 1521))    (CONNECT_DATA = (SERVICE_NAME = minerva2.dl.AC.UK) (FAILOVER_MODE =   (TYPE=SESSION)  (METHOD=BASIC)   )  ) )"
-         keywords.add("a*");
-         keywords.add("calibration");
-         ts.seachByKeywords("gjd37", keywords);
-         ts.seachByKeywords("gjd37", keywords);
+        keywords.add("a*");
+        keywords.add("calibration");
+        // ts.seachByKeywords("gjd37", keywords);
+        // ts.seachByKeywords("gjd37", keywords);
 
         // log.info("Hello");
         // ts.getMyInvestigations("gjd37");
@@ -530,51 +539,54 @@ public class TestSearch {
         // ts.seachByUserID("JAMES", "JAMES");
 
 
+
+
         Collection<String> ins = new ArrayList<String>();
         // ins.add("scan");
-        //ins.add("crisp");
+        ins.add("maps");
 
-        // ts.seachByRunNumber("gjd37", ins, 11757L,11759L);
+       // ts.seachByRunNumber("gjd37", ins, 11757L, 11759L);
 
         AdvancedSearchDetails dto = new AdvancedSearchDetails();
-        // dto.setInvestigationInclude(InvestigationInclude.)
-        // dto.setInvestigationName("multidetector");
-        /*Collection<String> inv  =   new ArrayList<String>();
-        inv.add("JAMES-JAMES");*/
-        //  dto.setInvestigators(inv);
-        //dto.setDateRangeStart(new Date(1,1,1/*System.currentTimeMillis()-900000000)*/));  //120 = 2020
-        //dto.setYearRangeEnd(new Date());
-        // dto.setSampleName("multidetecto");
-        // dto.setInstruments(ins);
-        //dto.setExperimentNumber("3684");
-        //  dto.setVisitId("40");
+        //  dto.setInvestigationInclude(InvestigationInclude.)
+        // dto.setInvestigationName("zscan;z=-468.0");
+
+        Collection<String> inv = new ArrayList<String>();
+        inv.add("Cvikl");
+        ///  dto.setInvestigators(inv); //no users
+       // dto.setInstruments(ins);
+        // dto.setVisitId("10561");
         //dto.setInvestigationType("experiment");
-        //dto.setBackCatalogueInvestigatorString("ab etc - oxford,");
-        //
-        //dto.setDatafileName("a");
+        // dto.setExperimentNumber("0");
+        // dto.setBackCatalogueInvestigatorString("Ruiz-Hervias -");
+
         Collection<String> keywords2 = new ArrayList<String>();
 
         //isis
-        keywords2.add("*ccw*");
-        // dto.setInvestigationName("SrF2 calibration  w=-25.3");
-        // dto.setKeywords(keywords2);
-        // dto.setDatafileName("CSP11758.");
-        // dto.setRunEnd(11759L);
-        // dto.setRunStart(11757L);
-        // dto.setFuzzy(false);
+       // keywords2.add("maps");
+        //dto.setKeywords(keywords2);
+       // dto.setDateRangeStart(new Date(108, 1, 1));  //120 = 2020
+       // dto.setDateRangeEnd(new Date(108, 9, 1));
+         dto.setSampleName("#7ND/RD;Tav(at start)=-145");                            
+       // dto.setRunEnd(11992.0);
+       // dto.setRunStart(11990.0);
+        //dto.setDatafileName("MAP11990_ICPDEBUG.TXT");
 
-        //date range
-        dto.setDateRangeStart(new Date(107, 10, 20));
-        dto.setDateRangeEnd(new Date(107, 10, 21));
-        //  ts.seachByAdvanced("ISIS_GUARDIAN", dto);
+        ts.seachByAdvanced("gjd37", dto);
+        //ts.seachByAdvanced("gjd37", dto);
 
-        //  ts.getAllKeywords("gjd37");
-        //
-        // ts.getUserKeywords("gjd37", null);
-        // ts.getAllInvestigations("gjd37");
-        //ts.getUserInvestigations("gjd37");
+//        AdvancedSearchDetails dto2 = new AdvancedSearchDetails();
+//        Collection<String> keywords3 = new ArrayList<String>();
+//        keywords3.add("calibration");
+//        dto2.setKeywords(keywords3);
+//        ts.seachByAdvanced("gjd37", dto2);
+    //ts.getAllKeywords("gjd37");
+    //
+    // ts.getUserKeywords("gjd37", null);
+    // ts.getAllInvestigations("gjd37");
+    //ts.getUserInvestigations("gjd37");
 
-       // ts.test();
+    // ts.test();
 
     //ts.searchByRun();
     // ts.searchByRun(); 

@@ -37,6 +37,7 @@ import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -121,10 +122,10 @@ import uk.icat3.util.Queries;
     @Column(name = "BCAT_INV_STR")
     private String bcatInvStr;
     
-    @Column(name = "INV_PARAM_NAME")
+    @Column(name = "INV_PARAM_NAME")   
     private String invParamName;
     
-    @Column(name = "INV_PARAM_VALUE")
+    @Column(name = "INV_PARAM_VALUE")   
     private String invParamValue;
     
     @Column(name = "GRANT_ID")
@@ -137,10 +138,10 @@ import uk.icat3.util.Queries;
     @Temporal(TemporalType.TIMESTAMP)
     private Date releaseDate;
     
-    @Column(name = "INV_START_DATE")
+    @Column(name = "INV_START_DATE")   
     @Temporal(TemporalType.TIMESTAMP)
     private Date invStartDate;
-    
+        
     @Column(name = "INV_END_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date invEndDate;

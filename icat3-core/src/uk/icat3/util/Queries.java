@@ -186,12 +186,14 @@ public class Queries {
             " (i.grantId = :grantId OR :grantId IS NULL) AND" +
             " (i.title LIKE :invTitle OR :invTitle IS NULL) AND" +
             " (i.bcatInvStr LIKE :bcatInvStr OR :bcatInvStr IS NULL) AND " +
-            " (i.invNumber = :invNumber  OR :invNumber IS NULL) ";
+            " (i.invNumber = :invNumber  OR :invNumber IS NULL) AND "+
+            " (i.invStartDate > :lowerTime OR :lowerTime IS NULL) AND " +
+            " (i.invEndDate < :upperTime OR :upperTime IS NULL)";
     
     //public static final String ADVANCED_SEARCH_JPQL_INSTRUMENT =  " AND i.instrument.name IN(:instrument)  AND i.instrument.markedDeleted = 'N' ";//expand IN, remove this if instrument null
     
     public static final String ADVANCED_SEARCH_JPQL_DATAFILE = " AND EXISTS (SELECT DISTINCT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
-            " df.dataset = i.datasetCollection AND (df.datafileCreateTime > :lowerTime OR :lowerTime IS NULL) AND (df.datafileCreateTime < :upperTime OR :upperTime IS NULL) AND " +
+            " df.dataset = i.datasetCollection AND " +
             "  (df.name OPERATION :datafileName OR :datafileName IS NULL) AND " + //remove if all are null
             " iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' AND " +           
             " (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
@@ -199,15 +201,14 @@ public class Queries {
             " AND iadf3.role.actionCanSelect = 'Y'))";
     
      public static final String ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE = " AND EXISTS (SELECT DISTINCT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +            
-            " df.dataset = i.datasetCollection AND (df.datafileCreateTime > :lowerTime OR :lowerTime IS NULL) AND (df.datafileCreateTime < :upperTime OR :upperTime IS NULL) AND " +
+            " df.dataset = i.datasetCollection AND " +
             "  (LOWER(df.name) OPERATION :datafileName OR :datafileName IS NULL) AND  " + //remove if all are null
             " iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' AND " +
             " (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
             " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
             " AND iadf3.role.actionCanSelect = 'Y'))";
     
-    
-    public static final String ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER = " AND EXISTS (SELECT dfp.datafileParameterPK.datafileId FROM DatafileParameter dfp,  IcatAuthorisation iadf4 WHERE " +
+        public static final String ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER = " AND EXISTS (SELECT dfp.datafileParameterPK.datafileId FROM DatafileParameter dfp,  IcatAuthorisation iadf4 WHERE " +
             " dfp.datafile.dataset = i.datasetCollection AND dfp.numericValue BETWEEN :lower AND :upper AND " +
             " dfp.datafileParameterPK.name = 'run_number' AND dfp.markedDeleted = 'N' AND " + //remove this if run number null"
             " iadf4.markedDeleted = 'N' AND dfp.datafile.markedDeleted = 'N' AND dfp.datafile.dataset.markedDeleted = 'N' AND " +            

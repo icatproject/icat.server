@@ -6,7 +6,6 @@ package uk.icat3.search;
 
 import java.util.Collection;
 import uk.icat3.util.InvestigationInclude;
-import uk.icat3.util.LogicalOperator;
 
 /**
  *
@@ -15,7 +14,7 @@ import uk.icat3.util.LogicalOperator;
 public class KeywordDetails {
 
     private Collection<String> keywords;
-    private InvestigationInclude investigationIncludes = InvestigationInclude.NONE;
+    private InvestigationInclude investigationInclude = InvestigationInclude.NONE;
     private boolean caseSensitve = true;
 
     public boolean isCaseSensitve() {
@@ -26,12 +25,12 @@ public class KeywordDetails {
         this.caseSensitve = caseSensitve;
     }
 
-    public InvestigationInclude getInvestigationIncludes() {
-        return investigationIncludes;
+    public InvestigationInclude getInvestigationInclude() {
+        return investigationInclude;
     }
 
-    public void setInvestigationIncludes(InvestigationInclude investigationIncludes) {
-        this.investigationIncludes = investigationIncludes;
+    public void setInvestigationInclude(InvestigationInclude investigationInclude) {
+        this.investigationInclude = investigationInclude;
     }
 
     public Collection<String> getKeywords() {

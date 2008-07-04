@@ -344,6 +344,16 @@ public class InvestigationSearch extends ManagerUtil {
             JPQL += " AND i.invNumber = :invNumber";
         }
 
+        if(advanDTO.hasStartDate()){
+            log.trace("Searching dateRangeStart info");
+            JPQL += " AND i.invStartDate > :lowerTime";
+        }
+        
+        if(advanDTO.hasEndDate()){
+            log.trace("Searching dateRangeEnd info");
+            JPQL += " AND i.invEndDate < :upperTime";
+        }
+        
         if (advanDTO.hasSample()) {
             log.trace("Searching sample info");
             boolean isFuzzy = advanDTO.getSampleName().contains("%");
@@ -490,12 +500,18 @@ public class InvestigationSearch extends ManagerUtil {
         if (advanDTO.hasSample()) {
             query = query.setParameter("sampleName", advanDTO.getSampleName());
         }
+        
+        if(advanDTO.hasStartDate()){
+             query = query.setParameter("lowerTime", advanDTO.getDateRangeStart());
+        }
+        
+        if(advanDTO.hasEndDate()){
+             query = query.setParameter("upperTime", advanDTO.getDateRangeEnd());
+        }
 
         if (advanDTO.hasDataFileParameters()) {
             query = query.setParameter("datafileName", advanDTO.getDatafileName());
-            query = query.setParameter("dataSetType", ElementType.DATASET);
-            query = query.setParameter("upperTime", advanDTO.getDateRangeEnd());
-            query = query.setParameter("lowerTime", advanDTO.getDateRangeStart());
+            query = query.setParameter("dataSetType", ElementType.DATASET);           
         }
 
         //set upper run number
@@ -681,7 +697,7 @@ public class InvestigationSearch extends ManagerUtil {
      * @return collection of {@link Investigation} investigation objects
      */
     public static Collection<Investigation> searchByKeywords(String userId, KeywordDetails keywordDetails, int startIndex, int number_results, EntityManager manager) {
-        InvestigationInclude includes = (keywordDetails.getInvestigationIncludes() == null) ? InvestigationInclude.NONE : keywordDetails.getInvestigationIncludes();
+        InvestigationInclude includes = (keywordDetails.getInvestigationInclude() == null) ? InvestigationInclude.NONE : keywordDetails.getInvestigationInclude();
 
         return searchByKeywords(userId, keywordDetails.getKeywords(), LogicalOperator.AND, includes, true, keywordDetails.isCaseSensitve(), startIndex, number_results, manager);
     }

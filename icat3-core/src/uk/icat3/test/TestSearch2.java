@@ -50,27 +50,56 @@ public class TestSearch2 {
         em.close();
     }
 
+    public void testP() throws Exception {
+        setUp();
+//df.dataset = i.datasetCollection AND 
+        long time = System.currentTimeMillis();
+        String QUERY = "SELECT i FROM IcatAuthorisation i WHERE " +
+                "i.elementType = :elementType AND i.elementId = :elementId AND " +
+                "i.userId = :userId AND i.parentElementType IS NULL AND " +
+                "i.parentElementId IS NULL AND i.markedDeleted = 'N'";
+
+        System.out.println(QUERY);
+
+        Query nullQuery = em.createQuery(QUERY);
+
+        nullQuery.setParameter("elementType", ElementType.INVESTIGATION);
+        nullQuery.setParameter("userId", "ANY");
+        nullQuery.setParameter("elementId", 7256755);
+
+        System.out.println(nullQuery.getResultList().size());
+
+        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
+
+        time = System.currentTimeMillis();
+
+
+        tearDown();
+    }
+
     public void testP1() throws Exception {
         setUp();
-
+//df.dataset = i.datasetCollection AND 
         long time = System.currentTimeMillis();
-        String QUERY = "SELECT DISTINCT i from Investigation i , IcatAuthorisation ia " +
-                "WHERE (i.id = ia.elementId AND ia.elementType = :objectType  AND " +
-                "(ia.userId = :userId OR ia.userId = 'ANY') AND ia.markedDeleted = 'N' " +
-                "AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' AND " +
-                "EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name " +
-                "LIKE :keyword AND kw.markedDeleted = 'N')";
-        
+        String QUERY = "SELECT DISTINCT i from Investigation i , IcatAuthorisation ia WHERE " +
+                "(i.id = ia.elementId AND ia.elementType = :objectType  AND (ia.userId = :userId " +
+                "OR ia.userId = 'ANY') AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') " +
+                "AND i.markedDeleted = 'N'  AND i.instrument IN(:instrument1) and (i.invStartDate > :lowerTime ) AND (I.invEndDate < :upperTime )  ";
+
+
         System.out.println(QUERY);
 
         Query nullQuery = em.createQuery(QUERY);
 
         nullQuery.setParameter("objectType", ElementType.INVESTIGATION);
         nullQuery.setParameter("userId", "gjd37");
-        nullQuery.setParameter("keyword", "calibration");
+        nullQuery.setParameter("instrument1", "maps");
+        // nullQuery.setParameter("dataSetType", ElementType.DATASET);
 
+        nullQuery.setParameter("lowerTime", new Date(108, 1, 1));
+        nullQuery.setParameter("upperTime", new Date(108, 2, 1));
 
-        System.out.println(nullQuery.getResultList());
+        System.out.println(nullQuery.getResultList().size());
 
         System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
 
@@ -84,31 +113,26 @@ public class TestSearch2 {
         setUp();
 
         long time = System.currentTimeMillis();
-        String QUERY = "SELECT DISTINCT i from Datafile i , DatafileParameter dfp,  IcatAuthorisation ia, FacilityInstrumentScientist fis " +
-                "WHERE  " +
-                "((:userId = 'SUPER_USER') OR (:userId = fis.facilityInstrumentScientistPK.federalId AND  fis.facilityInstrumentScientistPK.instrumentName = i.dataset.investigation.instrument AND fis.markedDeleted = 'N') " +
-                "OR (i.id = ia.elementId AND ia.elementType = :objectType  " +
-                "AND (ia.userId = :userId OR ia.userId = 'ANY') AND ia.markedDeleted = 'N' " +
-                "AND ia.role.actionCanSelect = 'Y')) AND i = dfp.datafile " +
-                "AND i.markedDeleted = 'N'  " +
-                "AND i.dataset.investigation.instrument IN (:instrument1, :instrument2) " +
-                "AND ((dfp.numericValue BETWEEN :lower AND :upper)) " +
-                "AND (dfp.datafileParameterPK.name = 'run_number') " +
-                "AND dfp.markedDeleted = 'N' AND dfp.markedDeleted = 'N' " +
-                "AND i.dataset.markedDeleted = 'N'  " +
-                "";
+        String QUERY = "SELECT DISTINCT i from Datafile i , DatafileParameter dfp , IcatAuthorisation ia " +
+                "WHERE  (i.dataset.id = ia.elementId AND ia.elementType = :objectType  " +
+                "AND (ia.userId = :userId OR ia.userId = 'ANY') AND ia.markedDeleted = 'N'" +
+                " AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N'  " +
+                "AND i.dataset.investigation.instrument IN (:instrument1) " +
+                "AND  i = dfp.datafile AND i.markedDeleted = 'N'  AND ((dfp.numericValue " +
+                "BETWEEN :lower AND :upper)) AND (dfp.datafileParameterPK.name = 'run_number') " +
+                "AND dfp.markedDeleted = 'N' AND dfp.markedDeleted = 'N' AND i.dataset.markedDeleted = 'N'";
+
 
         System.out.println(QUERY);
 
         Query nullQuery = em.createQuery(QUERY);
 
         nullQuery.setParameter("objectType", ElementType.DATASET);
-        nullQuery.setParameter("userId", "facility_scientist");
+        nullQuery.setParameter("userId", "gjd37");
 
-        nullQuery.setParameter("lower", 0);
-        nullQuery.setParameter("upper", 10000);
-        nullQuery.setParameter("instrument1", "SXD");
-        nullQuery.setParameter("instrument2", "SXD2");
+        nullQuery.setParameter("lower", 11757.0);
+        nullQuery.setParameter("upper", 11759.0);
+        nullQuery.setParameter("instrument1", "maps");
 
         System.out.println(nullQuery.getResultList());
 
@@ -155,8 +179,10 @@ public class TestSearch2 {
 
         TestSearch2 ts = new TestSearch2();
 
-        ts.testP1();
-
+        ts.testP();
+        ts.testP();
+        ts.testP();
+        ts.testP();
     //   ts.test2();
 
 
