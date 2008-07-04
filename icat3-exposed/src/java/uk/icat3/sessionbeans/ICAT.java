@@ -220,7 +220,8 @@ public class ICAT extends EJBObject implements ICATLocal {
     @WebMethod(operationName = "getKeywordsForUserType")
     @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.getKeywordsForUserType")
     @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.getKeywordsForUserTypeResponse")
-    public Collection<String> getKeywordsForUser(String sessionId, KeywordType type) throws SessionException {
+    public Collection<String> getKeywordsForUser(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "keywordType") KeywordType type) throws SessionException {
         return keywordSearchLocal.getKeywordsForUser(sessionId, type);
     }
 
@@ -270,7 +271,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     @WebMethod(operationName = "searchByAdvancedPagination")
     @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByAdvancedPagination")
     @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.searchByAdvancedPaginationResponse")
-    public Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch,
+    public Collection<Investigation> searchByAdvanced(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "advancedSearchDetails") AdvancedSearchDetails advancedSearch,
             @WebParam(name = "startIndex") int startIndex,
             @WebParam(name = "numberOfResults") int numberOfResults) throws SessionException {
         return investigationSearchLocal.searchByAdvanced(sessionId, advancedSearch, startIndex, numberOfResults);
@@ -282,7 +283,7 @@ public class ICAT extends EJBObject implements ICATLocal {
      * @param sessionId sessionId of the user.
      * @param keywords Collection of keywords to search on
      * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
-     * @param include {@link InvestigationInclude}
+     * @param investigationIncludes {@link InvestigationInclude}
      * @return collection of {@link Investigation} investigation objects
      * @throws uk.icat3.exceptions.SessionException
      */
@@ -292,9 +293,9 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection<Investigation> searchByKeywords(
     @WebParam(name = "sessionId") String sessionId,
     @WebParam(name = "keywords") Collection<String> keywords,
-    @WebParam(name = "include") InvestigationInclude include,
+    @WebParam(name = "investigationInclude") InvestigationInclude investigationIncludes,
     @WebParam(name = "fuzzy") boolean fuzzy) throws SessionException {
-    return investigationSearchLocal.searchByKeywords(sessionId, keywords, include, fuzzy);
+    return investigationSearchLocal.searchByKeywords(sessionId, keywords, investigationIncludes, fuzzy);
     }*/
     /**
      * Search by a collection of keywords for investigations that user has access to view, with AND been operator, fuzzy false, no includes
@@ -339,7 +340,7 @@ public class ICAT extends EJBObject implements ICATLocal {
      * @param sessionId sessionId of the user.
      * @param keywords Collection of keywords to search on
      * @param fuzzy search with wildcards, e.g like copper searches for %copper% i.e anything with copper in keyword, default false
-     * @param include {@link InvestigationInclude}
+     * @param investigationIncludes {@link InvestigationInclude}
      * @param startIndex start index of the results found, default 0
      * @param numberOfResults number of results found from the start index, default {@link Queries}.MAX_QUERY_RESULTSET
      * @return collection of {@link Investigation} investigation objects
@@ -351,18 +352,18 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection<Investigation> searchByKeywords(
     @WebParam(name = "sessionId") String sessionId,
     @WebParam(name = "keywords") Collection<String> keywords,
-    @WebParam(name = "include") InvestigationInclude include,
+    @WebParam(name = "investigationInclude") InvestigationInclude investigationIncludes,
     @WebParam(name = "fuzzy") boolean fuzzy,
     @WebParam(name = "startIndex") int startIndex,
     @WebParam(name = "numberOfResults") int numberOfResults) throws SessionException {
-    return investigationSearchLocal.searchByKeywords(sessionId, keywords, include, fuzzy, startIndex, numberOfResults);
+    return investigationSearchLocal.searchByKeywords(sessionId, keywords, investigationIncludes, fuzzy, startIndex, numberOfResults);
     }*/
     /**
      * Search by a collection of keywords for investigations that user has access to view, searching by fuzzy is true, with AND been operator
      *
      * @param sessionId sessionId of the user.
      * @param keywords Collection of keywords to search on
-     * @param include {@link InvestigationInclude}
+     * @param investigationIncludes {@link InvestigationInclude}
      * @param startIndex start index of the results found, default 0
      * @param numberOfResults number of results found from the start index, default {@link Queries}.MAX_QUERY_RESULTSET
      * @return collection of {@link Investigation} investigation objects
@@ -374,10 +375,10 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection<Investigation> searchByKeywords(
     @WebParam(name = "sessionId") String sessionId,
     @WebParam(name = "keywords") Collection<String> keywords,
-    @WebParam(name = "include") InvestigationInclude include,
+    @WebParam(name = "investigationInclude") InvestigationInclude investigationIncludes,
     @WebParam(name = "startIndex") int startIndex,
     @WebParam(name = "numberOfResults") int numberOfResults) throws SessionException {
-    return investigationSearchLocal.searchByKeywords(sessionId, keywords, include, startIndex, numberOfResults);
+    return investigationSearchLocal.searchByKeywords(sessionId, keywords, investigationIncludes, startIndex, numberOfResults);
     }*/
     /**
      * Search by a collection of keywords for investigations that user has access to view
@@ -417,7 +418,7 @@ public class ICAT extends EJBObject implements ICATLocal {
      * Lists all the investigations for the current user, ie who he is an investigator of
      *
      * @param sessionId
-     * @param include
+     * @param investigationIncludes
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
      * @return collection
      */
@@ -426,15 +427,15 @@ public class ICAT extends EJBObject implements ICATLocal {
     @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesResponse")
     public Collection<Investigation> getMyInvestigations(
             @WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "include") InvestigationInclude include) throws SessionException {
-        return investigationSearchLocal.getMyInvestigations(sessionId, include);
+            @WebParam(name = "investigationInclude") InvestigationInclude investigationIncludes) throws SessionException {
+        return investigationSearchLocal.getMyInvestigations(sessionId, investigationIncludes);
     }
 
     /**
      * Lists all the investigations for the current user, ie who he is an investigator of
      *
      * @param sessionId
-     * @param include
+     * @param investigationIncludes
      * @param startIndex start index of the results found
      * @param number_results number of results found from the start index
      * @throws uk.icat3.exceptions.SessionException if the session id is invalid
@@ -445,10 +446,10 @@ public class ICAT extends EJBObject implements ICATLocal {
     @ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesPaginationResponse")
     public Collection<Investigation> getMyInvestigations(
             @WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "include") InvestigationInclude include,
+            @WebParam(name = "investigationInclude") InvestigationInclude investigationIncludes,
             @WebParam(name = "startIndex") int startIndex,
             @WebParam(name = "number_results") int number_results) throws SessionException {
-        return investigationSearchLocal.getMyInvestigations(sessionId, include, startIndex, number_results);
+        return investigationSearchLocal.getMyInvestigations(sessionId, investigationIncludes, startIndex, number_results);
     }
 
     /**
@@ -738,7 +739,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Investigation getInvestigation(
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "investigationId") Long investigationId,
-            @WebParam(name = "includes") InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+            @WebParam(name = "investigationInclude") InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return investigationManagerLocal.getInvestigation(sessionId, investigationId, includes);
     }
 
@@ -776,7 +777,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     @ResponseWrapper(className = "uk.icat3.sessionbeans.getInvestigationsIncludesResponse")
     public Collection<Investigation> getInvestigations(@WebParam(name = "userId") String userId, 
            @WebParam(name = "investigationIds") Collection<Long> investigationIds, 
-            @WebParam(name = "includes")  InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+            @WebParam(name = "investigationInclude")  InvestigationInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return investigationManagerLocal.getInvestigations(userId, investigationIds, includes);
     }
 
@@ -1014,7 +1015,7 @@ public class ICAT extends EJBObject implements ICATLocal {
      * Modifies the investigation, depending on whether the user has permission to update this Investigation.
      *
      * @param sessionId sessionid of the user.
-     * @param investigation {@link Investigatoin} object to be updated
+     * @param investigation {@link Investigation} object to be updated
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @throws uk.icat3.exceptions.ValidationException if the investigation object is invalid
@@ -1023,8 +1024,8 @@ public class ICAT extends EJBObject implements ICATLocal {
     @WebMethod
     public void modifyInvestigation(
             @WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "investigaion") Investigation investigaion) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException {
-        investigationManagerLocal.modifyInvestigation(sessionId, investigaion);
+            @WebParam(name = "investigaion") Investigation investigation) throws SessionException, ValidationException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+        investigationManagerLocal.modifyInvestigation(sessionId, investigation);
     }
 
     /**
@@ -1212,7 +1213,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Dataset getDataset(
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "datasetId") Long datasetId,
-            @WebParam(name = "includes") DatasetInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
+            @WebParam(name = "datasetInclude") DatasetInclude includes) throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException {
         return datasetManagerLocal.getDataset(sessionId, datasetId, includes);
     }
 
