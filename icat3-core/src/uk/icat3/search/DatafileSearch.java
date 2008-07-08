@@ -45,7 +45,8 @@ public class DatafileSearch {
         if (instruments == null || instruments.isEmpty()) {
             throw new IllegalArgumentException("Instrument collection cannot be null or empty");
         }
-        log.trace("searchByRunNumber(" + userId + ", " + instruments + ", " + startRun + ", " + endRun + ", EntityManager)");
+        log.trace("searchByRunNumber(" + userId + ", " + instruments + ", " + startRun + ", " + endRun + ", "+ startIndex +", "+ number_results+", EntityManager)");
+                
 
         Collection<Datafile> datafiles = null;
 
