@@ -448,7 +448,7 @@ public class ICAT extends EJBObject implements ICATLocal {
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "investigationInclude") InvestigationInclude investigationIncludes,
             @WebParam(name = "startIndex") int startIndex,
-            @WebParam(name = "number_results") int number_results) throws SessionException {
+            @WebParam(name = "numberOfResults") int number_results) throws SessionException {
         return investigationSearchLocal.getMyInvestigations(sessionId, investigationIncludes, startIndex, number_results);
     }
 
@@ -484,7 +484,7 @@ public class ICAT extends EJBObject implements ICATLocal {
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "userSearch") String userSearch,
             @WebParam(name = "startIndex") int startIndex,
-            @WebParam(name = "number_results") int number_results) throws SessionException {
+            @WebParam(name = "numberOfResults") int number_results) throws SessionException {
         return investigationSearchLocal.searchByUserID(sessionId, userSearch, startIndex, number_results);
     }
 
@@ -520,7 +520,7 @@ public class ICAT extends EJBObject implements ICATLocal {
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "surname") String surname,
             @WebParam(name = "startIndex") int startIndex,
-            @WebParam(name = "number_results") int number_results) throws SessionException {
+            @WebParam(name = "numberOfResults") int number_results) throws SessionException {
         return investigationSearchLocal.searchByUserSurname(sessionId, surname, startIndex, number_results);
     }
 
@@ -680,7 +680,7 @@ public class ICAT extends EJBObject implements ICATLocal {
             @WebParam(name = "startRun") float startRun,
             @WebParam(name = "endRun") float endRun,
             @WebParam(name = "startIndex") int startIndex,
-            @WebParam(name = "number_results") int number_results) throws SessionException {
+            @WebParam(name = "numberOfResults") int number_results) throws SessionException {
         return datafileSearchLocal.searchByRunNumber(sessionId, instruments, startRun, endRun, startIndex, number_results);
     }
 
