@@ -6,6 +6,7 @@
 package uk.icat3.acctests.util;
 
 import java.util.List;
+import uk.icat3.client.InvestigationInclude;
 
 /**
  *
@@ -16,6 +17,58 @@ public class Helper {
     public static boolean isEmpty(String str) {
         if ((str == null) || (str.length() ==0)) return true;
         else return false;
+    }
+    
+    public static void checkIncluded(uk.icat3.client.Investigation investigation, InvestigationInclude include)  {
+        switch (include) {
+            case ALL:                                   checkDatafileParameterIncluded(investigation);
+                                                        checkSampleParameterIncluded(investigation);
+                                                        checkKeywordIncluded(investigation);
+                                                        checkPublicationIncluded(investigation);
+                                                        checkInvestigatorIncluded(investigation);
+                                                        break;
+                        
+            case ALL_EXCEPT_DATASETS_AND_DATAFILES:     checkSampleParameterIncluded(investigation);
+                                                        checkKeywordIncluded(investigation);
+                                                        checkPublicationIncluded(investigation);
+                                                        checkInvestigatorIncluded(investigation);
+                                                        break;
+                                                        
+            case DATASETS_AND_DATAFILES:                checkDatafileIncluded(investigation);
+                                                        break;
+                                            
+            case DATASETS_DATAFILES_AND_PARAMETERS:     checkDatafileParameterIncluded(investigation);                                
+                                                        break;
+                                                        
+            case DATASETS_ONLY:                         checkDatasetIncluded(investigation);
+                                                        break;
+                                                        
+            case INVESTIGATORS_AND_KEYWORDS:            checkInvestigatorIncluded(investigation);                                            
+                                                        checkKeywordIncluded(investigation);
+                                                        break;
+                                                        
+            case INVESTIGATORS_ONLY:                    checkInvestigatorIncluded(investigation);                                                
+                                                        break;
+                                                        
+            case INVESTIGATORS_SHIFTS_AND_SAMPLES:      checkSampleParameterIncluded(investigation);    
+                                                        break;
+                                                        
+            case INVESTIGATORS_SHIFTS_SAMPLES_AND_PUBLICATIONS:         checkSampleParameterIncluded(investigation);                                                
+                                                                        checkPublicationIncluded(investigation);
+                                                                        break;
+            
+            case KEYWORDS_ONLY:                         checkKeywordIncluded(investigation);                                                            
+                                                        break;
+            
+            case PUBLICATIONS_ONLY:                     checkPublicationIncluded(investigation);
+                                                        break;
+                                                        
+            case SAMPLES_ONLY:                          checkSampleParameterIncluded(investigation);                                                
+                                                        break;
+                                                        
+            //SHIFT_ONLY
+            //ROLE_ONLY                                                        
+        }   
     }
     
     public static uk.icat3.client.Investigation checkInvestigationIncluded(uk.icat3.client.Investigation investigation)  {
@@ -75,7 +128,7 @@ public class Helper {
         return sample;
     }
     
-    public static uk.icat3.client.SampleParameter checkSampleParametersIncluded(uk.icat3.client.Investigation investigation)  {
+    public static uk.icat3.client.SampleParameter checkSampleParameterIncluded(uk.icat3.client.Investigation investigation)  {
         checkInvestigationIncluded(investigation);        
         uk.icat3.client.Sample sample = checkSampleIncluded(investigation);        
         
