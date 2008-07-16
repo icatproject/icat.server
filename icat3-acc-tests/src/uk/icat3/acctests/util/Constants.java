@@ -10,6 +10,13 @@ package uk.icat3.acctests.util;
  * @author df01
  */
 public class Constants {
+    
+    
+    public static String ISIS_GUARDIAN = "ISIS_GUARDIAN";
+    public static String USER1 = "dwf64";
+    public static String USER2 = "ks82";
+    public static String USER3 = "lba63";
+    
     public static final String ICAT_ADMIN_USER = "ISIS-admin";
     public static final String ICAT_ADMIN_PASSWORD = "icatadmin33";
     
