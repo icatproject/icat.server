@@ -21,23 +21,21 @@ import static uk.icat3.client.InvestigationInclude.*;
 /**
  *
  * @author df01
+ * This class will test the ability of the API to provide a user with
+ * a correctly formatted download link (for multple datafiles) for 
+ * data.isis.  Actual download will not be tested since this is outside 
+ * of the remit of Devigo.
+ * 
  */
 public class ICAT_F_6 {
     
     private static uk.icat3.client.admin.ICATAdminService adminService = null;
     private static uk.icat3.client.admin.ICATAdmin adminPort = null;
     private static uk.icat3.client.ICATService service = null;
-    private static uk.icat3.client.ICAT port = null;
-    
-    private static String USER1 = "dwf64";
-    private static String USER2 = "ks82";
-    private static String USER3 = "lba63";
-    
-    private java.lang.String sessionId = null;
-    
+    private static uk.icat3.client.ICAT port = null;        
+    private java.lang.String sessionId = null;    
     private static List<String> keywords = null;
     
-
     public ICAT_F_6() {
     }
 
@@ -137,7 +135,7 @@ public class ICAT_F_6 {
             System.out.println("name: " + i.getTitle());            
             
             //check that all requested objects are contained within search result
-            Long datasetId = i.getDatasetCollection().get(0).getId();;
+            Long datasetId = i.getDatasetCollection().get(0).getId();
                         
             String url = port.downloadDataset(sessionId, datasetId);
             
