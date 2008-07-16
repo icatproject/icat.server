@@ -33,7 +33,7 @@ public class ICAT_F_2 {
     private static uk.icat3.client.ICATService service = null;
     private static uk.icat3.client.ICAT port = null;    
     
-    private java.lang.String sessionId = null;    
+    private static java.lang.String sessionId = null;    
     private static List<String> keywords = null;
     
     public ICAT_F_2() {
@@ -56,6 +56,7 @@ public class ICAT_F_2 {
             keywords.add(ICAT_F_2_KEYWORD2);
             keywords.add(ICAT_F_2_KEYWORD3);
             
+            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);  
                         
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -64,6 +65,8 @@ public class ICAT_F_2 {
 
     @AfterClass
     public static void tearDownClass() throws Exception {
+        port.logout(sessionId);
+        sessionId = null;
         adminService = null;
         adminPort = null;
         service = null;
@@ -76,19 +79,14 @@ public class ICAT_F_2 {
 
     @After
     public void tearDown() {
-        port.logout(sessionId);
-        sessionId = null;
+        
     }
 
    
     @Test
     public void keywordSearchAll() {    
         try {  
-            // TODO process result here
-            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
-                                    
+                                                
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);        
             
@@ -112,11 +110,7 @@ public class ICAT_F_2 {
     
     @Test
     public void keywordSearchAllExceptDatasetsAndDatafiles() {    
-        try {  
-            // TODO process result here
-            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
+        try {              
                                     
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);        
@@ -141,11 +135,7 @@ public class ICAT_F_2 {
     @Test
     public void keywordSearchDatasetsAndDatafiles() {    
         try {  
-            // TODO process result here
-            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
-                                    
+            
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);        
             
@@ -169,10 +159,7 @@ public class ICAT_F_2 {
     @Test
     public void keywordSearchDatasetsDatafilesAndParameters() {    
         try {  
-            // TODO process result here
-            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
+            
                                     
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);        
@@ -197,10 +184,7 @@ public class ICAT_F_2 {
     @Test
     public void keywordSearchDatasetsOnly() {    
         try {  
-            // TODO process result here
-            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
+            
                                     
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);        
@@ -225,11 +209,7 @@ public class ICAT_F_2 {
     @Test
     public void keywordSearchInvestigatorsAndKeywords() {    
         try {  
-            // TODO process result here
-            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
-                                    
+            
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);        
             
@@ -253,10 +233,7 @@ public class ICAT_F_2 {
     @Test
     public void keywordSearchInvestigatorsOnly() {    
         try {  
-            // TODO process result here
-            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
+            
                                     
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);        
@@ -282,10 +259,7 @@ public class ICAT_F_2 {
     @Test
     public void keywordSearchInvestigatorsShiftsAndSamples() {    
         try {  
-            // TODO process result here
-            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
+            
                                     
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);        
@@ -309,11 +283,7 @@ public class ICAT_F_2 {
     
     @Test
     public void keywordSearchInvestigatorsShiftsSamplesAndPublications() {    
-        try {  
-            // TODO process result here
-            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
+        try {             
                                     
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);        
@@ -339,11 +309,7 @@ public class ICAT_F_2 {
     @Test
     public void keywordSearchKeywordsOnly() {    
         try {  
-            // TODO process result here
-            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
-                                    
+           
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);        
             
@@ -367,11 +333,7 @@ public class ICAT_F_2 {
     @Test
     public void keywordSearchPublicationsOnly() {    
         try {  
-            // TODO process result here
-            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
-                                    
+            
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);        
             
@@ -395,11 +357,7 @@ public class ICAT_F_2 {
     @Test
     public void keywordSearchSamplesOnly() {    
         try {  
-            // TODO process result here
-            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
-                                    
+                                                            
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);        
             
