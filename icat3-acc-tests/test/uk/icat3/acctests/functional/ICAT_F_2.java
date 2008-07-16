@@ -17,6 +17,8 @@ import uk.icat3.acctests.util.Helper;
 import static uk.icat3.acctests.util.Constants.*;
 import static org.junit.Assert.*;
 import static uk.icat3.client.InvestigationInclude.*;
+
+
 /**
  *
  * @author df01
@@ -28,8 +30,7 @@ public class ICAT_F_2 {
     private static uk.icat3.client.ICATService service = null;
     private static uk.icat3.client.ICAT port = null;    
     
-    private java.lang.String sessionId = null;
-    private static String USER1 = "ISIS_GUARDIAN";
+    private java.lang.String sessionId = null;    
     private static List<String> keywords = null;
     
     public ICAT_F_2() {
@@ -81,7 +82,7 @@ public class ICAT_F_2 {
     public void keywordSearchAll() {    
         try {  
             // TODO process result here
-            sessionId = adminPort.loginAdmin(USER1);            
+            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
             if (sessionId == null) assertTrue(false);                        
             System.out.println("sessionId: " + sessionId);
                                     
@@ -110,7 +111,7 @@ public class ICAT_F_2 {
     public void keywordSearchAllExceptDatasetsAndDatafiles() {    
         try {  
             // TODO process result here
-            sessionId = adminPort.loginAdmin(USER1);            
+            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
             if (sessionId == null) assertTrue(false);                        
             System.out.println("sessionId: " + sessionId);
                                     
@@ -138,7 +139,7 @@ public class ICAT_F_2 {
     public void keywordSearchDatasetsAndDatafiles() {    
         try {  
             // TODO process result here
-            sessionId = adminPort.loginAdmin(USER1);            
+            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
             if (sessionId == null) assertTrue(false);                        
             System.out.println("sessionId: " + sessionId);
                                     
@@ -166,7 +167,7 @@ public class ICAT_F_2 {
     public void keywordSearchDatasetsDatafilesAndParameters() {    
         try {  
             // TODO process result here
-            sessionId = adminPort.loginAdmin(USER1);            
+            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
             if (sessionId == null) assertTrue(false);                        
             System.out.println("sessionId: " + sessionId);
                                     
@@ -194,7 +195,7 @@ public class ICAT_F_2 {
     public void keywordSearchDatasetsOnly() {    
         try {  
             // TODO process result here
-            sessionId = adminPort.loginAdmin(USER1);            
+            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
             if (sessionId == null) assertTrue(false);                        
             System.out.println("sessionId: " + sessionId);
                                     
@@ -222,7 +223,7 @@ public class ICAT_F_2 {
     public void keywordSearchInvestigatorsAndKeywords() {    
         try {  
             // TODO process result here
-            sessionId = adminPort.loginAdmin(USER1);            
+            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
             if (sessionId == null) assertTrue(false);                        
             System.out.println("sessionId: " + sessionId);
                                     
@@ -250,7 +251,7 @@ public class ICAT_F_2 {
     public void keywordSearchInvestigatorsOnly() {    
         try {  
             // TODO process result here
-            sessionId = adminPort.loginAdmin(USER1);            
+            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
             if (sessionId == null) assertTrue(false);                        
             System.out.println("sessionId: " + sessionId);
                                     
@@ -279,7 +280,7 @@ public class ICAT_F_2 {
     public void keywordSearchInvestigatorsShiftsAndSamples() {    
         try {  
             // TODO process result here
-            sessionId = adminPort.loginAdmin(USER1);            
+            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
             if (sessionId == null) assertTrue(false);                        
             System.out.println("sessionId: " + sessionId);
                                     
@@ -307,7 +308,7 @@ public class ICAT_F_2 {
     public void keywordSearchInvestigatorsShiftsSamplesAndPublications() {    
         try {  
             // TODO process result here
-            sessionId = adminPort.loginAdmin(USER1);            
+            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
             if (sessionId == null) assertTrue(false);                        
             System.out.println("sessionId: " + sessionId);
                                     
@@ -336,7 +337,7 @@ public class ICAT_F_2 {
     public void keywordSearchKeywordsOnly() {    
         try {  
             // TODO process result here
-            sessionId = adminPort.loginAdmin(USER1);            
+            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
             if (sessionId == null) assertTrue(false);                        
             System.out.println("sessionId: " + sessionId);
                                     
@@ -364,7 +365,7 @@ public class ICAT_F_2 {
     public void keywordSearchPublicationsOnly() {    
         try {  
             // TODO process result here
-            sessionId = adminPort.loginAdmin(USER1);            
+            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
             if (sessionId == null) assertTrue(false);                        
             System.out.println("sessionId: " + sessionId);
                                     
@@ -392,7 +393,7 @@ public class ICAT_F_2 {
     public void keywordSearchSamplesOnly() {    
         try {  
             // TODO process result here
-            sessionId = adminPort.loginAdmin(USER1);            
+            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);            
             if (sessionId == null) assertTrue(false);                        
             System.out.println("sessionId: " + sessionId);
                                     
