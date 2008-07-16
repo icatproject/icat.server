@@ -99,9 +99,15 @@ public class ICAT_F_6 {
             uk.icat3.client.Investigation i = port.getInvestigationIncludes(sessionId, investigations.get(0).getId(), DATASETS_AND_DATAFILES);            
             System.out.println("name: " + i.getTitle());            
             
-            //check that all requested objects are contained within search result
-            List<Long> datafileIds = new ArrayList<Long>();
+            uk.icat3.client.Dataset dataset = i.getDatasetCollection().get(0);
             
+            List<uk.icat3.client.Datafile> datafiles = dataset.getDatafileCollection();
+            
+            //populate list of datafile ids
+            List<Long> datafileIds = new ArrayList<Long>();
+            for (uk.icat3.client.Datafile datafile : datafiles) {
+                datafileIds.add(datafile.getId());
+            }//end for            
             
             String url = port.downloadDatafiles(sessionId, datafileIds);
             //if we get here without exception then all is OK!
@@ -131,7 +137,7 @@ public class ICAT_F_6 {
             System.out.println("name: " + i.getTitle());            
             
             //check that all requested objects are contained within search result
-            Long datasetId = null;
+            Long datasetId = i.getDatasetCollection().get(0).getId();;
                         
             String url = port.downloadDataset(sessionId, datasetId);
             
