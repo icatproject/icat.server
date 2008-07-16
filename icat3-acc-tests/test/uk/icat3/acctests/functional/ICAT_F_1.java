@@ -13,7 +13,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import uk.icat3.acctests.util.Constants;
+import static uk.icat3.acctests.util.Constants.*;
 import static org.junit.Assert.*;
 
 /**
@@ -29,14 +29,8 @@ public class ICAT_F_1 {
     private static uk.icat3.client.admin.ICATAdminService adminService = null;
     private static uk.icat3.client.admin.ICATAdmin adminPort = null;
     private static uk.icat3.client.ICATService service = null;
-    private static uk.icat3.client.ICAT port = null;
-    
-    private static String USER1 = "dwf64";
-    private static String USER2 = "ks82";
-    private static String USER3 = "lba63";
-    
-    private java.lang.String sessionId = null;
-    
+    private static uk.icat3.client.ICAT port = null;    
+    private java.lang.String sessionId = null;    
     private static List<String> keywords = null;
 
     public ICAT_F_1() {
@@ -119,14 +113,14 @@ public class ICAT_F_1 {
             adminService = new uk.icat3.client.admin.ICATAdminService();
             adminPort = adminService.getICATAdminPort();
             
-            ((BindingProvider)adminPort).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, Constants.ICAT_ADMIN_USER);
-            ((BindingProvider)adminPort).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, Constants.ICAT_ADMIN_PASSWORD);  
+            ((BindingProvider)adminPort).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, ICAT_ADMIN_USER);
+            ((BindingProvider)adminPort).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, ICAT_ADMIN_PASSWORD);  
             
             service = new uk.icat3.client.ICATService();
             port = service.getICATPort();
             
             keywords = new ArrayList<String>();
-            keywords.add(Constants.ICAT_F_1_KEYWORD1);
+            keywords.add(ICAT_F_1_KEYWORD1);
             
         } catch (Exception ex) {
             ex.printStackTrace();
