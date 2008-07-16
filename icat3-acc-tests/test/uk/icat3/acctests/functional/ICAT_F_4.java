@@ -15,6 +15,9 @@ import static org.junit.Assert.*;
 /**
  *
  * @author df01
+ * This class will test that the xml ingestion mechansim for ICAT3.3 
+ * still works (i.e. now that the code is using the updated API)
+ * 
  */
 public class ICAT_F_4 {
 
