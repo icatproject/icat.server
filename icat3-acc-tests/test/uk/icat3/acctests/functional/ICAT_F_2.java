@@ -20,8 +20,11 @@ import static uk.icat3.client.InvestigationInclude.*;
 
 
 /**
- *
+ *  
  * @author df01
+ * This following unit tests are to ensure that all requested objects
+ * are returned as part of a keyword search
+ * 
  */
 public class ICAT_F_2 {
 
