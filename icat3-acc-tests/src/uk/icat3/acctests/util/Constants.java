@@ -25,8 +25,15 @@ public class Constants {
     public static final String ICAT_F_2_KEYWORD1 = "structural";
     public static final String ICAT_F_2_KEYWORD2 = "electrochemical";
     public static final String ICAT_F_2_KEYWORD3 = "cycling";
+                    
+    public static final double ICAT_F_3_RUN_START = 16000;
+    public static final double ICAT_F_3_RUN_END = 16099;
+    public static final String ICAT_F_3_INSTRUMENT = "sxd";
+    public static final String ICAT_F_3_RUN_NUMBER = "RUN_NUMBER";
     
     
-            
+    public static final double ICAT_P_1_MAX_TIME = 0;
+    public static final double ICAT_P_3_MAX_TIME = 0;
+    
             
 }
