@@ -8,6 +8,7 @@ package uk.icat3.acctests.functional;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.ws.BindingProvider;
+import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -26,6 +27,7 @@ import static org.junit.Assert.*;
  */
 public class ICAT_F_1 {
     
+    private static Logger log = Logger.getLogger(ICAT_F_1.class);
     private static uk.icat3.client.admin.ICATAdminService adminService = null;
     private static uk.icat3.client.admin.ICATAdmin adminPort = null;
     private static uk.icat3.client.ICATService service = null;
@@ -36,18 +38,22 @@ public class ICAT_F_1 {
     public ICAT_F_1() {
     }
 
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
+    
     @Test
     public void loginAndSearch1() {                        
-        try {  
-            // TODO process result here
+        try {              
+            log.info("ICAT_F_1 #1 Testing login with fedid '" + USER1 + "'...");
             sessionId = adminPort.loginAdmin(USER1);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
-                                    
+            
+            //make sure session id not null
+            log.info("ICAT_F_1 #1 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                        
+            
+            //search for data with user                        
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords); 
-            System.out.println("size: " + investigations.size());
+            log.info("ICAT_F_1 #1 Searching for data, found '" + investigations.size() + "' investigations");
+            
+            //make sure some data is returned
             assertTrue(investigations.size() > 0);
                                    
         } catch (Exception ex) {
@@ -58,13 +64,18 @@ public class ICAT_F_1 {
     @Test
     public void loginAndSearch2() {                        
         try {  
-            // TODO process result here
+            log.info("ICAT_F_1 #2 Testing login with fedid '" + USER2 + "'...");
             sessionId = adminPort.loginAdmin(USER2);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
+            
+            //make sure session id not null
+            log.info("ICAT_F_1 #1 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
                         
+            //search for data
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords); 
-            System.out.println("size: " + investigations.size());
+            log.info("ICAT_F_1 #2 Searching for data, found '" + investigations.size() + "' investigations");
+            
+            //make sure data is returned
             assertTrue(investigations.size() > 0);
                                    
         } catch (Exception ex) {
@@ -75,13 +86,17 @@ public class ICAT_F_1 {
     @Test
     public void loginAndSearch3() {                        
         try {  
-            // TODO process result here
+            log.info("ICAT_F_1 #3 Testing login with fedid '" + USER3 + "'...");
             sessionId = adminPort.loginAdmin(USER3);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
+            
+            //make sure session id not null
+            log.info("ICAT_F_1 #1 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
                         
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords); 
-            System.out.println("size: " + investigations.size());
+            log.info("ICAT_F_1 #3 Searching for data, found '" + investigations.size() + "' investigations");
+            
+            //make sure data is returned
             assertTrue(investigations.size() > 0);
                                    
         } catch (Exception ex) {
