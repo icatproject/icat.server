@@ -86,8 +86,8 @@ public class Constants {
     
     public static final String ICAT_S_4_PUBLIC_EXPERIMENT_NUMBER_1 = "10268"; //Chalhalian (USER9)
     
-    public static final double ICAT_P_1_MAX_TIME = 7500;
-    public static final double ICAT_P_3_MAX_TIME = 1500;
+    public static final double ICAT_P_1_MAX_TIME = 500;
+    public static final double ICAT_P_3_MAX_TIME = 1000;
     
     public static final String ICAT_DATA_URL = "http://data.nd.rl.ac.uk/icat/getfiles.py/run?sessionId=";        
     public static final String ICAT_DOWNLOAD_ZIP = "action=zip";        
