@@ -54,6 +54,7 @@ public class ICAT_F_1 {
             log.info("ICAT_F_1 #1 Searching for data, found '" + investigations.size() + "' investigations");
             
             //make sure some data is returned
+            log.info("ICAT_F_1 #1 PASSED");
             assertTrue(investigations.size() > 0);
                                    
         } catch (Exception ex) {
@@ -68,7 +69,7 @@ public class ICAT_F_1 {
             sessionId = adminPort.loginAdmin(USER2);            
             
             //make sure session id not null
-            log.info("ICAT_F_1 #1 SessionId is '" + sessionId + "'");
+            log.info("ICAT_F_1 #2 SessionId is '" + sessionId + "'");
             assertTrue(sessionId != null);                                                
                         
             //search for data
@@ -76,6 +77,7 @@ public class ICAT_F_1 {
             log.info("ICAT_F_1 #2 Searching for data, found '" + investigations.size() + "' investigations");
             
             //make sure data is returned
+            log.info("ICAT_F_1 #2 PASSED");
             assertTrue(investigations.size() > 0);
                                    
         } catch (Exception ex) {
@@ -90,19 +92,131 @@ public class ICAT_F_1 {
             sessionId = adminPort.loginAdmin(USER3);            
             
             //make sure session id not null
-            log.info("ICAT_F_1 #1 SessionId is '" + sessionId + "'");
+            log.info("ICAT_F_1 #3 SessionId is '" + sessionId + "'");
             assertTrue(sessionId != null);                                                
                         
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords); 
             log.info("ICAT_F_1 #3 Searching for data, found '" + investigations.size() + "' investigations");
             
             //make sure data is returned
+            log.info("ICAT_F_1 #3 PASSED");
             assertTrue(investigations.size() > 0);
                                    
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
+    
+    @Test
+    public void loginAndSearch4() {                        
+        try {  
+            log.info("ICAT_F_1 #4 Testing login with fedid '" + USER4 + "'...");
+            sessionId = adminPort.loginAdmin(USER4);            
+            
+            //make sure session id not null
+            log.info("ICAT_F_1 #4 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
+                        
+            List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords); 
+            log.info("ICAT_F_1 #4 Searching for data, found '" + investigations.size() + "' investigations");
+            
+            //make sure data is returned
+            log.info("ICAT_F_1 #4 PASSED");
+            assertTrue(investigations.size() > 0);
+                                   
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void loginAndSearch5() {                        
+        try {  
+            log.info("ICAT_F_1 #5 Testing login with fedid '" + USER5 + "'...");
+            sessionId = adminPort.loginAdmin(USER4);            
+            
+            //make sure session id not null
+            log.info("ICAT_F_1 #5 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
+                        
+            List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords); 
+            log.info("ICAT_F_1 #5 Searching for data, found '" + investigations.size() + "' investigations");
+            
+            //make sure data is returned
+            log.info("ICAT_F_1 #5 PASSED");
+            assertTrue(investigations.size() > 0);
+                                   
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void loginAndSearch6() {                        
+        try {  
+            log.info("ICAT_F_1 #6 Testing login with fedid '" + USER6 + "'...");
+            sessionId = adminPort.loginAdmin(USER6);            
+            
+            //make sure session id not null
+            log.info("ICAT_F_1 #6 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
+                        
+            List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords); 
+            log.info("ICAT_F_1 #6 Searching for data, found '" + investigations.size() + "' investigations");
+            
+            //make sure data is returned
+            log.info("ICAT_F_1 #6 PASSED");
+            assertTrue(investigations.size() > 0);
+                                   
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void loginAndSearch7() {                        
+        try {  
+            log.info("ICAT_F_1 #7 Testing login with fedid '" + USER7 + "'...");
+            sessionId = adminPort.loginAdmin(USER7);            
+            
+            //make sure session id not null
+            log.info("ICAT_F_1 #7 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
+                        
+            List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords); 
+            log.info("ICAT_F_1 #7 Searching for data, found '" + investigations.size() + "' investigations");
+            
+            //make sure data is returned
+            log.info("ICAT_F_1 #7 PASSED");
+            assertTrue(investigations.size() > 0);
+                                   
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void loginAndSearch8() {                        
+        try {  
+            log.info("ICAT_F_1 #8 Testing login with fedid '" + USER8 + "'...");
+            sessionId = adminPort.loginAdmin(USER8);            
+            
+            //make sure session id not null
+            log.info("ICAT_F_1 #8 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
+                        
+            List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords); 
+            log.info("ICAT_F_1 #8 Searching for data, found '" + investigations.size() + "' investigations");
+            
+            //make sure data is returned
+            log.info("ICAT_F_1 #8 PASSED");
+            assertTrue(investigations.size() > 0);
+                                   
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
 
     @After
     public void tearDown() {

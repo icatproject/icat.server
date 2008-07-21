@@ -8,6 +8,7 @@ package uk.icat3.acctests.functional;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.ws.BindingProvider;
+import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -16,6 +17,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import static uk.icat3.acctests.util.Constants.*;
 import uk.icat3.acctests.util.Helper;
+import uk.icat3.client.DownloadInfo;
 import static uk.icat3.client.InvestigationInclude.*;
 /**
  *
@@ -28,14 +30,12 @@ import static uk.icat3.client.InvestigationInclude.*;
  */
 public class ICAT_F_5 {
     
+    private static Logger log = Logger.getLogger(ICAT_F_5.class);
     private static uk.icat3.client.admin.ICATAdminService adminService = null;
     private static uk.icat3.client.admin.ICATAdmin adminPort = null;
     private static uk.icat3.client.ICATService service = null;
-    private static uk.icat3.client.ICAT port = null;
-        
-    
-    private java.lang.String sessionId = null;
-    
+    private static uk.icat3.client.ICAT port = null;            
+    private java.lang.String sessionId = null;    
     private static List<String> keywords = null;
 
     public ICAT_F_5() {
@@ -82,28 +82,52 @@ public class ICAT_F_5 {
     @Test
     public void downloadDatafile() {
         try {  
-            // TODO process result here
-            sessionId = adminPort.loginAdmin(USER1);            
-            if (sessionId == null) assertTrue(false);                        
-            System.out.println("sessionId: " + sessionId);
+            
+            log.info("ICAT_F_5 #1 Testing download datafile with fedid '" + USER1 + "'...");            
+            sessionId= adminPort.loginAdmin(USER1);  
+            
+            //make sure session id not null
+            log.info("ICAT_F_5 #1 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                        
                                     
-            //get armstrong investigation
+            //search for data
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);        
+                        
+            //if no results returned --> fail
+            assertTrue(investigations.size() > 0); 
             
-            //if no results returned, don't bother do anything else
-            if (investigations.size() == 0) assertTrue(false);
-            
+            //get more detail
             uk.icat3.client.Investigation i = port.getInvestigationIncludes(sessionId, investigations.get(0).getId(), DATASETS_AND_DATAFILES);            
-            System.out.println("name: " + i.getTitle());            
+            log.info("ICAT_F_5 #1 Investigation#" + i.getId() + ", Title: '" + i.getTitle() + "'");  
             
-            uk.icat3.client.Dataset dataset = i.getDatasetCollection().get(0);
-            
+            //drill down to datafile level
+            uk.icat3.client.Dataset dataset = i.getDatasetCollection().get(0);            
             uk.icat3.client.Datafile datafile = dataset.getDatafileCollection().get(0);
-                                    
+
+            //get download string
             String url = port.downloadDatafile(sessionId, datafile.getId());
-            //if we get here without exception then all is OK!
-            assertTrue(Helper.isEmpty(url));
-                                  
+            log.info("ICAT_F_5 #1 Download URL for datafile #" + datafile.getName() + ", is '" + url + "'");  
+                                    
+            //ensure that download string is not empty            
+            assertTrue(!Helper.isEmpty(url));
+            
+            //ensure that download string conforms to spec
+            String dataStr = ICAT_DATA_URL + sessionId + "&" + ICAT_DOWNLOAD_DATAFILE + "&datafileId=" + datafile.getId();
+            assertTrue(dataStr.equalsIgnoreCase(url));
+            
+            List<Long> ids = new ArrayList<Long>();
+            ids.add(datafile.getId());
+            
+            //check to make sure that user can download data
+            log.info("ICAT_F_5 #1 Checking download permissions for user...");  
+            DownloadInfo di = port.checkDatafileDownloadAccess(sessionId, ids);            
+            assertTrue(!Helper.isEmpty(di.getUserId()));
+            assertTrue(di.getUserId().equals(USER1));
+            assertNotNull(di.getDatafileNames());    
+            assertTrue(((String)di.getDatafileNames().get(0)).equalsIgnoreCase(datafile.getName()));
+            
+            log.info("ICAT_F_5 #1 PASSED");  
+            
         } catch (Exception ex) {
             ex.printStackTrace();
         }  
