@@ -8,6 +8,7 @@ package uk.icat3.acctests.performance;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.ws.BindingProvider;
+import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -15,7 +16,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static uk.icat3.acctests.util.Constants.*;
 import static org.junit.Assert.*;
-import static uk.icat3.client.InvestigationInclude.*;
 
 /**
  *
@@ -27,6 +27,7 @@ import static uk.icat3.client.InvestigationInclude.*;
  */
 public class ICAT_P_1 {
 
+    private static Logger log = Logger.getLogger(ICAT_P_1.class);
     private static uk.icat3.client.admin.ICATAdminService adminService = null;
     private static uk.icat3.client.admin.ICATAdmin adminPort = null;
     private static uk.icat3.client.ICATService service = null;
@@ -48,7 +49,7 @@ public class ICAT_P_1 {
             service = new uk.icat3.client.ICATService();
             port = service.getICATPort();
 
-            sessionId = adminPort.loginAdmin(ISIS_GUARDIAN);
+            
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -56,8 +57,7 @@ public class ICAT_P_1 {
     }
 
     @AfterClass
-    public static void tearDownClass() throws Exception {
-        port.logout(sessionId);
+    public static void tearDownClass() throws Exception {        
         sessionId = null;
         adminService = null;
         adminPort = null;
@@ -71,42 +71,245 @@ public class ICAT_P_1 {
 
     @After
     public void tearDown() {
+        port.logout(sessionId);
     }
 
     @Test
-    public void searchAdvancedByRunNumber() {
+    public void searchKeywords1() {
         try {
             
-            long start = System.currentTimeMillis();
+            sessionId = adminPort.loginAdmin(USER5);
+            
+            //make sure session id not null
+            log.info("ICAT_P_1 #1 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
+            
             List<String>keywords = new ArrayList<String>();            
-            keywords.add(ICAT_F_2_KEYWORD1);
-            keywords.add(ICAT_F_2_KEYWORD2);
-            keywords.add(ICAT_F_2_KEYWORD3);           
-
+            keywords.add(ICAT_F_2_KEYWORD1);         
+            
+            long start = System.currentTimeMillis();
+                       
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);
-
-            //if no results returned, don't bother do anything else
-            if (investigations.size() == 0) {
-                assertTrue(false);
-            }
+            log.info("ICAT_P_1 #1 Searching for data using keywords: " + keywords + ", found '" + investigations.size() + "' investigations");
             
-            uk.icat3.client.Investigation i = port.getInvestigationIncludes(sessionId, investigations.get(0).getId(), NONE);
-            
-            //ensure that data is returned!
-            //..
-            //.
-            
+            //if no results returned --> fail                     
+            assertTrue("No results returned", investigations.size() > 0);
+                                    
             long finish = System.currentTimeMillis();
+            log.info("ICAT_P_1 #1 Time in ms '" + (finish - start) + "'");
             
-            if ((start - finish) <= ICAT_P_1_MAX_TIME) 
-                assertTrue(true);
-            
-            
+            assertTrue("To sloooooowwwwwwww", (finish - start) <= ICAT_P_1_MAX_TIME);
+                         
+            log.info("ICAT_P_1 #1 PASSED");            
             
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
-
+    
+    @Test
+    public void searchKeywords2() {
+        try {
+            
+            sessionId = adminPort.loginAdmin(USER5);
+            
+            //make sure session id not null
+            log.info("ICAT_P_1 #2 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
+            
+            List<String>keywords = new ArrayList<String>();            
+            keywords.add(ICAT_F_2_KEYWORD5);         
+            
+            long start = System.currentTimeMillis();
+                       
+            //get armstrong investigation
+            List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);
+            log.info("ICAT_P_1 #2 Searching for data using keywords: " + keywords + ", found '" + investigations.size() + "' investigations");
+            
+            //if no results returned --> fail                     
+            assertTrue("No results returned", investigations.size() > 0);
+                                    
+            long finish = System.currentTimeMillis();
+            log.info("ICAT_P_1 #2 Time in ms '" + (finish - start) + "'");
+            
+            assertTrue("To sloooooowwwwwwww", (finish - start) <= ICAT_P_1_MAX_TIME);
+                                 
+            log.info("ICAT_P_1 #2 PASSED");            
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void searchKeywords3() {
+        try {
+            
+            sessionId = adminPort.loginAdmin(USER4);
+            
+            //make sure session id not null
+            log.info("ICAT_P_1 #3 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
+            
+            List<String>keywords = new ArrayList<String>();            
+            keywords.add(ICAT_F_2_KEYWORD6);         
+            
+            long start = System.currentTimeMillis();
+                       
+            //get armstrong investigation
+            List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);
+            log.info("ICAT_P_1 #3 Searching for data using keywords: " + keywords + ", found '" + investigations.size() + "' investigations");
+            
+            //if no results returned --> fail                     
+            assertTrue("No results returned", investigations.size() > 0);
+                                                
+            long finish = System.currentTimeMillis();
+            log.info("ICAT_P_1 #3 Time in ms '" + (finish - start) + "'");
+            
+            assertTrue("To sloooooowwwwwwww", (finish - start) <= ICAT_P_1_MAX_TIME);
+                           
+            log.info("ICAT_P_1 #3 PASSED");            
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void searchKeywords4() {
+        try {
+            
+            sessionId = adminPort.loginAdmin(USER3);
+            
+            //make sure session id not null
+            log.info("ICAT_P_1 #4 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
+            
+            List<String>keywords = new ArrayList<String>();            
+            keywords.add(ICAT_F_2_KEYWORD7);         
+            
+            long start = System.currentTimeMillis();
+                       
+            //get armstrong investigation
+            List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);
+            log.info("ICAT_P_1 #4 Searching for data using keywords: " + keywords + ", found '" + investigations.size() + "' investigations");
+            
+            //if no results returned --> fail                     
+            assertTrue("No results returned", investigations.size() > 0);
+                                                
+            long finish = System.currentTimeMillis();
+            log.info("ICAT_P_1 #4 Time in ms '" + (finish - start) + "'");
+            
+            assertTrue("To sloooooowwwwwwww", (finish - start) <= ICAT_P_1_MAX_TIME);
+                        
+            log.info("ICAT_P_1 #4 PASSED");            
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void searchKeywords5() {
+        try {
+            
+            sessionId = adminPort.loginAdmin(USER2);
+            
+            //make sure session id not null
+            log.info("ICAT_P_1 #5 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
+            
+            List<String>keywords = new ArrayList<String>();            
+            keywords.add(ICAT_F_2_KEYWORD5); 
+            keywords.add(ICAT_F_2_KEYWORD7);         
+            
+            long start = System.currentTimeMillis();
+                       
+            //get armstrong investigation
+            List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);
+            log.info("ICAT_P_1 #5 Searching for data using keywords: " + keywords + ", found '" + investigations.size() + "' investigations");
+            
+            //if no results returned --> fail                     
+            assertTrue("No results returned", investigations.size() > 0);
+                                                
+            long finish = System.currentTimeMillis();
+            log.info("ICAT_P_1 #5 Time in ms '" + (finish - start) + "'");
+            
+            assertTrue("To sloooooowwwwwwww", (finish - start) <= ICAT_P_1_MAX_TIME);
+                             
+            log.info("ICAT_P_1 #5 PASSED");            
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void searchKeywords6() {
+        try {
+            
+            sessionId = adminPort.loginAdmin(USER1);
+            
+            //make sure session id not null
+            log.info("ICAT_P_1 #6 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
+            
+            List<String>keywords = new ArrayList<String>();            
+            keywords.add(ICAT_F_2_KEYWORD8); 
+                        
+            long start = System.currentTimeMillis();
+                       
+            //get armstrong investigation
+            List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);
+            log.info("ICAT_P_1 #6 Searching for data using keywords: " + keywords + ", found '" + investigations.size() + "' investigations");
+            
+            //if no results returned --> fail                     
+            assertTrue("No results returned", investigations.size() > 0);
+                                                
+            long finish = System.currentTimeMillis();
+            log.info("ICAT_P_1 #6 Time in ms '" + (finish - start) + "'");
+            
+            assertTrue("To sloooooowwwwwwww", (finish - start) <= ICAT_P_1_MAX_TIME);
+                                   
+            log.info("ICAT_P_1 #6 PASSED");   
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void searchKeywords7() {
+        try {
+            
+            sessionId = adminPort.loginAdmin(USER6);
+            
+            //make sure session id not null
+            log.info("ICAT_P_1 #7 SessionId is '" + sessionId + "'");
+            assertTrue(sessionId != null);                                                
+            
+            List<String>keywords = new ArrayList<String>();            
+            keywords.add(ICAT_F_2_KEYWORD8);
+            keywords.add(ICAT_F_2_KEYWORD9);
+                        
+            long start = System.currentTimeMillis();
+                                   
+            List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);
+            log.info("ICAT_P_1 #7 Searching for data using keywords: " + keywords + ", found '" + investigations.size() + "' investigations");
+            
+            //if no results returned --> fail                     
+            assertTrue("No results returned", investigations.size() > 0);
+                                                
+            long finish = System.currentTimeMillis();
+            log.info("ICAT_P_1 #7 Time in ms '" + (finish - start) + "'");
+            
+            assertTrue("To sloooooowwwwwwww", (finish - start) <= ICAT_P_1_MAX_TIME);
+                                  
+            log.info("ICAT_P_1 #7 PASSED");   
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 }
