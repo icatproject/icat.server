@@ -46,7 +46,6 @@ public class ICAT_S_5 {
             service = new uk.icat3.client.ICATService();
             port = service.getICATPort();
             
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }

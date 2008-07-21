@@ -127,7 +127,7 @@ public class ICAT_S_4 {
             }//end for
             
             //if we get here then all is ok
-            log.info("ICAT_S_3 #1 PASSED");            
+            log.info("ICAT_S_4 #1 PASSED");            
             
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -226,28 +226,28 @@ public class ICAT_S_4 {
             sessionId = adminPort.loginAdmin(USER7);
             
             //make sure session id not null
-            log.info("ICAT_S_3 #4 SessionId is '" + sessionId + "'");
+            log.info("ICAT_S_4 #4 SessionId is '" + sessionId + "'");
             assertTrue(sessionId != null);  
             
             //set up search criteria                        
-            log.info("ICAT_S_3 #4 Criteria [DATAFILE_NAME: '" + ICAT_S_1_DATAFILE_NAME + "']");
+            log.info("ICAT_S_4 #4 Criteria [DATAFILE_NAME: '" + ICAT_S_1_DATAFILE_NAME + "']");
                        
             AdvancedSearchDetails asd = new AdvancedSearchDetails();
             asd.setDatafileName(ICAT_S_1_DATAFILE_NAME);
                           
             //do search 
             List<uk.icat3.client.Investigation> investigations = port.searchByAdvanced(sessionId, asd);
-            log.info("ICAT_S_3 #4 Searching, found #" + investigations.size() + " results");
+            log.info("ICAT_S_4 #4 Searching, found #" + investigations.size() + " results");
             
             for (uk.icat3.client.Investigation i : investigations) {  
-                log.info("ICAT_S_3 #4 Investigation#" + i.getId() + ", Instrument: " + i.getInstrument() + ", Title: '" + i.getTitle() + "', Experiment Number: '" + i.getInvNumber());                                                  
+                log.info("ICAT_S_4 #4 Investigation#" + i.getId() + ", Instrument: " + i.getInstrument() + ", Title: '" + i.getTitle() + "', Experiment Number: '" + i.getInvNumber());                                                  
             }//end for  
             
             //should not return any results
             assertTrue("Should not return any results as user " + USER7 + " should not be able to view this commercial data", investigations.size() == 0);                        
             
             //if we get here then all is ok
-            log.info("ICAT_S_3 #4 PASSED");            
+            log.info("ICAT_S_4 #4 PASSED");            
             
         } catch (Exception ex) {
             ex.printStackTrace();

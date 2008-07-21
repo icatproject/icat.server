@@ -219,9 +219,9 @@ public class ICAT_S_2 {
             assertTrue(investigations.size() > 0);
             
             //loop through investigations for more detail
-            log.info("ICAT_S_1 #2 Looping through results to ensure correctness...");
+            log.info("ICAT_S_2 #3 Looping through results to ensure correctness...");
             for (uk.icat3.client.Investigation i : investigations) {                                                                
-                log.info("ICAT_S_1 #2 Investigation#" + i.getId() + ", Title: '" + i.getTitle() + "', Experiment Number: '" + i.getInvNumber());                                                  
+                log.info("ICAT_S_2 #3 Investigation#" + i.getId() + ", Title: '" + i.getTitle() + "', Experiment Number: '" + i.getInvNumber());                                                  
                 
                 //get dependent objects
                 uk.icat3.client.Investigation _inv = port.getInvestigationIncludes(sessionId, i.getId(), ALL);                                
@@ -327,9 +327,9 @@ public class ICAT_S_2 {
             assertTrue(investigations.size() > 0);
             
             //loop through investigations for more detail
-            log.info("ICAT_S_1 #5 Looping through results to ensure correctness...");
+            log.info("ICAT_S_2 #5 Looping through results to ensure correctness...");
             for (uk.icat3.client.Investigation i : investigations) {                                                                
-                log.info("ICAT_S_1 #5 Investigation#" + i.getId() + ", Instrument: '" + i.getInstrument() + "', Title: '" + i.getTitle() + "', Experiment Number: '" + i.getInvNumber());                                                  
+                log.info("ICAT_S_2 #5 Investigation#" + i.getId() + ", Instrument: '" + i.getInstrument() + "', Title: '" + i.getTitle() + "', Experiment Number: '" + i.getInvNumber());                                                  
                 
                 //get dependent objects
                 uk.icat3.client.Investigation _inv = port.getInvestigationIncludes(sessionId, i.getId(), ALL);                                
