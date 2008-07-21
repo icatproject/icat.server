@@ -61,7 +61,7 @@ public class ICAT_F_1 {
             ex.printStackTrace();
         }
     }
-    
+        
     @Test
     public void loginAndSearch2() {                        
         try {  

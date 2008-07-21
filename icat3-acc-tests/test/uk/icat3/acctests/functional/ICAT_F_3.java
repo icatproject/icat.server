@@ -150,7 +150,7 @@ public class ICAT_F_3 {
             log.info("ICAT_F_3 #2 Searching, found #" + investigations.size() + " results");
             
             //if no results returned --> fail                     
-            assertTrue(investigations.size() > 0);
+            assertTrue("No results returned", investigations.size() > 0);
                         
             //loop through investigations for more detail
             log.info("ICAT_F_3 #2 Looping through results to ensure correctness...");
@@ -297,7 +297,7 @@ public class ICAT_F_3 {
             log.info("ICAT_F_3 #5 Searching, found #" + investigations.size() + " results");
             
             //if no results returned --> fail                     
-            assertTrue(investigations.size() > 0);
+            assertTrue("No results returned", investigations.size() > 0);
                         
             //loop through investigations for more detail
             log.info("ICAT_F_3 #5 Looping through results to ensure correctness...");
@@ -331,7 +331,7 @@ public class ICAT_F_3 {
             log.info("ICAT_F_3 #6 Searching, found #" + investigations.size() + " results");
             
             //if no results returned --> fail                     
-            assertTrue(investigations.size() > 0);
+            assertTrue("No results returned", investigations.size() > 0);
                         
             //loop through investigations for more detail
             log.info("ICAT_F_3 #6 Looping through results to ensure correctness...");
@@ -456,7 +456,7 @@ public class ICAT_F_3 {
             log.info("ICAT_F_3 #9 Searching, found #" + investigations.size() + " results");
             
             //if no results returned --> fail                     
-            assertTrue(investigations.size() > 0);
+            assertTrue("No results returned", investigations.size() > 0);
                         
             //loop through investigations for more detail
             log.info("ICAT_F_3 #9 Looping through results to ensure correctness...");
