@@ -30,7 +30,13 @@ public class Constants {
     
     public static final String ICAT_F_2_KEYWORD1 = "structural";
     public static final String ICAT_F_2_KEYWORD2 = "electrochemical";
-    public static final String ICAT_F_2_KEYWORD3 = "cycling";
+    public static final String ICAT_F_2_KEYWORD3 = "cycling";    
+    public static final String ICAT_F_2_KEYWORD4 = "Shankland";
+    public static final String ICAT_F_2_KEYWORD5 = "powder";
+    public static final String ICAT_F_2_KEYWORD6 = "magnetic";
+    public static final String ICAT_F_2_KEYWORD7 = "structure";
+    public static final String ICAT_F_2_KEYWORD8 = "SXD";
+    public static final String ICAT_F_2_KEYWORD9 = "Empty";
                     
     public static final double ICAT_F_3_RUN_START = 16000;
     public static final double ICAT_F_3_RUN_END = 16099;
@@ -80,8 +86,8 @@ public class Constants {
     
     public static final String ICAT_S_4_PUBLIC_EXPERIMENT_NUMBER_1 = "10268"; //Chalhalian (USER9)
     
-    public static final double ICAT_P_1_MAX_TIME = 0;
-    public static final double ICAT_P_3_MAX_TIME = 0;
+    public static final double ICAT_P_1_MAX_TIME = 7500;
+    public static final double ICAT_P_3_MAX_TIME = 1500;
     
     public static final String ICAT_DATA_URL = "http://data.nd.rl.ac.uk/icat/getfiles.py/run?sessionId=";        
     public static final String ICAT_DOWNLOAD_ZIP = "action=zip";        
