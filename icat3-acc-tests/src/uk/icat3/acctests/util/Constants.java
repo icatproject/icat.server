@@ -66,9 +66,7 @@ public class Constants {
      * the commercial loq data files as listed within file 
      * "LOQ Commercial Data - for ICAT.xls"
      */    
-    public static final String ICAT_S_1_DATAFILE_NAME = "LOQ24803.RAW";       
-    
-    
+    public static final String ICAT_S_1_DATAFILE_NAME = "LOQ24803.RAW";               
     
     public static final String ICAT_S_2_NON_PUBLIC_EXPERIMENT_NUMBER_1 = "720544";       
     public static final String ICAT_S_2_NON_PUBLIC_EXPERIMENT_NUMBER_2 = "720568";  
@@ -91,7 +89,7 @@ public class Constants {
     
     public static final String ICAT_P_3_INSTRUMENT = "alf";
     public static final double ICAT_P_3_START_RUN = 1;
-    public static final double ICAT_P_3_END_RUN = 1;
+    public static final double ICAT_P_3_END_RUN = 199;
     
     public static final String ICAT_DATA_URL = "http://data.nd.rl.ac.uk/icat/getfiles.py/run?sessionId=";        
     public static final String ICAT_DOWNLOAD_ZIP = "action=zip";        
