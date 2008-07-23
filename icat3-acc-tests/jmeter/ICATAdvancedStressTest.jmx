@@ -67,7 +67,12 @@
           <stringProp name="DurationAssertion.duration">15000</stringProp>
         </DurationAssertion>
         <hashTree/>
-        <ResultCollector guiclass="AssertionVisualizer" testclass="ResultCollector" testname="Assertion Results" enabled="true">
+        <SizeAssertion guiclass="SizeAssertionGui" testclass="SizeAssertion" testname="Size Assertion" enabled="true">
+          <intProp name="SizeAssertion.operator">3</intProp>
+          <longProp name="SizeAssertion.size">0</longProp>
+        </SizeAssertion>
+        <hashTree/>
+        <ResultCollector guiclass="GraphVisualizer" testclass="ResultCollector" testname="Graph Results" enabled="true">
           <objProp>
             <value class="SampleSaveConfiguration">
               <time>true</time>
@@ -129,7 +134,7 @@
           <boolProp name="ResultCollector.error_logging">false</boolProp>
         </ResultCollector>
         <hashTree/>
-        <ResultCollector guiclass="GraphVisualizer" testclass="ResultCollector" testname="Graph Results" enabled="true">
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
           <objProp>
             <value class="SampleSaveConfiguration">
               <time>true</time>
@@ -156,7 +161,7 @@
             </value>
             <name>saveConfig</name>
           </objProp>
-          <stringProp name="filename">C:\Documents and Settings\df01\Desktop\dwf</stringProp>
+          <stringProp name="filename"></stringProp>
           <boolProp name="ResultCollector.error_logging">false</boolProp>
         </ResultCollector>
         <hashTree/>
