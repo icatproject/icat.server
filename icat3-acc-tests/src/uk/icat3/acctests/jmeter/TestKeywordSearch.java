@@ -19,6 +19,13 @@ import static uk.icat3.acctests.util.Constants.*;
 /**
  *
  * @author df01
+ * This is effectively the ICAT_P_2 performance acceptance test.  It has been
+ * written to conform to the JMeter framework and is called by the 
+ * ICATKeywordStressTest.jmx script repeatedly during load testing.
+ * Start time, end time and bytes(used to represent the number of results) 
+ * fields are populated and returned.  Each action is logged using log4j.
+ * Messages are logged to $HOME/.netbeans\6.1/modules/jmeter/bin/root.log
+ * by default.
  */
 public class TestKeywordSearch extends AbstractJavaSamplerClient {
     
@@ -32,9 +39,8 @@ public class TestKeywordSearch extends AbstractJavaSamplerClient {
     
     public void setupTest(JavaSamplerContext arg0) {
         try {    // Call Web Service Operation
-            
-            System.out.println("dwf64 In setup test");
-            log.info("ICAT_F_2 #1 In setupTest");
+                        
+            log.info("ICAT_P_2 #1 In setupTest");
             
             adminService = new uk.icat3.client.admin.ICATAdminService();
             adminPort = adminService.getICATAdminPort();
@@ -64,22 +70,22 @@ public class TestKeywordSearch extends AbstractJavaSamplerClient {
         //System.out.println("dwf64 In run test");
         
         try {              
-            log.info("ICAT_F_2 #1 Testing login with fedid '" + USER1 + "'...");
+            log.info("ICAT_P_2 #1 Testing login with fedid '" + USER1 + "'...");
             sessionId = adminPort.loginAdmin(USER1);            
             
             //make sure session id not null
-            log.info("ICAT_F_2 #1 SessionId is '" + sessionId + "'");
+            log.info("ICAT_P_2 #1 SessionId is '" + sessionId + "'");
             if (sessionId == null) throw new Exception("Login unsuccessful");                        
             
             //search for data with user                        
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords); 
-            log.info("ICAT_F_2 #1 Searching for data, found '" + investigations.size() + "' investigations");
+            log.info("ICAT_P_2 #1 Searching for data, found '" + investigations.size() + "' investigations");
             results.setBytes(investigations.size());
             
             //make sure some data is returned
-            log.info("ICAT_F_2 #1 PASSED");
+            log.info("ICAT_P_2 #1 PASSED");
             if (investigations.size() > 0) results.setSuccessful(true);
-            //System.out.println("dwf64 inv size " + investigations.size());           
+            
         } catch (Exception ex) {
             log.error(Helper.getStackTrace(ex));
             ex.printStackTrace();
@@ -89,7 +95,7 @@ public class TestKeywordSearch extends AbstractJavaSamplerClient {
     }
 
     public void teardownTest(JavaSamplerContext arg0) { 
-        log.info("ICAT_F_2 #1 In teardown test");
+        log.info("ICAT_P_2 #1 In teardown test");
         port.logout(sessionId);
         sessionId = null;
         adminService = null;
