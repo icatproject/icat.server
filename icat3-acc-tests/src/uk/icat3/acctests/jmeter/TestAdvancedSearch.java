@@ -19,6 +19,13 @@ import static uk.icat3.acctests.util.Constants.*;
 /**
  *
  * @author df01
+ * This is effectively the ICAT_P_4 performance acceptance test.  It has been
+ * written to conform to the JMeter framework and is called by the 
+ * ICATAdvancedStressTest.jmx script repeatedly during load testing.
+ * Start time, end time and bytes(used to represent the number of results) 
+ * fields are populated and returned.  Each action is logged using log4j.
+ * Messages are logged to $HOME/.netbeans\6.1/modules/jmeter/bin/root.log
+ * by default.
  */
 public class TestAdvancedSearch extends AbstractJavaSamplerClient {
     
@@ -57,8 +64,7 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
         SampleResult results = new SampleResult();
         results.sampleStart();
         //results.setSuccessful(false);  
-        results.setSuccessful(true);  
-        results.setSampleLabel("ICAT Advanced Search using '" + keywords + "'");                
+        results.setSuccessful(true);          
         
         try {              
             log.info("ICAT_F_4 #1 Testing login with fedid '" + USER1 + "'...");
@@ -77,6 +83,7 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
             //search for data with user                        
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords); 
             log.info("ICAT_F_4 #1 Searching for data with criteria [Instrument: '" + asd.getInstruments() + "'], [Start Run: '" + asd.getRunStart() + "'], [End Run: '" + asd.getRunEnd() + "'] found '" + investigations.size() + "' investigations");
+            results.setSampleLabel("ICAT Advanced Search using criteria [Instrument: '" + asd.getInstruments() + "'], [Start Run: '" + asd.getRunStart() + "'], [End Run: '" + asd.getRunEnd() + "']");                
             results.setBytes(investigations.size());
             
             //make sure some data is returned
