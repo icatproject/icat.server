@@ -187,8 +187,8 @@ public class Queries {
             " (i.title LIKE :invTitle OR :invTitle IS NULL) AND" +
             " (i.bcatInvStr LIKE :bcatInvStr OR :bcatInvStr IS NULL) AND " +
             " (i.invNumber = :invNumber  OR :invNumber IS NULL) AND "+
-            " (i.invStartDate > :lowerTime OR :lowerTime IS NULL) AND " +
-            " (i.invEndDate < :upperTime OR :upperTime IS NULL)";
+            " (((i.invStartDate BETWEEN :lowerTime AND :upperTime) OR (:lowerTime IS NULL)) OR " +
+            " ((i.invEndDate BETWEEN :lowerTime AND :upperTime) OR (:upperTime IS NULL)))";
     
     //public static final String ADVANCED_SEARCH_JPQL_INSTRUMENT =  " AND i.instrument.name IN(:instrument)  AND i.instrument.markedDeleted = 'N' ";//expand IN, remove this if instrument null
     

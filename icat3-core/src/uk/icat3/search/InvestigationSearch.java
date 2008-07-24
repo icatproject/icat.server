@@ -11,6 +11,7 @@ package uk.icat3.search;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
@@ -344,15 +345,10 @@ public class InvestigationSearch extends ManagerUtil {
             JPQL += " AND i.invNumber = :invNumber";
         }
 
-        if(advanDTO.hasStartDate()){
+        if(advanDTO.hasDate()){
             log.trace("Searching dateRangeStart info");
-            JPQL += " AND i.invStartDate > :lowerTime";
-        }
-        
-        if(advanDTO.hasEndDate()){
-            log.trace("Searching dateRangeEnd info");
-            JPQL += " AND i.invEndDate < :upperTime";
-        }
+            JPQL += " AND ((i.invStartDate BETWEEN :lowerTime AND :upperTime) OR (i.invEndDate BETWEEN :lowerTime AND :upperTime)) ";
+        }              
         
         if (advanDTO.hasSample()) {
             log.trace("Searching sample info");
@@ -501,14 +497,11 @@ public class InvestigationSearch extends ManagerUtil {
             query = query.setParameter("sampleName", advanDTO.getSampleName());
         }
         
-        if(advanDTO.hasStartDate()){
+        if(advanDTO.hasDate()){
              query = query.setParameter("lowerTime", advanDTO.getDateRangeStart());
-        }
-        
-        if(advanDTO.hasEndDate()){
              query = query.setParameter("upperTime", advanDTO.getDateRangeEnd());
-        }
-
+        } 
+        
         if (advanDTO.hasDataFileParameters()) {
             query = query.setParameter("datafileName", advanDTO.getDatafileName());
             query = query.setParameter("dataSetType", ElementType.DATASET);           

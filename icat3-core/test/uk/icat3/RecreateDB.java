@@ -30,10 +30,10 @@ public class RecreateDB {
     public static Test suite() {
 
         //icat api test (volga test)
-        ExecuteDatabaseScript script = new ExecuteDatabaseScript("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))", "icat_apitest", "bb8isb4ck");
+        //ExecuteDatabaseScript script = new ExecuteDatabaseScript("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))", "icat_apitest", "bb8isb4ck");
        
         //icat unit test (glens)
-       // ExecuteDatabaseScript script = new ExecuteDatabaseScript("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))", "icat_unittest", "s4nfr4n");
+        ExecuteDatabaseScript script = new ExecuteDatabaseScript("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))", "icat_unittest", "s4nfr4n");
         
         //CLF
         //ExecuteDatabaseScript script = new ExecuteDatabaseScript("jdbc:oracle:thin:@(DESCRIPTION =  (LOAD_BALANCE = yes) (FAILOVER = ON) (ADDRESS = (PROTOCOL = TCP)(HOST = honey-vip.esc.rl.ac.uk)(PORT = 1521))  (ADDRESS = (PROTOCOL = TCP)(HOST = goodnight-vip.esc.rl.ac.uk)(PORT = 1521))   (ADDRESS = (PROTOCOL = TCP)(HOST = domino-vip.esc.rl.ac.uk)(PORT = 1521))  (ADDRESS = (PROTOCOL = TCP)(HOST = sapphire-vip.esc.rl.ac.uk)(PORT = 1521))  (CONNECT_DATA = (SERVICE_NAME = ICATISIS.ESC.RL.AC.UK) (FAILOVER_MODE =   (TYPE=SESSION)  (METHOD=BASIC)   )  ) )", "Icatclf", "r1skjam3");

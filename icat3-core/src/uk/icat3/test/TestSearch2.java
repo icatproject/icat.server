@@ -52,27 +52,25 @@ public class TestSearch2 {
 
     public void testP() throws Exception {
         setUp();
-//df.dataset = i.datasetCollection AND 
+        
+        //df.dataset = i.datasetCollection AND 
         long time = System.currentTimeMillis();
-        String QUERY = "SELECT i FROM IcatAuthorisation i WHERE " +
-                "i.elementType = :elementType AND i.elementId = :elementId AND " +
-                "i.userId = :userId AND i.parentElementType IS NULL AND " +
-                "i.parentElementId IS NULL AND i.markedDeleted = 'N'";
+        String QUERY = "SELECT DISTINCT i from Investigation i WHERE i.instrument = :ins  AND (((i.invStartDate BETWEEN :lowerTime AND :upperTime) OR (:lowerTime IS NULL)) OR " +
+                " ((i.invEndDate BETWEEN :lowerTime AND :upperTime) OR (:upperTime IS NULL)))";
 
         System.out.println(QUERY);
 
         Query nullQuery = em.createQuery(QUERY);
 
-        nullQuery.setParameter("elementType", ElementType.INVESTIGATION);
-        nullQuery.setParameter("userId", "ANY");
-        nullQuery.setParameter("elementId", 7256755);
+        nullQuery.setParameter("ins", "maps");
+        nullQuery.setParameter("lowerTime", new Date(99, 1, 1));
+        nullQuery.setParameter("upperTime", new Date(99, 2, 1));
 
         System.out.println(nullQuery.getResultList().size());
 
         System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
 
         time = System.currentTimeMillis();
-
 
         tearDown();
     }
@@ -180,9 +178,7 @@ public class TestSearch2 {
         TestSearch2 ts = new TestSearch2();
 
         ts.testP();
-        ts.testP();
-        ts.testP();
-        ts.testP();
+
     //   ts.test2();
 
 

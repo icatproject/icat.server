@@ -451,17 +451,28 @@ public class AdvancedSearchDetails implements Serializable {
         }
     }
 
-    public boolean hasStartDate(){
-        if(dateRangeStart != null){
+    public boolean hasStartDate() {
+        if (dateRangeStart != null) {
             return true;
-         } else return false;
-        
+        } else {
+            return false;
+        }
     }
-    
-    public boolean hasEndDate(){
-        return (dateRangeEnd == null) ? false : true ;
+
+    public boolean hasDate() {
+        if (dateRangeStart != null) {
+            return true;
+        } else if (dateRangeEnd != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
-    
+
+    public boolean hasEndDate() {
+        return (dateRangeEnd == null) ? false : true;
+    }
+
     public boolean hasDataFileParameters() {
         if (datafileName != null) {
             return true;
@@ -471,7 +482,7 @@ public class AdvancedSearchDetails implements Serializable {
     }
 
     public boolean hasInvestigationParameters() {
-        if (dateRangeEnd != null || dateRangeStart != null || 
+        if (dateRangeEnd != null || dateRangeStart != null ||
                 grantId != null || backCatalogueInvestigatorString != null || experimentNumber != null ||
                 investigationAbstract != null || investigationName != null ||
                 investigationType != null || visitId != null) {
