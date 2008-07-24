@@ -66,19 +66,5 @@
     properties which you can use, check the target you are overriding in the
     nbproject/build-impl.xml file. 
 
-    -->
-   <target name="-pre-compile">
-        <!-- Copy the facility.name download.properties file over -->
-        <!-- If facility.name not set in super ant build then set it to defaulrt ${data.project.facility.name}-->
-        <condition property="facility.name" value="${project.facility.name}">
-            <and>
-                <not>
-                    <isset property="facility.name"/>
-                </not>
-            </and>           
-        </condition>
-          <!--  Copy download config for ${facility.name} -->
-          <echo message="Using facility ${facility.name}" />
-        <copy overwrite="true" file="${basedir}/src/${facility.name}-download.properties" tofile="${basedir}/src/download.properties" />        
-    </target>
+    --> 
 </project>
