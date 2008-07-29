@@ -92,12 +92,12 @@ public class ICAT_P_1 {
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);
             log.info("ICAT_P_1 #1 Searching for data using keywords: " + keywords + ", found '" + investigations.size() + "' investigations");
+                                                           
+            long finish = System.currentTimeMillis();
+            log.info("ICAT_P_1 #1 Time in ms '" + (finish - start) + "'");
             
             //if no results returned --> fail                     
             assertTrue("No results returned", investigations.size() > 0);
-                                    
-            long finish = System.currentTimeMillis();
-            log.info("ICAT_P_1 #1 Time in ms '" + (finish - start) + "'");
             
             assertTrue("To sloooooowwwwwwww", (finish - start) <= ICAT_P_1_MAX_TIME);
                          
@@ -126,12 +126,12 @@ public class ICAT_P_1 {
             //get armstrong investigation
             List<uk.icat3.client.Investigation> investigations = port.searchByKeywords(sessionId, keywords);
             log.info("ICAT_P_1 #2 Searching for data using keywords: " + keywords + ", found '" + investigations.size() + "' investigations");
-            
-            //if no results returned --> fail                     
-            assertTrue("No results returned", investigations.size() > 0);
-                                    
+                                              
             long finish = System.currentTimeMillis();
             log.info("ICAT_P_1 #2 Time in ms '" + (finish - start) + "'");
+           
+             //if no results returned --> fail                     
+            assertTrue("No results returned", investigations.size() > 0);
             
             assertTrue("To sloooooowwwwwwww", (finish - start) <= ICAT_P_1_MAX_TIME);
                                  
