@@ -21,7 +21,6 @@ import uk.icat3.acctests.security.ICAT_S_1;
 import uk.icat3.acctests.security.ICAT_S_2;
 import uk.icat3.acctests.security.ICAT_S_3;
 import uk.icat3.acctests.security.ICAT_S_4;
-import uk.icat3.acctests.security.ICAT_S_5;
 
 /**
  *
@@ -41,8 +40,7 @@ import uk.icat3.acctests.security.ICAT_S_5;
     ICAT_S_1.class,
     ICAT_S_2.class,
     ICAT_S_3.class,
-    ICAT_S_4.class,
-    ICAT_S_5.class            
+    ICAT_S_4.class            
 })    
     
 public class TestAll {

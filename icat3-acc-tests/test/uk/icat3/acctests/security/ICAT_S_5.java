@@ -5,18 +5,13 @@
 
 package uk.icat3.acctests.security;
 
-import java.util.List;
 import javax.xml.ws.BindingProvider;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
-import uk.icat3.client.AdvancedSearchDetails;
 import static uk.icat3.acctests.util.Constants.*;
-import static org.junit.Assert.*;
-import static uk.icat3.client.InvestigationInclude.*;
 
 /**
  *

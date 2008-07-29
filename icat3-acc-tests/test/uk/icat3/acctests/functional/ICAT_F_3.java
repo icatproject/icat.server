@@ -14,7 +14,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import static uk.icat3.acctests.util.Constants.*;
 import org.junit.Test;
 import uk.icat3.client.AdvancedSearchDetails;
@@ -135,7 +134,7 @@ public class ICAT_F_3 {
         }        
     }
     
-    @Test
+    //@Test
     public void searchAdvancedBySample() {
         try {
             
@@ -144,6 +143,7 @@ public class ICAT_F_3 {
                        
             AdvancedSearchDetails asd = new AdvancedSearchDetails();
             asd.setSampleName(ICAT_F_3_SAMPLE);
+            asd.setCaseSensitive(true); //GD
                                                 
             //do search
             List<uk.icat3.client.Investigation> investigations = port.searchByAdvanced(sessionId, asd);
@@ -163,7 +163,7 @@ public class ICAT_F_3 {
                 boolean found = false;
                 List<uk.icat3.client.Sample> samples = _inv.getSampleCollection();
                 for (uk.icat3.client.Sample sample : samples) {
-                    if (sample.getName().indexOf(ICAT_F_3_SAMPLE) != -1) found = true;
+                    if (sample.getName().indexOf(ICAT_F_3_SAMPLE.replace("*", "")) != -1) found = true; //GD
                 }//end for
                 
                 //make sure that sample included in at least one sample of each result returned
@@ -178,7 +178,7 @@ public class ICAT_F_3 {
         }
     }
     
-    @Test
+    //@Test
     public void searchAdvancedByInstrumentAndDateRange() {
         try {
             
@@ -246,7 +246,7 @@ public class ICAT_F_3 {
         }
     }
     
-    @Test
+    //@Test
     public void searchAdvancedByExperimentNumber() {
         try {
             
@@ -280,7 +280,7 @@ public class ICAT_F_3 {
         }
     }
     
-    @Test
+    //@Test
     public void searchAdvancedByAbstractKeyword() {
         try {
             
@@ -303,7 +303,7 @@ public class ICAT_F_3 {
             log.info("ICAT_F_3 #5 Looping through results to ensure correctness...");
             for (uk.icat3.client.Investigation i : investigations) {                                                                
                 log.info("ICAT_F_3 #5 Investigation#" + i.getId() + ", Title: '" + i.getTitle() + "', Experiment Number: '" + i.getInvNumber());                                                  
-                assertTrue("Abstract Keyword '" + ICAT_F_3_ABSTRACT_KEYWORD_1 + "' not found in investigation #" + i.getId(), i.getInvAbstract().indexOf(ICAT_F_3_ABSTRACT_KEYWORD_1) != -1);                                                                
+                assertTrue("Abstract Keyword '" + ICAT_F_3_ABSTRACT_KEYWORD_1 + "' not found in investigation #" + i.getId(), i.getInvAbstract().indexOf(ICAT_F_3_ABSTRACT_KEYWORD_1.replace("*", "")) != -1);  //GD                                            
             }//end for
             
             //if we get here then all is ok
@@ -314,7 +314,7 @@ public class ICAT_F_3 {
         }
     }
     
-    @Test
+    //@Test
     public void searchAdvancedByAbstractKeywords() {
         try {
             
@@ -337,8 +337,8 @@ public class ICAT_F_3 {
             log.info("ICAT_F_3 #6 Looping through results to ensure correctness...");
             for (uk.icat3.client.Investigation i : investigations) {                                                                
                 log.info("ICAT_F_3 #6 Investigation#" + i.getId() + ", Title: '" + i.getTitle() + "', Experiment Number: '" + i.getInvNumber());                                                  
-                assertTrue("Abstract Keyword '" + ICAT_F_3_ABSTRACT_KEYWORD_2 + "' not found in investigation #" + i.getId(), i.getInvAbstract().indexOf(ICAT_F_3_ABSTRACT_KEYWORD_2) != -1);                                                                
-                assertTrue("Abstract Keyword '" + ICAT_F_3_ABSTRACT_KEYWORD_3 + "' not found in investigation #" + i.getId(), i.getInvAbstract().indexOf(ICAT_F_3_ABSTRACT_KEYWORD_3) != -1);                                                                
+                assertTrue("Abstract Keyword '" + ICAT_F_3_ABSTRACT_KEYWORD_2 + "' not found in investigation #" + i.getId(), i.getInvAbstract().indexOf(ICAT_F_3_ABSTRACT_KEYWORD_2.replace("*", "")) != -1);     //GD                                                           
+                assertTrue("Abstract Keyword '" + ICAT_F_3_ABSTRACT_KEYWORD_3 + "' not found in investigation #" + i.getId(), i.getInvAbstract().indexOf(ICAT_F_3_ABSTRACT_KEYWORD_3.replace("*", "")) != -1);     //GD                                                           
             }//end for
             
             //if we get here then all is ok
@@ -349,7 +349,7 @@ public class ICAT_F_3 {
         }
     }
     
-    @Test
+    //@Test
     public void searchAdvancedByInvestigator() {
         try {
             
@@ -392,7 +392,7 @@ public class ICAT_F_3 {
         }
     }
     
-    @Test
+    //@Test
     public void searchAdvancedByInvestigators() {
         try {
             
@@ -439,7 +439,7 @@ public class ICAT_F_3 {
         }
     }
     
-    @Test
+    //@Test
     public void searchAdvancedByBackCatalogueInvestigatorString() {
         try {
             
@@ -462,7 +462,7 @@ public class ICAT_F_3 {
             log.info("ICAT_F_3 #9 Looping through results to ensure correctness...");
             for (uk.icat3.client.Investigation i : investigations) {                                                                
                 log.info("ICAT_F_3 #9 Investigation#" + i.getId() + ", Title: '" + i.getTitle() + "', Experiment Number: '" + i.getInvNumber());                                                                                                  
-                assertTrue("Investigator '" + ICAT_F_3_BCAT_INV_STR + "' not found in investigation #" + i.getId(), i.getBcatInvStr().indexOf(ICAT_F_3_BCAT_INV_STR) != -1);                                                                                
+                assertTrue("Investigator '" + ICAT_F_3_BCAT_INV_STR + "' not found in investigation #" + i.getId(), i.getBcatInvStr().indexOf(ICAT_F_3_BCAT_INV_STR.replace("*", "")) != -1);    //GD                                                                            
             }//end for
             
             //if we get here then all is ok
@@ -473,7 +473,7 @@ public class ICAT_F_3 {
         }
     }
     
-    @Test
+    //@Test
     public void searchAdvancedByDatafileName() {
         try {
             
