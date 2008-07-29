@@ -27,7 +27,7 @@ import static uk.icat3.acctests.util.Constants.*;
  */
 public class TestAdvancedSearch extends AbstractJavaSamplerClient {
 
-    private static Logger log = Logger.getLogger(TestAdvancedSearch1.class);
+    private static Logger log = Logger.getLogger(TestAdvancedSearch.class);
   
     private static java.lang.String sessionId = null;
     private static List<String> keywords = null;
@@ -79,8 +79,7 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
             System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
              
             //make sure some data is returned
-            log.info("ICAT_F_4 #1 PASSED");
-            System.out.println("dwf64 inv size " + investigations.size());
+            log.info("ICAT_F_4 #1 PASSED");           
             if (investigations.size() > 0) {
                 results.setSuccessful(true);
             }

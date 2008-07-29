@@ -70,9 +70,7 @@ public class TestKeywordSearch extends AbstractJavaSamplerClient {
             List<uk.icat3.client.Investigation> investigations = ICATUtil.getPort().searchByKeywords(sessionId, keywords);
             log.info("ICAT_P_2 #1 Searching for data, found '" + investigations.size() + "' investigations");
             results.setBytes(investigations.size());
-            
-            long end = System.currentTimeMillis();
-
+                        
             System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
 
             //make sure some data is returned
