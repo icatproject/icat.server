@@ -98,8 +98,7 @@ public class TestKeywordSearch extends AbstractJavaSamplerClient {
         return params;
     }
 
-    public static void main(String[] args) {
-        
+    public static void main(String[] args) {        
         TestKeywordSearch t = new TestKeywordSearch();
         JavaSamplerContext j = null;
         t.setupTest(j);
