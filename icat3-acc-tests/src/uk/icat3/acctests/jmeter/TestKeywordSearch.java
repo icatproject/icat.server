@@ -27,7 +27,7 @@ import static uk.icat3.acctests.util.Constants.*;
  */
 public class TestKeywordSearch extends AbstractJavaSamplerClient {
 
-    private static Logger log = Logger.getLogger(TestKeywordSearch1.class);
+    private static Logger log = Logger.getLogger(TestKeywordSearch.class);
     private static java.lang.String sessionId = null;
     private static List<String> keywords = null;
 
@@ -38,7 +38,7 @@ public class TestKeywordSearch extends AbstractJavaSamplerClient {
 
             log.info("ICAT_P_2 #1 Testing login with fedid '" + USER1 + "'...");
             if (sessionId == null) {
-                sessionId = ICATSingleton.getAdminInstance().loginAdmin(USER1);
+                sessionId = ICATUtil.getAdminPort().loginAdmin(USER1);
             }
 
             //make sure session id not null
@@ -67,7 +67,7 @@ public class TestKeywordSearch extends AbstractJavaSamplerClient {
             long time = System.currentTimeMillis();
 
             //search for data with user                        
-            List<uk.icat3.client.Investigation> investigations = ICATSingleton.getInstance().searchByKeywords(sessionId, keywords);
+            List<uk.icat3.client.Investigation> investigations = ICATUtil.getPort().searchByKeywords(sessionId, keywords);
             log.info("ICAT_P_2 #1 Searching for data, found '" + investigations.size() + "' investigations");
             results.setBytes(investigations.size());
             

@@ -39,7 +39,7 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
 
             log.info("ICAT_F_4 #1 Testing login with fedid '" + USER1 + "'...");
             if (sessionId == null) {
-                sessionId = ICATSingleton.getAdminInstance().loginAdmin(USER1);
+                sessionId = ICATUtil.getAdminPort().loginAdmin(USER1);
             }
 
             //make sure session id not null
@@ -72,7 +72,7 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
             asd.setRunEnd(ICAT_P_3_END_RUN);
 
             //search for data with user                        
-            List<uk.icat3.client.Investigation> investigations = ICATSingleton.getInstance().searchByKeywords(sessionId, keywords);
+            List<uk.icat3.client.Investigation> investigations = ICATUtil.getPort().searchByKeywords(sessionId, keywords);
             results.setSampleLabel("ICAT Advanced Search using criteria [Instrument: '" + asd.getInstruments() + "'], [Start Run: '" + asd.getRunStart() + "'], [End Run: '" + asd.getRunEnd() + "']");
             results.setBytes(investigations.size());
 
