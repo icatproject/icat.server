@@ -42,23 +42,23 @@ public class Constants {
     public static final double ICAT_F_3_RUN_END = 16099;
     public static final String ICAT_F_3_INSTRUMENT = "sxd";
     public static final String ICAT_F_3_RUN_NUMBER = "RUN_NUMBER";
-    public static final String ICAT_F_3_SAMPLE = "Telephone";
+    public static final String ICAT_F_3_SAMPLE = "*Telephone*"; //GD 
     public static final int ICAT_F_3_YEAR_START = 1999;
-    public static final int ICAT_F_3_YEAR_END = 1999;
+    public static final int ICAT_F_3_YEAR_END = 2004; //GD
     public static final int ICAT_F_3_MONTH_START = 2;
     public static final int ICAT_F_3_MONTH_END = 2;
     public static final int ICAT_F_3_DAY_START = 1;
     public static final int ICAT_F_3_DAY_END = 28;
     public static final int ICAT_F_3_HOUR = 1;
     public static final int ICAT_F_3_MINUTE = 1;
-    public static final int ICAT_F_3_SECOND = 1;
+    public static final int ICAT_F_3_SECOND = 1; //GD no data in icat between these dates
     public static final String ICAT_F_3_EXPERIMENT_NUMBER = "720568";
-    public static final String ICAT_F_3_ABSTRACT_KEYWORD_1 = "nano-actuators";            
-    public static final String ICAT_F_3_ABSTRACT_KEYWORD_2 = "Li3N";            
-    public static final String ICAT_F_3_ABSTRACT_KEYWORD_3 = "Deuterium";            
+    public static final String ICAT_F_3_ABSTRACT_KEYWORD_1 = "*nano-actuators*";    //GD        
+    public static final String ICAT_F_3_ABSTRACT_KEYWORD_2 = "*Li3N*";           //GD  
+    public static final String ICAT_F_3_ABSTRACT_KEYWORD_3 = "*Deuterium*";      //GD       
     public static final String ICAT_F_3_INVESTIGATOR_1 = "Armstrong";            
     public static final String ICAT_F_3_INVESTIGATOR_2 = "Bruce";            
-    public static final String ICAT_F_3_BCAT_INV_STR = "Shankland";       
+    public static final String ICAT_F_3_BCAT_INV_STR = "*Shankland*";       
     public static final String ICAT_F_3_DATAFILE_NAME = "GEM35639_STATUS.TXT";       
     
     /**
@@ -84,8 +84,8 @@ public class Constants {
     
     public static final String ICAT_S_4_PUBLIC_EXPERIMENT_NUMBER_1 = "10268"; //Chalhalian (USER9)
     
-    public static final double ICAT_P_1_MAX_TIME = 500;
-    public static final double ICAT_P_3_MAX_TIME = 1000;
+    public static final double ICAT_P_1_MAX_TIME = 5000; //GD 1000ms = 1s
+    public static final double ICAT_P_3_MAX_TIME = 10000;
     
     public static final String ICAT_P_3_INSTRUMENT = "alf";
     public static final double ICAT_P_3_START_RUN = 1;
