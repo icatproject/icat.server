@@ -135,7 +135,7 @@ public class Helper {
         uk.icat3.client.Sample sample = checkSampleIncluded(investigation);        
         
         List<uk.icat3.client.SampleParameter> sampleParams = sample.getSampleParameterCollection();
-        if ((sampleParams == null) || (sampleParams.size() ==0)) throw new IllegalArgumentException("No Samples were found in Investigation #" + investigation);
+        if ((sampleParams == null) || (sampleParams.size() ==0)) throw new IllegalArgumentException("No Sample Parameters were found in Investigation #" + investigation);
         
         uk.icat3.client.SampleParameter sampleParam = sampleParams.get(0);
         if (sampleParam == null) throw new IllegalArgumentException("SampleParameter is NULL in Investigation#" + investigation);

@@ -34,7 +34,7 @@ public class Constants {
     public static final String ICAT_F_2_KEYWORD4 = "Shankland";
     public static final String ICAT_F_2_KEYWORD5 = "powder";
     public static final String ICAT_F_2_KEYWORD6 = "magnetic";
-    public static final String ICAT_F_2_KEYWORD7 = "structure";
+    public static final String ICAT_F_2_KEYWORD7 = "Furnace";
     public static final String ICAT_F_2_KEYWORD8 = "SXD";
     public static final String ICAT_F_2_KEYWORD9 = "Empty";
                     
