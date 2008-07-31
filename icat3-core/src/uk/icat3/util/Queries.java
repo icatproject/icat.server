@@ -140,7 +140,7 @@ public class Queries {
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
-     * This is the search for the advanced search
+     * This is the search for the advanced search.  This is skeleton of the query, it is constructed in java
      */
     public static final String ADVANCED_SEARCH = "Investigation.findByAdvancedSearch";
     // String QUERY = "SELECT i FROM Investigation i, IcatAuthorisation ia WHERE i.id = ia.elementId AND ia.elementType = :investigationType AND i.markedDeleted = 'N' " +
@@ -194,7 +194,7 @@ public class Queries {
     
     public static final String ADVANCED_SEARCH_JPQL_DATAFILE = " AND EXISTS (SELECT DISTINCT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +
             " df.dataset = i.datasetCollection AND " +
-            "  (df.name OPERATION :datafileName OR :datafileName IS NULL) AND " + //remove if all are null
+            "  df.name OPERATION :datafileName AND " + //remove if all are null
             " iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' AND " +           
             " (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
             " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +
@@ -202,7 +202,7 @@ public class Queries {
     
      public static final String ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE = " AND EXISTS (SELECT DISTINCT df FROM Datafile df, IcatAuthorisation iadf3 WHERE " +            
             " df.dataset = i.datasetCollection AND " +
-            "  (LOWER(df.name) OPERATION :datafileName OR :datafileName IS NULL) AND  " + //remove if all are null
+            "  LOWER(df.name) OPERATION :datafileName  AND  " + //remove if all are null
             " iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' AND df.dataset.markedDeleted = 'N' AND " +
             " (df.dataset.id = iadf3.elementId AND iadf3.elementType = :dataSetType " +
             " AND (iadf3.userId = :userId OR iadf3.userId = 'ANY') " +

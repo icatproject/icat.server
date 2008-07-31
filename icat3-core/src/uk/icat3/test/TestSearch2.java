@@ -50,23 +50,49 @@ public class TestSearch2 {
         em.close();
     }
 
+    public void testSQL() throws Exception {
+        setUp();
+
+        long time = System.currentTimeMillis();
+
+        Query nullQuery = em.createNativeQuery("SELECT DISTINCT t0.ID, t0.GRANT_ID, t0.MOD_TIME, t0.FACILITY, t0.CREATE_ID, t0.RELEASE_DATE, t0.MOD_ID, t0.INV_START_DATE, t0.INV_END_DATE, t0.VISIT_ID, t0.INSTRUMENT, t0.INV_ABSTRACT, t0.INV_TYPE, t0.BCAT_INV_STR, t0.FACILITY_ACQUIRED, t0.INV_NUMBER, t0.CREATE_TIME, t0.TITLE, t0.INV_PARAM_VALUE, t0.PREV_INV_NUMBER, t0.DELETED, t0.INV_PARAM_NAME, t0.FACILITY_CYCLE FROM INVESTIGATION t0, ICAT_ROLE t2, ICAT_AUTHORISATION t1 WHERE ((((((((t0.ID = t1.ELEMENT_ID) AND (t1.ELEMENT_TYPE = 'INVESTIGATION')) AND ((t1.USER_ID = 'ISIS_GUARDIAN') OR (t1.USER_ID = 'ANY'))) AND (t1.DELETED = 'N')) AND (t2.ACTION_SELECT = 'Y')) AND (t0.DELETED = 'N')) AND EXISTS (SELECT 1 FROM DATASET t7, ICAT_AUTHORISATION t6, INVESTIGATION t5, DATASET t4, DATAFILE t3, ICAT_ROLE t8 WHERE ((((((((t3.DATASET_ID = t4.ID) AND ((t3.NAME = 'GEM35639_STATUS.TXT') OR ('GEM35639_STATUS.TXT' IS NULL))) AND (t6.DELETED = 'N')) AND (t3.DELETED = 'N')) AND (t7.DELETED = 'N')) AND ((((t7.ID = t6.ELEMENT_ID) AND (t6.ELEMENT_TYPE = 'DATASET')) AND ((t6.USER_ID = 'ISIS_GUARDIAN') OR (t6.USER_ID = 'ANY'))) AND (t8.ACTION_SELECT = 'Y'))) AND (t0.ID = t5.ID)) AND (((t4.INVESTIGATION_ID = t5.ID) AND (t7.ID = t3.DATASET_ID)) AND (t8.ROLE = t6.ROLE)))) ) AND (t2.ROLE = t1.ROLE))");
+
+        System.out.println(nullQuery.getResultList());
+
+        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
+
+        time = System.currentTimeMillis();
+
+        tearDown();
+    }
+
     public void testP() throws Exception {
         setUp();
-        
+
         //df.dataset = i.datasetCollection AND 
         long time = System.currentTimeMillis();
-        String QUERY = "SELECT DISTINCT i from Investigation i WHERE i.instrument = :ins  AND (((i.invStartDate BETWEEN :lowerTime AND :upperTime) OR (:lowerTime IS NULL)) OR " +
-                " ((i.invEndDate BETWEEN :lowerTime AND :upperTime) OR (:upperTime IS NULL)))";
+        String QUERY = "SELECT DISTINCT i from Investigation i , IcatAuthorisation ia " +
+                "WHERE (i.id = ia.elementId AND ia.elementType = :objectType  " +
+                "AND (ia.userId = :userId OR ia.userId = 'ANY') AND ia.markedDeleted = 'N' " +
+                "AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N'  " +
+                "AND EXISTS (SELECT DISTINCT df FROM Datafile df, IcatAuthorisation iadf3 " +
+                "WHERE  df.dataset = i.datasetCollection AND  LOWER(df.name)  =  :datafileName " +
+                " AND  iadf3.markedDeleted = 'N' AND df.markedDeleted = 'N' " +
+                "AND df.dataset.markedDeleted = 'N' AND  (df.dataset.id = iadf3.elementId " +
+                "AND iadf3.elementType = :dataSetType  AND (iadf3.userId = :userId OR iadf3.userId = 'ANY')  " +
+                "AND iadf3.role.actionCanSelect = 'Y'))";
 
         System.out.println(QUERY);
 
         Query nullQuery = em.createQuery(QUERY);
 
-        nullQuery.setParameter("ins", "maps");
-        nullQuery.setParameter("lowerTime", new Date(99, 1, 1));
-        nullQuery.setParameter("upperTime", new Date(99, 2, 1));
+        nullQuery.setParameter("objectType", ElementType.INVESTIGATION);
+        nullQuery.setParameter("dataSetType", ElementType.DATASET);
+        nullQuery.setParameter("userId", "ISIS_GUARDIAN");
+        nullQuery.setParameter("datafileName", "gem35639_status.txt");
+        // nullQuery.setParameter("dataSetType", ElementType.DATASET);
 
-        System.out.println(nullQuery.getResultList().size());
+        System.out.println(nullQuery.getResultList());
 
         System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
 

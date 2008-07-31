@@ -136,10 +136,10 @@
             <property name="toplink.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
             <property name="toplink.jdbc.password" value="sh00tingst4r"/>
               -->
-            <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))"/>
+            <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=jinx.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))"/>
             <property name="toplink.jdbc.user" value="icatisis_dev_b"/>
             <property name="toplink.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
-            <property name="toplink.jdbc.password" value="isisd3vb"/>
+            <property name="toplink.jdbc.password" value="isisd3vb"/> <!--1s1sd3v4--><!--a-->
             <property name="toplink.logging.level" value="FINE"/>
             <property name="toplink.cache.shared.default" value="false"/>
             <property name="toplink.cache.type.default" value="NONE"/>
@@ -273,7 +273,7 @@
         <class>uk.icat3.entity.TopicList</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
-            <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION =  (LOAD_BALANCE = yes) (FAILOVER = ON) (ADDRESS = (PROTOCOL = TCP)(HOST = honey-vip.esc.rl.ac.uk)(PORT = 1521))  (ADDRESS = (PROTOCOL = TCP)(HOST = goodnight-vip.esc.rl.ac.uk)(PORT = 1521))   (ADDRESS = (PROTOCOL = TCP)(HOST = domino-vip.esc.rl.ac.uk)(PORT = 1521))  (ADDRESS = (PROTOCOL = TCP)(HOST = sapphire-vip.esc.rl.ac.uk)(PORT = 1521))  (CONNECT_DATA = (SERVICE_NAME = ICATISIS.ESC.RL.AC.UK) (FAILOVER_MODE =   (TYPE=SESSION)  (METHOD=BASIC)   )  ) )" />
+            <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION =  (LOAD_BALANCE = yes) (FAILOVER = ON) (ADDRESS = (PROTOCOL = TCP)(HOST = honey-vip.esc.rl.ac.uk)(PORT = 1521))  (ADDRESS = (PROTOCOL = TCP)(HOST = goodnight-vip.esc.rl.ac.uk)(PORT = 1521))   (ADDRESS = (PROTOCOL = TCP)(HOST = domino-vip.esc.rl.ac.uk)(PORT = 1521))  (ADDRESS = (PROTOCOL = TCP)(HOST = sapphire-vip.esc.rl.ac.uk)(PORT = 1521))  (CONNECT_DATA = (SERVICE_NAME = MARS.ESC.RL.AC.UK) (FAILOVER_MODE =   (TYPE=SESSION)  (METHOD=BASIC)   )  ) )" />
             <property name="toplink.jdbc.user" value="icatisis"/>
             <property name="toplink.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
             <property name="toplink.jdbc.password" value="c00lgang"/>
@@ -286,3 +286,18 @@
         </properties>
     </persistence-unit>
 </persistence>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

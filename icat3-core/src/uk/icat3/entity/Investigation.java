@@ -122,9 +122,9 @@ import uk.icat3.util.Queries;
     @Column(name = "BCAT_INV_STR")
     private String bcatInvStr;
     
-    @Column(name = "INV_PARAM_NAME")   
+    @Column(name = "INV_PARAM_NAME")     
     private String invParamName;
-    
+       
     @Column(name = "INV_PARAM_VALUE")   
     private String invParamValue;
     
@@ -139,11 +139,11 @@ import uk.icat3.util.Queries;
     private Date releaseDate;
     
     @Column(name = "INV_START_DATE")   
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)    
     private Date invStartDate;
         
     @Column(name = "INV_END_DATE")
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)   
     private Date invEndDate;
     
     /*@JoinColumn(name = "FACILITY", referencedColumnName = "FACILITY_SHORT_NAME", nullable= false)
