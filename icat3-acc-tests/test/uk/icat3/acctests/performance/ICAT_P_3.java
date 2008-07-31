@@ -16,7 +16,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import static uk.icat3.acctests.util.Constants.*;
 import uk.icat3.client.AdvancedSearchDetails;
-import static uk.icat3.client.InvestigationInclude.*;
 
 
 /**

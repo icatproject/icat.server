@@ -32,7 +32,7 @@ import uk.icat3.acctests.security.ICAT_S_4;
     ICAT_F_1.class,
     ICAT_F_2.class,
     ICAT_F_3.class,
-    ICAT_F_4.class,
+    //ICAT_F_4.class,
     ICAT_F_5.class,
     ICAT_F_6.class,
     ICAT_P_1.class,    
