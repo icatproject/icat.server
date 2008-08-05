@@ -97,7 +97,7 @@ public class ICAT_P_3 {
             long finish = System.currentTimeMillis();
             log.info("ICAT_P_3 #1 Time in ms '" + (finish - start) + "'");
            
-             //if no results returned --> fail                     
+            //if no results returned --> fail                     
             assertTrue("No results returned", investigations.size() > 0);
             
             assertTrue("To sloooooowwwwwwww", (finish - start) <= ICAT_P_3_MAX_TIME);
