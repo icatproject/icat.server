@@ -40,7 +40,7 @@ public class Constants {
                     
     public static final double ICAT_F_3_RUN_START = 16000;
     public static final double ICAT_F_3_RUN_END = 16099;
-    public static final String ICAT_F_3_INSTRUMENT = "sxd";
+    public static final String ICAT_F_3_INSTRUMENT = "SXD";
     public static final String ICAT_F_3_RUN_NUMBER = "RUN_NUMBER";
     public static final String ICAT_F_3_SAMPLE = "*Telephone*"; //GD 
     public static final int ICAT_F_3_YEAR_START = 1999;
