@@ -15,14 +15,14 @@ public class KeywordDetails {
 
     private Collection<String> keywords;
     private InvestigationInclude investigationInclude = InvestigationInclude.NONE;
-    private boolean caseSensitve = true;
+    private boolean caseSensitive = true;
 
-    public boolean isCaseSensitve() {
-        return caseSensitve;
+    public boolean isCaseSensitive() {
+        return caseSensitive;
     }
 
-    public void setCaseSensitve(boolean caseSensitve) {
-        this.caseSensitve = caseSensitve;
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
     }
 
     public InvestigationInclude getInvestigationInclude() {
