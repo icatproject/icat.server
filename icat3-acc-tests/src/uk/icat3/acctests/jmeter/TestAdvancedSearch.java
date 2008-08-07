@@ -28,7 +28,6 @@ import static uk.icat3.acctests.util.Constants.*;
 public class TestAdvancedSearch extends AbstractJavaSamplerClient {
 
     private static Logger log = Logger.getLogger(TestAdvancedSearch.class);
-  
     private static java.lang.String sessionId = null;
     private static List<String> keywords = null;
 
@@ -44,10 +43,10 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
 
             //make sure session id not null
             log.info("ICAT_F_4 #1 SessionId is '" + sessionId + "'");
-            if (sessionId == null) {                
+            if (sessionId == null) {
                 throw new Exception("Login unsuccessful");
             }
-                      
+
         } catch (Exception ex) {
             log.error(Helper.getStackTrace(ex));
             ex.printStackTrace();
@@ -59,28 +58,30 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
         results.sampleStart();
         //results.setSuccessful(false);  
         results.setSuccessful(true);
-       
-        try {  
+
+        try {
             long time = System.currentTimeMillis();
-            
+
             uk.icat3.client.AdvancedSearchDetails asd = new uk.icat3.client.AdvancedSearchDetails();
             asd.getInstruments().add(ICAT_P_3_INSTRUMENT);
             asd.setRunStart(ICAT_P_3_START_RUN);
             asd.setRunEnd(ICAT_P_3_END_RUN);
-          
+
             //search for data with user                        
             List<uk.icat3.client.Investigation> investigations = ICATUtil.getPort().searchByAdvanced(sessionId, asd);
             results.setSampleLabel("ICAT Advanced Search using criteria [Instrument: '" + asd.getInstruments() + "'], [Start Run: '" + asd.getRunStart() + "'], [End Run: '" + asd.getRunEnd() + "']");
             results.setBytes(investigations.size());
-            
+
             System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
-             
-            //make sure some data is returned
-            log.info("ICAT_F_4 #1 PASSED");           
+
             if (investigations.size() > 0) {
+                //make sure some data is returned
+                log.info("ICAT_F_4 #1 PASSED");
                 results.setSuccessful(true);
+            } else {
+                log.info("ICAT_F_4 #1 FAILED");
             }
-            
+
         } catch (Exception ex) {
             log.error(Helper.getStackTrace(ex));
             ex.printStackTrace();
@@ -90,8 +91,8 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
     }
 
     public void teardownTest(JavaSamplerContext arg0) {
-        log.info("ICAT_P_4 #1 In teardown test");    
-        //do not log out, keep same sessionid for concurrent tests
+        log.info("ICAT_P_4 #1 In teardown test");
+    //do not log out, keep same sessionid for concurrent tests
     }
 
     public Arguments getDefaultParameters() {

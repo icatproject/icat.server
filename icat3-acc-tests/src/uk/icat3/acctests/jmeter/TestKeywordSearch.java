@@ -70,14 +70,15 @@ public class TestKeywordSearch extends AbstractJavaSamplerClient {
             List<uk.icat3.client.Investigation> investigations = ICATUtil.getPort().searchByKeywords(sessionId, keywords);
             log.info("ICAT_P_2 #1 Searching for data, found '" + investigations.size() + "' investigations");
             results.setBytes(investigations.size());
-                        
+
             System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
 
-            //make sure some data is returned
-            log.info("ICAT_P_2 #1 PASSED");
             if (investigations.size() > 0) {
+                //make sure some data is returned
+                log.info("ICAT_P_2 #1 PASSED");
                 results.setSuccessful(true);
             } else {
+                log.info("ICAT_P_2 #1 FAILED");
                 results.setSuccessful(false);
             }
         } catch (Exception ex) {
@@ -90,7 +91,7 @@ public class TestKeywordSearch extends AbstractJavaSamplerClient {
 
     public void teardownTest(JavaSamplerContext arg0) {
         log.info("ICAT_P_2 #1 In teardown test");
-        //do not log out, keep same sessionid for concurrent tests
+    //do not log out, keep same sessionid for concurrent tests
     }
 
     public Arguments getDefaultParameters() {
@@ -98,7 +99,7 @@ public class TestKeywordSearch extends AbstractJavaSamplerClient {
         return params;
     }
 
-    public static void main(String[] args) {        
+    public static void main(String[] args) {
         TestKeywordSearch t = new TestKeywordSearch();
         JavaSamplerContext j = null;
         t.setupTest(j);
