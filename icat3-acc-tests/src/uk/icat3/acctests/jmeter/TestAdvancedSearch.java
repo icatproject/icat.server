@@ -47,10 +47,7 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
             if (sessionId == null) {                
                 throw new Exception("Login unsuccessful");
             }
-            
-            keywords = new ArrayList<String>();
-            keywords.add(ICAT_F_1_KEYWORD1);
-
+                      
         } catch (Exception ex) {
             log.error(Helper.getStackTrace(ex));
             ex.printStackTrace();
@@ -62,7 +59,7 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
         results.sampleStart();
         //results.setSuccessful(false);  
         results.setSuccessful(true);
-
+       
         try {  
             long time = System.currentTimeMillis();
             
@@ -70,12 +67,12 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
             asd.getInstruments().add(ICAT_P_3_INSTRUMENT);
             asd.setRunStart(ICAT_P_3_START_RUN);
             asd.setRunEnd(ICAT_P_3_END_RUN);
-
+          
             //search for data with user                        
-            List<uk.icat3.client.Investigation> investigations = ICATUtil.getPort().searchByKeywords(sessionId, keywords);
+            List<uk.icat3.client.Investigation> investigations = ICATUtil.getPort().searchByAdvanced(sessionId, asd);
             results.setSampleLabel("ICAT Advanced Search using criteria [Instrument: '" + asd.getInstruments() + "'], [Start Run: '" + asd.getRunStart() + "'], [End Run: '" + asd.getRunEnd() + "']");
             results.setBytes(investigations.size());
-           
+            
             System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
              
             //make sure some data is returned

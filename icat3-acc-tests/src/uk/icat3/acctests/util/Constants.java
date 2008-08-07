@@ -87,7 +87,7 @@ public class Constants {
     public static final double ICAT_P_1_MAX_TIME = 5000; //GD 1000ms = 1s
     public static final double ICAT_P_3_MAX_TIME = 10000;
     
-    public static final String ICAT_P_3_INSTRUMENT = "ALF";
+    public static final String ICAT_P_3_INSTRUMENT = "OSIRIS";
     public static final double ICAT_P_3_START_RUN = 1;
     public static final double ICAT_P_3_END_RUN = 199;
     
