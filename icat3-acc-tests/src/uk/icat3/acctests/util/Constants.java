@@ -88,7 +88,7 @@ public class Constants {
     public static final double ICAT_P_3_MAX_TIME = 10000;
     
     public static final String ICAT_P_3_INSTRUMENT = "OSIRIS";
-    public static final double ICAT_P_3_START_RUN = 1;
+    public static final double ICAT_P_3_START_RUN = 100;
     public static final double ICAT_P_3_END_RUN = 199;
     
     public static final String ICAT_DATA_URL = "http://data.nd.rl.ac.uk/icat/getfiles.py/run?sessionId=";        
