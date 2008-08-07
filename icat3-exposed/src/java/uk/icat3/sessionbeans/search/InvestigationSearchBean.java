@@ -45,7 +45,7 @@ import uk.icat3.util.LogicalOperator;
 public class InvestigationSearchBean extends EJBObject implements InvestigationSearchLocal {
     
     static Logger log = Logger.getLogger(InvestigationSearchBean.class);
-    private boolean SECURITY_ON = true;
+    private final boolean SECURITY_ON = true;
     
     /** Creates a new instance of InvestigationSearchBean */
     public InvestigationSearchBean() {
@@ -65,7 +65,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        //now do the search using the  API
+        //now do the search using the API
         return InvestigationSearch.searchByAdvanced(userId, advancedSearch, startIndex, numberOfResults, manager);
     }
     
@@ -81,7 +81,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
-        //now do the search using the  API
+        //now do the search using the API
         return InvestigationSearch.searchByAdvanced(userId, advancedSearch, -1, -1, manager);
     }
     
