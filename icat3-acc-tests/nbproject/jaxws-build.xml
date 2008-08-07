@@ -18,7 +18,7 @@
         </condition>
     </target>
     <target name="wsimport-client-ICATAdmin" depends="wsimport-init,wsimport-client-check-ICATAdmin" unless="wsimport-client-ICATAdmin.notRequired">
-        <wsimport fork="true" xendorsed="true" sourcedestdir="${build.generated.dir}/wsimport/client" extension="true" destdir="${build.generated.dir}/wsimport/binaries" wsdl="${basedir}/xml-resources/web-service-references/ICATAdmin/wsdl/volga.dl.ac.uk_8182/ICATAdminService/ICATAdmin.wsdl" wsdlLocation="https://volga.dl.ac.uk:8182/ICATAdminService/ICATAdmin?wsdl" catalog="catalog.xml">
+        <wsimport fork="true" xendorsed="true" sourcedestdir="${build.generated.dir}/wsimport/client" extension="true" destdir="${build.generated.dir}/wsimport/binaries" wsdl="${basedir}/xml-resources/web-service-references/ICATAdmin/wsdl/facilities01.esc.rl.ac.uk_8181/ICATAdminService/ICATAdmin.wsdl" wsdlLocation="https://facilities01.esc.rl.ac.uk:8181/ICATAdminService/ICATAdmin?wsdl" catalog="catalog.xml">
             <jvmarg value="-Djava.endorsed.dirs=${jaxws.endorsed.dir}"/>
         </wsimport>
         <copy todir="${build.classes.dir}">
@@ -34,7 +34,7 @@
         </condition>
     </target>
     <target name="wsimport-client-ICAT" depends="wsimport-init,wsimport-client-check-ICAT" unless="wsimport-client-ICAT.notRequired">
-        <wsimport fork="true" xendorsed="true" sourcedestdir="${build.generated.dir}/wsimport/client" extension="true" destdir="${build.generated.dir}/wsimport/binaries" wsdl="${basedir}/xml-resources/web-service-references/ICAT/wsdl/volga.dl.ac.uk_8182/ICATService/ICAT.wsdl" wsdlLocation="https://volga.dl.ac.uk:8182/ICATService/ICAT?wsdl" catalog="catalog.xml">
+        <wsimport fork="true" xendorsed="true" sourcedestdir="${build.generated.dir}/wsimport/client" extension="true" destdir="${build.generated.dir}/wsimport/binaries" wsdl="${basedir}/xml-resources/web-service-references/ICAT/wsdl/facilities01.esc.rl.ac.uk_8181/ICATService/ICAT.wsdl" wsdlLocation="https://facilities01.esc.rl.ac.uk:8181/ICATService/ICAT?wsdl" catalog="catalog.xml">
             <jvmarg value="-Djava.endorsed.dirs=${jaxws.endorsed.dir}"/>
         </wsimport>
         <copy todir="${build.classes.dir}">
