@@ -24,7 +24,7 @@ public class Constants {
     public static String USER9 = "10139";    //Chakhalian Jaques
     
     public static final String ICAT_ADMIN_USER = "ISIS-admin";
-    public static final String ICAT_ADMIN_PASSWORD = "icatadmin33";
+    public static final String ICAT_ADMIN_PASSWORD = "TaunWuOd5";
     
     public static final String ICAT_F_1_KEYWORD1 = "SXD";
     
@@ -87,7 +87,7 @@ public class Constants {
     public static final double ICAT_P_1_MAX_TIME = 5000; //GD 1000ms = 1s
     public static final double ICAT_P_3_MAX_TIME = 10000;
     
-    public static final String ICAT_P_3_INSTRUMENT = "alf";
+    public static final String ICAT_P_3_INSTRUMENT = "ALF";
     public static final double ICAT_P_3_START_RUN = 1;
     public static final double ICAT_P_3_END_RUN = 199;
     

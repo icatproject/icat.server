@@ -75,7 +75,7 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
             List<uk.icat3.client.Investigation> investigations = ICATUtil.getPort().searchByKeywords(sessionId, keywords);
             results.setSampleLabel("ICAT Advanced Search using criteria [Instrument: '" + asd.getInstruments() + "'], [Start Run: '" + asd.getRunStart() + "'], [End Run: '" + asd.getRunEnd() + "']");
             results.setBytes(investigations.size());
-
+           
             System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
              
             //make sure some data is returned
