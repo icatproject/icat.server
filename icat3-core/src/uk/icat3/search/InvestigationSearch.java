@@ -692,7 +692,7 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Investigation> searchByKeywords(String userId, KeywordDetails keywordDetails, int startIndex, int number_results, EntityManager manager) {
         InvestigationInclude includes = (keywordDetails.getInvestigationInclude() == null) ? InvestigationInclude.NONE : keywordDetails.getInvestigationInclude();
 
-        return searchByKeywords(userId, keywordDetails.getKeywords(), LogicalOperator.AND, includes, true, keywordDetails.isCaseSensitve(), startIndex, number_results, manager);
+        return searchByKeywords(userId, keywordDetails.getKeywords(), LogicalOperator.AND, includes, true, keywordDetails.isCaseSensitive(), startIndex, number_results, manager);
     }
 
     /**
