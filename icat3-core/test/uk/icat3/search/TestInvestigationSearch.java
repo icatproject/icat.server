@@ -23,7 +23,6 @@ import uk.icat3.util.BaseTestClass;
 import static org.junit.Assert.*;
 import static uk.icat3.util.TestConstants.*;
 import uk.icat3.entity.Investigation;
-import uk.icat3.entity.InvestigationType;
 import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.ICATAPIException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
@@ -1470,7 +1469,7 @@ public class TestInvestigationSearch extends BaseTestClass {
         checkInvestigations(investigations);
     }
 
-    @Test
+    //@Test
     public void testAdvancedCreateTime2() throws ICATAPIException {
         log.info("Testing valid user, create time: " + VALID_USER_FOR_INVESTIGATION);
 
@@ -1547,6 +1546,65 @@ public class TestInvestigationSearch extends BaseTestClass {
 
         assertNotNull("Must not be an empty collection", investigations);
         assertEquals("Size should be two", 2, investigations.size());
+    }
+    //- +@Test
+    public void testAdvancedRunNumberInstrument() throws ICATAPIException {
+        log.info("Testing valid user, run number: " + VALID_USER_FOR_INVESTIGATION);
+
+        AdvancedSearchDetails asd = new AdvancedSearchDetails();
+        asd.setRunEnd(16000d);
+        asd.setRunStart(16099d);
+        Collection<String> ins = new ArrayList<String>();
+        ins.add("sxd");
+        asd.setInstruments(ins);
+
+        log.trace("RunNumber? " + asd.hasRunNumber());
+
+        long time = System.currentTimeMillis();
+
+        //test with name
+        Collection<Investigation> investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with " + asd + ": " + investigations.size());
+        log.trace(investigations);
+        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
+
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be two", 2, investigations.size());
+    }
+
+    @Test
+    public void testAdvancedDF() throws ICATAPIException {
+        log.info("Testing valid user, DF: " + VALID_USER_FOR_INVESTIGATION);
+
+        AdvancedSearchDetails asd = new AdvancedSearchDetails();
+        asd.setDatafileName("sXD01064.RAW");
+        asd.setCaseSensitive(false);
+
+        long time = System.currentTimeMillis();
+
+        //test with name
+        Collection<Investigation> investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd, em);
+        log.trace("Investigations found with " + asd + ": " + investigations.size());
+        log.trace(investigations);
+        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
+
+        AdvancedSearchDetails asd2 = new AdvancedSearchDetails();
+        asd2.setDatafileName("SXD01064.RAW");
+        asd2.setCaseSensitive(true);
+
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be two", 1, investigations.size());
+        
+        time = System.currentTimeMillis();
+
+        //test with name
+        investigations = InvestigationSearch.searchByAdvanced(VALID_USER_FOR_INVESTIGATION, asd2, em);
+        log.trace("Investigations found with " + asd + ": " + investigations.size());
+        log.trace(investigations);
+        System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
+
+        assertNotNull("Must not be an empty collection", investigations);
+        assertEquals("Size should be two", 1, investigations.size());
     }
     //@Test
     public void testAdvancedInvalidUser() throws ICATAPIException {
