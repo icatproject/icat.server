@@ -44,9 +44,9 @@ public class Constants {
     public static final String ICAT_F_3_RUN_NUMBER = "RUN_NUMBER";
     public static final String ICAT_F_3_SAMPLE = "*Telephone*"; //GD 
     public static final int ICAT_F_3_YEAR_START = 1999;
-    public static final int ICAT_F_3_YEAR_END = 2004; //GD
+    public static final int ICAT_F_3_YEAR_END = 1999; //GD
     public static final int ICAT_F_3_MONTH_START = 2;
-    public static final int ICAT_F_3_MONTH_END = 2;
+    public static final int ICAT_F_3_MONTH_END = 4;
     public static final int ICAT_F_3_DAY_START = 1;
     public static final int ICAT_F_3_DAY_END = 28;
     public static final int ICAT_F_3_HOUR = 1;
@@ -92,7 +92,7 @@ public class Constants {
     public static final double ICAT_P_3_END_RUN = 199;
     
     public static final String ICAT_DATA_URL = "http://data.nd.rl.ac.uk/icat/getfiles.py/run?sessionId=";        
-    public static final String ICAT_DOWNLOAD_ZIP = "action=zip";        
+    public static final String ICAT_DOWNLOAD_ZIP = "action=zip";       
     public static final String ICAT_DOWNLOAD_DATAFILE = "action=download";        
     
 }
