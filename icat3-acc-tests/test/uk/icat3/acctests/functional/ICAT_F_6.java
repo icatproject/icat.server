@@ -98,7 +98,7 @@ public class ICAT_F_6 {
             assertTrue(investigations.size() > 0);             
             
             //get more detail
-            uk.icat3.client.Investigation i = port.getInvestigationIncludes(sessionId, investigations.get(0).getId(), DATASETS_AND_DATAFILES);            
+            uk.icat3.client.Investigation i = port.getInvestigationIncludes(sessionId, investigations.get(1).getId(), DATASETS_AND_DATAFILES);            
             log.info("ICAT_F_6 #1 Investigation#" + i.getId() + ", Title: '" + i.getTitle() + "'");  
             
             //drill down to datafile level
@@ -117,8 +117,9 @@ public class ICAT_F_6 {
             
             //remove last '&'
             dataStr = dataStr.substring(0, dataStr.length()-1);
-            
+           
             String url = port.downloadDatafiles(sessionId, datafileIds);
+           
             log.info("ICAT_F_6 #1 Download URL for datafileIds #" + datafileIds + ", is '" + url + "'");              
             
             //ensure that download string is not empty            
@@ -159,7 +160,7 @@ public class ICAT_F_6 {
             assertTrue(investigations.size() > 0);    
             
             //get more detail
-            uk.icat3.client.Investigation i = port.getInvestigationIncludes(sessionId, investigations.get(0).getId(), DATASETS_AND_DATAFILES);            
+            uk.icat3.client.Investigation i = port.getInvestigationIncludes(sessionId, investigations.get(1).getId(), DATASETS_AND_DATAFILES);            
             log.info("ICAT_F_6 #2 Investigation#" + i.getId() + ", Title: '" + i.getTitle() + "'");  
             
             //drill down to datafile level
