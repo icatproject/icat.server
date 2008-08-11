@@ -134,7 +134,7 @@ public class ICAT_F_3 {
         }        
     }
     
-    //@Test
+    @Test
     public void searchAdvancedBySample() {
         try {
             
@@ -178,7 +178,7 @@ public class ICAT_F_3 {
         }
     }
     
-    //@Test
+   @Test
     public void searchAdvancedByInstrumentAndDateRange() {
         try {
             
@@ -246,7 +246,7 @@ public class ICAT_F_3 {
         }
     }
     
-    //@Test
+    @Test
     public void searchAdvancedByExperimentNumber() {
         try {
             
@@ -280,7 +280,7 @@ public class ICAT_F_3 {
         }
     }
     
-    //@Test
+    @Test
     public void searchAdvancedByAbstractKeyword() {
         try {
             
@@ -314,7 +314,7 @@ public class ICAT_F_3 {
         }
     }
     
-    //@Test
+    @Test
     public void searchAdvancedByAbstractKeywords() {
         try {
             
@@ -349,7 +349,7 @@ public class ICAT_F_3 {
         }
     }
     
-    //@Test
+    @Test
     public void searchAdvancedByInvestigator() {
         try {
             
@@ -392,7 +392,7 @@ public class ICAT_F_3 {
         }
     }
     
-    //@Test
+    @Test
     public void searchAdvancedByInvestigators() {
         try {
             
@@ -439,7 +439,7 @@ public class ICAT_F_3 {
         }
     }
     
-    //@Test
+    @Test
     public void searchAdvancedByBackCatalogueInvestigatorString() {
         try {
             
@@ -473,7 +473,7 @@ public class ICAT_F_3 {
         }
     }
     
-    //@Test
+    @Test
     public void searchAdvancedByDatafileName() {
         try {
             

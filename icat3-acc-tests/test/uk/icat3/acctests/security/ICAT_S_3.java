@@ -78,7 +78,7 @@ public class ICAT_S_3 {
         try {
 
             log.info("ICAT_S_3 #1 searchAdvancedByExperimentNumberNonPublicAllowed");
-            sessionId = adminPort.loginAdmin(USER7);
+            sessionId = adminPort.loginAdmin(USER1);
 
             //make sure session id not null
             log.info("ICAT_S_3 #1 SessionId is '" + sessionId + "'");
@@ -117,15 +117,16 @@ public class ICAT_S_3 {
                 //get access to samples
                 List<uk.icat3.client.Sample> samples = _inv.getSampleCollection();
                 assertTrue("Could not access samples", samples.size() > 0);
-
+                
+               
                 //get access to a parameter 
                 List<uk.icat3.client.Dataset> datasets = _inv.getDatasetCollection();
                 boolean foundParam = false;
-                for (uk.icat3.client.Dataset dataset : datasets) {
+                for (uk.icat3.client.Dataset dataset : datasets) {             
                     List<uk.icat3.client.Datafile> datafiles = dataset.getDatafileCollection();
-                    for (uk.icat3.client.Datafile datafile : datafiles) {
+                    for (uk.icat3.client.Datafile datafile : datafiles) {                        
                         List<uk.icat3.client.DatafileParameter> parameters = datafile.getDatafileParameterCollection();
-                        for (uk.icat3.client.DatafileParameter parameter : parameters) {
+                        for (uk.icat3.client.DatafileParameter parameter : parameters) {                            
                             if (parameter.getDatafileParameterPK().getName().length() > 0) {
                                 foundParam = true;
                             }//end if                                
@@ -273,7 +274,7 @@ public class ICAT_S_3 {
         try {
 
             log.info("ICAT_S_3 #5 searchAdvancedByExperimentNumberCommercialDataAllowed");
-            sessionId = adminPort.loginAdmin(USER9);
+            sessionId = adminPort.loginAdmin(USER1);
 
             //make sure session id not null
             log.info("ICAT_S_3 #5 SessionId is '" + sessionId + "'");

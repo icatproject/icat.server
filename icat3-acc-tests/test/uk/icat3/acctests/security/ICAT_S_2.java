@@ -150,7 +150,7 @@ public class ICAT_S_2 {
      * responsible for.  Should not be allowed access.
      */
     //GD DOWNLOADER for #24003358 set by set_icat_auth_data_entities
-    //@Test
+    @Test
     public void searchAdvancedByExperimentNumberNonPublicNotAllowed() {
         try {
 
@@ -189,7 +189,8 @@ public class ICAT_S_2 {
     /**
      * Search for commercial data on instrument that instrument scientist is responsible for.
      * Access should be allowed.
-     */    //@Test
+     */    
+    @Test
     public void searchAdvancedByDatafileNameCommercialInstSciAllowed() {
         try {
 
@@ -255,7 +256,7 @@ public class ICAT_S_2 {
      * Search for commercial data on instrument that instrument scientist is NOT responsible for.
      * Access should NOT be allowed.
      */    //GD DOWNLOADER for #24003359 set by set_icat_auth_data_entities
-    //@Test
+    @Test
     public void searchAdvancedByDatafileNameCommercialInstSciNotAllowed() {
         try {
 
@@ -294,7 +295,8 @@ public class ICAT_S_2 {
     /**
      * Search for public data on instrument that instrument scientist is NOT responsible for.
      * Access should be allowed.
-     */    //@Test
+     */    
+    @Test
     public void searchAdvancedByDatafileNamePublicDataAllowed() {
         try {
 
@@ -309,8 +311,8 @@ public class ICAT_S_2 {
             log.info("ICAT_S_2 #5 Criteria [DATAFILE_NAME: '" + ICAT_F_3_DATAFILE_NAME + "']");
 
             AdvancedSearchDetails asd = new AdvancedSearchDetails();
-            asd.setDatafileName(ICAT_F_3_DATAFILE_NAME);
-         
+            asd.setDatafileName(ICAT_F_3_DATAFILE_NAME_2);
+                    
             //do search 
             List<uk.icat3.client.Investigation> investigations = port.searchByAdvanced(sessionId, asd);
             log.info("ICAT_S_2 #5 Searching, found #" + investigations.size() + " results");
