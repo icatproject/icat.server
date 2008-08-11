@@ -396,7 +396,7 @@ public class MetadataIngest {
         }//end if                                
         
         if (investigation.getInstrument() != null)
-            inv.setInstrument(investigation.getInstrument().toLowerCase());
+            inv.setInstrument(investigation.getInstrument());
 
         return inv;
     }
