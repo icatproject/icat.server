@@ -56,8 +56,8 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
     public SampleResult runTest(JavaSamplerContext arg0) {
         SampleResult results = new SampleResult();
         results.sampleStart();
-        //results.setSuccessful(false);  
-        results.setSuccessful(true);
+        results.setSuccessful(false);  
+        //results.setSuccessful(true);
 
         try {
             long time = System.currentTimeMillis();
@@ -76,9 +76,11 @@ public class TestAdvancedSearch extends AbstractJavaSamplerClient {
 
             if (investigations.size() > 0) {
                 //make sure some data is returned
+                System.out.println("ICAT_F_4 #1 PASSED");
                 log.info("ICAT_F_4 #1 PASSED");
                 results.setSuccessful(true);
             } else {
+                System.out.println("ICAT_F_4 #1 FAILED");
                 log.info("ICAT_F_4 #1 FAILED");
             }
 

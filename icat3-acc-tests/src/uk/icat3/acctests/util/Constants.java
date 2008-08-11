@@ -46,7 +46,7 @@ public class Constants {
     public static final int ICAT_F_3_YEAR_START = 1999;
     public static final int ICAT_F_3_YEAR_END = 1999; //GD
     public static final int ICAT_F_3_MONTH_START = 2;
-    public static final int ICAT_F_3_MONTH_END = 4;
+    public static final int ICAT_F_3_MONTH_END = 2;
     public static final int ICAT_F_3_DAY_START = 1;
     public static final int ICAT_F_3_DAY_END = 28;
     public static final int ICAT_F_3_HOUR = 1;
@@ -60,6 +60,7 @@ public class Constants {
     public static final String ICAT_F_3_INVESTIGATOR_2 = "Bruce";            
     public static final String ICAT_F_3_BCAT_INV_STR = "*Shankland*";       
     public static final String ICAT_F_3_DATAFILE_NAME = "GEM35639_STATUS.TXT";       
+    public static final String ICAT_F_3_DATAFILE_NAME_2 = "SXD04465.RAW"; 
     
     /**
      * ICAT_S_1_DATAFILE_NAME refers to LOQ24803.RAW which is one of
