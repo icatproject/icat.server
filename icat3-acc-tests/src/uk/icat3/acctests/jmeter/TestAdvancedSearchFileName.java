@@ -59,7 +59,7 @@ public class TestAdvancedSearchFileName extends AbstractJavaSamplerClient {
         results.sampleStart();
         //results.setSuccessful(false);  
         results.setSuccessful(true);
-
+      
         try {
             long time = System.currentTimeMillis();
 
@@ -71,7 +71,7 @@ public class TestAdvancedSearchFileName extends AbstractJavaSamplerClient {
             List<uk.icat3.client.Investigation> investigations = ICATUtil.getPort().searchByAdvanced(sessionId, asd);
             results.setSampleLabel("ICAT Advanced Search using criteria [Datafile Name: '" + asd.getDatafileName() + "']");
             results.setBytes(investigations.size());
-                        
+            //System.out.println(""+investigations.size());  
             System.out.println((System.currentTimeMillis() - time) / 1000f + " seconds");
 
             if (investigations.size() > 0) {
@@ -102,7 +102,7 @@ public class TestAdvancedSearchFileName extends AbstractJavaSamplerClient {
         return params;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) {               
         TestAdvancedSearchFileName t = new TestAdvancedSearchFileName();
         JavaSamplerContext j = null;
         t.setupTest(j);
