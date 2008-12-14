@@ -17,15 +17,13 @@
         <ejbjarproject2:javac srcdir="${build.generated.dir}/wsgen/service" classpath="${j2ee.platform.wsgen.classpath}:${javac.classpath}" destdir="${classes.dir}"/>
     </target>
     <target name="wsgen-ICATAdminService" depends="wsgen-init, -do-compile">
-        <wsgen xendorsed="true" fork="true" destdir="${build.generated.dir}/wsgen/binaries" sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service/resources/" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.ICATAdmin">
+        <wsgen destdir="${build.generated.dir}/wsgen/binaries" sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service/resources/" xendorsed="true" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.ICATAdmin">
             <classpath path="${java.home}/../lib/tools.jar:${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
-            <jvmarg value="-Djava.endorsed.dirs=${jaxws.endorsed.dir}"/>
         </wsgen>
     </target>
     <target name="wsgen-ICATService" depends="wsgen-init, -do-compile">
-        <wsgen xendorsed="true" fork="true" destdir="${build.generated.dir}/wsgen/binaries" sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service/resources/" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.ICAT">
+        <wsgen destdir="${build.generated.dir}/wsgen/binaries" sourcedestdir="${build.generated.dir}/wsgen/service" resourcedestdir="${build.generated.dir}/wsgen/service/resources/" xendorsed="true" keep="false" genwsdl="true" sei="uk.icat3.sessionbeans.ICAT">
             <classpath path="${java.home}/../lib/tools.jar:${classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
-            <jvmarg value="-Djava.endorsed.dirs=${jaxws.endorsed.dir}"/>
         </wsgen>
     </target>
     <!--
