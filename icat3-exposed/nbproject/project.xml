@@ -8,19 +8,19 @@
         <data xmlns="http://www.netbeans.org/ns/j2ee-ejbjarproject/3">
             <name>icat3-exposed</name>
             <minimum-ant-version>1.6</minimum-ant-version>
-            <included-library files="1">reference.icat3-core.jar</included-library>
-            <included-library files="1">reference.icat3-jaxb.jar</included-library>
-            <included-library files="1">reference.icat3-user-default.jar</included-library>
-            <included-library files="1">reference.icat3-data.jar</included-library>
-            <included-library files="1">file.reference.log4j-1.2.14.jar</included-library>
-            <included-library files="1">file.reference.cog-jglobus.jar</included-library>
-            <included-library files="1">file.reference.commons-logging.jar</included-library>
-            <included-library files="1">file.reference.cryptix-asn1.jar</included-library>
-            <included-library files="1">file.reference.cryptix.jar</included-library>
-            <included-library files="1">file.reference.cryptix32.jar</included-library>
-            <included-library files="1">file.reference.jce-jdk13-120.jar</included-library>
-            <included-library files="1">file.reference.jgss.jar</included-library>
-            <included-library files="1">file.reference.puretls.jar</included-library>
+            <included-library>reference.icat3-core.jar</included-library>
+            <included-library>reference.icat3-jaxb.jar</included-library>
+            <included-library>reference.icat3-user-default.jar</included-library>
+            <included-library>reference.icat3-data.jar</included-library>
+            <included-library>file.reference.log4j-1.2.14.jar</included-library>
+            <included-library>file.reference.cog-jglobus.jar</included-library>
+            <included-library>file.reference.commons-logging.jar</included-library>
+            <included-library>file.reference.cryptix-asn1.jar</included-library>
+            <included-library>file.reference.cryptix.jar</included-library>
+            <included-library>file.reference.cryptix32.jar</included-library>
+            <included-library>file.reference.jce-jdk13-120.jar</included-library>
+            <included-library>file.reference.jgss.jar</included-library>
+            <included-library>file.reference.puretls.jar</included-library>
             <source-roots>
                 <root id="src.dir"/>
             </source-roots>
