@@ -332,14 +332,6 @@ exists or setup the property manually. For example like this:
         <copyfiles files="${reference.icat3-user-default.jar}" todir="${build.classes.dir}"/>
         <copyfiles files="${reference.icat3-data.jar}" todir="${build.classes.dir}"/>
         <copyfiles files="${file.reference.log4j-1.2.14.jar}" todir="${build.classes.dir}"/>
-        <copyfiles files="${file.reference.cog-jglobus.jar}" todir="${build.classes.dir}"/>
-        <copyfiles files="${file.reference.commons-logging.jar}" todir="${build.classes.dir}"/>
-        <copyfiles files="${file.reference.cryptix-asn1.jar}" todir="${build.classes.dir}"/>
-        <copyfiles files="${file.reference.cryptix.jar}" todir="${build.classes.dir}"/>
-        <copyfiles files="${file.reference.cryptix32.jar}" todir="${build.classes.dir}"/>
-        <copyfiles files="${file.reference.jce-jdk13-120.jar}" todir="${build.classes.dir}"/>
-        <copyfiles files="${file.reference.jgss.jar}" todir="${build.classes.dir}"/>
-        <copyfiles files="${file.reference.puretls.jar}" todir="${build.classes.dir}"/>
     </target>
     <target depends="compile" name="library-inclusion-in-manifest">
         <copyfiles files="${reference.icat3-core.jar}" manifestproperty="manifest.reference.icat3-core.jar" todir="${dist.ear.dir}"/>
@@ -347,16 +339,8 @@ exists or setup the property manually. For example like this:
         <copyfiles files="${reference.icat3-user-default.jar}" manifestproperty="manifest.reference.icat3-user-default.jar" todir="${dist.ear.dir}"/>
         <copyfiles files="${reference.icat3-data.jar}" manifestproperty="manifest.reference.icat3-data.jar" todir="${dist.ear.dir}"/>
         <copyfiles files="${file.reference.log4j-1.2.14.jar}" manifestproperty="manifest.file.reference.log4j-1.2.14.jar" todir="${dist.ear.dir}"/>
-        <copyfiles files="${file.reference.cog-jglobus.jar}" manifestproperty="manifest.file.reference.cog-jglobus.jar" todir="${dist.ear.dir}"/>
-        <copyfiles files="${file.reference.commons-logging.jar}" manifestproperty="manifest.file.reference.commons-logging.jar" todir="${dist.ear.dir}"/>
-        <copyfiles files="${file.reference.cryptix-asn1.jar}" manifestproperty="manifest.file.reference.cryptix-asn1.jar" todir="${dist.ear.dir}"/>
-        <copyfiles files="${file.reference.cryptix.jar}" manifestproperty="manifest.file.reference.cryptix.jar" todir="${dist.ear.dir}"/>
-        <copyfiles files="${file.reference.cryptix32.jar}" manifestproperty="manifest.file.reference.cryptix32.jar" todir="${dist.ear.dir}"/>
-        <copyfiles files="${file.reference.jce-jdk13-120.jar}" manifestproperty="manifest.file.reference.jce-jdk13-120.jar" todir="${dist.ear.dir}"/>
-        <copyfiles files="${file.reference.jgss.jar}" manifestproperty="manifest.file.reference.jgss.jar" todir="${dist.ear.dir}"/>
-        <copyfiles files="${file.reference.puretls.jar}" manifestproperty="manifest.file.reference.puretls.jar" todir="${dist.ear.dir}"/>
         <manifest file="${build.ear.classes.dir}/META-INF/MANIFEST.MF" mode="update">
-            <attribute name="Class-Path" value="${manifest.reference.icat3-core.jar} ${manifest.reference.icat3-jaxb.jar} ${manifest.reference.icat3-user-default.jar} ${manifest.reference.icat3-data.jar} ${manifest.file.reference.log4j-1.2.14.jar} ${manifest.file.reference.cog-jglobus.jar} ${manifest.file.reference.commons-logging.jar} ${manifest.file.reference.cryptix-asn1.jar} ${manifest.file.reference.cryptix.jar} ${manifest.file.reference.cryptix32.jar} ${manifest.file.reference.jce-jdk13-120.jar} ${manifest.file.reference.jgss.jar} ${manifest.file.reference.puretls.jar} "/>
+            <attribute name="Class-Path" value="${manifest.reference.icat3-core.jar} ${manifest.reference.icat3-jaxb.jar} ${manifest.reference.icat3-user-default.jar} ${manifest.reference.icat3-data.jar} ${manifest.file.reference.log4j-1.2.14.jar} "/>
         </manifest>
     </target>
     <target name="-copy-meta-inf">
