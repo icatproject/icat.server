@@ -519,9 +519,13 @@ public class MetadataIngest {
             parameter.setRangeTop(_parameter.getRangeTop());
             parameter.setStringValue(_parameter.getStringValue());
 
-            parameter = DataFileManager.addDataFileParameter(userId, parameter, datafileId, manager);
+            try {
+                parameter = DataFileManager.addDataFileParameter(userId, parameter, datafileId, manager);
+                parameters.add(parameter);
+            } catch (ValidationException ve) {
+                log.error("Error adding DatafileParameter (" + parameter.toString() + ") to Datafile#" + datafileId, ve);
+            }
 
-            parameters.add(parameter);
         } //end for
         return parameters;
     }
@@ -584,9 +588,13 @@ public class MetadataIngest {
             parameter.setRangeTop(_parameter.getRangeTop());
             parameter.setStringValue(_parameter.getStringValue());
 
-            parameter = DataSetManager.addDataSetParameter(userId, parameter, datasetId, manager);
+            try {
+                parameter = DataSetManager.addDataSetParameter(userId, parameter, datasetId, manager);
+                parameters.add(parameter);
+            } catch (ValidationException ve) {
+                log.error("Error adding DatasetParameter (" + parameter.toString() + ") to Dataset#" + datasetId, ve);
+            }
 
-            parameters.add(parameter);
         } //end for
         return parameters;
     }
@@ -607,10 +615,13 @@ public class MetadataIngest {
             parameter.setRangeTop(_parameter.getRangeTop());
             parameter.setStringValue(_parameter.getStringValue());
 
-            //store in database
-            parameter = (uk.icat3.entity.SampleParameter) uk.icat3.manager.InvestigationManager.addInvestigationObject(userId, parameter, investigation.getId(), manager);
+            try {
+                parameter = (uk.icat3.entity.SampleParameter) uk.icat3.manager.InvestigationManager.addInvestigationObject(userId, parameter, investigation.getId(), manager);
+                parameters.add(parameter);
+            } catch (ValidationException ve) {
+                log.error("Error adding SampleParameter (" + parameter.toString() + ") to Sample#" + sampleId + " in Investigation (" + investigation + ")", ve);
+            }
 
-            parameters.add(parameter);
         } //end for
         return parameters;
     }
