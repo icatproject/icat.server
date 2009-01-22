@@ -107,16 +107,7 @@ public class ICATXMLIngestClient {
         String buffer = readXMLFile(args[1]);
 
         //Check that configuration file is present and correct
-        Properties properties = readConfigFile();
-
-        
-        System.out.println("[runas] " + username);
-        System.out.println("[xml] " + buffer);
-        System.out.println("[username] " + properties.getProperty("username"));
-        System.out.println("[password] " + properties.getProperty("password"));
-        System.out.println("[icatadmin_endpoint] " + properties.getProperty("icatadmin_endpoint"));
-        System.out.println("[icat_endpoint] " + properties.getProperty("icat_endpoint"));
-
+        Properties properties = readConfigFile();     
 
         //uk.icat3.client.ICATAdminISISService icatAdminService = null;
         uk.icat3.client.admin.ICATAdmin icatAdminPort = null;
@@ -144,6 +135,8 @@ public class ICATXMLIngestClient {
             System.out.println("SessionId = " + sessionId);
 
             //ingest here
+            System.out.println("Ingesting metadata...");
+            icatPort.ingestMetadata(sessionId, buffer);
 
             System.out.println("Logging out...");
             icatPort.logout(sessionId);
