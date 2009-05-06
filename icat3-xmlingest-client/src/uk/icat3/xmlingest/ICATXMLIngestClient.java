@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -107,42 +108,52 @@ public class ICATXMLIngestClient {
         String buffer = readXMLFile(args[1]);
 
         //Check that configuration file is present and correct
-        Properties properties = readConfigFile();     
+        Properties properties = readConfigFile();
 
+        List<Long> ids = ingestInvestigation(username, buffer, properties);
+
+        for (Long id : ids) System.out.println("Returned : " + id);
+    }
+
+    public static List<Long> ingestInvestigation(String user, String xml, Properties properties) {
         //uk.icat3.client.ICATAdminISISService icatAdminService = null;
         uk.icat3.client.admin.ICATAdmin icatAdminPort = null;
         //uk.icat3.client.ICATISISService icatService = null;
         uk.icat3.client.ICAT icatPort = null;
+        List<Long> ids = null;
+
+        
 
         try {
 
             // Call Web Service Operation
             URL adminURL = new URL(properties.getProperty("icatadmin_endpoint"));
             icatAdminPort = new uk.icat3.client.admin.ICATAdminService(adminURL, new QName("admin.client.icat3.uk", "ICATAdminService")).getICATAdminPort();
-
             ((BindingProvider)icatAdminPort).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, properties.getProperty("icatadmin_endpoint"));
             ((BindingProvider)icatAdminPort).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, properties.getProperty("username"));
-            ((BindingProvider)icatAdminPort).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, properties.getProperty("password"));            
+            ((BindingProvider)icatAdminPort).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, properties.getProperty("password"));
 
             URL icatURL = new URL(properties.getProperty("icat_endpoint"));
             icatPort = new uk.icat3.client.ICATService(icatURL, new QName("client.icat3.uk", "ICATService")).getICATPort();
             ((BindingProvider)icatPort).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, properties.getProperty("icat_endpoint"));
 
             System.out.println("Logging in...");
-            java.lang.String sessionId = icatAdminPort.loginAdmin(username);
+            java.lang.String sessionId = icatAdminPort.loginAdmin(user);
             //java.lang.String sessionId = icatPort.login("dwf64", "sadsadas");
 
             System.out.println("SessionId = " + sessionId);
 
             //ingest here
             System.out.println("Ingesting metadata...");
-            icatPort.ingestMetadata(sessionId, buffer);
+            ids = icatPort.ingestMetadata(sessionId, xml);
 
             System.out.println("Logging out...");
             icatPort.logout(sessionId);
 
+            return ids;
         } catch (Exception ex) {
             ex.printStackTrace();
+            return null;
         }
     }
 }
