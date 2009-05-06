@@ -42,7 +42,7 @@ public class TestEntityBaseBean  extends BaseTestClass {
     /**
      * Tests own dataset as unique
      */
-    //@Test
+    @Test
     public void merge() throws ICATAPIException {
         Dataset dataset = new Dataset();
         
@@ -56,7 +56,7 @@ public class TestEntityBaseBean  extends BaseTestClass {
         assertEquals("This should be same", dataset2.getDescription(), dataset.getDescription());
     }
     
-    //@Test
+    @Test
     public void merge2() throws ICATAPIException {
         Dataset dataset = new Dataset();
         Investigation in = em.find(Investigation.class, VALID_INVESTIGATION_ID);
@@ -72,8 +72,9 @@ public class TestEntityBaseBean  extends BaseTestClass {
         assertEquals("This should be same", dataset2.getDescription(), "A");
         assertEquals("This should be same", dataset2.getDescription(), dataset.getDescription());
     }
-    
-    //@Test
+
+    /*
+    @Test
     public void cascadeRemoveDeletednvestigationObject() throws ICATAPIException {
         //get a investigation with deleted datasets
         Investigation in = em.find(Investigation.class, VALID_INVESTIGATION_ID);
@@ -104,8 +105,9 @@ public class TestEntityBaseBean  extends BaseTestClass {
             
         }
     }
+    */
     
-    //@Test
+    @Test
     public void cascadeRemoveDeletedDatasetd() throws ICATAPIException {
         //get a investigation with deleted datasets
         Dataset ds = em.find(Dataset.class, VALID_INVESTIGATION_ID);
@@ -118,7 +120,7 @@ public class TestEntityBaseBean  extends BaseTestClass {
         assertEquals("datafile number must be 2 after removing deleted items", 2, ds.getDatafileCollection().size());
     }
     
-    //@Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void cascadeDeleteInvestigation()  throws ICATAPIException {
         Investigation in = em.find(Investigation.class, VALID_INVESTIGATION_ID_TO_DE_DELETED);
         
@@ -175,7 +177,7 @@ public class TestEntityBaseBean  extends BaseTestClass {
         }
     }
     
-    //@Test
+    @Test
     public void cascadeRemoveDeletedDatafile() throws ICATAPIException {
         //get a investigation with deleted datasets
         Datafile df= em.find(Datafile.class, VALID_INVESTIGATION_ID);
@@ -189,7 +191,7 @@ public class TestEntityBaseBean  extends BaseTestClass {
         }
     }
     
-    //@Test(expected=InsufficientPrivilegesException.class)
+    @Test(expected=InsufficientPrivilegesException.class)
     public void cascadeRemoveDeletedDataset() throws ICATAPIException {
         
         boolean delete = true;

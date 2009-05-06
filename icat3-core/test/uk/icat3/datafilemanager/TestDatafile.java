@@ -422,7 +422,7 @@ public class TestDatafile extends BaseTestClassTX {
     public void getDatafiles() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for get a dataFile for dataFile id: "+VALID_INVESTIGATION_ID);
         Collection<Long> dsIds = new ArrayList<Long>();
-        dsIds.add(VALID_DATA_SET_ID);
+        dsIds.add(VALID_DATA_FILE_ID);
         
         Collection<Datafile> dataFilesGot = DataFileManager.getDataFiles(VALID_USER_FOR_INVESTIGATION, dsIds,  em);
         
@@ -555,7 +555,7 @@ public class TestDatafile extends BaseTestClassTX {
             Datafile file = new Datafile();
             Collection<DatafileFormat> datafileFormat = (Collection<DatafileFormat>)executeListResultCmd("select d from DatafileFormat d");
             file.setDatafileFormat(datafileFormat.iterator().next());
-            file.setName("unit test create data set");
+            file.setName("unit test create datafile " + Math.random());
             return file;
         } else {
             //create invalid dataFile

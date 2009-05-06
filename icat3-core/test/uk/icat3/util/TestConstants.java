@@ -19,7 +19,16 @@ public class TestConstants {
     //searching
     public final static String VALID_KEYWORD = "calibration";
     public final static String VALID_KEYWORD2 = "ccwilson";
-    
+    public final static String VALID_KEYWORD3 = "shul*";
+
+    public final static String VALID_DATAFILE_NAME1 = "MAPS01300.RAW";
+    public final static Double VALID_RUN_NUMBER_RANGE_START = 1299d;
+    public final static Double VALID_RUN_NUMBER_RANGE_END = 1301d;
+
+
+    public final static String VALID_INSTRUMENT1 = "MAPS";
+
+
     public final static String VALID_SAMPLE_NAME = "SrF2 calibration  w=-25.3";
     
     public final static String VALID_FEDID_FOR_INVESTIGATION =  "gjd37";
@@ -38,7 +47,8 @@ public class TestConstants {
     public final static long VALID_DATA_SET_ID =  3;
     public final static long VALID_DATA_FILE_ID =  3;
     public final static long VALID_SAMPLE_ID_FOR_INVESTIGATION_ID =  3;
-    
+
+    public final static String VALID_USER =  "9932";
     public final static String INVALID_USER =  "invalidUser" +Math.random();
     public final static String VALID_INVESTIGATION_SURNAME  = "HEALY";
     

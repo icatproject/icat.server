@@ -30,7 +30,7 @@ public class TestInvestigationListSearch extends BaseTestClass{
     private static Logger log = Logger.getLogger(TestInvestigationListSearch.class);
     
     
-    //@Test
+    @Test
     public void testGetAllSupersInvestigations(){
         log.info("Testing SUPER_USER, getAllInvestigations: "+SUPER_USER);
         
@@ -46,7 +46,7 @@ public class TestInvestigationListSearch extends BaseTestClass{
         assertEquals("Collection 'all Investigations' should be 5", 5 , invs.size());
     }
     
-    //@Test
+    @Test
     public void testGetAllNoUserInvestigations(){
         log.info("Testing ANY, getAllInvestigations: ANY");
         
@@ -94,7 +94,7 @@ public class TestInvestigationListSearch extends BaseTestClass{
         assertEquals("Collection 'all Investigations' should be 5", 5 , invs.size());
     }    
     
-    //@Test
+    @Test
     public void testGetAllDeletedScientistInvestigations(){
         log.info("Testing deleted_facility_scientist, getAllInvestigations: deleted_facility_scientist");
         

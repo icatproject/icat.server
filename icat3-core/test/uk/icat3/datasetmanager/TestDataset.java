@@ -718,7 +718,7 @@ public class TestDataset extends BaseTestClassTX {
             Dataset file = new Dataset();
             Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
             file.setDatasetType(datasetType.iterator().next().getName());
-            file.setName("unit test create data set");
+            file.setName("unit test create data set " + Math.random());
             return file;
         } else {
             //create invalid dataset

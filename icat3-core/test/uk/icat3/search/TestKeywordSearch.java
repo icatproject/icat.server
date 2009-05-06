@@ -32,7 +32,7 @@ public class TestKeywordSearch extends BaseTestClass {
      * Tests whether the user has any investigations and that he has access to the number of investigations
      * with no investigator
      */
-    //@Test
+    @Test
     public void testValidUserKeyword(){
         log.info("Testing valid user for all keywords: "+VALID_USER_FOR_INVESTIGATION);
         testKeywords(VALID_USER_FOR_INVESTIGATION);
