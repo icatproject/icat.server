@@ -39,7 +39,11 @@ public class BaseTestClass extends BaseTest{
     
      @BeforeClass
     public static void BeforeClassSetUp(){
-        setUpEntityManagerFactoryOnly();
+        try {
+            Thread.sleep(3000);
+        } catch (Exception e) {}
+
+         setUpEntityManagerFactoryOnly();
     }
     
     @AfterClass

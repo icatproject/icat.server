@@ -63,13 +63,14 @@ public class BaseTestClassTX extends BaseTest{
     
     @BeforeClass
     public static void BeforeClassSetUp(){
+        try {
+            Thread.sleep(3000);
+        } catch (Exception e) {}
         setUpEntityManagerFactoryOnly();
     }
     
     @AfterClass
     public static void AfterClassTearDown(){
         tearDownEntityManagerFactoryOnly();
-    }
-    
-    
+    }    
 }
