@@ -127,6 +127,7 @@ public class MetadataIngest {
                             //catch validation exception i.e. if duplicate keyword exists, allow ingestion of other keywords to continue
                         } //end try/catch
                     } //end
+
                     //add publications
                     List<uk.icat3.jaxb.gen.Publication> _publications = _inv.getPublication();
                     ArrayList<uk.icat3.entity.Publication> publications = getPublications(_publications, investigation.getId());
@@ -134,9 +135,13 @@ public class MetadataIngest {
                         try {
                             InvestigationManager.addInvestigationObject(userId, publication, investigation.getId(), manager);
                         } catch (ValidationException ve) {
-                            //catch validation exception i.e. if duplicate publication exists, allow ingestion of other publications to continue
+                            //catch validation exception i.e. if duplicate publication exists, allow ingestion of other publications to continue else rethrow exception
+                            if (!(ve.getMessage().indexOf("is not unique") != -1))
+                                throw ve;
+
                         } //end try/catch
                     } //end
+
                     //add investigators
                     List<uk.icat3.jaxb.gen.Investigator> _investigators = _inv.getInvestigator();
                     ArrayList<uk.icat3.entity.Investigator> investigators = getInvestigators(_investigators, investigation.getId());
@@ -144,10 +149,16 @@ public class MetadataIngest {
                         try {
                             InvestigationManager.addInvestigationObject(userId, investigator, investigation.getId(), manager);
                         } catch (ValidationException ve) {
-                            ve.printStackTrace();
-                        //catch validation exception i.e. if duplicate investigator exists, allow ingestion of other investigators to continue
+                            
+                            //catch validation exception i.e. if duplicate investigator exists, allow ingestion of other investigators to continue else rethrow exception
+                            if (!(ve.getMessage().indexOf("is not unique") != -1)) {
+                                log.warn("error adding investigator", ve);
+                                throw ve;
+                            }//end if
+
                         } //end try/catch
                     } //end
+
                     //add permissions for investigators to investigation
                     for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
                         if (!userId.equals(_investigator.getUserId())) {
@@ -158,11 +169,13 @@ public class MetadataIngest {
                             } //ignore if user already has permission
                         }//end if
                     } //end for
+
                     //add Investigation Samples (used in experiment pre-population)
                     List<uk.icat3.jaxb.gen.Sample> _samples = _inv.getSample();
                     for (uk.icat3.jaxb.gen.Sample _sample : _samples) {
                         uk.icat3.entity.Sample sample = getSample(userId, _sample, investigation, manager);
                     } //end for
+
                     List<Dataset> _datasets = _inv.getDataset();
                     for (Dataset _dataset : _datasets) {
                         uk.icat3.entity.Dataset dataset = getDataset(userId, _dataset, investigation, manager);
