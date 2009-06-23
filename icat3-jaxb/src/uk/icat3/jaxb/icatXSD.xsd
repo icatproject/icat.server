@@ -288,12 +288,6 @@
 			<xs:element name="user_id" type="str255"/>
 			<xs:element name="role" type="str255"/>
 			<xs:element name="privilege" type="Icat_Role" minOccurs="0"/>
-			<xs:element name="title" type="str255" minOccurs="0"/>
-			<xs:element name="initials" type="str255" minOccurs="0"/>
-			<xs:element name="first_name" type="str255" minOccurs="0"/>
-			<xs:element name="middle_name" type="str255" minOccurs="0"/>
-			<xs:element name="last_name" type="str255" minOccurs="0"/>
-			<xs:element name="affiliation" type="str255" minOccurs="0"/>
 			<xs:element name="affiliation_id" type="str255" minOccurs="0"/>
 		</xs:all>
 	</xs:complexType>
