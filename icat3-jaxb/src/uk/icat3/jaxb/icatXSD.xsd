@@ -348,7 +348,7 @@
 			<xs:element name="name" type="str255"/>
 			<xs:element name="instance" type="str255" minOccurs="0"/>
 			<xs:element name="chemical_formula" type="str255" minOccurs="0"/>
-			<xs:element name="safety_information" type="str4000" minOccurs="0"/>
+			<xs:element name="safety_information" type="str4000"/>
 			<xs:element name="parameter" type="Parameter" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 	</xs:complexType>
