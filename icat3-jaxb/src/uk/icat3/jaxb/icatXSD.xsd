@@ -284,13 +284,16 @@
 	</xs:complexType>
 	<!-- ................................................................-->
 	<xs:complexType name="Investigator">
-		<xs:all>
-			<xs:element name="user_id" type="str255"/>
-			<xs:element name="role" type="str255"/>
-			<xs:element name="privilege" type="Icat_Role" minOccurs="0"/>
-			<xs:element name="affiliation_id" type="str255" minOccurs="0"/>
-		</xs:all>
+        <xs:sequence minOccurs="1" maxOccurs="1">
+                <xs:choice minOccurs="1" maxOccurs="2">
+                    <xs:element name="user_id" type="str255"/>
+                    <xs:element name="affiliation_id" type="str255"/>
+                </xs:choice>
+                <xs:element name="role" type="str255"/>
+                <xs:element name="privilege" type="Icat_Role" minOccurs="0"/>
+            </xs:sequence>		
 	</xs:complexType>
+
 	<!-- ================================================================-->
 	<xs:complexType name="Dataset">
 		<xs:sequence>
