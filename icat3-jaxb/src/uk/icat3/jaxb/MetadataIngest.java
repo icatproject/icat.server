@@ -142,6 +142,91 @@ public class MetadataIngest {
                         } //end try/catch
                     } //end
 
+                    //add investigators and permission (if supplied in xml)
+                    log.debug("Adding investigators and permissions (if supplied in xml) to Investigation");
+                    List<uk.icat3.jaxb.gen.Investigator> _investigators = _inv.getInvestigator();
+                    for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
+
+                        //check that user/facility id information is valid
+                        String invUserId = _investigator.getUserId();
+                        String invAffiliationUserId = _investigator.getAffiliationId();
+
+                        //ensure that these match in database
+                        if ((invUserId != null) && (invAffiliationUserId != null)) {
+                            log.debug("Both user_id and affiliation supplied, checking to make sure that they match up...");
+
+                            FacilityUser fu = null;
+                            try {
+                                fu = (FacilityUser) manager.createNamedQuery("FacilityUser.findByFederalId").setParameter("fedId", invUserId).getSingleResult();
+                            } catch (Exception e) {
+                                log.warn("Error finding facilityUserId match for userId" + invUserId, e);
+                                throw new ValidationException("Error finding facilityUserId match for userId " + invUserId);
+                            }//end catch
+
+                            if (!invAffiliationUserId.equals(fu.getFacilityUserId()))
+                                throw new ValidationException("Error: userId and affiliationId do not match");
+
+                            log.debug("OK");
+                        }//end if
+
+                        //get affiliation id
+                        if ((invUserId != null) && (invAffiliationUserId == null)) {
+                            log.debug("user_id supplied, retrieving corresponding affiliation_id...");
+
+                            try {
+                                FacilityUser fu = (FacilityUser) manager.createNamedQuery("FacilityUser.findByFederalId").setParameter("fedId", invUserId).getSingleResult();
+                                invAffiliationUserId = fu.getFacilityUserId();
+                                log.debug("found match");
+
+                            } catch (Exception e) {
+                                log.warn("Error finding affiliation_id match for user_id" + invUserId, e);
+                                throw new ValidationException("Error finding affiliation_id match for user_id " + invUserId);
+                            }//end catch
+                        }//end if
+
+                        //get userId
+                        if ((invUserId == null) && (invAffiliationUserId != null)) {
+                            log.debug("affiliation_id supplied, retrieving corresponding user_id...");
+
+                            try {
+                                FacilityUser fu = (FacilityUser) manager.createNamedQuery("FacilityUser.findByFacilityUserId").setParameter("facilityUserId", invAffiliationUserId).getSingleResult();
+                                invUserId = fu.getFederalId();
+                                log.debug("match found");
+
+                            } catch (Exception e) {
+                                log.warn("Error finding user_id match for affiliation_id" + invAffiliationUserId, e);
+                                throw new ValidationException("Error finding user_id match for affiliation_id " + invAffiliationUserId);
+                            }//end catch
+                        }//end if
+
+                        //compose investigator entity ready for persistence
+                        uk.icat3.entity.InvestigatorPK pk = new uk.icat3.entity.InvestigatorPK(invAffiliationUserId, investigation.getId());
+                        uk.icat3.entity.Investigator investigator = new uk.icat3.entity.Investigator(pk);
+                        investigator.setRole(_investigator.getRole());
+
+                        try {
+                            //persist investigator
+                            log.debug("adding investigator to investigation");
+                            InvestigationManager.addInvestigationObject(userId, investigator, investigation.getId(), manager);
+
+                            //if permission included within xml then assign permission to investigator
+                            if (_investigator.getPrivilege() != null) {
+                                log.debug("adding permission to investigation for investigator");
+                                InvestigationManager.addAuthorisation(userId, _investigator.getUserId(), _investigator.getPrivilege(), investigation.getId(), manager);
+                            }//end if
+
+                        } catch (ValidationException ve) {
+
+                            //catch validation exception i.e. if duplicate investigator exists, allow ingestion of other investigators to continue else rethrow exception
+                            if (!(ve.getMessage().indexOf("is not unique") != -1)) {
+                                log.warn("error adding investigator", ve);
+                                throw ve;
+                            }//end if
+                        } //end catch
+
+                    } //end for
+
+                    /*
                     //add investigators
                     List<uk.icat3.jaxb.gen.Investigator> _investigators = _inv.getInvestigator();
                     ArrayList<uk.icat3.entity.Investigator> investigators = getInvestigators(_investigators, investigation.getId());
@@ -169,6 +254,19 @@ public class MetadataIngest {
                             } //ignore if user already has permission
                         }//end if
                     } //end for
+
+
+                     * private static ArrayList<uk.icat3.entity.Investigator> getInvestigators(List<uk.icat3.jaxb.gen.Investigator> _investigators, Long investigationId) {
+                            ArrayList<uk.icat3.entity.Investigator> investigators = new ArrayList<uk.icat3.entity.Investigator>();
+                            for (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) {
+                                uk.icat3.entity.InvestigatorPK pk = new uk.icat3.entity.InvestigatorPK(_investigator.getAffiliationId(), investigationId);
+                                uk.icat3.entity.Investigator investigator = new uk.icat3.entity.Investigator(pk);
+                                investigator.setRole(_investigator.getRole());
+                                investigators.add(investigator);
+                            } //end for
+                            return investigators;
+                        }
+                     */
 
                     //add Investigation Samples (used in experiment pre-population)
                     List<uk.icat3.jaxb.gen.Sample> _samples = _inv.getSample();
