@@ -645,8 +645,14 @@ public class MetadataIngest {
                     DataSetManager.addAuthorisation(userId, fedId, auth.getRole().getRole(), dataset.getId(), manager);
               
                 } catch (NoResultException nre) {
-                    log.debug("No permissions found for user on Investigation", nre);
-                }
+                    log.debug("No permissions found for user on Investigation so not attempting to add permission to dataset", nre);
+                } catch (ValidationException ve) {
+                    //if attempting to add duplicate permission, supress exception (ignore and carry on) otherwise rethrow
+                    if (!(ve.getMessage().indexOf("is not unique") != -1)) {
+                        log.warn("error adding dataset permission for user " + fedId, ve);
+                        throw ve;
+                    }//end if
+                }//end if
 
             /*
             Collection<uk.icat3.entity.IcatAuthorisation> auths = InvestigationManager.getAuthorisations(userId, investigation.getId(), manager);
