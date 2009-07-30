@@ -717,12 +717,12 @@ public class MetadataIngest {
             parameter.setRangeTop(_parameter.getRangeTop());
             parameter.setStringValue(_parameter.getStringValue());
 
-            try {
+            //try {
                 parameter = DataFileManager.addDataFileParameter(userId, parameter, datafileId, manager);
                 parameters.add(parameter);
-            } catch (ValidationException ve) {
-                log.error("Error adding DatafileParameter (" + parameter.toString() + ") to Datafile#" + datafileId, ve);
-            }
+            //} catch (ValidationException ve) {
+            //    log.error("Error adding DatafileParameter (" + parameter.toString() + ") to Datafile#" + datafileId, ve);
+            //}
 
         } //end for
         return parameters;
