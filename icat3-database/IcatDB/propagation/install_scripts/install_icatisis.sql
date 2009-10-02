@@ -1,6 +1,7 @@
 REM gathers the information required to run SQL*Plus scripts, then
 REM runs those scripts.
 
+
 REM Ensure the scripts in the "general_scripts" subdirectory are up to date
 REM before running this script.  See the "~notes.txt" file in that directory for
 REM details
