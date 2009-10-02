@@ -34,12 +34,12 @@ public class ICATXMLIngestClient {
     }
 
     public static String readXMLFile(String _filename) {
-        String _buffer = "";
+        StringBuffer _buffer=new StringBuffer();
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(_filename)));
             String line = "";
             while((line = br.readLine()) != null) {
-                _buffer += line;
+                _buffer.append(line);
             }//end while
         } catch (Exception e) {
             System.err.println("[ERROR] - Supplied filename does not exist or cannot be read");
@@ -47,7 +47,7 @@ public class ICATXMLIngestClient {
             System.exit(-1);
         }//end try/catch
 
-        return _buffer;
+        return _buffer.toString();
     }
 
     public static Properties readConfigFile() {
