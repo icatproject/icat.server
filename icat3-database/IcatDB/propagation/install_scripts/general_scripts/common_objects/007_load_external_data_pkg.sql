@@ -1,4 +1,3 @@
-/*<TOAD_FILE_CHUNK>*/
 CREATE OR REPLACE PACKAGE load_external_data_pkg AS
 
 /*
@@ -66,7 +65,6 @@ FUNCTION get_create_id RETURN instrument.create_id%TYPE;
 
 END load_external_data_pkg;
 /
-/*<TOAD_FILE_CHUNK>*/
 
 --##############################################################################
 
@@ -138,7 +136,7 @@ BEGIN
         description AS description,
         Row_Number() over(PARTITION BY Lower(name), version ORDER BY 1) rn
       FROM extern_datafile_format
-      WHERE Upper(&&parameter_datafile_icat_type) = 'Y'
+      WHERE Upper(dls) = 'Y'
       )
     WHERE rn = 1) source
   ON(target.name = source.name
@@ -150,9 +148,9 @@ BEGIN
       mod_time = systimestamp,
       mod_id = p_mod_id,
       create_id = LV_CREATE_ID,
-	  create_time = nvl(mod_time,systimestamp),
-	  FACILITY_ACQUIRED = 'Y',
-	  deleted = 'N'
+      create_time = nvl(mod_time,systimestamp),
+      FACILITY_ACQUIRED = 'Y',
+      deleted = 'N'
     WHERE (target.format_type != source.format_type
            OR (target.format_type IS NULL AND source.format_type IS NOT NULL)
            OR (target.format_type IS NOT NULL AND source.format_type IS NULL)
@@ -162,9 +160,9 @@ BEGIN
          OR (target.description IS NOT NULL AND source.description IS NULL)
         )
     OR target.create_id != LV_CREATE_ID
-	OR target.create_time is null
-	OR target.FACILITY_ACQUIRED is null
-	OR target.deleted is null
+    OR target.create_time is null
+    OR target.FACILITY_ACQUIRED is null
+    OR target.deleted is null
   WHEN NOT matched THEN
     INSERT(
       name,
@@ -174,9 +172,9 @@ BEGIN
       mod_time,
       mod_id,
       create_id,
-	  create_time,
-	  FACILITY_ACQUIRED,
-	  deleted)
+      create_time,
+      FACILITY_ACQUIRED,
+      deleted)
     VALUES(
       source.name,
       source.version,
@@ -185,9 +183,9 @@ BEGIN
       systimestamp,
       p_mod_id,
       LV_CREATE_ID,
-	  systimestamp,
-	  'Y',
-	  'N');
+      systimestamp,
+      'Y',
+      'N');
 
   log_pkg.write_log('load_datafile_format: finished');
 EXCEPTION
@@ -218,7 +216,7 @@ BEGIN
         description AS description,
         Row_Number() over(PARTITION BY Lower(name) ORDER BY 1) rn
       FROM extern_dataset_status
-      WHERE Upper(&&parameter_datafile_icat_type) = 'Y'
+      WHERE Upper(dls) = 'Y'
       )
     WHERE rn = 1) source
   ON(target.name = source.name)
@@ -228,17 +226,17 @@ BEGIN
       mod_time = systimestamp,
       mod_id = p_mod_id,
       create_id = LV_CREATE_ID,
-	  create_time = nvl(mod_time, systimestamp),
-	  FACILITY_ACQUIRED = 'Y',
-	  deleted = 'N'
+      create_time = nvl(mod_time, systimestamp),
+      FACILITY_ACQUIRED = 'Y',
+      deleted = 'N'
     WHERE (target.description != source.description
            OR (target.description IS NULL AND source.description IS NOT NULL)
            OR (target.description IS NOT NULL AND source.description IS NULL)
           )
    OR target.create_id != LV_CREATE_ID
-	OR target.create_time is null
-	OR target.FACILITY_ACQUIRED is null
-	OR target.deleted is null
+    OR target.create_time is null
+    OR target.FACILITY_ACQUIRED is null
+    OR target.deleted is null
   WHEN NOT matched THEN
     INSERT(
       name,
@@ -246,18 +244,18 @@ BEGIN
       mod_time,
       mod_id,
       create_id,
-	  create_time,
-	  FACILITY_ACQUIRED,
-	  deleted)
+      create_time,
+      FACILITY_ACQUIRED,
+      deleted)
     VALUES(
       source.name,
       source.description,
       systimestamp,
       p_mod_id,
       LV_CREATE_ID,
-	  systimestamp,
-	  'Y',
-	  'N');
+      systimestamp,
+      'Y',
+      'N');
 
   log_pkg.write_log('load_dataset_status: finished');
 EXCEPTION
@@ -288,7 +286,7 @@ BEGIN
         description AS description,
         Row_Number() over(PARTITION BY Lower(name) ORDER BY 1) rn
       FROM extern_dataset_type
-      WHERE Upper(&&parameter_datafile_icat_type) = 'Y'
+      WHERE Upper(dls) = 'Y'
       )
     WHERE rn = 1) source
   ON(target.name = source.name)
@@ -298,17 +296,17 @@ BEGIN
       mod_time = systimestamp,
       mod_id = p_mod_id,
       create_id = LV_CREATE_ID,
-	  create_time = nvl(mod_time, systimestamp),
-	  FACILITY_ACQUIRED = 'Y',
-	  deleted = 'N'
+      create_time = nvl(mod_time, systimestamp),
+      FACILITY_ACQUIRED = 'Y',
+      deleted = 'N'
     WHERE (target.description != source.description
            OR (target.description IS NULL AND source.description IS NOT NULL)
            OR (target.description IS NOT NULL AND source.description IS NULL)
           )
    OR target.create_id != LV_CREATE_ID
-	OR target.create_time is null
-	OR target.FACILITY_ACQUIRED is null
-	OR target.deleted is null
+    OR target.create_time is null
+    OR target.FACILITY_ACQUIRED is null
+    OR target.deleted is null
   WHEN NOT matched THEN
     INSERT(
       name,
@@ -316,18 +314,18 @@ BEGIN
       mod_time,
       mod_id,
       create_id,
-	  create_time,
-	  FACILITY_ACQUIRED,
-	  deleted)
+      create_time,
+      FACILITY_ACQUIRED,
+      deleted)
     VALUES(
       source.name,
       source.description,
       systimestamp,
       p_mod_id,
       LV_CREATE_ID,
-	  systimestamp,
-	  'Y',
-	  'N');
+      systimestamp,
+      'Y',
+      'N');
 
   log_pkg.write_log('load_dataset_type: finished');
 EXCEPTION
@@ -360,7 +358,7 @@ BEGIN
         description AS description,
         Row_Number() over(PARTITION BY Lower(name) ORDER BY 1) rn
       FROM extern_facility_cycle
-      WHERE Upper(&&parameter_datafile_icat_type) = 'Y'
+      WHERE Upper(dls) = 'Y'
       )
     WHERE rn = 1) source
   ON(target.name = source.name)
@@ -372,9 +370,9 @@ BEGIN
       mod_time = systimestamp,
       mod_id = p_mod_id,
       create_id = LV_CREATE_ID,
-	  create_time = nvl(mod_time,systimestamp),
-	  FACILITY_ACQUIRED = 'Y',
-	  deleted = 'N'
+      create_time = nvl(mod_time,systimestamp),
+      FACILITY_ACQUIRED = 'Y',
+      deleted = 'N'
     WHERE (target.description != source.description
            OR (target.description IS NULL AND source.description IS NOT NULL)
            OR (target.description IS NOT NULL AND source.description IS NULL)
@@ -388,9 +386,9 @@ BEGIN
          OR (target.finish_date IS NOT NULL AND source.finish_date IS NULL)
         )
    OR target.create_id != LV_CREATE_ID
-	OR target.create_time is null
-	OR target.FACILITY_ACQUIRED is null
-	OR target.deleted is null
+    OR target.create_time is null
+    OR target.FACILITY_ACQUIRED is null
+    OR target.deleted is null
   WHEN NOT matched THEN
     INSERT(
       name,
@@ -400,9 +398,9 @@ BEGIN
       mod_time,
       mod_id,
       create_id,
-	  create_time,
-	  FACILITY_ACQUIRED,
-	  deleted)
+      create_time,
+      FACILITY_ACQUIRED,
+      deleted)
     VALUES(
       source.name,
       source.description,
@@ -411,9 +409,9 @@ BEGIN
       systimestamp,
       p_mod_id,
       LV_CREATE_ID,
-	  systimestamp,
-	  'Y',
-	  'N');
+      systimestamp,
+      'Y',
+      'N');
 
   log_pkg.write_log('load_facility_cycle: finished');
 EXCEPTION
@@ -442,11 +440,11 @@ BEGIN
       SELECT
         Lower(name) AS name, -- lowercase lookup name!
         type AS type,
-		short_name AS short_name,
+        short_name AS short_name,
         description AS description,
         Row_Number() over(PARTITION BY Lower(name) ORDER BY 1) rn
       FROM extern_instrument
-      WHERE Upper(&&parameter_datafile_icat_type) = 'Y'
+      WHERE Upper(dls) = 'Y'
       )
     WHERE rn = 1) source
   ON(target.name = source.name)
@@ -457,9 +455,9 @@ BEGIN
       mod_time = systimestamp,
       mod_id = p_mod_id,
       create_id = LV_CREATE_ID,
-	  create_time = nvl(mod_time, systimestamp),
-	  FACILITY_ACQUIRED = 'Y',
-	  deleted = 'N'
+      create_time = nvl(mod_time, systimestamp),
+      FACILITY_ACQUIRED = 'Y',
+      deleted = 'N'
     WHERE (target.description != source.description
            OR (target.description IS NULL AND source.description IS NOT NULL)
            OR (target.description IS NOT NULL AND source.description IS NULL)
@@ -469,33 +467,33 @@ BEGIN
          OR (target.type IS NOT NULL AND source.type IS NULL)
         )
    OR target.create_id != LV_CREATE_ID
-	OR target.create_time is null
-	OR target.FACILITY_ACQUIRED is null
-	OR target.deleted is null
+    OR target.create_time is null
+    OR target.FACILITY_ACQUIRED is null
+    OR target.deleted is null
   WHEN NOT matched THEN
     INSERT(
       name,
-	  short_name,
+      short_name,
       description,
       type,
       mod_time,
       mod_id,
       create_id,
-	  create_time,
-	  FACILITY_ACQUIRED,
-	  deleted)
+      create_time,
+      FACILITY_ACQUIRED,
+      deleted)
     VALUES(
       source.name,
-	  source.short_name,
+      source.short_name,
       source.description,
       source.type,
       systimestamp,
       p_mod_id,
       LV_CREATE_ID,
-	  systimestamp,
-	  'Y',
-	  'N'
-	  );
+      systimestamp,
+      'Y',
+      'N'
+      );
 
   log_pkg.write_log('load_instrument: finished');
 EXCEPTION
@@ -526,7 +524,7 @@ BEGIN
         description AS description,
         Row_Number() over(PARTITION BY Lower(name) ORDER BY 1) rn
       FROM extern_investigation_type
-      WHERE Upper(&&parameter_datafile_icat_type) = 'Y'
+      WHERE Upper(dls) = 'Y'
       )
     WHERE rn = 1) source
   ON(target.name = source.name)
@@ -536,17 +534,17 @@ BEGIN
       mod_time = systimestamp,
       mod_id = p_mod_id,
       create_id = LV_CREATE_ID,
-	  create_time = nvl(mod_time, systimestamp),
-	  FACILITY_ACQUIRED = 'Y',
-	  deleted = 'N'
+      create_time = nvl(mod_time, systimestamp),
+      FACILITY_ACQUIRED = 'Y',
+      deleted = 'N'
     WHERE (target.description != source.description
            OR (target.description IS NULL AND source.description IS NOT NULL)
            OR (target.description IS NOT NULL AND source.description IS NULL)
           )
     OR target.create_id != LV_CREATE_ID
-	OR target.create_time is null
-	OR target.FACILITY_ACQUIRED is null
-	OR target.deleted is null
+    OR target.create_time is null
+    OR target.FACILITY_ACQUIRED is null
+    OR target.deleted is null
   WHEN NOT matched THEN
     INSERT(
       name,
@@ -554,18 +552,18 @@ BEGIN
       mod_time,
       mod_id,
       create_id,
-	  create_time,
-	  FACILITY_ACQUIRED,
-	  deleted)
+      create_time,
+      FACILITY_ACQUIRED,
+      deleted)
     VALUES(
       source.name,
       source.description,
       systimestamp,
       p_mod_id,
       LV_CREATE_ID,
-	  systimestamp,
-	  'Y',
-	  'N');
+      systimestamp,
+      'Y',
+      'N');
 
   log_pkg.write_log('load_investigation_type: finished');
 EXCEPTION
@@ -613,7 +611,7 @@ BEGIN
         description AS description,
         Row_Number() over(PARTITION BY Lower(name), units ORDER BY 1) rn
       FROM extern_parameter_list
-      WHERE Upper(&&parameter_datafile_icat_type) = 'Y'
+      WHERE Upper(dls) = 'Y'
       )
     WHERE rn = 1) source
   ON (target.name = source.name
@@ -639,9 +637,9 @@ BEGIN
       mod_time = systimestamp,
       mod_id = p_mod_id,
       create_id = LV_CREATE_ID,
-	  create_time =nvl(mod_time, systimestamp),
-	  FACILITY_ACQUIRED = 'Y',
-	  deleted = 'N'
+      create_time =nvl(mod_time, systimestamp),
+      FACILITY_ACQUIRED = 'Y',
+      deleted = 'N'
     WHERE (target.units_long_version != source.units_long_version
             OR (target.units_long_version IS NULL AND source.units_long_version IS NOT NULL)
             OR (target.units_long_version IS NOT NULL AND source.units_long_version IS NULL)
@@ -654,9 +652,9 @@ BEGIN
          OR (target.description IS NOT NULL AND source.description IS NULL)
         )
     OR target.create_id != LV_CREATE_ID
-	OR target.create_time is null
-	OR target.FACILITY_ACQUIRED is null
-	OR target.deleted is null
+    OR target.create_time is null
+    OR target.FACILITY_ACQUIRED is null
+    OR target.deleted is null
   WHEN NOT matched THEN
     INSERT(
       name,
@@ -669,14 +667,14 @@ BEGIN
       is_dataset_parameter,
       is_datafile_parameter,
       description,
-	  verified,
-	  seq_number,
+      verified,
+      seq_number,
       mod_time,
       mod_id,
       create_id,
-	  create_time,
-	  FACILITY_ACQUIRED,
-	  deleted)
+      create_time,
+      FACILITY_ACQUIRED,
+      deleted)
     VALUES(
       source.name,
       source.units,
@@ -688,14 +686,14 @@ BEGIN
       source.is_dataset_parameter,
       source.is_datafile_parameter,
       source.description,
-	  'Y',
-	  1,
+      'Y',
+      1,
       systimestamp,
       p_mod_id,
       LV_CREATE_ID,
-	  systimestamp,
-	  'Y',
-	  'N');
+      systimestamp,
+      'Y',
+      'N');
 
   log_pkg.write_log('load_parameter: finished');
 EXCEPTION
@@ -726,7 +724,7 @@ BEGIN
         description AS description,
         Row_Number() over(PARTITION BY Lower(name) ORDER BY 1) rn
       FROM extern_study_status
-      WHERE Upper(&&parameter_datafile_icat_type) = 'Y'
+      WHERE Upper(dls) = 'Y'
       )
     WHERE rn = 1) source
   ON(target.name = source.name)
@@ -736,17 +734,17 @@ BEGIN
       mod_time = systimestamp,
       mod_id = p_mod_id,
       create_id = LV_CREATE_ID,
-	  create_time = nvl(mod_time, systimestamp),
-	  FACILITY_ACQUIRED = 'Y',
-	  deleted = 'N'
+      create_time = nvl(mod_time, systimestamp),
+      FACILITY_ACQUIRED = 'Y',
+      deleted = 'N'
     WHERE (target.description != source.description
            OR (target.description IS NULL AND source.description IS NOT NULL)
            OR (target.description IS NOT NULL AND source.description IS NULL)
           )
     OR target.create_id != LV_CREATE_ID
-	OR target.create_time is null
-	OR target.FACILITY_ACQUIRED is null
-	OR target.deleted is null
+    OR target.create_time is null
+    OR target.FACILITY_ACQUIRED is null
+    OR target.deleted is null
   WHEN NOT matched THEN
     INSERT(
       name,
@@ -754,18 +752,18 @@ BEGIN
       mod_time,
       mod_id,
       create_id,
-	  create_time,
-	  FACILITY_ACQUIRED,
-	  deleted)
+      create_time,
+      FACILITY_ACQUIRED,
+      deleted)
     VALUES(
       source.name,
       source.description,
       systimestamp,
       p_mod_id,
       LV_CREATE_ID,
-	  systimestamp,
-	  'Y',
-	  'N');
+      systimestamp,
+      'Y',
+      'N');
 
   log_pkg.write_log('load_study_status: finished');
 EXCEPTION
@@ -826,77 +824,77 @@ BEGIN
   MERGE INTO icat_role target
   USING (
       SELECT ROLE,                           
-	ACTION_INSERT,                  
-	ACTION_INSERT_WEIGHT,          
-	ACTION_SELECT,                  
-	ACTION_SELECT_WEIGHT,           
-	ACTION_DOWNLOAD,                
-	ACTION_DOWNLOAD_WEIGHT,         
-	ACTION_UPDATE,                  
-	ACTION_UPDATE_WEIGHT,           
-	ACTION_DELETE,                  
-	ACTION_DELETE_WEIGHT,           
-	ACTION_REMOVE,                 
-	ACTION_REMOVE_WEIGHT,           
-	ACTION_ROOT_INSERT,             
-	ACTION_ROOT_INSERT_WEIGHT,      
-	ACTION_ROOT_REMOVE,             
-	ACTION_ROOT_REMOVE_WEIGHT,      
-	ACTION_SET_FA,                  
-	ACTION_SET_FA_WEIGHT,           
-	ACTION_MANAGE_USERS,            
-	ACTION_MANAGE_USERS_WEIGHT
-	from (
+    ACTION_INSERT,                  
+    ACTION_INSERT_WEIGHT,          
+    ACTION_SELECT,                  
+    ACTION_SELECT_WEIGHT,           
+    ACTION_DOWNLOAD,                
+    ACTION_DOWNLOAD_WEIGHT,         
+    ACTION_UPDATE,                  
+    ACTION_UPDATE_WEIGHT,           
+    ACTION_DELETE,                  
+    ACTION_DELETE_WEIGHT,           
+    ACTION_REMOVE,                 
+    ACTION_REMOVE_WEIGHT,           
+    ACTION_ROOT_INSERT,             
+    ACTION_ROOT_INSERT_WEIGHT,      
+    ACTION_ROOT_REMOVE,             
+    ACTION_ROOT_REMOVE_WEIGHT,      
+    ACTION_SET_FA,                  
+    ACTION_SET_FA_WEIGHT,           
+    ACTION_MANAGE_USERS,            
+    ACTION_MANAGE_USERS_WEIGHT
+    from (
     SELECT upper(ROLE)  as role,                           
-	ACTION_INSERT  as ACTION_INSERT,                  
-	ACTION_INSERT_WEIGHT as ACTION_INSERT_WEIGHT,          
-	ACTION_SELECT as ACTION_SELECT,                  
-	ACTION_SELECT_WEIGHT as ACTION_SELECT_WEIGHT,           
-	ACTION_DOWNLOAD as ACTION_DOWNLOAD,                
-	ACTION_DOWNLOAD_WEIGHT as ACTION_DOWNLOAD_WEIGHT,         
-	ACTION_UPDATE as ACTION_UPDATE,                  
-	ACTION_UPDATE_WEIGHT as ACTION_UPDATE_WEIGHT,           
-	ACTION_DELETE as ACTION_DELETE,                  
-	ACTION_DELETE_WEIGHT as ACTION_DELETE_WEIGHT,           
-	ACTION_REMOVE as ACTION_REMOVE,                 
-	ACTION_REMOVE_WEIGHT as ACTION_REMOVE_WEIGHT,           
-	ACTION_ROOT_INSERT as ACTION_ROOT_INSERT,             
-	ACTION_ROOT_INSERT_WEIGHT as ACTION_ROOT_INSERT_WEIGHT,      
-	ACTION_ROOT_REMOVE as ACTION_ROOT_REMOVE,             
-	ACTION_ROOT_REMOVE_WEIGHT as ACTION_ROOT_REMOVE_WEIGHT,      
-	ACTION_SET_FA as ACTION_SET_FA,                  
-	ACTION_SET_FA_WEIGHT as ACTION_SET_FA_WEIGHT,           
-	ACTION_MANAGE_USERS as ACTION_MANAGE_USERS,            
-	ACTION_MANAGE_USERS_WEIGHT as ACTION_MANAGE_USERS_WEIGHT,         
+    ACTION_INSERT  as ACTION_INSERT,                  
+    ACTION_INSERT_WEIGHT as ACTION_INSERT_WEIGHT,          
+    ACTION_SELECT as ACTION_SELECT,                  
+    ACTION_SELECT_WEIGHT as ACTION_SELECT_WEIGHT,           
+    ACTION_DOWNLOAD as ACTION_DOWNLOAD,                
+    ACTION_DOWNLOAD_WEIGHT as ACTION_DOWNLOAD_WEIGHT,         
+    ACTION_UPDATE as ACTION_UPDATE,                  
+    ACTION_UPDATE_WEIGHT as ACTION_UPDATE_WEIGHT,           
+    ACTION_DELETE as ACTION_DELETE,                  
+    ACTION_DELETE_WEIGHT as ACTION_DELETE_WEIGHT,           
+    ACTION_REMOVE as ACTION_REMOVE,                 
+    ACTION_REMOVE_WEIGHT as ACTION_REMOVE_WEIGHT,           
+    ACTION_ROOT_INSERT as ACTION_ROOT_INSERT,             
+    ACTION_ROOT_INSERT_WEIGHT as ACTION_ROOT_INSERT_WEIGHT,      
+    ACTION_ROOT_REMOVE as ACTION_ROOT_REMOVE,             
+    ACTION_ROOT_REMOVE_WEIGHT as ACTION_ROOT_REMOVE_WEIGHT,      
+    ACTION_SET_FA as ACTION_SET_FA,                  
+    ACTION_SET_FA_WEIGHT as ACTION_SET_FA_WEIGHT,           
+    ACTION_MANAGE_USERS as ACTION_MANAGE_USERS,            
+    ACTION_MANAGE_USERS_WEIGHT as ACTION_MANAGE_USERS_WEIGHT,         
         Row_Number() over(PARTITION BY lower(role) ORDER BY 1) rn
       FROM extern_icat_role
-      WHERE Upper(&&parameter_datafile_icat_type) = 'Y')
+      WHERE Upper(dls) = 'Y')
       where  rn = 1) source
   ON(target.role = source.role)
 /*  WHEN matched THEN
     UPDATE SET
-	   target.action_insert = source.action_insert,
-	   target.action_select = source.action_select,
-	   target.action_download = source.action_download,
-	   target.action_update = source.action_update,
-	   target.action_delete = source.action_delete,
-	   target.action_root_remove = source.action_root_remove,
-	   target.action_set_fa = source.action_set_fa, 
+       target.action_insert = source.action_insert,
+       target.action_select = source.action_select,
+       target.action_download = source.action_download,
+       target.action_update = source.action_update,
+       target.action_delete = source.action_delete,
+       target.action_root_remove = source.action_root_remove,
+       target.action_set_fa = source.action_set_fa, 
        target.create_id = LV_CREATE_ID,
-	   target.create_time = nvl(mod_time, systimestamp),
-	   target.FACILITY_ACQUIRED = 'Y',
-	   target.deleted = 'N'
+       target.create_time = nvl(mod_time, systimestamp),
+       target.FACILITY_ACQUIRED = 'Y',
+       target.deleted = 'N'
     WHERE  target.action_insert != source.action_insert
-	OR target.action_select != source.action_select
-	OR target.action_download != source.action_download
-	OR target.action_update != source.action_update
-	OR target.action_delete != source.action_delete
-	OR target.action_root_remove != source.action_root_remove
-	OR target.action_set_fa != source.action_set_fa 
+    OR target.action_select != source.action_select
+    OR target.action_download != source.action_download
+    OR target.action_update != source.action_update
+    OR target.action_delete != source.action_delete
+    OR target.action_root_remove != source.action_root_remove
+    OR target.action_set_fa != source.action_set_fa 
     OR target.create_id != LV_CREATE_ID
-	OR target.create_time is null
-	OR target.FACILITY_ACQUIRED is null
-	OR target.deleted is null  */
+    OR target.create_time is null
+    OR target.FACILITY_ACQUIRED is null
+    OR target.deleted is null  */
   WHEN NOT matched THEN
     INSERT(
 ROLE,
@@ -952,15 +950,15 @@ ROLE,
  source.ACTION_MANAGE_USERS_WEIGHT,
        systimestamp,
       p_mod_id,
-	  systimestamp,
-	  LV_CREATE_ID,
-	  'Y',
-	  'N');
-	  
+      systimestamp,
+      LV_CREATE_ID,
+      'Y',
+      'N');
+      
 
 
-	  
-	       
+      
+           
 
   log_pkg.write_log('load_icat_role: finished');
 EXCEPTION
@@ -986,57 +984,57 @@ BEGIN
   MERGE INTO this_icat target
   USING (
     SELECT facility_short_name,
-		   facility_long_name,
-		   facility_url,
-		   facility_description
+           facility_long_name,
+           facility_url,
+           facility_description
     FROM(
       SELECT
-	  upper(facility_short_name) AS facility_short_name,               
-	  facility_long_name AS  facility_long_name,   
-	  facility_url AS  facility_url,          
-	  facility_description AS facility_description,        
-	  Row_Number() over(PARTITION BY lower(facility_short_name) ORDER BY 1) rn
+      upper(facility_short_name) AS facility_short_name,               
+      facility_long_name AS  facility_long_name,   
+      facility_url AS  facility_url,          
+      facility_description AS facility_description,        
+      Row_Number() over(PARTITION BY lower(facility_short_name) ORDER BY 1) rn
       FROM extern_this_icat
-      WHERE Upper(&&parameter_datafile_icat_type) = 'Y'
+      WHERE Upper(dls) = 'Y'
       )
     WHERE rn = 1) source
   ON(target.facility_short_name = source.facility_short_name)
   WHEN matched THEN
     UPDATE SET
-	   target.facility_long_name = source.facility_long_name,
-	   target.facility_url = source.facility_url,
-	   target.facility_description = source.facility_description,
+       target.facility_long_name = source.facility_long_name,
+       target.facility_url = source.facility_url,
+       target.facility_description = source.facility_description,
        target.mod_id = p_mod_id,
-	   target.mod_time = systimestamp
+       target.mod_time = systimestamp
     WHERE  target.facility_long_name != source.facility_long_name
-	OR target.facility_url != source.facility_url
-	OR target.facility_description != source.facility_description
-	OR target.mod_id != p_mod_id
-	WHEN NOT matched THEN
+    OR target.facility_url != source.facility_url
+    OR target.facility_description != source.facility_description
+    OR target.mod_id != p_mod_id
+    WHEN NOT matched THEN
     INSERT(
       facility_short_name,
       facility_long_name,
       facility_url,
       facility_description,
-	  mod_time,
-	  mod_id,
+      mod_time,
+      mod_id,
       create_time,
-	  create_id,
-	  FACILITY_ACQUIRED,
-	  deleted)
+      create_id,
+      FACILITY_ACQUIRED,
+      deleted)
     VALUES(
-	  source.facility_short_name,
-	  source.facility_long_name,
-	  source.facility_url,
+      source.facility_short_name,
+      source.facility_long_name,
+      source.facility_url,
       source.facility_description,
-	  systimestamp,
+      systimestamp,
       p_mod_id,
-	  systimestamp,
-	  LV_CREATE_ID,
-	  'Y',
-	  'N');
-	  
-	       
+      systimestamp,
+      LV_CREATE_ID,
+      'Y',
+      'N');
+      
+           
 
   log_pkg.write_log('load_this_icat: finished');
 EXCEPTION
@@ -1063,48 +1061,48 @@ BEGIN
   MERGE INTO FACILITY_INSTRUMENT_SCIENTIST target
   USING (
     SELECT instrument_name,
-		   federal_id,
-		   sequence_number
+           federal_id,
+           sequence_number
     FROM(
       SELECT
-	   instrument_name  AS  instrument_name,    
+       instrument_name  AS  instrument_name,    
        federal_id   AS  federal_id,             
        sequence_number  AS sequence_number        
       FROM extern_station_scienist
-      WHERE Upper(&&parameter_datafile_icat_type) = 'Y'
+      WHERE Upper(dls) = 'Y'
       )
        ) source
   ON(target.instrument_name = source.instrument_name
      AND target.federal_id = source.federal_id)
   WHEN matched THEN
     UPDATE SET
-	   target.seq_number = source.sequence_number
+       target.seq_number = source.sequence_number
     WHERE  target.seq_number != source.sequence_number
 
-	WHEN NOT matched THEN
+    WHEN NOT matched THEN
     INSERT(
-		   instrument_name,       
-		   federal_id,             
-		   seq_number,             
-		   mod_time,               
-		   mod_id,                 
-		   create_time,            
-		   create_id,              
-		   facility_acquired,
-		   deleted)
+           instrument_name,       
+           federal_id,             
+           seq_number,             
+           mod_time,               
+           mod_id,                 
+           create_time,            
+           create_id,              
+           facility_acquired,
+           deleted)
     VALUES(
-	  source.instrument_name,
-	  nvl(source.federal_id,user),
-	  --source.sequence_number,
-	   1,
-	  systimestamp,
+      source.instrument_name,
+      nvl(source.federal_id,user),
+      --source.sequence_number,
+       1,
+      systimestamp,
       p_mod_id,
-	  systimestamp,
-	  LV_CREATE_ID,
-	  'Y',
-	  'N');
-	  
-	       
+      systimestamp,
+      LV_CREATE_ID,
+      'Y',
+      'N');
+      
+           
 
   log_pkg.write_log('load_fac_inst_scientist: finished');
 EXCEPTION
@@ -1125,4 +1123,3 @@ END load_fac_inst_scientist;
 
 END load_external_data_pkg;
 /
-

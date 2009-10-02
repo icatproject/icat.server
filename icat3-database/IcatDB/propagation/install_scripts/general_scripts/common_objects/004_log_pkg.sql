@@ -33,10 +33,7 @@ PROCEDURE write_exception(
 
 END log_pkg;
 /
-
-
 --##############################################################################
-
 
 CREATE OR REPLACE PACKAGE BODY log_pkg AS
 

@@ -1,3 +1,4 @@
+
 CREATE OR REPLACE TRIGGER air_dataset_trg
   AFTER INSERT  ON DATASET   FOR EACH ROW
 DECLARE
@@ -10,7 +11,7 @@ FOR row IN (SELECT federal_id FROM    FACILITY_INSTRUMENT_SCIENTIST fis, investi
             where fis.INSTRUMENT_NAME = i.instrument
               and   i.id = :NEW.INVESTIGATION_ID
               and  i.instrument is not null and federal_id is not null) LOOP
-              
+
 INSERT INTO icat_authorisation
 (
   ID,

@@ -7,7 +7,7 @@ AS
 BEGIN
 
 	-- Setting Data Entities for Public Release in ICAT_AUTHORISATION
-	 
+
 	-- This purpose of this process is to mark data as available for viewing by other
 	-- people who are registered with the authentication system but were not explicitly
 	-- given permission to view the investigation and dataset details.
@@ -27,7 +27,7 @@ BEGIN
 	-- experimental data should be allowed for any user who can access the system.
 	-- 3) Assuming the checks in 2) are passed then any INVESTIGATION and all of its
 	-- corresponding DATASETs which have the DATASET.DATASET_TYPE set to .experiment_raw.
-	-- should have rows added to the ICAT_AUTHORISATION table for the .ANY. user. 
+	-- should have rows added to the ICAT_AUTHORISATION table for the .ANY. user.
 
 
 	-- Get the days until public release
@@ -162,4 +162,3 @@ EXCEPTION
 
 END;
 /
-show errors;

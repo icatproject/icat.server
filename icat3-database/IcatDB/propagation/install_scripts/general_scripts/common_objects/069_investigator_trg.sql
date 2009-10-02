@@ -1,7 +1,7 @@
 CREATE OR REPLACE TRIGGER trg_investigator
     AFTER
     INSERT
-    ON INVESTIGATOR     FOR EACH ROW
+    ON ICATDLS33.INVESTIGATOR     FOR EACH ROW
 DECLARE
 
     v_error_message                VARCHAR2(200);
@@ -9,7 +9,7 @@ DECLARE
     v_bol_fed_id                BOOLEAN := FALSE;
 
     v_count_guardian            NUMBER;
-
+    v_count1                    number;
     v_federal_id                facility_user.federal_id%TYPE;
     v_role                        VARCHAR2(20);
     v_icat_authorisation_id        icat_authorisation.id%TYPE;
@@ -55,26 +55,34 @@ BEGIN
     -- Check the federal ID exists
     --v_bol_fed_id := ldap_authorisation(v_federal_id, NULL);
 
-    IF :new.facility_user_id is null then 
-    --if not v_bol_fed_if then 
+    IF :new.facility_user_id is null then
+    --if not v_bol_fed_if then
         -- Oh dear, no federal ID
         v_error_message := 'No federal ID found for user ' || :new.facility_user_id;
         RAISE NO_DATA_FOUND;
     END IF;
 
     -- Set their role in this investigation
-    IF :new.role = 'principal_experimenter' THEN
+    IF :new.role in ('DLS_STAFF','DELI') THEN
         v_role := 'ADMIN';
 
-    ELSIF :new.role = 'experimenter' THEN
+    ELSIF :new.role = 'NORMAL_USER' THEN
         v_role := 'CREATOR';
+        else
+        v_role := 'READER';
 
     END IF;
 
+select count(*) into v_count1 from icat_authorisation
+where user_id = v_federal_id
+and element_type = 'DATASET'
+and element_id is null
+and parent_element_type ='INVESTIGATION'
+and parent_element_id=:new.investigation_id;
+
     -- Before we insert the main icat_authorisation record, let's check if there's any
     -- dataset records so we can create this child record first
-    IF v_role IN ('ADMIN', 'CREATOR') THEN
-
+    IF v_role IN ('ADMIN', 'CREATOR') and v_count1 = 0 THEN
         -- Insert the dataset record
         INSERT INTO icat_authorisation (
             id,
@@ -109,7 +117,14 @@ BEGIN
         RETURNING id
         INTO      v_icat_authorisation_id;
 
-    END IF;
+
+    select count(*) into v_count1 from icat_authorisation
+    where user_id = v_federal_id
+    and element_type = 'INVESTIGATION'
+    and element_id = :new.investigation_id
+    and parent_element_type is null
+    and parent_element_id is null;
+    if v_count1 = 0 then
 
     -- Insert the main investigator record, using the dataset ID from the previous record as the child record
     INSERT INTO icat_authorisation (
@@ -142,8 +157,8 @@ BEGIN
         'trg_investigator',
         'Y',
         'N');
-
-
+end if;
+END IF;
     -- Need to check if there's an "GUARDIAN" entry for this investigation already
     -- If there isn't then do the same whole process again
     SELECT COUNT(*)
@@ -226,7 +241,6 @@ BEGIN
         --                   DEALING WITH THE SUPER USER                                --
         --                                                                              --
         -- -------------------------------------------------------------------------------
-
         -- Before we insert the main icat_authorisation record, let's check if there's any
         -- dataset records so we can create this child record first
         INSERT INTO icat_authorisation (
@@ -261,7 +275,6 @@ BEGIN
             'N')
         RETURNING id
         INTO      v_icat_authorisation_id;
-
         -- Insert the main investigator record, using the dataset ID from the previous record as the child record
         INSERT INTO icat_authorisation (
             id,
@@ -296,14 +309,13 @@ BEGIN
 
     END IF;
 
-
---Now go through datasets for any passed entries with the same investigation 
+/*
+--Now go through datasets for any passed entries with the same investigation
 --and add an entry in icat_authorisation so that the investigaion has access
 --to all the datasets
 
 for i in code1(:new.investigation_id) loop
 begin
-
         INSERT INTO icat_authorisation (
             id,
             user_id,
@@ -404,7 +416,7 @@ EXCEPTION
         log_pkg.write_exception('Error adding dataset entry for previous datasets of same investigation');
         end;
 end loop;
-
+*/
 
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
@@ -414,3 +426,4 @@ EXCEPTION
 
 END;
 /
+

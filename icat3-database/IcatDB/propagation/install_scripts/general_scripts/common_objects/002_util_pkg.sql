@@ -56,11 +56,7 @@ FUNCTION app_role(
 END util_pkg;
 /
 
-
-
 --##############################################################################
-
-
 CREATE OR REPLACE PACKAGE BODY util_pkg AS
 
 

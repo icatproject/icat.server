@@ -1,16 +1,33 @@
-/*<TOAD_FILE_CHUNK>*/
-CREATE OR REPLACE PACKAGE  batch_migration_pkg AS
+CREATE OR REPLACE PACKAGE batch_migration_pkg AS
 
 PROCEDURE duodesk_pr(
+  p_mod_id IN investigation.mod_id%TYPE);
+
+PROCEDURE migrate_investigations(
   p_mod_id IN investigation.mod_id%TYPE);
 
 FUNCTION get_create_id RETURN investigation.create_id%TYPE;
 
 test_wall EXCEPTION;
 
+
+PROCEDURE set_record_ignored(
+  p_inv_number IN VARCHAR2,
+  p_instrument IN VARCHAR2,
+  p_visit_id IN VARCHAR2,
+  p_facility_cycle IN VARCHAR2);
+  
+FUNCTION write_proposal(
+  p_inv_number IN VARCHAR2,
+  p_instrument IN VARCHAR2,
+  p_visit_id IN VARCHAR2,
+  p_facility_cycle IN VARCHAR2)
+  RETURN VARCHAR2;
+
 END batch_migration_pkg;
 /
-/*<TOAD_FILE_CHUNK>*/
+--##########################################
+
 CREATE OR REPLACE PACKAGE BODY batch_migration_pkg AS
 
 --------------------------------------------------------------------------------
@@ -759,7 +776,7 @@ BEGIN
   WHEN MATCHED THEN
     UPDATE SET
       inv_number      = source.inv_number,
-      visit_id        = lower(source.visit_id),
+      visit_id        = upper(source.visit_id),
       facility_cycle  = source.facility_cycle,
       instrument      = source.instrument,
       title           = source.title,

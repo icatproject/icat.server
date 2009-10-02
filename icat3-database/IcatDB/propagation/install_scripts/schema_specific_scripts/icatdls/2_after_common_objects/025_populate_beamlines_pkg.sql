@@ -1,7 +1,3 @@
-/*<TOAD_FILE_CHUNK>*/
-PROMPT Creating package populate_beamlines_pkg
-
-
 CREATE OR REPLACE PACKAGE populate_beamlines_pkg AS
 
 /*
@@ -43,10 +39,7 @@ PROCEDURE propagate_data;
 
 END populate_beamlines_pkg;
 /
-/*<TOAD_FILE_CHUNK>*/
-
 --##############################################################################
-
 
 CREATE OR REPLACE PACKAGE BODY populate_beamlines_pkg AS
 
@@ -115,6 +108,7 @@ BEGIN
   cre_syn('INVESTIGATION_TYPE');
   cre_syn('APPLICATIONS');
   cre_syn('USER_ROLES');
+  cre_syn('THIS_ICAT');
 
   log_pkg.write_log('finished creating synonyms for database link '||p_dblink);
 EXCEPTION
@@ -149,20 +143,26 @@ BEGIN
   WHEN NOT matched THEN
     INSERT(
       name        ,
+      short_name  ,
       type        ,
       description ,
       mod_time    ,
       mod_id,
       create_id,
-      deleted)
+      create_time,
+      deleted,
+      facility_acquired)
     VALUES(
       source.name        ,
+      source.short_name  ,
       source.type        ,
       source.description ,
       source.mod_time    ,
       source.mod_id,
       source.create_id,
-      source.deleted);
+      source.create_time,
+      source.deleted,
+      source.facility_acquired);
 
   log_pkg.write_log('finished populating instrument data');
 END push_instrument;
@@ -196,8 +196,8 @@ BEGIN
       description              = source.description              ,
       mod_id                   = source.mod_id                   ,
       mod_time                 = source.mod_time,
-      create_id                = source.create_id,
-      deleted                  = source.deleted
+      deleted                  = source.deleted,
+      verified                 = source.verified
   WHEN NOT matched THEN
     INSERT(
       name                     ,
@@ -213,7 +213,10 @@ BEGIN
       mod_id                   ,
       mod_time,
       create_id,
-      deleted)
+      create_time,
+      deleted,
+      facility_acquired,
+      verified)
     VALUES(
       source.name                     ,
       source.units                    ,
@@ -228,7 +231,10 @@ BEGIN
       source.mod_id                   ,
       source.mod_time,
       source.create_id,
-      source.deleted);
+            source.create_time,
+      source.deleted,
+      source.facility_acquired,
+      source.verified);
 
   log_pkg.write_log('finished populating parameter data');
 END push_parameter;
@@ -253,7 +259,6 @@ BEGIN
       description = source.description ,
       mod_time    = source.mod_time    ,
       mod_id      = source.mod_id,
-      create_id   = source.create_id,
       deleted     = source.deleted
   WHEN NOT matched THEN
     INSERT(
@@ -262,14 +267,18 @@ BEGIN
       mod_time    ,
       mod_id,
       create_id,
-      deleted)
+      create_time,
+      deleted,
+      facility_acquired)
     VALUES(
       source.name        ,
       source.description ,
       source.mod_time    ,
       source.mod_id,
       source.create_id,
-      source.deleted);
+      source.create_time  ,
+      source.deleted,
+      source.facility_acquired);
 
   log_pkg.write_log('finished populating investigation_type data');
 END push_investigation_type;
@@ -296,7 +305,6 @@ BEGIN
       description = source.description ,
       mod_time    = source.mod_time    ,
       mod_id      = source.mod_id,
-      create_id   = source.create_id,
       deleted     = source.deleted
   WHEN NOT matched THEN
     INSERT(
@@ -307,7 +315,9 @@ BEGIN
       mod_time    ,
       mod_id,
       create_id,
-      deleted)
+      create_time,
+      deleted,
+      facility_acquired)
     VALUES(
       source.name        ,
       source.start_date  ,
@@ -316,7 +326,9 @@ BEGIN
       source.mod_time    ,
       source.mod_id,
       source.create_id,
-      source.deleted);
+      source.create_time,
+      source.deleted,
+      source.facility_acquired);
 
   log_pkg.write_log('finished populating facility_cycle data');
 END push_facility_cycle;
@@ -341,8 +353,7 @@ BEGIN
       description = source.description ,
       mod_time    = source.mod_time    ,
       mod_id      = source.mod_id,
-      create_id   = source.create_id,
-      deleted     = source.deleted
+            deleted     = source.deleted
   WHEN NOT matched THEN
     INSERT(
       name        ,
@@ -350,14 +361,18 @@ BEGIN
       mod_time    ,
       mod_id,
       create_id,
-      deleted)
+      create_time,
+      deleted,
+      facility_acquired)
     VALUES(
       source.name        ,
       source.description ,
       source.mod_time    ,
       source.mod_id,
       source.create_id,
-      source.deleted);
+      source.create_time ,
+      source.deleted,
+      source.facility_acquired);
 
   log_pkg.write_log('finished populating dataset_status data');
 END push_dataset_status;
@@ -382,8 +397,7 @@ BEGIN
       description = source.description ,
       mod_time    = source.mod_time    ,
       mod_id      = source.mod_id,
-      create_id   = source.create_id,
-      deleted     = source.deleted
+          deleted     = source.deleted
   WHEN NOT matched THEN
     INSERT(
       name        ,
@@ -391,19 +405,78 @@ BEGIN
       mod_time    ,
       mod_id,
       create_id,
-      deleted)
+      create_time,
+      deleted,
+      facility_acquired)
     VALUES(
       source.name        ,
       source.description ,
       source.mod_time    ,
       source.mod_id,
       source.create_id,
-      source.deleted);
+      source.create_time   ,
+      source.deleted,
+      source.facility_acquired);
 
   log_pkg.write_log('finished populating dataset_type data');
 END push_dataset_type;
 
 --------------------------------------------------------------------------------
+
+procedure  push_this_icat is
+begin
+log_pkg.write_log('populating This Icat data');
+
+merge INTO bl_this_icat target
+  USING(
+    SELECT *
+    FROM this_icat
+    WHERE (facility_short_name) NOT IN(
+      SELECT facility_short_name from bl_this_icat
+      )
+    ) source
+  ON(target.facility_short_name = source.facility_short_name)
+  WHEN matched THEN
+    UPDATE SET
+      facility_long_name = source.facility_long_name ,
+      facility_url = source.facility_url,
+      facility_description = source.facility_description,
+      days_until_public_release = source.days_until_public_release,
+      mod_time    = source.mod_time    ,
+      mod_id      = source.mod_id,
+          deleted     = source.deleted
+  WHEN NOT matched THEN
+    INSERT(
+      facility_short_name        ,
+      facility_long_name,
+      facility_url,
+      facility_description,
+      days_until_public_release,
+      seq_number ,
+      mod_time    ,
+      mod_id,
+      create_id,
+      create_time,
+      deleted,
+      facility_acquired)
+    VALUES(
+      source.facility_short_name        ,
+      source.facility_long_name,
+      source.facility_url,
+      source.facility_description,
+      source.days_until_public_release,
+      source.seq_number ,
+      source.mod_time    ,
+      source.mod_id,
+      source.create_id,
+      source.create_time   ,
+      source.deleted,
+      source.facility_acquired);
+
+
+log_pkg.write_log('Finished populating This Icat data');
+end;
+
 
 PROCEDURE push_investigation(p_instrument IN investigation.instrument%TYPE) IS
 BEGIN
@@ -423,6 +496,7 @@ BEGIN
     UPDATE SET
       inv_number                 = source.inv_number      ,
       visit_id                   = source.visit_id        ,
+      facility                   = source.facility        ,      
       facility_cycle             = source.facility_cycle  ,
       instrument                 = source.instrument      ,
       title                      = source.title           ,
@@ -431,10 +505,13 @@ BEGIN
       prev_inv_number            = source.prev_inv_number ,
       bcat_inv_str               = source.bcat_inv_str    ,
       grant_id                   = source.grant_id        ,
+      inv_param_name             = source.inv_param_name  ,
+      inv_param_value            = source.inv_param_value ,
+      inv_start_date             = source.inv_start_date  ,            
+      inv_end_date               = source.inv_end_date  ,      
       release_date               = source.release_date    ,
       mod_time                   = source.mod_time        ,
       mod_id                     = source.mod_id,
-      create_id                  = source.create_id,
       deleted                    = source.deleted,
       src_hash                   = source.src_hash
   WHEN NOT matched THEN
@@ -442,6 +519,7 @@ BEGIN
       id              ,
       inv_number      ,
       visit_id        ,
+      facility        ,
       facility_cycle  ,
       instrument      ,
       title           ,
@@ -450,16 +528,23 @@ BEGIN
       prev_inv_number ,
       bcat_inv_str    ,
       grant_id        ,
+      inv_param_name  ,
+      inv_param_value ,
+      inv_start_date  ,
+      inv_end_date    ,
       release_date    ,
       mod_time        ,
       mod_id,
       create_id,
+      create_time,
       deleted,
-      src_hash)
+      src_hash,
+      facility_acquired)
     VALUES(
       source.id              ,
       source.inv_number      ,
       source.visit_id        ,
+      source. facility       ,
       source.facility_cycle  ,
       source.instrument      ,
       source.title           ,
@@ -468,12 +553,18 @@ BEGIN
       source.prev_inv_number ,
       source.bcat_inv_str    ,
       source.grant_id        ,
+      source.inv_param_name  ,
+      source.inv_param_value ,
+      source.inv_start_date  ,
+      source.inv_end_date    ,                  
       source.release_date    ,
       source.mod_time        ,
       source.mod_id,
       source.create_id,
+      source.create_time  ,
       source.deleted,
-      source.src_hash
+      source.src_hash,
+      source.facility_acquired
 );
 
   log_pkg.write_log('finished populating investigation data');
@@ -525,7 +616,6 @@ BEGIN
       last_name   = source.last_name,
       mod_time    = source.mod_time,
       mod_id      = source.mod_id,
-      create_id   = source.create_id,
       deleted     = source.deleted
   WHEN NOT MATCHED THEN
     INSERT(
@@ -539,7 +629,9 @@ BEGIN
       mod_time,
       mod_id,
       create_id,
-      deleted)
+      create_time,
+      deleted,
+      facility_acquired)
     VALUES(
       source.facility_user_id,
       source.federal_id,
@@ -551,7 +643,9 @@ BEGIN
       source.mod_time,
       source.mod_id,
       source.create_id,
-      source.deleted);
+      source.create_time   ,
+      source.deleted,
+      source.facility_acquired);
 
   log_pkg.write_log('facility_user populated successfully');
 EXCEPTION
@@ -584,7 +678,6 @@ BEGIN
       role         = source.role         ,
       mod_time     = source.mod_time     ,
       mod_id       = source.mod_id,
-      create_id    = source.create_id,
       deleted      = source.deleted
   WHEN NOT matched THEN
     INSERT(
@@ -594,7 +687,9 @@ BEGIN
       mod_time         ,
       mod_id,
       create_id,
-      deleted)
+      create_time,
+      deleted,
+      facility_acquired)
     VALUES(
       source.facility_user_id ,
       source.investigation_id ,
@@ -602,7 +697,9 @@ BEGIN
       source.mod_time         ,
       source.mod_id,
       source.create_id,
-      source.deleted);
+      source.create_time ,
+      source.deleted,
+      source.facility_acquired);
 
   log_pkg.write_log('finished populating investigator data');
 END push_investigator;
@@ -661,7 +758,6 @@ BEGIN
       repository       = source.repository       ,
       mod_time         = source.mod_time         ,
       mod_id           = source.mod_id,
-      create_id        = source.create_id,
       deleted          = source.deleted
   WHEN NOT matched THEN
     INSERT(
@@ -674,7 +770,9 @@ BEGIN
       mod_time         ,
       mod_id,
       create_id,
-      deleted)
+      create_time,
+      deleted,
+      facility_acquired)
     VALUES(
       source.id               ,
       source.investigation_id ,
@@ -685,7 +783,9 @@ BEGIN
       source.mod_time         ,
       source.mod_id,
       source.create_id,
-      source.deleted);
+      source.create_time  ,
+      source.deleted,
+      source.facility_acquired);
 
   log_pkg.write_log('finished populating publication data');
 END push_publication;
@@ -718,7 +818,6 @@ BEGIN
       proposal_sample_id = source.proposal_sample_id ,
       mod_time           = source.mod_time           ,
       mod_id             = source.mod_id,
-      create_id          = source.create_id,
       deleted            = source.deleted
   WHEN NOT matched THEN
     INSERT(
@@ -732,7 +831,9 @@ BEGIN
       mod_time           ,
       mod_id,
       create_id,
-      deleted)
+      create_time,
+      deleted,
+      facility_acquired)
     VALUES(
       source.id                 ,
       source.investigation_id   ,
@@ -744,7 +845,9 @@ BEGIN
       source.mod_time           ,
       source.mod_id,
       source.create_id,
-      source.deleted);
+      source.create_time  ,
+      source.deleted,
+      source.facility_acquired);
 
   log_pkg.write_log('finished populating sample data');
 END push_sample;
@@ -776,7 +879,6 @@ BEGIN
       description      = source.description      ,
       mod_time         = source.mod_time         ,
       mod_id           = source.mod_id,
-      create_id        = source.create_id,
       deleted          = source.deleted
   WHEN NOT matched THEN
     INSERT(
@@ -790,7 +892,9 @@ BEGIN
       mod_time         ,
       mod_id,
       create_id,
-      deleted)
+      create_time,
+      deleted,
+      facility_acquired)
     VALUES(
       source.id               ,
       source.sample_id        ,
@@ -802,7 +906,9 @@ BEGIN
       source.mod_time         ,
       source.mod_id,
       source.create_id,
-      source.deleted);
+      source.create_time ,
+      source.deleted,
+      source.facility_acquired);
 
   log_pkg.write_log('finished populating dataset data');
 END push_dataset;
@@ -838,7 +944,6 @@ BEGIN
       range_bottom  = source.range_bottom  ,
       mod_time      = source.mod_time      ,
       mod_id        = source.mod_id,
-      create_id     = source.create_id,
       deleted       = source.deleted
   WHEN NOT matched THEN
     INSERT(
@@ -853,7 +958,9 @@ BEGIN
       mod_time      ,
       mod_id,
       create_id,
-      deleted)
+      create_time,
+      deleted,
+      facility_acquired)
     VALUES(
       source.sample_id     ,
       source.name          ,
@@ -866,7 +973,9 @@ BEGIN
       source.mod_time      ,
       source.mod_id,
       source.create_id,
-      source.deleted);
+      source.create_time ,
+      source.deleted,
+      source.facility_acquired);
 
   log_pkg.write_log('finished populating sample_parameter data');
 END push_sample_parameter;
@@ -885,23 +994,26 @@ BEGIN
       app_name        = source.app_name,
       app_description = source.app_description,
       mod_time        = source.mod_time,
-      mod_id          = source.mod_id,
-      create_id       = source.create_id
-  WHEN NOT matched THEN
+      mod_id          = source.mod_id
+      WHEN NOT matched THEN
     INSERT(
       app_code,
       app_name,
       app_description,
       mod_time,
       mod_id,
-      create_id)
+      create_id,
+      create_time,
+      facility_acquired)
     VALUES(
       source.app_code,
       source.app_name,
       source.app_description,
       source.mod_time,
       source.mod_id,
-      source.create_id);
+      source.create_id,
+      source.create_time,
+      source.facility_acquired      );
 
   log_pkg.write_log('finished populating applications data');
 END push_applications;
@@ -920,8 +1032,7 @@ BEGIN
     UPDATE SET
       role       = source.role,
       mod_time   = source.mod_time,
-      mod_id     = source.mod_id,
-      create_id  = source.create_id
+      mod_id     = source.mod_id
   WHEN NOT matched THEN
     INSERT(
       app_code,
@@ -929,14 +1040,18 @@ BEGIN
       role,
       mod_time,
       mod_id,
-      create_id)
+      create_id,
+      create_time,
+      facility_acquired)
     VALUES(
       source.app_code,
       source.username,
       source.role,
       source.mod_time,
       source.mod_id,
-      source.create_id);
+      source.create_id,
+      source.create_time,
+      source.facility_acquired      );
 
   log_pkg.write_log('finished populating user_roles data');
 END push_user_roles;
@@ -946,7 +1061,7 @@ END push_user_roles;
 PROCEDURE propagate_data IS
 
   x INTEGER;
-  LV_LOCKNAME CONSTANT VARCHAR2(50) := 'populate_beamlines_pkg';--.propagate_data';
+  LV_LOCKNAME CONSTANT VARCHAR2(50) := 'POPULATE_BEAMLINES_PKG';--.propagate_data';
   lv_lockhandle VARCHAR2(100);
 
   CURSOR c_instruments IS
@@ -987,6 +1102,7 @@ BEGIN
         push_facility_cycle;
         push_dataset_status;
         push_dataset_type;
+        push_this_icat;
 
         -- application roles
         push_applications;
