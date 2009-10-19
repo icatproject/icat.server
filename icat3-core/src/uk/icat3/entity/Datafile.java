@@ -16,14 +16,12 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityResult;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -31,8 +29,6 @@ import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.SqlResultSetMapping;
-import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -53,6 +49,8 @@ import uk.icat3.util.ElementType;
  * Entity class Datafile
  *
  * @author gjd37
+ * Modification:
+ * 02-Sep-2009 (SN): Removed commented code and redundant code
  */
 @Entity
 @Table(name = "DATAFILE")
@@ -71,15 +69,8 @@ import uk.icat3.util.ElementType;
     @NamedQuery(name = "Datafile.findBySignature", query = "SELECT d FROM Datafile d WHERE d.signature = :signature"),
     @NamedQuery(name = "Datafile.findByModTime", query = "SELECT d FROM Datafile d WHERE d.modTime = :modTime"),
     @NamedQuery(name = "Datafile.findByModId", query = "SELECT d FROM Datafile d WHERE d.modId = :modId")////Added searches for ICAT3 API
-//@NamedQuery(name = "Datafile.findByRunNumber", query = "SELECT d FROM Datafile d WHERE d.datasetId.investigationId.investigatorCollection.investigatorPK.facilityUserId = :userId AND d.datasetId.investigationId.instrument.name = :instrument AND d.datafileParameterCollection.stringValue = 'run_number' AND d.datafileParameterCollection.numericValue BETWEEN :lower AND :upper")
-//    @NamedQuery(name = "Datafile.findByRunNumber", query = "SELECT d FROM Datafile d WHERE   d.datafileParameterCollection.stringValue = 'run_number' AND d.datafileParameterCollection.numericValue BETWEEN :lower AND :upper")
 })
-@NamedNativeQueries({ //Added searches for ICAT3 API
-//@NamedNativeQuery(name = Queries.DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER, query= Queries.DATAFILE_NATIVE_BY_INSTRUMANT_AND_RUN_NUMBER_SQL, resultSetMapping="dataFileMapping")
-})
-@SqlResultSetMappings({
-    @SqlResultSetMapping(name = "dataFileMapping", entities = {@EntityResult(entityClass = Datafile.class)})
-})
+
 @XmlRootElement
 @SequenceGenerator(name = "DATAFILE_SEQ", sequenceName = "DATAFILE_ID_SEQ", allocationSize = 1)
 public class Datafile extends EntityBaseBean implements Serializable {
@@ -192,11 +183,11 @@ public class Datafile extends EntityBaseBean implements Serializable {
     }
 
     /**
-     * Sets the id of this Datafile to the specified value.
-     * @param id the new id
+     * 
+     * @param id
      */
     public void setId(Long id) {
-        this.id = id;
+        this.id=id;
     }
 
     /**
@@ -752,10 +743,6 @@ public class Datafile extends EntityBaseBean implements Serializable {
     @PrePersist
     @Override
     public void prePersist() {
-        if (this.id != null) {
-            log.warn("Attempting to save a datafile: " + id + " when it should be auto generated, nulling id");
-            this.id = null;
-        }
         super.prePersist();
     }
 

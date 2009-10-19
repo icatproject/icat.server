@@ -210,7 +210,7 @@ public class DataFileManager extends ManagerUtil {
         Dataset dataset = find(Dataset.class, dataFile.getDataset().getId(), manager);
         dataFile.setDataset(dataset);
         //check id is null
-        dataFile.setId(null);
+//        dataFile.setId(null);
 
         //check user has update access
         IcatRole role = GateKeeper.performAuthorisation(userId, dataFile, AccessType.CREATE, manager);
@@ -228,10 +228,10 @@ public class DataFileManager extends ManagerUtil {
         dataFile.setCascade(Cascade.REMOVE_ID, Boolean.TRUE);
         dataFile.setCascade(Cascade.MOD_AND_CREATE_IDS, userId);
 
+
         dataFile.isValid(manager);
-
         manager.persist(dataFile);
-
+        manager.flush();
         //add new creator role to investigation for the user creating the df
         //Changed, do not need to add a row for datafile.
         //persistAuthorisation(userId, userId, role, ElementType.DATAFILE, dataFile.getId(), ElementType.DATASET, dataset.getId(), null, manager);
@@ -257,7 +257,6 @@ public class DataFileManager extends ManagerUtil {
         //check dataset exist
         Dataset dataset = find(Dataset.class, datasetId, manager);
         dataFile.setDataset(dataset);
-        dataFile.setId(null);
 
         return createDataFile(userId, dataFile, manager);
     }

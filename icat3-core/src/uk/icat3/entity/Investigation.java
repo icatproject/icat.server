@@ -224,9 +224,9 @@ import uk.icat3.util.Queries;
      * @param id the id of the Investigation
      */
     public Investigation(Long id) {
-        this.id = id;
+            this.id = id;
     }
-    
+
     /**
      * Creates a new instance of Investigation with the specified values.
      * @param id the id of the Investigation

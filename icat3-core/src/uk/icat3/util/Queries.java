@@ -425,6 +425,13 @@ public class Queries {
     public static final String ICAT_AUTHORISATION_FINDALL_FOR_ELEMENTTYPE_JPQL = "SELECT i FROM IcatAuthorisation i WHERE " +
             "i.elementType = :elementType AND i.elementId = :elementId AND " +
             "(i.userId = :userId OR :userId IS NULL) AND i.markedDeleted = 'N'";
+
+    /**
+     * Find ICAT AUTHORISATION by user and element id and type
+     */
+    public static final String ICAT_AUTHORISATION_FINDBY_ELEMENTID_ELEMENTTYPE_USERID ="IcatAuthorisation.findByElementIdAndElementTypeAndUserId";
+    public static final String ICAT_AUTHORISATION_FINDBY_ELEMENTID_ELEMENTTYPE_USERID_JPQL="SELECT i FROM IcatAuthorisation i WHERE " +
+            "i.elementType = :elementType AND i.elementId = :elementId AND i.userId = :userId";
     
     /**
      * Find ICAT AUTHORISATION by UNIQUE KEY (user, element id and type, parent type and id and not deleted

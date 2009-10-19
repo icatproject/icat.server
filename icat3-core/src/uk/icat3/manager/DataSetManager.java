@@ -215,7 +215,6 @@ public class DataSetManager extends ManagerUtil {
         Investigation investigation = find(Investigation.class, dataSet.getInvestigation().getId(), manager);
 
         dataSet.setInvestigation(investigation);
-        dataSet.setId(null);
 
         //check user has update access
         IcatRole role = GateKeeper.performAuthorisation(userId, dataSet, AccessType.CREATE, manager);
@@ -302,7 +301,6 @@ public class DataSetManager extends ManagerUtil {
         //check investigation exists
         Investigation investigation = find(Investigation.class, investigationId, manager);
         dataSet.setInvestigation(investigation);
-        dataSet.setId(null);
 
         return createDataSet(userId, dataSet, manager);
     }

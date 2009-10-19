@@ -109,7 +109,7 @@ public class Publication extends EntityBaseBean implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
-
+    
     /**
      * Gets the fullReference of this Publication.
      * @return the fullReference

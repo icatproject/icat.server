@@ -57,11 +57,12 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_CREATE_DATAFILE_DATASET, query = Queries.ICAT_AUTHORISATION_FINDBY_CREATE_DATAFILE_DATASET_JPQL),
     @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_CREATE_INVESTIGATION, query = Queries.ICAT_AUTHORISATION_FINDBY_CREATE_INVESTIGATION_JPQL),
     @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_INVESTIGATION, query = Queries.ICAT_AUTHORISATION_FINDBY_INVESTIGATION_JPQL),
-    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_DATAFILE_DATASET, query = Queries.ICAT_AUTHORISATION_FINDBY_DATAFILE_DATASET_JPQL)
+    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_DATAFILE_DATASET, query = Queries.ICAT_AUTHORISATION_FINDBY_DATAFILE_DATASET_JPQL),
+    @NamedQuery(name = Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID_ELEMENTTYPE_USERID, query=Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID_ELEMENTTYPE_USERID_JPQL)
 })
         @SequenceGenerator(name="ICAT_AUTHORISATION_SEQ",sequenceName="ICAT_AUTHORISATION_ID_SEQ",allocationSize=1)
         public class IcatAuthorisation extends EntityBaseBean implements Serializable {
-    
+
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="ICAT_AUTHORISATION_SEQ")
     @Column(name = "ID", nullable = false)
@@ -97,10 +98,6 @@ import uk.icat3.util.Queries;
     
     public Long getId() {
         return id;
-    }
-    
-    public void setId(Long id) {
-        this.id = id;
     }
     
     public String getUserId() {

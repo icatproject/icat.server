@@ -187,11 +187,11 @@ import uk.icat3.util.Queries;
     }
     
     /**
-     * Sets the id of this Dataset to the specified value.
-     * @param id the new id
+     * 
+     * @param id
      */
     public void setId(Long id) {
-        this.id = id;
+        this.id=id;
     }
     
     /**
@@ -707,10 +707,6 @@ import uk.icat3.util.Queries;
     @PrePersist
     @Override
     public void prePersist(){
-        if(this.id != null){
-            log.warn("Attempting to save a dataset: "+id +" when it should be auto generated, nulling id");
-            this.id = null;
-        }
         super.prePersist();
     }
     
