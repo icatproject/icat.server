@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE populate_beamlines_pkg AS
+CREATE OR REPLACE PACKAGE ICATDLS33.populate_beamlines_pkg AS
 
 /*
 
@@ -33,15 +33,25 @@ package_locked_ex EXCEPTION;
 PRAGMA EXCEPTION_INIT(package_locked_ex, -20100);
 
 --------------------------------------------------------------------------------
-
+procedure close_db_link (p_dblink IN beamline_instrument.dblink%TYPE);
 PROCEDURE propagate_data;
 
 
 END populate_beamlines_pkg;
 /
 --##############################################################################
+CREATE OR REPLACE PACKAGE BODY ICATDLS33.populate_beamlines_pkg AS
 
-CREATE OR REPLACE PACKAGE BODY populate_beamlines_pkg AS
+procedure close_db_link (p_dblink IN beamline_instrument.dblink%TYPE)
+is 
+begin
+execute immediate ('alter session close database link ' || p_dblink);
+   EXCEPTION
+      WHEN OTHERS
+      THEN
+         log_pkg.write_exception ('Closing DBLINK failure: ' || SQLERRM);
+end;
+
 
 PROCEDURE create_synonyms(
   p_dblink IN beamline_instrument.dblink%TYPE) IS
@@ -1127,6 +1137,7 @@ BEGIN
             'Propagation failed for instrument '||rec.instrument||Chr(10)||SQLERRM);
           ROLLBACK TO propagate_data_sp;
       END;
+      close_db_link(rec.dblink);            
     END LOOP;
 
     -- DML in all but the last iteration of the loop is committed by the
