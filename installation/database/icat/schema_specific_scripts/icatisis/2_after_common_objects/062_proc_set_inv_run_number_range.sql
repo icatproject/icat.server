@@ -91,7 +91,7 @@ BEGIN
 			DECLARE
 				-- Let's get a list of all the run numbers, in order
 				CURSOR c2 IS
-					SELECT datafile_parameter.numeric_value
+					SELECT DISTINCT datafile_parameter.numeric_value
 					FROM   datafile_parameter,
 				       	   datafile,
 					   	   dataset
