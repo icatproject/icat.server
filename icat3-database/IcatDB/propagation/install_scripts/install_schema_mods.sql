@@ -3,7 +3,7 @@ REM called from the schema install scripts in this directory.
 
 REM the log directory (log_dir) is defined in the calling script
 
-
+ 
 
 define logfile = AA_001_unique_federal_id.log
 SPOOL &log_dir&logfile
