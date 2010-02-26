@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE batch_migration_pkg AS
+CREATE OR REPLACE PACKAGE ICATDLS33.batch_migration_pkg AS
 
 PROCEDURE duodesk_pr(
   p_mod_id IN investigation.mod_id%TYPE);
@@ -26,9 +26,9 @@ FUNCTION write_proposal(
 
 END batch_migration_pkg;
 /
---##########################################
 
-CREATE OR REPLACE PACKAGE BODY batch_migration_pkg AS
+
+CREATE OR REPLACE PACKAGE BODY ICATDLS33.batch_migration_pkg AS
 
 --------------------------------------------------------------------------------
 
@@ -108,10 +108,10 @@ BEGIN
     OR (target.description IS NULL AND source.description IS NOT NULL)
     OR (target.description IS NOT NULL AND source.description IS NULL)
     OR target.description != source.description
-    OR create_id != LV_CREATE_ID
-    OR create_time is null
-    OR facility_acquired is null
-    OR deleted is null
+    OR target.create_id != LV_CREATE_ID
+    OR target.create_time is null
+    OR target.facility_acquired is null
+    OR target.deleted is null
   WHEN NOT matched THEN
     INSERT(
       name,
@@ -203,10 +203,10 @@ BEGIN
       facility_acquired = 'Y',
       deleted = 'N'
     WHERE target.is_sample_parameter != 'Y'
-      OR create_id != LV_CREATE_ID
-      OR create_time is null
-      OR facility_acquired is null
-      OR deleted is null
+      OR target.create_id != LV_CREATE_ID
+      OR target.create_time is null
+      OR target.facility_acquired is null
+      OR target.deleted is null
   WHEN NOT matched THEN
     INSERT(
       name,
@@ -242,13 +242,17 @@ BEGIN
       'N',
       'Y',
       source.description);
-
+      
+log_pkg.write_log('migrating parameter data first merge gone');
     --Now go through all the columns in sampleworksheet@duodesk and entre these
     --as entries into the parameter table.  Have to make sure that they are numeric
     --and update the numeric_value column if so
     for i in column_list loop
     execute immediate('insert into temp_samplesheet (select ''' || substr(i.column_name,instr(i.column_name,'_')+1) || ''',sum(is_number(' || i.column_name || ')) from samplesheet@duodesk)');
     end loop;
+
+log_pkg.write_log('migrating parameter data first loop gone');
+
 
   MERGE INTO parameter target
   USING(
@@ -293,6 +297,9 @@ BEGIN
       'Y',
       'N',
       'Y');
+
+log_pkg.write_log('migrating parameter data second merge gone');
+
 
     delete from temp_samplesheet;
 
@@ -786,21 +793,19 @@ BEGIN
       bcat_inv_str    = source.bcat_inv_str,
       grant_id        = source.grant_id,
       facility        = t_facility,
-      /* not updating release_date - it's not coming from the duodesk data
       release_date = source.release_date,
-      */
       mod_time        = systimestamp,
       mod_id          = p_mod_id,
       create_id = LV_CREATE_ID,
       create_time = nvl(mod_time,systimestamp),
       facility_acquired = 'Y',
       deleted = 'N'
-    WHERE (inv_number != source.inv_number
-    OR upper(visit_id) != upper(source.visit_id)
-    OR facility_cycle != source.facility_cycle
-    OR(facility_cycle IS NULL AND source.facility_cycle IS NOT NULL)
-    OR(facility_cycle IS NOT NULL AND source.facility_cycle IS NULL)
-    OR instrument != source.instrument
+    WHERE (target.inv_number != source.inv_number
+    OR upper(target.visit_id) != upper(source.visit_id)
+    OR target.facility_cycle != source.facility_cycle
+    OR(target.facility_cycle IS NULL AND source.facility_cycle IS NOT NULL)
+    OR(target.facility_cycle IS NOT NULL AND source.facility_cycle IS NULL)
+    OR target.instrument != source.instrument
     OR target.title != source.title
     OR target.inv_type != source.inv_type
     OR (target.inv_abstract != source.inv_abstract
@@ -819,16 +824,14 @@ BEGIN
          OR (target.grant_id IS NULL AND source.grant_id IS NOT NULL)
          OR (target.grant_id IS NOT NULL AND source.grant_id IS NULL)
         )
-/* -- not updating release_date at the moment
     OR (target.release_date != source.release_date
          OR (target.release_date IS NULL AND source.release_date IS NOT NULL)
          OR (target.release_date IS NOT NULL AND source.release_date IS NULL)
         )
-*/
-      OR create_id != LV_CREATE_ID
-      OR create_time is null
-      OR facility_acquired is null
-      OR deleted is null)
+      OR target.create_id != LV_CREATE_ID
+      OR target.create_time is null
+      OR target.facility_acquired is null
+      OR target.deleted is null)
   WHEN NOT MATCHED THEN
     INSERT(
       id,
@@ -1099,10 +1102,10 @@ BEGIN
          OR (target.shift_comment IS NULL AND source.shift_comment IS NOT NULL)
          OR (target.shift_comment IS NOT NULL AND source.shift_comment IS NULL)
         )
-      OR create_id != LV_CREATE_ID
-      OR create_time is null
-      OR facility_acquired is null
-      OR deleted is null
+      OR target.create_id != LV_CREATE_ID
+      OR target.create_time is null
+      OR target.facility_acquired is null
+      OR target.deleted is null
   WHEN NOT MATCHED THEN
     INSERT(
       investigation_id,
@@ -1277,10 +1280,10 @@ case when l_facility_user_id(indx) BETWEEN '20320' AND '20330' THEN
           OR (target.last_name IS NULL AND source.last_name IS NOT NULL)
           OR (target.last_name IS NOT NULL AND source.last_name IS NULL)
         )
-      OR create_id != LV_CREATE_ID
-      OR create_time is null
-      OR facility_acquired is null
-      OR deleted is null
+      OR target.create_id != LV_CREATE_ID
+      OR target.create_time is null
+      OR target.facility_acquired is null
+      OR target.deleted is null
   WHEN NOT MATCHED THEN
     INSERT(
       facility_user_id,
@@ -1576,10 +1579,10 @@ BEGIN
           OR (target.role IS NULL AND source.role IS NOT NULL)
           OR (target.role IS NOT NULL AND source.role IS NULL)
         )
-      OR create_id != LV_CREATE_ID
-      OR create_time is null
-      OR facility_acquired is null
-      OR deleted is null)
+      OR target.create_id != LV_CREATE_ID
+      OR target.create_time is null
+      OR target.facility_acquired is null
+      OR target.deleted is null)
   WHEN NOT MATCHED THEN
     INSERT(
       facility_user_id,
@@ -1874,10 +1877,10 @@ BEGIN
       create_time = nvl(mod_time, systimestamp),
       facility_acquired = 'Y',
       deleted = 'N'
-    WHERE create_id != LV_CREATE_ID
-      OR create_time is null
-      OR facility_acquired is null
-      OR deleted is null
+    WHERE target.create_id != LV_CREATE_ID
+      OR target.create_time is null
+      OR target.facility_acquired is null
+      OR target.deleted is null
   WHEN NOT MATCHED THEN
     INSERT(
       investigation_id,
@@ -2094,10 +2097,10 @@ BEGIN
       create_time = nvl(mod_time, systimestamp),
       facility_acquired = 'Y',
       deleted = 'N'
-    WHERE create_id != LV_CREATE_ID
-      OR create_time is null
-      OR facility_acquired is null
-      OR deleted is null
+    WHERE target.create_id != LV_CREATE_ID
+      OR target.create_time is null
+      OR target.facility_acquired is null
+      OR target.deleted is null
   WHEN NOT matched THEN
     INSERT(
       id,
@@ -2442,10 +2445,10 @@ BEGIN
           OR (target.chemical_formula IS NOT NULL AND source.chemical_formula IS NULL)
           )
       OR target.safety_information != source.safety_information
-      OR create_id != LV_CREATE_ID
-      OR create_time is null
-      OR facility_acquired is null
-      OR deleted is null
+      OR target.create_id != LV_CREATE_ID
+      OR target.create_time is null
+      OR target.facility_acquired is null
+      OR target.deleted is null
     )
   WHEN NOT matched THEN
     INSERT(
@@ -2743,10 +2746,10 @@ PROCEDURE migrate_sample_parameters(
           OR (target.range_bottom IS NULL AND source.range_bottom IS NOT NULL)
           OR (target.range_bottom IS NOT NULL AND source.range_bottom IS NULL)
           )
-      OR create_id != LV_CREATE_ID
-      OR create_time is null
-      OR facility_acquired is null
-      OR deleted is null
+      OR target.create_id != LV_CREATE_ID
+      OR target.create_time is null
+      OR target.facility_acquired is null
+      OR target.deleted is null
     WHEN NOT matched THEN
       INSERT(
         sample_id,
@@ -3129,6 +3132,7 @@ PROCEDURE duodesk_pr(
 
   ln_iteration PLS_INTEGER := 0;
 BEGIN
+  log_pkg.init;
   SAVEPOINT migration_sp;
 
   log_pkg.write_log('Data Migration started');
@@ -3212,6 +3216,7 @@ BEGIN
       END LOOP;
   ELSE
     log_pkg.write_log('Data Migration finished successfully');
+    COMMIT;
   END IF;
 EXCEPTION
   WHEN test_wall THEN
@@ -3221,6 +3226,7 @@ EXCEPTION
     RAISE;
   WHEN OTHERS THEN
     ROLLBACK TO migration_sp;
+    ICATDLS33.email_problem('ICAT',SQLERRM);
     log_pkg.write_exception(SQLERRM,1);
     log_pkg.write_log('Data Migration finished, UNSUCCESSFUL');
     RAISE;
