@@ -19,6 +19,7 @@ import javax.jws.WebService;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.FacilityCycle;
 import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
@@ -434,5 +435,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
         
         return InvestigationSearch.listAllParameters(manager);
     }
+
+    
     
 }

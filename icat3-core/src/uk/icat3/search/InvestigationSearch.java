@@ -15,6 +15,7 @@ import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.FacilityCycle;
 import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
@@ -912,4 +913,6 @@ public class InvestigationSearch extends ManagerUtil {
         log.trace("listAllParameters(EntityManager)");
         return manager.createNamedQuery(ALL_PARAMETERS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }
+
+    
 }

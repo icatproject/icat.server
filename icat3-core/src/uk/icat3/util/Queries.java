@@ -333,7 +333,14 @@ public class Queries {
      */
     public static final String ALL_INSTRUMENTS = "Instrument.listAll";
     public static final String ALL_INSTRUMENTS_JPQL = "SELECT DISTINCT i.name FROM Instrument i WHERE i.markedDeleted = 'N'";
-    
+
+    /**
+     * Find all FacilityCycles list,
+     *
+     */
+    public static final String ALL_FACILITYCYCLES = "FacilityCycle.listAll";
+    public static final String ALL_FACILITYCYCLES_JPQL = "SELECT DISTINCT f FROM FacilityCycle f WHERE f.markedDeleted = 'N'";
+
     /**
      * Find all investigation types,
      *

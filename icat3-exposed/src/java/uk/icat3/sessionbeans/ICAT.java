@@ -9,6 +9,7 @@
 package uk.icat3.sessionbeans;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -31,6 +32,8 @@ import uk.icat3.entity.DatafileParameterPK;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.DatasetParameterPK;
+import uk.icat3.entity.FacilityCycle;
+import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
@@ -46,6 +49,7 @@ import uk.icat3.entity.SampleParameterPK;
 import uk.icat3.exceptions.ICATAPIException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.search.AdvancedSearchDetails;
@@ -53,12 +57,15 @@ import uk.icat3.search.KeywordDetails;
 import uk.icat3.sessionbeans.data.DownloadManagerLocal;
 import uk.icat3.sessionbeans.manager.DatafileManagerLocal;
 import uk.icat3.sessionbeans.manager.DatasetManagerLocal;
+import uk.icat3.sessionbeans.manager.FacilityManagerLocal;
 import uk.icat3.sessionbeans.manager.InvestigationManagerLocal;
 import uk.icat3.sessionbeans.manager.XMLIngestionManagerLocal;
 import uk.icat3.sessionbeans.search.DatafileSearchLocal;
 import uk.icat3.sessionbeans.search.DatasetSearchLocal;
 import uk.icat3.sessionbeans.search.InvestigationSearchLocal;
 import uk.icat3.sessionbeans.search.KeywordSearchLocal;
+import uk.icat3.sessionbeans.util.Constants;
+import uk.icat3.user.UserDetails;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
@@ -94,6 +101,8 @@ public class ICAT extends EJBObject implements ICATLocal {
     protected XMLIngestionManagerLocal xmlIngestionManagerLocal;
     @EJB
     protected DownloadManagerLocal downloadManagerLocal;
+    @EJB
+    protected FacilityManagerLocal facilityManagerLocal;
     ///////////////////////  End of Inject all the EJBs   ///////////////////////
     /** Creates a new instance of AllOperationsBean */
     public ICAT() {
@@ -137,6 +146,7 @@ public class ICAT extends EJBObject implements ICATLocal {
             @WebParam(name = "password") String password,
             @WebParam(name = "lifetime") int lifetime) throws SessionException {
         return user.login(username, password, lifetime);
+
     }
 
     /**
@@ -150,6 +160,19 @@ public class ICAT extends EJBObject implements ICATLocal {
             @WebParam(name = "sessionId") String sessionId) {
         return user.logout(sessionId);
     }
+
+     @WebMethod()
+    public UserDetails getUserDetails(
+             @WebParam(name="sessionId") String sessionId,
+             @WebParam(name="usersName") String usersName) throws SessionException, NoSuchUserException{
+        return this.user.getUserDetails(sessionId, usersName);
+
+    }
+
+    
+
+
+
     ///////////////////////////     End of UserSession methods  //////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -561,6 +584,20 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection<Parameter> listParameters(
             @WebParam(name = "sessionId") String sessionId) throws SessionException {
         return investigationSearchLocal.listParameters(sessionId);
+    }
+
+    /**
+     *  Lists all the FacilityCycles in the DB
+     *
+     * @param sessionId
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection of FacilityCycles
+     */
+    @WebMethod
+    public Collection<FacilityCycle> listFacilityCycles(
+            @WebParam(name = "sessionId") String sessionId) throws SessionException {
+        return facilityManagerLocal.listAllFacilityCycles(sessionId);
+        
     }
 
     /**
@@ -1877,5 +1914,49 @@ public class ICAT extends EJBObject implements ICATLocal {
             @WebParam(name = "datasetId") Long datasetId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
         return downloadManagerLocal.checkDatasetDownloadAccess(sessionId, datasetId);
     }
+
+    /**
+     * Returns the current version of the ICAT API in use
+     * @param sessionId session id of the user.
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
+     * @return String the Current ICAT API Version (manually updated)
+     */
+    @WebMethod(operationName = "getICATAPIVersion")
+    public String getICATAPIVersion(@WebParam(name = "sessionId")
+    String sessionId) throws SessionException, InsufficientPrivilegesException {
+        return Constants.CURRENT_ICAT_API_VERSION;
+    }
+
+    /**
+     * Returns the FacilityUser for the given userId
+     * @param sessionId sessionId of the user
+     * @param facilityUserId the id of the user to retrieve
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return FacilityUser the FacilityUser requested
+     */
+    @WebMethod(operationName = "getFacilityUserByFacilityUserId")
+    public FacilityUser getFacilityUserByFacilityUserId(@WebParam(name = "sessionId") String sessionId,
+                                                        @WebParam(name = "facilityUserId") String facilityUserId) throws SessionException
+    {
+        return facilityManagerLocal.getFacilityUserByFacilityUserId(sessionId, facilityUserId);
+    }
+
+    /**
+     * Returns the FacilityUser for the given userId
+     * @param sessionId sessionId of the user
+     * @param facilityUserId the id of the user to retrieve
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return FacilityUser the FacilityUser requested
+     */
+    @WebMethod(operationName = "getFacilityUserByFederalId")
+    public FacilityUser getFacilityUserByFederalId(@WebParam(name = "sessionId") String sessionId,
+                                                        @WebParam(name = "federalId") String federalId) throws SessionException, NoSuchObjectFoundException
+    {
+        return facilityManagerLocal.getFacilityUserByFederalId(sessionId, federalId);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 }
+
+

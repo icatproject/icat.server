@@ -2,6 +2,7 @@ package uk.icat3.sessionbeans.search;
 
 import java.util.Collection;
 import javax.ejb.Local;
+import uk.icat3.entity.FacilityCycle;
 import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
@@ -54,4 +55,5 @@ public interface InvestigationSearchLocal {
     Collection<Parameter> listParameters(String sessionId) throws SessionException;
 
     Collection<String> listInvestigationTypes(String sessionId) throws SessionException;
+
     }

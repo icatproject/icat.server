@@ -20,5 +20,6 @@ public class Constants {
      * implementations
      */
    public static String DEFAULT_USER_IMPLEMENTATION = "uk.icat3.userdefault.facility.DefaultUser";
+   public static String CURRENT_ICAT_API_VERSION = "3.3.4";
     
 }

@@ -23,6 +23,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.Queries;
 
 /**
  * Entity class FacilityCycle
@@ -37,7 +38,11 @@ import uk.icat3.util.ElementType;
         @NamedQuery(name = "FacilityCycle.findByFinishDate", query = "SELECT f FROM FacilityCycle f WHERE f.finishDate = :finishDate"),
         @NamedQuery(name = "FacilityCycle.findByDescription", query = "SELECT f FROM FacilityCycle f WHERE f.description = :description"),
         @NamedQuery(name = "FacilityCycle.findByModTime", query = "SELECT f FROM FacilityCycle f WHERE f.modTime = :modTime"),
-        @NamedQuery(name = "FacilityCycle.findByModId", query = "SELECT f FROM FacilityCycle f WHERE f.modId = :modId")
+        @NamedQuery(name = "FacilityCycle.findByModId", query = "SELECT f FROM FacilityCycle f WHERE f.modId = :modId"),
+
+        //Added searches for ICAT3 API
+        @NamedQuery(name = Queries.ALL_FACILITYCYCLES, query = Queries.ALL_FACILITYCYCLES_JPQL)
+
     })
 public class FacilityCycle extends EntityBaseBean implements Serializable {
 
