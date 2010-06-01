@@ -161,6 +161,12 @@ set define OFF
 set define ON
 SPOOL OFF
 
+define logfile = DisableIkittenForeignConstraint.log
+SPOOL &log_dir&logfile
+set define OFF
+@schema_specific_scripts\icatdls\2_after_common_objects\DisableIkittenForeignConstraint.sql
+set define ON
+SPOOL OFF
 
 
 REM remaining general scripts
