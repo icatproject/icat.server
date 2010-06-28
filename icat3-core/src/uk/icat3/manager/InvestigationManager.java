@@ -287,6 +287,8 @@ public class InvestigationManager extends ManagerUtil {
 
         investigation.setFacility(getFacility(manager).getFacilityShortName());
 
+        //Reset investigation id incase it is set
+        investigation.setId(null);
         //check user has update access
         IcatRole role = GateKeeper.performAuthorisation(userId, investigation, AccessType.CREATE, manager);
 

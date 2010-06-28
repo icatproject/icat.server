@@ -116,10 +116,9 @@ public class TestInvestigation extends BaseTestClassTX {
     @Test(expected=ValidationException.class)
     public void addDuplicateInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid investigation to investigation Id: "+VALID_INVESTIGATION_ID);
-        
         //create invalid investigation, no name
         Investigation duplicateInvestigation = getInvestigationDuplicate(true);
-        
+        em.clear(); //Just to seperate out the entity query connection
         try {
             Investigation investigationInserted = (Investigation)InvestigationManager.createInvestigation(VALID_USER_FOR_INVESTIGATION, duplicateInvestigation,  em);
         } catch (ICATAPIException ex) {
@@ -199,7 +198,7 @@ public class TestInvestigation extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted investigation to investigation Id: "+VALID_INVESTIGATION_ID);
         
         Investigation validInvestigation  = getInvestigationDuplicate(true);
-        
+        em.clear();
         try {
             Investigation investigation = InvestigationManager.createInvestigation(VALID_USER_FOR_INVESTIGATION, validInvestigation, em);
         } catch (ICATAPIException ex) {
