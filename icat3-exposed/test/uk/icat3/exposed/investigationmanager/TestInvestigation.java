@@ -52,7 +52,6 @@ public class TestInvestigation extends BaseTestClassTX {
     @Test
     public void addInvestigation() throws ICATAPIException {
         log.info("Testing  session: "+ VALID_SESSION +"  for adding investigation");
-        
         Investigation validInvestigation  = getInvestigation(true);
         validInvestigation.setInvAbstract("Valid length");
         

@@ -325,11 +325,11 @@ public class TestDataset extends BaseTestClassTX {
         
         //find dataset type
         Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
-        set.setDatasetType(datasetType.iterator().next().toString());
+        set.setDatasetType(datasetType.iterator().next().getName());
         
         //add status
         Collection<DatasetStatus> datasetStstus = (Collection<DatasetStatus>)executeListResultCmd("select d from DatasetStatus d");
-        set.setDatasetStatus(datasetStstus.iterator().next().toString());
+        set.setDatasetStatus(datasetStstus.iterator().next().getName());
         
         //add a file
         Datafile file = new Datafile();
@@ -386,8 +386,8 @@ public class TestDataset extends BaseTestClassTX {
         Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
         
         DatasetType added =  datasetType.iterator().next();
-        file1.setDatasetType(added.toString());
-        file2.setDatasetType(added.toString());
+        file1.setDatasetType(added.getName());
+        file2.setDatasetType(added.getName());
         
         Collection<Dataset> datasets = new ArrayList<Dataset>();
         datasets.add(file1);
@@ -622,7 +622,7 @@ public class TestDataset extends BaseTestClassTX {
         //find dataset type
         Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
         
-        file.setDatasetType(datasetType.iterator().next().toString());
+        file.setDatasetType(datasetType.iterator().next().getName());
         
         try {
             DataSetManager.createDataSet(INVALID_USER, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
@@ -646,7 +646,7 @@ public class TestDataset extends BaseTestClassTX {
         //find dataset type
         Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
         
-        file.setDatasetType(datasetType.iterator().next().toString());
+        file.setDatasetType(datasetType.iterator().next().getName());
         
         try {
             DataSetManager.createDataSet(INVALID_USER, file, VALID_DATASET_ID_FOR_INVESTIGATION, em);
@@ -690,7 +690,7 @@ public class TestDataset extends BaseTestClassTX {
             //create valid file
             Dataset file = new Dataset();
             Collection<DatasetType> datasetType = (Collection<DatasetType>)executeListResultCmd("select d from DatasetType d");
-            file.setDatasetType(datasetType.iterator().next().toString());
+            file.setDatasetType(datasetType.iterator().next().getName());
             file.setName("unit test create data set");
             return file;
         } else {

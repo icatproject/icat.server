@@ -8,11 +8,13 @@
         <data xmlns="http://www.netbeans.org/ns/j2ee-ejbjarproject/3">
             <name>icat3-exposed</name>
             <minimum-ant-version>1.6</minimum-ant-version>
-            <included-library>reference.icat3-core.jar</included-library>
-            <included-library>reference.icat3-jaxb.jar</included-library>
-            <included-library>reference.icat3-user-default.jar</included-library>
-            <included-library>reference.icat3-data.jar</included-library>
-            <included-library>file.reference.log4j-1.2.14.jar</included-library>
+            <included-library dirs="200">reference.icat3-core.jar</included-library>
+            <included-library dirs="200">reference.icat3-jaxb.jar</included-library>
+            <included-library dirs="200">reference.icat3-data.jar</included-library>
+            <included-library dirs="200">reference.icat3-user-ansto.jar</included-library>
+            <included-library dirs="200">file.reference.log4j-1.2.14.jar</included-library>
+            <included-library dirs="200">file.reference.eclipselink-2.0.2.jar</included-library>
+            <included-library dirs="200">file.reference.eclipselink-javax.persistence-2.0.jar</included-library>
             <source-roots>
                 <root id="src.dir"/>
             </source-roots>
@@ -50,7 +52,7 @@
                 <id>jar</id>
             </reference>
             <reference>
-                <foreign-project>icat3-user-default</foreign-project>
+                <foreign-project>icat3-user-ansto</foreign-project>
                 <artifact-type>jar</artifact-type>
                 <script>build.xml</script>
                 <target>jar</target>

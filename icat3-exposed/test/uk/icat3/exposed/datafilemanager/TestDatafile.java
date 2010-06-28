@@ -108,9 +108,9 @@ public class TestDatafile extends BaseTestClassTX {
         Datafile duplicateDatafile = getDatafileDuplicate(true);
         duplicateDatafile.setDeleted(false);
         duplicateDatafile.setCreateId(VALID_ICAT_ADMIN_FOR_INVESTIGATION);
-        
-        Collection<Long> longs =  addAuthorisation(duplicateDatafile.getId(), duplicateDatafile.getDataset().getId(), VALID_ICAT_ADMIN_FOR_INVESTIGATION, ElementType.DATAFILE, IcatRoles.ICAT_ADMIN);
-        Iterator it = longs.iterator();
+        //No need for datafile authorisation it inherists from dataset
+        //Collection<Long> longs =  addAuthorisation(duplicateDatafile.getId(), duplicateDatafile.getDataset().getId(), VALID_ICAT_ADMIN_FOR_INVESTIGATION, ElementType.DATAFILE, IcatRoles.ICAT_ADMIN);
+        //Iterator it = longs.iterator();
         
         //set entitymanager for each new method
         icat.setEntityManager(em);
@@ -121,10 +121,10 @@ public class TestDatafile extends BaseTestClassTX {
         Datafile modified = em.find(Datafile.class,duplicateDatafile.getId() );
         assertNull("Datafile must not be found in DB "+duplicateDatafile, modified);
         
-        IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
+        //IcatAuthorisation icatAuth = em.find(IcatAuthorisation.class,it.next());
         
-        it = longs.iterator();
-        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);
+        //it = longs.iterator();
+        //assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);
     }
     
     /**
