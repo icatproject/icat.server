@@ -40,7 +40,7 @@ public class TestUser {
     
     protected static void setUp(){
         
-        emf = Persistence.createEntityManagerFactory("icat3-user-defaultPU");
+        emf = Persistence.createEntityManagerFactory("icat3-defaultunit-testing-PU");
         em = emf.createEntityManager();
         
         // Begin transaction
@@ -137,10 +137,15 @@ public class TestUser {
     
     
     public static void main(String[] args)throws SessionException {
+        String username = "";
+        String password = "";
         TestUser tu = new TestUser();
-        
+        if(username.compareTo("")==0||password.compareTo("")==0) {
+            System.out.println("Please change the source code TestUser.java to add username and password");
+            return;
+        }
         for(int i = 0; i < 1; i++){
-                 tu.login("glen","kkkkkk",2);
+                 tu.login("username","password",2);
         }
         // tu.insertSession();
        // tu.logout("18c7f182-031f-42c2-a351-bf3ef3f7484e");

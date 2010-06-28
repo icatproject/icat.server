@@ -37,9 +37,13 @@ public class BaseTestClassTX extends BaseTest{
     
     @After
     public void closeTX(){
+
         // Commit the transaction
         log.debug("commiting transaction on entityManager");
-        em.getTransaction().commit();
+        if(!em.getTransaction().getRollbackOnly())
+            em.getTransaction().commit();
+        else
+            em.getTransaction().rollback();
     }
     
     @BeforeClass

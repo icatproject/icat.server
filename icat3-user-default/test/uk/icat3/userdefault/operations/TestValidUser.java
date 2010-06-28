@@ -36,7 +36,10 @@ public class TestValidUser extends BaseTestClassTX {
      @Test
     public void testValidUsernamePassword() throws SessionException, CertificateException {
         log.trace("testValidUsernamePassword()");
-        
+        assertNotNull("Username cannot be null, please change/add the runtime arguments -Duser.name=",correctUser);
+        assertNotNull("Password cannot be null, please change/add the runtime arguments -Dusersso.password=",correctUserPassword);
+        assertFalse("Username cannot be null, please change/add the runtime arguments -Duser.name=",correctUser.compareTo("")==0);
+        assertFalse("Password cannot be null, please change/add the runtime arguments -Dusersso.password=",correctUserPassword.compareTo("")==0);
         UtilOperations.loadMyProxyServer(em);
         
         UserManager userManager = new UserManager(em);

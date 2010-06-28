@@ -27,18 +27,21 @@ public class PortalCredential {
     
     private static GSSCredential portalProxy;
     private static Logger log = Logger.getLogger(PortalCredential.class);
+    private static boolean portalCertificateExist = true;
     
-    public static  GSSCredential getPortalProxy() throws Exception{
-        if( portalProxy == null ) {
-            createPortalProxy();
-        } else    // proxy already exists
-        {
-            if( portalProxy.getRemainingLifetime() <= 120 )    // has proxy expired?
-            {
+    public static  GSSCredential getPortalProxy(){
+        if (!portalCertificateExist) {
+            return null;
+        }
+        try {
+            //Check whether portal proxy is created or expired
+            if (portalProxy == null || portalProxy.getRemainingLifetime() <= 120) {
                 createPortalProxy();
             }
+        } catch (Exception ex) {
+            log.warn("Please check your COG setup and certificates, continuing to use without certificates");
+            portalCertificateExist = false;
         }
-        
         return portalProxy;
         
         
@@ -73,6 +76,7 @@ public class PortalCredential {
         
         catch( Exception e ) {
             log.error("Cog properties not set correctly",e);
+            portalCertificateExist = false;
             throw e;
         }
         

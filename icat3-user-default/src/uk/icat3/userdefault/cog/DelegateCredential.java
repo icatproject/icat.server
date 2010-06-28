@@ -7,6 +7,7 @@
 package uk.icat3.userdefault.cog;
 
 import org.apache.log4j.Logger;
+import org.globus.gsi.gssapi.auth.IdentityAuthorization;
 import org.ietf.jgss.*;
 import org.globus.myproxy.*;
 
@@ -25,16 +26,13 @@ public abstract class DelegateCredential {
         String username = aUsername;
         String userPassphrase = aPassPhrase;
         
-        // check that portal proxy hasn't expired
-        if( portalProxy == null || portalProxy.getRemainingLifetime() <= 0 ) {
-            throw new MyProxyException( "Invalid server portal proxy: "+portalProxy.getName().toString() );
-        }
-        
         log.trace("Server Proxy Ok");
         log.info("Connecting to "+host+":"+port+", with DN: "+dn);
         
         org.globus.myproxy.MyProxy proxy = new org.globus.myproxy.MyProxy( host, port );
-        GSSCredential delegateUserProxy = proxy.get( host, port, portalProxy, username, userPassphrase, lifetime *3600 /*turn into seconds*/, dn );
+        proxy.setAuthorization(new IdentityAuthorization(dn));
+        GSSCredential delegateUserProxy = proxy.get(username, userPassphrase, lifetime*3600);
+        //GSSCredential delegateUserProxy = proxy.get( host, port, portalProxy, username, userPassphrase, lifetime *3600 /*turn into seconds*/, dn );
         log.trace("Retrieved user proxy.");
         return delegateUserProxy;
     }

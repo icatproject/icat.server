@@ -28,7 +28,7 @@ public class TestAdminUser extends BaseTestClassTX {
     
     private static Logger log = Logger.getLogger(TestAdminUser.class);
     
-    private String correctUser = "admin";
+    private String correctUser = "ADMIN_USER";
     private String correctAdminUser = "admin";
     private String correctUserPassword = "admintestpassword"+Math.random();
     private String correctSid;
