@@ -379,7 +379,7 @@ public abstract class EntityBaseBean implements Serializable {
                     } catch (ValidationException ex) {
                         throw ex;
                     } catch (Exception ex) {
-                        log.warn(getClass().getSimpleName() + ": " + fieldName + " cannot be accessed.", ex);
+                        log.trace(getClass().getSimpleName() + ": " + fieldName + " cannot be accessed.", ex);
                     }
                 }
 
@@ -398,7 +398,7 @@ public abstract class EntityBaseBean implements Serializable {
                 } catch (ValidationException ex) {
                     throw ex;
                 } catch (Exception ex) {
-                    log.warn(getClass().getSimpleName() + ": " + fieldName + " cannot be accessed.", ex);
+                    log.trace(getClass().getSimpleName() + ": " + fieldName + " cannot be accessed.", ex);
                 }
             }
         }
