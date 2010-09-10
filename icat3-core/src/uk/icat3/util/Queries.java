@@ -23,9 +23,12 @@ public class Queries {
     
     //Returns all of datafiles
     public static final String RETURN_ALL_DATAFILES_JPQL = "SELECT DISTINCT i from Datafile i ";
+
+    //Returns all of datasets
+    public static final String RETURN_ALL_DATASETS_JPQL = "SELECT DISTINCT i from Dataset i ";
     
     //Returns all of samples
-    public static final String RETURN_ALL_SAMPLES_JPQL = "SELECT DISTINCT i.sampleCollection from Investigation i ";
+    public static final String RETURN_ALL_SAMPLES_JPQL = "SELECT DISTINCT i from Sample i ";
     
     //Returns investigation id
     public static final String RETURN_ALL_INVESTIGATION_IDS_JPQL = "SELECT DISTINCT i.id from Investigation i ";
@@ -42,7 +45,17 @@ public class Queries {
      * i.dataset.investigation.instrument is not working properly
      */
     public static final String QUERY_USERS_DATAFILES_JPQL = ", IcatAuthorisation ia WHERE" +
-            "  (i.dataset.id = ia.elementId AND ia.elementType = :objectType " +
+            " (i.dataset.id = ia.elementId AND ia.elementType = :objectType " +
+            " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+            " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' ";
+
+     public static final String QUERY_USERS_DATASETS_JPQL = ", IcatAuthorisation ia WHERE" +
+            "  (i.id = ia.elementId AND ia.elementType = :objectType " +
+            " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+            " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' ";
+
+      public static final String QUERY_USERS_SAMPLES_JPQL = ", IcatAuthorisation ia WHERE" +
+            " (i.investigationId.id = ia.elementId AND ia.elementType = :objectType " +
             " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
             " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' ";
 

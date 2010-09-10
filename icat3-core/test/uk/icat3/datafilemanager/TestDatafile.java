@@ -246,7 +246,7 @@ public class TestDatafile extends BaseTestClassTX {
         Datafile file = getDatafile(true);
         
         //cannot add param with data file because dont know data file id yet
-        DatafileParameter param = TestDatafileParameter.getDatafileParameter(true, true);
+        DatafileParameter param = TestDatafileParameter.getDatafileParameter(true, TestDatafileParameter.NumericValue);
         param.setDatafile(file);
         
         file.addDataFileParameter(param);

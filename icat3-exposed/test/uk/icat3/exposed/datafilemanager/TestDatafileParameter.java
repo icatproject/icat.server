@@ -30,6 +30,7 @@ import uk.icat3.sessionbeans.manager.DatafileManagerBean;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.IcatRoles;
+import uk.icat3.util.ParameterValueType;
 import static uk.icat3.exposed.util.TestConstants.*;
 
 /**
@@ -516,7 +517,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
                 log.trace("Adding new parameter");
                 Parameter param = new Parameter("units","name");
                 param.setIsSampleParameter("N");
-                param.setNumericValue("Y");
+                param.setValueType(ParameterValueType.NUMERIC);
                 param.setSearchable("Y");
                 param.setIsDatasetParameter("N");
                 param.setIsDatafileParameter("Y");
@@ -534,7 +535,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
                 param.setIsSampleParameter("N");
                 param.setIsDatasetParameter("N");
                 param.setIsDatafileParameter("Y");
-                param.setNumericValue("N");
+                param.setValueType(ParameterValueType.STRING);
                 param.setSearchable("Y");
                 param.setCreateId("DATAFILE_PARAMETER_ADDED");
                 em.persist(param);

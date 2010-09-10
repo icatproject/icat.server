@@ -364,42 +364,46 @@ public abstract class EntityBaseBean implements Serializable {
 
             //now check all annoatations
             for (Annotation a : allFields[i].getDeclaredAnnotations()) {
-                //if this means its a none null column field
-                if (a.annotationType().getName().contains("Column") && a.toString().contains("nullable=false")) {
+                //Check whether the annotationn has Column Field.
+                if (a.annotationType().getName().contains("Column")) {
+                    //Check whether the annotation has nullable as false meaning
+                    //whether the property cannot be null, test whether its null.
+                    if (a.toString().contains("nullable=false")) {
 
-                    //now check if it is null, if so throw error
+                        //now check if it is null, if so throw error
+                        try {
+                            //get value
+                            Object result = getProperty(fieldName, this);
+                            if (result == null) {
+                                throw new ValidationException(getClass().getSimpleName() + ": " + fieldName + " cannot be null.");
+                            } else {
+                                log.trace(getClass().getSimpleName() + ": " + fieldName + " is valid");
+                            }
+                        } catch (ValidationException ex) {
+                            throw ex;
+                        } catch (Exception ex) {
+                            log.trace(getClass().getSimpleName() + ": " + fieldName + " cannot be accessed.", ex);
+                        }
+                    }
+                    //check max value now of strings, In JPA default string max length
+                    //is 255.
                     try {
                         //get value
                         Object result = getProperty(fieldName, this);
-                        if (result == null) {
-                            throw new ValidationException(getClass().getSimpleName() + ": " + fieldName + " cannot be null.");
-                        } else {
-                            log.trace(getClass().getSimpleName() + ": " + fieldName + " is valid");
+                        if (result instanceof String) {
+                            log.trace("Checking maximum string length of: " + fieldName);
+
+                            if (((String) result).length() > max) {
+                                log.trace("ICAT(max=" + max + ") : length is " + ((String) result).length());
+                                throw new ValidationException(getClass().getSimpleName() + ": " + fieldName + " cannot be more than " + max + " in length.");
+                            }
                         }
                     } catch (ValidationException ex) {
                         throw ex;
                     } catch (Exception ex) {
                         log.trace(getClass().getSimpleName() + ": " + fieldName + " cannot be accessed.", ex);
                     }
-                }
-
-                //check max value now of strings
-                try {
-                    //get value
-                    Object result = getProperty(fieldName, this);
-                    if (result instanceof String) {
-                        log.trace("Checking maximum string length of: " + fieldName);
-
-                        if (((String) result).length() > max) {
-                            log.trace("ICAT(max=" + max + ") : length is " + ((String) result).length());
-                            throw new ValidationException(getClass().getSimpleName() + ": " + fieldName + " cannot be more than " + max + " in length.");
-                        }
-                    }
-                } catch (ValidationException ex) {
-                    throw ex;
-                } catch (Exception ex) {
-                    log.trace(getClass().getSimpleName() + ": " + fieldName + " cannot be accessed.", ex);
-                }
+                }                
             }
         }
         return true;

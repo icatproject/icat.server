@@ -9,6 +9,7 @@
 
 package uk.icat3.exposed.datasetmanager;
 
+import uk.icat3.util.ParameterValueType;
 import java.util.Collection;
 import java.util.Random;
 import junit.framework.JUnit4TestAdapter;
@@ -508,7 +509,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
                 log.trace("Adding new parameter");
                 Parameter param = new Parameter("units","name");
                 param.setIsSampleParameter("N");
-                param.setNumericValue("Y");
+                param.setValueType(ParameterValueType.NUMERIC);
                 param.setSearchable("Y");
                 param.setIsDatasetParameter("Y");
                 param.setIsDatafileParameter("N");
@@ -526,7 +527,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
                 param.setIsSampleParameter("N");
                 param.setIsDatasetParameter("Y");
                 param.setIsDatafileParameter("N");
-                param.setNumericValue("N");
+                param.setValueType(ParameterValueType.STRING);
                 param.setSearchable("Y");
                 param.setCreateId("DATASET_PARAMETER_ADDED");
                 em.persist(param);

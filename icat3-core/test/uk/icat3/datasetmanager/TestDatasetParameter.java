@@ -9,6 +9,8 @@
 
 package uk.icat3.datasetmanager;
 
+import uk.icat3.util.ParameterValueType;
+import java.util.Date;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
@@ -41,15 +43,60 @@ public class TestDatasetParameter extends BaseTestClassTX {
     
     private static Logger log = Logger.getLogger(TestDatasetParameter.class);
     private Random random = new Random();
-    
+    public static final int NumericValue = 0;
+    public static final int StringValue = 1;
+    public static final int DateValue = 2;
+
+
+   /**
+     * Tests adding a dataset parameter of type string
+     */
+    @Test
+    public void addDatasetParameterString() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datasetParameter of type string to investigation Id: "+VALID_INVESTIGATION_ID);
+
+        DatasetParameter validDatasetParameter  = getDatasetParameter(true, StringValue);
+
+        DatasetParameter datasetParameterInserted = (DatasetParameter)DataSetManager.addDataSetParameter(VALID_USER_FOR_INVESTIGATION, validDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+
+        DatasetParameter modified = em.find(DatasetParameter.class,datasetParameterInserted.getDatasetParameterPK() );
+
+        checkDatasetParameter(modified);
+        assertFalse("Deleted must be false", modified.isDeleted());
+        assertNull("Numeric value must be null", modified.getNumericValue());
+        assertNotNull("String value must not be null", modified.getStringValue());
+        assertNull("Date value must be null", modified.getDateTimeValue());
+    }
+
+    /**
+     * Tests adding a datafile parameter of type Date
+     */
+    @Test
+    public void addDatasetParameterDate() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datasetParameter of type Date to investigation Id: "+VALID_INVESTIGATION_ID);
+
+        DatasetParameter validDatasetParameter  = getDatasetParameter(true, DateValue);
+
+        DatasetParameter datasetParameterInserted = (DatasetParameter)DataSetManager.addDataSetParameter(VALID_USER_FOR_INVESTIGATION, validDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+
+        DatasetParameter modified = em.find(DatasetParameter.class,datasetParameterInserted.getDatasetParameterPK() );
+
+        checkDatasetParameter(modified);
+        assertFalse("Deleted must be false", modified.isDeleted());
+        assertNull("Numeric value must be null", modified.getNumericValue());
+        assertNull("String value must be null", modified.getStringValue());
+        assertNotNull("Date value must not be null",modified.getDateTimeValue());
+    }
+
+
     /**
      * Tests creating a file
      */
     @Test
-    public void addDatasetParameter() throws ICATAPIException {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
+    public void addDatasetParameterNumeric() throws ICATAPIException {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datasetParameter of type numeric to investigation Id: "+VALID_INVESTIGATION_ID);
         
-        DatasetParameter validDatasetParameter  = getDatasetParameter(true, true);
+        DatasetParameter validDatasetParameter  = getDatasetParameter(true, NumericValue);
         
         DatasetParameter datasetParameterInserted = (DatasetParameter)DataSetManager.addDataSetParameter(VALID_USER_FOR_INVESTIGATION, validDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
         
@@ -59,6 +106,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         assertFalse("Deleted must be false", modified.isDeleted());
         assertNotNull("Must be numeric value", modified.getNumericValue());
         assertNull("String value must be null", modified.getStringValue());
+        assertNull("Date value must be null",modified.getDateTimeValue());
     }
             
     /**
@@ -70,7 +118,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         
         String modifiedError = "unit test error "+random.nextInt();
         //create invalid datasetParameter, no name
-        DatasetParameter modifiedDatasetParameter = getDatasetParameter(true, true);
+        DatasetParameter modifiedDatasetParameter = getDatasetParameter(true, NumericValue);
         DatasetParameter duplicateDatasetParameter = getDatasetParameterDuplicate(true);
         Dataset ds  =em.find(Dataset.class, VALID_DATA_SET_ID);
         modifiedDatasetParameter.setError(modifiedError);
@@ -242,7 +290,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
     public void addDatasetParameterInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for adding datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
-        DatasetParameter validDatasetParameter  = getDatasetParameter(true, true);
+        DatasetParameter validDatasetParameter  = getDatasetParameter(true, NumericValue);
         
         try {
             DatasetParameter datasetParameterInserted = (DatasetParameter)DataSetManager.addDataSetParameter(INVALID_USER, validDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
@@ -261,7 +309,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
     public void addDatasetParameterInvalidDataset() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datasetParameter to invalid investigation Id");
         
-        DatasetParameter validDatasetParameter  = getDatasetParameter(true,true);
+        DatasetParameter validDatasetParameter  = getDatasetParameter(true,NumericValue);
         
         try {
             DatasetParameter datasetParameterInserted = (DatasetParameter)DataSetManager.addDataSetParameter(VALID_USER_FOR_INVESTIGATION, validDatasetParameter, random.nextLong(), em);
@@ -280,7 +328,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
     public void addDatasetParameterInvalidDatasetId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datasetParameter to invalid investigation Id");
         
-        DatasetParameter validDatasetParameter  = getDatasetParameter(true,true);
+        DatasetParameter validDatasetParameter  = getDatasetParameter(true,NumericValue);
         validDatasetParameter.getDatasetParameterPK().setDatasetId(456787L);
         try {
             DatasetParameter datasetParameterInserted = (DatasetParameter)DataSetManager.addDataSetParameter(VALID_USER_FOR_INVESTIGATION, validDatasetParameter, VALID_INVESTIGATION_ID, em);
@@ -300,7 +348,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datasetParameter, no name
-        DatasetParameter invalidDatasetParameter = getDatasetParameter(false, true);
+        DatasetParameter invalidDatasetParameter = getDatasetParameter(false, NumericValue);
         
         try {
             DatasetParameter datasetParameterInserted = (DatasetParameter)DataSetManager.addDataSetParameter(VALID_USER_FOR_INVESTIGATION, invalidDatasetParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
@@ -322,7 +370,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datasetParameter, no name
-        DatasetParameter invalidDatasetParameter = getDatasetParameter(true, false);
+        DatasetParameter invalidDatasetParameter = getDatasetParameter(true, StringValue);
         //string value only allowed
         invalidDatasetParameter.setNumericValue(45d);
         
@@ -343,7 +391,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datasetParameter, no name
-        DatasetParameter invalidDatasetParameter = getDatasetParameter(true, true);
+        DatasetParameter invalidDatasetParameter = getDatasetParameter(true, NumericValue);
         //string value only allowed
         invalidDatasetParameter.setStringValue("45d");
         
@@ -421,7 +469,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datasetarameter, no name
-        DatasetParameter datasetParameter = getDatasetParameter(true, true);
+        DatasetParameter datasetParameter = getDatasetParameter(true, NumericValue);
         datasetParameter.setDatasetParameterPK(null);
         
         try {
@@ -441,7 +489,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datasetParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datasetarameter, no name
-        DatasetParameter datasetParameter = getDatasetParameter(true, true);
+        DatasetParameter datasetParameter = getDatasetParameter(true, NumericValue);
         datasetParameter.setDatasetParameterPK(null);
         
         try {
@@ -461,7 +509,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datafileParameter to investigation Id: "+VALID_INVESTIGATION_ID);
         
         //create invalid datasetarameter, no name
-        DatasetParameter datasetParameter = getDatasetParameter(true, true);
+        DatasetParameter datasetParameter = getDatasetParameter(true, NumericValue);
         datasetParameter.setDatasetParameterPK(null);
         
         try {
@@ -500,42 +548,66 @@ public class TestDatasetParameter extends BaseTestClassTX {
     
     
     
-    
-    static Parameter getParameter(boolean numeric){
+    static Parameter getParameter(int type) {
         Parameter parameter = null;
-        if(numeric){
-            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.numericValue = 'Y' AND d.isDatasetParameter = 'Y'");
-            if(parameters.size() == 0){
-                log.trace("Adding new parameter");
-                Parameter param = new Parameter("units","name");
-                param.setIsSampleParameter("N");
-                param.setNumericValue("Y");
-                param.setSearchable("Y");
-                param.setIsDatasetParameter("Y");
-                param.setIsDatafileParameter("N");
-                param.setCreateId("DATASET_PARAMETER_ADDED");
-                param.setVerified(true);
-                em.persist(param);
-                parameter =  param;
-            } else {
-                parameter = parameters.iterator().next();
+        switch (type) {
+            case NumericValue: {
+                Collection<Parameter> parameters = (Collection<Parameter>) executeListResultCmd("select d from Parameter d where d.numericValue = 'Y' AND d.isDatasetParameter = 'Y'");
+                if (parameters.size() == 0) {
+                    log.trace("Adding new parameter");
+                    Parameter param = new Parameter("units", "name");
+                    param.setIsSampleParameter("N");
+                    param.setValueType(ParameterValueType.NUMERIC);
+                    param.setSearchable("Y");
+                    param.setIsDatasetParameter("Y");
+                    param.setIsDatafileParameter("N");
+                    param.setCreateId("DATASET_PARAMETER_ADDED");
+                    param.setVerified(true);
+                    em.persist(param);
+                    parameter = param;
+                } else {
+                    parameter = parameters.iterator().next();
+                }
             }
-        } else {
-            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.numericValue = 'N' AND d.isDatasetParameter = 'Y'");
-            if(parameters.size() == 0){
-                log.trace("Adding new parameter");
-                Parameter param = new Parameter("units string","name");
-                param.setIsSampleParameter("N");
-                param.setIsDatasetParameter("Y");
-                param.setIsDatafileParameter("N");
-                param.setNumericValue("N");
-                param.setSearchable("Y");
-                param.setCreateId("DATASET_PARAMETER_ADDED");
-                em.persist(param);
-                parameter =  param;
-            } else {
-                parameter = parameters.iterator().next();
+            break;
+            case StringValue: {
+                Collection<Parameter> parameters = (Collection<Parameter>) executeListResultCmd("select d from Parameter d where d.numericValue = 'N' AND d.isDatasetParameter = 'Y'");
+                if (parameters.size() == 0) {
+                    log.trace("Adding new parameter");
+                    Parameter param = new Parameter("units string", "name");
+                    param.setIsSampleParameter("N");
+                    param.setIsDatasetParameter("Y");
+                    param.setIsDatafileParameter("N");
+                    param.setValueType(ParameterValueType.STRING);
+                    param.setSearchable("Y");
+                    param.setCreateId("DATASET_PARAMETER_ADDED");
+                    param.setVerified(true);
+                    em.persist(param);
+                    parameter = param;
+                } else {
+                    parameter = parameters.iterator().next();
+                }
             }
+            break;
+            case DateValue: {
+                Collection<Parameter> parameters = (Collection<Parameter>) executeListResultCmd("select d from Parameter d where d.parameterPK.name = 'Date_Time' AND d.numericValue = 'N' AND d.isDatasetParameter = 'Y'");
+                if (parameters.size() == 0) {
+                    log.trace("Adding new parameter");
+                    Parameter param = new Parameter("Date_Time", "name");
+                    param.setIsSampleParameter("N");
+                    param.setIsDatasetParameter("Y");
+                    param.setIsDatafileParameter("N");
+                    param.setValueType(ParameterValueType.DATE_AND_TIME);
+                    param.setSearchable("Y");
+                    param.setCreateId("DATASET_PARAMETER_ADDED");
+                    param.setVerified(true);
+                    em.persist(param);
+                    parameter = param;
+                } else {
+                    parameter = parameters.iterator().next();
+                }
+            }
+            break;
         }
         log.trace(parameter);
         return parameter;
@@ -554,15 +626,21 @@ public class TestDatasetParameter extends BaseTestClassTX {
         return datasetParameter;
     }
     
-    static DatasetParameter getDatasetParameter(boolean valid, boolean numeric){
-        Parameter parameter = getParameter(numeric);
+    static DatasetParameter getDatasetParameter(boolean valid, int type){
+        Parameter parameter = getParameter(type);
         if(valid){
             //create valid datasetParameter
             DatasetParameter datasetParameter = new DatasetParameter(parameter.getParameterPK().getUnits(),parameter.getParameterPK().getName(), VALID_SAMPLE_ID_FOR_INVESTIGATION_ID);
-            if(numeric){
-                datasetParameter.setNumericValue(45d);
-            } else {
-                datasetParameter.setStringValue("string value");
+            switch(type){
+                case NumericValue:
+                    datasetParameter.setNumericValue(45d);
+                    break;
+                case StringValue:
+                    datasetParameter.setStringValue("string value");
+                    break;
+                case DateValue:
+                    datasetParameter.setDateTimeValue(new Date(10000L));
+                    break;
             }
             datasetParameter.getDatasetParameterPK().setDatasetId(VALID_SAMPLE_ID_FOR_INVESTIGATION_ID);
             return datasetParameter;

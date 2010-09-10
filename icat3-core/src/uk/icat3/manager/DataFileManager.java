@@ -14,6 +14,7 @@ import java.util.Collection;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
+import uk.icat3.entity.DatafileFormat;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.IcatAuthorisation;
@@ -184,8 +185,12 @@ public class DataFileManager extends ManagerUtil {
         GateKeeper.performAuthorisation(userId, datafileManaged, AccessType.UPDATE, manager);
         //String facilityUserId = getFacilityUserId(userId, manager);
         datafileManaged.setModId(userId);
-        datafileManaged.merge(dataFile);
+        //log.trace("Is Datafile Format Managed"+manager.contains(datafileManaged.getDatafileFormat()));
+        //DatafileFormat dfformat = dataFile.getDatafileFormat();
 
+        datafileManaged.merge(dataFile);
+       // datafileManaged.setDatafileFormat(dfformat);
+        datafileManaged=manager.merge(datafileManaged);
         return datafileManaged;
     }
 

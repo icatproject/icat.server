@@ -37,3 +37,10 @@ set define OFF
 @general_scripts/schema_mods/005_partition_icat_authorisation.sql
 set define ON
 SPOOL OFF
+
+define logfile = AA_006_partition_dataset_parameter.log
+SPOOL &log_dir&logfile
+set define OFF
+@general_scripts/schema_mods/006_partition_dataset_parameter.sql
+set define ON
+SPOOL OFF

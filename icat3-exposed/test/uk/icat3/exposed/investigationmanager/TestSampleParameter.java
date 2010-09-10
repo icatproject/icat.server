@@ -9,6 +9,7 @@
 
 package uk.icat3.exposed.investigationmanager;
 
+import uk.icat3.util.ParameterValueType;
 import java.util.Collection;
 import java.util.Random;
 import junit.framework.JUnit4TestAdapter;
@@ -484,7 +485,7 @@ public class TestSampleParameter extends BaseTestClassTX {
                 log.trace("Adding new parameter");
                 Parameter param = new Parameter("units","name");
                 param.setIsSampleParameter("Y");
-                param.setNumericValue("Y");
+                param.setValueType(ParameterValueType.NUMERIC);
                 param.setSearchable("Y");
                 param.setIsDatasetParameter("N");
                 param.setIsDatafileParameter("N");
@@ -502,7 +503,7 @@ public class TestSampleParameter extends BaseTestClassTX {
                 param.setIsSampleParameter("Y");
                 param.setIsDatasetParameter("N");
                 param.setIsDatafileParameter("N");
-                param.setNumericValue("N");
+                param.setValueType(ParameterValueType.STRING);
                 param.setSearchable("Y");
                 param.setCreateId("SAMPLE_PARAMETER_ADDED");
                 em.persist(param);

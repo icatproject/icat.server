@@ -276,7 +276,16 @@ import uk.icat3.util.Queries;
      * Used to see if there is a unique sample already in Db so that it can be merged or set as deleted
      */
     public Sample find(EntityManager manager) {
-        return (Sample)manager.createNamedQuery("Sample.findByUnique").setParameter("name", name).setParameter("instance", instance).setParameter("investigationId", investigationId).getSingleResult();
+        log.trace("searhing for: " + this.name + " " + this.instance + " " + this.investigationId);
+        Sample result = null;
+        try {
+            result = (Sample) manager.createNamedQuery("Sample.findByUnique").setParameter("name", name).setParameter("instance", instance).setParameter("investigationId", investigationId).getSingleResult();
+        } catch (NoResultException e) {
+            log.trace("can't find result.");
+            return null;
+        }
+        return result;
+
     }
     
     /**
@@ -362,7 +371,7 @@ import uk.icat3.util.Queries;
      * @param managerValue value of the EntityManager value
      */
     public void setCascade(Cascade type, Object cascadeValue, EntityManager manager, Object managerValue) throws InsufficientPrivilegesException{
-        log.trace("Cascading: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
+        log.trace("Sample Cascading: "+toString()+" from type: "+type+" to :"+cascadeValue+" EntityManager: "+(manager == null ? "null" : "manager")+", managerValue: "+ managerValue);
         
         String deleted = "Y";
         String facilityAcquired = "Y";
@@ -399,6 +408,7 @@ import uk.icat3.util.Queries;
             this.setModId(cascadeValue.toString());
             this.setCreateId(cascadeValue.toString());
         }
+        log.trace("finished cascading");
     }
     
     /**

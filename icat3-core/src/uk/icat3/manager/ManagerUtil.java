@@ -40,6 +40,7 @@ import uk.icat3.util.DatafileInclude;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
+import uk.icat3.util.ParameterValueType;
 import uk.icat3.util.Queries;
 
 /**
@@ -826,7 +827,7 @@ public class ManagerUtil {
     }
 
     /////////////////////////////////// END OF ICAT AUTHRORISATION METHODS /////////////////////////////////
-    public static Parameter addParameter(String userId, EntityManager manager, String name, String units, boolean numeric) {
+    public static Parameter addParameter(String userId, EntityManager manager, String name, String units, ParameterValueType type) {
         log.trace("Adding '" + name + "', '" + units + "' to the parameter table");
 
         if (userId == null) {
@@ -835,8 +836,7 @@ public class ManagerUtil {
 
         ParameterPK PK = new ParameterPK(units, name);
         Parameter parameter = new Parameter(PK);
-        parameter.setNumeric(numeric);
-
+        parameter.setValueType(type);
         parameter.setDatasetParameter(true);
         parameter.setDatafileParameter(true);
         parameter.setSampleParameter(true);

@@ -9,23 +9,24 @@
 
 package uk.icat3.sessionbeans.search;
 
+
 import java.util.Collection;
+import java.util.List;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
 import javax.jws.WebMethod;
-import javax.jws.WebService;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
-import uk.icat3.entity.FacilityCycle;
 import uk.icat3.entity.IcatRole;
-import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
-import uk.icat3.entity.InvestigationType;
 import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.SessionException;
+import uk.icat3.search.parameter.ParameterComparisonCondition;
+import uk.icat3.search.parameter.ParameterCondition;
+import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.InvestigationSearch;
 import uk.icat3.search.KeywordDetails;
@@ -436,6 +437,15 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
         return InvestigationSearch.listAllParameters(manager);
     }
 
-    
-    
+    @WebMethod()
+    public Collection<Investigation> searchByParameterOperable (String sessionId, ParameterCondition parameterOperable) throws SessionException, ParameterSearchException {
+        String userId = user.getUserIdFromSessionId(sessionId);
+        return InvestigationSearch.searchByParameterOperable(userId, parameterOperable, manager);
+    }
+
+    @WebMethod()
+    public Collection<Investigation> searchByParameter(String sessionId, List<ParameterComparisonCondition> listComparators) throws SessionException, ParameterSearchException {
+        String userId = user.getUserIdFromSessionId(sessionId);
+        return InvestigationSearch.searchByParameterListComparators(userId, listComparators, -1, -1, manager);
+    }
 }

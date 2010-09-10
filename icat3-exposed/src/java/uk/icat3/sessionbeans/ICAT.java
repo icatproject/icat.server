@@ -8,9 +8,8 @@
  */
 package uk.icat3.sessionbeans;
 
-import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -52,6 +51,9 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.search.parameter.ParameterComparisonCondition;
+import uk.icat3.search.parameter.ParameterLogicalCondition;
+import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.KeywordDetails;
 import uk.icat3.sessionbeans.data.DownloadManagerLocal;
@@ -70,6 +72,7 @@ import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.KeywordType;
+import uk.icat3.util.Queries;
 
 /**
  *
@@ -1954,6 +1957,36 @@ public class ICAT extends EJBObject implements ICATLocal {
                                                         @WebParam(name = "federalId") String federalId) throws SessionException, NoSuchObjectFoundException
     {
         return facilityManagerLocal.getFacilityUserByFederalId(sessionId, federalId);
+    }
+
+    @WebMethod(operationName ="searchByParameterOperator")
+    public Collection<Investigation> searchByParameterOperator (
+            @WebParam(name="sessionId")
+            String sessionId,
+            @WebParam(name="operator")
+            ParameterLogicalCondition operator) throws SessionException, ParameterSearchException {
+
+        return investigationSearchLocal.searchByParameterOperable(sessionId, operator);
+    }
+
+    @WebMethod(operationName ="searchByParameterComparator")
+    public Collection<Investigation> searchByParameterComparator (
+            @WebParam(name="sessionId")
+            String sessionId,
+            @WebParam(name="comparator")
+            ParameterComparisonCondition comparator) throws SessionException, ParameterSearchException {
+
+        return investigationSearchLocal.searchByParameterOperable(sessionId, comparator);
+    }
+
+     @WebMethod(operationName ="searchByParameterComparators")
+    public Collection<Investigation> searchByParameterComparators (
+            @WebParam(name="sessionId")
+            String sessionId,
+            @WebParam(name="comparators")
+            List<ParameterComparisonCondition> comparators) throws SessionException, ParameterSearchException {
+
+        return investigationSearchLocal.searchByParameter(sessionId, comparators);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

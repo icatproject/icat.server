@@ -9,6 +9,8 @@
 
 package uk.icat3.datafilemanager;
 
+import uk.icat3.util.ParameterValueType;
+import java.util.Date;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
@@ -42,15 +44,59 @@ public class TestDatafileParameter extends BaseTestClassTX {
     
     private static Logger log = Logger.getLogger(TestDatafileParameter.class);
     private Random random = new Random();
-    
+    public static final int NumericValue=0;
+    public static final int StringValue=1;
+    public static final int DateValue=2;
+
+
     /**
-     * Tests creating a file paramter
+     * Tests creating a file paramter string
      */
     @Test
-    public void addDatafileParameter() throws Exception {
-        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
+    public void addDatafileParameterString() throws Exception {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datafileParameter of type String to investigation Id: "+VALID_DATA_FILE_ID);
+
+        DatafileParameter validDatafileParameter  = getDatafileParameter(true, StringValue);
+
+        DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, VALID_DATA_FILE_ID, em);
+
+        DatafileParameter modified = em.find(DatafileParameter.class,datafileParameterInserted.getDatafileParameterPK() );
+
+        checkDatafileParameter(modified);
+        assertFalse("Deleted must be false", modified.isDeleted());
+        assertNull("Numeric value must be null", modified.getNumericValue());
+        assertNotNull("String value must not be null", modified.getStringValue());
+        assertNull("Date value must be null",modified.getDateTimeValue());
+    }
+
+    /**
+     * Tests creating a file paramter date
+     */
+    @Test
+    public void addDatafileParameterDate() throws Exception {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datafileParameter of type Date to investigation Id: "+VALID_DATA_FILE_ID);
+
+        DatafileParameter validDatafileParameter  = getDatafileParameter(true, DateValue);
+
+        DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, VALID_DATA_FILE_ID, em);
+
+        DatafileParameter modified = em.find(DatafileParameter.class,datafileParameterInserted.getDatafileParameterPK() );
+
+        checkDatafileParameter(modified);
+        assertFalse("Deleted must be false", modified.isDeleted());
+        assertNull("Numeric value must be null", modified.getNumericValue());
+        assertNull("String value must be null", modified.getStringValue());
+        assertNotNull("Date value must not be null",modified.getDateTimeValue());
+    }
+
+    /**
+     * Tests creating a file parameter numeric
+     */
+    @Test
+    public void addDatafileParameterNumeric() throws Exception {
+        log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datafileParameter of type Numeric to investigation Id: "+VALID_DATA_FILE_ID);
         
-        DatafileParameter validDatafileParameter  = getDatafileParameter(true, true);
+        DatafileParameter validDatafileParameter  = getDatafileParameter(true, NumericValue);
         
         DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, VALID_DATA_FILE_ID, em);
         
@@ -60,9 +106,11 @@ public class TestDatafileParameter extends BaseTestClassTX {
         assertFalse("Deleted must be false", modified.isDeleted());
         assertNotNull("Must be numeric value", modified.getNumericValue());
         assertNull("String value must be null", modified.getStringValue());
+        assertNull("Date value must be null",modified.getDateTimeValue());
     }
-    
-    
+
+
+
     /**
      * Tests modifying a data file parameter
      */
@@ -72,7 +120,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         
         String modifiedError = "unit test error "+random.nextInt();
         //create invalid datafileParameter, no name
-        DatafileParameter modifiedDatafileParameter = getDatafileParameter(true, true);
+        DatafileParameter modifiedDatafileParameter = getDatafileParameter(true, NumericValue);
         DatafileParameter duplicateDatafileParameter = getDatafileParameterDuplicate(true);
         Datafile df  =em.find(Datafile.class, VALID_DATA_FILE_ID);
         modifiedDatafileParameter.setError(modifiedError);
@@ -242,7 +290,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
     public void addDatafileParameterInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for adding datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
-        DatafileParameter validDatafileParameter  = getDatafileParameter(true, true);
+        DatafileParameter validDatafileParameter  = getDatafileParameter(true, NumericValue);
         
         try {
             DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(INVALID_USER, validDatafileParameter, VALID_DATASET_ID_FOR_INVESTIGATION, em);
@@ -262,7 +310,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
     public void addDatafileParameterInvalidDatafile() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datafileParameter to invalid investigation Id");
         
-        DatafileParameter validDatafileParameter  = getDatafileParameter(true,true);
+        DatafileParameter validDatafileParameter  = getDatafileParameter(true,NumericValue);
         
         try {
             DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, random.nextLong(), em);
@@ -282,7 +330,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
     public void addDatafileParameterInvalidDatafileId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding datafileParameter to invalid investigation Id");
         
-        DatafileParameter validDatafileParameter  = getDatafileParameter(true,true);
+        DatafileParameter validDatafileParameter  = getDatafileParameter(true,NumericValue);
         validDatafileParameter.getDatafileParameterPK().setDatafileId(456787L);
         try {
             DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, validDatafileParameter, VALID_DATA_FILE_ID, em);
@@ -303,7 +351,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
-        DatafileParameter invalidDatafileParameter = getDatafileParameter(false, true);
+        DatafileParameter invalidDatafileParameter = getDatafileParameter(false, NumericValue);
         
         try {
             DatafileParameter datafileParameterInserted = (DatafileParameter)DataFileManager.addDataFileParameter(VALID_USER_FOR_INVESTIGATION, invalidDatafileParameter, VALID_DATA_FILE_ID, em);
@@ -326,7 +374,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
-        DatafileParameter invalidDatafileParameter = getDatafileParameter(true, false);
+        DatafileParameter invalidDatafileParameter = getDatafileParameter(true, StringValue);
         //string value only allowed
         invalidDatafileParameter.setNumericValue(45d);
         
@@ -348,7 +396,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
-        DatafileParameter invalidDatafileParameter = getDatafileParameter(true, true);
+        DatafileParameter invalidDatafileParameter = getDatafileParameter(true, NumericValue);
         //numeric value only allowed
         invalidDatafileParameter.setStringValue("45d");
         
@@ -426,7 +474,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
-        DatafileParameter datafileParameter = getDatafileParameter(true, true);
+        DatafileParameter datafileParameter = getDatafileParameter(true, NumericValue);
         datafileParameter.setDatafileParameterPK(null);
         
         try {
@@ -446,7 +494,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
-        DatafileParameter datafileParameter = getDatafileParameter(true, true);
+        DatafileParameter datafileParameter = getDatafileParameter(true, NumericValue);
         datafileParameter.setDatafileParameterPK(null);
         
         try {
@@ -466,7 +514,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a datafileParameter to investigation Id: "+VALID_DATA_FILE_ID);
         
         //create invalid datafileParameter, no name
-        DatafileParameter datafileParameter = getDatafileParameter(true, true);
+        DatafileParameter datafileParameter = getDatafileParameter(true, NumericValue);
         datafileParameter.setDatafileParameterPK(null);
         
         try {
@@ -505,15 +553,17 @@ public class TestDatafileParameter extends BaseTestClassTX {
     /**
      * gets a numeric or string paramter from DB, if not there creates one
      */
-    static Parameter getParameter(boolean numeric){
+    static Parameter getParameter(int type){
         Parameter parameter = null;
+        boolean numeric=false;
+        if(type==NumericValue) numeric=true;
         if(numeric){
             Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.numericValue = 'Y' AND d.isDatafileParameter = 'Y'");
             if(parameters.size() == 0){
                 log.trace("Adding new parameter");
                 Parameter param = new Parameter("units","name");
                 param.setIsSampleParameter("N");
-                param.setNumericValue("Y");
+                param.setValueType(ParameterValueType.NUMERIC);
                 param.setSearchable("Y");
                 param.setIsDatasetParameter("N");
                 param.setIsDatafileParameter("Y");
@@ -531,7 +581,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
                 param.setIsSampleParameter("N");
                 param.setIsDatasetParameter("N");
                 param.setIsDatafileParameter("Y");
-                param.setNumericValue("N");
+                param.setValueType(ParameterValueType.STRING);
                 param.setSearchable("Y");
                 param.setCreateId("DATAFILE_PARAMETER_ADDED");
                 em.persist(param);
@@ -563,19 +613,24 @@ public class TestDatafileParameter extends BaseTestClassTX {
     /**
      * Creates a datafile parameter which is either valid or not also that is numeric or not
      */
-    static DatafileParameter getDatafileParameter(boolean valid, boolean numeric){
-        Parameter parameter = getParameter(numeric);
+    static DatafileParameter getDatafileParameter(boolean valid, int type){
+        Parameter parameter = getParameter(type);
         if(valid){
             //create valid datafileParameter
             DatafileParameter datafileParameter = new DatafileParameter(parameter.getParameterPK().getUnits(),parameter.getParameterPK().getName(), VALID_SAMPLE_ID_FOR_INVESTIGATION_ID);
-            if(numeric){
-                datafileParameter = new DatafileParameter("pulses","good_frames", VALID_SAMPLE_ID_FOR_INVESTIGATION_ID);
-                
-                datafileParameter.setNumericValue(45d);
-            } else {
-                datafileParameter = new DatafileParameter("yyyy-MM-dd HH:mm:ss","finish_date", VALID_SAMPLE_ID_FOR_INVESTIGATION_ID);
-                
-                datafileParameter.setStringValue("string value");
+            switch(type){
+                case NumericValue:
+                    datafileParameter = new DatafileParameter("pulses","good_frames", VALID_SAMPLE_ID_FOR_INVESTIGATION_ID);
+                    datafileParameter.setNumericValue(45d);
+                    break;
+                case StringValue:
+                    datafileParameter = new DatafileParameter("yyyy-MM-dd HH:mm:ss","finish_date", VALID_SAMPLE_ID_FOR_INVESTIGATION_ID);
+                    datafileParameter.setStringValue("string value");
+                    break;
+                case DateValue:
+                    datafileParameter = new DatafileParameter("datetime","shot_time", VALID_SAMPLE_ID_FOR_INVESTIGATION_ID);
+                    datafileParameter.setDateTimeValue(new Date(10000L));
+                    break;
             }
             datafileParameter.getDatafileParameterPK().setDatafileId(VALID_DATA_FILE_ID);
             return datafileParameter;

@@ -18,6 +18,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -25,6 +27,7 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.ParameterValueType;
 import uk.icat3.util.Queries;
 
 /**
@@ -39,7 +42,7 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = "Parameter.findByUnits", query = "SELECT p FROM Parameter p WHERE p.parameterPK.units = :units"),
     @NamedQuery(name = "Parameter.findByUnitsLongVersion", query = "SELECT p FROM Parameter p WHERE p.unitsLongVersion = :unitsLongVersion"),
     @NamedQuery(name = "Parameter.findBySearchable", query = "SELECT p FROM Parameter p WHERE p.searchable = :searchable"),
-    @NamedQuery(name = "Parameter.findByNumericValue", query = "SELECT p FROM Parameter p WHERE p.numericValue = :numericValue"),
+    @NamedQuery(name = "Parameter.findByValueType", query = "SELECT p FROM Parameter p WHERE p.valueType = :valueType"),
     @NamedQuery(name = "Parameter.findByNonNumericValueFormat", query = "SELECT p FROM Parameter p WHERE p.nonNumericValueFormat = :nonNumericValueFormat"),
     @NamedQuery(name = "Parameter.findByIsSampleParameter", query = "SELECT p FROM Parameter p WHERE p.isSampleParameter = :isSampleParameter"),
     @NamedQuery(name = "Parameter.findByIsDatasetParameter", query = "SELECT p FROM Parameter p WHERE p.isDatasetParameter = :isDatasetParameter"),
@@ -65,7 +68,7 @@ import uk.icat3.util.Queries;
     private String searchable;
     
     @Column(name = "NUMERIC_VALUE", nullable = false)
-    private String numericValue;
+    private String valueType;
     
     @Column(name = "NON_NUMERIC_VALUE_FORMAT")
     private String nonNumericValueFormat;
@@ -114,17 +117,17 @@ import uk.icat3.util.Queries;
      * Creates a new instance of Parameter with the specified values.
      * @param parameterPK the parameterPK of the Parameter
      * @param searchable the searchable of the Parameter
-     * @param numericValue the numericValue of the Parameter
+     * @param valueType the valueType of the Parameter
      * @param isSampleParameter the isSampleParameter of the Parameter
      * @param isDatasetParameter the isDatasetParameter of the Parameter
      * @param isDatafileParameter the isDatafileParameter of the Parameter
      * @param modId the modId of the Parameter
      * @param modTime the modTime of the Parameter
      */
-    public Parameter(ParameterPK parameterPK, String searchable, String numericValue, String isSampleParameter, String isDatasetParameter, String isDatafileParameter, String modId, Date modTime) {
+    public Parameter(ParameterPK parameterPK, String searchable, String valueType, String isSampleParameter, String isDatasetParameter, String isDatafileParameter, String modId, Date modTime) {
         this.parameterPK = parameterPK;
         this.searchable = searchable;
-        this.numericValue = numericValue;
+        this.valueType = valueType;
         this.isSampleParameter = isSampleParameter;
         this.isDatasetParameter = isDatasetParameter;
         this.isDatafileParameter = isDatafileParameter;
@@ -189,21 +192,21 @@ import uk.icat3.util.Queries;
         this.searchable = searchable;
     }
     
-    /**
-     * Gets the numericValue of this Parameter.
-     * @return the numericValue
-     */
-    public String getNumericValue() {
-        return this.numericValue;
-    }
+//    /**
+//     * Gets the valueType of this Parameter.
+//     * @return the valueType
+//     */
+//    public String getValueType() {
+//        return this.valueType;
+//    }
     
-    /**
-     * Sets the numericValue of this Parameter to the specified value.
-     * @param numericValue the new numericValue
-     */
-    public void setNumericValue(String numericValue) {
-        this.numericValue = numericValue;
-    }
+//    /**
+//     * Sets the valueType of this Parameter to the specified value.
+//     * @param valueType the new valueType
+//     */
+//    public void setValueType(String numericValue) {
+//        this.valueType = numericValue;
+//    }
     
     /**
      * Gets the nonNumericValueFormat of this Parameter.
@@ -438,10 +441,29 @@ import uk.icat3.util.Queries;
      * @return
      */
     public boolean isNumeric(){
-        if(getNumericValue() != null && getNumericValue().equalsIgnoreCase("Y")) return true;
+        if(getValueType() != null && getValueType()==ParameterValueType.NUMERIC) return true;
         else return false;
     }
-    
+
+    /**
+     * Check weather this paramter value is a string parameter
+     * @return
+     */
+    public boolean isString(){
+        if(getValueType() != null && getValueType()==ParameterValueType.STRING) return true;
+        else return false;
+    }
+
+
+    /**
+     * Check weather this paramter value is a Date Time parameter
+     * @return
+     */
+    public boolean isDateTime(){
+        if(getValueType() != null && getValueType()==ParameterValueType.DATE_AND_TIME) return true;
+        else return false;
+    }
+
     /**
      * Check weather parameter is verified
      * @return
@@ -456,10 +478,15 @@ import uk.icat3.util.Queries;
     }
     
     // for web services
-    public void setNumeric(boolean numeric){
-        this.numericValue = (numeric) ? "Y" : "N";
+    public void setValueType(ParameterValueType type){
+        valueType = type.getValue();
     }
-    
+
+    public ParameterValueType getValueType(){
+        return ParameterValueType.toParameterValueType(valueType);
+    }
+
+
     public void setSampleParameter(boolean sampleParameter){
         this.isSampleParameter = (sampleParameter) ? "Y" : "N";
     }

@@ -175,10 +175,10 @@ prompt
 
 
 prompt Creating log directory for icat...
-define log_dir = log\&database_name\icat\
+define log_dir = log/&database_name/icat/
 
 host mkdir log
-host mkdir log\&database_name
+host mkdir log/&database_name
 host mkdir &log_dir
 
 prompt
@@ -197,7 +197,7 @@ REM log_prefix: A
 define logfile = A_script1.log
 SPOOL &log_dir&logfile
 set define OFF
-@general_scripts\script1.sql
+@general_scripts/script1.sql
 set define ON
 SPOOL OFF
 
@@ -226,14 +226,14 @@ REM log_prefix: C
 define logfile = D_050_create_loq_extern_table.log
 SPOOL &log_dir&logfile
 set define OFF
-@schema_specific_scripts\icatisis\2_after_common_objects\050_create_loq_extern_table.sql
+@schema_specific_scripts/icatisis/2_after_common_objects/050_create_loq_extern_table.sql
 set define ON
 SPOOL OFF
 
 define logfile = D_055_update_loq_flag.log
 SPOOL &log_dir&logfile
 set define OFF
-@schema_specific_scripts\icatisis\2_after_common_objects\055_update_loq_flag.sql
+@schema_specific_scripts/icatisis/2_after_common_objects/055_update_loq_flag.sql
 set define ON
 SPOOL OFF
 
@@ -241,7 +241,7 @@ SPOOL OFF
 define logfile = D_062_proc_set_inv_run_number_range.log
 SPOOL &log_dir&logfile
 set define OFF
-@schema_specific_scripts\icatisis\2_after_common_objects\062_proc_set_inv_run_number_range.sql
+@schema_specific_scripts/icatisis/2_after_common_objects/062_proc_set_inv_run_number_range.sql
 set define ON
 SPOOL OFF
 
@@ -251,7 +251,7 @@ SPOOL OFF
 define logfile = D_070_set_jobs.log
 SPOOL &log_dir&logfile
 set define OFF
-@schema_specific_scripts\icatisis\2_after_common_objects\070_set_jobs.sql
+@schema_specific_scripts/icatisis/2_after_common_objects/070_set_jobs.sql
 set define ON
 SPOOL OFF
 
@@ -259,7 +259,7 @@ SPOOL OFF
 define logfile = D_071_initialise_data.log
 SPOOL &log_dir&logfile
 set define OFF
-@data\initialise_data.sql
+@data/initialise_data.sql
 set define ON
 SPOOL OFF
 
@@ -291,10 +291,10 @@ rem define log_dir = ../dataportal/log/
 rem host mkdir ../dataportal/log
 
 prompt Creating log directory for dataportal...
-define log_dir = log\&database_name\dataportal\
+define log_dir = log/&database_name/dataportal/
 
 host mkdir log
-host mkdir log\&database_name
+host mkdir log/&database_name
 host mkdir &log_dir
 
 
@@ -338,17 +338,17 @@ rem define log_dir = ../testicat/log/
 rem host mkdir ../testicat/log
 
 prompt Creating log directory for testicat...
-define log_dir = log\&database_name\testicat\
+define log_dir = log/&database_name/testicat/
 
 host mkdir log
-host mkdir log\&database_name
+host mkdir log/&database_name
 host mkdir &log_dir
 
 REM use script1.sql (as in icat schema installation) to create tables etc, common to all schemas
 define logfile = testicat_schema_install.log
 SPOOL &log_dir&logfile
 set define OFF
-@general_scripts\script1.sql
+@general_scripts/script1.sql
 set define ON
 SPOOL OFF
 
@@ -356,7 +356,7 @@ REM use script1.sql (as in icat schema installation) to create tables etc, commo
 define logfile = testicat_install_sequences.log
 SPOOL &log_dir&logfile
 set define OFF
-@general_scripts\common_objects\008_id_sequences.sql
+@general_scripts/common_objects/008_id_sequences.sql
 set define ON
 SPOOL OFF
 
@@ -365,7 +365,7 @@ REM insert list table data (as in icat installation)
 define logfile = testicat_initialise_data.log
 SPOOL &log_dir&logfile
 set define OFF
-@data\initialise_data.sql
+@data/initialise_data.sql
 set define ON
 SPOOL OFF
 
@@ -373,7 +373,7 @@ REM insert test data for unit testing...
 define logfile = testicat_insert_test_data.log
 SPOOL &log_dir&logfile
 set define OFF
-@unit_test\insert_test_data.sql
+@unit_test/insert_test_data.sql
 set define ON
 SPOOL OFF
 
