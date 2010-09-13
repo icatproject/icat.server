@@ -80,6 +80,20 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
         
         return DatasetSearch.getDatasetsBySample(userId, sample, manager);
     }
+
+    /**
+     * Search the datasets that match the given name.
+     * @param sessionId
+     * @param datasetName
+     * @return collection of datasets that match the name and have authorisation to access them.
+     * @throws SessionException
+     */
+    @WebMethod()
+    public Collection<Dataset> searchDatasetsByName(String sessionId, String datasetName) throws SessionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        return DatasetSearch.getDatasetsByName(userId, datasetName, manager);
+    }
     
     /**
      *  List all the valid avaliable types for datasets

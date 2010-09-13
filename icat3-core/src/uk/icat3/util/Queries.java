@@ -496,6 +496,13 @@ public class Queries {
             "i.elementType = :elementType AND i.elementId = :elementId AND " +
             "i.userId = :userId AND i.parentElementType = :parentElementType AND " +
             "i.parentElementId = :parentElementId AND i.markedDeleted = 'N'";
+
+
+    /**
+     * Find dataset by name with authorisation
+     */
+    public static final String DATASET_FINDBY_NAME_NOTDELECTED = "Dataset.findByNameNotDeleted";
+    public static final String DATASET_FINDBY_NAME_NOTDELETED_JPQL = "SELECT i FROM Dataset i WHERE i.name = :name and i.markedDeleted = 'N'";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     

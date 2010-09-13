@@ -174,6 +174,36 @@ public class DatasetSearch {
     }
 
     /**
+     * This method returns list of datasets that match the dataset name.
+     * @param userId      : user id performing the search
+     * @param datasetName : input dataset name that is being searched for
+     * @param manager
+     * @return : list of datasets that match the datasetname.
+     */
+    public static Collection<Dataset> getDatasetsByName(String userId, String datasetName, EntityManager manager) {
+        //Get the list of datasets that match the dataset name
+        Collection<Dataset> datasets = (Collection<Dataset>) manager.createNamedQuery(DATASET_FINDBY_NAME_NOTDELECTED).setParameter("name", datasetName);
+
+
+        Collection<Dataset> datasetsPermission = new ArrayList<Dataset>();
+        //Perform the permission checks
+        for (Dataset dataset : datasets) {
+            try {
+                //check read permission
+                GateKeeper.performAuthorisation(userId, dataset, AccessType.READ, manager);
+
+                //add dataset to list returned to user
+                log.trace("Adding " + dataset + " to returned list");
+                datasetsPermission.add(dataset);
+
+            } catch (InsufficientPrivilegesException ignore) {
+                //user does not have read access to these to dont add
+            }
+        }
+        return datasetsPermission;
+    }
+
+    /**
      * Search the datafiles from parameter selection.
      *
      * @param userId User identification

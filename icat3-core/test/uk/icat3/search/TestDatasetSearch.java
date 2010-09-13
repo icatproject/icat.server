@@ -126,7 +126,35 @@ public class TestDatasetSearch extends BaseTestClassTX {
             throw ex;
         }
     }
-    
+
+    /**
+     * Tests dataset getSamplesBySampleName
+     */
+    @Test
+    public void testgetDatasetsByName() {
+        log.info("Testing valid user for get Datasets by dataset name: " + VALID_USER_FOR_INVESTIGATION);
+
+        Collection<Dataset> datasets = DatasetSearch.getDatasetsByName(VALID_USER_FOR_INVESTIGATION, VALID_DATASET_NAME, em);
+
+        //TODO dynamic find this, at the moment its one dataset
+        assertNotNull("Must not be an null collection of datasets ", datasets);
+        assertEquals("Number of datasets searched for " + VALID_DATASET_NAME + " should be 2", 2, datasets.size());
+    }
+
+    /**
+     * Tests dataset getSamplesBySampleName
+     */
+    @Test
+    public void testgetDatasetsByNameInvalidUser() {
+        log.info("Testing invalid user for get Datasets by dataset name: " + INVALID_USER);
+
+        Collection<Dataset> datasets = DatasetSearch.getDatasetsByName(INVALID_USER, VALID_DATASET_NAME, em);
+
+        //TODO dynamic find this, at the moment its one dataset
+        assertNotNull("Must not be an null collection of datasets ", datasets);
+        assertEquals("Number of datasets searched for " + VALID_DATASET_NAME + " should be 0", 0, datasets.size());
+
+    }
     
     public static junit.framework.Test suite(){
         return new JUnit4TestAdapter(TestDatasetSearch.class);
