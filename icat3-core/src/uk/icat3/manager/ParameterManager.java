@@ -72,7 +72,7 @@ public class ParameterManager extends ManagerUtil {
                 throw new NoSearchableParameterException(param);
             else if (type == ParameterType.DATAFILE && !param.isDatafileParameter())
                 throw new NoSearchableParameterException(param, "Parameter not relevant for Datafile");
-            else if (type == ParameterType.DATASET && !param.isDataSetParameter())
+            else if (type == ParameterType.DATASET && !param.isDatasetParameter())
                 throw new NoSearchableParameterException(param, "Parameter not relevant for Dataset");
             else if (type == ParameterType.SAMPLE && !param.isSampleParameter())
                 throw new NoSearchableParameterException(param, "Parameter not relevant for Sample");
