@@ -2,17 +2,19 @@
 <icat version="1.0 RC6" xsi:noNamespaceSchemaLocation="../icatXSD/icatXSD.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <study>
     <investigation>
-      <inv_number>1010611</inv_number>
+      <inv_number>1010613</inv_number>
       <visit_id>1</visit_id>
       <instrument>MAPS</instrument>
-      <title>Proposal title would go here</title>
+      <title>Some title would go here</title>
       <investigator>
-        <user_id>9932</user_id>
+        <user_id>damian</user_id>
+		<affiliation_id>9932</affiliation_id>
         <role>experimenter</role>
         <privilege>READER</privilege>
       </investigator>
       <investigator>
-        <user_id>9933</user_id>
+        <user_id>doug</user_id>
+		<affiliation_id>9933</affiliation_id>
         <role>principal_experimenter</role>
         <privilege>ADMIN</privilege>
       </investigator>
