@@ -413,7 +413,7 @@ import uk.icat3.util.Queries;
      * Check weather this paramter is a dataset parameter
      * @return
      */
-    public boolean isDataSetParameter(){
+    public boolean isDatasetParameter(){
         if(getIsDatasetParameter() != null && getIsDatasetParameter().equalsIgnoreCase("Y")) return true;
         else return false;
     }
@@ -498,4 +498,5 @@ import uk.icat3.util.Queries;
     public void setDatasetParameter(boolean datasetParameter){
         this.isDatasetParameter = (datasetParameter) ? "Y" : "N";
     }
+
 }
