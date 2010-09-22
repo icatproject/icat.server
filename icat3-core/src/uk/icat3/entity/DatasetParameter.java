@@ -409,7 +409,7 @@ import uk.icat3.util.ParameterValueType;
         }
         
         //check that it is a dataset parameter
-        if(!parameterDB.isDataSetParameter()) throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" is not a data set parameter.");
+        if(!parameterDB.isDatasetParameter()) throw new ValidationException("DatasetParameter: "+paramName+" with units: "+paramUnits+" is not a data set parameter.");
         
         //check is numeric
         if(parameterDB.isNumeric()){

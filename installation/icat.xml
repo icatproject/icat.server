@@ -4,11 +4,12 @@
 <!-- (If you delete it and reopen the project it will be recreated.) -->
 <project name="Installation" basedir=".">
     <description>Configures and installs the ICAT API project onto Glassfish.</description>
-    <import file="nbproject/ant-deploy.xml"/>
     <property file="${basedir}/nbproject/glassfish.properties"/>
     <property file="${basedir}/nbproject/databases.properties"/>
     <property name="dist.dir" value="dist"/>
-    <property name="application.jar" value="icat3-api-ws.jar"/>
+    <property name="application" value="icat"/>
+    <property name="application.jar" value="${application}.ear"/>
+    <import file="nbproject/ant-deploy-v${sjsas.version}.xml"/>
   
     <!--                                                      -->
     <!--  Redeploys ICAT API file ${dist.dir}/icat3-exposed.jar -->   
@@ -111,19 +112,19 @@
             onerror="abort">
             DELETE MYPROXY_SERVERS;
             -- Normal myproxy
-            --INSERT INTO MYPROXY_SERVERS values (1, '/C=UK/O=eScience/OU=CLRC/L=RAL/CN=host/myproxy.grid-support.ac.uk/E=support@grid-support.ac.uk', 7512, 'myproxy.grid-support.ac.uk', 1, systimestamp);
+            --INSERT INTO MYPROXY_SERVERS(ID,CA_ROOT_CERTIFICATE,PORT_NUMBER,PROXY_SERVER_ADDRESS,ACTIVE,MOD_TIME) values (1, '/C=UK/O=eScience/OU=CLRC/L=RAL/CN=host/myproxy.grid-support.ac.uk/E=support@grid-support.ac.uk', 7512, 'myproxy.grid-support.ac.uk', 1, systimestamp);
             -- SSO MyProxy
-            INSERT INTO MYPROXY_SERVERS values (1, '/C=UK/O=eScience/OU=CLRC/L=RAL/CN=myproxy-sso.grid-support.ac.uk/E=support@grid-support.ac.uk', 7512, 'myproxy-sso.grid-support.ac.uk', 1, systimestamp);
+            INSERT INTO MYPROXY_SERVERS(ID,CA_ROOT_CERTIFICATE,PORT_NUMBER,PROXY_SERVER_ADDRESS,ACTIVE,MOD_TIME) values (1, '/C=UK/O=eScience/OU=CLRC/L=RAL/CN=myproxy-sso.grid-support.ac.uk/E=support@grid-support.ac.uk', 7512, 'myproxy-sso.grid-support.ac.uk', 1, systimestamp);
            
             -- Now configure Admin / Super user service for ICAT ADMIN web services
             -- If ADMIN_USER and/or SUPER_USER is in the USER_ID column of the USER_TABLE in icat-user DB then
             -- these are enabled to login through the Admin web service
             -- ADMIN_USER allows users to log in as anther user and SUPER_USER allows you to log in as SUPER_USER
-           INSERT INTO USER_TABLE values (0, 'ADMIN_USER', null, 'ADMIN_USER DN', systimestamp);
-           INSERT INTO USER_TABLE values (1, 'SUPER_USER', null, 'SUPER_USER DN', systimestamp);
-		INSERT INTO USER_TABLE values (2, 'overlord', 'password', 'overlord DN', systimestamp);
-		INSERT INTO USER_TABLE values (3, 'damian', 'password', 'damian DN', systimestamp);
-		INSERT INTO USER_TABLE values (4, 'doug', 'password', 'doug DN', systimestamp);
+           INSERT INTO USER_TABLE(ID,USER_ID,PASSWORD,DN,MOD_TIME) values (0, 'ADMIN_USER', null, 'ADMIN_USER DN', systimestamp);
+           INSERT INTO USER_TABLE(ID,USER_ID,PASSWORD,DN,MOD_TIME) values (1, 'SUPER_USER', null, 'SUPER_USER DN', systimestamp);
+		INSERT INTO USER_TABLE(ID,USER_ID,PASSWORD,DN,MOD_TIME) values (2, 'overlord', 'password', 'overlord DN', systimestamp);
+		INSERT INTO USER_TABLE(ID,USER_ID,PASSWORD,DN,MOD_TIME) values (3, 'damian', 'password', 'damian DN', systimestamp);
+		INSERT INTO USER_TABLE(ID,USER_ID,PASSWORD,DN,MOD_TIME) values (4, 'doug', 'password', 'doug DN', systimestamp);
         </sql>
         <echo level="warn" message="The server now needs to be restarted or application redeployed for these changes to be recognised." />
     </target>
