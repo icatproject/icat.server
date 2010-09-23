@@ -14,20 +14,20 @@
     <!--                                                      -->
     <!--  Redeploys ICAT API file ${dist.dir}/icat3-exposed.jar -->   
     <!--                                                      -->
-    <target name="redeploy" depends="-copy-application-jar" description="Redeploys ICAT API">
+    <target name="redeploy"  description="Redeploys ICAT API">
         <antcall target="-undeploy-application" />
         <antcall target="-deploy-application" />
     </target>
     <!--                                                      -->
     <!--  Deploys ICAT API file ${dist.dir}/icat3-exposed.jar -->   
     <!--                                                      -->
-    <target name="deploy" depends="-copy-application-jar" description="Deploys ICAT API">
+    <target name="deploy"  description="Deploys ICAT API">
         <antcall target="-deploy-application" />
     </target>
     <!--                                                      -->
     <!--  Undeploys ICAT API file ${dist.dir}/icat3-exposed.jar -->   
     <!--                                                      -->
-    <target name="undeploy" depends="-copy-application-jar" description="Undeploys ICAT API">
+    <target name="undeploy" description="Undeploys ICAT API">
         <antcall target="-undeploy-application" />
     </target>    
     <!--                                                      -->

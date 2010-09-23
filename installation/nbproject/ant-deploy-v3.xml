@@ -312,7 +312,7 @@
         <fail unless="admin.auth.password" >${admin.auth.password} needs to be set.
         </fail>
           <!--  echo user password to password file too -->
-        <echo message="AS_ADMIN_PASSWORD=${sjsas.password} ${line.separator}AS_ADMIN_USERPASSWORD=${admin.auth.password}" file="${sjsas.password.file}"/>
+        <echo message="AS_ADMIN_PASSWORD=${sjsas.password}${line.separator}AS_ADMIN_USERPASSWORD=${admin.auth.password}" file="${sjsas.password.file}"/>
         <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="true">
             <arg line=" --passwordfile ${sjsas.password.file} create-file-user --groups ${admin.auth.group} ${admin.auth.user}"/>
         </exec>
