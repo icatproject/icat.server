@@ -259,6 +259,20 @@ public class DatasetSearch {
         return searchByParameter(userId, ejpql, startIndex, numberResults, manager);
     }
 
+         /**
+     * Search by parameters in the database. The parameter object 'ejpql' contains some
+     * JPQL statement (parameters, conditions).
+     *
+     * @param userId federalId of the user.
+     * @param ejpql This object contains the jpql statement.
+     * @param manager manager object that will facilitate interaction with underlying database
+     * @return Collection of investigation matched
+     * @throws NoParameterTypeException
+     */
+     public static Collection<Dataset> searchByParameterListComparators(String userId, List<ParameterComparisonCondition> listComparators, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException {
+        return searchByParameterListComparators(userId,listComparators,0,MAX_QUERY_RESULTSET,manager);
+    }
+
      /**
       * Search by parameters from a parameterOperable.
       *

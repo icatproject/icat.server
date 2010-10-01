@@ -10,18 +10,21 @@
 package uk.icat3.sessionbeans.search;
 
 import java.util.Collection;
+import java.util.List;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
 import javax.jws.WebMethod;
-import javax.jws.WebService;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileFormat;
+import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.DatafileSearch;
+import uk.icat3.search.parameter.ParameterComparisonCondition;
+import uk.icat3.search.parameter.ParameterCondition;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 
@@ -81,7 +84,35 @@ public class DatafileSearchBean extends EJBObject implements DatafileSearchLocal
         
         return DatafileSearch.searchByRunNumber(userId, instruments, startRun, endRun, startIndex, number_results, manager);
     }
-    
+
+    /**
+     * searches for the datafiles that have datafile parameters meeting condition in the input
+     * @param sessionId
+     * @param parameterOperable
+     * @return collection of datafiles meeting the condition and have permissions
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod()
+    public Collection<Datafile> searchDatafilesByParameterOperable (String sessionId, ParameterCondition parameterOperable) throws SessionException, ParameterSearchException {
+       String userId = user.getUserIdFromSessionId(sessionId);
+       return  DatafileSearch.searchByParameterOperable(userId, parameterOperable, manager);
+    }
+
+    /**
+     * Searches for the datafiles that have datafile parameters meeting conditons in the input
+     * @param sessionId
+     * @param parameterComparator
+     * @return collection of datafiles meeting the condition and have permissions
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod()
+    public Collection<Datafile> searchDatafilesByParameter(String sessionId, List<ParameterComparisonCondition> parameterComparator) throws SessionException, ParameterSearchException {
+       String userId = user.getUserIdFromSessionId(sessionId);
+       return  DatafileSearch.searchByParameterListComparators(userId, parameterComparator, manager);
+    }
+
     /**
      *  List all the valid avaliable formats for datafiles
      *

@@ -647,7 +647,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection<Dataset> searchDatasetsBySample(
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "sample") Sample sample) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
-        return datasetSearchLocal.searchDataSetsBySample(sessionId, sample);
+        return datasetSearchLocal.searchDatasetsBySample(sessionId, sample);
     }
 
     /**
@@ -1988,7 +1988,46 @@ public class ICAT extends EJBObject implements ICATLocal {
 
         return investigationSearchLocal.searchByParameter(sessionId, comparators);
     }
+    
+      @WebMethod(operationName ="searchDatasetsByParameterComparator")
+    public Collection<Dataset> searchDatasetsByParameterComparator (
+            @WebParam(name="sessionId")
+            String sessionId,
+            @WebParam(name="comparator")
+            ParameterComparisonCondition comparator) throws SessionException, ParameterSearchException {
 
+        return datasetSearchLocal.searchDatasetsByParameterOperable(sessionId, comparator);
+    }
+
+     @WebMethod(operationName ="searchDatasetsByParameterComparators")
+    public Collection<Dataset> searchDatasetsByParameterComparators (
+            @WebParam(name="sessionId")
+            String sessionId,
+            @WebParam(name="comparators")
+            List<ParameterComparisonCondition> comparators) throws SessionException, ParameterSearchException {
+
+        return datasetSearchLocal.searchDatasetsByParameter(sessionId, comparators);
+    }
+
+      @WebMethod(operationName ="searchDatafilesByParameterComparator")
+    public Collection<Datafile> searchDatafilesByParameterComparator (
+            @WebParam(name="sessionId")
+            String sessionId,
+            @WebParam(name="comparator")
+            ParameterComparisonCondition comparator) throws SessionException, ParameterSearchException {
+
+        return datafileSearchLocal.searchDatafilesByParameterOperable(sessionId, comparator);
+    }
+
+     @WebMethod(operationName ="searchDatafilesByParameterComparators")
+    public Collection<Datafile> searchDatafilesByParameterComparators (
+            @WebParam(name="sessionId")
+            String sessionId,
+            @WebParam(name="comparators")
+            List<ParameterComparisonCondition> comparators) throws SessionException, ParameterSearchException {
+
+        return datafileSearchLocal.searchDatafilesByParameter(sessionId, comparators);
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
