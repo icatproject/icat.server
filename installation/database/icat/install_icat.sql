@@ -18,7 +18,6 @@ undefine sis_password
 REM undefine icatisis_username
 undefine icatisis_password
 undefine externaltable_location
-undefine dataportal_password
 undefine icatuser_password
 define testicat_username = testicat
 define testicat_password = password
@@ -28,7 +27,6 @@ ACCEPT database_name CHAR prompt          'Enter Database Name             : '
 ACCEPT sys_password CHAR hide prompt      'Enter SYS password              : '
 REM ACCEPT icatisis_username CHAR prompt      'Enter ICATISIS schema name      : '
 ACCEPT icatisis_password CHAR prompt      'Enter icat password       : '
-ACCEPT dataportal_password CHAR prompt    'Enter dataportal password       : '
 ACCEPT icatuser_password CHAR prompt      'Enter icatuser   password       : '
 ACCEPT externaltables_location CHAR prompt 'Enter External tables location : '
 
@@ -71,31 +69,6 @@ CREATE OR REPLACE DIRECTORY external_tables as '&externaltables_location';
 GRANT READ ON DIRECTORY external_tables TO icat;
 
 
-prompt
-prompt ====================================================================
-prompt creating user dataportal
-prompt
-
-CREATE USER dataportal PROFILE "DEFAULT" IDENTIFIED BY "&dataportal_password" DEFAULT TABLESPACE "USERS" TEMPORARY TABLESPACE "TEMP" QUOTA UNLIMITED ON "USERS" ACCOUNT UNLOCK;
-GRANT CREATE DATABASE LINK TO dataportal;
-GRANT CREATE LIBRARY TO dataportal;
-GRANT CREATE MATERIALIZED VIEW TO dataportal;
-GRANT CREATE OPERATOR TO dataportal;
-GRANT CREATE PROCEDURE TO dataportal;
-GRANT CREATE PUBLIC DATABASE LINK TO dataportal;
-GRANT CREATE PUBLIC SYNONYM TO dataportal;
-GRANT CREATE SEQUENCE TO dataportal;
-GRANT CREATE SESSION TO dataportal;
-GRANT CREATE SYNONYM TO dataportal;
-GRANT CREATE TABLE TO dataportal;
-GRANT CREATE TRIGGER TO dataportal;
-GRANT CREATE TYPE TO dataportal;
-GRANT CREATE VIEW TO dataportal;
-GRANT UNLIMITED TABLESPACE TO dataportal;
-GRANT "CONNECT" TO dataportal;
-GRANT "PLUSTRACE" TO dataportal;
-GRANT "RESOURCE" TO dataportal;
-GRANT CREATE JOB TO dataportal;
 
 prompt
 prompt ====================================================================
@@ -182,7 +155,7 @@ host mkdir log/&database_name
 host mkdir &log_dir
 
 prompt
-prompt Log files will be written to &log_dir and ../dataportal/log/.
+prompt Log files will be written to &log_dir
 prompt If this directory does not exist then it should be created, or log files
 prompt may not be written.
 prompt
@@ -279,50 +252,6 @@ prompt ====================================================================
 prompt
 
 
-prompt
-prompt ====================================================================
-prompt installing dataportal schema
-prompt
-
-connect dataportal/&dataportal_password@&database_name
-undefine log_dir
-
-rem define log_dir = ../dataportal/log/
-rem host mkdir ../dataportal/log
-
-prompt Creating log directory for dataportal...
-define log_dir = log/&database_name/dataportal/
-
-host mkdir log
-host mkdir log/&database_name
-host mkdir &log_dir
-
-
-define logfile = dataportal_schema_create_oracle.log
-SPOOL &log_dir&logfile
-set define OFF
-@../dataportal/dataportal_schema_create_oracle.sql
-set define ON
-SPOOL OFF
-
-define logfile = dataportal_schema_insert_oracle.log
-SPOOL &log_dir&logfile
-set define OFF
-@../dataportal/dataportal_schema_insert_oracle.sql
-set define ON
-SPOOL OFF
-
-define logfile = dataportal_schema_update_oracle.log
-SPOOL &log_dir&logfile
-set define OFF
-@../dataportal/dataportal_schema_update_oracle.sql
-set define ON
-SPOOL OFF
-
-prompt
-prompt dataportal schema installation done!!
-prompt ====================================================================
-prompt
 
 
 prompt

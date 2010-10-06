@@ -127,12 +127,12 @@ set define OFF
 set define ON
 SPOOL OFF
 
-define logfile = D_069_investigator_trg.log
-SPOOL &log_dir&logfile
-set define OFF
-@general_scripts/common_objects/069_investigator_trg.sql
-set define ON
-SPOOL OFF
+--define logfile = D_069_investigator_trg.log
+--SPOOL &log_dir&logfile
+--set define OFF
+--@general_scripts/common_objects/069_investigator_trg.sql
+--set define ON
+--SPOOL OFF
 
 
 define logfile = D_071_UPDATE_ICAT_AUTH_WITH_GUARDIAN_AND_SUPER.log
