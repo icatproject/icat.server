@@ -8,7 +8,6 @@
 package uk.icat3.exceptions;
 
 import uk.icat3.search.parameter.ComparisonOperator;
-import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.entity.Parameter;
 
 /**
@@ -16,16 +15,16 @@ import uk.icat3.entity.Parameter;
  * 
  * @author cruzcruz
  */
-public class NoNumericComparatorException extends ComparatorException {
+public class NoDatetimeComparatorException extends ComparatorException {
 
     private static String msg = "Extracting JPQL condition exception:";
 
-    public NoNumericComparatorException (Parameter param, ComparisonOperator comp) {
-        super (NoNumericComparatorException.msg +
+    public NoDatetimeComparatorException (Parameter param, ComparisonOperator comp) {
+        super (NoDatetimeComparatorException.msg +
                 "Parameter '" +
                 param.getParameterPK().getName() +
                 "(" + param.getParameterPK().getUnits() +
-                ")' contains numeric value " +
+                ")' contains Datetime value " +
                 "but comparator '" + comp.name() + "' is for string values");
     }
 }

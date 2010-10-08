@@ -8,7 +8,6 @@
 package uk.icat3.exceptions;
 
 import uk.icat3.search.parameter.ComparisonOperator;
-import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.entity.Parameter;
 
 /**
@@ -16,7 +15,7 @@ import uk.icat3.entity.Parameter;
  *
  * @author cruzcruz
  */
-public class NoStringComparatorException extends ParameterSearchException {
+public class NoStringComparatorException extends ComparatorException {
 
     private static String msg = "Extracting JPQL condition exception:";
    

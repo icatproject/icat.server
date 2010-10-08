@@ -9,13 +9,17 @@
 package uk.icat3.search;
 
 import java.util.logging.Level;
+import uk.icat3.exceptions.DatevalueException;
+import uk.icat3.exceptions.DatevalueFormatException;
 import uk.icat3.exceptions.EmptyListParameterException;
 import uk.icat3.exceptions.EmptyOperatorException;
+import uk.icat3.exceptions.NoDatetimeComparatorException;
 import uk.icat3.exceptions.NoElementTypeException;
 import uk.icat3.exceptions.NoNumericComparatorException;
 import uk.icat3.exceptions.NoSearchableParameterException;
 import uk.icat3.exceptions.NoStringComparatorException;
 import uk.icat3.exceptions.NullParameterException;
+import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.search.parameter.util.ParameterSearchUtilSingleton;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
@@ -25,7 +29,7 @@ import uk.icat3.exceptions.NoParametersException;
 import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.search.parameter.util.ExtractedJPQL;
 import uk.icat3.search.parameter.util.ParameterSearchUtil;
-import uk.icat3.search.parameter.util.ParameterValued;
+import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.util.Queries;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -40,8 +44,6 @@ import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Parameter;
 import uk.icat3.manager.ManagerUtil;
-import uk.icat3.manager.ParameterManager;
-import uk.icat3.search.parameter.ParameterType;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
@@ -118,14 +120,9 @@ public class InvestigationSearch extends ManagerUtil {
      * @throws NoParametersException
      * @throws ParameterSearchException
      */
-    private static Collection<Investigation> searchByParameter(String userId, ExtractedJPQL ejpql, int startIndex, int numberResults, EntityManager manager) throws ParameterNoExistsException, NoSearchableParameterException, NoParametersException, NoParameterTypeException {
+    private static Collection<Investigation> searchByParameterImpl(String userId, ExtractedJPQL ejpql, int startIndex, int numberResults, EntityManager manager) throws ParameterNoExistsException, NoSearchableParameterException, NoParametersException, NoParameterTypeException {
         try {
             log.trace("searchByParameter(" + ", " + ejpql.getCondition() + ", " + startIndex + ", " + numberResults + ", EntityManager)");
-
-            // Make sure the parameter are searchable before continue.
-            ParameterManager.existsSearchableParameters(ejpql.getDatafileParameter().values(), ParameterType.DATAFILE, manager);
-            ParameterManager.existsSearchableParameters(ejpql.getDatasetParameter().values(), ParameterType.DATASET, manager);
-            ParameterManager.existsSearchableParameters(ejpql.getSampleParameter().values(), ParameterType.SAMPLE, manager);
 
             String jpql = LIST_ALL_USERS_INVESTIGATIONS_JPQL + " AND EXISTS (" + "select " + ParameterSearchUtil.PARAM_NAME + "0 from " + ejpql.getParametersJPQL(ElementType.INVESTIGATION) + " WHERE " + ejpql.getCondition() + ")";
             Query q = manager.createQuery(jpql);
@@ -157,11 +154,39 @@ public class InvestigationSearch extends ManagerUtil {
      * @return Collection of investigation matched
      * @throws NoParameterTypeException
      */
-     public static Collection<Investigation> searchByParameterListComparators(String userId, List<ParameterComparisonCondition> listComparators, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoNumericComparatorException, NoStringComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException {
+     public static Collection<Investigation> searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoNumericComparatorException, NoStringComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
         
-        ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLComparators (listComparators);
+        ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLComparators (listComparators, manager);
         
-        return searchByParameter(userId, ejpql, startIndex, numberResults, manager);
+        return searchByParameterImpl(userId, ejpql, startIndex, numberResults, manager);
+    }
+
+    /**
+    * Search by parameters in the database. The parameter object 'ejpql' contains some
+    * JPQL statement (parameters, conditions).
+    *
+    * @param userId federalId of the user.
+    * @param ejpql This object contains the jpql statement.
+    * @param manager manager object that will facilitate interaction with underlying database
+    * @return Collection of investigation matched
+    * @throws EmptyListParameterException
+    * @throws NoParameterTypeException
+    * @throws NoNumericComparatorException
+    * @throws NoStringComparatorException
+    * @throws NoSearchableParameterException
+    * @throws NullParameterException
+    * @throws ParameterNoExistsException
+    * @throws NoParametersException
+    * @throws NoDatetimeComparatorException
+    * @throws DatevalueException
+    * @throws NumericvalueException
+    * @throws DatevalueFormatException
+    */
+    public static Collection<Investigation> searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoNumericComparatorException, NoStringComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
+
+        ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLComparators (listComparators, manager);
+
+        return searchByParameterImpl(userId, ejpql, -1, -1, manager);
     }
 
      /**
@@ -176,10 +201,10 @@ public class InvestigationSearch extends ManagerUtil {
       * @throws ParameterSearchException
       * @see ParameterCondition
       */
-     public static Collection<Investigation> searchByParameterOperable(String userId, ParameterCondition parameterOperable, int startIndex, int numberResults, EntityManager manager) throws EmptyOperatorException, NullParameterException, NoSearchableParameterException, NoStringComparatorException, NoNumericComparatorException, NoParameterTypeException, NoParametersException, ParameterNoExistsException {
-        ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable);
+     public static Collection<Investigation> searchByParameterCondition(String userId, ParameterCondition parameterOperable, int startIndex, int numberResults, EntityManager manager) throws EmptyOperatorException, NullParameterException, NoSearchableParameterException, NoStringComparatorException, NoNumericComparatorException, NoParameterTypeException, NoParametersException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
+        ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable, manager);
 
-        return searchByParameter(userId, ejpql, startIndex, numberResults, manager);
+        return searchByParameterImpl(userId, ejpql, startIndex, numberResults, manager);
     }
 
      /**
@@ -191,10 +216,10 @@ public class InvestigationSearch extends ManagerUtil {
       * @return
       * @throws ParameterSearchException
       */
-    public static Collection<Investigation> searchByParameterOperable(String userId, ParameterCondition parameterOperable, EntityManager manager) throws EmptyOperatorException, NullParameterException, NoSearchableParameterException, NoStringComparatorException, NoNumericComparatorException, NoParameterTypeException, NoParametersException, ParameterNoExistsException {
-        ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable);
+    public static Collection<Investigation> searchByParameterCondition(String userId, ParameterCondition parameterOperable, EntityManager manager) throws EmptyOperatorException, NullParameterException, NoSearchableParameterException, NoStringComparatorException, NoNumericComparatorException, NoParameterTypeException, NoParametersException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
+        ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable, manager);
 
-        return searchByParameter(userId, ejpql, -1, -1, manager);
+        return searchByParameterImpl(userId, ejpql, -1, -1, manager);
     }
 
     /**
@@ -209,10 +234,10 @@ public class InvestigationSearch extends ManagerUtil {
      * @return Investigations which contains all the paremeters from listParam
      * @throws ParameterSearchException
      */
-    public static Collection<Investigation> searchByParameterListParameter(String userId, List<ParameterValued> listParam, int startIndex, int numberResults, EntityManager manager) throws NoParameterTypeException, EmptyListParameterException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException {
-        ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam);
+    public static Collection<Investigation> searchByParameterList(String userId, List<ParameterSearch> listParam, int startIndex, int numberResults, EntityManager manager) throws NoParameterTypeException, EmptyListParameterException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException {
+        ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam, manager);
 
-        return searchByParameter(userId, ejpql, startIndex, numberResults, manager);
+        return searchByParameterImpl(userId, ejpql, startIndex, numberResults, manager);
     }
 
     /**
@@ -225,10 +250,10 @@ public class InvestigationSearch extends ManagerUtil {
      * @return Investigations which contains all the paremeters from listParam
      * @throws ParameterSearchException
      */
-    public static Collection<Investigation> searchByParameterListParameter(String userId, List<ParameterValued> listParam, EntityManager manager) throws ParameterSearchException {
-        ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam);
+    public static Collection<Investigation> searchByParameterList(String userId, List<ParameterSearch> listParam, EntityManager manager) throws ParameterSearchException {
+        ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam, manager);
 
-        return searchByParameter(userId, ejpql, -1, 1, manager);
+        return searchByParameterImpl(userId, ejpql, -1, 1, manager);
     }
 
     /**
@@ -1059,6 +1084,4 @@ public class InvestigationSearch extends ManagerUtil {
         log.trace("listAllParameters(EntityManager)");
         return manager.createNamedQuery(ALL_PARAMETERS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
     }
-
-    
 }

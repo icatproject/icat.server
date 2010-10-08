@@ -33,7 +33,7 @@ public class ListComparatorTest extends BaseParameterSearchTest {
         lc.add(pcDatafile.get(1));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterListComparators("SUPER_USER", lc, -1, -1, em);
+                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
         
        assertTrue("Results of investigations should not be ZERO", (li.size() == 1));
     }
@@ -44,7 +44,7 @@ public class ListComparatorTest extends BaseParameterSearchTest {
         lc.add(pcDataset.get(0));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterListComparators("SUPER_USER", lc, -1, -1, em);
+                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
 
        assertTrue("Results of investigations should not be ZERO", (li.size() == 1));
         
@@ -57,7 +57,7 @@ public class ListComparatorTest extends BaseParameterSearchTest {
         lc.add(pcSample.get(0));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterListComparators("SUPER_USER", lc, 1, -1, em);
+                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, 1, -1, em);
 
         showInv(li);
 
@@ -74,7 +74,7 @@ public class ListComparatorTest extends BaseParameterSearchTest {
         lc.add(pcSample.get(0));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterListComparators("SUPER_USER", lc, 1, -1, em);
+                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, 1, -1, em);
         
        assertTrue("Results of investigations should not be ZERO", (li.size() == 1));
     }

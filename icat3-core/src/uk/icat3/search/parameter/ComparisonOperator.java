@@ -28,18 +28,9 @@ public enum ComparisonOperator {
     /** <b>param.value <= value</b><br/>Parameter value less or equal that a value */
     LESS_EQUAL,
 
-    /** <b>value1 < param.value > value2</b><br/>Parameter value between to two value */
+    /** <b>value1 < param.value < value2</b><br/>Parameter value between to two value */
     BETWEEN,
 
-    /** <b>value1 <= param.value => value2</b><br/>Parameter value between to two value */
-    BETWEEN_EQUAL,
-
-    /** <b>value1 <= param.value > value2</b><br/>Parameter value between to two value */
-    BETWEEN_EQUAL_LEFT,
-
-    /** <b>value1 < param.value => value2</b><br/>Parameter value between to two value */
-    BETWEEN_EQUAL_RIGHT,
-    
     /** <b>param.value like (%value%)</b><br/>Parameter value contains value */
     CONTAIN,
 

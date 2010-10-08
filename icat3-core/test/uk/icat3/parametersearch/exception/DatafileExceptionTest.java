@@ -7,6 +7,9 @@
 
 package uk.icat3.parametersearch.exception;
 
+import uk.icat3.exceptions.DatevalueException;
+import uk.icat3.exceptions.DatevalueFormatException;
+import uk.icat3.exceptions.NoDatetimeComparatorException;
 import uk.icat3.exceptions.NoSearchableParameterException;
 import uk.icat3.exceptions.NoParameterTypeException;
 import uk.icat3.exceptions.NoStringComparatorException;
@@ -26,13 +29,14 @@ import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.ParameterPK;
 import static org.junit.Assert.*;
+import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
 import uk.icat3.search.parameter.ParameterType;
 import uk.icat3.search.parameter.ComparisonOperator;
-import uk.icat3.search.parameter.util.ParameterValued;
+import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.search.DatafileSearch;
 import uk.icat3.util.LogicalOperator;
 
@@ -48,14 +52,14 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
     @Test
     public void noSearchableExceptionTest () {
         boolean exception = false;
-        ParameterValued pv3 = new ParameterValued(ParameterType.DATAFILE, parameter.get("datafile1"));
+        ParameterSearch pv3 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
         try {
-            List<ParameterValued> lp = new ArrayList<ParameterValued>();
-            ParameterValued pv4 = new ParameterValued(ParameterType.DATAFILE, parameter.get("datafile2"));
+            List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
+            ParameterSearch pv4 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2"));
             pv3.getParam().setSearchable("N");
             lp.add(pv3);
             lp.add(pv4);
-            DatafileSearch.searchByParameterListParameter("SUPER_USER", lp, 1, -1, em);
+            DatafileSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
         } catch (NoParametersException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
@@ -85,12 +89,20 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
              // ------------- ComparisonOperator 1 ----------------------
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
-            comp1.setParameterValued(new ParameterValued(ParameterType.DATAFILE, parameter.get("datafile1")));
+            comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
             comp1.setComparator(ComparisonOperator.START_WITH);
-            comp1.setValue(new Double (3.14));
+            comp1.setNumericValue(new Double (3.14));
             lc.add(comp1);
-            DatafileSearch.searchByParameterListComparators("SUPER_USER", lc, -1, -1, em);
+            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
 
+        } catch (NoDatetimeComparatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NumericvalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueFormatException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
@@ -127,7 +139,15 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             op1.add(op2);
             op1.add(op1);
             List<Datafile> li = (List<Datafile>) DatafileSearch
-                .searchByParameterOperable("SUPER_USER", op1, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
+        } catch (NoDatetimeComparatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NumericvalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueFormatException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
@@ -161,10 +181,18 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
             comp1.setParameterValued(null);
             comp1.setComparator(ComparisonOperator.EQUAL);
-            comp1.setValue(new Double (3.14));
+            comp1.setNumericValue(new Double (3.14));
 
             lc.add(comp1);
-            DatafileSearch.searchByParameterListComparators("SUPER_USER", lc, -1, -1, em);
+            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
+        } catch (NoDatetimeComparatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NumericvalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueFormatException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
@@ -191,13 +219,159 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
      * Operator is empty
      */
     @Test
-    public void emptyListExceptionTest () {
+    public void numericvalueExceptionTest () {
+        boolean exception = false;
+        try {
+            List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
+             // ------------- ComparisonOperator 1 ----------------------
+            ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
+            comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
+            comp1.setComparator(ComparisonOperator.EQUAL);
+            comp1.setStringValue("fail");
+
+            lc.add(comp1);
+            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
+        } catch (EmptyListParameterException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoDatetimeComparatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NumericvalueException ex) {
+            exception = true;
+        } catch (DatevalueFormatException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParameterNoExistsException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoParameterTypeException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoParametersException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NullParameterException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSearchableParameterException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoStringComparatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoNumericComparatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally {
+            assertTrue("Should be a NumericvalueException", exception);
+        }
+    }
+
+    /**
+     * Operator is empty
+     */
+    @Test
+    public void datevalueFormatExceptionTest () {
+        boolean exception = false;
+        try {
+            List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
+             // ------------- ComparisonOperator 1 ----------------------
+            ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
+            comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("time1")));
+            comp1.setComparator(ComparisonOperator.EQUAL);
+            comp1.setDatetimeValue("wrong format");
+
+            lc.add(comp1);
+            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
+        } catch (EmptyListParameterException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoDatetimeComparatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NumericvalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueFormatException ex) {
+            exception = true;
+        } catch (ParameterNoExistsException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoParameterTypeException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoParametersException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NullParameterException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSearchableParameterException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoStringComparatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoNumericComparatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally {
+            assertTrue("Should be a DatevalueFormatException", exception);
+        }
+    }
+
+    /**
+     * Operator is empty
+     */
+    @Test
+    public void datevalueExceptionTest () {
+        boolean exception = false;
+        try {
+            List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
+             // ------------- ComparisonOperator 1 ----------------------
+            ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
+            comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("time1")));
+            comp1.setComparator(ComparisonOperator.EQUAL);
+            comp1.setNumericValue(new Double(23));
+
+            lc.add(comp1);
+            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
+        } catch (EmptyListParameterException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoDatetimeComparatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            exception = true;
+        } catch (NumericvalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueFormatException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParameterNoExistsException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoParameterTypeException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoParametersException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NullParameterException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSearchableParameterException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoStringComparatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoNumericComparatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally {
+            assertTrue("Should be a DatevalueFormatException", exception);
+        }
+    }
+
+     /**
+     * Operator is empty
+     */
+    @Test
+    public void emptyOperatorExceptionTest () {
         boolean exception = false;
         try {
             ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
             List<Datafile> li = (List<Datafile>) DatafileSearch
-                .searchByParameterOperable("SUPER_USER", op1, 1, -1, em);
-            assertTrue("Results of investigations should be 2 not " + li.size(), li.size() == 2);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
+        } catch (NoDatetimeComparatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NumericvalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueFormatException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
@@ -228,14 +402,14 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
 //    @Test
     public void unexpectedParameterException () {
         boolean exception = false;
-        ParameterValued pv3 = new ParameterValued(ParameterType.DATAFILE, parameter.get("datafile1"));
+        ParameterSearch pv3 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
         try {
-            List<ParameterValued> lp = new ArrayList<ParameterValued>();
+            List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
             Parameter param = new Parameter (parameter.get("datafile2").getParameterPK());
-            ParameterValued pv4 = new ParameterValued(ParameterType.SAMPLE, param);
+            ParameterSearch pv4 = new ParameterSearch(ParameterType.SAMPLE, param);
             lp.add(pv3);
             lp.add(pv4);
-            DatafileSearch.searchByParameterListParameter("SUPER_USER", lp, 1, -1, em);
+            DatafileSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
         } catch (NoParametersException ex) {
            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
@@ -257,15 +431,15 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
     @Test
     public void parameterNoExistsException () {
         boolean exception = false;
-        ParameterValued pv3 = new ParameterValued(ParameterType.DATAFILE, parameter.get("datafile1"));
+        ParameterSearch pv3 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
         try {
-            List<ParameterValued> lp = new ArrayList<ParameterValued>();
+            List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
             Parameter param = new Parameter(new ParameterPK("noName", "noUnits"));
             param.setDatafileParameter(true);
-            ParameterValued pv4 = new ParameterValued(ParameterType.DATAFILE, param);
+            ParameterSearch pv4 = new ParameterSearch(ParameterType.DATAFILE, param);
             lp.add(pv3);
             lp.add(pv4);
-            DatafileSearch.searchByParameterListParameter("SUPER_USER", lp, 1, -1, em);
+            DatafileSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
         } catch (NoParametersException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {

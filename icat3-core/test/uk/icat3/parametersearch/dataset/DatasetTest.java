@@ -10,7 +10,7 @@ package uk.icat3.parametersearch.dataset;
 import uk.icat3.exceptions.NoParameterTypeException;
 import uk.icat3.exceptions.NoParametersException;
 import uk.icat3.exceptions.ParameterSearchException;
-import uk.icat3.search.parameter.util.ParameterValued;
+import uk.icat3.search.parameter.util.ParameterSearch;
 import java.util.ArrayList;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
@@ -33,18 +33,18 @@ public class DatasetTest extends BaseParameterSearchTest {
 
     @Test
     public void listParameterTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException {
-        List<ParameterValued> lp = new ArrayList<ParameterValued>();
+        List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
 
-        ParameterValued pv1 = new ParameterValued(ParameterType.DATAFILE, parameter.get("datafile1"));
-        ParameterValued pv2 = new ParameterValued(ParameterType.DATASET, parameter.get("dataset1"));
-        ParameterValued pv3 = new ParameterValued(ParameterType.SAMPLE, parameter.get("sample1"));
+        ParameterSearch pv1 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
+        ParameterSearch pv2 = new ParameterSearch(ParameterType.DATASET, parameter.get("dataset1"));
+        ParameterSearch pv3 = new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample1"));
 
         lp.add(pv1);
         lp.add(pv2);
         lp.add(pv3);
 
         List<Dataset> li = (List<Dataset>) DatasetSearch
-                .searchByParameterListParameter("SUPER_USER", lp, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
 
         assertTrue("Results of investigations should not be ZERO", (li.size() == 1));
         
@@ -65,7 +65,7 @@ public class DatasetTest extends BaseParameterSearchTest {
         lc.add(pcDatafile.get(2));
 
         List<Dataset> ld = (List<Dataset>) DatasetSearch
-                .searchByParameterListComparators("SUPER_USER", lc, -1, -1, em);
+                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
 
        assertTrue("Results of investigations should not be ZERO", (ld.size() == 1));
     }
@@ -89,7 +89,7 @@ public class DatasetTest extends BaseParameterSearchTest {
         op1.add(pcDataset.get(1));
 
         List<Dataset> li = (List<Dataset>) DatasetSearch
-                .searchByParameterOperable("SUPER_USER", op1, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
 
        assertTrue("Results of investigations should be 2 not " + li.size(), (li.size() == 2));
     }

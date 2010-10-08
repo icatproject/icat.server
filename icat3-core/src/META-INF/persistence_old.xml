@@ -37,17 +37,16 @@
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <!-- Prints out SQL generated from EJBQL -->
-      <!--<property name="eclipselink.logging.level" value="FINE"/>-->
+      <property name="eclipselink.logging.level" value="FINE"/>
       <!-- No caching of entity data -->
       <property name="eclipselink.cache.shared.default" value="false"/>
       <property name="eclipselink.cache.type.default" value="NONE"/>
-      <property name="eclipselink.cache.size.default" value="0"/>
+      <property name="eclipselink.cache.size.default" value="0"/> 
       <property name="eclipselink.query-results-cache" value="false"/>
-      <property name="eclipselink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = orly1v)(PORT = 1521))(ADDRESS = (PROTOCOL = TCP)(HOST = orly2v)(PORT = 1521))(LOAD_BALANCE = yes)(CONNECT_DATA =(SERVER = DEDICATED)(SERVICE_NAME = site_dev_s)))"/>
-      <!--<property name="eclipselink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = icatdb.ill.fr)(PORT = 1521))(CONNECT_DATA =(SERVER = DEDICATED)(SERVICE_NAME = icat)))"/>-->
-      <property name="eclipselink.jdbc.password" value="icat"/>
-      <property name="eclipselink.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
-      <property name="eclipselink.jdbc.user" value="icat"/>
+      <property name="eclipselink.jdbc.url" value="jdbc:oracle:thin:@//localhost:1521/XE"/>
+      <property name="eclipselink.jdbc.password" value="password"/>
+      <property name="eclipselink.jdbc.driver" value="oracle.jdbc.OracleDriver"/>
+      <property name="eclipselink.jdbc.user" value="testicat"/>
     </properties>
   </persistence-unit>
 </persistence>

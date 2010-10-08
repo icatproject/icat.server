@@ -16,7 +16,7 @@ import uk.icat3.entity.Parameter;
  */
 public class ParameterNoExistsException extends ParameterSearchException {
 
-    private final static String msg = "Parameter no exists";
+    private final static String msg = "No exists parameter";
 
     public ParameterNoExistsException() {
         super (ParameterNoExistsException.msg);
@@ -24,7 +24,7 @@ public class ParameterNoExistsException extends ParameterSearchException {
 
 
     public ParameterNoExistsException(Parameter param) {
-        super (ParameterNoExistsException.msg + " named '" + param.getParameterPK().getName() +
+        super (ParameterNoExistsException.msg + " with name '" + param.getParameterPK().getName() +
                 "' and units '" + param.getParameterPK().getUnits() + "'");
     }
 }

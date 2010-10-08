@@ -41,7 +41,7 @@ public class OperableTest extends BaseParameterSearchTest {
         op1.add(pcDatafile.get(2));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterOperable("SUPER_USER", op1, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
         
 
        assertTrue("Results of investigations should be 2 not " + li.size(), (li.size() == 2));
@@ -54,7 +54,7 @@ public class OperableTest extends BaseParameterSearchTest {
         lc.add(pcDataset.get(0));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterListComparators("SUPER_USER", lc, -1, -1, em);
+                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
 
        assertTrue("Results of investigations should not be ZERO", (li.size() == 1));
 
@@ -76,7 +76,7 @@ public class OperableTest extends BaseParameterSearchTest {
         op1.add(pcSample.get(0));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterOperable("SUPER_USER", op1, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
 
 
         assertTrue("Results of investigations should be 1 not " + li.size(), (li.size() == 1));
@@ -100,7 +100,7 @@ public class OperableTest extends BaseParameterSearchTest {
         
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterOperable("SUPER_USER", op1, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
 
 
        assertTrue("Results of investigations should be 2 not " + li.size(), (li.size() == 2));
@@ -123,7 +123,7 @@ public class OperableTest extends BaseParameterSearchTest {
         op1.add(op2);
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterOperable("SUPER_USER", op1, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
 
 
        assertTrue("Results of investigations should be ZERO not " + li.size(), (li.size() == 0));

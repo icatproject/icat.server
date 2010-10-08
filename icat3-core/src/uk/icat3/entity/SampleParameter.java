@@ -44,7 +44,7 @@ import uk.icat3.util.ParameterValueType;
     @NamedQuery(name = "SampleParameter.findByUnits", query = "SELECT s FROM SampleParameter s WHERE s.sampleParameterPK.units = :units"),
     @NamedQuery(name = "SampleParameter.findByStringValue", query = "SELECT s FROM SampleParameter s WHERE s.stringValue = :stringValue"),
     @NamedQuery(name = "SampleParameter.findByNumericValue", query = "SELECT s FROM SampleParameter s WHERE s.numericValue = :numericValue"),
-    @NamedQuery(name = "SampleParameter.findByDateTimeValue", query = "SELECT s FROM SampleParameter s WHERE s.dateTimeValue = :dateTimeValue"),
+//    @NamedQuery(name = "SampleParameter.findByDateTimeValue", query = "SELECT s FROM SampleParameter s WHERE s.dateTimeValue = :dateTimeValue"),
     @NamedQuery(name = "SampleParameter.findByError", query = "SELECT s FROM SampleParameter s WHERE s.error = :error"),
     @NamedQuery(name = "SampleParameter.findByRangeTop", query = "SELECT s FROM SampleParameter s WHERE s.rangeTop = :rangeTop"),
     @NamedQuery(name = "SampleParameter.findByRangeBottom", query = "SELECT s FROM SampleParameter s WHERE s.rangeBottom = :rangeBottom"),
@@ -65,9 +65,9 @@ import uk.icat3.util.ParameterValueType;
     @Column(name = "NUMERIC_VALUE")
     private Double numericValue;
 
-    @Column(name = "DATETIME_VALUE")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateTimeValue;
+//    @Column(name = "DATETIME_VALUE")
+//    @Temporal(TemporalType.TIMESTAMP)
+//    private Date dateTimeValue;
     
     @Column(name = "ERROR")
     private String error;
@@ -189,7 +189,8 @@ import uk.icat3.util.ParameterValueType;
      * @return Date in milliseconds.
      */
     public Date getDateTimeValue() {
-        return dateTimeValue;
+//        return dateTimeValue;
+        return null;
     }
 
     /**
@@ -198,7 +199,7 @@ import uk.icat3.util.ParameterValueType;
      * @param dateTimeValue the new date time value
      */
     public void setDateTimeValue(Date dateTimeValue) {
-        this.dateTimeValue = dateTimeValue;
+//        this.dateTimeValue = dateTimeValue;
     }
 
 
@@ -307,7 +308,7 @@ import uk.icat3.util.ParameterValueType;
     public ParameterValueType getValueType() {
         if(stringValue != null && numericValue == null) return ParameterValueType.STRING;
         else if(numericValue != null && stringValue == null) return ParameterValueType.NUMERIC;
-        else if(numericValue == null && stringValue == null && dateTimeValue != null) return ParameterValueType.DATE_AND_TIME;
+//        else if(numericValue == null && stringValue == null && dateTimeValue != null) return ParameterValueType.DATE_AND_TIME;
         return ParameterValueType.STRING;
     }
 

@@ -19,7 +19,7 @@ import uk.icat3.exceptions.NullParameterException;
  * 
  * @author cruzcruz
  */
-public class ParameterValued {
+public class ParameterSearch {
     /** JQPL field name for NUMERIC_VALUE */
     private static String NUMERIC_VALUE = "numericValue";
     /** JQPL field name for STRING_VALUE */
@@ -35,18 +35,18 @@ public class ParameterValued {
     ///////////////////////////////////////////////////////////////////////////
     //                CONSTRUCTORS                                           //
     ///////////////////////////////////////////////////////////////////////////
-    public ParameterValued() {
+    public ParameterSearch() {
     }
 
-    public ParameterValued (Parameter param) {
+    public ParameterSearch (Parameter param) {
         this.param = param;
     }
 
-    public ParameterValued(ParameterType type) {
+    public ParameterSearch(ParameterType type) {
         this.type = type;
     }
 
-    public ParameterValued(ParameterType type, Parameter param) {
+    public ParameterSearch(ParameterType type, Parameter param) {
         this.type = type;
         this.param = param;
     }

@@ -7,6 +7,9 @@
 
 package uk.icat3.parametersearch.exception;
 
+import uk.icat3.exceptions.DatevalueException;
+import uk.icat3.exceptions.DatevalueFormatException;
+import uk.icat3.exceptions.NoDatetimeComparatorException;
 import uk.icat3.exceptions.NoSearchableParameterException;
 import uk.icat3.exceptions.NoParameterTypeException;
 import uk.icat3.exceptions.NoStringComparatorException;
@@ -26,13 +29,14 @@ import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.ParameterPK;
 import static org.junit.Assert.*;
+import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
 import uk.icat3.search.parameter.ParameterType;
 import uk.icat3.search.parameter.ComparisonOperator;
-import uk.icat3.search.parameter.util.ParameterValued;
+import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.search.InvestigationSearch;
 import uk.icat3.util.LogicalOperator;
 
@@ -48,14 +52,14 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
     @Test
     public void noSearchableExceptionTest () {
         boolean exception = false;
-        ParameterValued pv3 = new ParameterValued(ParameterType.DATAFILE, parameter.get("datafile1"));
+        ParameterSearch pv3 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
         try {
-            List<ParameterValued> lp = new ArrayList<ParameterValued>();
-            ParameterValued pv4 = new ParameterValued(ParameterType.DATAFILE, parameter.get("datafile2"));
+            List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
+            ParameterSearch pv4 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2"));
             pv3.getParam().setSearchable("N");
             lp.add(pv3);
             lp.add(pv4);
-            InvestigationSearch.searchByParameterListParameter("SUPER_USER", lp, 1, -1, em);
+            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
         } catch (ParameterNoExistsException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
@@ -85,12 +89,20 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
              // ------------- ComparisonOperator 1 ----------------------
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
-            comp1.setParameterValued(new ParameterValued(ParameterType.DATAFILE, parameter.get("datafile1")));
+            comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
             comp1.setComparator(ComparisonOperator.START_WITH);
-            comp1.setValue(new Double (3.14));
+            comp1.setNumericValue(new Double (3.14));
             lc.add(comp1);
-            InvestigationSearch.searchByParameterListComparators("SUPER_USER", lc, -1, -1, em);
+            InvestigationSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
 
+        } catch (NoDatetimeComparatorException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NumericvalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueFormatException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
@@ -117,10 +129,10 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
     public void noParameterTypeExceptionTest () {
         boolean exception = false;
         try {
-            List<ParameterValued> lp = new ArrayList<ParameterValued>();
-            ParameterValued pv4 = new ParameterValued(null, new Parameter());
+            List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
+            ParameterSearch pv4 = new ParameterSearch(null, new Parameter());
             lp.add(pv4);
-            InvestigationSearch.searchByParameterListParameter("SUPER_USER", lp, 1, -1, em);
+            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
         } catch (NoParametersException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
@@ -153,7 +165,15 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             op1.add(op2);
             op1.add(op1);
             List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterOperable("SUPER_USER", op1, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
+        } catch (NoDatetimeComparatorException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NumericvalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueFormatException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
@@ -187,10 +207,18 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
             comp1.setParameterValued(null);
             comp1.setComparator(ComparisonOperator.EQUAL);
-            comp1.setValue(new Double (3.14));
+            comp1.setNumericValue(new Double (3.14));
             lc.add(comp1);
-            InvestigationSearch.searchByParameterListComparators("SUPER_USER", lc, -1, -1, em);
+            InvestigationSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
 
+        } catch (NoDatetimeComparatorException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NumericvalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueFormatException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
@@ -222,8 +250,16 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
         try {
             ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
             List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterOperable("SUPER_USER", op1, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
             assertTrue("Results of investigations should be 2 not " + li.size(), li.size() == 2);
+        } catch (NoDatetimeComparatorException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NumericvalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueFormatException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
@@ -254,14 +290,14 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
     @Test
     public void noSearchableParameter () {
         boolean exception = false;
-        ParameterValued pv3 = new ParameterValued(ParameterType.DATAFILE, parameter.get("datafile1"));
+        ParameterSearch pv3 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
         try {
-            List<ParameterValued> lp = new ArrayList<ParameterValued>();
+            List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
             Parameter param = new Parameter (parameter.get("datafile2").getParameterPK());
-            ParameterValued pv4 = new ParameterValued(ParameterType.DATASET, param);
+            ParameterSearch pv4 = new ParameterSearch(ParameterType.DATASET, param);
             lp.add(pv3);
             lp.add(pv4);
-            InvestigationSearch.searchByParameterListParameter("SUPER_USER", lp, 1, -1, em);
+            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
         } catch (ParameterNoExistsException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
@@ -283,15 +319,15 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
     @Test
     public void ParameterNoExistsException () {
         boolean exception = false;
-//        ParameterValued pv3 = new ParameterValued(ParameterType.DATAFILE, parameter.get("datafile1"));
+//        ParameterSearch pv3 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
         try {
-            List<ParameterValued> lp = new ArrayList<ParameterValued>();
+            List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
             Parameter param = new Parameter(new ParameterPK("noName", "noUnits"));
             param.setDatafileParameter(true);
-            ParameterValued pv4 = new ParameterValued(ParameterType.DATAFILE, param);
+            ParameterSearch pv4 = new ParameterSearch(ParameterType.DATAFILE, param);
 //            lp.add(pv3);
             lp.add(pv4);
-            InvestigationSearch.searchByParameterListParameter("SUPER_USER", lp, 1, -1, em);
+            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
         } catch (NoParametersException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
@@ -318,14 +354,14 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
     @Test
     public void noSearchableParameterException () {
         boolean exception = false;
-        ParameterValued pv3 = new ParameterValued(ParameterType.DATAFILE, parameter.get("datafile1"));
+        ParameterSearch pv3 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
         try {
-            List<ParameterValued> lp = new ArrayList<ParameterValued>();
+            List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
             Parameter param = new Parameter (parameter.get("datafile2").getParameterPK());
-            ParameterValued pv4 = new ParameterValued(ParameterType.SAMPLE, param);
+            ParameterSearch pv4 = new ParameterSearch(ParameterType.SAMPLE, param);
             lp.add(pv3);
             lp.add(pv4);
-            InvestigationSearch.searchByParameterListParameter("SUPER_USER", lp, 1, -1, em);
+            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
         } catch (NoParametersException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
