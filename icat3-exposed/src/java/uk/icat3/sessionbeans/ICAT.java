@@ -9,7 +9,6 @@
 package uk.icat3.sessionbeans;
 
 import java.util.Collection;
-import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -56,6 +55,7 @@ import uk.icat3.search.parameter.ParameterLogicalCondition;
 import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.KeywordDetails;
+import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.sessionbeans.data.DownloadManagerLocal;
 import uk.icat3.sessionbeans.manager.DatafileManagerLocal;
 import uk.icat3.sessionbeans.manager.DatasetManagerLocal;
@@ -66,12 +66,14 @@ import uk.icat3.sessionbeans.search.DatafileSearchLocal;
 import uk.icat3.sessionbeans.search.DatasetSearchLocal;
 import uk.icat3.sessionbeans.search.InvestigationSearchLocal;
 import uk.icat3.sessionbeans.search.KeywordSearchLocal;
+import uk.icat3.sessionbeans.search.SampleSearchLocal;
 import uk.icat3.sessionbeans.util.Constants;
 import uk.icat3.user.UserDetails;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.KeywordType;
+import uk.icat3.util.ParameterValueType;
 import uk.icat3.util.Queries;
 
 /**
@@ -96,6 +98,8 @@ public class ICAT extends EJBObject implements ICATLocal {
     protected DatafileSearchLocal datafileSearchLocal;
     @EJB
     protected DatasetSearchLocal datasetSearchLocal;
+    @EJB
+    protected SampleSearchLocal sampleSearchLocal;
     @EJB
     protected InvestigationSearchLocal investigationSearchLocal;
     @EJB
@@ -647,7 +651,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection<Dataset> searchDatasetsBySample(
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "sample") Sample sample) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
-        return datasetSearchLocal.searchDatasetsBySample(sessionId, sample);
+        return datasetSearchLocal.searchDataSetsBySample(sessionId, sample);
     }
 
     /**
@@ -1959,74 +1963,232 @@ public class ICAT extends EJBObject implements ICATLocal {
         return facilityManagerLocal.getFacilityUserByFederalId(sessionId, federalId);
     }
 
-    @WebMethod(operationName ="searchByParameterOperator")
-    public Collection<Investigation> searchByParameterOperator (
+    /**
+     * Return the investigation matched by a logical condition.
+     *
+     * @param sessionId Session identification
+     * @param logicalCondition Logical condition
+     * @return Collection of investigation
+     *
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod(operationName ="searchByParameterCondition")
+    public Collection<Investigation> searchByParameterCondition (
             @WebParam(name="sessionId")
             String sessionId,
-            @WebParam(name="operator")
-            ParameterLogicalCondition operator) throws SessionException, ParameterSearchException {
+                        @WebParam(name="logicalCondition")
+            ParameterLogicalCondition logicalCondition) throws SessionException, ParameterSearchException {
 
-        return investigationSearchLocal.searchByParameterOperable(sessionId, operator);
+        return investigationSearchLocal.searchByParameterCondition(sessionId, logicalCondition);
     }
 
-    @WebMethod(operationName ="searchByParameterComparator")
-    public Collection<Investigation> searchByParameterComparator (
+    /**
+     * Return the investigation matched by a comparison(s)
+     *
+     * @param sessionId Session identification
+     * @param comparisionCondition Comparison
+     * @return Collection of investigation
+     * 
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod(operationName ="searchByParameterComparison")
+    public Collection<Investigation> searchByParameterComparison (
             @WebParam(name="sessionId")
             String sessionId,
-            @WebParam(name="comparator")
-            ParameterComparisonCondition comparator) throws SessionException, ParameterSearchException {
+                        @WebParam(name="comparisionCondition")
+            ParameterComparisonCondition... comparisionCondition) throws SessionException, ParameterSearchException {
 
-        return investigationSearchLocal.searchByParameterOperable(sessionId, comparator);
+        return investigationSearchLocal.searchByParameterComparison(sessionId, comparisionCondition);
     }
 
-     @WebMethod(operationName ="searchByParameterComparators")
-    public Collection<Investigation> searchByParameterComparators (
-            @WebParam(name="sessionId")
-            String sessionId,
-            @WebParam(name="comparators")
-            List<ParameterComparisonCondition> comparators) throws SessionException, ParameterSearchException {
-
-        return investigationSearchLocal.searchByParameter(sessionId, comparators);
-    }
-    
-      @WebMethod(operationName ="searchDatasetsByParameterComparator")
-    public Collection<Dataset> searchDatasetsByParameterComparator (
-            @WebParam(name="sessionId")
-            String sessionId,
-            @WebParam(name="comparator")
-            ParameterComparisonCondition comparator) throws SessionException, ParameterSearchException {
-
-        return datasetSearchLocal.searchDatasetsByParameterOperable(sessionId, comparator);
+    /**
+     * Return the investigation matched by a parameter(s)
+     *
+     * @param sessionId Session identification
+     * @param parameterSearch Parameter
+     * @return Collection of investigation
+     * 
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod(operationName = "searchByParameter")
+    public Collection<Investigation> searchByParameter(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "parameterValued")
+    ParameterSearch... parameterSearch) throws SessionException, ParameterSearchException {
+        return investigationSearchLocal.searchByParameter(sessionId, parameterSearch);
     }
 
-     @WebMethod(operationName ="searchDatasetsByParameterComparators")
-    public Collection<Dataset> searchDatasetsByParameterComparators (
-            @WebParam(name="sessionId")
-            String sessionId,
-            @WebParam(name="comparators")
-            List<ParameterComparisonCondition> comparators) throws SessionException, ParameterSearchException {
-
-        return datasetSearchLocal.searchDatasetsByParameter(sessionId, comparators);
+    /**
+     * Return datafiles matched by a logical condition.
+     * 
+     * @param sessionId Session identification
+     * @param logicalCondition Logial condition
+     * @return Collection of datafiles
+     * 
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod(operationName = "searchDatafileByParameterCondition")
+    public Collection<Datafile> searchDatafileByParameterCondition(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "logicalCondition")
+    ParameterLogicalCondition logicalCondition) throws SessionException, ParameterSearchException {
+        return datafileSearchLocal.searchByParameterCondition(sessionId, logicalCondition);
     }
 
-      @WebMethod(operationName ="searchDatafilesByParameterComparator")
-    public Collection<Datafile> searchDatafilesByParameterComparator (
+    /**
+     * Return datafiles matched by comparison(s).
+     *
+     * @param sessionId Session identification
+     * @param comparison Comparison
+     * @return Collection of datafiles
+     * 
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod(operationName ="searchDatafileByParameterComparison")
+    public Collection<Datafile> searchDatafileByParameterComparison (
             @WebParam(name="sessionId")
             String sessionId,
-            @WebParam(name="comparator")
-            ParameterComparisonCondition comparator) throws SessionException, ParameterSearchException {
+                     @WebParam(name="comparison")
+            ParameterComparisonCondition... comparison) throws SessionException, ParameterSearchException {
 
-        return datafileSearchLocal.searchDatafilesByParameterOperable(sessionId, comparator);
+        return datafileSearchLocal.searchByParameterComparison(sessionId, comparison);
     }
 
-     @WebMethod(operationName ="searchDatafilesByParameterComparators")
-    public Collection<Datafile> searchDatafilesByParameterComparators (
+    /**
+     * Return datafiles matched by parameter(s).
+     *
+     * @param sessionId Session identification
+     * @param parameters Parameters
+     * @return Collection of datafiles
+     * 
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod(operationName ="searchDatafileByParameter")
+    public Collection<Datafile> searchDatafileByParameter (
             @WebParam(name="sessionId")
             String sessionId,
-            @WebParam(name="comparators")
-            List<ParameterComparisonCondition> comparators) throws SessionException, ParameterSearchException {
+                     @WebParam(name="comparisonList")
+            ParameterSearch... parameters) throws SessionException, ParameterSearchException {
 
-        return datafileSearchLocal.searchDatafilesByParameter(sessionId, comparators);
+        return datafileSearchLocal.searchByParameter(sessionId, parameters);
+    }
+
+    /**
+     * Return datasets matched by a logical condition.
+     *
+     * @param sessionId Session identification
+     * @param logicalCondition Logial condition
+     * @return Collection of datasets
+     *
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod(operationName = "searchDatasetByParameterCondition")
+    public Collection<Dataset> searchDatasetByParameterCondition(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "logicalCondition")
+    ParameterLogicalCondition logicalCondition) throws SessionException, ParameterSearchException {
+        return datasetSearchLocal.searchByParameterCondition(sessionId, logicalCondition);
+    }
+
+    /**
+     * Return datasets matched by comparison(s).
+     *
+     * @param sessionId Session identification
+     * @param comparison Comparison
+     * @return Collection of datasets
+     *
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod(operationName ="searchDatasetByParameterComparison")
+    public Collection<Dataset> searchDatasetByParameterComparison (
+            @WebParam(name="sessionId")
+            String sessionId,
+                     @WebParam(name="comparison")
+            ParameterComparisonCondition... comparison) throws SessionException, ParameterSearchException {
+
+        return datasetSearchLocal.searchByParameterComparison(sessionId, comparison);
+    }
+
+    /**
+     * Return datasets matched by parameter(s).
+     *
+     * @param sessionId Session identification
+     * @param parameters Parameters
+     * @return Collection of datasets
+     *
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod(operationName ="searchDatasetByParameter")
+    public Collection<Dataset> searchDatasetByParameter (
+            @WebParam(name="sessionId")
+            String sessionId,
+                     @WebParam(name="comparisonList")
+            ParameterSearch... parameters) throws SessionException, ParameterSearchException {
+
+        return datasetSearchLocal.searchByParameter(sessionId, parameters);
+    }
+
+    /**
+     * Return samples matched by a logical condition.
+     *
+     * @param sessionId Session identification
+     * @param logicalCondition Logial condition
+     * @return Collection of samples
+     *
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod(operationName = "searchSampleByParameterCondition")
+    public Collection<Sample> searchSampleByParameterCondition(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "logicalCondition")
+    ParameterLogicalCondition logicalCondition) throws SessionException, ParameterSearchException {
+        return sampleSearchLocal.searchByParameterCondition(sessionId, logicalCondition);
+    }
+
+    /**
+     * Return samples matched by comparison(s).
+     *
+     * @param sessionId Session identification
+     * @param comparison Comparison
+     * @return Collection of samples
+     *
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod(operationName ="searchSampleByParameterComparison")
+    public Collection<Sample> searchSampleByParameterComparison (
+            @WebParam(name="sessionId")
+            String sessionId,
+                     @WebParam(name="comparison")
+            ParameterComparisonCondition... comparison) throws SessionException, ParameterSearchException {
+
+        return sampleSearchLocal.searchByParameterComparison(sessionId, comparison);
+    }
+
+    /**
+     * Return samples matched by parameter(s).
+     *
+     * @param sessionId Session identification
+     * @param parameters Parameters
+     * @return Collection of samples
+     *
+     * @throws SessionException
+     * @throws ParameterSearchException
+     */
+    @WebMethod(operationName ="searchSampleByParameter")
+    public Collection<Sample> searchSampleByParameter (
+            @WebParam(name="sessionId")
+            String sessionId,
+                     @WebParam(name="comparisonList")
+            ParameterSearch... parameters) throws SessionException, ParameterSearchException {
+
+        return sampleSearchLocal.searchByParameter(sessionId, parameters);
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 }

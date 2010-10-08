@@ -9,6 +9,7 @@
 
 package uk.icat3.sessionbeans.search;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -25,6 +26,7 @@ import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterCondition;
+import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 
@@ -84,35 +86,7 @@ public class DatafileSearchBean extends EJBObject implements DatafileSearchLocal
         
         return DatafileSearch.searchByRunNumber(userId, instruments, startRun, endRun, startIndex, number_results, manager);
     }
-
-    /**
-     * searches for the datafiles that have datafile parameters meeting condition in the input
-     * @param sessionId
-     * @param parameterOperable
-     * @return collection of datafiles meeting the condition and have permissions
-     * @throws SessionException
-     * @throws ParameterSearchException
-     */
-    @WebMethod()
-    public Collection<Datafile> searchDatafilesByParameterOperable (String sessionId, ParameterCondition parameterOperable) throws SessionException, ParameterSearchException {
-       String userId = user.getUserIdFromSessionId(sessionId);
-       return  DatafileSearch.searchByParameterOperable(userId, parameterOperable, manager);
-    }
-
-    /**
-     * Searches for the datafiles that have datafile parameters meeting conditons in the input
-     * @param sessionId
-     * @param parameterComparator
-     * @return collection of datafiles meeting the condition and have permissions
-     * @throws SessionException
-     * @throws ParameterSearchException
-     */
-    @WebMethod()
-    public Collection<Datafile> searchDatafilesByParameter(String sessionId, List<ParameterComparisonCondition> parameterComparator) throws SessionException, ParameterSearchException {
-       String userId = user.getUserIdFromSessionId(sessionId);
-       return  DatafileSearch.searchByParameterListComparators(userId, parameterComparator, manager);
-    }
-
+    
     /**
      *  List all the valid avaliable formats for datafiles
      *
@@ -126,5 +100,37 @@ public class DatafileSearchBean extends EJBObject implements DatafileSearchLocal
         String userId = user.getUserIdFromSessionId(sessionId);
         
         return DatafileSearch.listDatafileFormats(manager);
+    }
+
+    @Override
+    public Collection<Datafile> searchByParameterCondition(String sessionId, ParameterCondition logicalCondition) throws SessionException, ParameterSearchException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        return DatafileSearch.searchByParameterCondition(userId, logicalCondition, manager);
+    }
+
+    @Override
+    public Collection<Datafile> searchByParameter(String sessionId, ParameterSearch... parameters) throws SessionException, ParameterSearchException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        List<ParameterSearch> list = new ArrayList<ParameterSearch>();
+        for (ParameterSearch p : parameters) {
+            list.add(p);
+        }
+        return DatafileSearch.searchByParameterList(userId, list, manager);
+    }
+
+    @Override
+    public Collection<Datafile> searchByParameterComparison(String sessionId, ParameterComparisonCondition... parameters) throws SessionException, ParameterSearchException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        List<ParameterComparisonCondition> list = new ArrayList<ParameterComparisonCondition>();
+        for (ParameterComparisonCondition p : parameters) {
+            list.add(p);
+        }
+        return DatafileSearch.searchByParameterComparisonList(userId, list, manager);
     }
 }

@@ -13,6 +13,7 @@ import uk.icat3.search.parameter.ParameterCondition;
 import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.KeywordDetails;
+import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.util.InvestigationInclude;
 
 /**
@@ -57,7 +58,9 @@ public interface InvestigationSearchLocal {
 
     Collection<String> listInvestigationTypes(String sessionId) throws SessionException;
 
-    Collection<Investigation> searchByParameterOperable (String sessionId, ParameterCondition parameterOperable) throws SessionException, ParameterSearchException;
+    Collection<Investigation> searchByParameterCondition (String sessionId, ParameterCondition parameterOperable) throws SessionException, ParameterSearchException;
 
-    Collection<Investigation> searchByParameter(String sessionId, List<ParameterComparisonCondition> parameterComparator) throws SessionException, ParameterSearchException;
+    Collection<Investigation> searchByParameterComparison(String sessionId, ParameterComparisonCondition... parameterComparator) throws SessionException, ParameterSearchException;
+
+    Collection<Investigation> searchByParameter(String sessionId, ParameterSearch... parameters) throws SessionException, ParameterSearchException;
     }

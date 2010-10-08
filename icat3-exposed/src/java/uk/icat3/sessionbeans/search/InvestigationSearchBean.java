@@ -10,6 +10,7 @@
 package uk.icat3.sessionbeans.search;
 
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -30,6 +31,7 @@ import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.InvestigationSearch;
 import uk.icat3.search.KeywordDetails;
+import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.util.InvestigationInclude;
@@ -438,14 +440,29 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
     }
 
     @WebMethod()
-    public Collection<Investigation> searchByParameterOperable (String sessionId, ParameterCondition parameterOperable) throws SessionException, ParameterSearchException {
+    public Collection<Investigation> searchByParameterCondition (String sessionId, ParameterCondition parameterOperable) throws SessionException, ParameterSearchException {
         String userId = user.getUserIdFromSessionId(sessionId);
-        return InvestigationSearch.searchByParameterOperable(userId, parameterOperable, manager);
+        return InvestigationSearch.searchByParameterCondition(userId, parameterOperable, manager);
     }
 
     @WebMethod()
-    public Collection<Investigation> searchByParameter(String sessionId, List<ParameterComparisonCondition> listComparators) throws SessionException, ParameterSearchException {
+    public Collection<Investigation> searchByParameterComparison(String sessionId, ParameterComparisonCondition... listComparators) throws SessionException, ParameterSearchException {
         String userId = user.getUserIdFromSessionId(sessionId);
-        return InvestigationSearch.searchByParameterListComparators(userId, listComparators, -1, -1, manager);
+        List<ParameterComparisonCondition> list = new ArrayList<ParameterComparisonCondition>();
+        for (ParameterComparisonCondition p : listComparators) {
+            list.add(p);
+        }
+        return InvestigationSearch.searchByParameterComparisonList(userId, list, -1, -1, manager);
+    }
+
+    @Override
+    public Collection<Investigation> searchByParameter(String sessionId, ParameterSearch... parameters) throws SessionException, ParameterSearchException {
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        List<ParameterSearch> list = new ArrayList<ParameterSearch>();
+        for (ParameterSearch p : parameters)
+            list.add(p);
+        
+        return InvestigationSearch.searchByParameterList(userId, list, -1, -1, manager);
     }
 }
