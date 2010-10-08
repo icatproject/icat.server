@@ -21,5 +21,9 @@ public class NullParameterException extends ParameterSearchException {
         super (msg + ": field " + fieldName + " cannot be null");
     }
 
+    public NullParameterException() {
+        super (msg + ": parameter is null");
+    }
+
 
 }
