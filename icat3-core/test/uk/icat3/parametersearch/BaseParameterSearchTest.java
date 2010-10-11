@@ -283,6 +283,7 @@ public class BaseParameterSearchTest extends BaseTest {
             Datafile datFile2 = createDatafile(dat2, "datafile_2");
 
             Parameter sp1_1 = createParameter("deg", "sample1", ElementType.SAMPLE);
+            Parameter elec = createParameter("V", "voltage", ElementType.SAMPLE);
             Parameter ds1_1 = createParameter("deg", "dataset1", ElementType.DATASET);
             Parameter df1_1 = createParameter("deg", "datafile1", ElementType.DATAFILE);
             Parameter df1_2 = createParameter("deg", "datafile2", ElementType.DATAFILE);
@@ -295,6 +296,7 @@ public class BaseParameterSearchTest extends BaseTest {
             removeEntities.add(df1_1);
             removeEntities.add(df1_2);
             removeEntities.add(time1);
+            removeEntities.add(elec);
             removeEntities.add(str1);
 
             Parameter df2_1 = createParameter("deg", "datafile2_1",ElementType.DATAFILE);
@@ -304,6 +306,7 @@ public class BaseParameterSearchTest extends BaseTest {
             removeEntities.add(sp2_1);
             removeEntities.add(ds2_1);
 
+            removeEntities.add(createSampleParameter(samp, elec, new Double(55.55)));
             removeEntities.add(createSampleParameter(samp, sp1_1, new Double(2.2)));
             removeEntities.add(createSampleParameter(samp2, sp2_1, new Double(21.2)));
             removeEntities.add(createDatasetParameter(dat, ds1_1, new Double(2.1)));
