@@ -45,7 +45,8 @@ import uk.icat3.parametersearch.sample.ValueTypeSampleTest;
     InvestigationExceptionTest.class,
     DatafileExceptionTest.class,
     DatasetExceptionTest.class,
-    SampleExceptionTest.class
+    SampleExceptionTest.class,
+    UsesExamples.class
 })
         
 public class TestAllParameterSearch {

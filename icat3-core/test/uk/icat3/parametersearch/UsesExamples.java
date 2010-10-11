@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
+import junit.framework.JUnit4TestAdapter;
 import uk.icat3.exceptions.ParameterSearchException;
 import org.junit.Test;
 import uk.icat3.entity.Datafile;
@@ -248,5 +249,9 @@ public class UsesExamples extends BaseParameterSearchTest {
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, em);
 
         assertTrue("Results of investigations should be 1 not " + ld.size(), (ld.size() == 1));
+    }
+
+    public static junit.framework.Test suite(){
+        return new JUnit4TestAdapter(UsesExamples.class);
     }
 }
