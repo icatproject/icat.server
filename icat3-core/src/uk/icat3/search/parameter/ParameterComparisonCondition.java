@@ -51,8 +51,8 @@ public final class ParameterComparisonCondition extends ParameterCondition{
      * @param comparator ComparisonOperator which compare with
      * @param value Value to compare with parameter 'param'
      */
-    public ParameterComparisonCondition(Parameter param, ComparisonOperator comparator, String value) {
-        this.param = new ParameterSearch(param);
+    public ParameterComparisonCondition(ParameterSearch param, ComparisonOperator comparator, Object value) {
+        this.param = param;
         this.comparator = comparator;
         this.value = value;
     }
