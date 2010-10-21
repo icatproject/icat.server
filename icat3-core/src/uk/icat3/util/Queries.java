@@ -355,6 +355,27 @@ public class Queries {
     public static final String ALL_FACILITYCYCLES_JPQL = "SELECT DISTINCT f FROM FacilityCycle f WHERE f.markedDeleted = 'N'";
 
     /**
+     * Find parameters by name and units
+     */
+    public static final String PARAMETER_SEARCH_BY_NAME_UNITS = "ParameterSearch.findByUnits";
+    public static final String PARAMETER_SEARCH_BY_NAME_UNITS_JPQL = "SELECT p FROM Parameter p WHERE " +
+            "p.parameterPK.name LIKE :name " +
+            "AND p.parameterPK.units LIKE :units AND p.markedDeleted = 'N'";
+    /**
+     * Find parameters by name
+     */
+    public static final String PARAMETER_SEARCH_BY_NAME = "ParameterSearch.findByName";
+    public static final String PARAMETER_SEARCH_BY_NAME_JPQL = "SELECT p FROM Parameter p WHERE " +
+            "p.parameterPK.name LIKE :name " +
+            "AND p.markedDeleted = 'N'";
+    /**
+     * Find parameters by units
+     */
+    public static final String PARAMETER_SEARCH_BY_UNITS = "ParameterSearch.findByEagerUnits";
+    public static final String PARAMETER_SEARCH_BY_UNITS_JPQL = "SELECT p FROM Parameter p WHERE " +
+            "p.parameterPK.units LIKE :units AND p.markedDeleted = 'N'";
+
+    /**
      * Find all investigation types,
      *
      */

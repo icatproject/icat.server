@@ -46,7 +46,10 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = "Parameter.findByModId", query = "SELECT p FROM Parameter p WHERE p.modId = :modId"),
     @NamedQuery(name = "Parameter.findByModTime", query = "SELECT p FROM Parameter p WHERE p.modTime = :modTime"),
     
-    @NamedQuery(name = Queries.ALL_PARAMETERS, query = Queries.ALL_PARAMETERS_JPQL)
+    @NamedQuery(name = Queries.ALL_PARAMETERS, query = Queries.ALL_PARAMETERS_JPQL),
+    @NamedQuery(name = Queries.PARAMETER_SEARCH_BY_NAME_UNITS, query = Queries.PARAMETER_SEARCH_BY_NAME_UNITS_JPQL),
+    @NamedQuery(name = Queries.PARAMETER_SEARCH_BY_NAME, query = Queries.PARAMETER_SEARCH_BY_NAME_JPQL),
+    @NamedQuery(name = Queries.PARAMETER_SEARCH_BY_UNITS, query = Queries.PARAMETER_SEARCH_BY_UNITS_JPQL)
 })
         public class Parameter extends EntityBaseBean implements Serializable {
     
