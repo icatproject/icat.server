@@ -66,6 +66,7 @@ import uk.icat3.sessionbeans.search.DatafileSearchLocal;
 import uk.icat3.sessionbeans.search.DatasetSearchLocal;
 import uk.icat3.sessionbeans.search.InvestigationSearchLocal;
 import uk.icat3.sessionbeans.search.KeywordSearchLocal;
+import uk.icat3.sessionbeans.search.ParameterSearchLocal;
 import uk.icat3.sessionbeans.search.SampleSearchLocal;
 import uk.icat3.sessionbeans.util.Constants;
 import uk.icat3.user.UserDetails;
@@ -110,6 +111,8 @@ public class ICAT extends EJBObject implements ICATLocal {
     protected DownloadManagerLocal downloadManagerLocal;
     @EJB
     protected FacilityManagerLocal facilityManagerLocal;
+    @EJB
+    protected ParameterSearchLocal parameterSearchLocal;
     ///////////////////////  End of Inject all the EJBs   ///////////////////////
     /** Creates a new instance of AllOperationsBean */
     public ICAT() {
@@ -2189,6 +2192,47 @@ public class ICAT extends EJBObject implements ICATLocal {
             ParameterSearch... parameters) throws SessionException, ParameterSearchException {
 
         return sampleSearchLocal.searchByParameter(sessionId, parameters);
+    }
+
+    /**
+     * Returns parameters matched by name and units. The search parameters are
+     * insensitive (no different between lowercase or uppercase) and eager (match
+     * the word, LIKE '%name%' behavior).
+     *
+     * @param sessionId Session identification
+     * @param name Parameter name
+     * @param units Parameter units
+     * @param manager Entity manager which handles database
+     * @return Paremeter collection matched by name and units
+     *
+     * @throws SessionException
+     */
+    @WebMethod(operationName = "getParameterByNameUnits")
+    public Collection<Parameter> getParameterByNameUnits(@WebParam(name = "sesssionId")
+    String sesssionId, @WebParam(name = "name")
+    String name, @WebParam(name = "units")
+    String units) throws SessionException {
+        return parameterSearchLocal.getParameterByNameUnits(sesssionId, name, units);
+    }
+
+    /**
+     * Web service operation
+     */
+    @WebMethod(operationName = "getParameterByName")
+    public Collection<Parameter> getParameterByName(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "name")
+    String name) throws SessionException {
+        return parameterSearchLocal.getParameterByName(sessionId, name);
+    }
+
+    /**
+     * Web service operation
+     */
+    @WebMethod(operationName = "getParameterByUnits")
+    public Collection<Parameter> getParameterByUnits(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "units")
+    String units) throws SessionException {
+        return parameterSearchLocal.getParameterByUnits(sessionId, units);
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 }
