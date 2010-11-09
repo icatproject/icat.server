@@ -12,6 +12,8 @@ import uk.icat3.user.User;
  */
 @Local
 public interface UserSessionLocal extends User {
+
+    public abstract boolean isSessionValid(String sessionId);
     
    //signatures extended from User.
   

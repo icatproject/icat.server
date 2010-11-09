@@ -179,6 +179,19 @@ public class ICAT extends EJBObject implements ICATLocal {
 
     }
 
+     @WebMethod()
+    public boolean isSessionValid(
+             @WebParam(name="sessionId") String sessionId) {
+        try
+        {
+         return this.user.isSessionValid(sessionId);
+        }
+        catch(Exception e)
+        {
+            return false;
+        }
+     }
+
     
 
 

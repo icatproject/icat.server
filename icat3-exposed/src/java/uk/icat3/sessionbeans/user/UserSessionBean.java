@@ -9,6 +9,7 @@
 
 package uk.icat3.sessionbeans.user;
 
+import java.util.logging.Level;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -171,5 +172,22 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal, User
         UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
         
         return userManager.getUserDetails(sid, user);
+    }
+
+    /**
+     *
+     * @param sessionId
+     * @return true if session is valid, false otherwise
+     */
+    public boolean isSessionValid(String sessionId) {
+        try {
+            this.getUserIdFromSessionId(sessionId);
+            return true;
+        } catch (SessionException se) {
+            return false;
+        }
+        catch (Exception se) {
+            return false;
+        }
     }
 }
