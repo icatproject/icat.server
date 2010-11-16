@@ -43,7 +43,7 @@ import uk.icat3.util.ParameterValueType;
     @NamedQuery(name = "DatasetParameter.findByUnits", query = "SELECT d FROM DatasetParameter d WHERE d.datasetParameterPK.units = :units"),
     @NamedQuery(name = "DatasetParameter.findByStringValue", query = "SELECT d FROM DatasetParameter d WHERE d.stringValue = :stringValue"),
     @NamedQuery(name = "DatasetParameter.findByNumericValue", query = "SELECT d FROM DatasetParameter d WHERE d.numericValue = :numericValue"),
-//    @NamedQuery(name = "DatesetParameter.findByDateTimeValue", query = "SELECT d FROM DatasetParameter d WHERE d.dateTimeValue = :dateTimeValue"),
+    @NamedQuery(name = "DatesetParameter.findByDateTimeValue", query = "SELECT d FROM DatasetParameter d WHERE d.dateTimeValue = :dateTimeValue"),
     @NamedQuery(name = "DatasetParameter.findByRangeTop", query = "SELECT d FROM DatasetParameter d WHERE d.rangeTop = :rangeTop"),
     @NamedQuery(name = "DatasetParameter.findByRangeBottom", query = "SELECT d FROM DatasetParameter d WHERE d.rangeBottom = :rangeBottom"),
     @NamedQuery(name = "DatasetParameter.findByError", query = "SELECT d FROM DatasetParameter d WHERE d.error = :error"),
@@ -65,9 +65,9 @@ import uk.icat3.util.ParameterValueType;
     @Column(name = "NUMERIC_VALUE")
     private Double numericValue;
 
-//    @Column(name = "DATETIME_VALUE")
-//    @Temporal(TemporalType.TIMESTAMP)
-//    private Date dateTimeValue;
+    @Column(name = "DATETIME_VALUE")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dateTimeValue;
     
     @Column(name = "RANGE_TOP")
     private String rangeTop;
@@ -179,8 +179,7 @@ import uk.icat3.util.ParameterValueType;
      * @return Date in milliseconds.
      */
     public Date getDateTimeValue() {
-//        return dateTimeValue;
-        return null;
+        return dateTimeValue;
     }
 
     /**
@@ -189,7 +188,7 @@ import uk.icat3.util.ParameterValueType;
      * @param dateTimeValue the new date time value
      */
     public void setDateTimeValue(Date dateTimeValue) {
-//        this.dateTimeValue = dateTimeValue;
+        this.dateTimeValue = dateTimeValue;
     }
     
     /**
