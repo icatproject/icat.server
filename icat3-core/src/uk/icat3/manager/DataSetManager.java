@@ -171,7 +171,7 @@ public class DataSetManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      * @return true to avoid erausre name clash with another method
      */
-    public static boolean deleteDataSets(String userId, Collection<Dataset> dataSets, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException {
+    public static boolean deleteDataSetsWithIds(String userId, Collection<Dataset> dataSets, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException {
         log.trace("deleteDataSets(" + userId + ", " + dataSets + ", EntityManager)");
 
         for (Dataset dataSet : dataSets) {

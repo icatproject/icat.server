@@ -83,7 +83,7 @@ public class DataFileManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void deleteDataFiles(String userId, Collection<Long> dataFileIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException {
+    public static void deleteDataFilesWithIds(String userId, Collection<Long> dataFileIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException {
         log.trace("deleteDataFiles(" + userId + ", " + dataFileIds + ", EntityManager)");
 
         for (Long dataFileId : dataFileIds) {

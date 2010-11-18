@@ -71,7 +71,7 @@
          <!-- Log4j properties for all the apps -->
         <copy overwrite="false" file="${basedir}/nbproject/log4j.properties" todir="${sjsas.root}/domains/${sjsas.domain}/config" />
         <!--  Oracle's JDBC driver -->
-        <copy  overwrite="false" todir="${sjsas.root}/domains/${sjsas.domain}/lib/ext">
+        <copy  overwrite="false" todir="${sjsas.root}/domains/${sjsas.domain}/lib/">
            <!--<fileset dir="${basedir}/lib" excludes="**/*commons*.jar, **/*jglobus*.jar" includes="**/*.jar"/>-->
             <fileset file="${basedir}/lib/ojdbc14.jar" />
         </copy>

@@ -19,6 +19,8 @@ REM undefine icatisis_username
 undefine icatisis_password
 undefine externaltable_location
 undefine icatuser_password
+define ICAT = icat
+define TESTICAT = testicat
 define testicat_username = testicat
 define testicat_password = password
 set define ON
@@ -30,6 +32,24 @@ ACCEPT icatisis_password CHAR prompt      'Enter icat password       : '
 ACCEPT icatuser_password CHAR prompt      'Enter icatuser   password       : '
 ACCEPT externaltables_location CHAR prompt 'Enter External tables location : '
 
+connect sys/&sys_password@&database_name as sysdba
+VARIABLE separator varchar2(1);
+DECLARE
+   sepstring  CHAR(100);
+BEGIN
+  select dbms_utility.port_string into sepstring from dual;
+  if substr(sepstring,0,5) = 'Linux' then
+	:separator := '/';
+  else
+	:separator := '\\';
+  end if;
+END;
+/
+column vappidcol new_value SEPPATH noprint
+SELECT :separator vappidcol from dual;
+
+define;
+ACCEPT separator char promt 'hello'
 
 prompt
 prompt ====================================================================
@@ -148,10 +168,10 @@ prompt
 
 
 prompt Creating log directory for icat...
-define log_dir = log/&database_name/icat/
+define log_dir = log&SEPPATH&database_name&SEPPATH&ICAT&SEPPATH
 
 host mkdir log
-host mkdir log/&database_name
+host mkdir log&SEPPATH&database_name
 host mkdir &log_dir
 
 prompt
@@ -263,14 +283,14 @@ prompt
 connect testicat/&testicat_password@&database_name
 undefine log_dir
 
-rem define log_dir = ../testicat/log/
-rem host mkdir ../testicat/log
+rem define log_dir = ..&SEPPATHtesticat&SEPPATHlog&SEPPATH
+rem host mkdir ..&SEPPATHtesticat&SEPPATHlog
 
 prompt Creating log directory for testicat...
-define log_dir = log/&database_name/testicat/
+define log_dir = log&SEPPATH&database_name&SEPPATH&TESTICAT&SEPPATH
 
 host mkdir log
-host mkdir log/&database_name
+host mkdir log&SEPPATH&database_name
 host mkdir &log_dir
 
 REM use script1.sql (as in icat schema installation) to create tables etc, common to all schemas

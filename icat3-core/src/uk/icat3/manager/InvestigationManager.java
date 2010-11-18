@@ -134,7 +134,7 @@ public class InvestigationManager extends ManagerUtil {
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
      */
-    public static void deleteInvestigations(String userId, Collection<Long> investigationIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException {
+    public static void deleteInvestigationsWithIds(String userId, Collection<Long> investigationIds, EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException {
         log.trace("deleteInvestigations(" + userId + ", " + investigationIds + ", EntityManager)");
 
         for (Long investigationId : investigationIds) {
