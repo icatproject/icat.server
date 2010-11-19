@@ -1082,6 +1082,6 @@ public class InvestigationSearch extends ManagerUtil {
      */
     public static Collection<Parameter> listAllParameters(EntityManager manager) {
         log.trace("listAllParameters(EntityManager)");
-        return manager.createNamedQuery(ALL_PARAMETERS).setMaxResults(MAX_QUERY_RESULTSET).getResultList();
+        return manager.createNamedQuery(ALL_PARAMETERS).getResultList();
     }
 }
