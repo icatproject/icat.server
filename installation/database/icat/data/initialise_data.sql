@@ -1,7 +1,7 @@
 Insert into THIS_ICAT
    (FACILITY_SHORT_NAME, FACILITY_LONG_NAME, FACILITY_URL, FACILITY_DESCRIPTION, DAYS_UNTIL_PUBLIC_RELEASE, SEQ_NUMBER, MOD_ID, MOD_TIME, CREATE_ID, CREATE_TIME, DELETED, FACILITY_ACQUIRED)
  Values
-   ('ISIS', 'ANON Pulsed Neutron & Muon Source', 'http://www.anon.ac.uk', 'ANON supports an international community of around 1600 scientists who use neutrons and muons for research in physics, chemistry, materials science, geology, engineering and biology', 1096, 999, 'damian', TO_TIMESTAMP('05/08/2008 14:12:49.0','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', TO_TIMESTAMP('05/08/2008 14:12:49.0','DD/MM/YYYY HH24:MI:SS.FF'), 'N', 'Y');
+   ('ISIS', 'ANON Pulsed Neutron and Muon Source', 'http://www.anon.ac.uk', 'ANON supports an international community of around 1600 scientists who use neutrons and muons for research in physics, chemistry, materials science, geology, engineering and biology', 1096, 999, 'damian', TO_TIMESTAMP('05/08/2008 14:12:49.0','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', TO_TIMESTAMP('05/08/2008 14:12:49.0','DD/MM/YYYY HH24:MI:SS.FF'), 'N', 'Y');
 
 
 

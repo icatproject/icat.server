@@ -13,7 +13,6 @@ connect sys/&sys_password@&database_name as sysdba
 
 DROP USER icat CASCADE;
 DROP USER icatuser CASCADE;
-DROP USER dataportal CASCADE;
 DROP USER testicat CASCADE;
 
 prompt

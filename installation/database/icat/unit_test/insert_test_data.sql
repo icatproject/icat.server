@@ -1138,4 +1138,5 @@ Insert into FACILITY_INSTRUMENT_SCIENTIST Values
 Insert into FACILITY_INSTRUMENT_SCIENTIST Values
   ('MAPS', 'deleted_facility_scientist', 1, TO_TIMESTAMP('02/01/2007 11:52:56.3','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', systimestamp, 'FIRST PROPAGATION', 'N', 'Y');
 
+commit;
 

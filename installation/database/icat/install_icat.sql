@@ -4,9 +4,9 @@ REM runs those scripts.
 
 
 PROMPT
-PROMPT I C A T I S I S   I N S T A L L
+PROMPT I C A T    I N S T A L L
 PROMPT
-PROMPT This script will create ICATISIS schema objects in a named schema in a
+PROMPT This script will create ICAT schema objects in a named schema in a
 PROMPT specified database.  
 PROMPT
 
@@ -14,9 +14,9 @@ PROMPT
 define parameter_datafile_icat_type = isis
 
 undefine database_name
-undefine sis_password
-REM undefine icatisis_username
-undefine icatisis_password
+undefine sys_password
+undefine icat_username
+undefine icat_password
 undefine externaltable_location
 undefine icatuser_password
 define ICAT = icat
@@ -25,11 +25,11 @@ define testicat_username = testicat
 define testicat_password = password
 set define ON
 
-ACCEPT database_name CHAR prompt          'Enter Database Name             : '
-ACCEPT sys_password CHAR hide prompt      'Enter SYS password              : '
-REM ACCEPT icatisis_username CHAR prompt      'Enter ICATISIS schema name      : '
-ACCEPT icatisis_password CHAR prompt      'Enter icat password       : '
-ACCEPT icatuser_password CHAR prompt      'Enter icatuser   password       : '
+ACCEPT database_name CHAR prompt           'Enter Database Name             : '
+ACCEPT sys_password CHAR hide prompt       'Enter SYS password              : '
+REM ACCEPT icat_username CHAR prompt       'Enter ICAT schema name      : '
+ACCEPT icat_password CHAR prompt           'Enter icat password       : '
+ACCEPT icatuser_password CHAR prompt       'Enter icatuser   password       : '
 ACCEPT externaltables_location CHAR prompt 'Enter External tables location : '
 
 connect sys/&sys_password@&database_name as sysdba
@@ -48,8 +48,6 @@ END;
 column vappidcol new_value SEPPATH noprint
 SELECT :separator vappidcol from dual;
 
-define;
-ACCEPT separator char promt 'hello'
 
 prompt
 prompt ====================================================================
@@ -58,8 +56,8 @@ prompt
 
 
 connect sys/&sys_password@&database_name as sysdba
-REM CREATE USER icat PROFILE "DEFAULT" IDENTIFIED BY "&icatisis_password" DEFAULT TABLESPACE "USERS" TEMPORARY TABLESPACE "TEMP" QUOTA UNLIMITED ON "USERS" ACCOUNT UNLOCK;
-CREATE USER icat PROFILE "DEFAULT" IDENTIFIED BY "&icatisis_password" DEFAULT TABLESPACE "USERS" TEMPORARY TABLESPACE "TEMP" QUOTA UNLIMITED ON "USERS" ACCOUNT UNLOCK;
+REM CREATE USER icat PROFILE "DEFAULT" IDENTIFIED BY "&icat_password" DEFAULT TABLESPACE "USERS" TEMPORARY TABLESPACE "TEMP" QUOTA UNLIMITED ON "USERS" ACCOUNT UNLOCK;
+CREATE USER icat PROFILE "DEFAULT" IDENTIFIED BY "&icat_password" DEFAULT TABLESPACE "USERS" TEMPORARY TABLESPACE "TEMP" QUOTA UNLIMITED ON "USERS" ACCOUNT UNLOCK;
 GRANT CREATE DATABASE LINK TO icat;
 GRANT CREATE LIBRARY TO icat;
 GRANT CREATE MATERIALIZED VIEW TO icat;
@@ -156,7 +154,7 @@ GRANT READ ON DIRECTORY external_tables TO testicat;
 
 prompt
 prompt Testing connection...
-connect icat/&icatisis_password@&database_name
+connect icat/&icat_password@&database_name
 
 
 prompt
