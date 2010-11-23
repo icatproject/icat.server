@@ -65,7 +65,7 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = "Dataset.findByModId", query = "SELECT d FROM Dataset d WHERE d.modId = :modId"),
     @NamedQuery(name = Queries.DATASET_FINDBY_UNIQUE, query = Queries.DATASET_FINDBY_UNIQUE_JPQL),
     @NamedQuery(name = Queries.DATASETS_BY_SAMPLES, query = Queries.DATASETS_BY_SAMPLES_JPQL),
-    @NamedQuery(name = Queries.DATASET_FINDBY_NAME_NOTDELECTED, query=Queries.DATASET_FINDBY_NAME_NOTDELETED_JPQL) 
+    @NamedQuery(name = Queries.DATASET_FINDBY_NAME_NOTDELETED, query=Queries.DATASET_FINDBY_NAME_NOTDELETED_JPQL) 
 })
         @XmlRootElement
         @SequenceGenerator(name="DATASET_SEQ",sequenceName="DATASET_ID_SEQ",allocationSize=1)

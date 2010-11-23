@@ -30,6 +30,7 @@ import uk.icat3.investigationmanager.TestManagerUtil;
 import uk.icat3.investigationmanager.TestPublication;
 import uk.icat3.investigationmanager.TestSample;
 import uk.icat3.investigationmanager.TestSampleParameter;
+import uk.icat3.parametersearch.TestAllParameterSearch;
 import uk.icat3.search.TestDatasetSearch;
 import uk.icat3.search.TestInvalidUser;
 import uk.icat3.search.TestInvestigationSearch;
@@ -106,7 +107,8 @@ import uk.icat3.security.TestGateKeeperUpdaterInvestigation;
     TestGateKeeperDownloaderDatafile.class,
     TestGateKeeperIcatAdminDatafile.class,
     TestGateKeeperReaderDatafile.class,
-    TestGateKeeperUpdaterDatafile.class
+    TestGateKeeperUpdaterDatafile.class,
+    TestAllParameterSearch.class
             
 })
         public class TestAll {

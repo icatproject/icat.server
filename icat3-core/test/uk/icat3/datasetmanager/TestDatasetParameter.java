@@ -552,7 +552,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
         Parameter parameter = null;
         switch (type) {
             case NumericValue: {
-                Collection<Parameter> parameters = (Collection<Parameter>) executeListResultCmd("select d from Parameter d where d.numericValue = 'Y' AND d.isDatasetParameter = 'Y'");
+                Collection<Parameter> parameters = (Collection<Parameter>) executeListResultCmd("select d from Parameter d where d.valueType = 'Y' AND d.isDatasetParameter = 'Y'");
                 if (parameters.size() == 0) {
                     log.trace("Adding new parameter");
                     Parameter param = new Parameter("units", "name");
@@ -571,7 +571,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
             }
             break;
             case StringValue: {
-                Collection<Parameter> parameters = (Collection<Parameter>) executeListResultCmd("select d from Parameter d where d.numericValue = 'N' AND d.isDatasetParameter = 'Y'");
+                Collection<Parameter> parameters = (Collection<Parameter>) executeListResultCmd("select d from Parameter d where d.valueType = 'N' AND d.isDatasetParameter = 'Y'");
                 if (parameters.size() == 0) {
                     log.trace("Adding new parameter");
                     Parameter param = new Parameter("units string", "name");
@@ -590,7 +590,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
             }
             break;
             case DateValue: {
-                Collection<Parameter> parameters = (Collection<Parameter>) executeListResultCmd("select d from Parameter d where d.parameterPK.name = 'Date_Time' AND d.numericValue = 'N' AND d.isDatasetParameter = 'Y'");
+                Collection<Parameter> parameters = (Collection<Parameter>) executeListResultCmd("select d from Parameter d where d.parameterPK.name = 'Date_Time' AND d.valueType = 'N' AND d.isDatasetParameter = 'Y'");
                 if (parameters.size() == 0) {
                     log.trace("Adding new parameter");
                     Parameter param = new Parameter("Date_Time", "name");

@@ -183,7 +183,7 @@ public class DatasetSearch {
      */
     public static Collection<Dataset> getDatasetsByName(String userId, String datasetName, EntityManager manager) {
         //Get the list of datasets that match the dataset name
-        Collection<Dataset> datasets = (Collection<Dataset>) manager.createNamedQuery(DATASET_FINDBY_NAME_NOTDELECTED).setParameter("name", datasetName);
+        Collection<Dataset> datasets = (Collection<Dataset>) manager.createNamedQuery(DATASET_FINDBY_NAME_NOTDELETED).setParameter("name", datasetName).getResultList();
 
 
         Collection<Dataset> datasetsPermission = new ArrayList<Dataset>();

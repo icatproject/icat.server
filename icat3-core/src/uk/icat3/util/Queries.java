@@ -522,7 +522,7 @@ public class Queries {
     /**
      * Find dataset by name with authorisation
      */
-    public static final String DATASET_FINDBY_NAME_NOTDELECTED = "Dataset.findByNameNotDeleted";
+    public static final String DATASET_FINDBY_NAME_NOTDELETED = "Dataset.findByNameNotDeleted";
     public static final String DATASET_FINDBY_NAME_NOTDELETED_JPQL = "SELECT i FROM Dataset i WHERE i.name = :name and i.markedDeleted = 'N'";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     

@@ -138,7 +138,7 @@ public class TestDatasetSearch extends BaseTestClassTX {
 
         //TODO dynamic find this, at the moment its one dataset
         assertNotNull("Must not be an null collection of datasets ", datasets);
-        assertEquals("Number of datasets searched for " + VALID_DATASET_NAME + " should be 2", 2, datasets.size());
+        assertEquals("Number of datasets searched for " + VALID_DATASET_NAME + " should be 1", 1, datasets.size());
     }
 
     /**

@@ -558,7 +558,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
         boolean numeric=false;
         if(type==NumericValue) numeric=true;
         if(numeric){
-            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.numericValue = 'Y' AND d.isDatafileParameter = 'Y'");
+            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.valueType = 'Y' AND d.isDatafileParameter = 'Y'");
             if(parameters.size() == 0){
                 log.trace("Adding new parameter");
                 Parameter param = new Parameter("units","name");
@@ -574,7 +574,7 @@ public class TestDatafileParameter extends BaseTestClassTX {
                 parameter = parameters.iterator().next();
             }
         } else {
-            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.numericValue = 'N' AND d.isDatafileParameter = 'Y'");
+            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.valueType = 'N' AND d.isDatafileParameter = 'Y'");
             if(parameters.size() == 0){
                 log.trace("Adding new parameter");
                 Parameter param = new Parameter("units string","name");

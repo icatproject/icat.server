@@ -85,36 +85,36 @@ public class TestSampleParameter extends BaseTestClassTX {
         assertNotNull("Date value must not be null",modified.getDateTimeValue());
     }
 
-    
+
     /**
      * Tests adding a sample parameter of type numeric
      */
     @Test
     public void addSampleParameterNumeric() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sampleParameter of type Numeric to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         SampleParameter validSampleParameter  = getSampleParameter(true, NumericValue);
-        
+
         SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter, VALID_INVESTIGATION_ID, em);
-        
+
         SampleParameter modified = em.find(SampleParameter.class,sampleParameterInserted.getSampleParameterPK()  );
-        
+
         checkSampleParameter(modified);
         assertFalse("Deleted must be false", modified.isDeleted());
         assertNotNull("Must be numeric value", modified.getNumericValue());
         assertNull("String value must be null", modified.getStringValue());
     }
-        
+
     /**
      * Tests creating a file
      */
     @Test
     public void modifySampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         String modifiedError = "unit test error "+random.nextInt();
         //create invalid sampleParameter, no name
-        
+
         SampleParameter modifiedSampleParameter = getSampleParameter(true, NumericValue);
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
         modifiedSampleParameter.setError(modifiedError);
@@ -122,27 +122,27 @@ public class TestSampleParameter extends BaseTestClassTX {
         Sample sample = em.find(Sample.class, VALID_SAMPLE_ID_FOR_INVESTIGATION_ID);
         modifiedSampleParameter.setSample(sample);
         modifiedSampleParameter.setSampleParameterPK(duplicateSampleParameter.getSampleParameterPK());
-        
+
         InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, modifiedSampleParameter, em);
-        
+
         SampleParameter modified = em.find(SampleParameter.class, duplicateSampleParameter.getSampleParameterPK()  );
-        
+
         assertEquals("error must be "+modifiedError+" and not "+modified.getError(), modified.getError(), modifiedError);
-        
+
         checkSampleParameter(modified);
         assertFalse("Deleted must be false", modified.isDeleted());
     }
-    
+
     /**
      * Tests creating a file
      */
     @Test(expected=ValidationException.class)
     public void addDuplicateSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         //create invalid sampleParameter, no name
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
-        
+
         try {
             SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
@@ -151,179 +151,179 @@ public class TestSampleParameter extends BaseTestClassTX {
             throw ex;
         }
     }
-    
+
     /**
      * Tests creating a file
      */
     @Test
     public void deleteSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         SampleParameter validSampleParameter  = getSampleParameterDuplicate(true);
-        
-        
+
+
         InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter,  AccessType.DELETE, em);
-        
+
         SampleParameter modified = em.find(SampleParameter.class,validSampleParameter.getSampleParameterPK());
-        
+
         checkSampleParameter(modified);
         assertTrue("Deleted must be true", modified.isDeleted());
     }
-    
+
     /**
      * Tests creating a file
      */
     @Test
     public void undeleteSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for undeelting sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         SampleParameter validSampleParameter  = getSampleParameterDuplicate(true);
-        
-        
+
+
         InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter,  AccessType.DELETE, em);
-        
+
         SampleParameter modified = em.find(SampleParameter.class,validSampleParameter.getSampleParameterPK());
-        
+
         checkSampleParameter(modified);
         assertTrue("Deleted must be false", !modified.isDeleted());
-        
+
         deleteSampleParameter();
     }
-    
+
     /**
      * Tests creating a file
      */
     @Test(expected=ValidationException.class)
     public void addDeletedSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding deleted sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         //create invalid sampleParameter, no name
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
-        
+
         try {
             SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'unique'", ex.getMessage().contains("unique"));
-            
+
             throw ex;
         }
-        
+
        /* SampleParameter modified = em.find(SampleParameter.class,sampleParameterInserted.getSampleParameterPK()  );
-        
+
         checkSampleParameter(modified);
         assertFalse("Deleted must be false", modified.isDeleted());*/
     }
-    
+
     /**
      * Tests creating a file
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void removeSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         //create invalid sampleParameter, no name
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
         duplicateSampleParameter.setDeleted(false);
-        
+
         try {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, duplicateSampleParameter, AccessType.REMOVE, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            
+
             throw ex;
         }
     }
-    
+
     /**
      * Tests creating a file
      */
     @Test
     public void removeActualSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+ICAT_ADMIN_USER+ " for rmeoving sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         //create invalid sampleParameter, no name
         SampleParameter duplicateSampleParameter = getSampleParameterDuplicate(true);
         duplicateSampleParameter.setDeleted(false);
         duplicateSampleParameter.setCreateId(ICAT_ADMIN_USER);
-        
-        
+
+
         InvestigationManager.deleteInvestigationObject(ICAT_ADMIN_USER, duplicateSampleParameter, AccessType.REMOVE, em);
-        
+
         SampleParameter modified = em.find(SampleParameter.class,duplicateSampleParameter.getSampleParameterPK()  );
-        
+
         assertNull("SampleParameter must not be found in DB "+duplicateSampleParameter, modified);
     }
-    
+
     /**
      * Tests creating a file
      */
     @Test
     public void addSampleParameterNew() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding new sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         SampleParameterPK PK = new SampleParameterPK("silly sample units", "silly sample name", VALID_INVESTIGATION_ID);
         SampleParameter validSampleParameter = new SampleParameter(PK);
         validSampleParameter.setNumericValue(3d);
-        
+
         SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter, VALID_INVESTIGATION_ID, em);
-        
+
         SampleParameter modified = em.find(SampleParameter.class,sampleParameterInserted.getSampleParameterPK()  );
-        
+
         checkSampleParameter(modified);
         assertFalse("Deleted must be false", modified.isDeleted());
         assertNotNull("Must be numeric value", modified.getNumericValue());
         assertNull("String value must be null", modified.getStringValue());
-        
+
         removeActualSampleParameter();
     }
-    
+
     /**
      * Tests creating a file
      */
     @Test(expected=InsufficientPrivilegesException.class)
     public void addSampleParameterInvalidUser() throws ICATAPIException {
         log.info("Testing  user: "+INVALID_USER+ " for adding sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         SampleParameter validSampleParameter  = getSampleParameter(true, NumericValue);
-        
+
         try {
             SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(INVALID_USER, validSampleParameter, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            
+
             throw ex;
         }
     }
-    
+
     /**
      * Tests creating a file
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void addSampleParameterInvalidInvestigation() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sampleParameter to invalid investigation Id");
-        
+
         SampleParameter validSampleParameter  = getSampleParameter(true,NumericValue);
-        
+
         try {
             SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter, random.nextLong(), em);
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
-            
+
             throw ex;
         }
     }
-    
+
     /**
      * Tests creating a file
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void addSampleParameterInvalidSampleId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding sampleParameter to invalid investigation Id");
-        
+
         SampleParameter validSampleParameter  = getSampleParameter(true,NumericValue);
         validSampleParameter.getSampleParameterPK().setSampleId(456787L);
         try {
@@ -331,21 +331,21 @@ public class TestSampleParameter extends BaseTestClassTX {
         } catch (ICATAPIException ex) {
             log.warn("caught: "+ex.getClass()+" "+ex.getMessage());
             assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
-            
+
             throw ex;
         }
     }
-    
+
     /**
      * Tests creating a file
      */
     @Test(expected=ValidationException.class)
     public void addInvalidSampleParameter() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         //create invalid sampleParameter, no name
         SampleParameter invalidSampleParameter = getSampleParameter(false, NumericValue);
-        
+
         try {
             SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidSampleParameter, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
@@ -354,19 +354,19 @@ public class TestSampleParameter extends BaseTestClassTX {
             throw ex;
         }
     }
-    
+
     /**
      * Tests creating a file
      */
     @Test(expected=ValidationException.class)
     public void addInvalidSampleParameter2() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         //create invalid sampleParameter, no name
         SampleParameter invalidSampleParameter = getSampleParameter(true, StringValue);
         //string value only allowed
         invalidSampleParameter.setNumericValue(45d);
-        
+
         try {
             SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidSampleParameter, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
@@ -375,19 +375,19 @@ public class TestSampleParameter extends BaseTestClassTX {
             throw ex;
         }
     }
-    
+
     /**
      * Tests creating a file
      */
     @Test(expected=ValidationException.class)
     public void addInvalidSampleParameter3() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for adding invalid sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         //create invalid sampleParameter, no name
         SampleParameter invalidSampleParameter = getSampleParameter(true, NumericValue);
         //string value only allowed
         invalidSampleParameter.setStringValue("45d");
-        
+
         try {
             SampleParameter sampleParameterInserted = (SampleParameter)InvestigationManager.addInvestigationObject(VALID_USER_FOR_INVESTIGATION, invalidSampleParameter, VALID_INVESTIGATION_ID, em);
         } catch (ICATAPIException ex) {
@@ -396,17 +396,17 @@ public class TestSampleParameter extends BaseTestClassTX {
             throw ex;
         }
     }
-    
+
     /**
      * Tests deleting a file, no Id
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void deleteSampleParameterNoId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for rmeoving sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         SampleParameter validSampleParameter  = getSampleParameter(true, NumericValue);
         validSampleParameter.setSampleParameterPK(null);
-        
+
         try {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter,  AccessType.DELETE, em);
         } catch (ICATAPIException ex) {
@@ -415,17 +415,17 @@ public class TestSampleParameter extends BaseTestClassTX {
             throw ex;
         }
     }
-    
+
     /**
      * Tests deleting a file, no Id
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void removeSampleParameterNoId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         SampleParameter validSampleParameter  = getSampleParameter(true, NumericValue);
         validSampleParameter.setSampleParameterPK(null);
-        
+
         try {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter,  AccessType.REMOVE, em);
         } catch (ICATAPIException ex) {
@@ -434,17 +434,17 @@ public class TestSampleParameter extends BaseTestClassTX {
             throw ex;
         }
     }
-    
+
     /**
      * Tests deleting a file, no Id
      */
     @Test(expected=NoSuchObjectFoundException.class)
     public void updateSampleParameterNoId() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         SampleParameter validSampleParameter  = getSampleParameter(true, NumericValue);
         validSampleParameter.setSampleParameterPK(null);
-        
+
         try {
             InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, validSampleParameter,  em);
         } catch (ICATAPIException ex) {
@@ -453,17 +453,17 @@ public class TestSampleParameter extends BaseTestClassTX {
             throw ex;
         }
     }
-    
+
     /**
      * Tests creating a file
      */
    // @Test(expected=InsufficientPrivilegesException.class)
     public void modifySampleParameterProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for modifying a props sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         //create invalid sampleParameter, no name
         SampleParameter propsSampleParameter = getSampleParameterDuplicate(false);
-        
+
         try {
             InvestigationManager.updateInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsSampleParameter, em);
         } catch (ICATAPIException ex) {
@@ -472,17 +472,17 @@ public class TestSampleParameter extends BaseTestClassTX {
             throw ex;
         }
     }
-    
+
     /**
      * Tests creating a file
      */
     //@Test(expected=InsufficientPrivilegesException.class)
     public void deleteSampleParameterProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for deleting a props sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         //create invalid sampleParameter, no name
         SampleParameter propsSampleParameter = getSampleParameterDuplicate(false);
-        
+
         try {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsSampleParameter, AccessType.DELETE, em);
         } catch (ICATAPIException ex) {
@@ -491,17 +491,17 @@ public class TestSampleParameter extends BaseTestClassTX {
             throw ex;
         }
     }
-    
+
     /**
      * Tests creating a file
      */
     //@Test(expected=InsufficientPrivilegesException.class)
     public void removeSampleParameterProps() throws ICATAPIException {
         log.info("Testing  user: "+VALID_USER_FOR_INVESTIGATION+ " for removing a props sampleParameter to investigation Id: "+VALID_INVESTIGATION_ID);
-        
+
         //create invalid sampleParameter, no name
         SampleParameter propsSampleParameter = getSampleParameterDuplicate(false);
-        
+
         try {
             InvestigationManager.deleteInvestigationObject(VALID_USER_FOR_INVESTIGATION, propsSampleParameter, AccessType.REMOVE, em);
         } catch (ICATAPIException ex) {
@@ -510,7 +510,7 @@ public class TestSampleParameter extends BaseTestClassTX {
             throw ex;
         }
     }
-    
+
     @Test
     public void removeParameter(){
         Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.facilityAcquired = 'N' order by d.modTime desc");
@@ -527,7 +527,7 @@ public class TestSampleParameter extends BaseTestClassTX {
         switch(type){
             case NumericValue:
             {
-            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.numericValue = 'Y' AND d.isSampleParameter = 'Y'");
+            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.valueType = 'Y' AND d.isSampleParameter = 'Y'");
             if(parameters.size() == 0){
                 log.trace("Adding new parameter");
                 Parameter param = new Parameter("units","name");
@@ -548,7 +548,7 @@ public class TestSampleParameter extends BaseTestClassTX {
 
             case StringValue:
             {
-            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.numericValue = 'N' AND d.isSampleParameter = 'Y'");
+            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.parameterPK.name = 'name' AND d.parameterPK.units = 'units string' AND d.valueType = 'N' AND d.isSampleParameter = 'Y'");
             if(parameters.size() == 0){
                 log.trace("Adding new parameter");
                 Parameter param = new Parameter("units string","name");
@@ -569,7 +569,7 @@ public class TestSampleParameter extends BaseTestClassTX {
 
             case DateValue:
             {
-            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.parameterPK.name = 'Date_Time' AND d.numericValue = 'N' AND d.isSampleParameter = 'Y'");
+            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.parameterPK.units = 'Date_Time' AND d.parameterPK.name = 'name' AND d.valueType = 'D' AND d.isSampleParameter = 'Y'");
             if(parameters.size() == 0){
                 log.trace("Adding new parameter");
                 Parameter param = new Parameter("Date_Time","name");

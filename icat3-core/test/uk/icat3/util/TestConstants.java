@@ -30,7 +30,7 @@ public class TestConstants {
 
 
     public final static String VALID_SAMPLE_NAME = "SrF2 calibration  w=-25.3";
-    public final static String VALID_DATASET_NAME = "default"; 
+    public final static String VALID_DATASET_NAME = "Default";
     
     public final static String VALID_FEDID_FOR_INVESTIGATION =  "gjd37";
     public final static String VALID_SURNAME_FOR_INVESTIGATION =  "User"; //from test user

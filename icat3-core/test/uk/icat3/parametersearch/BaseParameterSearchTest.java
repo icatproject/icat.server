@@ -124,7 +124,7 @@ public class BaseParameterSearchTest extends BaseTest {
         Dataset dat = new Dataset();
         dat.setName(name);
         dat.setInvestigation(inv);
-        dat.setDatasetType("test");
+        dat.setDatasetType("experiment_raw");
 
         return DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, dat, em);
     }
@@ -290,6 +290,7 @@ public class BaseParameterSearchTest extends BaseTest {
 
             Parameter time1 = createParameter(ParameterValueType.DATE_AND_TIME, "yyyy-MM-dd HH:mm:ss", "time1",  ElementType.DATAFILE);
             Parameter str1 = createParameter(ParameterValueType.STRING, "str", "string1",  ElementType.DATAFILE);
+            Parameter str2 = createParameter(ParameterValueType.STRING, "strFullScan", "scanType", ElementType.DATAFILE);
 
             removeEntities.add(sp1_1);
             removeEntities.add(ds1_1);
@@ -298,6 +299,7 @@ public class BaseParameterSearchTest extends BaseTest {
             removeEntities.add(time1);
             removeEntities.add(elec);
             removeEntities.add(str1);
+            removeEntities.add(str2);
 
             Parameter df2_1 = createParameter("deg", "datafile2_1",ElementType.DATAFILE);
             Parameter sp2_1 = createParameter("deg", "sample2_1", ElementType.SAMPLE);
