@@ -2,7 +2,7 @@
 <persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
     <!--  This is used for scratch arean for testing, the db will be populated and not be dropped etc -->
     <persistence-unit name="icat3-jaxbPU" transaction-type="RESOURCE_LOCAL">
-        <provider>oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider</provider>
+        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <class>uk.icat3.entity.Publication</class>
         <class>uk.icat3.entity.Facility</class>
         <class>uk.icat3.entity.Sample</class>
@@ -34,22 +34,23 @@
         <class>uk.icat3.entity.TopicList</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
-            <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))"/>
-            <property name="toplink.jdbc.user" value="icat_scratch"/>
-            <property name="toplink.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
-            <property name="toplink.jdbc.password" value="c1sco"/>
-            <!-- Prints out SQL generated from EJBQL -->
-            <property name="toplink.logging.level" value="FINE"/> 
-            <!-- No caching of entity data -->
-            <property name="toplink.cache.shared.default" value="false"/>
-            <property name="toplink.cache.type.default" value="NONE"/>
-            <property name="toplink.cache.size.default" value="0"/>
+         <!-- Prints out SQL generated from EJBQL -->
+            <property name="eclipselink.logging.level" value="SEVERE"/>
+        <!-- No caching of entity data -->
+            <property name="eclipselink.cache.shared.default" value="false"/>
+            <property name="eclipselink.cache.type.default" value="NONE"/>
+            <property name="eclipselink.cache.size.default" value="0"/>
+            <property name="eclipselink.query-results-cache" value="false"/>
+            <property name="eclipselink.jdbc.url" value="jdbc:oracle:thin:@//localhost:1521/XE"/>
+            <property name="eclipselink.jdbc.password" value="password"/>
+            <property name="eclipselink.jdbc.driver" value="oracle.jdbc.OracleDriver"/>
+            <property name="eclipselink.jdbc.user" value="testicat"/>
         </properties>
         
     </persistence-unit>
 
 <persistence-unit name="icat3-apitest" transaction-type="RESOURCE_LOCAL">
-        <provider>oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider</provider>
+        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <class>uk.icat3.entity.Publication</class>
         <class>uk.icat3.entity.Facility</class>
         <class>uk.icat3.entity.Sample</class>
@@ -81,16 +82,17 @@
         <class>uk.icat3.entity.TopicList</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
-            <property name="toplink.jdbc.url" value="jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(HOST=elektra.dl.ac.uk)(PROTOCOL=tcp)(PORT=1521))(CONNECT_DATA=(SID=minerva2)))"/>
-            <property name="toplink.jdbc.user" value="icat_apitest"/>
-            <property name="toplink.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
-            <property name="toplink.jdbc.password" value="bb8isb4ck"/>
-            <!-- Prints out SQL generated from EJBQL -->
-            <property name="toplink.logging.level" value="FINE"/> 
-            <!-- No caching of entity data -->
-            <property name="toplink.cache.shared.default" value="false"/>
-            <property name="toplink.cache.type.default" value="NONE"/>
-            <property name="toplink.cache.size.default" value="0"/>
+         <!-- Prints out SQL generated from EJBQL -->
+            <property name="eclipselink.logging.level" value="SEVERE"/>
+        <!-- No caching of entity data -->
+            <property name="eclipselink.cache.shared.default" value="false"/>
+            <property name="eclipselink.cache.type.default" value="NONE"/>
+            <property name="eclipselink.cache.size.default" value="0"/>
+            <property name="eclipselink.query-results-cache" value="false"/>
+            <property name="eclipselink.jdbc.url" value="jdbc:oracle:thin:@//localhost:1521/XE"/>
+            <property name="eclipselink.jdbc.password" value="password"/>
+            <property name="eclipselink.jdbc.driver" value="oracle.jdbc.OracleDriver"/>
+            <property name="eclipselink.jdbc.user" value="testicat"/>
         </properties>
         
     </persistence-unit>

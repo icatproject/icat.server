@@ -504,7 +504,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
     static Parameter getParameter(boolean numeric){
         Parameter parameter = null;
         if(numeric){
-            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.numericValue = 'Y' AND d.isDatasetParameter = 'Y'");
+            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.valueType = 'Y' AND d.isDatasetParameter = 'Y'");
             if(parameters.size() == 0){
                 log.trace("Adding new parameter");
                 Parameter param = new Parameter("units","name");
@@ -520,7 +520,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
                 parameter = parameters.iterator().next();
             }
         } else {
-            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.numericValue = 'N' AND d.isDatasetParameter = 'Y'");
+            Collection<Parameter> parameters = (Collection<Parameter>)executeListResultCmd("select d from Parameter d where d.valueType = 'N' AND d.isDatasetParameter = 'Y'");
             if(parameters.size() == 0){
                 log.trace("Adding new parameter");
                 Parameter param = new Parameter("units string","name");

@@ -39,7 +39,7 @@
       <!-- Prints out SQL generated from EJBQL -->
       <!-- No caching of entity data -->
       <property name="eclipselink.target-server" value="SunAS9"/>
-      <property name="eclipselink.logging.level" value="FINE"/>
+      <property name="eclipselink.logging.level" value="INFO"/>
       <property name="eclipselink.cache.shared.default" value="false"/>
       <property name="eclipselink.cache.type.default" value="NONE"/>
       <property name="eclipselink.cache.size.default" value="0"/>
@@ -59,7 +59,7 @@
       <property name="eclipselink.cache.shared.default" value="false"/>
       <property name="eclipselink.cache.type.default" value="NONE"/>
       <property name="eclipselink.cache.size.default" value="0"/>
-      <property name="eclipselink.logging.level" value="FINE"/>
+      <property name="eclipselink.logging.level" value="INFO"/>
       <property name="eclipselink.ddl-generation" value="create-tables"/>
       <property name="eclipselink.target-database" value="Oracle"/>
     </properties>
@@ -100,7 +100,7 @@
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <!-- Prints out SQL generated from EJBQL -->
-      <property name="eclipselink.logging.level" value="FINE"/>
+      <property name="eclipselink.logging.level" value="SEVERE"/>
       <!-- No caching of entity data -->
       <property name="eclipselink.cache.shared.default" value="false"/>
       <property name="eclipselink.cache.type.default" value="NONE"/>

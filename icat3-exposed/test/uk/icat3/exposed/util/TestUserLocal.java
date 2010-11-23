@@ -60,5 +60,10 @@ public class TestUserLocal implements UserSessionLocal{
     public UserDetails getUserDetails(String sessionId, String user) throws SessionException, NoSuchUserException{
         throw new SessionException("Invalid getUserDetails");
     }
+
+    @Override
+    public boolean isSessionValid(String sessionId) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }
 

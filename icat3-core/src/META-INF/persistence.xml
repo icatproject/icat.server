@@ -37,7 +37,7 @@
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <!-- Prints out SQL generated from EJBQL -->
-      <property name="eclipselink.logging.level" value="FINE"/>
+      <property name="eclipselink.logging.level" value="SEVERE"/>
       <!-- No caching of entity data -->
       <property name="eclipselink.cache.shared.default" value="false"/>
       <property name="eclipselink.cache.type.default" value="NONE"/>

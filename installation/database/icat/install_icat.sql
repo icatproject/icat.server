@@ -23,6 +23,8 @@ define ICAT = icat
 define TESTICAT = testicat
 define testicat_username = testicat
 define testicat_password = password
+define testicatuser_username = testicatuser
+define testicatuser_password = password
 set define ON
 
 ACCEPT database_name CHAR prompt           'Enter Database Name             : '
@@ -151,6 +153,31 @@ CREATE OR REPLACE DIRECTORY external_tables as '&externaltables_location';
 GRANT READ ON DIRECTORY external_tables TO testicat;
 
 
+prompt
+prompt ====================================================================
+prompt creating user testicatuser
+prompt
+
+CREATE USER testicatuser PROFILE "DEFAULT" IDENTIFIED BY "&testicatuser_password" DEFAULT TABLESPACE "USERS" TEMPORARY TABLESPACE "TEMP" QUOTA UNLIMITED ON "USERS" ACCOUNT UNLOCK;
+GRANT CREATE DATABASE LINK TO testicatuser;
+GRANT CREATE LIBRARY TO testicatuser;
+GRANT CREATE MATERIALIZED VIEW TO testicatuser;
+GRANT CREATE OPERATOR TO testicatuser;
+GRANT CREATE PROCEDURE TO testicatuser;
+GRANT CREATE PUBLIC DATABASE LINK TO testicatuser;
+GRANT CREATE PUBLIC SYNONYM TO testicatuser;
+GRANT CREATE SEQUENCE TO testicatuser;
+GRANT CREATE SESSION TO testicatuser;
+GRANT CREATE SYNONYM TO testicatuser;
+GRANT CREATE TABLE TO testicatuser;
+GRANT CREATE TRIGGER TO testicatuser;
+GRANT CREATE TYPE TO testicatuser;
+GRANT CREATE VIEW TO testicatuser;
+GRANT UNLIMITED TABLESPACE TO testicatuser;
+GRANT "CONNECT" TO testicatuser;
+GRANT "PLUSTRACE" TO testicatuser;
+GRANT "RESOURCE" TO testicatuser;
+GRANT CREATE JOB TO testicatuser;
 
 prompt
 prompt Testing connection...
