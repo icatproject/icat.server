@@ -5,6 +5,7 @@ import javax.ejb.Local;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileFormat;
 import uk.icat3.exceptions.ParameterSearchException;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterCondition;
@@ -22,9 +23,9 @@ public interface DatafileSearchLocal {
 
     Collection<DatafileFormat> listDatafileFormats(String sessionId) throws SessionException;
 
-    Collection<Datafile> searchByParameterCondition(String sessionId, ParameterCondition logicalCondition) throws SessionException, ParameterSearchException;
+    Collection<Datafile> searchByParameterCondition(String sessionId, ParameterCondition logicalCondition) throws SessionException, ParameterSearchException, RestrictionException;
 
-    Collection<Datafile> searchByParameter(String sessionId, ParameterSearch... parameters) throws SessionException, ParameterSearchException;
+    Collection<Datafile> searchByParameter(String sessionId, ParameterSearch... parameters) throws SessionException, ParameterSearchException, RestrictionException;
 
-    Collection<Datafile> searchByParameterComparison(String sessionId, ParameterComparisonCondition... parameters) throws SessionException, ParameterSearchException;
+    Collection<Datafile> searchByParameterComparison(String sessionId, ParameterComparisonCondition... parameters) throws SessionException, ParameterSearchException, RestrictionException;
 }

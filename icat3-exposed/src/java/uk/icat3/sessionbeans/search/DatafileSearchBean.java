@@ -22,6 +22,7 @@ import javax.xml.ws.ResponseWrapper;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileFormat;
 import uk.icat3.exceptions.ParameterSearchException;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
@@ -29,6 +30,8 @@ import uk.icat3.search.parameter.ParameterCondition;
 import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
+import uk.icat3.util.DatafileInclude;
+import uk.icat3.util.Queries;
 
 /**
  *
@@ -103,15 +106,15 @@ public class DatafileSearchBean extends EJBObject implements DatafileSearchLocal
     }
 
     @Override
-    public Collection<Datafile> searchByParameterCondition(String sessionId, ParameterCondition logicalCondition) throws SessionException, ParameterSearchException {
+    public Collection<Datafile> searchByParameterCondition(String sessionId, ParameterCondition logicalCondition) throws SessionException, ParameterSearchException, RestrictionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
-        return DatafileSearch.searchByParameterCondition(userId, logicalCondition, manager);
+        return DatafileSearch.searchByParameterCondition(userId, logicalCondition, Queries.NO_RESTRICTION, DatafileInclude.NONE, manager);
     }
 
     @Override
-    public Collection<Datafile> searchByParameter(String sessionId, ParameterSearch... parameters) throws SessionException, ParameterSearchException {
+    public Collection<Datafile> searchByParameter(String sessionId, ParameterSearch... parameters) throws SessionException, ParameterSearchException, RestrictionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
@@ -119,11 +122,11 @@ public class DatafileSearchBean extends EJBObject implements DatafileSearchLocal
         for (ParameterSearch p : parameters) {
             list.add(p);
         }
-        return DatafileSearch.searchByParameterList(userId, list, manager);
+        return DatafileSearch.searchByParameterList(userId, list, Queries.NO_RESTRICTION, DatafileInclude.NONE, manager);
     }
 
     @Override
-    public Collection<Datafile> searchByParameterComparison(String sessionId, ParameterComparisonCondition... parameters) throws SessionException, ParameterSearchException {
+    public Collection<Datafile> searchByParameterComparison(String sessionId, ParameterComparisonCondition... parameters) throws SessionException, ParameterSearchException, RestrictionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
@@ -131,6 +134,6 @@ public class DatafileSearchBean extends EJBObject implements DatafileSearchLocal
         for (ParameterComparisonCondition p : parameters) {
             list.add(p);
         }
-        return DatafileSearch.searchByParameterComparisonList(userId, list, manager);
+        return DatafileSearch.searchByParameterComparisonList(userId, list, Queries.NO_RESTRICTION, DatafileInclude.NONE, manager);
     }
 }
