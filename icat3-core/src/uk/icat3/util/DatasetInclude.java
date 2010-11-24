@@ -25,7 +25,7 @@ public enum DatasetInclude {
     DATASET_PARAMETERS_ONLY,
     DATASET_DATAFILES_AND_PARAMETERS,
     DATASET_ID_ONLY,
-    DATASET_NUMBER_OF_RESULTS,
+//    DATASET_NUMBER_OF_RESULTS,
     NONE;
     
     public boolean isDatafiles(){
@@ -63,9 +63,9 @@ public enum DatasetInclude {
      * the objects returned will a number which represent the number of results.
      * @return
      */
-    public boolean isDatasetNumberOfResults () {
-        if (this == DatasetInclude.DATASET_NUMBER_OF_RESULTS)
-            return true;
-        return false;
-    }
+//    public boolean isDatasetNumberOfResults () {
+//        if (this == DatasetInclude.DATASET_NUMBER_OF_RESULTS)
+//            return true;
+//        return false;
+//    }
 }
