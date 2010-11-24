@@ -59,6 +59,7 @@ import uk.icat3.security.TestGateKeeperUpdaterInvestigation;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    TestAllParameterSearchRestriction.class,
     TestInvestigation.class,
     TestInvestigator.class,
     TestKeyword.class,

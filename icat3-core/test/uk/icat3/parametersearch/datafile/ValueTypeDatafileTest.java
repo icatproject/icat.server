@@ -17,11 +17,14 @@ import org.junit.Test;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.ParameterPK;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterType;
 import uk.icat3.search.parameter.util.ParameterSearch;
+import uk.icat3.util.DatafileInclude;
+import uk.icat3.util.Queries;
 
 /**
  *
@@ -32,10 +35,10 @@ public class ValueTypeDatafileTest extends BaseParameterSearchTest {
     /**
      * Test Between comparator search
      *
-     * @throws ParameterSearchException
+     * @throws ParameterSearchException, RestrictionException
      */
     @Test
-    public void between () throws ParameterSearchException {
+    public void between () throws ParameterSearchException, RestrictionException {
 
         // Get the parameter, manually or get from a service
         Parameter datfile = new Parameter(new ParameterPK("deg", "datafile1"));
@@ -57,17 +60,17 @@ public class ValueTypeDatafileTest extends BaseParameterSearchTest {
         comp1.setNumericValueRight(new Double (4));
 
         List<Datafile> ld = (List<Datafile>) DatafileSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, Queries.NO_RESTRICTION, DatafileInclude.NONE, em);
         assertTrue("Results of investigations should be 1 not " + ld.size(), (ld.size() == 1));
     }
 
     /**
      * Test datetime parameter search
      * 
-     * @throws ParameterSearchException
+     * @throws ParameterSearchException, RestrictionException
      */
     @Test
-    public void dateTime () throws ParameterSearchException {
+    public void dateTime () throws ParameterSearchException, RestrictionException {
         // Get the parameter, manually or get from a service
         Parameter datfile = new Parameter(new ParameterPK("yyyy-MM-dd HH:mm:ss", "time1"));
 
@@ -88,17 +91,17 @@ public class ValueTypeDatafileTest extends BaseParameterSearchTest {
         comp1.setDatetimeValueRight("2010-10-10 00:00:00");
 
         List<Datafile> ld = (List<Datafile>) DatafileSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, Queries.NO_RESTRICTION, DatafileInclude.NONE, em);
         assertTrue("Results of investigations should be 1 not " + ld.size(), (ld.size() == 1));
     }
 
     /**
      * Test stringdatetime value for datetime parameter search
      *
-     * @throws ParameterSearchException
+     * @throws ParameterSearchException, RestrictionException
      */
     @Test
-    public void stringDateTime () throws ParameterSearchException {
+    public void stringDateTime () throws ParameterSearchException, RestrictionException {
         // Get the parameter, manually or get from a service
         Parameter datfile = new Parameter(new ParameterPK("yyyy-MM-dd HH:mm:ss", "time1"));
 
@@ -119,7 +122,7 @@ public class ValueTypeDatafileTest extends BaseParameterSearchTest {
 //        comp1.setValueRight(new Double (4));
 
         List<Datafile> ld = (List<Datafile>) DatafileSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, Queries.NO_RESTRICTION, DatafileInclude.NONE, em);
 
         assertTrue("Results of investigations should be 1 not " + ld.size(), (ld.size() == 1));
     }
@@ -127,10 +130,10 @@ public class ValueTypeDatafileTest extends BaseParameterSearchTest {
     /**
      * Test string value parameter search
      *
-     * @throws ParameterSearchException
+     * @throws ParameterSearchException, RestrictionException
      */
     @Test
-    public void stringValue () throws ParameterSearchException {
+    public void stringValue () throws ParameterSearchException, RestrictionException {
         // Get the parameter manually or get from a service
         Parameter datfile = new Parameter(new ParameterPK("str", "string1"));
 
@@ -151,7 +154,7 @@ public class ValueTypeDatafileTest extends BaseParameterSearchTest {
 //        comp1.setValueRight(new Double (4));
 
         List<Datafile> ld = (List<Datafile>) DatafileSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, Queries.NO_RESTRICTION, DatafileInclude.NONE, em);
 
         assertTrue("Results of investigations should be 1 not " + ld.size(), (ld.size() == 1));
     }
@@ -159,10 +162,10 @@ public class ValueTypeDatafileTest extends BaseParameterSearchTest {
     /**
      * Test numeric value parameter search.
      *
-     * @throws ParameterSearchException
+     * @throws ParameterSearchException, RestrictionException
      */
     @Test
-    public void numericValue () throws ParameterSearchException {
+    public void numericValue () throws ParameterSearchException, RestrictionException {
         // Get the parameter manually or get from a service
         Parameter datfile = new Parameter(new ParameterPK("str", "string1"));
 
@@ -180,10 +183,9 @@ public class ValueTypeDatafileTest extends BaseParameterSearchTest {
         // Add the value to compare
         comp1.setNumericValue(21);
         // Add a second value if needed (only for BETWEEN)
-//        comp1.setValueRight(new Double (4));
 
         List<Datafile> ld = (List<Datafile>) DatafileSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, Queries.NO_RESTRICTION, DatafileInclude.NONE, em);
 
         assertTrue("Results of investigations should be 1 not " + ld.size(), (ld.size() == 1));
     }

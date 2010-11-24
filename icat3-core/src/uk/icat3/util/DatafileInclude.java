@@ -20,6 +20,7 @@ public enum DatafileInclude {
     DATAFILE_PARAMETERS,
     RELATED_DATAFILES,
     ALL,
+    DATAFILE_ID_ONLY,
     NONE;
     
     public boolean isDatafileParameters(){
@@ -30,6 +31,12 @@ public enum DatafileInclude {
     public boolean isRelatedDatafiles(){
         if(this == DatafileInclude.RELATED_DATAFILES || this == DatafileInclude.ALL) return true;
         else return false;
-    }    
+    }
+
+    public boolean isDatafileId () {
+        if (this == DATAFILE_ID_ONLY)
+            return true;
+        return false;
+    }
   
 }

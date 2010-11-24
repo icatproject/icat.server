@@ -22,6 +22,10 @@ import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.DatevalueFormatException;
 import uk.icat3.exceptions.NoDatetimeComparatorException;
 import uk.icat3.exceptions.NumericvalueException;
+import uk.icat3.exceptions.RestrictionEmptyListException;
+import uk.icat3.exceptions.RestrictionINException;
+import uk.icat3.exceptions.RestrictionNullException;
+import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterCondition;
 import uk.icat3.exceptions.EmptyListParameterException;
@@ -35,12 +39,17 @@ import uk.icat3.exceptions.NoElementTypeException;
 import uk.icat3.exceptions.NullParameterException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.ParameterSearchException;
+import uk.icat3.manager.ManagerUtil;
+import uk.icat3.restrictions.RestrictionCondition;
+import uk.icat3.restrictions.RestrictionType;
+import uk.icat3.restrictions.util.RestrictionUtil;
 import uk.icat3.search.parameter.util.ExtractedJPQL;
 import uk.icat3.search.parameter.util.ParameterSearchUtilSingleton;
 import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.AccessType;
+import uk.icat3.util.DatafileInclude;
 import static uk.icat3.util.Queries.*;
 /**
  * Searchs on the datafiles for run number on the datafile parameter table.
@@ -182,21 +191,42 @@ public class DatafileSearch {
      * @throws NoParametersException
      * @throws ParameterSearchException
      */
-    private static Collection<Datafile> searchByParameterImpl(String userId, ExtractedJPQL ejpql, int startIndex, int numberResults, EntityManager manager) throws  NoSearchableParameterException, ParameterNoExistsException, NoParametersException, NoParameterTypeException {
+    private static Collection<Datafile> searchByParameterImpl(String userId, ExtractedJPQL ejpql, RestrictionUtil restricion, DatafileInclude include, int startIndex, int numberResults, EntityManager manager) throws  NoSearchableParameterException, ParameterNoExistsException, NoParametersException, NoParameterTypeException {
         try {
             log.trace("searchByParameter(" + ", " + ejpql.getCondition() + ", " + startIndex + ", " + numberResults + ", EntityManager)");
 
-            String jpql = RETURN_ALL_DATAFILES_JPQL + ", " + ejpql.getParametersJPQL(ElementType.DATAFILE) + QUERY_USERS_DATAFILES_JPQL + " AND " + ejpql.getCondition();
+            // Return type
+            String returnJPQL = RETURN_ALL_DATAFILES_JPQL;
+            // Return ids
+            if (include == DatafileInclude.DATAFILE_ID_ONLY)
+                returnJPQL = RETURN_ALL_DATAFILES_ID_JPQL;
+//            else if (include == DatafileInclude.DATASET_ONLY)
+//                returnJPQL = RETURN_ALL_DATASETS_JPQL;
+//            else if (include == DatafileInclude.DATASET_NUMBER_OF_RESULTS)
+//                returnJPQL = RETURN_DATASET_COUNT_RESULT_JPQL;
+
+            String restrictionParam = "";
+            if (restricion.isContainDatafileAttributes() && ejpql.getDatafileParameter().isEmpty())
+                restrictionParam += ", IN(i.datafileCollection) df";
+            if (restricion.isContainSampleAttributes() && ejpql.getSampleParameter().isEmpty())
+                restrictionParam += ", IN(i.investigation.sampleCollection) sample";
+
+            String jpql =  returnJPQL + restrictionParam + ", " + ejpql.getParametersJPQL(ElementType.DATAFILE) + QUERY_USERS_DATAFILES_JPQL + " AND " + ejpql.getCondition();
             Query q = manager.createQuery(jpql);
             for (Entry<String, Object> e : ejpql.getAllJPQLParameter().entrySet()) {
                 q.setParameter(e.getKey(), e.getValue());
             }
             q.setParameter("objectType", ElementType.DATASET);
             q.setParameter("userId", userId);
-            if (numberResults < 0)
-                return q.setMaxResults(MAX_QUERY_RESULTSET).getResultList();
-            else 
-                return q.setMaxResults(numberResults).setFirstResult(startIndex).getResultList();
+            // Object returns and check number of results
+            Collection<Datafile> res = ManagerUtil.getResultList (q, startIndex, numberResults);
+            // Return is a Collection of Long
+            if (include == DatafileInclude.DATAFILE_ID_ONLY)
+                return res;
+            // Add include options
+            ManagerUtil.getDatafileInformation (res, include);
+            // Return resutl.
+            return res;
             
         } catch (NoElementTypeException ex) {
             java.util.logging.Logger.getLogger(DatafileSearch.class.getName()).log(Level.SEVERE, null, ex);
@@ -228,11 +258,12 @@ public class DatafileSearch {
      * @throws NumericvalueException
      * @throws DatevalueFormatException
      */
-     public static Collection<Datafile> searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoNumericComparatorException, NoStringComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException  {
+     public static Collection<Datafile> searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, RestrictionCondition restrCond, DatafileInclude include, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoNumericComparatorException, NoStringComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException  {
         
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLComparators (listComparators, manager);
+        RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATAFILE);
 
-        return searchByParameterImpl(userId, ejpql, startIndex, numberResults, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, startIndex, numberResults, manager);
     }
 
      /**
@@ -258,11 +289,12 @@ public class DatafileSearch {
      * @throws NumericvalueException
      * @throws DatevalueFormatException
      */
-     public static Collection<Datafile> searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoNumericComparatorException, NoStringComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException  {
+     public static Collection<Datafile> searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, RestrictionCondition restrCond, DatafileInclude include, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoNumericComparatorException, NoStringComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException  {
 
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLComparators (listComparators, manager);
+        RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATAFILE);
 
-        return searchByParameterImpl(userId, ejpql, -1, -1, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, -1, -1, manager);
     }
 
      /**
@@ -288,10 +320,11 @@ public class DatafileSearch {
       * @throws NumericvalueException
       * @throws DatevalueFormatException
       */
-     public static Collection<Datafile> searchByParameterCondition(String userId, ParameterCondition parameterOperable, int startIndex, int numberResults, EntityManager manager) throws NoParametersException, EmptyOperatorException, NullParameterException, NoSearchableParameterException, NoStringComparatorException, NoNumericComparatorException, NoParameterTypeException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
+     public static Collection<Datafile> searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restrCond, DatafileInclude include, int startIndex, int numberResults, EntityManager manager) throws NoParametersException, EmptyOperatorException, NullParameterException, NoSearchableParameterException, NoStringComparatorException, NoNumericComparatorException, NoParameterTypeException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable, manager);
+        RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATAFILE);
 
-        return searchByParameterImpl(userId, ejpql, startIndex, numberResults, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, startIndex, numberResults, manager);
     }
 
      /**
@@ -314,10 +347,11 @@ public class DatafileSearch {
       * @throws NumericvalueException
       * @throws DatevalueFormatException
       */
-    public static Collection<Datafile> searchByParameterCondition(String userId, ParameterCondition parameterOperable, EntityManager manager) throws EmptyOperatorException, NullParameterException, NoSearchableParameterException, ParameterNoExistsException, NoParametersException, NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
+    public static Collection<Datafile> searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restrCond, DatafileInclude include, EntityManager manager) throws EmptyOperatorException, NullParameterException, NoSearchableParameterException, ParameterNoExistsException, NoParametersException, NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable, manager);
+        RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATAFILE);
 
-        return searchByParameterImpl(userId, ejpql, -1, -1, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, -1, -1, manager);
     }
 
     /**
@@ -337,10 +371,10 @@ public class DatafileSearch {
      * @throws ParameterNoExistsException
      * @throws NoParametersException
      */
-    public static Collection<Datafile> searchByParameterList(String userId, List<ParameterSearch> listParam, int startIndex, int numberResults, EntityManager manager) throws NoParameterTypeException, EmptyListParameterException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException {
+    public static Collection<Datafile> searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restrCond, DatafileInclude include, int startIndex, int numberResults, EntityManager manager) throws NoParameterTypeException, EmptyListParameterException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException, DatevalueException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam, manager);
-
-        return searchByParameterImpl(userId, ejpql, startIndex, numberResults, manager);
+        RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATAFILE);
+        return searchByParameterImpl(userId, ejpql, restric, include, startIndex, numberResults, manager);
     }
 
     /**
@@ -358,9 +392,10 @@ public class DatafileSearch {
      * @throws ParameterNoExistsException
      * @throws NoParametersException
      */
-    public static Collection<Datafile> searchByParameterList(String userId, List<ParameterSearch> listParam, EntityManager manager) throws NoParameterTypeException, EmptyListParameterException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException {
+    public static Collection<Datafile> searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restrCond, DatafileInclude include, EntityManager manager) throws NoParameterTypeException, EmptyListParameterException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException, DatevalueException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam, manager);
+        RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATAFILE);
 
-        return searchByParameterImpl(userId, ejpql, -1, 1, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, -1, 1, manager);
     }
 }

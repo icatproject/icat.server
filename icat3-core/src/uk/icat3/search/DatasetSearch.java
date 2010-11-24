@@ -27,6 +27,10 @@ import uk.icat3.exceptions.NoDatetimeComparatorException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
+import uk.icat3.exceptions.RestrictionEmptyListException;
+import uk.icat3.exceptions.RestrictionINException;
+import uk.icat3.exceptions.RestrictionNullException;
+import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.manager.ManagerUtil;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterCondition;
@@ -39,6 +43,9 @@ import uk.icat3.exceptions.NoParametersException;
 import uk.icat3.exceptions.NoSearchableParameterException;
 import uk.icat3.exceptions.NoStringComparatorException;
 import uk.icat3.exceptions.NullParameterException;
+import uk.icat3.restrictions.RestrictionCondition;
+import uk.icat3.restrictions.RestrictionType;
+import uk.icat3.restrictions.util.RestrictionUtil;
 import uk.icat3.search.parameter.util.ExtractedJPQL;
 import uk.icat3.search.parameter.util.ParameterSearchUtilSingleton;
 import uk.icat3.search.parameter.util.ParameterSearch;
@@ -218,26 +225,67 @@ public class DatasetSearch {
      * @throws NoParametersException
      * @throws NoParameterTypeException
      */
-    private static Collection<Dataset> searchByParameterImpl(String userId, ExtractedJPQL ejpql, int startIndex, int numberResults, EntityManager manager) throws ParameterNoExistsException, NoSearchableParameterException, NoParametersException, NoParameterTypeException {
+    private static Collection searchByParameterImpl(String userId, ExtractedJPQL ejpql, RestrictionUtil restricion, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws ParameterNoExistsException, NoSearchableParameterException, NoParametersException, NoParameterTypeException {
         try {
             log.trace("searchByParameter(" + ", " + ejpql.getCondition() + ", " + startIndex + ", " + numberResults + ", EntityManager)");
 
-            String jpql = RETURN_ALL_DATASETS_JPQL + ", " + ejpql.getParametersJPQL(ElementType.DATASET) + QUERY_USERS_DATASETS_JPQL + " AND " + ejpql.getCondition();
-            Query q = manager.createQuery(jpql);
+            // Return type
+            String returnJPQL = RETURN_ALL_DATASETS_JPQL;
+            // Return ids
+            if (include == DatasetInclude.DATASET_ID_ONLY)
+                returnJPQL = RETURN_ALL_DATASETS_ID_JPQL;
+//            else if (include == DatasetInclude.DATASET_ONLY)
+//                returnJPQL = RETURN_ALL_DATASETS_JPQL;
+//            else if (include == DatasetInclude.DATASET_NUMBER_OF_RESULTS)
+//                returnJPQL = RETURN_DATASET_COUNT_RESULT_JPQL;
+
+            String restrictionParam = "";
+            if (restricion.isContainDatafileAttributes() && ejpql.getDatafileParameter().isEmpty())
+                restrictionParam += ", IN(i.datafileCollection) df";
+            if (restricion.isContainSampleAttributes() && ejpql.getSampleParameter().isEmpty())
+                restrictionParam += ", IN(i.investigation.sampleCollection) sample";
+
+            String jpql = restrictionParam + ", " + ejpql.getParametersJPQL(ElementType.DATASET)
+                    + QUERY_USERS_DATASETS_JPQL + " AND " + ejpql.getCondition();
+            
+            if (!restricion.isEmpty())
+                jpql += " AND " + restricion.getSentenceJPQL();
+
+            Query q = manager.createQuery(returnJPQL + jpql);
+            Query qCount = manager.createQuery(RETURN_DATASET_COUNT_RESULT_JPQL + jpql);
             for (Entry<String, Object> e : ejpql.getAllJPQLParameter().entrySet()) {
                 q.setParameter(e.getKey(), e.getValue());
+                qCount.setParameter(e.getKey(), e.getValue());
             }
+
+            for (Entry<String, Object> e : restricion.getJpqlParameter().entrySet()) {
+                q.setParameter(e.getKey(), e.getValue());
+                qCount.setParameter(e.getKey(), e.getValue());
+            }
+            
             q.setParameter("objectType", ElementType.DATASET);
             q.setParameter("userId", userId);
-            if (numberResults < 0) {
-                return q.setMaxResults(MAX_QUERY_RESULTSET).getResultList();
-            } else {
-                return q.setMaxResults(numberResults).setFirstResult(startIndex).getResultList();
-            }
+            qCount.setParameter("objectType", ElementType.DATASET);
+            qCount.setParameter("userId", userId);
+            // Object returns and check number of results
+//            ICATList res = (ICATList) ManagerUtil.getResultList (q, startIndex, numberResults);
+            Collection res = ManagerUtil.getResultList (q, startIndex, numberResults);
+//            if (include == DatasetInclude.DATASET_NUMBER_OF_RESULTS)
+//                res.setRealResults((Integer)qCount.getSingleResult());
+            
+            // Return type is a Collection of Long
+            if (include == DatasetInclude.DATASET_ID_ONLY)
+                return res;
+
+            // Check if the dataset should include other objects (Datafiles, Parameters)
+            ManagerUtil.getDatasetInformation(userId, res, include, manager);
+
+            return res;
+            
         } catch (NoElementTypeException ex) {
             java.util.logging.Logger.getLogger(DatasetSearch.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return new ArrayList<Dataset>();
+        return new ArrayList();
     }
 
     /**
@@ -263,11 +311,12 @@ public class DatasetSearch {
      * @throws NumericvalueException
      * @throws DatevalueFormatException
      */
-     public static Collection<Dataset> searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
+     public static Collection searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, RestrictionCondition restrCond, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
 
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLComparators (listComparators, manager);
+        RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATASET);
 
-        return searchByParameterImpl(userId, ejpql, startIndex, numberResults, manager);
+        return (Collection) searchByParameterImpl(userId, ejpql, restric, include, startIndex, numberResults, manager);
     }
 
      /**
@@ -293,8 +342,8 @@ public class DatasetSearch {
      * @throws NumericvalueException
      * @throws DatevalueFormatException
      */
-     public static Collection<Dataset> searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
-        return searchByParameterComparisonList(userId, listComparators, -1, -1, manager);
+     public static Collection searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, RestrictionCondition restrCond, DatasetInclude include, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
+        return searchByParameterComparisonList(userId, listComparators, restrCond, include, -1, -1, manager);
     }
 
      /**
@@ -320,10 +369,11 @@ public class DatasetSearch {
       * @throws DatevalueFormatException
       * @see ParameterCondition
       */
-     public static Collection<Dataset> searchByParameterCondition(String userId, ParameterCondition parameterOperable, int startIndex, int numberResults, EntityManager manager) throws NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, EmptyOperatorException, NoParametersException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
+     public static Collection searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restrCond, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, EmptyOperatorException, NoParametersException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable, manager);
+        RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATASET);
 
-        return searchByParameterImpl(userId, ejpql, startIndex, numberResults, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, startIndex, numberResults, manager);
     }
 
      /**
@@ -347,10 +397,10 @@ public class DatasetSearch {
       * @throws NumericvalueException
       * @throws DatevalueFormatException
       */
-    public static Collection<Dataset> searchByParameterCondition(String userId, ParameterCondition parameterOperable, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, EmptyOperatorException, NoParametersException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
+    public static Collection searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restrCond, DatasetInclude include, EntityManager manager) throws NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, EmptyOperatorException, NoParametersException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable, manager);
-
-        return searchByParameterImpl(userId, ejpql, -1, -1, manager);
+        RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATASET);
+        return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
 
     /**
@@ -370,10 +420,10 @@ public class DatasetSearch {
      * @throws ParameterNoExistsException
      * @throws NoParametersException
      */
-    public static Collection<Dataset> searchByParameterList(String userId, List<ParameterSearch> listParam, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException {
+    public static Collection searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restrCond, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, RestrictionEmptyListException, DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam, manager);
-
-        return searchByParameterImpl(userId, ejpql, startIndex, numberResults, manager);
+        RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATASET);
+        return searchByParameterImpl(userId, ejpql, restric, include, startIndex, numberResults, manager);
     }
 
     /**
@@ -391,10 +441,11 @@ public class DatasetSearch {
      * @throws ParameterNoExistsException
      * @throws NoParametersException
      */
-    public static Collection<Dataset> searchByParameterList(String userId, List<ParameterSearch> listParam, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException {
+    public static Collection searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restrCond, DatasetInclude include, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, RestrictionEmptyListException, DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam, manager);
-
-        return searchByParameterImpl(userId, ejpql, -1, 1, manager);
+        RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATASET);
+        
+        return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
     
 }

@@ -897,4 +897,37 @@ public class ManagerUtil {
 
         return true;
     }
+
+    /**
+     * Set the number of the results and return the result.
+     *
+     * @param q Query
+     * @param startIndex Start index
+     * @param numberResults Number of results
+     * @return
+     */
+    public static Collection getResultList(Query q, int startIndex, int numberResults) {
+        if (numberResults == Queries.NO_PAGINATION)
+            return q.setMaxResults(Queries.MAX_QUERY_RESULTSET).getResultList();
+        else if (numberResults == Queries.NO_LIMITED_RESULTS)
+            return q.getResultList();
+        else
+            return q.setMaxResults(numberResults).setFirstResult(startIndex).getResultList();
+    }
+
+    /**
+     * Return the object with the include options
+     * 
+     * @param res Collection of datafiles
+     * @param datafileInclude Include options
+     */
+    public static void getDatafileInformation(Collection<Datafile> res, DatafileInclude datafileInclude) {
+        if (datafileInclude.isDatafileParameters()) {
+            for (Datafile d : res)
+                d.getDatafileParameterCollection().size();
+        }
+        if (datafileInclude.isRelatedDatafiles())
+            for (Datafile d : res)
+                d.getRelatedDatafilesCollection().size();
+    }
 }

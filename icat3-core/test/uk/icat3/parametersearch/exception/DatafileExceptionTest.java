@@ -31,6 +31,10 @@ import uk.icat3.entity.ParameterPK;
 import static org.junit.Assert.*;
 import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
+import uk.icat3.exceptions.RestrictionEmptyListException;
+import uk.icat3.exceptions.RestrictionINException;
+import uk.icat3.exceptions.RestrictionNullException;
+import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
@@ -38,7 +42,9 @@ import uk.icat3.search.parameter.ParameterType;
 import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.search.DatafileSearch;
+import uk.icat3.util.DatafileInclude;
 import uk.icat3.util.LogicalOperator;
+import uk.icat3.util.Queries;
 
 /**
  *
@@ -59,7 +65,17 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             pv3.getParam().setSearchable("N");
             lp.add(pv3);
             lp.add(pv4);
-            DatafileSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
+            DatafileSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, DatafileInclude.NONE, 1, -1, em);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
@@ -93,8 +109,16 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             comp1.setComparator(ComparisonOperator.START_WITH);
             comp1.setNumericValue(new Double (3.14));
             lc.add(comp1);
-            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
+            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, DatafileInclude.NONE, -1, -1, em);
 
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoDatetimeComparatorException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
@@ -139,7 +163,15 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             op1.add(op2);
             op1.add(op1);
             List<Datafile> li = (List<Datafile>) DatafileSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, DatafileInclude.NONE, 1, -1, em);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoDatetimeComparatorException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
@@ -184,7 +216,15 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             comp1.setNumericValue(new Double (3.14));
 
             lc.add(comp1);
-            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
+            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, DatafileInclude.NONE, -1, -1, em);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoDatetimeComparatorException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
@@ -230,7 +270,15 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             comp1.setStringValue("fail");
 
             lc.add(comp1);
-            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
+            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, DatafileInclude.NONE, -1, -1, em);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (EmptyListParameterException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoDatetimeComparatorException ex) {
@@ -276,7 +324,15 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             comp1.setDatetimeValue("wrong format");
 
             lc.add(comp1);
-            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
+            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, DatafileInclude.NONE, -1, -1, em);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (EmptyListParameterException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoDatetimeComparatorException ex) {
@@ -322,7 +378,15 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             comp1.setNumericValue(new Double(23));
 
             lc.add(comp1);
-            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
+            DatafileSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, DatafileInclude.NONE, -1, -1, em);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (EmptyListParameterException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoDatetimeComparatorException ex) {
@@ -363,7 +427,15 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
         try {
             ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
             List<Datafile> li = (List<Datafile>) DatafileSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, DatafileInclude.NONE, 1, -1, em);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoDatetimeComparatorException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
@@ -409,7 +481,17 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             ParameterSearch pv4 = new ParameterSearch(ParameterType.SAMPLE, param);
             lp.add(pv3);
             lp.add(pv4);
-            DatafileSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
+            DatafileSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, DatafileInclude.NONE, 1, -1, em);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
@@ -439,7 +521,17 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             ParameterSearch pv4 = new ParameterSearch(ParameterType.DATAFILE, param);
             lp.add(pv3);
             lp.add(pv4);
-            DatafileSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
+            DatafileSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, DatafileInclude.NONE, 1, -1, em);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {

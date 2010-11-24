@@ -260,6 +260,7 @@ public class BaseParameterSearchTest extends BaseTest {
         investigation.setId((long)i);
         investigation.setTitle(title + " "+ i);
         investigation.setInvNumber("9-10-" + i);
+        investigation.setInvStartDate(new Date());
         investigation.setInvType("experiment");
         investigation.setFacility(ManagerUtil.getFacility(em).getFacilityShortName());
 
@@ -277,10 +278,13 @@ public class BaseParameterSearchTest extends BaseTest {
             Investigation inv2 = createInvestigation("Investigation 2");
             Sample samp = createSample(inv, "Sample_1");
             Sample samp2 = createSample(inv2, "Sample_2");
-            Dataset dat = createDataset(inv, "dataset_1");
-            Dataset dat2 = createDataset(inv2, "dataset_2");
+            Dataset dat = createDataset(inv, "dataset_1 blue");
+            Dataset dat2 = createDataset(inv2, "dataset_2 red");
+            Dataset dat3 = createDataset(inv, "dataset_3 blue");
             Datafile datFile = createDatafile(dat, "datafile_1");
             Datafile datFile2 = createDatafile(dat2, "datafile_2");
+            Datafile datFile3 = createDatafile(dat3, "datafile_1Dat3");
+            Datafile datFile4 = createDatafile(dat, "datafile_1Dat3");
 
             Parameter sp1_1 = createParameter("deg", "sample1", ElementType.SAMPLE);
             Parameter elec = createParameter("V", "voltage", ElementType.SAMPLE);
@@ -301,9 +305,12 @@ public class BaseParameterSearchTest extends BaseTest {
             removeEntities.add(str1);
             removeEntities.add(str2);
 
+            Parameter df3_1 = createParameter("deg", "datafile3_1",ElementType.DATAFILE);
             Parameter df2_1 = createParameter("deg", "datafile2_1",ElementType.DATAFILE);
             Parameter sp2_1 = createParameter("deg", "sample2_1", ElementType.SAMPLE);
             Parameter ds2_1 = createParameter("deg", "dataset2_1", ElementType.DATASET);
+
+            removeEntities.add(df3_1);
             removeEntities.add(df2_1);
             removeEntities.add(sp2_1);
             removeEntities.add(ds2_1);
@@ -318,16 +325,25 @@ public class BaseParameterSearchTest extends BaseTest {
             removeEntities.add(createDatafileParameter(datFile, time1, new Date(600000)));
             removeEntities.add(createDatafileParameter(datFile, str1, "21 is a number"));
             removeEntities.add(createDatafileParameter(datFile2, df2_1, new Double(21.0000002)));
-
-            removeEntities.add(datFile);
-            removeEntities.add(dat);
-            removeEntities.add(samp);
-            removeEntities.add(inv);
+            removeEntities.add(createDatafileParameter(datFile3, df2_1, new Double(21.0000002)));
+            removeEntities.add(createDatafileParameter(datFile4, df2_1, new Double(21.0000002)));
 
             removeEntities.add(datFile2);
+            removeEntities.add(datFile4);
+            removeEntities.add(datFile3);
+            removeEntities.add(datFile);
+
+            removeEntities.add(dat);
+            removeEntities.add(dat3);
             removeEntities.add(dat2);
+
+            removeEntities.add(samp);
             removeEntities.add(samp2);
+            
             removeEntities.add(inv2);
+            removeEntities.add(inv);
+
+            
             // Be sure that autho for TEST doesn't exists
             if (autho != null)
                 removeEntities.add(autho);

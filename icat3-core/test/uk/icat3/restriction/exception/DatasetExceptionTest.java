@@ -5,8 +5,10 @@
  * Created on 6 juil. 2010
  */
 
-package uk.icat3.parametersearch.exception;
+package uk.icat3.restriction.exception;
 
+import uk.icat3.exceptions.RestrictionNullException;
+import uk.icat3.parametersearch.exception.*;
 import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.DatevalueFormatException;
 import uk.icat3.exceptions.NoDatetimeComparatorException;
@@ -20,6 +22,7 @@ import uk.icat3.exceptions.CyclicException;
 import uk.icat3.exceptions.NoParametersException;
 import uk.icat3.exceptions.NoNumericComparatorException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.List;
@@ -33,9 +36,12 @@ import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.RestrictionEmptyListException;
 import uk.icat3.exceptions.RestrictionINException;
-import uk.icat3.exceptions.RestrictionNullException;
 import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
+import uk.icat3.restrictions.RestrictionComparisonCondition;
+import uk.icat3.restrictions.RestrictionLogicalCondition;
+import uk.icat3.restrictions.RestrictionOperator;
+import uk.icat3.restrictions.attributes.RestrictionAttributes;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
 import uk.icat3.search.parameter.ParameterType;
@@ -57,22 +63,32 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
      * The parameter contains a numberic value but the comparator is for a string.
      */
     @Test
-    public void comparatorExceptionTest () {
+    public void RestrictionINExceptionTest () {
         boolean exception = false;
         try {
+            List<String> inList = new ArrayList<String>();
+            inList.add("ASC'\\'\"II");
+            inList.add("cosa");
+            // Restriction condition
+            RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
+                .add (new RestrictionComparisonCondition(
+                            RestrictionAttributes.DATAFILE_FORMAT_TYPE, RestrictionOperator.IN, new Date(0)));
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
              // ------------- ComparisonOperator 1 ----------------------
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
             comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
-            comp1.setComparator(ComparisonOperator.START_WITH);
+            comp1.setComparator(ComparisonOperator.GREATER_EQUAL);
             comp1.setNumericValue(new Double (3.14));
             lc.add(comp1);
-            DatasetSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, DatasetInclude.NONE, -1, -1, em);
+            DatasetSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc
+                    , restricLog, DatasetInclude.NONE, -1, -1, em);
 
         } catch (RestrictionNullException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (CyclicException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            exception = true;
         } catch (RestrictionOperatorException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionEmptyListException ex) {
@@ -94,7 +110,7 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
         } catch (NoParameterTypeException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoNumericComparatorException ex) {
-            exception = true;
+            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoStringComparatorException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSearchableParameterException ex) {
@@ -111,23 +127,27 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
      * Add the operator itself produces an cyclic execption.
      */
     @Test
-    public void cyclicExceptionTest () {
+    public void RestrictionOperatorExceptionTest () {
         boolean exception = false;
         try {
+            // Restriction condition
+            RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
+                .add (new RestrictionComparisonCondition(
+                            RestrictionAttributes.DATAFILE_ID, RestrictionOperator.START_WITH, 123));
+
             ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
             ParameterLogicalCondition op2 = new ParameterLogicalCondition(LogicalOperator.AND);
             op2.add(pcDatafile.get(0));
             op2.add(pcDatafile.get(1));
             op1.add(op2);
-            op1.add(op1);
-            List<Dataset> li = (List<Dataset>) DatasetSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, DatasetInclude.NONE, 1, -1, em);
+            DatasetSearch
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, restricLog, DatasetInclude.NONE, 1, -1, em);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionINException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            exception = true;
         } catch (RestrictionEmptyListException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoDatetimeComparatorException ex) {
@@ -155,28 +175,38 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
         } catch (NoNumericComparatorException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (CyclicException ex) {
-            exception = true;
+            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         finally {
             assertTrue("Should be a CyclicException", exception);
         }
     }
 
+
+    /**
+     * Operator is empty
+     */
     @Test
-    public void nullParameterExceptionTest () {
+    public void CyclicExceptionTest () {
         boolean exception = false;
         try {
-            List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
-             // ------------- ComparisonOperator 1 ----------------------
-            ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
-            comp1.setParameterValued(null);
-            comp1.setComparator(ComparisonOperator.EQUAL);
-            comp1.setNumericValue(new Double (3.14));
-            lc.add(comp1);
-            DatasetSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, DatasetInclude.NONE, -1, -1, em);
-
+            // Restriction condition
+            RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
+                .add(new RestrictionLogicalCondition(LogicalOperator.OR))
+                .add(new RestrictionLogicalCondition(LogicalOperator.AND))
+                .add(new RestrictionComparisonCondition(null, null, new Date()))
+                ;
+            restricLog.add(restricLog);
+            
+            ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
+            op1.add(pcDatafile.get(1));
+            List<Dataset> li = (List<Dataset>) DatasetSearch
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, restricLog, DatasetInclude.NONE, 1, -1, em);
+            assertTrue("Results of investigations should be 2 not " + li.size(), li.size() == 2);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (CyclicException ex) {
+            exception = true;
         } catch (RestrictionINException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
@@ -191,25 +221,25 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueFormatException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoParametersException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (EmptyListParameterException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoNumericComparatorException ex) {
+        } catch (NoParametersException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoStringComparatorException ex) {
+        } catch (EmptyOperatorException ex) {
+            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NullParameterException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSearchableParameterException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NullParameterException ex) {
-            exception = true;
+        } catch (NoStringComparatorException ex) {
+            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoNumericComparatorException ex) {
+            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         finally {
-            assertTrue("Should be a NullParameterException", exception);
+            assertTrue("Should be a EmptyOperatorException", exception);
         }
     }
 
@@ -217,14 +247,24 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
      * Operator is empty
      */
     @Test
-    public void emptyListExceptionTest () {
+    public void restrictionNullTest () {
         boolean exception = false;
         try {
+            // Restriction condition
+            RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
+                .add(new RestrictionLogicalCondition(LogicalOperator.OR))
+                .add(new RestrictionLogicalCondition(LogicalOperator.AND))
+                .add(new RestrictionComparisonCondition(null, null, ""))
+                ;
+
             ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
+            op1.add(pcDatafile.get(1));
             List<Dataset> li = (List<Dataset>) DatasetSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, DatasetInclude.NONE, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, restricLog, DatasetInclude.NONE, 1, -1, em);
             assertTrue("Results of investigations should be 2 not " + li.size(), li.size() == 2);
         } catch (RestrictionNullException ex) {
+            exception = true;
+        } catch (CyclicException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionINException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -247,7 +287,7 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
         } catch (NoParametersException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (EmptyOperatorException ex) {
-            exception = true;
+            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NullParameterException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSearchableParameterException ex) {
@@ -268,7 +308,7 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
      * but this parameter is not relevant to datafile.
      */
     @Test
-    public void noSearchableParameter () {
+    public void DatevalueExceptionParameter () {
         boolean exception = false;
         ParameterSearch pv3 = new ParameterSearch(ParameterType.DATASET, parameter.get("dataset1"));
         try {

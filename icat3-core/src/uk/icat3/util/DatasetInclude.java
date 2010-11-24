@@ -24,6 +24,8 @@ public enum DatasetInclude {
     DATASET_AND_DATAFILES_ONLY,
     DATASET_PARAMETERS_ONLY,
     DATASET_DATAFILES_AND_PARAMETERS,
+    DATASET_ID_ONLY,
+    DATASET_NUMBER_OF_RESULTS,
     NONE;
     
     public boolean isDatafiles(){
@@ -41,6 +43,29 @@ public enum DatasetInclude {
         if(this == DatasetInclude.DATASET_PARAMETERS_ONLY ||
                 this == DatasetInclude.DATASET_DATAFILES_AND_PARAMETERS  ) return true;
         else return false;
-    }    
+    }
+
+    /**
+     * Check if this object is a DATASET_ID_ONLY enum. If this
+     * option is selected, only the Dataset Id are returned.
+     *
+     * @return True if this object is DATASET_ID_ONLY, otherwise false.
+     */
+    public boolean isDatasetId () {
+        if (this == DatasetInclude.DATASET_ID_ONLY)
+            return true;
+        return false;
+    }
   
+
+    /**
+     * Check if this object is a DATASET_NUMBER_OF_RESULTS enum. In that case
+     * the objects returned will a number which represent the number of results.
+     * @return
+     */
+    public boolean isDatasetNumberOfResults () {
+        if (this == DatasetInclude.DATASET_NUMBER_OF_RESULTS)
+            return true;
+        return false;
+    }
 }

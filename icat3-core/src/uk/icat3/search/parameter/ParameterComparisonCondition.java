@@ -15,6 +15,7 @@ import uk.icat3.exceptions.NullParameterException;
 import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.DatevalueFormatException;
+import uk.icat3.util.Queries;
 
 /**
  * This class contains information about the parameter and the value which is
@@ -25,8 +26,7 @@ import uk.icat3.exceptions.DatevalueFormatException;
  */
 public final class ParameterComparisonCondition extends ParameterCondition{
 
-    private static final String sqlFormat = "yyyy-MM-dd HH:mm:ss";
-    private static final DateFormat dateFormat = new SimpleDateFormat(sqlFormat);
+   
     /** Parameter valued which contains parameter and its type */
     private ParameterSearch param;
     /** Type of comparator (greater_than, less_than, equal, ..)*/
@@ -118,9 +118,9 @@ public final class ParameterComparisonCondition extends ParameterCondition{
      */
     public void setDatetimeValue(String value) throws DatevalueFormatException {
         try {
-            this.value = dateFormat.parse(value);
+            this.value = Queries.dateFormat.parse(value);
         } catch (ParseException ex) {
-            throw new DatevalueFormatException(sqlFormat);
+            throw new DatevalueFormatException(Queries.sqlFormat);
         }
     }
 
@@ -165,9 +165,9 @@ public final class ParameterComparisonCondition extends ParameterCondition{
      */
     public void setDatetimeValueRight (String valueRight) throws DatevalueFormatException {
         try {
-            this.valueRight = dateFormat.parse(valueRight);
+            this.valueRight = Queries.dateFormat.parse(valueRight);
         } catch (ParseException ex) {
-            throw new DatevalueFormatException(sqlFormat);
+            throw new DatevalueFormatException(Queries.sqlFormat);
         }
     }
 

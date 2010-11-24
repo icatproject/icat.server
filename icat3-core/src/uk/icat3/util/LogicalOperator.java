@@ -23,6 +23,6 @@ public enum LogicalOperator {
      * Match atleast one
      */
     OR;
-    
+
 }
 

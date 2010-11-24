@@ -5,7 +5,7 @@
  * Created on 8 juil. 2010
  */
 
-package uk.icat3.parametersearch.dataset;
+package uk.icat3.restriction.dataset;
 
 import uk.icat3.parametersearch.*;
 import static org.junit.Assert.*;

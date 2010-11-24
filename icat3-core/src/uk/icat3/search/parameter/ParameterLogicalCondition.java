@@ -51,7 +51,7 @@ public final class ParameterLogicalCondition extends ParameterCondition {
      * @param param Parmareter Operable to add
      * @throws CyclicException In case a cyclic structure had been build.
      */
-    public void add (ParameterCondition param) throws CyclicException  {
+    public ParameterLogicalCondition add (ParameterCondition param) throws CyclicException  {
         if (param == this)
             throw new CyclicException("It's the same object");
 
@@ -67,6 +67,8 @@ public final class ParameterLogicalCondition extends ParameterCondition {
                     throw new CyclicException("Cyclic structure. " + this.toString());
         }
         listComparable.add(param);
+
+        return this;
     }
 
 

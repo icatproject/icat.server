@@ -9,6 +9,10 @@
 
 package uk.icat3.util;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import uk.icat3.restrictions.RestrictionCondition;
+
 /**
  *
  * @author gjd37
@@ -16,7 +20,7 @@ package uk.icat3.util;
 public class Queries {
     
     public static final String SUPER_USER = "SUPER_USER";
-    
+
     /////////////////////////////////////    These are to be added together to form queries  ///////////////////////
     //Returns all of investigation
     public static final String RETURN_ALL_INVESTIGATIONS_JPQL = "SELECT DISTINCT i from Investigation i ";
@@ -24,8 +28,17 @@ public class Queries {
     //Returns all of datafiles
     public static final String RETURN_ALL_DATAFILES_JPQL = "SELECT DISTINCT i from Datafile i ";
 
-    //Returns all of datasets
+    //Returns all of datafiles
+    public static final String RETURN_ALL_DATAFILES_ID_JPQL = "SELECT DISTINCT i.id from Datafile i ";
+
+    /** Returns all of datasets */
     public static final String RETURN_ALL_DATASETS_JPQL = "SELECT DISTINCT i from Dataset i ";
+
+    /** Returns all of datasets id */
+    public static final String RETURN_ALL_DATASETS_ID_JPQL = "SELECT DISTINCT i.id from Dataset i ";
+
+    /** Return number of results */
+    public static final String RETURN_DATASET_COUNT_RESULT_JPQL = "SELECT count (DISTINCT i.id) from Dataset i ";
     
     //Returns all of samples
     public static final String RETURN_ALL_SAMPLES_JPQL = "SELECT DISTINCT i from Sample i ";
@@ -552,4 +565,16 @@ public class Queries {
      * Max number of returned items in a collection
      */
     public static int MAX_QUERY_RESULTSET = 200;
+
+    /** Number of results is limited to MAX_QUERY_RESULTSET */
+    public static final int NO_PAGINATION = -1;
+    /** Number of results is unlimited */
+    public static final int NO_LIMITED_RESULTS = -99;
+
+    public static final String PARAM_NAME_JPQL = "i";
+
+    public static final RestrictionCondition NO_RESTRICTION = null;
+
+    public static final String sqlFormat = "yyyy-MM-dd HH:mm:ss";
+    public static final DateFormat dateFormat = new SimpleDateFormat(sqlFormat);
 }

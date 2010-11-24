@@ -36,5 +36,14 @@ package uk.icat3.search.parameter;
  * @see ParameterOperator
  */
  public class  ParameterCondition {
-    
+    private boolean isNegate = false;
+
+    public static ParameterCondition NOT (ParameterCondition cond) {
+        cond.isNegate = true;
+        return cond;
+    }
+
+    public boolean isIsNegate() {
+        return isNegate;
+    }
 }
