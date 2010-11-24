@@ -40,9 +40,9 @@ import uk.icat3.exceptions.NullParameterException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.manager.ManagerUtil;
-import uk.icat3.restrictions.RestrictionCondition;
-import uk.icat3.restrictions.RestrictionType;
-import uk.icat3.restrictions.util.RestrictionUtil;
+import uk.icat3.restriction.RestrictionCondition;
+import uk.icat3.restriction.RestrictionType;
+import uk.icat3.restriction.util.RestrictionUtil;
 import uk.icat3.search.parameter.util.ExtractedJPQL;
 import uk.icat3.search.parameter.util.ParameterSearchUtilSingleton;
 import uk.icat3.search.parameter.util.ParameterSearch;
@@ -206,12 +206,15 @@ public class DatafileSearch {
 //                returnJPQL = RETURN_DATASET_COUNT_RESULT_JPQL;
 
             String restrictionParam = "";
-            if (restricion.isContainDatafileAttributes() && ejpql.getDatafileParameter().isEmpty())
-                restrictionParam += ", IN(i.datafileCollection) df";
+            if (restricion.isContainDatasetAttributes() && ejpql.getDatafileParameter().isEmpty())
+                restrictionParam += ", IN(i.dataset) ds";
             if (restricion.isContainSampleAttributes() && ejpql.getSampleParameter().isEmpty())
                 restrictionParam += ", IN(i.investigation.sampleCollection) sample";
 
             String jpql =  returnJPQL + restrictionParam + ", " + ejpql.getParametersJPQL(ElementType.DATAFILE) + QUERY_USERS_DATAFILES_JPQL + " AND " + ejpql.getCondition();
+            if (!restricion.isEmpty())
+                jpql += " AND " + restricion.getSentenceJPQL();
+            
             Query q = manager.createQuery(jpql);
             for (Entry<String, Object> e : ejpql.getAllJPQLParameter().entrySet()) {
                 q.setParameter(e.getKey(), e.getValue());

@@ -11,7 +11,7 @@ package uk.icat3.util;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import uk.icat3.restrictions.RestrictionCondition;
+import uk.icat3.restriction.RestrictionCondition;
 
 /**
  *
