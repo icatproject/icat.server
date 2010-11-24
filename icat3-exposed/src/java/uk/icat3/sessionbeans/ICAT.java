@@ -51,7 +51,7 @@ import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
-import uk.icat3.restrictions.RestrictionCondition;
+import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
 import uk.icat3.exceptions.ParameterSearchException;
