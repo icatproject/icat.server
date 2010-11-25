@@ -143,7 +143,7 @@ public class ExtractTest extends BaseParameterSearchTest {
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION
                         , comp1
                         , restriction1
-                        , DatasetInclude.DATASET_ID_ONLY
+                        , DatasetInclude.ALL_DATASET_ID
                         , Queries.NO_LIMITED_RESULTS
                         , Queries.NO_LIMITED_RESULTS
                         , em);
@@ -201,7 +201,7 @@ public class ExtractTest extends BaseParameterSearchTest {
 //        lp.add(pv3);
 
 //        List<Long> li = (List<Long>) DatasetSearch
-//                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, DatasetInclude.DATASET_ID_ONLY, Queries.NO_PAGINATION, Queries.NO_LIMITED_RESULTS, em);
+//                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, DatasetInclude.ALL_DATASET_ID, Queries.NO_PAGINATION, Queries.NO_LIMITED_RESULTS, em);
 //
 //        int cont = 0;
 //        for (Long l : li) {

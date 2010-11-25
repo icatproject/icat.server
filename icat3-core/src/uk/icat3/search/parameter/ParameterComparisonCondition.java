@@ -7,13 +7,10 @@
 
 package uk.icat3.search.parameter;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import uk.icat3.exceptions.NullParameterException;
 import uk.icat3.search.parameter.util.ParameterSearch;
-import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.DatevalueFormatException;
 import uk.icat3.util.Queries;
 
@@ -120,7 +117,7 @@ public final class ParameterComparisonCondition extends ParameterCondition{
         try {
             this.value = Queries.dateFormat.parse(value);
         } catch (ParseException ex) {
-            throw new DatevalueFormatException(Queries.sqlFormat);
+            throw new DatevalueFormatException(Queries.sqlDateTimeFormat);
         }
     }
 
@@ -167,7 +164,7 @@ public final class ParameterComparisonCondition extends ParameterCondition{
         try {
             this.valueRight = Queries.dateFormat.parse(valueRight);
         } catch (ParseException ex) {
-            throw new DatevalueFormatException(Queries.sqlFormat);
+            throw new DatevalueFormatException(Queries.sqlDateTimeFormat);
         }
     }
 

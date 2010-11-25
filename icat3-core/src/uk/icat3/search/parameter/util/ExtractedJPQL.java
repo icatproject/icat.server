@@ -13,6 +13,7 @@ import java.util.Map;
 import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.NoElementTypeException;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.Queries;
 
 /**
  * This class define all the parameter and condition extracted from a parameter
@@ -76,10 +77,10 @@ public class ExtractedJPQL {
      private String getSampleParameterJPQL () throws NoParametersException {
         String ret = "";
         for (Map.Entry<String, Parameter> e : datafileParameter.entrySet())
-            ret += ", IN(df.datafileParameterCollection) " + e.getKey();
+            ret += ", IN(" + Queries.DATAFILE_NAME + ".datafileParameterCollection) " + e.getKey();
 
         for (Map.Entry<String, Parameter> e : datasetParameter.entrySet())
-            ret += ", IN(ds.datasetParameterCollection) " + e.getKey();
+            ret += ", IN(" + Queries.DATASET_NAME + ".datasetParameterCollection) " + e.getKey();
 
         for (Map.Entry<String, Parameter> e : sampleParameter.entrySet())
             ret += ", IN(i.sampleParameterCollection) " + e.getKey();
@@ -89,9 +90,10 @@ public class ExtractedJPQL {
 
         String parameter = "";
         if (!datafileParameter.isEmpty())
-            parameter += ", IN(i.investigationId.datasetCollection) ds, IN(ds.datafileCollection) df";
+            parameter += ", IN(i.investigationId.datasetCollection) " + Queries.DATASET_NAME 
+                    + ", IN(" + Queries.DATASET_NAME + ".datafileCollection) " + Queries.DATAFILE_NAME;
         if (datafileParameter.isEmpty() && !datasetParameter.isEmpty())
-            parameter += ", IN(i.investigationId.datasetCollection) ds";
+            parameter += ", IN(i.investigationId.datasetCollection) " + Queries.DATASET_NAME;
 
 
         if (parameter.isEmpty())
@@ -109,22 +111,22 @@ public class ExtractedJPQL {
     private String getDatasetParameterJPQL () throws NoParametersException {
         String ret = "";
         for (Map.Entry<String, Parameter> e : datafileParameter.entrySet())
-            ret += ", IN(df.datafileParameterCollection) " + e.getKey();
+            ret += ", IN(" + Queries.DATAFILE_NAME + ".datafileParameterCollection) " + e.getKey();
 
         for (Map.Entry<String, Parameter> e : datasetParameter.entrySet())
             ret += ", IN(i.datasetParameterCollection) " + e.getKey();
 
         for (Map.Entry<String, Parameter> e : sampleParameter.entrySet())
-            ret += ", IN(sample.sampleParameterCollection) " + e.getKey();
+            ret += ", IN(" + Queries.SAMPLE_NAME + ".sampleParameterCollection) " + e.getKey();
 
         if (ret.isEmpty())
             throw new NoParametersException();
 
         String parameter = "";
         if (!datafileParameter.isEmpty())
-            parameter += ", IN(i.datafileCollection) df";
+            parameter += ", IN(i.datafileCollection) " + Queries.DATAFILE_NAME ;
         if (!sampleParameter.isEmpty())
-            parameter += ", IN(i.investigation.sampleCollection) sample";
+            parameter += ", IN(i.investigation.sampleCollection) " + Queries.SAMPLE_NAME;
         
 
         if (parameter.isEmpty())
@@ -155,7 +157,7 @@ public class ExtractedJPQL {
 
         String parameter = "";
         if (!sampleParameter.isEmpty())
-            parameter += ", IN(i.dataset.investigation.sampleCollection) sample";
+            parameter += ", IN(i.dataset.investigation.sampleCollection) " + Queries.SAMPLE_NAME;
 
         if (parameter.isEmpty())
             return ret.substring(2);
@@ -187,11 +189,12 @@ public class ExtractedJPQL {
 
         String parameter = "";
         if (!datafileParameter.isEmpty())
-            parameter += ", IN(i.datasetCollection) ds, IN(ds.datafileCollection) df";
+            parameter += ", IN(i.datasetCollection) " + Queries.DATASET_NAME 
+                    + ", IN(ds.datafileCollection) " + Queries.DATAFILE_NAME;
         if (datafileParameter.isEmpty() && !datasetParameter.isEmpty())
-            parameter += ", IN(i.datasetCollection) ds";
+            parameter += ", IN(i.datasetCollection) " + Queries.DATASET_NAME;
         if (!sampleParameter.isEmpty())
-            parameter += ", IN(i.sampleCollection) sample";
+            parameter += ", IN(i.sampleCollection) " + Queries.SAMPLE_NAME;
 
         return parameter.substring(2) + ret;
     }

@@ -8,6 +8,7 @@
 package uk.icat3.restriction;
 
 /**
+ * Defines available restricion operators
  *
  * @author cruzcruz
  */
@@ -31,6 +32,13 @@ public enum RestrictionOperator {
     /** Restriction IN (value, value2, value3, ..) */
     IN;
 
+    /**
+     * Extract operation together with the string value for the
+     * operator and the value.
+     *
+     * @param value Operation
+     * @return
+     */
     public String getRestriction(String value) {
         if (this == RestrictionOperator.GREATER_THAN)
             return "> " + value;

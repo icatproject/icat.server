@@ -10,25 +10,28 @@ package uk.icat3.restriction;
 import java.util.Collection;
 import java.util.Date;
 import uk.icat3.exceptions.RestrictionNullException;
-import uk.icat3.restriction.RestrictionOperator;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
 
 /**
+ * This class contains information about the restriction and the value which is
+ * going to be compare with.
  *
  * @author cruzcruz
  */
 public class RestrictionComparisonCondition extends RestrictionCondition {
-
-    RestrictionAttributes restAttr;
-    RestrictionOperator restOp;
-    Object value;
+    /** Attribute to compare with */
+    private RestrictionAttributes restAttr;
+    /** Restriction operator */
+    private RestrictionOperator restOp;
+    /** Value to compare with attribute */
+    private Object value;
 
     /**
      * Constructor
      * 
-     * @param restAttr
-     * @param restOp
-     * @param value
+     * @param restAttr Restriction attribute to compare with value
+     * @param restOp Restriction operator
+     * @param value Restriction value to compare with attribute
      */
     public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, String value) {
         this.restAttr = restAttr;
@@ -39,9 +42,9 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
     /**
      * Constructor
      *
-     * @param restAttr
-     * @param restOp
-     * @param value
+     * @param restAttr Restriction attribute to compare with value
+     * @param restOp Restriction operator
+     * @param value Restriction value to compare with attribute
      */
     public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, Collection<String> value) {
         this.restAttr = restAttr;
@@ -52,9 +55,9 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
     /**
      * Constructor
      *
-     * @param restAttr
-     * @param restOp
-     * @param value
+     * @param restAttr Restriction attribute to compare with value
+     * @param restOp Restriction operator
+     * @param value Restriction value to compare with attribute
      */
     public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, Date value) {
         this.restAttr = restAttr;
@@ -65,16 +68,20 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
     /**
      * Constructor
      *
-     * @param restAttr
-     * @param restOp
-     * @param value
+     * @param restAttr Restriction attribute to compare with value
+     * @param restOp Restriction operator
+     * @param value Restriction value to compare with attribute
      */
     public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, Number value) {
         this.restAttr = restAttr;
         this.restOp = restOp;
         this.value = value;
     }
-
+    /**
+     * Check the restriction is well contructed.
+     * 
+     * @throws RestrictionNullException
+     */
     public void validate () throws RestrictionNullException {
         if (this.restAttr == null ||
                 this.restOp == null ||

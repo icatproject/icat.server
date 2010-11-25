@@ -61,7 +61,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
                 .add (new RestrictionComparisonCondition(
                             RestrictionAttributes.DATAFILE_FORMAT_TYPE, RestrictionOperator.IN, inList))
                 .add (new RestrictionComparisonCondition(
-                            RestrictionAttributes.DATASET_TYPE, RestrictionOperator.EQUAL, "test"))
+                            RestrictionAttributes.DATASET_TYPE, RestrictionOperator.EQUAL, "experiment_raw"))
                 .add (new RestrictionLogicalCondition(LogicalOperator.OR)
                         .add(restriction1)
                         .add(new RestrictionComparisonCondition(
@@ -116,7 +116,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
                             RestrictionAttributes.DATAFILE_FORMAT_TYPE, RestrictionOperator.IN, inList))
                 // DATASET_TYPE = 'test'
                 .add (new RestrictionComparisonCondition(
-                            RestrictionAttributes.DATASET_TYPE, RestrictionOperator.EQUAL, "test"))
+                            RestrictionAttributes.DATASET_TYPE, RestrictionOperator.EQUAL, "experiment_raw"))
                 // OR
                 .add (new RestrictionLogicalCondition(LogicalOperator.OR)
                         // INVESTIGATION_TILE like 'Investigation 1%'
@@ -174,6 +174,35 @@ public class UsesExamples extends BaseParameterSearchTest  {
                 .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restriction1, DatasetInclude.NONE, 1, -1, em);
 
         assertEquals("Number of datasets incorrect.", 2, li.size());
+    }
+
+     @Test
+    public void returnIdsTest () throws ParameterSearchException, RestrictionException {
+        List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
+
+        ParameterSearch pv1 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
+        ParameterSearch pv2 = new ParameterSearch(ParameterType.DATASET, parameter.get("dataset1"));
+        ParameterSearch pv3 = new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample1"));
+
+        lp.add(pv1);
+        lp.add(pv2);
+        lp.add(pv3);
+
+        List li = (List) DatasetSearch
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, null
+                , DatasetInclude.ALL_DATASET_ID
+                , Queries.NO_LIMITED_RESULTS
+                , Queries.NO_LIMITED_RESULTS, em);
+
+         List ld = (List) DatafileSearch
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, null
+                , DatafileInclude.ALL_DATAFILE_ID
+                , Queries.NO_LIMITED_RESULTS
+                , Queries.NO_LIMITED_RESULTS, em);
+
+        assertTrue("Results of datasets should be 1, not " + li.size(), (li.size() == 1));
+        assertTrue("Object should be Long, not " + li.get(0).getClass().getName()
+                , Long.class == li.get(0).getClass());
     }
 
     public static junit.framework.Test suite(){

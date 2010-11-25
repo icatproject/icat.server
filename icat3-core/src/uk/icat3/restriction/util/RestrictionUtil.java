@@ -29,30 +29,52 @@ import uk.icat3.util.LogicalOperator;
 import uk.icat3.util.Queries;
 
 /**
- *
+ * This class provides methods to transform from a restriction structure to
+ * a JPQL String sentence.
+ * 
  * @author cruzcruz
  */
 public class RestrictionUtil {
-
+    /** JPQL setence where condition are defined */
     private String sentenceJPQL;
+    /** Restriction type */
     private RestrictionType restType;
+    /** Check if restriction contains Sample attributes */
     private boolean containSampleAttributes;
+    /** Check if restriction contains Datafile attributes */
     private boolean containDatafileAttributes;
+    /** Check if restriction contains Dataset attributes */
     private boolean containDatasetAttributes;
+    /** Check if restriction contains Investigation attributes */
     private boolean containInvestigationAttributes;
+    /** Parameter name for JPQL query parameter */
     private final String PARAM_NAME = "restric";
+    /** Counter for parameter name */
     private int contParameter;
     /** List of JPQL parameters */
     private Map<String, Object> jpqlParameter;
 
+    /**
+     * Constructor
+     *
+     * @param restCond Restriction Condition
+     * @param restType Restriction Type
+     * 
+     * @throws RestrictionEmptyListException
+     * @throws DatevalueException
+     * @throws RestrictionOperatorException
+     * @throws RestrictionINException
+     * @throws RestrictionNullException
+     */
     public RestrictionUtil(RestrictionCondition restCond, RestrictionType restType) throws RestrictionEmptyListException, DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException  {
+        // Initialites variables
         sentenceJPQL = "";
         this.restType = restType;
         contParameter = 0;
         jpqlParameter = new HashMap<String, Object>();
         containDatasetAttributes = containDatafileAttributes
                 = containInvestigationAttributes = containSampleAttributes = false;
-
+        // Check restriction is not null
         if (restCond != null) {
             extractJPQL(restCond);
             // If it's ordered
@@ -60,7 +82,7 @@ public class RestrictionUtil {
                 String order = " DESC";
                 if (restCond.isOrderByAsc())
                    order = " ASC";
-
+                // Add order
                 this.sentenceJPQL += " order by "
                             + getParamName(restCond.getOderByAttr())
                             + restCond.getOderByAttr().getValue()
@@ -69,11 +91,24 @@ public class RestrictionUtil {
         }
     }
 
-
+    /**
+     * Check if JPQL sentence is empty
+     *
+     * @return true if JPQL final sentence is empty
+     */
     public boolean isEmpty () {
         return this.sentenceJPQL.isEmpty();
     }
-
+    /**
+     * Extract JPQL sentence from restriction condition
+     * 
+     * @param restCond Restriction Condition
+     * @throws RestrictionEmptyListException
+     * @throws DatevalueException
+     * @throws RestrictionOperatorException
+     * @throws RestrictionINException
+     * @throws RestrictionNullException
+     */
     private void extractJPQL(RestrictionCondition restCond) throws RestrictionEmptyListException, DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
 
         if (restCond.isIsNegate())
@@ -116,20 +151,31 @@ public class RestrictionUtil {
         }
     }
 
+    /**
+     * Open a parenthesis in JPQL final sentence
+     */
     private void openParenthesis() {
         sentenceJPQL += "(";
     }
 
+    /**
+     * Close a parenthesis in JPQL final sentence
+     */
+    private void closeParenthesis() {
+        sentenceJPQL += ")";
+    }
+    /**
+     * Add logical operator condition into JPQL final sentence
+     * @param logicalOperator
+     */
     private void addCondition(LogicalOperator logicalOperator) {
        sentenceJPQL += " " + logicalOperator.name() + " ";
     }
-
+    /**
+     * Add NOT condition
+     */
     private void addNotCondition() {
         sentenceJPQL += " NOT ";
-    }
-
-    private void closeParenthesis() {
-        sentenceJPQL += ")";
     }
 
     /**
@@ -143,7 +189,7 @@ public class RestrictionUtil {
     }
 
     /**
-     * Return correcto JPQL parameter name
+     * Return correct JPQL parameter name
      *
      * @param comp
      * @return
@@ -163,26 +209,22 @@ public class RestrictionUtil {
                 containSampleAttributes = true;
             }
             // Investigation attributes
-            else if (attr.isInvestigation()) {
+            else if (attr.isInvestigation())
                 paramName += ".investigation";
-            }
         }
         // Restriction is over a Datafile search
         else if (restType == RestrictionType.DATAFILE) {
             // Dataset attributes
-            if (attr.isDataset()) {
-                paramName = ".dataset";
-            }
+            if (attr.isDataset())
+                paramName += ".dataset";
             // Sample attributes
             else if (attr.isSample()) {
                 paramName = "sample";
                 containSampleAttributes = true;
             }
             // Investigation attributes
-            else if (attr.isInvestigation()) {
+            else if (attr.isInvestigation())
                 paramName += ".dataset.investigation";
-
-            }
         }
         // Restriction is over a Sample search
         else if (restType == RestrictionType.SAMPLE) {
@@ -214,11 +256,10 @@ public class RestrictionUtil {
             }
             // Sample attributes
             else if (attr.isSample()) {
-                paramName += "sample";
+                paramName = "sample";
                 containSampleAttributes = true;
             }
         }
-
         return paramName + ".";
     }
         
@@ -243,15 +284,16 @@ public class RestrictionUtil {
         }
         // IN operator
         else if (comp.getRestOp() == RestrictionOperator.IN) {
+            // If value is an instance of Collection
             if (comp.getValue() instanceof Collection) {
                 Collection col = (Collection) comp.getValue();
                 String value = "";
-                for (Object o : col) {
+                for (Object o : col)
                     value += ", '" + removeBadChar(o.toString()) + "'";
-                }
 
                 return value.substring(2);
             }
+            // If value is a String separated by ','
             else if (comp.getValue() instanceof String) {
                 String value = removeBadChar(comp.getValue().toString());
                 value = value.replaceAll("\\s*,\\s*", "','")
@@ -259,14 +301,15 @@ public class RestrictionUtil {
                              .replaceAll("\\s*$", "'");
                 return value;
             }
+            // Restriciton exception. Operator IN only List<String> or String
             throw new RestrictionINException();
         }
         // Numeric, String or Date operator. Value is an Object
         else {
             paramValue = getNextParamName();
-
             // If attribute is a DateTime value
             if (comp.getRestAttr().isDateTime()) {
+                // If value is String, transform into a Date
                 if (comp.getValue().getClass() == String.class) {
                     try {
                         jpqlParameter.put(paramValue, Queries.dateFormat.parse(comp.getValue().toString()));
@@ -274,8 +317,10 @@ public class RestrictionUtil {
                         Logger.getLogger(RestrictionUtil.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
+                // If value is a Date
                 else if (comp.getValue() instanceof Date)
                     jpqlParameter.put(paramValue, comp.getValue());
+                // Date value exception
                 else
                     throw new DatevalueException(comp.getValue().toString());
             }
@@ -284,6 +329,8 @@ public class RestrictionUtil {
                 try {
                     if (comp.getValue().getClass() == String.class)
                         jpqlParameter.put(paramValue, Long.parseLong(comp.getValue().toString()));
+                    else if (comp.getValue() instanceof Number)
+                        jpqlParameter.put(paramValue, comp.getValue());
                 } catch (Throwable t) {
                     Logger.getLogger(RestrictionUtil.class.getName()).log(Level.SEVERE, null, t);
                 }
@@ -295,6 +342,12 @@ public class RestrictionUtil {
         }
     }
 
+    /**
+     * Remove chars not allowed from a String
+     *
+     * @param value String
+     * @return
+     */
     private String removeBadChar (String value) {
         return value.replaceAll("['\"\\\\]", "");
     }

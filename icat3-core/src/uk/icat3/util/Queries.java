@@ -570,11 +570,18 @@ public class Queries {
     public static final int NO_PAGINATION = -1;
     /** Number of results is unlimited */
     public static final int NO_LIMITED_RESULTS = -99;
-
+    /** Common name for JPQL setence select object*/
     public static final String PARAM_NAME_JPQL = "i";
-
+    /** Common name for JPQL setence Datafile object*/
+    public static final String DATAFILE_NAME = "df";
+    /** Common name for JPQL setence Dataset object*/
+    public static final String DATASET_NAME = "ds";
+    /** Common name for JPQL setence Sample object*/
+    public static final String SAMPLE_NAME = "sample";
+    /** No restriction conditions */
     public static final RestrictionCondition NO_RESTRICTION = null;
-
-    public static final String sqlFormat = "yyyy-MM-dd HH:mm:ss";
-    public static final DateFormat dateFormat = new SimpleDateFormat(sqlFormat);
+    /** DateTime string format */
+    public static final String sqlDateTimeFormat = "yyyy-MM-dd HH:mm:ss";
+    /** Date format tansform */
+    public static final DateFormat dateFormat = new SimpleDateFormat(sqlDateTimeFormat);
 }

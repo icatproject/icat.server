@@ -63,11 +63,18 @@ public enum RestrictionAttributes {
     RestrictionAttributes(String value) {
         this.value = value;
     }
-
+    /**
+     * Return value of the attribute
+     *
+     * @return
+     */
     public String getValue() {
         return this.value;
     }
-
+    /**
+     * Check if attribute is numeric value
+     * @return True if attribute is numeric, otherwise false.
+     */
     public boolean isNumeric() {
         if (this == RestrictionAttributes.INVESTIGATION_ID ||
             this == RestrictionAttributes.SAMPLE_ID ||
@@ -76,7 +83,10 @@ public enum RestrictionAttributes {
             return true;
         return false;
     }
-
+    /**
+     * Check if attribute is Datetime value
+     * @return True if attribute is Datetime, otherwise false.
+     */
     public boolean isDateTime() {
         if (this == RestrictionAttributes.INVESTIGATION_START_DATE ||
             this == RestrictionAttributes.INVESTIGATION_END_DATE ||
@@ -86,44 +96,55 @@ public enum RestrictionAttributes {
 
         return false;
     }
-
+    /**
+     * Check if attribute is String value
+     * @return True if attribute is String, otherwise false.
+     */
     public boolean isString() {
         if (!isDateTime() && ! isNumeric())
             return true;
         return false;
     }
-
+    /**
+     * Check if attribute belongs to Dataset
+     * @return True if attribute belongs to Dataset, otherwise false.
+     */
     public boolean isDataset () {
         // Dataset attributes
-        if (this.ordinal() <= RestrictionAttributes.DATASET_TYPE.ordinal()) {
+        if (this.ordinal() <= RestrictionAttributes.DATASET_TYPE.ordinal())
             return true;
-        }
         return false;
     }
-
+     /**
+     * Check if attribute belongs to Datafile
+     * @return True if attribute belongs to Datafile, otherwise false.
+     */
     public boolean isDatafile() {
         // Datafile attributes
         if (this.ordinal() >= RestrictionAttributes.DATAFILE_ID.ordinal()  &&
-                 this.ordinal() <= RestrictionAttributes.DATAFILE_FORMAT_TYPE.ordinal()) {
+                 this.ordinal() <= RestrictionAttributes.DATAFILE_FORMAT_TYPE.ordinal())
            return true;
-        }
         return false;
     }
-
+     /**
+     * Check if attribute belongs to Sample
+     * @return True if attribute belongs to Sample, otherwise false.
+     */
     public boolean isSample() {
         // Sample attributes
         if (this.ordinal() >= RestrictionAttributes.SAMPLE_ID.ordinal()  &&
-                 this.ordinal() <= RestrictionAttributes.SAMPLE_SAFETY_INFORMATION.ordinal()) {
+                 this.ordinal() <= RestrictionAttributes.SAMPLE_SAFETY_INFORMATION.ordinal())
             return true;
-        }
         return false;
     }
-
+     /**
+     * Check if attribute belongs to Investigation
+     * @return True if attribute belongs to Investigation, otherwise false.
+     */
     public boolean isInvestigation() {
         // Investigation attributes
-       if (this.ordinal() >= RestrictionAttributes.INVESTIGATION_ID.ordinal()) {
+       if (this.ordinal() >= RestrictionAttributes.INVESTIGATION_ID.ordinal())
             return true;
-        }
         return false;
     }
 }

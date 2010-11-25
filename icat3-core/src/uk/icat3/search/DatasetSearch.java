@@ -53,6 +53,7 @@ import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
+import uk.icat3.util.Queries;
 import static uk.icat3.util.Queries.*;
 /**
  * Searchs on the datasets for samples and list types and status' of datasets.
@@ -232,54 +233,42 @@ public class DatasetSearch {
             // Return type
             String returnJPQL = RETURN_ALL_DATASETS_JPQL;
             // Return ids
-            if (include == DatasetInclude.DATASET_ID_ONLY)
+            if (include == DatasetInclude.ALL_DATASET_ID) {
                 returnJPQL = RETURN_ALL_DATASETS_ID_JPQL;
-//            else if (include == DatasetInclude.DATASET_ONLY)
-//                returnJPQL = RETURN_ALL_DATASETS_JPQL;
-//            else if (include == DatasetInclude.DATASET_NUMBER_OF_RESULTS)
-//                returnJPQL = RETURN_DATASET_COUNT_RESULT_JPQL;
-
+                numberResults = NO_LIMITED_RESULTS;
+            }
+            // Check for restriction parameters
             String restrictionParam = "";
+            // Check if the parameter are defined in parameter search
             if (restricion.isContainDatafileAttributes() && ejpql.getDatafileParameter().isEmpty())
-                restrictionParam += ", IN(i.datafileCollection) df";
+                restrictionParam += ", IN(i.datafileCollection) " + DATAFILE_NAME;
             if (restricion.isContainSampleAttributes() && ejpql.getSampleParameter().isEmpty())
-                restrictionParam += ", IN(i.investigation.sampleCollection) sample";
-
+                restrictionParam += ", IN(i.investigation.sampleCollection) " + SAMPLE_NAME;
+            // Construction JPQL sentence
             String jpql = restrictionParam + ", " + ejpql.getParametersJPQL(ElementType.DATASET)
                     + QUERY_USERS_DATASETS_JPQL + " AND " + ejpql.getCondition();
-            
+            // Add restriction if exists
             if (!restricion.isEmpty())
                 jpql += " AND " + restricion.getSentenceJPQL();
-
+            // Create Query
             Query q = manager.createQuery(returnJPQL + jpql);
-            Query qCount = manager.createQuery(RETURN_DATASET_COUNT_RESULT_JPQL + jpql);
+            // Set JPQL parameters
             for (Entry<String, Object> e : ejpql.getAllJPQLParameter().entrySet()) {
                 q.setParameter(e.getKey(), e.getValue());
-                qCount.setParameter(e.getKey(), e.getValue());
             }
-
             for (Entry<String, Object> e : restricion.getJpqlParameter().entrySet()) {
                 q.setParameter(e.getKey(), e.getValue());
-                qCount.setParameter(e.getKey(), e.getValue());
             }
-            
             q.setParameter("objectType", ElementType.DATASET);
             q.setParameter("userId", userId);
-            qCount.setParameter("objectType", ElementType.DATASET);
-            qCount.setParameter("userId", userId);
             // Object returns and check number of results
-//            ICATList res = (ICATList) ManagerUtil.getResultList (q, startIndex, numberResults);
             Collection res = ManagerUtil.getResultList (q, startIndex, numberResults);
-//            if (include == DatasetInclude.DATASET_NUMBER_OF_RESULTS)
-//                res.setRealResults((Integer)qCount.getSingleResult());
-            
             // Return type is a Collection of Long
-            if (include == DatasetInclude.DATASET_ID_ONLY)
+            if (include == DatasetInclude.ALL_DATASET_ID)
                 return res;
-
             // Check if the dataset should include other objects (Datafiles, Parameters)
             ManagerUtil.getDatasetInformation(userId, res, include, manager);
-
+            // Return results
             return res;
             
         } catch (NoElementTypeException ex) {

@@ -57,7 +57,7 @@ public class DatasetTest extends BaseParameterSearchTest {
 
         List li = (List) DatasetSearch
                 .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, null
-                , DatasetInclude.DATASET_ID_ONLY
+                , DatasetInclude.ALL_DATASET_ID
                 , Queries.NO_LIMITED_RESULTS
                 , Queries.NO_LIMITED_RESULTS, em);
 

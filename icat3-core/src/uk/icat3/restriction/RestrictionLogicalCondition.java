@@ -13,7 +13,10 @@ import uk.icat3.exceptions.CyclicException;
 import uk.icat3.util.LogicalOperator;
 
 /**
- *
+ * This class represents a restriction logical condition in which it is
+ * defined logical operator combinations. That means this
+ * object aims to construct AND, OR operations.
+ * 
  * @author cruzcruz
  */
 public class RestrictionLogicalCondition extends RestrictionCondition {
@@ -34,8 +37,9 @@ public class RestrictionLogicalCondition extends RestrictionCondition {
     /**
      * Add a new restriction condition
      * 
-     * @param restCondition
-     * @return
+     * @param restCondition Restriction condition
+     * @return this object
+     * 
      * @throws CyclicException
      */
     public RestrictionLogicalCondition add (RestrictionCondition restCondition) throws CyclicException {

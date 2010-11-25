@@ -112,7 +112,7 @@ public class DatafileTest extends BaseParameterSearchTest {
         List<Datafile> li = (List<Datafile>) DatafileSearch
                 .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restriction1, DatafileInclude.DATAFILE_PARAMETERS, 1, -1, em);
 
-        assertEquals("Results of datafiles incorrect.", 3, li.size());
+        assertEquals("Results of datafiles incorrect.", 2, li.size());
 //        assertEquals("Number of Results of Datafiles of 'datafile_1' are incorrect.",
 //               2, li.get(1).getDatafileParameterCollection().size());
     }
@@ -127,7 +127,7 @@ public class DatafileTest extends BaseParameterSearchTest {
                 .add(new RestrictionComparisonCondition(
                     RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
                 ;
-        restricLog.setOrderByDesc(RestrictionAttributes.DATAFILE_NAME);
+        restricLog.setOrderByAsc(RestrictionAttributes.DATAFILE_NAME);
         // Parameter condition
         ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
 
@@ -139,7 +139,7 @@ public class DatafileTest extends BaseParameterSearchTest {
         List<Datafile> li = (List<Datafile>) DatafileSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, restricLog, DatafileInclude.NONE, 1, -1, em);
 
-       assertEquals("Results of Datafiles incorrect.", 3, li.size());
+       assertEquals("Results of Datafiles incorrect.", 2, li.size());
        assertTrue("Datafile name should be 'datafile_1', not " + li.get(0).getName(),
                (li.get(0).getName().equals("datafile_1")));
     }
@@ -158,7 +158,7 @@ public class DatafileTest extends BaseParameterSearchTest {
 
         List li = (List) DatafileSearch
                 .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, null
-                , DatafileInclude.DATAFILE_ID_ONLY
+                , DatafileInclude.ALL_DATAFILE_ID
                 , Queries.NO_LIMITED_RESULTS
                 , Queries.NO_LIMITED_RESULTS, em);
 
