@@ -8,7 +8,6 @@
 package uk.icat3.restriction.exception;
 
 import uk.icat3.exceptions.RestrictionNullException;
-import uk.icat3.parametersearch.exception.*;
 import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.DatevalueFormatException;
 import uk.icat3.exceptions.NoDatetimeComparatorException;
@@ -56,8 +55,7 @@ import uk.icat3.util.Queries;
  *
  * @author cruzcruz
  */
-public class DatasetExceptionTest extends BaseParameterSearchTest {
-
+public class RestrictionExceptionTest extends BaseParameterSearchTest {
 
     /**
      * The parameter contains a numberic value but the comparator is for a string.
@@ -66,6 +64,7 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
     public void RestrictionINExceptionTest () {
         boolean exception = false;
         try {
+
             List<String> inList = new ArrayList<String>();
             inList.add("ASC'\\'\"II");
             inList.add("cosa");
@@ -84,39 +83,39 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
                     , restricLog, DatasetInclude.NONE, -1, -1, em);
 
         } catch (RestrictionNullException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (CyclicException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionINException ex) {
             exception = true;
         } catch (RestrictionOperatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionEmptyListException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoDatetimeComparatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NumericvalueException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueFormatException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (EmptyListParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoNumericComparatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoStringComparatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSearchableParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NullParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         finally {
             assertTrue("Should be a NoNumericComparatorException", exception);
@@ -143,39 +142,39 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
             DatasetSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, restricLog, DatasetInclude.NONE, 1, -1, em);
         } catch (RestrictionNullException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionINException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
             exception = true;
         } catch (RestrictionEmptyListException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoDatetimeComparatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NumericvalueException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueFormatException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (EmptyOperatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NullParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSearchableParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoStringComparatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoNumericComparatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (CyclicException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         finally {
             assertTrue("Should be a CyclicException", exception);
@@ -204,39 +203,39 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, restricLog, DatasetInclude.NONE, 1, -1, em);
             assertTrue("Results of investigations should be 2 not " + li.size(), li.size() == 2);
         } catch (RestrictionNullException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (CyclicException ex) {
             exception = true;
         } catch (RestrictionINException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionEmptyListException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoDatetimeComparatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NumericvalueException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueFormatException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (EmptyOperatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NullParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSearchableParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoStringComparatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoNumericComparatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         finally {
             assertTrue("Should be a EmptyOperatorException", exception);
@@ -265,37 +264,37 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
         } catch (RestrictionNullException ex) {
             exception = true;
         } catch (CyclicException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionINException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionEmptyListException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoDatetimeComparatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NumericvalueException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueFormatException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (EmptyOperatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NullParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSearchableParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoStringComparatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoNumericComparatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         finally {
             assertTrue("Should be a EmptyOperatorException", exception);
@@ -320,27 +319,27 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
             lp.add(pv4);
             DatasetSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, DatasetInclude.NONE, 1, -1, em);
         } catch (RestrictionNullException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionINException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionEmptyListException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (EmptyListParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSearchableParameterException ex) {
             exception = true;
         } catch (NullParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         finally {
             assertTrue("Should be a NoSearchableException", exception);
@@ -361,27 +360,27 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
             lp.add(pv4);
             DatasetSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, DatasetInclude.NONE, 1, -1, em);
         } catch (RestrictionNullException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionINException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionEmptyListException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
             exception = true;
         } catch (NoParameterTypeException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (EmptyListParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSearchableParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NullParameterException ex) {
-            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         finally {
             assertTrue("Should be a ParameterNoExistsException", exception);
@@ -389,6 +388,6 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
     }
 
     public static junit.framework.Test suite(){
-        return new JUnit4TestAdapter(DatasetExceptionTest.class);
+        return new JUnit4TestAdapter(RestrictionExceptionTest.class);
     }
 }
