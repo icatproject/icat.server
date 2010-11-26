@@ -9,8 +9,6 @@ package uk.icat3.restriction;
 
 import uk.icat3.restriction.sample.SampleTest;
 import uk.icat3.restriction.investigation.InvestigationTest;
-import uk.icat3.restriction.dataset.DatasetTest;
-import uk.icat3.restriction.datafile.DatafileTest;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import org.junit.runner.RunWith;
