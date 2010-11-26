@@ -17,12 +17,15 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import uk.icat3.entity.Sample;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
 import uk.icat3.search.parameter.ParameterType;
 import uk.icat3.search.SampleSearch;
 import uk.icat3.util.LogicalOperator;
+import uk.icat3.util.Queries;
+import uk.icat3.util.SampleInclude;
 
 /**
  *
@@ -31,7 +34,7 @@ import uk.icat3.util.LogicalOperator;
 public class SampleTest extends BaseParameterSearchTest {
 
     @Test
-    public void listParameterTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException {
+    public void listParameterTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException, RestrictionException {
         List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
 
         ParameterSearch pv1 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
@@ -43,7 +46,7 @@ public class SampleTest extends BaseParameterSearchTest {
         lp.add(pv3);
         
         List<Sample> ls = (List<Sample>) SampleSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, SampleInclude.NONE, 1, -1, em);
 
         assertFalse("Results of investigations should not be ZERO", (ls.size() == 0));
     }
@@ -55,7 +58,7 @@ public class SampleTest extends BaseParameterSearchTest {
      * @throws ParameterSearchException
      */
     @Test
-    public void listComparatorTest () throws NoParameterTypeException, ParameterSearchException {
+    public void listComparatorTest () throws NoParameterTypeException, ParameterSearchException, RestrictionException {
 
         List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
         lc.add(pcDataset.get(1));
@@ -63,7 +66,7 @@ public class SampleTest extends BaseParameterSearchTest {
         lc.add(pcDatafile.get(2));
 
         List<Sample> ld = (List<Sample>) SampleSearch
-                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
+                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, SampleInclude.NONE, -1, -1, em);
 
        assertTrue("Results of investigations should not be ZERO", (ld.size() == 1));
     }
@@ -75,7 +78,7 @@ public class SampleTest extends BaseParameterSearchTest {
      * @throws ParameterSearchException
      */
     @Test
-    public void operableTest () throws NoParameterTypeException, ParameterSearchException {
+    public void operableTest () throws NoParameterTypeException, ParameterSearchException, RestrictionException {
         ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
         ParameterLogicalCondition op2 = new ParameterLogicalCondition(LogicalOperator.AND);
 
@@ -86,7 +89,7 @@ public class SampleTest extends BaseParameterSearchTest {
         op1.add(pcSample.get(1));
 
         List<Sample> li = (List<Sample>) SampleSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, SampleInclude.NONE, 1, -1, em);
 
        assertTrue("Results of investigations should be 2 not " + li.size(), (li.size() == 2));
     }

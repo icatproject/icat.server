@@ -31,6 +31,10 @@ import uk.icat3.entity.ParameterPK;
 import static org.junit.Assert.*;
 import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
+import uk.icat3.exceptions.RestrictionEmptyListException;
+import uk.icat3.exceptions.RestrictionINException;
+import uk.icat3.exceptions.RestrictionNullException;
+import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
@@ -38,7 +42,9 @@ import uk.icat3.search.parameter.ParameterType;
 import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.search.InvestigationSearch;
+import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
+import uk.icat3.util.Queries;
 
 /**
  *
@@ -59,7 +65,17 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             pv3.getParam().setSearchable("N");
             lp.add(pv3);
             lp.add(pv4);
-            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
+            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
@@ -93,11 +109,19 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             comp1.setComparator(ComparisonOperator.START_WITH);
             comp1.setNumericValue(new Double (3.14));
             lc.add(comp1);
-            InvestigationSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
+            InvestigationSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, InvestigationInclude.NONE, -1, -1, em);
 
         } catch (NoDatetimeComparatorException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NumericvalueException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -132,7 +156,17 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
             ParameterSearch pv4 = new ParameterSearch(null, new Parameter());
             lp.add(pv4);
-            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
+            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
@@ -165,10 +199,18 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             op1.add(op2);
             op1.add(op1);
             List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
-        } catch (NoDatetimeComparatorException ex) {
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
+         } catch (DatevalueException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (DatevalueException ex) {
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoDatetimeComparatorException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NumericvalueException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -209,11 +251,18 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             comp1.setComparator(ComparisonOperator.EQUAL);
             comp1.setNumericValue(new Double (3.14));
             lc.add(comp1);
-            InvestigationSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
-
+            InvestigationSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, InvestigationInclude.NONE, -1, -1, em);
         } catch (NoDatetimeComparatorException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NumericvalueException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -250,11 +299,19 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
         try {
             ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
             List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
             assertTrue("Results of investigations should be 2 not " + li.size(), li.size() == 2);
-        } catch (NoDatetimeComparatorException ex) {
-            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoDatetimeComparatorException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NumericvalueException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -297,7 +354,17 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             ParameterSearch pv4 = new ParameterSearch(ParameterType.DATASET, param);
             lp.add(pv3);
             lp.add(pv4);
-            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
+            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParameterTypeException ex) {
@@ -327,7 +394,17 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             ParameterSearch pv4 = new ParameterSearch(ParameterType.DATAFILE, param);
 //            lp.add(pv3);
             lp.add(pv4);
-            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
+            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
@@ -361,7 +438,17 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             ParameterSearch pv4 = new ParameterSearch(ParameterType.SAMPLE, param);
             lp.add(pv3);
             lp.add(pv4);
-            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
+            InvestigationSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
+        } catch (RestrictionEmptyListException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionOperatorException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionINException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RestrictionNullException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DatevalueException ex) {
+            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoParametersException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParameterNoExistsException ex) {
