@@ -12,10 +12,8 @@ package uk.icat3.search;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
@@ -53,7 +51,6 @@ import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
-import uk.icat3.util.Queries;
 import static uk.icat3.util.Queries.*;
 /**
  * Searchs on the datasets for samples and list types and status' of datasets.
@@ -240,29 +237,17 @@ public class DatasetSearch {
             // Check for restriction parameters
             String restrictionParam = "";
             // Check if the parameter are defined in parameter search
-            if (restricion.isContainDatafileAttributes() && ejpql.getDatafileParameter().isEmpty())
-                restrictionParam += ", IN(i.datafileCollection) " + DATAFILE_NAME;
-            if (restricion.isContainSampleAttributes() && ejpql.getSampleParameter().isEmpty())
-                restrictionParam += ", IN(i.investigation.sampleCollection) " + SAMPLE_NAME;
+            if (ejpql.getDatafileParameter().isEmpty())
+                restrictionParam += restricion.getParameterJPQL(ElementType.DATASET, ElementType.DATAFILE);
+            if (ejpql.getSampleParameter().isEmpty())
+                restrictionParam += restricion.getParameterJPQL(ElementType.DATASET, ElementType.SAMPLE);
             // Construction JPQL sentence
-            String jpql = restrictionParam + ", " + ejpql.getParametersJPQL(ElementType.DATASET)
-                    + QUERY_USERS_DATASETS_JPQL + " AND " + ejpql.getCondition();
-            // Add restriction if exists
-            if (!restricion.isEmpty())
-                jpql += " AND " + restricion.getSentenceJPQL();
-            // Create Query
-            Query q = manager.createQuery(returnJPQL + jpql);
-            // Set JPQL parameters
-            for (Entry<String, Object> e : ejpql.getAllJPQLParameter().entrySet()) {
-                q.setParameter(e.getKey(), e.getValue());
-            }
-            for (Entry<String, Object> e : restricion.getJpqlParameter().entrySet()) {
-                q.setParameter(e.getKey(), e.getValue());
-            }
-            q.setParameter("objectType", ElementType.DATASET);
-            q.setParameter("userId", userId);
+            String jpql = returnJPQL + restrictionParam + ", " + ejpql.getParametersJPQL(ElementType.DATASET)
+                    + QUERY_USERS_DATASETS_JPQL;
             // Object returns and check number of results
-            Collection res = ManagerUtil.getResultList (q, startIndex, numberResults);
+            Collection res = ManagerUtil.getRestultList(jpql, ejpql, restricion
+                    , ElementType.DATASET, userId, startIndex, numberResults
+                    , manager);
             // Return type is a Collection of Long
             if (include == DatasetInclude.ALL_DATASET_ID)
                 return res;

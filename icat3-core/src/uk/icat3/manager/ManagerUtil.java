@@ -10,6 +10,7 @@ package uk.icat3.manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map.Entry;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -33,6 +34,8 @@ import uk.icat3.entity.SampleParameter;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.restriction.util.RestrictionUtil;
+import uk.icat3.search.parameter.util.ExtractedJPQL;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.util.AccessType;
 import uk.icat3.util.Cascade;
@@ -906,13 +909,36 @@ public class ManagerUtil {
      * @param numberResults Number of results
      * @return
      */
-    public static Collection getResultList(Query q, int startIndex, int numberResults) {
+    public static Collection getRestultList(String jpql, ExtractedJPQL ejpql, RestrictionUtil restricion, ElementType elementType, String userId, int startIndex, int numberResults, EntityManager manager) {
+        
+        // Check if there are any parameter condition
+        if (!ejpql.isEmpty())
+            jpql += " AND " + ejpql.getCondition();
+        // Check if there are any restriction
+        if (!restricion.isEmpty())
+            jpql += " AND " + restricion.getSentenceJPQL();
+        System.out.println("-------------------");
+        System.out.println(jpql);
+        System.out.println("-------------------");
+        // Create Query
+        Query q = manager.createQuery(jpql);
+        // Set JPQL parameters
+        for (Entry<String, Object> e : ejpql.getAllJPQLParameter().entrySet()) {
+            q.setParameter(e.getKey(), e.getValue());
+        }
+        for (Entry<String, Object> e : restricion.getJpqlParameter().entrySet()) {
+            q.setParameter(e.getKey(), e.getValue());
+        }
+        q.setParameter("objectType", elementType);
+        q.setParameter("userId", userId);
+
         if (numberResults == Queries.NO_PAGINATION)
             return q.setMaxResults(Queries.MAX_QUERY_RESULTSET).getResultList();
         else if (numberResults == Queries.NO_LIMITED_RESULTS)
             return q.getResultList();
         else
             return q.setMaxResults(numberResults).setFirstResult(startIndex).getResultList();
+
     }
 
     /**

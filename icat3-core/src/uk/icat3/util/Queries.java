@@ -28,8 +28,14 @@ public class Queries {
     //Returns all of datafiles
     public static final String RETURN_ALL_DATAFILES_JPQL = "SELECT DISTINCT i from Datafile i ";
 
-    //Returns all of datafiles
+    /** Returns all of Datafile ids*/
     public static final String RETURN_ALL_DATAFILES_ID_JPQL = "SELECT DISTINCT i.id from Datafile i ";
+
+    /** Returns all of Investigation ids*/
+    public static final String RETURN_ALL_INVESTIGATIONS_ID_JPQL = "SELECT DISTINCT i.id from Investigation i ";
+
+    /** Returns all Sample ids */
+    public static final String RETURN_ALL_SAMPLE_ID_JPQL = "SELECT DISTINCT i.id from Sample i ";
 
     /** Returns all of datasets */
     public static final String RETURN_ALL_DATASETS_JPQL = "SELECT DISTINCT i from Dataset i ";

@@ -86,6 +86,8 @@ public enum InvestigationInclude {
      * all information except datasets and datafiles, ie keywords, sample and investigators
      */
     ALL_EXCEPT_DATASETS_AND_DATAFILES,
+    /** All investigation id */
+    ALL_INVESTIGATION_ID,
     /**
      * all information except datasets, datafiles and icatroles, ie keywords, sample and investigators
      */
@@ -176,6 +178,12 @@ public enum InvestigationInclude {
                 this == InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES ||
                 this == InvestigationInclude.ALL_EXCEPT_DATASETS_DATAFILES_AND_ROLES) return true;
         else return false;
+    }
+
+    public boolean isAllInvestigationId () {
+        if (this == InvestigationInclude.ALL_INVESTIGATION_ID)
+            return true;
+        return false;
     }
     
 }

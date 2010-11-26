@@ -7,6 +7,8 @@
 
 package uk.icat3.restriction.attribute;
 
+import uk.icat3.restriction.RestrictionType;
+
 /**
  * This class defines all the attributes which is able to search for.
  * This attributes are sectioned depending on the database table where they
@@ -146,5 +148,21 @@ public enum RestrictionAttributes {
        if (this.ordinal() >= RestrictionAttributes.INVESTIGATION_ID.ordinal())
             return true;
         return false;
+    }
+    /**
+     * Retrun restriction type of the attribute
+     * 
+     * @return
+     */
+    public RestrictionType getAttributeType() {
+        if (this.isDatafile())
+            return RestrictionType.DATAFILE;
+        if (this.isDataset())
+            return RestrictionType.DATASET;
+        if (this.isSample())
+            return RestrictionType.SAMPLE;
+        if (this.isInvestigation())
+            return RestrictionType.INVESTIGATION;
+        return null;
     }
 }

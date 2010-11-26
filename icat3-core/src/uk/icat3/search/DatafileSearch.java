@@ -11,7 +11,6 @@ package uk.icat3.search;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -203,22 +202,15 @@ public class DatafileSearch {
             }
             // Check for restriction parameters
             String restrictionParam = "";
-            if (restricion.isContainSampleAttributes() && ejpql.getSampleParameter().isEmpty())
-                restrictionParam += ", IN(i.investigation.sampleCollection) " + SAMPLE_NAME;
+            if (ejpql.getSampleParameter().isEmpty())
+                restrictionParam += restricion.getParameterJPQL(ElementType.DATAFILE, ElementType.SAMPLE);
             // Construction JPQL sentence
-            String jpql =  returnJPQL + restrictionParam + ", " + ejpql.getParametersJPQL(ElementType.DATAFILE) + QUERY_USERS_DATAFILES_JPQL + " AND " + ejpql.getCondition();
-            if (!restricion.isEmpty())
-                jpql += " AND " + restricion.getSentenceJPQL();
-            // Create Query
-            Query q = manager.createQuery(jpql);
-            // Set JPQL parameters
-            for (Entry<String, Object> e : ejpql.getAllJPQLParameter().entrySet()) {
-                q.setParameter(e.getKey(), e.getValue());
-            }
-            q.setParameter("objectType", ElementType.DATASET);
-            q.setParameter("userId", userId);
+            String jpql =  returnJPQL + restrictionParam + ", " + ejpql.getParametersJPQL(ElementType.DATAFILE)
+                    + QUERY_USERS_DATAFILES_JPQL;
             // Object returns and check number of results
-            Collection res = ManagerUtil.getResultList (q, startIndex, numberResults);
+            Collection res = ManagerUtil.getRestultList(jpql, ejpql, restricion
+                    , ElementType.DATASET, userId, startIndex, numberResults
+                    , manager);
             // Return is a Collection of Long
             if (include == DatafileInclude.ALL_DATAFILE_ID)
                 return res;

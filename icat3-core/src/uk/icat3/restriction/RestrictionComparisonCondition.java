@@ -25,6 +25,36 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
     private RestrictionOperator restOp;
     /** Value to compare with attribute */
     private Object value;
+    /** Second value for BETWEEN operator */
+    private Object value2 = null;
+
+    /**
+     * Constructor Between for dates
+     * 
+     * @param restAttr Restriction attribute to compare with value
+     * @param restOp Restriction operator
+     * @param value Restriction value to compare with attribute
+     */
+    public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, Date lValue, Date rValue){
+        this.restAttr = restAttr;
+        this.restOp = restOp;
+        this.value = lValue;
+        this.value2 = rValue;
+    }
+
+    /**
+     * Constructor Between for numbers.
+     *
+     * @param restAttr Restriction attribute to compare with value
+     * @param restOp Restriction operator
+     * @param value Restriction value to compare with attribute
+     */
+    public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, Number lValue, Number rValue){
+        this.restAttr = restAttr;
+        this.restOp = restOp;
+        this.value = lValue;
+        this.value2 = rValue;
+    }
 
     /**
      * Constructor
@@ -40,7 +70,7 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
     }
 
     /**
-     * Constructor
+     * Constructor for IN
      *
      * @param restAttr Restriction attribute to compare with value
      * @param restOp Restriction operator
@@ -64,7 +94,6 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
         this.restOp = restOp;
         this.value = value;
     }
-
     /**
      * Constructor
      *
@@ -83,9 +112,13 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
      * @throws RestrictionNullException
      */
     public void validate () throws RestrictionNullException {
+        // Check if any private field is null.
         if (this.restAttr == null ||
                 this.restOp == null ||
                 this.value == null)
+            throw new RestrictionNullException ();
+        // Check value2 is not null, if Between operator is selected
+        if (this.restOp == RestrictionOperator.BETWEEN && this.value2 == null)
             throw new RestrictionNullException ();
     }
 
@@ -97,23 +130,15 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
         return restAttr;
     }
 
-    public void setRestAttr(RestrictionAttributes restAttr) {
-        this.restAttr = restAttr;
-    }
-
     public RestrictionOperator getRestOp() {
         return restOp;
-    }
-
-    public void setRestOp(RestrictionOperator restOp) {
-        this.restOp = restOp;
     }
 
     public Object getValue() {
         return value;
     }
 
-    public void setValue(Object value) {
-        this.value = value;
+    public Object getValue2() {
+        return value2;
     }
 }

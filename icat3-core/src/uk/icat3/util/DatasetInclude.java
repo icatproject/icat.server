@@ -51,7 +51,7 @@ public enum DatasetInclude {
      *
      * @return True if this object is ALL_DATASET_ID, otherwise false.
      */
-    public boolean isDatasetId () {
+    public boolean isAllDatasetId () {
         if (this == DatasetInclude.ALL_DATASET_ID)
             return true;
         return false;

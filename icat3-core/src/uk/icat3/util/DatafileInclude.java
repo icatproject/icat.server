@@ -33,7 +33,7 @@ public enum DatafileInclude {
         else return false;
     }
 
-    public boolean isDatafileId () {
+    public boolean isAllDatafileId () {
         if (this == ALL_DATAFILE_ID)
             return true;
         return false;

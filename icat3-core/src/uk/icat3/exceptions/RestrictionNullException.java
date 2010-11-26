@@ -13,7 +13,7 @@ package uk.icat3.exceptions;
  */
 public class RestrictionNullException extends RestrictionException {
 
-    private static final String msg = "Type no recognized. Only Collection and String.";
+    private static final String msg = "Values can't be null";
     public RestrictionNullException() {
         super (msg);
     }

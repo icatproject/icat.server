@@ -83,17 +83,17 @@ public class ExtractedJPQL {
             ret += ", IN(" + Queries.DATASET_NAME + ".datasetParameterCollection) " + e.getKey();
 
         for (Map.Entry<String, Parameter> e : sampleParameter.entrySet())
-            ret += ", IN(i.sampleParameterCollection) " + e.getKey();
+            ret += ", IN(" + Queries.PARAM_NAME_JPQL + ".sampleParameterCollection) " + e.getKey();
 
         if (ret.isEmpty())
             throw new NoParametersException();
 
         String parameter = "";
         if (!datafileParameter.isEmpty())
-            parameter += ", IN(i.investigationId.datasetCollection) " + Queries.DATASET_NAME 
+            parameter += ", IN(" + Queries.PARAM_NAME_JPQL + ".investigationId.datasetCollection) " + Queries.DATASET_NAME
                     + ", IN(" + Queries.DATASET_NAME + ".datafileCollection) " + Queries.DATAFILE_NAME;
         if (datafileParameter.isEmpty() && !datasetParameter.isEmpty())
-            parameter += ", IN(i.investigationId.datasetCollection) " + Queries.DATASET_NAME;
+            parameter += ", IN(" + Queries.PARAM_NAME_JPQL + ".investigationId.datasetCollection) " + Queries.DATASET_NAME;
 
 
         if (parameter.isEmpty())
@@ -114,7 +114,7 @@ public class ExtractedJPQL {
             ret += ", IN(" + Queries.DATAFILE_NAME + ".datafileParameterCollection) " + e.getKey();
 
         for (Map.Entry<String, Parameter> e : datasetParameter.entrySet())
-            ret += ", IN(i.datasetParameterCollection) " + e.getKey();
+            ret += ", IN(" + Queries.PARAM_NAME_JPQL + ".datasetParameterCollection) " + e.getKey();
 
         for (Map.Entry<String, Parameter> e : sampleParameter.entrySet())
             ret += ", IN(" + Queries.SAMPLE_NAME + ".sampleParameterCollection) " + e.getKey();
@@ -124,9 +124,9 @@ public class ExtractedJPQL {
 
         String parameter = "";
         if (!datafileParameter.isEmpty())
-            parameter += ", IN(i.datafileCollection) " + Queries.DATAFILE_NAME ;
+            parameter += ", IN(" + Queries.PARAM_NAME_JPQL + ".datafileCollection) " + Queries.DATAFILE_NAME ;
         if (!sampleParameter.isEmpty())
-            parameter += ", IN(i.investigation.sampleCollection) " + Queries.SAMPLE_NAME;
+            parameter += ", IN(" + Queries.PARAM_NAME_JPQL + ".investigation.sampleCollection) " + Queries.SAMPLE_NAME;
         
 
         if (parameter.isEmpty())
@@ -144,20 +144,20 @@ public class ExtractedJPQL {
     private String getDatafileParameterJPQL () throws NoParametersException {
         String ret = "";
         for (Map.Entry<String, Parameter> e : datafileParameter.entrySet())
-            ret += ", IN(i.datafileParameterCollection) " + e.getKey();
+            ret += ", IN(" + Queries.PARAM_NAME_JPQL + ".datafileParameterCollection) " + e.getKey();
         
         for (Map.Entry<String, Parameter> e : datasetParameter.entrySet())
-            ret += ", IN(i.dataset.datasetParameterCollection) " + e.getKey();
+            ret += ", IN(" + Queries.PARAM_NAME_JPQL + ".dataset.datasetParameterCollection) " + e.getKey();
 
         for (Map.Entry<String, Parameter> e : sampleParameter.entrySet())
-            ret += ", IN(sample.sampleParameterCollection) " + e.getKey();
+            ret += ", IN(" + Queries.SAMPLE_NAME + ".sampleParameterCollection) " + e.getKey();
 
         if (ret.isEmpty())
             throw new NoParametersException();
 
         String parameter = "";
         if (!sampleParameter.isEmpty())
-            parameter += ", IN(i.dataset.investigation.sampleCollection) " + Queries.SAMPLE_NAME;
+            parameter += ", IN(" + Queries.PARAM_NAME_JPQL + ".dataset.investigation.sampleCollection) " + Queries.SAMPLE_NAME;
 
         if (parameter.isEmpty())
             return ret.substring(2);
@@ -176,27 +176,37 @@ public class ExtractedJPQL {
     private String getInvestigationParametersJPQL () throws NoParametersException {
         String ret = "";
         for (Map.Entry<String, Parameter> e : datafileParameter.entrySet())
-            ret += ", IN(df.datafileParameterCollection) " + e.getKey();
+            ret += ", IN(" + Queries.DATAFILE_NAME + ".datafileParameterCollection) " + e.getKey();
 
         for (Map.Entry<String, Parameter> e : datasetParameter.entrySet())
-             ret += ", IN(ds.datasetParameterCollection) " + e.getKey();
+             ret += ", IN(" + Queries.DATASET_NAME + ".datasetParameterCollection) " + e.getKey();
 
         for (Map.Entry<String, Parameter> e : sampleParameter.entrySet())
-             ret += ", IN(sample.sampleParameterCollection) " + e.getKey();
+             ret += ", IN(" + Queries.SAMPLE_NAME + ".sampleParameterCollection) " + e.getKey();
 
         if (ret.isEmpty())
             throw new NoParametersException();
 
         String parameter = "";
         if (!datafileParameter.isEmpty())
-            parameter += ", IN(i.datasetCollection) " + Queries.DATASET_NAME 
-                    + ", IN(ds.datafileCollection) " + Queries.DATAFILE_NAME;
+            parameter += ", IN(" + Queries.PARAM_NAME_JPQL + ".datasetCollection) " + Queries.DATASET_NAME
+                    + ", IN(" + Queries.DATASET_NAME + ".datafileCollection) " + Queries.DATAFILE_NAME;
         if (datafileParameter.isEmpty() && !datasetParameter.isEmpty())
-            parameter += ", IN(i.datasetCollection) " + Queries.DATASET_NAME;
+            parameter += ", IN(" + Queries.PARAM_NAME_JPQL + ".datasetCollection) " + Queries.DATASET_NAME;
         if (!sampleParameter.isEmpty())
-            parameter += ", IN(i.sampleCollection) " + Queries.SAMPLE_NAME;
+            parameter += ", IN(" + Queries.PARAM_NAME_JPQL + ".sampleCollection) " + Queries.SAMPLE_NAME;
 
         return parameter.substring(2) + ret;
+    }
+
+    /**
+     * Check if there are any condition
+     * @return
+     */
+    public boolean isEmpty () {
+        if (this.condition.length() == 0)
+            return true;
+        return false;
     }
 
 

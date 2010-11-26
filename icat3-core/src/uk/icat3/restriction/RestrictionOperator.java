@@ -29,6 +29,8 @@ public enum RestrictionOperator {
     START_WITH,
     /** Restriction (%value) */
     END_WITH,
+    /** Restriction between */
+    BETWEEN,
     /** Restriction IN (value, value2, value3, ..) */
     IN;
 
@@ -66,6 +68,13 @@ public enum RestrictionOperator {
 
         if (this == RestrictionOperator.IN)
             return "IN (" + value + ")";
+        
+        return value;
+    }
+
+    public String getRestrictionBetween (String value, String value2) {
+        if (this == RestrictionOperator.BETWEEN)
+            return "BETWEEN " + value + " AND " + value2;
         
         return "";
     }

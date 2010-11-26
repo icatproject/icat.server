@@ -20,8 +20,9 @@ import uk.icat3.util.LogicalOperator;
  * @author cruzcruz
  */
 public class RestrictionLogicalCondition extends RestrictionCondition {
-
+    /** List of restrictions */
     private List<RestrictionCondition> restConditions;
+    /** Restriction locial operator */
     private LogicalOperator logicalOperator;
 
     /**
@@ -43,22 +44,26 @@ public class RestrictionLogicalCondition extends RestrictionCondition {
      * @throws CyclicException
      */
     public RestrictionLogicalCondition add (RestrictionCondition restCondition) throws CyclicException {
+        // The restriction object itself has been added.
         if (restCondition == this)
             throw new CyclicException("It's the same object");
-
+        // The restriction object already exists
         if (restConditions.contains(restCondition))
             throw new CyclicException("This ParameterOperator has already been inserted");
-
+        // If it's a logical condition
         if (restCondition.getClass() == RestrictionLogicalCondition.class) {
             RestrictionLogicalCondition op = (RestrictionLogicalCondition)restCondition;
+            // Check if this object is contained inside the restCondition
             if (op.restConditions.contains(this))
                 throw new CyclicException("Cyclic structure. " + this.toString());
+            // Check for each condition in the list, restCondition doesn't exists
             for (RestrictionCondition p : restConditions)
                 if (p.getClass() == RestrictionLogicalCondition.class && op.restConditions.contains(p))
                     throw new CyclicException("Cyclic structure. " + this.toString());
         }
+        // Add new condition to the list
         restConditions.add(restCondition);
-        
+        // Return this object
         return this;
     }
 
