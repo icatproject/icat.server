@@ -17,9 +17,12 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import uk.icat3.entity.Investigation;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
 import uk.icat3.search.parameter.ParameterType;
 import uk.icat3.search.InvestigationSearch;
+import uk.icat3.util.InvestigationInclude;
+import uk.icat3.util.Queries;
 
 /**
  *
@@ -28,7 +31,7 @@ import uk.icat3.search.InvestigationSearch;
 public class ListParameterTest extends BaseParameterSearchTest {
     
     @Test
-    public void datafileParameterTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException {
+    public void datafileParameterTest () throws ParameterSearchException, RestrictionException {
         
         List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
 
@@ -39,14 +42,14 @@ public class ListParameterTest extends BaseParameterSearchTest {
         lp.add(pv4);
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
 
        showInv(li);
        assertTrue("Results of investigations should not be ZERO", (li.size() == 1));
     }
 
     @Test
-    public void datasetParameterTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException {
+    public void datasetParameterTest () throws ParameterSearchException, RestrictionException {
         List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
 
         ParameterSearch pv2 = new ParameterSearch(ParameterType.DATASET, parameter.get("dataset1"));
@@ -57,7 +60,7 @@ public class ListParameterTest extends BaseParameterSearchTest {
 //        lp.add(pv4);
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
 
         showInv(li);
         assertTrue("Results of investigations should not be ZERO", (li.size() == 1));
@@ -65,7 +68,7 @@ public class ListParameterTest extends BaseParameterSearchTest {
     }
 
     @Test
-    public void sampleParameterTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException {
+    public void sampleParameterTest () throws ParameterSearchException, RestrictionException {
         List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
 
         ParameterSearch pv3 = new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample1"));
@@ -73,14 +76,14 @@ public class ListParameterTest extends BaseParameterSearchTest {
         lp.add(pv3);
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
 
         showInv(li);
         assertFalse("Results of investigations should not be ZERO", (li.size() == 0));
     }
 
     @Test
-    public void allParameterTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException {
+    public void allParameterTest () throws ParameterSearchException, RestrictionException {
         List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
         
         ParameterSearch pv1 = new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample1"));
@@ -92,7 +95,7 @@ public class ListParameterTest extends BaseParameterSearchTest {
         lp.add(pv3);
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION,lp, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
 
         showInv(li);
         assertTrue("Results of investigations should not be ZERO", (li.size() == 1));

@@ -16,9 +16,12 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import uk.icat3.entity.Investigation;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.InvestigationSearch;
+import uk.icat3.util.InvestigationInclude;
+import uk.icat3.util.Queries;
 
 /**
  *
@@ -27,37 +30,37 @@ import uk.icat3.search.InvestigationSearch;
 public class ListComparatorTest extends BaseParameterSearchTest {
 
     @Test
-    public void datafileParameterTest () throws NoParameterTypeException, ParameterSearchException {
+    public void datafileParameterTest () throws NoParameterTypeException, ParameterSearchException, RestrictionException {
         List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
         lc.add(pcDatafile.get(0));
         lc.add(pcDatafile.get(1));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
+                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, InvestigationInclude.NONE, -1, -1, em);
         
        assertTrue("Results of investigations should not be ZERO", (li.size() == 1));
     }
 
     @Test
-    public void datasetParameterTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException {
+    public void datasetParameterTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException, RestrictionException {
         List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
         lc.add(pcDataset.get(0));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, -1, -1, em);
+                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, InvestigationInclude.NONE, -1, -1, em);
 
        assertTrue("Results of investigations should not be ZERO", (li.size() == 1));
         
     }
 
     @Test
-    public void sampleParameterTest () throws NoParameterTypeException, ParameterSearchException {
+    public void sampleParameterTest () throws NoParameterTypeException, ParameterSearchException, RestrictionException {
 
         List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
         lc.add(pcSample.get(0));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, 1, -1, em);
+                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
 
         showInv(li);
 
@@ -66,7 +69,7 @@ public class ListComparatorTest extends BaseParameterSearchTest {
     }
 
     @Test
-    public void allParameterTest () throws NoParameterTypeException, ParameterSearchException {
+    public void allParameterTest () throws NoParameterTypeException, ParameterSearchException, RestrictionException {
 
         List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
         lc.add(pcDatafile.get(0));
@@ -74,7 +77,7 @@ public class ListComparatorTest extends BaseParameterSearchTest {
         lc.add(pcSample.get(0));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, 1, -1, em);
+                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
         
        assertTrue("Results of investigations should not be ZERO", (li.size() == 1));
     }
