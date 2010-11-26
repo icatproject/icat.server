@@ -7,15 +7,15 @@
 
 package uk.icat3.restriction;
 
+import uk.icat3.restriction.sample.SampleTest;
+import uk.icat3.restriction.investigation.InvestigationTest;
+import uk.icat3.restriction.dataset.DatasetTest;
+import uk.icat3.restriction.datafile.DatafileTest;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import uk.icat3.restriction.datafile.DatafileTest;
-import uk.icat3.restriction.dataset.DatasetTest;
-import uk.icat3.restriction.dataset.ValueTypeDatasetTest;
-import uk.icat3.restriction.exception.DatafileExceptionTest;
-import uk.icat3.restriction.exception.DatasetExceptionTest;
+import uk.icat3.restriction.exception.RestrictionExceptionTest;
 
 /**
  *
@@ -23,12 +23,12 @@ import uk.icat3.restriction.exception.DatasetExceptionTest;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-            DatasetTest.class,
-            DatafileTest.class,
-            ValueTypeDatasetTest.class,
-            DatasetExceptionTest.class,
-            DatafileExceptionTest.class,
-            UsesExamples.class
+    DatasetTest.class,
+    InvestigationTest.class,
+    SampleTest.class,
+    DatafileTest.class,
+    RestrictionExceptionTest.class,
+    UsesExamples.class
 })
         
 public class TestAllRestrictions {
