@@ -29,6 +29,7 @@ import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.restriction.RestrictionLogicalCondition;
 import uk.icat3.search.DatasetSearch;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
+import uk.icat3.search.parameter.ParameterCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
 import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.sessionbeans.ArgumentValidator;
@@ -120,7 +121,7 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
 
     @WebMethod()
     @Override
-    public Collection searchByParameterCondition(String sessionId, ParameterLogicalCondition logicalCondition) throws SessionException, ParameterSearchException, RestrictionException {
+    public Collection searchByParameterCondition(String sessionId, ParameterCondition logicalCondition) throws SessionException, ParameterSearchException, RestrictionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
@@ -156,7 +157,7 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
 
     @WebMethod()
     @Override
-    public Collection searchByParameterCondition(String sessionId, ParameterLogicalCondition paramLogCond, DatasetInclude include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+    public Collection searchByParameterCondition(String sessionId, ParameterCondition paramLogCond, DatasetInclude include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
@@ -207,7 +208,7 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
 
     @WebMethod()
     @Override
-    public Collection searchByParameterCondition(String sessionId, ParameterLogicalCondition paramLogCond, DatasetInclude include) throws SessionException, ParameterSearchException, RestrictionException {
+    public Collection searchByParameterCondition(String sessionId, ParameterCondition paramLogCond, DatasetInclude include) throws SessionException, ParameterSearchException, RestrictionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
@@ -243,7 +244,7 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
 
     @WebMethod()
     @Override
-    public Collection searchByParameterCondition(String sessionId, ParameterLogicalCondition paramLogCond, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+    public Collection searchByParameterCondition(String sessionId, ParameterCondition paramLogCond, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 

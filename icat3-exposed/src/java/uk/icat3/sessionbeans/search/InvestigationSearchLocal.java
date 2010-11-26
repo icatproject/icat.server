@@ -2,25 +2,20 @@ package uk.icat3.sessionbeans.search;
 
 
 import java.util.Collection;
-import java.util.List;
 import javax.ejb.Local;
 import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.SessionException;
-import uk.icat3.search.parameter.ParameterComparisonCondition;
-import uk.icat3.search.parameter.ParameterCondition;
-import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.KeywordDetails;
-import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.util.InvestigationInclude;
 
 /**
  * This is the business interface for InvestigationSearch enterprise bean.
  */
 @Local
-public interface InvestigationSearchLocal {
+public interface InvestigationSearchLocal extends ParameterSearchInterface<InvestigationInclude> {
 
     Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch) throws SessionException;
 
@@ -57,10 +52,5 @@ public interface InvestigationSearchLocal {
     Collection<Parameter> listParameters(String sessionId) throws SessionException;
 
     Collection<String> listInvestigationTypes(String sessionId) throws SessionException;
-
-    Collection<Investigation> searchByParameterCondition (String sessionId, ParameterCondition parameterOperable) throws SessionException, ParameterSearchException;
-
-    Collection<Investigation> searchByParameterComparison(String sessionId, ParameterComparisonCondition... parameterComparator) throws SessionException, ParameterSearchException;
-
-    Collection<Investigation> searchByParameter(String sessionId, ParameterSearch... parameters) throws SessionException, ParameterSearchException;
+    
     }

@@ -25,9 +25,12 @@ import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.SessionException;
+import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterCondition;
 import uk.icat3.exceptions.ParameterSearchException;
+import uk.icat3.exceptions.RestrictionException;
+import uk.icat3.restriction.RestrictionLogicalCondition;
 import uk.icat3.search.AdvancedSearchDetails;
 import uk.icat3.search.InvestigationSearch;
 import uk.icat3.search.KeywordDetails;
@@ -36,6 +39,7 @@ import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
+import uk.icat3.util.Queries;
 
 /**
  *
@@ -440,29 +444,158 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
     }
 
     @WebMethod()
-    public Collection<Investigation> searchByParameterCondition (String sessionId, ParameterCondition parameterOperable) throws SessionException, ParameterSearchException {
+    public Collection searchByParameterCondition (String sessionId, ParameterCondition parameterOperable) throws SessionException, ParameterSearchException, RestrictionException {
         String userId = user.getUserIdFromSessionId(sessionId);
-        return InvestigationSearch.searchByParameterCondition(userId, parameterOperable, manager);
+        return InvestigationSearch.searchByParameterCondition(userId, parameterOperable, Queries.NO_RESTRICTION, InvestigationInclude.NONE, manager);
     }
 
     @WebMethod()
-    public Collection<Investigation> searchByParameterComparison(String sessionId, ParameterComparisonCondition... listComparators) throws SessionException, ParameterSearchException {
+    public Collection searchByParameterComparison(String sessionId, ParameterComparisonCondition... listComparators) throws SessionException, ParameterSearchException, RestrictionException {
         String userId = user.getUserIdFromSessionId(sessionId);
         List<ParameterComparisonCondition> list = new ArrayList<ParameterComparisonCondition>();
         for (ParameterComparisonCondition p : listComparators) {
             list.add(p);
         }
-        return InvestigationSearch.searchByParameterComparisonList(userId, list, -1, -1, manager);
+        return InvestigationSearch.searchByParameterComparisonList(userId, list, Queries.NO_RESTRICTION, InvestigationInclude.NONE, -1, -1, manager);
     }
 
     @Override
-    public Collection<Investigation> searchByParameter(String sessionId, ParameterSearch... parameters) throws SessionException, ParameterSearchException {
+    public Collection searchByParameter(String sessionId, ParameterSearch... parameters) throws SessionException, ParameterSearchException, RestrictionException {
         String userId = user.getUserIdFromSessionId(sessionId);
 
         List<ParameterSearch> list = new ArrayList<ParameterSearch>();
         for (ParameterSearch p : parameters)
             list.add(p);
         
-        return InvestigationSearch.searchByParameterList(userId, list, -1, -1, manager);
+        return InvestigationSearch.searchByParameterList(userId, list, Queries.NO_RESTRICTION, InvestigationInclude.NONE, -1, -1, manager);
+    }
+
+    @Override
+    public Collection searchByParameterCondition(String sessionId, ParameterCondition logicalCondition, InvestigationInclude include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restriction) {
+            restLogCond.add(r);
+        }
+
+        return InvestigationSearch.searchByParameterCondition(userId, logicalCondition, restLogCond, include, manager);
+    }
+
+    @Override
+    public Collection searchByParameterComparison(String sessionId, ParameterComparisonCondition[] comparison, InvestigationInclude include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restriction) {
+            restLogCond.add(r);
+        }
+
+        List<ParameterComparisonCondition> list = new ArrayList<ParameterComparisonCondition>();
+        for (ParameterComparisonCondition p : comparison) {
+            list.add(p);
+        }
+
+        return InvestigationSearch.searchByParameterComparisonList(userId, list, restLogCond, include, manager);
+    }
+
+    @Override
+    public Collection searchByParameter(String sessionId, ParameterSearch[] parameters, InvestigationInclude include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restriction) {
+            restLogCond.add(r);
+        }
+
+        List<ParameterSearch> list = new ArrayList<ParameterSearch>();
+        for (ParameterSearch p : parameters)
+            list.add(p);
+
+        return InvestigationSearch.searchByParameterList(userId, list, restLogCond, include, manager);
+    }
+
+    @Override
+    public Collection searchByParameterCondition(String sessionId, ParameterCondition logicalCondition, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restriction) {
+            restLogCond.add(r);
+        }
+
+        return InvestigationSearch.searchByParameterCondition(userId, logicalCondition, restLogCond, InvestigationInclude.NONE, manager);
+    }
+
+    @Override
+    public Collection searchByParameterComparison(String sessionId, ParameterComparisonCondition[] comparison, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restriction) {
+            restLogCond.add(r);
+        }
+
+        List<ParameterComparisonCondition> list = new ArrayList<ParameterComparisonCondition>();
+        for (ParameterComparisonCondition p : comparison) {
+            list.add(p);
+        }
+
+        return InvestigationSearch.searchByParameterComparisonList(userId, list, restLogCond, InvestigationInclude.NONE, manager);
+    }
+
+    @Override
+    public Collection searchByParameter(String sessionId, ParameterSearch[] parameters, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restriction) {
+            restLogCond.add(r);
+        }
+
+        List<ParameterSearch> list = new ArrayList<ParameterSearch>();
+        for (ParameterSearch p : parameters)
+            list.add(p);
+
+        return InvestigationSearch.searchByParameterList(userId, list, restLogCond, InvestigationInclude.NONE, manager);
+    }
+
+    @Override
+    public Collection searchByParameterCondition(String sessionId, ParameterCondition logicalCondition, InvestigationInclude include) throws SessionException, ParameterSearchException, RestrictionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        return InvestigationSearch.searchByParameterCondition(userId, logicalCondition, Queries.NO_RESTRICTION, include, manager);
+    }
+
+    @Override
+    public Collection searchByParameterComparison(String sessionId, ParameterComparisonCondition[] comparison, InvestigationInclude include) throws SessionException, ParameterSearchException, RestrictionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        List<ParameterComparisonCondition> list = new ArrayList<ParameterComparisonCondition>();
+        for (ParameterComparisonCondition p : comparison) {
+            list.add(p);
+        }
+
+        return InvestigationSearch.searchByParameterComparisonList(userId, list, Queries.NO_RESTRICTION, include, manager);
+    }
+
+    @Override
+    public Collection searchByParameter(String sessionId, ParameterSearch[] parameters, InvestigationInclude include) throws SessionException, ParameterSearchException, RestrictionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        List<ParameterSearch> list = new ArrayList<ParameterSearch>();
+        for (ParameterSearch p : parameters)
+            list.add(p);
+
+        return InvestigationSearch.searchByParameterList(userId, list, Queries.NO_RESTRICTION, include, manager);
     }
 }
