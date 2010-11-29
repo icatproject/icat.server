@@ -77,7 +77,6 @@ import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.KeywordType;
-import uk.icat3.util.ParameterValueType;
 import uk.icat3.util.Queries;
 import uk.icat3.util.SampleInclude;
 
@@ -2035,7 +2034,7 @@ public class ICAT extends EJBObject implements ICATLocal {
      */
     @WebMethod(operationName = "searchByParameter")
     public Collection searchByParameter(@WebParam(name = "sessionId")
-    String sessionId, @WebParam(name = "parameterValued")
+    String sessionId, @WebParam(name = "parameterSearch")
     ParameterSearch... parameterSearch) throws SessionException, ParameterSearchException, RestrictionException {
         return investigationSearchLocal.searchByParameter(sessionId, parameterSearch);
     }
