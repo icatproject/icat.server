@@ -82,11 +82,11 @@ public final class ParameterComparisonCondition extends ParameterCondition{
         this.comparator = comparator;
     }
 
-    public ParameterSearch getParameterValued() {
+    public ParameterSearch getParameterSearch() {
         return param;
     }
 
-    public void setParameterValued(ParameterSearch param) {
+    public void setParameterSearch(ParameterSearch param) {
         this.param = param;
     }
 
