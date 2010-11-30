@@ -7,7 +7,6 @@
 
 package uk.icat3.restriction.datafile;
 
-import uk.icat3.restriction.datafile.*;
 import uk.icat3.exceptions.EmptyListParameterException;
 import uk.icat3.exceptions.NoParameterTypeException;
 import uk.icat3.exceptions.NoParametersException;
@@ -17,6 +16,7 @@ import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.search.parameter.util.ParameterSearch;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
@@ -25,8 +25,12 @@ import uk.icat3.exceptions.RestrictionException;
 import static org.junit.Assert.*;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
 import uk.icat3.restriction.RestrictionComparisonCondition;
+import uk.icat3.restriction.RestrictionComparisonCondition;
+import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.restriction.RestrictionLogicalCondition;
+import uk.icat3.restriction.RestrictionLogicalCondition;
+import uk.icat3.restriction.RestrictionOperator;
 import uk.icat3.restriction.RestrictionOperator;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
@@ -72,6 +76,35 @@ public class DatafileTest extends BaseParameterSearchTest {
 //    }
 
     @Test
+    public void differentsAttr () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {
+
+        RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
+                RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "");
+
+        RestrictionLogicalCondition restrLog = new RestrictionLogicalCondition(LogicalOperator.OR)
+                .add(restriction1)
+                .add(new RestrictionComparisonCondition(
+                RestrictionAttributes.DATAFILE_NAME, RestrictionOperator.END_WITH, ""))
+                .add(new RestrictionComparisonCondition(
+                RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.END_WITH, ""))
+                .add(new RestrictionComparisonCondition(
+                RestrictionAttributes.SAMPLE_NAME, RestrictionOperator.END_WITH, ""))
+                ;
+
+        List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
+        ParameterSearch pv1 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2_1"));
+        lp.add(pv1);
+
+        // Investigation search
+        List<Datafile> li = (List<Datafile>) DatafileSearch
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restrLog, DatafileInclude.NONE, 1, -1, em);
+
+        assertEquals("Results of Datafiles incorrect.", 3, li.size());
+//        assertEquals("Number of Results of Datafiles of 'dataset_1' are incorrect.",
+//               2, li.get(1).getDatafileCollection().size());
+    }
+
+    @Test
     public void restrictionConditionTest () throws ParameterSearchException, RestrictionException {
         // Restriction comparison condition
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
@@ -97,6 +130,37 @@ public class DatafileTest extends BaseParameterSearchTest {
        assertEquals("Results of Datafiles incorrect.", 2, li.size());
        assertTrue("Datafile name should be 'datafile_1', not " + li.get(0).getName(),
                (li.get(0).getName().contains("datafile_1")));
+    }
+
+    @Test
+    public void restrictionCondition2Test () throws ParameterSearchException, RestrictionException {
+         RestrictionLogicalCondition investDat = new RestrictionLogicalCondition(LogicalOperator.AND)
+                 .add(new RestrictionComparisonCondition(
+                    RestrictionAttributes.INVESTIGATION_START_DATE, RestrictionOperator.EQUAL, new Date(0)))
+                 .add(new RestrictionComparisonCondition(
+                    RestrictionAttributes.INVESTIGATION_END_DATE, RestrictionOperator.EQUAL, new Date(2342342)));
+        // Restricction logical condition
+        RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.OR)
+                .add((investDat))
+                .add(new RestrictionComparisonCondition(
+                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                ;
+
+        restricLog.setOrderByAsc(RestrictionAttributes.DATAFILE_NAME);
+        // Parameter conditions
+        ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
+        op1.add(pcDataset.get(0));
+        op1.add(pcDataset.get(1));
+        op1.add(pcSample.get(0));
+        op1.add(pcDatafile.get(1));
+        // Dataset search
+        List<Datafile> li = (List<Datafile>) DatafileSearch
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1
+                        , restricLog, DatafileInclude.NONE, 1, -1, em);
+
+       assertEquals("Results of Datasets incorrect.", 2, li.size());
+       assertEquals("Datafile name incorrect order ", "datafile_1", li.get(0).getName())
+               ;
     }
 
     @Test
