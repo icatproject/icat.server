@@ -392,7 +392,6 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
         } catch (NoDatetimeComparatorException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
-            Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
             exception = true;
         } catch (NumericvalueException ex) {
             Logger.getLogger(DatafileExceptionTest.class.getName()).log(Level.SEVERE, null, ex);

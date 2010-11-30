@@ -291,6 +291,7 @@ public class BaseParameterSearchTest extends BaseTest {
             Parameter ds1_1 = createParameter("deg", "dataset1", ElementType.DATASET);
             Parameter df1_1 = createParameter("deg", "datafile1", ElementType.DATAFILE);
             Parameter df1_2 = createParameter("deg", "datafile2", ElementType.DATAFILE);
+            Parameter df2_2 = createParameter("deg", "DATAFILE2_2", ElementType.DATAFILE);
 
             Parameter time1 = createParameter(ParameterValueType.DATE_AND_TIME, "yyyy-MM-dd HH:mm:ss", "time1",  ElementType.DATAFILE);
             Parameter str1 = createParameter(ParameterValueType.STRING, "str", "string1",  ElementType.DATAFILE);
@@ -300,6 +301,7 @@ public class BaseParameterSearchTest extends BaseTest {
             removeEntities.add(ds1_1);
             removeEntities.add(df1_1);
             removeEntities.add(df1_2);
+            removeEntities.add(df2_2);
             removeEntities.add(time1);
             removeEntities.add(elec);
             removeEntities.add(str1);

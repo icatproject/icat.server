@@ -49,7 +49,10 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = Queries.ALL_PARAMETERS, query = Queries.ALL_PARAMETERS_JPQL),
     @NamedQuery(name = Queries.PARAMETER_SEARCH_BY_NAME_UNITS, query = Queries.PARAMETER_SEARCH_BY_NAME_UNITS_JPQL),
     @NamedQuery(name = Queries.PARAMETER_SEARCH_BY_NAME, query = Queries.PARAMETER_SEARCH_BY_NAME_JPQL),
-    @NamedQuery(name = Queries.PARAMETER_SEARCH_BY_UNITS, query = Queries.PARAMETER_SEARCH_BY_UNITS_JPQL)
+    @NamedQuery(name = Queries.PARAMETER_SEARCH_BY_UNITS, query = Queries.PARAMETER_SEARCH_BY_UNITS_JPQL),
+    @NamedQuery(name = Queries.PARAMETER_SEARCH_BY_NAME_UNITS_SENSITIVE, query = Queries.PARAMETER_SEARCH_BY_NAME_UNITS_JPQL_SENSITIVE),
+    @NamedQuery(name = Queries.PARAMETER_SEARCH_BY_NAME_SENSITIVE, query = Queries.PARAMETER_SEARCH_BY_NAME_JPQL_SENSITIVE),
+    @NamedQuery(name = Queries.PARAMETER_SEARCH_BY_UNITS_SENSITIVE, query = Queries.PARAMETER_SEARCH_BY_UNITS_JPQL_SENSITIVE)
 })
         public class Parameter extends EntityBaseBean implements Serializable {
     

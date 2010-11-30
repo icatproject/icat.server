@@ -30,8 +30,8 @@ public class TestParameterSearch extends BaseParameterSearchTest {
      */
     @Test
     public void testgetParameterByName(){
-        Collection<Parameter> li = ParameterSearch.getParameterByName("", "datafile", em);
-        assertEquals("Number of parameter incorrect", 4, li.size());
+        Collection<Parameter> li = ParameterSearch.getParameterByName("", "Datafile", em);
+        assertEquals("Number of parameter incorrect", 5, li.size());
     }
 
     /**

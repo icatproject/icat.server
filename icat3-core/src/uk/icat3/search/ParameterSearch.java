@@ -41,10 +41,17 @@ public class ParameterSearch {
             name = "";
         else if (units == null)
             units = "";
-
-        name = sensitiveEager (name, false, true);
-        units = sensitiveEager(units, false, true);
-        return manager.createNamedQuery(Queries.PARAMETER_SEARCH_BY_NAME_UNITS)
+        // Select type of search
+        boolean sensitive = false;
+        boolean eager = true;
+        name = sensitiveEager (name, sensitive, eager);
+        units = sensitiveEager(units, sensitive, eager);
+        // Select query (no sensitive = all fields to lower)
+        String namedQuery = Queries.PARAMETER_SEARCH_BY_NAME_UNITS;
+        if (sensitive)
+            namedQuery = Queries.PARAMETER_SEARCH_BY_NAME_UNITS_SENSITIVE;
+        
+        return manager.createNamedQuery(namedQuery)
                 .setParameter("name", "" + name + "")
                 .setParameter("units", "" + units + "").getResultList();
     }
@@ -64,9 +71,15 @@ public class ParameterSearch {
 
         if (name == null)
             name = "";
-
-        name = sensitiveEager(name, false, true);
-        return manager.createNamedQuery(Queries.PARAMETER_SEARCH_BY_NAME)
+        // Select of type of search
+        boolean sensitive = false;
+        boolean eager = true;
+        name = sensitiveEager(name, sensitive, eager);
+        // Select query (no sensitive = all fields to lower)
+        String namedQuery = Queries.PARAMETER_SEARCH_BY_NAME;
+        if (sensitive)
+            namedQuery = Queries.PARAMETER_SEARCH_BY_NAME_SENSITIVE;
+        return manager.createNamedQuery(namedQuery)
                 .setParameter("name", "" + name + "").getResultList();
     }
 
@@ -86,8 +99,15 @@ public class ParameterSearch {
         if (units == null)
             units = "";
 
-        units = sensitiveEager(units, false, true);
-        return manager.createNamedQuery(Queries.PARAMETER_SEARCH_BY_UNITS)
+         // Select of type of search
+        boolean sensitive = false;
+        boolean eager = true;
+        units = sensitiveEager(units, sensitive, eager);
+        // Select query (no sensitive = all fields to lower)
+        String namedQuery = Queries.PARAMETER_SEARCH_BY_UNITS;
+        if (sensitive)
+            namedQuery = Queries.PARAMETER_SEARCH_BY_UNITS_SENSITIVE;
+        return manager.createNamedQuery(namedQuery)
                 .setParameter("units", "" + units + "").getResultList();
     }
 

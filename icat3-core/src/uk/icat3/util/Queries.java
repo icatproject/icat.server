@@ -378,20 +378,41 @@ public class Queries {
      */
     public static final String PARAMETER_SEARCH_BY_NAME_UNITS = "ParameterSearch.findByUnits";
     public static final String PARAMETER_SEARCH_BY_NAME_UNITS_JPQL = "SELECT p FROM Parameter p WHERE " +
-            "p.parameterPK.name LIKE :name " +
-            "AND p.parameterPK.units LIKE :units AND p.markedDeleted = 'N'";
+            "lower(p.parameterPK.name) LIKE :name " +
+            "AND lower(p.parameterPK.units) LIKE :units AND p.markedDeleted = 'N'";
     /**
      * Find parameters by name
      */
     public static final String PARAMETER_SEARCH_BY_NAME = "ParameterSearch.findByName";
     public static final String PARAMETER_SEARCH_BY_NAME_JPQL = "SELECT p FROM Parameter p WHERE " +
-            "p.parameterPK.name LIKE :name " +
+            "lower(p.parameterPK.name) LIKE :name " +
             "AND p.markedDeleted = 'N'";
     /**
      * Find parameters by units
      */
     public static final String PARAMETER_SEARCH_BY_UNITS = "ParameterSearch.findByEagerUnits";
     public static final String PARAMETER_SEARCH_BY_UNITS_JPQL = "SELECT p FROM Parameter p WHERE " +
+            "lower(p.parameterPK.units) LIKE :units AND p.markedDeleted = 'N'";
+
+    /**
+     * Find parameters by name and units
+     */
+    public static final String PARAMETER_SEARCH_BY_NAME_UNITS_SENSITIVE = "ParameterSearch.findByUnitsSensitive";
+    public static final String PARAMETER_SEARCH_BY_NAME_UNITS_JPQL_SENSITIVE = "SELECT p FROM Parameter p WHERE " +
+            "p.parameterPK.name LIKE :name " +
+            "AND p.parameterPK.units LIKE :units AND p.markedDeleted = 'N'";
+    /**
+     * Find parameters by name
+     */
+    public static final String PARAMETER_SEARCH_BY_NAME_SENSITIVE = "ParameterSearch.findByNameSensitive";
+    public static final String PARAMETER_SEARCH_BY_NAME_JPQL_SENSITIVE = "SELECT p FROM Parameter p WHERE " +
+            "p.parameterPK.name LIKE :name " +
+            "AND p.markedDeleted = 'N'";
+    /**
+     * Find parameters by units
+     */
+    public static final String PARAMETER_SEARCH_BY_UNITS_SENSITIVE = "ParameterSearch.findByEagerUnitsSensitive";
+    public static final String PARAMETER_SEARCH_BY_UNITS_JPQL_SENSITIVE = "SELECT p FROM Parameter p WHERE " +
             "p.parameterPK.units LIKE :units AND p.markedDeleted = 'N'";
 
     /**
