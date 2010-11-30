@@ -105,7 +105,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
              // ------------- ComparisonOperator 1 ----------------------
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
-            comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
+            comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
             comp1.setComparator(ComparisonOperator.START_WITH);
             comp1.setNumericValue(new Double (3.14));
             lc.add(comp1);
@@ -211,7 +211,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
              // ------------- ComparisonOperator 1 ----------------------
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
-            comp1.setParameterValued(null);
+            comp1.setParameterSearch(null);
             comp1.setComparator(ComparisonOperator.EQUAL);
             comp1.setNumericValue(new Double (3.14));
 
@@ -265,7 +265,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
              // ------------- ComparisonOperator 1 ----------------------
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
-            comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
+            comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
             comp1.setComparator(ComparisonOperator.EQUAL);
             comp1.setStringValue("fail");
 
@@ -319,7 +319,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
              // ------------- ComparisonOperator 1 ----------------------
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
-            comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("time1")));
+            comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("time1")));
             comp1.setComparator(ComparisonOperator.EQUAL);
             comp1.setDatetimeValue("wrong format");
 
@@ -373,7 +373,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
              // ------------- ComparisonOperator 1 ----------------------
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
-            comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("time1")));
+            comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("time1")));
             comp1.setComparator(ComparisonOperator.EQUAL);
             comp1.setNumericValue(new Double(23));
 

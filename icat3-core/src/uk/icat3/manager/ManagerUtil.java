@@ -910,16 +910,17 @@ public class ManagerUtil {
      * @return
      */
     public static Collection getRestultList(String jpql, ExtractedJPQL ejpql, RestrictionUtil restricion, ElementType elementType, String userId, int startIndex, int numberResults, EntityManager manager) {
-        
+
+        // Check if there are any restriction
+        if (!restricion.isEmpty())
+            jpql += " AND (" + restricion.getSentenceJPQL() + ")";
         // Check if there are any parameter condition
         if (!ejpql.isEmpty())
             jpql += " AND " + ejpql.getCondition();
-        // Check if there are any restriction
-        if (!restricion.isEmpty())
-            jpql += " AND " + restricion.getSentenceJPQL();
-        System.out.println("-------------------");
-        System.out.println(jpql);
-        System.out.println("-------------------");
+
+        // Add order by is exists
+        jpql += restricion.getOrderBy();
+        
         // Create Query
         Query q = manager.createQuery(jpql);
         // Set JPQL parameters

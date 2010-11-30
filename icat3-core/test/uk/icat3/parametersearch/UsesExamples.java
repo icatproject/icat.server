@@ -54,7 +54,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         // Create the comparasion
         ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
         // Add the parameterValued
-        comp1.setParameterValued(pamVal);
+        comp1.setParameterSearch(pamVal);
         // Add the comparator
         comp1.setComparator(ComparisonOperator.BETWEEN);
         // Add the value to compare
@@ -151,7 +151,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
 
         // Add the parameterValued
-        comp1.setParameterValued(pamVal);
+        comp1.setParameterSearch(pamVal);
         // Add the comparator
         comp1.setComparator(ComparisonOperator.LESS_EQUAL);
         // Add the value to compare
@@ -183,7 +183,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
 
         // Add the parameterValued
-        comp1.setParameterValued(pamVal);
+        comp1.setParameterSearch(pamVal);
         // Add the comparator
         comp1.setComparator(ComparisonOperator.LESS_EQUAL);
         // Add the value to compare
@@ -215,7 +215,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
 
         // Add the parameterValued
-        comp1.setParameterValued(pamVal);
+        comp1.setParameterSearch(pamVal);
         // Add the comparator
         comp1.setComparator(ComparisonOperator.CONTAIN);
         // Add the value to compare
@@ -247,7 +247,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
 
         // Add the parameterValued
-        comp1.setParameterValued(pamVal);
+        comp1.setParameterSearch(pamVal);
         // Add the comparator
         comp1.setComparator(ComparisonOperator.CONTAIN);
         // Add the value to compare

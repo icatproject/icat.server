@@ -19,7 +19,7 @@ public class RestrictionCondition {
     /** Indicates if restriction condition is negated (NOT) */
     private boolean isNegate = false;
     /** Contain order by field, if exists */
-    private RestrictionAttributes oderByAttr = null;
+    private RestrictionAttributes orderByAttr = null;
     /** Indicates the order direction */
     private boolean orderByAsc;
 
@@ -33,13 +33,25 @@ public class RestrictionCondition {
         cond.isNegate = true;
         return cond;
     }
+
+    public static RestrictionLogicalCondition orderByDesc (RestrictionAttributes attr) {
+        RestrictionLogicalCondition a = new RestrictionLogicalCondition(null);
+        a.setOrderByDesc(attr);
+        return a;
+    }
+
+    public static RestrictionLogicalCondition orderByAsc (RestrictionAttributes attr) {
+        RestrictionLogicalCondition a = new RestrictionLogicalCondition(null);
+        a.setOrderByAsc(attr);
+        return a;
+    }
     /**
      * Set ascending order and attribute
      *
      * @param attr Attribute to order by
      */
     public void setOrderByAsc (RestrictionAttributes attr) {
-        this.oderByAttr = attr;
+        this.orderByAttr = attr;
         this.orderByAsc = true;
     }
     /**
@@ -48,7 +60,7 @@ public class RestrictionCondition {
      * @param attr Attribute to order by
      */
     public RestrictionCondition setOrderByDesc (RestrictionAttributes attr) {
-        this.oderByAttr = attr;
+        this.orderByAttr = attr;
         this.orderByAsc = false;
         return this;
     }
@@ -66,7 +78,13 @@ public class RestrictionCondition {
      * @return Attribute to order by.
      */
     public RestrictionAttributes getOderByAttr() {
-        return oderByAttr;
+        return orderByAttr;
+    }
+
+    public boolean hasOrder () {
+        if (this.orderByAttr == null)
+            return false;
+        return true;
     }
     /**
      * Check if order is Ascending

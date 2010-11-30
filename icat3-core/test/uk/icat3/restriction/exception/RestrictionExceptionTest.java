@@ -75,7 +75,7 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
              // ------------- ComparisonOperator 1 ----------------------
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
-            comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
+            comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
             comp1.setComparator(ComparisonOperator.GREATER_EQUAL);
             comp1.setNumericValue(new Double (3.14));
             lc.add(comp1);

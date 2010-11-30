@@ -130,7 +130,7 @@ public class ExtractTest extends BaseParameterSearchTest {
         // Create the comparasion
         ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
         // Add the parameterValued
-        comp1.setParameterValued(pamVal);
+        comp1.setParameterSearch(pamVal);
         // Add the comparator
         comp1.setComparator(ComparisonOperator.EQUAL);
         comp1.setNumericValue(5);
@@ -276,22 +276,22 @@ public class ExtractTest extends BaseParameterSearchTest {
 //        p2.setValueType(ParameterValueType.NUMERIC);
 //
 //        ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
-//        comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, p1));
+//        comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p1));
 //        comp1.setComparator(ComparisonOperator.START_WITH);
 //        comp1.setStringValue("comp1");
 //
 //        ParameterComparisonCondition comp2 = new ParameterComparisonCondition();
-//        comp2.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, p2));
+//        comp2.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p2));
 //        comp2.setComparator(ComparisonOperator.LESS_EQUAL);
 //        comp2.setNumericValue(new Float("12.23423"));
 //
 //        ParameterComparisonCondition comp3 = new ParameterComparisonCondition();
-//        comp3.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, p3));
+//        comp3.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p3));
 //        comp3.setComparator(ComparisonOperator.START_WITH);
 //        comp3.setStringValue("comp3");
 //
 //        ParameterComparisonCondition comp4 = new ParameterComparisonCondition();
-//        comp4.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, p4));
+//        comp4.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p4));
 //        comp4.setComparator(ComparisonOperator.START_WITH);
 //        comp4.setStringValue("comp4");
 //

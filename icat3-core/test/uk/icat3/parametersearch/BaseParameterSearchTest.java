@@ -476,7 +476,7 @@ public class BaseParameterSearchTest extends BaseTest {
 
 
         ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
-        comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, p1));
+        comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p1));
         comp1.setComparator(ComparisonOperator.GREATER_EQUAL);
         comp1.setNumericValue(new Float (1));
         // ----------------------------------------------------
@@ -488,7 +488,7 @@ public class BaseParameterSearchTest extends BaseTest {
         p2.setValueType(ParameterValueType.STRING);
 
         ParameterComparisonCondition comp2 = new ParameterComparisonCondition();
-        comp2.setParameterValued(new ParameterSearch(ParameterType.SAMPLE, p2));
+        comp2.setParameterSearch(new ParameterSearch(ParameterType.SAMPLE, p2));
         comp2.setComparator(ComparisonOperator.START_WITH);
         comp2.setStringValue("10");
         // ----------------------------------------------------
@@ -500,7 +500,7 @@ public class BaseParameterSearchTest extends BaseTest {
         p3.setValueType(ParameterValueType.STRING);
 
         ParameterComparisonCondition comp3 = new ParameterComparisonCondition();
-        comp3.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, p3));
+        comp3.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p3));
         comp3.setComparator(ComparisonOperator.START_WITH);
         comp3.setStringValue("");
         // ----------------------------------------------------
@@ -572,49 +572,49 @@ public class BaseParameterSearchTest extends BaseTest {
 
          // ------------- ComparisonOperator 1 ----------------------
         ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
-        comp1.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
+        comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
         comp1.setComparator(ComparisonOperator.EQUAL);
         comp1.setNumericValue(new Double (3.14));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 2 ----------------------
         ParameterComparisonCondition comp2 = new ParameterComparisonCondition();
-        comp2.setParameterValued(new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample1")));
+        comp2.setParameterSearch(new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample1")));
         comp2.setComparator(ComparisonOperator.EQUAL);
         comp2.setNumericValue(new Double(2.2));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 3 ----------------------
         ParameterComparisonCondition comp3 = new ParameterComparisonCondition();
-        comp3.setParameterValued(new ParameterSearch(ParameterType.DATASET, parameter.get("dataset1")));
+        comp3.setParameterSearch(new ParameterSearch(ParameterType.DATASET, parameter.get("dataset1")));
         comp3.setComparator(ComparisonOperator.EQUAL);
         comp3.setNumericValue(new Double (2.1));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 4 ----------------------
         ParameterComparisonCondition comp4 = new ParameterComparisonCondition();
-        comp4.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2_1")));
+        comp4.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2_1")));
         comp4.setComparator(ComparisonOperator.EQUAL);
         comp4.setNumericValue(new Double (21.0000002));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 5 -------------------------
         ParameterComparisonCondition comp5 = new ParameterComparisonCondition();
-        comp5.setParameterValued(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2")));
+        comp5.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2")));
         comp5.setComparator(ComparisonOperator.EQUAL);
         comp5.setNumericValue(new Double (5.2));
         // ----------------------------------------------------
 
          // ------------- ComparisonOperator 6 -------------------------
         ParameterComparisonCondition comp6 = new ParameterComparisonCondition();
-        comp6.setParameterValued(new ParameterSearch(ParameterType.DATASET, parameter.get("dataset2_1")));
+        comp6.setParameterSearch(new ParameterSearch(ParameterType.DATASET, parameter.get("dataset2_1")));
         comp6.setComparator(ComparisonOperator.EQUAL);
         comp6.setNumericValue(new Double(21.1));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 7 -------------------------
         ParameterComparisonCondition comp7 = new ParameterComparisonCondition();
-        comp7.setParameterValued(new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample2_1")));
+        comp7.setParameterSearch(new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample2_1")));
         comp7.setComparator(ComparisonOperator.EQUAL);
         comp7.setNumericValue(new Double(21.2));
         // ----------------------------------------------------

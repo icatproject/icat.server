@@ -138,7 +138,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
                      )
                 ;
         // Set order ASC
-        restricLog.setOrderByAsc(RestrictionAttributes.DATASET_NAME);
+        restricLog.setOrderByDesc(RestrictionAttributes.DATASET_NAME);
         // List of parameter
         List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
         // Parameter search
@@ -162,7 +162,42 @@ public class UsesExamples extends BaseParameterSearchTest  {
        assertEquals("Results of Datafiles incorrect.", 2, ldf.size());
        assertEquals("Results of Investigations incorrect.", 1, li.size());
        assertEquals("Results of Samples incorrect.", 1, ls.size());
-       assertEquals("First dataset name incorrect.", "dataset_1 blue", lds.get(0).getName());
+       assertEquals("First dataset name incorrect.", "dataset_3 blue", lds.get(0).getName());
+    }
+
+    /**
+     * Restriction order by and NOT exapmle
+     * @throws ParameterSearchException
+     * @throws RestrictionException
+     */
+    @Test
+    public void restrictionOrderBy () throws ParameterSearchException, RestrictionException {
+        // Set order ASC
+        RestrictionCondition restricLog = RestrictionCondition.orderByDesc(RestrictionAttributes.DATASET_NAME);
+        // List of parameter
+        List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
+        // Parameter search
+        ParameterSearch pv1 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2_1"));
+        lp.add(pv1);
+
+        // Dataset search
+        List<Dataset> lds = (List<Dataset>) DatasetSearch
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, DatasetInclude.NONE, 1, -1, em);
+        // Datafile search
+        List<Datafile> ldf = (List<Datafile>) DatafileSearch
+            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, DatafileInclude.NONE, 1, -1, em);
+        // Sample search
+        List<Sample> ls = (List<Sample>) SampleSearch
+            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, SampleInclude.NONE, 1, -1, em);
+        // Investigation search
+        List<Investigation> li = (List<Investigation>) InvestigationSearch
+            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, InvestigationInclude.NONE, 1, -1, em);
+
+       assertEquals("Results of Datasets incorrect.", 3, lds.size());
+       assertEquals("Results of Datafiles incorrect.", 3, ldf.size());
+       assertEquals("Results of Investigations incorrect.", 2, li.size());
+       assertEquals("Results of Samples incorrect.", 2, ls.size());
+       assertEquals("First dataset name incorrect.", "dataset_3 blue", lds.get(0).getName());
     }
 
     /**

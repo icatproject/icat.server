@@ -54,6 +54,7 @@ public class RestrictionUtil {
     private int contParameter;
     /** List of JPQL parameters */
     private Map<String, Object> jpqlParameter;
+    private String orderByJPQL;
 
     /**
      * Constructor
@@ -67,9 +68,10 @@ public class RestrictionUtil {
      * @throws RestrictionINException
      * @throws RestrictionNullException
      */
-    public RestrictionUtil(RestrictionCondition restCond, RestrictionType restType) throws RestrictionEmptyListException, DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException  {
+    public RestrictionUtil(RestrictionCondition restCond, RestrictionType restType) throws DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException, RestrictionEmptyListException  {
         // Initialites variables
         sentenceJPQL = "";
+        this.orderByJPQL = "";
         this.restType = restType;
         contParameter = 0;
         jpqlParameter = new HashMap<String, Object>();
@@ -77,7 +79,6 @@ public class RestrictionUtil {
                 = containInvestigationAttributes = containSampleAttributes = false;
         // Check restriction is not null
         if (restCond != null) {
-            extractJPQL(restCond);
             // If it's ordered. The attribute type has to be the same that
             // the restriction type. (No sense order by Investigation.name if
             // the results are Datasets).
@@ -87,12 +88,17 @@ public class RestrictionUtil {
                 if (restCond.isOrderByAsc())
                    order = " ASC";
                 // Add order to sentence JPQL
-                this.sentenceJPQL += " order by "
+                this.orderByJPQL = " order by "
                             + getParamName(restCond.getOderByAttr())
                             + restCond.getOderByAttr().getValue()
                             + order;
             }
+            extractJPQL(restCond);
         }
+    }
+
+    public String getOrderBy () {
+        return this.orderByJPQL;
     }
 
     /**
@@ -128,8 +134,11 @@ public class RestrictionUtil {
         else if (restCond.getClass() == RestrictionLogicalCondition.class) {
             RestrictionLogicalCondition op = (RestrictionLogicalCondition) restCond;
 
-            if (op.getRestConditions().isEmpty())
+            if (op.getRestConditions().isEmpty()) {
+                if (op.hasOrder())
+                    return;
                 throw new RestrictionEmptyListException();
+            }
 
             // Open parenthesis for the list of comparators
             openParenthesis();
