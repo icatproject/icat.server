@@ -220,7 +220,7 @@
     <target name="-add-jms-destination" depends="-init-cl-deployment-env" >
         <echo level="info" message="Adding JMS destination ${jms.dest.name}" />
         <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="true">
-            <arg line="--passwordfile ${sjsas.password.file} create-jms-resource --restype javax.jms.Queue --enabled=true --property Name=${jms.dest.name} jms/${jms.dest.name}"/>
+            <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} create-jms-resource --restype javax.jms.Queue --enabled=true --property Name=${jms.dest.name} jms/${jms.dest.name}"/>
         </exec>
         <delete file="${sjsas.password.file}"/>
     </target>
@@ -230,7 +230,7 @@
     <target name="-remove-jms-destination" depends="-init-cl-deployment-env" >
         <echo  level="info" message="Removing JMS destination ${jms.dest.name}" />
         <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="false">
-            <arg line=" --passwordfile ${sjsas.password.file} delete-jms-resource jms/${jms.dest.name} "/>
+            <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} delete-jms-resource jms/${jms.dest.name} "/>
         </exec>
         <delete file="${sjsas.password.file}"/>
     </target>
@@ -241,7 +241,7 @@
     <target name="-remove-jms-factory" depends="-init-cl-deployment-env" >
         <echo  level="info" message="Removing JMS factory ${jms.fact.name}" />
         <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="false">
-            <arg line=" --passwordfile ${sjsas.password.file} delete-jms-resource  ${jms.fact.name}"/>
+            <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} delete-jms-resource  ${jms.fact.name}"/>
         </exec>
         <delete file="${sjsas.password.file}"/>
     </target>
@@ -252,7 +252,7 @@
     <target name="-add-jms-factory" depends="-init-cl-deployment-env" >
         <echo level="info" message="Adding JMS factory ${jms.fact.name}" />
         <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/{asadmin}" failonerror="true">
-            <arg line=" --passwordfile ${sjsas.password.file} create-jms-resource --restype javax.jms.QueueConnectionFactory --enabled=true  ${jms.fact.name}"/>
+            <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} create-jms-resource --restype javax.jms.QueueConnectionFactory --enabled=true  ${jms.fact.name}"/>
         </exec>
         <delete file="${sjsas.password.file}"/>
     </target>
@@ -263,11 +263,11 @@
     <target name="-add-connection-pool" depends="-init-cl-deployment-env" >
         <echo  level="info" message="Adding connection pool ${connection.pool.name}" />
         <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="true">
-            <arg line=" --passwordfile ${sjsas.password.file}  create-jdbc-connection-pool --datasourceclassname ${data.source} --restype javax.sql.DataSource --failconnection=true --steadypoolsize 2 --maxpoolsize 8 --validationmethod table --validationtable ${table}  --isconnectvalidatereq=false --description ${description} --property url=${url}:password=${password}:user=${user}:ImplicitCachingEnabled=true:MaxStatements=200 ${connection.pool.name}"/>
+            <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file}  create-jdbc-connection-pool --datasourceclassname ${data.source} --restype javax.sql.DataSource --failconnection=true --steadypoolsize 2 --maxpoolsize 8 --validationmethod table --validationtable ${table}  --isconnectvalidatereq=false --description ${description} --property url=${url}:password=${password}:user=${user}:ImplicitCachingEnabled=true:MaxStatements=200 ${connection.pool.name}"/>
         </exec>
         <!-- isconnectvalidatereq=false improves performace -->
         <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="true">
-            <arg line=" --passwordfile ${sjsas.password.file} create-jdbc-resource  --connectionpoolid ${connection.pool.name} jdbc/${connection.pool.name}" />
+            <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} create-jdbc-resource  --connectionpoolid ${connection.pool.name} jdbc/${connection.pool.name}" />
         </exec>
         <delete file="${sjsas.password.file}"/>
     </target>
@@ -278,10 +278,10 @@
     <target name="-remove-connection-pool" depends="-init-cl-deployment-env" >
         <echo  level="info" message="Removing connection pool ${connection.pool.name}" />
          <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="false">
-            <arg line=" --passwordfile ${sjsas.password.file} delete-jdbc-resource jdbc/${connection.pool.name}"/>
+            <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} delete-jdbc-resource jdbc/${connection.pool.name}"/>
         </exec>
          <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="false">
-            <arg line=" --passwordfile ${sjsas.password.file} delete-jdbc-connection-pool ${connection.pool.name}"/>
+            <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} delete-jdbc-connection-pool ${connection.pool.name}"/>
         </exec>
         <delete file="${sjsas.password.file}"/>
     </target>
@@ -291,7 +291,7 @@
     <target name="-deploy-application" depends="-init-cl-deployment-env" >
         <echo level="info" message="Deploying ${application.jar}"/>
          <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="true">
-            <arg line=" --passwordfile ${sjsas.password.file} deploy ${basedir}/${dist.dir}/${application.jar}"/>
+            <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} deploy ${basedir}/${dist.dir}/${application.jar}"/>
         </exec>
         <delete file="${sjsas.password.file}"/>
     </target>
@@ -301,7 +301,7 @@
     <target name="-undeploy-application" depends="-init-cl-deployment-env" >
         <echo level="info" message="Undeploying ${application}"/>
          <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="false">
-            <arg line=" --passwordfile ${sjsas.password.file} undeploy ${application}"/>
+            <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} undeploy ${application}"/>
         </exec>
         <delete file="${sjsas.password.file}"/>
     </target>
@@ -314,7 +314,7 @@
           <!--  echo user password to password file too -->
         <echo message="AS_ADMIN_PASSWORD=${sjsas.password}${line.separator}AS_ADMIN_USERPASSWORD=${admin.auth.password}" file="${sjsas.password.file}"/>
         <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="true">
-            <arg line=" --passwordfile ${sjsas.password.file} create-file-user --groups ${admin.auth.group} ${admin.auth.user}"/>
+            <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} create-file-user --groups ${admin.auth.group} ${admin.auth.user}"/>
         </exec>
         <delete file="${sjsas.password.file}"/>
     </target>
@@ -323,7 +323,7 @@
     <!--                                                             -->
     <target name="-remove-file-realm-user" depends="-init-cl-deployment-env" >
          <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="false">
-            <arg line=" --passwordfile ${sjsas.password.file} delete-file-user ${admin.auth.user}"/>
+            <arg line="--port ${sjsas.admin.port}  --passwordfile ${sjsas.password.file} delete-file-user ${admin.auth.user}"/>
         </exec>
         <delete file="${sjsas.password.file}"/>
     </target>
