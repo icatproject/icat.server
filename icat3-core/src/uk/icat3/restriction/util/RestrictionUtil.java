@@ -90,7 +90,7 @@ public class RestrictionUtil {
         this.conditionsDefined = false;
         this.orderByJPQL = "";
         this.maxResults = -1;
-        this.startIndex = -1;
+        this.startIndex = 0;
         this.orderByAsc = false;
         this.orderByAttr = null;
         this.restType = restType;
@@ -127,7 +127,7 @@ public class RestrictionUtil {
      * @return true it max results was set. Otherwise false.
      */
     public boolean hasMaxResults () {
-        if (maxResults < 0)
+        if (maxResults <= 0)
             return false;
         return true;
     }
