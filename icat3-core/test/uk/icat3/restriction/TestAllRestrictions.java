@@ -7,13 +7,19 @@
 
 package uk.icat3.restriction;
 
+import uk.icat3.restriction.dataset.DatasetTest;
+import uk.icat3.restriction.datafile.*;
+import uk.icat3.restriction.dataset.DatasetSimpleRestrictionTest;
 import uk.icat3.restriction.sample.SampleTest;
 import uk.icat3.restriction.investigation.InvestigationTest;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import uk.icat3.parametersearch.datafile.DatafileTest;
 import uk.icat3.restriction.exception.RestrictionExceptionTest;
+import uk.icat3.restriction.investigation.InvestigationSimpleRestrictionTest;
+import uk.icat3.restriction.sample.SampleSimpleRestrictionTest;
 
 /**
  *
@@ -25,6 +31,10 @@ import uk.icat3.restriction.exception.RestrictionExceptionTest;
     InvestigationTest.class,
     SampleTest.class,
     DatafileTest.class,
+    DatafileSimpleRestrictionTest.class,
+    DatasetSimpleRestrictionTest.class,
+    InvestigationSimpleRestrictionTest.class,
+    SampleSimpleRestrictionTest.class,
     RestrictionExceptionTest.class,
     UsesExamples.class
 })
