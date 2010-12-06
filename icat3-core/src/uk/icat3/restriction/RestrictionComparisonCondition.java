@@ -26,8 +26,16 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
     /** Value to compare with attribute */
     private Object value;
     /** Second value for BETWEEN operator */
-    private Object value2 = null;
+    private Object valueRigth = null;
 
+    /**
+     * Construction
+     */
+    public RestrictionComparisonCondition() {
+        this.restAttr = null;
+        this.restOp = null;
+        this.value = null;
+    }
     /**
      * Constructor Between for dates
      * 
@@ -39,7 +47,7 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
         this.restAttr = restAttr;
         this.restOp = restOp;
         this.value = lValue;
-        this.value2 = rValue;
+        this.valueRigth = rValue;
     }
 
     /**
@@ -53,7 +61,7 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
         this.restAttr = restAttr;
         this.restOp = restOp;
         this.value = lValue;
-        this.value2 = rValue;
+        this.valueRigth = rValue;
     }
 
     /**
@@ -68,7 +76,6 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
         this.restOp = restOp;
         this.value = value;
     }
-
     /**
      * Constructor for IN
      *
@@ -81,7 +88,6 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
         this.restOp = restOp;
         this.value = value;
     }
-
     /**
      * Constructor
      *
@@ -117,8 +123,8 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
                 this.restOp == null ||
                 this.value == null)
             throw new RestrictionNullException ();
-        // Check value2 is not null, if Between operator is selected
-        if (this.restOp == RestrictionOperator.BETWEEN && this.value2 == null)
+        // If Between operator is selected, check if value2 is not null
+        if (this.restOp == RestrictionOperator.BETWEEN && this.valueRigth == null)
             throw new RestrictionNullException ();
     }
 
@@ -130,15 +136,31 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
         return restAttr;
     }
 
+    public void setRestAttr(RestrictionAttributes restAttr) {
+        this.restAttr = restAttr;
+    }
+
     public RestrictionOperator getRestOp() {
         return restOp;
+    }
+
+    public void setRestOp(RestrictionOperator restOp) {
+        this.restOp = restOp;
     }
 
     public Object getValue() {
         return value;
     }
 
-    public Object getValue2() {
-        return value2;
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
+    public Object getValueRigth() {
+        return valueRigth;
+    }
+
+    public void setValueRigth(Object valueRigth) {
+        this.valueRigth = valueRigth;
     }
 }

@@ -10,6 +10,7 @@ package uk.icat3.search.parameter;
 import uk.icat3.exceptions.CyclicException;
 import java.util.ArrayList;
 import java.util.List;
+import uk.icat3.exceptions.EmptyOperatorException;
 import uk.icat3.util.LogicalOperator;
 
 /**
@@ -31,6 +32,7 @@ public final class ParameterLogicalCondition extends ParameterCondition {
      *  Constructor
      */
     public ParameterLogicalCondition() {
+        operator = null;
         listComparable = new ArrayList<ParameterCondition> ();
     }
 
@@ -52,29 +54,51 @@ public final class ParameterLogicalCondition extends ParameterCondition {
      * @throws CyclicException In case a cyclic structure had been build.
      */
     public ParameterLogicalCondition add (ParameterCondition param) throws CyclicException  {
-        if (param == this)
-            throw new CyclicException("It's the same object");
-
-        if (listComparable.contains(param))
-            throw new CyclicException("This ParameterOperator has already been inserted");
-        
-        if (param.getClass() == ParameterLogicalCondition.class) {
-            ParameterLogicalCondition op = (ParameterLogicalCondition)param;
-            if (op.listComparable.contains(this))
-                throw new CyclicException("Cyclic structure. " + this.toString());
-            for (ParameterCondition p : listComparable)
-                if (p.getClass() == ParameterLogicalCondition.class && op.listComparable.contains(p))
-                    throw new CyclicException("Cyclic structure. " + this.toString());
-        }
         listComparable.add(param);
-
         return this;
     }
 
+   /**
+    * Check if there is a cyclic structure. A list of checked conditions are passed.
+    * If this object belongs already to that object, there is a cyclic structure.
+    * 
+    * @param checkCondList
+    * @throws CyclicException
+    */
+    private void validate (List<ParameterLogicalCondition> checkCondList) throws CyclicException  {
+        for (ParameterCondition param : listComparable) {
+            // If this object is inserted in its list
+            if (this == param)
+                throw new CyclicException("Cyclic structure. " + this.toString());
+            // If the object is a parameter logical condition
+            if (param.getClass() == ParameterLogicalCondition.class) {
+                ParameterLogicalCondition op = ((ParameterLogicalCondition)param);
+                // Check the object doesn't exists in the list of checked conditions
+                if (checkCondList.contains(op))
+                    throw new CyclicException("Cyclic structure. " + this.toString());
+                // Add check condition to the list
+                checkCondList.add(this);
+                // Validate the condition
+                op.validate(checkCondList);
+            }
+        }
+    }
+    /**
+     * Check if this object is well construct
+     * 
+     * @throws CyclicException
+     * @throws EmptyOperatorException
+     */
+    public void validate () throws CyclicException, EmptyOperatorException {
+        if (this.operator == null)
+            throw new EmptyOperatorException();
+        validate (new ArrayList<ParameterLogicalCondition>());
+    }
 
-    ////////////////////////////////////////////////////////////////////////////
-    //                               GETTERS and SETTERS
-    //////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////
+    //                               GETTERS and SETTERS                  //
+    ////////////////////////////////////////////////////////////////////////
     public List<ParameterCondition> getListComparable() {
         return listComparable;
     }
@@ -82,15 +106,11 @@ public final class ParameterLogicalCondition extends ParameterCondition {
     public void setListComparable(List<ParameterCondition> lc){
         listComparable = lc;
     }
-    
-    public LogicalOperator getLogicalOperator() {
+
+    public LogicalOperator getOperator() {
         return operator;
     }
 
-    public LogicalOperator getOperator(){
-        return operator;
-    }
-    
     public void setOperator(LogicalOperator operator) {
         this.operator = operator;
     }

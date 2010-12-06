@@ -10,6 +10,7 @@ package uk.icat3.restriction;
 import java.util.ArrayList;
 import java.util.List;
 import uk.icat3.exceptions.CyclicException;
+import uk.icat3.exceptions.EmptyOperatorException;
 import uk.icat3.util.LogicalOperator;
 
 /**
@@ -23,8 +24,15 @@ public class RestrictionLogicalCondition extends RestrictionCondition {
     /** List of restrictions */
     private List<RestrictionCondition> restConditions;
     /** Restriction locial operator */
-    private LogicalOperator logicalOperator;
+    private LogicalOperator operator;
 
+    /**
+     * Constructor
+     */
+    public RestrictionLogicalCondition() {
+        this.operator = LogicalOperator.AND;
+        restConditions = new ArrayList<RestrictionCondition> ();
+    }
     /**
      * Constructor.
      * 
@@ -32,7 +40,7 @@ public class RestrictionLogicalCondition extends RestrictionCondition {
      */
     public RestrictionLogicalCondition(LogicalOperator logicalOperator) {
         restConditions = new ArrayList<RestrictionCondition> ();
-        this.logicalOperator = logicalOperator;
+        this.operator = logicalOperator;
     }
 
     /**
@@ -44,27 +52,47 @@ public class RestrictionLogicalCondition extends RestrictionCondition {
      * @throws CyclicException
      */
     public RestrictionLogicalCondition add (RestrictionCondition restCondition) throws CyclicException {
-        // The restriction object itself has been added.
-        if (restCondition == this)
-            throw new CyclicException("It's the same object");
-        // The restriction object already exists
-        if (restConditions.contains(restCondition))
-            throw new CyclicException("This ParameterOperator has already been inserted");
-        // If it's a logical condition
-        if (restCondition.getClass() == RestrictionLogicalCondition.class) {
-            RestrictionLogicalCondition op = (RestrictionLogicalCondition)restCondition;
-            // Check if this object is contained inside the restCondition
-            if (op.restConditions.contains(this))
-                throw new CyclicException("Cyclic structure. " + this.toString());
-            // Check for each condition in the list, restCondition doesn't exists
-            for (RestrictionCondition p : restConditions)
-                if (p.getClass() == RestrictionLogicalCondition.class && op.restConditions.contains(p))
-                    throw new CyclicException("Cyclic structure. " + this.toString());
-        }
         // Add new condition to the list
         restConditions.add(restCondition);
         // Return this object
         return this;
+    }
+
+    /**
+    * Check if there is a cyclic structure. A list of checked conditions are passed.
+    * If this object belongs already to that object, there is a cyclic structure.
+    *
+    * @param checkCondList
+    * @throws CyclicException
+    */
+    private void validate (List<RestrictionCondition> checkCondList) throws CyclicException {
+        for (RestrictionCondition restCondition : restConditions) {
+            // The restriction object itself has been added.
+            if (restCondition == this)
+                throw new CyclicException("It's the same object");
+            // If it's a logical condition
+            if (restCondition.getClass() == RestrictionLogicalCondition.class) {
+                RestrictionLogicalCondition op = (RestrictionLogicalCondition)restCondition;
+                // Check if the condition 'op' already exists
+                if (checkCondList.contains(op))
+                    throw new CyclicException("Cyclic structure. " + this.toString());
+                // Add checked condition to check condition list
+                checkCondList.add(this);
+                // Validate other restriction logical condition
+                op.validate(checkCondList);
+            }
+        }
+    }
+    /**
+     * Check if this object is well construct
+     *
+     * @throws CyclicException
+     * @throws EmptyOperatorException
+     */
+    public void validate () throws CyclicException, EmptyOperatorException {
+        if (this.operator == null)
+            throw new EmptyOperatorException();
+        validate (new ArrayList<RestrictionCondition>());
     }
 
 
@@ -72,13 +100,19 @@ public class RestrictionLogicalCondition extends RestrictionCondition {
     //                  GETTERS and SETTERS                     //
     //////////////////////////////////////////////////////////////
     
-    public LogicalOperator getLogicalOperator() {
-        return logicalOperator;
+    public LogicalOperator getOperator() {
+        return operator;
     }
 
     public List<RestrictionCondition> getRestConditions() {
         return restConditions;
     }
 
+    public void setRestConditions(List<RestrictionCondition> restConditions) {
+        this.restConditions = restConditions;
+    }
 
+    public void setOperator(LogicalOperator logicalOperator) {
+        this.operator = logicalOperator;
+    }
 }

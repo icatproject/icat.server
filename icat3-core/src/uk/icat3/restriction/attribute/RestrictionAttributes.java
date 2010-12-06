@@ -13,17 +13,20 @@ import uk.icat3.restriction.RestrictionType;
  * This class defines all the attributes which is able to search for.
  * This attributes are sectioned depending on the database table where they
  * come from.
+ *
+ * The string value is the name of the table field inside database.
  * 
  * @author cruzcruz
  */
 public enum RestrictionAttributes {
+    // Dataset attributes
     DATASET_ID("id"),
     DATASET_NAME("name"),
     DATASET_DESCRIPTION("description"),
     DATASET_LOCATION("location"),
     DATASET_STATUS("datasetStatus"),
     DATASET_TYPE("datasetType"),
-
+    // Datafile attributes
     DATAFILE_ID("id"),
     DATAFILE_NAME("name"),
     DATAFILE_DESCRIPTION("description"),
@@ -37,13 +40,13 @@ public enum RestrictionAttributes {
     DATAFILE_CHECKSUM("checksum"),
     DATAFILE_SIGNATURE("signature"),
     DATAFILE_FORMAT_TYPE("datafileFormat.formatType"),
-
+    // Sample attributes
     SAMPLE_ID("id"),
     SAMPLE_INSTANCE("instance"),
     SAMPLE_NAME("name"),
     SAMPLE_CHEMICAL_FORMULA("chemicalFormula"),
     SAMPLE_SAFETY_INFORMATION("safetyInformation"),
-
+    // Investigation attributes
     INVESTIGATION_ID("id"),
     INVESTIGATION_INV_NUMBER("invNumber"),
     INVESTIGATION_VISIT_ID("visitId"),
@@ -58,10 +61,17 @@ public enum RestrictionAttributes {
     INVESTIGATION_TYPE("invType"),
     INVESTIGATION_RELEASE_DATE("releaseDate"),
     INVESTIGATION_START_DATE("invStartDate"),
-    INVESTIGATION_END_DATE("invEndDate");
+    INVESTIGATION_END_DATE("invEndDate"),
+    // Investigator attributes
+    INVESTIGATOR_ID("id"),
+    INVESTIGATOR_USER_FIRST_NAME("facilityUser.firstName"),
+    INVESTIGATOR_USER_MIDDLE_NAME("facilityUser.middleName"),
+    INVESTIGATOR_USER_LAST_NAME("facilityUser.lastName"),
+    INVESTIGATOR_USER_ID("facilityUser.facilityUserId");
 
+    /** Value of the selected enum */
     private final String value;
-
+    /** Constructor */
     RestrictionAttributes(String value) {
         this.value = value;
     }
@@ -81,7 +91,8 @@ public enum RestrictionAttributes {
         if (this == RestrictionAttributes.INVESTIGATION_ID ||
             this == RestrictionAttributes.SAMPLE_ID ||
             this == RestrictionAttributes.DATASET_ID ||
-            this == RestrictionAttributes.DATAFILE_ID)
+            this == RestrictionAttributes.DATAFILE_ID ||
+            this == RestrictionAttributes.INVESTIGATOR_ID)
             return true;
         return false;
     }
@@ -144,13 +155,23 @@ public enum RestrictionAttributes {
      * @return True if attribute belongs to Investigation, otherwise false.
      */
     public boolean isInvestigation() {
-        // Investigation attributes
-       if (this.ordinal() >= RestrictionAttributes.INVESTIGATION_ID.ordinal())
+       // Investigation attributes
+       if (this.ordinal() >= RestrictionAttributes.INVESTIGATION_ID.ordinal() &&
+               this.ordinal() <= RestrictionAttributes.INVESTIGATION_END_DATE.ordinal())
+            return true;
+        return false;
+    }
+     /**
+     * Check if attribute belongs to Investigator
+     * @return True if attribute belongs to Investigator, otherwise false.
+     */
+    public boolean isInvestigator () {
+        if (this.ordinal() >= RestrictionAttributes.INVESTIGATOR_ID.ordinal())
             return true;
         return false;
     }
     /**
-     * Retrun restriction type of the attribute
+     * Retrun restriction search type of the attribute
      * 
      * @return
      */

@@ -902,57 +902,96 @@ public class ManagerUtil {
     }
 
     /**
-     * Set the number of the results and return the result.
+     * Create the query and set the number of the results
      *
-     * @param q Query
-     * @param startIndex Start index
+     * @param jpql JPQL string sentence
+     * @param ejpql Parameter search structure
+     * @param restriction Restriction structure
+     * @param elementType Element type to search for
+     * @param userId User identification
+     * @param startIndex Start of results
      * @param numberResults Number of results
-     * @return
+     * @param manager Entity manager to database
+     * @return Collection of results
      */
-    public static Collection getRestultList(String jpql, ExtractedJPQL ejpql, RestrictionUtil restricion, ElementType elementType, String userId, int startIndex, int numberResults, EntityManager manager) {
-
+    public static Collection getResultList(String jpql, ExtractedJPQL ejpql, RestrictionUtil restriction, ElementType elementType, String userId, int startIndex, int numberResults, EntityManager manager) {
+        log.trace("getResultList (" + jpql + ", ejpql, restriction, " + elementType 
+                + ", " + userId + ", " + startIndex + ", "
+                + numberResults + ", manager");
         // Check if there are any restriction
-        if (!restricion.isEmpty())
-            jpql += " AND (" + restricion.getSentenceJPQL() + ")";
+        if (restriction != null && !restriction.isEmpty())
+            jpql += " AND (" + restriction.getSentenceJPQL() + ")";
         // Check if there are any parameter condition
-        if (!ejpql.isEmpty())
+        if (ejpql != null && !ejpql.isEmpty())
             jpql += " AND " + ejpql.getCondition();
 
         // Add order by is exists
-        jpql += restricion.getOrderBy();
-        
+        if (restriction != null)
+            jpql += restriction.getOrderBy();
+
         // Create Query
         Query q = manager.createQuery(jpql);
-        // Set JPQL parameters
-        for (Entry<String, Object> e : ejpql.getAllJPQLParameter().entrySet()) {
-            q.setParameter(e.getKey(), e.getValue());
-        }
-        for (Entry<String, Object> e : restricion.getJpqlParameter().entrySet()) {
-            q.setParameter(e.getKey(), e.getValue());
-        }
+        // Set JPQL parameters for parameters search
+        if (ejpql != null)
+            for (Entry<String, Object> e : ejpql.getAllJPQLParameter().entrySet()) {
+                q.setParameter(e.getKey(), e.getValue());
+            }
+        // Set JPQL parameters for restrictions
+        if (restriction != null)
+            for (Entry<String, Object> e : restriction.getJpqlParameter().entrySet()) {
+                q.setParameter(e.getKey(), e.getValue());
+            }
         q.setParameter("objectType", elementType);
         q.setParameter("userId", userId);
-
+        // Check if maximun of results was set
+        if (restriction != null && restriction.hasMaxResults()) {
+            startIndex = restriction.getStartIndex();
+            numberResults = restriction.getMaxResults();
+        }
+        // Number of results to return
         if (numberResults == Queries.NO_PAGINATION)
+            // Maximun of results permitted
             return q.setMaxResults(Queries.MAX_QUERY_RESULTSET).getResultList();
         else if (numberResults == Queries.NO_LIMITED_RESULTS)
+            // Unlimit results
             return q.getResultList();
-        else
-            return q.setMaxResults(numberResults).setFirstResult(startIndex).getResultList();
-
+        else {
+            // Numbers of resutls was specified
+            return q.setFirstResult(startIndex)
+                    .setMaxResults(numberResults)
+                    .getResultList();
+        }
+    }
+    /**
+     * Create the query and set the number of the results
+     *
+     * @param jpql JPQL string sentence
+     * @param restriction Restriction structure
+     * @param elementType Element type to search for
+     * @param userId User identification
+     * @param startIndex Start of results
+     * @param numberResults Number of results
+     * @param manager Entity manager to database
+     *
+     * @return Collection of results
+     */
+    public static Collection getResultList(String jpql, RestrictionUtil restrUtil, ElementType elementType, String userId, int startIndex, int numberResults, EntityManager manager) {
+        return getResultList(jpql, null, restrUtil, elementType, userId, startIndex, numberResults, manager);
     }
 
     /**
-     * Return the object with the include options
+     * Return list of datafiles with the include options
      * 
      * @param res Collection of datafiles
      * @param datafileInclude Include options
      */
     public static void getDatafileInformation(Collection<Datafile> res, DatafileInclude datafileInclude) {
+        // Include datafile parameters
         if (datafileInclude.isDatafileParameters()) {
             for (Datafile d : res)
                 d.getDatafileParameterCollection().size();
         }
+        // Include related datafiles
         if (datafileInclude.isRelatedDatafiles())
             for (Datafile d : res)
                 d.getRelatedDatafilesCollection().size();

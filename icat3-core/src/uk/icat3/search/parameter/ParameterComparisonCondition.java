@@ -7,12 +7,9 @@
 
 package uk.icat3.search.parameter;
 
-import java.text.ParseException;
-import java.util.Date;
 import uk.icat3.exceptions.NullParameterException;
 import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.exceptions.DatevalueFormatException;
-import uk.icat3.util.Queries;
 
 /**
  * This class contains information about the parameter and the value which is
@@ -22,13 +19,11 @@ import uk.icat3.util.Queries;
  * @see ParameterCondition
  */
 public final class ParameterComparisonCondition extends ParameterCondition{
-
-   
+    
     /** Parameter valued which contains parameter and its type */
     private ParameterSearch param;
     /** Type of comparator (greater_than, less_than, equal, ..)*/
     private ComparisonOperator comparator = null;
-    
     /** Value to compare with */
     private Object value = null;
     /** Second value to compare with (only for some comparators like between)*/
@@ -59,7 +54,7 @@ public final class ParameterComparisonCondition extends ParameterCondition{
      *
      * @return False in case of missing a field.
      */
-    public void validate () throws NullParameterException {
+    public void validate () throws NullParameterException, DatevalueFormatException {
         if (this.param == null)
             throw new NullParameterException(this.getClass().getName() + ".param");
         if (this.comparator == null)
@@ -90,52 +85,11 @@ public final class ParameterComparisonCondition extends ParameterCondition{
         this.param = param;
     }
 
-//    public void setValue(Object value) {
-//        this.value = value;
-//    }
-
     public Object getValue() {
         return value;
     }
 
-    /**
-     * Set a java.lang.Date date to compare with a datetime parameter
-     * 
-     * @param value Date value to compare with
-     */
-    public void setDatetimeValue(Date value) {
-        this.value = value;
-    }
-
-    /**
-     * Set a java.lang.String date to compare with a datetime parameter.
-     * The String has to match the database date format 'yyyy-MM-dd HH:mm:ss'.
-     * 
-     * @param value String value to compare with
-     */
-    public void setDatetimeValue(String value) throws DatevalueFormatException {
-        try {
-            this.value = Queries.dateFormat.parse(value);
-        } catch (ParseException ex) {
-            throw new DatevalueFormatException(Queries.sqlDateTimeFormat);
-        }
-    }
-
-    /**
-     * Set a java.lang.String value to compare with
-     * 
-     * @param value String value to compare with
-     */
-    public void setStringValue(String value) {
-        this.value = value;
-    }
-
-    /**
-     * Set a Number value to compare with.
-     * 
-     * @param value Number value to compare with
-     */
-    public void setNumericValue(Number value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 
@@ -143,48 +97,7 @@ public final class ParameterComparisonCondition extends ParameterCondition{
         return valueRight;
     }
 
-    /**
-     * Set the second java.lang.Date date to compare with a datetime parameter.
-     * Only valid for BETWEEN comparator.
-     * 
-     * @param value Date value (Date java class) to compare with
-     */
-    public void setDatetimeValueRight (Date valueRight) {
-        this.valueRight = valueRight;
-    }
-
-    /**
-     * Set the second java.lang.String date to compare with a datetime parameter.
-     * The String has to match the SQL format 'yyyy-MM-dd HH:mm:ss'.
-     * Only valid for BETWEEN comparator.
-     *
-     * @param value Date value (String class) to compare with
-     */
-    public void setDatetimeValueRight (String valueRight) throws DatevalueFormatException {
-        try {
-            this.valueRight = Queries.dateFormat.parse(valueRight);
-        } catch (ParseException ex) {
-            throw new DatevalueFormatException(Queries.sqlDateTimeFormat);
-        }
-    }
-
-    /**
-     * Set the second java.lang.String value to compare with a string parameter.
-     * Only valid for BETWEEN comparator.
-     *
-     * @param value String value to compare with
-     */
-    public void setStringValueRight (String valueRight) {
-        this.valueRight = valueRight;
-    }
-
-    /**
-     * Set the second java.lang.Number numeric to compare with a numeric parameter.
-     * Only valid for BETWEEN comparator.
-     *
-     * @param value Numeric value to compare with
-     */
-    public void setNumericValueRight (Number valueRight) {
+    public void setValueRight(Object valueRight) {
         this.valueRight = valueRight;
     }
 }

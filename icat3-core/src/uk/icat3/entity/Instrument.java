@@ -37,7 +37,8 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = "Instrument.findByModId", query = "SELECT i FROM Instrument i WHERE i.modId = :modId"),
     
     //Added searches for ICAT3 API
-    @NamedQuery(name = Queries.ALL_INSTRUMENTS, query = Queries.ALL_INSTRUMENTS_JPQL)
+    @NamedQuery(name = Queries.ALL_INSTRUMENTS, query = Queries.ALL_INSTRUMENTS_JPQL),
+    @NamedQuery(name = Queries.INSTRUMENTS, query = Queries.INSTRUMENTS_JPQL)
 })
 public class Instrument extends EntityBaseBean implements Serializable {
     
@@ -50,6 +51,9 @@ public class Instrument extends EntityBaseBean implements Serializable {
     
     @Column(name = "DESCRIPTION")
     private String description;
+
+    @Column(name = "SHORT_NAME")
+    private String shortName;
                
     /*@OneToMany(mappedBy = "instrument")
     @XmlTransient
@@ -151,6 +155,15 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public ElementType getRootElementType(){
         return ElementType.INVESTIGATION;
     }
+
+    public String getShortName() {
+        return shortName;
+    }
+
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
+    }
+
     
     /**
      * Returns a hash code value for the object.  This implementation computes

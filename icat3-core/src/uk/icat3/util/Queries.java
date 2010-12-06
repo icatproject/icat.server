@@ -367,6 +367,12 @@ public class Queries {
     public static final String ALL_INSTRUMENTS_JPQL = "SELECT DISTINCT i.name FROM Instrument i WHERE i.markedDeleted = 'N'";
 
     /**
+     * Find all instruments list,
+     */
+    public static final String INSTRUMENTS = "Instrument.list";
+    public static final String INSTRUMENTS_JPQL = "SELECT DISTINCT i FROM Instrument i WHERE i.markedDeleted = 'N'";
+
+    /**
      * Find all FacilityCycles list,
      *
      */
@@ -605,6 +611,8 @@ public class Queries {
     public static final String DATASET_NAME = "ds";
     /** Common name for JPQL setence Sample object*/
     public static final String SAMPLE_NAME = "sample";
+    /** Common name for JPQL setence Investigator object*/
+    public static final String INVESTIGATOR_NAME = "invtor";
     /** No restriction conditions */
     public static final RestrictionCondition NO_RESTRICTION = null;
     /** DateTime string format */

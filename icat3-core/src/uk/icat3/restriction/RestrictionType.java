@@ -8,7 +8,7 @@
 package uk.icat3.restriction;
 
 /**
- * Defines the restriction type
+ * Defines the restriction search type
  * 
  * @author cruzcruz
  */

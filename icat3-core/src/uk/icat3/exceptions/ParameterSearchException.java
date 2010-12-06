@@ -11,7 +11,7 @@ package uk.icat3.exceptions;
  *
  * @author cruzcruz
  */
-public class ParameterSearchException extends Exception {
+public class ParameterSearchException extends RestrictionException {
 
     public ParameterSearchException() {
     }

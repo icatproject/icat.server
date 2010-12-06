@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Sample;
+import uk.icat3.exceptions.CyclicException;
 import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.DatevalueFormatException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
@@ -210,6 +211,112 @@ public class DatasetSearch {
     }
 
     /**
+     * This method is the implementation for all restriction searchs, and
+     * return datasets which match with restriction.
+     *
+     * @param userId User identification
+     * @param restrUtil Restriction util
+     * @param include Include options
+     * @param startIndex Start index
+     * @param numberResults Number of results to return
+     * @param manager Entity manager to database
+     *
+     * @return Collection of datasets which match restriction condition
+     */
+    private static Collection<Dataset> searchByRestrictionImpl (String userId, RestrictionUtil restrUtil, DatasetInclude include, int startIndex, int numberResults, EntityManager manager){
+        log.trace("searchByRestrictionImpl(" + ", restrCond, " + startIndex + ", " + numberResults + ", EntityManager)");
+        // Return type
+        String returnJPQL = RETURN_ALL_DATASETS_JPQL;
+        // Return ids
+        if (include == DatasetInclude.ALL_DATASET_ID) {
+            returnJPQL = RETURN_ALL_DATASETS_ID_JPQL;
+            numberResults = NO_LIMITED_RESULTS;
+        }
+        String restrictionParam = restrUtil.getParameterJPQL(ElementType.DATASET);
+        // Construction JPQL sentence
+        String jpql = returnJPQL
+                + restrictionParam
+                + QUERY_USERS_DATASETS_JPQL;
+        // Object returns and check number of results
+        Collection res = ManagerUtil.getResultList(jpql, restrUtil
+                , ElementType.DATASET, userId, startIndex, numberResults
+                , manager);
+        // Return type is a Collection of Long
+        if (include == DatasetInclude.ALL_DATASET_ID)
+            return res;
+        // Check if the dataset should include other objects (Datafiles, Parameters)
+        ManagerUtil.getDatasetInformation(userId, res, include, manager);
+        // Return results
+        return res;
+    }
+    /**
+     * Search dataset which match with restriction conditions
+     *
+     * @param userId User identifaction
+     * @param restriction Restriction condition
+     * @param manager Entity manager to database
+     *
+     * @return Collection of datasets which match restriction condition
+     *
+     * @throws DatevalueException
+     * @throws RestrictionOperatorException
+     * @throws RestrictionINException
+     * @throws RestrictionNullException
+     * @throws RestrictionEmptyListException
+     */
+    public static Collection<Dataset> searchByRestriction (String userId, RestrictionCondition restriction, EntityManager manager) throws DatevalueException, CyclicException, RestrictionOperatorException, RestrictionINException, EmptyOperatorException, RestrictionNullException, RestrictionEmptyListException {
+        log.trace("searchByRestriction( restrCond , EntityManager)");
+        RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.DATASET);
+        return searchByRestrictionImpl(userId, restric, DatasetInclude.NONE, NO_PAGINATION, NO_LIMITED_RESULTS, manager);
+    }
+    /**
+     * Search dataset which match with restriction conditions
+     *
+     * @param userId User identifaction
+     * @param restriction Restriction condition
+     * @param include Include options
+     * @param manager Entity manager to database
+     *
+     * @return Collection of datasets which match restriction condition
+     *
+     * @throws DatevalueException
+     * @throws RestrictionOperatorException
+     * @throws RestrictionINException
+     * @throws RestrictionNullException
+     * @throws RestrictionEmptyListException
+     */
+    public static Collection<Dataset> searchByRestriction (String userId, RestrictionCondition restriction, DatasetInclude include, EntityManager manager) throws DatevalueException, RestrictionOperatorException, RestrictionINException, EmptyOperatorException, CyclicException, RestrictionNullException, RestrictionEmptyListException {
+        log.trace("searchByRestriction( restrCond , EntityManager)");
+
+        RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.DATASET);
+        return searchByRestrictionImpl(userId, restric, include, NO_PAGINATION, NO_LIMITED_RESULTS, manager);
+    }
+    /**
+     * Search dataset which match with restriction conditions
+     *
+     * @param userId User identifaction
+     * @param restriction Restriction condition
+     * @param include Include options
+     * @param startIndex Start index of results
+     * @param numberResults Number of results
+     * @param manager Entity manager to database
+     *
+     * @return Collection of datasets which match restriction condition
+     *
+     * @throws DatevalueException
+     * @throws RestrictionOperatorException
+     * @throws RestrictionINException
+     * @throws RestrictionNullException
+     * @throws RestrictionEmptyListException
+     */
+    public static Collection<Dataset> searchByRestriction (String userId, RestrictionCondition restriction, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws DatevalueException, EmptyOperatorException, RestrictionOperatorException, CyclicException, RestrictionINException, RestrictionNullException, RestrictionEmptyListException {
+        log.trace("searchByRestriction( restrCond , EntityManager)");
+
+        RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.DATASET);
+        return searchByRestrictionImpl(userId, restric, include, startIndex, numberResults, manager);
+    }
+
+    /**
      * Search the datasets from parameter selection.
      *
      * @param userId User identification
@@ -241,11 +348,12 @@ public class DatasetSearch {
                 restrictionParam += restricion.getParameterJPQL(ElementType.DATASET, ElementType.DATAFILE);
             if (ejpql.getSampleParameter().isEmpty())
                 restrictionParam += restricion.getParameterJPQL(ElementType.DATASET, ElementType.SAMPLE);
+            restrictionParam += restricion.getParameterJPQL(ElementType.DATASET, ElementType.INVESTIGATOR);
             // Construction JPQL sentence
             String jpql = returnJPQL + restrictionParam + ", " + ejpql.getParametersJPQL(ElementType.DATASET)
                     + QUERY_USERS_DATASETS_JPQL;
             // Object returns and check number of results
-            Collection res = ManagerUtil.getRestultList(jpql, ejpql, restricion
+            Collection res = ManagerUtil.getResultList(jpql, ejpql, restricion
                     , ElementType.DATASET, userId, startIndex, numberResults
                     , manager);
             // Return type is a Collection of Long
@@ -285,7 +393,7 @@ public class DatasetSearch {
      * @throws NumericvalueException
      * @throws DatevalueFormatException
      */
-     public static Collection searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, RestrictionCondition restrCond, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
+     public static Collection searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, RestrictionCondition restrCond, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, CyclicException, EmptyOperatorException, NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
 
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLComparators (listComparators, manager);
         RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATASET);
@@ -316,7 +424,7 @@ public class DatasetSearch {
      * @throws NumericvalueException
      * @throws DatevalueFormatException
      */
-     public static Collection searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, RestrictionCondition restrCond, DatasetInclude include, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
+     public static Collection searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, RestrictionCondition restrCond, DatasetInclude include, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoStringComparatorException, EmptyOperatorException, NoNumericComparatorException, NoSearchableParameterException, CyclicException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
         return searchByParameterComparisonList(userId, listComparators, restrCond, include, -1, -1, manager);
     }
 
@@ -343,7 +451,7 @@ public class DatasetSearch {
       * @throws DatevalueFormatException
       * @see ParameterCondition
       */
-     public static Collection searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restrCond, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, EmptyOperatorException, NoParametersException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
+     public static Collection searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restrCond, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, CyclicException, NullParameterException, EmptyOperatorException, NoParametersException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable, manager);
         RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATASET);
 
@@ -371,7 +479,7 @@ public class DatasetSearch {
       * @throws NumericvalueException
       * @throws DatevalueFormatException
       */
-    public static Collection searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restrCond, DatasetInclude include, EntityManager manager) throws NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, EmptyOperatorException, NoParametersException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
+    public static Collection searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restrCond, DatasetInclude include, EntityManager manager) throws NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, EmptyOperatorException, CyclicException, NoParametersException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable, manager);
         RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATASET);
         return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
@@ -394,7 +502,7 @@ public class DatasetSearch {
      * @throws ParameterNoExistsException
      * @throws NoParametersException
      */
-    public static Collection searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restrCond, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, RestrictionEmptyListException, DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
+    public static Collection searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restrCond, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoSearchableParameterException, EmptyOperatorException, NullParameterException, ParameterNoExistsException, CyclicException, NoParametersException, RestrictionEmptyListException, DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam, manager);
         RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATASET);
         return searchByParameterImpl(userId, ejpql, restric, include, startIndex, numberResults, manager);
@@ -415,7 +523,7 @@ public class DatasetSearch {
      * @throws ParameterNoExistsException
      * @throws NoParametersException
      */
-    public static Collection searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restrCond, DatasetInclude include, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, NoParametersException, RestrictionEmptyListException, DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
+    public static Collection searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restrCond, DatasetInclude include, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, EmptyOperatorException, NoParametersException, CyclicException, RestrictionEmptyListException, DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam, manager);
         RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATASET);
         
