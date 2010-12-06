@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
+import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.ParameterPK;
@@ -41,12 +42,14 @@ import uk.icat3.restriction.RestrictionComparisonCondition;
 import uk.icat3.restriction.RestrictionLogicalCondition;
 import uk.icat3.restriction.RestrictionOperator;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
+import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
 import uk.icat3.search.parameter.ParameterType;
 import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.search.DatasetSearch;
+import uk.icat3.util.DatafileInclude;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.LogicalOperator;
 import uk.icat3.util.Queries;
@@ -77,11 +80,13 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
             comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
             comp1.setComparator(ComparisonOperator.GREATER_EQUAL);
-            comp1.setNumericValue(new Double (3.14));
+            comp1.setValue(new Double (3.14));
             lc.add(comp1);
             DatasetSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc
                     , restricLog, DatasetInclude.NONE, -1, -1, em);
 
+        } catch (EmptyOperatorException ex) {
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (CyclicException ex) {
@@ -181,7 +186,6 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
         }
     }
 
-
     /**
      * Operator is empty
      */
@@ -240,6 +244,57 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
         finally {
             assertTrue("Should be a EmptyOperatorException", exception);
         }
+    }
+
+    /**
+     * Operator is empty
+     */
+    @Test
+    public void cyclicExceptionTest () {
+        boolean exception = false;
+        try {
+            // Restriction condition
+            RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
+                
+                ;
+            RestrictionLogicalCondition restr2 = new RestrictionLogicalCondition(LogicalOperator.AND);
+            RestrictionLogicalCondition restr3 = new RestrictionLogicalCondition();
+            restricLog.add(restr2);
+//            restricLog.add(restr3);
+//            restr2.add(restr3);
+//            restr2.setMaxResults(2);
+
+            restr2.setMaxResults(5);
+//            ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
+//            op1.add(pcDatafile.get(10));
+            
+            List<Datafile> li =  (List<Datafile>) DatafileSearch
+                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restr3, DatafileInclude.NONE, 1, -1, em);
+            for (Datafile d : li) {
+                System.out.println("--------------------> " + d.getName());
+            }
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+//            assertTrue("Results of investigations should be 2 not " + li.size(), li.size() == 2);
+//        } catch (RestrictionNullException ex) {
+//            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (CyclicException ex) {
+//            exception = true;
+//        } catch (RestrictionINException ex) {
+//            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (RestrictionOperatorException ex) {
+//            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (RestrictionEmptyListException ex) {
+//            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (DatevalueException ex) {
+//            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (EmptyOperatorException ex) {
+//            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        finally {
+//            assertTrue("Should be a EmptyOperatorException", exception);
+//        }
     }
 
     /**
@@ -318,6 +373,10 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
             lp.add(pv3);
             lp.add(pv4);
             DatasetSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, DatasetInclude.NONE, 1, -1, em);
+        }catch (EmptyOperatorException ex) {
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (CyclicException ex) {
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionINException ex) {
@@ -359,6 +418,10 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
             lp.add(pv3);
             lp.add(pv4);
             DatasetSearch.searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, DatasetInclude.NONE, 1, -1, em);
+        }catch (EmptyOperatorException ex) {
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (CyclicException ex) {
+            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionINException ex) {
