@@ -8,7 +8,6 @@
 package uk.icat3.restriction;
 
 import uk.icat3.restriction.dataset.DatasetTest;
-import uk.icat3.restriction.datafile.*;
 import uk.icat3.restriction.dataset.DatasetSimpleRestrictionTest;
 import uk.icat3.restriction.sample.SampleTest;
 import uk.icat3.restriction.investigation.InvestigationTest;
