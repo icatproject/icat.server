@@ -949,7 +949,7 @@ public class ManagerUtil {
             numberResults = restriction.getMaxResults();
         }
         // Number of results to return
-        if (numberResults == Queries.NO_PAGINATION || numberResults == 0 )
+        if (numberResults == Queries.NO_PAGINATION)
             // Maximun of results permitted
             return q.setMaxResults(Queries.MAX_QUERY_RESULTSET).getResultList();
         else if (numberResults == Queries.NO_LIMITED_RESULTS)

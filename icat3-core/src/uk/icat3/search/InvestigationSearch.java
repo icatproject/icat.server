@@ -170,7 +170,7 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Investigation> searchByRestriction (String userId, RestrictionCondition restriction, EntityManager manager) throws RestrictionOperatorException, CyclicException, RestrictionINException, EmptyOperatorException, RestrictionNullException, RestrictionEmptyListException, DatevalueException {
         log.trace("searchByRestriction( restrCond , EntityManager)");
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.INVESTIGATION);
-        return searchByRestrictionImpl(userId, restric, InvestigationInclude.NONE, NO_PAGINATION, NO_LIMITED_RESULTS, manager);
+        return searchByRestrictionImpl(userId, restric, InvestigationInclude.NONE, NO_PAGINATION, NO_PAGINATION, manager);
     }
     /**
      * Search investigation which match with restriction conditions
@@ -192,7 +192,7 @@ public class InvestigationSearch extends ManagerUtil {
         log.trace("searchByRestriction( restrCond , EntityManager)");
 
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.INVESTIGATION);
-        return searchByRestrictionImpl(userId, restric, include, NO_PAGINATION, NO_LIMITED_RESULTS, manager);
+        return searchByRestrictionImpl(userId, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
     /**
      * Search investigation which match with restriction conditions
@@ -316,7 +316,7 @@ public class InvestigationSearch extends ManagerUtil {
 
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLComparators (listComparators, manager);
         RestrictionUtil restric = new RestrictionUtil(restricion, RestrictionType.INVESTIGATION);
-        return searchByParameterImpl(userId, ejpql, restric, include, -1, -1, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
 
      /**
@@ -349,7 +349,7 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Investigation> searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restricion, InvestigationInclude include, EntityManager manager) throws EmptyOperatorException, NullParameterException, CyclicException, NoSearchableParameterException, NoStringComparatorException, NoNumericComparatorException, NoParameterTypeException, NoParametersException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable, manager);
         RestrictionUtil restric = new RestrictionUtil(restricion, RestrictionType.INVESTIGATION);
-        return searchByParameterImpl(userId, ejpql, restric, include, -1, -1, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
 
     /**
@@ -383,7 +383,7 @@ public class InvestigationSearch extends ManagerUtil {
     public static Collection<Investigation> searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restricion, InvestigationInclude include, EntityManager manager) throws ParameterSearchException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam, manager);
         RestrictionUtil restric = new RestrictionUtil(restricion, RestrictionType.INVESTIGATION);
-        return searchByParameterImpl(userId, ejpql, restric, include, -1, 1, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
 
     /**

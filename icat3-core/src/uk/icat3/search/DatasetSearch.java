@@ -267,7 +267,7 @@ public class DatasetSearch {
     public static Collection<Dataset> searchByRestriction (String userId, RestrictionCondition restriction, EntityManager manager) throws DatevalueException, CyclicException, RestrictionOperatorException, RestrictionINException, EmptyOperatorException, RestrictionNullException, RestrictionEmptyListException {
         log.trace("searchByRestriction( restrCond , EntityManager)");
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.DATASET);
-        return searchByRestrictionImpl(userId, restric, DatasetInclude.NONE, NO_PAGINATION, NO_LIMITED_RESULTS, manager);
+        return searchByRestrictionImpl(userId, restric, DatasetInclude.NONE, NO_PAGINATION, NO_PAGINATION, manager);
     }
     /**
      * Search dataset which match with restriction conditions
@@ -289,7 +289,7 @@ public class DatasetSearch {
         log.trace("searchByRestriction( restrCond , EntityManager)");
 
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.DATASET);
-        return searchByRestrictionImpl(userId, restric, include, NO_PAGINATION, NO_LIMITED_RESULTS, manager);
+        return searchByRestrictionImpl(userId, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
     /**
      * Search dataset which match with restriction conditions
@@ -425,7 +425,7 @@ public class DatasetSearch {
      * @throws DatevalueFormatException
      */
      public static Collection searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, RestrictionCondition restrCond, DatasetInclude include, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoStringComparatorException, EmptyOperatorException, NoNumericComparatorException, NoSearchableParameterException, CyclicException, NullParameterException, ParameterNoExistsException, NoParametersException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException {
-        return searchByParameterComparisonList(userId, listComparators, restrCond, include, -1, -1, manager);
+        return searchByParameterComparisonList(userId, listComparators, restrCond, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
 
      /**

@@ -109,7 +109,7 @@ public class SampleSearch {
     public static Collection<Sample> searchByRestriction (String userId, RestrictionCondition restriction, EntityManager manager) throws DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException, EmptyOperatorException, RestrictionEmptyListException, CyclicException {
         log.trace("searchByRestriction( restrCond , EntityManager)");
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.SAMPLE);
-        return searchByRestrictionImpl(userId, restric, SampleInclude.NONE, NO_PAGINATION, NO_LIMITED_RESULTS, manager);
+        return searchByRestrictionImpl(userId, restric, SampleInclude.NONE, NO_PAGINATION, NO_PAGINATION, manager);
     }
     /**
      * Search sample which match with restriction conditions
@@ -131,7 +131,7 @@ public class SampleSearch {
         log.trace("searchByRestriction( restrCond , EntityManager)");
 
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.SAMPLE);
-        return searchByRestrictionImpl(userId, restric, include, NO_PAGINATION, NO_LIMITED_RESULTS, manager);
+        return searchByRestrictionImpl(userId, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
     /**
      * Search sample which match with restriction conditions
@@ -240,7 +240,7 @@ public class SampleSearch {
 
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLComparators (listComparators, manager);
         RestrictionUtil restric = new RestrictionUtil(restCond, RestrictionType.SAMPLE);
-        return searchByParameterImpl(userId, ejpql, restric, include, -1, -1, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
 
      /**
@@ -273,7 +273,7 @@ public class SampleSearch {
     public static Collection<Sample> searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restCond, SampleInclude include, EntityManager manager) throws DatevalueFormatException, NoParameterTypeException, EmptyListParameterException, NoSearchableParameterException, NoParametersException, NullParameterException, CyclicException, ParameterNoExistsException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException, DatevalueException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException, DatevalueException, EmptyOperatorException, NoStringComparatorException, NoNumericComparatorException, NoDatetimeComparatorException, NumericvalueException    {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable, manager);
         RestrictionUtil restric = new RestrictionUtil(restCond, RestrictionType.SAMPLE);
-        return searchByParameterImpl(userId, ejpql, restric, include, -1, -1, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
 
     /**
@@ -307,6 +307,6 @@ public class SampleSearch {
     public static Collection<Sample> searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restCond, SampleInclude include, EntityManager manager) throws DatevalueFormatException, NoParameterTypeException, EmptyListParameterException, EmptyOperatorException, NoSearchableParameterException, NoParametersException, NullParameterException, CyclicException, ParameterNoExistsException, RestrictionEmptyListException, RestrictionOperatorException, RestrictionINException, RestrictionNullException, DatevalueException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam, manager);
         RestrictionUtil restric = new RestrictionUtil(restCond, RestrictionType.SAMPLE);
-        return searchByParameterImpl(userId, ejpql, restric, include, -1, 1, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
 }

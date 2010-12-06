@@ -393,7 +393,7 @@ public class DatafileSearch {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLComparators (listComparators, manager);
         RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATAFILE);
 
-        return searchByParameterImpl(userId, ejpql, restric, include, -1, -1, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
 
      /**
@@ -449,7 +449,7 @@ public class DatafileSearch {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable, manager);
         RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATAFILE);
 
-        return searchByParameterImpl(userId, ejpql, restric, include, -1, -1, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
 
     /**
@@ -494,6 +494,6 @@ public class DatafileSearch {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam, manager);
         RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATAFILE);
 
-        return searchByParameterImpl(userId, ejpql, restric, include, -1, 1, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
     }
 }
