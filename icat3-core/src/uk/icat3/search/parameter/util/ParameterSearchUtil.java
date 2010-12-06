@@ -7,6 +7,7 @@
 
 package uk.icat3.search.parameter.util;
 
+import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import java.util.Date;
 import javax.persistence.EntityManager;
 import uk.icat3.exceptions.CyclicException;
@@ -22,7 +23,6 @@ import uk.icat3.exceptions.NoParameterTypeException;
 import uk.icat3.exceptions.NoParametersException;
 import uk.icat3.exceptions.NoSearchableParameterException;
 import uk.icat3.exceptions.NullParameterException;
-import uk.icat3.exceptions.ParameterSearchException;
 import java.util.List;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.ParameterPK;
@@ -188,14 +188,15 @@ public class ParameterSearchUtil {
      * @throws DatevalueFormatException
      */
     private String parseDateTimeValue (Object value, ExtractedJPQLPriva ejpql) throws DatevalueException, DatevalueFormatException {
-        Date date;
+        Date date = null;
         try {
             if (value.getClass() == String.class)
                 date = Queries.dateFormat.parse(value.toString());
             else
-                date = Date.class.cast(value);
+                date = XMLGregorianCalendarImpl.parse(value.toString()).toGregorianCalendar().getTime();
+
         } catch (Throwable t) {
-            throw new DatevalueException(value.toString());
+            throw new DatevalueException(value.toString(), t);
         }
         // Add JPQL parameter to compare object witth object, not Strings
         String name = getNextParamName();

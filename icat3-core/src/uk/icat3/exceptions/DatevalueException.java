@@ -26,4 +26,8 @@ public class DatevalueException extends ComparasionValueException {
     public DatevalueException(String value) {
         super (DatevalueException.msg + "'" + value +"' is not a Date");
     }
+
+    public DatevalueException(String value, Throwable t) {
+        super (DatevalueException.msg + "'" + value +"' is not a Date. " + t.getClass().getName());
+    }
 }
