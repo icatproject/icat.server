@@ -11,6 +11,7 @@ import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import uk.icat3.investigationmanager.TestInstrument;
 
 /**
  *
@@ -19,7 +20,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     uk.icat3.parametersearch.TestAllParameterSearch.class,
-    uk.icat3.restriction.TestAllRestrictions.class
+    uk.icat3.restriction.TestAllRestrictions.class,
+    TestInstrument.class
 })
         
 public class TestAllParameterSearchRestriction {

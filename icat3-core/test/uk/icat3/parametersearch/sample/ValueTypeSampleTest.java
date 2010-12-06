@@ -55,9 +55,9 @@ public class ValueTypeSampleTest extends BaseParameterSearchTest {
         // Add the comparator
         comp1.setComparator(ComparisonOperator.BETWEEN);
         // Add the value to compare
-        comp1.setNumericValue(3);
+        comp1.setValue(3);
         // Add a second value if needed (only for BETWEEN)
-        comp1.setNumericValueRight(new Double (4));
+        comp1.setValueRight(new Double (4));
 
         List<Sample> ld = (List<Sample>) SampleSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, Queries.NO_RESTRICTION, SampleInclude.NONE, em);
@@ -86,9 +86,9 @@ public class ValueTypeSampleTest extends BaseParameterSearchTest {
         // Add the comparator
         comp1.setComparator(ComparisonOperator.BETWEEN);
         // Add the value to compare
-        comp1.setDatetimeValue(new Date(0));
+        comp1.setValue(new Date(0));
         // Add a second value if needed (only for BETWEEN)
-        comp1.setDatetimeValueRight("2010-10-10 00:00:00");
+        comp1.setValueRight("2010-10-10 00:00:00");
 
         List<Sample> ld = (List<Sample>) SampleSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, Queries.NO_RESTRICTION, SampleInclude.NONE, em);
@@ -117,7 +117,7 @@ public class ValueTypeSampleTest extends BaseParameterSearchTest {
         // Add the comparator
         comp1.setComparator(ComparisonOperator.LESS_EQUAL);
         // Add the value to compare
-        comp1.setDatetimeValue("2010-02-22 00:00:00");
+        comp1.setValue("2010-02-22 00:00:00");
         // Add a second value if needed (only for BETWEEN)
 //        comp1.setValueRight(new Double (4));
 
@@ -149,7 +149,7 @@ public class ValueTypeSampleTest extends BaseParameterSearchTest {
         // Add the comparator
         comp1.setComparator(ComparisonOperator.CONTAIN);
         // Add the value to compare
-        comp1.setStringValue("number");
+        comp1.setValue("number");
         // Add a second value if needed (only for BETWEEN)
 //        comp1.setValueRight(new Double (4));
 
@@ -181,7 +181,7 @@ public class ValueTypeSampleTest extends BaseParameterSearchTest {
         // Add the comparator
         comp1.setComparator(ComparisonOperator.CONTAIN);
         // Add the value to compare
-        comp1.setNumericValue(21);
+        comp1.setValue(21);
         // Add a second value if needed (only for BETWEEN)
 //        comp1.setValueRight(new Double (4));
 

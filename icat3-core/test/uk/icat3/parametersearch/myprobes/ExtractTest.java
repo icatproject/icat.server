@@ -133,11 +133,11 @@ public class ExtractTest extends BaseParameterSearchTest {
         comp1.setParameterSearch(pamVal);
         // Add the comparator
         comp1.setComparator(ComparisonOperator.EQUAL);
-        comp1.setNumericValue(5);
+        comp1.setValue(5);
         // Add the value to compare
-//        comp1.setDatetimeValue(new Date(0));
+//        comp1.setValue(new Date(0));
         // Add a second value if needed (only for BETWEEN)
-//        comp1.setDatetimeValueRight("2010-10-10 00:00:00");
+//        comp1.setValueRight("2010-10-10 00:00:00");
             try {
                 List<Dataset> ld = (List<Dataset>) DatasetSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION
@@ -150,6 +150,8 @@ public class ExtractTest extends BaseParameterSearchTest {
                 System.out.println("");
                 System.out.println("---> " + ld.size());
                 System.out.println("");
+            }catch (CyclicException ex) {
+                Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
             } catch (RestrictionNullException ex) {
                 Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
             } catch (RestrictionOperatorException ex) {
@@ -278,22 +280,22 @@ public class ExtractTest extends BaseParameterSearchTest {
 //        ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
 //        comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p1));
 //        comp1.setComparator(ComparisonOperator.START_WITH);
-//        comp1.setStringValue("comp1");
+//        comp1.setValue("comp1");
 //
 //        ParameterComparisonCondition comp2 = new ParameterComparisonCondition();
 //        comp2.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p2));
 //        comp2.setComparator(ComparisonOperator.LESS_EQUAL);
-//        comp2.setNumericValue(new Float("12.23423"));
+//        comp2.setValue(new Float("12.23423"));
 //
 //        ParameterComparisonCondition comp3 = new ParameterComparisonCondition();
 //        comp3.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p3));
 //        comp3.setComparator(ComparisonOperator.START_WITH);
-//        comp3.setStringValue("comp3");
+//        comp3.setValue("comp3");
 //
 //        ParameterComparisonCondition comp4 = new ParameterComparisonCondition();
 //        comp4.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p4));
 //        comp4.setComparator(ComparisonOperator.START_WITH);
-//        comp4.setStringValue("comp4");
+//        comp4.setValue("comp4");
 //
 //        List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
 //        lc.add(comp1);

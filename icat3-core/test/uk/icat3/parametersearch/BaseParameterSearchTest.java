@@ -7,6 +7,7 @@
 
 package uk.icat3.parametersearch;
 
+import javax.persistence.EntityTransaction;
 import uk.icat3.search.parameter.ParameterType;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterCondition;
@@ -35,9 +36,12 @@ import uk.icat3.entity.DatafileParameterPK;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.DatasetParameterPK;
+import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.IcatRole;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.Investigator;
+import uk.icat3.entity.InvestigatorPK;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.ParameterPK;
 import uk.icat3.entity.Sample;
@@ -127,6 +131,27 @@ public class BaseParameterSearchTest extends BaseTest {
         dat.setDatasetType("experiment_raw");
 
         return DataSetManager.createDataSet(VALID_USER_FOR_INVESTIGATION, dat, em);
+    }
+
+    private static FacilityUser createFacilityUser (String id, String first, String middle, String last) {
+        FacilityUser fu = new FacilityUser(id, new Date(), id);
+        em.persist(fu);
+        return fu;
+    }
+
+
+    private static Investigator createInvestigator (Investigation inv, FacilityUser fu) {
+        Investigator invtor = new Investigator();
+        invtor.setFacilityUser(fu);
+        invtor.setInvestigation(inv);
+        invtor.setRole("downloader");
+        invtor.setInvestigatorPK(new InvestigatorPK(fu.getFacilityUserId(), inv.getId()));
+        
+        invtor.setModId(fu.getFacilityUserId());
+        invtor.setModTime(new Date());
+
+        em.persist(invtor);
+        return invtor;
     }
 
     private static DatasetParameter createDatasetParameter (Dataset dat, Parameter p, Number numb) {
@@ -274,8 +299,12 @@ public class BaseParameterSearchTest extends BaseTest {
         removeEntities = new ArrayList<Object>();
         try {
             IcatAuthorisation autho = createTestAutho();
+//            FacilityUser user1 = createFacilityUser("TEST", "", "", "");
             Investigation inv = createInvestigation("Investigation 1");
             Investigation inv2 = createInvestigation("Investigation 2");
+//            Investigator invtor1 = createInvestigator(inv, user1);
+//            Investigator invtor2 = createInvestigator(inv2, user1);
+//            Investigator invtor2 = createInvestigator(inv2, "najor");
             Sample samp = createSample(inv, "Sample_1");
             Sample samp2 = createSample(inv2, "Sample_2");
             Dataset dat = createDataset(inv, "dataset_1 blue");
@@ -341,10 +370,13 @@ public class BaseParameterSearchTest extends BaseTest {
 
             removeEntities.add(samp);
             removeEntities.add(samp2);
-            
+
+//            removeEntities.add(invtor1);
+//            removeEntities.add(invtor2);
             removeEntities.add(inv2);
             removeEntities.add(inv);
 
+//            removeEntities.add(user1);
             
             // Be sure that autho for TEST doesn't exists
             if (autho != null)
@@ -478,7 +510,7 @@ public class BaseParameterSearchTest extends BaseTest {
         ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
         comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p1));
         comp1.setComparator(ComparisonOperator.GREATER_EQUAL);
-        comp1.setNumericValue(new Float (1));
+        comp1.setValue(new Float (1));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 2 ----------------------
@@ -490,7 +522,7 @@ public class BaseParameterSearchTest extends BaseTest {
         ParameterComparisonCondition comp2 = new ParameterComparisonCondition();
         comp2.setParameterSearch(new ParameterSearch(ParameterType.SAMPLE, p2));
         comp2.setComparator(ComparisonOperator.START_WITH);
-        comp2.setStringValue("10");
+        comp2.setValue("10");
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 3 ----------------------
@@ -502,7 +534,7 @@ public class BaseParameterSearchTest extends BaseTest {
         ParameterComparisonCondition comp3 = new ParameterComparisonCondition();
         comp3.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p3));
         comp3.setComparator(ComparisonOperator.START_WITH);
-        comp3.setStringValue("");
+        comp3.setValue("");
         // ----------------------------------------------------
         
         ParameterLogicalCondition op1 = new ParameterLogicalCondition();
@@ -574,49 +606,49 @@ public class BaseParameterSearchTest extends BaseTest {
         ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
         comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
         comp1.setComparator(ComparisonOperator.EQUAL);
-        comp1.setNumericValue(new Double (3.14));
+        comp1.setValue(new Double (3.14));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 2 ----------------------
         ParameterComparisonCondition comp2 = new ParameterComparisonCondition();
         comp2.setParameterSearch(new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample1")));
         comp2.setComparator(ComparisonOperator.EQUAL);
-        comp2.setNumericValue(new Double(2.2));
+        comp2.setValue(new Double(2.2));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 3 ----------------------
         ParameterComparisonCondition comp3 = new ParameterComparisonCondition();
         comp3.setParameterSearch(new ParameterSearch(ParameterType.DATASET, parameter.get("dataset1")));
         comp3.setComparator(ComparisonOperator.EQUAL);
-        comp3.setNumericValue(new Double (2.1));
+        comp3.setValue(new Double (2.1));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 4 ----------------------
         ParameterComparisonCondition comp4 = new ParameterComparisonCondition();
         comp4.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2_1")));
         comp4.setComparator(ComparisonOperator.EQUAL);
-        comp4.setNumericValue(new Double (21.0000002));
+        comp4.setValue(new Double (21.0000002));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 5 -------------------------
         ParameterComparisonCondition comp5 = new ParameterComparisonCondition();
         comp5.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2")));
         comp5.setComparator(ComparisonOperator.EQUAL);
-        comp5.setNumericValue(new Double (5.2));
+        comp5.setValue(new Double (5.2));
         // ----------------------------------------------------
 
          // ------------- ComparisonOperator 6 -------------------------
         ParameterComparisonCondition comp6 = new ParameterComparisonCondition();
         comp6.setParameterSearch(new ParameterSearch(ParameterType.DATASET, parameter.get("dataset2_1")));
         comp6.setComparator(ComparisonOperator.EQUAL);
-        comp6.setNumericValue(new Double(21.1));
+        comp6.setValue(new Double(21.1));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 7 -------------------------
         ParameterComparisonCondition comp7 = new ParameterComparisonCondition();
         comp7.setParameterSearch(new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample2_1")));
         comp7.setComparator(ComparisonOperator.EQUAL);
-        comp7.setNumericValue(new Double(21.2));
+        comp7.setValue(new Double(21.2));
         // ----------------------------------------------------
         
         pcDatafile = new ArrayList<ParameterComparisonCondition>();

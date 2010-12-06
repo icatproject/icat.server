@@ -58,9 +58,9 @@ public class UsesExamples extends BaseParameterSearchTest  {
         // Add the comparator
         comp1.setComparator(ComparisonOperator.BETWEEN);
         // Add the value to compare
-        comp1.setDatetimeValue(new Date(0));
+        comp1.setValue(new Date(0));
         // Add a second value if needed (only for BETWEEN)
-        comp1.setDatetimeValueRight("2010-10-10 00:00:00");
+        comp1.setValueRight("2010-10-10 00:00:00");
 
         List<Datafile> ld = (List<Datafile>) DatafileSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, Queries.NO_RESTRICTION, DatafileInclude.NONE, em);
@@ -155,7 +155,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         // Add the comparator
         comp1.setComparator(ComparisonOperator.LESS_EQUAL);
         // Add the value to compare
-        comp1.setDatetimeValue(new Date());
+        comp1.setValue(new Date());
         // Add a second value if needed (only for BETWEEN)
 //        comp1.setValueRight(new Double (4));
 
@@ -187,7 +187,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         // Add the comparator
         comp1.setComparator(ComparisonOperator.LESS_EQUAL);
         // Add the value to compare
-        comp1.setDatetimeValue("2010-02-22 00:00:00");
+        comp1.setValue("2010-02-22 00:00:00");
         // Add a second value if needed (only for BETWEEN)
 //        comp1.setValueRight(new Double (4));
 
@@ -219,7 +219,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         // Add the comparator
         comp1.setComparator(ComparisonOperator.CONTAIN);
         // Add the value to compare
-        comp1.setStringValue("number");
+        comp1.setValue("number");
         // Add a second value if needed (only for BETWEEN)
 //        comp1.setValueRight(new Double (4));
 
@@ -251,7 +251,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         // Add the comparator
         comp1.setComparator(ComparisonOperator.CONTAIN);
         // Add the value to compare
-        comp1.setNumericValue(21);
+        comp1.setValue(21);
         // Add a second value if needed (only for BETWEEN)
 //        comp1.setValueRight(new Double (4));
 
