@@ -15,6 +15,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
 import uk.icat3.entity.Sample;
+import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
@@ -37,7 +38,7 @@ import uk.icat3.util.SampleInclude;
  */
 @Stateless()
 //@WebService(targetNamespace="client.icat3.uk")
-//this interceptor check no nulls passed in and logs the method arguments
+//this interceptor check no nulls passed in and logs the method sarguments
 @Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class SampleSearchBean extends EJBObject implements SampleSearchLocal {
@@ -202,5 +203,43 @@ public class SampleSearchBean extends EJBObject implements SampleSearchLocal {
             list.add(p);
 
         return SampleSearch.searchByParameterList(userId, list, Queries.NO_RESTRICTION, include, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, RestrictionCondition... restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restricion)
+            restLogCond.add(r);
+
+        return SampleSearch.searchByRestriction(userId, restLogCond, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, SampleInclude include, RestrictionCondition... restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restricion)
+            restLogCond.add(r);
+
+        return SampleSearch.searchByRestriction(userId, restLogCond, include, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        return SampleSearch.searchByRestriction(userId, restricion, SampleInclude.NONE, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, SampleInclude include, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        return SampleSearch.searchByRestriction(userId, restricion, include, manager);
     }
 }

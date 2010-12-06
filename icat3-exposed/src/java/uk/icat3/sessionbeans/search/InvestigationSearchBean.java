@@ -22,8 +22,10 @@ import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.IcatRole;
+import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Parameter;
+import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
@@ -597,5 +599,47 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
             list.add(p);
 
         return InvestigationSearch.searchByParameterList(userId, list, Queries.NO_RESTRICTION, include, manager);
+    }
+
+    @Override
+    public Collection<Instrument> getAllInstruments(String sessionId) throws SessionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        
+        return InvestigationSearch.getAllInstruments(manager);
+    }
+
+    @Override
+    public Collection<Investigation> searchByRestriction(String sessionId, RestrictionCondition... restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restricion)
+            restLogCond.add(r);
+        return InvestigationSearch.searchByRestriction(userId, restLogCond, manager);
+    }
+
+    @Override
+    public Collection<Investigation> searchByRestriction(String sessionId, InvestigationInclude include, RestrictionCondition... restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restricion)
+            restLogCond.add(r);
+        return InvestigationSearch.searchByRestriction(userId, restLogCond, include, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException {
+         //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        return InvestigationSearch.searchByRestriction(userId, restricion, InvestigationInclude.NONE, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, InvestigationInclude include, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+        return InvestigationSearch.searchByRestriction(userId, restricion, include, manager);
     }
 }

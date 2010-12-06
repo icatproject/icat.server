@@ -4,6 +4,7 @@ package uk.icat3.sessionbeans.search;
 import java.util.Collection;
 import javax.ejb.Local;
 import uk.icat3.entity.IcatRole;
+import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.SessionException;
@@ -46,6 +47,14 @@ public interface InvestigationSearchLocal extends ParameterSearchInterface<Inves
     Collection<Investigation> searchByUserSurname(String sessionId, String surname, int startIndex, int number_results) throws SessionException;
 
     Collection<String> listInstruments(String sessionId) throws SessionException;
+    /**
+     * Return all information about all instruments
+     *
+     * @param sessionId Session identification
+     * @return Collection of instruments
+     * @throws SessionException
+     */
+    Collection<Instrument> getAllInstruments(String sessionId) throws SessionException;
 
     Collection<IcatRole> listRoles(String sessionId) throws SessionException;
 

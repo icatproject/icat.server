@@ -34,6 +34,7 @@ import uk.icat3.entity.FacilityCycle;
 import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.IcatRole;
+import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.InvestigatorPK;
@@ -44,6 +45,7 @@ import uk.icat3.entity.Publication;
 import uk.icat3.entity.Sample;
 import uk.icat3.entity.SampleParameter;
 import uk.icat3.entity.SampleParameterPK;
+import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.ICATAPIException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
@@ -51,7 +53,8 @@ import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
-import uk.icat3.restriction.RestrictionCondition;
+import uk.icat3.restriction.RestrictionComparisonCondition;
+import uk.icat3.restriction.RestrictionLogicalCondition;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
 import uk.icat3.exceptions.ParameterSearchException;
@@ -584,6 +587,19 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection<String> listInstruments(
             @WebParam(name = "sessionId") String sessionId) throws SessionException {
         return investigationSearchLocal.listInstruments(sessionId);
+    }
+
+    /**
+     *  Lists all the instruments in the DB
+     *
+     * @param sessionId
+     * @throws uk.icat3.exceptions.SessionException if the session id is invalid
+     * @return collection of instruments
+     */
+    @WebMethod
+    public Collection<Instrument> getAllInstruments(
+            @WebParam(name = "sessionId") String sessionId) throws SessionException {
+        return investigationSearchLocal.getAllInstruments(sessionId);
     }
 
     /**
@@ -2259,7 +2275,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     String sessionId, @WebParam(name = "paramLogicalCond")
     ParameterLogicalCondition paramLogicalCond, @WebParam(name = "include")
     DatasetInclude include, @WebParam(name = "restriction")
-    RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restriction) throws SessionException, ParameterSearchException, RestrictionException {
         return datasetSearchLocal.searchByParameterCondition(sessionId, paramLogicalCond, include, restriction);
     }
 
@@ -2271,7 +2287,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     String sessionId, @WebParam(name = "comparisons")
     ParameterComparisonCondition[] comparisons, @WebParam(name = "include")
     DatasetInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return datasetSearchLocal.searchByParameterComparison(sessionId, comparisons, include, restrictions);
     }
 
@@ -2282,7 +2298,7 @@ public class ICAT extends EJBObject implements ICATLocal {
                      @WebParam(name="comparisonList")
             ParameterSearch[] parameters, @WebParam(name = "include")
     DatasetInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
 
         return datasetSearchLocal.searchByParameter(sessionId, parameters, include, restrictions);
     }
@@ -2306,7 +2322,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     String sessionId, @WebParam(name = "comparisons")
     ParameterComparisonCondition[] comparisons, @WebParam(name = "include")
     DatasetInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return datasetSearchLocal.searchByParameterComparison(sessionId, comparisons, include);
     }
 
@@ -2317,7 +2333,7 @@ public class ICAT extends EJBObject implements ICATLocal {
                      @WebParam(name="comparisonList")
             ParameterSearch[] parameters, @WebParam(name = "include")
     DatasetInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
 
         return datasetSearchLocal.searchByParameter(sessionId, parameters, include);
     }
@@ -2331,7 +2347,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection searchDatasetByParameterConditionRtr(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "paramLogicalCond")
     ParameterLogicalCondition paramLogicalCond, @WebParam(name = "restriction")
-    RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restriction) throws SessionException, ParameterSearchException, RestrictionException {
         return datasetSearchLocal.searchByParameterCondition(sessionId, paramLogicalCond, restriction);
     }
 
@@ -2344,7 +2360,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection searchDatasetByParameterComparisonRtr(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "comparisons")
     ParameterComparisonCondition[] comparisons, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return datasetSearchLocal.searchByParameterComparison(sessionId, comparisons, restrictions);
     }
 
@@ -2354,7 +2370,7 @@ public class ICAT extends EJBObject implements ICATLocal {
             String sessionId,
                      @WebParam(name="comparisonList")
             ParameterSearch[] parameters, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return datasetSearchLocal.searchByParameter(sessionId, parameters, restrictions);
     }
 
@@ -2366,7 +2382,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     String sessionId, @WebParam(name = "paramLogicalCond")
     ParameterLogicalCondition paramLogicalCond, @WebParam(name = "include")
     SampleInclude include, @WebParam(name = "restriction")
-    RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restriction) throws SessionException, ParameterSearchException, RestrictionException {
         return sampleSearchLocal.searchByParameterCondition(sessionId, paramLogicalCond, include, restriction);
     }
 
@@ -2378,7 +2394,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     String sessionId, @WebParam(name = "comparisons")
     ParameterComparisonCondition[] comparisons, @WebParam(name = "include")
     SampleInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return sampleSearchLocal.searchByParameterComparison(sessionId, comparisons, include, restrictions);
     }
 
@@ -2389,7 +2405,7 @@ public class ICAT extends EJBObject implements ICATLocal {
                      @WebParam(name="comparisonList")
             ParameterSearch[] parameters, @WebParam(name = "include")
     SampleInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
 
         return sampleSearchLocal.searchByParameter(sessionId, parameters, include, restrictions);
     }
@@ -2413,7 +2429,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     String sessionId, @WebParam(name = "comparisons")
     ParameterComparisonCondition[] comparisons, @WebParam(name = "include")
     SampleInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return sampleSearchLocal.searchByParameterComparison(sessionId, comparisons, include);
     }
 
@@ -2424,7 +2440,7 @@ public class ICAT extends EJBObject implements ICATLocal {
                      @WebParam(name="comparisonList")
             ParameterSearch[] parameters, @WebParam(name = "include")
     SampleInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
 
         return sampleSearchLocal.searchByParameter(sessionId, parameters, include);
     }
@@ -2438,7 +2454,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection searchSampleByParameterConditionRtr(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "paramLogicalCond")
     ParameterLogicalCondition paramLogicalCond, @WebParam(name = "restriction")
-    RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restriction) throws SessionException, ParameterSearchException, RestrictionException {
         return sampleSearchLocal.searchByParameterCondition(sessionId, paramLogicalCond, restriction);
     }
 
@@ -2451,7 +2467,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection searchSampleByParameterComparisonRtr(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "comparisons")
     ParameterComparisonCondition[] comparisons, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return sampleSearchLocal.searchByParameterComparison(sessionId, comparisons, restrictions);
     }
 
@@ -2461,7 +2477,7 @@ public class ICAT extends EJBObject implements ICATLocal {
             String sessionId,
                      @WebParam(name="comparisonList")
             ParameterSearch[] parameters, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return sampleSearchLocal.searchByParameter(sessionId, parameters, restrictions);
     }
 
@@ -2473,7 +2489,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     String sessionId, @WebParam(name = "paramLogicalCond")
     ParameterLogicalCondition paramLogicalCond, @WebParam(name = "include")
     DatafileInclude include, @WebParam(name = "restriction")
-    RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restriction) throws SessionException, ParameterSearchException, RestrictionException {
         return datafileSearchLocal.searchByParameterCondition(sessionId, paramLogicalCond, include, restriction);
     }
 
@@ -2485,7 +2501,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     String sessionId, @WebParam(name = "comparisons")
     ParameterComparisonCondition[] comparisons, @WebParam(name = "include")
     DatafileInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return datafileSearchLocal.searchByParameterComparison(sessionId, comparisons, include, restrictions);
     }
 
@@ -2496,7 +2512,7 @@ public class ICAT extends EJBObject implements ICATLocal {
                      @WebParam(name="comparisonList")
             ParameterSearch[] parameters, @WebParam(name = "include")
     DatafileInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
 
         return datafileSearchLocal.searchByParameter(sessionId, parameters, include, restrictions);
     }
@@ -2520,7 +2536,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     String sessionId, @WebParam(name = "comparisons")
     ParameterComparisonCondition[] comparisons, @WebParam(name = "include")
     DatafileInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return datafileSearchLocal.searchByParameterComparison(sessionId, comparisons, include);
     }
 
@@ -2531,7 +2547,7 @@ public class ICAT extends EJBObject implements ICATLocal {
                      @WebParam(name="comparisonList")
             ParameterSearch[] parameters, @WebParam(name = "include")
     DatafileInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
 
         return datafileSearchLocal.searchByParameter(sessionId, parameters, include);
     }
@@ -2545,7 +2561,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection searchDatafileByParameterConditionRtr(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "paramLogicalCond")
     ParameterLogicalCondition paramLogicalCond, @WebParam(name = "restriction")
-    RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restriction) throws SessionException, ParameterSearchException, RestrictionException {
         return datafileSearchLocal.searchByParameterCondition(sessionId, paramLogicalCond, restriction);
     }
 
@@ -2558,7 +2574,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection searchDatafileByParameterComparisonRtr(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "comparisons")
     ParameterComparisonCondition[] comparisons, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return datafileSearchLocal.searchByParameterComparison(sessionId, comparisons, restrictions);
     }
 
@@ -2568,7 +2584,7 @@ public class ICAT extends EJBObject implements ICATLocal {
             String sessionId,
                      @WebParam(name="comparisonList")
             ParameterSearch[] parameters, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return datafileSearchLocal.searchByParameter(sessionId, parameters, restrictions);
     }
 
@@ -2580,7 +2596,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     String sessionId, @WebParam(name = "paramLogicalCond")
     ParameterLogicalCondition paramLogicalCond, @WebParam(name = "include")
     InvestigationInclude include, @WebParam(name = "restriction")
-    RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restriction) throws SessionException, ParameterSearchException, RestrictionException {
         return investigationSearchLocal.searchByParameterCondition(sessionId, paramLogicalCond, include, restriction);
     }
 
@@ -2592,7 +2608,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     String sessionId, @WebParam(name = "comparisons")
     ParameterComparisonCondition[] comparisons, @WebParam(name = "include")
     InvestigationInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return investigationSearchLocal.searchByParameterComparison(sessionId, comparisons, include, restrictions);
     }
 
@@ -2603,7 +2619,7 @@ public class ICAT extends EJBObject implements ICATLocal {
                      @WebParam(name="comparisonList")
             ParameterSearch[] parameters, @WebParam(name = "include")
     InvestigationInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
 
         return investigationSearchLocal.searchByParameter(sessionId, parameters, include, restrictions);
     }
@@ -2627,7 +2643,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     String sessionId, @WebParam(name = "comparisons")
     ParameterComparisonCondition[] comparisons, @WebParam(name = "include")
     InvestigationInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return investigationSearchLocal.searchByParameterComparison(sessionId, comparisons, include);
     }
 
@@ -2638,7 +2654,7 @@ public class ICAT extends EJBObject implements ICATLocal {
                      @WebParam(name="comparisonList")
             ParameterSearch[] parameters, @WebParam(name = "include")
     InvestigationInclude include, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
 
         return investigationSearchLocal.searchByParameter(sessionId, parameters, include);
     }
@@ -2652,7 +2668,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection searchByParameterConditionRtr(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "paramLogicalCond")
     ParameterLogicalCondition paramLogicalCond, @WebParam(name = "restriction")
-    RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restriction) throws SessionException, ParameterSearchException, RestrictionException {
         return investigationSearchLocal.searchByParameterCondition(sessionId, paramLogicalCond, restriction);
     }
 
@@ -2665,7 +2681,7 @@ public class ICAT extends EJBObject implements ICATLocal {
     public Collection searchByParameterComparisonRtr(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "comparisons")
     ParameterComparisonCondition[] comparisons, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return investigationSearchLocal.searchByParameterComparison(sessionId, comparisons, restrictions);
     }
 
@@ -2675,8 +2691,112 @@ public class ICAT extends EJBObject implements ICATLocal {
             String sessionId,
                      @WebParam(name="comparisonList")
             ParameterSearch[] parameters, @WebParam(name = "restrictions")
-    RestrictionCondition... restrictions) throws SessionException, ParameterSearchException, RestrictionException {
+    RestrictionLogicalCondition restrictions) throws SessionException, ParameterSearchException, RestrictionException {
         return investigationSearchLocal.searchByParameter(sessionId, parameters, restrictions);
+    }
+
+    @WebMethod
+    public Collection<Investigation> searchByRestriction(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "restriction") RestrictionLogicalCondition restriction) throws SessionException, RestrictionException, DatevalueException {
+        return investigationSearchLocal.searchByRestriction(sessionId, restriction);
+    }
+
+    @WebMethod
+    public Collection<Investigation> searchByRestrictionComparasion(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "restriction") RestrictionComparisonCondition... restriction) throws SessionException, RestrictionException, DatevalueException {
+        return investigationSearchLocal.searchByRestriction(sessionId, restriction);
+    }
+
+    @WebMethod
+    public Collection searchByRestrictionInclude(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "include") InvestigationInclude include,
+            @WebParam(name = "restriction") RestrictionLogicalCondition restriction) throws SessionException, RestrictionException {
+        return investigationSearchLocal.searchByRestriction(sessionId, include, restriction);
+    }
+
+    @WebMethod
+    public Collection<Dataset> searchDatasetByRestriction(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "restriction") RestrictionLogicalCondition restriction) throws SessionException, RestrictionException, DatevalueException {
+        return datasetSearchLocal.searchByRestriction(sessionId, restriction);
+    }
+
+    @WebMethod
+    public Collection searchDatasetByRestrictionInclude(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "include") DatasetInclude include,
+            @WebParam(name = "restriction") RestrictionLogicalCondition restriction) throws SessionException, RestrictionException {
+        return datasetSearchLocal.searchByRestriction(sessionId, include, restriction);
+    }
+
+    @WebMethod
+    public Collection<Datafile> searchDatafileByRestriction(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "restriction") RestrictionLogicalCondition restriction) throws SessionException, RestrictionException, DatevalueException {
+        return datafileSearchLocal.searchByRestriction(sessionId, restriction);
+    }
+
+    @WebMethod
+    public Collection searchDatafileByRestrictionInclude(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "include") DatafileInclude include,
+            @WebParam(name = "restriction") RestrictionLogicalCondition restriction) throws SessionException, RestrictionException {
+        return datafileSearchLocal.searchByRestriction(sessionId, include, restriction);
+    }
+
+    @WebMethod
+    public Collection<Sample> searchSampleByRestriction(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "restriction") RestrictionLogicalCondition restriction) throws SessionException, RestrictionException, DatevalueException {
+        return sampleSearchLocal.searchByRestriction(sessionId, restriction);
+    }
+
+    @WebMethod
+    public Collection searchSampleByRestrictionInclude(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "include") SampleInclude include,
+            @WebParam(name = "restriction") RestrictionLogicalCondition restriction) throws SessionException, RestrictionException {
+        return sampleSearchLocal.searchByRestriction(sessionId, include, restriction);
+    }
+
+    @WebMethod
+    public Collection searchByRestrictionComparisonInclude(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "include") InvestigationInclude include,
+            @WebParam(name = "restriction") RestrictionComparisonCondition... restriction) throws SessionException, RestrictionException {
+        return investigationSearchLocal.searchByRestriction(sessionId, include, restriction);
+    }
+
+    @WebMethod
+    public Collection<Dataset> searchDatasetByRestrictionComparison(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "restriction") RestrictionComparisonCondition... restriction) throws SessionException, RestrictionException, DatevalueException {
+        return datasetSearchLocal.searchByRestriction(sessionId, restriction);
+    }
+
+    @WebMethod
+    public Collection searchDatasetByRestrictionComparisonInclude(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "include") DatasetInclude include,
+            @WebParam(name = "restriction") RestrictionComparisonCondition... restriction) throws SessionException, RestrictionException {
+        return datasetSearchLocal.searchByRestriction(sessionId, include, restriction);
+    }
+
+    @WebMethod
+    public Collection<Datafile> searchDatafileByRestrictionComparison(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "restriction") RestrictionComparisonCondition... restriction) throws SessionException, RestrictionException, DatevalueException {
+        return datafileSearchLocal.searchByRestriction(sessionId, restriction);
+    }
+
+    @WebMethod
+    public Collection searchDatafileByRestrictionComparisonInclude(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "include") DatafileInclude include,
+            @WebParam(name = "restriction") RestrictionComparisonCondition... restriction) throws SessionException, RestrictionException {
+        return datafileSearchLocal.searchByRestriction(sessionId, include, restriction);
+    }
+
+    @WebMethod
+    public Collection<Sample> searchSampleByRestrictionComparison(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "restriction") RestrictionComparisonCondition... restriction) throws SessionException, RestrictionException, DatevalueException {
+        return sampleSearchLocal.searchByRestriction(sessionId, restriction);
+    }
+
+    @WebMethod
+    public Collection searchSampleByRestrictionComparisonInclude(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "include") SampleInclude include,
+            @WebParam(name = "restriction") RestrictionComparisonCondition... restriction) throws SessionException, RestrictionException {
+        return sampleSearchLocal.searchByRestriction(sessionId, include, restriction);
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 }

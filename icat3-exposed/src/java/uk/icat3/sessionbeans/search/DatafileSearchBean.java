@@ -21,6 +21,7 @@ import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileFormat;
+import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.SessionException;
@@ -265,5 +266,45 @@ public class DatafileSearchBean extends EJBObject implements DatafileSearchLocal
         }
 
         return DatafileSearch.searchByParameterList(userId, list, Queries.NO_RESTRICTION, include, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, RestrictionCondition... restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restricion)
+            restLogCond.add(r);
+
+        return DatafileSearch.searchByRestriction(userId, restLogCond, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, DatafileInclude include, RestrictionCondition[] restricion) throws SessionException, RestrictionException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restricion)
+            restLogCond.add(r);
+
+        return DatafileSearch.searchByRestriction(userId, restLogCond, include, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        return DatafileSearch.searchByRestriction(userId, restricion, DatafileInclude.NONE, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, DatafileInclude include, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        return DatafileSearch.searchByRestriction(userId, restricion, include, manager);
     }
 }

@@ -20,6 +20,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
 import javax.jws.WebMethod;
 import uk.icat3.entity.Sample;
+import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ParameterSearchException;
@@ -291,5 +292,45 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
             list.add(p);
 
         return DatasetSearch.searchByParameterList(userId, list, restLogCond, DatasetInclude.NONE, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, RestrictionCondition... restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restricion)
+            restLogCond.add(r);
+
+        return DatasetSearch.searchByRestriction(userId, restLogCond, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, DatasetInclude include, RestrictionCondition... restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
+        for (RestrictionCondition r : restricion)
+            restLogCond.add(r);
+
+        return DatasetSearch.searchByRestriction(userId, restLogCond, include, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        return DatasetSearch.searchByRestriction(userId, restricion, DatasetInclude.NONE, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, DatasetInclude include, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException {
+        //for user bean get userId
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        return DatasetSearch.searchByRestriction(userId, restricion, include, manager);
     }
 }

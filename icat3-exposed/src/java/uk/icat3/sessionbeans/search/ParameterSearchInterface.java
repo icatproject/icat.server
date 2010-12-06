@@ -8,6 +8,7 @@
 package uk.icat3.sessionbeans.search;
 
 import java.util.Collection;
+import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.SessionException;
@@ -25,6 +26,58 @@ import uk.icat3.search.parameter.util.ParameterSearch;
  * @author cruzcruz
  */
 public interface ParameterSearchInterface<T extends Enum> {
+
+    /**
+     * Search investigation which match with restriction conditions
+     *
+     * @param userId User identifaction
+     * @param restriction Restriction condition
+     * @return Collection of investigation
+     *
+     * @throws SessionException
+     * @throws RestrictionException
+     * @throws DatevalueException
+     */
+    Collection searchByRestriction(String sessionId, RestrictionCondition... restricion) throws SessionException, RestrictionException, DatevalueException;
+    /**
+     * Search investigation which match with restriction conditions
+     *
+     * @param userId User identifaction
+     * @param restriction Restriction condition
+     * @param include Include options
+     * @return Collection of investigation
+     *
+     * @throws SessionException
+     * @throws RestrictionException
+     * @throws DatevalueException
+     */
+    Collection searchByRestriction(String sessionId, T include, RestrictionCondition... restricion) throws SessionException, RestrictionException, DatevalueException;
+
+    /**
+     * Search investigation which match with restriction conditions
+     *
+     * @param userId User identifaction
+     * @param restriction Restriction condition
+     * @return Collection of investigation
+     *
+     * @throws SessionException
+     * @throws RestrictionException
+     * @throws DatevalueException
+     */
+    Collection searchByRestriction(String sessionId, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException;
+    /**
+     * Search investigation which match with restriction conditions
+     *
+     * @param userId User identifaction
+     * @param restriction Restriction condition
+     * @param include Include options
+     * @return Collection of investigation
+     *
+     * @throws SessionException
+     * @throws RestrictionException
+     * @throws DatevalueException
+     */
+    Collection searchByRestriction(String sessionId, T include, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException;
 
     /**
      * Return datasets matched by a logical condition.
