@@ -21,7 +21,7 @@ import uk.icat3.exceptions.NoNumericComparatorException;
 import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.RestrictionEmptyListException;
-import uk.icat3.exceptions.RestrictionINException;
+import uk.icat3.exceptions.OperatorINException;
 import uk.icat3.exceptions.RestrictionNullException;
 import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.search.parameter.ComparisonOperator;
@@ -60,7 +60,7 @@ public class ExtractTest extends BaseParameterSearchTest {
     }
 
     @Test
-    public void restriction () throws CyclicException, NoParameterTypeException, RestrictionOperatorException, RestrictionINException {
+    public void restriction () throws CyclicException, NoParameterTypeException, RestrictionOperatorException, OperatorINException {
         try {
             RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.CONTAIN, "gation 1");
             ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
@@ -104,7 +104,7 @@ public class ExtractTest extends BaseParameterSearchTest {
     }
 
 //    @Test
-    public void probe () throws RestrictionINException {
+    public void probe () throws OperatorINException {
         try {
             RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(RestrictionAttributes.INVESTIGATION_ID, RestrictionOperator.GREATER_THAN, "123");
 //            RestrictionLogicalCondition log = new RestrictionLogicalCondition(LogicalOperator.OR)

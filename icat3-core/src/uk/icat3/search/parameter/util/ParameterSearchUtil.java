@@ -8,6 +8,7 @@
 package uk.icat3.search.parameter.util;
 
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
+import java.util.Collection;
 import java.util.Date;
 import javax.persistence.EntityManager;
 import uk.icat3.exceptions.CyclicException;
@@ -31,6 +32,7 @@ import uk.icat3.exceptions.DatevalueFormatException;
 import uk.icat3.exceptions.EmptyListParameterException;
 import uk.icat3.exceptions.NoDatetimeComparatorException;
 import uk.icat3.exceptions.NumericvalueException;
+import uk.icat3.exceptions.OperatorINException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.manager.ParameterManager;
 import uk.icat3.util.LogicalOperator;
@@ -86,20 +88,24 @@ public class ParameterSearchUtil {
      *
      * @param paramName Parameter name in the JPQL statement
      * @param paramComp ParameterComparisonCondition
+     * @param ejpql Parameter information container
+     * 
      * @return JPQL condition
      * @throws NoStringComparatorException
      * @throws NoNumericComparatorException
      */
-    private String getCondition (String paramName, ParameterComparisonCondition paramComp, ExtractedJPQLPriva ejpql) throws NoStringComparatorException, NoNumericComparatorException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
+    private String getCondition (String paramName, ParameterComparisonCondition paramComp, ExtractedJPQLPriva ejpql) throws NoStringComparatorException, NoNumericComparatorException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, OperatorINException {
 
         // Get parameter
         Parameter param = paramComp.getParameterSearch().getParam();
         ComparisonOperator comparator = paramComp.getComparator();
         Object value = paramComp.getValue();
-
+        // Check if comparator is IN
+        if (comparator == ComparisonOperator.IN)
+           return paramName + " IN (" + getValueIN (ejpql, param, value) + ")";
         // Numeric comparators
         if (param.isNumeric()) {
-           String valueStr = parseNumericValue(value, ejpql);
+            String valueStr = parseNumericValue(value, ejpql);
             if (comparator == ComparisonOperator.GREATER_THAN)
                 return paramName + " > " + valueStr;
             if (comparator == ComparisonOperator.GREATER_EQUAL)
@@ -113,6 +119,7 @@ public class ParameterSearchUtil {
             if (comparator == ComparisonOperator.BETWEEN)
                 return paramName + " BETWEEN " + valueStr + " AND " + 
                         parseNumericValue(paramComp.getValueRight(), ejpql);
+            
 
             throw new NoNumericComparatorException(param, comparator);
         }
@@ -215,7 +222,7 @@ public class ParameterSearchUtil {
      * @return JPQL statement
      * @throws ParameterSearchException
      */
-    public ExtractedJPQL extractJPQLOperable (ParameterCondition paramOperable, EntityManager manager) throws EmptyOperatorException, NullParameterException, NoSearchableParameterException, NoStringComparatorException, NoNumericComparatorException, NoParameterTypeException, NoParametersException, NoDatetimeComparatorException, ParameterNoExistsException, DatevalueException, NumericvalueException, DatevalueFormatException, CyclicException {
+    public ExtractedJPQL extractJPQLOperable (ParameterCondition paramOperable, EntityManager manager) throws EmptyOperatorException, NullParameterException, NoSearchableParameterException, NoStringComparatorException, NoNumericComparatorException, NoParameterTypeException, NoParametersException, NoDatetimeComparatorException, ParameterNoExistsException, DatevalueException, NumericvalueException, DatevalueFormatException, CyclicException, OperatorINException {
         ExtractedJPQLPriva ejpql = new ExtractedJPQLPriva();
 
         this.manager = manager;
@@ -239,7 +246,7 @@ public class ParameterSearchUtil {
      * @throws NoNumericComparatorException
      * @throws ParameterSearchException
      */
-    private void extractJPQLComparator (ParameterComparisonCondition comp, ExtractedJPQLPriva ejpql) throws NoParameterTypeException, NoStringComparatorException, NoSearchableParameterException, NullParameterException, NoNumericComparatorException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
+    private void extractJPQLComparator (ParameterComparisonCondition comp, ExtractedJPQLPriva ejpql) throws NoParameterTypeException, NoStringComparatorException, NoSearchableParameterException, NullParameterException, NoNumericComparatorException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, OperatorINException {
         // Check that the comparator is well contructed.
         comp.validate();
 
@@ -272,7 +279,7 @@ public class ParameterSearchUtil {
      * @throws NoStringComparatorException
      * @throws NoNumericComparatorException
      */
-    private void addParameterCondition (String paramName, ParameterComparisonCondition comp, ExtractedJPQLPriva ejpql) throws NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, NoParameterTypeException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
+    private void addParameterCondition (String paramName, ParameterComparisonCondition comp, ExtractedJPQLPriva ejpql) throws NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, NoParameterTypeException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, OperatorINException {
         ejpql.addParameter(paramName, comp.getParameterSearch());
 
         ejpql.openParenthesis();
@@ -292,7 +299,7 @@ public class ParameterSearchUtil {
      * @throws NoStringComparatorException
      * @throws NoNumericComparatorException
      */
-    private void addParameterOrCondition (String paramName, String param, ParameterComparisonCondition comp, ExtractedJPQLPriva ejpql) throws NoStringComparatorException, NoNumericComparatorException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException {
+    private void addParameterOrCondition (String paramName, String param, ParameterComparisonCondition comp, ExtractedJPQLPriva ejpql) throws NoStringComparatorException, NoNumericComparatorException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, OperatorINException {
         ejpql.addParameterJPQL(param, comp.getParameterSearch().getParam());
         
         ejpql.openParenthesis();
@@ -337,7 +344,7 @@ public class ParameterSearchUtil {
      * @throws NumericvalueException
      * @throws DatevalueFormatException
      */
-    private String extractJPQL (ParameterComparisonCondition comp, ExtractedJPQLPriva ejpql, String paramName) throws NullParameterException, NoSearchableParameterException, NoStringComparatorException,  NoNumericComparatorException, NoParameterTypeException, NoParametersException, NoDatetimeComparatorException, ParameterNoExistsException, DatevalueException, NumericvalueException, DatevalueFormatException {
+    private String extractJPQL (ParameterComparisonCondition comp, ExtractedJPQLPriva ejpql, String paramName) throws NullParameterException, NoSearchableParameterException, NoStringComparatorException,  NoNumericComparatorException, NoParameterTypeException, NoParametersException, NoDatetimeComparatorException, ParameterNoExistsException, DatevalueException, NumericvalueException, DatevalueFormatException, OperatorINException {
         comp.validate();
         checkParameter(comp.getParameterSearch(), manager);
 
@@ -382,7 +389,7 @@ public class ParameterSearchUtil {
      * @throws NumericvalueException
      * @throws DatevalueFormatException
      */
-    private void extractJPQL(ParameterCondition paramOperable, ExtractedJPQLPriva ejpql) throws EmptyOperatorException, NullParameterException, NoSearchableParameterException, NoStringComparatorException,  NoNumericComparatorException, NoParametersException, NoParameterTypeException, NoDatetimeComparatorException, ParameterNoExistsException, DatevalueException, NumericvalueException, DatevalueFormatException, CyclicException {
+    private void extractJPQL(ParameterCondition paramOperable, ExtractedJPQLPriva ejpql) throws EmptyOperatorException, NullParameterException, NoSearchableParameterException, NoStringComparatorException,  NoNumericComparatorException, NoParametersException, NoParameterTypeException, NoDatetimeComparatorException, ParameterNoExistsException, DatevalueException, NumericvalueException, DatevalueFormatException, CyclicException, OperatorINException {
         extractJPQL(paramOperable, ejpql, null);
     }
 
@@ -410,7 +417,7 @@ public class ParameterSearchUtil {
      * @return
      * @throws ParameterSearchException
      */
-    private String extractJPQL(ParameterCondition parameterOperable, ExtractedJPQLPriva ejpql, String paramName) throws EmptyOperatorException, NullParameterException, NoSearchableParameterException, NoParametersException, NoStringComparatorException, NoNumericComparatorException, NoParameterTypeException, NoDatetimeComparatorException, ParameterNoExistsException, DatevalueException, NumericvalueException, DatevalueFormatException, CyclicException  {
+    private String extractJPQL(ParameterCondition parameterOperable, ExtractedJPQLPriva ejpql, String paramName) throws EmptyOperatorException, NullParameterException, NoSearchableParameterException, NoParametersException, NoStringComparatorException, NoNumericComparatorException, NoParameterTypeException, NoDatetimeComparatorException, ParameterNoExistsException, DatevalueException, NumericvalueException, DatevalueFormatException, CyclicException, OperatorINException  {
         if (parameterOperable.isIsNegate())
             ejpql.addNotCondition();
         
@@ -505,7 +512,7 @@ public class ParameterSearchUtil {
      * @throws NumericvalueException
      * @throws DatevalueFormatException
      */
-    public ExtractedJPQL extractJPQLComparators(List<ParameterComparisonCondition> listComparators, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, NoDatetimeComparatorException, ParameterNoExistsException, DatevalueException, NumericvalueException, DatevalueFormatException  {
+    public ExtractedJPQL extractJPQLComparators(List<ParameterComparisonCondition> listComparators, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, NoStringComparatorException, NoNumericComparatorException, NoSearchableParameterException, NullParameterException, NoDatetimeComparatorException, ParameterNoExistsException, DatevalueException, NumericvalueException, DatevalueFormatException, OperatorINException  {
         checkList(listComparators);
         for (ParameterComparisonCondition cond : listComparators) {
             checkParameter(cond.getParameterSearch(), manager);
@@ -580,6 +587,66 @@ public class ParameterSearchUtil {
             throw new NoSearchableParameterException(param, "Parameter not relevant for Sample");
         
         paramV.setParam(param);
+    }
+    /**
+     * Retrun the value for IN comparator
+     * 
+     * @param ejpql Parameter information container
+     * @param param Parameter to compare with value
+     * @param value Value to compare with parameter
+     * 
+     * @return jpql sentence
+     * 
+     * @throws OperatorINException
+     */
+    private String getValueIN(ExtractedJPQLPriva ejpql, Parameter param, Object value) throws OperatorINException {
+        // If value is an instance of Collection
+        if (value instanceof Collection) {
+            Collection col = (Collection)value;
+            String res = "";
+            // Check if parameter is Numeric or Date
+            if (param.isNumeric() || param.isDateTime()) {
+                for (Object o : col) {
+                    if (!(o instanceof Number) && !(o instanceof Date))
+                        throw new OperatorINException("Class " + o.getClass()
+                                + " no recognized. Only Date, Number or String classes are accepted.");
+                    String name = getNextParamName();
+                    ejpql.addParameterJPQL(name, o);
+                    res += ", :" + name;
+                }
+            }
+            // Parameter is String
+            else {
+                for (Object o : col)
+                    res += ", '" + removeBadChar(o.toString()) + "'";
+            }
+
+            return res.substring(2);
+        }
+        // If value is a Date or a Number
+        else if (value instanceof Date || value instanceof Number) {
+            String name = getNextParamName();
+            ejpql.addParameterJPQL(name, value);
+            return ":" + name;
+        }
+        // If value is a String separated by ','
+        else {
+            String res = removeBadChar(value.toString());
+            res = res.replaceAll("\\s*,\\s*", "','")
+                         .replaceAll("^\\s*", "'")
+                         .replaceAll("\\s*$", "'");
+            return res;
+        }
+    }
+
+    /**
+     * Remove chars not allowed from a String
+     *
+     * @param value String
+     * @return
+     */
+    private String removeBadChar (String value) {
+        return value.replaceAll("['\"\\\\]", "");
     }
 
     /**

@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
 import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.RestrictionEmptyListException;
-import uk.icat3.exceptions.RestrictionINException;
+import uk.icat3.exceptions.OperatorINException;
 import uk.icat3.exceptions.RestrictionNullException;
 import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
@@ -74,7 +74,7 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (OperatorINException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -127,7 +127,7 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (OperatorINException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -175,7 +175,7 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (OperatorINException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -218,7 +218,7 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (OperatorINException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -276,7 +276,7 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (OperatorINException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -325,7 +325,7 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
 //            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
 //        } catch (RestrictionOperatorException ex) {
 //            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (RestrictionINException ex) {
+//        } catch (OperatorINException ex) {
 //            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
 //        } catch (RestrictionNullException ex) {
 //            Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -383,7 +383,7 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (OperatorINException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -427,7 +427,7 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (OperatorINException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -473,7 +473,7 @@ public class InvestigationExceptionTest extends BaseParameterSearchTest {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (OperatorINException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(InvestigationExceptionTest.class.getName()).log(Level.SEVERE, null, ex);

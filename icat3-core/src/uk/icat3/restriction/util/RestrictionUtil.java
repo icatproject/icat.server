@@ -7,18 +7,21 @@
 
 package uk.icat3.restriction.util;
 
+import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import sun.util.calendar.CalendarUtils;
 import uk.icat3.exceptions.CyclicException;
 import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.EmptyOperatorException;
 import uk.icat3.exceptions.RestrictionEmptyListException;
-import uk.icat3.exceptions.RestrictionINException;
+import uk.icat3.exceptions.OperatorINException;
 import uk.icat3.exceptions.RestrictionNullException;
 import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.restriction.RestrictionComparisonCondition;
@@ -83,10 +86,10 @@ public class RestrictionUtil {
      * @throws RestrictionEmptyListException
      * @throws DatevalueException
      * @throws RestrictionOperatorException
-     * @throws RestrictionINException
+     * @throws OperatorINException
      * @throws RestrictionNullException
      */
-    public RestrictionUtil(RestrictionCondition restCond, RestrictionType restType) throws DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException, RestrictionEmptyListException, CyclicException, EmptyOperatorException  {
+    public RestrictionUtil(RestrictionCondition restCond, RestrictionType restType) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, RestrictionEmptyListException, CyclicException, EmptyOperatorException  {
         // Initialites variables
         this.enumInclude = null;
         this.sentenceJPQL = "";
@@ -170,10 +173,10 @@ public class RestrictionUtil {
      * @throws RestrictionEmptyListException
      * @throws DatevalueException
      * @throws RestrictionOperatorException
-     * @throws RestrictionINException
+     * @throws OperatorINException
      * @throws RestrictionNullException
      */
-    private void extractJPQL(RestrictionCondition restCond) throws DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException, CyclicException, EmptyOperatorException {
+    private void extractJPQL(RestrictionCondition restCond) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, CyclicException, EmptyOperatorException {
         // Check if this condition is negated
         if (restCond.isNegate())
             addNotCondition();
@@ -274,7 +277,7 @@ public class RestrictionUtil {
      *
      * @param comp
      */
-    private void addRestrictionCondition(RestrictionComparisonCondition comp) throws DatevalueException, RestrictionOperatorException, RestrictionINException {
+    private void addRestrictionCondition(RestrictionComparisonCondition comp) throws DatevalueException, RestrictionOperatorException, OperatorINException {
         // Add restricion.
         sentenceJPQL += getParamName(comp.getRestAttr()) + comp.getRestAttr().getValue() + " "
                         + comp.getRestOp().getRestriction(getParamValue(comp));
@@ -381,7 +384,7 @@ public class RestrictionUtil {
      * @param comp
      * @return
      */
-    private String getParamValue (RestrictionComparisonCondition comp) throws DatevalueException, RestrictionOperatorException, RestrictionINException {
+    private String getParamValue (RestrictionComparisonCondition comp) throws DatevalueException, RestrictionOperatorException, OperatorINException {
         String paramValue = "";
         // String operator. Value must be a String
         if (comp.getRestOp() == RestrictionOperator.CONTAIN ||
@@ -402,10 +405,35 @@ public class RestrictionUtil {
             if (comp.getValue() instanceof Collection) {
                 Collection col = (Collection) comp.getValue();
                 String value = "";
-                for (Object o : col)
-                    value += ", '" + removeBadChar(o.toString()) + "'";
-
+                if (comp.getRestAttr().isNumeric() || comp.getRestAttr().isDateTime()) {
+                    for (Object o : col) {
+                        if (!(o instanceof Number) && !(o instanceof Date)) {
+                            try {
+                                if (comp.getRestAttr().isNumeric())
+                                    o = Double.parseDouble(o.toString());
+                                else if (comp.getRestAttr().isDateTime())
+                                    o = Queries.dateFormat.parse(o.toString());
+                            } catch (Throwable t) {
+                                throw new OperatorINException("Class " + o.getClass()
+                                        + " no recognized. Only Date, Number or String classes are accepted.");
+                            }
+                        }
+                        String name = getNextParamName();
+                        jpqlParameter.put(name, o);
+                        value += ", :" + name;
+                    }
+                }
+                else {
+                    for (Object o : col)
+                        value += ", '" + removeBadChar(o.toString()) + "'";
+                }
                 return value.substring(2);
+            }
+            // If value is a Date or a Number
+            else if (comp.getValue() instanceof Date || comp.getValue() instanceof Number) {
+                String name = getNextParamName();
+                jpqlParameter.put(name, comp.getValue());
+                return ":" + name;
             }
             // If value is a String separated by ','
             else if (comp.getValue() instanceof String) {
@@ -416,14 +444,28 @@ public class RestrictionUtil {
                 return value;
             }
             // Restriciton exception. Operator IN only List<String> or String
-            throw new RestrictionINException();
+            throw new OperatorINException();
         }
         // BETWEEN operator
         else if (comp.getRestOp() == RestrictionOperator.BETWEEN) {
+            Object value = comp.getValue();
+            Object valueRight = comp.getValueRigth();
+            if (comp.getRestAttr().isNumeric()) {
+                if (!(value instanceof Number))
+                    value = Double.parseDouble(value.toString());
+                if (!(valueRight instanceof Number))
+                    valueRight = Double.parseDouble(valueRight.toString());
+            }
+            else if (comp.getRestAttr().isDateTime()) {
+                if (!(value instanceof Date))
+                    value = parseDatetimeValue (value);
+                if (!(valueRight instanceof Date))
+                    valueRight = parseDatetimeValue (valueRight);
+            }
             paramValue = getNextParamName();
             String paramValue2 = getNextParamName();
-            jpqlParameter.put(paramValue, comp.getValue());
-            jpqlParameter.put(paramValue2, comp.getValueRigth());
+            jpqlParameter.put(paramValue, value);
+            jpqlParameter.put(paramValue2, valueRight);
             return comp.getRestOp().getRestrictionBetween(":" + paramValue, ":" + paramValue2);
         }
         // Numeric, String or Date operator. Value is an Object
@@ -431,26 +473,13 @@ public class RestrictionUtil {
             paramValue = getNextParamName();
             // If attribute is a DateTime value
             if (comp.getRestAttr().isDateTime()) {
-                // If value is String, transform into a Date
-                if (comp.getValue().getClass() == String.class) {
-                    try {
-                        jpqlParameter.put(paramValue, Queries.dateFormat.parse(comp.getValue().toString()));
-                    } catch (ParseException ex) {
-                        Logger.getLogger(RestrictionUtil.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-                // If value is a Date
-                else if (comp.getValue() instanceof Date)
-                    jpqlParameter.put(paramValue, comp.getValue());
-                // Date value exception
-                else
-                    throw new DatevalueException(comp.getValue().toString());
+                jpqlParameter.put(paramValue, parseDatetimeValue(comp.getValue()));
             }
             // If attribute is a Numeric value
             else if (comp.getRestAttr().isNumeric()) {
                 try {
                     if (comp.getValue().getClass() == String.class)
-                        jpqlParameter.put(paramValue, Long.parseLong(comp.getValue().toString()));
+                        jpqlParameter.put(paramValue, Double.parseDouble(comp.getValue().toString()));
                     else if (comp.getValue() instanceof Number)
                         jpqlParameter.put(paramValue, comp.getValue());
                 } catch (Throwable t) {
@@ -665,5 +694,31 @@ public class RestrictionUtil {
 
     public Map<String, Object> getJpqlParameter() {
         return jpqlParameter;
+    }
+
+    /**
+     * Return JPQL parameter name which represents the datetime value to compare
+     * with a datatime parameter.
+     *
+     * @param value Value to compare with
+     * @param ejpql JPQL object utils
+     * @return JPQL parameter name
+     *
+     * @throws DatevalueException
+     * @throws DatevalueFormatException
+     */
+    private Date parseDatetimeValue (Object value) throws DatevalueException {
+        Date date = null;
+        try {
+            if (value.getClass() == String.class)
+                date = Queries.dateFormat.parse(value.toString());
+            else if (value.getClass() == Date.class)
+                date = (Date)value;
+            else
+                date = XMLGregorianCalendarImpl.parse(value.toString()).toGregorianCalendar().getTime();
+        } catch (Throwable t) {
+            throw new DatevalueException(value.toString(), t);
+        }
+        return date;
     }
 }

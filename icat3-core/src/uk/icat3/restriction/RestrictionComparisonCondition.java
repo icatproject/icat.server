@@ -43,7 +43,7 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
      * @param restOp Restriction operator
      * @param value Restriction value to compare with attribute
      */
-    public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, Date lValue, Date rValue){
+    public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, Date lValue, Object rValue){
         this.restAttr = restAttr;
         this.restOp = restOp;
         this.value = lValue;

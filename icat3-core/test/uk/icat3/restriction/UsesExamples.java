@@ -7,6 +7,7 @@
 
 package uk.icat3.restriction;
 
+import java.sql.Timestamp;
 import uk.icat3.parametersearch.*;
 import java.util.ArrayList;
 import static org.junit.Assert.*;
@@ -479,6 +480,45 @@ public class UsesExamples extends BaseParameterSearchTest  {
 //       assertEquals("Results of Investigations incorrect.", 1, li.size());
 //       assertEquals("Results of Samples incorrect.", 1, ls.size());
 //    }
+
+    /**
+     * Restriction logical condition example
+     *
+     * @throws ParameterSearchException
+     * @throws RestrictionException
+     */
+    @Test
+    public void betweenDates () throws ParameterSearchException, RestrictionException {
+        // Restriction comparison
+        RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
+                RestrictionAttributes.INVESTIGATION_START_DATE, RestrictionOperator.BETWEEN
+                , new Date(0)
+                , "2050-01-01 00:00:00");
+        // Restriction condition
+        RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
+                .add (new RestrictionLogicalCondition(LogicalOperator.AND)
+                        .add(restriction1)
+                        .add(new RestrictionComparisonCondition(
+                            RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                     )
+                ;
+        // Dataset search
+        List<Dataset> lds = (List<Dataset>) DatasetSearch
+                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, DatasetInclude.NONE, 1, -1, em);
+        // Datafile search
+        List<Datafile> ldf = (List<Datafile>) DatafileSearch
+            .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, DatafileInclude.NONE, 1, -1, em);
+        // Sample search
+        List<Sample> ls = (List<Sample>) SampleSearch
+            .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, SampleInclude.NONE, 1, -1, em);
+        // Investigation search
+        List<Investigation> li = (List<Investigation>) InvestigationSearch
+            .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, InvestigationInclude.NONE, 1, -1, em);
+       assertEquals("Results of Datasets incorrect.", 2, lds.size());
+//       assertEquals("Results of Datafiles incorrect.", 2, ldf.size());
+//       assertEquals("Results of Investigations incorrect.", 1, li.size());
+//       assertEquals("Results of Samples incorrect.", 1, ls.size());
+    }
 
     public static junit.framework.Test suite(){
         return new JUnit4TestAdapter(UsesExamples.class);

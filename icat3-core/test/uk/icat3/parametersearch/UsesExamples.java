@@ -8,6 +8,7 @@
 package uk.icat3.parametersearch;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
@@ -104,8 +105,8 @@ public class UsesExamples extends BaseParameterSearchTest  {
         ParameterComparisonCondition compVoltageSample =
                 new ParameterComparisonCondition(
                         new ParameterSearch(ParameterType.SAMPLE, voltage),
-                        ComparisonOperator.EQUAL,
-                        new Double(55.55));
+                        ComparisonOperator.IN,
+                        Arrays.asList(new Double(55.55), new Double(34)));
         // string like '%21%'
         ParameterComparisonCondition compStringDatafile =
                  new ParameterComparisonCondition(

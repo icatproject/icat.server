@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
 import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.RestrictionEmptyListException;
-import uk.icat3.exceptions.RestrictionINException;
+import uk.icat3.exceptions.OperatorINException;
 import uk.icat3.exceptions.RestrictionNullException;
 import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
@@ -75,7 +75,7 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
             Logger.getLogger(SampleExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (OperatorINException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -128,7 +128,7 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, DatasetInclude.NONE, 1, -1, em);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (OperatorINException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -185,7 +185,7 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
             Logger.getLogger(SampleExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (OperatorINException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionOperatorException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -236,7 +236,7 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
 //            Logger.getLogger(SampleExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
 //        } catch (RestrictionNullException ex) {
 //            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (RestrictionINException ex) {
+//        } catch (OperatorINException ex) {
 //            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
 //        } catch (RestrictionOperatorException ex) {
 //            Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -295,7 +295,7 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
             Logger.getLogger(SampleExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (OperatorINException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -340,7 +340,7 @@ public class DatasetExceptionTest extends BaseParameterSearchTest {
             Logger.getLogger(SampleExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RestrictionNullException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionINException ex) {
+        } catch (OperatorINException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DatevalueException ex) {
             Logger.getLogger(DatasetExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
