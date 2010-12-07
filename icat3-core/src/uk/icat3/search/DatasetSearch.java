@@ -225,6 +225,10 @@ public class DatasetSearch {
      */
     private static Collection<Dataset> searchByRestrictionImpl (String userId, RestrictionUtil restrUtil, DatasetInclude include, int startIndex, int numberResults, EntityManager manager){
         log.trace("searchByRestrictionImpl(" + ", restrCond, " + startIndex + ", " + numberResults + ", EntityManager)");
+        // Check if there exists include options defined inside restrictions
+        if (restrUtil.hasInclude()) {
+            include = (DatasetInclude) restrUtil.getInclude();
+        }
         // Return type
         String returnJPQL = RETURN_ALL_DATASETS_JPQL;
         // Return ids
@@ -333,7 +337,10 @@ public class DatasetSearch {
     private static Collection searchByParameterImpl(String userId, ExtractedJPQL ejpql, RestrictionUtil restricion, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws ParameterNoExistsException, NoSearchableParameterException, NoParametersException, NoParameterTypeException {
         try {
             log.trace("searchByParameter(" + ", " + ejpql.getCondition() + ", " + startIndex + ", " + numberResults + ", EntityManager)");
-
+            // Check if there exists include options defined inside restrictions
+            if (restricion.hasInclude()) {
+                include = (DatasetInclude) restricion.getInclude();
+            }
             // Return type
             String returnJPQL = RETURN_ALL_DATASETS_JPQL;
             // Return ids

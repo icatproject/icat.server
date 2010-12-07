@@ -71,6 +71,8 @@ public class RestrictionUtil {
     private boolean conditionsDefined;
     /** Indicates start of index */
     private int startIndex;
+    /** Include options */
+    private Enum enumInclude;
 
     /**
      * Constructor
@@ -86,6 +88,7 @@ public class RestrictionUtil {
      */
     public RestrictionUtil(RestrictionCondition restCond, RestrictionType restType) throws DatevalueException, RestrictionOperatorException, RestrictionINException, RestrictionNullException, RestrictionEmptyListException, CyclicException, EmptyOperatorException  {
         // Initialites variables
+        this.enumInclude = null;
         this.sentenceJPQL = "";
         this.conditionsDefined = false;
         this.orderByJPQL = "";
@@ -215,6 +218,28 @@ public class RestrictionUtil {
             this.orderByAsc = restCond.isOrderByAsc();
             this.orderByAttr = restCond.getOrderByAttr();
         }
+        // Check if there exists include options
+        if (restCond.hasInclude(restType)) {
+            this.enumInclude = restCond.getInclude(restType);
+        }
+    }
+
+    /**
+     * Return include
+     * @return
+     */
+    public Enum getInclude() {
+        return enumInclude;
+    }
+    /**
+     * Check if there exists include.
+     * 
+     * @return
+     */
+    public boolean hasInclude () {
+        if (this.enumInclude != null)
+            return true;
+        return false;
     }
 
     /**

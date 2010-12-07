@@ -304,7 +304,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
        assertEquals("Results of Samples incorrect.", 1, ls.size());
     }
 
-     @Test
+    @Test
     public void returnIdsTest () throws ParameterSearchException, RestrictionException {
         List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
 
@@ -315,26 +315,33 @@ public class UsesExamples extends BaseParameterSearchTest  {
         lp.add(pv1);
 //        lp.add(pv2);
 //        lp.add(pv3);
+        RestrictionCondition cond = new RestrictionCondition();
+        cond.setDatafileInclude(DatafileInclude.ALL_DATAFILE_ID);
+        cond.setInvestigationInclude(InvestigationInclude.ALL_INVESTIGATION_ID);
+        cond.setDatasetInclude(DatasetInclude.ALL_DATASET_ID);
+
+        List li = (List) InvestigationSearch
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, cond
+                , InvestigationInclude.NONE
+                , Queries.NO_LIMITED_RESULTS
+                , Queries.NO_LIMITED_RESULTS, em);
 
         List lds = (List) DatasetSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, null
-                , DatasetInclude.ALL_DATASET_ID
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, cond
+                , DatasetInclude.NONE
                 , Queries.NO_LIMITED_RESULTS
                 , Queries.NO_LIMITED_RESULTS, em);
 
          List ldf = (List) DatafileSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, null
-                , DatafileInclude.ALL_DATAFILE_ID
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, cond
+                , DatafileInclude.NONE
                 , Queries.NO_LIMITED_RESULTS
                 , Queries.NO_LIMITED_RESULTS, em);
-         List li = (List) InvestigationSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, null
-                , InvestigationInclude.ALL_INVESTIGATION_ID
-                , Queries.NO_LIMITED_RESULTS
-                , Queries.NO_LIMITED_RESULTS, em);
+         
+         cond.setSampleInclude(SampleInclude.ALL_SAMPLE_ID);
          List ls = (List) SampleSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, null
-                , SampleInclude.ALL_SAMPLE_ID
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, cond
+                , SampleInclude.NONE
                 , Queries.NO_LIMITED_RESULTS
                 , Queries.NO_LIMITED_RESULTS, em);
 
@@ -342,8 +349,10 @@ public class UsesExamples extends BaseParameterSearchTest  {
         assertEquals("Results of Datafiles incorrect.", 3, ldf.size());
         assertEquals("Results of Investigations incorrect.", 2, li.size());
         assertEquals("Results of Samples incorrect.", 2, ls.size());
-        assertTrue("Object should be Long, not " + li.get(0).getClass().getName()
-                , Long.class == li.get(0).getClass());
+        assertEquals("Dataset return type is not Long", Long.class, lds.get(0).getClass());
+        assertEquals("Datafile return type is not Long", Long.class, ldf.get(0).getClass());
+        assertEquals("Investigation return type is not Long", Long.class, li.get(0).getClass());
+        assertEquals("Sample return type is not Long", Long.class, ls.get(0).getClass());
     }
 
     @Test

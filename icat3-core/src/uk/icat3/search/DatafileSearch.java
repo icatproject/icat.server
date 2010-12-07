@@ -194,6 +194,10 @@ public class DatafileSearch {
      */
     private static Collection<Datafile> searchByRestrictionImpl (String userId, RestrictionUtil restrUtil, DatafileInclude include, int startIndex, int numberResults, EntityManager manager){
         log.trace("searchByRestrictionImpl(" + ", restrCond, " + startIndex + ", " + numberResults + ", EntityManager)");
+        // Check if there exists include options defined inside restrictions
+        if (restrUtil.hasInclude()) {
+            include = (DatafileInclude) restrUtil.getInclude();
+        }
         // Return type
         String returnJPQL = RETURN_ALL_DATAFILES_JPQL;
         // Return ids
@@ -300,6 +304,10 @@ public class DatafileSearch {
     private static Collection searchByParameterImpl(String userId, ExtractedJPQL ejpql, RestrictionUtil restricion, DatafileInclude include, int startIndex, int numberResults, EntityManager manager) throws  NoSearchableParameterException, ParameterNoExistsException, NoParametersException, NoParameterTypeException {
         try {
             log.trace("searchByParameter(" + ", " + ejpql.getCondition() + ", " + startIndex + ", " + numberResults + ", EntityManager)");
+            // Check if there exists include options defined inside restrictions
+            if (restricion.hasInclude()) {
+                include = (DatafileInclude) restricion.getInclude();
+            }
             // Return type
             String returnJPQL = RETURN_ALL_DATAFILES_JPQL;
             // Return ids

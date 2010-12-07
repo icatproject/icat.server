@@ -8,6 +8,10 @@
 package uk.icat3.restriction;
 
 import uk.icat3.restriction.attribute.RestrictionAttributes;
+import uk.icat3.util.DatafileInclude;
+import uk.icat3.util.DatasetInclude;
+import uk.icat3.util.InvestigationInclude;
+import uk.icat3.util.SampleInclude;
 
 /**
  * This class represents restriction conditions with which we
@@ -24,6 +28,14 @@ public class RestrictionCondition {
     private boolean orderByAsc = true;
     /** Maximun number of results to return */
     private Integer maxResults;
+    /** Investigation include options */
+    private InvestigationInclude investigationInclude = null;
+    /** Dataset include options */
+    private DatasetInclude datasetInclude = null;
+    /** Datafile include options */
+    private DatafileInclude datafileInclude = null;
+    /** Sample include options */
+    private SampleInclude sampleInclude = null;
 
     /**
      * Negates the restriction condition 'cond'
@@ -78,6 +90,34 @@ public class RestrictionCondition {
         if (this.maxResults == null || this.maxResults < 0)
             return false;
         return true;
+    }
+    /**
+     * Check if has include options
+     * 
+     * @return true if any include options were defined. Otherwise false
+     */
+    public boolean hasInclude(RestrictionType restType) {
+        if (this.sampleInclude != null && restType == RestrictionType.SAMPLE)
+            return true;
+        if (this.investigationInclude != null && restType == RestrictionType.INVESTIGATION)
+            return true;
+        if (this.datafileInclude != null && restType == RestrictionType.DATAFILE)
+            return true;
+        if (this.datasetInclude != null && restType == RestrictionType.DATASET)
+            return true;
+        return false;
+    }
+
+    public Enum getInclude (RestrictionType restType) {
+         if (this.sampleInclude != null && restType == RestrictionType.SAMPLE)
+            return this.sampleInclude;
+        if (this.investigationInclude != null && restType == RestrictionType.INVESTIGATION)
+            return this.investigationInclude;
+        if (this.datafileInclude != null && restType == RestrictionType.DATAFILE)
+            return this.datafileInclude;
+        if (this.datasetInclude != null && restType == RestrictionType.DATASET)
+            return this.datasetInclude;
+        return null;
     }
 
     ////////////////////////////////////////////////////////////////////
@@ -159,5 +199,37 @@ public class RestrictionCondition {
         if (maxResults == null)
             return -1;
         return maxResults;
+    }
+
+    public DatafileInclude getDatafileInclude() {
+        return datafileInclude;
+    }
+
+    public void setDatafileInclude(DatafileInclude datafileInclude) {
+        this.datafileInclude = datafileInclude;
+    }
+
+    public DatasetInclude getDatasetInclude() {
+        return datasetInclude;
+    }
+
+    public void setDatasetInclude(DatasetInclude datasetInclude) {
+        this.datasetInclude = datasetInclude;
+    }
+
+    public InvestigationInclude getInvestigationInclude() {
+        return investigationInclude;
+    }
+
+    public void setInvestigationInclude(InvestigationInclude investigationInclude) {
+        this.investigationInclude = investigationInclude;
+    }
+
+    public SampleInclude getSampleInclude() {
+        return sampleInclude;
+    }
+
+    public void setSampleInclude(SampleInclude sampleInclude) {
+        this.sampleInclude = sampleInclude;
     }
 }

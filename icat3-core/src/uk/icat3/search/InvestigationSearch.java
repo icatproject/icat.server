@@ -128,6 +128,10 @@ public class InvestigationSearch extends ManagerUtil {
      */
     private static Collection<Investigation> searchByRestrictionImpl (String userId, RestrictionUtil restrUtil, InvestigationInclude include, int startIndex, int numberResults, EntityManager manager){
         log.trace("searchByRestrictionImpl(" + ", restrCond, " + startIndex + ", " + numberResults + ", EntityManager)");
+        // Check if there exists include options defined inside restrictions
+        if (restrUtil.hasInclude()) {
+            include = (InvestigationInclude) restrUtil.getInclude();
+        }
         // Return type
         String returnJPQL = RETURN_ALL_INVESTIGATIONS_JPQL;
         // Return all ids
@@ -234,7 +238,10 @@ public class InvestigationSearch extends ManagerUtil {
     private static Collection<Investigation> searchByParameterImpl(String userId, ExtractedJPQL ejpql, RestrictionUtil restricion, InvestigationInclude include, int startIndex, int numberResults, EntityManager manager) throws ParameterNoExistsException, NoSearchableParameterException, CyclicException, NoParametersException, NoParameterTypeException {
         try {
             log.trace("searchByParameter(" + ", " + ejpql.getCondition() + ", " + startIndex + ", " + numberResults + ", EntityManager)");
-
+            // Check if there exists include options defined inside restrictions
+            if (restricion.hasInclude()) {
+                include = (InvestigationInclude) restricion.getInclude();
+            }
             // Return type
             String returnJPQL = RETURN_ALL_INVESTIGATIONS_JPQL;
             // Return ids
@@ -252,7 +259,7 @@ public class InvestigationSearch extends ManagerUtil {
                 restrictionParam += restricion.getParameterJPQL(ElementType.INVESTIGATION, ElementType.DATASET);
             restrictionParam += restricion.getParameterJPQL(ElementType.INVESTIGATION, ElementType.INVESTIGATOR);
             // Construction JPQL sentence
-            String jpql = returnJPQL 
+            String jpql = returnJPQL
                     + restrictionParam + "," + ejpql.getParametersJPQL(ElementType.INVESTIGATION)
                     + QUERY_USERS_INVESTIGATIONS_JPQL;
             // Object returns and check number of results

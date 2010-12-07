@@ -192,6 +192,8 @@ public class ParameterSearchUtil {
         try {
             if (value.getClass() == String.class)
                 date = Queries.dateFormat.parse(value.toString());
+            else if (value.getClass() == Date.class)
+                date = (Date)value;
             else
                 date = XMLGregorianCalendarImpl.parse(value.toString()).toGregorianCalendar().getTime();
 
