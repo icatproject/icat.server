@@ -46,4 +46,8 @@ package uk.icat3.search.parameter;
     public boolean isIsNegate() {
         return isNegate;
     }
+
+    public void setIsNegate(boolean isNegate) {
+        this.isNegate = isNegate;
+    }
 }
