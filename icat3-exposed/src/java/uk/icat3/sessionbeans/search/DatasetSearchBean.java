@@ -156,92 +156,6 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
         return DatasetSearch.searchByParameterList(userId, list, Queries.NO_RESTRICTION, DatasetInclude.NONE, manager);
     }
 
-    @WebMethod()
-    @Override
-    public Collection searchByParameterCondition(String sessionId, ParameterCondition paramLogCond, DatasetInclude include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
-        for (RestrictionCondition r : restriction) {
-            restLogCond.add(r);
-        }
-
-        return DatasetSearch.searchByParameterCondition(userId, paramLogCond, restLogCond, include, manager);
-    }
-
-    @WebMethod()
-    @Override
-    public Collection searchByParameterComparison(String sessionId, ParameterComparisonCondition[] comparison, DatasetInclude include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
-        for (RestrictionCondition r : restriction) {
-            restLogCond.add(r);
-        }
-
-        List<ParameterComparisonCondition> list = new ArrayList<ParameterComparisonCondition>();
-        for (ParameterComparisonCondition p : comparison) {
-            list.add(p);
-        }
-
-        return DatasetSearch.searchByParameterComparisonList(userId, list, restLogCond, include, manager);
-    }
-
-    @WebMethod()
-    @Override
-    public Collection searchByParameter(String sessionId, ParameterSearch[] parameters, DatasetInclude include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
-        for (RestrictionCondition r : restriction) {
-            restLogCond.add(r);
-        }
-
-        List<ParameterSearch> list = new ArrayList<ParameterSearch>();
-        for (ParameterSearch p : parameters)
-            list.add(p);
-
-        return DatasetSearch.searchByParameterList(userId, list, restLogCond, include, manager);
-    }
-
-    @WebMethod()
-    @Override
-    public Collection searchByParameterCondition(String sessionId, ParameterCondition paramLogCond, DatasetInclude include) throws SessionException, ParameterSearchException, RestrictionException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        return DatasetSearch.searchByParameterCondition(userId, paramLogCond, Queries.NO_RESTRICTION, include, manager);
-    }
-
-    @WebMethod()
-    @Override
-    public Collection searchByParameterComparison(String sessionId, ParameterComparisonCondition[] comparison, DatasetInclude include) throws SessionException, ParameterSearchException, RestrictionException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        List<ParameterComparisonCondition> list = new ArrayList<ParameterComparisonCondition>();
-        for (ParameterComparisonCondition p : comparison) {
-            list.add(p);
-        }
-
-        return DatasetSearch.searchByParameterComparisonList(userId, list, Queries.NO_RESTRICTION, include, manager);
-    }
-
-    @WebMethod()
-    @Override
-    public Collection searchByParameter(String sessionId, ParameterSearch[] parameters, DatasetInclude include) throws SessionException, ParameterSearchException, RestrictionException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        List<ParameterSearch> list = new ArrayList<ParameterSearch>();
-        for (ParameterSearch p : parameters)
-            list.add(p);
-
-        return DatasetSearch.searchByParameterList(userId, list, Queries.NO_RESTRICTION, include, manager);
-    }
 
     @WebMethod()
     @Override
@@ -307,30 +221,10 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
     }
 
     @Override
-    public Collection searchByRestriction(String sessionId, DatasetInclude include, RestrictionCondition... restricion) throws SessionException, RestrictionException, DatevalueException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
-        for (RestrictionCondition r : restricion)
-            restLogCond.add(r);
-
-        return DatasetSearch.searchByRestriction(userId, restLogCond, include, manager);
-    }
-
-    @Override
     public Collection searchByRestriction(String sessionId, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
         return DatasetSearch.searchByRestriction(userId, restricion, DatasetInclude.NONE, manager);
-    }
-
-    @Override
-    public Collection searchByRestriction(String sessionId, DatasetInclude include, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        return DatasetSearch.searchByRestriction(userId, restricion, include, manager);
     }
 }

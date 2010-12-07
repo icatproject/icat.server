@@ -11,7 +11,7 @@ import uk.icat3.util.DatafileInclude;
  * This is the business interface for DatafileSearch enterprise bean.
  */
 @Local
-public interface DatafileSearchLocal extends ParameterSearchInterface<DatafileInclude> {
+public interface DatafileSearchLocal extends ParameterSearchInterface {
 
     Collection<Datafile> searchByRunNumber(String sessionId, Collection<String> instruments, float startRun, float endRun) throws SessionException;
 

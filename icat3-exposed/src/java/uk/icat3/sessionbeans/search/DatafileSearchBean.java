@@ -143,52 +143,6 @@ public class DatafileSearchBean extends EJBObject implements DatafileSearchLocal
     }
 
     @Override
-    public Collection searchByParameterCondition(String sessionId, ParameterCondition logicalCondition, DatafileInclude include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
-        for (RestrictionCondition r : restriction)
-            restLogCond.add(r);
-
-        return DatafileSearch.searchByParameterCondition(userId, logicalCondition, restLogCond, include, manager);
-    }
-
-    @Override
-    public Collection searchByParameterComparison(String sessionId, ParameterComparisonCondition[] comparisons, DatafileInclude include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        List<ParameterComparisonCondition> list = new ArrayList<ParameterComparisonCondition>();
-        for (ParameterComparisonCondition p : comparisons) {
-            list.add(p);
-        }
-
-        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
-        for (RestrictionCondition r : restriction)
-            restLogCond.add(r);
-
-        return DatafileSearch.searchByParameterComparisonList(userId, list, restLogCond, include, manager);
-    }
-
-    @Override
-    public Collection searchByParameter(String sessionId, ParameterSearch[] parameters, DatafileInclude include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        List<ParameterSearch> list = new ArrayList<ParameterSearch>();
-        for (ParameterSearch p : parameters) {
-            list.add(p);
-        }
-
-        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
-        for (RestrictionCondition r : restriction)
-            restLogCond.add(r);
-
-        return DatafileSearch.searchByParameterList(userId, list, restLogCond, include, manager);
-    }
-
-    @Override
     public Collection searchByParameterCondition(String sessionId, ParameterCondition logicalCondition, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -235,40 +189,6 @@ public class DatafileSearchBean extends EJBObject implements DatafileSearchLocal
     }
 
     @Override
-    public Collection searchByParameterCondition(String sessionId, ParameterCondition logicalCondition, DatafileInclude include) throws SessionException, ParameterSearchException, RestrictionException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-        
-        return DatafileSearch.searchByParameterCondition(userId, logicalCondition, Queries.NO_RESTRICTION, include, manager);
-    }
-
-    @Override
-    public Collection searchByParameterComparison(String sessionId, ParameterComparisonCondition[] comparisons, DatafileInclude include) throws SessionException, ParameterSearchException, RestrictionException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        List<ParameterComparisonCondition> list = new ArrayList<ParameterComparisonCondition>();
-        for (ParameterComparisonCondition p : comparisons) {
-            list.add(p);
-        }
-
-        return DatafileSearch.searchByParameterComparisonList(userId, list, Queries.NO_RESTRICTION, include, manager);
-    }
-
-    @Override
-    public Collection searchByParameter(String sessionId, ParameterSearch[] parameters, DatafileInclude include) throws SessionException, ParameterSearchException, RestrictionException {
-         //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        List<ParameterSearch> list = new ArrayList<ParameterSearch>();
-        for (ParameterSearch p : parameters) {
-            list.add(p);
-        }
-
-        return DatafileSearch.searchByParameterList(userId, list, Queries.NO_RESTRICTION, include, manager);
-    }
-
-    @Override
     public Collection searchByRestriction(String sessionId, RestrictionCondition... restricion) throws SessionException, RestrictionException, DatevalueException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
@@ -281,30 +201,10 @@ public class DatafileSearchBean extends EJBObject implements DatafileSearchLocal
     }
 
     @Override
-    public Collection searchByRestriction(String sessionId, DatafileInclude include, RestrictionCondition[] restricion) throws SessionException, RestrictionException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
-        for (RestrictionCondition r : restricion)
-            restLogCond.add(r);
-
-        return DatafileSearch.searchByRestriction(userId, restLogCond, include, manager);
-    }
-
-    @Override
     public Collection searchByRestriction(String sessionId, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
         return DatafileSearch.searchByRestriction(userId, restricion, DatafileInclude.NONE, manager);
-    }
-
-    @Override
-    public Collection searchByRestriction(String sessionId, DatafileInclude include, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException {
-        //for user bean get userId
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        return DatafileSearch.searchByRestriction(userId, restricion, include, manager);
     }
 }

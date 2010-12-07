@@ -16,7 +16,7 @@ import uk.icat3.util.InvestigationInclude;
  * This is the business interface for InvestigationSearch enterprise bean.
  */
 @Local
-public interface InvestigationSearchLocal extends ParameterSearchInterface<InvestigationInclude> {
+public interface InvestigationSearchLocal extends ParameterSearchInterface {
 
     Collection<Investigation> searchByAdvanced(String sessionId, AdvancedSearchDetails advancedSearch) throws SessionException;
 

@@ -25,7 +25,7 @@ import uk.icat3.search.parameter.util.ParameterSearch;
  * 
  * @author cruzcruz
  */
-public interface ParameterSearchInterface<T extends Enum> {
+public interface ParameterSearchInterface {
 
     /**
      * Search investigation which match with restriction conditions
@@ -44,20 +44,6 @@ public interface ParameterSearchInterface<T extends Enum> {
      *
      * @param userId User identifaction
      * @param restriction Restriction condition
-     * @param include Include options
-     * @return Collection of investigation
-     *
-     * @throws SessionException
-     * @throws RestrictionException
-     * @throws DatevalueException
-     */
-    Collection searchByRestriction(String sessionId, T include, RestrictionCondition... restricion) throws SessionException, RestrictionException, DatevalueException;
-
-    /**
-     * Search investigation which match with restriction conditions
-     *
-     * @param userId User identifaction
-     * @param restriction Restriction condition
      * @return Collection of investigation
      *
      * @throws SessionException
@@ -65,20 +51,6 @@ public interface ParameterSearchInterface<T extends Enum> {
      * @throws DatevalueException
      */
     Collection searchByRestriction(String sessionId, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException;
-    /**
-     * Search investigation which match with restriction conditions
-     *
-     * @param userId User identifaction
-     * @param restriction Restriction condition
-     * @param include Include options
-     * @return Collection of investigation
-     *
-     * @throws SessionException
-     * @throws RestrictionException
-     * @throws DatevalueException
-     */
-    Collection searchByRestriction(String sessionId, T include, RestrictionCondition restricion) throws SessionException, RestrictionException, DatevalueException;
-
     /**
      * Return datasets matched by a logical condition.
      *
@@ -114,46 +86,6 @@ public interface ParameterSearchInterface<T extends Enum> {
      * @throws ParameterSearchException
      */
     public Collection searchByParameter(String sessionId, ParameterSearch... parameters) throws SessionException, ParameterSearchException, RestrictionException;
-
-    /**
-     * Return datasets matched by a logical condition, include and restrictions.
-     *
-     * @param sessionId Session identification
-     * @param logicalCondition Logial condition
-     * @param include Include options
-     * @param restriction Restrictions
-     * @return Collection of datasets
-     *
-     * @throws SessionException
-     * @throws ParameterSearchException
-     */
-    public Collection searchByParameterCondition(String sessionId, ParameterCondition logicalCondition, T include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException;
-    /**
-     * Return datasets matched by comparison(s), include and restrictions.
-     *
-     * @param sessionId Session identification
-     * @param comparison Comparison
-     * @param include Include options
-     * @param restriction Restrictions
-     * @return Collection of datasets
-     *
-     * @throws SessionException
-     * @throws ParameterSearchException
-     */
-    public Collection searchByParameterComparison(String sessionId, ParameterComparisonCondition[] comparison, T include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException;
-    /**
-     * Return datasets matched by parameter(s), include and restrictions.
-     *
-     * @param sessionId Session identification
-     * @param parameters Parameters
-     * @param include Include options
-     * @param restriction Restrictions
-     * @return Collection of datasets
-     *
-     * @throws SessionException
-     * @throws ParameterSearchException
-     */
-    public Collection searchByParameter(String sessionId, ParameterSearch[] parameters, T include, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException;
     /**
      * Return datasets matched by a logical condition and restriction.
      *
@@ -190,39 +122,4 @@ public interface ParameterSearchInterface<T extends Enum> {
      * @throws ParameterSearchException
      */
     public Collection searchByParameter(String sessionId, ParameterSearch[] parameters, RestrictionCondition... restriction) throws SessionException, ParameterSearchException, RestrictionException;
-    /**
-     * Return datasets matched by a logical condition and include
-     *
-     * @param sessionId Session identification
-     * @param logicalCondition Logial condition
-     * @param include Include options
-     * @return Collection of datasets
-     *
-     * @throws SessionException
-     * @throws ParameterSearchException
-     */
-    public Collection searchByParameterCondition(String sessionId, ParameterCondition logicalCondition, T include) throws SessionException, ParameterSearchException, RestrictionException;
-    /**
-     * Return datasets matched by comparison and include.
-     *
-     * @param sessionId Session identification
-     * @param comparison Comparison condition
-     * @param include Include options
-     * @return
-     * @throws SessionException
-     * @throws ParameterSearchException
-     * @throws RestrictionException
-     */
-    public Collection searchByParameterComparison(String sessionId, ParameterComparisonCondition[] comparison, T include) throws SessionException, ParameterSearchException, RestrictionException;
-    /**
-     * Return datasets matched by parameter(s) and include.
-     *
-     * @param sessionId Session identification
-     * @param parameters Parameters
-     * @param include Include options
-     * @throws SessionException
-     * @throws ParameterSearchException
-     * @throws RestrictionException
-     */
-    public Collection searchByParameter(String sessionId, ParameterSearch[] parameters, T include) throws SessionException, ParameterSearchException, RestrictionException;
 }

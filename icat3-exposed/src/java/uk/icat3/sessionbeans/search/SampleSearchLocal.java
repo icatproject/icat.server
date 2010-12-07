@@ -22,5 +22,5 @@ import uk.icat3.util.SampleInclude;
  * @author cruzcruz
  */
 @Local
-public interface SampleSearchLocal extends ParameterSearchInterface<SampleInclude> {
+public interface SampleSearchLocal extends ParameterSearchInterface {
 }

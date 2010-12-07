@@ -13,7 +13,7 @@ import uk.icat3.util.DatasetInclude;
  * This is the business interface for DatasetSearch enterprise bean.
  */
 @Local
-public interface DatasetSearchLocal extends ParameterSearchInterface<DatasetInclude> {
+public interface DatasetSearchLocal extends ParameterSearchInterface {
 
     Collection<Sample> searchSamplesBySampleName(String sessionId, String sampleName) throws SessionException;
 
