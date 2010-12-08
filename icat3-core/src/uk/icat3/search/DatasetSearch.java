@@ -223,7 +223,7 @@ public class DatasetSearch {
      *
      * @return Collection of datasets which match restriction condition
      */
-    private static Collection<Dataset> searchByRestrictionImpl (String userId, RestrictionUtil restrUtil, DatasetInclude include, int startIndex, int numberResults, EntityManager manager){
+    private static Collection searchByRestrictionImpl (String userId, RestrictionUtil restrUtil, DatasetInclude include, int startIndex, int numberResults, EntityManager manager){
         log.trace("searchByRestrictionImpl(" + ", restrCond, " + startIndex + ", " + numberResults + ", EntityManager)");
         // Check if there exists include options defined inside restrictions
         if (restrUtil.hasInclude()) {
@@ -268,7 +268,7 @@ public class DatasetSearch {
      * @throws RestrictionNullException
      * @throws RestrictionEmptyListException
      */
-    public static Collection<Dataset> searchByRestriction (String userId, RestrictionCondition restriction, EntityManager manager) throws DatevalueException, CyclicException, RestrictionOperatorException, OperatorINException, EmptyOperatorException, RestrictionNullException, RestrictionEmptyListException {
+    public static Collection searchByRestriction (String userId, RestrictionCondition restriction, EntityManager manager) throws DatevalueException, CyclicException, RestrictionOperatorException, OperatorINException, EmptyOperatorException, RestrictionNullException, RestrictionEmptyListException {
         log.trace("searchByRestriction( restrCond , EntityManager)");
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.DATASET);
         return searchByRestrictionImpl(userId, restric, DatasetInclude.NONE, NO_PAGINATION, NO_PAGINATION, manager);
@@ -289,7 +289,7 @@ public class DatasetSearch {
      * @throws RestrictionNullException
      * @throws RestrictionEmptyListException
      */
-    public static Collection<Dataset> searchByRestriction (String userId, RestrictionCondition restriction, DatasetInclude include, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, EmptyOperatorException, CyclicException, RestrictionNullException, RestrictionEmptyListException {
+    public static Collection searchByRestriction (String userId, RestrictionCondition restriction, DatasetInclude include, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, EmptyOperatorException, CyclicException, RestrictionNullException, RestrictionEmptyListException {
         log.trace("searchByRestriction( restrCond , EntityManager)");
 
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.DATASET);
@@ -313,7 +313,7 @@ public class DatasetSearch {
      * @throws RestrictionNullException
      * @throws RestrictionEmptyListException
      */
-    public static Collection<Dataset> searchByRestriction (String userId, RestrictionCondition restriction, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws DatevalueException, EmptyOperatorException, RestrictionOperatorException, CyclicException, OperatorINException, RestrictionNullException, RestrictionEmptyListException {
+    public static Collection searchByRestriction (String userId, RestrictionCondition restriction, DatasetInclude include, int startIndex, int numberResults, EntityManager manager) throws DatevalueException, EmptyOperatorException, RestrictionOperatorException, CyclicException, OperatorINException, RestrictionNullException, RestrictionEmptyListException {
         log.trace("searchByRestriction( restrCond , EntityManager)");
 
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.DATASET);
@@ -405,7 +405,7 @@ public class DatasetSearch {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLComparators (listComparators, manager);
         RestrictionUtil restric = new RestrictionUtil(restrCond, RestrictionType.DATASET);
 
-        return (Collection) searchByParameterImpl(userId, ejpql, restric, include, startIndex, numberResults, manager);
+        return searchByParameterImpl(userId, ejpql, restric, include, startIndex, numberResults, manager);
     }
 
      /**

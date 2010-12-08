@@ -192,7 +192,7 @@ public class DatafileSearch {
      *
      * @return Collection of datafiles which match restriction condition
      */
-    private static Collection<Datafile> searchByRestrictionImpl (String userId, RestrictionUtil restrUtil, DatafileInclude include, int startIndex, int numberResults, EntityManager manager){
+    private static Collection searchByRestrictionImpl (String userId, RestrictionUtil restrUtil, DatafileInclude include, int startIndex, int numberResults, EntityManager manager){
         log.trace("searchByRestrictionImpl(" + ", restrCond, " + startIndex + ", " + numberResults + ", EntityManager)");
         // Check if there exists include options defined inside restrictions
         if (restrUtil.hasInclude()) {
@@ -237,7 +237,7 @@ public class DatafileSearch {
      * @throws RestrictionNullException
      * @throws RestrictionEmptyListException
      */
-    public static Collection<Datafile> searchByRestriction (String userId, RestrictionCondition restriction, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, RestrictionEmptyListException, CyclicException, EmptyOperatorException {
+    public static Collection searchByRestriction (String userId, RestrictionCondition restriction, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, RestrictionEmptyListException, CyclicException, EmptyOperatorException {
         log.trace("searchByRestriction( restrCond , EntityManager)");
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.DATAFILE);
         return searchByRestrictionImpl(userId, restric, DatafileInclude.NONE, NO_PAGINATION, NO_LIMITED_RESULTS, manager);
@@ -258,7 +258,7 @@ public class DatafileSearch {
      * @throws RestrictionNullException
      * @throws RestrictionEmptyListException
      */
-    public static Collection<Datafile> searchByRestriction (String userId, RestrictionCondition restriction, DatafileInclude include, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, RestrictionEmptyListException, EmptyOperatorException, CyclicException {
+    public static Collection searchByRestriction (String userId, RestrictionCondition restriction, DatafileInclude include, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, RestrictionEmptyListException, EmptyOperatorException, CyclicException {
         log.trace("searchByRestriction( restrCond , EntityManager)");
 
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.DATAFILE);
@@ -282,7 +282,7 @@ public class DatafileSearch {
      * @throws RestrictionNullException
      * @throws RestrictionEmptyListException
      */
-    public static Collection<Datafile> searchByRestriction (String userId, RestrictionCondition restriction, DatafileInclude include, int startIndex, int numberResults, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, EmptyOperatorException, RestrictionEmptyListException, CyclicException {
+    public static Collection searchByRestriction (String userId, RestrictionCondition restriction, DatafileInclude include, int startIndex, int numberResults, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, EmptyOperatorException, RestrictionEmptyListException, CyclicException {
         log.trace("searchByRestriction( restrCond , EntityManager)");
 
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.DATAFILE);
