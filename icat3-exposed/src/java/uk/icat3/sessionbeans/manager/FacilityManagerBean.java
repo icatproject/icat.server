@@ -15,8 +15,10 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.FacilityCycle;
 import uk.icat3.entity.FacilityUser;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.manager.FacilityManager;
+import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 
@@ -57,5 +59,11 @@ public class FacilityManagerBean extends EJBObject implements FacilityManagerLoc
      public FacilityUser getFacilityUserByFederalId(String sessionId, String federalId) throws SessionException, NoSuchObjectFoundException {
         String userId = user.getUserIdFromSessionId(sessionId);
         return FacilityManager.getFacilityUserByFederalId(federalId, manager);
+    }
+
+    @Override
+    public Collection searchByRestriction(String sessionId, RestrictionCondition restricion) throws SessionException, RestrictionException {
+         String userId = user.getUserIdFromSessionId(sessionId);
+        return FacilityManager.searchByRestriction(restricion, manager);
     }
 }

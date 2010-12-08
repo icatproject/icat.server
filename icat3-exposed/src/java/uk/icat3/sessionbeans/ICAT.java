@@ -2547,9 +2547,10 @@ public class ICAT extends EJBObject implements ICATLocal {
     }
     /**
      * Return samples matched by a logical condition.
-     *
+     * 
      * @param sessionId Session identification
      * @param logicalCondition Logial condition
+     * 
      * @return Collection of samples
      *
      * @throws SessionException
@@ -2561,6 +2562,24 @@ public class ICAT extends EJBObject implements ICATLocal {
     ParameterLogicalCondition logicalCondition) throws SessionException, ParameterSearchException, RestrictionException {
         return sampleSearchLocal.searchByParameterCondition(sessionId, logicalCondition);
     }
+    /**
+     * Searchs for facility users which match with restriction contidion.
+     *
+     * @param sessionId Session identification
+     * @param restriction Restriction condition
+     * 
+     * @return Collection of Facility Users
+     *
+     * @throws SessionException
+     * @throws RestrictionException
+     * @throws DatevalueException
+     */
+    @WebMethod
+    public Collection<FacilityUser> searchFacilityUserByRestriction(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "restriction") RestrictionCondition restriction) throws SessionException, RestrictionException, DatevalueException {
+        return facilityManagerLocal.searchByRestriction(sessionId, restriction);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
