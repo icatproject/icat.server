@@ -67,7 +67,15 @@ public enum RestrictionAttributes {
     INVESTIGATOR_USER_FIRST_NAME("facilityUser.firstName"),
     INVESTIGATOR_USER_MIDDLE_NAME("facilityUser.middleName"),
     INVESTIGATOR_USER_LAST_NAME("facilityUser.lastName"),
-    INVESTIGATOR_USER_ID("facilityUser.facilityUserId");
+    INVESTIGATOR_USER_ID("facilityUser.facilityUserId"),
+    // Facility User attributes
+    FACILITY_USER_ID("facilityUserId"),
+    FACILITY_USER_FIRST_NAME("firstName"),
+    FACILITY_USER_MIDDLE_NAME("middleName"),
+    FACILITY_USER_INITIALS("initials"),
+    FACILITY_USER_TITLE("title"),
+    FACILITY_USER_LAST_NAME("lastName");
+
 
     /** Value of the selected enum */
     private final String value;
@@ -166,7 +174,18 @@ public enum RestrictionAttributes {
      * @return True if attribute belongs to Investigator, otherwise false.
      */
     public boolean isInvestigator () {
-        if (this.ordinal() >= RestrictionAttributes.INVESTIGATOR_ID.ordinal())
+        if (this.ordinal() >= RestrictionAttributes.INVESTIGATOR_ID.ordinal() &&
+                this.ordinal() <= RestrictionAttributes.INVESTIGATOR_USER_ID.ordinal())
+            return true;
+        return false;
+    }
+    /**
+     * Check if attribute belongs to Facility User
+     * @return True if attribute belongs to FacilityUser, otherwise false.
+     */
+    public boolean isFacilityUser () {
+        if (this.ordinal() >= RestrictionAttributes.FACILITY_USER_ID.ordinal() &&
+                this.ordinal() <= RestrictionAttributes.FACILITY_USER_LAST_NAME.ordinal())
             return true;
         return false;
     }

@@ -36,6 +36,7 @@ import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.RestrictionEmptyListException;
 import uk.icat3.exceptions.OperatorINException;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
 import uk.icat3.restriction.RestrictionComparisonCondition;
@@ -61,77 +62,10 @@ import uk.icat3.util.Queries;
 public class RestrictionExceptionTest extends BaseParameterSearchTest {
 
     /**
-     * The parameter contains a numberic value but the comparator is for a string.
-     */
-    @Test
-    public void RestrictionINExceptionTest () {
-        boolean exception = false;
-        try {
-
-            List<String> inList = new ArrayList<String>();
-            inList.add("ASC'\\'\"II");
-            inList.add("cosa");
-            // Restriction condition
-            RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
-                .add (new RestrictionComparisonCondition(
-                            RestrictionAttributes.DATAFILE_FORMAT_TYPE, RestrictionOperator.IN, new Date(0)));
-            List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
-             // ------------- ComparisonOperator 1 ----------------------
-            ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
-            comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
-            comp1.setComparator(ComparisonOperator.GREATER_EQUAL);
-            comp1.setValue(new Double (3.14));
-            lc.add(comp1);
-            DatasetSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc
-                    , restricLog, DatasetInclude.NONE, -1, -1, em);
-
-        } catch (EmptyOperatorException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionNullException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (CyclicException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (OperatorINException ex) {
-            exception = true;
-        } catch (RestrictionOperatorException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RestrictionEmptyListException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoDatetimeComparatorException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (DatevalueException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NumericvalueException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (DatevalueFormatException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoParametersException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ParameterNoExistsException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (EmptyListParameterException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoParameterTypeException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoNumericComparatorException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoStringComparatorException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSearchableParameterException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NullParameterException ex) {
-            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        finally {
-            assertTrue("Should be a NoNumericComparatorException", exception);
-        }
-    }
-
-    /**
      * Add the operator itself produces an cyclic execption.
      */
     @Test
-    public void RestrictionOperatorExceptionTest () {
+    public void RestrictionOperatorExceptionTest () throws RestrictionException {
         boolean exception = false;
         try {
             // Restriction condition
@@ -190,7 +124,7 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
      * Operator is empty
      */
     @Test
-    public void CyclicExceptionTest () {
+    public void CyclicExceptionTest () throws RestrictionException {
         boolean exception = false;
         try {
             // Restriction condition
@@ -250,7 +184,7 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
      * Operator is empty
      */
     @Test
-    public void cyclicExceptionTest () {
+    public void cyclicExceptionTest () throws RestrictionException {
         boolean exception = false;
         try {
             // Restriction condition
@@ -301,7 +235,7 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
      * Operator is empty
      */
     @Test
-    public void restrictionNullTest () {
+    public void restrictionNullTest () throws RestrictionException {
         boolean exception = false;
         try {
             // Restriction condition
@@ -362,7 +296,7 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
      * but this parameter is not relevant to datafile.
      */
     @Test
-    public void DatevalueExceptionParameter () {
+    public void DatevalueExceptionParameter () throws RestrictionException {
         boolean exception = false;
         ParameterSearch pv3 = new ParameterSearch(ParameterType.DATASET, parameter.get("dataset1"));
         try {
@@ -407,7 +341,7 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
     }
 
     @Test
-    public void ParameterNoExistsException () {
+    public void ParameterNoExistsException () throws RestrictionException {
         boolean exception = false;
         ParameterSearch pv3 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
         try {

@@ -918,31 +918,37 @@ public class ManagerUtil {
         log.trace("getResultList (" + jpql + ", ejpql, restriction, " + elementType 
                 + ", " + userId + ", " + startIndex + ", "
                 + numberResults + ", manager");
+        // Variable to declare conditions
+        String conditions = "";
         // Check if there are any restriction
         if (restriction != null && !restriction.isEmpty())
-            jpql += " AND (" + restriction.getSentenceJPQL() + ")";
+            conditions += " AND (" + restriction.getSentenceJPQL() + ")";
         // Check if there are any parameter condition
         if (ejpql != null && !ejpql.isEmpty())
-            jpql += " AND " + ejpql.getCondition();
-
+            conditions += " AND " + ejpql.getCondition();
         // Add order by is exists
         if (restriction != null)
-            jpql += restriction.getOrderBy();
-
+            conditions += restriction.getOrderBy();
+        // If there are not elementType neither user, delete the first
+        //  word 'AND' in string 'conditions', and add 'WHERE'
+        if (elementType == null && userId == null && !conditions.isEmpty())
+            conditions = " WHERE " + conditions.substring(5);
         // Create Query
-        Query q = manager.createQuery(jpql);
+        Query q = manager.createQuery(jpql + conditions);
         // Set JPQL parameters for parameters search
         if (ejpql != null)
             for (Entry<String, Object> e : ejpql.getAllJPQLParameter().entrySet()) {
                 q.setParameter(e.getKey(), e.getValue());
             }
         // Set JPQL parameters for restrictions
-        if (restriction != null)
-            for (Entry<String, Object> e : restriction.getJpqlParameter().entrySet()) {
+        if (restriction != null) {
+            for (Entry<String, Object> e : restriction.getJpqlParameter().entrySet())
                 q.setParameter(e.getKey(), e.getValue());
-            }
-        q.setParameter("objectType", elementType);
-        q.setParameter("userId", userId);
+        }
+        if (elementType != null)
+            q.setParameter("objectType", elementType);
+        if (userId != null)
+            q.setParameter("userId", userId);
         // Check if maximun of results was set
         if (restriction != null && restriction.hasMaxResults()) {
             startIndex = restriction.getStartIndex();
@@ -961,6 +967,19 @@ public class ManagerUtil {
                     .setMaxResults(numberResults)
                     .getResultList();
         }
+    }
+    /**
+     * Return result list. The jpql has to be absent of WHERE sql key word.
+     * 
+     * @param jpql JPQL string sentence
+     * @param restrUtil Restriction structure
+     * @param startIndex Start of results
+     * @param numberResults Number of results
+     * @param manager Entity manager to database
+     * @return
+     */
+    public static Collection getResultList(String jpql, RestrictionUtil restrUtil, int startIndex, int numberResults, EntityManager manager) {
+        return getResultList(jpql, null, restrUtil, null, null, startIndex, numberResults, manager);
     }
     /**
      * Create the query and set the number of the results

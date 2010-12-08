@@ -20,5 +20,7 @@ public enum RestrictionType {
     /** Sample restriction search */
     SAMPLE,
     /** Datafile restriction search */
-    DATAFILE
+    DATAFILE,
+    /** Facility user restriction search */
+    FACILITY_USER
 }

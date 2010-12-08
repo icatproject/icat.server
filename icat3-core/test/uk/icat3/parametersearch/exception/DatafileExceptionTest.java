@@ -33,6 +33,7 @@ import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.RestrictionEmptyListException;
 import uk.icat3.exceptions.OperatorINException;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.RestrictionNullException;
 import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
@@ -56,7 +57,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
      * List parameter error test. Test the exceptions work fine.
      */
     @Test
-    public void noSearchableExceptionTest () {
+    public void noSearchableExceptionTest () throws RestrictionException {
         boolean exception = false;
         ParameterSearch pv3 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
         try {
@@ -103,7 +104,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
      * The parameter contains a numberic value but the comparator is for a string.
      */
     @Test
-    public void comparatorExceptionTest () {
+    public void comparatorExceptionTest () throws RestrictionException {
         boolean exception = false;
         try {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
@@ -161,7 +162,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
      * Add the operator itself produces an cyclic execption.
      */
     @Test
-    public void cyclicExceptionTest () {
+    public void cyclicExceptionTest () throws RestrictionException {
         boolean exception = false;
         try {
             ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
@@ -223,7 +224,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
      * Add the operator itself produces an cyclic execption.
      */
     @Test
-    public void cyclicExceptionTest2 () {
+    public void cyclicExceptionTest2 () throws RestrictionException {
         boolean exception = false;
         try {
             ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
@@ -282,7 +283,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
     }
 
     @Test
-    public void nullParameterExceptionTest () {
+    public void nullParameterExceptionTest () throws RestrictionException {
         boolean exception = false;
         try {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
@@ -340,7 +341,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
      * Operator is empty
      */
     @Test
-    public void numericvalueExceptionTest () {
+    public void numericvalueExceptionTest () throws RestrictionException {
         boolean exception = false;
         try {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
@@ -398,7 +399,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
      * Operator is empty
      */
     @Test
-    public void datevalueFormatExceptionTest () {
+    public void datevalueFormatExceptionTest () throws RestrictionException {
         boolean exception = false;
         try {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
@@ -456,7 +457,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
      * Operator is empty
      */
     @Test
-    public void datevalueExceptionTest () {
+    public void datevalueExceptionTest () throws RestrictionException {
         boolean exception = false;
         try {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
@@ -514,7 +515,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
 //     * Operator is empty
 //     */
 //    @Test
-//    public void emptyOperatorExceptionTest () {
+//    public void emptyOperatorExceptionTest () throws RestrictionException {
 //        boolean exception = false;
 //        try {
 //            ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
@@ -566,7 +567,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
      * but this parameter is not relevant to datafile.
      */
 //    @Test
-    public void unexpectedParameterException () {
+    public void unexpectedParameterException () throws RestrictionException {
         boolean exception = false;
         ParameterSearch pv3 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
         try {
@@ -609,7 +610,7 @@ public class DatafileExceptionTest extends BaseParameterSearchTest {
     }
 
     @Test
-    public void parameterNoExistsException () {
+    public void parameterNoExistsException () throws RestrictionException {
         boolean exception = false;
         ParameterSearch pv3 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1"));
         try {

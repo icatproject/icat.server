@@ -23,6 +23,7 @@ import uk.icat3.exceptions.NoNumericComparatorException;
 import uk.icat3.exceptions.NoStringComparatorException;
 import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterCondition;
 import uk.icat3.exceptions.EmptyListParameterException;
@@ -110,7 +111,7 @@ public class SampleSearch {
      * @throws RestrictionNullException
      * @throws RestrictionEmptyListException
      */
-    public static Collection searchByRestriction (String userId, RestrictionCondition restriction, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, EmptyOperatorException, RestrictionEmptyListException, CyclicException {
+    public static Collection searchByRestriction (String userId, RestrictionCondition restriction, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, EmptyOperatorException, RestrictionEmptyListException, CyclicException, RestrictionException {
         log.trace("searchByRestriction( restrCond , EntityManager)");
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.SAMPLE);
         return searchByRestrictionImpl(userId, restric, SampleInclude.NONE, NO_PAGINATION, NO_PAGINATION, manager);
@@ -131,7 +132,7 @@ public class SampleSearch {
      * @throws RestrictionNullException
      * @throws RestrictionEmptyListException
      */
-    public static Collection searchByRestriction (String userId, RestrictionCondition restriction, SampleInclude include, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, EmptyOperatorException, RestrictionEmptyListException, CyclicException {
+    public static Collection searchByRestriction (String userId, RestrictionCondition restriction, SampleInclude include, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, EmptyOperatorException, RestrictionEmptyListException, RestrictionException, CyclicException {
         log.trace("searchByRestriction( restrCond , EntityManager)");
 
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.SAMPLE);
@@ -155,7 +156,7 @@ public class SampleSearch {
      * @throws RestrictionNullException
      * @throws RestrictionEmptyListException
      */
-    public static Collection searchByRestriction (String userId, RestrictionCondition restriction, SampleInclude include, int startIndex, int numberResults, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, EmptyOperatorException, RestrictionNullException, RestrictionEmptyListException, CyclicException {
+    public static Collection searchByRestriction (String userId, RestrictionCondition restriction, SampleInclude include, int startIndex, int numberResults, EntityManager manager) throws DatevalueException, RestrictionOperatorException, OperatorINException, EmptyOperatorException, RestrictionException, RestrictionNullException, RestrictionEmptyListException, CyclicException {
         log.trace("searchByRestriction( restrCond , EntityManager)");
 
         RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.SAMPLE);
@@ -225,7 +226,7 @@ public class SampleSearch {
      * @return Collection of investigation matched
      * @throws NoParameterTypeException
      */
-     public static Collection searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, RestrictionCondition restCond, SampleInclude include, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, EmptyOperatorException, NoParameterTypeException, ParameterNoExistsException, CyclicException, NoSearchableParameterException, NoParametersException, NoStringComparatorException, NoNumericComparatorException, NullParameterException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException   {
+     public static Collection searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, RestrictionCondition restCond, SampleInclude include, int startIndex, int numberResults, EntityManager manager) throws EmptyListParameterException, RestrictionException, EmptyOperatorException, NoParameterTypeException, ParameterNoExistsException, CyclicException, NoSearchableParameterException, NoParametersException, NoStringComparatorException, NoNumericComparatorException, NullParameterException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException   {
 
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLComparators (listComparators, manager);
         RestrictionUtil restric = new RestrictionUtil(restCond, RestrictionType.SAMPLE);
@@ -244,7 +245,7 @@ public class SampleSearch {
      * @return Collection of investigation matched
      * @throws NoParameterTypeException
      */
-     public static Collection searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, RestrictionCondition restCond, SampleInclude include, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, EmptyOperatorException, ParameterNoExistsException, NoSearchableParameterException, NoParametersException, CyclicException, NoStringComparatorException, NoNumericComparatorException, NullParameterException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException   {
+     public static Collection searchByParameterComparisonList(String userId, List<ParameterComparisonCondition> listComparators, RestrictionCondition restCond, SampleInclude include, EntityManager manager) throws EmptyListParameterException, NoParameterTypeException, RestrictionException, EmptyOperatorException, ParameterNoExistsException, NoSearchableParameterException, NoParametersException, CyclicException, NoStringComparatorException, NoNumericComparatorException, NullParameterException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException   {
 
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLComparators (listComparators, manager);
         RestrictionUtil restric = new RestrictionUtil(restCond, RestrictionType.SAMPLE);
@@ -263,7 +264,7 @@ public class SampleSearch {
       * @throws ParameterSearchException
       * @see ParameterCondition
       */
-     public static Collection searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restCond, SampleInclude include, int startIndex, int numberResults, EntityManager manager) throws EmptyOperatorException, NoSearchableParameterException, NullParameterException, NoStringComparatorException, CyclicException, NoNumericComparatorException, NoParameterTypeException, NoParametersException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException   {
+     public static Collection searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restCond, SampleInclude include, int startIndex, int numberResults, EntityManager manager) throws EmptyOperatorException, NoSearchableParameterException, RestrictionException, NullParameterException, NoStringComparatorException, CyclicException, NoNumericComparatorException, NoParameterTypeException, NoParametersException, ParameterNoExistsException, NoDatetimeComparatorException, DatevalueException, NumericvalueException, DatevalueFormatException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException   {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable, manager);
         RestrictionUtil restric = new RestrictionUtil(restCond, RestrictionType.SAMPLE);
         return searchByParameterImpl(userId, ejpql, restric, include, startIndex, numberResults, manager);
@@ -278,7 +279,7 @@ public class SampleSearch {
       * @return
       * @throws ParameterSearchException
       */
-    public static Collection searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restCond, SampleInclude include, EntityManager manager) throws DatevalueFormatException, NoParameterTypeException, EmptyListParameterException, NoSearchableParameterException, NoParametersException, NullParameterException, CyclicException, ParameterNoExistsException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException, EmptyOperatorException, NoStringComparatorException, NoNumericComparatorException, NoDatetimeComparatorException, NumericvalueException    {
+    public static Collection searchByParameterCondition(String userId, ParameterCondition parameterOperable, RestrictionCondition restCond, SampleInclude include, EntityManager manager) throws DatevalueFormatException, NoParameterTypeException, EmptyListParameterException, RestrictionException, NoSearchableParameterException, NoParametersException, NullParameterException, CyclicException, ParameterNoExistsException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException, EmptyOperatorException, NoStringComparatorException, NoNumericComparatorException, NoDatetimeComparatorException, NumericvalueException    {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLOperable(parameterOperable, manager);
         RestrictionUtil restric = new RestrictionUtil(restCond, RestrictionType.SAMPLE);
         return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);
@@ -296,7 +297,7 @@ public class SampleSearch {
      * @return Investigations which contains all the paremeters from listParam
      * @throws ParameterSearchException
      */
-    public static Collection searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restCond, SampleInclude include, int startIndex, int numberResults, EntityManager manager) throws NoParameterTypeException, EmptyListParameterException, EmptyOperatorException, NoSearchableParameterException, NoParametersException, NullParameterException, CyclicException, ParameterNoExistsException, ParameterNoExistsException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException {
+    public static Collection searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restCond, SampleInclude include, int startIndex, int numberResults, EntityManager manager) throws NoParameterTypeException, EmptyListParameterException, RestrictionException, EmptyOperatorException, NoSearchableParameterException, NoParametersException, NullParameterException, CyclicException, ParameterNoExistsException, ParameterNoExistsException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam, manager);
         RestrictionUtil restric = new RestrictionUtil(restCond, RestrictionType.SAMPLE);
         return searchByParameterImpl(userId, ejpql, restric, include, startIndex, numberResults, manager);
@@ -312,7 +313,7 @@ public class SampleSearch {
      * @return Investigations which contains all the paremeters from listParam
      * @throws ParameterSearchException
      */
-    public static Collection searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restCond, SampleInclude include, EntityManager manager) throws DatevalueFormatException, NoParameterTypeException, EmptyListParameterException, EmptyOperatorException, NoSearchableParameterException, NoParametersException, NullParameterException, CyclicException, ParameterNoExistsException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException {
+    public static Collection searchByParameterList(String userId, List<ParameterSearch> listParam, RestrictionCondition restCond, SampleInclude include, EntityManager manager) throws DatevalueFormatException, NoParameterTypeException, EmptyListParameterException, EmptyOperatorException, RestrictionException, NoSearchableParameterException, NoParametersException, NullParameterException, CyclicException, ParameterNoExistsException, RestrictionEmptyListException, RestrictionOperatorException, OperatorINException, RestrictionNullException, DatevalueException {
         ExtractedJPQL ejpql = ParameterSearchUtilSingleton.getInstance().extractJPQLParameters(listParam, manager);
         RestrictionUtil restric = new RestrictionUtil(restCond, RestrictionType.SAMPLE);
         return searchByParameterImpl(userId, ejpql, restric, include, NO_PAGINATION, NO_PAGINATION, manager);

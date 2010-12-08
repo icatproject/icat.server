@@ -33,6 +33,7 @@ import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.RestrictionEmptyListException;
 import uk.icat3.exceptions.OperatorINException;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.RestrictionNullException;
 import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
@@ -56,7 +57,7 @@ public class SampleExceptionTest extends BaseParameterSearchTest {
      * The parameter contains a numberic value but the comparator is for a string.
      */
     @Test
-    public void comparatorExceptionTest () {
+    public void comparatorExceptionTest ()throws RestrictionException {
         boolean exception = false;
         try {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
@@ -114,7 +115,7 @@ public class SampleExceptionTest extends BaseParameterSearchTest {
      * Add the operator itself produces an cyclic execption.
      */
     @Test
-    public void cyclicExceptionTest () {
+    public void cyclicExceptionTest () throws RestrictionException{
         boolean exception = false;
         try {
             ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
@@ -166,7 +167,7 @@ public class SampleExceptionTest extends BaseParameterSearchTest {
     }
 
     @Test
-    public void nullParameterExceptionTest () {
+    public void nullParameterExceptionTest ()throws RestrictionException {
         boolean exception = false;
         try {
             List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();
@@ -277,7 +278,7 @@ public class SampleExceptionTest extends BaseParameterSearchTest {
      * but this parameter is not relevant to datafile.
      */
     @Test
-    public void noSearchableParameterException () {
+    public void noSearchableParameterException () throws RestrictionException{
         boolean exception = false;
         ParameterSearch pv3 = new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample1"));
         try {
@@ -321,7 +322,7 @@ public class SampleExceptionTest extends BaseParameterSearchTest {
     }
 
     @Test
-    public void ParameterNoExistsException () {
+    public void ParameterNoExistsException () throws RestrictionException{
         boolean exception = false;
         ParameterSearch pv3 = new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample1"));
         try {

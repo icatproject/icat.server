@@ -11,6 +11,12 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.FacilityCycle;
 import uk.icat3.entity.FacilityUser;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.RestrictionException;
+import uk.icat3.exceptions.RestrictionOperatorException;
+import uk.icat3.restriction.RestrictionCondition;
+import uk.icat3.restriction.RestrictionType;
+import uk.icat3.restriction.util.RestrictionUtil;
+import uk.icat3.util.Queries;
 import static uk.icat3.util.Queries.*;
 
 /**
@@ -71,5 +77,39 @@ public class FacilityManager extends ManagerUtil {
         //return manager.createNamedQuery(ALL_FACILITYCYCLES)/*.setMaxResults(MAX_QUERY_RESULTSET)*/.getResultList();
         return manager.find(FacilityUser.class, facilityUserId);
     }
+    /**
+     * This method is the implementation for all restriction searchs, and
+     * return facility users which match with restriction.
+     *
+     * @param userId User identification
+     * @param restrUtil Restriction util
+     * @param startIndex Start index
+     * @param numberResults Number of results to return
+     * @param manager Entity manager to database
+     *
+     * @return Collection of facility users which match restriction condition
+     */
+    private static Collection searchByRestrictionImpl (RestrictionUtil restrUtil, int startIndex, int numberResults, EntityManager manager) {
+        log.trace("searchByRestrictionImpl(restrUtil, " + startIndex + ", " + numberResults + ", EntityManager)");
+        // Objects to return
+        return ManagerUtil.getResultList(Queries.RETURN_ALL_FACILITY_USERS, restrUtil
+                , startIndex, numberResults
+                , manager);
+    }
 
+    /**
+     * Search facility users which match with restriction conditions
+     *
+     * @param restriction Restriction condition
+     * @param manager Entity manager to database
+     *
+     * @return Collection of facility users which match restriction condition
+     *
+     * @throws RestrictionException
+     */
+    public static Collection searchByRestriction (RestrictionCondition restriction, EntityManager manager) throws RestrictionException {
+        log.trace("searchByRestriction( restrCond , EntityManager)");
+        RestrictionUtil restric = new RestrictionUtil(restriction, RestrictionType.FACILITY_USER);
+        return searchByRestrictionImpl(restric, NO_PAGINATION, NO_PAGINATION, manager);
+    }
 }

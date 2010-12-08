@@ -7,7 +7,6 @@
 
 package uk.icat3.restriction;
 
-import java.sql.Timestamp;
 import uk.icat3.parametersearch.*;
 import java.util.ArrayList;
 import static org.junit.Assert.*;
@@ -18,9 +17,11 @@ import uk.icat3.exceptions.ParameterSearchException;
 import org.junit.Test;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
+import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.RestrictionException;
+import uk.icat3.manager.FacilityManager;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
 import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.DatasetSearch;
@@ -515,6 +516,57 @@ public class UsesExamples extends BaseParameterSearchTest  {
         List<Investigation> li = (List<Investigation>) InvestigationSearch
             .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, InvestigationInclude.NONE, 1, -1, em);
        assertEquals("Results of Datasets incorrect.", 2, lds.size());
+       assertEquals("Results of Datafiles incorrect.", 3, ldf.size());
+       assertEquals("Results of Investigations incorrect.", 1, li.size());
+       assertEquals("Results of Samples incorrect.", 1, ls.size());
+    }
+
+    /**
+     * Restriction logical condition example
+     *
+     * @throws ParameterSearchException
+     * @throws RestrictionException
+     */
+    @Test
+    public void facilityUser () throws ParameterSearchException, RestrictionException {
+        String contain = "n";
+        // Create restriction comparison for proposal start with
+        RestrictionComparisonCondition compFirstName = new RestrictionComparisonCondition();
+        compFirstName.setRestAttr(RestrictionAttributes.INVESTIGATOR_USER_FIRST_NAME);
+        compFirstName.setRestOp(RestrictionOperator.START_WITH);
+        compFirstName.setValue(contain);
+        // Create restriction comparison for proposal start with
+        RestrictionComparisonCondition compMiddleName = new RestrictionComparisonCondition();
+        compMiddleName.setRestAttr(RestrictionAttributes.INVESTIGATOR_USER_MIDDLE_NAME);
+        compMiddleName.setRestOp(RestrictionOperator.START_WITH);
+        compMiddleName.setValue(contain);
+        // Create restriction comparison for proposal start with
+        RestrictionComparisonCondition compLastName = new RestrictionComparisonCondition();
+        compLastName.setRestAttr(RestrictionAttributes.INVESTIGATOR_USER_LAST_NAME);
+        compLastName.setRestOp(RestrictionOperator.START_WITH);
+        compLastName.setValue(contain);
+        // Create logical condition
+        RestrictionLogicalCondition logCond = new RestrictionLogicalCondition();
+        logCond.setOperator(LogicalOperator.OR);
+        // Maximum results returned
+        logCond.setMaxResults(15);
+        List<FacilityUser> lf = (List<FacilityUser>) FacilityManager.searchByRestriction(logCond, em);
+        // Add all title investigation to list res
+        for (FacilityUser user : lf)
+                System.out.println(user.getFacilityUserId());
+//        // Dataset search
+//        List<Dataset> lds = (List<Dataset>) DatasetSearch
+//                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, DatasetInclude.NONE, 1, -1, em);
+//        // Datafile search
+//        List<Datafile> ldf = (List<Datafile>) DatafileSearch
+//            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, DatafileInclude.NONE, 1, -1, em);
+//        // Sample search
+//        List<Sample> ls = (List<Sample>) SampleSearch
+//            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, SampleInclude.NONE, 1, -1, em);
+//        // Investigation search
+//        List<Investigation> li = (List<Investigation>) InvestigationSearch
+//            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, InvestigationInclude.NONE, 1, -1, em);
+//       assertEquals("Results of Datasets incorrect.", 2, lds.size());
 //       assertEquals("Results of Datafiles incorrect.", 2, ldf.size());
 //       assertEquals("Results of Investigations incorrect.", 1, li.size());
 //       assertEquals("Results of Samples incorrect.", 1, ls.size());

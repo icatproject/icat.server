@@ -8,20 +8,18 @@
 package uk.icat3.restriction.util;
 
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
-import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import sun.util.calendar.CalendarUtils;
 import uk.icat3.exceptions.CyclicException;
 import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.EmptyOperatorException;
 import uk.icat3.exceptions.RestrictionEmptyListException;
 import uk.icat3.exceptions.OperatorINException;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.RestrictionNullException;
 import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.restriction.RestrictionComparisonCondition;
@@ -89,7 +87,7 @@ public class RestrictionUtil {
      * @throws OperatorINException
      * @throws RestrictionNullException
      */
-    public RestrictionUtil(RestrictionCondition restCond, RestrictionType restType) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, RestrictionEmptyListException, CyclicException, EmptyOperatorException  {
+    public RestrictionUtil(RestrictionCondition restCond, RestrictionType restType) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, RestrictionEmptyListException, CyclicException, EmptyOperatorException, RestrictionException  {
         // Initialites variables
         this.enumInclude = null;
         this.sentenceJPQL = "";
@@ -176,7 +174,7 @@ public class RestrictionUtil {
      * @throws OperatorINException
      * @throws RestrictionNullException
      */
-    private void extractJPQL(RestrictionCondition restCond) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, CyclicException, EmptyOperatorException {
+    private void extractJPQL(RestrictionCondition restCond) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, CyclicException, EmptyOperatorException, RestrictionException {
         // Check if this condition is negated
         if (restCond.isNegate())
             addNotCondition();
@@ -277,7 +275,7 @@ public class RestrictionUtil {
      *
      * @param comp
      */
-    private void addRestrictionCondition(RestrictionComparisonCondition comp) throws DatevalueException, RestrictionOperatorException, OperatorINException {
+    private void addRestrictionCondition(RestrictionComparisonCondition comp) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionException {
         // Add restricion.
         sentenceJPQL += getParamName(comp.getRestAttr()) + comp.getRestAttr().getValue() + " "
                         + comp.getRestOp().getRestriction(getParamValue(comp));
@@ -289,7 +287,7 @@ public class RestrictionUtil {
      * @param comp
      * @return
      */
-    private String getParamName (RestrictionAttributes attr) {
+    private String getParamName (RestrictionAttributes attr) throws RestrictionException {
         String paramName = Queries.PARAM_NAME_JPQL;
         // Restriction is for Dataset search
         if (restType == RestrictionType.DATASET) {
@@ -373,6 +371,14 @@ public class RestrictionUtil {
             else if (attr.isInvestigator()) {
                 paramName = Queries.INVESTIGATOR_NAME;
                 containInvestigatorAttributes = true;
+            }
+        }
+        // Restriction is for a Facility User
+        else if (restType == RestrictionType.FACILITY_USER) {
+            // If attribute is not from FacilityUser, it is an error
+            if (!attr.isFacilityUser()) {
+                throw new RestrictionException("FacilityUser cannot be relatitoned with" +
+                        " attribute '" + attr.name() + "'");
             }
         }
         return paramName + ".";

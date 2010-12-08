@@ -24,6 +24,8 @@ public class Queries {
     /////////////////////////////////////    These are to be added together to form queries  ///////////////////////
     //Returns all of investigation
     public static final String RETURN_ALL_INVESTIGATIONS_JPQL = "SELECT DISTINCT i from Investigation i ";
+    // Returns all facility users
+    public static String RETURN_ALL_FACILITY_USERS = "SELECT DISTINCT i from FacilityUser i ";
     
     //Returns all of datafiles
     public static final String RETURN_ALL_DATAFILES_JPQL = "SELECT DISTINCT i from Datafile i ";
