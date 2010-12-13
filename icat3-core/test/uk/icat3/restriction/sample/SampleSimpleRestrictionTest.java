@@ -28,9 +28,9 @@ import static org.junit.Assert.*;
 import uk.icat3.restriction.RestrictionComparisonCondition;
 import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.restriction.RestrictionLogicalCondition;
-import uk.icat3.restriction.RestrictionOperator;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
 import uk.icat3.search.SampleSearch;
+import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.util.SampleInclude;
 import uk.icat3.util.LogicalOperator;
 import uk.icat3.util.Queries;
@@ -45,11 +45,11 @@ public class SampleSimpleRestrictionTest extends BaseParameterSearchTest {
 //    public void datafilesIncludeDatafileTest () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {
 //        // Restriction condition
 //        RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-//                RestrictionAttributes.SAMPLE_TITLE, RestrictionOperator.CONTAIN, "gation 2");
+//                RestrictionAttributes.SAMPLE_TITLE, ComparisonOperator.CONTAINS, "gation 2");
 //        RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.OR)
 //                .add(RestrictionCondition.Not(restriction1))
 //                .add(new RestrictionComparisonCondition(
-//                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+//                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
 //                ;
 //        // Parameter condition
 //        ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
@@ -76,7 +76,7 @@ public class SampleSimpleRestrictionTest extends BaseParameterSearchTest {
 
         RestrictionLogicalCondition restrLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(new RestrictionComparisonCondition(
-                RestrictionAttributes.SAMPLE_NAME, RestrictionOperator.START_WITH, "Sample_"))
+                RestrictionAttributes.SAMPLE_NAME, ComparisonOperator.STARTS_WITH, "Sample_"))
                 ;
 
         // Sample search
@@ -93,7 +93,7 @@ public class SampleSimpleRestrictionTest extends BaseParameterSearchTest {
         // Restricction logical condition
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "red"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "red"))
                 ;
         restricLog.setOrderByAsc(RestrictionAttributes.DATASET_NAME);
         // Parameter conditions
@@ -110,7 +110,7 @@ public class SampleSimpleRestrictionTest extends BaseParameterSearchTest {
         // Restricction logical condition
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
                 ;
         restricLog.setOrderByAsc(RestrictionAttributes.SAMPLE_NAME);
         // Sample search
@@ -128,9 +128,9 @@ public class SampleSimpleRestrictionTest extends BaseParameterSearchTest {
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(new RestrictionLogicalCondition(LogicalOperator.OR)
                     .add (new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
                     .add (new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "red"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "red"))
 
                     )
                 ;
@@ -148,7 +148,7 @@ public class SampleSimpleRestrictionTest extends BaseParameterSearchTest {
     public void restrictionComparisonTest () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {
         
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue");
+                RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue");
 
         List<Sample> li = (List<Sample>) SampleSearch
                 .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restriction1
@@ -164,7 +164,7 @@ public class SampleSimpleRestrictionTest extends BaseParameterSearchTest {
         // Restriction condition
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.OR)
                 .add(new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
                 ;
         List<Sample> li = (List<Sample>) SampleSearch
                 .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, SampleInclude.NONE, 1, -1, em);

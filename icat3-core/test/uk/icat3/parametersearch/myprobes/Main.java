@@ -31,9 +31,9 @@ import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.RestrictionEmptyListException;
 import uk.icat3.exceptions.RestrictionOperatorException;
+import uk.icat3.manager.FacilityManager;
 import uk.icat3.restriction.RestrictionComparisonCondition;
 import uk.icat3.restriction.RestrictionLogicalCondition;
-import uk.icat3.restriction.RestrictionOperator;
 import uk.icat3.restriction.RestrictionType;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
 import uk.icat3.restriction.util.RestrictionUtil;
@@ -52,22 +52,22 @@ import uk.icat3.util.LogicalOperator;
 public class Main {
 
     public static void main (String argv[]) throws RestrictionOperatorException {
-        String value ="  asdfad, asdfasdf, asdf asdf   ";
-        value = value.replaceAll("\\s*,\\s*", "','")
-                .replaceAll("^\\s+", "'")
-                .replaceAll("\\s+$", "'");
-        System.out.println(value);
+        String value =" ^*+`+`*^*´+ç-´´-.ç`ñ`ñç+`+`çÇ:+`:+'¡')((/&%najor  234234-  ";
+//        value = value.replaceAll("\\s*,\\s*", "','")
+//                .replaceAll("^\\s+", "'")
+//                .replaceAll("\\s+$", "'");
+        System.out.println(value.replaceAll("[^\\w\\s-:]", ""));
 //        try {
-//            RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(RestrictionAttributes.DATASET_NAME, RestrictionOperator.CONTAIN, "s");
+//            RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(RestrictionAttributes.DATASET_NAME, ComparisonOperator.CONTAIN, "s");
 //            RestrictionLogicalCondition log = new RestrictionLogicalCondition(LogicalOperator.OR)
 //                    .add(comp)
 //                    .add(new RestrictionComparisonCondition(
-//                            RestrictionAttributes.DATASET_DESCRIPTION, RestrictionOperator.IN, "'s', 'd'"))
+//                            RestrictionAttributes.DATASET_DESCRIPTION, ComparisonOperator.IN, "'s', 'd'"))
 //                    .add (new RestrictionLogicalCondition(LogicalOperator.AND)
 //                        .add(new RestrictionComparisonCondition(
-//                            RestrictionAttributes.INVESTIGATION_END_DATE, RestrictionOperator.GREATER_EQUAL, new Date(0)))
+//                            RestrictionAttributes.INVESTIGATION_END_DATE, ComparisonOperator.GREATER_EQUAL, new Date(0)))
 //                        .add(new RestrictionComparisonCondition(
-//                            RestrictionAttributes.DATAFILE_NAME, RestrictionOperator.CONTAIN, "0876")
+//                            RestrictionAttributes.DATAFILE_NAME, ComparisonOperator.CONTAIN, "0876")
 //                    ));
 //
 //            System.out.println("----> " + new RestrictionUtil(log, RestrictionType.DATASET).getSentenceJPQL());

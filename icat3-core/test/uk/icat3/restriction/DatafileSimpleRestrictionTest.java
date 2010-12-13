@@ -20,12 +20,10 @@ import org.junit.Test;
 import uk.icat3.entity.Datafile;
 import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
-import uk.icat3.restriction.RestrictionComparisonCondition;
-import uk.icat3.restriction.RestrictionLogicalCondition;
-import uk.icat3.restriction.RestrictionOperator;
 import static org.junit.Assert.*;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
 import uk.icat3.search.DatafileSearch;
+import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.util.DatafileInclude;
 import uk.icat3.util.LogicalOperator;
 import uk.icat3.util.Queries;
@@ -40,11 +38,11 @@ public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
 //    public void datafilesIncludeDatafileTest () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {
 //        // Restriction condition
 //        RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-//                RestrictionAttributes.DATAFILE_NAME, RestrictionOperator.CONTAIN, "gation 2");
+//                RestrictionAttributes.DATAFILE_NAME, ComparisonOperator.CONTAINS, "gation 2");
 //        RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.OR)
 //                .add(RestrictionCondition.Not(restriction1))
 //                .add(new RestrictionComparisonCondition(
-//                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+//                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
 //                ;
 //        // Parameter condition
 //        ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
@@ -69,16 +67,16 @@ public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
     public void differentsAttr () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {
 
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.DATAFILE_NAME, RestrictionOperator.START_WITH, "datafile");
+                RestrictionAttributes.DATAFILE_NAME, ComparisonOperator.STARTS_WITH, "datafile");
 
         RestrictionLogicalCondition restrLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(restriction1)
                 .add(new RestrictionComparisonCondition(
-                RestrictionAttributes.DATAFILE_NAME, RestrictionOperator.END_WITH, ""))
+                RestrictionAttributes.DATAFILE_NAME, ComparisonOperator.ENDS_WITH, ""))
                 .add(new RestrictionComparisonCondition(
-                RestrictionAttributes.DATAFILE_NAME, RestrictionOperator.END_WITH, ""))
+                RestrictionAttributes.DATAFILE_NAME, ComparisonOperator.ENDS_WITH, ""))
                 .add(new RestrictionComparisonCondition(
-                RestrictionAttributes.SAMPLE_NAME, RestrictionOperator.END_WITH, ""))
+                RestrictionAttributes.SAMPLE_NAME, ComparisonOperator.ENDS_WITH, ""))
                 ;
 
         // Datafile search
@@ -94,12 +92,12 @@ public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
     public void restrictionConditionTest () throws ParameterSearchException, RestrictionException {
         // Restriction comparison condition
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.CONTAIN, "gation 2");
+                RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.CONTAINS, "gation 2");
         // Restricction logical condition
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(restriction1)
                 .add(new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "red"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "red"))
                 ;
         restricLog.setOrderByAsc(RestrictionAttributes.DATASET_NAME);
         // Parameter conditions
@@ -116,7 +114,7 @@ public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
         // Restricction logical condition
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
                 ;
         restricLog.setOrderByAsc(RestrictionAttributes.DATASET_NAME);
         // Datafile search
@@ -134,9 +132,9 @@ public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(new RestrictionLogicalCondition(LogicalOperator.OR)
                     .add (new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
                     .add (new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "red"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "red"))
 
                     )
                 ;
@@ -158,7 +156,7 @@ public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
     public void restrictionComparisonTest () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {
         
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue");
+                RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue");
 
         List<Datafile> li = (List<Datafile>) DatafileSearch
                 .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restriction1
@@ -173,11 +171,11 @@ public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
     public void restrictionLogicalConditionTest () throws NoParameterTypeException, RestrictionException, ParameterSearchException {
         // Restriction condition
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.DATAFILE_NAME, RestrictionOperator.CONTAIN, "Investigation");
+                RestrictionAttributes.DATAFILE_NAME, ComparisonOperator.CONTAINS, "Investigation");
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.OR)
                 .add(restriction1)
                 .add(new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "red"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "red"))
                 ;
         List<Datafile> li = (List<Datafile>) DatafileSearch
                 .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, DatafileInclude.NONE, 1, -1, em);

@@ -147,7 +147,7 @@ public class ValueTypeInvestigationTest extends BaseParameterSearchTest {
         // Add the parameterValued
         comp1.setParameterSearch(pamVal);
         // Add the comparator
-        comp1.setComparator(ComparisonOperator.CONTAIN);
+        comp1.setComparator(ComparisonOperator.CONTAINS);
         // Add the value to compare
         comp1.setValue("number");
         // Add a second value if needed (only for BETWEEN)
@@ -179,7 +179,7 @@ public class ValueTypeInvestigationTest extends BaseParameterSearchTest {
         // Add the parameterValued
         comp1.setParameterSearch(pamVal);
         // Add the comparator
-        comp1.setComparator(ComparisonOperator.CONTAIN);
+        comp1.setComparator(ComparisonOperator.CONTAINS);
         // Add the value to compare
         comp1.setValue(21);
         // Add a second value if needed (only for BETWEEN)

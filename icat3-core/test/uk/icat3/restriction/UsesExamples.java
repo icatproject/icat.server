@@ -9,6 +9,7 @@ package uk.icat3.restriction;
 
 import uk.icat3.parametersearch.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +28,7 @@ import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.DatasetSearch;
 import uk.icat3.search.InvestigationSearch;
 import uk.icat3.search.SampleSearch;
+import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.search.parameter.ParameterCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
 import uk.icat3.search.parameter.ParameterType;
@@ -45,6 +47,139 @@ import uk.icat3.util.SampleInclude;
  */
 public class UsesExamples extends BaseParameterSearchTest  {
 
+    @Test
+    public void keywords () throws RestrictionException {
+        // Instruments logical condition
+        RestrictionLogicalCondition restInstrumentCond = new RestrictionLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+        // Cycles logical condition
+        RestrictionLogicalCondition restCycleCond = new RestrictionLogicalCondition();
+        restCycleCond.setOperator(LogicalOperator.AND);
+        // Create new comparison
+        RestrictionComparisonCondition comparisonInstr;
+        comparisonInstr = new RestrictionComparisonCondition();
+        comparisonInstr.setRestrictionAttribute(RestrictionAttributes.KEYWORD);
+        comparisonInstr.setComparisonOperator(ComparisonOperator.CONTAINS);
+        comparisonInstr.setValue("keyword number");
+
+        RestrictionLogicalCondition r2 = new RestrictionLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+        RestrictionLogicalCondition r3 = new RestrictionLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+
+        restInstrumentCond.getRestConditions().add(comparisonInstr);
+        restInstrumentCond.getRestConditions().add(restCycleCond);
+        restCycleCond.getRestConditions().add(r2);
+        r2.getRestConditions().add(r3);
+
+        Collection li = InvestigationSearch.searchByRestriction(VALID_USER_FOR_INVESTIGATION, restInstrumentCond, em);
+        Collection ldat = DatasetSearch.searchByRestriction(VALID_USER_FOR_INVESTIGATION, restInstrumentCond, em);
+        Collection ldaf = DatafileSearch.searchByRestriction(VALID_USER_FOR_INVESTIGATION, restInstrumentCond, em);
+        Collection ls = SampleSearch.searchByRestriction(VALID_USER_FOR_INVESTIGATION, restInstrumentCond, em);
+        
+        assertEquals("Number of Investigation for Keyword 'keyword number'", 1, li.size());
+        assertEquals("Number of Datasets for Keyword 'keyword number'", 2, ldat.size());
+        assertEquals("Number of Datafiles for Keyword 'keyword number'", 3, ldaf.size());
+        assertEquals("Number of Samples for Keyword 'keyword number'", 1, ls.size());
+    }
+
+    @Test
+    public void keywords2 () throws RestrictionException {
+        // Instruments logical condition
+        RestrictionLogicalCondition restInstrumentCond = new RestrictionLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+        // Cycles logical condition
+        RestrictionLogicalCondition restCycleCond = new RestrictionLogicalCondition();
+        restCycleCond.setOperator(LogicalOperator.AND);
+        // Create new comparison
+        RestrictionComparisonCondition comparisonInstr;
+        comparisonInstr = new RestrictionComparisonCondition();
+        comparisonInstr.setRestrictionAttribute(RestrictionAttributes.KEYWORD);
+        comparisonInstr.setComparisonOperator(ComparisonOperator.STARTS_WITH);
+        comparisonInstr.setValue("my keyword");
+
+        RestrictionLogicalCondition r2 = new RestrictionLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+
+        // Parameter conditions
+        ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
+        op1.add(pcDataset.get(0));
+        op1.add(pcDataset.get(1));
+
+        restInstrumentCond.getRestConditions().add(comparisonInstr);
+        restInstrumentCond.getRestConditions().add(restCycleCond);
+        restCycleCond.getRestConditions().add(r2);
+
+        Collection li = InvestigationSearch.searchByParameterCondition(VALID_USER_FOR_INVESTIGATION
+                , op1, restInstrumentCond
+                , InvestigationInclude.NONE, Queries.NO_PAGINATION, Queries.NO_PAGINATION, em);
+        Collection ldat = DatasetSearch.searchByParameterCondition(VALID_USER_FOR_INVESTIGATION
+                , op1, restInstrumentCond
+                , DatasetInclude.NONE, Queries.NO_PAGINATION, Queries.NO_PAGINATION, em);
+        Collection ldaf = DatafileSearch.searchByParameterCondition(VALID_USER_FOR_INVESTIGATION
+                , op1, restInstrumentCond
+                , DatafileInclude.NONE, Queries.NO_PAGINATION, Queries.NO_PAGINATION, em);
+        Collection ls = SampleSearch.searchByParameterCondition(VALID_USER_FOR_INVESTIGATION
+                , op1, restInstrumentCond
+                , SampleInclude.NONE, Queries.NO_PAGINATION, Queries.NO_PAGINATION, em);
+
+        assertEquals("Number of Investigation for Keyword 'keyword number'", 1, li.size());
+        assertEquals("Number of Datasets for Keyword 'keyword number'", 1, ldat.size());
+        assertEquals("Number of Datafiles for Keyword 'keyword number'", 2, ldaf.size());
+        assertEquals("Number of Samples for Keyword 'keyword number'", 1, ls.size());
+    }
+
+    @Test
+    public void andOrNested () throws RestrictionException {
+        // Instruments logical condition
+        RestrictionLogicalCondition restInstrumentCond = new RestrictionLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+        // Cycles logical condition
+        RestrictionLogicalCondition restCycleCond = new RestrictionLogicalCondition();
+        restCycleCond.setOperator(LogicalOperator.AND);
+        // Create new comparison
+        RestrictionComparisonCondition comparisonInstr;
+        comparisonInstr = new RestrictionComparisonCondition();
+        comparisonInstr.setRestrictionAttribute(RestrictionAttributes.INVESTIGATION_INSTRUMENT);
+        comparisonInstr.setComparisonOperator(ComparisonOperator.EQUALS);
+        comparisonInstr.setValue("instrument");
+
+        RestrictionLogicalCondition r2 = new RestrictionLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+
+        restInstrumentCond.getRestConditions().add(comparisonInstr);
+        restInstrumentCond.getRestConditions().add(restCycleCond);
+        restCycleCond.getRestConditions().add(r2);
+
+        Collection li = InvestigationSearch.searchByRestriction(VALID_USER_FOR_INVESTIGATION, restInstrumentCond, em);
+        assertEquals("Number of investigation per instrument", 2, li.size());
+    }
+
+    /**
+     * Restriction logical condition example
+     *
+     * @throws ParameterSearchException
+     * @throws RestrictionException
+     */
+    @Test
+    public void restrinINCondition () throws ParameterSearchException, RestrictionException {
+        Collection<Long> lid = new ArrayList<Long>();
+        lid.add((long)7928950);
+        lid.add((long)7928951);
+        lid.add((long)7928952);
+        // List of parameter
+        List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
+        // Parameter search
+        ParameterSearch pv1 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2_1"));
+        lp.add(pv1);
+        // Restriction comparison
+        RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
+                RestrictionAttributes.DATAFILE_ID, ComparisonOperator.IN, lid);
+        // Dataset search
+        Collection ldf = DatasetSearch
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restriction1, DatasetInclude.NONE, 1, -1, em);
+//       assertEquals("Results of Datafiles incorrect.", 2, ldf.size());
+    }
     /**
      * Restriction logical condition example
      * 
@@ -55,23 +190,24 @@ public class UsesExamples extends BaseParameterSearchTest  {
     public void restrictionLogicalCondition () throws ParameterSearchException, RestrictionException {
         // Restriction comparison
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.START_WITH, "Investigation 1");
+                RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.STARTS_WITH, "Investigation 1");
+        restriction1.setSensitive(true);
         // Create a list for operator IN
         List<String> inList = new ArrayList<String>();
-        inList.add("ASC'\\'\"II");
+        inList.add("Asc'[]\\'\"II");
         inList.add("cosa");
         // Restriction condition
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add (new RestrictionComparisonCondition(
-                            RestrictionAttributes.INVESTIGATION_START_DATE, RestrictionOperator.GREATER_THAN, new Date(0)))
+                            RestrictionAttributes.INVESTIGATION_START_DATE, ComparisonOperator.GREATER_THAN, new Date(0)))
                 .add (new RestrictionComparisonCondition(
-                            RestrictionAttributes.DATAFILE_FORMAT_TYPE, RestrictionOperator.IN, inList))
+                            RestrictionAttributes.DATAFILE_FORMAT_TYPE, ComparisonOperator.IN, inList))
                 .add (new RestrictionComparisonCondition(
-                            RestrictionAttributes.DATASET_TYPE, RestrictionOperator.EQUAL, "experiment_raw"))
+                            RestrictionAttributes.DATASET_TYPE, ComparisonOperator.EQUALS, "experiment_raw"))
                 .add (new RestrictionLogicalCondition(LogicalOperator.OR)
                         .add(restriction1)
                         .add(new RestrictionComparisonCondition(
-                            RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                            RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "bLue"))
                      )
                 ;
         // List of parameter
@@ -97,17 +233,75 @@ public class UsesExamples extends BaseParameterSearchTest  {
        assertEquals("Results of Samples incorrect.", 1, ls.size());
     }
 
+    @Test
+    public void inSensitiveCondition () throws ParameterSearchException, RestrictionException {
+        // Restriction comparison
+       RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
+               .add (new RestrictionComparisonCondition(
+                    RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.STARTS_WITH, "INVestiGation 1"))
+               .add (new RestrictionComparisonCondition(
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "BlUE"))
+
+       ;
+        
+        // Dataset search
+        List<Dataset> lds = (List<Dataset>) DatasetSearch
+                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, DatasetInclude.NONE, 1, -1, em);
+        // Datafile search
+        List<Datafile> ldf = (List<Datafile>) DatafileSearch
+            .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, DatafileInclude.NONE, 1, -1, em);
+        // Sample search
+        List<Sample> ls = (List<Sample>) SampleSearch
+            .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, SampleInclude.NONE, 1, -1, em);
+        // Investigation search
+        List<Investigation> li = (List<Investigation>) InvestigationSearch
+            .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, InvestigationInclude.NONE, 1, -1, em);
+       assertEquals("Results of Datasets incorrect.", 2, lds.size());
+       assertEquals("Results of Datafiles incorrect.", 3, ldf.size());
+       assertEquals("Results of Investigations incorrect.", 1, li.size());
+       assertEquals("Results of Samples incorrect.", 1, ls.size());
+    }
+
+    @Test
+    public void sensitiveCondition () throws ParameterSearchException, RestrictionException {
+        // Restriction comparison
+       RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
+               .add (new RestrictionComparisonCondition(
+                    RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.STARTS_WITH, "InvestiGation 1"))
+               .add (new RestrictionComparisonCondition(
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
+
+       ;
+
+        // Dataset search
+        List<Dataset> lds = (List<Dataset>) DatasetSearch
+                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, DatasetInclude.NONE, 1, -1, em);
+        // Datafile search
+        List<Datafile> ldf = (List<Datafile>) DatafileSearch
+            .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, DatafileInclude.NONE, 1, -1, em);
+        // Sample search
+        List<Sample> ls = (List<Sample>) SampleSearch
+            .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, SampleInclude.NONE, 1, -1, em);
+        // Investigation search
+        List<Investigation> li = (List<Investigation>) InvestigationSearch
+            .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, InvestigationInclude.NONE, 1, -1, em);
+       assertEquals("Results of Datasets incorrect.", 2, lds.size());
+       assertEquals("Results of Datafiles incorrect.", 3, ldf.size());
+       assertEquals("Results of Investigations incorrect.", 1, li.size());
+       assertEquals("Results of Samples incorrect.", 1, ls.size());
+    }
+
     
 
     /**
-     * Restriction order by and NOT exapmle
+     * Restriction order by and Not exapmle
      * @throws ParameterSearchException
      * @throws RestrictionException
      */
     @Test
     public void restrictionNotOrder () throws ParameterSearchException, RestrictionException {
         // Restriction condition. Example
-            // NOT (INVESTIGATION_START_DATE = Date(0)) AND
+            // Not (INVESTIGATION_START_DATE = Date(0)) AND
             // DATAFILE_FORMAT_TYPE IN ('ASCII', 'cosa) AND
             // DATASET_TYPE = 'test' AND
             // (   INVESTIGATION_TILE like 'Investigation 1%' OR
@@ -115,30 +309,30 @@ public class UsesExamples extends BaseParameterSearchTest  {
         // Creation of a simple comparison.
         // INVESTIGATION_TILE like 'Investigation 1%'
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.START_WITH, "Investigation 1");
+                RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.STARTS_WITH, "Investigation 1");
         // List for operator IN
         List<String> inList = new ArrayList<String>();
         inList.add("ASCII");
         inList.add("no type");
         // Creation of a logical restriction
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
-                // Set NOT restriction
-                // NOT (INVESTIGATION_START_DATE = Date(0))
+                // Set Not restriction
+                // Not (INVESTIGATION_START_DATE = Date(0))
                 .add (RestrictionCondition.Not(new RestrictionComparisonCondition(
-                            RestrictionAttributes.INVESTIGATION_START_DATE, RestrictionOperator.EQUAL, new Date(0))))
+                            RestrictionAttributes.INVESTIGATION_START_DATE, ComparisonOperator.EQUALS, new Date(0))))
                 // DATAFILE_FORMAT_TYPE IN ('ASCII', 'cosa)
                 .add (new RestrictionComparisonCondition(
-                            RestrictionAttributes.DATAFILE_FORMAT_TYPE, RestrictionOperator.IN, inList))
+                            RestrictionAttributes.DATAFILE_FORMAT_TYPE, ComparisonOperator.IN, inList))
                 // DATASET_TYPE = 'test'
                 .add (new RestrictionComparisonCondition(
-                            RestrictionAttributes.DATASET_TYPE, RestrictionOperator.EQUAL, "experiment_raw"))
+                            RestrictionAttributes.DATASET_TYPE, ComparisonOperator.EQUALS, "experiment_raw"))
                 // OR
                 .add (new RestrictionLogicalCondition(LogicalOperator.OR)
                         // INVESTIGATION_TILE like 'Investigation 1%'
                         .add(restriction1)
                         // DATASET_NAME like '%blue'
                         .add(new RestrictionComparisonCondition(
-                            RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                            RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
                      )
                 ;
         // Set order ASC
@@ -170,7 +364,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
     }
 
     /**
-     * Restriction order by and NOT exapmle
+     * Restriction order by and Not exapmle
      * @throws ParameterSearchException
      * @throws RestrictionException
      */
@@ -187,7 +381,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         // Dataset search
         List<Dataset> lds = (List<Dataset>) DatasetSearch
                 .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, DatasetInclude.NONE, 1, -1, em);
-        restricLog.setOrderByAttr(null);
+        restricLog.setOrderByAttribute(null);
         // Datafile search
         List<Datafile> ldf = (List<Datafile>) DatafileSearch
             .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, DatafileInclude.NONE, 1, -1, em);
@@ -218,7 +412,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         // Dataset search
         List<Dataset> lds = (List<Dataset>) DatasetSearch
                 .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, DatasetInclude.NONE, 1, -1, em);
-        restricLog.setOrderByAttr(null);
+        restricLog.setOrderByAttribute(null);
         // Datafile search
         List<Datafile> ldf = (List<Datafile>) DatafileSearch
             .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, DatafileInclude.NONE, 1, -1, em);
@@ -278,10 +472,10 @@ public class UsesExamples extends BaseParameterSearchTest  {
     public void restrictionComparisonCondition () throws ParameterSearchException, RestrictionException {
         // Creation of a logical restriction
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
-                // Set NOT restriction
-                // NOT (INVESTIGATION_START_DATE = Date(0))
+                // Set Not restriction
+                // Not (INVESTIGATION_START_DATE = Date(0))
                 .add (RestrictionCondition.Not(new RestrictionComparisonCondition(
-                            RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.CONTAIN, "gation 1")));
+                            RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.CONTAINS, "gation 1")));
         // Parameter search
         List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
         ParameterSearch pv1 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2_1"));
@@ -361,12 +555,12 @@ public class UsesExamples extends BaseParameterSearchTest  {
     public void restrictionConditionTest () throws ParameterSearchException, RestrictionException {
         // Restriction comparison condition
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.CONTAIN, "gation 2");
+                RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.CONTAINS, "gation 2");
         // Restricction logical condition
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.OR)
                 .add(RestrictionCondition.Not(restriction1))
                 .add(new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
                 ;
         restricLog.setOrderByAsc(RestrictionAttributes.DATASET_NAME);
         // Parameter conditions
@@ -402,16 +596,16 @@ public class UsesExamples extends BaseParameterSearchTest  {
     public void notRestrictionConditionTest () throws ParameterSearchException, RestrictionException {
         // Restriction comparison condition
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.CONTAIN, "gation 2");
+                RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.CONTAINS, "gation 2");
         // Restricction logical condition
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.OR)
                 .add(new RestrictionLogicalCondition(LogicalOperator.OR)
 //                    .add(new RestrictionComparisonCondition(
-//                        RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.CONTAIN, "gation 1"))
+//                        RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.CONTAINS, "gation 1"))
                     .add(restriction1)
                     )
                 .add(new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
                 ;
         restricLog.setOrderByAsc(RestrictionAttributes.DATASET_NAME);
         // Parameter conditions
@@ -422,9 +616,9 @@ public class UsesExamples extends BaseParameterSearchTest  {
 //        op1.add(pcDatafile.get(1));
         // Dataset search
         List<Dataset> lds = (List<Dataset>) DatasetSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, ParameterCondition.NOT(op1)
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, ParameterCondition.Not(op1)
                         , restricLog, DatasetInclude.NONE, 1, -1, em);
-        restricLog.setOrderByAttr(null);
+        restricLog.setOrderByAttribute(null);
          // Dataset search
         List<Datafile> ldf = (List<Datafile>) DatafileSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1
@@ -458,7 +652,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
 //    public void investigatorLogicalCondition () throws ParameterSearchException, RestrictionException {
 //        // Restriction comparison
 //        RestrictionComparisonCondition restricLog = new RestrictionComparisonCondition(
-//                RestrictionAttributes.INVESTIGATOR_USER_ID, RestrictionOperator.START_WITH, "T");
+//                RestrictionAttributes.INVESTIGATOR_USER_ID, ComparisonOperator.STARTS_WITH, "T");
 //       // List of parameter
 //        List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
 //        // Parameter search
@@ -492,15 +686,15 @@ public class UsesExamples extends BaseParameterSearchTest  {
     public void betweenDates () throws ParameterSearchException, RestrictionException {
         // Restriction comparison
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.INVESTIGATION_START_DATE, RestrictionOperator.BETWEEN
+                RestrictionAttributes.INVESTIGATION_START_DATE, ComparisonOperator.BETWEEN
                 , new Date(0)
-                , "2050-01-01 00:00:00");
+                , "2050-01-01 ");
         // Restriction condition
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add (new RestrictionLogicalCondition(LogicalOperator.AND)
                         .add(restriction1)
                         .add(new RestrictionComparisonCondition(
-                            RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                            RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
                      )
                 ;
         // Dataset search
@@ -532,18 +726,18 @@ public class UsesExamples extends BaseParameterSearchTest  {
         String contain = "n";
         // Create restriction comparison for proposal start with
         RestrictionComparisonCondition compFirstName = new RestrictionComparisonCondition();
-        compFirstName.setRestAttr(RestrictionAttributes.INVESTIGATOR_USER_FIRST_NAME);
-        compFirstName.setRestOp(RestrictionOperator.START_WITH);
+        compFirstName.setRestrictionAttribute(RestrictionAttributes.INVESTIGATOR_USER_FIRST_NAME);
+        compFirstName.setComparisonOperator(ComparisonOperator.STARTS_WITH);
         compFirstName.setValue(contain);
         // Create restriction comparison for proposal start with
         RestrictionComparisonCondition compMiddleName = new RestrictionComparisonCondition();
-        compMiddleName.setRestAttr(RestrictionAttributes.INVESTIGATOR_USER_MIDDLE_NAME);
-        compMiddleName.setRestOp(RestrictionOperator.START_WITH);
+        compMiddleName.setRestrictionAttribute(RestrictionAttributes.INVESTIGATOR_USER_MIDDLE_NAME);
+        compMiddleName.setComparisonOperator(ComparisonOperator.STARTS_WITH);
         compMiddleName.setValue(contain);
         // Create restriction comparison for proposal start with
         RestrictionComparisonCondition compLastName = new RestrictionComparisonCondition();
-        compLastName.setRestAttr(RestrictionAttributes.INVESTIGATOR_USER_LAST_NAME);
-        compLastName.setRestOp(RestrictionOperator.START_WITH);
+        compLastName.setRestrictionAttribute(RestrictionAttributes.INVESTIGATOR_USER_LAST_NAME);
+        compLastName.setComparisonOperator(ComparisonOperator.STARTS_WITH);
         compLastName.setValue(contain);
         // Create logical condition
         RestrictionLogicalCondition logCond = new RestrictionLogicalCondition();
@@ -571,6 +765,19 @@ public class UsesExamples extends BaseParameterSearchTest  {
 //       assertEquals("Results of Investigations incorrect.", 1, li.size());
 //       assertEquals("Results of Samples incorrect.", 1, ls.size());
     }
+
+    @Test
+    public void equalString () throws RestrictionException {
+         // Restriction comparison
+        RestrictionComparisonCondition r = new RestrictionComparisonCondition();
+        r.setRestrictionAttribute(RestrictionAttributes.INVESTIGATION_INSTRUMENT);
+        r.setComparisonOperator(ComparisonOperator.EQUALS);
+        r.setValue("instrument");
+        Collection li = InvestigationSearch.searchByRestriction(VALID_USER_FOR_INVESTIGATION, r, em);
+        assertEquals("Number of investigation per instrument", 2, li.size());
+    }
+
+    
 
     public static junit.framework.Test suite(){
         return new JUnit4TestAdapter(UsesExamples.class);

@@ -39,9 +39,12 @@ import uk.icat3.entity.DatasetParameterPK;
 import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.IcatAuthorisation;
 import uk.icat3.entity.IcatRole;
+import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.InvestigatorPK;
+import uk.icat3.entity.Keyword;
+import uk.icat3.entity.KeywordPK;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.ParameterPK;
 import uk.icat3.entity.Sample;
@@ -90,6 +93,22 @@ public class BaseParameterSearchTest extends BaseTest {
         em.persist(p);
         return p;
     }
+
+    private static Keyword createKeyword (String name, Investigation inv) {
+        Keyword key = new Keyword(new KeywordPK(name, inv.getId()));
+
+        Timestamp timeSQL = new Timestamp(new Date().getTime());
+        
+        key.setInvestigation(inv);
+        key.setCreateTime(timeSQL);
+        key.setModTime(timeSQL);
+        key.setCreateId(VALID_USER_FOR_INVESTIGATION);
+        key.setModId(VALID_USER_FOR_INVESTIGATION);
+
+        em.persist(key);
+        return key;
+    }
+
     // TODO: create parameter first
     private static Parameter createParameter (String units, String name, ElementType type) {
         Parameter p = new Parameter();
@@ -279,10 +298,26 @@ public class BaseParameterSearchTest extends BaseTest {
         return autho;
     }
 
-    private static Investigation createInvestigation(String title) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException {
+    private static Instrument createInstrument (String name, String shortName) {
+        Instrument inst = new Instrument(name, new Date(0), "najor");
+
+        inst.setName(name);
+        inst.setShortName(shortName);
+
+        Timestamp timeSQL = new Timestamp(new Date().getTime());
+        inst.setCreateTime(timeSQL);
+        inst.setModTime(timeSQL);
+        
+        em.persist(inst);
+
+        return inst;
+    }
+
+    private static Investigation createInvestigation(String title, Instrument instr) throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException {
         int i = random.nextInt();
         Investigation investigation = new Investigation();
         investigation.setId((long)i);
+        investigation.setInstrument(instr.getName());
         investigation.setTitle(title + " "+ i);
         investigation.setInvNumber("9-10-" + i);
         investigation.setInvStartDate(new Date());
@@ -300,8 +335,11 @@ public class BaseParameterSearchTest extends BaseTest {
         try {
             IcatAuthorisation autho = createTestAutho();
 //            FacilityUser user1 = createFacilityUser("TEST", "", "", "");
-            Investigation inv = createInvestigation("Investigation 1");
-            Investigation inv2 = createInvestigation("Investigation 2");
+            Instrument instr = createInstrument ("instrument", "inst");
+            Investigation inv = createInvestigation("Investigation 1", instr);
+            Investigation inv2 = createInvestigation("Investigation 2", instr);
+
+            Keyword key = createKeyword("my KeyWord number1", inv);
 //            Investigator invtor1 = createInvestigator(inv, user1);
 //            Investigator invtor2 = createInvestigator(inv2, user1);
 //            Investigator invtor2 = createInvestigator(inv2, "najor");
@@ -371,11 +409,14 @@ public class BaseParameterSearchTest extends BaseTest {
             removeEntities.add(samp);
             removeEntities.add(samp2);
 
+            removeEntities.add(key);
+
 //            removeEntities.add(invtor1);
 //            removeEntities.add(invtor2);
             removeEntities.add(inv2);
             removeEntities.add(inv);
 
+            removeEntities.add(instr);
 //            removeEntities.add(user1);
             
             // Be sure that autho for TEST doesn't exists
@@ -414,6 +455,7 @@ public class BaseParameterSearchTest extends BaseTest {
             else if (obj.getClass() == Investigation.class) {
                 try {
                     InvestigationManager.removeInvestigation(VALID_USER_FOR_INVESTIGATION, (Investigation) obj, em);
+                    em.flush();
                 } catch (NoSuchObjectFoundException ex) {
                     Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (InsufficientPrivilegesException ex) {
@@ -521,7 +563,7 @@ public class BaseParameterSearchTest extends BaseTest {
 
         ParameterComparisonCondition comp2 = new ParameterComparisonCondition();
         comp2.setParameterSearch(new ParameterSearch(ParameterType.SAMPLE, p2));
-        comp2.setComparator(ComparisonOperator.START_WITH);
+        comp2.setComparator(ComparisonOperator.STARTS_WITH);
         comp2.setValue("10");
         // ----------------------------------------------------
 
@@ -533,7 +575,7 @@ public class BaseParameterSearchTest extends BaseTest {
 
         ParameterComparisonCondition comp3 = new ParameterComparisonCondition();
         comp3.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p3));
-        comp3.setComparator(ComparisonOperator.START_WITH);
+        comp3.setComparator(ComparisonOperator.STARTS_WITH);
         comp3.setValue("");
         // ----------------------------------------------------
         
@@ -605,49 +647,49 @@ public class BaseParameterSearchTest extends BaseTest {
          // ------------- ComparisonOperator 1 ----------------------
         ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
         comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
-        comp1.setComparator(ComparisonOperator.EQUAL);
+        comp1.setComparator(ComparisonOperator.EQUALS);
         comp1.setValue(new Double (3.14));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 2 ----------------------
         ParameterComparisonCondition comp2 = new ParameterComparisonCondition();
         comp2.setParameterSearch(new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample1")));
-        comp2.setComparator(ComparisonOperator.EQUAL);
+        comp2.setComparator(ComparisonOperator.EQUALS);
         comp2.setValue(new Double(2.2));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 3 ----------------------
         ParameterComparisonCondition comp3 = new ParameterComparisonCondition();
         comp3.setParameterSearch(new ParameterSearch(ParameterType.DATASET, parameter.get("dataset1")));
-        comp3.setComparator(ComparisonOperator.EQUAL);
+        comp3.setComparator(ComparisonOperator.EQUALS);
         comp3.setValue(new Double (2.1));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 4 ----------------------
         ParameterComparisonCondition comp4 = new ParameterComparisonCondition();
         comp4.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2_1")));
-        comp4.setComparator(ComparisonOperator.EQUAL);
+        comp4.setComparator(ComparisonOperator.EQUALS);
         comp4.setValue(new Double (21.0000002));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 5 -------------------------
         ParameterComparisonCondition comp5 = new ParameterComparisonCondition();
         comp5.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2")));
-        comp5.setComparator(ComparisonOperator.EQUAL);
+        comp5.setComparator(ComparisonOperator.EQUALS);
         comp5.setValue(new Double (5.2));
         // ----------------------------------------------------
 
          // ------------- ComparisonOperator 6 -------------------------
         ParameterComparisonCondition comp6 = new ParameterComparisonCondition();
         comp6.setParameterSearch(new ParameterSearch(ParameterType.DATASET, parameter.get("dataset2_1")));
-        comp6.setComparator(ComparisonOperator.EQUAL);
+        comp6.setComparator(ComparisonOperator.EQUALS);
         comp6.setValue(new Double(21.1));
         // ----------------------------------------------------
 
         // ------------- ComparisonOperator 7 -------------------------
         ParameterComparisonCondition comp7 = new ParameterComparisonCondition();
         comp7.setParameterSearch(new ParameterSearch(ParameterType.SAMPLE, parameter.get("sample2_1")));
-        comp7.setComparator(ComparisonOperator.EQUAL);
+        comp7.setComparator(ComparisonOperator.EQUALS);
         comp7.setValue(new Double(21.2));
         // ----------------------------------------------------
         

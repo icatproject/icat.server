@@ -21,6 +21,7 @@ import uk.icat3.exceptions.CyclicException;
 import uk.icat3.exceptions.NoParametersException;
 import uk.icat3.exceptions.NoNumericComparatorException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,29 +30,34 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
+import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.ParameterPK;
+import uk.icat3.exceptions.AttributeTypeException;
 import static org.junit.Assert.*;
 import uk.icat3.exceptions.NumericvalueException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.RestrictionEmptyListException;
 import uk.icat3.exceptions.OperatorINException;
+import uk.icat3.exceptions.ParameterSearchException;
 import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.RestrictionOperatorException;
+import uk.icat3.exceptions.RestrictionValueClassException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
 import uk.icat3.restriction.RestrictionComparisonCondition;
 import uk.icat3.restriction.RestrictionLogicalCondition;
-import uk.icat3.restriction.RestrictionOperator;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
 import uk.icat3.search.DatafileSearch;
-import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
 import uk.icat3.search.parameter.ParameterType;
-import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.search.DatasetSearch;
+import uk.icat3.search.InvestigationSearch;
+import uk.icat3.search.SampleSearch;
+import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.util.DatafileInclude;
 import uk.icat3.util.DatasetInclude;
+import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 import uk.icat3.util.Queries;
 
@@ -60,6 +66,142 @@ import uk.icat3.util.Queries;
  * @author cruzcruz
  */
 public class RestrictionExceptionTest extends BaseParameterSearchTest {
+
+    @Test
+   public void objectRestrictions () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {
+
+        RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
+                RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue");
+
+        RestrictionLogicalCondition restrLog = new RestrictionLogicalCondition(LogicalOperator.OR)
+                .add(restriction1)
+                .add(new RestrictionComparisonCondition(
+                RestrictionAttributes.DATAFILE_NAME, ComparisonOperator.ENDS_WITH, ""))
+                .add(new RestrictionComparisonCondition(
+                RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.ENDS_WITH, ""))
+                .add(new RestrictionComparisonCondition(
+                RestrictionAttributes.SAMPLE_NAME, ComparisonOperator.ENDS_WITH, ""))
+                ;
+
+        List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
+        ParameterSearch pv1 = new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile2_1"));
+        lp.add(pv1);
+
+        // Investigation search
+        List<Investigation> li = (List<Investigation>) InvestigationSearch
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restrLog, InvestigationInclude.NONE, 1, -1, em);
+
+        RestrictionComparisonCondition objComp = new RestrictionComparisonCondition();
+        objComp.setRestrictionAttribute(RestrictionAttributes.DATASET);
+        objComp.setComparisonOperator(ComparisonOperator.EQUALS);
+        objComp.setValue(li.get(0));
+        boolean exception = false;
+        try {
+            Collection ldaf = DatafileSearch.searchByRestriction(VALID_USER_FOR_INVESTIGATION, objComp, em);
+            Collection ldat = DatasetSearch.searchByRestriction(VALID_USER_FOR_INVESTIGATION, objComp, em);
+            Collection ls = SampleSearch.searchByRestriction(VALID_USER_FOR_INVESTIGATION, objComp, em);
+        } catch (RestrictionValueClassException e) {
+            exception = true;
+        }
+        
+        assertTrue("Exception RestrictionValueClassException expected ", exception);
+    }
+
+    @Test
+    public void EmptyListParameterException () throws RestrictionException {
+        // Instruments logical condition
+        RestrictionLogicalCondition restInstrumentCond = new RestrictionLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+        // Cycles logical condition
+        RestrictionLogicalCondition restCycleCond = new RestrictionLogicalCondition();
+        restCycleCond.setOperator(LogicalOperator.AND);
+        // Create new comparison
+        RestrictionComparisonCondition comparisonInstr;
+        comparisonInstr = new RestrictionComparisonCondition();
+        comparisonInstr.setRestrictionAttribute(RestrictionAttributes.KEYWORD);
+        comparisonInstr.setComparisonOperator(ComparisonOperator.CONTAINS);
+        comparisonInstr.setValue("keyword number");
+
+        RestrictionLogicalCondition r2 = new RestrictionLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+
+        restInstrumentCond.getRestConditions().add(restCycleCond);
+
+        restCycleCond.getRestConditions().add(r2);
+        restCycleCond.getRestConditions().add(comparisonInstr);
+
+        try {
+            Collection li = InvestigationSearch.searchByRestriction(VALID_USER_FOR_INVESTIGATION, restInstrumentCond, em);
+        } catch (Throwable e) {
+            assertTrue("Exception not expected " + e.getMessage(), true);
+        }
+    }
+
+    @Test
+    public void AttributeTypeException () throws RestrictionException {
+        // Instruments logical condition
+        RestrictionLogicalCondition restInstrumentCond = new RestrictionLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+        // Cycles logical condition
+        RestrictionLogicalCondition restCycleCond = new RestrictionLogicalCondition();
+        restCycleCond.setOperator(LogicalOperator.AND);
+        // Create new comparison
+        RestrictionComparisonCondition comparisonInstr;
+        comparisonInstr = new RestrictionComparisonCondition();
+        comparisonInstr.setRestrictionAttribute(RestrictionAttributes.PARAMETER_NAME);
+        comparisonInstr.setComparisonOperator(ComparisonOperator.CONTAINS);
+        comparisonInstr.setValue("keyword number");
+
+        RestrictionLogicalCondition r2 = new RestrictionLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+
+        restInstrumentCond.getRestConditions().add(comparisonInstr);
+        restInstrumentCond.getRestConditions().add(restCycleCond);
+        restCycleCond.getRestConditions().add(r2);
+
+        boolean exception = false;
+        try {
+            Collection li = InvestigationSearch.searchByRestriction(VALID_USER_FOR_INVESTIGATION, restInstrumentCond, em);
+        } catch (AttributeTypeException e) {
+            exception = true;
+        }
+
+        assertTrue("Exception shoudl be EmptyListParameterException", exception);
+    }
+
+    @Test
+    public void AttributeTypeException1 () throws RestrictionException {
+        // Instruments logical condition
+        RestrictionLogicalCondition restInstrumentCond = new RestrictionLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+        // Cycles logical condition
+        RestrictionLogicalCondition restCycleCond = new RestrictionLogicalCondition();
+        restCycleCond.setOperator(LogicalOperator.AND);
+        // Create new comparison
+        RestrictionComparisonCondition comparisonInstr;
+        comparisonInstr = new RestrictionComparisonCondition();
+        comparisonInstr.setRestrictionAttribute(RestrictionAttributes.FACILITY_USER_FIRST_NAME);
+        comparisonInstr.setComparisonOperator(ComparisonOperator.CONTAINS);
+        comparisonInstr.setValue("keyword number");
+
+        RestrictionLogicalCondition r2 = new RestrictionLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+
+        restInstrumentCond.getRestConditions().add(comparisonInstr);
+        restInstrumentCond.getRestConditions().add(restCycleCond);
+        restCycleCond.getRestConditions().add(r2);
+
+        boolean exception = false;
+        try {
+            Collection li = InvestigationSearch.searchByRestriction(VALID_USER_FOR_INVESTIGATION, restInstrumentCond, em);
+        } catch (AttributeTypeException e) {
+            exception = true;
+        }
+
+        assertTrue("Exception shoudl be EmptyListParameterException", exception);
+    }
+
+    
 
     /**
      * Add the operator itself produces an cyclic execption.
@@ -71,7 +213,7 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
             // Restriction condition
             RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add (new RestrictionComparisonCondition(
-                            RestrictionAttributes.DATAFILE_ID, RestrictionOperator.START_WITH, 123));
+                            RestrictionAttributes.DATAFILE_ID, ComparisonOperator.STARTS_WITH, 123));
 
             ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
             ParameterLogicalCondition op2 = new ParameterLogicalCondition(LogicalOperator.AND);
@@ -194,23 +336,20 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
             RestrictionLogicalCondition restr2 = new RestrictionLogicalCondition(LogicalOperator.AND);
             RestrictionLogicalCondition restr3 = new RestrictionLogicalCondition();
             restricLog.add(restr2);
-//            restricLog.add(restr3);
-//            restr2.add(restr3);
-//            restr2.setMaxResults(2);
+            restricLog.add(restr3);
+            restr2.add(restr3);
+            restr3.add(restr2);
+            restr2.setMaxResults(2);
 
             restr2.setMaxResults(5);
 //            ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
 //            op1.add(pcDatafile.get(10));
             
             List<Datafile> li =  (List<Datafile>) DatafileSearch
-                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restr3, DatafileInclude.NONE, 1, -1, em);
-            for (Datafile d : li) {
-                System.out.println("--------------------> " + d.getName());
-            }
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-//            assertTrue("Results of investigations should be 2 not " + li.size(), li.size() == 2);
+                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, DatafileInclude.NONE, 1, -1, em);
+        } catch (CyclicException t) {
+            exception = true;
+        }
 //        } catch (RestrictionNullException ex) {
 //            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
 //        } catch (CyclicException ex) {
@@ -226,9 +365,12 @@ public class RestrictionExceptionTest extends BaseParameterSearchTest {
 //        } catch (EmptyOperatorException ex) {
 //            Logger.getLogger(RestrictionExceptionTest.class.getName()).log(Level.SEVERE, null, ex);
 //        }
-//        finally {
-//            assertTrue("Should be a EmptyOperatorException", exception);
-//        }
+            catch (Throwable t) {
+                t.printStackTrace();
+            }
+        finally {
+            assertTrue("Should be a CyclicException", exception);
+        }
     }
 
     /**

@@ -25,9 +25,9 @@ import static org.junit.Assert.*;
 import uk.icat3.restriction.RestrictionComparisonCondition;
 import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.restriction.RestrictionLogicalCondition;
-import uk.icat3.restriction.RestrictionOperator;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
 import uk.icat3.search.InvestigationSearch;
+import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 import uk.icat3.util.Queries;
@@ -42,11 +42,11 @@ public class InvestigationSimpleRestrictionTest extends BaseParameterSearchTest 
 //    public void datafilesIncludeDatafileTest () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {
 //        // Restriction condition
 //        RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-//                RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.CONTAIN, "gation 2");
+//                RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.CONTAINS, "gation 2");
 //        RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.OR)
 //                .add(RestrictionCondition.Not(restriction1))
 //                .add(new RestrictionComparisonCondition(
-//                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+//                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
 //                ;
 //        // Parameter condition
 //        ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
@@ -71,16 +71,16 @@ public class InvestigationSimpleRestrictionTest extends BaseParameterSearchTest 
     public void differentsAttr () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {
 
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.START_WITH, "Investigation");
+                RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.STARTS_WITH, "Investigation");
 
         RestrictionLogicalCondition restrLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(restriction1)
                 .add(new RestrictionComparisonCondition(
-                RestrictionAttributes.DATAFILE_NAME, RestrictionOperator.END_WITH, ""))
+                RestrictionAttributes.DATAFILE_NAME, ComparisonOperator.ENDS_WITH, ""))
                 .add(new RestrictionComparisonCondition(
-                RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.END_WITH, ""))
+                RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.ENDS_WITH, ""))
                 .add(new RestrictionComparisonCondition(
-                RestrictionAttributes.SAMPLE_NAME, RestrictionOperator.END_WITH, ""))
+                RestrictionAttributes.SAMPLE_NAME, ComparisonOperator.ENDS_WITH, ""))
                 ;
 
         // Investigation search
@@ -96,12 +96,12 @@ public class InvestigationSimpleRestrictionTest extends BaseParameterSearchTest 
     public void restrictionConditionTest () throws ParameterSearchException, RestrictionException {
         // Restriction comparison condition
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.CONTAIN, "gation 2");
+                RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.CONTAINS, "gation 2");
         // Restricction logical condition
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(restriction1)
                 .add(new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "red"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "red"))
                 ;
         restricLog.setOrderByAsc(RestrictionAttributes.DATASET_NAME);
         // Parameter conditions
@@ -117,12 +117,12 @@ public class InvestigationSimpleRestrictionTest extends BaseParameterSearchTest 
     public void betweenTest () throws ParameterSearchException, RestrictionException {
         // Restriction comparison condition
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.INVESTIGATION_START_DATE, RestrictionOperator.BETWEEN, new Date(0), new Date(1324));
+                RestrictionAttributes.INVESTIGATION_START_DATE, ComparisonOperator.BETWEEN, new Date(0), new Date(1324));
         // Restricction logical condition
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(RestrictionCondition.Not(restriction1))
                 .add(new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
                 ;
         restricLog.setOrderByAsc(RestrictionAttributes.INVESTIGATION_TITLE);
         // Investigation search
@@ -138,17 +138,17 @@ public class InvestigationSimpleRestrictionTest extends BaseParameterSearchTest 
     public void restrictionCondition2Test () throws ParameterSearchException, RestrictionException {
         RestrictionLogicalCondition investDat = new RestrictionLogicalCondition(LogicalOperator.AND)
                  .add(new RestrictionComparisonCondition(
-                    RestrictionAttributes.INVESTIGATION_START_DATE, RestrictionOperator.EQUAL, new Date(0)))
+                    RestrictionAttributes.INVESTIGATION_START_DATE, ComparisonOperator.EQUALS, new Date(0)))
                  .add(new RestrictionComparisonCondition(
-                    RestrictionAttributes.INVESTIGATION_END_DATE, RestrictionOperator.EQUAL, new Date(2342342)));
+                    RestrictionAttributes.INVESTIGATION_END_DATE, ComparisonOperator.EQUALS, new Date(2342342)));
         // Restricction logical condition
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(RestrictionCondition.Not(investDat))
                 .add(new RestrictionLogicalCondition(LogicalOperator.OR)
                     .add (new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
                     .add (new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "red"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "red"))
 
                     )
                 ;
@@ -166,7 +166,7 @@ public class InvestigationSimpleRestrictionTest extends BaseParameterSearchTest 
     public void restrictionComparisonTest () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {
         
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue");
+                RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue");
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
                 .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restriction1
@@ -181,11 +181,11 @@ public class InvestigationSimpleRestrictionTest extends BaseParameterSearchTest 
     public void restrictionLogicalConditionTest () throws NoParameterTypeException, RestrictionException, ParameterSearchException {
         // Restriction condition
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-                RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.CONTAIN, "gation 1");
+                RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.CONTAINS, "gation 1");
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.OR)
                 .add(restriction1)
                 .add(new RestrictionComparisonCondition(
-                    RestrictionAttributes.DATASET_NAME, RestrictionOperator.END_WITH, "blue"))
+                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
                 ;
         List<Investigation> li = (List<Investigation>) InvestigationSearch
                 .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, InvestigationInclude.NONE, 1, -1, em);

@@ -9,6 +9,7 @@ package uk.icat3.parametersearch;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +23,8 @@ import uk.icat3.entity.ParameterPK;
 import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.search.DatafileSearch;
 import uk.icat3.search.DatasetSearch;
+import uk.icat3.search.InvestigationSearch;
+import uk.icat3.search.SampleSearch;
 import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
@@ -29,8 +32,10 @@ import uk.icat3.search.parameter.ParameterType;
 import uk.icat3.search.parameter.util.ParameterSearch;
 import uk.icat3.util.DatafileInclude;
 import uk.icat3.util.DatasetInclude;
+import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
 import uk.icat3.util.Queries;
+import uk.icat3.util.SampleInclude;
 
 /**
  * This class show some examples of search
@@ -38,6 +43,82 @@ import uk.icat3.util.Queries;
  * @author cruzcruz
  */
 public class UsesExamples extends BaseParameterSearchTest  {
+
+    @Test
+    public void paramsearchWithLogicaCondition () throws RestrictionException {
+        // Instruments logical condition
+        ParameterLogicalCondition restInstrumentCond = new ParameterLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+        // Cycles logical condition
+        ParameterLogicalCondition restCycleCond = new ParameterLogicalCondition();
+        restCycleCond.setOperator(LogicalOperator.AND);
+        
+        // Get the parameters manually or from a service
+        Parameter voltage = new Parameter("V", "voltage");
+
+         ParameterComparisonCondition compVoltageSample =
+                new ParameterComparisonCondition(
+                        new ParameterSearch(ParameterType.SAMPLE, voltage),
+                        ComparisonOperator.IN,
+                        Arrays.asList(new Double(55.55), new Double(34)));
+
+        ParameterLogicalCondition r2 = new ParameterLogicalCondition();
+        r2.setOperator(LogicalOperator.AND);
+        r2.add(compVoltageSample);
+
+        restInstrumentCond.getListComparable().add(new ParameterSearch(ParameterType.SAMPLE, voltage));
+        restInstrumentCond.getListComparable().add(restCycleCond);
+        restCycleCond.getListComparable().add(r2);
+
+        Collection ldat = DatasetSearch.searchByParameterCondition(VALID_USER_FOR_INVESTIGATION
+                , restInstrumentCond, Queries.NO_RESTRICTION
+                , DatasetInclude.NONE, em);
+        Collection li = InvestigationSearch.searchByParameterCondition(VALID_USER_FOR_INVESTIGATION
+                , restInstrumentCond, Queries.NO_RESTRICTION
+                , InvestigationInclude.NONE, em);
+        Collection ldaf = DatafileSearch.searchByParameterCondition(VALID_USER_FOR_INVESTIGATION
+                , restInstrumentCond, Queries.NO_RESTRICTION
+                , DatafileInclude.NONE, em);
+        Collection ls = SampleSearch.searchByParameterCondition(VALID_USER_FOR_INVESTIGATION
+                , restInstrumentCond, Queries.NO_RESTRICTION
+                , SampleInclude.NONE, em);
+        
+        assertEquals("Number of Investigation in Parameter Search 'Voltage' 'V'", 1, li.size());
+        assertEquals("Number of Datasets in Parameter Search 'Voltage' 'V'", 2, ldat.size());
+        assertEquals("Number of Samples in Parameter Search 'Voltage' 'V'", 1, ls.size());
+        assertEquals("Number of Datafiles in Parameter Search 'Voltage' 'V'", 3, ldaf.size());
+    }
+
+    @Test
+    public void andOrNested () throws RestrictionException {
+        // Instruments logical condition
+        ParameterLogicalCondition restInstrumentCond = new ParameterLogicalCondition();
+        restInstrumentCond.setOperator(LogicalOperator.AND);
+        // Cycles logical condition
+        ParameterLogicalCondition restCycleCond = new ParameterLogicalCondition();
+        restCycleCond.setOperator(LogicalOperator.AND);
+        
+        // Get the parameters manually or from a service
+        Parameter voltage = new Parameter("V", "voltage");
+        // Create new comparison
+        ParameterComparisonCondition compVoltageSample =
+                new ParameterComparisonCondition(
+                        new ParameterSearch(ParameterType.SAMPLE, voltage),
+                        ComparisonOperator.IN,
+                        Arrays.asList(new Double(55.55), new Double(34)));
+
+        ParameterLogicalCondition r2 = new ParameterLogicalCondition();
+        r2.setOperator(LogicalOperator.AND);
+
+        restInstrumentCond.getListComparable().add(compVoltageSample);
+        restInstrumentCond.getListComparable().add(restCycleCond);
+        restCycleCond.getListComparable().add(r2);
+
+        Collection li = DatasetSearch.searchByParameterCondition(VALID_USER_FOR_INVESTIGATION
+                , restInstrumentCond, Queries.NO_RESTRICTION
+                , DatasetInclude.NONE, em);
+        assertEquals("Number of investigation per instrument", 2, li.size());
+    }
 
     /**
      * Test between example
@@ -111,7 +192,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         ParameterComparisonCondition compStringDatafile =
                  new ParameterComparisonCondition(
                         new ParameterSearch(ParameterType.DATAFILE, string),
-                        ComparisonOperator.CONTAIN, "number");
+                        ComparisonOperator.CONTAINS, "number");
         // dateTime > Date(0)
         ParameterComparisonCondition compDateTimeDatafile =
                 new ParameterComparisonCondition(
@@ -218,7 +299,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         // Add the parameterValued
         comp1.setParameterSearch(pamVal);
         // Add the comparator
-        comp1.setComparator(ComparisonOperator.CONTAIN);
+        comp1.setComparator(ComparisonOperator.CONTAINS);
         // Add the value to compare
         comp1.setValue("number");
         // Add a second value if needed (only for BETWEEN)
@@ -227,7 +308,70 @@ public class UsesExamples extends BaseParameterSearchTest  {
         List<Datafile> ld = (List<Datafile>) DatafileSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, Queries.NO_RESTRICTION, DatafileInclude.NONE, em);
 
-        assertTrue("Results of investigations should be 1 not " + ld.size(), (ld.size() == 1));
+        assertEquals("Results of Datafiles incorrect", 1, ld.size());
+    }
+
+    /**
+     * Test string value parameter search
+     *
+     * @throws ParameterSearchException
+     */
+    @Test
+    public void sensitiveValue () throws ParameterSearchException, RestrictionException {
+        // Get the parameter manually or get from a service
+        Parameter datfile = new Parameter(new ParameterPK("str", "string1"));
+
+        // Create the parameter to compare with. Two argument: type of the parameter
+        //  to compare and the parameter. (Try to find a better name to parameterValued)
+        ParameterSearch pamVal = new ParameterSearch(ParameterType.DATAFILE, datfile);
+
+        // Create the comparasion
+        ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
+
+        // Add the parameterValued
+        comp1.setParameterSearch(pamVal);
+        // Add the comparator
+        comp1.setComparator(ComparisonOperator.CONTAINS);
+        // Add the value to compare
+        comp1.setValue("NuMbEr");
+        comp1.setSensitive(true);
+        // Add a second value if needed (only for BETWEEN)
+//        comp1.setValueRight(new Double (4));
+
+        List<Datafile> ld = (List<Datafile>) DatafileSearch
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, Queries.NO_RESTRICTION, DatafileInclude.NONE, em);
+
+        assertEquals("Results of Datafiles incorrect", 0, ld.size());
+    }
+
+    /**
+     * Test string value parameter search
+     *
+     * @throws ParameterSearchException
+     */
+    @Test
+    public void inSensitiveValue () throws ParameterSearchException, RestrictionException {
+        // Get the parameter manually or get from a service
+        Parameter datfile = new Parameter(new ParameterPK("str", "string1"));
+
+        // Create the parameter to compare with. Two argument: type of the parameter
+        //  to compare and the parameter. (Try to find a better name to parameterValued)
+        ParameterSearch pamVal = new ParameterSearch(ParameterType.DATAFILE, datfile);
+
+        // Create the comparasion
+        ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
+
+        // Add the parameterValued
+        comp1.setParameterSearch(pamVal);
+        // Add the comparator
+        comp1.setComparator(ComparisonOperator.CONTAINS);
+        // Add the value to compare
+        comp1.setValue("NuMbEr");
+
+        List<Datafile> ld = (List<Datafile>) DatafileSearch
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, comp1, Queries.NO_RESTRICTION, DatafileInclude.NONE, em);
+
+        assertEquals("Results of Datafiles incorrect", 1, ld.size());
     }
 
     /**
@@ -250,7 +394,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         // Add the parameterValued
         comp1.setParameterSearch(pamVal);
         // Add the comparator
-        comp1.setComparator(ComparisonOperator.CONTAIN);
+        comp1.setComparator(ComparisonOperator.CONTAINS);
         // Add the value to compare
         comp1.setValue(21);
         // Add a second value if needed (only for BETWEEN)

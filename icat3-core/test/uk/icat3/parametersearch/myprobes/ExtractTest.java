@@ -40,7 +40,6 @@ import uk.icat3.exceptions.NoStringComparatorException;
 import uk.icat3.exceptions.NullParameterException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
 import uk.icat3.restriction.RestrictionComparisonCondition;
-import uk.icat3.restriction.RestrictionOperator;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
 import uk.icat3.search.DatasetSearch;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
@@ -63,7 +62,7 @@ public class ExtractTest extends BaseParameterSearchTest {
     @Test
     public void restriction () throws CyclicException, NoParameterTypeException, RestrictionOperatorException, OperatorINException, RestrictionException {
         try {
-            RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(RestrictionAttributes.INVESTIGATION_TITLE, RestrictionOperator.CONTAIN, "gation 1");
+            RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.CONTAINS, "gation 1");
             ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
             op1.add(pcDataset.get(0));
             op1.add(pcDataset.get(1));
@@ -107,16 +106,16 @@ public class ExtractTest extends BaseParameterSearchTest {
 //    @Test
     public void probe () throws OperatorINException, RestrictionException {
         try {
-            RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(RestrictionAttributes.INVESTIGATION_ID, RestrictionOperator.GREATER_THAN, "123");
+            RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(RestrictionAttributes.INVESTIGATION_ID, ComparisonOperator.GREATER_THAN, "123");
 //            RestrictionLogicalCondition log = new RestrictionLogicalCondition(LogicalOperator.OR)
 //                    .add(comp)
 //                    .add(new RestrictionComparisonCondition(
-//                            RestrictionAttributes.DATASET_DESCRIPTION, RestrictionOperator.IN, "'s', 'd'"))
+//                            RestrictionAttributes.DATASET_DESCRIPTION, ComparisonOperator.IN, "'s', 'd'"))
 //                    .add (new RestrictionLogicalCondition(LogicalOperator.AND)
 //                        .add(new RestrictionComparisonCondition(
-//                            RestrictionAttributes.INVESTIGATION_END_DATE, RestrictionOperator.GREATER_EQUAL, new Date(0)))
+//                            RestrictionAttributes.INVESTIGATION_END_DATE, ComparisonOperator.GREATER_EQUAL, new Date(0)))
 //                        .add(new RestrictionComparisonCondition(
-//                            RestrictionAttributes.DATAFILE_NAME, RestrictionOperator.CONTAIN, "0876")
+//                            RestrictionAttributes.DATAFILE_NAME, ComparisonOperator.CONTAINS, "0876")
 //                    ));
 //
 //            System.out.println("----> " + new RestrictionUtil(log, RestrictionType.DATASET).getSentenceJPQL());
@@ -133,7 +132,7 @@ public class ExtractTest extends BaseParameterSearchTest {
         // Add the parameterValued
         comp1.setParameterSearch(pamVal);
         // Add the comparator
-        comp1.setComparator(ComparisonOperator.EQUAL);
+        comp1.setComparator(ComparisonOperator.EQUALS);
         comp1.setValue(5);
         // Add the value to compare
 //        comp1.setValue(new Date(0));
@@ -280,7 +279,7 @@ public class ExtractTest extends BaseParameterSearchTest {
 //
 //        ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
 //        comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p1));
-//        comp1.setComparator(ComparisonOperator.START_WITH);
+//        comp1.setComparator(ComparisonOperator.STARTS_WITH);
 //        comp1.setValue("comp1");
 //
 //        ParameterComparisonCondition comp2 = new ParameterComparisonCondition();
@@ -290,12 +289,12 @@ public class ExtractTest extends BaseParameterSearchTest {
 //
 //        ParameterComparisonCondition comp3 = new ParameterComparisonCondition();
 //        comp3.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p3));
-//        comp3.setComparator(ComparisonOperator.START_WITH);
+//        comp3.setComparator(ComparisonOperator.STARTS_WITH);
 //        comp3.setValue("comp3");
 //
 //        ParameterComparisonCondition comp4 = new ParameterComparisonCondition();
 //        comp4.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, p4));
-//        comp4.setComparator(ComparisonOperator.START_WITH);
+//        comp4.setComparator(ComparisonOperator.STARTS_WITH);
 //        comp4.setValue("comp4");
 //
 //        List<ParameterComparisonCondition> lc = new ArrayList<ParameterComparisonCondition>();

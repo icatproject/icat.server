@@ -64,7 +64,7 @@ public class SampleExceptionTest extends BaseParameterSearchTest {
              // ------------- ComparisonOperator 1 ----------------------
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
             comp1.setParameterSearch(new ParameterSearch(ParameterType.DATAFILE, parameter.get("datafile1")));
-            comp1.setComparator(ComparisonOperator.START_WITH);
+            comp1.setComparator(ComparisonOperator.STARTS_WITH);
             comp1.setValue(new Double (3.14));
             lc.add(comp1);
             SampleSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, SampleInclude.NONE, -1, -1, em);
@@ -174,7 +174,7 @@ public class SampleExceptionTest extends BaseParameterSearchTest {
              // ------------- ComparisonOperator 1 ----------------------
             ParameterComparisonCondition comp1 = new ParameterComparisonCondition();
             comp1.setParameterSearch(null);
-            comp1.setComparator(ComparisonOperator.EQUAL);
+            comp1.setComparator(ComparisonOperator.EQUALS);
             comp1.setValue(new Double (3.14));
             lc.add(comp1);
             SampleSearch.searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, SampleInclude.NONE, -1, -1, em);
