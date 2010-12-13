@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
-import uk.icat3.entity.Sample;
 import uk.icat3.exceptions.CyclicException;
 import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.DatevalueFormatException;
@@ -196,7 +195,10 @@ public class SampleSearch {
                 restrictionParam += restricion.getParameterJPQL(ElementType.SAMPLE, ElementType.DATAFILE);
             if (ejpql.getDatasetParameter().isEmpty() && ejpql.getDatafileParameter().isEmpty())
                 restrictionParam += restricion.getParameterJPQL(ElementType.SAMPLE, ElementType.DATASET);
+            // Add Investigator parameter if exists
             restrictionParam += restricion.getParameterJPQL(ElementType.SAMPLE, ElementType.INVESTIGATOR);
+            // Add Keyword parameter if exists
+            restrictionParam += restricion.getParameterJPQL(ElementType.SAMPLE, ElementType.KEYWORD);
             
             // Construction JPQL sentence
             String jpql = returnJPQL + restrictionParam + ", " + ejpql.getParametersJPQL(ElementType.SAMPLE)

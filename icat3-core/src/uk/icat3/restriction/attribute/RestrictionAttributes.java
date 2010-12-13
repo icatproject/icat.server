@@ -21,6 +21,7 @@ import uk.icat3.restriction.RestrictionType;
 public enum RestrictionAttributes {
     // Dataset attributes
     DATASET_ID("id"),
+    DATASET(""),
     DATASET_NAME("name"),
     DATASET_DESCRIPTION("description"),
     DATASET_LOCATION("location"),
@@ -28,6 +29,7 @@ public enum RestrictionAttributes {
     DATASET_TYPE("datasetType"),
     // Datafile attributes
     DATAFILE_ID("id"),
+    DATAFILE(""),
     DATAFILE_NAME("name"),
     DATAFILE_DESCRIPTION("description"),
     DATAFILE_LOCATION("location"),
@@ -42,12 +44,14 @@ public enum RestrictionAttributes {
     DATAFILE_FORMAT_TYPE("datafileFormat.formatType"),
     // Sample attributes
     SAMPLE_ID("id"),
+    SAMPLE(""),
     SAMPLE_INSTANCE("instance"),
     SAMPLE_NAME("name"),
     SAMPLE_CHEMICAL_FORMULA("chemicalFormula"),
     SAMPLE_SAFETY_INFORMATION("safetyInformation"),
     // Investigation attributes
     INVESTIGATION_ID("id"),
+    INVESTIGATION(""),
     INVESTIGATION_INV_NUMBER("invNumber"),
     INVESTIGATION_VISIT_ID("visitId"),
     INVESTIGATION_TITLE("title"),
@@ -74,7 +78,17 @@ public enum RestrictionAttributes {
     FACILITY_USER_MIDDLE_NAME("middleName"),
     FACILITY_USER_INITIALS("initials"),
     FACILITY_USER_TITLE("title"),
-    FACILITY_USER_LAST_NAME("lastName");
+    FACILITY_USER_LAST_NAME("lastName"),
+    // Keyword
+    KEYWORD("keywordPK.name"),
+    // Parameter
+    PARAMETER_NAME("parameterPK.name"),
+    PARAMETER_SEARCHABLE("searchable"),
+    PARAMETER_VALUE_TYPE("valueType"),
+    PARAMETER_IS_SAMPLE_PARAMETER("isSampleParameter"),
+    PARAMETER_IS_DATASET_PARAMETER("isDatasetParameter"),
+    PARAMETER_IS_DATAFILE_PARAMETER("isDatafileParameter"),
+    PARAMETER_UNITS("parameterPK.units");
 
 
     /** Value of the selected enum */
@@ -122,7 +136,7 @@ public enum RestrictionAttributes {
      * @return True if attribute is String, otherwise false.
      */
     public boolean isString() {
-        if (!isDateTime() && ! isNumeric())
+        if (!isDateTime() && !isNumeric() && !isObject())
             return true;
         return false;
     }
@@ -186,6 +200,37 @@ public enum RestrictionAttributes {
     public boolean isFacilityUser () {
         if (this.ordinal() >= RestrictionAttributes.FACILITY_USER_ID.ordinal() &&
                 this.ordinal() <= RestrictionAttributes.FACILITY_USER_LAST_NAME.ordinal())
+            return true;
+        return false;
+    }
+    /**
+     * Check if attribute belongs to Keyword
+     * @return True if attribute belongs to FacilityUser, otherwise false.
+     */
+    public boolean isKeyword () {
+        if (this == RestrictionAttributes.KEYWORD )
+            return true;
+        return false;
+    }
+    /**
+     * Check if attribute belongs to Parameter
+     * @return True if attribute belongs to FacilityUser, otherwise false.
+     */
+    public boolean isParameter () {
+        if (this.ordinal() >= RestrictionAttributes.PARAMETER_NAME.ordinal() &&
+                this.ordinal() <= RestrictionAttributes.PARAMETER_UNITS.ordinal())
+            return true;
+        return false;
+    }
+    /**
+     * Check if attribute is an Object (Dataset, Investigation, Datafile, Sample
+     * @return True if attribute belongs to FacilityUser, otherwise false.
+     */
+    public boolean isObject () {
+        if (this == RestrictionAttributes.DATASET ||
+                this == RestrictionAttributes.INVESTIGATION ||
+                this == RestrictionAttributes.DATAFILE ||
+                this == RestrictionAttributes.SAMPLE)
             return true;
         return false;
     }

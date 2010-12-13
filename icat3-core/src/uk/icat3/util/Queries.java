@@ -24,6 +24,10 @@ public class Queries {
     /////////////////////////////////////    These are to be added together to form queries  ///////////////////////
     //Returns all of investigation
     public static final String RETURN_ALL_INVESTIGATIONS_JPQL = "SELECT DISTINCT i from Investigation i ";
+
+    // Returns all facility users
+    public static String RETURN_ALL_PARAMETERS = "SELECT DISTINCT i from Parameter i ";
+
     // Returns all facility users
     public static String RETURN_ALL_FACILITY_USERS = "SELECT DISTINCT i from FacilityUser i ";
     
@@ -615,10 +619,14 @@ public class Queries {
     public static final String SAMPLE_NAME = "sample";
     /** Common name for JPQL setence Investigator object*/
     public static final String INVESTIGATOR_NAME = "invtor";
+    /** Common name for JPQL setence Keyword object*/
+    public static String KEYWORD_NAME = "k";
     /** No restriction conditions */
     public static final RestrictionCondition NO_RESTRICTION = null;
     /** DateTime string format */
     public static final String sqlDateTimeFormat = "yyyy-MM-dd HH:mm:ss";
     /** Date format tansform */
     public static final DateFormat dateFormat = new SimpleDateFormat(sqlDateTimeFormat);
+    /** Indicates a empty condition */
+    public static String EMPTY_CONDITION = "empty";
 }

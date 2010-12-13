@@ -12,8 +12,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import uk.icat3.exceptions.AttributeTypeException;
 import uk.icat3.exceptions.CyclicException;
 import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.EmptyOperatorException;
@@ -25,9 +27,9 @@ import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.restriction.RestrictionComparisonCondition;
 import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.restriction.RestrictionLogicalCondition;
-import uk.icat3.restriction.RestrictionOperator;
 import uk.icat3.restriction.RestrictionType;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
+import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.LogicalOperator;
 import uk.icat3.util.Queries;
@@ -48,6 +50,8 @@ public class RestrictionUtil {
     private boolean containSampleAttributes;
     /** Check if restriction contains Investigator attributes */
     private boolean containInvestigatorAttributes;
+    /** Check if restriction contains Keyword attributes */
+    private boolean containKeywordAttributes;
     /** Check if restriction contains Datafile attributes */
     private boolean containDatafileAttributes;
     /** Check if restriction contains Dataset attributes */
@@ -68,8 +72,6 @@ public class RestrictionUtil {
     private boolean orderByAsc;
     /** Defines attribute to order by */
     private RestrictionAttributes orderByAttr;
-    /** Indicates if there was conditions comparisons defined */
-    private boolean conditionsDefined;
     /** Indicates start of index */
     private int startIndex;
     /** Include options */
@@ -91,7 +93,6 @@ public class RestrictionUtil {
         // Initialites variables
         this.enumInclude = null;
         this.sentenceJPQL = "";
-        this.conditionsDefined = false;
         this.orderByJPQL = "";
         this.maxResults = -1;
         this.startIndex = 0;
@@ -101,12 +102,11 @@ public class RestrictionUtil {
         contParameter = 0;
         jpqlParameter = new HashMap<String, Object>();
         containDatasetAttributes = containDatafileAttributes = containInvestigatorAttributes
-                = containInvestigationAttributes = containSampleAttributes = false;
+                = containInvestigationAttributes = containKeywordAttributes
+                = containSampleAttributes = false;
         // Check restriction is not null
         if (restCond != null) {
             extractJPQL(restCond);
-            if (!conditionsDefined)
-                sentenceJPQL = "";
             // If it's ordered. The attribute type should be the same that
             // the restriction type. (If order by Investigation.name and
             // the results are Datasets, it could repeat entries).
@@ -174,38 +174,45 @@ public class RestrictionUtil {
      * @throws OperatorINException
      * @throws RestrictionNullException
      */
-    private void extractJPQL(RestrictionCondition restCond) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, CyclicException, EmptyOperatorException, RestrictionException {
+    private String extractJPQL(RestrictionCondition restCond) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, CyclicException, EmptyOperatorException, RestrictionException {
         // Check if this condition is negated
         if (restCond.isNegate())
             addNotCondition();
 
         // If it's a parameterComparator
-        if (restCond.getClass() == RestrictionComparisonCondition.class) {
-            ((RestrictionComparisonCondition) restCond).validate();
-            this.conditionsDefined = true;
+        if (restCond.getClass() == RestrictionComparisonCondition.class)
             addRestrictionCondition((RestrictionComparisonCondition) restCond);
-        }
 
         // If it's a ParameterLogicalCondition
         else if (restCond.getClass() == RestrictionLogicalCondition.class) {
             RestrictionLogicalCondition op = (RestrictionLogicalCondition) restCond;
-            op.validate();
-
+            if (op.getRestConditions().isEmpty() || !op.validate())
+                return Queries.EMPTY_CONDITION;
             // Open parenthesis for the list of comparators
             openParenthesis();
             // Numbers of conditions
             int size = op.getRestConditions().size();
+            String ret;
             // Read all conditions
             for (int i = 0; i < size; i++) {
+                // If search is sensitive, propagate to their children
+                if (op.isSensitive())
+                    op.getRestConditions().get(i).setSensitive(true);
+                // If operator is an OR
                 if (op.getOperator() == LogicalOperator.OR)
-                    extractJPQL(op.getRestConditions().get(i));
+                    ret = extractJPQL(op.getRestConditions().get(i));
+                // If operator is an AND
                 else
-                    extractJPQL(op.getRestConditions().get(i));
-
-                // Not add last Logical Operator
-                if (i < (size - 1))
+                    ret = extractJPQL(op.getRestConditions().get(i));
+                // Not add Logical Operator if it is the last one or
+                // the codintion before was empty
+                if (i < (size - 1) && !Queries.EMPTY_CONDITION.equals(ret)) {
                     addCondition(op.getOperator());
+                }
             }
+            // If ends with an LogicalOperator, remove
+            if (sentenceJPQL.endsWith(op.getOperator().name() + " "))
+                sentenceJPQL = sentenceJPQL.replaceAll(op.getOperator().name() + " $", " ");
             // Close the parenthesis for the comparators
             closeParenthesis();
         }
@@ -217,12 +224,13 @@ public class RestrictionUtil {
         // Check if order was set in any condition
         if (restCond.hasOrder()) {
             this.orderByAsc = restCond.isOrderByAsc();
-            this.orderByAttr = restCond.getOrderByAttr();
+            this.orderByAttr = restCond.getOrderByAttribute();
         }
         // Check if there exists include options
         if (restCond.hasInclude(restType)) {
             this.enumInclude = restCond.getInclude(restType);
         }
+        return null;
     }
 
     /**
@@ -276,9 +284,16 @@ public class RestrictionUtil {
      * @param comp
      */
     private void addRestrictionCondition(RestrictionComparisonCondition comp) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionException {
+        // Check if comparison is well construct
+        comp.validate();
+        // Get parameter name
+        String parameter = getParamName(comp.getRestrictionAttribute()) + comp.getRestrictionAttribute().getValue();
+        // If search is insensitive and attribute type is String, lower JPQL name attribute
+        if (!comp.isSensitive() && comp.getRestrictionAttribute().isString())
+            parameter = "LOWER (" + parameter + ")";
         // Add restricion.
-        sentenceJPQL += getParamName(comp.getRestAttr()) + comp.getRestAttr().getValue() + " "
-                        + comp.getRestOp().getRestriction(getParamValue(comp));
+        sentenceJPQL += parameter + " "
+                        + comp.getComparisonOperator().getCondition(getParamValue(comp));
     }
 
     /**
@@ -289,8 +304,32 @@ public class RestrictionUtil {
      */
     private String getParamName (RestrictionAttributes attr) throws RestrictionException {
         String paramName = Queries.PARAM_NAME_JPQL;
+        // Restriction is for a Facility User
+        if ((restType == RestrictionType.FACILITY_USER && !attr.isFacilityUser()) ||
+                (restType != RestrictionType.FACILITY_USER && attr.isFacilityUser())) {
+            // If attribute is not from FacilityUser, it is an error
+            throw new AttributeTypeException(restType.name() + " cannot be relatitoned with" +
+                    " attribute '" + attr.name() + "'. Uses RestrictionAttributtes.INVESTIGATOR instead.");
+        }
+        // Restriction is for a Parameter
+        else if ((restType == RestrictionType.PARAMETER && !attr.isParameter()) ||
+                (restType != RestrictionType.PARAMETER && attr.isParameter())) {
+            // If attribute is not from FacilityUser, it is an error
+            throw new AttributeTypeException(restType.name() + " cannot be relatitoned with" +
+                    " attribute '" + attr.name() + "'. Uses 'searchbyParameterRestriction' method instead.");
+        }
+        // Investigator attributes
+        else if (attr.isInvestigator()) {
+            paramName = Queries.INVESTIGATOR_NAME;
+            containInvestigatorAttributes = true;
+        }
+        // Keyword attribute
+        else if (attr.isKeyword()) {
+            paramName = Queries.KEYWORD_NAME;
+            this.containKeywordAttributes = true;
+        }
         // Restriction is for Dataset search
-        if (restType == RestrictionType.DATASET) {
+        else if (restType == RestrictionType.DATASET) {
             // Datafile attributes
             if (attr.isDatafile()) {
                 paramName = Queries.DATAFILE_NAME;
@@ -304,11 +343,6 @@ public class RestrictionUtil {
             // Investigation attributes
             else if (attr.isInvestigation())
                 paramName += ".investigation";
-            // Investigator attributes
-            else if (attr.isInvestigator()) {
-                paramName = Queries.INVESTIGATOR_NAME;
-                containInvestigatorAttributes = true;
-            }
         }
         // Restriction is for a Datafile search
         else if (restType == RestrictionType.DATAFILE) {
@@ -323,11 +357,6 @@ public class RestrictionUtil {
             // Investigation attributes
             else if (attr.isInvestigation())
                 paramName += ".dataset.investigation";
-            // Investigator attributes
-            else if (attr.isInvestigator()) {
-                paramName = Queries.INVESTIGATOR_NAME;
-                containInvestigatorAttributes = true;
-            }
         }
         // Restriction is for a Sample search
         else if (restType == RestrictionType.SAMPLE) {
@@ -344,11 +373,6 @@ public class RestrictionUtil {
             // Investigation attributes
             else if (attr.isInvestigation())
                 paramName += ".investigationId";
-            // Investigator attributes
-            else if (attr.isInvestigator()) {
-                paramName = Queries.INVESTIGATOR_NAME;
-                containInvestigatorAttributes = true;
-            }
         }
         // Restriction is for a Investigation search
         else if (restType == RestrictionType.INVESTIGATION) {
@@ -367,20 +391,10 @@ public class RestrictionUtil {
                 paramName = Queries.SAMPLE_NAME;
                 containSampleAttributes = true;
             }
-            // Investigator attributes
-            else if (attr.isInvestigator()) {
-                paramName = Queries.INVESTIGATOR_NAME;
-                containInvestigatorAttributes = true;
-            }
         }
-        // Restriction is for a Facility User
-        else if (restType == RestrictionType.FACILITY_USER) {
-            // If attribute is not from FacilityUser, it is an error
-            if (!attr.isFacilityUser()) {
-                throw new RestrictionException("FacilityUser cannot be relatitoned with" +
-                        " attribute '" + attr.name() + "'");
-            }
-        }
+        // If attribute is an Object
+        if (attr.isObject())
+            return paramName;
         return paramName + ".";
     }
         
@@ -390,49 +404,57 @@ public class RestrictionUtil {
      * @param comp
      * @return
      */
-    private String getParamValue (RestrictionComparisonCondition comp) throws DatevalueException, RestrictionOperatorException, OperatorINException {
+    private String getParamValue (RestrictionComparisonCondition comp) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionException {
         String paramValue = "";
         // String operator. Value must be a String
-        if (comp.getRestOp() == RestrictionOperator.CONTAIN ||
-                comp.getRestOp() == RestrictionOperator.START_WITH ||
-                comp.getRestOp() == RestrictionOperator.END_WITH) {
+        if (comp.getComparisonOperator() == ComparisonOperator.CONTAINS ||
+                comp.getComparisonOperator() == ComparisonOperator.STARTS_WITH ||
+                comp.getComparisonOperator() == ComparisonOperator.ENDS_WITH) {
             // Attribute is a Number, but should be String
-            if (comp.getRestAttr().isNumeric())
+            if (comp.getRestrictionAttribute().isNumeric())
                 throw new RestrictionOperatorException("Attribute is Numeric");
             // Attribute is a Date, but should be String
-            else if (comp.getRestAttr().isDateTime())
+            else if (comp.getRestrictionAttribute().isDateTime())
                 throw new RestrictionOperatorException("Attribute is Datetime");
-            
-            return comp.getValue().toString();
+            // Attribute is a Date, but should be String
+            else if (comp.getRestrictionAttribute().isObject())
+                throw new RestrictionOperatorException("Attribute is an Object");
+            // Return String value
+            return getStringValue(comp, comp.getValue());
         }
         // IN operator
-        else if (comp.getRestOp() == RestrictionOperator.IN) {
+        else if (comp.getComparisonOperator() == ComparisonOperator.IN) {
             // If value is an instance of Collection
             if (comp.getValue() instanceof Collection) {
                 Collection col = (Collection) comp.getValue();
+                if (col.isEmpty())
+                    throw new RestrictionException ("List of IN parameters is empty.");
                 String value = "";
-                if (comp.getRestAttr().isNumeric() || comp.getRestAttr().isDateTime()) {
+                // If attribute is Numeric or a Date
+                if (comp.getRestrictionAttribute().isNumeric() ||
+                        comp.getRestrictionAttribute().isDateTime()) {
+                    // Lists the collection
                     for (Object o : col) {
-                        if (!(o instanceof Number) && !(o instanceof Date)) {
-                            try {
-                                if (comp.getRestAttr().isNumeric())
-                                    o = Double.parseDouble(o.toString());
-                                else if (comp.getRestAttr().isDateTime())
-                                    o = Queries.dateFormat.parse(o.toString());
-                            } catch (Throwable t) {
-                                throw new OperatorINException("Class " + o.getClass()
-                                        + " no recognized. Only Date, Number or String classes are accepted.");
-                            }
-                        }
+                        if (!(o instanceof Number) && !(o instanceof Date))
+                            o = transformNumberDate (comp.getRestrictionAttribute(), o.toString());
+                        // Add jpql parameter
                         String name = getNextParamName();
                         jpqlParameter.put(name, o);
                         value += ", :" + name;
                     }
                 }
-                else {
-                    for (Object o : col)
-                        value += ", '" + removeBadChar(o.toString()) + "'";
+                // If attribute is an object
+                else if (comp.getRestrictionAttribute().isObject()) {
+                    for (Object o : col) {
+                        String name = getNextParamName();
+                        jpqlParameter.put(name, o);
+                        value += ", :" + name;
+                    }
                 }
+                // If attribute is a String
+                else
+                    for (Object o : col)
+                        value += ", '" + getStringValue(comp, o) + "'";
                 return value.substring(2);
             }
             // If value is a Date or a Number
@@ -443,60 +465,139 @@ public class RestrictionUtil {
             }
             // If value is a String separated by ','
             else if (comp.getValue() instanceof String) {
-                String value = removeBadChar(comp.getValue().toString());
-                value = value.replaceAll("\\s*,\\s*", "','")
-                             .replaceAll("^\\s*", "'")
-                             .replaceAll("\\s*$", "'");
+                String value = getStringValue(comp, comp.getValue());
+                // If attribute is a String, construct IN ('val', 'val,...)
+                if (comp.getRestrictionAttribute().isString())
+                    return value.replaceAll("\\s*,\\s*", "','")
+                                 .replaceAll("^\\s*", "'")
+                                 .replaceAll("\\s*$", "'");
+                // Else if attribute is Numberic or Date
+                // Tokenizer
+                StringTokenizer token = new StringTokenizer(value, ",");
+                Object obj;
+                String nextToken;
+                // Check all tokens
+                while (token.hasMoreTokens()) {
+                    nextToken = token.nextToken().trim();
+                    obj = transformNumberDate (comp.getRestrictionAttribute(), nextToken);
+                    String name = getNextParamName();
+                    jpqlParameter.put(name, obj);
+                    value += ", :" + name;
+                }
+
                 return value;
+            }
+            // If attribute is an Object
+            else if (comp.getRestrictionAttribute().isObject() &&
+                     comp.getComparisonOperator() == ComparisonOperator.EQUALS) {
+                String name = getNextParamName();
+                jpqlParameter.put(name, comp.getValue());
+                return ":" + name;
             }
             // Restriciton exception. Operator IN only List<String> or String
             throw new OperatorINException();
         }
         // BETWEEN operator
-        else if (comp.getRestOp() == RestrictionOperator.BETWEEN) {
+        else if (comp.getComparisonOperator() == ComparisonOperator.BETWEEN) {
             Object value = comp.getValue();
-            Object valueRight = comp.getValueRigth();
-            if (comp.getRestAttr().isNumeric()) {
+            Object valueRight = comp.getValueRight();
+            // If attribute is a Numeric
+            if (comp.getRestrictionAttribute().isNumeric()) {
                 if (!(value instanceof Number))
                     value = Double.parseDouble(value.toString());
                 if (!(valueRight instanceof Number))
                     valueRight = Double.parseDouble(valueRight.toString());
             }
-            else if (comp.getRestAttr().isDateTime()) {
+            // If attribute is a Date
+            else if (comp.getRestrictionAttribute().isDateTime()) {
                 if (!(value instanceof Date))
                     value = parseDatetimeValue (value);
                 if (!(valueRight instanceof Date))
                     valueRight = parseDatetimeValue (valueRight);
             }
+            // Bettween operator only aplicable for Numeric or Date values
+            else
+                throw new RestrictionException("Values for operator BETWEEN must be Date or Number");
+            // Add JPQL parameter
             paramValue = getNextParamName();
             String paramValue2 = getNextParamName();
             jpqlParameter.put(paramValue, value);
             jpqlParameter.put(paramValue2, valueRight);
-            return comp.getRestOp().getRestrictionBetween(":" + paramValue, ":" + paramValue2);
+            return comp.getComparisonOperator().getConditionBetween(":" + paramValue, ":" + paramValue2);
         }
         // Numeric, String or Date operator. Value is an Object
         else {
             paramValue = getNextParamName();
             // If attribute is a DateTime value
-            if (comp.getRestAttr().isDateTime()) {
+            if (comp.getRestrictionAttribute().isDateTime()) {
+                // Parser value to Date
                 jpqlParameter.put(paramValue, parseDatetimeValue(comp.getValue()));
             }
             // If attribute is a Numeric value
-            else if (comp.getRestAttr().isNumeric()) {
+            else if (comp.getRestrictionAttribute().isNumeric()) {
                 try {
+                    // Parse string value to Number
                     if (comp.getValue().getClass() == String.class)
                         jpqlParameter.put(paramValue, Double.parseDouble(comp.getValue().toString()));
+                    // If value class instance of Number, add the value
                     else if (comp.getValue() instanceof Number)
                         jpqlParameter.put(paramValue, comp.getValue());
                 } catch (Throwable t) {
                     Logger.getLogger(RestrictionUtil.class.getName()).log(Level.SEVERE, null, t);
                 }
             }
-            else
+            // If attribute is an Object and Comparison is EQUALS
+            else if (comp.getRestrictionAttribute().isObject() &&
+                    comp.getComparisonOperator() == ComparisonOperator.EQUALS)
                 jpqlParameter.put(paramValue, comp.getValue());
-
+            // Attribute is a String
+            else {
+                // Return String value
+                return "'" + getStringValue(comp, comp.getValue()) + "'";
+            }
+            // Return value
             return ":" + paramValue;
         }
+    }
+    /**
+     * Return String value, depending on sensitive or insensitive case
+     *
+     * @param comp Restriction Comparison Condition
+     * @param value Value translatable to String
+     * @return
+     */
+    private String getStringValue (RestrictionComparisonCondition comp, Object value) {
+        // If search is sensitive, no make changes inside String value
+        if (comp.isSensitive())
+            return removeBadChar(value.toString());
+        // If search is insensitive, transform String to lower case
+        else
+            return removeBadChar(value.toString().toLowerCase());
+    }
+    /**
+     * Tranformation from a String to a Number or Date, depending of
+     * RestrcitionAttribute type. If the transformation cannot be
+     * applied, the String itself will be returned.
+     * 
+     * @param attr Restriction Attribute
+     * @param strValue String to transform to
+     * @return Number or Date transformed, or 'nextToken'.
+     * @throws OperatorINException
+     */
+    private Object transformNumberDate (RestrictionAttributes attr, String strValue) throws OperatorINException {
+        try {
+            // If attribute is Numeric, transform string into a number
+            if (attr.isNumeric())
+                return Double.parseDouble(strValue);
+            // If attribute is Date, transform string into a Date
+            else if (attr.isDateTime()) {
+                return parseDatetimeValue(strValue);
+            }
+        } catch (Throwable t) {
+            throw new OperatorINException("String " + strValue
+                    + " no translable. Only Date, Number or String classes are accepted.");
+        }
+        return strValue;
     }
 
     /**
@@ -519,6 +620,10 @@ public class RestrictionUtil {
             if (this.isContainInvestigatorAttributes() && parameterType == ElementType.INVESTIGATOR)
                 restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".dataset.investigation.investigatorCollection) "
                         + Queries.INVESTIGATOR_NAME;
+            // Keywords
+            if (this.isContainKeywordAttributes() && parameterType == ElementType.KEYWORD)
+                restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".dataset.investigation.keywordCollection) "
+                        + Queries.KEYWORD_NAME;
         }
         // Dataset
         else if (searchType == ElementType.DATASET) {
@@ -533,23 +638,29 @@ public class RestrictionUtil {
             if (this.isContainInvestigatorAttributes() && parameterType == ElementType.INVESTIGATOR)
                 restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".investigation.investigatorCollection) "
                         + Queries.INVESTIGATOR_NAME;
+            // Keywords
+            if (this.isContainKeywordAttributes() && parameterType == ElementType.KEYWORD)
+                restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".investigation.keywordCollection) "
+                        + Queries.KEYWORD_NAME;
         }
         // Sample
         else if (searchType == ElementType.SAMPLE) {
             // Datafile
-            if (this.isContainDatafileAttributes() && parameterType == ElementType.DATAFILE) {
+            if (this.isContainDatafileAttributes() && parameterType == ElementType.DATAFILE)
                 restrictionParam += ", IN(" + Queries.DATASET_NAME
                         + ".datafileCollection) " + Queries.DATAFILE_NAME;
-            }
             // Dataset
             else if (this.isContainDatasetAttributes() && parameterType == ElementType.DATASET)
                 restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL
                         + ".investigationId.datasetCollection) " + Queries.DATASET_NAME;
-            
             // Investigator
             if (this.isContainInvestigatorAttributes() && parameterType == ElementType.INVESTIGATOR)
                 restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".investigationId.investigatorCollection) "
                         + Queries.INVESTIGATOR_NAME;
+            // Keywords
+            if (this.isContainKeywordAttributes() && parameterType == ElementType.KEYWORD)
+                restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".investigationId.keywordCollection) "
+                        + Queries.KEYWORD_NAME;
         }
         // Investigation
         else if (searchType == ElementType.INVESTIGATION) {
@@ -569,6 +680,10 @@ public class RestrictionUtil {
             if (this.isContainInvestigatorAttributes() && parameterType == ElementType.INVESTIGATOR)
                 restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".investigatorCollection) "
                         + Queries.INVESTIGATOR_NAME;
+            // Keywords
+            if (this.isContainKeywordAttributes() && parameterType == ElementType.KEYWORD)
+                restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".keywordCollection) "
+                        + Queries.KEYWORD_NAME;
         }
         return restrictionParam;
     }
@@ -592,6 +707,10 @@ public class RestrictionUtil {
             if (this.isContainInvestigatorAttributes())
                 restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".dataset.investigation.investigatorCollection) "
                         + Queries.INVESTIGATOR_NAME;
+            // Keywords
+            if (this.isContainKeywordAttributes())
+                restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".dataset.investigation.keywordCollection) "
+                        + Queries.KEYWORD_NAME;
         }
         // Dataset
         else if (searchType == ElementType.DATASET) {
@@ -606,6 +725,10 @@ public class RestrictionUtil {
             if (this.isContainInvestigatorAttributes())
                 restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".investigation.investigatorCollection) "
                         + Queries.INVESTIGATOR_NAME;
+            // Keywords
+            if (this.isContainKeywordAttributes())
+                restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".investigation.keywordCollection) "
+                        + Queries.KEYWORD_NAME;
         }
         // Sample
         else if (searchType == ElementType.SAMPLE) {
@@ -624,6 +747,10 @@ public class RestrictionUtil {
             if (this.isContainInvestigatorAttributes())
                 restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".investigationId.investigatorCollection) "
                         + Queries.INVESTIGATOR_NAME;
+            // Keywords
+            if (this.isContainKeywordAttributes())
+                restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".investigationId.keywordCollection) "
+                        + Queries.KEYWORD_NAME;
         }
         // Investigation
         else if (searchType == ElementType.INVESTIGATION) {
@@ -646,6 +773,11 @@ public class RestrictionUtil {
             if (this.isContainInvestigatorAttributes())
                 restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".investigatorCollection) "
                         + Queries.INVESTIGATOR_NAME;
+            // Keywords
+            if (this.isContainKeywordAttributes())
+                restrictionParam += ", IN(" + Queries.PARAM_NAME_JPQL + ".keywordCollection) "
+                        + Queries.KEYWORD_NAME;
+
         }
         return restrictionParam;
     }
@@ -657,7 +789,7 @@ public class RestrictionUtil {
      * @return
      */
     private String removeBadChar (String value) {
-        return value.replaceAll("['\"\\\\]", "");
+        return value.replaceAll("[^\\w\\s-:,]", "");
     }
 
 
@@ -698,6 +830,10 @@ public class RestrictionUtil {
         return containInvestigatorAttributes;
     }
 
+    public boolean isContainKeywordAttributes() {
+        return containKeywordAttributes;
+    }
+
     public Map<String, Object> getJpqlParameter() {
         return jpqlParameter;
     }
@@ -716,8 +852,16 @@ public class RestrictionUtil {
     private Date parseDatetimeValue (Object value) throws DatevalueException {
         Date date = null;
         try {
-            if (value.getClass() == String.class)
-                date = Queries.dateFormat.parse(value.toString());
+            if (value.getClass() == String.class) {
+                String strValue = value.toString();
+                strValue = strValue.trim();
+                // Accept dates like yyyy-MM-dd, without time
+                if (strValue.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
+                    strValue += " 00:00:00";
+                }
+                value = strValue;
+                date = Queries.dateFormat.parse(strValue);
+            }
             else if (value.getClass() == Date.class)
                 date = (Date)value;
             else

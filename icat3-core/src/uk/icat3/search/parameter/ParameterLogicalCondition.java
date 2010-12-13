@@ -10,6 +10,7 @@ package uk.icat3.search.parameter;
 import uk.icat3.exceptions.CyclicException;
 import java.util.ArrayList;
 import java.util.List;
+import uk.icat3.exceptions.EmptyListParameterException;
 import uk.icat3.exceptions.EmptyOperatorException;
 import uk.icat3.util.LogicalOperator;
 
@@ -65,8 +66,13 @@ public final class ParameterLogicalCondition extends ParameterCondition {
     * @param checkCondList
     * @throws CyclicException
     */
-    private void validate (List<ParameterLogicalCondition> checkCondList) throws CyclicException  {
+    private boolean validate (List<ParameterLogicalCondition> checkCondList) throws CyclicException, EmptyListParameterException  {
+        boolean hasComparison = false;
+        // Lists parameter Collection
         for (ParameterCondition param : listComparable) {
+            // If parameter is null
+            if (param == null)
+                throw new EmptyListParameterException("A condition in List of ParameterCondition is NULL.");
             // If this object is inserted in its list
             if (this == param)
                 throw new CyclicException("Cyclic structure. " + this.toString());
@@ -79,9 +85,15 @@ public final class ParameterLogicalCondition extends ParameterCondition {
                 // Add check condition to the list
                 checkCondList.add(this);
                 // Validate the condition
-                op.validate(checkCondList);
+                if (op.validate(checkCondList))
+                    hasComparison = true;
             }
+            // If the object is a parameter logical condition
+            else if (param instanceof ParameterCondition)
+                hasComparison = true;
         }
+
+        return hasComparison;
     }
     /**
      * Check if this object is well construct
@@ -89,10 +101,10 @@ public final class ParameterLogicalCondition extends ParameterCondition {
      * @throws CyclicException
      * @throws EmptyOperatorException
      */
-    public void validate () throws CyclicException, EmptyOperatorException {
+    public boolean validate () throws CyclicException, EmptyOperatorException, EmptyListParameterException {
         if (this.operator == null)
             throw new EmptyOperatorException();
-        validate (new ArrayList<ParameterLogicalCondition>());
+        return validate (new ArrayList<ParameterLogicalCondition>());
     }
 
 

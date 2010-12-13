@@ -10,6 +10,7 @@ package uk.icat3.restriction;
 import java.util.ArrayList;
 import java.util.List;
 import uk.icat3.exceptions.CyclicException;
+import uk.icat3.exceptions.EmptyListParameterException;
 import uk.icat3.exceptions.EmptyOperatorException;
 import uk.icat3.util.LogicalOperator;
 
@@ -65,8 +66,11 @@ public class RestrictionLogicalCondition extends RestrictionCondition {
     * @param checkCondList
     * @throws CyclicException
     */
-    private void validate (List<RestrictionCondition> checkCondList) throws CyclicException {
+    private boolean validate (List<RestrictionCondition> checkCondList) throws CyclicException, EmptyListParameterException {
+        boolean hasComparison = false;
         for (RestrictionCondition restCondition : restConditions) {
+            if (restCondition == null)
+                throw new EmptyListParameterException("A condition in List of RestrictionCondition is NULL.");
             // The restriction object itself has been added.
             if (restCondition == this)
                 throw new CyclicException("It's the same object");
@@ -79,20 +83,27 @@ public class RestrictionLogicalCondition extends RestrictionCondition {
                 // Add checked condition to check condition list
                 checkCondList.add(this);
                 // Validate other restriction logical condition
-                op.validate(checkCondList);
+                if (op.validate(checkCondList))
+                    hasComparison = true;
+            }
+            // If it's a comparison condition
+            else if (restCondition.getClass() == RestrictionComparisonCondition.class) {
+                hasComparison = true;
             }
         }
+        return hasComparison;
     }
+
     /**
      * Check if this object is well construct
      *
      * @throws CyclicException
      * @throws EmptyOperatorException
      */
-    public void validate () throws CyclicException, EmptyOperatorException {
+    public boolean validate () throws CyclicException, EmptyOperatorException, EmptyListParameterException {
         if (this.operator == null)
             throw new EmptyOperatorException();
-        validate (new ArrayList<RestrictionCondition>());
+        return validate (new ArrayList<RestrictionCondition>());
     }
 
 

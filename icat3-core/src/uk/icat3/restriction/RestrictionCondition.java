@@ -8,6 +8,7 @@
 package uk.icat3.restriction;
 
 import uk.icat3.restriction.attribute.RestrictionAttributes;
+import uk.icat3.search.Condition;
 import uk.icat3.util.DatafileInclude;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.InvestigationInclude;
@@ -19,11 +20,9 @@ import uk.icat3.util.SampleInclude;
  *
  * @author cruzcruz
  */
-public class RestrictionCondition {
-    /** Indicates if restriction condition is negated (NOT) */
-    private boolean negate = false;
+public class RestrictionCondition extends Condition {
     /** Contain order by field, if exists */
-    private RestrictionAttributes orderByAttr = null;
+    private RestrictionAttributes orderByAttribute = null;
     /** Indicates the order direction */
     private boolean orderByAsc = true;
     /** Maximun number of results to return */
@@ -38,13 +37,14 @@ public class RestrictionCondition {
     private SampleInclude sampleInclude = null;
 
     /**
-     * Negates the restriction condition 'cond'
+     * Negates this condition
      *
-     * @param cond Restriction condition to negate
-     * @return
+     * @param cond Parameter condition
+     *
+     * @return Object itself
      */
     public static RestrictionCondition Not (RestrictionCondition cond) {
-        cond.negate = true;
+        cond.setNegate(true);
         return cond;
     }
     /**
@@ -76,7 +76,7 @@ public class RestrictionCondition {
      * @param attr Attribute to order by
      */
     public RestrictionCondition setOrderByDesc (RestrictionAttributes attr) {
-        this.orderByAttr = attr;
+        this.orderByAttribute = attr;
         this.orderByAsc = false;
         return this;
     }
@@ -130,34 +130,17 @@ public class RestrictionCondition {
      * @param attr Attribute to order by
      */
     public void setOrderByAsc (RestrictionAttributes attr) {
-        this.orderByAttr = attr;
+        this.orderByAttribute = attr;
         this.orderByAsc = true;
     }
     
-    /**
-     * Check if this condition is negated
-     *
-     * @return True if this condition is negated. Otherwise false
-     */
-    public boolean isNegate() {
-        return negate;
-    }
-    /**
-     * Get attribute to order by.
-     *
-     * @return Attribute to order by.
-     */
-    public RestrictionAttributes getOrderByAttr() {
-        return orderByAttr;
-    }
-
     /**
      * Check if the restriction has order by
      * 
      * @return true if has order by. Otherwise false
      */
     public boolean hasOrder () {
-        if (this.orderByAttr == null)
+        if (this.orderByAttribute == null)
             return false;
         return true;
     }
@@ -169,15 +152,6 @@ public class RestrictionCondition {
     public boolean isOrderByAsc() {
         return orderByAsc;
     }
-    /**
-     * Negate this condition
-     *
-     * @return True if this condition is negated. Otherwise false
-     */
-    public void setNegate(boolean negate) {
-        this.negate = negate;
-    }
-
     public void setMaxResults(int maxResults) {
         this.maxResults = maxResults;
     }
@@ -186,8 +160,12 @@ public class RestrictionCondition {
         this.orderByAsc = orderByAsc;
     }
 
-    public void setOrderByAttr(RestrictionAttributes orderByAttr) {
-        this.orderByAttr = orderByAttr;
+    public RestrictionAttributes getOrderByAttribute() {
+        return orderByAttribute;
+    }
+
+    public void setOrderByAttribute(RestrictionAttributes orderByAttribute) {
+        this.orderByAttribute = orderByAttribute;
     }
 
     /**

@@ -356,7 +356,10 @@ public class DatasetSearch {
                 restrictionParam += restricion.getParameterJPQL(ElementType.DATASET, ElementType.DATAFILE);
             if (ejpql.getSampleParameter().isEmpty())
                 restrictionParam += restricion.getParameterJPQL(ElementType.DATASET, ElementType.SAMPLE);
+            // Add investigator parameter if exists
             restrictionParam += restricion.getParameterJPQL(ElementType.DATASET, ElementType.INVESTIGATOR);
+            // Add keyword parameter if exists
+            restrictionParam += restricion.getParameterJPQL(ElementType.DATASET, ElementType.KEYWORD);
             // Construction JPQL sentence
             String jpql = returnJPQL + restrictionParam + ", " + ejpql.getParametersJPQL(ElementType.DATASET)
                     + QUERY_USERS_DATASETS_JPQL;

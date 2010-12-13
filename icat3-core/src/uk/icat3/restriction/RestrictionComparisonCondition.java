@@ -9,8 +9,15 @@ package uk.icat3.restriction;
 
 import java.util.Collection;
 import java.util.Date;
+import uk.icat3.entity.Datafile;
+import uk.icat3.entity.Dataset;
+import uk.icat3.entity.Investigation;
+import uk.icat3.entity.Sample;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.RestrictionNullException;
+import uk.icat3.exceptions.RestrictionValueClassException;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
+import uk.icat3.search.parameter.ComparisonOperator;
 
 /**
  * This class contains information about the restriction and the value which is
@@ -20,20 +27,20 @@ import uk.icat3.restriction.attribute.RestrictionAttributes;
  */
 public class RestrictionComparisonCondition extends RestrictionCondition {
     /** Attribute to compare with */
-    private RestrictionAttributes restAttr;
+    private RestrictionAttributes restrictionAttribute;
     /** Restriction operator */
-    private RestrictionOperator restOp;
+    private ComparisonOperator comparisonOperator;
     /** Value to compare with attribute */
     private Object value;
     /** Second value for BETWEEN operator */
-    private Object valueRigth = null;
+    private Object valueRight = null;
 
     /**
      * Construction
      */
     public RestrictionComparisonCondition() {
-        this.restAttr = null;
-        this.restOp = null;
+        this.restrictionAttribute = null;
+        this.comparisonOperator = null;
         this.value = null;
     }
     /**
@@ -43,11 +50,11 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
      * @param restOp Restriction operator
      * @param value Restriction value to compare with attribute
      */
-    public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, Date lValue, Object rValue){
-        this.restAttr = restAttr;
-        this.restOp = restOp;
+    public RestrictionComparisonCondition(RestrictionAttributes restAttr, ComparisonOperator restOp, Date lValue, Object rValue){
+        this.restrictionAttribute = restAttr;
+        this.comparisonOperator = restOp;
         this.value = lValue;
-        this.valueRigth = rValue;
+        this.valueRight = rValue;
     }
 
     /**
@@ -57,11 +64,11 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
      * @param restOp Restriction operator
      * @param value Restriction value to compare with attribute
      */
-    public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, Number lValue, Number rValue){
-        this.restAttr = restAttr;
-        this.restOp = restOp;
+    public RestrictionComparisonCondition(RestrictionAttributes restAttr, ComparisonOperator restOp, Number lValue, Number rValue){
+        this.restrictionAttribute = restAttr;
+        this.comparisonOperator = restOp;
         this.value = lValue;
-        this.valueRigth = rValue;
+        this.valueRight = rValue;
     }
 
     /**
@@ -71,9 +78,9 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
      * @param restOp Restriction operator
      * @param value Restriction value to compare with attribute
      */
-    public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, String value) {
-        this.restAttr = restAttr;
-        this.restOp = restOp;
+    public RestrictionComparisonCondition(RestrictionAttributes restAttr, ComparisonOperator restOp, String value) {
+        this.restrictionAttribute = restAttr;
+        this.comparisonOperator = restOp;
         this.value = value;
     }
     /**
@@ -83,9 +90,9 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
      * @param restOp Restriction operator
      * @param value Restriction value to compare with attribute
      */
-    public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, Collection<String> value) {
-        this.restAttr = restAttr;
-        this.restOp = restOp;
+    public RestrictionComparisonCondition(RestrictionAttributes restAttr, ComparisonOperator restOp, Collection value) {
+        this.restrictionAttribute = restAttr;
+        this.comparisonOperator = restOp;
         this.value = value;
     }
     /**
@@ -95,9 +102,9 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
      * @param restOp Restriction operator
      * @param value Restriction value to compare with attribute
      */
-    public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, Date value) {
-        this.restAttr = restAttr;
-        this.restOp = restOp;
+    public RestrictionComparisonCondition(RestrictionAttributes restAttr, ComparisonOperator restOp, Date value) {
+        this.restrictionAttribute = restAttr;
+        this.comparisonOperator = restOp;
         this.value = value;
     }
     /**
@@ -107,9 +114,9 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
      * @param restOp Restriction operator
      * @param value Restriction value to compare with attribute
      */
-    public RestrictionComparisonCondition(RestrictionAttributes restAttr, RestrictionOperator restOp, Number value) {
-        this.restAttr = restAttr;
-        this.restOp = restOp;
+    public RestrictionComparisonCondition(RestrictionAttributes restAttr, ComparisonOperator restOp, Number value) {
+        this.restrictionAttribute = restAttr;
+        this.comparisonOperator = restOp;
         this.value = value;
     }
     /**
@@ -117,35 +124,54 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
      * 
      * @throws RestrictionNullException
      */
-    public void validate () throws RestrictionNullException {
+    public void validate () throws RestrictionNullException, RestrictionException {
         // Check if any private field is null.
-        if (this.restAttr == null ||
-                this.restOp == null ||
+        if (this.restrictionAttribute == null ||
+                this.comparisonOperator == null ||
                 this.value == null)
             throw new RestrictionNullException ();
         // If Between operator is selected, check if value2 is not null
-        if (this.restOp == RestrictionOperator.BETWEEN && this.valueRigth == null)
+        if (this.comparisonOperator == ComparisonOperator.BETWEEN && this.valueRight == null)
             throw new RestrictionNullException ();
+        // Check if value and attribute belongs to same type
+        if (this.restrictionAttribute.isObject()) {
+            // Datafile attribute, value has to be Datafile class
+            if (this.restrictionAttribute == RestrictionAttributes.DATAFILE &&
+                    this.getValue().getClass() != Datafile.class)
+                throw new RestrictionValueClassException("Attempt to set a value of type "
+                        + this.getValue().getClass().getSimpleName()
+                        + " where expected type of class Datafile");
+            // Dataset attribute, value has to be Dataset class
+            if (this.restrictionAttribute == RestrictionAttributes.DATASET &&
+                    this.getValue().getClass() != Dataset.class)
+                throw new RestrictionValueClassException("Attempt to set a value of type "
+                        + this.getValue().getClass().getSimpleName()
+                        + " where expected type of class Dataset");
+            // Sample attribute, value has to be Sample class
+            if (this.restrictionAttribute == RestrictionAttributes.SAMPLE &&
+                    this.getValue().getClass() != Sample.class)
+                throw new RestrictionValueClassException("Attempt to set a value of type "
+                        + this.getValue().getClass().getSimpleName()
+                        + " where expected type of class Sample");
+            // Investigation attribute, value has to be Investigation class
+            if (this.restrictionAttribute == RestrictionAttributes.INVESTIGATION &&
+                    this.getValue().getClass() != Investigation.class)
+                throw new RestrictionValueClassException("Attempt to set a value of type "
+                        + this.getValue().getClass().getSimpleName()
+                        + " where expected type of class Investigation");
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////
     //                     GETTERS and SETTERS                              //
     //////////////////////////////////////////////////////////////////////////
 
-    public RestrictionAttributes getRestAttr() {
-        return restAttr;
+    public RestrictionAttributes getRestrictionAttribute() {
+        return restrictionAttribute;
     }
 
-    public void setRestAttr(RestrictionAttributes restAttr) {
-        this.restAttr = restAttr;
-    }
-
-    public RestrictionOperator getRestOp() {
-        return restOp;
-    }
-
-    public void setRestOp(RestrictionOperator restOp) {
-        this.restOp = restOp;
+    public void setRestrictionAttribute(RestrictionAttributes attribute) {
+        this.restrictionAttribute = attribute;
     }
 
     public Object getValue() {
@@ -156,11 +182,19 @@ public class RestrictionComparisonCondition extends RestrictionCondition {
         this.value = value;
     }
 
-    public Object getValueRigth() {
-        return valueRigth;
+    public Object getValueRight() {
+        return valueRight;
     }
 
-    public void setValueRigth(Object valueRigth) {
-        this.valueRigth = valueRigth;
+    public void setValueRight(Object valueRight) {
+        this.valueRight = valueRight;
+    }
+
+    public ComparisonOperator getComparisonOperator() {
+        return comparisonOperator;
+    }
+
+    public void setComparisonOperator(ComparisonOperator comparisonOperator) {
+        this.comparisonOperator = comparisonOperator;
     }
 }

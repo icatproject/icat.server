@@ -12,6 +12,7 @@ import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.NoParameterTypeException;
 import uk.icat3.exceptions.NoSearchableParameterException;
 import uk.icat3.exceptions.NullParameterException;
+import uk.icat3.search.parameter.ParameterCondition;
 
 /**
  * This class contains the information about a parameter which is going to
@@ -19,7 +20,7 @@ import uk.icat3.exceptions.NullParameterException;
  * 
  * @author cruzcruz
  */
-public class ParameterSearch {
+public class ParameterSearch extends ParameterCondition {
     /** JQPL field name for NUMERIC_VALUE */
     private static String NUMERIC_VALUE = "numericValue";
     /** JQPL field name for STRING_VALUE */

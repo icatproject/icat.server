@@ -320,7 +320,10 @@ public class DatafileSearch {
             String restrictionParam = "";
             if (ejpql.getSampleParameter().isEmpty())
                 restrictionParam += restricion.getParameterJPQL(ElementType.DATAFILE, ElementType.SAMPLE);
+            // Add investigator parameter if exists
             restrictionParam += restricion.getParameterJPQL(ElementType.DATAFILE, ElementType.INVESTIGATOR);
+            // Add Keyword parameter if exists
+            restrictionParam += restricion.getParameterJPQL(ElementType.DATAFILE, ElementType.KEYWORD);
             // Construction JPQL sentence
             String jpql =  returnJPQL + restrictionParam + ", " + ejpql.getParametersJPQL(ElementType.DATAFILE)
                     + QUERY_USERS_DATAFILES_JPQL;

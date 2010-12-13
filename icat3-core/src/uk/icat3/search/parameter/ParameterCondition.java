@@ -7,6 +7,8 @@
 
 package uk.icat3.search.parameter;
 
+import uk.icat3.search.Condition;
+
 /**
  * This is the parent class for ParameterOperator and ParameterComparator, and
  * it's used to create the parameter search structure.
@@ -35,19 +37,17 @@ package uk.icat3.search.parameter;
  * @see ParameterComparator
  * @see ParameterOperator
  */
- public class  ParameterCondition {
-    private boolean isNegate = false;
+ public class  ParameterCondition extends Condition {
 
-    public static ParameterCondition NOT (ParameterCondition cond) {
-        cond.isNegate = true;
+    /**
+     * Negates this condition
+     *
+     * @param cond Parameter condition
+     *
+     * @return Object itself
+     */
+    public static ParameterCondition Not (ParameterCondition cond) {
+        cond.setNegate(true);
         return cond;
-    }
-
-    public boolean isIsNegate() {
-        return isNegate;
-    }
-
-    public void setIsNegate(boolean isNegate) {
-        this.isNegate = isNegate;
     }
 }

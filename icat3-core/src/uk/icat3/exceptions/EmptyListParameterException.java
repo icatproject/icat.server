@@ -21,5 +21,8 @@ public class EmptyListParameterException extends ParameterSearchException {
         super (msg + ": list of parameter is empty");
     }
 
+    public EmptyListParameterException(String msg) {
+        super (msg);
+    }
 
 }

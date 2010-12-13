@@ -258,7 +258,11 @@ public class InvestigationSearch extends ManagerUtil {
                 restrictionParam += restricion.getParameterJPQL(ElementType.INVESTIGATION, ElementType.DATAFILE);
             if (ejpql.getDatasetParameter().isEmpty() && ejpql.getDatafileParameter().isEmpty())
                 restrictionParam += restricion.getParameterJPQL(ElementType.INVESTIGATION, ElementType.DATASET);
+            // Add investigator parameter
             restrictionParam += restricion.getParameterJPQL(ElementType.INVESTIGATION, ElementType.INVESTIGATOR);
+            // Add keywords parameter
+            restrictionParam += restricion.getParameterJPQL(ElementType.INVESTIGATION, ElementType.KEYWORD);
+
             // Construction JPQL sentence
             String jpql = returnJPQL
                     + restrictionParam + "," + ejpql.getParametersJPQL(ElementType.INVESTIGATION)
