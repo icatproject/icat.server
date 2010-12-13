@@ -13,7 +13,9 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
 import uk.icat3.entity.Parameter;
+import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.SessionException;
+import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.search.ParameterSearch;
 import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
@@ -46,9 +48,16 @@ public class ParameterSearchBean extends EJBObject implements ParameterSearchLoc
 
     @Override
     public Collection<Parameter> getParameterByUnits(String sessionId, String units) throws SessionException {
-         //for user bean get userId
+        //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
         
         return ParameterSearch.getParameterByUnits(userId, units, manager);
+    }
+
+    @Override
+    public Collection getParameterByRestriction(String sessionId, RestrictionCondition condition) throws SessionException, RestrictionException {
+        String userId = user.getUserIdFromSessionId(sessionId);
+
+        return ParameterSearch.getParameterByRestriction(userId, condition, manager);
     }
 }
