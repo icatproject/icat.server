@@ -1,8 +1,8 @@
 /*
  * This code is developed in Institut Laue-Langevin (France).
- * Its goal is the implementation of parameter search into ICAT Web Service
+ * Its goal is the implementation of parameter and restriction search into ICAT Web Service
  * 
- * Created on 9 déc. 2010
+ * Created on 9 dec. 2010
  */
 
 package uk.icat3.search;
