@@ -131,7 +131,7 @@ public class RestrictionUtil {
      * @return true it max results was set. Otherwise false.
      */
     public boolean hasMaxResults () {
-        if (maxResults < 0)
+        if (maxResults <= 0)
             return false;
         return true;
     }

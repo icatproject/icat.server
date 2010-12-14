@@ -61,6 +61,7 @@ public enum RestrictionAttributes {
     INVESTIGATION_PARAM_NAME("invParamName"),
     INVESTIGATION_PARAM_VALUE("invParamValue"),
     INVESTIGATION_FACILITY("facility"),
+    INVESTIGATION_FACILITY_CYCLE_NAME("facilityCycle.name"),
     INVESTIGATION_INSTRUMENT("instrument"),
     INVESTIGATION_TYPE("invType"),
     INVESTIGATION_RELEASE_DATE("releaseDate"),

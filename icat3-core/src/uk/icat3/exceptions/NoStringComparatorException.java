@@ -22,11 +22,11 @@ public class NoStringComparatorException extends ComparatorException {
 
     public NoStringComparatorException (Parameter param, ComparisonOperator comp) {
         super (NoStringComparatorException.msg +
-                "Parameter '" +
+                "Parameter with name='" +
                 param.getParameterPK().getName() +
-                "(" + param.getParameterPK().getUnits() +
-                ")' contains string value " +
-                "but comparator '" + comp.name() + "' is for numeric values");
+                "' and units='" + param.getParameterPK().getUnits() +
+                "', is a STRING parameter, " +
+                "comparator '" + comp.name() + "' is only for Numeric or Date values.");
     }
 
     

@@ -87,7 +87,7 @@ public class RestrictionCondition extends Condition {
      * @return true it max results was set. Otherwise false.
      */
     public boolean hasMaxResults () {
-        if (this.maxResults == null || this.maxResults < 0)
+        if (this.maxResults == null || this.maxResults <= 0)
             return false;
         return true;
     }
