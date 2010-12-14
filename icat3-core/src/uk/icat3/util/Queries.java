@@ -603,7 +603,7 @@ public class Queries {
     /**
      * Max number of returned items in a collection
      */
-    public static int MAX_QUERY_RESULTSET = 200;
+    public static int MAX_QUERY_RESULTSET = 400;
 
     /** Number of results is limited to MAX_QUERY_RESULTSET */
     public static final int NO_PAGINATION = -1;
