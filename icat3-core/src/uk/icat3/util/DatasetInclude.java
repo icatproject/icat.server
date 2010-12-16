@@ -24,7 +24,7 @@ public enum DatasetInclude {
     DATASET_AND_DATAFILES_ONLY,
     DATASET_PARAMETERS_ONLY,
     DATASET_DATAFILES_AND_PARAMETERS,
-    ALL_DATASET_ID,
+//    ALL_DATASET_ID,
 //    DATASET_NUMBER_OF_RESULTS,
     NONE;
     
@@ -45,17 +45,17 @@ public enum DatasetInclude {
         else return false;
     }
 
-    /**
-     * Check if this object is a ALL_DATASET_ID enum. If this
-     * option is selected, only the Dataset Id are returned.
-     *
-     * @return True if this object is ALL_DATASET_ID, otherwise false.
-     */
-    public boolean isAllDatasetId () {
-        if (this == DatasetInclude.ALL_DATASET_ID)
-            return true;
-        return false;
-    }
+//    /**
+//     * Check if this object is a ALL_DATASET_ID enum. If this
+//     * option is selected, only the Dataset Id are returned.
+//     *
+//     * @return True if this object is ALL_DATASET_ID, otherwise false.
+//     */
+//    public boolean isAllDatasetId () {
+//        if (this == DatasetInclude.ALL_DATASET_ID)
+//            return true;
+//        return false;
+//    }
   
 
     /**

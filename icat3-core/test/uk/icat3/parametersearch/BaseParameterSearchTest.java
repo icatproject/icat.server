@@ -61,6 +61,7 @@ import uk.icat3.util.BaseTest;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.LogicalOperator;
 import uk.icat3.util.ParameterValueType;
+import uk.icat3.util.TestConstants;
 
 /**
  * THIS ONLY A CLASS TO MAKE TEST IN JPQL STATEMENTS
@@ -76,7 +77,7 @@ public class BaseParameterSearchTest extends BaseTest {
     public static String logOp = " AND ";
     private long time;
     private static Random random = new Random();
-    public static final String VALID_USER_FOR_INVESTIGATION  = "TEST";
+    public static final String VALID_USER_FOR_INVESTIGATION = TestConstants.VALID_USER_FOR_INVESTIGATION;
     protected static List<Object> removeEntities;
     protected static ArrayList<ParameterComparisonCondition> pcDatafile;
     protected static ArrayList<ParameterComparisonCondition> pcDataset;
@@ -288,7 +289,7 @@ public class BaseParameterSearchTest extends BaseTest {
         Timestamp timeSQL = new Timestamp(new Date().getTime());
         autho.setUserId(VALID_USER_FOR_INVESTIGATION);
 
-        autho.setRole(em.find(IcatRole.class, "SUPER"));
+           autho.setRole(em.find(IcatRole.class, "SUPER"));
         autho.setElementType(ElementType.INVESTIGATION);
         autho.setCreateTime(timeSQL);
         autho.setModTime(timeSQL);

@@ -228,9 +228,12 @@ public class DatafileTest extends BaseParameterSearchTest {
         lp.add(pv2);
         lp.add(pv3);
 
+        RestrictionCondition cond = new RestrictionCondition();
+        cond.setReturnLongId(true);
+
         List li = (List) DatafileSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, null
-                , DatafileInclude.ALL_DATAFILE_ID
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, cond
+                , DatafileInclude.NONE
                 , Queries.NO_LIMITED_RESULTS
                 , Queries.NO_LIMITED_RESULTS, em);
 

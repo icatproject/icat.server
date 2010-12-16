@@ -191,9 +191,12 @@ public class DatasetSimpleRestrictionTest extends BaseParameterSearchTest {
     @Test
     public void returnIdsTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException, EmptyListParameterException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, RestrictionException {
 
+        RestrictionCondition cond = new RestrictionCondition();
+        cond.setReturnLongId(true);
+
         List li = (List) DatasetSearch
-                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, null
-                , DatasetInclude.ALL_DATASET_ID
+                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, cond
+                , DatasetInclude.NONE
                 , Queries.NO_LIMITED_RESULTS
                 , Queries.NO_LIMITED_RESULTS, em);
 

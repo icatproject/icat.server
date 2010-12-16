@@ -202,7 +202,8 @@ public class DatafileSearch {
         // Return type
         String returnJPQL = RETURN_ALL_DATAFILES_JPQL;
         // Return ids
-        if (include == DatafileInclude.ALL_DATAFILE_ID) {
+//        if (include == DatafileInclude.ALL_DATAFILE_ID) {
+        if (restrUtil.isReturnLongId()) {
             returnJPQL = RETURN_ALL_DATAFILES_ID_JPQL;
             numberResults = NO_LIMITED_RESULTS;
         }
@@ -216,7 +217,8 @@ public class DatafileSearch {
                 , ElementType.DATASET, userId, startIndex, numberResults
                 , manager);
         // Return type is a Collection of Long
-        if (include == DatafileInclude.ALL_DATAFILE_ID)
+        if (restrUtil.isReturnLongId())
+//        if (include == DatafileInclude.ALL_DATAFILE_ID)
             return res;
         // Check if the dataset should include other objects (Datafiles, Parameters)
         ManagerUtil.getDatafileInformation(res, include);
@@ -312,7 +314,8 @@ public class DatafileSearch {
             // Return type
             String returnJPQL = RETURN_ALL_DATAFILES_JPQL;
             // Return ids
-            if (include == DatafileInclude.ALL_DATAFILE_ID) {
+//            if (include == DatafileInclude.ALL_DATAFILE_ID) {
+            if (restricion.isReturnLongId()) {
                 returnJPQL = RETURN_ALL_DATAFILES_ID_JPQL;
                 numberResults = NO_LIMITED_RESULTS;
             }
@@ -332,7 +335,8 @@ public class DatafileSearch {
                     , ElementType.DATASET, userId, startIndex, numberResults
                     , manager);
             // Return is a Collection of Long
-            if (include == DatafileInclude.ALL_DATAFILE_ID)
+//            if (include == DatafileInclude.ALL_DATAFILE_ID)
+            if (restricion.isReturnLongId())
                 return res;
             // Check if the datafile should include other objects
             ManagerUtil.getDatafileInformation (res, include);

@@ -136,7 +136,8 @@ public class InvestigationSearch extends ManagerUtil {
         // Return type
         String returnJPQL = RETURN_ALL_INVESTIGATIONS_JPQL;
         // Return all ids
-        if (include == InvestigationInclude.ALL_INVESTIGATION_ID) {
+//        if (include == InvestigationInclude.ALL_INVESTIGATION_ID) {
+        if (restrUtil.isReturnLongId()) {
             returnJPQL = RETURN_ALL_INVESTIGATIONS_ID_JPQL;
             numberResults = NO_LIMITED_RESULTS;
         }
@@ -150,7 +151,8 @@ public class InvestigationSearch extends ManagerUtil {
                 , ElementType.INVESTIGATION, userId, startIndex, numberResults
                 , manager);
         // Return type is a Collection of Long
-        if (include == InvestigationInclude.ALL_INVESTIGATION_ID)
+//        if (include == InvestigationInclude.ALL_INVESTIGATION_ID)
+        if (restrUtil.isReturnLongId())
             return res;
         // Check if the dataset should include other objects (Datafiles, Parameters)
         ManagerUtil.getInvestigationInformation(userId, res, include, manager);
@@ -246,7 +248,8 @@ public class InvestigationSearch extends ManagerUtil {
             // Return type
             String returnJPQL = RETURN_ALL_INVESTIGATIONS_JPQL;
             // Return ids
-            if (include == InvestigationInclude.ALL_INVESTIGATION_ID) {
+//            if (include == InvestigationInclude.ALL_INVESTIGATION_ID) {
+            if (restricion.isReturnLongId()) {
                 returnJPQL = RETURN_ALL_INVESTIGATIONS_ID_JPQL;
                 numberResults = NO_LIMITED_RESULTS;
             }
@@ -272,7 +275,8 @@ public class InvestigationSearch extends ManagerUtil {
                     , ElementType.INVESTIGATION, userId, startIndex, numberResults
                     , manager);
             // Return type is a Collection of Long
-            if (include == InvestigationInclude.ALL_INVESTIGATION_ID)
+//            if (include == InvestigationInclude.ALL_INVESTIGATION_ID)
+            if (restricion.isReturnLongId())
                 return res;
             // Check if the dataset should include other objects (Datafiles, Parameters)
             ManagerUtil.getInvestigationInformation(userId, res, include, manager);

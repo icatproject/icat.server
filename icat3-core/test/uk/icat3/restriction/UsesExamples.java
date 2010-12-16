@@ -512,9 +512,10 @@ public class UsesExamples extends BaseParameterSearchTest  {
 //        lp.add(pv2);
 //        lp.add(pv3);
         RestrictionCondition cond = new RestrictionCondition();
-        cond.setDatafileInclude(DatafileInclude.ALL_DATAFILE_ID);
-        cond.setInvestigationInclude(InvestigationInclude.ALL_INVESTIGATION_ID);
-        cond.setDatasetInclude(DatasetInclude.ALL_DATASET_ID);
+//        cond.setDatafileInclude(DatafileInclude.ALL_DATAFILE_ID);
+//        cond.setInvestigationInclude(InvestigationInclude.ALL_INVESTIGATION_ID);
+//        cond.setDatasetInclude(DatasetInclude.ALL_DATASET_ID);
+        cond.setReturnLongId(true);
 
         List li = (List) InvestigationSearch
                 .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, cond
@@ -534,7 +535,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
                 , Queries.NO_LIMITED_RESULTS
                 , Queries.NO_LIMITED_RESULTS, em);
          
-         cond.setSampleInclude(SampleInclude.ALL_SAMPLE_ID);
+//         cond.setSampleInclude(SampleInclude.ALL_SAMPLE_ID);
          List ls = (List) SampleSearch
                 .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, cond
                 , SampleInclude.NONE

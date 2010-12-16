@@ -17,13 +17,13 @@ package uk.icat3.util;
  */
 public enum SampleInclude {
         
-    ALL_SAMPLE_ID,
+//    ALL_SAMPLE_ID,
     NONE;
     
-    public boolean isAllSampleId () {
-        if (this == ALL_SAMPLE_ID)
-            return true;
-        return false;
-    }
+//    public boolean isAllSampleId () {
+//        if (this == ALL_SAMPLE_ID)
+//            return true;
+//        return false;
+//    }
   
 }

@@ -35,6 +35,8 @@ public class RestrictionCondition extends Condition {
     private DatafileInclude datafileInclude = null;
     /** Sample include options */
     private SampleInclude sampleInclude = null;
+    /** Return only identification long without limit of number results */
+    private boolean returnLongId = false;
 
     /**
      * Negates this condition
@@ -209,5 +211,13 @@ public class RestrictionCondition extends Condition {
 
     public void setSampleInclude(SampleInclude sampleInclude) {
         this.sampleInclude = sampleInclude;
+    }
+
+    public boolean isReturnLongId() {
+        return returnLongId;
+    }
+
+    public void setReturnLongId(boolean returnLongId) {
+        this.returnLongId = returnLongId;
     }
 }

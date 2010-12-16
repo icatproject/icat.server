@@ -76,6 +76,8 @@ public class RestrictionUtil {
     private int startIndex;
     /** Include options */
     private Enum enumInclude;
+    /** Indicate return is a list of long */
+    private boolean returnLongId;
 
     /**
      * Constructor
@@ -91,6 +93,7 @@ public class RestrictionUtil {
      */
     public RestrictionUtil(RestrictionCondition restCond, RestrictionType restType) throws DatevalueException, RestrictionOperatorException, OperatorINException, RestrictionNullException, RestrictionEmptyListException, CyclicException, EmptyOperatorException, RestrictionException  {
         // Initialites variables
+        this.returnLongId = false;
         this.enumInclude = null;
         this.sentenceJPQL = "";
         this.orderByJPQL = "";
@@ -107,6 +110,7 @@ public class RestrictionUtil {
         // Check restriction is not null
         if (restCond != null) {
             extractJPQL(restCond);
+            checkConditionOptions(restCond);
             // If it's ordered. The attribute type should be the same that
             // the restriction type. (If order by Investigation.name and
             // the results are Datasets, it could repeat entries).
@@ -216,20 +220,8 @@ public class RestrictionUtil {
             // Close the parenthesis for the comparators
             closeParenthesis();
         }
-        // Check if maximun of results was set in any condition
-        if (restCond.hasMaxResults()) {
-            this.maxResults = restCond.getMaxResults();
-            this.startIndex = 0;
-        }
-        // Check if order was set in any condition
-        if (restCond.hasOrder()) {
-            this.orderByAsc = restCond.isOrderByAsc();
-            this.orderByAttr = restCond.getOrderByAttribute();
-        }
-        // Check if there exists include options
-        if (restCond.hasInclude(restType)) {
-            this.enumInclude = restCond.getInclude(restType);
-        }
+        checkConditionOptions (restCond);
+        
         return null;
     }
 
@@ -838,6 +830,12 @@ public class RestrictionUtil {
         return jpqlParameter;
     }
 
+    public boolean isReturnLongId() {
+        return returnLongId;
+    }
+
+    
+
     /**
      * Return JPQL parameter name which represents the datetime value to compare
      * with a datatime parameter.
@@ -870,5 +868,29 @@ public class RestrictionUtil {
             throw new DatevalueException(value.toString(), t);
         }
         return date;
+    }
+    /**
+     * Check for the conditons options inside a RestrictionCondition
+     * 
+     * @param restCond Restriction condition
+     */
+    private void checkConditionOptions(RestrictionCondition restCond) {
+        // Check if maximun of results was set in any condition
+        if (restCond.hasMaxResults()) {
+            this.maxResults = restCond.getMaxResults();
+            this.startIndex = 0;
+        }
+        // Check if order was set in any condition
+        if (restCond.hasOrder()) {
+            this.orderByAsc = restCond.isOrderByAsc();
+            this.orderByAttr = restCond.getOrderByAttribute();
+        }
+        // Check if there exists include options
+        if (restCond.hasInclude(restType)) {
+            this.enumInclude = restCond.getInclude(restType);
+        }
+        // Chekf return option
+        if (restCond.isReturnLongId())
+            this.returnLongId = true;
     }
 }

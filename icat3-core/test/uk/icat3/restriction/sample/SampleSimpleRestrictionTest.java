@@ -7,7 +7,6 @@
 
 package uk.icat3.restriction.sample;
 
-import uk.icat3.restriction.sample.*;
 import uk.icat3.exceptions.EmptyListParameterException;
 import uk.icat3.exceptions.NoParameterTypeException;
 import uk.icat3.exceptions.NoParametersException;
@@ -15,9 +14,6 @@ import uk.icat3.exceptions.NoSearchableParameterException;
 import uk.icat3.exceptions.NullParameterException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.ParameterSearchException;
-import uk.icat3.search.parameter.util.ParameterSearch;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
@@ -176,9 +172,11 @@ public class SampleSimpleRestrictionTest extends BaseParameterSearchTest {
     @Test
     public void returnIdsTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException, EmptyListParameterException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, RestrictionException {
 
+        RestrictionCondition cond = new RestrictionCondition();
+        cond.setReturnLongId(true);
         List li = (List) SampleSearch
-                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, null
-                , SampleInclude.ALL_SAMPLE_ID
+                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, cond
+                , SampleInclude.NONE
                 , Queries.NO_LIMITED_RESULTS
                 , Queries.NO_LIMITED_RESULTS, em);
 

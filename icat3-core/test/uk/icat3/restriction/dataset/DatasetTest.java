@@ -259,9 +259,12 @@ public class DatasetTest extends BaseParameterSearchTest {
         lp.add(pv2);
         lp.add(pv3);
 
+        RestrictionCondition cond = new RestrictionCondition();
+        cond.setReturnLongId(true);
+
         List li = (List) DatasetSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, null
-                , DatasetInclude.ALL_DATASET_ID
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, cond
+                , DatasetInclude.NONE
                 , Queries.NO_LIMITED_RESULTS
                 , Queries.NO_LIMITED_RESULTS, em);
 

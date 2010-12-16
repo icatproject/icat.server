@@ -35,7 +35,7 @@ public class TestConstants {
     public final static String VALID_FEDID_FOR_INVESTIGATION =  "gjd37";
     public final static String VALID_SURNAME_FOR_INVESTIGATION =  "User"; //from test user
     
-    public final static String VALID_FACILITY_USER_FOR_INVESTIGATION =  "test";
+    public final static String VALID_FACILITY_USER_FOR_INVESTIGATION = "test";
     public final static String VALID_USER_FOR_INVESTIGATION =  VALID_FACILITY_USER_FOR_INVESTIGATION;
     public final static String VALID_FACILITY_USER_FOR_PROPS_INVESTIGATION =  "FIRST PROPAGATION";
     public final static long VALID_DATASET_ID_FOR_INVESTIGATION =  3;

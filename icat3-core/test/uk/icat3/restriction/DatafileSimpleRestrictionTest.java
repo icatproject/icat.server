@@ -187,9 +187,12 @@ public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
     @Test
     public void returnIdsTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException, EmptyListParameterException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, RestrictionException {
 
+         RestrictionCondition cond = new RestrictionCondition();
+        cond.setReturnLongId(true);
+
         List li = (List) DatafileSearch
-                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, null
-                , DatafileInclude.ALL_DATAFILE_ID
+                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, cond
+                , DatafileInclude.NONE
                 , Queries.NO_LIMITED_RESULTS
                 , Queries.NO_LIMITED_RESULTS, em);
 

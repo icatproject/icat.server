@@ -197,9 +197,11 @@ public class InvestigationSimpleRestrictionTest extends BaseParameterSearchTest 
     @Test
     public void returnIdsTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException, EmptyListParameterException, NoSearchableParameterException, NullParameterException, ParameterNoExistsException, RestrictionException {
 
+        RestrictionCondition cond = new RestrictionCondition();
+        cond.setReturnLongId(true);
         List li = (List) InvestigationSearch
-                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, null
-                , InvestigationInclude.ALL_INVESTIGATION_ID
+                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, cond
+                , InvestigationInclude.NONE
                 , Queries.NO_LIMITED_RESULTS
                 , Queries.NO_LIMITED_RESULTS, em);
 

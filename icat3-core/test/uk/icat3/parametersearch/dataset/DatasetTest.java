@@ -23,6 +23,7 @@ import uk.icat3.entity.Dataset;
 import uk.icat3.exceptions.RestrictionException;
 import static org.junit.Assert.*;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
+import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterLogicalCondition;
 import uk.icat3.search.parameter.ParameterType;
@@ -50,15 +51,17 @@ public class DatasetTest extends BaseParameterSearchTest {
         lp.add(pv2);
         lp.add(pv3);
 
+        RestrictionCondition cond = new RestrictionCondition();
+        cond.setReturnLongId(true);
+
         List li = (List) DatasetSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, null
-                , DatasetInclude.ALL_DATASET_ID
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, cond
+                , DatasetInclude.NONE
                 , Queries.NO_LIMITED_RESULTS
                 , Queries.NO_LIMITED_RESULTS, em);
 
         assertTrue("Results of datasets should be 1, not " + li.size(), (li.size() == 1));
-        assertTrue("Object should be Long, not " + li.get(0).getClass().getName()
-                , Long.class == li.get(0).getClass());
+        assertEquals("Object should be Long, not ", Long.class, li.get(0).getClass());
     }
 
 //    @Test

@@ -134,6 +134,7 @@ public class ExtractTest extends BaseParameterSearchTest {
         // Add the comparator
         comp1.setComparator(ComparisonOperator.EQUALS);
         comp1.setValue(5);
+        restriction1.setReturnLongId(true);
         // Add the value to compare
 //        comp1.setValue(new Date(0));
         // Add a second value if needed (only for BETWEEN)
@@ -143,7 +144,7 @@ public class ExtractTest extends BaseParameterSearchTest {
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION
                         , comp1
                         , restriction1
-                        , DatasetInclude.ALL_DATASET_ID
+                        , DatasetInclude.NONE
                         , Queries.NO_LIMITED_RESULTS
                         , Queries.NO_LIMITED_RESULTS
                         , em);

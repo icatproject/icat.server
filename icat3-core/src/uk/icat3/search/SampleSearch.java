@@ -79,10 +79,12 @@ public class SampleSearch {
         // Return type
         String returnJPQL = RETURN_ALL_SAMPLES_JPQL;
         // Return ids
-        if (include == SampleInclude.ALL_SAMPLE_ID) {
+//        if (include == SampleInclude.ALL_SAMPLE_ID) {
+        if (restrUtil.isReturnLongId()) {
             returnJPQL = RETURN_ALL_SAMPLE_ID_JPQL;
             numberResults = NO_LIMITED_RESULTS;
         }
+        // Get ejpql parameters
         String restrictionParam = restrUtil.getParameterJPQL(ElementType.SAMPLE);
         // Construction JPQL sentence
         String jpql = returnJPQL
@@ -184,7 +186,8 @@ public class SampleSearch {
             // Return type
             String returnJPQL = RETURN_ALL_SAMPLES_JPQL;
             // Return ids
-            if (include == SampleInclude.ALL_SAMPLE_ID) {
+//            if (include == SampleInclude.ALL_SAMPLE_ID) {
+            if (restricion.isReturnLongId()) {
                 returnJPQL = RETURN_ALL_SAMPLE_ID_JPQL;
                 numberResults = NO_LIMITED_RESULTS;
             }
