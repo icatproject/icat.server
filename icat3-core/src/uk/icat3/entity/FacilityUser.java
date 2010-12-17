@@ -40,7 +40,7 @@ import uk.icat3.util.ElementType;
     @NamedQuery(name = "FacilityUser.findByMiddleName", query = "SELECT f FROM FacilityUser f WHERE f.middleName = :middleName"),
     @NamedQuery(name = "FacilityUser.findByLastName", query = "SELECT f FROM FacilityUser f WHERE f.lastName = :lastName"),
     @NamedQuery(name = "FacilityUser.findByModTime", query = "SELECT f FROM FacilityUser f WHERE f.modTime = :modTime"),
-    @NamedQuery(name = "FacilityUser.findByModId", query = "SELECT f FROM FacilityUser f WHERE f.modId = :modId"),
+    @NamedQuery(name = "FacilityUser.findByModId", query = "SELECT f FROM FacilityUser f WHERE f.modId = :modId")
 })
         @XmlRootElement
         public class FacilityUser extends EntityBaseBean implements Serializable {

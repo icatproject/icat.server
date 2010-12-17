@@ -89,7 +89,7 @@ public class MetadataIngest {
         ArrayList invIds = new ArrayList();
         Long returnIds = null;
 
-        try {
+        
 
             List<Study> _studies = icat.getStudy();
             for (Study _study : _studies) {
@@ -303,13 +303,7 @@ public class MetadataIngest {
                 } //end for
             } //end for
         //return invIds
-        } catch (NoSuchObjectFoundException ex) {
-            //java.util.logging.Logger.getLogger("global").log(Level.SEVERE, null, ex);
-            throw (ex);
-        } catch (InsufficientPrivilegesException ex) {
-            //java.util.logging.Logger.getLogger("global").log(Level.SEVERE, null, ex);
-            throw (ex);
-        } //end try / catch#
+       
         return (Long[]) invIds.toArray(new Long[0]);
     }
 

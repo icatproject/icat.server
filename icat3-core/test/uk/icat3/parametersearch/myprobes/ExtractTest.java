@@ -12,8 +12,6 @@ import uk.icat3.exceptions.ParameterSearchException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.DatevalueFormatException;
 import uk.icat3.exceptions.NoDatetimeComparatorException;
@@ -28,6 +26,8 @@ import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterType;
+
+import org.apache.log4j.Logger;
 import org.junit.Test;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Parameter;
@@ -75,31 +75,31 @@ public class ExtractTest extends BaseParameterSearchTest {
                 System.out.println("---> " + li.size());
                 System.out.println("");
         } catch (RestrictionNullException ex) {
-            Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
+        	 log.error(ex);
         } catch (NoStringComparatorException ex) {
-            Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
+        	log.error(ex);
         } catch (NoNumericComparatorException ex) {
-            Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
+        	log.error(ex);
         } catch (NoSearchableParameterException ex) {
-            Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
+        	log.error(ex);
         } catch (NullParameterException ex) {
-            Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
+        	log.error(ex);
         } catch (EmptyOperatorException ex) {
-            Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
+        	log.error(ex);
         } catch (NoParametersException ex) {
-            Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
+        	log.error(ex);
         } catch (ParameterNoExistsException ex) {
-            Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
+        	log.error(ex);
         } catch (NoDatetimeComparatorException ex) {
-            Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
+        	log.error(ex);
         } catch (DatevalueException ex) {
-            Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
+        	log.error(ex);
         } catch (NumericvalueException ex) {
-            Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
+        	log.error(ex);
         } catch (DatevalueFormatException ex) {
-            Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
+        	log.error(ex);
         } catch (RestrictionEmptyListException ex) {
-            Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
+        	log.error(ex);
         }
     }
 

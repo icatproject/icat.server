@@ -9,7 +9,6 @@
 
 package uk.icat3.sessionbeans.user;
 
-import java.util.logging.Level;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;

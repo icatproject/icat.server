@@ -20,8 +20,6 @@ import uk.icat3.exceptions.CyclicException;
 import uk.icat3.exceptions.NoParametersException;
 import uk.icat3.exceptions.NoNumericComparatorException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;

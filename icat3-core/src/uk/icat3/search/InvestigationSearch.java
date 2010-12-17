@@ -8,7 +8,45 @@
  */
 package uk.icat3.search;
 
-import java.util.logging.Level;
+import static uk.icat3.util.Queries.ADVANCED_SEARCH_JPQL_DATAFILE;
+import static uk.icat3.util.Queries.ADVANCED_SEARCH_JPQL_DATAFILE_CASE_INSENSITIVE;
+import static uk.icat3.util.Queries.ADVANCED_SEARCH_JPQL_DATAFILE_PARAMETER;
+import static uk.icat3.util.Queries.ALL_INSTRUMENTS;
+import static uk.icat3.util.Queries.ALL_INVESTIGATION_TYPES;
+import static uk.icat3.util.Queries.ALL_PARAMETERS;
+import static uk.icat3.util.Queries.ALL_ROLES;
+import static uk.icat3.util.Queries.INSTRUMENTS;
+import static uk.icat3.util.Queries.INVESTIGATION_LIST_BY_KEYWORD;
+import static uk.icat3.util.Queries.INVESTIGATION_LIST_BY_KEYWORDS_JPQL;
+import static uk.icat3.util.Queries.INVESTIGATION_LIST_BY_KEYWORDS_JPQL_NOSECURITY;
+import static uk.icat3.util.Queries.INVESTIGATION_LIST_BY_KEYWORD_JPQL;
+import static uk.icat3.util.Queries.INVESTIGATION_LIST_BY_KEYWORD_RTN_ID;
+import static uk.icat3.util.Queries.INVESTIGATION_LIST_BY_SURNAME;
+import static uk.icat3.util.Queries.INVESTIGATION_LIST_BY_USERID;
+import static uk.icat3.util.Queries.INVESTIGATION_LIST_BY_USERID_RTID;
+import static uk.icat3.util.Queries.LIST_ALL_USERS_INVESTIGATIONS_JPQL;
+import static uk.icat3.util.Queries.MAX_QUERY_RESULTSET;
+import static uk.icat3.util.Queries.NO_LIMITED_RESULTS;
+import static uk.icat3.util.Queries.NO_PAGINATION;
+import static uk.icat3.util.Queries.QUERY_USERS_INVESTIGATIONS_JPQL;
+import static uk.icat3.util.Queries.RETURN_ALL_INVESTIGATIONS_ID_JPQL;
+import static uk.icat3.util.Queries.RETURN_ALL_INVESTIGATIONS_JPQL;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
+import org.apache.log4j.Logger;
+
+import uk.icat3.entity.IcatRole;
+import uk.icat3.entity.Instrument;
+import uk.icat3.entity.Investigation;
+import uk.icat3.entity.Parameter;
+import uk.icat3.exceptions.CyclicException;
 import uk.icat3.exceptions.DatevalueException;
 import uk.icat3.exceptions.DatevalueFormatException;
 import uk.icat3.exceptions.EmptyListParameterException;
@@ -16,45 +54,32 @@ import uk.icat3.exceptions.EmptyOperatorException;
 import uk.icat3.exceptions.NoDatetimeComparatorException;
 import uk.icat3.exceptions.NoElementTypeException;
 import uk.icat3.exceptions.NoNumericComparatorException;
+import uk.icat3.exceptions.NoParameterTypeException;
+import uk.icat3.exceptions.NoParametersException;
 import uk.icat3.exceptions.NoSearchableParameterException;
 import uk.icat3.exceptions.NoStringComparatorException;
 import uk.icat3.exceptions.NullParameterException;
 import uk.icat3.exceptions.NumericvalueException;
-import uk.icat3.exceptions.ParameterNoExistsException;
-import uk.icat3.exceptions.RestrictionEmptyListException;
 import uk.icat3.exceptions.OperatorINException;
+import uk.icat3.exceptions.ParameterNoExistsException;
+import uk.icat3.exceptions.ParameterSearchException;
+import uk.icat3.exceptions.RestrictionEmptyListException;
 import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.RestrictionNullException;
 import uk.icat3.exceptions.RestrictionOperatorException;
-import uk.icat3.search.parameter.util.ParameterSearchUtilSingleton;
-import uk.icat3.search.parameter.ParameterComparisonCondition;
-import uk.icat3.search.parameter.ParameterCondition;
-import uk.icat3.exceptions.NoParameterTypeException;
-import uk.icat3.exceptions.NoParametersException;
-import uk.icat3.exceptions.ParameterSearchException;
-import uk.icat3.search.parameter.util.ExtractedJPQL;
-import uk.icat3.search.parameter.util.ParameterSearch;
-import uk.icat3.util.Queries;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import org.apache.log4j.Logger;
-import uk.icat3.entity.IcatRole;
-import uk.icat3.entity.Instrument;
-import uk.icat3.entity.Investigation;
-import uk.icat3.entity.Parameter;
-import uk.icat3.exceptions.CyclicException;
 import uk.icat3.manager.ManagerUtil;
 import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.restriction.RestrictionType;
 import uk.icat3.restriction.util.RestrictionUtil;
+import uk.icat3.search.parameter.ParameterComparisonCondition;
+import uk.icat3.search.parameter.ParameterCondition;
+import uk.icat3.search.parameter.util.ExtractedJPQL;
+import uk.icat3.search.parameter.util.ParameterSearch;
+import uk.icat3.search.parameter.util.ParameterSearchUtilSingleton;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.InvestigationInclude;
 import uk.icat3.util.LogicalOperator;
-import static uk.icat3.util.Queries.*;
+import uk.icat3.util.Queries;
 
 /**
  * This is the service to allows access to search through the icat schema.
@@ -283,7 +308,7 @@ public class InvestigationSearch extends ManagerUtil {
             // Return results
             return res;
         } catch (NoElementTypeException ex) {
-            java.util.logging.Logger.getLogger(InvestigationSearch.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(ex);
         }
         return new ArrayList<Investigation>();
     }

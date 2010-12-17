@@ -12,7 +12,6 @@ package uk.icat3.search;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Dataset;
@@ -382,7 +381,7 @@ public class DatasetSearch {
             return res;
             
         } catch (NoElementTypeException ex) {
-            java.util.logging.Logger.getLogger(DatasetSearch.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(ex);
         }
         return new ArrayList();
     }

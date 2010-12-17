@@ -11,7 +11,6 @@ package uk.icat3.search;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
@@ -344,7 +343,7 @@ public class DatafileSearch {
             return res;
             
         } catch (NoElementTypeException ex) {
-            java.util.logging.Logger.getLogger(DatafileSearch.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(ex);
         }
 
         return new ArrayList ();

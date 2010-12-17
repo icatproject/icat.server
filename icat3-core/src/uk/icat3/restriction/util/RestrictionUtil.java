@@ -13,8 +13,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import uk.icat3.exceptions.AttributeTypeException;
 import uk.icat3.exceptions.CyclicException;
 import uk.icat3.exceptions.DatevalueException;
@@ -535,7 +537,7 @@ public class RestrictionUtil {
                     else if (comp.getValue() instanceof Number)
                         jpqlParameter.put(paramValue, comp.getValue());
                 } catch (Throwable t) {
-                    Logger.getLogger(RestrictionUtil.class.getName()).log(Level.SEVERE, null, t);
+                    Logger.getLogger(RestrictionUtil.class.getName()).error(t);
                 }
             }
             // If attribute is an Object and Comparison is EQUALS
