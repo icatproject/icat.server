@@ -370,13 +370,15 @@ public class DatasetSearch {
             Collection res = ManagerUtil.getResultList(jpql, ejpql, restricion
                     , ElementType.DATASET, userId, startIndex, numberResults
                     , manager);
+            log.trace("Got " + res.size() + " results"+ (res.isEmpty()? "":" of type " +res.iterator().next().getClass()));
+            
             // Return type is a Collection of Long
-//            if (include == DatasetInclude.ALL_DATASET_ID)
-            if (restricion.isReturnLongId())
+            if (restricion.isReturnLongId()) {
                 return res;
+            }
+            
             // Check if the dataset should include other objects (Datafiles, Parameters)
             ManagerUtil.getDatasetInformation(userId, res, include, manager);
-            // Return results
             return res;
             
         } catch (NoElementTypeException ex) {

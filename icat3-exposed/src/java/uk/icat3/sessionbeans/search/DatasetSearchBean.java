@@ -166,6 +166,13 @@ public class DatasetSearchBean extends EJBObject implements DatasetSearchLocal {
         RestrictionLogicalCondition restLogCond = new RestrictionLogicalCondition(LogicalOperator.AND);
         for (RestrictionCondition r : restriction) {
             restLogCond.add(r);
+            // TODO - these properties which apply to the whole query should not be part of the restriction mechanism
+            if (r.hasMaxResults()) {
+            	restLogCond.setMaxResults(r.getMaxResults());
+            }
+            if (r.isReturnLongId()) {
+            	restLogCond.setReturnLongId(true);
+            }
         }
 
         return DatasetSearch.searchByParameterCondition(userId, paramLogCond, restLogCond, DatasetInclude.NONE, manager);
