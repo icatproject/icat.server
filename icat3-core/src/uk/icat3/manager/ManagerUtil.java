@@ -467,7 +467,7 @@ public class ManagerUtil {
      */
     public static Facility getFacility(EntityManager manager) {
         try {
-            Collection<Facility> facilities = (Collection<Facility>) manager.createNamedQuery("FacilityUser.findAll").getResultList();
+            Collection<Facility> facilities = (Collection<Facility>) manager.createNamedQuery("Facility.findAll").getResultList();
             if (facilities == null || facilities.size() == 0) {
                 throw new RuntimeException("This Icat table set up incorrectly");
             }

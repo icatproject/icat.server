@@ -29,6 +29,7 @@ import uk.icat3.util.ElementType;
 @Entity
 @Table(name = "THIS_ICAT")
 @NamedQueries({
+    @NamedQuery(name = "Facility.findAll", query="SELECT t FROM Facility t"),
     @NamedQuery(name = "Facility.findByFacilityShortName", query = "SELECT t FROM Facility t WHERE t.facilityShortName = :facilityShortName"), 
     @NamedQuery(name = "Facility.findByFacilityLongName", query = "SELECT t FROM Facility t WHERE t.facilityLongName = :facilityLongName"),
     @NamedQuery(name = "Facility.findByFacilityUrl", query = "SELECT t FROM Facility t WHERE t.facilityUrl = :facilityUrl"), 
