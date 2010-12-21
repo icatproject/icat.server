@@ -6,20 +6,20 @@ package uk.icat3.sessionbeans;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
+
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import org.apache.log4j.BasicConfigurator;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
 import uk.icat3.sessionbeans.util.Constants;
@@ -80,27 +80,19 @@ public abstract class EJBObject {
             facilityLogFile = "ISIS";
             System.out.println("Unable to load props file, setting log as  " + facilityLogFile + "\n" + mre);
         }
-
         FACILITY = facilityLogFile;
 
-        Properties props = new Properties();
-        try {
-            InputStream configStream = new FileInputStream("log4j.properties");
-            props.load(configStream);
-            configStream.close();
-
-            props.setProperty("log4j.appender.logxml.file" , "../logs/icat-api.xml");
-            props.setProperty("log4j.appender.logfile.file" , "../logs/icat-api.log");
-            //LogManager.resetConfiguration();
-
-            //load config from user.home
-            PropertyConfigurator.configure(props);
-            log.info("Loaded log4j properties from : log4j.properties");
-
-        } catch (Exception e) {
-            System.out.println("Unable to reload props file\n" + e);
-            BasicConfigurator.configure();
-        }
+		/*
+		 * Set up log4j. Note that even if the requested log4j.properties file is not found or is
+		 * corrupt log4j will do its best to produce some output. The file will be checked for
+		 * changes every minute. Existing properties will NOT be removed - so to reduce logging you
+		 * may need to specify a logging level of INHERIT to take values from further up the tree.
+		 */
+		String log4jFile = "log4j.properties";
+		LogManager.resetConfiguration();
+		PropertyConfigurator.configureAndWatch(log4jFile);
+		log = Logger.getLogger(EJBObject.class);
+		log.info("Loaded log4j properties from : " + log4jFile + " and will watch it.");
 
         //check if overrides default session implementation
         File sessionConf = new File(System.getProperty("user.home") + File.separator + ".session.conf");
@@ -142,8 +134,7 @@ public abstract class EJBObject {
         } finally {
             long time = System.currentTimeMillis() - start;
             log.debug("Exiting " + target + " , This method takes " +
-                    time / 1000f + "s to execute\n");
-            log.debug("\n");
+                    time / 1000f + "s to execute");
         }
     }
 }
