@@ -7,7 +7,6 @@
 
 package uk.icat3.parametersearch;
 
-import javax.persistence.EntityTransaction;
 import uk.icat3.search.parameter.ParameterType;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterCondition;
@@ -62,16 +61,14 @@ import uk.icat3.util.ParameterValueType;
 import uk.icat3.util.TestConstants;
 
 /**
- * THIS ONLY A CLASS TO MAKE TEST IN JPQL STATEMENTS
+ * This class creates temporary data into ICAT Database with wich
+ * test are running. At the end of the running test, the data created
+ * is deleted.
  * 
- * Datafile_parameter count = 1392669
- * Dataset_parameter count = 0
- * Sample_parameter count = 759
  * @author cruzcruz
  */
 public class BaseParameterSearchTest extends BaseTest {
     public static ParameterSearchUtil searchUtil;
-    private static  List<Parameter> lp;
     public static String logOp = " AND ";
     private long time;
     private static Random random = new Random();
@@ -108,7 +105,6 @@ public class BaseParameterSearchTest extends BaseTest {
         return key;
     }
 
-    // TODO: create parameter first
     private static Parameter createParameter (String units, String name, ElementType type) {
         Parameter p = new Parameter();
 
@@ -425,13 +421,13 @@ public class BaseParameterSearchTest extends BaseTest {
 //            removeEntities();
             //        createDatafile(createDataset(createInvestigation()));
         } catch (NoSuchObjectFoundException ex) {
-            Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
+//            Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
             removeEntities();
         } catch (InsufficientPrivilegesException ex) {
-            Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
+//            Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
             removeEntities();
         } catch (ValidationException ex) {
-            Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
+//            Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
             removeEntities();
         }
 
@@ -446,9 +442,9 @@ public class BaseParameterSearchTest extends BaseTest {
                 try {
                     DataSetManager.removeDataSet(VALID_USER_FOR_INVESTIGATION, (Dataset) obj, em);
                 } catch (NoSuchObjectFoundException ex) {
-                    Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
+//                    Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (InsufficientPrivilegesException ex) {
-                    Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
+//                    Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             else if (obj.getClass() == Investigation.class) {
@@ -456,18 +452,18 @@ public class BaseParameterSearchTest extends BaseTest {
                     InvestigationManager.removeInvestigation(VALID_USER_FOR_INVESTIGATION, (Investigation) obj, em);
                     em.flush();
                 } catch (NoSuchObjectFoundException ex) {
-                    Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
+//                    Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (InsufficientPrivilegesException ex) {
-                    Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
+//                    Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             else if (obj.getClass() == Datafile.class) {
                 try {
                     DataFileManager.removeDataFile(VALID_USER_FOR_INVESTIGATION, (Datafile) obj, em);
                 } catch (NoSuchObjectFoundException ex) {
-                    Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
+//                    Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (InsufficientPrivilegesException ex) {
-                    Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
+//                    Logger.getLogger(BaseParameterSearchTest.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 //            else if (obj.getClass() == DatafileParameter.class)

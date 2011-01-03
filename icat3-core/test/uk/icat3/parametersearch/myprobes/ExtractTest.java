@@ -7,37 +7,20 @@
 
 package uk.icat3.parametersearch.myprobes;
 
-import uk.icat3.exceptions.CyclicException;
 import uk.icat3.exceptions.ParameterSearchException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import uk.icat3.exceptions.DatevalueException;
-import uk.icat3.exceptions.DatevalueFormatException;
-import uk.icat3.exceptions.NoDatetimeComparatorException;
-import uk.icat3.exceptions.NoNumericComparatorException;
-import uk.icat3.exceptions.NumericvalueException;
-import uk.icat3.exceptions.ParameterNoExistsException;
-import uk.icat3.exceptions.RestrictionEmptyListException;
-import uk.icat3.exceptions.OperatorINException;
 import uk.icat3.exceptions.RestrictionException;
-import uk.icat3.exceptions.RestrictionNullException;
-import uk.icat3.exceptions.RestrictionOperatorException;
 import uk.icat3.search.parameter.ComparisonOperator;
 import uk.icat3.search.parameter.ParameterComparisonCondition;
 import uk.icat3.search.parameter.ParameterType;
 
-import org.apache.log4j.Logger;
 import org.junit.Test;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.ParameterPK;
-import uk.icat3.exceptions.EmptyOperatorException;
 import uk.icat3.exceptions.NoParameterTypeException;
 import uk.icat3.exceptions.NoParametersException;
-import uk.icat3.exceptions.NoSearchableParameterException;
-import uk.icat3.exceptions.NoStringComparatorException;
-import uk.icat3.exceptions.NullParameterException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
 import uk.icat3.restriction.RestrictionComparisonCondition;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
@@ -60,8 +43,7 @@ public class ExtractTest extends BaseParameterSearchTest {
     }
 
     @Test
-    public void restriction () throws CyclicException, NoParameterTypeException, RestrictionOperatorException, OperatorINException, RestrictionException {
-        try {
+    public void restriction () throws RestrictionException, ParameterSearchException{
             RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.CONTAINS, "gation 1");
             ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
             op1.add(pcDataset.get(0));
@@ -71,41 +53,10 @@ public class ExtractTest extends BaseParameterSearchTest {
             List<Dataset> li = (List<Dataset>) DatasetSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, restriction1, DatasetInclude.NONE, 1, -1, em);
 
-            System.out.println("");
-                System.out.println("---> " + li.size());
-                System.out.println("");
-        } catch (RestrictionNullException ex) {
-        	 log.error(ex);
-        } catch (NoStringComparatorException ex) {
-        	log.error(ex);
-        } catch (NoNumericComparatorException ex) {
-        	log.error(ex);
-        } catch (NoSearchableParameterException ex) {
-        	log.error(ex);
-        } catch (NullParameterException ex) {
-        	log.error(ex);
-        } catch (EmptyOperatorException ex) {
-        	log.error(ex);
-        } catch (NoParametersException ex) {
-        	log.error(ex);
-        } catch (ParameterNoExistsException ex) {
-        	log.error(ex);
-        } catch (NoDatetimeComparatorException ex) {
-        	log.error(ex);
-        } catch (DatevalueException ex) {
-        	log.error(ex);
-        } catch (NumericvalueException ex) {
-        	log.error(ex);
-        } catch (DatevalueFormatException ex) {
-        	log.error(ex);
-        } catch (RestrictionEmptyListException ex) {
-        	log.error(ex);
-        }
     }
 
 //    @Test
-    public void probe () throws OperatorINException, RestrictionException {
-        try {
+    public void probe () {
             RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(RestrictionAttributes.INVESTIGATION_ID, ComparisonOperator.GREATER_THAN, "123");
 //            RestrictionLogicalCondition log = new RestrictionLogicalCondition(LogicalOperator.OR)
 //                    .add(comp)
@@ -151,40 +102,10 @@ public class ExtractTest extends BaseParameterSearchTest {
                 System.out.println("");
                 System.out.println("---> " + ld.size());
                 System.out.println("");
-            }catch (CyclicException ex) {
-                Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (RestrictionNullException ex) {
-                Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (RestrictionOperatorException ex) {
-                Logger.getLogger(ExtractTest.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoParameterTypeException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoStringComparatorException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoNumericComparatorException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSearchableParameterException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NullParameterException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (EmptyOperatorException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoParametersException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ParameterNoExistsException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoDatetimeComparatorException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (DatevalueException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NumericvalueException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (DatevalueFormatException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }  catch (RestrictionEmptyListException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            catch (Throwable t) {
+                t.printStackTrace();
+            }
     }
 
 
