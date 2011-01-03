@@ -14,7 +14,8 @@ package uk.icat3.exceptions;
  */
 public class AttributeTypeException extends RestrictionException {
 
-    private static String msg = "Attribute incompatibility. ";
+    private static String msg = "Attribute incompatibility. The attibute could not" +
+            " be relationed to the search type.";
 
     public AttributeTypeException(String msg) {
         super (AttributeTypeException.msg + msg);
