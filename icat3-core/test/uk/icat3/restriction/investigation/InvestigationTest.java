@@ -68,7 +68,7 @@ public class InvestigationTest extends BaseParameterSearchTest {
 
         // Investigation search
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restrLog, InvestigationInclude.NONE, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restrLog, InvestigationInclude.NONE, -1, -1, em);
 
         RestrictionComparisonCondition objComp = new RestrictionComparisonCondition();
         objComp.setRestrictionAttribute(RestrictionAttributes.INVESTIGATION);
@@ -106,7 +106,7 @@ public class InvestigationTest extends BaseParameterSearchTest {
 
         // Investigation search
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restrLog, InvestigationInclude.NONE, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restrLog, InvestigationInclude.NONE, -1, -1, em);
 
         assertEquals("Results of Investigations incorrect.", 2, li.size());
 //        assertEquals("Number of Results of Datafiles of 'dataset_1' are incorrect.",
@@ -134,7 +134,7 @@ public class InvestigationTest extends BaseParameterSearchTest {
         // Investigation search
         List<Investigation> li = (List<Investigation>) InvestigationSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1
-                        , restricLog, InvestigationInclude.NONE, 1, -1, em);
+                        , restricLog, InvestigationInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Investigations incorrect.", 1, li.size());
        assertTrue("Investigation name incorrect.", li.get(0).getTitle().contains("Investigation 1"));
@@ -161,7 +161,7 @@ public class InvestigationTest extends BaseParameterSearchTest {
         // Investigation search
         List<Investigation> li = (List<Investigation>) InvestigationSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1
-                        , restricLog, InvestigationInclude.NONE, 1, -1, em);
+                        , restricLog, InvestigationInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Investigations incorrect.", 2, li.size());
        assertTrue("Investigation name incorrect.", li.get(0).getTitle().contains("Investigation 1"));
@@ -190,7 +190,7 @@ public class InvestigationTest extends BaseParameterSearchTest {
         // Investigation search
         List<Investigation> li = (List<Investigation>) InvestigationSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1
-                        , restricLog, InvestigationInclude.NONE, 1, -1, em);
+                        , restricLog, InvestigationInclude.NONE, -1, -1, em);
        
        assertEquals("Results of Investigations incorrect.", 2, li.size());
        assertTrue("Investigation name incorrect.", li.get(0).getTitle().contains("Investigation 1"));
@@ -207,7 +207,7 @@ public class InvestigationTest extends BaseParameterSearchTest {
         lp.add(pv1);
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restriction1, InvestigationInclude.DATASETS_ONLY, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restriction1, InvestigationInclude.DATASETS_ONLY, -1, -1, em);
 
         assertEquals("Results of investigations incorrect.", 1, li.size());
 //        assertEquals("Number of Results of Datasets of 'investigation_1' are incorrect.",
@@ -233,7 +233,7 @@ public class InvestigationTest extends BaseParameterSearchTest {
         op1.add(pcDatafile.get(1));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, restricLog, InvestigationInclude.NONE, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, restricLog, InvestigationInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Investigations incorrect.", 1, li.size());
        assertTrue("Investigation name incorrect.", li.get(0).getTitle().contains("Investigation 1"));

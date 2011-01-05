@@ -34,35 +34,6 @@ import uk.icat3.util.Queries;
  */
 public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
 
-//    @Test
-//    public void datafilesIncludeDatafileTest () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {
-//        // Restriction condition
-//        RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-//                RestrictionAttributes.DATAFILE_NAME, ComparisonOperator.CONTAINS, "gation 2");
-//        RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.OR)
-//                .add(RestrictionCondition.Not(restriction1))
-//                .add(new RestrictionComparisonCondition(
-//                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
-//                ;
-//        // Parameter condition
-//        ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
-//
-//        op1.add(pcDataset.get(0));
-//        op1.add(pcDataset.get(1));
-//        op1.add(pcSample.get(0));
-//        op1.add(pcDatafile.get(1));
-//
-//        List<Datafile> li = (List<Datafile>) DatafileSearch
-//                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1
-//                        , restricLog, DatafileInclude.DATASET_DATAFILES_AND_PARAMETERS, 1, -1, em);
-//
-//       assertEquals("Results of Datafiles incorrect.", 1, li.size());
-//       assertTrue("Datafile name should be 'datafile_1', not " + li.get(0).getName(),
-//               (li.get(0).getName().contains("datafile_1")));
-//       assertEquals("Number of Results of Datafiles of 'datafile_1' are incorrect.",
-//               2, li.get(0).getDatafileCollection().size());
-//    }
-
     @Test
     public void differentsAttr () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {
 
@@ -103,7 +74,7 @@ public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
         // Parameter conditions
         List<Datafile> li = (List<Datafile>) DatafileSearch
                 .searchByRestriction(VALID_USER_FOR_INVESTIGATION
-                        , restricLog, DatafileInclude.NONE, 1, -1, em);
+                        , restricLog, DatafileInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Datafiles incorrect.", 1, li.size());
        assertTrue("Datafile name incorrect.", li.get(0).getName().contains("datafile_2"));
@@ -120,7 +91,7 @@ public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
         // Datafile search
         List<Datafile> li = (List<Datafile>) DatafileSearch
                 .searchByRestriction(VALID_USER_FOR_INVESTIGATION
-                        , restricLog, DatafileInclude.NONE, 1, -1, em);
+                        , restricLog, DatafileInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Datafiles incorrect.", 3, li.size());
        assertTrue("Datafile name incorrect.", li.get(0).getName().contains("datafile_1"));
@@ -142,7 +113,7 @@ public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
         // Datafile search
         List<Datafile> li = (List<Datafile>) DatafileSearch
                 .searchByRestriction(VALID_USER_FOR_INVESTIGATION
-                        , restricLog, DatafileInclude.NONE, 1, -1, em);
+                        , restricLog, DatafileInclude.NONE, -1, -1, em);
 
         for (Datafile d : li) {
             System.out.println(" ----> " + d.getName());
@@ -160,7 +131,7 @@ public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
 
         List<Datafile> li = (List<Datafile>) DatafileSearch
                 .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restriction1
-                , DatafileInclude.NONE, 1, -1, em);
+                , DatafileInclude.NONE, -1, -1, em);
 
         assertEquals("Results of datafiles incorrect.", 3, li.size());
 //        assertEquals("Number of Results of Datasets of 'datafile_1' are incorrect.",
@@ -178,7 +149,7 @@ public class DatafileSimpleRestrictionTest extends BaseParameterSearchTest {
                     RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "red"))
                 ;
         List<Datafile> li = (List<Datafile>) DatafileSearch
-                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, DatafileInclude.NONE, 1, -1, em);
+                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, DatafileInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Datafiles incorrect.", 1, li.size());
        assertEquals("Datafile name incorrect.", "datafile_2", li.get(0).getName());

@@ -194,7 +194,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
         restriction1.setSensitive(true);
         // Create a list for operator IN
         List<String> inList = new ArrayList<String>();
-        inList.add("Asc'[]\\'\"II");
+        inList.add("nexus");
         inList.add("cosa");
         // Restriction condition
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
@@ -302,7 +302,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
     public void restrictionNotOrder () throws ParameterSearchException, RestrictionException {
         // Restriction condition. Example
             // Not (INVESTIGATION_START_DATE = Date(0)) AND
-            // DATAFILE_FORMAT_TYPE IN ('ASCII', 'cosa) AND
+            // DATAFILE_FORMAT_TYPE IN ('ASCII', 'no type') AND
             // DATASET_TYPE = 'test' AND
             // (   INVESTIGATION_TILE like 'Investigation 1%' OR
             //     DATASET_NAME like '%blue')
@@ -312,7 +312,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
                 RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.STARTS_WITH, "Investigation 1");
         // List for operator IN
         List<String> inList = new ArrayList<String>();
-        inList.add("ASCII");
+        inList.add("NeXus");
         inList.add("no type");
         // Creation of a logical restriction
         RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.AND)
@@ -320,7 +320,7 @@ public class UsesExamples extends BaseParameterSearchTest  {
                 // Not (INVESTIGATION_START_DATE = Date(0))
                 .add (RestrictionCondition.Not(new RestrictionComparisonCondition(
                             RestrictionAttributes.INVESTIGATION_START_DATE, ComparisonOperator.EQUALS, new Date(0))))
-                // DATAFILE_FORMAT_TYPE IN ('ASCII', 'cosa)
+                // DATAFILE_FORMAT_TYPE IN ('ASCII', 'no type')
                 .add (new RestrictionComparisonCondition(
                             RestrictionAttributes.DATAFILE_FORMAT_TYPE, ComparisonOperator.IN, inList))
                 // DATASET_TYPE = 'test'
@@ -444,22 +444,59 @@ public class UsesExamples extends BaseParameterSearchTest  {
 
         // Dataset search
         List<Dataset> lds = (List<Dataset>) DatasetSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, DatasetInclude.NONE, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, DatasetInclude.NONE, -1, -1, em);
         // Datafile search
         List<Datafile> ldf = (List<Datafile>) DatafileSearch
-            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, DatafileInclude.NONE, 1, -1, em);
+            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, DatafileInclude.NONE, -1, -1, em);
         // Sample search
         List<Sample> ls = (List<Sample>) SampleSearch
-            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, SampleInclude.NONE, 1, -1, em);
+            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, SampleInclude.NONE, -1, -1, em);
         // Investigation search
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, InvestigationInclude.NONE, 1, -1, em);
+            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restricLog, InvestigationInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Datasets incorrect.", 2, lds.size());
        assertEquals("Results of Datafiles incorrect.", 2, ldf.size());
        assertEquals("Results of Investigations incorrect.", 2, li.size());
        assertEquals("Results of Samples incorrect.", 2, ls.size());
        assertEquals("Second dataset name incorrect.", "dataset_2 red", lds.get(1).getName());
+    }
+
+    @Test
+    public void firstResults () throws ParameterSearchException, RestrictionException {
+        // Create comparison
+        RestrictionComparisonCondition restricLog = new RestrictionComparisonCondition(
+                RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.STARTS_WITH, "Investigation");
+        // Set first result
+        restricLog.setFirstResult(1);
+
+        restricLog.setOrderByAsc(true);
+        restricLog.setOrderByAsc(RestrictionAttributes.DATASET_NAME);
+
+        // Dataset search
+        List<Dataset> lds = (List<Dataset>) DatasetSearch
+                .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, DatasetInclude.NONE, -1, -1, em);
+        restricLog.setOrderByAsc(RestrictionAttributes.DATAFILE_NAME);
+        // Datafile search
+        List<Datafile> ldf = (List<Datafile>) DatafileSearch
+            .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, DatafileInclude.NONE, -1, -1, em);
+        restricLog.setOrderByAsc(RestrictionAttributes.SAMPLE_NAME);
+        // Sample search
+        List<Sample> ls = (List<Sample>) SampleSearch
+            .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, SampleInclude.NONE, -1, -1, em);
+        restricLog.setOrderByAsc(RestrictionAttributes.INVESTIGATION_TITLE);
+        // Investigation search
+        List<Investigation> li = (List<Investigation>) InvestigationSearch
+            .searchByRestriction(VALID_USER_FOR_INVESTIGATION, restricLog, InvestigationInclude.NONE, -1, -1, em);
+
+       assertEquals("Results of Datasets incorrect.", 2, lds.size());
+       assertEquals("Dataset names incorrect.", "dataset_2 red", lds.get(0).getName());
+       assertEquals("Results of Datafiles incorrect.", 3, ldf.size());
+       assertEquals("Datafile names incorrect.", "datafile_1Dat3", ldf.get(0).getName());
+       assertEquals("Results of Investigations incorrect.", 1, li.size());
+       assertTrue("Investigation names incorrect.", li.get(0).getTitle().startsWith("Investigation 2"));
+       assertEquals("Results of Samples incorrect.", 1, ls.size());
+       assertEquals("Sample names incorrect.", "Sample_2", ls.get(0).getName());
     }
 
     /**

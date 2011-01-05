@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import uk.icat3.exceptions.AttributeTypeException;
@@ -74,8 +73,8 @@ public class RestrictionUtil {
     private boolean orderByAsc;
     /** Defines attribute to order by */
     private RestrictionAttributes orderByAttr;
-    /** Indicates start of index */
-    private int startIndex;
+    /** Indicates start of result */
+    private int firstResult;
     /** Include options */
     private Enum enumInclude;
     /** Indicate return is a list of long */
@@ -100,7 +99,7 @@ public class RestrictionUtil {
         this.sentenceJPQL = "";
         this.orderByJPQL = "";
         this.maxResults = -1;
-        this.startIndex = 0;
+        this.firstResult = 0;
         this.orderByAsc = false;
         this.orderByAttr = null;
         this.restType = restType;
@@ -142,6 +141,16 @@ public class RestrictionUtil {
         return true;
     }
     /**
+     * Check if first result was set
+     *
+     * @return true it max results was set. Otherwise false.
+     */
+    public boolean hasFirstResults () {
+        if (firstResult <= 0)
+            return false;
+        return true;
+    }
+    /**
      * Number maximun of results to return.
      *
      * @return maximun results to return
@@ -158,8 +167,8 @@ public class RestrictionUtil {
         return this.orderByJPQL;
     }
 
-    public int getStartIndex() {
-        return startIndex;
+    public int getFirstResult() {
+        return firstResult;
     }
 
     /**
@@ -880,8 +889,12 @@ public class RestrictionUtil {
         // Check if maximun of results was set in any condition
         if (restCond.hasMaxResults()) {
             this.maxResults = restCond.getMaxResults();
-            this.startIndex = 0;
+            this.firstResult = 0;
         }
+        // Check if first results was set in any condition
+        if (restCond.hasFirstResults())
+            this.firstResult = restCond.getFirstResult();
+
         // Check if order was set in any condition
         if (restCond.hasOrder()) {
             this.orderByAsc = restCond.isOrderByAsc();

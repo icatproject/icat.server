@@ -67,7 +67,7 @@ public class SampleTest extends BaseParameterSearchTest {
         // Sample search
         List<Sample> ls = (List<Sample>) SampleSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1
-                        , restricLog, SampleInclude.NONE, 1, -1, em);
+                        , restricLog, SampleInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Datasets incorrect.", 1, ls.size());
        assertEquals("Sample name incorrect.", "Sample_1", ls.get(0).getName());
@@ -107,7 +107,7 @@ public class SampleTest extends BaseParameterSearchTest {
         // Sample search
         List<Sample> li = (List<Sample>) SampleSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1
-                        , restricLog, SampleInclude.NONE, 1, -1, em);
+                        , restricLog, SampleInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Datasets incorrect.", 1, li.size());
        assertEquals("Sample name incorrect.", "Sample_1", li.get(0).getName());
@@ -134,7 +134,7 @@ public class SampleTest extends BaseParameterSearchTest {
         // Sample search
         List<Sample> li = (List<Sample>) SampleSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1
-                        , restricLog, SampleInclude.NONE, 1, -1, em);
+                        , restricLog, SampleInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Datasets incorrect.", 2, li.size());
        assertEquals("Sample name incorrect.", "Sample_1", li.get(0).getName());
@@ -163,7 +163,7 @@ public class SampleTest extends BaseParameterSearchTest {
         // Sample search
         List<Sample> li = (List<Sample>) SampleSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1
-                        , restricLog, SampleInclude.NONE, 1, -1, em);
+                        , restricLog, SampleInclude.NONE, -1, -1, em);
        
        assertEquals("Results of Datasets incorrect.", 2, li.size());
        assertEquals("Sample name incorrect.", "Sample_1", li.get(0).getName());
@@ -190,7 +190,7 @@ public class SampleTest extends BaseParameterSearchTest {
         lp.add(pv1);
 
         List<Sample> li = (List<Sample>) SampleSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restrLog, SampleInclude.NONE, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restrLog, SampleInclude.NONE, -1, -1, em);
 
         assertEquals("Results of Samples incorrect.", 2, li.size());
 //        assertEquals("Number of Results of Datafiles of 'dataset_1' are incorrect.",
@@ -216,7 +216,7 @@ public class SampleTest extends BaseParameterSearchTest {
         op1.add(pcDatafile.get(1));
 
         List<Sample> li = (List<Sample>) SampleSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, restricLog, SampleInclude.NONE, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, restricLog, SampleInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Datasets incorrect.", 1, li.size());
        assertEquals("Sample name incorrect.", "Sample_1", li.get(0).getName());

@@ -14,9 +14,6 @@ import uk.icat3.exceptions.NoSearchableParameterException;
 import uk.icat3.exceptions.NullParameterException;
 import uk.icat3.exceptions.ParameterNoExistsException;
 import uk.icat3.exceptions.ParameterSearchException;
-import uk.icat3.search.parameter.util.ParameterSearch;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
@@ -25,9 +22,7 @@ import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.parametersearch.BaseParameterSearchTest;
 import static org.junit.Assert.*;
 import uk.icat3.restriction.RestrictionComparisonCondition;
-import uk.icat3.restriction.RestrictionComparisonCondition;
 import uk.icat3.restriction.RestrictionCondition;
-import uk.icat3.restriction.RestrictionLogicalCondition;
 import uk.icat3.restriction.RestrictionLogicalCondition;
 import uk.icat3.restriction.attribute.RestrictionAttributes;
 import uk.icat3.search.DatasetSearch;
@@ -42,34 +37,6 @@ import uk.icat3.util.Queries;
  */
 public class DatasetSimpleRestrictionTest extends BaseParameterSearchTest {
 
-//    @Test
-//    public void datafilesIncludeDatafileTest () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {
-//        // Restriction condition
-//        RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
-//                RestrictionAttributes.DATASET_NAME, ComparisonOperator.CONTAINS, "gation 2");
-//        RestrictionLogicalCondition restricLog = new RestrictionLogicalCondition(LogicalOperator.OR)
-//                .add(RestrictionCondition.Not(restriction1))
-//                .add(new RestrictionComparisonCondition(
-//                    RestrictionAttributes.DATASET_NAME, ComparisonOperator.ENDS_WITH, "blue"))
-//                ;
-//        // Parameter condition
-//        ParameterLogicalCondition op1 = new ParameterLogicalCondition(LogicalOperator.OR);
-//
-//        op1.add(pcDataset.get(0));
-//        op1.add(pcDataset.get(1));
-//        op1.add(pcSample.get(0));
-//        op1.add(pcDatafile.get(1));
-//
-//        List<Dataset> li = (List<Dataset>) DatasetSearch
-//                .searchByParameterCondition(VALID_USER_FOR_DATASET, op1
-//                        , restricLog, DatasetInclude.DATASET_DATAFILES_AND_PARAMETERS, 1, -1, em);
-//
-//       assertEquals("Results of Datasets incorrect.", 1, li.size());
-//       assertTrue("Dataset name should be 'dataset_1', not " + li.get(0).getTitle(),
-//               (li.get(0).getTitle().contains("dataset_1")));
-//       assertEquals("Number of Results of Datafiles of 'dataset_1' are incorrect.",
-//               2, li.get(0).getDatafileCollection().size());
-//    }
 
     @Test
     public void differentsAttr () throws NoParameterTypeException, RestrictionException, NoParametersException, ParameterSearchException {

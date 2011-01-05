@@ -72,7 +72,7 @@ public class DatasetTest extends BaseParameterSearchTest {
 
         // Dataset search
         List<Dataset> ldat = (List<Dataset>) DatasetSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restrLog, DatasetInclude.NONE, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restrLog, DatasetInclude.NONE, -1, -1, em);
 
         assertEquals("Results of Datasets incorrect.", 3, ldat.size());
 
@@ -111,7 +111,7 @@ public class DatasetTest extends BaseParameterSearchTest {
 
         // Investigation search
         List<Dataset> li = (List<Dataset>) DatasetSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restrLog, DatasetInclude.NONE, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restrLog, DatasetInclude.NONE, -1, -1, em);
 
         assertEquals("Results of Datasets incorrect.", 3, li.size());
 //        assertEquals("Number of Results of Datafiles of 'dataset_1' are incorrect.",
@@ -138,7 +138,7 @@ public class DatasetTest extends BaseParameterSearchTest {
         // Dataset search
         List<Dataset> li = (List<Dataset>) DatasetSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1
-                        , restricLog, DatasetInclude.NONE, 1, -1, em);
+                        , restricLog, DatasetInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Datasets incorrect.", 1, li.size());
        assertEquals("Dataset name incorrect.", li.get(0).getName(),
@@ -166,7 +166,7 @@ public class DatasetTest extends BaseParameterSearchTest {
         // Dataset search
         List<Dataset> li = (List<Dataset>) DatasetSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1
-                        , restricLog, DatasetInclude.NONE, 1, -1, em);
+                        , restricLog, DatasetInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Datasets incorrect.", 2, li.size());
         assertEquals("Dataset name incorrect.", li.get(0).getName(),
@@ -196,7 +196,7 @@ public class DatasetTest extends BaseParameterSearchTest {
         // Dataset search
         List<Dataset> li = (List<Dataset>) DatasetSearch
                 .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1
-                        , restricLog, DatasetInclude.NONE, 1, -1, em);
+                        , restricLog, DatasetInclude.NONE, -1, -1, em);
        
        assertEquals("Results of Datasets incorrect.", 2, li.size());
        assertEquals("Dataset name incorrect", li.get(0).getName(),
@@ -214,7 +214,7 @@ public class DatasetTest extends BaseParameterSearchTest {
         lp.add(pv1);
 
         List<Dataset> li = (List<Dataset>) DatasetSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restriction1, DatasetInclude.DATASET_AND_DATAFILES_ONLY, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, restriction1, DatasetInclude.DATASET_AND_DATAFILES_ONLY, -1, -1, em);
 
         assertEquals("Results of datasets incorrect.", 2, li.size());
 //        assertEquals("Number of Results of Datafiles of 'dataset_1' are incorrect.",
@@ -240,7 +240,7 @@ public class DatasetTest extends BaseParameterSearchTest {
         op1.add(pcDatafile.get(1));
 
         List<Dataset> li = (List<Dataset>) DatasetSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, restricLog, DatasetInclude.NONE, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, restricLog, DatasetInclude.NONE, -1, -1, em);
 
        assertEquals("Results of Datasets incorrect.", 1, li.size());
        assertTrue("Dataset name should be 'dataset_1', not " + li.get(0).getName(),

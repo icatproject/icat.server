@@ -60,7 +60,7 @@ public class ListComparatorTest extends BaseParameterSearchTest {
         lc.add(pcSample.get(0));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
+                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, InvestigationInclude.NONE, -1, -1, em);
 
         showInv(li);
 
@@ -77,7 +77,7 @@ public class ListComparatorTest extends BaseParameterSearchTest {
         lc.add(pcSample.get(0));
 
         List<Investigation> li = (List<Investigation>) InvestigationSearch
-                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, InvestigationInclude.NONE, 1, -1, em);
+                .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, InvestigationInclude.NONE, -1, -1, em);
         
        assertTrue("Results of investigations should not be ZERO", (li.size() == 1));
     }

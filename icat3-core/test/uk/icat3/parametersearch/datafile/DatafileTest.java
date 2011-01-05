@@ -49,7 +49,7 @@ public class DatafileTest extends BaseParameterSearchTest {
         List<Datafile> ld = (List<Datafile>) DatafileSearch
                 .searchByParameterComparisonList(VALID_USER_FOR_INVESTIGATION, lc, Queries.NO_RESTRICTION, DatafileInclude.NONE, -1, -1, em);
 
-       assertTrue("Results of investigations should not be ZERO", (ld.size() == 1));
+       assertTrue("Results of investigations should 1", (ld.size() == 1));
     }
 
     
@@ -76,7 +76,7 @@ public class DatafileTest extends BaseParameterSearchTest {
         lp.add(pv4);
 
         List<Datafile> li = (List<Datafile>) DatafileSearch
-            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, DatafileInclude.NONE, 1, -1, em);
+            .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, DatafileInclude.NONE, -1, -1, em);
 
         assertTrue("Results of investigations should not be ZERO", (li.size() == 1));
     }
@@ -100,7 +100,7 @@ public class DatafileTest extends BaseParameterSearchTest {
         op1.add(pcDatafile.get(2));
 
         List<Datafile> li = (List<Datafile>) DatafileSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, DatafileInclude.NONE, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, DatafileInclude.NONE, -1, -1, em);
         
        assertTrue("Results of datafiles should be 3 not " + li.size(), (li.size() == 3));
     }

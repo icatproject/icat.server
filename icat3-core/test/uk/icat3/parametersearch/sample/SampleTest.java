@@ -46,7 +46,7 @@ public class SampleTest extends BaseParameterSearchTest {
         lp.add(pv3);
         
         List<Sample> ls = (List<Sample>) SampleSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, SampleInclude.NONE, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, SampleInclude.NONE, -1, -1, em);
 
         assertFalse("Results of investigations should not be ZERO", (ls.size() == 0));
     }
@@ -89,7 +89,7 @@ public class SampleTest extends BaseParameterSearchTest {
         op1.add(pcSample.get(1));
 
         List<Sample> li = (List<Sample>) SampleSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, SampleInclude.NONE, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, SampleInclude.NONE, -1, -1, em);
 
        assertTrue("Results of investigations should be 2 not " + li.size(), (li.size() == 2));
     }

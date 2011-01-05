@@ -950,9 +950,15 @@ public class ManagerUtil {
         if (userId != null)
             q.setParameter("userId", userId);
         // Check if maximun of results was set
-        if (restriction != null && restriction.hasMaxResults()) {
-            startIndex = restriction.getStartIndex();
-            numberResults = restriction.getMaxResults();
+        if (restriction != null) {
+            // Add first result
+            if (restriction.hasFirstResults()) {
+                startIndex = restriction.getFirstResult();
+                q.setFirstResult(startIndex);
+            }
+            // Add maximun of results
+            if (restriction.hasMaxResults())
+                numberResults = restriction.getMaxResults();
         }
         // Number of results to return
         if (numberResults == Queries.NO_PAGINATION)
@@ -962,6 +968,8 @@ public class ManagerUtil {
             // Unlimit results
             return q.getResultList();
         else {
+            if (startIndex < 0)
+                startIndex = 0;
             // Numbers of resutls was specified
             return q.setFirstResult(startIndex)
                     .setMaxResults(numberResults)

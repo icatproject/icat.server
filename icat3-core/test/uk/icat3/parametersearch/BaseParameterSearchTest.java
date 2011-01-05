@@ -28,6 +28,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileFormat;
+import uk.icat3.entity.DatafileFormatPK;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.DatafileParameterPK;
 import uk.icat3.entity.Dataset;
@@ -189,10 +190,29 @@ public class BaseParameterSearchTest extends BaseTest {
         return datParam;
     }
 
-    private static Datafile createDatafile (Dataset dat, String name) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
+    private static DatafileFormat createDatafileFormat (String name, String type) {
+        DatafileFormat df = new DatafileFormat ();
+
+        df.setDescription(name + " " + type);
+        df.setFormatType(type);
+        df.setDatafileFormatPK(new DatafileFormatPK ("v1", name));
+
+        Timestamp timeSQL = new Timestamp(new Date().getTime());
+
+        df.setCreateTime(timeSQL);
+        df.setModTime(timeSQL);
+        df.setCreateId(VALID_USER_FOR_INVESTIGATION);
+        df.setModId(VALID_USER_FOR_INVESTIGATION);
+
+        em.persist(df);
+
+        return df;
+    }
+
+    private static Datafile createDatafile (Dataset dat, String name, DatafileFormat datafileFormat) throws InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException {
         Datafile file = new Datafile();
-        Collection<DatafileFormat> datafileFormat = (Collection<DatafileFormat>)executeListResultCmd("select d from DatafileFormat d");
-        file.setDatafileFormat(datafileFormat.iterator().next());
+//        Collection<DatafileFormat> datafileFormat = (Collection<DatafileFormat>)executeListResultCmd("select d from DatafileFormat d");
+        file.setDatafileFormat(datafileFormat);
         file.setName(name);
         file.setDataset(dat);
 
@@ -343,10 +363,11 @@ public class BaseParameterSearchTest extends BaseTest {
             Dataset dat = createDataset(inv, "dataset_1 blue");
             Dataset dat2 = createDataset(inv2, "dataset_2 red");
             Dataset dat3 = createDataset(inv, "dataset_3 blue");
-            Datafile datFile = createDatafile(dat, "datafile_1");
-            Datafile datFile2 = createDatafile(dat2, "datafile_2");
-            Datafile datFile3 = createDatafile(dat3, "datafile_1Dat3");
-            Datafile datFile4 = createDatafile(dat, "datafile_1Dat3");
+            DatafileFormat df = createDatafileFormat ("nexus", "nexus");
+            Datafile datFile = createDatafile(dat, "datafile_1", df);
+            Datafile datFile2 = createDatafile(dat2, "datafile_2", df);
+            Datafile datFile3 = createDatafile(dat3, "datafile_1Dat3", df);
+            Datafile datFile4 = createDatafile(dat, "datafile_1Dat3", df);
 
             Parameter sp1_1 = createParameter("deg", "sample1", ElementType.SAMPLE);
             Parameter elec = createParameter("V", "voltage", ElementType.SAMPLE);
@@ -413,6 +434,7 @@ public class BaseParameterSearchTest extends BaseTest {
 
             removeEntities.add(instr);
 //            removeEntities.add(user1);
+            removeEntities.add(df);
             
             // Be sure that autho for TEST doesn't exists
             if (autho != null)

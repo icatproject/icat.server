@@ -27,6 +27,8 @@ public class RestrictionCondition extends Condition {
     private boolean orderByAsc = true;
     /** Maximun number of results to return */
     private Integer maxResults;
+    /** Number of firs result */
+    private Integer firstResult;
     /** Investigation include options */
     private InvestigationInclude investigationInclude = null;
     /** Dataset include options */
@@ -90,6 +92,16 @@ public class RestrictionCondition extends Condition {
      */
     public boolean hasMaxResults () {
         if (this.maxResults == null || this.maxResults <= 0)
+            return false;
+        return true;
+    }
+    /**
+     * Check if max results was set
+     *
+     * @return true it max results was set. Otherwise false.
+     */
+    public boolean hasFirstResults () {
+        if (this.firstResult == null || this.firstResult <= 0)
             return false;
         return true;
     }
@@ -179,6 +191,16 @@ public class RestrictionCondition extends Condition {
         if (maxResults == null)
             return -1;
         return maxResults;
+    }
+
+    public Integer getFirstResult() {
+        if (firstResult == null)
+            return -1;
+        return firstResult;
+    }
+
+    public void setFirstResult(Integer firstResult) {
+        this.firstResult = firstResult;
     }
 
     public DatafileInclude getDatafileInclude() {

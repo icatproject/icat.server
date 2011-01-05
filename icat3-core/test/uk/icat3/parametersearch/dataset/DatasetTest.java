@@ -99,7 +99,7 @@ public class DatasetTest extends BaseParameterSearchTest {
         lp.add(pv3);
 
         List<Dataset> li = (List<Dataset>) DatasetSearch
-                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, DatasetInclude.NONE, 1, -1, em);
+                .searchByParameterList(VALID_USER_FOR_INVESTIGATION, lp, Queries.NO_RESTRICTION, DatasetInclude.NONE, -1, -1, em);
 
         assertTrue("Results of datasets should be 1, not " + li.size(), (li.size() == 1));
         
@@ -144,7 +144,7 @@ public class DatasetTest extends BaseParameterSearchTest {
         op1.add(pcDataset.get(1));
 
         List<Dataset> li = (List<Dataset>) DatasetSearch
-                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, DatasetInclude.NONE, 1, -1, em);
+                .searchByParameterCondition(VALID_USER_FOR_INVESTIGATION, op1, Queries.NO_RESTRICTION, DatasetInclude.NONE, -1, -1, em);
 
        assertEquals("Results of datasets incorrect.", 2, li.size());
     }
