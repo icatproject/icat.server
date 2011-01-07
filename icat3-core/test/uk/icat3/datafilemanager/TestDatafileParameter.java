@@ -67,6 +67,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
         assertNull("Numeric value must be null", modified.getNumericValue());
         assertNotNull("String value must not be null", modified.getStringValue());
         assertNull("Date value must be null",modified.getDateTimeValue());
+        //Remove the parameter after adding
+        em.remove(datafileParameterInserted);
     }
 
     /**
@@ -87,6 +89,8 @@ public class TestDatafileParameter extends BaseTestClassTX {
         assertNull("Numeric value must be null", modified.getNumericValue());
         assertNull("String value must be null", modified.getStringValue());
         assertNotNull("Date value must not be null",modified.getDateTimeValue());
+        //Remove the parameter after adding
+        em.remove(datafileParameterInserted);        
     }
 
     /**

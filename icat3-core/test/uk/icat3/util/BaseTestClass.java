@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import uk.icat3.entity.IcatAuthorisation;
 
 /**
  *
@@ -26,7 +27,7 @@ import org.junit.BeforeClass;
 public class BaseTestClass extends BaseTest{
     
     private static Logger log = Logger.getLogger(BaseTestClass.class);
-    
+    private IcatAuthorisation testAuth;
     @Before
     public void Before(){
         setUpEntityManagerOnly();
@@ -50,5 +51,8 @@ public class BaseTestClass extends BaseTest{
     public static void AfterClassTearDown(){
         tearDownEntityManagerFactoryOnly();
     }
-    
+
+    protected IcatAuthorisation getTestAutho(){
+        return testAuth;
+    }
 }

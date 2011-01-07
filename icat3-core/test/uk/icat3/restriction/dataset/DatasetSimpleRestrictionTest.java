@@ -43,6 +43,7 @@ public class DatasetSimpleRestrictionTest extends BaseParameterSearchTest {
 
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
                 RestrictionAttributes.DATASET_NAME, ComparisonOperator.STARTS_WITH, "dataset");
+        restriction1.setSensitive(true);
 
         RestrictionLogicalCondition restrLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(restriction1)

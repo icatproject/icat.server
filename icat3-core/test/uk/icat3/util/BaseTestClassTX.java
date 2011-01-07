@@ -15,6 +15,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import uk.icat3.entity.IcatAuthorisation;
 
 /**
  *
@@ -28,6 +29,7 @@ import org.junit.BeforeClass;
 public class BaseTestClassTX extends BaseTest{
     
     private static Logger log = Logger.getLogger(BaseTestClassTX.class);
+    private IcatAuthorisation testAuth;
     
     @Before
     public void beginTX(){
@@ -39,10 +41,12 @@ public class BaseTestClassTX extends BaseTest{
         log.debug("beginning transaction on entityManager");
         
         em.getTransaction().begin();
+        testAuth=createTestAutho();
     }
     
     @After
     public void closeTX(){
+        removeTestAutho(testAuth);
         
         // Commit the transaction
         log.debug("commiting transaction on entityManager");

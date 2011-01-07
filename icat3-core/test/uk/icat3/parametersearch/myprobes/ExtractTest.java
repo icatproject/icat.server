@@ -74,7 +74,7 @@ public class ExtractTest extends BaseParameterSearchTest {
 
              // Get the parameter, manually or get from a service
 //        Parameter dateTime = new Parameter(new ParameterPK("yyyy-MM-dd HH:mm:ss", "time1"));
-            Parameter p = new Parameter(new ParameterPK("Å", "Wavelength"));
+            Parameter p = new Parameter(new ParameterPK("\u0134", "Wavelength"));
         // Create the parameter to compare with. Two argument: type of the parameter
         //  to compare and the parameter.
         ParameterSearch pamVal = new ParameterSearch(ParameterType.DATAFILE, p);
@@ -114,7 +114,7 @@ public class ExtractTest extends BaseParameterSearchTest {
     public void listParameterTest () throws NoParameterTypeException, NoParametersException, ParameterSearchException {
         List<ParameterSearch> lp = new ArrayList<ParameterSearch>();
 
-        Parameter p = new Parameter(new ParameterPK("Å", "Wavelength"));
+        Parameter p = new Parameter(new ParameterPK("\u0134", "Wavelength"));
 
         ParameterSearch pv1 = new ParameterSearch(ParameterType.DATAFILE, p);
 //        ParameterSearch pv2 = new ParameterSearch(ParameterType.DATASET, parameter.get("dataset1"));

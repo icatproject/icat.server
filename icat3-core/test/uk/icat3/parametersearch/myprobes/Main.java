@@ -50,11 +50,11 @@ import uk.icat3.util.LogicalOperator;
 public class Main {
 
     public static void main (String argv[]) throws RestrictionOperatorException {
-        String value =" ^*+`+`*^*´+ç-´´-.ç`ñ`ñç+`+`çÇ:+`:+'¡')((/&%najor  234234-  ";
+//        String value =" ^*+`+`*^*ï¿½+ï¿½-ï¿½ï¿½-.ï¿½`ï¿½`ï¿½ï¿½+`+`ï¿½ï¿½:+`:+'ï¿½')((/&%najor  234234-  ";
 //        value = value.replaceAll("\\s*,\\s*", "','")
 //                .replaceAll("^\\s+", "'")
 //                .replaceAll("\\s+$", "'");
-        System.out.println(value.replaceAll("[^\\w\\s-:]", ""));
+//        System.out.println(value.replaceAll("[^\\w\\s-:]", ""));
 //        try {
 //            RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(RestrictionAttributes.DATASET_NAME, ComparisonOperator.CONTAIN, "s");
 //            RestrictionLogicalCondition log = new RestrictionLogicalCondition(LogicalOperator.OR)

@@ -298,21 +298,6 @@ public class BaseParameterSearchTest extends BaseTest {
         return sampParam;
     }
 
-    private static IcatAuthorisation createTestAutho () {
-        IcatAuthorisation autho = new IcatAuthorisation();
-        Timestamp timeSQL = new Timestamp(new Date().getTime());
-        autho.setUserId(VALID_USER_FOR_INVESTIGATION);
-
-           autho.setRole(em.find(IcatRole.class, "SUPER"));
-        autho.setElementType(ElementType.INVESTIGATION);
-        autho.setCreateTime(timeSQL);
-        autho.setModTime(timeSQL);
-        autho.setCreateId(VALID_USER_FOR_INVESTIGATION);
-        autho.setModId(VALID_USER_FOR_INVESTIGATION);
-        em.persist(autho);
-        return autho;
-    }
-
     private static Instrument createInstrument (String name, String shortName) {
         Instrument inst = new Instrument(name, new Date(0), "najor");
 

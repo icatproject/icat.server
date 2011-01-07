@@ -590,7 +590,7 @@ public class TestDatasetParameter extends BaseTestClassTX {
             }
             break;
             case DateValue: {
-                Collection<Parameter> parameters = (Collection<Parameter>) executeListResultCmd("select d from Parameter d where d.parameterPK.name = 'Date_Time' AND d.valueType = 'N' AND d.isDatasetParameter = 'Y'");
+                Collection<Parameter> parameters = (Collection<Parameter>) executeListResultCmd("select d from Parameter d where d.parameterPK.name = 'Date_Time' AND d.valueType = 'D' AND d.isDatasetParameter = 'Y'");
                 if (parameters.size() == 0) {
                     log.trace("Adding new parameter");
                     Parameter param = new Parameter("Date_Time", "name");
@@ -616,10 +616,10 @@ public class TestDatasetParameter extends BaseTestClassTX {
     static DatasetParameter getDatasetParameterDuplicate(boolean last){
         DatasetParameter datasetParameter = null;
         if(!last){
-            Collection<DatasetParameter> datasetParameters = (Collection<DatasetParameter>)executeListResultCmd("select d from DatasetParameter d where d.facilityAcquired = 'Y'");
+            Collection<DatasetParameter> datasetParameters = (Collection<DatasetParameter>)executeListResultCmd("select d from DatasetParameter d where d.facilityAcquired = 'Y' and d.parameter.valueType = 'Y'");
             datasetParameter = datasetParameters.iterator().next();
         } else {
-            Collection<DatasetParameter> datasetParameters = (Collection<DatasetParameter>)executeListResultCmd("select d from DatasetParameter d where d.facilityAcquired = 'N' order by d.modTime desc");
+            Collection<DatasetParameter> datasetParameters = (Collection<DatasetParameter>)executeListResultCmd("select d from DatasetParameter d where d.facilityAcquired = 'N' and d.parameter.valueType = 'Y' order by d.modTime desc");
             datasetParameter = datasetParameters.iterator().next();
         }
         log.trace(datasetParameter);

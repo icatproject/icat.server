@@ -54,11 +54,12 @@ public class TestManagerUtil extends BaseTestClassTX {
         Dataset dataset = getDatasetDuplicate(false);
         
         Dataset datasetDu  = new Dataset();
-        dataset.merge(datasetDu);
+        datasetDu.merge(dataset);
         
         //set things
         datasetDu.setId(null);
         datasetDu.setInvestigationId(dataset.getInvestigationId());
+        datasetDu.setInvestigation(dataset.getInvestigation());
         log.trace(datasetDu.getName()+" "+datasetDu.getId());
         
         boolean unique = ManagerUtil.isUnique(datasetDu,em);
@@ -100,7 +101,7 @@ public class TestManagerUtil extends BaseTestClassTX {
     /**
      * Tests new dataset as unique
      */
-    @Test
+//    @Test
     public void datasetUnique4() throws ICATAPIException {
                       
         Dataset dataset_ = getDataset(true);

@@ -72,6 +72,7 @@ public class InvestigationSimpleRestrictionTest extends BaseParameterSearchTest 
 
         RestrictionComparisonCondition restriction1 = new RestrictionComparisonCondition(
                 RestrictionAttributes.INVESTIGATION_TITLE, ComparisonOperator.STARTS_WITH, "Investigation");
+        restriction1.setSensitive(true);
 
         RestrictionLogicalCondition restrLog = new RestrictionLogicalCondition(LogicalOperator.AND)
                 .add(restriction1)
