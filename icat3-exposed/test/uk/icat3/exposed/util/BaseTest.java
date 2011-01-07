@@ -9,8 +9,10 @@
 
 package uk.icat3.exposed.util;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -33,7 +35,6 @@ public class BaseTest {
     static protected  EntityManagerFactory  emf = null;
     // Create new EntityManager
     static protected EntityManager  em = null;
-    
     public static void setUp(){
         
         emf = Persistence.createEntityManagerFactory(TestConstants.PERSISTENCE_UNIT);
@@ -45,8 +46,7 @@ public class BaseTest {
         // Begin transaction
         log.debug("beginning transaction on entityManager");
         
-        em.getTransaction().begin();
-        
+        em.getTransaction().begin();        
     }
     
     public static void setUpEntityManagerOnly(){
@@ -144,6 +144,21 @@ public class BaseTest {
         }
         
         return longs;
+    }
+
+    protected static IcatAuthorisation createTestAutho () {
+        IcatAuthorisation autho = new IcatAuthorisation();
+        Timestamp timeSQL = new Timestamp(new Date().getTime());
+        autho.setUserId(TestConstants.VALID_USER_FOR_INVESTIGATION);
+        autho.setRole(em.find(IcatRole.class, "SUPER"));
+        autho.setElementType(ElementType.INVESTIGATION);
+        autho.setCreateTime(timeSQL);
+        autho.setModTime(timeSQL);
+        autho.setCreateId(TestConstants.VALID_USER_FOR_INVESTIGATION);
+        autho.setModId(TestConstants.VALID_USER_FOR_INVESTIGATION);
+        em.persist(autho);
+        em.flush();
+        return autho;
     }
     
     public static Collection<?> executeListResultCmd(String sql){
