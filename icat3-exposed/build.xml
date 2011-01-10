@@ -7,7 +7,7 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="icat3-exposed" default="default" basedir="." xmlns:ejbjarproject="http://www.netbeans.org/ns/j2ee-ejbjarproject/3">
+<project name="icat3-exposed" default="default" basedir="." xmlns:ejbjarproject="http://www.netbeans.org/ns/j2ee-ejbjarproject/3" xmlns:ejbjarproject2="http://www.netbeans.org/ns/j2ee-ejbjarproject/2">
     <description>Builds, tests, and runs the project icat3-exposed.</description>
     <import file="nbproject/build-impl.xml"/>
     <!--
@@ -65,4 +65,7 @@
     nbproject/build-impl.xml file. 
 
     -->
+    <target depends="init,compile-test,-pre-test-run" if="have.tests" name="-do-test-run">
+        <ejbjarproject2:junit testincludes="**/TestAll.java"/>
+    </target>
 </project>
