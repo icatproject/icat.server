@@ -22,7 +22,6 @@ FUNCTION write_proposal(
 END batch_migration_publication;
 /
 
-
 CREATE OR REPLACE PACKAGE BODY ICATDLS33."BATCH_MIGRATION_PUBLICATION" AS
 
 --------------------------------------------------------------------------------
@@ -142,9 +141,11 @@ Begin
   -- like materialize and push_subq to make the first subquery run first.
   -- that subquery is now populating a global temp table.  :-(
   log_pkg.write_log('cleaning up investigator');
-  INSERT INTO dls_migration_tmp1 (id, usernumber)
+  
+  /* Eter replace the code by different version
+  INSERT INTO dls_migration_tmp1 (run_name,id, usernumber)
     SELECT
-        i.id, p.usernumber
+        'PUBLIC',i.id, p.usernumber
       FROM
         investigation i,
         (SELECT
@@ -163,6 +164,24 @@ Begin
       --WHERE i.inv_number = To_Char(prop.propos_no)
       WHERE i.inv_number = UPPER(prop.propos_categ_code || prop.propos_categ_cpt)
       AND p.entid = prop.proposc_sc_mat;
+  */
+
+  INSERT INTO dls_migration_tmp1
+            (run_name, ID, usernumber)
+   SELECT 'PUBLIC', i.ID, prop.usernumber
+     FROM investigation i,
+          (SELECT /*+ DRIVING_SITE(proposal) */ 
+                  DISTINCT proposc.proposc_sc_mat, proposal.propos_categ_code,
+                           proposal.propos_categ_cpt, p.usernumber
+                      FROM proposc@duodesk proposc,
+                           proposal@duodesk proposal,
+                           tblpeople@duodesk p
+                     WHERE proposc.proposc_propos_no = proposal.propos_no
+                       AND NVL (proposal.propos_efface, 'N') != 'Y'
+                       AND NVL (proposc.proposc_efface, 'N') != 'Y'
+                       and p.entid = proposc.proposc_sc_mat) prop
+    WHERE i.inv_number =
+                       UPPER (prop.propos_categ_code || prop.propos_categ_cpt);
 
   DELETE
   FROM investigator
@@ -176,6 +195,9 @@ Begin
         id
       FROM investigation i2
     );
+    
+delete from dls_migration_tmp1 where run_name = 'PUBLIC';    
+    
 log_pkg.write_log('investigator cleanup complite');
 EXCEPTION
   WHEN OTHERS THEN

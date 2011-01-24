@@ -436,7 +436,7 @@ BEGIN
         write_proposal(
           rec.inv_number, rec.instrument, rec.visit_id, rec.facility_cycle));
 
-      DELETE FROM investigation WHERE id = rec.id;
+      -- cioffi DELETE FROM investigation WHERE id = rec.id;
 
       log_pkg.write_log(
         'The above proposal was removed from Duodesk and has been '||
@@ -844,7 +844,12 @@ AND investigation_id in (
     END IF;
   END LOOP;
   --*/
-
+  
+  --This line has been added by Keir Hawker 06/10/2010 in order to clean up the shift table temporarily
+  -- while hte publication-propagation job is disabled 
+  --delete from shift;   
+  
+  
 
   FORALL indx IN l_visit_id.FIRST..l_visit_id.LAST
   SAVE EXCEPTIONS
@@ -910,6 +915,7 @@ EXCEPTION
       ln_errors PLS_INTEGER;
       ln_error_index PLS_INTEGER;
     BEGIN
+      ICATDLS33.email_problem('ICAT','Could not migrate all Shift data from Duodesk please check icatdls33.log_table for details');
       g_bulk_warnings := TRUE;
 
       ln_errors := SQL%bulk_exceptions.COUNT;
@@ -1189,7 +1195,6 @@ PROCEDURE migrate_investigators(
   l_investigation_id t_investigation_id;
   l_role t_role;
 
-
 CURSOR c_experimentor_data is
 SELECT inv_number, instrument, visit_id, facility_cycle,
            facility_user_id, investigation_id, role
@@ -1259,7 +1264,7 @@ BEGIN
 
   log_pkg.write_log('investigator cursor opened');
 
-  /* testing error trapping.  cause a constraint violation
+  /*-- testing error trapping.  cause a constraint violation
   Dbms_Output.put_line('testing bulk error collection: investigators');
   FOR i IN 1..20 LOOP
     IF g_inv_unique_fields.Count = 0 AND Mod(i,3) = 0 THEN
@@ -1273,7 +1278,7 @@ BEGIN
       l_investigation_id(i) := l_investigation_id(i) * -1;
     END IF;
   END LOOP;
-  --*/
+  */
 
 
   FORALL indx IN l_inv_number.FIRST..l_inv_number.LAST
@@ -1425,7 +1430,6 @@ EXCEPTION
     log_pkg.write_exception('investigator migration failed');
     RAISE;
 END migrate_investigators;
-
 --------------------------------------------------------------------------------
 
 PROCEDURE populate_icat_authorisation (p_mod_id IN investigation.mod_id%TYPE)  IS
@@ -1556,11 +1560,16 @@ BEGIN
     log_pkg.write_log('*****');
 
     g_bulk_warnings := FALSE;
-
     migrate_investigations(p_mod_id);
     migrate_shifts(p_mod_id);
     migrate_facility_users(p_mod_id);
-    migrate_investigators(p_mod_id);
+ 
+--commentetd out by Keir Hawker due to problem with propagation from DuoDesk - 01/09/2010
+--HAS TO be commented back in
+   migrate_investigators(p_mod_id);
+
+
+
     populate_icat_authorisation(p_mod_id);
 
     -- if there were no errors during the dml sections then we leave the loop.
@@ -1577,6 +1586,7 @@ BEGIN
     log_pkg.write_log('Investigation  Data Migration finished, UNSUCCESSFUL');
     log_pkg.write_log('Unable to find a set of valid proposals',1);
   ELSIF g_inv_unique_fields.Count > 0 THEN
+    ICATDLS33.email_problem('ICAT','Could not migrate all data from Duodesk please check icatdls33.log_table for details');
     log_pkg.write_log('Investigation  Data Migration finished with warnings');
     log_pkg.write_log('Could not migrate data for the following proposal(s).'||
                       '  See above for details:');
@@ -1592,8 +1602,8 @@ BEGIN
             1);
       END LOOP;
   ELSE
-    log_pkg.write_log('Investigation Data Migration finished successfully');
     COMMIT;
+    log_pkg.write_log('Investigation Data Migration finished successfully');
   END IF;
 EXCEPTION
   WHEN test_wall THEN
@@ -1602,10 +1612,10 @@ EXCEPTION
     -- the state of the data, for testing
     RAISE;
   WHEN OTHERS THEN
-    ROLLBACK TO migration_sp;
     ICATDLS33.email_problem('ICAT',SQLERRM);
     log_pkg.write_exception(SQLERRM,1);
     log_pkg.write_log('Investigation Data Migration finished, UNSUCCESSFUL');
+    ROLLBACK TO migration_sp;
     RAISE;
 END duodesk_pr;
 
