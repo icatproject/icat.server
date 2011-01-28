@@ -29,6 +29,7 @@ undefine icatdls_username
 undefine icatdls_password
 
 set define ON
+set validate off
 
 ACCEPT database_name CHAR prompt         'Enter Database Name       : '
 ACCEPT icatdls_username CHAR prompt      'Enter ICATDLS schema name : '
@@ -105,6 +106,29 @@ REM objects specific to this schema which cannot be or do not need to be created
 REM earlier in the install
 REM log_prefix: D
 
+define logfile = create_temp_samplesheet_table.log
+SPOOL &log_dir&logfile
+set define OFF
+@schema_specific_scripts\icatdls\2_after_common_objects\create_temp_samplesheet_table.sql
+set define ON
+SPOOL OFF
+
+define logfile = create_cleanup_sample_parameter_table.log
+SPOOL &log_dir&logfile
+set define OFF
+@schema_specific_scripts\icatdls\2_after_common_objects\create_cleanup_sample_parameter_table.sql
+set define ON
+SPOOL OFF
+
+define logfile = create_federal_investigation_view.log
+SPOOL &log_dir&logfile
+set define OFF
+@schema_specific_scripts\icatdls\2_after_common_objects\create_federal_investigation_view.sql
+set define ON
+SPOOL OFF
+
+
+
 define logfile = D_001_tt_inv_unique_fields.log
 SPOOL &log_dir&logfile
 set define OFF
@@ -140,19 +164,51 @@ set define OFF
 set define ON
 SPOOL OFF
 
-define logfile = D_020_icatdls_batch_migration_pkg.log
+define logfile = batch_single_migration.sql.log
+SPOOL &log_dir&logfile
+@schema_specific_scripts\icatdls\2_after_common_objects\batch_single_migration.sql
+SPOOL OFF
+
+define logfile = icatdls_batch_migration_investigation.log
+SPOOL &log_dir&logfile
+@schema_specific_scripts\icatdls\2_after_common_objects\icatdls_batch_migration_investigaton_pkg.sql
+SPOOL OFF
+
+define logfile = icatdls_batch_migration_publication.log
+SPOOL &log_dir&logfile
+@schema_specific_scripts\icatdls\2_after_common_objects\icatdls_batch_migration_publication_pkg.sql
+SPOOL OFF
+
+define logfile = populate_single_beamline.sql.log
+SPOOL &log_dir&logfile
+@schema_specific_scripts\icatdls\2_after_common_objects\populate_single_beamline.sql
+SPOOL OFF
+
+define logfile = icatdls_populate_beamlines.log
+SPOOL &log_dir&logfile
+@schema_specific_scripts\icatdls\2_after_common_objects\icatdls_populate_beamlines.sql
+SPOOL OFF
+
+define logfile = icatdls_cleanupicat.log
+SPOOL &log_dir&logfile
+@schema_specific_scripts\icatdls\2_after_common_objects\icatdls_cleanupicat.sql
+SPOOL OFF
+
+define logfile = icatdls_cleanupikitten.log
 SPOOL &log_dir&logfile
 set define OFF
-@schema_specific_scripts\icatdls\2_after_common_objects\020_icatdls_batch_migration_pkg.sql
+@schema_specific_scripts\icatdls\2_after_common_objects\icatdls_cleanupikitten.sql
 set define ON
 SPOOL OFF
 
-define logfile = D_025_populate_beamlines_pkg.log
+define logfile = pkg_icat.log
 SPOOL &log_dir&logfile
 set define OFF
-@schema_specific_scripts\icatdls\2_after_common_objects\025_populate_beamlines_pkg.sql
+@schema_specific_scripts\icatdls\2_after_common_objects\pkg_icat.sql
 set define ON
 SPOOL OFF
+
+
 
 define logfile = D_070_set_jobs.log
 SPOOL &log_dir&logfile
@@ -168,22 +224,91 @@ set define OFF
 set define ON
 SPOOL OFF
 
-
-REM remaining general scripts
-REM log_prefix: E
-
-define logfile = E_01_dpal.log
+define logfile = alterschema.log
 SPOOL &log_dir&logfile
 set define OFF
-@general_scripts\dpal.sql
+@schema_specific_scripts\icatdls\2_after_common_objects\alterschema.sql
+set define ON
+SPOOL OFF
+
+define logfile = email_problem.log
+SPOOL &log_dir&logfile
+set define OFF
+@schema_specific_scripts\icatdls\2_after_common_objects\email_problem.sql
+set define ON
+SPOOL OFF
+
+define logfile = createtrigger.log
+SPOOL &log_dir&logfile
+@schema_specific_scripts\icatdls\2_after_common_objects\createtrigger.sql
+SPOOL OFF
+
+define logfile = check_missing_instrument.log
+SPOOL &log_dir&logfile
+set define OFF
+@schema_specific_scripts\icatdls\2_after_common_objects\check_missing_instrument.sql
+set define ON
+SPOOL OFF
+
+define logfile = propagate_single_visit.log
+SPOOL &log_dir&logfile
+set define OFF
+@schema_specific_scripts\icatdls\2_after_common_objects\propagate_single_visit.sql
+set define ON
+SPOOL OFF
+
+define logfile = test_links.log
+SPOOL &log_dir&logfile
+set define OFF
+@schema_specific_scripts\icatdls\2_after_common_objects\test_links.sql
+set define ON
+SPOOL OFF
+
+define logfile = shift_time_fn.log
+SPOOL &log_dir&logfile
+set define OFF
+@schema_specific_scripts\icatdls\2_after_common_objects\shift_time_fn.sql
+set define ON
+SPOOL OFF
+
+define logfile = is_number_fn.log
+SPOOL &log_dir&logfile
+set define OFF
+@schema_specific_scripts\icatdls\2_after_common_objects\is_number_fn.sql
+set define ON
+SPOOL OFF
+
+define logfile = mytable_type.log
+SPOOL &log_dir&logfile
+set define OFF
+@schema_specific_scripts\icatdls\2_after_common_objects\mytable_type.sql
+set define ON
+SPOOL OFF
+
+define logfile = in_list_fn.log
+SPOOL &log_dir&logfile
+set define OFF
+@schema_specific_scripts\icatdls\2_after_common_objects\in_list_fn.sql
 set define ON
 SPOOL OFF
 
 
 
+REM remaining general scripts
+REM log_prefix: E
+
+--define logfile = E_01_dpal.log
+--SPOOL &log_dir&logfile
+--set define OFF
+--@general_scripts\dpal.sql
+--set define ON
+--SPOOL OFF
+
+
+
 prompt Compiling the schema...
 BEGIN
-  Dbms_Utility.compile_schema(schema => USER);
+  Dbms_Utility.compile_schema(schema => '&icatdls_username');
 END;
 /
 
@@ -192,3 +317,4 @@ prompt
 prompt ====================================================================
 prompt Installation complete.  Please check the log files.
 prompt
+exit;
