@@ -25,7 +25,7 @@ BEGIN
 
   cre_syn('DATAFILE');
   cre_syn('DATAFILE_PARAMETER');
-  cre_syn('DATASET_LEVEL_PERMISSION');
+  --cre_syn('DATASET_LEVEL_PERMISSION');
   cre_syn('DATASET_PARAMETER');
   cre_syn('ICAT_AUTHORISATION');
   cre_syn('RELATED_DATAFILES');
@@ -53,6 +53,7 @@ BEGIN
   cre_syn('INVESTIGATION_TYPE');
   cre_syn('APPLICATIONS');
   cre_syn('USER_ROLES');
+  cre_syn('THIS_ICAT');
 END create_synonyms;
 
 BEGIN

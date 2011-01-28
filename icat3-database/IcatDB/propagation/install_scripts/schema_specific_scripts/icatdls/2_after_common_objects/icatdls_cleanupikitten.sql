@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE ICATDLS33.cleanupikitten_pkg AS
+CREATE OR REPLACE PACKAGE cleanupikitten_pkg AS
 
 PROCEDURE cleanup_instruments(dblink varchar2);
 PROCEDURE cleanup_parameters(dblink varchar2);
@@ -16,7 +16,7 @@ END cleanupikitten_pkg;
 /
 
 
-CREATE OR REPLACE PACKAGE BODY ICATDLS33.cleanupikitten_pkg AS
+CREATE OR REPLACE PACKAGE BODY cleanupikitten_pkg AS
 
 PROCEDURE cleanup_instruments(dblink varchar2) as
 begin

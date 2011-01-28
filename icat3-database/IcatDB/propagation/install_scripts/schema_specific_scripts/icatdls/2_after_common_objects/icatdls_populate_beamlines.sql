@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE ICATDLS33."POPULATE_BEAMLINES" AS
+CREATE OR REPLACE PACKAGE "POPULATE_BEAMLINES" AS
 
 /*
 
@@ -37,7 +37,7 @@ PRAGMA EXCEPTION_INIT(package_locked_ex, -20100);
 END populate_beamlines;
 /
 
-CREATE OR REPLACE PACKAGE BODY ICATDLS33."POPULATE_BEAMLINES" AS
+CREATE OR REPLACE PACKAGE BODY "POPULATE_BEAMLINES" AS
 
 procedure close_db_link (p_dblink IN beamline_instrument.dblink%TYPE)
 is
@@ -475,7 +475,7 @@ BEGIN
         WHEN OTHERS THEN
           log_pkg.write_exception(
             'Propagation failed for instrument '||rec.instrument||Chr(10)||SQLERRM);
-            ICATDLS33.email_problem(rec.instrument,SQLERRM);
+            &icatdls_username..email_problem(rec.instrument,SQLERRM);
           ROLLBACK TO propagate_data_sp;
       END;
       commit;
@@ -493,7 +493,7 @@ BEGIN
 EXCEPTION
   WHEN OTHERS THEN
     log_pkg.write_exception('Propagation failed: '||SQLERRM);
-    ICATDLS33.email_problem('ICAT',SQLERRM);
+    &icatdls_username..email_problem('ICAT',SQLERRM);
 
     BEGIN
       x := Dbms_Lock.RELEASE(lv_lockhandle);

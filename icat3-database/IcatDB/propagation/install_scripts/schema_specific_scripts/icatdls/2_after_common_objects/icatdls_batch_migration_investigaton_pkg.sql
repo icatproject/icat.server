@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE ICATDLS33."BATCH_MIGRATION_INVESTIGATION" AS
+CREATE OR REPLACE PACKAGE "BATCH_MIGRATION_INVESTIGATION" AS
 
 PROCEDURE duodesk_pr(
   p_mod_id IN investigation.mod_id%TYPE);
@@ -22,7 +22,7 @@ FUNCTION write_proposal(
 END batch_migration_investigation;
 /
 
-CREATE OR REPLACE PACKAGE BODY ICATDLS33."BATCH_MIGRATION_INVESTIGATION" AS
+CREATE OR REPLACE PACKAGE BODY "BATCH_MIGRATION_INVESTIGATION" AS
 
 --------------------------------------------------------------------------------
 
@@ -666,8 +666,8 @@ PROCEDURE migrate_shifts(
                               AS visit_id,
       Lower(NULL)             AS facility_cycle, -- lowercase lookup name!
       inv.id                  AS investigation_id,
-      shift_time(pl.pl_date_deb,pl.pl_shifts_deb)          AS start_date,
-      shift_time(pl.pl_date_fin,pl.pl_shifts_fin)          AS end_date,
+      &icatdls_username..shift_time(pl.pl_date_deb,pl.pl_shifts_deb)          AS start_date,
+      &icatdls_username..shift_time(pl.pl_date_fin,pl.pl_shifts_fin)          AS end_date,
       pl.pl_com               AS shift_comment
     FROM proposal@duodesk p,
          duo_proposal@duodesk dp,
@@ -734,8 +734,8 @@ BEGIN
       --p.propos_categ_code  
       --|| p.propos_categ_cpt  AS inv_number, --bug
       inv.id,
-      shift_time(pl.pl_date_deb,pl.pl_shifts_deb)          AS start_date,
-      shift_time(pl.pl_date_fin,pl.pl_shifts_fin)          AS end_date
+      &icatdls_username..shift_time(pl.pl_date_deb,pl.pl_shifts_deb)          AS start_date,
+      &icatdls_username..shift_time(pl.pl_date_fin,pl.pl_shifts_fin)          AS end_date
     FROM proposal@duodesk p,
          duo_proposal@duodesk dp,
          mesure@duodesk m,
@@ -790,7 +790,7 @@ AND investigation_id in (
         AND (investigation_id, start_date, end_date) NOT IN(
          SELECT
          inv.id,
-        shift_time(pl.pl_date_deb,pl.pl_shifts_deb)          AS start_date,
+        &icatdls_username..shift_time(pl.pl_date_deb,pl.pl_shifts_deb)          AS start_date,
         shift_time(pl.pl_date_fin,pl.pl_shifts_fin)          AS end_date
     FROM proposal@duodesk p,
          duo_proposal@duodesk dp,
@@ -915,7 +915,7 @@ EXCEPTION
       ln_errors PLS_INTEGER;
       ln_error_index PLS_INTEGER;
     BEGIN
-      ICATDLS33.email_problem('ICAT','Could not migrate all Shift data from Duodesk please check icatdls33.log_table for details');
+      &icatdls_username..email_problem('ICAT','Could not migrate all Shift data from Duodesk please check log_table for details');
       g_bulk_warnings := TRUE;
 
       ln_errors := SQL%bulk_exceptions.COUNT;
@@ -1586,7 +1586,7 @@ BEGIN
     log_pkg.write_log('Investigation  Data Migration finished, UNSUCCESSFUL');
     log_pkg.write_log('Unable to find a set of valid proposals',1);
   ELSIF g_inv_unique_fields.Count > 0 THEN
-    ICATDLS33.email_problem('ICAT','Could not migrate all data from Duodesk please check icatdls33.log_table for details');
+    &icatdls_username..email_problem('ICAT','Could not migrate all data from Duodesk please check log_table for details');
     log_pkg.write_log('Investigation  Data Migration finished with warnings');
     log_pkg.write_log('Could not migrate data for the following proposal(s).'||
                       '  See above for details:');
@@ -1612,7 +1612,7 @@ EXCEPTION
     -- the state of the data, for testing
     RAISE;
   WHEN OTHERS THEN
-    ICATDLS33.email_problem('ICAT',SQLERRM);
+    &icatdls_username..email_problem('ICAT',SQLERRM);
     log_pkg.write_exception(SQLERRM,1);
     log_pkg.write_log('Investigation Data Migration finished, UNSUCCESSFUL');
     ROLLBACK TO migration_sp;

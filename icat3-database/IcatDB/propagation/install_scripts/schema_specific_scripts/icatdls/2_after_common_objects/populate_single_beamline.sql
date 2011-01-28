@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE ICATDLS33.POPULATE_SINGLE_BEAMLINES_PKG AS
+CREATE OR REPLACE PACKAGE POPULATE_SINGLE_BEAMLINES_PKG AS
 
 /*
 
@@ -39,7 +39,7 @@ END populate_single_beamlines_pkg;
 
 
 
-CREATE OR REPLACE PACKAGE BODY ICATDLS33.POPULATE_SINGLE_BEAMLINES_PKG AS
+CREATE OR REPLACE PACKAGE BODY POPULATE_SINGLE_BEAMLINES_PKG AS
 
 procedure close_db_link (p_dblink IN beamline_instrument.dblink%TYPE)
 is 
@@ -1159,7 +1159,7 @@ BEGIN
 EXCEPTION
   WHEN OTHERS THEN
     log_pkg.write_exception('Propagation failed: '||SQLERRM);
-    email_problem('ICAT',SQLERRM);
+    &icatdls_username..email_problem('ICAT',SQLERRM);
 
     BEGIN
       x := Dbms_Lock.RELEASE(lv_lockhandle);

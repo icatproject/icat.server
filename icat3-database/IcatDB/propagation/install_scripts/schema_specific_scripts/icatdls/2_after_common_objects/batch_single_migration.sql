@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE ICATDLS33.BATCH_SINGLE_MIGRATION_PKG AS
+CREATE OR REPLACE PACKAGE BATCH_SINGLE_MIGRATION_PKG AS
 
 PROCEDURE duodesk_pr(
   visit investigation.visit_id%TYPE, beamline investigation.instrument%TYPE,p_mod_id IN investigation.mod_id%TYPE default 'PROPAGATION');
@@ -24,7 +24,7 @@ FUNCTION write_proposal(
 END batch_single_migration_pkg;
 /
 
-CREATE OR REPLACE PACKAGE BODY ICATDLS33.BATCH_SINGLE_MIGRATION_PKG AS
+CREATE OR REPLACE PACKAGE BODY BATCH_SINGLE_MIGRATION_PKG AS
 
 --------------------------------------------------------------------------------
 
@@ -1359,8 +1359,8 @@ PROCEDURE migrate_shifts(
                               AS visit_id,
       Lower(NULL)             AS facility_cycle, -- lowercase lookup name!
       inv.id                  AS investigation_id,
-      shift_time(pl.pl_date_deb,pl.pl_shifts_deb)          AS start_date,
-      shift_time(pl.pl_date_fin,pl.pl_shifts_fin)          AS end_date,
+      &icatdls_username..shift_time(pl.pl_date_deb,pl.pl_shifts_deb)          AS start_date,
+      &icatdls_username..shift_time(pl.pl_date_fin,pl.pl_shifts_fin)          AS end_date,
       pl.pl_com               AS shift_comment
     FROM proposal@duodesk p,
          duo_proposal@duodesk dp,
@@ -2737,7 +2737,7 @@ EXCEPTION
     RAISE;
   WHEN OTHERS THEN
     ROLLBACK TO migration_sp;
-    email_problem('ICAT',SQLERRM);
+    &icatdls_username..email_problem('ICAT',SQLERRM);
     log_pkg.write_exception(SQLERRM,1);
     log_pkg.write_log('Data Migration finished, UNSUCCESSFUL');
     RAISE;

@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE ICATDLS33.set_deleted_pkg AS
+CREATE OR REPLACE PACKAGE set_deleted_pkg AS
 
 /*
 
@@ -18,7 +18,7 @@ END set_deleted_pkg;
 /
 
 
-CREATE OR REPLACE PACKAGE BODY ICATDLS33.set_deleted_pkg AS
+CREATE OR REPLACE PACKAGE BODY set_deleted_pkg AS
 
 PROCEDURE do_investigation(p_id IN investigation.id%TYPE) IS
 BEGIN

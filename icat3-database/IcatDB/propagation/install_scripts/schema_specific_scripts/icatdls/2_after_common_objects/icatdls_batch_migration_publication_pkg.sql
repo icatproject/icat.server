@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE ICATDLS33."BATCH_MIGRATION_PUBLICATION" AS
+CREATE OR REPLACE PACKAGE "BATCH_MIGRATION_PUBLICATION" AS
 
 PROCEDURE duodesk_pr(
   p_mod_id IN investigation.mod_id%TYPE);
@@ -22,7 +22,7 @@ FUNCTION write_proposal(
 END batch_migration_publication;
 /
 
-CREATE OR REPLACE PACKAGE BODY ICATDLS33."BATCH_MIGRATION_PUBLICATION" AS
+CREATE OR REPLACE PACKAGE BODY "BATCH_MIGRATION_PUBLICATION" AS
 
 --------------------------------------------------------------------------------
 
@@ -2031,7 +2031,7 @@ EXCEPTION
     RAISE;
   WHEN OTHERS THEN
     ROLLBACK TO migration_sp;
-    ICATDLS33.email_problem('ICAT',SQLERRM);
+    &icatdls_username..email_problem('ICAT',SQLERRM);
     log_pkg.write_exception(SQLERRM,1);
     log_pkg.write_log('Publication Data Migration finished, UNSUCCESSFUL');
     RAISE;
