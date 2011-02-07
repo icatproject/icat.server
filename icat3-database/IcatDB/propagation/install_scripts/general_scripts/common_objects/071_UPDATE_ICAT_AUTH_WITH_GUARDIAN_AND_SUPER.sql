@@ -1,4 +1,4 @@
-CREATE OR REPLACE procedure update_icat_auth_with_guardian_and_super as
+CREATE OR REPLACE procedure update_icat_auth_with_g_and_s as
 
     v_error_message                VARCHAR2(200);
 

@@ -1,7 +1,7 @@
 CREATE OR REPLACE TRIGGER trg_investigator
     AFTER
     INSERT
-    ON ICATDLS33.INVESTIGATOR     FOR EACH ROW
+    ON INVESTIGATOR     FOR EACH ROW
 DECLARE
 
     v_error_message                VARCHAR2(200);

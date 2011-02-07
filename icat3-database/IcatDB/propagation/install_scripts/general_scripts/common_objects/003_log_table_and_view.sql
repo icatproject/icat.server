@@ -5,8 +5,8 @@ REM a table and view for logging status info, etc
 CREATE TABLE log_table(
   oracle_id        VARCHAR2(30) DEFAULT USER,
   datestamp        DATE DEFAULT SYSDATE,
-  run_num          INTEGER,
-  seq_num          INTEGER,
+  run_num          NUMBER(38),
+  seq_num          NUMBER(38),
   text             VARCHAR2(4000 CHAR),
   exception_log    VARCHAR2(1)
 );
