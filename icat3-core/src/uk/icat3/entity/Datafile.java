@@ -24,10 +24,12 @@ import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
+import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -68,7 +70,8 @@ import uk.icat3.util.ElementType;
     @NamedQuery(name = "Datafile.findByChecksum", query = "SELECT d FROM Datafile d WHERE d.checksum = :checksum"),
     @NamedQuery(name = "Datafile.findBySignature", query = "SELECT d FROM Datafile d WHERE d.signature = :signature"),
     @NamedQuery(name = "Datafile.findByModTime", query = "SELECT d FROM Datafile d WHERE d.modTime = :modTime"),
-    @NamedQuery(name = "Datafile.findByModId", query = "SELECT d FROM Datafile d WHERE d.modId = :modId")////Added searches for ICAT3 API
+    @NamedQuery(name = "Datafile.findByModId", query = "SELECT d FROM Datafile d WHERE d.modId = :modId"),////Added searches for ICAT3 API
+    @NamedQuery(name = "Datafile.findByUnique", query = "SELECT d FROM Datafile d where d.name = :name and d.location = :location and d.dataset.id = :datasetId")
 })
 
 @XmlRootElement
@@ -731,6 +734,8 @@ public class Datafile extends EntityBaseBean implements Serializable {
                 throw new ValidationException(datafileFormat + " is not a valid DatafileFormat");
             }
         }
+        //check if unique
+        isUnique(manager);
 
         return isValid();
     }
@@ -765,5 +770,44 @@ public class Datafile extends EntityBaseBean implements Serializable {
 
     public void setDatafileInclude(DatafileInclude datafileInclude) {
         this.datafileInclude = datafileInclude;
+    }
+
+    /**
+     * This method checks whether the datafile already exists, if it does then it
+     * will throw a validation exception.
+     * The field that it check is Name, Location, and Dataset ID. These form Composite Unique key.
+     * @param manager
+     * @return
+     * @throws ValidationException
+     */
+    private boolean isUnique(EntityManager manager) throws ValidationException {
+        Query query =  manager.createNamedQuery("Datafile.findByUnique");
+        query = query.setParameter("name",name);
+        query = query.setParameter("location", location);
+        query = query.setParameter("datasetId",dataset.getId());
+
+        try {
+            log.trace("Looking for: name: "+ name);
+            log.trace("Looking for: location: "+ location);
+            log.trace("Looking for: datasetId: "+datasetId);
+            Datafile datafileFound = (Datafile)query.getSingleResult();
+            log.trace("Returned: "+datafileFound);
+            if(datafileFound.getId() != null && datafileFound.getId().equals(this.getId())) {
+                System.out.println("Found this same object");
+                log.trace("Datafile found is this datafile");
+                return true;
+            } else {
+                log.trace("Datafile found is not this datafile, so not unique");
+                throw new ValidationException(this+" is not unique. Same unique key as "+datafileFound);
+            }
+        } catch(NoResultException nre) {
+            log.trace("No results so unique");
+            //means it is unique
+            return true;
+        } catch(Throwable ex) {
+            log.warn(ex);
+            //means it is unique
+            throw new ValidationException(this+" is not unique.");
+        }
     }
 }

@@ -9,6 +9,7 @@
 
 package uk.icat3.datafilemanager;
 
+import javax.persistence.PersistenceException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -493,6 +494,8 @@ public class TestDatafile extends BaseTestClassTX {
             throw ex;
         }
     }
+
+
     
     /**
      * Tests creating a invalid file for invalid user, should throw ValidationException that contains
@@ -544,7 +547,30 @@ public class TestDatafile extends BaseTestClassTX {
 //        it = longs.iterator();
 //        assertNull("IcatAuthorisation["+it.next()+"] must not be found in DB ", icatAuth);
     }
-    
+
+
+    /**
+     * This test creates a duplicate datafile that already exists for a valid user,
+     * should throw a ValidationException that contains message not unique.
+     * @throws ICATAPIException
+     */
+    @Test(expected=ValidationException.class)
+    public void testCreateDuplicateDatafile() throws ICATAPIException {
+        log.info("Testing creating duplicate datafile for valid user: "+VALID_USER_FOR_INVESTIGATION);
+        //create duplicate file
+        Datafile file = getDatafileDuplicate(true);
+        Datafile duplicateFile = new Datafile();
+        duplicateFile.setName(file.getName());
+        duplicateFile.setLocation(file.getLocation());
+        duplicateFile.setDatasetId(file.getDatasetId());
+        try{
+            Datafile dataFile = DataFileManager.createDataFile(VALID_USER_FOR_INVESTIGATION, duplicateFile, VALID_DATASET_ID_FOR_INVESTIGATION, em);
+        }catch(ICATAPIException ex){
+            log.info("Caught : " +ex.getClass()+" : "+ex.getMessage());
+            assertTrue("Exception must contain 'is not Unique'", ex.getMessage().contains("is not unique"));
+            throw ex;
+        }
+    }
     /**
      * Creates a datafile which is either valid or not
      */
