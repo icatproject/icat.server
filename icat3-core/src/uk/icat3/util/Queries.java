@@ -62,7 +62,7 @@ public class Queries {
     // OR (userId = SUPER) OR (userId is in icatAuthrosation table and role is select)   
     public static final String QUERY_USERS_INVESTIGATIONS_JPQL = ", IcatAuthorisation ia WHERE" +           
             " ((i.id = ia.elementId AND ia.elementType = :objectType " +
-            " AND (ia.userId = :userId OR ia.userId = 'ANY'))" + " OR (ia.elementId IS NULL AND ia.elementType = 'INVESTIGATION' AND ia.userId = :userId)"+ 
+            " AND (ia.userId = :userId OR ia.userId = 'ANY'))" + " OR (ia.elementId IS NULL AND ia.elementType = uk.icat3.util.ElementType.INVESTIGATION AND ia.userId = :userId)"+ 
             " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' ";
 
     /**
