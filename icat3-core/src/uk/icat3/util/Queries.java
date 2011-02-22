@@ -70,18 +70,18 @@ public class Queries {
      * i.dataset.investigation.instrument is not working properly
      */
     public static final String QUERY_USERS_DATAFILES_JPQL = ", IcatAuthorisation ia WHERE" +
-            " (i.dataset.id = ia.elementId AND ia.elementType = :objectType " +
-            " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+            " ((i.dataset.id = ia.elementId AND ia.elementType = :objectType " +
+            " AND (ia.userId = :userId OR ia.userId = 'ANY'))" + " OR (ia.elementId IS NULL AND ia.elementType = uk.icat3.util.ElementType.INVESTIGATION AND ia.userId = :userId)" +
             " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' ";
 
      public static final String QUERY_USERS_DATASETS_JPQL = ", IcatAuthorisation ia WHERE" +
-            "  (i.id = ia.elementId AND ia.elementType = :objectType " +
-            " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+            "  ((i.id = ia.elementId AND ia.elementType = :objectType " +
+            " AND (ia.userId = :userId OR ia.userId = 'ANY'))" + " OR (ia.elementId IS NULL AND ia.elementType = uk.icat3.util.ElementType.INVESTIGATION AND ia.userId = :userId)" +
             " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' ";
 
       public static final String QUERY_USERS_SAMPLES_JPQL = ", IcatAuthorisation ia WHERE" +
-            " (i.investigationId.id = ia.elementId AND ia.elementType = :objectType " +
-            " AND (ia.userId = :userId OR ia.userId = 'ANY')" +
+            " ((i.investigationId.id = ia.elementId AND ia.elementType = :objectType " +
+            " AND (ia.userId = :userId OR ia.userId = 'ANY'))" +  " OR (ia.elementId IS NULL AND ia.elementType = uk.icat3.util.ElementType.INVESTIGATION AND ia.userId = :userId)" +
             " AND ia.markedDeleted = 'N' AND ia.role.actionCanSelect = 'Y') AND i.markedDeleted = 'N' ";
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
