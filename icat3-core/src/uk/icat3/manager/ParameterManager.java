@@ -90,7 +90,7 @@ public class ParameterManager extends ManagerUtil {
         param.setCreateId(userId);
         param.setModId(userId);
         //TODO: Check whether the SUPER is inserting and set it to verified true
-        param.setVerified(true);
+        param.setVerified(false);
         param.isValid(manager);
 
         try{
@@ -158,10 +158,12 @@ public class ParameterManager extends ManagerUtil {
         try{
         //Find the parameter matching name and units
             Parameter param = (Parameter)manager.createNamedQuery("Parameter.findByNameAndUnits").setParameter("name", name).setParameter("units", units).getSingleResult();
+
         //TODO: Check user has permission to remove the parameter
 
         //Remove the parameter from database
-            manager.remove(param);
+          if(param.isVerified()) throw new Exception("Parameter is verfied and can only be deleted manually from database");
+          manager.remove(param);
         }catch(NoResultException ex){
             throw new ValidationException("Parameter "+name+","+units+" doesn't exsist");
         }catch(NonUniqueResultException ex){
