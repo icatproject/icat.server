@@ -163,6 +163,12 @@ public class BaseTest {
     }
 
     protected static IcatAuthorisation createTestAutho () {
+        //find Test autho
+        try{
+            IcatAuthorisation result = (IcatAuthorisation)em.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDBY_ELEMENTID_ELEMENTTYPE_USERID).setParameter("elementType",ElementType.INVESTIGATION).setParameter("elementId", null).setParameter("userId",TestConstants.VALID_USER_FOR_INVESTIGATION).getSingleResult();
+            return result;
+        } catch (Exception ex) {          
+        }
         IcatAuthorisation autho = new IcatAuthorisation();
         Timestamp timeSQL = new Timestamp(new Date().getTime());
         autho.setUserId(TestConstants.VALID_USER_FOR_INVESTIGATION);

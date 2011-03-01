@@ -14,6 +14,7 @@ import uk.icat3.exposed.investigationmanager.TestKeyword;
 import uk.icat3.exposed.investigationmanager.TestPublication;
 import uk.icat3.exposed.investigationmanager.TestSample;
 import uk.icat3.exposed.investigationmanager.TestSampleParameter;
+import uk.icat3.sessionbeans.manager.TestParameterManagerBean;
 
 
 @RunWith(Suite.class)
@@ -29,7 +30,8 @@ import uk.icat3.exposed.investigationmanager.TestSampleParameter;
             TestDatasetParameter.class,
             
             TestDatafile.class,
-            TestDatafileParameter.class
+            TestDatafileParameter.class,
+            TestParameterManagerBean.class
             
             //TestKeywordSearch.class,
             //TestInvalidUser.class

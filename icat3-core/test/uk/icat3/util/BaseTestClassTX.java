@@ -41,13 +41,18 @@ public class BaseTestClassTX extends BaseTest{
         log.debug("beginning transaction on entityManager");
         
         em.getTransaction().begin();
+        try{
         testAuth=createTestAutho();
+        }catch(Exception ex){
+            log.warn("Exception creating test autho");
+        }
     }
     
     @After
     public void closeTX(){
-        removeTestAutho(testAuth);
-        
+         removeTestAutho(testAuth);
+
+
         // Commit the transaction
         log.debug("commiting transaction on entityManager");
         try {
@@ -62,6 +67,7 @@ public class BaseTestClassTX extends BaseTest{
             log.debug("tearDown(), closing entityManager");
             log.debug("");
             em.close();
+
         }
     }
     

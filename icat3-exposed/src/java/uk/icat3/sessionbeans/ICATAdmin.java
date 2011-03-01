@@ -11,6 +11,7 @@ package uk.icat3.sessionbeans;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -20,8 +21,11 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import org.apache.log4j.Logger;
+import uk.icat3.entity.Parameter;
 import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
+import uk.icat3.exceptions.ValidationException;
+import uk.icat3.sessionbeans.manager.ParameterManagerLocal;
 import uk.icat3.user.UserDetails;
 
 /**
@@ -40,7 +44,9 @@ import uk.icat3.user.UserDetails;
 public class ICATAdmin extends EJBObject /*implements ICATLocal*/ {
     
     static Logger log = Logger.getLogger(ICATAdmin.class);
-    
+    ///////////////////////  Inject all the EJBs   //////////////////////////
+    @EJB
+    protected ParameterManagerLocal parameterManagerLocal;
     /** Creates a new instance of AllOperationsBean */
     public ICATAdmin() {
     }
@@ -94,5 +100,25 @@ public class ICATAdmin extends EJBObject /*implements ICATLocal*/ {
     
     
     ///////////////////////////     End of Datafile Manager methods  /////////////////////////////////////////
+    ///////////////////////////     Parameter Manager methods  /////////////////////////////////////////
+    @WebMethod
+    public void createParameter(String sessionId, Parameter param) throws ValidationException, SessionException{
+        //Admin protected by GF authentication
+        parameterManagerLocal.createParameter(sessionId, param);
+    }
+
+    @WebMethod
+    @ExcludeClassInterceptors
+    public Parameter updateParameter(String sessionId, String name, String units, boolean isSearchable, boolean isDatasetParameter, boolean isDatafileParameter, boolean isSampleParameter) throws ValidationException, SessionException {
+        //Admin protected by GF authentication
+        return parameterManagerLocal.updateParameter(sessionId, name,units,isSearchable,isDatasetParameter,isDatafileParameter,isSampleParameter);
+    }
+
+    @WebMethod
+    public void removeParameter(String sessionId, String name,String units) throws ValidationException, SessionException{
+        //Admin protected by GF authentication
+        parameterManagerLocal.removeParameter(sessionId, name, units);
+    }
+    ///////////////////////////     End of Parameter Manager methods  /////////////////////////////////////////
     
 }

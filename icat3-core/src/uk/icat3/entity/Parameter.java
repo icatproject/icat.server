@@ -16,11 +16,15 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
+import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+import uk.icat3.exceptions.ValidationException;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.ParameterValueType;
 import uk.icat3.util.Queries;
@@ -45,7 +49,8 @@ import uk.icat3.util.Queries;
     @NamedQuery(name = "Parameter.findByDescription", query = "SELECT p FROM Parameter p WHERE p.description = :description"),
     @NamedQuery(name = "Parameter.findByModId", query = "SELECT p FROM Parameter p WHERE p.modId = :modId"),
     @NamedQuery(name = "Parameter.findByModTime", query = "SELECT p FROM Parameter p WHERE p.modTime = :modTime"),
-    
+    @NamedQuery(name = "Parameter.findByNameAndUnits", query = "SELECT p FROM Parameter p WHERE p.parameterPK.name = :name and p.parameterPK.units = :units"),
+
     @NamedQuery(name = Queries.ALL_PARAMETERS, query = Queries.ALL_PARAMETERS_JPQL),
     @NamedQuery(name = Queries.PARAMETER_SEARCH_BY_NAME_UNITS, query = Queries.PARAMETER_SEARCH_BY_NAME_UNITS_JPQL),
     @NamedQuery(name = Queries.PARAMETER_SEARCH_BY_NAME, query = Queries.PARAMETER_SEARCH_BY_NAME_JPQL),
@@ -498,5 +503,38 @@ import uk.icat3.util.Queries;
     
     public void setDatasetParameter(boolean datasetParameter){
         this.isDatasetParameter = (datasetParameter) ? "Y" : "N";
+    }
+
+    private boolean isUnique(EntityManager manager) throws ValidationException{
+        log.trace("isUnique");
+        Query query = manager.createNamedQuery("Parameter.findByNameAndUnits");
+        query.setParameter("name", parameterPK.getName());
+        query.setParameter("units", parameterPK.getUnits());
+        try{
+            log.trace("Looking for Parameter with Name: "+parameterPK.getName()+" and Units: "+parameterPK.getUnits());
+            Parameter param = (Parameter)query.getSingleResult();
+            if(param == this) {
+                log.trace("Parameter found");
+                return true;
+            } else {
+                log.trace("Parameter already exist, so no unique");
+                throw new ValidationException(this+" is not unique.  Same unique key as "+param);
+            }
+        }catch(NoResultException nre) {
+            log.trace("No results so unique");
+            //means it is unique
+            return true;
+        } catch(Throwable ex) {
+            log.warn(ex);
+            //means it is unique
+            if(ex instanceof ValidationException) throw (ValidationException)ex;
+            else throw new ValidationException(this+" is not unique.");
+        }
+    }
+
+    @Override
+    public boolean isValid(EntityManager manager) throws ValidationException{
+        isUnique(manager);
+        return super.isValid(manager, true);
     }
 }
