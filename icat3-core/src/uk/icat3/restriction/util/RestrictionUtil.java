@@ -792,7 +792,7 @@ public class RestrictionUtil {
      * @return
      */
     private String removeBadChar (String value) {
-        return value.replaceAll("[^\\w\\s-:,]", "");
+        return value.replaceAll("[^\\w\\s-:,.]", "");
     }
 
 
