@@ -102,20 +102,20 @@ public class ICATAdmin extends EJBObject /*implements ICATLocal*/ {
     ///////////////////////////     End of Datafile Manager methods  /////////////////////////////////////////
     ///////////////////////////     Parameter Manager methods  /////////////////////////////////////////
     @WebMethod
-    public void createParameter(String sessionId, Parameter param) throws ValidationException, SessionException{
+    public void createParameter(@WebParam(name = "sessionId")String sessionId, @WebParam(name = "parameter")Parameter param) throws ValidationException, SessionException{
         //Admin protected by GF authentication
         parameterManagerLocal.createParameter(sessionId, param);
     }
 
     @WebMethod
     @ExcludeClassInterceptors
-    public Parameter updateParameter(String sessionId, String name, String units, boolean isSearchable, boolean isDatasetParameter, boolean isDatafileParameter, boolean isSampleParameter) throws ValidationException, SessionException {
+    public Parameter updateParameter(@WebParam(name = "sessionId")String sessionId, @WebParam(name = "parameterName")String name, @WebParam(name = "parameterUnits")String units, @WebParam(name = "isSearchable")boolean isSearchable, @WebParam(name = "isDatasetParameter")boolean isDatasetParameter, @WebParam(name = "isDatafileParameter")boolean isDatafileParameter, @WebParam(name = "isSampleParameter")boolean isSampleParameter) throws ValidationException, SessionException {
         //Admin protected by GF authentication
         return parameterManagerLocal.updateParameter(sessionId, name,units,isSearchable,isDatasetParameter,isDatafileParameter,isSampleParameter);
     }
 
     @WebMethod
-    public void removeParameter(String sessionId, String name,String units) throws ValidationException, SessionException{
+    public void removeParameter(@WebParam(name = "sessionId")String sessionId, @WebParam(name = "parameterName")String name,@WebParam(name = "parameterUnits")String units) throws ValidationException, SessionException{
         //Admin protected by GF authentication
         parameterManagerLocal.removeParameter(sessionId, name, units);
     }
