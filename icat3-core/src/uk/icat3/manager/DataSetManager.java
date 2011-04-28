@@ -11,7 +11,11 @@ package uk.icat3.manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
 import org.apache.log4j.Logger;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
@@ -29,6 +33,7 @@ import uk.icat3.util.Cascade;
 import uk.icat3.util.DatasetInclude;
 import uk.icat3.util.ElementType;
 import uk.icat3.util.IcatRoles;
+import uk.icat3.util.Queries;
 
 /**
  * This is the manager class for all operations for data sets.
@@ -277,10 +282,35 @@ public class DataSetManager extends ManagerUtil {
         //String facilityUserId = getFacilityUserId(userId, manager);
         datasetManaged.setModId(userId);
         datasetManaged.merge(dataSet);
+        
+        /* User cannot touch the investigation but may have changed the investigationId */
+        Long invId = dataSet.getInvestigationId();
+        if (invId == null) {
+        	log.trace("Updating dataset's investigation to be null");
+        	datasetManaged.setInvestigationId(null);
+        	datasetManaged.setInvestigation(null);
+        } else {
+        	log.trace("Updating dataset to point to investigation " + invId);
+        	datasetManaged.setInvestigationId(invId);
+        	datasetManaged.setInvestigation(find(Investigation.class, invId, manager));
+        }
+        
+		/* Fix the authorizations */
+		Query query = manager.createNamedQuery(Queries.ICAT_AUTHORISATION_FINDALL_FOR_ELEMENTTYPE);
+		query.setParameter("elementId", datasetManaged.getId());
+		query.setParameter("userId", null); // not searching by userId
+		query.setParameter("elementType", ElementType.DATASET);
 
-        datasetManaged.isValid(manager);
+		@SuppressWarnings("unchecked")
+		List<IcatAuthorisation> authzs =  query.getResultList();
+		for (IcatAuthorisation authz : authzs) {
+			authz.setParentElementId(invId);
+			log.trace("Updated dataset authz: " + authz + " to point to investigation " + invId);
+		}
 
-        return datasetManaged;
+		datasetManaged.isValid(manager);
+
+		return datasetManaged;
     }
 
     /**
