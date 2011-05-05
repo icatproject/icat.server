@@ -10,6 +10,7 @@ package uk.icat3.userdefault.facility;
 
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -19,7 +20,6 @@ import javax.persistence.NoResultException;
 import org.apache.log4j.Logger;
 import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSCredential;
-import uk.icat3.entity.FacilityUser;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.user.User;
@@ -28,6 +28,7 @@ import uk.icat3.userdefault.cog.DelegateCredential;
 import uk.icat3.userdefault.cog.PortalCredential;
 import uk.icat3.userdefault.entity.*;
 import uk.icat3.userdefault.exception.LoginError;
+import uk.icat3.userdefault.message.LoginInterceptor;
 import uk.icat3.util.IcatRoles;
 
 /**
@@ -370,6 +371,8 @@ public class DefaultUser implements User {
             //save session
             log.trace("Persiting session.");
             manager.persist(session);
+            Timestamp loginTime = new Timestamp(new Date().getTime());
+            LoginInterceptor.sendLoginMessage(sid, username, loginTime);
             log.info("New session created for user: " + DN + " sid: " + sid);
 
             return sid;

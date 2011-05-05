@@ -8,6 +8,7 @@
  */
 package uk.icat3.userdefault.facility;
 
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -20,6 +21,7 @@ import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.user.User;
 import uk.icat3.user.UserDetails;
 import uk.icat3.userdefault.entity.*;
+import uk.icat3.userdefault.message.LoginInterceptor;
 import uk.icat3.util.IcatRoles;
 
 /**
@@ -168,6 +170,7 @@ public class DefaultUser implements User {
         
         log.info("checking password against database ");
         try {
+            //local
             user = (uk.icat3.userdefault.entity.User) manager.createNamedQuery("User.findByUserId").setParameter("userId", username).getSingleResult();
             if (!user.getPassword().equals(password))
                 throw new Exception();
@@ -188,7 +191,9 @@ public class DefaultUser implements User {
 
         user.addSession(session);
         manager.persist(session);
-
+        Timestamp loginTime = new Timestamp(new Date().getTime());
+        log.info("About to send login message");
+        LoginInterceptor.sendLoginMessage(sid, username, loginTime);
         log.info("Logged in for user: " + username + " with sessionid:" + sid);
 
         return sid;

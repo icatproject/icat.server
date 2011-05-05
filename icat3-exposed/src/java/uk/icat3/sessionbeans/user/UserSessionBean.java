@@ -59,7 +59,7 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal, User
     public String login(String username, String password) throws SessionException {
         log.trace("login("+username+", *******)");
         
-        UserManager userManager = new UserManager(DEFAULT_USER_IMPLEMENTATION, managerUser);
+        UserManager userManager = new UserManager("uk.icat3.userdefault.facility.DefaultUser", managerUser);
         
         return userManager.login(username,password);
     }

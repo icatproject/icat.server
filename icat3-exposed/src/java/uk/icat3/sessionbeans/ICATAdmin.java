@@ -74,10 +74,10 @@ public class ICATAdmin extends EJBObject /*implements ICATLocal*/ {
         return user.login(credential);
     }*/
     
-    //@WebMethod()
-    public UserDetails getUserDetails(@WebParam(name="sessionId") String sessionId, @WebParam(name="usersName") String usersName) throws SessionException, NoSuchUserException{
+    //@WebMethod(operationName="getUserDetailsAdmin")
+   /** public UserDetails getUserDetails(@WebParam(name="sessionId") String sessionId, @WebParam(name="usersName") String usersName) throws SessionException, NoSuchUserException{
         return this.user.getUserDetails(sessionId, usersName);
-    }
+    } */
     ///////////////////////////     End of UserSession methods  //////////////////////////////////
     
     

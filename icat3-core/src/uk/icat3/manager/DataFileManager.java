@@ -30,7 +30,7 @@ import uk.icat3.util.ElementType;
 /**
  * This is the manager class for all operations for data files.
  *
- * These are update, remove, delete, create on data files and data file paramters
+ * These are update, remove, delete, create on data files and data file parameters
  *
  * @author gjd37
  */
@@ -40,7 +40,7 @@ public class DataFileManager extends ManagerUtil {
 
     /**
      * Deletes the data file for a user depending if the user's id has delete permissions to delete the data file.
-     * Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
+     * Deleting the file marks it, and all of its parameters as deleted but does not remove it from the database.
      *
      * @param userId federalId of the user.
      * @param dataFile  object to be deleted
@@ -54,7 +54,7 @@ public class DataFileManager extends ManagerUtil {
 
     /**
      * Deletes the data file with ID, for a users depending if the users id has delete permissions to delete the data file from
-     * the ID. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
+     * the ID. Deleting the file marks it, and all of its parameters as deleted but does not remove it from the database.
      *
      * @param userId federalId of the user.
      * @param dataFileId Id of data file to be deleted
@@ -75,7 +75,7 @@ public class DataFileManager extends ManagerUtil {
 
     /**
      * Deletes the collection of files for a users depending if the users id has delete permissions to delete the files from
-     * their ids. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
+     * their ids. Deleting the file marks it, and all of its parameters as deleted but does not remove it from the database.
      *
      * @param userId federalId of the user.
      * @param dataFileIds Ids of data files to be deleted
@@ -94,7 +94,7 @@ public class DataFileManager extends ManagerUtil {
 
     /**
      * Deletes the collection of data files for a users depending if the users id has delete permissions to
-     * delete the data file. Deleting the file marks it, and all of its paramters as deleted but does not remove it from the database.
+     * delete the data file. Deleting the file marks it, and all of its parameters as deleted but does not remove it from the database.
      *
      * @param userId federalId of the user.
      * @param dataFiles objects to be deleted
@@ -345,7 +345,7 @@ public class DataFileManager extends ManagerUtil {
     /////////////////////   Util commands /////////////////////////
 
     /**
-     * Updates the data file paramter object, depending if the user has access to update the data file parameter.
+     * Updates the data file parameter object, depending if the user has access to update the data file parameter.
      *
      * @param userId federalId of the user.
      * @param datafileParameter object to be updated
@@ -370,10 +370,10 @@ public class DataFileManager extends ManagerUtil {
     }
 
     /**
-     * Adds a data file paramter object to a data file, depending if the user has access to create the data file parameter from
+     * Adds a data file parameter object to a data file, depending if the user has access to create the data file parameter from
      * the associated data file id.
      *
-     * If the paramter is marked as deleted then it will be undeleted, if not present a new paramter is added.
+     * If the parameter is marked as deleted then it will be undeleted, if not present a new paramter is added.
      *
      * @param userId federalId of the user.
      * @param datafileParameter object to be added
@@ -425,10 +425,10 @@ public class DataFileManager extends ManagerUtil {
     }
 
     /**
-     * Adds a data file paramter object to a data file, depending if the user has access to create the data file parameter from
+     * Adds a data file parameter object to a data file, depending if the user has access to create the data file parameter from
      * the associated data file id.
      *
-     * If the paramter is marked as deleted then it will be undeleted, if not present a new paramter is added.
+     * If the parameter is marked as deleted then it will be undeleted, if not present a new paramter is added.
      *
      * @param userId federalId of the user.
      * @param datafileParameter object to be added
@@ -446,14 +446,14 @@ public class DataFileManager extends ManagerUtil {
     }
 
     /**
-     * Adds a collection of data file paramter objects to a data file, depending if the user has access to create the data file parameter from
+     * Adds a collection of data file parameter objects to a data file, depending if the user has access to create the data file parameter from
      * the associated data file id.
      *
-     * If the paramter is marked as deleted then it will be undeleted, if not present a new paramter is added.
+     * If the parameter is marked as deleted then it will be undeleted, if not present a new parameter is added.
      *
      * @param userId federalId of the user.
      * @param datafileParameters collection of objects to be added
-     * @param datafileId the data file id that you want a add the paramter to
+     * @param datafileId the data file id that you want a add the parameter to
      * @param manager manager object that will facilitate interaction with underlying database
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object
@@ -474,7 +474,7 @@ public class DataFileManager extends ManagerUtil {
     }
 
     /**
-     * Removes (from the database) a data file paramter object, depending if the user has access to remove the data file parameter from
+     * Removes (from the database) a data file parameter object, depending if the user has access to remove the data file parameter from
      * the associated data file id.
      *
      * @param userId federalId of the user.
