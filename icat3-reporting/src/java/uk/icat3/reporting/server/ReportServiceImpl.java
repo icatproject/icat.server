@@ -7,6 +7,7 @@ package uk.icat3.reporting.server;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -47,7 +48,7 @@ public class ReportServiceImpl extends RemoteServiceServlet {
             //Get logos for report
             params.put("LOGO_LEFT", props.getProperty("logoLeft"));
             params.put("LOGO_RIGHT", props.getProperty("logoRight"));
-            Connection con = createConnection();
+            Connection con = createConnection(props);
             //Get folder jrxml is stored in and create full file path
             String source = props.getProperty("sourceFolder") + sourceFile;
             JasperReport jasperReport = JasperCompileManager.compileReport(
@@ -77,7 +78,7 @@ public class ReportServiceImpl extends RemoteServiceServlet {
         try {
             params.put("LOGO_LEFT", props.getProperty("logoLeft"));
             params.put("LOGO_RIGHT", props.getProperty("logoRight"));
-            Connection con = createConnection();
+            Connection con = createConnection(props);
             String source = props.getProperty("sourceFolder") + sourceFile;
             JasperReport jasperReport = JasperCompileManager.compileReport(
                     source);
@@ -106,7 +107,7 @@ public class ReportServiceImpl extends RemoteServiceServlet {
         try {
             params.put("LOGO_LEFT", props.getProperty("logoLeft"));
             params.put("LOGO_RIGHT", props.getProperty("logoRight"));
-            Connection con = createConnection();
+            Connection con = createConnection(props);
             String source = props.getProperty("sourceFolder") + sourceFile;
             JasperReport jasperReport = JasperCompileManager.compileReport(
                     source);
@@ -126,19 +127,20 @@ public class ReportServiceImpl extends RemoteServiceServlet {
         }
     }
 
-    public Connection createConnection() {
-        String username = "ICATISISLOG";
-        String password = "ic4tl0g627";
-        String DATABASE_USER = "user";
-        String DATABASE_PASSWORD = "password";
-        String AUTO_RECONNECT = "autoReconnect";
-        String MAX_RECONNECTS = "maxReconnects";
-
+    public Connection createConnection(Properties props) {
         try {
+            String username = props.getProperty("dbUsername");
+            String password = props.getProperty("dbPassword");
+            String DATABASE_USER = "user";
+            String DATABASE_PASSWORD = "password";
+            String AUTO_RECONNECT = "autoReconnect";
+            String MAX_RECONNECTS = "maxReconnects";
+
+
             String driver = "oracle.jdbc.driver.OracleDriver";
             // load the driver
             Class.forName(driver);
-            String dbURL = "jdbc:oracle:thin:@(DESCRIPTION=(LOAD_BALANCE=yes)(ADDRESS=(PROTOCOL=TCP)(HOST=orisa.esc.rl.ac.uk)(PORT=1521)) (CONNECT_DATA=(SERVER=dedicated)(SERVICE_NAME=orisa.esc.rl.ac.uk)))";
+            String dbURL = props.getProperty("dbURL");
 
             Properties connProperties = new Properties();
             connProperties.put(DATABASE_USER, username);
