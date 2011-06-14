@@ -75,7 +75,7 @@
             <param name="connection.pool.name" value="icat3-user" />
         </antcall>
         <antcall target="-remove-connection-pool" >
-            <param name="connection.pool.name" value="icat-log" />
+            <param name="connection.pool.name" value="icatisislog" />
         </antcall>
     </target>
     <!--                                                            -->
