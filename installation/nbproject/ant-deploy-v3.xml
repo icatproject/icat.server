@@ -270,7 +270,7 @@
     <!--                                                      -->
     <target name="-add-jms-factory" depends="-init-cl-deployment-env" >
         <echo level="info" message="Adding JMS factory ${jms.fact.name}" />
-        <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/{asadmin}" failonerror="true">
+        <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="true">
             <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} create-jms-resource --restype javax.jms.QueueConnectionFactory --enabled=true  ${jms.fact.name}"/>
         </exec>
         <delete file="${sjsas.password.file}"/>

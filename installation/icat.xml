@@ -67,73 +67,73 @@
     <!--   Adds all ICAT Log jms resources to glassfish      -->
     <target name ="add-jms-resources" description="Adds all JMS resources for ICAT API Logging module">
 	<antcall target="-add-jms-factory">
-		<param name="${jms.fact.name}" value="jms/icat/QueueConnectionFactory"/>
+		<param name="jms.fact.name" value="jms/icat/QueueConnectionFactory"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
-		<param name="${jms.resource.name}" value="advanced/Queue"/>
+		<param name="jms.resource.name" value="advanced/Queue"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
-		<param name="${jms.resource.name}" value="login/Queue"/>
+		<param name="jms.resource.name" value="login/Queue"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
-		<param name="${jms.resource.name}" value="logout/Queue"/>
+		<param name="jms.resource.name" value="logout/Queue"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
-		<param name="${jms.resource.name}" value="keywords/Queue"/>
+		<param name="jms.resource.name" value="keywords/Queue"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
-		<param name="${jms.resource.name}" value="runnumber/Queue"/>
+		<param name="jms.resource.name" value="runnumber/Queue"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
-		<param name="${jms.resource.name}" value="download/Queue"/>
+		<param name="jms.resource.name" value="download/Queue"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
-		<param name="${jms.resource.name}" value="sample/Queue"/>
+		<param name="jms.resource.name" value="sample/Queue"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
-		<param name="${jms.resource.name}" value="datafile/Queue"/>
+		<param name="jms.resource.name" value="datafile/Queue"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
-		<param name="${jms.resource.name}" value="dataset/Queue"/>
+		<param name="jms.resource.name" value="dataset/Queue"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
-		<param name="${jms.resource.name}" value="investigations/Queue"/>
+		<param name="jms.resource.name" value="investigations/Queue"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
-		<param name="${jms.resource.name}" value="myinvestigations/Queue"/>
+		<param name="jms.resource.name" value="myinvestigations/Queue"/>
 	</antcall>
 	<antcall target="-add-jms-destination">
-		<param name="${jms.destination.name}" value="AdvancedSearch"/>
+		<param name="jms.destination.name" value="AdvancedSearch"/>
 	</antcall>
 	<antcall target="-add-jms-destination">
-		<param name="${jms.destination.name}" value="Login"/>
+		<param name="jms.destination.name" value="Login"/>
 	</antcall>
 	<antcall target="-add-jms-destination">
-		<param name="${jms.destination.name}" value="Logout"/>
+		<param name="jms.destination.name" value="Logout"/>
 	</antcall>
 	<antcall target="-add-jms-destination">
-		<param name="${jms.destination.name}" value="Keywords"/>
+		<param name="jms.destination.name" value="Keywords"/>
 	</antcall>
 	<antcall target="-add-jms-destination">
-		<param name="${jms.destination.name}" value="RunNumber"/>
+		<param name="jms.destination.name" value="RunNumber"/>
 	</antcall>
 	<antcall target="-add-jms-destination">
-		<param name="${jms.destination.name}" value="Download"/>
+		<param name="jms.destination.name" value="Download"/>
 	</antcall>
 	<antcall target="-add-jms-destination">
-		<param name="${jms.destination.name}" value="Sample"/>
+		<param name="jms.destination.name" value="Sample"/>
 	</antcall>
 	<antcall target="-add-jms-destination">
-		<param name="${jms.destination.name}" value="ViewDatafiles"/>
+		<param name="jms.destination.name" value="ViewDatafiles"/>
 	</antcall>
 	<antcall target="-add-jms-destination">
-		<param name="${jms.destination.name}" value="ViewDatasets"/>
+		<param name="jms.destination.name" value="ViewDatasets"/>
 	</antcall>
 	<antcall target="-add-jms-destination">
-		<param name="${jms.destination.name}" value="ViewInvestigations"/>
+		<param name="jms.destination.name" value="ViewInvestigations"/>
 	</antcall>
 	<antcall target="-add-jms-destination">
-		<param name="${jms.destination.name}" value="ViewMyInvestigations"/>
+		<param name="jms.destination.name" value="ViewMyInvestigations"/>
 	</antcall>
     </target>
 
@@ -141,73 +141,73 @@
     <!--   remove all ICAT Log jms resources to glassfish      -->
     <target name ="remove-jms-resources" description="Adds all JMS resources for ICAT API Logging module">
 	<antcall target="-remove-jms-resource">
-		<param name="${jms.resource.name}" value="advanced/Queue"/>
+		<param name="jms.resource.name" value="advanced/Queue"/>
 	</antcall>
 	<antcall target="-remove-jms-resource">
-		<param name="${jms.resource.name}" value="login/Queue"/>
+		<param name="jms.resource.name" value="login/Queue"/>
 	</antcall>
 	<antcall target="-remove-jms-resource">
-		<param name="${jms.resource.name}" value="logout/Queue"/>
+		<param name="jms.resource.name" value="logout/Queue"/>
 	</antcall>
 	<antcall target="-remove-jms-resource">
-		<param name="${jms.resource.name}" value="keywords/Queue"/>
+		<param name="jms.resource.name" value="keywords/Queue"/>
 	</antcall>
 	<antcall target="-remove-jms-resource">
-		<param name="${jms.resource.name}" value="runnumber/Queue"/>
+		<param name="jms.resource.name" value="runnumber/Queue"/>
 	</antcall>
 	<antcall target="-remove-jms-resource">
-		<param name="${jms.resource.name}" value="download/Queue"/>
+		<param name="jms.resource.name" value="download/Queue"/>
 	</antcall>
 	<antcall target="-remove-jms-resource">
-		<param name="${jms.resource.name}" value="sample/Queue"/>
+		<param name="jms.resource.name" value="sample/Queue"/>
 	</antcall>
 	<antcall target="-remove-jms-resource">
-		<param name="${jms.resource.name}" value="datafile/Queue"/>
+		<param name="jms.resource.name" value="datafile/Queue"/>
 	</antcall>
 	<antcall target="-remove-jms-resource">
-		<param name="${jms.resource.name}" value="dataset/Queue"/>
+		<param name="jms.resource.name" value="dataset/Queue"/>
 	</antcall>
 	<antcall target="-remove-jms-resource">
-		<param name="${jms.resource.name}" value="investigations/Queue"/>
+		<param name="jms.resource.name" value="investigations/Queue"/>
 	</antcall>
 	<antcall target="-remove-jms-resource">
-		<param name="${jms.resource.name}" value="myinvestigations/Queue"/>
+		<param name="jms.resource.name" value="myinvestigations/Queue"/>
 	</antcall>
 	<antcall target="-remove-jms-destination">
-		<param name="${jms.destination.name}" value="AdvancedSearch"/>
+		<param name="jms.destination.name" value="AdvancedSearch"/>
 	</antcall>
 	<antcall target="-remove-jms-destination">
-		<param name="${jms.destination.name}" value="Login"/>
+		<param name="jms.destination.name" value="Login"/>
 	</antcall>
 	<antcall target="-remove-jms-destination">
-		<param name="${jms.destination.name}" value="Logout"/>
+		<param name="jms.destination.name" value="Logout"/>
 	</antcall>
 	<antcall target="-remove-jms-destination">
-		<param name="${jms.destination.name}" value="Keywords"/>
+		<param name="jms.destination.name" value="Keywords"/>
 	</antcall>
 	<antcall target="-remove-jms-destination">
-		<param name="${jms.destination.name}" value="RunNumber"/>
+		<param name="jms.destination.name" value="RunNumber"/>
 	</antcall>
 	<antcall target="-remove-jms-destination">
-		<param name="${jms.destination.name}" value="Download"/>
+		<param name="jms.destination.name" value="Download"/>
 	</antcall>
 	<antcall target="-remove-jms-destination">
-		<param name="${jms.destination.name}" value="Sample"/>
+		<param name="jms.destination.name" value="Sample"/>
 	</antcall>
 	<antcall target="-remove-jms-destination">
-		<param name="${jms.destination.name}" value="ViewDatafiles"/>
+		<param name="jms.destination.name" value="ViewDatafiles"/>
 	</antcall>
 	<antcall target="-remove-jms-destination">
-		<param name="${jms.destination.name}" value="ViewDatasets"/>
+		<param name="jms.destination.name" value="ViewDatasets"/>
 	</antcall>
 	<antcall target="-remove-jms-destination">
-		<param name="${jms.destination.name}" value="ViewInvestigations"/>
+		<param name="jms.destination.name" value="ViewInvestigations"/>
 	</antcall>
 	<antcall target="-remove-jms-destination">
-		<param name="${jms.destination.name}" value="ViewMyInvestigations"/>
+		<param name="jms.destination.name" value="ViewMyInvestigations"/>
 	</antcall>
 	<antcall target="-remove-jms-factory">
-		<param name="${jms.fact.name}" value="jms/icat/QueueConnectionFactory"/>
+		<param name="jms.fact.name" value="jms/icat/QueueConnectionFactory"/>
 	</antcall>
     </target>
     
