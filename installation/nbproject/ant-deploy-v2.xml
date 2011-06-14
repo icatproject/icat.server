@@ -143,7 +143,20 @@
     <!--  This is because the : and = need to be escaped      -->                                                  
     <!--  when executing the admin command via ant            -->
     <!--                                                      -->
-    <target name="-replaceURLs" depends="-replace-icatuser-url, -replace-icat-url" />
+    <target name="-replaceURLs" depends="-replace-icatuser-url, -replace-icat-url, -replace-icatlog-url" />
+    <target name="-replace-icatlog-url">
+        <echo level="info" message="${icatlog.url}" />
+        <!-- Save URL to file -->
+        <tempfile deleteonexit="true" prefix="urlreplace" property="url.file" destdir="${java.io.tmpdir}"/>  <!-- do not forget to delete this! -->
+        <echo message="${icatlog.url}" file="${url.file}"/>
+        <!-- Replace URL strings -->
+        <replace file="${url.file}" value="\:" token=":" />
+        <replace file="${url.file}" value="\=" token="=" />  
+        <!-- Read back in as property -->
+        <loadfile property="icatlog.url.replaced" srcFile="${url.file}" />
+        <delete file="${url.file}"/>
+        <echo level="info" message="${icatlog.url.replaced}" />
+    </target>   
     <target name="-replace-icatuser-url">
         <echo level="info" message="${icatuser.url}" />
         <!-- Save URL to file -->
