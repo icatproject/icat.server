@@ -243,7 +243,7 @@
         <sun-appserv-admin  user="${sjsas.username}"
                 passwordfile="${sjsas.password.file}"
                 host="${sjsas.host}" port="${sjsas.admin.port}"
-                command="create-jms-resource --restype javax.jms.Queue --enabled=true --property Name=${jms.resource.name} jms/${jms.resource.name}" asinstalldir="${sjsas.root}"/>
+                command="create-jms-resource --restype javax.jms.Queue --enabled=true --property Name=${jms.resource.property.name} jms/${jms.resource.name}" asinstalldir="${sjsas.root}"/>
         <delete file="${sjsas.password.file}"/>
     </target>
     <!--                                                      -->

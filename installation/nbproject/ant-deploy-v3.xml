@@ -239,7 +239,7 @@
     <target name="-add-jms-resource" depends="-init-cl-deployment-env" >
         <echo level="info" message="Adding JMS resource ${jms.resource.name}" />
         <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="true">
-            <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} create-jms-resource --restype javax.jms.Queue --enabled=true --property Name=${jms.resource.name} jms/${jms.resource.name}"/>
+            <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} create-jms-resource --restype javax.jms.Queue --enabled=true --property Name=${jms.resource.property.name} jms/${jms.resource.name}"/>
         </exec>
         <delete file="${sjsas.password.file}"/>
     </target>
@@ -280,7 +280,7 @@
     <!--  to glassfish                                        -->    
     <!--                                                      -->
     <target name="-add-jms-destination" depends="-init-cl-deployment-env" >
-        <echo level="info" message="Adding JMS destination ${jms.dest.name}" />
+        <echo level="info" message="Adding JMS destination ${jms.destination.name}" />
         <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="true">
             <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} create-jmsdest --desttype queue ${jms.destination.name}"/>
         </exec>
@@ -290,7 +290,7 @@
     <!--  Removes a JMS destination queue from glassfish       -->    
     <!--                                                      -->
     <target name="-remove-jms-destination" depends="-init-cl-deployment-env" >
-        <echo  level="info" message="Removing JMS destination ${jms.dest.name}" />
+        <echo  level="info" message="Removing JMS destination ${jms.destination.name}" />
         <exec dir="${sjsas.root}/bin" executable="${sjsas.root}/bin/${asadmin}" failonerror="false">
             <arg line=" --port ${sjsas.admin.port} --passwordfile ${sjsas.password.file} delete-jmsdest --desttype queue ${jms.destination.name} "/>
         </exec>

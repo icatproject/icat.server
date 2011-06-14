@@ -71,36 +71,47 @@
 	</antcall>
 	<antcall target="-add-jms-resource">
 		<param name="jms.resource.name" value="advanced/Queue"/>
+		<param name="jms.resource.property.name" value="AdvancedSearch"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
 		<param name="jms.resource.name" value="login/Queue"/>
+		<param name="jms.resource.property.name" value="Login"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
 		<param name="jms.resource.name" value="logout/Queue"/>
+		<param name="jms.resource.property.name" value="Logout"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
 		<param name="jms.resource.name" value="keywords/Queue"/>
+		<param name="jms.resource.property.name" value="Keywords"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
 		<param name="jms.resource.name" value="runnumber/Queue"/>
+		<param name="jms.resource.property.name" value="RunNumber"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
 		<param name="jms.resource.name" value="download/Queue"/>
+		<param name="jms.resource.property.name" value="Download"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
 		<param name="jms.resource.name" value="sample/Queue"/>
+		<param name="jms.resource.property.name" value="Sample"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
 		<param name="jms.resource.name" value="datafile/Queue"/>
+		<param name="jms.resource.property.name" value="ViewDatafiles"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
 		<param name="jms.resource.name" value="dataset/Queue"/>
+		<param name="jms.resource.property.name" value="ViewDatasets"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
 		<param name="jms.resource.name" value="investigations/Queue"/>
+		<param name="jms.resource.property.name" value="ViewInvestigations"/>
 	</antcall>
 	<antcall target="-add-jms-resource">
 		<param name="jms.resource.name" value="myinvestigations/Queue"/>
+		<param name="jms.resource.property.name" value="ViewMyInvestigations"/>
 	</antcall>
 	<antcall target="-add-jms-destination">
 		<param name="jms.destination.name" value="AdvancedSearch"/>
@@ -172,6 +183,7 @@
 	</antcall>
 	<antcall target="-remove-jms-resource">
 		<param name="jms.resource.name" value="myinvestigations/Queue"/>
+
 	</antcall>
 	<antcall target="-remove-jms-destination">
 		<param name="jms.destination.name" value="AdvancedSearch"/>
@@ -243,7 +255,8 @@
     <!--                                                      -->
     <target name="clean" description="Removes all of ICAT API" >
         <antcall target="remove-config" />
-        <antcall target="remove-server-resources" />        
+        <antcall target="remove-server-resources" />
+	<antcall target="remove-jms-resources"/>        
         <antcall target="-remove-file-realm-user">
             <param name="admin.auth.user" value="${facility.name}-admin" />
         </antcall>
@@ -256,6 +269,7 @@
     <target name="install" description="Installs all of ICAT API" >
         <antcall target="init-config" />
         <antcall target="add-server-resources" />
+	<antcall target="add-jms-resources" />
         <antcall target="-add-file-realm-user">
             <param name="admin.auth.user" value="${facility.name}-admin" />
             <param name="admin.auth.group" value="admin" />
