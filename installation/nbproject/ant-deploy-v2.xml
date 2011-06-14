@@ -233,30 +233,57 @@
         </exec>
     </target>  
     <!--                                                      -->
-    <!--  Adds JMS desination queue jms/${jms.dest.name}      -->
+    <!--  Adds JMS resource queue jms/${jms.dest.name}      -->
     <!--  to glassfish                                        -->    
     <!--                                                      -->
-    <target name="-add-jms-destination" depends="-init-cl-deployment-env" >
-        <echo level="info" message="Adding JMS destination ${jms.dest.name}" />
+    <target name="-add-jms-resource" depends="-init-cl-deployment-env" >
+        <echo level="info" message="Adding JMS destination ${jms.resource.name}" />
         <taskdef name="sun-appserv-admin" classname="org.apache.tools.ant.taskdefs.optional.sun.appserv.AdminTask"
                  classpath="${sjsas.root}/lib/sun-appserv-ant.jar" />
         <sun-appserv-admin  user="${sjsas.username}"
                 passwordfile="${sjsas.password.file}"
                 host="${sjsas.host}" port="${sjsas.admin.port}"
-                command="create-jms-resource --restype javax.jms.Queue --enabled=true --property Name=${jms.dest.name} jms/${jms.dest.name}" asinstalldir="${sjsas.root}"/>
+                command="create-jms-resource --restype javax.jms.Queue --enabled=true --property Name=${jms.resource.name} jms/${jms.resource.name}" asinstalldir="${sjsas.root}"/>
         <delete file="${sjsas.password.file}"/>
     </target>
     <!--                                                      -->
-    <!--  Removes a JMS desination queue from glassfish       -->    
+    <!--  Removes a JMS resource queue from glassfish       -->    
     <!--                                                      -->
-    <target name="-remove-jms-destination" depends="-init-cl-deployment-env" >
-        <echo  level="info" message="Removing JMS destination ${jms.dest.name}" />
+    <target name="-remove-jms-resource" depends="-init-cl-deployment-env" >
+        <echo  level="info" message="Removing JMS destination ${jms.resource.name}" />
         <taskdef name="sun-appserv-admin" classname="org.apache.tools.ant.taskdefs.optional.sun.appserv.AdminTask"
                  classpath="${sjsas.root}/lib/sun-appserv-ant.jar" />
         <sun-appserv-admin  user="${sjsas.username}"
                 passwordfile="${sjsas.password.file}"
                 host="${sjsas.host}" port="${sjsas.admin.port}"
-                command="delete-jms-resource jms/${jms.dest.name}" asinstalldir="${sjsas.root}"/>
+                command="delete-jms-resource jms/${jms.resource.name}" asinstalldir="${sjsas.root}"/>
+        <delete file="${sjsas.password.file}"/>
+    </target>
+    <!--                                                      -->
+    <!--  Adds JMS destination queue jms/${jms.dest.name}      -->
+    <!--  to glassfish                                        -->    
+    <!--                                                      -->
+    <target name="-add-jms-destination" depends="-init-cl-deployment-env" >
+        <echo level="info" message="Adding JMS destination ${jms.destination.name}" />
+        <taskdef name="sun-appserv-admin" classname="org.apache.tools.ant.taskdefs.optional.sun.appserv.AdminTask"
+                 classpath="${sjsas.root}/lib/sun-appserv-ant.jar" />
+        <sun-appserv-admin  user="${sjsas.username}"
+                passwordfile="${sjsas.password.file}"
+                host="${sjsas.host}" port="${sjsas.admin.port}"
+                command="create-jmsdest --desttype queue ${jms.destination.name}" asinstalldir="${sjsas.root}"/>
+        <delete file="${sjsas.password.file}"/>
+    </target>
+    <!--                                                      -->
+    <!--  Removes a JMS resource queue from glassfish       -->    
+    <!--                                                      -->
+    <target name="-remove-jms-destination" depends="-init-cl-deployment-env" >
+        <echo  level="info" message="Removing JMS destination ${jms.resource.name}" />
+        <taskdef name="sun-appserv-admin" classname="org.apache.tools.ant.taskdefs.optional.sun.appserv.AdminTask"
+                 classpath="${sjsas.root}/lib/sun-appserv-ant.jar" />
+        <sun-appserv-admin  user="${sjsas.username}"
+                passwordfile="${sjsas.password.file}"
+                host="${sjsas.host}" port="${sjsas.admin.port}"
+                command="delete-jmsdest ${jms.destination.name}" asinstalldir="${sjsas.root}"/>
         <delete file="${sjsas.password.file}"/>
     </target>
     <!--                                                       -->
