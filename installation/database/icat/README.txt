@@ -1,4 +1,4 @@
-To install the icat schema:
+To install the icat schemas:
 
 1. cd to the directory containing the file install_icat.sql.
 2. Run sqlplus without connecting to the database (sqlplus /nolog) 
@@ -25,6 +25,7 @@ Enter Database Name             : XE
 Enter SYS password              : mysyspasswd
 Enter icat password       	: myicatpasswd
 Enter icatuser   password       : myicatuserpasswd
+Enter icatlog    password       : myicatlogpasswd
 Enter External tables location 	: /tmp/extloc
 
 ====================================================================

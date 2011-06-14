@@ -37,6 +37,12 @@
         <fail unless="icatuser.password" message="Must set icatuser.password in database.properties" />
         <fail unless="icatuser.data.source.classname" message="Must set icatuser.data.source.classname in database.properties" />
         <fail unless="icatuser.driver" message="Must set icatuser.driver in database.properties" />
+        <!-- Icat log -->
+        <fail unless="icatlog.user" message="Must set icatlog.user in database.properties" />
+        <fail unless="icatlog.url" message="Must set icatlog.url in database.properties" />
+        <fail unless="icatlog.password" message="Must set icatlog.password in database.properties" />
+        <fail unless="icatlog.data.source.classname" message="Must set icatlog.data.source.classname in database.properties" />
+        <fail unless="icatlog.driver" message="Must set icatlog.driver in database.properties" />
          <!-- Glassfish config -->
         <fail unless="sjsas.admin.port" message="Must set sjsas.admin.port in glassfish.properties" />
         <fail unless="sjsas.http.port" message="Must set sjsas.http.port in glassfish.properties" />

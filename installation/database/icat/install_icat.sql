@@ -20,6 +20,7 @@ undefine icat_password
 undefine externaltable_location
 undefine icatuser_password
 define ICAT = icat
+define ICATLOG = icatlog
 define TESTICAT = testicat
 define testicat_username = testicat
 define testicat_password = password
@@ -29,10 +30,11 @@ set define ON
 
 ACCEPT database_name CHAR prompt           'Enter Database Name             : '
 ACCEPT sys_password CHAR hide prompt       'Enter SYS password              : '
-REM ACCEPT icat_username CHAR prompt       'Enter ICAT schema name      : '
-ACCEPT icat_password CHAR prompt           'Enter icat password       : '
+REM ACCEPT icat_username CHAR prompt       'Enter ICAT schema name          : '
+ACCEPT icat_password CHAR prompt           'Enter icat password             : '
 ACCEPT icatuser_password CHAR prompt       'Enter icatuser   password       : '
-ACCEPT externaltables_location CHAR prompt 'Enter External tables location : '
+ACCEPT icatlog_password CHAR prompt        'Enter icatlog password	    :'
+ACCEPT externaltables_location CHAR prompt 'Enter External tables location  : '
 
 connect sys/&sys_password@&database_name as sysdba
 VARIABLE separator varchar2(1);
@@ -115,6 +117,45 @@ GRANT "CONNECT" TO icatuser;
 GRANT "PLUSTRACE" TO icatuser;
 GRANT "RESOURCE" TO icatuser;
 GRANT CREATE JOB TO icatuser;
+
+
+prompt
+prompt ====================================================================
+prompt creating user icatlog
+prompt
+
+
+connect sys/&sys_password@&database_name as sysdba
+REM CREATE USER icatlog PROFILE "DEFAULT" IDENTIFIED BY "&icatlog_password" DEFAULT TABLESPACE "USERS" TEMPORARY TABLESPACE "TEMP" QUOTA UNLIMITED ON "USERS" ACCOUNT UNLOCK;
+CREATE USER icatlog PROFILE "DEFAULT" IDENTIFIED BY "&icatlog_password" DEFAULT TABLESPACE "USERS" TEMPORARY TABLESPACE "TEMP" QUOTA UNLIMITED ON "USERS" ACCOUNT UNLOCK;
+GRANT CREATE DATABASE LINK TO icatlog;
+GRANT CREATE LIBRARY TO icatlog;
+GRANT CREATE MATERIALIZED VIEW TO icatlog;
+GRANT CREATE OPERATOR TO icatlog;
+GRANT CREATE PROCEDURE TO icatlog;
+GRANT CREATE PUBLIC DATABASE LINK TO icatlog;
+GRANT CREATE PUBLIC SYNONYM TO icatlog;
+
+GRANT CREATE SEQUENCE TO icatlog;
+GRANT CREATE SESSION TO icatlog;
+GRANT CREATE SYNONYM TO icatlog;
+GRANT CREATE TABLE TO icatlog;
+GRANT CREATE TRIGGER TO icatlog;
+GRANT CREATE TYPE TO icatlog;
+GRANT CREATE VIEW TO icatlog;
+GRANT UNLIMITED TABLESPACE TO icatlog;
+GRANT EXECUTE ON "SYS"."DBMS_RLS" TO icatlog;
+GRANT SELECT ON "SYS"."V_$SESSION" TO icatlog;
+GRANT SELECT ON "SYS"."V_$SESSTAT" TO icatlog;
+GRANT SELECT ON "SYS"."V_$STATNAME" TO icatlog;
+GRANT "CONNECT" TO icatlog;
+GRANT "PLUSTRACE" TO icatlog;
+GRANT "RESOURCE" TO icatlog;
+GRANT CREATE JOB TO icatlog;
+
+
+CREATE OR REPLACE DIRECTORY external_tables as '&externaltables_location';
+GRANT READ ON DIRECTORY external_tables TO icatlog;
 
 prompt
 prompt ====================================================================
@@ -296,8 +337,23 @@ prompt icat schema installation done!!
 prompt ====================================================================
 prompt
 
+prompt
+prompt Installing icatlog schema !!
+prompt ====================================================================
+prompt
 
-
+connect icatlog/&icatlog_password@&database_name
+set define OFF
+@general_scripts/icat_logging.sql
+set define ON
+prompt  inserting default data
+set define OFF
+@data/initialise_logging.sql
+set define ON
+prompt
+prompt icatlog schema installation done!!
+prompt ====================================================================
+prompt
 
 prompt
 prompt ====================================================================

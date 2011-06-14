@@ -53,6 +53,15 @@
             <param name="data.source" value="${icatuser.data.source.classname}" />
             <param name="description" value='"This is the ICAT user schema for the ICAT API session"' />
         </antcall>
+        <antcall target="-add-connection-pool" >
+            <param name="connection.pool.name" value="icatisislog" />
+            <param name="user" value="${icatlog.user}" />
+            <param name="url" value='"${icatlog.url.replaced}"' />
+            <param name="password" value="${icatlog.password}" />
+            <param name="table" value="LOGIN" />
+            <param name="data.source" value="${icatlog.data.source.classname}" />
+            <param name="description" value='"This is the ICAT Log schema for the ICAT API session"' />
+        </antcall>
     </target>
     <!--                                                     -->
     <!--  Removes all ICAT APIs server resources from         -->   
@@ -64,6 +73,9 @@
         </antcall>
         <antcall target="-remove-connection-pool" >
             <param name="connection.pool.name" value="icat3-user" />
+        </antcall>
+        <antcall target="-remove-connection-pool" >
+            <param name="connection.pool.name" value="icat-log" />
         </antcall>
     </target>
     <!--                                                            -->
