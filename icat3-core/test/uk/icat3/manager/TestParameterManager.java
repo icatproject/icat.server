@@ -128,7 +128,7 @@ public class TestParameterManager extends BaseTestClassTX{
         param.setCreateTime(new Date());
         param.setDeleted(false);
         param.setFacilityAcquiredSet(false);
-        param.setVerified(true);
+        param.setVerified(false);
         em.persist(param);
         em.flush();
 
@@ -139,6 +139,29 @@ public class TestParameterManager extends BaseTestClassTX{
         ParameterManager.removeParameter(userId, name, units, manager);
     }
 
+
+    /**
+     * Test of removeParameter method, of class ParameterManager.
+     */
+    @Test(expected = ValidationException.class)
+    public void testRemoveParameterWithVerified() throws ValidationException {
+        //Create a new parameter
+        ParameterPK  pk = new ParameterPK("kg", "weight");
+        Parameter param = new Parameter(pk, "Y", ParameterValueType.NUMERIC.getValue(), "N", "Y", "Y", "SUPER", new Date());
+        param.setCreateId("SUPER");
+        param.setCreateTime(new Date());
+        param.setDeleted(false);
+        param.setFacilityAcquiredSet(false);
+        param.setVerified(true);
+        em.persist(param);
+        em.flush();
+
+        String userId = "SUPER";
+        String name = "weight";
+        String units = "kg";
+        EntityManager manager = em;
+        ParameterManager.removeParameter(userId, name, units, manager);
+    }
 
     /**
      * Test of updateParameter method, of class ParameterManager.
