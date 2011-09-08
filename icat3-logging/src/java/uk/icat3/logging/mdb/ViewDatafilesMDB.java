@@ -26,7 +26,7 @@ import uk.icat3.logging.entity.DatafileView;
 import uk.icat3.logging.entity.Login;
 import uk.icat3.logging.entity.SimpleView;
 import uk.icat3.logging.util.PropertyNames;
-import uk.icat3.manager.DataFileManager;
+import uk.icat3.manager.DatafileManager;
 import uk.icat3.logging.util.QueueNames;
 
 /**
@@ -76,7 +76,7 @@ public class ViewDatafilesMDB implements MessageListener {
             ArrayList<Long> fileIds = (ArrayList<Long>) msg.getObject();
             for (Long id : fileIds) {
                 log.debug("Data file id to be found: " + id);
-                Datafile file = DataFileManager.getDataFile(userId, id, exposed);
+                Datafile file = DatafileManager.getDataFile(userId, id, exposed);
                 log.debug("========Some datafile info: " + file.getName());
 
                 Dataset dataset = file.getDataset();

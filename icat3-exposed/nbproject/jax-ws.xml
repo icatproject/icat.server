@@ -4,9 +4,6 @@
     <service name="ICAT">
       <implementation-class>uk.icat3.sessionbeans.ICAT</implementation-class>
     </service>
-    <service name="ICATAdmin">
-      <implementation-class>uk.icat3.sessionbeans.ICATAdmin</implementation-class>
-    </service>
   </services>
   <clients>
   </clients>

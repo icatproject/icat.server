@@ -1,192 +1,112 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package uk.icat3.manager;
 
-import java.util.Date;
-import javax.persistence.EntityManager;
-import org.junit.After;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Before;
+import org.junit.Test;
+
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.ParameterPK;
-import uk.icat3.exceptions.ValidationException;
-import uk.icat3.util.BaseTestClassTX;
+import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.search.InvestigationSearch;
+import uk.icat3.util.BaseTestTransaction;
 import uk.icat3.util.ParameterValueType;
 
-/**
- * This is unit test for parameter manager.
- * @author Mr. Srikanth Nagella
- */
-public class TestParameterManager extends BaseTestClassTX{
-    private Parameter paramMts;
-    public TestParameterManager() {
-    }
+public class TestParameterManager extends BaseTestTransaction {
 
-    @Before
-    public void setUpManager() throws Exception {
-        //Find the parameter if it exists use it or else create a new
-        try{
-            paramMts = (Parameter) em.createNamedQuery("Parameter.findByNameAndUnits").setParameter("name", "length").setParameter("units", "meters").getSingleResult();
-            return;
-        }catch(Exception ex){
-        }
-        //Create a new parameter
-        ParameterPK  pk = new ParameterPK("meters", "length");
-        paramMts = new Parameter(pk, "Y", ParameterValueType.NUMERIC.getValue(), "N", "Y", "Y", "SUPER", new Date());
-        paramMts.setCreateId("SUPER");
-        paramMts.setCreateTime(new Date());
-        paramMts.setDeleted(false);
-        paramMts.setFacilityAcquiredSet(false);
-        paramMts.setVerified(true);
-        em.persist(paramMts);
-        em.flush();
-    }
+	@Before
+	public void setUpManager() throws Exception {
+		RuleManager.addUserGroupMember("PHacker", "P1", em);
+		RuleManager.addUserGroupMember("PHacker", "P2", em);
+		RuleManager.addRule("PHacker", "Parameter", "CRUD", null, em);
+	}
 
-    @After
-    public void tearDownManager(){
-        try{
-            if(!em.getTransaction().getRollbackOnly()){
-                em.remove(paramMts);
-                em.flush();
-            }
-        }catch(Exception ex){
-            System.out.println("Caught exception");
-        }
-    }
+	private Parameter createKnownParameter() throws Exception {
+		return createParameter("test-length", "test-units", true, ParameterValueType.NUMERIC, false, true, true, true,
+				true);
+	}
 
-    /**
-     * Test of getParameter method, of class ParameterManager.
-     */
-    @Test
-    public void testGetParameter() {
-        String name = "length";
-        String units = "meters";
-        Parameter expResult = paramMts;
-        Parameter result = ParameterManager.getParameter(name, units, em);
-        assertEquals(expResult, result);
-    }
+	/**
+	 * Test of createParameter method, of class ParameterManager.
+	 */
+	@Test
+	public void testCreateParameter() throws Exception {
+		int nParms = InvestigationSearch.listAllParameters(em).size();
+		Parameter pm = createKnownParameter();
+		pm.setParameterPK((ParameterPK) BeanManager.create("P1", pm, em));
+		pm = (Parameter) BeanManager.get("P1", "Parameter", pm.getPK(), em);
+		Parameter pmref = createKnownParameter();
+		assertEquals(pmref.getParameterPK().getName(), pm.getParameterPK().getName());
+		assertEquals(pmref.getParameterPK().getUnits(), pm.getParameterPK().getUnits());
+		assertEquals(pmref.isSampleParameter(), pm.isSampleParameter());
+		assertEquals(pmref.isDatasetParameter(), pm.isDatasetParameter());
+		assertEquals(pmref.isDatafileParameter(), pm.isDatafileParameter());
+		assertEquals(pmref.isDatafileParameter(), pm.isDatafileParameter());
+		assertEquals("createId", "P1", pm.getCreateId());
+		assertEquals("modId", "P1", pm.getModId());
+		assertEquals("Size", nParms + 1, InvestigationSearch.listAllParameters(em).size());
+	}
 
-    /**
-     * Test of getParameter method for non existing parameter name
-     */
-    @Test
-    public void testGetParameterNonvalidParameterName(){
-        String name = "lengths";
-        String units = "meters";
-        Parameter expResult = null;
-        Parameter result = ParameterManager.getParameter(name, units, em);
-        assertEquals(expResult,result);
-    }
+	/**
+	 * Test of updateParameter method, of class ParameterManager.
+	 */
+	@Test
+	public void testUpdateParameter() throws Exception {
+		int nParms = InvestigationSearch.listAllParameters(em).size();
 
-    /**
-     * Test of createParameter method, of class ParameterManager.
-     */
-    @Test
-    public void testCreateParameter() throws ValidationException{
-        String userId = "test";
-        String name = "distance";
-        String units = "meters";
-        ParameterValueType valueType = ParameterValueType.NUMERIC;
-        boolean isSearchable = true;
-        boolean isDatasetParameter = true;
-        boolean isDatafileParameter = true;
-        boolean isSampleParameter = false;
-        Parameter result = ParameterManager.createParameter(userId, name, units, valueType, isSearchable, isDatasetParameter, isDatafileParameter, isSampleParameter, em);
-        assertEquals(result.getParameterPK().getName(),name);
-        assertEquals(result.getParameterPK().getUnits(),units);
-        assertEquals(result.isSampleParameter(),isSampleParameter);
-        assertEquals(result.isDatasetParameter(),isDatasetParameter);
-        assertEquals(result.isDatafileParameter(),isDatafileParameter);
-        em.remove(result);
-    }
+		Parameter orig = createKnownParameter();
+		orig.setParameterPK((ParameterPK) BeanManager.create("P1", orig, em));
+		orig = (Parameter) BeanManager.get("P1", "Parameter", orig.getPK(), em);
 
-    /**
-     * Test of updateParameter method, of class ParameterManager.
-     */
-    @Test
-    public void testUpdateParameter() throws ValidationException {
-        System.out.println("updateParameter");
-        Parameter param = ParameterManager.updateParameter(paramMts.getCreateId(), paramMts.getParameterPK().getName(), paramMts.getParameterPK().getUnits(),true, paramMts.isDatasetParameter(), paramMts.isDatafileParameter(), !paramMts.isSampleParameter(), em);
-        assertEquals(param.isDatasetParameter(),paramMts.isDatasetParameter());
-        assertEquals(param.isDatafileParameter(),paramMts.isDatafileParameter());
-        assertEquals(param.isSampleParameter(),true);
-    }
+		assertEquals("Size", nParms + 1, InvestigationSearch.listAllParameters(em).size());
+		Parameter newP = createKnownParameter();
+		newP.setDescription("wibble");
+		BeanManager.update("P2", newP, em);
+		Parameter result = (Parameter) BeanManager.get("P1",  "Parameter", orig.getPK(), em); 
 
-    /**
-     * Test of removeParameter method, of class ParameterManager.
-     */
-    @Test
-    public void testRemoveParameter() throws ValidationException {
-        //Create a new parameter
-        ParameterPK  pk = new ParameterPK("kg", "weight");
-        Parameter param = new Parameter(pk, "Y", ParameterValueType.NUMERIC.getValue(), "N", "Y", "Y", "SUPER", new Date());
-        param.setCreateId("SUPER");
-        param.setCreateTime(new Date());
-        param.setDeleted(false);
-        param.setFacilityAcquiredSet(false);
-        param.setVerified(false);
-        em.persist(param);
-        em.flush();
+		assertEquals(orig.getParameterPK().getName(), result.getParameterPK().getName());
+		assertEquals(orig.getParameterPK().getUnits(), result.getParameterPK().getUnits());
+		assertEquals(orig.isSampleParameter(), result.isSampleParameter());
+		assertEquals(orig.isDatasetParameter(), result.isDatasetParameter());
+		assertEquals(orig.isDatafileParameter(), result.isDatafileParameter());
+		assertEquals(orig.isDatafileParameter(), result.isDatafileParameter());
+		assertEquals("wibble", result.getDescription());
+		assertEquals("createId", "P1", result.getCreateId());
+		assertEquals("modId", "P2", result.getModId());
+		assertEquals("Size", nParms + 1, InvestigationSearch.listAllParameters(em).size());
+	}
 
-        String userId = "SUPER";
-        String name = "weight";
-        String units = "kg";
-        EntityManager manager = em;
-        ParameterManager.removeParameter(userId, name, units, manager);
-    }
+	/**
+	 * Test of removeParameter method, of class ParameterManager.
+	 */
+	@Test
+	public void testRemoveParameter() throws Exception {
+		int nParms = InvestigationSearch.listAllParameters(em).size();
+		BeanManager.create("P1", createKnownParameter(),em);
+		assertEquals("Size", nParms + 1, InvestigationSearch.listAllParameters(em).size());
+		Parameter newP = createKnownParameter();
+		BeanManager.delete("P2", newP, em);
+		assertEquals("Size", nParms, InvestigationSearch.listAllParameters(em).size());
+	}
 
+	@Test(expected = InsufficientPrivilegesException.class)
+	public void testRemoveParameterBadUser() throws Exception {
+		int nParms = InvestigationSearch.listAllParameters(em).size();
+		BeanManager.create("P1", createKnownParameter(),em);
+		assertEquals("Size", nParms + 1, InvestigationSearch.listAllParameters(em).size());
+		Parameter newP = createKnownParameter();
+		BeanManager.delete("P3", newP, em);
+	}
 
-    /**
-     * Test of removeParameter method, of class ParameterManager.
-     */
-    @Test(expected = ValidationException.class)
-    public void testRemoveParameterWithVerified() throws ValidationException {
-        //Create a new parameter
-        ParameterPK  pk = new ParameterPK("kg", "weight");
-        Parameter param = new Parameter(pk, "Y", ParameterValueType.NUMERIC.getValue(), "N", "Y", "Y", "SUPER", new Date());
-        param.setCreateId("SUPER");
-        param.setCreateTime(new Date());
-        param.setDeleted(false);
-        param.setFacilityAcquiredSet(false);
-        param.setVerified(true);
-        em.persist(param);
-        em.flush();
+	@Test(expected = NoSuchObjectFoundException.class)
+	public void testUpdateParameterNotExists() throws Exception {
+		int nParms = InvestigationSearch.listAllParameters(em).size();
+		BeanManager.create("P1", createKnownParameter(),em);
+		assertEquals("Size", nParms + 1, InvestigationSearch.listAllParameters(em).size());
+		Parameter newP = createKnownParameter();
+		newP.getParameterPK().setName("Bad");
+		BeanManager.delete("P3", newP, em);
+	}
 
-        String userId = "SUPER";
-        String name = "weight";
-        String units = "kg";
-        EntityManager manager = em;
-        ParameterManager.removeParameter(userId, name, units, manager);
-    }
-
-    /**
-     * Test of updateParameter method, of class ParameterManager.
-     */
-    @Test(expected = ValidationException.class)
-    public void testUpdateParameterNonExisting() throws ValidationException {
-        System.out.println("updateParameter");
-        Parameter param = ParameterManager.updateParameter(paramMts.getCreateId(), paramMts.getParameterPK().getName(), "kg",true, paramMts.isDatasetParameter(), paramMts.isDatafileParameter(), !paramMts.isSampleParameter(), em);
-        fail("Shouldn't update as the parameter doesn't exist");
-    }
-    
-    /**
-     * Test of createParameter method, of class ParameterManager.
-     */
-    @Test(expected = ValidationException.class)
-    public void testCreateParameterWithDuplicate() throws ValidationException{
-        String userId = "test";
-        String name = "length";
-        String units = "meters";
-        ParameterValueType valueType = ParameterValueType.NUMERIC;
-        boolean isSearchable = true;
-        boolean isDatasetParameter = true;
-        boolean isDatafileParameter = true;
-        boolean isSampleParameter = false;
-        Parameter result = ParameterManager.createParameter(userId, name, units, valueType, isSearchable, isDatasetParameter, isDatafileParameter, isSampleParameter, em);
-        fail("Shouldn't create a duplicate parameter");
-    }
 }

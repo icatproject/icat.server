@@ -10,20 +10,15 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
-import javax.persistence.CascadeType;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.xml.bind.annotation.XmlTransient;
-import uk.icat3.util.ElementType;
+
 import uk.icat3.util.Queries;
 
 /**
@@ -31,6 +26,7 @@ import uk.icat3.util.Queries;
  *
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "INVESTIGATION_TYPE")
 @NamedQueries( {
@@ -111,29 +107,7 @@ import uk.icat3.util.Queries;
         this.description = description;
     }
     
-    /**
-     * Gets the investigationCollection of this InvestigationType.
-     * @return the investigationCollection
-     */
-    /*@XmlTransient
-    public Collection<Investigation> getInvestigationCollection() {
-        return this.investigationCollection;
-    }*/
-    
-    /**
-     * Sets the investigationCollection of this InvestigationType to the specified value.
-     * @param investigationCollection the new investigationCollection
-     */
-    /*public void setInvestigationCollection(Collection<Investigation> investigationCollection) {
-        this.investigationCollection = investigationCollection;
-    }*/
-    
-    /**
-     * Gets the element type of the bean
-     */
-    public ElementType getRootElementType(){
-        return ElementType.INVESTIGATION;
-    }
+ 
     
     /**
      * Returns a hash code value for the object.  This implementation computes
@@ -175,5 +149,10 @@ import uk.icat3.util.Queries;
     public String toString() {
         return "InvestigationType[name=" + name + "]";
     }
+
+	@Override
+	public Object getPK() {
+		return name;
+	}
     
 }

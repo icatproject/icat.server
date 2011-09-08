@@ -13,14 +13,14 @@ package uk.icat3.sessionbeans.manager;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.interceptor.Interceptors;
+
 import org.apache.log4j.Logger;
+
 import uk.icat3.exceptions.ICATAPIException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.jaxb.MetadataIngest;
-import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 
 /**
@@ -29,9 +29,6 @@ import uk.icat3.sessionbeans.EJBObject;
  * @author gjd37
  */
 @Stateless()
-//@WebService(/*name="XMLIngestionManagerService",*/targetNamespace="client.icat3.uk")
-//this interceptor check no nulls passed in and logs the method arguments
-@Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 public class XMLIngestionManagerBean extends EJBObject implements XMLIngestionManagerLocal {
     

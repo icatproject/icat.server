@@ -69,7 +69,8 @@ public class DownloadInterceptor {
                     log.debug("====Datafile id: " + args[1].toString());
                     ids.add(new Long(args[1].toString()));
                 } else if (args[1] instanceof Collection) {
-                    Collection<Long> fileIds = (Collection<Long>) args[1];
+                    @SuppressWarnings("unchecked")
+					Collection<Long> fileIds = (Collection<Long>) args[1];
                     ids.addAll(fileIds);
                 }
                 downloadMsg.setObject(ids);

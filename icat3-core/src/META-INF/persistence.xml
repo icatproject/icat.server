@@ -46,7 +46,7 @@
       <property name="eclipselink.jdbc.url" value="jdbc:oracle:thin:@//localhost:1521/XE"/>
       <property name="eclipselink.jdbc.password" value="password"/>
       <property name="eclipselink.jdbc.driver" value="oracle.jdbc.OracleDriver"/>
-      <property name="eclipselink.jdbc.user" value="testicat"/>
+      <property name="eclipselink.jdbc.user" value="icat"/>
     </properties>
   </persistence-unit>
 </persistence>

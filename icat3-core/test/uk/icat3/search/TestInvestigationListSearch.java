@@ -9,43 +9,29 @@
 
 package uk.icat3.search;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.Collection;
+
 import junit.framework.JUnit4TestAdapter;
-import org.junit.Test;
+
 import org.apache.log4j.Logger;
-import uk.icat3.util.BaseTestClass;
-import static org.junit.Assert.*;
-import static uk.icat3.util.TestConstants.*;
+import org.junit.Test;
+
 import uk.icat3.entity.Investigation;
-import uk.icat3.util.ElementType;
+import uk.icat3.search.parameter.util.ElementType;
+import uk.icat3.util.BaseClassTransaction;
 import uk.icat3.util.Queries;
-import static uk.icat3.util.Util.*;
 
 /**
  *
  * @author gjd37
  */
-public class TestInvestigationListSearch extends BaseTestClass{
+public class TestInvestigationListSearch extends BaseClassTransaction{
     
     private static Logger log = Logger.getLogger(TestInvestigationListSearch.class);
-    
-    
-    @Test
-    public void testGetAllSupersInvestigations(){
-        log.info("Testing SUPER_USER, getAllInvestigations: "+SUPER_USER);
-        
-        log.debug("Testing user investigations: "+SUPER_USER);
-        
-        Collection<Investigation> invs = em.createQuery(Queries.INVESTIGATIONS_BY_USER_JPQL).
-                setParameter("objectType",ElementType.INVESTIGATION).
-                setParameter("userId",SUPER_USER).getResultList();
-        
-        log.trace("Investigations for user "+SUPER_USER+" is "+invs.size());
-        
-        assertNotNull("Must not be an empty collection", invs);
-        assertEquals("Collection 'all Investigations' should be 5", 5 , invs.size());
-    }
-    
+       
     @Test
     public void testGetAllNoUserInvestigations(){
         log.info("Testing ANY, getAllInvestigations: ANY");

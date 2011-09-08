@@ -1,14 +1,40 @@
+Insert into THIS_ICAT
+   (FACILITY_SHORT_NAME, FACILITY_LONG_NAME, FACILITY_URL, FACILITY_DESCRIPTION, DAYS_UNTIL_PUBLIC_RELEASE, SEQ_NUMBER, MOD_ID, MOD_TIME, CREATE_ID, CREATE_TIME, DELETED, FACILITY_ACQUIRED)
+ Values
+   ('ISIS', 'For test purposes only', 'http://www.anon.ac.uk', 'ANON supports an international community of around 1600 scientists who use neutrons and muons for research in physics, chemistry, materials science, geology, engineering and biology', 1096, 999, 'damian', TO_TIMESTAMP('05/08/2008 14:12:49.0','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', TO_TIMESTAMP('05/08/2008 14:12:49.0','DD/MM/YYYY HH24:MI:SS.FF'), 'N', 'Y');
+
+
+Insert into INSTRUMENT
+   (NAME, SHORT_NAME, TYPE, DESCRIPTION, SEQ_NUMBER, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED)
+Values
+   ('MAPS', 'MAP', 'Excitations', '"Maps has changed the way the neutron community thinks about inelastic neutron scattering. Its huge array of position sensitive detectors has created a survey technique that is able to map vast areas of the Brillouin zone, making it possible to see the unexpected. It is able to reveal broad features which could easily be dismissed as background on a triple-axis machine.Computer model of Mas spectrometer The position sensitive detectors give near-continuous coverage over a large solid angle detector array in the forward direction. The pixel size in reciprocal space is significantly smaller than the resolution volume defined by the other instrumental contributions. In contrast, conventional detectors on Het and Mari integrate along one direction in reciprocal space, which overwhelms the intrinsic resolution in that direction. With MAPS there there is complete freedom to construct scans along any direction in reciprocal space and project data onto any plane in reciprocal space. Maps is optimised to measure high energy magnetic excitations in single crystals with varying energy resolution depending on choice of monochromating chopper."', 999, TO_TIMESTAMP('12/09/2007 13:30:16.6','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', TO_TIMESTAMP('12/09/2007 13:30:16.6','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', 'Y', 'N');
+
+Insert into INSTRUMENT
+   (NAME, SHORT_NAME, TYPE, DESCRIPTION, SEQ_NUMBER, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED)
+Values
+   ('CRISP', 'CSP', 'Large Scale Structures', '"CRISP Reflectometer. CRISP is one of two Neutron Reflectometers (NR) at ISIS. It is the original instrument and was designed for high resolution studies of a wide range of interfacial phenomena. The instrument is highly automated, allowing reproducible measurements to be made with high precision, and the sample geometry is horizontal to facilitate the study of liquid surfaces. CRISP, unlike its sister instrument SURF, can also perform polarised neutron reflectivity (PNR) measurements with full polarisation analysis. There is also overhead crane access for the installation of large items of sample environment."', 999, TO_TIMESTAMP('12/09/2007 13:30:16.6','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', TO_TIMESTAMP('12/09/2007 13:30:16.6','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', 'Y', 'N');
+
+
+Insert into INVESTIGATION_TYPE
+   (NAME, DESCRIPTION, SEQ_NUMBER, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED)
+Values
+   ('experiment', 'A scientific experiment.', 999, TO_TIMESTAMP('12/09/2007 13:30:16.6','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', TO_TIMESTAMP('12/09/2007 13:30:16.6','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', 'Y', 'N');
+
+Insert into DATASET_TYPE
+   (NAME, DESCRIPTION, SEQ_NUMBER, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED)
+ Values
+   ('experiment_raw', 'RAW data collected at the facility during an experiment.', 999, TO_TIMESTAMP('12/09/2007 13:30:16.5','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', TO_TIMESTAMP('12/09/2007 13:30:16.5','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', 'Y', 'N');
+   
+   
 Insert into INVESTIGATION
    (ID, INV_NUMBER, VISIT_ID, INV_ABSTRACT, INV_PARAM_NAME, INV_PARAM_VALUE, INV_START_DATE, FACILITY, FACILITY_CYCLE, INSTRUMENT, TITLE, INV_TYPE, BCAT_INV_STR, RELEASE_DATE, MOD_TIME, MOD_ID, CREATE_ID, CREATE_TIME, DELETED, FACILITY_ACQUIRED)
- Values
+Values
    (2, '32', '1', 'This is a test abstract','Run number range', '2300 - 2400', TO_TIMESTAMP('02/01/2007 00:00:00.0','DD/MM/YYYY HH24:MI:SS.FF'), 'ISIS', null, 'MAPS', 'SrF2 calibration  w=-25.3', 'experiment', '/CCW - / RAL', TO_TIMESTAMP('02/01/2009 00:00:00.0','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:39:59.1','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'FIRST PROPAGATION', systimestamp, 'N', 'Y');
-
 
 Insert into INVESTIGATION
    (ID, INV_NUMBER, VISIT_ID,  FACILITY, GRANT_ID, INV_ABSTRACT, INSTRUMENT, TITLE, INV_TYPE, BCAT_INV_STR, RELEASE_DATE, MOD_TIME, MOD_ID, CREATE_ID, CREATE_TIME, DELETED, FACILITY_ACQUIRED)
  Values
    (3, '12345', '12', 'ISIS', 15, 'test abstract', 'MAPS', 'Test Investigation without any investigators', 'experiment', 'damian', TO_TIMESTAMP('02/01/2009 00:00:00.0','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:39:59.1','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'FIRST PROPAGATION', systimestamp, 'N', 'Y');
-
 
 Insert into INVESTIGATION
    (ID, INV_NUMBER, VISIT_ID, FACILITY, INSTRUMENT, TITLE, INV_TYPE, BCAT_INV_STR, RELEASE_DATE, MOD_TIME, MOD_ID, CREATE_ID, CREATE_TIME, DELETED, FACILITY_ACQUIRED)
@@ -31,17 +57,16 @@ Insert into INVESTIGATION
  Values
    (7, '232323', 'deletable', 'ISIS', 'MAPS', 'Test Investigation deleable', 'experiment', 'gjdd37', TO_TIMESTAMP('02/01/2009 00:00:00.0','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:39:59.1','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'FIRST PROPAGATION', systimestamp, 'N', 'N');
 
---  Test investigation for DLS --
 Insert into INVESTIGATION
    (ID, INV_NUMBER, VISIT_ID, INV_START_DATE, INV_ABSTRACT, INV_PARAM_NAME, INV_PARAM_VALUE, FACILITY, INSTRUMENT, FACILITY_CYCLE, TITLE, INV_TYPE, BCAT_INV_STR, RELEASE_DATE, MOD_TIME, MOD_ID, CREATE_ID, CREATE_TIME, DELETED, FACILITY_ACQUIRED)
  Values
    (8, '543', 'NT449-1', TO_TIMESTAMP('02/01/2008 00:00:00.0','DD/MM/YYYY HH24:MI:SS.FF'), 'This is a test abstract for the dataportal demo','Run number range', '2300 - 2400', 'ISIS', 'MAPS', null, 'Powder Diffraction 1459GPa', 'experiment', 'gjd37', TO_TIMESTAMP('02/01/2008 00:00:00.0','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:39:59.1','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'FIRST PROPAGATION', systimestamp, 'N', 'N');
 
 
---Insert into FACILITY_USER
---   (FACILITY_USER_ID, FEDERAL_ID, TITLE, INITIALS, FIRST_NAME, LAST_NAME, MOD_TIME, MOD_ID, CREATE_ID, CREATE_TIME, DELETED, FACILITY_ACQUIRED)
--- Values
---   ('9932', 'dwf64', 'Mr', 'DW', 'Damian', 'Flannery', TO_TIMESTAMP('16/01/2007 11:16:55.1','DD/MM/YYYY HH24:MI:SS.FF'), 'JAMES', 'FIRST PROPAGATION', systimestamp, 'N', 'Y');
+Insert into FACILITY_USER
+   (FACILITY_USER_ID, FEDERAL_ID, TITLE, INITIALS, FIRST_NAME, LAST_NAME, MOD_TIME, MOD_ID, CREATE_ID, CREATE_TIME, DELETED, FACILITY_ACQUIRED)
+ Values
+   ('9932', 'dwf64', 'Mr', 'DW', 'Damian', 'Flannery', TO_TIMESTAMP('16/01/2007 11:16:55.1','DD/MM/YYYY HH24:MI:SS.FF'), 'JAMES', 'FIRST PROPAGATION', systimestamp, 'N', 'Y');
 Insert into FACILITY_USER
    (FACILITY_USER_ID, FEDERAL_ID, TITLE, INITIALS, FIRST_NAME, LAST_NAME, MOD_TIME, MOD_ID, CREATE_ID, CREATE_TIME, DELETED, FACILITY_ACQUIRED)
  Values
@@ -114,7 +139,6 @@ Insert into INVESTIGATOR
    (3, 'Testing User', TO_TIMESTAMP('16/01/2007 09:00:17.7','DD/MM/YYYY HH24:MI:SS.FF'), 'Glen', 'FIRST PROPAGATION', systimestamp, 'N', 'N');
 
 
-
 Insert into PUBLICATION
    (ID, INVESTIGATION_ID, FULL_REFERENCE, URL, REPOSITORY_ID, REPOSITORY,  MOD_TIME, MOD_ID, CREATE_ID, CREATE_TIME, DELETED, FACILITY_ACQUIRED)
  Values
@@ -125,616 +149,435 @@ Insert into PUBLICATION
  Values
    (2, 3, 'publication','http://publication','rep id','rep', TO_TIMESTAMP('16/01/2007 09:00:17.7','DD/MM/YYYY HH24:MI:SS.FF'), 'Glen', 'FIRST PROPAGATION', systimestamp, 'N', 'Y');
 
+Insert into PUBLICATION
+   (ID, INVESTIGATION_ID, FULL_REFERENCE, URL, REPOSITORY_ID, REPOSITORY,  MOD_TIME, MOD_ID, CREATE_ID, CREATE_TIME, DELETED, FACILITY_ACQUIRED)
+ Values
+   (3, 3, 'fac acquired??','http://publication','rep id','rep', TO_TIMESTAMP('16/01/2007 09:00:17.7','DD/MM/YYYY HH24:MI:SS.FF'), 'Glen', 'FIRST PROPAGATION', systimestamp, 'N', 'N');
 
 
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD,  MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (1, 'gjd37', 'CREATOR', 'INVESTIGATION', 2,  null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,   USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (2, 'shk78', 'CREATOR', 'INVESTIGATION', 2,  null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,   USER_CHILD_RECORD, MOD_TIME, MOD_ID,CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (3, 'djh37', 'CREATOR', 'INVESTIGATION', 2,  null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD,  MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (4,  'dwf64', 'CREATOR', 'INVESTIGATION', 2,  null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,   USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (5, 'tang76', 'CREATOR', 'INVESTIGATION', 2,  null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+Insert into DATASET_TYPE
+   (NAME, DESCRIPTION, SEQ_NUMBER, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED)
+ Values
+   ('GQ', 'Gemini Quantel', 999, TO_TIMESTAMP('12/09/2007 13:30:16.5','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', TO_TIMESTAMP('12/09/2007 13:30:16.5','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', 'Y', 'N');
 
+   
 
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (220,  'gjd37', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 2,  1, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD,  MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (1, 'gjd37', 'CREATOR', 'INVESTIGATION', 2,  null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,   USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (2, 'shk78', 'CREATOR', 'INVESTIGATION', 2,  null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,   USER_CHILD_RECORD, MOD_TIME, MOD_ID,CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (3, 'djh37', 'CREATOR', 'INVESTIGATION', 2,  null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD,  MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (4,  'dwf64', 'CREATOR', 'INVESTIGATION', 2,  null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,   USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (5, 'tang76', 'CREATOR', 'INVESTIGATION', 2,  null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--
 --Insert into ICAT_AUTHORISATION 
 --  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (221,  'gjd37', 'CREATOR', 'DATAFILE', null, 'DATASET', 2,  6, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (222,  'gjd37', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (223,  'gjd37', 'CREATOR', 'INVESTIGATION', null, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (7,  'shk78', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (8,  'djh37', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (9,  'dwf64', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (10,  'tang76', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
-
+--    (220,  'gjd37', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 2,  1, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
 --Insert into ICAT_AUTHORISATION 
 --  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (11,  'gjd37', 'CREATOR', 'DATAFILE', 2, 'DATASET', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (222,  'gjd37', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
 --  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (12 ,  'shk78', 'CREATOR', 'DATAFILE', 2, 'DATASET', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (223,  'gjd37', 'CREATOR', 'INVESTIGATION', null, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
 --Insert into ICAT_AUTHORISATION 
 --  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (13,  'djh37', 'CREATOR', 'DATAFILE', 2, 'DATASET', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (7,  'shk78', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
 --  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (14, 'dwf64', 'CREATOR', 'DATAFILE', 2, 'DATASET', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
---Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE,PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
--- Values 
---    (15,  'tang76', 'CREATOR', 'DATAFILE', 2, 'DATASET', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
-
---Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
--- Values 
---    (16,'gjd37', 'CREATOR', 'DATAFILE', 58, 'DATASET', 2,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (8,  'djh37', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
 --  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
- --   (17 ,  'shk78', 'CREATOR', 'DATAFILE', 58, 'DATASET', 2, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (9,  'dwf64', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
 --  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (18,  'djh37', 'CREATOR', 'DATAFILE', 58, 'DATASET', 2, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (10,  'tang76', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--
 --Insert into ICAT_AUTHORISATION 
 --  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (19,  'dwf64', 'CREATOR', 'DATAFILE', 58, 'DATASET', 2, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (21, 'test', 'CREATOR', 'INVESTIGATION', 2,  null, null, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
 --Insert into ICAT_AUTHORISATION 
---(ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (20, 'tang76', 'CREATOR', 'DATAFILE', 58, 'DATASET', 2, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (21, 'test', 'CREATOR', 'INVESTIGATION', 2,  null, null, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (22, 'test', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (22, 'test', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--
 --Insert into ICAT_AUTHORISATION 
 --  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (23, 'test', 'CREATOR', 'DATAFILE', 58, 'DATASET', 2, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (60, 'test', 'CREATOR', 'INVESTIGATION', 3, null, null, 79, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--
 --Insert into ICAT_AUTHORISATION 
---   (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (24, 'test', 'CREATOR', 'DATAFILE', 2, 'DATASET', 2, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (60, 'test', 'CREATOR', 'INVESTIGATION', 3, null, null, 79, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
---removed by dwf06-May-09
+--    (25, 'test', 'READER', 'INVESTIGATION', 4,  null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (26, 'test', 'CREATOR', 'DATASET', 3, 'INVESTIGATION', 3, 81, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (79, 'test', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (72,  'ANY', 'READER', 'INVESTIGATION', 5, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (28, 'test_reader', 'READER', 'INVESTIGATION', 3, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (29, 'test_admin', 'ADMIN', 'INVESTIGATION', 3, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (30, 'test_deleter', 'DELETER', 'INVESTIGATION', 3,null, null, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (31, 'test_downloader', 'DOWNLOADER', 'INVESTIGATION', 3, null, null,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (32, 'test_updater', 'UPDATER', 'INVESTIGATION', 3, null, null,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (45, 'test_creator', 'CREATOR', 'INVESTIGATION', 3, null, null,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (54, 'test_icatadmin', 'ICAT_ADMIN', 'INVESTIGATION', 3, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (84, 'test_icatadmin', 'ICAT_ADMIN', 'DATASET', 3, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--
+--
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (68, 'test_reader', 'READER', 'INVESTIGATION', 5, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (61, 'test_admin', 'ADMIN', 'INVESTIGATION', 5, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (62, 'test_deleter', 'DELETER', 'INVESTIGATION', 5,null, null, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (63, 'test_downloader', 'DOWNLOADER', 'INVESTIGATION', 5, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (64, 'test_updater', 'UPDATER', 'INVESTIGATION', 5, null, null,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (65, 'test_creator', 'CREATOR', 'INVESTIGATION', 5, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (66, 'test_icatadmin', 'ICAT_ADMIN', 'INVESTIGATION', 5, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (47,  'test_creator', 'CREATOR', 'INVESTIGATION', null, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (48,  'test_reader', 'READER', 'INVESTIGATION', null, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (49,  'test_updater', 'UPDATER', 'INVESTIGATION', null, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (50,  'test_downloader', 'DOWNLOADER', 'INVESTIGATION', null, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (51,  'test_admin', 'ADMIN', 'INVESTIGATION', null, null, null, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (52,  'test_deleter', 'DELETER', 'INVESTIGATION', null, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (53,  'test_icatadmin', 'ICAT_ADMIN', 'INVESTIGATION', null, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--
+--
+--
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (33, 'test_reader', 'READER', 'DATASET', 3, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (34, 'test_admin', 'ADMIN', 'DATASET', 3, 'INVESTIGATION', 3,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (35, 'test_deleter', 'DELETER', 'DATASET', 3, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (36, 'test_downloader', 'DOWNLOADER', 'DATASET', 3, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (37, 'test_updater', 'UPDATER', 'DATASET', 3, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (44, 'test_creator', 'CREATOR', 'DATASET', 3, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--
+--
+--
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (96, 'test_reader', 'READER', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (97, 'test_admin', 'ADMIN', 'DATASET', null, 'INVESTIGATION', 3,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (98, 'test_deleter', 'DELETER', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (99, 'test_downloader', 'DOWNLOADER', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (89, 'test_updater', 'UPDATER', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (88, 'test_creator', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (67, 'test_icatadmin', 'ICAT_ADMIN', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (224, 'dwf64', 'CREATOR', 'INVESTIGATION', NULL,  NULL, NULL,  systimestamp, 'dwf64', systimestamp, 'dwf64', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (225, 'vtw67827', 'CREATOR', 'INVESTIGATION', NULL,  NULL, NULL,  systimestamp, 'dwf64', systimestamp, 'dwf64', 'N','Y');
+--
+--
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (90, 'test_reader', 'READER', 'DATASET', 5, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (91, 'test_admin', 'ADMIN', 'DATASET', 5, 'INVESTIGATION', 3,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (92, 'test_deleter', 'DELETER', 'DATASET', 5, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (93, 'test_downloader', 'DOWNLOADER', 'DATASET', 5, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (94, 'test_updater', 'UPDATER', 'DATASET', 5, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (95, 'test_creator', 'CREATOR', 'DATASET', 5, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (75, 'test_icatadmin', 'ICAT_ADMIN', 'DATASET', 5, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (230, 'ALL', 'READER', 'INVESTIGATION', 2, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (231, 'ALL', 'READER', 'INVESTIGATION', 3, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (232, 'ALL', 'READER', 'INVESTIGATION', 7, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--
 --Insert into ICAT_AUTHORISATION 
 --  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (74, 'test', 'CREATOR', 'INVESTIGATION', null,  null, null, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (25, 'test', 'READER', 'INVESTIGATION', 4,  null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (26, 'test', 'CREATOR', 'DATASET', 3, 'INVESTIGATION', 3, 81, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (79, 'test', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
--- Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
--- Values 
---    (81, 'test', 'CREATOR', 'DATAFILE', null, 'DATASET', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
+--    (233,  'ALL', 'CREATOR', 'DATASET', 6, 'INVESTIGATION', 7,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
 --  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
- --   (27,  'test', 'CREATOR', 'DATAFILE', 3, 'DATASET', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (234,  'ALL', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
 --  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (70,  'test', 'CREATOR', 'DATAFILE', 68, 'DATASET', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (235,  'ALL', 'CREATOR', 'DATASET', 3, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
 --Insert into ICAT_AUTHORISATION 
--- (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (71,  'test', 'CREATOR', 'DATAFILE', 57, 'DATASET', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (236,  'ALL', 'READER', 'DATASET', 5, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (83,  'test', 'CREATOR', 'DATAFILE', 56, 'DATASET', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (72,  'ANY', 'READER', 'INVESTIGATION', 5, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (28, 'test_reader', 'READER', 'INVESTIGATION', 3, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (29, 'test_admin', 'ADMIN', 'INVESTIGATION', 3, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (30, 'test_deleter', 'DELETER', 'INVESTIGATION', 3,null, null, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (31, 'test_downloader', 'DOWNLOADER', 'INVESTIGATION', 3, null, null,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (32, 'test_updater', 'UPDATER', 'INVESTIGATION', 3, null, null,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (45, 'test_creator', 'CREATOR', 'INVESTIGATION', 3, null, null,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (54, 'test_icatadmin', 'ICAT_ADMIN', 'INVESTIGATION', 3, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (84, 'test_icatadmin', 'ICAT_ADMIN', 'DATASET', 3, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (237,  'ALL', 'READER', 'DATASET', 4, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+----SUPER USER
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (87, 'test_icatadmin', 'ICAT_ADMIN', 'DATAFILE', 56, 'DATASET', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (68, 'test_reader', 'READER', 'INVESTIGATION', 5, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (61, 'test_admin', 'ADMIN', 'INVESTIGATION', 5, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (62, 'test_deleter', 'DELETER', 'INVESTIGATION', 5,null, null, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (63, 'test_downloader', 'DOWNLOADER', 'INVESTIGATION', 5, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (64, 'test_updater', 'UPDATER', 'INVESTIGATION', 5, null, null,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (65, 'test_creator', 'CREATOR', 'INVESTIGATION', 5, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (66, 'test_icatadmin', 'ICAT_ADMIN', 'INVESTIGATION', 5, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (47,  'test_creator', 'CREATOR', 'INVESTIGATION', null, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (48,  'test_reader', 'READER', 'INVESTIGATION', null, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (49,  'test_updater', 'UPDATER', 'INVESTIGATION', null, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (50,  'test_downloader', 'DOWNLOADER', 'INVESTIGATION', null, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (51,  'test_admin', 'ADMIN', 'INVESTIGATION', null, null, null, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (52,  'test_deleter', 'DELETER', 'INVESTIGATION', null, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (53,  'test_icatadmin', 'ICAT_ADMIN', 'INVESTIGATION', null, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
-
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (33, 'test_reader', 'READER', 'DATASET', 3, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (34, 'test_admin', 'ADMIN', 'DATASET', 3, 'INVESTIGATION', 3,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (35, 'test_deleter', 'DELETER', 'DATASET', 3, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (36, 'test_downloader', 'DOWNLOADER', 'DATASET', 3, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (37, 'test_updater', 'UPDATER', 'DATASET', 3, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (44, 'test_creator', 'CREATOR', 'DATASET', 3, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
-
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (96, 'test_reader', 'READER', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (97, 'test_admin', 'ADMIN', 'DATASET', null, 'INVESTIGATION', 3,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (98, 'test_deleter', 'DELETER', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (99, 'test_downloader', 'DOWNLOADER', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (89, 'test_updater', 'UPDATER', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (88, 'test_creator', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (67, 'test_icatadmin', 'ICAT_ADMIN', 'DATASET', null, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (224, 'dwf64', 'CREATOR', 'INVESTIGATION', NULL,  NULL, NULL,  systimestamp, 'dwf64', systimestamp, 'dwf64', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (225, 'vtw67827', 'CREATOR', 'INVESTIGATION', NULL,  NULL, NULL,  systimestamp, 'dwf64', systimestamp, 'dwf64', 'N','Y');
-
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (90, 'test_reader', 'READER', 'DATASET', 5, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (91, 'test_admin', 'ADMIN', 'DATASET', 5, 'INVESTIGATION', 3,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (92, 'test_deleter', 'DELETER', 'DATASET', 5, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (93, 'test_downloader', 'DOWNLOADER', 'DATASET', 5, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (94, 'test_updater', 'UPDATER', 'DATASET', 5, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (95, 'test_creator', 'CREATOR', 'DATASET', 5, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (75, 'test_icatadmin', 'ICAT_ADMIN', 'DATASET', 5, 'INVESTIGATION', 3, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
-
+--    (240,  'SUPER_USER', 'ICAT_ADMIN', 'INVESTIGATION', 2, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (38, 'test_reader', 'READER', 'DATAFILE', 3, 'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (241,  'SUPER_USER', 'ICAT_ADMIN', 'INVESTIGATION', 3, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
-  --  (39, 'test_admin', 'ADMIN', 'DATAFILE', 3,  'DATASET', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (242,  'SUPER_USER', 'ICAT_ADMIN', 'INVESTIGATION', 4, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
- --   (40, 'test_deleter', 'DELETER', 'DATAFILE', 3,  'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (243,  'SUPER_USER', 'ICAT_ADMIN', 'INVESTIGATION', 5, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (41, 'test_downloader', 'DOWNLOADER', 'DATAFILE', 3,  'DATASET', 3,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (244,  'SUPER_USER', 'ICAT_ADMIN', 'INVESTIGATION', 6, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- --Values 
---    (42, 'test_updater', 'UPDATER', 'DATAFILE', 3,  'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
--- Insert into ICAT_AUTHORISATION 
- -- (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (43, 'test_creator', 'CREATOR', 'DATAFILE', 3,  'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (245,  'SUPER_USER', 'ICAT_ADMIN', 'INVESTIGATION', 7, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
- --   (200, 'test_icatadmin', 'ICAT_ADMIN', 'DATAFILE', 3,  'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
+--    (246,  'SUPER_USER', 'ICAT_ADMIN', 'DATASET', 2, 'INVESTIGATION', 2,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (201, 'test_reader', 'READER', 'DATAFILE', 57, 'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (247,  'SUPER_USER', 'ICAT_ADMIN', 'DATASET', 3, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
-----  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (202, 'test_admin', 'ADMIN', 'DATAFILE', 57,  'DATASET', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (248,  'SUPER_USER', 'ICAT_ADMIN', 'DATASET', 4, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
- --   (203, 'test_deleter', 'DELETER', 'DATAFILE', 57,  'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (249,  'SUPER_USER', 'ICAT_ADMIN', 'DATASET', 5, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (204, 'test_downloader', 'DOWNLOADER', 'DATAFILE', 57,  'DATASET', 3,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (250,  'SUPER_USER', 'ICAT_ADMIN', 'DATASET', 6, 'INVESTIGATION', 7,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+---- Facility Scientist
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (205, 'test_updater', 'UPDATER', 'DATAFILE', 57,  'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (251,  'facility_scientist', 'READER', 'INVESTIGATION', 3, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (206, 'test_creator', 'CREATOR', 'DATAFILE', 57,  'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (252,  'facility_scientist', 'READER', 'DATASET', 3, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--
+--
+----  DLS Users for Investigation 8 --
 --Insert into ICAT_AUTHORISATION 
- -- (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- --Values 
---    (207, 'test_icatadmin', 'ICAT_ADMIN', 'DATAFILE', 57,  'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
---Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
- --   (215, 'test_icatadmin', 'ICAT_ADMIN', 'INVESTIGATION', 7,  null, null, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (260,  'wcap93', 'CREATOR', 'INVESTIGATION', 8, null, null, 261, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (216, 'test_icatadmin', 'ICAT_ADMIN', 'DATASET', 6,  'INVESTIGATION', 7, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (261,  'wcap93', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 8, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- --Values 
- --   (217, 'test_icatadmin', 'ICAT_ADMIN', 'DATAFILE', 60,  'DATASET', 6, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
---Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (208, 'test_reader', 'READER', 'DATAFILE', null, 'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (262,  'awa25', 'CREATOR', 'INVESTIGATION', 8, null, null, 263, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
- -- (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- --Values 
---    (209, 'test_admin', 'ADMIN', 'DATAFILE', null,  'DATASET', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
---Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
- --   (210, 'test_deleter', 'DELETER', 'DATAFILE', null,  'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (263,  'awa25', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 8, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (211, 'test_downloader', 'DOWNLOADER', 'DATAFILE', null,  'DATASET', 3,null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (264,  'zjt21856', 'CREATOR', 'INVESTIGATION', 8, null, null, 265, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (212, 'test_updater', 'UPDATER', 'DATAFILE', null,  'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (265,  'zjt21856', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 8, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (213, 'test_creator', 'CREATOR', 'DATAFILE', null,  'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (266,  'cnp64921', 'CREATOR', 'INVESTIGATION', 8, null, null, 267, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 --Insert into ICAT_AUTHORISATION 
---  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
 -- Values 
---    (214, 'test_icatadmin', 'ICAT_ADMIN', 'DATAFILE', null,  'DATASET', 3, null,  systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (230, 'ALL', 'READER', 'INVESTIGATION', 2, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (231, 'ALL', 'READER', 'INVESTIGATION', 3, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID, USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (232, 'ALL', 'READER', 'INVESTIGATION', 7, null, null,null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (233,  'ALL', 'CREATOR', 'DATASET', 6, 'INVESTIGATION', 7,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (234,  'ALL', 'CREATOR', 'DATASET', 2, 'INVESTIGATION', 2,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (235,  'ALL', 'CREATOR', 'DATASET', 3, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (236,  'ALL', 'READER', 'DATASET', 5, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (237,  'ALL', 'READER', 'DATASET', 4, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
---SUPER USER
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (240,  'SUPER_USER', 'ICAT_ADMIN', 'INVESTIGATION', 2, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (241,  'SUPER_USER', 'ICAT_ADMIN', 'INVESTIGATION', 3, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (242,  'SUPER_USER', 'ICAT_ADMIN', 'INVESTIGATION', 4, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (243,  'SUPER_USER', 'ICAT_ADMIN', 'INVESTIGATION', 5, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (244,  'SUPER_USER', 'ICAT_ADMIN', 'INVESTIGATION', 6, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (245,  'SUPER_USER', 'ICAT_ADMIN', 'INVESTIGATION', 7, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (246,  'SUPER_USER', 'ICAT_ADMIN', 'DATASET', 2, 'INVESTIGATION', 2,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (247,  'SUPER_USER', 'ICAT_ADMIN', 'DATASET', 3, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (248,  'SUPER_USER', 'ICAT_ADMIN', 'DATASET', 4, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (249,  'SUPER_USER', 'ICAT_ADMIN', 'DATASET', 5, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (250,  'SUPER_USER', 'ICAT_ADMIN', 'DATASET', 6, 'INVESTIGATION', 7,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
--- Facility Scientist
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (251,  'facility_scientist', 'READER', 'INVESTIGATION', 3, null, null,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (252,  'facility_scientist', 'READER', 'DATASET', 3, 'INVESTIGATION', 3,  null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-
-
---  DLS Users for Investigation 8 --
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (260,  'wcap93', 'CREATOR', 'INVESTIGATION', 8, null, null, 261, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (261,  'wcap93', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 8, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (262,  'awa25', 'CREATOR', 'INVESTIGATION', 8, null, null, 263, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (263,  'awa25', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 8, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (264,  'zjt21856', 'CREATOR', 'INVESTIGATION', 8, null, null, 265, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (265,  'zjt21856', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 8, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (266,  'cnp64921', 'CREATOR', 'INVESTIGATION', 8, null, null, 267, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (267,  'cnp64921', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 8, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
-Insert into ICAT_AUTHORISATION 
-  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
- Values 
-    (268,  'gjd37', 'CREATOR', 'INVESTIGATION', 8, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--    (267,  'cnp64921', 'CREATOR', 'DATASET', null, 'INVESTIGATION', 8, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
+--Insert into ICAT_AUTHORISATION 
+--  (ID,  USER_ID, ROLE,  ELEMENT_TYPE, ELEMENT_ID, PARENT_ELEMENT_TYPE, PARENT_ELEMENT_ID,  USER_CHILD_RECORD, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED)
+-- Values 
+--    (268,  'gjd37', 'CREATOR', 'INVESTIGATION', 8, null, null, null, systimestamp, 'glen', systimestamp, 'glen', 'N','Y');
 
 
 
@@ -834,6 +677,189 @@ Insert into SAMPLE
  Values
    (4, 3, 'Deleted sample', '0', TO_TIMESTAMP('02/01/2007 11:44:00.4','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'FIRST PROPAGATION', systimestamp, 'Y', 'Y');
 
+   
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('total_proton_charge', 'uAmp hours', 'uAmp hours', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'),'FIRST PROPAGATION', 'N', 'Y', 'Y');
+ 
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('good_frames', 'pulses', 'pulses', 'Y', 'Y', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:25:15.9','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'),'FIRST PROPAGATION', 'N', 'Y', 'Y');
+ 
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('good_proton_charge', 'uAmp hours', 'uAmp hours', 'Y', 'Y', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'),'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('monitor_sum1', 'neutrons', 'neutrons', 'Y', 'Y', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:25:15.9','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'),'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('monitor_sum2', 'neutrons', 'neutrons', 'Y', 'Y', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:25:15.9','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'),'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('monitor_sum3', 'neutrons', 'neutrons', 'Y', 'Y', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:25:15.9','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'),'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('notes', 'N/A', 'N/A', 'Y', 'N', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'),TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('number_of_periods', 'decimal', 'decimal', 'Y', 'Y', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:25:15.9','DD/MM/YYYY HH24:MI:SS.FF'),TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('number_of_spectra', 'decimal', 'decimal', 'Y', 'Y', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:25:15.9','DD/MM/YYYY HH24:MI:SS.FF'),TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('number_of_time_channels', 'decimal', 'decimal', 'Y', 'Y', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:25:15.9','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'),'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('run_duration', 'seconds', 'seconds', 'Y', 'Y', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:25:15.9','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'),'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('run_header', 'N/A', 'N/A', 'Y', 'N', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'),TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, DESCRIPTION, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('run_number', 'N/A', 'Y', 'Y', 'U', 'U', 'Y', 'Other possible name : shot_number', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:25:15.6','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'),'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('finish_date', 'yyyy-MM-dd HH:mm:ss', 'yyyy-MM-dd HH:mm:ss', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'),'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('run_number', 'decimal', 'decimal', 'Y', 'Y', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:25:15.9','DD/MM/YYYY HH24:MI:SS.FF'),TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('run_title', 'N/A', 'N/A', 'Y', 'N', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'),TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('short_title', 'N/A', 'N/A', 'Y', 'N', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'),TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('start_date', 'yyyy-MM-dd HH:mm:ss', 'yyyy-MM-dd HH:mm:ss', 'Y', 'N', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'),TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'N', 'Y', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID,  MOD_TIME, CREATE_TIME, CREATE_ID, DELETED, FACILITY_ACQUIRED, VERIFIED)
+ Values
+   ('time_channel_parameters', 'N/A', 'N/A', 'Y', 'N', 'U', 'U', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'),TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'N', 'Y', 'Y');
+
+
+
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('sample_state', 'N/A', 'N/A', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('sample_situation', 'N/A', 'N/A', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('nexus_version', 'N/A', 'N/A', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('hdf_version', 'N/A', 'N/A', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('program_version', 'N/A', 'N/A', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('program_name', 'N/A', 'N/A', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('start_time', 'N/A', 'N/A', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('end_time', 'N/A', 'N/A', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('duration', 'second', 'second', 'Y', 'Y', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('switching_states', 'N/A', 'N/A', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('sample_temperature_setting', 'Kelvin', 'Kelvin', 'Y', 'Y', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('sample_magnetic_field_setting', 'Gauss', 'Gauss', 'Y', 'Y', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('sample_magnetic_field_state', 'N/A', 'N/A', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('detector_orientation', 'N/A', 'N/A', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('collimator_type', 'N/A', 'N/A', 'Y', 'N', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('source_total_count', 'Mev', 'Mev', 'Y', 'Y', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('source_daereads', 'N/A', 'N/A', 'Y', 'Y', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('source_frames', 'N/A', 'N/A', 'Y', 'Y', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('data_avg_counts', 'counts', 'counts', 'Y', 'Y', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('data_std_counts', 'counts', 'counts', 'Y', 'Y', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('histogram_resolution', 'picoseconds', 'picoseconds', 'Y', 'Y', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('time_zero', 'microseconds', 'microseconds', 'Y', 'Y', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('temperature_avg', 'Kelvin', 'Kelvin', 'Y', 'Y', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+
+
+Insert into PARAMETER
+   (NAME, UNITS, UNITS_LONG_VERSION, SEARCHABLE, NUMERIC_VALUE, IS_SAMPLE_PARAMETER, IS_DATASET_PARAMETER, IS_DATAFILE_PARAMETER, MOD_ID, MOD_TIME, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED, VERIFIED)
+ Values
+   ('temperature_std', 'Kelvin', 'Kelvin', 'Y', 'Y', 'Y', 'Y', 'Y', 'FIRST PROPAGATION', TO_TIMESTAMP('02/01/2007 11:32:57.5','DD/MM/YYYY HH24:MI:SS.FF'), TO_TIMESTAMP('02/01/2007 11:25:14.7','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'Y', 'N', 'Y');
+  
 
 Insert into SAMPLE_PARAMETER
    (SAMPLE_ID, NAME, UNITS, STRING_VALUE, MOD_TIME, MOD_ID, CREATE_ID, CREATE_TIME, DELETED, FACILITY_ACQUIRED)
@@ -844,6 +870,12 @@ Insert into SAMPLE_PARAMETER
  Values
    (4, 'total_proton_charge', 'uAmp hours', '89.6272', TO_TIMESTAMP('02/01/2007 11:52:56.3','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'FIRST PROPAGATION', systimestamp, 'Y', 'N');
 
+   
+Insert into DATASET_STATUS
+   (NAME, SEQ_NUMBER, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED)
+ Values
+   ('complete', 999, TO_TIMESTAMP('12/09/2007 13:48:41.6','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', TO_TIMESTAMP('12/09/2007 13:48:41.6','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', 'Y', 'N');
+   
 
 Insert into DATASET
    (ID, SAMPLE_ID, INVESTIGATION_ID, NAME, DATASET_TYPE, DATASET_STATUS, DESCRIPTION, MOD_TIME, MOD_ID, CREATE_ID, CREATE_TIME, DELETED, FACILITY_ACQUIRED)
@@ -872,6 +904,15 @@ Insert into DATASET_PARAMETER
  Values
    (2, 'good_frames', 'pulses', 189541, TO_TIMESTAMP('02/01/2007 11:52:56.3','DD/MM/YYYY HH24:MI:SS.FF'), 'FIRST PROPAGATION', 'FIRST PROPAGATION', systimestamp, 'N', 'Y');
 
+
+Insert into DATAFILE_FORMAT
+   (NAME, VERSION, FORMAT_TYPE, DESCRIPTION, SEQ_NUMBER, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED)
+Values
+   ('nexus', '3.0.0', 'HDF5', 'Neutron and X-Ray data format.', 999, TO_TIMESTAMP('12/09/2007 13:30:16.4','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', TO_TIMESTAMP('12/09/2007 13:30:16.4','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', 'Y', 'N');
+Insert into DATAFILE_FORMAT
+   (NAME, VERSION, FORMAT_TYPE, SEQ_NUMBER, MOD_TIME, MOD_ID, CREATE_TIME, CREATE_ID, FACILITY_ACQUIRED, DELETED)
+Values
+   ('isis neutron raw v8', '8', 'binary', 999, TO_TIMESTAMP('12/09/2007 13:48:41.7','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', TO_TIMESTAMP('12/09/2007 13:48:41.7','DD/MM/YYYY HH24:MI:SS.FF'), 'damian', 'Y', 'N');
 
 
 Insert into DATAFILE

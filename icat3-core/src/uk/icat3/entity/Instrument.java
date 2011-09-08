@@ -10,23 +10,22 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlTransient;
-import uk.icat3.util.ElementType;
+
 import uk.icat3.util.Queries;
 /**
  * Entity class Instrument
  *
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "INSTRUMENT")
 @NamedQueries( {
@@ -132,30 +131,6 @@ public class Instrument extends EntityBaseBean implements Serializable {
         this.description = description;
     }    
      
-    /**
-     * Gets the investigationCollection of this Instrument.
-     * @return the investigationCollection
-     */
-    /* @XmlTransient
-    public Collection<Investigation> getInvestigationCollection() {
-        return this.investigationCollection;
-    }*/
-    
-    /**
-     * Sets the investigationCollection of this Instrument to the specified value.
-     * @param investigationCollection the new investigationCollection
-     */
-    /*public void setInvestigationCollection(Collection<Investigation> investigationCollection) {
-        this.investigationCollection = investigationCollection;
-    }*/
-    
-    /**
-     * Gets the element type of the bean
-     */
-    public ElementType getRootElementType(){
-        return ElementType.INVESTIGATION;
-    }
-
     public String getShortName() {
         return shortName;
     }
@@ -205,5 +180,10 @@ public class Instrument extends EntityBaseBean implements Serializable {
     public String toString() {
         return "Instrument[name=" + name + "]";
     }
+
+	@Override
+	public Object getPK() {
+		return name;
+	}
     
 }

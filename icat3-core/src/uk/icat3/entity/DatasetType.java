@@ -10,20 +10,14 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
-import javax.persistence.CascadeType;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.xml.bind.annotation.XmlTransient;
-import uk.icat3.util.ElementType;
+
 import uk.icat3.util.Queries;
 
 /**
@@ -31,6 +25,7 @@ import uk.icat3.util.Queries;
  *
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "DATASET_TYPE")
 @NamedQueries( {
@@ -96,31 +91,7 @@ public class DatasetType extends EntityBaseBean implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-    
-    /**
-     * Gets the datasetCollection of this DatasetType.
-     * @return the datasetCollection
-     */
-    /*@XmlTransient
-    public Collection<Dataset> getDatasetCollection() {
-        return this.datasetCollection;
-    }*/
-    
-    /**
-     * Sets the datasetCollection of this DatasetType to the specified value.
-     * @param datasetCollection the new datasetCollection
-     */
-    /*public void setDatasetCollection(Collection<Dataset> datasetCollection) {
-        this.datasetCollection = datasetCollection;
-    }*/
-    
-    /**
-     * Gets the element type of the bean
-     */
-    public ElementType getRootElementType(){
-        return ElementType.DATASET;
-    }
-    
+       
     /**
      * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
@@ -161,5 +132,10 @@ public class DatasetType extends EntityBaseBean implements Serializable {
     public String toString() {
         return "DatasetType[name=" + name + "]";
     }
+
+	@Override
+	public Object getPK() {
+		return name;
+	}
     
 }

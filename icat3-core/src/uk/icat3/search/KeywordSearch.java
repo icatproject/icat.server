@@ -9,12 +9,21 @@
 
 package uk.icat3.search;
 
+import static uk.icat3.util.Queries.ALLKEYWORDS;
+import static uk.icat3.util.Queries.ALLKEYWORDS_NATIVE_ALPHA;
+import static uk.icat3.util.Queries.ALLKEYWORDS_NATIVE_ALPHA_NUMERIC;
+import static uk.icat3.util.Queries.KEYWORDS_FOR_USER;
+import static uk.icat3.util.Queries.KEYWORDS_FOR_USER_ALPHA;
+import static uk.icat3.util.Queries.KEYWORDS_FOR_USER_ALPHA_NUMERIC;
+
 import java.util.Collection;
+
 import javax.persistence.EntityManager;
+
 import org.apache.log4j.Logger;
-import uk.icat3.util.ElementType;
+
+import uk.icat3.search.parameter.util.ElementType;
 import uk.icat3.util.KeywordType;
-import static uk.icat3.util.Queries.*;
 /**
  *
  * @author gjd37
@@ -71,6 +80,7 @@ public class KeywordSearch {
      * @param manager manager object that will facilitate interaction with underlying database
      * @return list of keywords
      */
+    //TODO should only show keywords of public accessible investigations
     public static Collection<String> getKeywordsForUser(String userId, KeywordType type, String startKeyword, int numberReturned, EntityManager manager){
         log.trace("getKeywordsForUser("+userId+", "+type+", "+startKeyword+", "+numberReturned+", EntityManager)");
         
@@ -81,33 +91,29 @@ public class KeywordSearch {
             //switch on type
             if(type == null || type == KeywordType.ALL){
                 return  (Collection<String>)manager.createNamedQuery(KEYWORDS_FOR_USER).
-                        setParameter("objectType", ElementType.INVESTIGATION).
-                        setParameter("userId",userId).
                         setParameter("startKeyword", startKeyword).getResultList();
             } else if(type == KeywordType.ALPHA){
                 return (Collection<String>)manager.createNamedQuery(KEYWORDS_FOR_USER_ALPHA).
-                        setParameter("userId",userId).
                         setParameter("startKeyword", startKeyword).getResultList();
             } else if(type == KeywordType.ALPHA_NUMERIC){
                 return (Collection<String>)manager.createNamedQuery(KEYWORDS_FOR_USER_ALPHA_NUMERIC).
-                        setParameter("userId",userId).
+                        
                         setParameter("startKeyword", startKeyword).getResultList();
             } else throw new RuntimeException(""); //should never be thrown
         } else {
             if(type == null || type == KeywordType.ALL){
                 return  (Collection<String>)manager.createNamedQuery(KEYWORDS_FOR_USER).
-                        setParameter("objectType", ElementType.INVESTIGATION).
-                        setParameter("userId",userId).
+                     
                         setParameter("startKeyword", startKeyword).
                         setMaxResults(numberReturned).getResultList();
             } else if(type == KeywordType.ALPHA){
                 return (Collection<String>)manager.createNamedQuery(KEYWORDS_FOR_USER_ALPHA).
-                        setParameter("userId",userId).
+                      
                         setParameter("startKeyword", startKeyword).
                         setMaxResults(numberReturned).getResultList();
             } else if(type == KeywordType.ALPHA_NUMERIC){
                 return (Collection<String>)manager.createNamedQuery(KEYWORDS_FOR_USER_ALPHA_NUMERIC).
-                        setParameter("userId",userId).
+                       
                         setParameter("startKeyword", startKeyword).
                         setMaxResults(numberReturned).getResultList();
             } else throw new RuntimeException(""); //should never be thrown

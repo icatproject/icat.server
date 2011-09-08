@@ -69,7 +69,8 @@ public class ViewDatasetsInterceptor {
             } else if (args[1] instanceof Collection) {
                 //getDatasets
                 log.debug("args at 1 is Collection");
-                Collection<Long> ids = (Collection<Long>)args[1];
+                @SuppressWarnings("unchecked")
+				Collection<Long> ids = (Collection<Long>)args[1];
                 setIds.addAll(ids);
             }
             

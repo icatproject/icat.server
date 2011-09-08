@@ -13,6 +13,7 @@ import javax.persistence.Embeddable;
  *
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Embeddable
 public class FacilityInstrumentScientistPK extends EntityPrimaryKeyBaseBean implements Serializable {
    

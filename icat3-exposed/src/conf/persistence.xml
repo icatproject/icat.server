@@ -34,6 +34,8 @@
     <class>uk.icat3.entity.TopicList</class>
     <class>uk.icat3.entity.FacilityInstrumentScientist</class>
     <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
+    <class>uk.icat3.entity.UserGroup</class>
+    <class>uk.icat3.entity.Rule</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <!-- Prints out SQL generated from EJBQL -->

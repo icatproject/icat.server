@@ -11,29 +11,27 @@ package uk.icat3.sessionbeans.search;
 
 
 import java.util.Collection;
+
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.interceptor.Interceptors;
 import javax.jws.WebMethod;
-import javax.jws.WebService;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
+
 import org.apache.log4j.Logger;
+
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.search.KeywordSearch;
-import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 import uk.icat3.util.KeywordType;
+import uk.icat3.util.Queries;
 
 /**
  *
  * @author gjd37
  */
 @Stateless
-//@WebService(targetNamespace="client.icat3.uk")
-//this interceptor check no nulls passed in and logs the method arguments
-@Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class KeywordSearchBean extends EJBObject implements KeywordSearchLocal {
     

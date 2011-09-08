@@ -11,6 +11,7 @@ package uk.icat3.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -19,16 +20,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlTransient;
-import uk.icat3.util.ElementType;
 
 /**
  * Entity class Shift
  * 
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "SHIFT")
 @NamedQueries( {
@@ -53,7 +52,6 @@ public class Shift extends EntityBaseBean implements Serializable {
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
-     @ICAT(merge=false)
     private Investigation investigation;
     
     /** Creates a new instance of Shift */
@@ -138,13 +136,6 @@ public class Shift extends EntityBaseBean implements Serializable {
     public void setInvestigation(Investigation investigation) {
         this.investigation = investigation;
     }
-
-    /**
-     * Gets the element type of the bean
-     */
-    public ElementType getRootElementType(){
-        return ElementType.INVESTIGATION;
-    }
     
     /**
      * Returns a hash code value for the object.  This implementation computes 
@@ -186,5 +177,10 @@ public class Shift extends EntityBaseBean implements Serializable {
     public String toString() {
         return "Shift[shiftPK=" + shiftPK + "]";
     }
+
+	@Override
+	public Object getPK() {
+		return shiftPK;
+	}
     
 }

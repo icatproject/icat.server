@@ -68,7 +68,8 @@ public class ViewDatafilesInterceptor {
             } else if (args[1] instanceof Collection) {
                 //getDatafiles method
                 log.debug("arg at 1 is Collection");
-                Collection<Long> fileIds = (Collection<Long>)args[1];
+                @SuppressWarnings("unchecked")
+				Collection<Long> fileIds = (Collection<Long>)args[1];
                 files.addAll(fileIds);
             }
 

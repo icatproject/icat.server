@@ -10,8 +10,8 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.net.URL;
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,13 +24,13 @@ import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
-import uk.icat3.util.ElementType;
 
 /**
  * Entity class Publication
  * 
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "PUBLICATION")
 @NamedQueries( {
@@ -65,7 +65,6 @@ public class Publication extends EntityBaseBean implements Serializable {
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", nullable = false)
     @ManyToOne
     @XmlTransient
-     @ICAT(merge=false)
     private Investigation investigationId;
     
     /** Creates a new instance of Publication */
@@ -192,13 +191,6 @@ public class Publication extends EntityBaseBean implements Serializable {
     }
 
     /**
-     * Gets the element type of the bean
-     */
-    public ElementType getRootElementType(){
-        return ElementType.INVESTIGATION;
-    }
-    
-    /**
      * Returns a hash code value for the object.  This implementation computes 
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
@@ -238,5 +230,10 @@ public class Publication extends EntityBaseBean implements Serializable {
     public String toString() {
         return "Publication[id=" + id + "]";
     }
+
+	@Override
+	public Object getPK() {
+		return id;
+	}
     
 }

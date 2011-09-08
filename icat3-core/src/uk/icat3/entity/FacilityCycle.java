@@ -12,6 +12,7 @@ package uk.icat3.entity;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -22,7 +23,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlTransient;
-import uk.icat3.util.ElementType;
+
 import uk.icat3.util.Queries;
 
 /**
@@ -30,6 +31,7 @@ import uk.icat3.util.Queries;
  * 
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "FACILITY_CYCLE")
 @NamedQueries( {
@@ -171,13 +173,6 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
     }
 
     /**
-     * Gets the element type of the bean
-     */
-    public ElementType getRootElementType(){
-        return ElementType.INVESTIGATION;
-    }
-    
-    /**
      * Returns a hash code value for the object.  This implementation computes 
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
@@ -217,5 +212,10 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
     public String toString() {
         return "FacilityCycle[name=" + name + "]";
     }
+
+	@Override
+	public Object getPK() {
+		return name;
+	}
     
 }

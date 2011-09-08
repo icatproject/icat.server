@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
  *
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Embeddable
 public class InvestigatorPK extends EntityPrimaryKeyBaseBean implements Serializable {
     

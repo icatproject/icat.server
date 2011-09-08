@@ -8,14 +8,12 @@
 package uk.icat3.search;
 
 import java.util.Collection;
+
 import javax.persistence.EntityManager;
+
 import org.apache.log4j.Logger;
+
 import uk.icat3.entity.Parameter;
-import uk.icat3.exceptions.RestrictionException;
-import uk.icat3.manager.ManagerUtil;
-import uk.icat3.restriction.RestrictionCondition;
-import uk.icat3.restriction.RestrictionType;
-import uk.icat3.restriction.util.RestrictionUtil;
 import uk.icat3.util.Queries;
 
 /**
@@ -134,29 +132,6 @@ public class ParameterSearch {
         return value;
     }
 
-    /**
-     * This method is the implementation for all restriction searchs, and
-     * return facility users which match with restriction.
-     *
-     * @param userId User identification
-     * @param restrUtil Restriction util
-     * @param startIndex Start index
-     * @param numberResults Number of results to return
-     * @param manager Entity manager to database
-     *
-     * @return Collection of facility users which match restriction condition
-     */
-    private static Collection searchByRestrictionImpl (RestrictionUtil restrUtil, int startIndex, int numberResults, EntityManager manager) {
-        log.trace("searchByRestrictionImpl(restrUtil, " + startIndex + ", " + numberResults + ", EntityManager)");
-        // Objects to return
-        return ManagerUtil.getResultList(Queries.RETURN_ALL_PARAMETERS, restrUtil
-                , startIndex, numberResults
-                , manager);
-    }
-
-    public static Collection getParameterByRestriction(String userId, RestrictionCondition condition, EntityManager manager) throws RestrictionException {
-        log.trace("searchByRestriction( restrCond , EntityManager)");
-        RestrictionUtil restric = new RestrictionUtil(condition, RestrictionType.PARAMETER);
-        return searchByRestrictionImpl(restric, Queries.NO_PAGINATION, Queries.NO_PAGINATION, manager);
-    }
+  
+ 
 }

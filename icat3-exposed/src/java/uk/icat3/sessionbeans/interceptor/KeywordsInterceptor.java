@@ -65,7 +65,8 @@ public class KeywordsInterceptor {
             if (args.length == 2) {
                 //Method is searchByKeywords
                 log.info("Args is 2- plain keyword search");
-                Collection<String> keywords = (Collection<String>) args[1];
+                @SuppressWarnings("unchecked")
+				Collection<String> keywords = (Collection<String>) args[1];
                 ArrayList<String> keys = new ArrayList<String>();
                 keys.addAll(keywords);
                 keywordMsg.setObject(keys);

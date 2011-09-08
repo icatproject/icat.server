@@ -8,26 +8,15 @@
 package uk.icat3.sessionbeans.search;
 
 import java.util.Collection;
+
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.interceptor.Interceptors;
+
 import uk.icat3.entity.Parameter;
-import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.SessionException;
-import uk.icat3.restriction.RestrictionCondition;
 import uk.icat3.search.ParameterSearch;
-import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
 
-/**
- * The bean is in charge to make search in parameter table
- * 
- * @author cruzcruz
- */
 @Stateless
-@Interceptors(ArgumentValidator.class)
-@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class ParameterSearchBean extends EJBObject implements ParameterSearchLocal {
 
     @Override
@@ -54,10 +43,4 @@ public class ParameterSearchBean extends EJBObject implements ParameterSearchLoc
         return ParameterSearch.getParameterByUnits(userId, units, manager);
     }
 
-    @Override
-    public Collection getParameterByRestriction(String sessionId, RestrictionCondition condition) throws SessionException, RestrictionException {
-        String userId = user.getUserIdFromSessionId(sessionId);
-
-        return ParameterSearch.getParameterByRestriction(userId, condition, manager);
-    }
 }

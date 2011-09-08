@@ -8,11 +8,11 @@
 package uk.icat3.sessionbeans.search;
 
 import java.util.Collection;
+
 import javax.ejb.Local;
+
 import uk.icat3.entity.Parameter;
-import uk.icat3.exceptions.RestrictionException;
 import uk.icat3.exceptions.SessionException;
-import uk.icat3.restriction.RestrictionCondition;
 
 /**
  * This interface is in charge of provide methods to retrive parameters according
@@ -51,20 +51,6 @@ public interface ParameterSearchLocal {
      * @throws SessionException
      */
     Collection<Parameter> getParameterByName (String sessionId, String name) throws SessionException;
-
-    /**
-     * Returns parameters matched by RestrictionCondition. The search parameters are
-     * insensitive (no different between lowercase or uppercase) and eager (match
-     * the word, LIKE '%name%' behavior).
-     *
-     * @param sessionId Session identification
-     * @param name Parameter name
-     * @param manager Entity manager which handles database
-     * @return Paremeter collection matched by name
-     *
-     * @throws SessionException
-     */
-    Collection getParameterByRestriction (String sessionId, RestrictionCondition condition) throws SessionException, RestrictionException;
 
     /**
      * Returns parameters matched by units. The search parameters are

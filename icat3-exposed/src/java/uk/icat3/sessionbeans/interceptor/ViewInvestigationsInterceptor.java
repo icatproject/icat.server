@@ -66,7 +66,8 @@ public class ViewInvestigationsInterceptor {
                 invIds.add(new Long(args[1].toString()));
             } else if (args[1] instanceof Collection) {
                 //getInvestigations
-                Collection<Long> ids = (Collection<Long>)args[1];
+                @SuppressWarnings("unchecked")
+				Collection<Long> ids = (Collection<Long>)args[1];
                 invIds.addAll(ids);
             }
 

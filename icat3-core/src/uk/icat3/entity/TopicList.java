@@ -10,9 +10,7 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigInteger;
-import java.util.Date;
-import javax.persistence.Column;
+
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -20,16 +18,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlTransient;
-import uk.icat3.util.ElementType;
 
 /**
  * Entity class TopicList
  *
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "TOPIC_LIST")
 @NamedQueries( {
@@ -136,14 +132,7 @@ public class TopicList extends EntityBaseBean implements Serializable {
     public void setTopic(Topic topic) {
         this.topic = topic;
     }
-    
-    /**
-     * Gets the element type of the bean
-     */
-    public ElementType getRootElementType(){
-        return ElementType.INVESTIGATION;
-    }
-    
+        
     /**
      * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
@@ -184,5 +173,10 @@ public class TopicList extends EntityBaseBean implements Serializable {
     public String toString() {
         return "TopicList[topicListPK=" + topicListPK + "]";
     }
+
+	@Override
+	public Object getPK() {
+		return topicListPK;
+	}
     
 }

@@ -10,7 +10,7 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -22,14 +22,16 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+
+import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.ValidationException;
-import uk.icat3.util.ElementType;
 
 /**
  * Entity class Investigator
  *
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "INVESTIGATOR")
 @NamedQueries( {
@@ -47,52 +49,23 @@ public class Investigator extends EntityBaseBean implements Serializable {
     @EmbeddedId
     protected InvestigatorPK investigatorPK;
     
-    /*TODO*/ @Column(name = "ROLE")
+    @Column(name = "ROLE")
     private String role;
     
     @JoinColumn(name = "FACILITY_USER_ID", referencedColumnName = "FACILITY_USER_ID", insertable = false, updatable = false)
-    @ManyToOne  
-    private FacilityUser facilityUser;
-    
-    @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
-    @ICAT(merge=false)
+    private FacilityUser facilityUser;
+    
+    @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID",  insertable = false, updatable = false)
+    @ManyToOne
+    @XmlTransient
     private Investigation investigation;
     
-    /** Creates a new instance of Investigator */
+    /* Needed for JPA */
     public Investigator() {
     }
-    
-    /**
-     * Creates a new instance of Investigator with the specified values.
-     * @param investigatorPK the investigatorPK of the Investigator
-     */
-    public Investigator(InvestigatorPK investigatorPK) {
-        this.investigatorPK = investigatorPK;
-    }
-    
-    /**
-     * Creates a new instance of Investigator with the specified values.
-     * @param investigatorPK the investigatorPK of the Investigator
-     * @param modTime the modTime of the Investigator
-     * @param modId the modId of the Investigator
-     */
-    public Investigator(InvestigatorPK investigatorPK, Date modTime, String modId) {
-        this.investigatorPK = investigatorPK;
-        this.modTime = modTime;
-        this.modId = modId;
-    }
-    
-    /**
-     * Creates a new instance of InvestigatorPK with the specified values.
-     * @param facilityUserId the facilityUserId of the InvestigatorPK
-     * @param investigationId the investigationId of the InvestigatorPK
-     */
-    public Investigator(String facilityUserId, Long investigationId) {
-        this.investigatorPK = new InvestigatorPK(facilityUserId, investigationId);
-    }
-    
+     
     /**
      * Gets the investigatorPK of this Investigator.
      * @return the investigatorPK
@@ -105,6 +78,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
      * Sets the investigatorPK of this Investigator to the specified value.
      * @param investigatorPK the new investigatorPK
      */
+    
     public void setInvestigatorPK(InvestigatorPK investigatorPK) {
         this.investigatorPK = investigatorPK;
     }
@@ -112,17 +86,9 @@ public class Investigator extends EntityBaseBean implements Serializable {
     /**
      * Gets the facilityUser of this Investigator.
      * @return the facilityUser
-     */    
+     */ 
     public FacilityUser getFacilityUser() {
         return this.facilityUser;
-    }
-    
-    /**
-     * Sets the facilityUser of this Investigator to the specified value.
-     * @param facilityUser the new facilityUser
-     */
-    public void setFacilityUser(FacilityUser facilityUser) {
-        this.facilityUser = facilityUser;
     }
     
     /**
@@ -145,24 +111,8 @@ public class Investigator extends EntityBaseBean implements Serializable {
      * Gets the investigation of this Investigator.
      * @return the investigation
      */
-    @XmlTransient
     public Investigation getInvestigation() {
         return this.investigation;
-    }
-    
-    /**
-     * Sets the investigation of this Investigator to the specified value.
-     * @param investigation the new investigation
-     */
-    public void setInvestigation(Investigation investigation) {
-        this.investigation = investigation;
-    }
-    
-    /**
-     * Gets the element type of the bean
-     */
-    public ElementType getRootElementType(){
-        return ElementType.INVESTIGATION;
     }
     
     /**
@@ -182,9 +132,11 @@ public class Investigator extends EntityBaseBean implements Serializable {
      *
      * @throws ValidationException
      * @return
+     * @throws IcatInternalException 
      */
     @Override
-    public boolean isValid(EntityManager manager, boolean deepValidation) throws ValidationException {
+    public void isValid(EntityManager manager, boolean deepValidation) throws ValidationException, IcatInternalException {
+    	super.isValid(manager,deepValidation);
         //check that the parameter dataset id is the same as actual dataset id
         if(getInvestigation() != null){
             //check embedded primary key
@@ -200,8 +152,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
         if(user == null) throw new ValidationException("FacilityUser: "+investigatorPK.getFacilityUserId()+" does not exist");
         
         investigatorPK.isValid();
-        
-        return isValid();
+      
     }
     
     /**
@@ -232,5 +183,10 @@ public class Investigator extends EntityBaseBean implements Serializable {
     public String toString() {
         return "Investigator[investigatorPK=" + investigatorPK + "]";
     }
+
+	@Override
+	public Object getPK() {
+		return investigatorPK;
+	}
     
 }

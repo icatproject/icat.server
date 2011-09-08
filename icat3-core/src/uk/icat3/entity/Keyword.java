@@ -11,6 +11,7 @@ package uk.icat3.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+
 import javax.persistence.ColumnResult;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -26,8 +27,9 @@ import javax.persistence.SqlResultSetMapping;
 import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
+
+import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.ValidationException;
-import uk.icat3.util.ElementType;
 import uk.icat3.util.Queries;
 
 /**
@@ -35,6 +37,7 @@ import uk.icat3.util.Queries;
  *
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "KEYWORD")
 @NamedQueries( {
@@ -73,7 +76,6 @@ import uk.icat3.util.Queries;
     @JoinColumn(name = "INVESTIGATION_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
     @XmlTransient
-    @ICAT(merge=false)
     private Investigation investigation;
     
     /** Creates a new instance of Keyword */
@@ -141,14 +143,7 @@ import uk.icat3.util.Queries;
     public void setInvestigation(Investigation investigation) {
         this.investigation = investigation;
     }
-    
-    /**
-     * Gets the element type of the bean
-     */
-    public ElementType getRootElementType(){
-        return ElementType.INVESTIGATION;
-    }
-    
+       
     /**
      * Returns a hash code value for the object.  This implementation computes
      * a hash code value based on the id fields in this object.
@@ -166,11 +161,13 @@ import uk.icat3.util.Queries;
      *
      * @throws ValidationException
      * @return
+     * @throws IcatInternalException 
      */
     @Override
-    public boolean isValid(EntityManager manager) throws ValidationException {
+    public void isValid(EntityManager manager) throws ValidationException, IcatInternalException {
+    	super.isValid(manager);
         if(keywordPK == null) throw new ValidationException(this +" private key cannot be null");
-        return keywordPK.isValid();
+        keywordPK.isValid();
         
     }
     
@@ -202,5 +199,10 @@ import uk.icat3.util.Queries;
     public String toString() {
         return "Keyword[keywordPK=" + keywordPK + "]";
     }
+
+	@Override
+	public Object getPK() {
+		return keywordPK;
+	}
     
 }

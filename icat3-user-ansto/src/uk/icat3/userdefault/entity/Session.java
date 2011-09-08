@@ -11,6 +11,7 @@ package uk.icat3.userdefault.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -26,8 +27,8 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
 import uk.icat3.exceptions.SessionException;
-import uk.icat3.util.IcatRoles;
 
 
 /**
@@ -164,15 +165,7 @@ public class Session implements Serializable {
         //TODO change toString() implementation to return a better display name
         return  "uk.icat3.userdefault.entity.Session[id=" + id + "]";
     }
-    
-    public boolean isAdmin(){
-        return getUserId().isAdmin();        
-    }
-    
-    public boolean isSuper(){
-        return getUserId().isSuper();
-    }
-    
+        
     public String getRunAs() {
         return runAs;
     }

@@ -25,7 +25,7 @@ import uk.icat3.logging.entity.DatasetView;
 import uk.icat3.logging.entity.Login;
 import uk.icat3.logging.entity.SimpleView;
 import uk.icat3.logging.util.PropertyNames;
-import uk.icat3.manager.DataSetManager;
+import uk.icat3.manager.DatasetManager;
 import uk.icat3.logging.util.QueueNames;
 
 /**
@@ -83,7 +83,7 @@ public class ViewDatasetsMDB implements MessageListener {
             }
 
             for (Long setId : setIds) {
-                Dataset dataset = DataSetManager.getDataSet(userId, setId, exposed);
+                Dataset dataset = DatasetManager.getDataSet(userId, setId, exposed);
                 Investigation investigation = dataset.getInvestigation();
                 Collection<Investigator> invs = investigation.getInvestigatorCollection();
                 String pi = null;

@@ -1,12 +1,9 @@
-/*
- * EJBObject.java
- *
- */
 package uk.icat3.sessionbeans;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.net.URL;
+import java.io.PrintStream;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
@@ -31,56 +28,24 @@ import uk.icat3.sessionbeans.util.Constants;
 public abstract class EJBObject {
 
     static Logger log = Logger.getLogger(EJBObject.class);
-    protected static String FACILITY;
-    protected static Properties facilityProps;
+
     @PersistenceContext(unitName = "icat3-exposed")
     protected EntityManager manager;
     @EJB
     protected UserSessionLocal user;
 
-    // For junit testing only
+    /* For junit testing only */
     public void setUserSession(UserSessionLocal localUserSession) {
         this.user = localUserSession;
     }
 
-    // For junit testing only
+    /* For junit testing only */
     public void setEntityManager(EntityManager manager) {
         this.manager = manager;
     }
 
-    protected Object mergeEntity(Object entity) {
-        return manager.merge(entity);
-    }
-
-    protected Object persistEntity(Object entity) {
-        manager.persist(entity);
-        return entity;
-    }
-
-    protected Object refreshEntity(Object entity) {
-        manager.refresh(entity);
-        return entity;
-    }
-
-    protected void removeEntity(Object entity) {
-        manager.remove(manager.merge(entity));
-    }
-
     @PostConstruct
     protected void init() {
-
-        //load resource bundle
-        URL url = this.getClass().getResource("/uk/icat3/sessionbeans/facility.properties");
-        facilityProps = new Properties();
-        String facilityLogFile = null;
-        try {
-            facilityProps.load(url.openStream());
-            facilityLogFile = facilityProps.getProperty("facility.name");
-        } catch (Exception mre) {
-            facilityLogFile = "ISIS";
-            System.out.println("Unable to load props file, setting log as  " + facilityLogFile + "\n" + mre);
-        }
-        FACILITY = facilityLogFile;
 
 		/*
 		 * Set up log4j. Note that even if the requested log4j.properties file is not found or is
@@ -137,4 +102,13 @@ public abstract class EJBObject {
                     time / 1000f + "s to execute");
         }
     }
+    
+	protected void reportThrowable(Throwable e) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintStream s = new PrintStream(baos);
+		e.printStackTrace(s);
+		s.close();
+		log.error("Unexpected failure in Java " + System.getProperties().getProperty("java.version") + " " + baos);
+	}
+    
 }

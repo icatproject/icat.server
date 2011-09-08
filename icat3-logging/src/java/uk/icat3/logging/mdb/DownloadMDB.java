@@ -29,8 +29,8 @@ import uk.icat3.logging.entity.Download;
 import uk.icat3.logging.entity.Login;
 import uk.icat3.logging.util.PropertyNames;
 import uk.icat3.logging.util.QueueNames;
-import uk.icat3.manager.DataFileManager;
-import uk.icat3.manager.DataSetManager;
+import uk.icat3.manager.DatafileManager;
+import uk.icat3.manager.DatasetManager;
 
 /**
  *
@@ -82,7 +82,7 @@ public class DownloadMDB implements MessageListener {
                 //TextMessage is for downloadDataset
                 TextMessage msg = (TextMessage) message;
                 Long datasetId = new Long(msg.getText());
-                Dataset dataset = DataSetManager.getDataSet(userId, datasetId, exposed);
+                Dataset dataset = DatasetManager.getDataSet(userId, datasetId, exposed);
                 files = dataset.getDatafileCollection();
             } else if (message instanceof ObjectMessage) {
                 //ObjectMessage is for downloadDatafile and downloadDatafiles
@@ -91,7 +91,7 @@ public class DownloadMDB implements MessageListener {
                 log.debug("==== Size of array list is " + ids.size() + " =====");
                 for (Long fileId : ids) {
                     log.debug("File id: " + fileId);
-                    Datafile datafile = DataFileManager.getDataFile(userId, fileId, exposed);
+                    Datafile datafile = DatafileManager.getDataFile(userId, fileId, exposed);
                     files.add(datafile);
                 }
             }

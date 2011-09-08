@@ -1,11 +1,13 @@
 package uk.icat3.user;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+
 import javax.persistence.EntityManager;
+
 import org.apache.log4j.Logger;
-import uk.icat3.exceptions.SessionException;
+
 import uk.icat3.exceptions.NoSuchUserException;
+import uk.icat3.exceptions.SessionException;
 
 
 /*
@@ -102,8 +104,8 @@ public class UserManager implements User {
         return object;
     }
     
-    public String login(String adminUsername, String AdminPassword, String runAsUser) throws SessionException {
-        return this.user.login(adminUsername, AdminPassword, runAsUser);
+    public String login(String adminUsername, String adminPassword, String runAsUser) throws SessionException {
+        return this.user.login(adminUsername, adminPassword, runAsUser);
     }
     
     public String login(String credential) throws SessionException {

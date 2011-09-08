@@ -9,24 +9,24 @@
 
 package uk.icat3.search;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static uk.icat3.util.TestConstants.VALID_USER_FOR_INVESTIGATION;
+
 import java.util.ArrayList;
 import java.util.Collection;
-import junit.framework.JUnit4TestAdapter;
-import org.junit.Test;
+
 import org.apache.log4j.Logger;
+import org.junit.Test;
+
 import uk.icat3.entity.Datafile;
-import uk.icat3.entity.DatafileFormat;
-import uk.icat3.entity.Instrument;
-import uk.icat3.util.BaseTestClassTX;
-import uk.icat3.exceptions.*;
-import static org.junit.Assert.*;
-import static uk.icat3.util.TestConstants.*;
+import uk.icat3.util.BaseClassTransaction;
 
 /**
  *
  * @author gjd37
  */
-public class TestDatafileSearch extends BaseTestClassTX {
+public class TestDatafileSearch extends BaseClassTransaction {
     
     private static Logger log = Logger.getLogger(TestDatafileSearch.class);
     
@@ -186,21 +186,4 @@ public class TestDatafileSearch extends BaseTestClassTX {
         }
     }
     
-     /**
-     * Tests dataset types
-     */
-    @Test
-    public void testlistDatafileFormats(){
-        log.info("Testing valid user for all DatafileFormats: "+VALID_USER_FOR_INVESTIGATION);
-        Collection<DatafileFormat> types = DatafileSearch.listDatafileFormats(em);
-        
-        Collection<DatafileFormat> typesInDB = (Collection<DatafileFormat>)executeListResultCmd("SELECT d FROM DatafileFormat d where d.markedDeleted = 'N'");
-        
-        assertNotNull("Must not be an null collection of types ", types);
-        assertEquals("Number of DatafileFormats searched is different to number in DB",typesInDB.size(),types.size());
-    }
-    
-    public static junit.framework.Test suite(){
-        return new JUnit4TestAdapter(TestDatafileSearch.class);
-    }
 }

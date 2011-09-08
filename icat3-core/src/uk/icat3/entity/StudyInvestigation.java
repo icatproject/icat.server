@@ -10,8 +10,8 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -20,15 +20,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import uk.icat3.util.ElementType;
 
 /**
  * Entity class StudyInvestigation
  * 
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "STUDY_INVESTIGATION")
 @NamedQueries( {
@@ -55,7 +53,6 @@ public class StudyInvestigation extends EntityBaseBean implements Serializable {
 
     @JoinColumn(name = "STUDY_ID", referencedColumnName = "ID", insertable = false, updatable = false)
     @ManyToOne
-     @ICAT(merge=false)
     private Study study;
     
     /** Creates a new instance of StudyInvestigation */
@@ -158,13 +155,6 @@ public class StudyInvestigation extends EntityBaseBean implements Serializable {
     }
 
     /**
-     * Gets the element type of the bean
-     */
-    public ElementType getRootElementType(){
-        return ElementType.STUDY;
-    }
-    
-    /**
      * Returns a hash code value for the object.  This implementation computes 
      * a hash code value based on the id fields in this object.
      * @return a hash code value for this object.
@@ -204,5 +194,10 @@ public class StudyInvestigation extends EntityBaseBean implements Serializable {
     public String toString() {
         return "StudyInvestigation[studyInvestigationPK=" + studyInvestigationPK + "]";
     }
+
+	@Override
+	public Object getPK() {
+		return studyInvestigationPK;
+	}
     
 }

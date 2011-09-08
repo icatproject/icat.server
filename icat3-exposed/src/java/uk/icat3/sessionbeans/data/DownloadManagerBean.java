@@ -9,26 +9,26 @@
 package uk.icat3.sessionbeans.data;
 
 import java.util.Collection;
+
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.interceptor.Interceptors;
+
 import org.apache.log4j.Logger;
+
 import uk.icat3.data.DownloadInfo;
 import uk.icat3.data.DownloadManager;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
-import uk.icat3.sessionbeans.ArgumentValidator;
 import uk.icat3.sessionbeans.EJBObject;
-import uk.icat3.exceptions.NoSuchObjectFoundException;
 
 /**
  *
  * @author gjd37
  */
 @Stateless
-@Interceptors(ArgumentValidator.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class DownloadManagerBean extends EJBObject implements DownloadManagerLocal {
 

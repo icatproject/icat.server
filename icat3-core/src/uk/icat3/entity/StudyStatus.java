@@ -12,6 +12,7 @@ package uk.icat3.entity;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -22,13 +23,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlTransient;
-import uk.icat3.util.ElementType;
 
-/**
- * Entity class StudyStatus
- * 
- * @author gjd37
- */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "STUDY_STATUS")
 @NamedQueries( {
@@ -163,14 +159,7 @@ public class StudyStatus implements Serializable {
     public void setStudyCollection(Collection<Study> studyCollection) {
         this.studyCollection = studyCollection;
     }
-
-    /**
-     * Gets the element type of the bean
-     */
-    public ElementType getRootElementType(){
-        return ElementType.STUDY;
-    }
-    
+  
     /**
      * Returns a hash code value for the object.  This implementation computes 
      * a hash code value based on the id fields in this object.

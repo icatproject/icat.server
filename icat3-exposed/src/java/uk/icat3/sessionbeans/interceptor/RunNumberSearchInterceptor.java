@@ -60,7 +60,8 @@ public class RunNumberSearchInterceptor {
             String userId = user.getUserIdFromSessionId(sessionId);
             runMsg = (ObjectMessage) PropertySetter.setProperties(runMsg, sessionId, userId, methodName, time);
 
-            Collection<String> instruments = (Collection<String>)args[1];
+            @SuppressWarnings("unchecked")
+			Collection<String> instruments = (Collection<String>)args[1];
             //cast collection to arraylist- message will only accept serializable object
             ArrayList<String> insList = new ArrayList<String>();
             insList.addAll(instruments);

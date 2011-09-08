@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,7 +29,6 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import uk.icat3.util.IcatRoles;
 
 /**
  *
@@ -168,14 +168,5 @@ public class User implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     } 
-    
-    public boolean isAdmin(){
-        if(getUserId().equals(IcatRoles.ADMIN_USER.toString())) return true;
-        else return false;                
-    }
-    
-    public boolean isSuper(){
-        if(getUserId().equals(IcatRoles.SUPER_USER.toString())) return true;
-        else return false;                 
-    }           
+            
 }
