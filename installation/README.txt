@@ -3,7 +3,7 @@
 Introduction
 ------------
 This document is to guide an administrator through the steps needed to install the iCAT API onto
-Glassfish v2.1 on Microsoft Windows or Linux
+Glassfish 2 or 3 on Microsoft Windows or Linux.
 
 Prerequisites
 -------------
@@ -22,14 +22,14 @@ The installation needs the following software installed:
 Installation
 ------------
 Note: <JAVA_HOME> -- is Java Home directory path
-      <GLASSFISH_HOME> -- is glassfish direcotry path
+      <GLASSFISH_HOME> -- is glassfish directory path
       <INSTALLATION_HOME> -- is path where icat installation directory is extracted to
 1) Extract icatx.x.x.zip to <INSTALLATION_PATH>
 2) Check ant is installed with the correct version and its binary is available in path.
 	$ ant -version
 	  Apache Ant Version 1.x.x compiled on x xx xxx
    Version should be > 1.7
-3) Configure Database: edit file <INSTALLATION_HOME>/nbproject/database.properties file
+3) Configure Database: edit file <INSTALLATION_HOME>/nbproject/databases.properties file
 	a)  Configure iCAT Schema
 		i)   Add your database details for icat.user,icat.url, and icat.password properties
 		ii)  icat.user and icat.password are username and password used at iCAT Schema creation
