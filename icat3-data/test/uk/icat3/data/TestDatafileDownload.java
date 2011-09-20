@@ -8,22 +8,35 @@
  */
 package uk.icat3.data;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static uk.icat3.data.DownloadConstants.DATAFILEID_NAME;
+import static uk.icat3.data.DownloadConstants.DATASETID_NAME;
+import static uk.icat3.data.DownloadConstants.SESSIONID_NAME;
+import static uk.icat3.util.TestConstants.INVALID_USER;
+import static uk.icat3.util.TestConstants.READER_USER;
+import static uk.icat3.util.TestConstants.VALID_DATA_FILE_ID;
+import static uk.icat3.util.TestConstants.VALID_DATA_SET_ID;
+import static uk.icat3.util.TestConstants.VALID_USER_FOR_INVESTIGATION;
+
 import java.util.ArrayList;
 import java.util.Collection;
+
 import junit.framework.JUnit4TestAdapter;
-import org.junit.Test;
+
 import org.apache.log4j.Logger;
-import uk.icat3.entity.Datafile;
-import uk.icat3.util.BaseTestClassTX;
-import uk.icat3.exceptions.*;
-import static org.junit.Assert.*;
-import static uk.icat3.util.TestConstants.*;
-import static uk.icat3.data.DownloadConstants.*;
+import org.junit.Test;
+
+import uk.icat3.data.DownloadConstants.ACTION;
+import uk.icat3.exceptions.ICATAPIException;
+import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.util.BaseTestTransaction;
 /**
  *
  * @author gjd37
  */
-public class TestDatafileDownload extends BaseTestClassTX {
+public class TestDatafileDownload extends BaseTestTransaction {
 
     private static Logger log = Logger.getLogger(TestDatafileDownload.class);
 
