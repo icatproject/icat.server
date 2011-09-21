@@ -1,0 +1,67 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>co.uk.icat3</groupId>
+		<artifactId>icat3</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>icat3-core</artifactId>
+	<packaging>jar</packaging>
+
+	<name>icat3-core</name>
+
+	<properties>
+	</properties>
+
+	<dependencies>
+
+<!-- 
+		<dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>persistence-api</artifactId>
+			<version>1.0b</version>
+		</dependency>
+ -->
+
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>6.0</version>
+		</dependency>
+		
+<!-- 
+		<dependency>
+			<groupId>javaee</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>5</version>
+		</dependency>
+ -->
+
+		<dependency>
+			<groupId>ojdbc</groupId>
+			<artifactId>ojdbc</artifactId>
+			<version>14</version>
+		</dependency>
+
+		<!-- test dependencies -->
+		<!-- <dependency> <groupId>org.apache.openejb</groupId> <artifactId>openejb-core</artifactId> 
+			<version>3.1.4</version> <scope>test</scope> </dependency> -->
+		<dependency>
+			<groupId>org.eclipse.persistence</groupId>
+			<artifactId>eclipselink</artifactId>
+			<version>2.3.0</version>
+			<scope>test</scope>
+		</dependency>
+
+
+	</dependencies>
+
+
+
+</project>
+
+
+

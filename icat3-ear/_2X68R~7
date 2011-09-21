@@ -1,0 +1,280 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>co.uk.icat3</groupId>
+		<artifactId>icat3</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>icat3-ear</artifactId>
+	<packaging>ear</packaging>
+
+	<name>icat3-ear</name>
+
+	<properties>
+	</properties>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>co.uk.icat3</groupId>
+			<artifactId>icat3-exposed</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<type>ejb</type>
+		</dependency>
+<!--
+		<dependency>
+			<groupId>co.uk.icat3</groupId>
+			<artifactId>icat3-logging</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<type>ejb</type>
+		</dependency>
+-->
+	</dependencies>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-ear-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<defaultJavaBundleDir>lib</defaultJavaBundleDir>
+
+					<modules>
+						<!-- <ejbModule> <groupId>co.uk.icat3</groupId> <artifactId>icat3-exposed</artifactId> 
+							</ejbModule> -->
+					</modules>
+
+				</configuration>
+			</plugin>
+
+
+
+
+
+ <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>1.0-alpha-1</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <configuration>
+              <files>
+                <file>build.properties</file>
+              </files>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+ <plugin>
+                <groupId>org.glassfish.maven.plugin</groupId>
+                <artifactId>maven-glassfish-plugin</artifactId>
+                <version>2.1</version>
+                <configuration>
+                    <glassfishDirectory>/wspace/gf/glassfish3/glassfish</glassfishDirectory>
+                    <!-- <glassfishDirectory>${glassfish.home}</glassfishDirectory> -->
+                    <!--<user>${domain.username}</user>
+                    <adminPassword>${domain.password}</adminPassword> -->
+                    <user>admin</user>
+<!--                    <adminPassword>adminadmin</adminPassword>  -->
+                    <passwordFile>gf_pass</passwordFile>
+                    <autoCreate>true</autoCreate>
+                    <debug>true</debug>
+                    <echo>true</echo>
+                    <terse>false</terse>
+	            <redeploy>true</redeploy>
+		    <verbose>true</verbose>
+                    <!-- <skip>${test.int.skip}</skip> -->
+                    <domain>
+<!--                        <name>${domain.name}</name> -->
+                        <name>icat</name>
+                        <adminPort>4848</adminPort>
+                        <httpPort>8080</httpPort>
+                        <httpsPort>8443</httpsPort>
+                        <iiopPort>3700</iiopPort>
+                        <jmsPort>7676</jmsPort>
+                        <reuse>false</reuse>
+			<!--
+                        <jvmOptions>
+                            <option>-Djava.security.auth.login.config=${project.build.testOutputDirectory}/login.conf</option>
+                        </jvmOptions>
+                        <properties>
+                            <property>
+                                <name>server.log-service.file</name>
+                                <value>${domain.log.dir}/server.log</value>
+                            </property>
+                        </properties>
+                        <auth>
+                            <realm>
+                                <name>testRealm</name>
+                                <className>com.sun.enterprise.security.auth.realm.file.FileRealm</className>
+                                <properties>
+                                    <property>
+                                        <name>jaas-context</name>
+                                        <value>test</value>
+                                    </property>
+                                    <property>
+                                        <name>file</name>
+                                        <value>${project.build.outputDirectory}/keyfile</value>
+                                    </property>
+                                </properties>
+                            </realm>
+                        </auth> -->
+                        <!-- <resourceDescriptor>path/to/resources.xml</resourceDescriptor> -->
+                        <resources>
+                            <jdbcDataSource>
+                                <name>icat3</name>
+                                <type>connectionPoolDataSource</type>
+                                <poolName>icat3</poolName>
+                                <className>oracle.jdbc.pool.OracleDataSource</className>
+                                <description>This is the main ICAT schema</description>
+                                <allowNonComponentCallers>false</allowNonComponentCallers>
+                                <validateConnections>true</validateConnections>
+                                <validationMethod>metaData</validationMethod>
+                                <properties>
+                                    <property>
+                                        <name>portNumber</name>
+                                        <value>1521</value>
+                                    </property>
+                                    <property>
+                                        <name>password</name>
+                                        <value>myicatpasswd</value>
+                                    </property>
+                                    <property>
+                                        <name>user</name>
+                                        <value>icat</value>
+                                    </property>
+                                    <property>
+                                        <name>serverName</name>
+                                        <value>esctest.esc.rl.ac.uk</value>
+                                    </property>
+                                    <property>
+                                        <name>databaseName</name>
+                                        <value>icat3</value>
+                                    </property>
+                                </properties>
+                            </jdbcDataSource> 
+                            <jdbcDataSource>
+                                <name>jdbc/icat3__pm</name>
+                                <type>connectionPoolDataSource</type>
+                                <poolName>jdbc/icat3__pm</poolName>
+                                <className>oracle.jdbc.pool.OracleDataSource</className>
+                                <description>This is the main ICAT schema</description>
+                                <allowNonComponentCallers>false</allowNonComponentCallers>
+                                <validateConnections>true</validateConnections>
+                                <validationMethod>metaData</validationMethod>
+                                <properties>
+                                    <property>
+                                        <name>portNumber</name>
+                                        <value>1521</value>
+                                    </property>
+                                    <property>
+                                        <name>password</name>
+                                        <value>myicatpasswd</value>
+                                    </property>
+                                    <property>
+                                        <name>user</name>
+                                        <value>icat</value>
+                                    </property>
+                                    <property>
+                                        <name>serverName</name>
+                                        <value>esctest.esc.rl.ac.uk</value>
+                                    </property>
+                                    <property>
+                                        <name>databaseName</name>
+                                        <value>icat3</value>
+                                    </property>
+                                </properties>
+                            </jdbcDataSource> 
+                            <jdbcDataSource>
+                                <name>jdbc/icat3__nontx</name>
+                                <type>connectionPoolDataSource</type>
+                                <poolName>jdbc/icat3__nontx</poolName>
+                                <className>oracle.jdbc.pool.OracleDataSource</className>
+                                <description>This is the main ICAT schema</description>
+                                <allowNonComponentCallers>false</allowNonComponentCallers>
+                                <validateConnections>true</validateConnections>
+                                <validationMethod>metaData</validationMethod>
+                                <properties>
+                                    <property>
+                                        <name>portNumber</name>
+                                        <value>1521</value>
+                                    </property>
+                                    <property>
+                                        <name>password</name>
+                                        <value>myicatpasswd</value>
+                                    </property>
+                                    <property>
+                                        <name>user</name>
+                                        <value>icat</value>
+                                    </property>
+                                    <property>
+                                        <name>serverName</name>
+                                        <value>esctest.esc.rl.ac.uk</value>
+                                    </property>
+                                    <property>
+                                        <name>databaseName</name>
+                                        <value>icat3</value>
+                                    </property>
+                                </properties>
+                            </jdbcDataSource> 
+                            <jdbcDataSource>
+                                <name>icat3-user</name>
+                                <type>connectionPoolDataSource</type>
+                                <poolName>icat3-user</poolName>
+                                <className>oracle.jdbc.pool.OracleDataSource</className>
+                                <description>This is the ICAT user schema for the ICAT API session</description>
+                                <allowNonComponentCallers>false</allowNonComponentCallers>
+                                <validateConnections>true</validateConnections>
+                                <validationMethod>metaData</validationMethod>
+                                <properties>
+                                    <property>
+                                        <name>portNumber</name>
+                                        <value>1521</value>
+                                    </property>
+                                    <property>
+                                        <name>password</name>
+                                        <value>myicatuserpasswd</value>
+                                    </property>
+                                    <property>
+                                        <name>user</name>
+                                        <value>icatuser</value>
+                                    </property>
+                                    <property>
+                                        <name>serverName</name>
+                                        <value>esctest.esc.rl.ac.uk</value>
+                                    </property>
+                                    <property>
+                                        <name>databaseName</name>
+                                        <value>icat3-user</value>
+                                    </property>
+                                </properties>
+                            </jdbcDataSource> 
+                        </resources>
+                    </domain>
+                    <components>
+                        <component>
+                            <name>${project.artifactId}</name>
+                            <artifact>${project.build.directory}/${project.build.finalName}.ear</artifact>
+                        </component>
+                    </components>
+                </configuration>
+            </plugin>
+		</plugins>
+	</build>
+
+
+
+</project>
+
+
+
