@@ -11,6 +11,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<uniqueVersion>false</uniqueVersion>
 
 		<sonar.jdbc.url>jdbc:derby://esctest.esc.rl.ac.uk:1527/sonar;create=true</sonar.jdbc.url>
 		<sonar.jdbc.driver>org.apache.derby.jdbc.ClientDriver</sonar.jdbc.driver>
@@ -126,6 +127,18 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
 			</plugin>
+ <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-jar-plugin</artifactId>
+       <version>2.2</version>
+       <executions>
+         <execution>
+           <goals>
+             <goal>test-jar</goal>
+           </goals>
+         </execution>
+       </executions>
+     </plugin>
 		</plugins>
 	</build>
 
@@ -133,10 +146,12 @@
 		<snapshotRepository>
 			<id>snapshots</id>
 			<url>http://esctest.esc.rl.ac.uk:7070/nexus/content/repositories/snapshots</url>
+			<uniqueVersion>false</uniqueVersion>
 		</snapshotRepository>
 		<repository>
 			<id>releases</id>
 			<url>http://esctest.esc.rl.ac.uk:7070/nexus/content/repositories/releases</url>
+			<uniqueVersion>false</uniqueVersion>
 		</repository>
 	</distributionManagement>
 
