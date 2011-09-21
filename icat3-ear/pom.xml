@@ -14,6 +14,7 @@
 	<name>icat3-ear</name>
 
 	<properties>
+		<uniqueVersion>false</uniqueVersion>
 	</properties>
 
 	<dependencies>
@@ -43,16 +44,10 @@
 				<version>2.6</version>
 				<configuration>
 					<defaultJavaBundleDir>lib</defaultJavaBundleDir>
-
 					<modules>
-						<!-- <ejbModule> <groupId>co.uk.icat3</groupId> <artifactId>icat3-exposed</artifactId> 
-							</ejbModule> -->
 					</modules>
-
 				</configuration>
 			</plugin>
-
-
 
 
 
@@ -80,15 +75,15 @@
                 <artifactId>maven-glassfish-plugin</artifactId>
                 <version>2.1</version>
                 <configuration>
-                    <glassfishDirectory>/wspace/gf/glassfish3/glassfish</glassfishDirectory>
-                    <!-- <glassfishDirectory>${glassfish.home}</glassfishDirectory> -->
-                    <!--<user>${domain.username}</user>
-                    <adminPassword>${domain.password}</adminPassword> -->
-                    <user>admin</user>
+<!--                    <glassfishDirectory>/wspace/gf/glassfish3/glassfish</glassfishDirectory> -->
+                    <glassfishDirectory>${glassfish.home}</glassfishDirectory> 
+                    <user>${domain.username}</user>
+<!--                   <adminPassword>${domain.password}</adminPassword> -->
+<!--                    <user>admin</user> -->
 <!--                    <adminPassword>adminadmin</adminPassword>  -->
                     <passwordFile>gf_pass</passwordFile>
-                    <autoCreate>true</autoCreate>
-                    <debug>true</debug>
+                     <autoCreate>true</autoCreate>
+                    <debug>true</debug> 
                     <echo>true</echo>
                     <terse>false</terse>
 	            <redeploy>true</redeploy>
