@@ -37,6 +37,7 @@
 		<module>icat3-client</module>
 		<module>icat3-cmd-util</module>
 		<module>icat3-ear</module>
+		<module>icat3-api-examples</module>
 <!--		<module>icat3-io</module> -->
 	</modules>
 
