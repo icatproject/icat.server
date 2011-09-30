@@ -26,19 +26,16 @@
 		<module>icat3-data</module>
 		<module>icat3-jaxb</module>
 		<module>icat3-logging</module>
-		<!--
-		<module>icat3-user-default</module>
-		<module>icat3-user-ldap</module>
-		-->
+		<!-- <module>icat3-user-default</module> <module>icat3-user-ldap</module> -->
 		<module>icat3-user-ansto</module>
 		<module>icat3-exposed</module>
 		<module>icat3-download</module>
 		<module>icat3-reporting</module>
-		<module>icat3-client</module>
-		<module>icat3-cmd-util</module>
+<!-- 		<module>icat3-client</module> -->
+		<!-- <module>icat3-cmd-util</module> -->
 		<module>icat3-ear</module>
-		<module>icat3-api-examples</module>
-<!--		<module>icat3-io</module> -->
+	<!-- <module>icat3-api-examples</module> -->
+		<!-- <module>icat3-io</module> -->
 	</modules>
 
 
@@ -89,10 +86,7 @@
 
 
 	<build>
-<!--
-		<sourceDirectory>src</sourceDirectory>
-		<testSourceDirectory>test</testSourceDirectory>
--->
+		<!-- <sourceDirectory>src</sourceDirectory> <testSourceDirectory>test</testSourceDirectory> -->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -127,19 +121,20 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
+				<version>2.0-beta-2</version>
 			</plugin>
- <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-jar-plugin</artifactId>
-       <version>2.2</version>
-       <executions>
-         <execution>
-           <goals>
-             <goal>test-jar</goal>
-           </goals>
-         </execution>
-       </executions>
-     </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

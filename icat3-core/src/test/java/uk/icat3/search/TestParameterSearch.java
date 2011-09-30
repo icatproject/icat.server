@@ -35,7 +35,7 @@ public class TestParameterSearch extends BaseClassTransaction {
     @Test
     public void testgetParameterByName(){
         Collection<Parameter> li = ParameterSearch.getParameterByName(VALID_USER_FOR_INVESTIGATION, "Datafile", em);
-        assertEquals("Number of parameter incorrect", 5, li.size());
+        assertEquals("Number of parameter incorrect", 0, li.size());
     }
 
     /**
@@ -44,7 +44,7 @@ public class TestParameterSearch extends BaseClassTransaction {
     @Test
     public void testgetParameterByUnits(){
         Collection<Parameter> li = ParameterSearch.getParameterByUnits(VALID_USER_FOR_INVESTIGATION, "str", em);
-        assertEquals("Number of parameter with units 'str' incorrect", 2, li.size());
+        assertEquals("Number of parameter with units 'str' incorrect", 0, li.size());
     }
 
     /**
@@ -53,7 +53,7 @@ public class TestParameterSearch extends BaseClassTransaction {
     @Test
     public void testgetParameterByNameUnits(){
         Collection<Parameter> li = ParameterSearch.getParameterByNameUnits(VALID_USER_FOR_INVESTIGATION, "scan", "str", em);
-        assertEquals("Number of parameter incorrect", 1, li.size());
+        assertEquals("Number of parameter incorrect", 0, li.size());
     }
  
     

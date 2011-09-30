@@ -87,11 +87,9 @@ public class DatafileSearch {
 		// set query with datafile as entity object
 		Query query = manager.createQuery(JPQL);
 
-		// sets the paramters
-		query = query.setParameter("userId", userId);
+		// sets the parameters
 		query = query.setParameter("lower", startRun);
 		query = query.setParameter("upper", endRun);
-		query = query.setParameter("objectType", ElementType.DATASET);
 
 		// set instruments
 		int j = 1;
