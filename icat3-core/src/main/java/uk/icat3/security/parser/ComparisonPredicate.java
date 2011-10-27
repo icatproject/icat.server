@@ -1,13 +1,17 @@
 package uk.icat3.security.parser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import uk.icat3.exceptions.BadParameterException;
 
 public class ComparisonPredicate {
 
-	// ComparisonPredicate ::= value ( COMPOP value ) | ( "IN" "(" value ("," value)* ")" ) | (
+	// ComparisonPredicate ::= value ( COMPOP value ) | ( "IN" "(" value (","
+	// value)* ")" ) | (
 	// "BETWEEN" value "AND" value )
 
 	private Token value1;
@@ -16,39 +20,54 @@ public class ComparisonPredicate {
 	private Token value3;
 	private List<Token> inValues;
 
+	private static final Set<String> beanFields = new HashSet<String>(
+			Arrays.asList("createTime", "createId", "modTime", "modId"));
+
 	public ComparisonPredicate(Input input) throws ParserException {
-		value1 = input.consume(Token.Type.NAME, Token.Type.STRING, Token.Type.INTEGER, Token.Type.REAL,
-				Token.Type.PARAMETER, Token.Type.TIMESTAMP);
-		compop = input.consume(Token.Type.COMPOP, Token.Type.IN, Token.Type.BETWEEN);
+		value1 = input.consume(Token.Type.NAME, Token.Type.STRING,
+				Token.Type.INTEGER, Token.Type.REAL, Token.Type.PARAMETER,
+				Token.Type.TIMESTAMP);
+		compop = input.consume(Token.Type.COMPOP, Token.Type.IN,
+				Token.Type.BETWEEN);
 		if (compop.getType() == Token.Type.COMPOP) {
-			value2 = input.consume(Token.Type.NAME, Token.Type.STRING, Token.Type.INTEGER, Token.Type.REAL,
-					Token.Type.PARAMETER, Token.Type.TIMESTAMP);
+			value2 = input.consume(Token.Type.NAME, Token.Type.STRING,
+					Token.Type.INTEGER, Token.Type.REAL, Token.Type.PARAMETER,
+					Token.Type.TIMESTAMP);
 		} else if (compop.getType() == Token.Type.IN) {
 			input.consume(Token.Type.OPENPAREN);
 			inValues = new ArrayList<Token>();
-			inValues.add(input.consume(Token.Type.STRING, Token.Type.INTEGER, Token.Type.REAL, Token.Type.PARAMETER,
-					Token.Type.TIMESTAMP));
-			while (input.consume(Token.Type.COMMA, Token.Type.CLOSEPAREN).getType().equals(Token.Type.COMMA)) {
-				inValues.add(input.consume(Token.Type.STRING, Token.Type.INTEGER, Token.Type.REAL,
+			inValues.add(input
+					.consume(Token.Type.STRING, Token.Type.INTEGER,
+							Token.Type.REAL, Token.Type.PARAMETER,
+							Token.Type.TIMESTAMP));
+			while (input.consume(Token.Type.COMMA, Token.Type.CLOSEPAREN)
+					.getType().equals(Token.Type.COMMA)) {
+				inValues.add(input.consume(Token.Type.STRING,
+						Token.Type.INTEGER, Token.Type.REAL,
 						Token.Type.PARAMETER, Token.Type.TIMESTAMP));
 			}
 		} else {
-			value2 = input.consume(Token.Type.NAME, Token.Type.STRING, Token.Type.INTEGER, Token.Type.REAL,
-					Token.Type.PARAMETER, Token.Type.TIMESTAMP);
+			value2 = input.consume(Token.Type.NAME, Token.Type.STRING,
+					Token.Type.INTEGER, Token.Type.REAL, Token.Type.PARAMETER,
+					Token.Type.TIMESTAMP);
 			input.consume(Token.Type.AND);
-			value3 = input.consume(Token.Type.NAME, Token.Type.STRING, Token.Type.INTEGER, Token.Type.REAL,
-					Token.Type.PARAMETER, Token.Type.TIMESTAMP);
+			value3 = input.consume(Token.Type.NAME, Token.Type.STRING,
+					Token.Type.INTEGER, Token.Type.REAL, Token.Type.PARAMETER,
+					Token.Type.TIMESTAMP);
 		}
 	}
 
 	public StringBuilder getWhere(Class<?> tb) throws BadParameterException {
 		StringBuilder sb = new StringBuilder();
 		if (compop.getType() == Token.Type.COMPOP) {
-			boolean one = value1.getType() == Token.Type.NAME && value2.getType() != Token.Type.NAME;
-			boolean two = value2.getType() == Token.Type.NAME && value1.getType() != Token.Type.NAME;
+			boolean one = value1.getType() == Token.Type.NAME
+					&& value2.getType() != Token.Type.NAME;
+			boolean two = value2.getType() == Token.Type.NAME
+					&& value1.getType() != Token.Type.NAME;
 			if (!one && !two) {
-				throw new BadParameterException("Attribute comparisons require one attribute name and one value: "
-						+ value1 + " " + compop + " " + value2);
+				throw new BadParameterException(
+						"Attribute comparisons require one attribute name and one value: "
+								+ value1 + " " + compop + " " + value2);
 			}
 			if (one) {
 				sb.append(getName(value1, tb));
@@ -65,8 +84,9 @@ public class ComparisonPredicate {
 			}
 		} else if (compop.getType() == Token.Type.IN) {
 			if (value1.getType() != Token.Type.NAME) {
-				throw new BadParameterException("\"IN\" comparisons require a name on the LHS rather than "
-						+ Tokenizer.getTypeToPrint(value1.getType()));
+				throw new BadParameterException(
+						"\"IN\" comparisons require a name on the LHS rather than "
+								+ Tokenizer.getTypeToPrint(value1.getType()));
 			}
 			sb.append(getName(value1, tb));
 			sb.append(" IN (");
@@ -82,10 +102,12 @@ public class ComparisonPredicate {
 			sb.append(")");
 		} else {
 			if (value1.getType() != Token.Type.NAME) {
-				throw new BadParameterException("\"BETWEEN\" comparisons require a name on the LHS rather than "
-						+ Tokenizer.getTypeToPrint(value1.getType()));
+				throw new BadParameterException(
+						"\"BETWEEN\" comparisons require a name on the LHS rather than "
+								+ Tokenizer.getTypeToPrint(value1.getType()));
 			}
-			sb.append(getName(value1, tb)).append(" BETWEEN ").append(getValue(value2)).append(" AND ")
+			sb.append(getName(value1, tb)).append(" BETWEEN ")
+					.append(getValue(value2)).append(" AND ")
 					.append(getValue(value3));
 		}
 		return sb;
@@ -96,17 +118,23 @@ public class ComparisonPredicate {
 		if (value.getType() == Token.Type.STRING) {
 			val = "'" + val.replace("'", "''") + "'";
 		} else if (value.getType() == Token.Type.TIMESTAMP) {
-			val =":" + value.getValue().replace(" ", "").replace(":", "").replace("-", "").replace("{", "").replace("}", "");
+			val = ":"
+					+ value.getValue().replace(" ", "").replace(":", "")
+							.replace("-", "").replace("{", "").replace("}", "");
 		}
 		return val;
 	}
 
-	private String getName(Token value, Class<?> tb) throws BadParameterException {
+	private String getName(Token value, Class<?> tb)
+			throws BadParameterException {
 		String val = value.getValue();
-		try {
-			tb.getDeclaredField(val.split("\\.")[0]);
-		} catch (NoSuchFieldException e) {
-			throw new BadParameterException("Field " + val + " of " + tb + " does not exist");
+		if (!beanFields.contains(val)) {
+			try {
+				tb.getDeclaredField(val.split("\\.")[0]);
+			} catch (NoSuchFieldException e) {
+				throw new BadParameterException("Field " + val + " of " + tb
+						+ " does not exist");
+			}
 		}
 		val = tb.getSimpleName() + "$." + val;
 		return val;
