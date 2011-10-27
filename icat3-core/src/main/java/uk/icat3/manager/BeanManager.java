@@ -25,7 +25,6 @@ import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ObjectAlreadyExistsException;
 import uk.icat3.exceptions.ValidationException;
-import uk.icat3.security.EntityInfoHandler;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.security.parser.GetQuery;
 import uk.icat3.security.parser.Input;
@@ -41,31 +40,35 @@ import uk.icat3.util.InvestigationInclude;
 public class BeanManager {
 
 	// Global class logger
-	static Logger log = Logger.getLogger(BeanManager.class);
-	static final EntityInfoHandler eih = EntityInfoHandler.getInstance();
+	private static Logger log = Logger.getLogger(BeanManager.class);
+
+	// Used to protect against someone making an object with the same primary key
+	private static final Object lock = new Object();
 
 	public static Object create(String userId, EntityBaseBean bean, EntityManager manager)
 			throws InsufficientPrivilegesException, ObjectAlreadyExistsException, ValidationException,
 			NoSuchObjectFoundException, IcatInternalException {
 
 		bean.preparePersistTop(userId, manager);
-		bean.isUnique(manager);
-		try {
-			log.trace(bean + " prepared for persist.");
-			manager.persist(bean);
-			log.trace(bean + " persisted.");
-			manager.flush();
-			log.trace(bean + " flushed.");
-		} catch (EntityExistsException e) {
-			throw new ObjectAlreadyExistsException(e.getMessage());
-		} catch (Throwable e) {
-			manager.clear();
-			bean.preparePersistTop(userId, manager);
-			bean.isValid(manager, true);
-			e.printStackTrace(System.err);
-			throw new IcatInternalException("Unexpected DB response " + e.getMessage());
+	
+		synchronized (lock) {
+			bean.isUnique(manager);
+			try {
+				log.trace(bean + " prepared for persist.");
+				manager.persist(bean);
+				log.trace(bean + " persisted.");
+				manager.flush();
+				log.trace(bean + " flushed.");
+			} catch (EntityExistsException e) {
+				throw new ObjectAlreadyExistsException(e.getMessage());
+			} catch (Throwable e) {
+				manager.clear();
+				bean.preparePersistTop(userId, manager);
+				bean.isValid(manager, true);
+				e.printStackTrace(System.err);
+				throw new IcatInternalException("Unexpected DB response " + e.getMessage());
+			}
 		}
-
 		// Check authz now everything persisted
 		GateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
 		return bean.getPK();
