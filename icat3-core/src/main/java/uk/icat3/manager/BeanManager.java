@@ -40,39 +40,35 @@ import uk.icat3.util.InvestigationInclude;
 public class BeanManager {
 
 	// Global class logger
-	private static Logger log = Logger.getLogger(BeanManager.class);
-
-	// Used to protect against someone making an object with the same primary key
-	private static final Object lock = new Object();
+	private static final Logger log = Logger.getLogger(BeanManager.class);
 
 	public static Object create(String userId, EntityBaseBean bean, EntityManager manager)
 			throws InsufficientPrivilegesException, ObjectAlreadyExistsException, ValidationException,
 			NoSuchObjectFoundException, IcatInternalException {
+		// TODO this code can throw a primary key exception if the same object
+		// is being created by two threads. Probably need to use a Bean Managed
+		// Transaction to avoid the problem.
 
 		bean.preparePersistTop(userId, manager);
-	
-		synchronized (lock) {
-			bean.isUnique(manager);
-			try {
-				log.trace(bean + " prepared for persist.");
-				manager.persist(bean);
-				log.trace(bean + " persisted.");
-				manager.flush();
-				log.trace(bean + " flushed.");
-			} catch (EntityExistsException e) {
-				throw new ObjectAlreadyExistsException(e.getMessage());
-			} catch (Throwable e) {
-				manager.clear();
-				bean.preparePersistTop(userId, manager);
-				bean.isValid(manager, true);
-				e.printStackTrace(System.err);
-				throw new IcatInternalException("Unexpected DB response " + e.getMessage());
-			}
+		bean.isUnique(manager);
+		try {
+			log.trace(bean + " prepared for persist.");
+			manager.persist(bean);
+			log.trace(bean + " persisted.");
+			manager.flush();
+			log.trace(bean + " flushed.");
+		} catch (EntityExistsException e) {
+			throw new ObjectAlreadyExistsException(e.getMessage());
+		} catch (Throwable e) {
+			manager.clear();
+			bean.preparePersistTop(userId, manager);
+			bean.isValid(manager, true);
+			e.printStackTrace(System.err);
+			throw new IcatInternalException("Unexpected DB response " + e.getMessage());
 		}
 		// Check authz now everything persisted
 		GateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
 		return bean.getPK();
-
 	}
 
 	public static void delete(String userId, EntityBaseBean bean, EntityManager manager)
