@@ -257,7 +257,7 @@ public class TestSearch {
 		addMembers();
 		addRules();
 		addData();
-		String query = "Dataset.id ORDER BY id [datasetType IN :types AND name >= :lower AND name <= :upper]";
+		String query = "Dataset.id ORDER BY startDate [datasetType IN :types AND name >= :lower AND name <= :upper]";
 		query = query.replace(":lower", "'Wabble'")
 				.replace(":upper", "'Wobble'")
 				.replace(":types", "('GS', 'GQ')");

@@ -22,6 +22,8 @@ import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlElement;
@@ -102,6 +104,30 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@Column(name = "SAMPLE_ID")
 	private Long sampleId;
 
+	@Column(name = "START_DATE")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date startDate;
+
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	@Column(name = "END_DATE")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date endDate;
+
 	/** Creates a new instance of Dataset */
 	public Dataset() {
 	}
@@ -166,18 +192,19 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Determines whether another object is equal to this Dataset. The result is <code>true</code>
-	 * if and only if the argument is not null and is a Dataset object that has the same id field
-	 * values as this object.
+	 * Determines whether another object is equal to this Dataset. The result is
+	 * <code>true</code> if and only if the argument is not null and is a
+	 * Dataset object that has the same id field values as this object.
 	 * 
 	 * @param object
 	 *            the reference object with which to compare
-	 * @return <code>true</code> if this object is the same as the argument; <code>false</code>
-	 *         otherwise.
+	 * @return <code>true</code> if this object is the same as the argument;
+	 *         <code>false</code> otherwise.
 	 */
 	@Override
 	public boolean equals(Object object) {
-		// TODO: Warning - this method won't work in the case the id fields are not set
+		// TODO: Warning - this method won't work in the case the id fields are
+		// not set
 		if (!(object instanceof Dataset)) {
 			return false;
 		}
@@ -199,9 +226,10 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * This method is used by JAXWS to map to datafileCollection. Depending on what the include is
-	 * set to depends on what is returned to JAXWS and serialised into XML. This is because without
-	 * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+	 * This method is used by JAXWS to map to datafileCollection. Depending on
+	 * what the include is set to depends on what is returned to JAXWS and
+	 * serialised into XML. This is because without XmlTransient all the
+	 * collections in the domain model are serialised into XML (meaning alot of
 	 * DB hits and serialisation).
 	 */
 	@SuppressWarnings("unused")
@@ -225,10 +253,11 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * This method is used by JAXWS to map to datasetParameterCollection. Depending on what the
-	 * include is set to depends on what is returned to JAXWS and serialised into XML. This is
-	 * because without XmlTransient all the collections in the domain model are serialised into XML
-	 * (meaning alot of DB hits and serialisation).
+	 * This method is used by JAXWS to map to datasetParameterCollection.
+	 * Depending on what the include is set to depends on what is returned to
+	 * JAXWS and serialised into XML. This is because without XmlTransient all
+	 * the collections in the domain model are serialised into XML (meaning alot
+	 * of DB hits and serialisation).
 	 */
 	@SuppressWarnings("unused")
 	@XmlElement(name = "datasetParameterCollection")
@@ -318,8 +347,8 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Returns a hash code value for the object. This implementation computes a hash code value
-	 * based on the id fields in this object.
+	 * Returns a hash code value for the object. This implementation computes a
+	 * hash code value based on the id fields in this object.
 	 * 
 	 * @return a hash code value for this object.
 	 */
@@ -331,8 +360,8 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Overrides the isValid function, checks each of the datafiles and datafile parameters are
-	 * valid
+	 * Overrides the isValid function, checks each of the datafiles and datafile
+	 * parameters are valid
 	 * 
 	 * @throws ValidationException
 	 * @return
@@ -343,7 +372,8 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			IcatInternalException {
 		super.isValid(manager, deepValidation);
 
-		// check sample info, sample id must be a part of an investigations as well
+		// check sample info, sample id must be a part of an investigations as
+		// well
 		outer: if (this.sampleId != null) {
 			// check valid sample id
 
@@ -421,7 +451,8 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		this.id = null;
 		for (DatasetParameter datasetParameter : this.datasetParameterCollection) {
 			datasetParameter.preparePersist(modId, manager);
-			datasetParameter.setDataset(this); // Must set the backwards reference
+			datasetParameter.setDataset(this); // Must set the backwards
+												// reference
 		}
 		for (Datafile datafile : this.datafileCollection) {
 			datafile.preparePersist(modId, manager);
@@ -436,7 +467,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			this.investigation = ManagerUtil.find(Investigation.class, this.investigationId, manager);
 		}
 	}
-	
+
 	@Override
 	public void postMergeFixup(EntityManager manager) throws NoSuchObjectFoundException {
 		this.investigation = ManagerUtil.find(Investigation.class, this.investigationId, manager);
@@ -465,7 +496,8 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Sets the datasetParameterCollection of this Dataset to the specified value.
+	 * Sets the datasetParameterCollection of this Dataset to the specified
+	 * value.
 	 * 
 	 * @param datasetParameterCollection
 	 *            the new datasetParameterCollection
@@ -569,8 +601,8 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Returns a string representation of the object. This implementation constructs that
-	 * representation based on the id fields.
+	 * Returns a string representation of the object. This implementation
+	 * constructs that representation based on the id fields.
 	 * 
 	 * @return a string representation of the object.
 	 */
