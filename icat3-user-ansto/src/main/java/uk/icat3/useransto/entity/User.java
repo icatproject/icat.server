@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package uk.icat3.userdefault.entity;
+package uk.icat3.useransto.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ public class User implements Serializable {
     private Date modTime;
             
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId",fetch=FetchType.LAZY)
-    private java.util.Collection <uk.icat3.userdefault.entity.Session> session;
+    private java.util.Collection <uk.icat3.useransto.entity.Session> session;
        
     @PrePersist
     @PreUpdate

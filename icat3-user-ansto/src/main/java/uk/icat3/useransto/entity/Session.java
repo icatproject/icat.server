@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package uk.icat3.userdefault.entity;
+package uk.icat3.useransto.entity;
 
 import java.io.Serializable;
 import java.util.Date;

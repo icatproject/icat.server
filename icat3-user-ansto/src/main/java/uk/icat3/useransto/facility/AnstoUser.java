@@ -1,4 +1,4 @@
-package uk.icat3.userdefault.facility;
+package uk.icat3.useransto.facility;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -15,8 +15,8 @@ import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.user.User;
 import uk.icat3.user.UserDetails;
-import uk.icat3.userdefault.entity.Session;
-import uk.icat3.userdefault.message.LoginInterceptor;
+import uk.icat3.useransto.entity.Session;
+import uk.icat3.useransto.message.LoginInterceptor;
 
 /**
  * This class uses a local DB connection through an entitymanager with two tables for the session
@@ -24,23 +24,21 @@ import uk.icat3.userdefault.message.LoginInterceptor;
  * code will get the proxy and insert the information in the session table with the associated user
  * in the user table. An admin user can log onto the system and run commands on behalf of a user,
  * the admin password needs to be set up in the user table first
- * 
- * @author gjd37
  */
-public class DefaultUser implements User {
+public class AnstoUser implements User {
 
 	// entity manager for the session database.
 	private EntityManager manager;
 	// Global class logger
-	static Logger log = Logger.getLogger(DefaultUser.class);
+	static Logger log = Logger.getLogger(AnstoUser.class);
 
 	/** Creates a new instance of DefaultUser */
-	public DefaultUser(EntityManager manager) {
+	public AnstoUser(EntityManager manager) {
 		this.manager = manager;
 	}
 
 	/** Creates a new instance of DefaultUser */
-	public DefaultUser() {
+	public AnstoUser() {
 	}
 
 	public String getUserIdFromSessionId(String sessionId) throws SessionException {
@@ -87,7 +85,7 @@ public class DefaultUser implements User {
 	@Override
 	public String login(String username, String password, int lifetime) throws SessionException {
 
-		uk.icat3.userdefault.entity.User user = null;
+		uk.icat3.useransto.entity.User user = null;
 
 		log.trace("login(" + username + ", *********, " + lifetime + ")");
 		if (username == null || username.equals("")) {
@@ -100,7 +98,7 @@ public class DefaultUser implements User {
 		log.info("checking password against database ");
 
 		try {
-			user = (uk.icat3.userdefault.entity.User) manager.createNamedQuery("User.findByUserId")
+			user = (uk.icat3.useransto.entity.User) manager.createNamedQuery("User.findByUserId")
 					.setParameter("userId", username).getSingleResult();
 		} catch (NoResultException e) {
 			throw new SessionException("Username and password do not match");
@@ -204,11 +202,11 @@ public class DefaultUser implements User {
 		log.trace("login(admin, *********, " + runAsUser + ")");
 
 		// find admin user first
-		uk.icat3.userdefault.entity.User user = null;
+		uk.icat3.useransto.entity.User user = null;
 
 		// check if trying to log on as admin, if admin in DB then this is enabled
 		try {
-			user = (uk.icat3.userdefault.entity.User) manager.createNamedQuery("User.findByUserId")
+			user = (uk.icat3.useransto.entity.User) manager.createNamedQuery("User.findByUserId")
 					.setParameter("userId", adminUsername).getSingleResult();
 		} catch (NoResultException ex) {
 			log.warn("Admin user '" + adminUsername + "' account not set up in DB");

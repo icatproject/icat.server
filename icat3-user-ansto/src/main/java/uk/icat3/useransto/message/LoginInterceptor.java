@@ -1,4 +1,4 @@
-package uk.icat3.userdefault.message;
+package uk.icat3.useransto.message;
 
 /**
  *
