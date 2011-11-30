@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<icat version="1.0 RC6" xsi:noNamespaceSchemaLocation="icatXSD.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<icat version="1.0 RC6" xsi:noNamespaceSchemaLocation="icatXSD.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<study>
 		<investigation>
 			<inv_number>0</inv_number>
@@ -10,13 +11,11 @@
 				<user_id>tang76</user_id>
 				<role>experimenter</role>
 				<privilege>ADMIN</privilege>
-				<affiliation_id>Tom</affiliation_id>
 			</investigator>
 			<investigator>
 				<user_id>dwf64</user_id>
 				<role>experimenter</role>
 				<privilege>ADMIN</privilege>
-				<affiliation_id>9932</affiliation_id>
 			</investigator>
 			<inv_type>EXPERIMENT</inv_type>
 			<bcat_inv_str>MG/CLB - 6397 </bcat_inv_str>

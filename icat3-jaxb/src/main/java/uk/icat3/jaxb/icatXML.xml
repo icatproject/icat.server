@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<icat version="1.0 RC6" xsi:noNamespaceSchemaLocation="icatXSD.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<icat version="1.0 RC6" xsi:noNamespaceSchemaLocation="icatXSD.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<study>
 		<name>study-test-1</name>
 		<purpose>Test the XML Schema</purpose>
@@ -15,23 +16,10 @@
 			<investigator>
 				<user_id>ll56</user_id>
 				<role>tester, developer</role>
-				<title>Mr.</title>
-				<initials>L. L.</initials>
-				<first_name>Laurent</first_name>
-				<last_name>Lerusse</last_name>
-				<affiliation> CCLRC - e-Science Center - Facility Support Group - Data Management Group</affiliation>
-				<affiliation_id>CCLRC-ESC-EDM</affiliation_id>
 			</investigator>
 			<investigator>
 				<user_id>lhe430</user_id>
 				<role> Principal Investigator</role>
-				<title>Miss.</title>
-				<initials> L. H. E.</initials>
-				<first_name>Lisa</first_name>
-				<middle_name>Hedwidge</middle_name>
-				<last_name> Eccles</last_name>
-				<affiliation> CCLRC - e-Science Center - Data Management Group</affiliation>
-				<affiliation_id>CCLRC-ESC-EDM</affiliation_id>
 			</investigator>
 			<inv_abstract>Dummy investigation to verify the XML schema that will be used as a validation of the input of the XML ingestion</inv_abstract>
 			<inv_type>EXPERIMENT</inv_type>
@@ -39,28 +27,40 @@
 			<bcat_inv_str>Not sure what this parameter is.</bcat_inv_str>
 			<grant_id>CCLRC_2006-001</grant_id>
 			<facility_cycle>cycle_07_02</facility_cycle>
-			<keyword><name>test</name></keyword>
-			<keyword><name>xml</name></keyword>
-			<keyword><name>xsd</name></keyword>
-			<keyword><name>icat</name></keyword>
-			<keyword><name>ingestion</name></keyword>
-			<keyword><name>0.1</name></keyword>
-				<topic>
-					<name>XML</name>
-					<topic_level>1</topic_level>
-				</topic>
-				<topic>
-					<name>Schema</name>
-					<topic_level>1</topic_level>
-				</topic>
-				<topic>
-					<name>Ingestion</name>
-					<topic_level>2</topic_level>
-				</topic>
-			
-			
-				
-			
+			<keyword>
+				<name>test</name>
+			</keyword>
+			<keyword>
+				<name>xml</name>
+			</keyword>
+			<keyword>
+				<name>xsd</name>
+			</keyword>
+			<keyword>
+				<name>icat</name>
+			</keyword>
+			<keyword>
+				<name>ingestion</name>
+			</keyword>
+			<keyword>
+				<name>0.1</name>
+			</keyword>
+			<topic>
+				<name>XML</name>
+				<topic_level>1</topic_level>
+			</topic>
+			<topic>
+				<name>Schema</name>
+				<topic_level>1</topic_level>
+			</topic>
+			<topic>
+				<name>Ingestion</name>
+				<topic_level>2</topic_level>
+			</topic>
+
+
+
+
 			<dataset>
 				<name>test-1</name>
 				<dataset_type>EXPERIMENT_RAW</dataset_type>
@@ -85,7 +85,7 @@
 						<string_value> transparent</string_value>
 						<units>N/A</units>
 						<description> color of the water</description>
-					</parameter>					
+					</parameter>
 				</sample>
 				<datafile>
 					<name>file_01.nxs</name>
@@ -107,12 +107,12 @@
 						<units>N/A</units>
 						<description>Compression parameter used in Photoshop.</description>
 					</parameter>
-                                        <parameter>
+					<parameter>
 						<name>run_number</name>
 						<numeric_value>1</numeric_value>
-						<units>N/A</units>						
-					</parameter>                                        
-				</datafile>				
+						<units>N/A</units>
+					</parameter>
+				</datafile>
 			</dataset>
 		</investigation>
 	</study>

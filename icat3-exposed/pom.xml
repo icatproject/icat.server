@@ -1,166 +1,57 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
- 
-    <parent>
-       <groupId>co.uk.icat3</groupId>
-       <artifactId>icat3</artifactId>
-       <version>1.0.0-SNAPSHOT</version>
-    </parent>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>co.uk.icat3</groupId>
-    <artifactId>icat3-exposed</artifactId>
-    <packaging>ejb</packaging>
-    
-    <name>icat3-exposed</name>
+	<parent>
+		<groupId>co.uk.icat3</groupId>
+		<artifactId>icat3</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
 
-    <properties>
-    </properties>
+	<groupId>co.uk.icat3</groupId>
+	<artifactId>icat3-exposed</artifactId>
+	<packaging>ejb</packaging>
 
-    <dependencies>
+	<name>icat3-exposed</name>
 
-<dependency>
-  <groupId>co.uk.icat3</groupId>
-  <artifactId>icat3-core</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-</dependency>
-<dependency>
-  <groupId>co.uk.icat3</groupId>
-  <artifactId>icat3-data</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-</dependency>
-<dependency>
-  <groupId>co.uk.icat3</groupId>
-  <artifactId>icat3-logging</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>co.uk.icat3</groupId>
-  <artifactId>icat3-jaxb</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-</dependency>
+	<dependencies>
+		<dependency>
+			<groupId>co.uk.icat3</groupId>
+			<artifactId>icat3-core</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 
-<dependency>
-  <groupId>co.uk.icat3</groupId>
-  <artifactId>icat3-user-ansto</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-</dependency>
+		<dependency>
+			<groupId>co.uk.icat3</groupId>
+			<artifactId>icat3-data</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 
+		<dependency>
+			<groupId>co.uk.icat3</groupId>
+			<artifactId>icat3-logging</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
 
-<dependency>
-  <groupId>javax.activation</groupId>
-  <artifactId>activation</artifactId>
-  <version>1.1</version>
-</dependency>
+		<dependency>
+			<groupId>co.uk.icat3</groupId>
+			<artifactId>icat3-jaxb</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 
-<dependency>
-  <groupId>javax.mail</groupId>
-  <artifactId>javax.mail-api</artifactId>
-  <version>1.4.4</version>
-</dependency>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1</version>
+		</dependency>
 
-
-                    <dependency>
-    <groupId>org.eclipse.persistence</groupId>
-    <artifactId>eclipselink</artifactId>
-                        <version>2.3.0</version>
-</dependency>
-
-
-    </dependencies>
-
-
-
-  <build>
-        <finalName>${project.artifactId}</finalName>
-        <plugins>
-
-  <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-ejb-plugin</artifactId>
-        <version>2.3</version>
-<!--
-        <configuration>
-          <ejbVersion>3.0</ejbVersion>
-        </configuration>
--->
-      </plugin>
-
-<!--
-            <plugin>
-                <groupId>org.mortbay.jetty</groupId>
-                <artifactId>maven-jetty-plugin</artifactId>
-                <version>6.1.22</version>
-
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.openejb</groupId>
-                        <artifactId>openejb-core</artifactId>
-                        <version>3.1.4</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>org.apache.activemq</groupId>
-                                <artifactId>activemq-core</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.apache.activemq</groupId>
-                                <artifactId>activemq-ra</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.apache.activemq</groupId>
-                                <artifactId>activeio-core</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>junit</groupId>
-                                <artifactId>junit</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.mortbay.jetty</groupId>
-                        <artifactId>jsp-2.1-jetty</artifactId>
-                        <version>6.1.22</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>ant</groupId>
-                                <artifactId>ant</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-
-	
-			
-
-                </dependencies>
-                <configuration>
-<!- -                    <jettyConfig>${basedir}/src/main/jetty/jetty.xml</jettyConfig> - ->
- <scanIntervalSeconds>5</scanIntervalSeconds>
-    <contextPath>/example</contextPath>
-    <systemProperties>
-      <systemProperty>
-        <name>java.naming.factory.initial</name>
-        <value>org.apache.openejb.client.LocalInitialContextFactory</value>
-      </systemProperty>
-      <systemProperty>
-        <name>java.naming.factory.url.pkgs</name>
-        <value>org.mortbay.naming</value>
-      </systemProperty>
-    </systemProperties>
-
-
-      <connectors>
-        <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
-          <port>6060</port>
-          <maxIdleTime>60000</maxIdleTime>
-        </connector>
-      </connectors>
-
-                </configuration>
-            </plugin>
--->
-        </plugins>
-</build>
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>javax.mail-api</artifactId>
+			<version>1.4.4</version>
+		</dependency>
+	</dependencies>
 
 </project>
 

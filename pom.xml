@@ -26,35 +26,30 @@
 		<module>icat3-data</module>
 		<module>icat3-jaxb</module>
 		<module>icat3-logging</module>
-		<!-- <module>icat3-user-default</module> <module>icat3-user-ldap</module> -->
+<!-- 		<module>icat3-user-default</module> -->
+		<module>icat3-user-ldap</module>
 		<module>icat3-user-ansto</module>
 		<module>icat3-exposed</module>
 		<module>icat3-download</module>
 		<module>icat3-reporting</module>
-<!-- 		<module>icat3-client</module> -->
+		 <module>icat3-client</module> 
 		<!-- <module>icat3-cmd-util</module> -->
 		<module>icat3-ear</module>
-	<!-- <module>icat3-api-examples</module> -->
+		<!-- <module>icat3-api-examples</module> -->
 		<!-- <module>icat3-io</module> -->
 	</modules>
 
-
 	<repositories>
 		<repository>
-			<id>public_repos</id>
-			<url>http://esctest.esc.rl.ac.uk:7070/nexus/content/groups/public/</url>
+			<id>EclipseLink Repo</id>
+			<url>http://download.eclipse.org/rt/eclipselink/maven.repo</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>public_repos</id>
-			<url>http://esctest.esc.rl.ac.uk:7070/nexus/content/groups/public/</url>
-		</pluginRepository>
-	</pluginRepositories>
-
 	<dependencies>
-
 
 		<dependency>
 			<groupId>log4j</groupId>
@@ -75,18 +70,15 @@
 			<version>1.6.2</version>
 		</dependency>
 
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.1</version>
+			<version>4.8.1</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
-
 	<build>
-		<!-- <sourceDirectory>src</sourceDirectory> <testSourceDirectory>test</testSourceDirectory> -->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -137,19 +129,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<distributionManagement>
-		<snapshotRepository>
-			<id>snapshots</id>
-			<url>http://esctest.esc.rl.ac.uk:7070/nexus/content/repositories/snapshots</url>
-			<uniqueVersion>false</uniqueVersion>
-		</snapshotRepository>
-		<repository>
-			<id>releases</id>
-			<url>http://esctest.esc.rl.ac.uk:7070/nexus/content/repositories/releases</url>
-			<uniqueVersion>false</uniqueVersion>
-		</repository>
-	</distributionManagement>
 
 </project>
 
