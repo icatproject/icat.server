@@ -21,7 +21,7 @@ import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.user.User;
 import uk.icat3.user.UserDetails;
 import uk.icat3.userdefault.entity.*;
-import uk.icat3.util.IcatRoles;
+//import uk.icat3.util.IcatRoles;
 import uk.icat3.userdefault.message.LoginInterceptor;
 import uk.icat3.userdefault.message.LoginLdap;
 
@@ -69,13 +69,13 @@ public class DefaultUser implements User {
             }
 
             //check if session id is running as admin, if so, return runAs userId
-            if (session.isAdmin()) {
+/*            if (session.isAdmin()) {
                 log.info("user: " + userId + " is associated with: " + sessionId);
                 return userId;
             } else {
-                log.info("user: " + session.getUserId().getUserId() + " is associated with: " + sessionId);
+*/                log.info("user: " + session.getUserId().getUserId() + " is associated with: " + sessionId);
                 return session.getUserId().getUserId();
-            }
+//            }
 
 
         } catch (NoResultException ex) {
@@ -117,7 +117,7 @@ public class DefaultUser implements User {
         if (password == null || password.equals("")) {
             throw new IllegalArgumentException("Password cannot be null or empty.");
         }
-        if (IcatRoles.SUPER_USER.toString().equals(username) || IcatRoles.ADMIN_USER.toString().equals(username)) {
+/*        if (IcatRoles.SUPER_USER.toString().equals(username) || IcatRoles.ADMIN_USER.toString().equals(username)) {
             //ICAT keyword IcatRoles.SUPER_USER, cannot be used to log in this way, 
             //try login(String adminUsername, String adminPassword, String runAsUser)
             throw new SessionException("Cannot login using username " + IcatRoles.SUPER_USER);
@@ -127,7 +127,7 @@ public class DefaultUser implements User {
             //try login(String adminUsername, String adminPassword, String runAsUser)
             throw new SessionException("Cannot login using username " + IcatRoles.ADMIN_USER);
         }
-
+*/
         boolean local = false;
         boolean ldap = false;
         uk.icat3.userdefault.entity.User user = null;
@@ -140,25 +140,25 @@ public class DefaultUser implements User {
             local = true;
             //If user is in local database, they have logged in with their ICAT userId
             if (!user.getPassword().equals(password)) {
-                throw new Exception();
+                log.info("Password match for ["+username+"] not found in local database");
+                local = false;
             }
         } catch (Exception e) {
-            log.fatal("User not found in local database", e);
-            local = false;
+        	log.info("User ["+username+"] not found in local database");
+        	local = false;
         }
         log.info("local: " + local);
 
         try {
-            //if user not found in local database, use ldap
+        	//if user not found in local database, use ldap
             if (!local) {
                 ldap = LoginLdap.ldapAuthenticate(username, password);
                 log.info("ldap: " + ldap);
             }
 
-
             //if all 3 fail, throw exception- user not found
             if ((!local) && (!ldap)) {
-                throw new Exception();
+                throw new SessionException("Username and/or password incorrect");
             } else {
                 sessionId = UUID.randomUUID().toString();
                 log.info("Session id: " + sessionId);
@@ -177,7 +177,7 @@ public class DefaultUser implements User {
                         user = (uk.icat3.userdefault.entity.User) manager.createNamedQuery("User.findByUserId").setParameter("userId", username).getSingleResult();
                     } catch (Exception e) {
                         //if not, need to create a new user and persist to database
-                        log.fatal("New user- create user object", e);
+                        log.fatal("New user- create user object: " + e.getMessage());
                         user = new uk.icat3.userdefault.entity.User();
                         user.setDn(source);
                         user.setUserId(username);
@@ -202,15 +202,16 @@ public class DefaultUser implements User {
 
                 Timestamp loginTime = new Timestamp(new Date().getTime());
                 LoginInterceptor.sendLoginMessage(sessionId, username, loginTime);
-                log.info("Login message has been sent");
             }
             return sessionId;
+        } catch (SessionException se) {
+        	// just rethrow it
+            throw se;
         } catch (Exception e) {
+        	// log the detail then rethrow it as a SessionException
             log.fatal("Error in login", e);
-            return null;
+            throw new SessionException(e.getMessage());
         }
-
-
 
     }
 
@@ -289,7 +290,7 @@ public class DefaultUser implements User {
         uk.icat3.userdefault.entity.User user = null;
 
         //check if trying to log on as super, if super in DB then this is enabled
-        if (IcatRoles.SUPER_USER.toString().equals(runAsUser)) {
+/*        if (IcatRoles.SUPER_USER.toString().equals(runAsUser)) {
             try {
                 user = (uk.icat3.userdefault.entity.User) manager.createNamedQuery("User.findByUserId").setParameter("userId", IcatRoles.SUPER_USER.toString()).getSingleResult();
                 isSuper = true;
@@ -306,7 +307,7 @@ public class DefaultUser implements User {
                 throw new SessionException("Admin user account not set up");
             }
         }
-
+*/
         //check that password is the same, should really have it
         //method protected by Glassfish basic authentication
         /*if(!adminPassword.equals(user.getPassword())){
