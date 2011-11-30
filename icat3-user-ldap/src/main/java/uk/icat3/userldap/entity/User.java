@@ -7,12 +7,13 @@
  * and open the template in the editor.
  */
 
-package uk.icat3.userdefault.entity;
+package uk.icat3.userldap.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,12 +29,12 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-//import uk.icat3.util.IcatRoles;
 
 /**
  *
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "USER_TABLE")
 @NamedQueries( {
@@ -65,7 +66,7 @@ public class User implements Serializable {
     private Date modTime;
             
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId",fetch=FetchType.LAZY)
-    private java.util.Collection <uk.icat3.userdefault.entity.Session> session;
+    private java.util.Collection <Session> session;
        
     @PrePersist
     @PreUpdate

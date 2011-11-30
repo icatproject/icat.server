@@ -8,14 +8,14 @@
  */
 package uk.icat3.userldap;
 
-import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+
 import org.apache.log4j.Logger;
+
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.user.UserManager;
-import uk.icat3.userdefault.entity.User;
 
 /**
  * 

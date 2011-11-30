@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package uk.icat3.userdefault.exception;
+package uk.icat3.userldap.exception;
 
 
 /**

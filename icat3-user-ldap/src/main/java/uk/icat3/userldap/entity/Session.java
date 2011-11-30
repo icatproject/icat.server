@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package uk.icat3.userdefault.entity;
+package uk.icat3.userldap.entity;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -33,6 +33,7 @@ import uk.icat3.exceptions.SessionException;
  *
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "USER_SESSION")
 @NamedQueries( {

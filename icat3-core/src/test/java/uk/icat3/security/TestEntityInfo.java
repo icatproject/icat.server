@@ -143,7 +143,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 	@Test
 	public void getters() throws Exception {
 		testGetters(Investigation.class, 25);
-		testGetters(Dataset.class, 11);
+		testGetters(Dataset.class, 13);
 		testGetters(Keyword.class, 2);
 		testGetters(TopicList.class, 3);
 		testGetters(Investigator.class, 4);
@@ -168,7 +168,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 	@Test
 	public void setters() throws Exception {
 		testSetters(Investigation.class, 16);
-		testSetters(Dataset.class, 7);
+		testSetters(Dataset.class, 9);
 		testSetters(Keyword.class, 0);
 		testSetters(TopicList.class, 1);
 		testSetters(Investigator.class, 1);

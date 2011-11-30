@@ -1,12 +1,3 @@
-/*
- * ProxyServers.java
- *
- * Created on 19 June 2006, 15:50
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
 package uk.icat3.userldap.entity;
 
 import java.io.Serializable;
@@ -28,6 +19,7 @@ import javax.persistence.TemporalType;
  *
  * @author gjd37
  */
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "MYPROXY_SERVERS")
 @NamedQueries( {

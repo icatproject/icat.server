@@ -6,24 +6,26 @@
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-package uk.icat3.userdefault.facility;
+package uk.icat3.userldap.facility;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.UUID;
+
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+
 import org.apache.log4j.Logger;
-import uk.icat3.exceptions.SessionException;
+
 import uk.icat3.exceptions.NoSuchUserException;
-import uk.icat3.user.User;
+import uk.icat3.exceptions.SessionException;
+import uk.icat3.userldap.entity.User;
 import uk.icat3.user.UserDetails;
-import uk.icat3.userdefault.entity.*;
-//import uk.icat3.util.IcatRoles;
-import uk.icat3.userdefault.message.LoginInterceptor;
-import uk.icat3.userdefault.message.LoginLdap;
+import uk.icat3.userldap.entity.Session;
+import uk.icat3.userldap.message.LoginInterceptor;
+import uk.icat3.userldap.message.LoginLdap;
 
 /**
  * This class uses a local DB connection through an entitymanager with three tables for the session
@@ -34,20 +36,20 @@ import uk.icat3.userdefault.message.LoginLdap;
  *
  * @author gjd37
  */
-public class DefaultUser implements User {
+public class LdapUser implements uk.icat3.user.User {
 
     //entity manager for the session database.
     private EntityManager manager;
     // Global class logger
-    static Logger log = Logger.getLogger(DefaultUser.class);
+    static Logger log = Logger.getLogger(LdapUser.class);
 
     /** Creates a new instance of DefaultUser */
-    public DefaultUser(EntityManager manager) {
+    public LdapUser(EntityManager manager) {
         this.manager = manager;
     }
 
     /** Creates a new instance of DefaultUser */
-    public DefaultUser() {
+    public LdapUser() {
     }
 
     public String getUserIdFromSessionId(String sessionId) throws SessionException {
@@ -58,7 +60,7 @@ public class DefaultUser implements User {
 
         try {
             //find the user by session id, throws NoResultException if session not found
-            uk.icat3.userdefault.entity.Session session = (uk.icat3.userdefault.entity.Session) manager.createNamedQuery("Session.findByUserSessionId").setParameter("userSessionId", sessionId).getSingleResult();
+            Session session = (Session) manager.createNamedQuery("Session.findByUserSessionId").setParameter("userSessionId", sessionId).getSingleResult();
             log.info("Found session by sessionId");
             String runAs = session.getRunAs();
             String userId = runAs;
@@ -130,13 +132,13 @@ public class DefaultUser implements User {
 */
         boolean local = false;
         boolean ldap = false;
-        uk.icat3.userdefault.entity.User user = null;
+       User user = null;
         String sessionId = null;
         String source = null;
 
         try {
             // local
-            user = (uk.icat3.userdefault.entity.User) manager.createNamedQuery("User.findByUserId").setParameter("userId", username).getSingleResult();
+            user = (User) manager.createNamedQuery("User.findByUserId").setParameter("userId", username).getSingleResult();
             local = true;
             //If user is in local database, they have logged in with their ICAT userId
             if (!user.getPassword().equals(password)) {
@@ -174,11 +176,11 @@ public class DefaultUser implements User {
                 if (user == null) {
                     try {
                         //check whether user has logged in using fedId/email before
-                        user = (uk.icat3.userdefault.entity.User) manager.createNamedQuery("User.findByUserId").setParameter("userId", username).getSingleResult();
+                        user = (User) manager.createNamedQuery("User.findByUserId").setParameter("userId", username).getSingleResult();
                     } catch (Exception e) {
                         //if not, need to create a new user and persist to database
                         log.fatal("New user- create user object: " + e.getMessage());
-                        user = new uk.icat3.userdefault.entity.User();
+                        user = new User();
                         user.setDn(source);
                         user.setUserId(username);
                         manager.persist(user);
@@ -186,7 +188,7 @@ public class DefaultUser implements User {
                 }
 
                 //create a session to put in DB
-                uk.icat3.userdefault.entity.Session session = new uk.icat3.userdefault.entity.Session();
+               Session session = new Session();
                 Calendar cal = GregorianCalendar.getInstance();
                 cal.add(GregorianCalendar.HOUR, 2); //add 2 hours
                 session.setExpireDateTime(cal.getTime());
@@ -224,7 +226,7 @@ public class DefaultUser implements User {
     public boolean logout(String sessionId) {
         log.trace("logout(" + sessionId + ")");
         try {
-            uk.icat3.userdefault.entity.Session session = (uk.icat3.userdefault.entity.Session) manager.createNamedQuery("Session.findByUserSessionId").setParameter("userSessionId", sessionId).getSingleResult();
+            Session session = (Session) manager.createNamedQuery("Session.findByUserSessionId").setParameter("userSessionId", sessionId).getSingleResult();
             manager.remove(session);
             return true;
         } catch (NoResultException ex) {
@@ -287,7 +289,7 @@ public class DefaultUser implements User {
         boolean isSuper = false;
 
         //find admin user first
-        uk.icat3.userdefault.entity.User user = null;
+        User user = null;
 
         //check if trying to log on as super, if super in DB then this is enabled
 /*        if (IcatRoles.SUPER_USER.toString().equals(runAsUser)) {
@@ -319,7 +321,7 @@ public class DefaultUser implements User {
         String sid = UUID.randomUUID().toString();
 
         //create a session to put in DB
-        uk.icat3.userdefault.entity.Session session = new uk.icat3.userdefault.entity.Session();
+        Session session = new Session();
         Calendar cal = GregorianCalendar.getInstance();
         cal.add(GregorianCalendar.HOUR, 2); //add 2 hours
         session.setExpireDateTime(cal.getTime());

@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package uk.icat3.userdefault.message;
+package uk.icat3.userldap.message;
 
 /**
  *
