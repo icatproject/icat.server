@@ -28,7 +28,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import uk.icat3.util.IcatRoles;
+//import uk.icat3.util.IcatRoles;
 
 /**
  *
@@ -169,7 +169,7 @@ public class User implements Serializable {
         this.password = password;
     } 
     
-    public boolean isAdmin(){
+/*    public boolean isAdmin(){
         if(getUserId().equals(IcatRoles.ADMIN_USER.toString())) return true;
         else return false;                
     }
@@ -177,5 +177,6 @@ public class User implements Serializable {
     public boolean isSuper(){
         if(getUserId().equals(IcatRoles.SUPER_USER.toString())) return true;
         else return false;                 
-    }           
+    }
+*/           
 }

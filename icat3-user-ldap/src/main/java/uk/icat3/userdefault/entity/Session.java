@@ -164,14 +164,14 @@ public class Session implements Serializable {
         return  "uk.icat3.userdefault.entity.Session[id=" + id + "]";
     }
     
-    public boolean isAdmin(){
+/*    public boolean isAdmin(){
         return getUserId().isAdmin();        
     }
     
     public boolean isSuper(){
         return getUserId().isSuper();
     }
-    
+*/    
     public String getRunAs() {
         return runAs;
     }
