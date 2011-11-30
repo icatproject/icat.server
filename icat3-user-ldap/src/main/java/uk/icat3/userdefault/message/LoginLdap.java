@@ -42,10 +42,10 @@ public class LoginLdap {
             log.info("Authentication successful");
             success = true;
         } catch (AuthenticationException authEx) {
-            log.fatal("Authentication exception thrown", authEx);
+            log.fatal("Authentication exception thrown:"+authEx.getMessage());
             success = false;
         } catch (NamingException nameEx) {
-            log.fatal("Naming exception thrown", nameEx);
+            log.fatal("Naming exception thrown"+nameEx.getMessage());
             success = false;
         }
         return success;
