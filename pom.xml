@@ -26,13 +26,12 @@
 		<module>icat3-data</module>
 		<module>icat3-jaxb</module>
 		<module>icat3-logging</module>
-<!-- 		<module>icat3-user-default</module> -->
 		<module>icat3-user-ldap</module>
 		<module>icat3-user-ansto</module>
 		<module>icat3-exposed</module>
 		<module>icat3-download</module>
 		<module>icat3-reporting</module>
-		 <module>icat3-client</module> 
+<!-- 		 <module>icat3-client</module>  -->
 		<!-- <module>icat3-cmd-util</module> -->
 		<module>icat3-ear</module>
 		<!-- <module>icat3-api-examples</module> -->

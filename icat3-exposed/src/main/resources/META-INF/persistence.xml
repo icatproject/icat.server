@@ -1,117 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
-  <persistence-unit name="icat3-exposed" transaction-type="JTA">
-    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-    <jta-data-source>jdbc/icat3</jta-data-source>
-    <class>uk.icat3.entity.Publication</class>
-    <class>uk.icat3.entity.Facility</class>
-    <class>uk.icat3.entity.Sample</class>
-    <class>uk.icat3.entity.Investigation</class>
-    <class>uk.icat3.entity.Dataset</class>
-    <class>uk.icat3.entity.InvestigationType</class>
-    <class>uk.icat3.entity.DatafileFormat</class>
-    <class>uk.icat3.entity.Shift</class>
-    <class>uk.icat3.entity.Keyword</class>
-    <class>uk.icat3.entity.DatasetType</class>
-    <class>uk.icat3.entity.FacilityCycle</class>
-    <class>uk.icat3.entity.DatasetStatus</class>
-    <class>uk.icat3.entity.StudyInvestigation</class>
-    <class>uk.icat3.entity.DatasetParameter</class>
-    <class>uk.icat3.entity.Topic</class>
-    <class>uk.icat3.entity.Instrument</class>
-    <class>uk.icat3.entity.RelatedDatafiles</class>
-    <class>uk.icat3.entity.StudyStatus</class>
-    <class>uk.icat3.entity.SampleParameter</class>
-    <class>uk.icat3.entity.Datafile</class>
-    <class>uk.icat3.entity.Parameter</class>
-    <class>uk.icat3.entity.SoftwareVersion</class>
-    <class>uk.icat3.entity.FacilityUser</class>
-    <class>uk.icat3.entity.Investigator</class>
-    <class>uk.icat3.entity.Study</class>
-    <class>uk.icat3.entity.DatafileParameter</class>
-    <class>uk.icat3.entity.IcatAuthorisation</class>
-    <class>uk.icat3.entity.IcatRole</class>
-    <class>uk.icat3.entity.TopicList</class>
-    <class>uk.icat3.entity.FacilityInstrumentScientist</class>
-    <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
-    <class>uk.icat3.entity.UserGroup</class>
-    <class>uk.icat3.entity.Rule</class>
-    <exclude-unlisted-classes>true</exclude-unlisted-classes>
-    <properties>
-      <!-- Prints out SQL generated from EJBQL -->
-      <!-- No caching of entity data -->
-      <property name="eclipselink.target-server" value="SunAS9"/>
-      <property name="eclipselink.logging.level" value="INFO"/>
-      <property name="eclipselink.cache.shared.default" value="false"/>
-      <property name="eclipselink.cache.type.default" value="NONE"/>
-      <property name="eclipselink.cache.size.default" value="0"/>
-    </properties>
-  </persistence-unit>
-  <persistence-unit name="icat3-exposed-user" transaction-type="JTA">
-    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-    <jta-data-source>jdbc/icat3-user</jta-data-source>
-    <class>uk.icat3.userdefault.entity.ProxyServers</class>
-    <class>uk.icat3.userdefault.entity.User</class>
-    <class>uk.icat3.userdefault.entity.Session</class>
-    <exclude-unlisted-classes>true</exclude-unlisted-classes>
-    <properties>
-      <!-- Prints out SQL generated from EJBQL -->
-      <!-- No caching of entity data -->
-      <property name="eclipselink.target-server" value="SunAS9"/>
-      <property name="eclipselink.cache.shared.default" value="false"/>
-      <property name="eclipselink.cache.type.default" value="NONE"/>
-      <property name="eclipselink.cache.size.default" value="0"/>
-      <property name="eclipselink.logging.level" value="INFO"/>
-      <property name="eclipselink.ddl-generation" value="create-tables"/>
-      <property name="eclipselink.target-database" value="Oracle"/>
-    </properties>
-  </persistence-unit>
-  <persistence-unit name="icat3-scratch-testing-PU" transaction-type="RESOURCE_LOCAL">
-    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-    <class>uk.icat3.entity.Publication</class>
-    <class>uk.icat3.entity.Facility</class>
-    <class>uk.icat3.entity.Sample</class>
-    <class>uk.icat3.entity.Investigation</class>
-    <class>uk.icat3.entity.Dataset</class>
-    <class>uk.icat3.entity.InvestigationType</class>
-    <class>uk.icat3.entity.DatafileFormat</class>
-    <class>uk.icat3.entity.Shift</class>
-    <class>uk.icat3.entity.Keyword</class>
-    <class>uk.icat3.entity.DatasetType</class>
-    <class>uk.icat3.entity.FacilityCycle</class>
-    <class>uk.icat3.entity.DatasetStatus</class>
-    <class>uk.icat3.entity.StudyInvestigation</class>
-    <class>uk.icat3.entity.DatasetParameter</class>
-    <class>uk.icat3.entity.Topic</class>
-    <class>uk.icat3.entity.Instrument</class>
-    <class>uk.icat3.entity.RelatedDatafiles</class>
-    <class>uk.icat3.entity.StudyStatus</class>
-    <class>uk.icat3.entity.SampleParameter</class>
-    <class>uk.icat3.entity.Datafile</class>
-    <class>uk.icat3.entity.Parameter</class>
-    <class>uk.icat3.entity.SoftwareVersion</class>
-    <class>uk.icat3.entity.FacilityUser</class>
-    <class>uk.icat3.entity.Investigator</class>
-    <class>uk.icat3.entity.Study</class>
-    <class>uk.icat3.entity.DatafileParameter</class>
-    <class>uk.icat3.entity.IcatAuthorisation</class>
-    <class>uk.icat3.entity.IcatRole</class>
-    <class>uk.icat3.entity.TopicList</class>
-    <class>uk.icat3.entity.FacilityInstrumentScientist</class>
-    <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
-    <exclude-unlisted-classes>false</exclude-unlisted-classes>
-    <properties>
-      <!-- Prints out SQL generated from EJBQL -->
-      <property name="eclipselink.logging.level" value="SEVERE"/>
-      <!-- No caching of entity data -->
-      <property name="eclipselink.cache.shared.default" value="false"/>
-      <property name="eclipselink.cache.type.default" value="NONE"/>
-      <property name="eclipselink.cache.size.default" value="0"/>
-      <property name="eclipselink.query-results-cache" value="false"/>
-      <property name="eclipselink.jdbc.url" value="jdbc:oracle:thin:@//localhost:1521/XE"/>
-      <property name="eclipselink.jdbc.password" value="password"/>
-      <property name="eclipselink.jdbc.driver" value="oracle.jdbc.OracleDriver"/>
-      <property name="eclipselink.jdbc.user" value="testicat"/>
-    </properties>
-  </persistence-unit>
+<persistence version="1.0"
+	xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+
+	<persistence-unit name="icat3-exposed"
+		transaction-type="JTA">
+		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+		<jta-data-source>jdbc/icat3</jta-data-source>
+		<class>uk.icat3.entity.Publication</class>
+		<class>uk.icat3.entity.Facility</class>
+		<class>uk.icat3.entity.Sample</class>
+		<class>uk.icat3.entity.Investigation</class>
+		<class>uk.icat3.entity.Dataset</class>
+		<class>uk.icat3.entity.InvestigationType</class>
+		<class>uk.icat3.entity.DatafileFormat</class>
+		<class>uk.icat3.entity.Shift</class>
+		<class>uk.icat3.entity.Keyword</class>
+		<class>uk.icat3.entity.DatasetType</class>
+		<class>uk.icat3.entity.FacilityCycle</class>
+		<class>uk.icat3.entity.DatasetStatus</class>
+		<class>uk.icat3.entity.StudyInvestigation</class>
+		<class>uk.icat3.entity.DatasetParameter</class>
+		<class>uk.icat3.entity.Topic</class>
+		<class>uk.icat3.entity.Instrument</class>
+		<class>uk.icat3.entity.RelatedDatafiles</class>
+		<class>uk.icat3.entity.StudyStatus</class>
+		<class>uk.icat3.entity.SampleParameter</class>
+		<class>uk.icat3.entity.Datafile</class>
+		<class>uk.icat3.entity.Parameter</class>
+		<class>uk.icat3.entity.SoftwareVersion</class>
+		<class>uk.icat3.entity.FacilityUser</class>
+		<class>uk.icat3.entity.Investigator</class>
+		<class>uk.icat3.entity.Study</class>
+		<class>uk.icat3.entity.DatafileParameter</class>
+		<class>uk.icat3.entity.IcatAuthorisation</class>
+		<class>uk.icat3.entity.IcatRole</class>
+		<class>uk.icat3.entity.TopicList</class>
+		<class>uk.icat3.entity.FacilityInstrumentScientist</class>
+		<class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
+		<class>uk.icat3.entity.UserGroup</class>
+		<class>uk.icat3.entity.Rule</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<!-- Prints out SQL generated from EJBQL -->
+			<!-- No caching of entity data -->
+			<property name="eclipselink.target-server" value="SunAS9" />
+			<property name="eclipselink.logging.level" value="INFO" />
+			<property name="eclipselink.cache.shared.default" value="false" />
+			<property name="eclipselink.cache.type.default" value="NONE" />
+			<property name="eclipselink.cache.size.default" value="0" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="icat3-exposed-user"
+		transaction-type="JTA">
+		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+		<jta-data-source>jdbc/icat3-user</jta-data-source>
+		<class>uk.icat3.useransto.entity.UserE</class>
+		<class>uk.icat3.useransto.entity.Session</class>
+		<class>uk.icat3.userldap.entity.LdapUserE</class>
+		<class>uk.icat3.userldap.entity.LdapSession</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<!-- Prints out SQL generated from EJBQL -->
+			<!-- No caching of entity data -->
+			<property name="eclipselink.target-server" value="SunAS9" />
+			<property name="eclipselink.cache.shared.default" value="false" />
+			<property name="eclipselink.cache.type.default" value="NONE" />
+			<property name="eclipselink.cache.size.default" value="0" />
+			<property name="eclipselink.logging.level" value="INFO" />
+			<property name="eclipselink.ddl-generation" value="create-tables" />
+			<property name="eclipselink.target-database" value="Oracle" />
+		</properties>
+	</persistence-unit>
+
 </persistence>

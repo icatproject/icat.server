@@ -15,6 +15,7 @@ import java.io.Serializable;
  *
  * @author df01
  */
+@SuppressWarnings("serial")
 public class UserDetails implements Serializable {
     
     private String title;    

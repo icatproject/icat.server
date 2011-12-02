@@ -1,4 +1,4 @@
-package uk.icat3.useransto.entity;
+package uk.icat3.userldap.entity;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -15,9 +15,9 @@ import uk.icat3.exceptions.SessionException;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "USER_SESSION_ANSTO")
-@NamedQuery(name = "AnstoSession.findByUserSessionId", query = "SELECT s FROM Session s WHERE s.userSessionId = :userSessionId")
-public class Session implements Serializable {
+@Table(name = "USER_SESSION")
+@NamedQuery(name = "LdapSession.findByUserSessionId", query = "SELECT s FROM LdapSession s WHERE s.userSessionId = :userSessionId")
+public class LdapSession implements Serializable {
 
 	@Id
 	@Column(name = "USER_SESSION_ID")
@@ -31,15 +31,15 @@ public class Session implements Serializable {
 	private String runAs;
 
 	// Needed by JPA
-	public Session() {
+	public LdapSession() {
 	}
 
 	public void checkValid() throws SessionException {
 		if (expireDateTime.before(new Date()))
-			throw new SessionException("Session id:" + getUserSessionId() + " has expired");
+			throw new SessionException("LdapSession id:" + getUserSessionId() + " has expired");
 	}
 
-	public Session(String userSessionId, String runAs, Date expireDateTime) {
+	public LdapSession(String userSessionId, String runAs, Date expireDateTime) {
 		this.userSessionId = userSessionId;
 		this.runAs = runAs;
 		this.expireDateTime = expireDateTime;

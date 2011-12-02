@@ -41,7 +41,7 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal, User
 
 	public static final String ADMIN = "root";
 
-	static Logger log = Logger.getLogger(UserSessionBean.class);
+	private static final Logger log = Logger.getLogger(UserSessionBean.class);
 
 	@PersistenceContext(unitName = "icat3-exposed-user")
 	private EntityManager managerUser;
@@ -51,15 +51,14 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal, User
 	@SuppressWarnings("unused")
 	@PostConstruct
 	private void getAuthClassName() {
+		File f = new File("icat.properties");
 		try {
 			Properties props = new Properties();
-			props.load(new FileInputStream(new File("icat.properties")));
-
+			props.load(new FileInputStream(f));
 			authClassName = props.getProperty("auth.classname");
-
 			log.info("Setting auth.classname as: " + authClassName);
 		} catch (Exception e) {
-			log.fatal("Problem with icat.properties " + e.getMessage());
+			log.fatal("Problem with " + f.getAbsolutePath() + "  " + e.getMessage());
 		}
 	}
 

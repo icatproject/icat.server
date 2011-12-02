@@ -108,7 +108,7 @@ public class TestUser {
 	 * setUp(); uk.icat3.userdefault.entity.Session se = new
 	 * uk.icat3.userdefault.entity.Session(); se.setCredential("dd");
 	 * 
-	 * User user = em.find(User.class, 1L); se.setUserId(user);
+	 * LdapUserE user = em.find(LdapUserE.class, 1L); se.setUserId(user);
 	 * se.setUserSessionId("df"); se.setExpireDateTime(new Date());
 	 * se.setCredential(
 	 * "-----BEGIN CERTIFICATE-----MIIB7TCCAZegAwIBAgICIhswDQYJKoZIhvcNAQEEBQAwdjELMAkGA1UEBhMCVUsxETAPBgNVBAoTCGVTY2llbmNlMQ0wCwYDVQQLEwRDTFJDMQswCQYDVQQHEwJETDEYMBYGA1UEAxMPZ2xlbiBkcmlua3dhdGVyMQ4wDAYDVQQDEwVwcm94eTEOMAwGA1UEAxMFcHJveHkwHhcNMDcwMzIwMTEwMTA3WhcNMDcwMzIwMTMwNjA3WjCBhjELMAkGA1UEBhMCVUsxETAPBgNVBAoTCGVTY2llbmNlMQ0wCwYDVQQLEwRDTFJDMQswCQYDVQQHEwJETDEYMBYGA1UEAxMPZ2xlbiBkcmlua3dhdGVyMQ4wDAYDVQQDEwVwcm94eTEOMAwGA1UEAxMFcHJveHkxDjAMBgNVBAMTBXByb3h5MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKd9NUYTkWTvVRyj0CPQ3netMoDO94Y4+RakiN7sn0st6fmZxG4Tn6/MStDb+8S4COFiUCxRLEcHkc8PYLjDbX8CAwEAATANBgkqhkiG9w0BAQQFAANBAJwE93hderi2+LlY/wdpEzwLUUumv+YLkq8/cY2Tz3NY/PwxuEuHnFulK836PDEiN2THjTnQ4BeNZwYlhyf/Lag=-----END CERTIFICATE----------BEGIN RSA PRIVATE KEY-----MIIBOQIBAAJBAKd9NUYTkWTvVRyj0CPQ3netMoDO94Y4+RakiN7sn0st6fmZxG4Tn6/MStDb+8S4COFiUCxRLEcHkc8PYLjDbX8CAwEAAQJANmbl8fATLszKQXY3+hoy2H6KQ+p13cQNrDwfNQF4sCsgI9tP2xPj8vxvgV5HZOuCoHoaLO18l6y7dzv1TUus0QIhANNXpA6m3Lg86SZEAo3f05k21SjpPErCoh/SqMK9WMPJAiEAyuFeO4cqmd6pJZxgrYiwcNIlBfxDiTguzxSdyVhg+wcCIBEwJYWTiIvrWELmcRa8x2bEkN186oxh+/F+nn8ICzoRAiAeeg6C2MJAjR9RxBUN3IvM1vSy2nt2wJbfitRNK9advwIgeSQorhb0TXXFdAKDR20TeoHyPIPh/urjrfi1DUCmdN8=-----END RSA PRIVATE KEY----------BEGIN CERTIFICATE-----"
