@@ -4,13 +4,13 @@ package uk.icat3.security.parser;
 public class Token {
 
 	enum Type {
-		 STRING, NAME, OPENPAREN, CLOSEPAREN, BRA, KET, COMPOP, ENTSEP, INTEGER, AND, OR, NOT, REAL, PARAMETER, DISTINCT, ORDER, BY, ASC, DESC, COMMA, IN, BETWEEN, TIMESTAMP, INCLUDE;
+		 STRING, NAME, OPENPAREN, CLOSEPAREN, BRA, KET, COMPOP, ENTSEP, INTEGER, AND, OR, NOT, REAL, PARAMETER, DISTINCT, ORDER, BY, ASC, DESC, COMMA, IN, BETWEEN, TIMESTAMP, INCLUDE, MIN, MAX, AVG, COUNT, SUM;
 		 
 		 public String toString() {
 			return Tokenizer.getTypeToPrint(this);
 		 }
 	};
-
+	
 	private Type type;
 
 	private String value;

@@ -20,6 +20,7 @@ public class Tokenizer {
 	private final static Set<String> boolops = new HashSet<String>(Arrays.asList("AND", "OR", "NOT"));
 	private final static Set<String> keyWords = new HashSet<String>(Arrays.asList("DISTINCT", "ORDER", "BY", "ASC",
 			"DESC", "IN", "BETWEEN", "INCLUDE"));
+	private final static Set<String> functions = new HashSet<String>(Arrays.asList("MIN", "MAX", "AVG", "COUNT", "SUM"));
 
 	public static List<Token> getTokens(String input) throws LexerException {
 		List<Token> tokens = new ArrayList<Token>();
@@ -119,7 +120,7 @@ public class Tokenizer {
 				if (!Character.isLetterOrDigit(ch) && ch != '_' && ch != '.') {
 					String name = input.substring(start, i);
 					String nameUp = name.toUpperCase();
-					if (boolops.contains(nameUp) || keyWords.contains(nameUp)) {
+					if (boolops.contains(nameUp) || keyWords.contains(nameUp) || functions.contains(nameUp)) {
 						tokens.add(new Token(Token.Type.valueOf(nameUp), nameUp));
 					} else if (nameUp.equals("LIKE")) {
 						tokens.add(new Token(Token.Type.COMPOP, "LIKE"));

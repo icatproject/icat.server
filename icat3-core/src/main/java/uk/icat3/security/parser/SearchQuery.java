@@ -1,6 +1,7 @@
 package uk.icat3.security.parser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,8 +22,10 @@ import uk.icat3.security.EntityInfoHandler;
 
 public class SearchQuery {
 
-	// Query ::= [ "DISTINCT" ] name Include Order ( "[" SearchCondition "]" )? ( ("<->")? name ( "["
-	// SearchCondition "]") ? )*
+	// Query ::= ( [ [num] "," [num] ] [ "DISTINCT" ] name Include Order ) |
+	// ( "MIN" | "MAX" | "AVG" | "COUNT" | "SUM" "(" name ")" )
+	// ( "[" SearchCondition "]" )? ( ("<->")? name ( "[" SearchCondition "]") ?
+	// )*
 
 	public class TableAndSearchCondition {
 
@@ -46,17 +49,57 @@ public class SearchQuery {
 
 	private Include include;
 
-	public SearchQuery(Input input) throws ParserException, BadParameterException {
-		Token t = input.consume(Token.Type.NAME, Token.Type.DISTINCT);
-		if (t.getType() == Token.Type.DISTINCT) {
-			this.distinct = true;
-			this.result = input.consume(Token.Type.NAME);
-		} else {
-			this.result = t;
-		}
+	private Integer offset;
 
-		this.order = new Order(input);
-		this.include = new Include(input);
+	private Integer number;
+
+	private String aggFunction;
+
+	public SearchQuery(Input input) throws ParserException, BadParameterException {
+
+		Token t = input.consume(Token.Type.NAME, Token.Type.DISTINCT, Token.Type.INTEGER, Token.Type.COMMA,
+				Token.Type.COUNT, Token.Type.MAX, Token.Type.MIN, Token.Type.AVG, Token.Type.SUM);
+		if (t.getType() == Token.Type.COUNT || t.getType() == Token.Type.MAX || t.getType() == Token.Type.MIN
+				|| t.getType() == Token.Type.AVG || t.getType() == Token.Type.SUM) {
+			aggFunction = t.getValue();
+			input.consume(Token.Type.OPENPAREN);
+			this.result = input.consume(Token.Type.NAME);
+			input.consume(Token.Type.CLOSEPAREN);
+		} else {
+			if (t.getType() == Token.Type.INTEGER) {
+				this.offset = Integer.parseInt(t.getValue());
+				input.consume(Token.Type.COMMA);
+				t = input.consume(Token.Type.NAME, Token.Type.DISTINCT, Token.Type.INTEGER);
+				if (t.getType() == Token.Type.INTEGER) {
+					this.number = Integer.parseInt(t.getValue());
+					t = input.consume(Token.Type.NAME, Token.Type.DISTINCT);
+				}
+			} else if (t.getType() == Token.Type.COMMA) {
+				t = input.consume(Token.Type.NAME, Token.Type.DISTINCT, Token.Type.INTEGER);
+				if (t.getType() == Token.Type.INTEGER) {
+					this.number = Integer.parseInt(t.getValue());
+					t = input.consume(Token.Type.NAME, Token.Type.DISTINCT);
+				}
+			}
+
+			if (t.getType() == Token.Type.DISTINCT) {
+				this.distinct = true;
+				this.result = input.consume(Token.Type.NAME);
+			} else {
+				this.result = t;
+			}
+
+			t = input.peek(0);
+			if (t != null) {
+				if (t.getType() == Token.Type.ORDER) {
+					this.order = new Order(input);
+					this.include = new Include(input);
+				} else {
+					this.include = new Include(input);
+					this.order = new Order(input);
+				}
+			}
+		}
 
 		t = input.peek(0);
 		if (t != null) {
@@ -100,7 +143,8 @@ public class SearchQuery {
 				.setParameter("what", beanName);
 
 		List<Rule> rules = query.getResultList();
-		SearchQuery.logger.debug("Got " + rules.size() + " authz queries for search by " + userId + " to a " + beanName);
+		SearchQuery.logger
+				.debug("Got " + rules.size() + " authz queries for search by " + userId + " to a " + beanName);
 		StringBuilder restriction = new StringBuilder();
 		boolean first = true;
 		for (Rule r : rules) {
@@ -141,9 +185,11 @@ public class SearchQuery {
 
 	private StringBuilder getOrderBy() throws BadParameterException {
 		StringBuilder sb = new StringBuilder();
-		StringBuilder orderBy = this.order.getOrderBy(this.getFirstEntity());
-		if (orderBy != null) {
-			sb.append("ORDER BY " + orderBy);
+		if (this.order != null) {
+			StringBuilder orderBy = this.order.getOrderBy(this.getFirstEntity());
+			if (orderBy != null) {
+				sb.append("ORDER BY " + orderBy);
+			}
 		}
 		return sb;
 	}
@@ -171,8 +217,13 @@ public class SearchQuery {
 			beanName = resultName;
 			resultName = resultName + "$";
 		}
-		sb.append(resultName + " FROM " + beanName + " AS " + beanName + "$ " + step.join());
 
+		if (aggFunction == null) {
+			sb.append(resultName);
+		} else {
+			sb.append(aggFunction + "(" + resultName + ")");
+		}
+		sb.append(" FROM " + beanName + " AS " + beanName + "$ " + step.join());
 		return sb;
 	}
 
@@ -210,10 +261,14 @@ public class SearchQuery {
 			sb.append("DISTINCT ");
 		}
 		sb.append(this.result);
-		
-		sb.append(this.include);
 
-		sb.append(this.order);
+		if (this.include != null) {
+			sb.append(this.include);
+		}
+
+		if (this.order != null) {
+			sb.append(this.order);
+		}
 
 		if (this.searchCondition != null) {
 			sb.append('[');
@@ -232,7 +287,19 @@ public class SearchQuery {
 	}
 
 	public Set<Class<? extends EntityBaseBean>> getIncludes() throws BadParameterException {
-		return this.include.getBeans();
+		if (this.include != null) {
+			return this.include.getBeans();
+		} else {
+			return Collections.emptySet();
+		}
+	}
+
+	public Integer getOffset() {
+		return this.offset;
+	}
+
+	public Integer getNumber() {
+		return this.number;
 	}
 
 }

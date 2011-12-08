@@ -68,6 +68,16 @@ public class Search {
 			}
 			jpqlQuery.setParameter("ts" + m.group(1), d);
 		}
+		
+		Integer offset = q.getOffset();
+		if (offset != null) {
+			jpqlQuery.setFirstResult(offset);
+		}
+		Integer number = q.getNumber();
+		if (number != null) {
+			jpqlQuery.setMaxResults(number);
+		}
+		
 
 		List<?> result = jpqlQuery.getResultList();
 
