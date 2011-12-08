@@ -12,60 +12,24 @@
 	<packaging>jar</packaging>
 	<name>icat3-client</name>
 
-	<dependencies>
-		
-		<dependency>
-			<groupId>org.apache.ws.commons.axiom</groupId>
-			<artifactId>axiom-api</artifactId>
-			<version>1.2.12</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ws.commons.axiom</groupId>
-			<artifactId>axiom-impl</artifactId>
-			<version>1.2.12</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.axis2</groupId>
-			<artifactId>axis2</artifactId>
-			<version>1.6.0</version>
-		</dependency>
-		<dependency>
-			<groupId>axis</groupId>
-			<artifactId>axis</artifactId>
-			<version>1.4</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.xmlbeans</groupId>
-			<artifactId>xmlbeans</artifactId>
-			<version>2.4.0</version>
-		</dependency>
-
-	</dependencies>
-
 	<build>
 		<plugins>
-
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>axistools-maven-plugin</artifactId>
-				<version>1.4</version>
-				<configuration>
-					<urls>
-						<url>${wsdl}</url>
-					</urls>
-					<!-- <packageSpace>uk.icat3.client</packageSpace> -->
-					<!-- <testCases>true</testCases> <serverSide>true</serverSide> -->
-					<subPackageByFileName>false</subPackageByFileName>
-				</configuration>
+				<groupId>org.jvnet.jax-ws-commons</groupId>
+				<artifactId>jaxws-maven-plugin</artifactId>
+				<version>2.1</version>
 				<executions>
 					<execution>
 						<goals>
-							<goal>wsdl2java</goal>
+							<goal>wsimport</goal>
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<wsdlUrls>
+						<wsdlUrl>http://localhost:8080/ICATService/ICAT?wsdl</wsdlUrl>
+					</wsdlUrls>
+				</configuration>
 			</plugin>
 
 			<plugin>
@@ -87,48 +51,7 @@
 				</executions>
 			</plugin>
 
-
 		</plugins>
-
-
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											properties-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0-alpha-1,)
-										</versionRange>
-										<goals>
-											<goal>
-												read-project-properties
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 
 </project>
