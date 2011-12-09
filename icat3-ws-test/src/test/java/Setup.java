@@ -1,9 +1,11 @@
-import java.io.Console;
+import static org.junit.Assert.assertTrue;
+
 import java.net.URL;
 import java.util.List;
 
 import javax.xml.namespace.QName;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import uk.icat3.client.DatafileFormat;
@@ -18,18 +20,18 @@ import uk.icat3.client.ObjectAlreadyExistsException_Exception;
 import uk.icat3.client.Parameter;
 
 public class Setup {
-	
-	@Test
-	public void t1() {};
 
-	private static enum Action {
-		AUTHZ, CLEAR, CREATE;
-	}
+	@Test
+	public void t1() {
+		assertTrue(false);
+	};
+
 
 	private static ICAT icatEP;
 	private static String sessionId;
 
-	private static void clear() throws Exception {
+	@Test
+	public  void clear() throws Exception {
 		List<Object> lo = Setup.icatEP.search(Setup.sessionId, "Investigation");
 		for (Object o : lo) {
 			System.out.println("Deleting " + o);
@@ -67,7 +69,8 @@ public class Setup {
 		}
 	}
 
-	private static void create() throws Exception {
+	@Test
+	public void create() throws Exception {
 		String fac = "CLF";
 		Setup.createFacility(fac, 90L);
 
@@ -95,7 +98,7 @@ public class Setup {
 		Setup.createInvestigation(fac, "112013", "Inv", "experiment");
 		Setup.createInvestigation(fac, "102030", "Inv", "experiment");
 		Setup.createInvestigation(fac, "112010", "Inv", "experiment");
-		
+
 		Setup.createDatafileFormat("png", "binary");
 		Setup.createDatafileFormat("bmp", "binary");
 		Setup.createDatafileFormat("pcx", "binary");
@@ -113,20 +116,6 @@ public class Setup {
 
 	}
 
-	private static void createDatafileFormat(String name, String formatType) throws Exception {
-		DatafileFormatPK dffpk = new DatafileFormatPK();
-		dffpk.setName(name);
-		dffpk.setVersion("1");
-		DatafileFormat dff = new DatafileFormat();
-		dff.setDatafileFormatPK(dffpk);
-		dff.setFormatType(formatType);
-		try {
-			Setup.icatEP.create(Setup.sessionId, dff);
-		} catch (ObjectAlreadyExistsException_Exception e) {
-			System.out.println(e.getMessage());
-		}
-
-	}
 
 	private static void createDatasetType(String name) throws Exception {
 		DatasetType dst = new DatasetType();
@@ -173,81 +162,27 @@ public class Setup {
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
+	@BeforeClass
+	public static void setup() throws Exception {
 
-		if (args.length == 0) {
-			abort("You must specify authz, clear or create");
-		}
-
-		Action action = null;
-		if (args[0].equals("authz")) {
-			action = Action.AUTHZ;
-		} else if (args[0].equals("clear")) {
-			action = Action.CLEAR;
-		} else if (args[0].equals("create")) {
-			action = Action.CREATE;
-		} else {
-			abort("You must specify authz, clear or create");
-		}
-
-		Console console = System.console();
-		if (console == null) {
-			abort("Application has no console");
-		}
-		String rootpassword = new String(console.readPassword("Please enter the ICAT root password "));
-
-		if (action == Action.CLEAR) {
-			if (!(console.readLine("Please type 'CLEAR' to clear the database ")).equals("CLEAR")) {
-				System.out.println("Exiting without action");
-				System.exit(0);
-			}
-		}
-
-		String impUserName = "IMP";
-		String cicUserName = "CIC";
-		String guestUserName = "guest";
 		String urlString = ("http://localhost:8080");
-		for (int i = 1; i < args.length; i++) {
-			String name = args[i++];
-			if (i < args.length) {
-				if (name.equals("--IMP")) {
-					impUserName = args[i];
-				} else if (name.equals("--CIC")) {
-					cicUserName = args[i];
-				} else if (name.equals("--guest")) {
-					guestUserName = args[i];
-				} else if (name.equals("--url")) {
-					urlString = args[i];
-				} else {
-					abort("Option " + name + " is not recognised.");
-				}
-			} else {
-				abort("Option " + name + " has no value specified.");
-			}
-		}
 
 		URL icatUrl = new URL(urlString + "/ICATService/ICAT?wsdl");
 
 		ICATService icatService = new ICATService(icatUrl, new QName("client.icat3.uk", "ICATService"));
 		Setup.icatEP = icatService.getICATPort();
 
-		Setup.sessionId = Setup.icatEP.login("root", rootpassword);
+		Setup.sessionId = Setup.icatEP.login("root", "password");
 
-		if (action == Action.AUTHZ) {
-			setAuthz(impUserName, cicUserName, guestUserName);
-		} else if (action == Action.CLEAR) {
-			clear();
-		} else {
-			create();
-		}
 	}
 
-	private static void abort(String msg) {
-		System.err.println(msg);
-		System.exit(1);
-	}
 
-	private static void setAuthz(String impUsername, String cicUsername, String guestUsername) throws Exception {
+
+	@Test
+	public void setAuthz() throws Exception {
+		String impUsername = "IMP";
+		String cicUsername = "CIC";
+		String guestUsername = "guest";
 		Setup.icatEP.addUserGroupMember(Setup.sessionId, impUsername, impUsername);
 		Setup.icatEP.addRule(Setup.sessionId, impUsername, "Investigation", "CRUD", null);
 		Setup.icatEP.addRule(Setup.sessionId, impUsername, "FacilityUser", "CRUD", null);
