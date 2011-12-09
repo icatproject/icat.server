@@ -8,7 +8,6 @@
  */
 package icat3wstest;
 
-import uk.icat3.client.*;
 import java.util.ArrayList;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
