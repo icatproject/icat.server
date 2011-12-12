@@ -31,11 +31,9 @@
 		<module>icat3-exposed</module>
 		<module>icat3-download</module>
 		<module>icat3-reporting</module>
-<!-- 		 <module>icat3-client</module>  -->
-		<!-- <module>icat3-cmd-util</module> -->
 		<module>icat3-ear</module>
-		<!-- <module>icat3-api-examples</module> -->
-		<!-- <module>icat3-io</module> -->
+		<module>icat3-client</module>
+		<module>icat3-ws-test</module>
 	</modules>
 
 	<repositories>
