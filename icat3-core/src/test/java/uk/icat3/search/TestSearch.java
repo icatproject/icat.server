@@ -54,6 +54,7 @@ public class TestSearch {
 		RuleManager.addRule("user-office", "Datafile", "CRUD", "[name='fred']", em);
 		RuleManager.addRule("CIC-user", "Dataset", "CRUD", null, em);
 		RuleManager.addRule("CIC-user", "DatasetParameter", "CRUD", null, em);
+		RuleManager.addRule("CIC-user", "Datafile", "CRUD", null, em);
 		RuleManager.addRule(null, "Parameter", "R", null, em);
 		RuleManager.addRule("expt-A", "Dataset", "R", "Investigation [invNumber = 'A']", em);
 		RuleManager.addRule("expt-A", "DatasetParameter", "R", "Dataset <-> Investigation [invNumber = 'A']", em);
