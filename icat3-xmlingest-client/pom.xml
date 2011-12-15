@@ -9,10 +9,10 @@
     </parent>
 
     <groupId>co.uk.icat3</groupId>
-    <artifactId>icat3-xmllingest-client</artifactId>
+    <artifactId>icat3-xmlingest-client</artifactId>
     <packaging>jar</packaging>
     
-    <name>icat3-xmllingest-client</name>
+    <name>icat3-xmlingest-client</name>
 
     <properties>
     </properties>
