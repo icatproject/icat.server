@@ -1,35 +1,39 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<icat version="1.0 RC6" xsi:noNamespaceSchemaLocation="../icatXSD/icatXSD.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<icat version="1.0 RC6" xsi:noNamespaceSchemaLocation="icatXSD.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <study>
-    <name>Turning lead into gold</name>
-    <purpose>To make an absolute fortune</purpose>
+    <name>Variable Temperature Study of Analgescic Medicines</name>
+    <purpose>Variable Temperature Study of Analgescic Medicines: An investigation into the molecular effects of temperature on C8H9NO2</purpose>
     <status>ONGOING</status>
-    <study_creation_date>2008-11-06T21:49:14</study_creation_date>
+    <study_creation_date>2006-11-06T21:49:14</study_creation_date>
     <investigation trusted="true">
-      <inv_number>12368</inv_number>
+      <inv_number>12367</inv_number>
       <visit_id>1</visit_id>
-      <instrument>MAPS</instrument>
-      <title>Turning lead into gold: Structural and magnetic phase transformation from worthsome to worthmore</title>
+      <instrument>CRISP</instrument>
+      <title>Experiment using neutrons to measure low temperature stability of Paracetamol</title>
 	<investigator>
 		<user_id>damian</user_id>
-		<affiliation_id>9932</affiliation_id>
 		<role>principal_experimentor</role>
 		<privilege>ADMIN</privilege>
 	</investigator>
-	<inv_abstract>Nullam non pede. Sed arcu. Phasellus ac nulla. Aliquam tristique enim vel erat. Morbi nunc. Aenean viverra. Duis est purus, tristique sed, lacinia quis, tincidunt eget, metus. Proin non nibh. Praesent vel felis in quam laoreet imperdiet. Nullam et pede. Aliquam posuere auctor est. Quisque mattis, metus eu pellentesque pharetra, magna velit malesuada mauris, at placerat dui urna non mauris. Morbi dignissim. In hac habitasse platea dictumst. Vivamus suscipit consequat eros. Sed bibendum. Nunc convallis. In ipsum enim, ullamcorper a, rutrum quis, luctus non, ante. Nulla pretium gravida est. Mauris luctus</inv_abstract>
+	<investigator>
+		<user_id>doug</user_id>
+		<role>experimentor</role>
+		<privilege>READER</privilege>
+	</investigator>
+	<inv_abstract>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque eleifend. Nunc nunc orci, pharetra in, suscipit in, molestie ut, odio. Morbi in elit vel purus lobortis mattis. Maecenas sodales tempus lorem. Duis cursus massa vitae purus. Sed et lorem. In hac habitasse platea dictumst. Aliquam quam felis, tristique sit amet, tempus nec, ultrices vitae, lorem. Proin lobortis, est ut lobortis vulputate, nisl nulla convallis nibh, ut tincidunt urna quam eu libero. Nullam purus dui, feugiat ac, mollis a, posuere sed, elit. Maecenas porttitor vestibulum lacus. Sed fringilla ipsum in purus commodo aliquam. Quisque ut mauris sed odio fringilla varius.</inv_abstract>
       <inv_type>EXPERIMENT</inv_type>
-      <bcat_inv_str>Damian Flannery</bcat_inv_str>
+      <bcat_inv_str>Doug and Damian</bcat_inv_str>
       <keyword>
-        <name>Lead</name>
+        <name>Paracetamol</name>
       </keyword>
       <keyword>
-        <name>Gold</name>
+        <name>Low</name>
       </keyword>
       <keyword>
-        <name>Transformation</name>
+        <name>Temperature</name>
       </keyword>
       <keyword>
-        <name>MAPS</name>
+        <name>CRISP</name>
       </keyword>
       <keyword>
         <name>ISIS</name>
@@ -38,42 +42,42 @@
         <name>Neutron</name>
       </keyword>
 	<dataset>
-        <name>Gold at 73.15K ambient pressure</name>
+        <name>Paracetamol at 273.15K</name>
         <dataset_type>EXPERIMENT_RAW</dataset_type>
         <dataset_status>COMPLETE</dataset_status>
-        <description>TST73890 Damian Secret experiment 06-Nov-2006 21:49:14   346.6</description>
+        <description>TST73890 CRISP Team          Flood testing period con06-Nov-2006 21:49:14   346.6</description>
         <sample>
-          <name>Lead</name>
-	    <chemical_formula>Pb</chemical_formula>
+          <name>Paracetamol</name>
+	    <chemical_formula>C8H9NO2</chemical_formula>
           <safety_information>No information available</safety_information>
         </sample>
         <datafile>
-          <name>TST73891.RAW</name>
-          <location>C:\icattest\TST73891.RAW</location>
+          <name>TST73890.RAW</name>
+          <location>C:\icattest\TST73890.RAW</location>
           <description>Flood testing period control nper=2</description>
           <datafile_format>isis neutron raw</datafile_format>
           <datafile_format_version>2</datafile_format_version>
-          <datafile_create_time>2008-11-06T21:49:14</datafile_create_time>
-          <datafile_modify_time>2008-11-06T23:52:57</datafile_modify_time>
-          <file_size>562448</file_size>
+          <datafile_create_time>2006-11-06T21:49:14</datafile_create_time>
+          <datafile_modify_time>2006-11-06T23:52:57</datafile_modify_time>
+          <file_size>552448</file_size>
           <parameter>
             <name>run_number</name>
-            <numeric_value>73891</numeric_value>
+            <numeric_value>73890</numeric_value>
             <units>N/A</units>
           </parameter>
           <parameter>
             <name>run_header</name>
-            <string_value>TST73891 Damian 06-Nov-2008 21:49:14   346.6</string_value>
+            <string_value>CSP73890CRISP Team          Flood testing period con06-Nov-2006 21:49:14   346.6</string_value>
             <units>N/A</units>
           </parameter>
           <parameter>
             <name>number_of_detectors</name>
-            <numeric_value>2260</numeric_value>
+            <numeric_value>260</numeric_value>
             <units>N/A</units>
           </parameter>
           <parameter>
             <name>primary_flight_path</name>
-            <numeric_value>12.25</numeric_value>
+            <numeric_value>10.25</numeric_value>
             <units>m</units>
           </parameter>
           <parameter>
@@ -83,52 +87,52 @@
           </parameter>
           <parameter>
             <name>run_title</name>
-            <string_value>I'm not putting the real title in here!  Someone might see it!</string_value>
+            <string_value>Flood testing period control nper=2</string_value>
             <units>N/A</units>
           </parameter>
           <parameter>
             <name>short_title</name>
-            <string_value>I'll never tell</string_value>
-            <units>N/A</units>
+            <string_value>Flood testing period con</string_value>
+            <units>K</units>
           </parameter>
 	    <parameter>
             <name>temperature</name>
-            <numeric_value>373.15</numeric_value>
-            <units>K</units>
+            <numeric_value>273.15</numeric_value>
+            <units>N/A</units>
           </parameter>
           <parameter>
             <name>start_date</name>
-            <string_value>2008-11-06 21:49:14</string_value>
+            <string_value>2006-11-06 21:49:14</string_value>
             <units>yyyy-MM-dd HH:mm:ss</units>
           </parameter>
           <parameter>
             <name>finish_date</name>
-            <string_value>2008-11-06 23:52:45</string_value>
+            <string_value>2006-11-06 23:52:45</string_value>
             <units>yyyy-MM-dd HH:mm:ss</units>
           </parameter>
           <parameter>
             <name>run_duration</name>
-            <numeric_value>72450</numeric_value>
+            <numeric_value>7250</numeric_value>
             <units>seconds</units>
           </parameter>
           <parameter>
             <name>good_proton_charge</name>
-            <numeric_value>546.636</numeric_value>
+            <numeric_value>346.636</numeric_value>
             <units>uAmp hours</units>
           </parameter>
           <parameter>
             <name>total_proton_charge</name>
-            <numeric_value>546.705</numeric_value>
+            <numeric_value>346.705</numeric_value>
             <units>uAmp hours</units>
           </parameter>
           <parameter>
             <name>good_frames</name>
-            <numeric_value>560130</numeric_value>
+            <numeric_value>360130</numeric_value>
             <units>pulses</units>
           </parameter>
           <parameter>
             <name>monitor_sum1</name>
-            <numeric_value>21093288</numeric_value>
+            <numeric_value>11093288</numeric_value>
             <units>neutrons</units>
           </parameter>
           <parameter>
@@ -163,7 +167,7 @@
           </parameter>
           <parameter>
             <name>notes</name>
-            <string_value>How am I going to carry all of this gold?</string_value>
+            <string_value>Powerspike at RAL may have interfered with data collection.  Run immediate analysis.</string_value>
             <units>N/A</units>
           </parameter>
         </datafile>
