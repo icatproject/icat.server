@@ -37,7 +37,9 @@ public class AnstoUser implements uk.icat3.user.User {
 					.setParameter("userSessionId", sessionId).getSingleResult();
 			session.checkValid();
 			// TODO do we want to get rid of the getUserDetails call?
-			return new UserDetails();
+                        UserDetails userDetails = new UserDetails();
+                        userDetails.setFederalId(session.getRunAs());
+			return userDetails;
 
 		} catch (final NoResultException e) {
 			throw new SessionException("Invalid sessionid: " + sessionId);

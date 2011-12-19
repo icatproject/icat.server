@@ -37,6 +37,8 @@ public class LdapUser implements uk.icat3.user.User {
 					.setParameter("userSessionId", sessionId).getSingleResult();
 			session.checkValid();
 			// TODO do we want to get rid of the getUserDetails call?
+                        UserDetails userDetails = new UserDetails();
+                        userDetails.setFederalId(session.getRunAs());
 			return new UserDetails();
 
 		} catch (final NoResultException e) {
