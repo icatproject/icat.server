@@ -37,10 +37,9 @@ public class LdapUser implements uk.icat3.user.User {
 					.setParameter("userSessionId", sessionId).getSingleResult();
 			session.checkValid();
 			// TODO do we want to get rid of the getUserDetails call?
-                        UserDetails userDetails = new UserDetails();
-                        userDetails.setFederalId(session.getRunAs());
-			return new UserDetails();
-
+			UserDetails userDetails = new UserDetails();
+			userDetails.setFederalId(session.getRunAs());
+			return userDetails;
 		} catch (final NoResultException e) {
 			throw new SessionException("Invalid sessionid: " + sessionId);
 		} catch (final SessionException e) {
@@ -96,8 +95,8 @@ public class LdapUser implements uk.icat3.user.User {
 		log.trace("Entitity Manager is " + manager);
 		log.info("Checking password against database");
 		try {
-			LdapUserE user = (uk.icat3.userldap.entity.LdapUserE) this.manager.createNamedQuery("LdapUserE.findByUserId")
-					.setParameter("userId", username).getSingleResult();
+			LdapUserE user = (uk.icat3.userldap.entity.LdapUserE) this.manager
+					.createNamedQuery("LdapUserE.findByUserId").setParameter("userId", username).getSingleResult();
 			if (!user.getPassword().equals(password)) {
 				throw new SessionException("Username and password do not match");
 			}
@@ -109,7 +108,7 @@ public class LdapUser implements uk.icat3.user.User {
 			log.trace("Unexpected problem " + e.getMessage());
 			throw new SessionException("Unexpected problem " + e.getMessage());
 		}
-		
+
 		final LdapSession session = newSession(username, lifetime);
 		this.manager.persist(session);
 		String sid = session.getUserSessionId();
