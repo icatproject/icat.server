@@ -14,7 +14,6 @@ import uk.icat3.user.UserDetails;
 import uk.icat3.useransto.entity.Session;
 import uk.icat3.useransto.entity.UserE;
 
-
 public class AnstoUser implements uk.icat3.user.User {
 
 	private final EntityManager manager;
@@ -37,10 +36,9 @@ public class AnstoUser implements uk.icat3.user.User {
 					.setParameter("userSessionId", sessionId).getSingleResult();
 			session.checkValid();
 			// TODO do we want to get rid of the getUserDetails call?
-                        UserDetails userDetails = new UserDetails();
-                        userDetails.setFederalId(session.getRunAs());
+			UserDetails userDetails = new UserDetails();
+			userDetails.setFederalId(session.getRunAs());
 			return userDetails;
-
 		} catch (final NoResultException e) {
 			throw new SessionException("Invalid sessionid: " + sessionId);
 		} catch (final SessionException e) {
@@ -97,8 +95,8 @@ public class AnstoUser implements uk.icat3.user.User {
 		log.trace("Entitity Manager is " + manager);
 		log.info("Checking password against database");
 		try {
-			user = (UserE) this.manager.createNamedQuery("AnstoUser.findByUserId")
-					.setParameter("userId", username).getSingleResult();
+			user = (UserE) this.manager.createNamedQuery("AnstoUser.findByUserId").setParameter("userId", username)
+					.getSingleResult();
 		} catch (final NoResultException e) {
 			throw new SessionException("Username and password do not match");
 		} catch (final Exception e) {
@@ -108,24 +106,24 @@ public class AnstoUser implements uk.icat3.user.User {
 		if (!user.getPassword().equals(password)) {
 			throw new SessionException("Username and password do not match");
 		}
-		
+
 		final Session session = newSession(username, lifetime);
 		this.manager.persist(session);
 		String sid = session.getUserSessionId();
 		log.info("Logged in for user: " + username + " with sessionid:" + sid);
-		
-//		final Timestamp loginTime = new Timestamp(new Date().getTime());
-//		log.info("About to send login message");
-//		LoginInterceptor.sendLoginMessage(sid, username, loginTime);
-		
+
+		// final Timestamp loginTime = new Timestamp(new Date().getTime());
+		// log.info("About to send login message");
+		// LoginInterceptor.sendLoginMessage(sid, username, loginTime);
+
 		return sid;
 	}
-	
+
 	@Override
 	public String login(String adminUsername, String dummy, String runAsUser) {
 		log.trace("login(admin, *********, " + runAsUser + ")");
 
-		final Session session = newSession(runAsUser, 2);		
+		final Session session = newSession(runAsUser, 2);
 		this.manager.persist(session);
 		String sid = session.getUserSessionId();
 		log.info("Logged in for user: " + runAsUser + " running as  " + runAsUser + " with sessionid:" + sid);
@@ -133,14 +131,14 @@ public class AnstoUser implements uk.icat3.user.User {
 		return sid;
 
 	}
-	
+
 	private Session newSession(String effectiveUser, int lifetime) {
 		final String sid = UUID.randomUUID().toString();
-		
+
 		final Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.HOUR, lifetime);
 		final Session session = new Session(sid, effectiveUser, cal.getTime());
-		
+
 		return session;
 	}
 
