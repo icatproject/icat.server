@@ -97,7 +97,7 @@ public class DownloadMDB implements MessageListener {
             }
 
             download.setNoFiles(new Long(files.size()));
-            int totalSize = 0;
+            long totalSize = 0;
 
 
             for (Datafile file : files) {

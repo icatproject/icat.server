@@ -24,6 +24,7 @@ import uk.icat3.jaxb.gen.Investigation;
 import uk.icat3.jaxb.gen.Parameter;
 import uk.icat3.jaxb.gen.Study;
 import uk.icat3.jaxb.helper.StringComparer;
+
 import uk.icat3.manager.BeanManager;
 import uk.icat3.manager.InvestigationManager;
 import uk.icat3.search.AdvancedSearchDetails;
@@ -34,20 +35,22 @@ import uk.icat3.search.InvestigationSearch;
  * 
  * Created on 23-May-2007, 12:15:23
  * 
- * This class implements a service that enables a user/facility to submit an xml document that
- * declaratively describes data that is to be ingested into ICAT. This is designed as an alternative
- * to manipulating api directly which would necessitate familiarity with the ICAT API and would
- * require integration of the ICAT API...
+ * This class implements a service that enables a user/facility to submit an xml
+ * document that declaratively describes data that is to be ingested into ICAT.
+ * This is designed as an alternative to manipulating api directly which would
+ * necessitate familiarity with the ICAT API and would require integration of
+ * the ICAT API...
  * 
- * uses the icat3-jaxb package to read an icat compliant xml file for ingestion into ICAT. The
- * database is queried to decipher where
+ * uses the icat3-jaxb package to read an icat compliant xml file for ingestion
+ * into ICAT. The database is queried to decipher where
  * 
  * 
- * ISIS will use this service at the end of each experimental run to submit metadata for a resulting
- * raw / log / nexus file read xml into object tree find related investigation if related
- * investigation found then place datafile within that investigation if no related investigation
- * found then a new one must be created along with all other related artifacts e.g. datasets,
- * samples etc.
+ * ISIS will use this service at the end of each experimental run to submit
+ * metadata for a resulting raw / log / nexus file read xml into object tree
+ * find related investigation if related investigation found then place datafile
+ * within that investigation if no related investigation found then a new one
+ * must be created along with all other related artifacts e.g. datasets, samples
+ * etc.
  * 
  * 
  * @author df01
@@ -61,8 +64,9 @@ public class MetadataIngest {
 	static long DATE_THRESHOLD = 604800000; // one week in seconds
 
 	/**
-	 * Method that accepts XML document in the form of a String for ingestion into ICAT Spawns
-	 * insert off to asynchronous MessageDrivenBean for efficiency
+	 * Method that accepts XML document in the form of a String for ingestion
+	 * into ICAT Spawns insert off to asynchronous MessageDrivenBean for
+	 * efficiency
 	 * 
 	 * @param userId
 	 * @param xml
@@ -97,23 +101,28 @@ public class MetadataIngest {
 			List<Investigation> _investigations = _study.getInvestigation();
 
 			for (Investigation _inv : _investigations) {
-				// After successful parsing of xml, check to see if datafile belongs to existing
+				// After successful parsing of xml, check to see if datafile
+				// belongs to existing
 				// investigation
 				investigationId = findMatchingInvestigation(userId, _inv, manager);
 
-				// If datafile belongs to existing investigation then ingest just the datafile
+				// If datafile belongs to existing investigation then ingest
+				// just the datafile
 				if (investigationId != null) {
 					// ingest datafile
 					investigation = InvestigationManager.getInvestigation(userId, investigationId, manager);
 
-					// InvestigationSearch.getInvestigationInformation(userId, investigation,
+					// InvestigationSearch.getInvestigationInformation(userId,
+					// investigation,
 					// InvestigationInclude.ALL, manager);
 
-					// may want to do extra checks here to make sure metadata is correct
+					// may want to do extra checks here to make sure metadata is
+					// correct
 					// ..
 					// .
 				} // end if
-					// If datafile does not belong to existing investigation then ingest everything
+					// If datafile does not belong to existing investigation
+					// then ingest everything
 				if (investigationId == null) {
 					investigation = getInvestigation(userId, _inv, manager);
 					investigation.setId((Long) BeanManager.create(userId, investigation, manager));
@@ -128,7 +137,8 @@ public class MetadataIngest {
 						keyword.getKeywordPK().setInvestigationId(investigation.getId());
 						BeanManager.create(userId, keyword, manager);
 					} catch (Exception ve) {
-						// catch validation exception i.e. if duplicate keyword exists, allow
+						// catch validation exception i.e. if duplicate keyword
+						// exists, allow
 						// ingestion of other keywords to continue
 					} // end try/catch
 				} // end
@@ -142,8 +152,10 @@ public class MetadataIngest {
 						publication.setId(investigation.getId());
 						BeanManager.create(userId, publication, manager);
 					} catch (ValidationException ve) {
-						// catch validation exception i.e. if duplicate publication exists, allow
-						// ingestion of other publications to continue else rethrow exception
+						// catch validation exception i.e. if duplicate
+						// publication exists, allow
+						// ingestion of other publications to continue else
+						// rethrow exception
 						if (!(ve.getMessage().indexOf("is not unique") != -1))
 							throw ve;
 
@@ -226,8 +238,10 @@ public class MetadataIngest {
 
 					} catch (ValidationException ve) {
 
-						// catch validation exception i.e. if duplicate investigator exists, allow
-						// ingestion of other investigators to continue else rethrow exception
+						// catch validation exception i.e. if duplicate
+						// investigator exists, allow
+						// ingestion of other investigators to continue else
+						// rethrow exception
 						if (!(ve.getMessage().indexOf("is not unique") != -1)) {
 							log.warn("error adding investigator", ve);
 							throw ve;
@@ -237,38 +251,49 @@ public class MetadataIngest {
 				} // end for
 
 				/*
-				 * //add investigators List<uk.icat3.jaxb.gen.Investigator> _investigators =
-				 * _inv.getInvestigator(); ArrayList<uk.icat3.entity.Investigator> investigators =
+				 * //add investigators List<uk.icat3.jaxb.gen.Investigator>
+				 * _investigators = _inv.getInvestigator();
+				 * ArrayList<uk.icat3.entity.Investigator> investigators =
 				 * getInvestigators(_investigators, investigation.getId()); for
-				 * (uk.icat3.entity.Investigator investigator : investigators) { try {
-				 * InvestigationManager.addInvestigationObject(userId, investigator,
-				 * investigation.getId(), manager); } catch (ValidationException ve) {
+				 * (uk.icat3.entity.Investigator investigator : investigators) {
+				 * try { InvestigationManager.addInvestigationObject(userId,
+				 * investigator, investigation.getId(), manager); } catch
+				 * (ValidationException ve) {
 				 * 
-				 * //catch validation exception i.e. if duplicate investigator exists, allow
-				 * ingestion of other investigators to continue else rethrow exception if
+				 * //catch validation exception i.e. if duplicate investigator
+				 * exists, allow ingestion of other investigators to continue
+				 * else rethrow exception if
 				 * (!(ve.getMessage().indexOf("is not unique") != -1)) {
-				 * log.warn("error adding investigator", ve); throw ve; }//end if
+				 * log.warn("error adding investigator", ve); throw ve; }//end
+				 * if
 				 * 
 				 * } //end try/catch } //end
 				 * 
 				 * //add permissions for investigators to investigation for
-				 * (uk.icat3.jaxb.gen.Investigator _investigator : _investigators) { if
+				 * (uk.icat3.jaxb.gen.Investigator _investigator :
+				 * _investigators) { if
 				 * (!userId.equals(_investigator.getUserId())) { try {
-				 * InvestigationManager.addAuthorisation(userId, _investigator.getUserId(),
-				 * _investigator.getPrivilege(), investigation.getId(), manager); } catch
-				 * (ValidationException ve) { ve.printStackTrace(); } //ignore if user already has
+				 * InvestigationManager.addAuthorisation(userId,
+				 * _investigator.getUserId(), _investigator.getPrivilege(),
+				 * investigation.getId(), manager); } catch (ValidationException
+				 * ve) { ve.printStackTrace(); } //ignore if user already has
 				 * permission }//end if } //end for
 				 * 
 				 * 
 				 * private static ArrayList<uk.icat3.entity.Investigator>
-				 * getInvestigators(List<uk.icat3.jaxb.gen.Investigator> _investigators, Long
-				 * investigationId) { ArrayList<uk.icat3.entity.Investigator> investigators = new
-				 * ArrayList<uk.icat3.entity.Investigator>(); for (uk.icat3.jaxb.gen.Investigator
-				 * _investigator : _investigators) { uk.icat3.entity.InvestigatorPK pk = new
-				 * uk.icat3.entity.InvestigatorPK(_investigator.getAffiliationId(),
-				 * investigationId); uk.icat3.entity.Investigator investigator = new
-				 * uk.icat3.entity.Investigator(pk); investigator.setRole(_investigator.getRole());
-				 * investigators.add(investigator); } //end for return investigators; }
+				 * getInvestigators(List<uk.icat3.jaxb.gen.Investigator>
+				 * _investigators, Long investigationId) {
+				 * ArrayList<uk.icat3.entity.Investigator> investigators = new
+				 * ArrayList<uk.icat3.entity.Investigator>(); for
+				 * (uk.icat3.jaxb.gen.Investigator _investigator :
+				 * _investigators) { uk.icat3.entity.InvestigatorPK pk = new
+				 * uk.icat3
+				 * .entity.InvestigatorPK(_investigator.getAffiliationId(),
+				 * investigationId); uk.icat3.entity.Investigator investigator =
+				 * new uk.icat3.entity.Investigator(pk);
+				 * investigator.setRole(_investigator.getRole());
+				 * investigators.add(investigator); } //end for return
+				 * investigators; }
 				 */
 
 				// add Investigation Samples (used in experiment pre-population)
@@ -282,25 +307,30 @@ public class MetadataIngest {
 					uk.icat3.entity.Dataset dataset = getDataset(userId, _dataset, investigation, manager);
 
 					/*
-					 * This has moved into createDataset method //add permssions for investigators
-					 * to dataset for (uk.icat3.jaxb.gen.Investigator _investigator :
-					 * _investigators) { if (!userId.equals(_investigator.getUserId())) { try
-					 * {DataSetManager.addAuthorisation(userId, _investigator.getUserId(),
-					 * _investigator.getPrivilege(), dataset.getId(), manager);} catch (Exception e)
-					 * {}; } } //end for
+					 * This has moved into createDataset method //add permssions
+					 * for investigators to dataset for
+					 * (uk.icat3.jaxb.gen.Investigator _investigator :
+					 * _investigators) { if
+					 * (!userId.equals(_investigator.getUserId())) { try
+					 * {DataSetManager.addAuthorisation(userId,
+					 * _investigator.getUserId(), _investigator.getPrivilege(),
+					 * dataset.getId(), manager);} catch (Exception e) {}; } }
+					 * //end for
 					 */
 					List<Datafile> _datafiles = _dataset.getDatafile();
 					for (Datafile _datafile : _datafiles) {
 						uk.icat3.entity.Datafile datafile = getDatafile(userId, _datafile, dataset, manager);
 
 						/*
-						 * no need to do this for individual files since v3.3 //add permssions for
-						 * investigators to datafile for (uk.icat3.jaxb.gen.Investigator
-						 * _investigator : _investigators) { if
+						 * no need to do this for individual files since v3.3
+						 * //add permssions for investigators to datafile for
+						 * (uk.icat3.jaxb.gen.Investigator _investigator :
+						 * _investigators) { if
 						 * (!userId.equals(_investigator.getUserId())) { try
-						 * {DataFileManager.addAuthorisation(userId, _investigator.getUserId(),
-						 * _investigator.getPrivilege(), datafile.getId(), manager);} catch
-						 * (Exception e) {}; } } //end for
+						 * {DataFileManager.addAuthorisation(userId,
+						 * _investigator.getUserId(),
+						 * _investigator.getPrivilege(), datafile.getId(),
+						 * manager);} catch (Exception e) {}; } } //end for
 						 */
 					} // end for datafile
 				} // end for
@@ -312,8 +342,9 @@ public class MetadataIngest {
 	}
 
 	/**
-	 * Method searches database in order to find matching investigation. If a match is found then
-	 * the Experiment Number is returned otherwise null is returned.
+	 * Method searches database in order to find matching investigation. If a
+	 * match is found then the Experiment Number is returned otherwise null is
+	 * returned.
 	 */
 	private static Long findMatchingInvestigation(String userId, uk.icat3.jaxb.gen.Investigation _investigation,
 			EntityManager manager) {
@@ -393,7 +424,8 @@ public class MetadataIngest {
 			// if there is a match then return investigationId
 			for (uk.icat3.entity.Investigation inv : investigations) {
 
-				// check to make sure that given experiment number is 'believable' in comparison to
+				// check to make sure that given experiment number is
+				// 'believable' in comparison to
 				// returned result
 				if (_investigation.getInstrument().equalsIgnoreCase(inv.getInstrument())) {
 					investigationId = inv.getId();
@@ -402,7 +434,8 @@ public class MetadataIngest {
 			} // end for
 			return investigationId;
 		} // end if
-			// if experiment number not found or not trusted then we need to do some detective work
+			// if experiment number not found or not trusted then we need to do
+			// some detective work
 			// ...
 			// .
 			// add instrument to search criteria
@@ -418,14 +451,17 @@ public class MetadataIngest {
 		}
 
 		/*
-		 * ISIS Specific - Have instead replaced with Date Range Search below //get run number
-		 * Double runNumber = null; Collection<Parameter> params =
-		 * _investigation.getDataset().get(0).getDatafile().get(0).getParameter(); if ((params !=
-		 * null) && (params.size() >0)) { for (Parameter param : params) { if
-		 * (param.getName().equalsIgnoreCase(RUN_NUMBER)) runNumber = param.getNumericValue();
-		 * }//end for }//end if if (runNumber != null) { advanDTO.setRunStart(new
-		 * Double(runNumber.longValue() - RUN_NUMBER_THRESHOLD)); advanDTO.setRunEnd(new
-		 * Double(runNumber.longValue() + RUN_NUMBER_THRESHOLD)); }//end if
+		 * ISIS Specific - Have instead replaced with Date Range Search below
+		 * //get run number Double runNumber = null; Collection<Parameter>
+		 * params =
+		 * _investigation.getDataset().get(0).getDatafile().get(0).getParameter
+		 * (); if ((params != null) && (params.size() >0)) { for (Parameter
+		 * param : params) { if (param.getName().equalsIgnoreCase(RUN_NUMBER))
+		 * runNumber = param.getNumericValue(); }//end for }//end if if
+		 * (runNumber != null) { advanDTO.setRunStart(new
+		 * Double(runNumber.longValue() - RUN_NUMBER_THRESHOLD));
+		 * advanDTO.setRunEnd(new Double(runNumber.longValue() +
+		 * RUN_NUMBER_THRESHOLD)); }//end if
 		 */
 
 		// get create date of file
@@ -440,7 +476,8 @@ public class MetadataIngest {
 			e.printStackTrace();
 		} // end try/catch
 			// String investigators = null;
-			// Collection<Investigator> investigators = _investigation.getInvestigator();
+			// Collection<Investigator> investigators =
+			// _investigation.getInvestigator();
 			// advanDTO.setInvestigators(investigators);
 		advanDTO.setBackCatalogueInvestigatorString(_investigation.getBcatInvStr());
 
@@ -452,7 +489,8 @@ public class MetadataIngest {
 			while (it.hasNext()) {
 				try {
 					uk.icat3.entity.Investigation inv = (uk.icat3.entity.Investigation) it.next();
-					// if we get a match of 4 (highest value) see apache codec package, then return
+					// if we get a match of 4 (highest value) see apache codec
+					// package, then return
 					// match
 					if (StringComparer.compareStrings(_investigation.getTitle(), inv.getTitle()) > .4) {
 						log.debug("___****___ found match, title: " + inv.getTitle() + ", RB: " + inv.getInvNumber());
@@ -464,7 +502,8 @@ public class MetadataIngest {
 			} // end while
 		} // end if
 
-		// if we get here and inv marked as calibration then assign unique inv number
+		// if we get here and inv marked as calibration then assign unique inv
+		// number
 		if (_investigation.getInvType().equalsIgnoreCase("calibration")) {
 			_investigation.setInvNumber("CAL_" + _investigation.getInstrument() + "_" + createTime);
 		}
@@ -472,18 +511,21 @@ public class MetadataIngest {
 		// if we get here then no match was found, so return null
 		return null;
 	}
-	
-	   /**
-     * Method that returns true if String parameter is empty (i.e. null or 0-length)
-     * or false if String contains data.
-     * 
-     * @param str           String to be compared
-     * @return boolean      result of test
-     */ 
-    private static boolean isEmpty(String str) {
-        if ((str == null) || (str.length() == 0)) return true;
-        else return false;
-    }
+
+	/**
+	 * Method that returns true if String parameter is empty (i.e. null or
+	 * 0-length) or false if String contains data.
+	 * 
+	 * @param str
+	 *            String to be compared
+	 * @return boolean result of test
+	 */
+	private static boolean isEmpty(String str) {
+		if ((str == null) || (str.length() == 0))
+			return true;
+		else
+			return false;
+	}
 
 	private static uk.icat3.entity.Investigation getInvestigation(String userId,
 			uk.icat3.jaxb.gen.Investigation investigation, EntityManager manager) {
@@ -528,7 +570,8 @@ public class MetadataIngest {
 			}// end while
 		}// end if
 			// warning damian check this code! inv vs _inv below
-		// if does NOT exist then set normally else find highest visit_id and increment by one
+		// if does NOT exist then set normally else find highest visit_id and
+		// increment by one
 		if (!exists) {
 			inv.setVisitId(investigation.getVisitId());
 		} else {
@@ -540,7 +583,8 @@ public class MetadataIngest {
 			inv.setInstrument(investigation.getInstrument());
 		}
 
-		// InvestigationSearch.getInvestigationInformation(userId, inv, InvestigationInclude.ALL,
+		// InvestigationSearch.getInvestigationInformation(userId, inv,
+		// InvestigationInclude.ALL,
 		// manager);
 
 		return inv;
@@ -627,7 +671,8 @@ public class MetadataIngest {
 		} // end if
 
 		// add permissions for all investigators to this dataset
-		// dwf added optimisation because adding datafile to existing dataset to Diamond
+		// dwf added optimisation because adding datafile to existing dataset to
+		// Diamond
 		// investigation with 19 experimenters took ~4seconds
 		if (newDataset) {
 			long start = System.currentTimeMillis();
@@ -635,9 +680,11 @@ public class MetadataIngest {
 			for (uk.icat3.entity.Investigator investigator : investigators) {
 
 				// get userid of stored investigator in this investigation
-				// String facilityUser = investigator.getInvestigatorPK().getFacilityUserId();
+				// String facilityUser =
+				// investigator.getInvestigatorPK().getFacilityUserId();
 				String fedId = null;
-				// if this is a newly created investigation then facilityuser object will not be
+				// if this is a newly created investigation then facilityuser
+				// object will not be
 				// attached to investigation
 				// so we must retrieve fedid using named query
 				if (investigator.getFacilityUser() == null) {
@@ -656,13 +703,16 @@ public class MetadataIngest {
 
 				/*
 				 * Collection<uk.icat3.entity.IcatAuthorisation> auths =
-				 * InvestigationManager.getAuthorisations(userId, investigation.getId(), manager);
-				 * for (uk.icat3.entity.IcatAuthorisation auth : auths) {
+				 * InvestigationManager.getAuthorisations(userId,
+				 * investigation.getId(), manager); for
+				 * (uk.icat3.entity.IcatAuthorisation auth : auths) {
 				 * 
-				 * //apply that permission to this new dataset if (!userId.equals(fedId)) { try {
-				 * DataSetManager.addAuthorisation(userId, fedId, auth.getRole().getRole(),
-				 * dataset.getId(), manager); } catch (ValidationException ve)
-				 * {ve.printStackTrace();}; }//end if }//end for
+				 * //apply that permission to this new dataset if
+				 * (!userId.equals(fedId)) { try {
+				 * DataSetManager.addAuthorisation(userId, fedId,
+				 * auth.getRole().getRole(), dataset.getId(), manager); } catch
+				 * (ValidationException ve) {ve.printStackTrace();}; }//end if
+				 * }//end for
 				 */
 
 			}// end for
@@ -752,7 +802,7 @@ public class MetadataIngest {
 		datafile.setDescription(_datafile.getDescription());
 
 		if (_datafile.getFileSize() != null) {
-			datafile.setFileSize(_datafile.getFileSize().intValue());
+			datafile.setFileSize(_datafile.getFileSize().longValue());
 		}
 		datafile.setLocation(_datafile.getLocation());
 		datafile.setName(_datafile.getName());
@@ -768,7 +818,7 @@ public class MetadataIngest {
 
 		return datafile;
 	}
-	
+
 	private static Date parseDate(String s) {
 		return DatatypeConverter.parseDateTime(s).getTime();
 	}
