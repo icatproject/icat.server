@@ -37,6 +37,12 @@
 		<class>uk.icat3.entity.TopicList</class>
 		<class>uk.icat3.entity.FacilityInstrumentScientist</class>
 		<class>uk.icat3.entity.UserGroup</class>
+<!-- 		<class>uk.icat3.entity.Application</class> -->
+<!-- 		<class>uk.icat3.entity.Job</class> -->
+<!-- 		<class>uk.icat3.entity.InputDataset</class> -->
+<!-- 		<class>uk.icat3.entity.OutputDataset</class> -->
+<!-- 		<class>uk.icat3.entity.InputDatafile</class> -->
+<!-- 		<class>uk.icat3.entity.OutputDatafile</class> -->
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<property name="eclipselink.logging.level" value="WARNING" />
@@ -48,6 +54,9 @@
 			<property name="eclipselink.jdbc.password" value="password" />
 			<property name="eclipselink.jdbc.driver" value="oracle.jdbc.OracleDriver" />
 			<property name="eclipselink.jdbc.user" value="icat" />
+<!-- 			<property name="eclipselink.ddl-generation" value="create-tables" /> -->
+<!-- 			<property name="eclipselink.ddl-generation.output_mode" -->
+<!-- 				value="both" /> -->
 		</properties>
 	</persistence-unit>
 </persistence>

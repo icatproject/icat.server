@@ -40,15 +40,22 @@
 		<class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
 		<class>uk.icat3.entity.UserGroup</class>
 		<class>uk.icat3.entity.Rule</class>
+<!-- 		<class>uk.icat3.entity.Application</class> -->
+<!-- 		<class>uk.icat3.entity.Job</class> -->
+<!-- 		<class>uk.icat3.entity.InputDataset</class> -->
+<!-- 		<class>uk.icat3.entity.OutputDataset</class> -->
+<!-- 		<class>uk.icat3.entity.InputDatafile</class> -->
+<!-- 		<class>uk.icat3.entity.OutputDatafile</class> -->
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
-			<!-- Prints out SQL generated from EJBQL -->
-			<!-- No caching of entity data -->
 			<property name="eclipselink.target-server" value="SunAS9" />
-			<property name="eclipselink.logging.level" value="INFO" />
+			<property name="eclipselink.logging.level" value="FINE" />
 			<property name="eclipselink.cache.shared.default" value="false" />
 			<property name="eclipselink.cache.type.default" value="NONE" />
 			<property name="eclipselink.cache.size.default" value="0" />
+<!-- 			<property name="eclipselink.ddl-generation" value="create-tables" /> -->
+<!-- 			<property name="eclipselink.ddl-generation.output_mode" -->
+<!-- 				value="both" /> -->
 		</properties>
 	</persistence-unit>
 
@@ -62,15 +69,15 @@
 		<class>uk.icat3.userldap.entity.LdapSession</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
-			<!-- Prints out SQL generated from EJBQL -->
-			<!-- No caching of entity data -->
 			<property name="eclipselink.target-server" value="SunAS9" />
 			<property name="eclipselink.cache.shared.default" value="false" />
 			<property name="eclipselink.cache.type.default" value="NONE" />
 			<property name="eclipselink.cache.size.default" value="0" />
 			<property name="eclipselink.logging.level" value="INFO" />
+			<property name="eclipselink.ddl-generation" value="NONE" />
 			<property name="eclipselink.ddl-generation" value="create-tables" />
-			<property name="eclipselink.target-database" value="Oracle" />
+			<property name="eclipselink.ddl-generation.output_mode"
+				value="both" />
 		</properties>
 	</persistence-unit>
 

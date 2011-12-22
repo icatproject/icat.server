@@ -1,7 +1,12 @@
 package uk.icat3.manager;
 
-import java.util.Arrays;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.persistence.EntityExistsException;
@@ -9,22 +14,15 @@ import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
-import uk.icat3.entity.Datafile;
-import uk.icat3.entity.Dataset;
-import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.EntityBaseBean;
-import uk.icat3.entity.Investigation;
-import uk.icat3.entity.Investigator;
-import uk.icat3.entity.Keyword;
-import uk.icat3.entity.Publication;
-import uk.icat3.entity.Sample;
-import uk.icat3.entity.Shift;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ObjectAlreadyExistsException;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.security.EntityInfoHandler;
+import uk.icat3.security.EntityInfoHandler.Relationship;
 import uk.icat3.security.GateKeeper;
 import uk.icat3.security.parser.GetQuery;
 import uk.icat3.security.parser.Input;
@@ -33,14 +31,12 @@ import uk.icat3.security.parser.ParserException;
 import uk.icat3.security.parser.Token;
 import uk.icat3.security.parser.Tokenizer;
 import uk.icat3.util.AccessType;
-import uk.icat3.util.DatafileInclude;
-import uk.icat3.util.DatasetInclude;
-import uk.icat3.util.InvestigationInclude;
 
 public class BeanManager {
 
 	// Global class logger
 	private static final Logger log = Logger.getLogger(BeanManager.class);
+	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
 	public static Object create(String userId, EntityBaseBean bean, EntityManager manager)
 			throws InsufficientPrivilegesException, ObjectAlreadyExistsException, ValidationException,
@@ -79,7 +75,7 @@ public class BeanManager {
 		try {
 			manager.remove(beanManaged);
 			manager.flush();
-			log.trace("Deleted bean " + bean  + " flushed.");
+			log.trace("Deleted bean " + bean + " flushed.");
 		} catch (Throwable e) {
 			manager.clear();
 			bean.isValid(manager, false);
@@ -94,10 +90,10 @@ public class BeanManager {
 		GateKeeper.performAuthorisation(userId, beanManaged, AccessType.UPDATE, manager);
 		beanManaged.setModId(userId);
 		beanManaged.merge(bean, manager);
-		
+
 		try {
 			manager.flush();
-			log.trace("Updated bean " + bean  + " flushed.");
+			log.trace("Updated bean " + bean + " flushed.");
 		} catch (Throwable e) {
 			manager.clear();
 			bean.isValid(manager, false);
@@ -134,93 +130,12 @@ public class BeanManager {
 
 		Set<Class<? extends EntityBaseBean>> includes = q.getIncludes();
 		if (includes.size() > 0) {
-			processIncludes(beanManaged, includes);
+			beanManaged.addIncludes(includes);
 		}
 
 		GateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
 		log.debug("got " + entityClass.getSimpleName() + "[id:" + primaryKey + "]");
 		return beanManaged;
-	}
-
-	@SuppressWarnings("unchecked")
-	public
-	static void processIncludes(EntityBaseBean beanManaged,
-			Set<Class<? extends EntityBaseBean>> includes) throws BadParameterException {
-		/* This is a nasty temporary hack before doing it properly TODO */
-
-		 Class<? extends EntityBaseBean> entityClass = beanManaged.getClass();
-		
-		if (entityClass.equals(Dataset.class)) {
-			if (includes.containsAll(Arrays.asList(Datafile.class, DatasetParameter.class))) {
-				includeDataset((Dataset) beanManaged, DatasetInclude.DATASET_DATAFILES_AND_PARAMETERS);
-			} else if (includes.contains(Datafile.class)) {
-				includeDataset((Dataset) beanManaged, DatasetInclude.DATASET_AND_DATAFILES_ONLY);
-			} else if (includes.contains(DatasetParameter.class)) {
-				includeDataset((Dataset) beanManaged, DatasetInclude.DATASET_PARAMETERS_ONLY);
-			} else {
-				throw new BadParameterException("Unable to deal with specified includes");
-			}
-
-		} else if (entityClass.equals(Investigation.class)) {
-
-			if (includes.containsAll(Arrays.asList(Dataset.class, Datafile.class, DatasetParameter.class,
-					Investigator.class, Keyword.class, Shift.class, Sample.class, Publication.class))) {
-				includeInvestigation((Investigation) beanManaged, InvestigationInclude.ALL);
-
-			} else if (includes.containsAll(Arrays.asList(Investigator.class, Keyword.class, Shift.class, Sample.class,
-					Publication.class))) {
-				includeInvestigation((Investigation) beanManaged,
-						InvestigationInclude.ALL_EXCEPT_DATASETS_AND_DATAFILES);
-
-			} else if (includes.containsAll(Arrays.asList(Dataset.class, Datafile.class, DatasetParameter.class))) {
-				includeInvestigation((Investigation) beanManaged,
-						InvestigationInclude.DATASETS_DATAFILES_AND_PARAMETERS);
-
-			} else if (includes.containsAll(Arrays.asList(Dataset.class, Datafile.class))) {
-				includeInvestigation((Investigation) beanManaged, InvestigationInclude.DATASETS_AND_DATAFILES);
-
-			} else if (includes.containsAll(Arrays.asList(Dataset.class, DatasetParameter.class))) {
-				includeInvestigation((Investigation) beanManaged,
-						InvestigationInclude.DATASETS_AND_DATASET_PARAMETERS_ONLY);
-
-			} else if (includes.contains(Dataset.class)) {
-				includeInvestigation((Investigation) beanManaged, InvestigationInclude.DATASETS_ONLY);
-
-			} else if (includes.containsAll(Arrays.asList(Investigator.class, Shift.class, Sample.class,
-					Publication.class))) {
-				includeInvestigation((Investigation) beanManaged,
-						InvestigationInclude.INVESTIGATORS_SHIFTS_SAMPLES_AND_PUBLICATIONS);
-
-			} else if (includes.containsAll(Arrays.asList(Investigator.class, Shift.class, Sample.class))) {
-				includeInvestigation((Investigation) beanManaged, InvestigationInclude.INVESTIGATORS_SHIFTS_AND_SAMPLES);
-
-			} else if (includes.containsAll(Arrays.asList(Investigator.class, Shift.class))) {
-				includeInvestigation((Investigation) beanManaged, InvestigationInclude.INVESTIGATORS_AND_SHIFTS);
-
-			} else if (includes.containsAll(Arrays.asList(Investigator.class, Sample.class))) {
-				includeInvestigation((Investigation) beanManaged, InvestigationInclude.INVESTIGATORS_AND_KEYWORDS);
-
-			} else if (includes.contains(Investigator.class)) {
-				includeInvestigation((Investigation) beanManaged, InvestigationInclude.INVESTIGATORS_ONLY);
-
-			} else if (includes.contains(Keyword.class)) {
-				includeInvestigation((Investigation) beanManaged, InvestigationInclude.KEYWORDS_ONLY);
-
-			} else if (includes.contains(Publication.class)) {
-				includeInvestigation((Investigation) beanManaged, InvestigationInclude.PUBLICATIONS_ONLY);
-
-			} else if (includes.contains(Sample.class)) {
-				includeInvestigation((Investigation) beanManaged, InvestigationInclude.SAMPLES_ONLY);
-
-			} else if (includes.contains(Shift.class)) {
-				includeInvestigation((Investigation) beanManaged, InvestigationInclude.SHIFT_ONLY);
-
-			} else {
-				throw new BadParameterException("Unable to deal with specified includes");
-			}
-		} else {
-			throw new BadParameterException("Unable to deal with specified includes");
-		}
 	}
 
 	public static EntityBaseBean find(EntityBaseBean bean, EntityManager manager) throws NoSuchObjectFoundException,
@@ -243,84 +158,78 @@ public class BeanManager {
 		return object;
 	}
 
-	private static void includeDataset(Dataset dataset, DatasetInclude include) {
-		dataset.setDatasetInclude(include);
-		ManagerUtil.log.trace("Setting data sets to include: " + include);
+	// This code might be in EntityBaseBean however this would mean that it
+	// would be processed by JPA which gets confused by it.
+	public static void merge(EntityBaseBean thisBean, Object fromBean, EntityManager manager)
+			throws IcatInternalException {
+		Class<? extends EntityBaseBean> klass = thisBean.getClass();
+		Map<Field, Method> setters = eiHandler.getSetters(klass);
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
 
-		if (include.isDatafiles()) {
-			// size invokes the JPA to get the information, other wise the collections are null
-			dataset.getDatafileCollection().size();
-		}
-
-		for (Datafile datafile : dataset.getDatafileCollection()) {
-			if (include.isDatafilesAndParameters()) {
-				datafile.setDatafileInclude(DatafileInclude.ALL);
-			} else {
-				datafile.setDatafileInclude(DatafileInclude.NONE);
+		for (Entry<Field, Method> fieldAndMethod : setters.entrySet()) {
+			Field field = fieldAndMethod.getKey();
+			try {
+				Method m = getters.get(field);
+				Object value = m.invoke(fromBean, new Object[0]);
+				if (EntityBaseBean.class.isAssignableFrom(field.getType())) {
+					log.debug("Needs special processing as " + value + " is a bean");
+					if (value != null) {
+						Object pk = ((EntityBaseBean) value).getPK();
+						log.debug("PK is " + pk);
+						value = (EntityBaseBean) manager.find(field.getType(), pk);
+						fieldAndMethod.getValue().invoke(thisBean, new Object[] { value });
+					} else {
+						fieldAndMethod.getValue().invoke(thisBean, (EntityBaseBean) null);
+					}
+				} else {
+					fieldAndMethod.getValue().invoke(thisBean, new Object[] { value });
+				}
+				log.trace("Updated " + klass.getSimpleName() + "." + field.getName() + " to " + value);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new IcatInternalException("" + e);
 			}
 		}
+
 	}
 
-	private static void includeInvestigation(Investigation investigation, InvestigationInclude include) {
-		ManagerUtil.log.trace("Setting investigation to include: " + include);
-		investigation.setInvestigationInclude(include);
+	// This code might be in EntityBaseBean however this would mean that it
+	// would be processed by JPA which gets confused by it.
+	@SuppressWarnings("unchecked")
+	public static void addIncludes(EntityBaseBean thisBean, Set<Class<? extends EntityBaseBean>> requestedIncludes)
+			throws IcatInternalException {
+		log.debug("addIncludes " + requestedIncludes + " for " + thisBean);
+		Class<? extends EntityBaseBean> entityClass = thisBean.getClass();
+		Set<Relationship> relationships = eiHandler.getRelatedEntities(entityClass);
+		for (Relationship r : relationships) {
+			if (r.isCollection()) {
+				Class<? extends EntityBaseBean> bean = r.getBean();
+				if (requestedIncludes.contains(bean)) {
 
-		if (include.isInvestigators()) {
-			ManagerUtil.log.trace("Including investigators");
-			investigation.getInvestigatorCollection().size();
-		}
-		if (include.isKeywords()) {
-			ManagerUtil.log.trace("Including keywords");
-			investigation.getKeywordCollection().size();
-		}
-		if (include.isPublications()) {
-			ManagerUtil.log.trace("Including publications");
-			investigation.getPublicationCollection().size();
-		}
-		if (include.isSamples()) {
-			ManagerUtil.log.trace("Including samples");
-			investigation.getSampleCollection().size();
-		}
-		if (include.isShifts()) {
-			ManagerUtil.log.trace("Including shifts");
-			investigation.getShiftCollection().size();
-		}
+					// Mark as wanted
+					thisBean.getIncludes().add(bean);
 
-		if (include.isDatasetsAndDatafiles()) {
-			ManagerUtil.log.trace("Including Datasets And Datafiles");
-			investigation.getDatasetCollection().size();
+					// Avoid looping forever
+					HashSet<Class<? extends EntityBaseBean>> includeReduced = new HashSet<Class<? extends EntityBaseBean>>(
+							requestedIncludes);
+					includeReduced.remove(bean);
 
-		} else if (include.isDatasets()) {
-			ManagerUtil.log.trace("Including Datasets only");
-			investigation.getDatasetCollection().size();
-
-		}
-
-		if (include == InvestigationInclude.DATASETS_AND_DATASET_PARAMETERS_ONLY) {
-			for (Dataset dataset : investigation.getDatasetCollection()) {
-				ManagerUtil.log.trace("Setting data sets to include: " + DatasetInclude.DATASET_PARAMETERS_ONLY);
-				dataset.setDatasetInclude(DatasetInclude.DATASET_PARAMETERS_ONLY);
-			}
-		} else if (include.isDatasetsAndDatafiles() && !include.isDatasetsDatafilesAndParameters()) {
-			for (Dataset dataset : investigation.getDatasetCollection()) {
-				ManagerUtil.log.trace("Setting data sets to include: " + DatasetInclude.DATASET_AND_DATAFILES_ONLY);
-				dataset.setDatasetInclude(DatasetInclude.DATASET_AND_DATAFILES_ONLY);
-				for (Datafile datafile : dataset.getDatafileCollection()) {
-					ManagerUtil.log.trace("Setting data file to include: " + DatafileInclude.NONE);
-					datafile.setDatafileInclude(DatafileInclude.NONE);
-				}
-			}
-		} else if (include.isDatasetsDatafilesAndParameters()) {
-			for (Dataset dataset : investigation.getDatasetCollection()) {
-				ManagerUtil.log.trace("Setting data sets to include: "
-						+ DatasetInclude.DATASET_DATAFILES_AND_PARAMETERS);
-				dataset.setDatasetInclude(DatasetInclude.DATASET_DATAFILES_AND_PARAMETERS);
-				for (Datafile datafile : dataset.getDatafileCollection()) {
-					ManagerUtil.log.trace("Setting data file to include: " + DatafileInclude.ALL);
-					datafile.setDatafileInclude(DatafileInclude.ALL);
+					// Recurse into collection
+					Map<Field, Method> getters = eiHandler.getGetters(thisBean.getClass());
+					Collection<EntityBaseBean> collection = null;
+					Field field = r.getField();
+					try {
+						collection = (Collection<EntityBaseBean>) getters.get(field).invoke(thisBean, (Object[]) null);
+					} catch (Exception e) {
+						throw new IcatInternalException(e.toString());
+					}
+					for (EntityBaseBean b : collection) {
+						b.addIncludes(includeReduced);
+					}
 				}
 			}
 		}
+
 	}
 
 }

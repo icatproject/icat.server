@@ -66,12 +66,12 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	protected static Logger log = Logger.getLogger(Dataset.class);
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-	private Collection<Datafile> datafileCollection = new ArrayList<Datafile>();
+	protected Collection<Datafile> datafileCollection = new ArrayList<Datafile>();
 
 	private transient DatasetInclude datasetInclude = DatasetInclude.NONE;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-	private Collection<DatasetParameter> datasetParameterCollection = new ArrayList<DatasetParameter>();
+	protected Collection<DatasetParameter> datasetParameterCollection = new ArrayList<DatasetParameter>();
 
 	@Column(name = "DATASET_STATUS")
 	private String datasetStatus;
@@ -235,7 +235,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@SuppressWarnings("unused")
 	@XmlElement(name = "datafileCollection")
 	private Collection<Datafile> getDatafileCollection_() {
-		if (this.datasetInclude.isDatafiles()) {
+		if (this.datasetInclude.isDatafiles() || includes.contains(Datafile.class)) {
 			return this.datafileCollection;
 		} else {
 			return null;
@@ -262,7 +262,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@SuppressWarnings("unused")
 	@XmlElement(name = "datasetParameterCollection")
 	private Collection<DatasetParameter> getDatasetParameterCollection_() {
-		if (this.datasetInclude.isDatasetParameters()) {
+		if (this.datasetInclude.isDatasetParameters() || includes.contains(DatasetParameter.class)) {
 			return this.datasetParameterCollection;
 		} else {
 			return null;

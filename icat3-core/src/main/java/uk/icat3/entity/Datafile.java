@@ -50,7 +50,8 @@ import uk.icat3.util.DatafileInclude;
 /**
  * Entity class Datafile
  * 
- * @author gjd37 Modification: 02-Sep-2009 (SN): Removed commented code and redundant code
+ * @author gjd37 Modification: 02-Sep-2009 (SN): Removed commented code and
+ *         redundant code
  */
 @SuppressWarnings("serial")
 @Entity
@@ -108,7 +109,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	private Date datafileModifyTime;
 
 	@Column(name = "FILE_SIZE")
-	private Integer fileSize;
+	private Long fileSize;
 
 	@Column(name = "COMMAND")
 	private String command;
@@ -120,10 +121,10 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	private String signature;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
-	private Collection<RelatedDatafiles> relatedDatafilesCollection;
+	protected Collection<RelatedDatafiles> relatedDatafilesCollection;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile1")
-	private Collection<RelatedDatafiles> relatedDatafilesCollection1;
+	protected Collection<RelatedDatafiles> relatedDatafilesCollection1;
 
 	@JoinColumns(value = { @JoinColumn(name = "DATAFILE_FORMAT", referencedColumnName = "NAME"),
 			@JoinColumn(name = "DATAFILE_FORMAT_VERSION", referencedColumnName = "VERSION") })
@@ -139,7 +140,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	private transient Long datasetId;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
-	private Collection<DatafileParameter> datafileParameterCollection = new ArrayList<DatafileParameter>();
+	protected Collection<DatafileParameter> datafileParameterCollection = new ArrayList<DatafileParameter>();
 
 	/**
 	 * What to include within the datafile for searches or gets
@@ -331,7 +332,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	 * 
 	 * @return the fileSize
 	 */
-	public Integer getFileSize() {
+	public Long getFileSize() {
 		return this.fileSize;
 	}
 
@@ -341,7 +342,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	 * @param fileSize
 	 *            the new fileSize
 	 */
-	public void setFileSize(Integer fileSize) {
+	public void setFileSize(Long fileSize) {
 		this.fileSize = fileSize;
 	}
 
@@ -413,7 +414,8 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Sets the relatedDatafilesCollection of this Datafile to the specified value.
+	 * Sets the relatedDatafilesCollection of this Datafile to the specified
+	 * value.
 	 * 
 	 * @param relatedDatafilesCollection
 	 *            the new relatedDatafilesCollection
@@ -423,15 +425,16 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * This method is used by JAXWS to map to datasetParameterCollection. Depending on what the
-	 * include is set to depends on what is returned to JAXWS and serialised into XML. This is
-	 * because without XmlTransient all the collections in the domain model are serialised into XML
-	 * (meaning alot of DB hits and serialisation).
+	 * This method is used by JAXWS to map to datasetParameterCollection.
+	 * Depending on what the include is set to depends on what is returned to
+	 * JAXWS and serialised into XML. This is because without XmlTransient all
+	 * the collections in the domain model are serialised into XML (meaning alot
+	 * of DB hits and serialisation).
 	 */
 	@SuppressWarnings("unused")
 	@XmlElement(name = "relatedDatafilesCollection")
 	private Collection<RelatedDatafiles> getRelatedDatafilesCollection_() {
-		if (datafileInclude.isRelatedDatafiles()) {
+		if (datafileInclude.isRelatedDatafiles() || includes.contains(RelatedDatafiles.class)) {
 			return this.relatedDatafilesCollection;
 		} else {
 			return null;
@@ -453,7 +456,8 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Sets the relatedDatafilesCollection1 of this Datafile to the specified value.
+	 * Sets the relatedDatafilesCollection1 of this Datafile to the specified
+	 * value.
 	 * 
 	 * @param relatedDatafilesCollection1
 	 *            the new relatedDatafilesCollection1
@@ -531,7 +535,8 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Sets the datafileParameterCollection of this Datafile to the specified value.
+	 * Sets the datafileParameterCollection of this Datafile to the specified
+	 * value.
 	 * 
 	 * @param datafileParameterCollection
 	 *            the new datafileParameterCollection
@@ -541,15 +546,15 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * This method is used by JAXWS to map to datasetParameterCollection. Depending on what the
-	 * include is set to depends on what is returned to JAXWS and serialised into XML. This is
-	 * because without XmlTransient all the collections in the domain model are serialised into XML
-	 * (meaning alot of DB hits and serialisation).
+	 * This method is used by JAXWS to map to datasetParameterCollection.
+	 * Depending on what the include is set to depends on what is returned to
+	 * JAXWS and serialised into XML. This is because without XmlTransient all
+	 * the collections in the domain model are serialised into XML.
 	 */
 	@SuppressWarnings("unused")
 	@XmlElement(name = "datafileParameterCollection")
 	private Collection<DatafileParameter> getDatafileParameterCollection_() {
-		if (datafileInclude.isDatafileParameters()) {
+		if (datafileInclude.isDatafileParameters() || includes.contains(DatafileParameter.class)) {
 			return this.datafileParameterCollection;
 		} else {
 			return null;
@@ -577,8 +582,8 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Returns a hash code value for the object. This implementation computes a hash code value
-	 * based on the id fields in this object.
+	 * Returns a hash code value for the object. This implementation computes a
+	 * hash code value based on the id fields in this object.
 	 * 
 	 * @return a hash code value for this object.
 	 */
@@ -590,18 +595,19 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Determines whether another object is equal to this Datafile. The result is <code>true</code>
-	 * if and only if the argument is not null and is a Datafile object that has the same id field
-	 * values as this object.
+	 * Determines whether another object is equal to this Datafile. The result
+	 * is <code>true</code> if and only if the argument is not null and is a
+	 * Datafile object that has the same id field values as this object.
 	 * 
 	 * @param object
 	 *            the reference object with which to compare
-	 * @return <code>true</code> if this object is the same as the argument; <code>false</code>
-	 *         otherwise.
+	 * @return <code>true</code> if this object is the same as the argument;
+	 *         <code>false</code> otherwise.
 	 */
 	@Override
 	public boolean equals(Object object) {
-		// TODO: Warning - this method won't work in the case the id fields are not set
+		// TODO: Warning - this method won't work in the case the id fields are
+		// not set
 		if (!(object instanceof Datafile)) {
 			return false;
 		}
@@ -613,8 +619,8 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Returns a string representation of the object. This implementation constructs that
-	 * representation based on the id fields.
+	 * Returns a string representation of the object. This implementation
+	 * constructs that representation based on the id fields.
 	 * 
 	 * @return a string representation of the object.
 	 */
@@ -624,12 +630,12 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Overrides the isValid function, checks each of the datafiles and datafile parameters are
-	 * valid
+	 * Overrides the isValid function, checks each of the datafiles and datafile
+	 * parameters are valid
 	 * 
 	 * @throws ValidationException
 	 * @return
-	 * @throws IcatInternalException 
+	 * @throws IcatInternalException
 	 */
 	@Override
 	public void isValid(EntityManager manager) throws ValidationException, IcatInternalException {
@@ -673,9 +679,9 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * This method checks whether the datafile already exists, if it does then it will throw a
-	 * validation exception. The field that it check is Name, Location, and Dataset ID. These form
-	 * Composite Unique key.
+	 * This method checks whether the datafile already exists, if it does then
+	 * it will throw a validation exception. The field that it check is Name,
+	 * Location, and Dataset ID. These form Composite Unique key.
 	 * 
 	 * @param manager
 	 * @return
@@ -717,10 +723,11 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		id = null;
 		for (DatafileParameter datafileParameter : datafileParameterCollection) {
 			datafileParameter.preparePersist(modId, manager);
-			datafileParameter.setDatafile(this); // Must set the backwards reference
+			datafileParameter.setDatafile(this); // Must set the backwards
+													// reference
 		}
 	}
-	
+
 	@Override
 	public void preparePersistTop(String modId, EntityManager manager) throws NoSuchObjectFoundException {
 		super.preparePersistTop(modId, manager);

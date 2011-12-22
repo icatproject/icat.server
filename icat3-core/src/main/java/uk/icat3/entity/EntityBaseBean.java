@@ -13,9 +13,11 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
@@ -32,6 +34,7 @@ import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ObjectAlreadyExistsException;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.manager.BeanManager;
 import uk.icat3.security.EntityInfoHandler;
 
 @SuppressWarnings("serial")
@@ -60,6 +63,12 @@ public abstract class EntityBaseBean implements Serializable {
 
 	@Column(name = "MOD_ID", nullable = false)
 	protected String modId;
+
+	protected transient Set<Class<? extends EntityBaseBean>> includes = new HashSet<Class<? extends EntityBaseBean>>();
+
+	public Set<Class<? extends EntityBaseBean>> getIncludes() {
+		return includes;
+	}
 
 	/**
 	 * Gets the modTime of this entity.
@@ -118,7 +127,8 @@ public abstract class EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Automatically updates deleted, modTime, createTime and modId when entity is created
+	 * Automatically updates deleted, modTime, createTime and modId when entity
+	 * is created
 	 * 
 	 * @throws IcatInternalException
 	 */
@@ -177,7 +187,8 @@ public abstract class EntityBaseBean implements Serializable {
 	}
 
 	/*
-	 * If this method is overridden it should normally be called as well by super.isValid()
+	 * If this method is overridden it should normally be called as well by
+	 * super.isValid()
 	 */
 	public void isValid(EntityManager manager) throws ValidationException, IcatInternalException {
 		isValid(manager, true);
@@ -189,37 +200,26 @@ public abstract class EntityBaseBean implements Serializable {
 	}
 
 	/*
-	 * If this method is overridden it should normally be called as well by super.isValid()
+	 * If this method is overridden it should normally be called as well by
+	 * super.merge()
 	 */
-	public void merge(Object from, EntityManager manager) throws ValidationException, IcatInternalException, NoSuchObjectFoundException {
-
-		Class<? extends EntityBaseBean> klass = this.getClass();
-		Map<Field, Method> setters = eiHandler.getSetters(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-
-		for (Entry<Field, Method> entry : setters.entrySet()) {
-			Field field = entry.getKey();
-			try {
-				Method m = getters.get(field);
-				Object value = m.invoke(from, new Object[0]);
-				entry.getValue().invoke(this, new Object[] { value });
-				logger.trace("Updated " + klass.getSimpleName() + "." + field.getName() + " to " + value);
-			} catch (Exception e) {
-				throw new IcatInternalException("" + e);
-			}
-		}
+	public void merge(Object from, EntityManager manager) throws ValidationException, IcatInternalException,
+			NoSuchObjectFoundException {
+		BeanManager.merge(this,  from,  manager);
 		this.postMergeFixup(manager);
 	}
 
 	/*
-	 * If this method is overridden it should normally be called as well by super.isValid()
+	 * If this method is overridden it should normally be called as well by
+	 * super.isValid()
 	 */
 	public void postMergeFixup(EntityManager manager) throws NoSuchObjectFoundException {
 		// Do nothing by default
 	}
 
 	/*
-	 * If this method is overridden it should normally be called as well by super.isUnique()
+	 * If this method is overridden it should normally be called as well by
+	 * super.isUnique()
 	 */
 	public void isUnique(EntityManager manager) throws ValidationException, ObjectAlreadyExistsException,
 			IcatInternalException {
@@ -235,7 +235,6 @@ public abstract class EntityBaseBean implements Serializable {
 						+ "] already present.");
 			}
 		}
-
 	}
 
 	public void preparePersistTop(String modId, EntityManager manager) throws NoSuchObjectFoundException {
@@ -247,4 +246,9 @@ public abstract class EntityBaseBean implements Serializable {
 	}
 
 	public abstract Object getPK();
+
+	public void addIncludes(Set<Class<? extends EntityBaseBean>> requestedIncludes) throws IcatInternalException {
+		BeanManager.addIncludes(this, requestedIncludes);
+
+	}
 }

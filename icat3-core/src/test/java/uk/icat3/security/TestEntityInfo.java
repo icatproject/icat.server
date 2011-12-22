@@ -26,6 +26,7 @@ import uk.icat3.security.EntityInfoHandler.KeyType;
 import uk.icat3.security.EntityInfoHandler.Relationship;
 import uk.icat3.util.BaseTestTransaction;
 
+
 public class TestEntityInfo extends BaseTestTransaction {
 
 	private static EntityInfoHandler pkHandler = EntityInfoHandler.getInstance();
@@ -39,6 +40,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testPKS(Investigator.class, "getInvestigatorPK", "getInvestigationId", "getFacilityUserId");
 		testPKS(FacilityUser.class, "getFacilityUserId");
 		testPKS(Topic.class, "getId");
+//		testPKS(Job.class, "getId");
 	}
 
 	private void testPKS(Class<? extends EntityBaseBean> klass, String... pkname) throws Exception {
@@ -61,7 +63,8 @@ public class TestEntityInfo extends BaseTestTransaction {
 				"FacilityCycle by facilityCycle one");
 
 		testRel(Dataset.class, "DatasetParameter by datasetParameterCollection many",
-				"Datafile by datafileCollection many", "Investigation by investigation one");
+				"Datafile by datafileCollection many", "Investigation by investigation one", "Job by withInputs many",
+				"Job by withOutputs many");
 
 		testRel(Keyword.class, "Investigation by investigation one");
 
@@ -71,6 +74,8 @@ public class TestEntityInfo extends BaseTestTransaction {
 
 		testRel(FacilityUser.class, "Investigator by investigatorCollection many");
 		testRel(Topic.class, "TopicList by topicListCollection many");
+//		testRel(Job.class, "Dataset by inputDatasets many", "Application by application one",
+//				"Datafile by inputDatafiles many", "Dataset by outputDatasets many", "Datafile by outputDatafiles many");
 
 	}
 
@@ -97,6 +102,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testNNF(FacilityUser.class, "facilityUserId");
 		testNNF(Topic.class, "id");
 		testNNF(Parameter.class, "valueType");
+//		testNNF(Job.class);
 	}
 
 	private void testNNF(Class<? extends EntityBaseBean> klass, String... nnfs) throws Exception {
@@ -125,6 +131,8 @@ public class TestEntityInfo extends BaseTestTransaction {
 				"federalId 255", "firstName 255");
 		testSF(Topic.class, "name 255");
 		testSF(Parameter.class, "description 255", "nonNumericValueFormat 255", "unitsLongVersion 255");
+//		testSF(Job.class);
+
 	}
 
 	private void testSF(Class<? extends EntityBaseBean> klass, String... sfs) throws Exception {
@@ -143,13 +151,14 @@ public class TestEntityInfo extends BaseTestTransaction {
 	@Test
 	public void getters() throws Exception {
 		testGetters(Investigation.class, 25);
-		testGetters(Dataset.class, 13);
+		testGetters(Dataset.class, 15);
 		testGetters(Keyword.class, 2);
 		testGetters(TopicList.class, 3);
 		testGetters(Investigator.class, 4);
 		testGetters(FacilityUser.class, 8);
 		testGetters(Topic.class, 5);
 		testGetters(Parameter.class, 12);
+//		testGetters(Job.class, 6);
 	}
 
 	private void testGetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
@@ -160,7 +169,6 @@ public class TestEntityInfo extends BaseTestTransaction {
 			cap = Character.toUpperCase(cap.charAt(0)) + cap.substring(1);
 			String m = entry.getValue().getName();
 			assertTrue(klass.getSimpleName() + " value ", m.equals("get" + cap) || m.equals("is" + cap));
-			System.out.println(entry.getKey().getName() + " " + entry.getValue().getName());
 		}
 
 	}
@@ -175,6 +183,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testSetters(FacilityUser.class, 6);
 		testSetters(Topic.class, 3);
 		testSetters(Parameter.class, 8);
+//		testSetters(Job.class, 1);
 	}
 
 	private void testSetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
@@ -187,22 +196,22 @@ public class TestEntityInfo extends BaseTestTransaction {
 			assertTrue(klass.getSimpleName() + " value ", m.equals("set" + cap));
 		}
 	}
-	
+
 	@Test
 	public void keytype() throws Exception {
 		testKeytype(Investigation.class, EntityInfoHandler.KeyType.GENERATED);
-		testKeytype(Dataset.class,EntityInfoHandler.KeyType.GENERATED);
-		testKeytype(Keyword.class,EntityInfoHandler.KeyType.COMPOUND);
+		testKeytype(Dataset.class, EntityInfoHandler.KeyType.GENERATED);
+		testKeytype(Keyword.class, EntityInfoHandler.KeyType.COMPOUND);
 		testKeytype(TopicList.class, EntityInfoHandler.KeyType.COMPOUND);
-		testKeytype(Investigator.class,EntityInfoHandler.KeyType.COMPOUND);
+		testKeytype(Investigator.class, EntityInfoHandler.KeyType.COMPOUND);
 		testKeytype(FacilityUser.class, EntityInfoHandler.KeyType.SIMPLE);
 		testKeytype(Topic.class, EntityInfoHandler.KeyType.SIMPLE);
-		testKeytype(Parameter.class,EntityInfoHandler.KeyType.COMPOUND);
+		testKeytype(Parameter.class, EntityInfoHandler.KeyType.COMPOUND);
+		//		testKeytype(Job.class, EntityInfoHandler.KeyType.GENERATED);
 	}
 
 	private void testKeytype(Class<? extends EntityBaseBean> klass, KeyType keyType) throws Exception {
 		assertEquals(klass.getSimpleName() + " keyType", keyType, pkHandler.getKeytype(klass));
 	}
-
 
 }

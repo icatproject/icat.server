@@ -99,7 +99,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@Column(name = "TITLE", nullable = false)
 	private String title;
 
-	@Column(name = "INV_ABSTRACT", length=4000)
+	@Column(name = "INV_ABSTRACT", length = 4000)
 	private String invAbstract;
 
 	@Column(name = "PREV_INV_NUMBER")
@@ -133,10 +133,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	private Date invEndDate;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
-	private Collection<Publication> publicationCollection;
+	protected Collection<Publication> publicationCollection;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
-	private Collection<Sample> sampleCollection;
+	protected Collection<Sample> sampleCollection;
 
 	@JoinColumn(name = "FACILITY_CYCLE", referencedColumnName = "NAME")
 	@ManyToOne
@@ -165,22 +165,22 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private Collection<Dataset> datasetCollection = new ArrayList<Dataset>();
+	protected Collection<Dataset> datasetCollection = new ArrayList<Dataset>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private Collection<Shift> shiftCollection;
+	protected Collection<Shift> shiftCollection;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private Collection<Keyword> keywordCollection;
+	protected Collection<Keyword> keywordCollection;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private Collection<StudyInvestigation> studyInvestigationCollection;
+	protected Collection<StudyInvestigation> studyInvestigationCollection;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private Collection<Investigator> investigatorCollection;
+	protected Collection<Investigator> investigatorCollection;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private Collection<TopicList> topicListCollection;
+	protected Collection<TopicList> topicListCollection;
 
 	/**
 	 * InvestigationIncludes that needs to be added to the investigation
@@ -405,7 +405,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Adds a Publication to the investigation, also adds the investigation to the Publication.
+	 * Adds a Publication to the investigation, also adds the investigation to
+	 * the Publication.
 	 */
 	public void addPublication(Publication publication) {
 		publication.setInvestigationId(this);
@@ -419,21 +420,23 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * This method is used by JAXWS to map to datasetCollection. Depending on what the include is
-	 * set to depends on what is returned to JAXWS and serialised into XML. This is because without
-	 * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+	 * This method is used by JAXWS to map to datasetCollection. Depending on
+	 * what the include is set to depends on what is returned to JAXWS and
+	 * serialised into XML. This is because without XmlTransient all the
+	 * collections in the domain model are serialised into XML (meaning alot of
 	 * DB hits and serialisation).
 	 */
 	@XmlElement(name = "publicationCollection")
 	private Collection<Publication> getPublicationCollection_() {
-		if (investigationInclude.isPublications()) {
+		if (investigationInclude.isPublications() || includes.contains(Publication.class)) {
 			return this.publicationCollection;
 		} else
 			return null;
 	}
 
 	/**
-	 * Sets the publicationCollection of this Investigation to the specified value.
+	 * Sets the publicationCollection of this Investigation to the specified
+	 * value.
 	 * 
 	 * @param publicationCollection
 	 *            the new publicationCollection
@@ -453,7 +456,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Adds a Sample to the investigation, also adds the investigation to the Sample.
+	 * Adds a Sample to the investigation, also adds the investigation to the
+	 * Sample.
 	 */
 	public void addSample(Sample sample) {
 		sample.setInvestigationId(this);
@@ -468,14 +472,15 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * This method is used by JAXWS to map to datasetCollection. Depending on what the include is
-	 * set to depends on what is returned to JAXWS and serialised into XML. This is because without
-	 * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+	 * This method is used by JAXWS to map to datasetCollection. Depending on
+	 * what the include is set to depends on what is returned to JAXWS and
+	 * serialised into XML. This is because without XmlTransient all the
+	 * collections in the domain model are serialised into XML (meaning alot of
 	 * DB hits and serialisation).
 	 */
 	@XmlElement(name = "sampleCollection")
 	private Collection<Sample> getSampleCollection_() {
-		if (investigationInclude.isSamples()) {
+		if (investigationInclude.isSamples() || includes.contains(Sample.class)) {
 			return this.sampleCollection;
 		} else
 			return null;
@@ -522,14 +527,15 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * This method is used by JAXWS to map to datasetCollection. Depending on what the include is
-	 * set to depends on what is returned to JAXWS and serialised into XML. This is because without
-	 * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+	 * This method is used by JAXWS to map to datasetCollection. Depending on
+	 * what the include is set to depends on what is returned to JAXWS and
+	 * serialised into XML. This is because without XmlTransient all the
+	 * collections in the domain model are serialised into XML (meaning alot of
 	 * DB hits and serialisation).
 	 */
 	@XmlElement(name = "datasetCollection")
 	private Collection<Dataset> getDatasetCollection_() {
-		if (investigationInclude.isDatasets()) {
+		if (investigationInclude.isDatasets() || includes.contains(Dataset.class)) {
 			return this.datasetCollection;
 		} else
 			return null;
@@ -550,7 +556,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Adds a DataSet to the investigation, also adds the investigation to the DataSet.
+	 * Adds a DataSet to the investigation, also adds the investigation to the
+	 * DataSet.
 	 */
 	public void addDataSet(Dataset dataSet) {
 		dataSet.setInvestigation(this);
@@ -585,14 +592,15 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * This method is used by JAXWS to map to shiftCollection. Depending on what the include is set
-	 * to depends on what is returned to JAXWS and serialised into XML. This is because without
-	 * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
-	 * DB hits and serialisation).
+	 * This method is used by JAXWS to map to shiftCollection. Depending on what
+	 * the include is set to depends on what is returned to JAXWS and serialised
+	 * into XML. This is because without XmlTransient all the collections in the
+	 * domain model are serialised into XML (meaning alot of DB hits and
+	 * serialisation).
 	 */
 	@XmlElement(name = "shiftCollection")
 	private Collection<Shift> getShiftCollection_() {
-		if (investigationInclude.isShifts()) {
+		if (investigationInclude.isShifts() || includes.contains(Shift.class)) {
 			return this.shiftCollection;
 		} else
 			return null;
@@ -614,14 +622,15 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * This method is used by JAXWS to map to keywordCollection. Depending on what the include is
-	 * set to depends on what is returned to JAXWS and serialised into XML. This is because without
-	 * XmlTransient all the collections in the domain model are serialised into XML (meaning alot of
+	 * This method is used by JAXWS to map to keywordCollection. Depending on
+	 * what the include is set to depends on what is returned to JAXWS and
+	 * serialised into XML. This is because without XmlTransient all the
+	 * collections in the domain model are serialised into XML (meaning alot of
 	 * DB hits and serialisation).
 	 */
 	@XmlElement(name = "keywordCollection")
 	private Collection<Keyword> getKeywordCollection_() {
-		if (investigationInclude.isKeywords()) {
+		if (investigationInclude.isKeywords() || includes.contains(Keyword.class)) {
 			return this.keywordCollection;
 		} else
 			return null;
@@ -642,7 +651,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Adds a Keyword to the investigation, also adds the investigation to the Keyword.
+	 * Adds a Keyword to the investigation, also adds the investigation to the
+	 * Keyword.
 	 */
 	public void addKeyword(Keyword keyword) {
 		keyword.setInvestigation(this);
@@ -674,7 +684,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Sets the studyInvestigationCollection of this Investigation to the specified value.
+	 * Sets the studyInvestigationCollection of this Investigation to the
+	 * specified value.
 	 * 
 	 * @param studyInvestigationCollection
 	 *            the new studyInvestigationCollection
@@ -700,14 +711,15 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	 */
 
 	/**
-	 * This method is used by JAXWS to map to investigatorCollection. Depending on what the include
-	 * is set to depends on what is returned to JAXWS and serialised into XML. This is because
-	 * without XmlTransient all the collections in the domain model are serialised into XML (meaning
-	 * alot of DB hits and serialisation).
+	 * This method is used by JAXWS to map to investigatorCollection. Depending
+	 * on what the include is set to depends on what is returned to JAXWS and
+	 * serialised into XML. This is because without XmlTransient all the
+	 * collections in the domain model are serialised into XML (meaning alot of
+	 * DB hits and serialisation).
 	 */
 	@XmlElement(name = "investigatorCollection")
 	private Collection<Investigator> getInvestigatorCollection_() {
-		if (investigationInclude.isInvestigators()) {
+		if (investigationInclude.isInvestigators() || includes.contains(Investigator.class)) {
 			return this.investigatorCollection;
 			// return null;
 		} else
@@ -719,7 +731,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Adds a Keyword to the investigation, also adds the investigation to the Keyword.
+	 * Adds a Keyword to the investigation, also adds the investigation to the
+	 * Keyword.
 	 */
 	public void addInvestigator(Investigator investigator) {
 		investigator.getInvestigatorPK().setInvestigationId(this.id);
@@ -733,7 +746,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Sets the investigatorCollection of this Investigation to the specified value.
+	 * Sets the investigatorCollection of this Investigation to the specified
+	 * value.
 	 * 
 	 * @param investigatorCollection
 	 *            the new investigatorCollection
@@ -753,7 +767,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Sets the topicListCollection of this Investigation to the specified value.
+	 * Sets the topicListCollection of this Investigation to the specified
+	 * value.
 	 * 
 	 * @param topicListCollection
 	 *            the new topicListCollection
@@ -763,8 +778,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Returns a hash code value for the object. This implementation computes a hash code value
-	 * based on the id fields in this object.
+	 * Returns a hash code value for the object. This implementation computes a
+	 * hash code value based on the id fields in this object.
 	 * 
 	 * @return a hash code value for this object.
 	 */
@@ -776,18 +791,20 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Determines whether another object is equal to this Investigation. The result is
-	 * <code>true</code> if and only if the argument is not null and is a Investigation object that
-	 * has the same id field values as this object.
+	 * Determines whether another object is equal to this Investigation. The
+	 * result is <code>true</code> if and only if the argument is not null and
+	 * is a Investigation object that has the same id field values as this
+	 * object.
 	 * 
 	 * @param object
 	 *            the reference object with which to compare
-	 * @return <code>true</code> if this object is the same as the argument; <code>false</code>
-	 *         otherwise.
+	 * @return <code>true</code> if this object is the same as the argument;
+	 *         <code>false</code> otherwise.
 	 */
 	@Override
 	public boolean equals(Object object) {
-		// TODO: Warning - this method won't work in the case the id fields are not set
+		// TODO: Warning - this method won't work in the case the id fields are
+		// not set
 		if (!(object instanceof Investigation)) {
 			return false;
 		}
@@ -798,8 +815,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Returns a string representation of the object. This implementation constructs that
-	 * representation based on the id fields.
+	 * Returns a string representation of the object. This implementation
+	 * constructs that representation based on the id fields.
 	 * 
 	 * @return a string representation of the object.
 	 */
@@ -809,9 +826,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	/**
-	 * Method to be overriding if needed to check if the data held in the entity is valid. This
-	 * method should be used for search DB for foreign key constraints etc Deep validation if all of
-	 * its children need to be validated
+	 * Method to be overriding if needed to check if the data held in the entity
+	 * is valid. This method should be used for search DB for foreign key
+	 * constraints etc Deep validation if all of its children need to be
+	 * validated
 	 * 
 	 * @return true if validation is correct,
 	 * @param manager
@@ -820,9 +838,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	 *            if all of child entities need to be validated
 	 * @throws ValidationException
 	 *             if validation error.
-	 * @throws IcatInternalException 
+	 * @throws IcatInternalException
 	 */
-	public void isValid(EntityManager manager, boolean deepValidation) throws ValidationException, IcatInternalException {
+	public void isValid(EntityManager manager, boolean deepValidation) throws ValidationException,
+			IcatInternalException {
 		super.isValid(manager, deepValidation);
 
 		if (deepValidation) {
@@ -856,9 +875,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	/**
 	 * Checks weather the investigation is unique in the database.
-	 * @throws ObjectAlreadyExistsException 
+	 * 
+	 * @throws ObjectAlreadyExistsException
 	 */
-	public void isUnique(EntityManager manager) throws ObjectAlreadyExistsException  {
+	public void isUnique(EntityManager manager) throws ObjectAlreadyExistsException {
 		log.trace("isUnique?");
 		Query query = manager.createNamedQuery("Investigation.findByUnique");
 		query = query.setParameter("invNumber", invNumber);
@@ -879,7 +899,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 				return;
 			} else {
 				log.trace("investigation found is not this investigation, so no unique");
-				throw new ObjectAlreadyExistsException(this + " is not unique.  Same unique key as " + investigationFound);
+				throw new ObjectAlreadyExistsException(this + " is not unique.  Same unique key as "
+						+ investigationFound);
 			}
 		} catch (NoResultException nre) {
 			log.trace("No results so unique");

@@ -17,7 +17,6 @@ import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
-import uk.icat3.manager.BeanManager;
 import uk.icat3.security.parser.Input;
 import uk.icat3.security.parser.LexerException;
 import uk.icat3.security.parser.ParserException;
@@ -68,7 +67,7 @@ public class Search {
 			}
 			jpqlQuery.setParameter("ts" + m.group(1), d);
 		}
-		
+
 		Integer offset = q.getOffset();
 		if (offset != null) {
 			jpqlQuery.setFirstResult(offset);
@@ -77,14 +76,13 @@ public class Search {
 		if (number != null) {
 			jpqlQuery.setMaxResults(number);
 		}
-		
 
 		List<?> result = jpqlQuery.getResultList();
 
 		Set<Class<? extends EntityBaseBean>> includes = q.getIncludes();
 		if (includes.size() > 0) {
 			for (Object beanManaged : result) {
-				BeanManager.processIncludes((EntityBaseBean) beanManaged, includes);
+				((EntityBaseBean) beanManaged).addIncludes(includes);
 			}
 		}
 
