@@ -11,8 +11,11 @@
 	<artifactId>icat3-client</artifactId>
 	<packaging>jar</packaging>
 	<name>icat3-client</name>
-	
-	<properties><wsdl>http://localhost:8080/ICATService/ICAT?wsdl</wsdl></properties>
+
+	<!-- <properties><wsdl>http://localhost:8080/ICATService/ICAT?wsdl</wsdl></properties> -->
+	<properties>
+		<wsdl>${basedir}/ICAT.wsdl</wsdl>
+	</properties>
 
 	<build>
 		<plugins>
@@ -31,6 +34,27 @@
 					<wsdlUrls>
 						<wsdlUrl>${wsdl}</wsdlUrl>
 					</wsdlUrls>
+				</configuration>
+			</plugin>
+
+			<plugin>
+
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.2.1</version>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<executable>sh</executable>
+					<arguments>
+						<argument>wsdl.sh</argument>
+					</arguments>
 				</configuration>
 			</plugin>
 
