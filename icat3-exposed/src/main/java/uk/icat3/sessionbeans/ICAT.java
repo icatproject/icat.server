@@ -19,6 +19,7 @@ import javax.xml.ws.ResponseWrapper;
 import org.apache.log4j.Logger;
 
 import uk.icat3.data.DownloadInfo;
+import uk.icat3.entity.Application;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.DatafileFormat;
 import uk.icat3.entity.DatafileParameter;
@@ -31,11 +32,16 @@ import uk.icat3.entity.Facility;
 import uk.icat3.entity.FacilityCycle;
 import uk.icat3.entity.FacilityInstrumentScientist;
 import uk.icat3.entity.FacilityUser;
+import uk.icat3.entity.InputDatafile;
+import uk.icat3.entity.InputDataset;
 import uk.icat3.entity.Instrument;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.InvestigationType;
 import uk.icat3.entity.Investigator;
+import uk.icat3.entity.Job;
 import uk.icat3.entity.Keyword;
+import uk.icat3.entity.OutputDatafile;
+import uk.icat3.entity.OutputDataset;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.Publication;
 import uk.icat3.entity.RelatedDatafiles;
@@ -204,7 +210,13 @@ public class ICAT extends EJBObject {
     		@WebParam StudyStatus studyStatus,
     		@WebParam Topic topic,
     		@WebParam TopicList topicList,
-    		@WebParam UserGroup userGroup
+    		@WebParam UserGroup userGroup,
+    		@WebParam Application application,
+    		@WebParam Job job,
+    		@WebParam InputDataset inputDataset,
+    		@WebParam OutputDataset outputDataset,
+    		@WebParam InputDatafile inputDatafile,
+    		@WebParam OutputDatafile outputDatafile
     ) {
     	beanManagerLocal.dummy(facility);
     }
