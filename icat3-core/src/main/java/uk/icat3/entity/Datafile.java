@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -79,7 +80,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	/**
 	 * Override logger
 	 */
-	protected static Logger log = Logger.getLogger(Datafile.class);
+	private static Logger log = Logger.getLogger(Datafile.class);
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DATAFILE_SEQ")
 	@Column(name = "ID", nullable = false)
@@ -121,10 +122,10 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	private String signature;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
-	protected Collection<RelatedDatafiles> relatedDatafilesCollection;
+	private Collection<RelatedDatafiles> relatedDatafilesCollection;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile1")
-	protected Collection<RelatedDatafiles> relatedDatafilesCollection1;
+	private Collection<RelatedDatafiles> relatedDatafilesCollection1;
 
 	@JoinColumns(value = { @JoinColumn(name = "DATAFILE_FORMAT", referencedColumnName = "NAME"),
 			@JoinColumn(name = "DATAFILE_FORMAT_VERSION", referencedColumnName = "VERSION") })
@@ -140,7 +141,13 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	private transient Long datasetId;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
-	protected Collection<DatafileParameter> datafileParameterCollection = new ArrayList<DatafileParameter>();
+	private Collection<DatafileParameter> datafileParameterCollection = new ArrayList<DatafileParameter>();
+	
+	@OneToMany(mappedBy = "datafile")
+	private Set<InputDatafile> inputDatafiles;
+
+	@OneToMany(mappedBy = "datafile")
+	private Set<OutputDatafile> outputDatafiles;
 
 	/**
 	 * What to include within the datafile for searches or gets
@@ -579,6 +586,36 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		datafileParameters.add(dataFileParameter);
 
 		this.setDatafileParameterCollection(datafileParameters);
+	}
+	
+	@XmlTransient
+	public Set<InputDatafile> getInputDatafiles() {
+		return this.inputDatafiles;
+	}
+
+	@SuppressWarnings("unused")
+	@XmlElement(name = "inputDatafiles")
+	private Set<InputDatafile> getInputDatafiles_() {
+		if (this.includes.contains(InputDatafile.class)) {
+			return this.inputDatafiles;
+		} else {
+			return null;
+		}
+	}
+	
+	@XmlTransient
+	public Set<OutputDatafile> getOutputDatafiles() {
+		return this.outputDatafiles;
+	}
+
+	@SuppressWarnings("unused")
+	@XmlElement(name = "outputDatafiles")
+	private Set<OutputDatafile> getOutputDatafiles_() {
+		if (this.includes.contains(OutputDatafile.class)) {
+			return this.outputDatafiles;
+		} else {
+			return null;
+		}
 	}
 
 	/**

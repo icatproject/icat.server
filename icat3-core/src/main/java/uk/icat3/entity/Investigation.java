@@ -83,7 +83,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	/**
 	 * Override logger
 	 */
-	protected static Logger log = Logger.getLogger(Investigation.class);
+	private static Logger log = Logger.getLogger(Investigation.class);
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "INVESTIGATION_SEQ")
@@ -133,10 +133,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	private Date invEndDate;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
-	protected Collection<Publication> publicationCollection;
+	private Collection<Publication> publicationCollection;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigationId")
-	protected Collection<Sample> sampleCollection;
+	private Collection<Sample> sampleCollection;
 
 	@JoinColumn(name = "FACILITY_CYCLE", referencedColumnName = "NAME")
 	@ManyToOne
@@ -165,22 +165,22 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	}
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	protected Collection<Dataset> datasetCollection = new ArrayList<Dataset>();
+	private Collection<Dataset> datasetCollection = new ArrayList<Dataset>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	protected Collection<Shift> shiftCollection;
+	private Collection<Shift> shiftCollection;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	protected Collection<Keyword> keywordCollection;
+	private Collection<Keyword> keywordCollection;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	protected Collection<StudyInvestigation> studyInvestigationCollection;
+	private Collection<StudyInvestigation> studyInvestigationCollection;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	protected Collection<Investigator> investigatorCollection;
+	private Collection<Investigator> investigatorCollection;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	protected Collection<TopicList> topicListCollection;
+	private Collection<TopicList> topicListCollection;
 
 	/**
 	 * InvestigationIncludes that needs to be added to the investigation

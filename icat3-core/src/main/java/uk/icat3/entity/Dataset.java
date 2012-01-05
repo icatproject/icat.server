@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -60,18 +61,15 @@ import uk.icat3.util.Queries;
 @SequenceGenerator(name = "DATASET_SEQ", sequenceName = "DATASET_ID_SEQ", allocationSize = 1)
 public class Dataset extends EntityBaseBean implements Serializable {
 
-	/**
-	 * Override logger
-	 */
-	protected static Logger log = Logger.getLogger(Dataset.class);
+	private final static Logger log = Logger.getLogger(Dataset.class);
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-	protected Collection<Datafile> datafileCollection = new ArrayList<Datafile>();
+	private Collection<Datafile> datafileCollection = new ArrayList<Datafile>();
 
 	private transient DatasetInclude datasetInclude = DatasetInclude.NONE;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-	protected Collection<DatasetParameter> datasetParameterCollection = new ArrayList<DatasetParameter>();
+	private Collection<DatasetParameter> datasetParameterCollection = new ArrayList<DatasetParameter>();
 
 	@Column(name = "DATASET_STATUS")
 	private String datasetStatus;
@@ -108,21 +106,11 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date startDate;
 
-	public Date getStartDate() {
-		return startDate;
-	}
+	@OneToMany(mappedBy = "dataset")
+	private Set<InputDataset> inputDatasets;
 
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
-
-	public Date getEndDate() {
-		return endDate;
-	}
-
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
+	@OneToMany(mappedBy = "dataset")
+	private Set<OutputDataset> outputDatasets;
 
 	@Column(name = "END_DATE")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -191,6 +179,14 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		this.setDatasetParameterCollection(datasetParameters);
 	}
 
+	@Override
+	public void canDelete(EntityManager manager) throws ValidationException {
+		super.canDelete(manager);
+		if (!this.inputDatasets.isEmpty()) {
+			throw new ValidationException("Datasets may not be deleted while there are related InputDatasets");
+		}
+	}
+
 	/**
 	 * Determines whether another object is equal to this Dataset. The result is
 	 * <code>true</code> if and only if the argument is not null and is a
@@ -208,34 +204,22 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		if (!(object instanceof Dataset)) {
 			return false;
 		}
-		Dataset other = (Dataset) object;
+		final Dataset other = (Dataset) object;
 		if (this.id != other.id && (this.id == null || !this.id.equals(other.id))) {
 			return false;
 		}
 		return true;
 	}
 
-	/**
-	 * Gets the datafileCollection of this Dataset.
-	 * 
-	 * @return the datafileCollection
-	 */
 	@XmlTransient
 	public Collection<Datafile> getDatafileCollection() {
 		return this.datafileCollection;
 	}
 
-	/**
-	 * This method is used by JAXWS to map to datafileCollection. Depending on
-	 * what the include is set to depends on what is returned to JAXWS and
-	 * serialised into XML. This is because without XmlTransient all the
-	 * collections in the domain model are serialised into XML (meaning alot of
-	 * DB hits and serialisation).
-	 */
 	@SuppressWarnings("unused")
 	@XmlElement(name = "datafileCollection")
 	private Collection<Datafile> getDatafileCollection_() {
-		if (this.datasetInclude.isDatafiles() || includes.contains(Datafile.class)) {
+		if (this.datasetInclude.isDatafiles() || this.includes.contains(Datafile.class)) {
 			return this.datafileCollection;
 		} else {
 			return null;
@@ -262,7 +246,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@SuppressWarnings("unused")
 	@XmlElement(name = "datasetParameterCollection")
 	private Collection<DatasetParameter> getDatasetParameterCollection_() {
-		if (this.datasetInclude.isDatasetParameters() || includes.contains(DatasetParameter.class)) {
+		if (this.datasetInclude.isDatasetParameters() || this.includes.contains(DatasetParameter.class)) {
 			return this.datasetParameterCollection;
 		} else {
 			return null;
@@ -286,6 +270,10 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		return this.description;
 	}
 
+	public Date getEndDate() {
+		return this.endDate;
+	}
+
 	/**
 	 * Gets the id of this Dataset.
 	 * 
@@ -295,41 +283,51 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		return this.id;
 	}
 
-	/**
-	 * Gets the investigation of this Dataset.
-	 * 
-	 * @return the investigation
-	 */
+	@XmlTransient
+	public Set<InputDataset> getInputDatasets() {
+		return this.inputDatasets;
+	}
+
+	@SuppressWarnings("unused")
+	@XmlElement(name = "inputDatasets")
+	private Set<InputDataset> getInputDatasets_() {
+		if (this.includes.contains(InputDataset.class)) {
+			return this.inputDatasets;
+		} else {
+			return null;
+		}
+	}
+
 	@XmlTransient
 	public Investigation getInvestigation() {
 		return this.investigation;
 	}
 
-	/**
-	 * Gets the investigationId of this Dataset.
-	 * 
-	 * @return the investigationId
-	 */
 	public Long getInvestigationId() {
 		return this.investigationId;
 	}
 
-	/**
-	 * Gets the location of this Datafile.
-	 * 
-	 * @return the location
-	 */
 	public String getLocation() {
 		return this.location;
 	}
 
-	/**
-	 * Gets the name of this Dataset.
-	 * 
-	 * @return the name
-	 */
 	public String getName() {
 		return this.name;
+	}
+
+	@XmlTransient
+	public Set<OutputDataset> getOutputDatasets() {
+		return this.outputDatasets;
+	}
+
+	@SuppressWarnings("unused")
+	@XmlElement(name = "outputDatasets")
+	private Set<OutputDataset> getOutputDatasets_() {
+		if (this.includes.contains(OutputDataset.class)) {
+			return this.outputDatasets;
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -337,13 +335,12 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		return this.id;
 	}
 
-	/**
-	 * Gets the sampleId of this Dataset.
-	 * 
-	 * @return the sampleId
-	 */
 	public Long getSampleId() {
 		return this.sampleId;
+	}
+
+	public Date getStartDate() {
+		return this.startDate;
 	}
 
 	/**
@@ -355,8 +352,21 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@Override
 	public int hashCode() {
 		int hash = 0;
-		hash += (this.id != null ? this.id.hashCode() : 0);
+		hash += this.id != null ? this.id.hashCode() : 0;
 		return hash;
+	}
+
+	@Override
+	public void isUnique(EntityManager manager) throws ValidationException, ObjectAlreadyExistsException,
+			IcatInternalException {
+		super.isUnique(manager);
+		if (manager.createNamedQuery(Queries.DATASET_FINDBY_UNIQUE, Dataset.class).setParameter("name", this.name)
+				.setParameter("sampleId", this.sampleId).setParameter("investigation", this.investigation)
+				.setParameter("datasetType", this.datasetType).getResultList().size() > 0) {
+			throw new ObjectAlreadyExistsException(
+					"Uniqueness constraint on (name, sampleId, investigation, datasetType): " + this.name + ", "
+							+ this.sampleId + ", " + this.investigation + ", " + this.datasetType);
+		}
 	}
 
 	/**
@@ -377,13 +387,13 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		outer: if (this.sampleId != null) {
 			// check valid sample id
 
-			Sample sampleRef = manager.find(Sample.class, this.sampleId);
+			final Sample sampleRef = manager.find(Sample.class, this.sampleId);
 			if (sampleRef == null) {
 				throw new ValidationException("Sample[id=" + this.sampleId + "] is not a valid sample id");
 			}
 
-			Collection<Sample> samples = this.investigation.getSampleCollection();
-			for (Sample sample : samples) {
+			final Collection<Sample> samples = this.investigation.getSampleCollection();
+			for (final Sample sample : samples) {
 				Dataset.log.trace("Sample for Investigation is: " + sample);
 				if (sample.getId().equals(this.sampleId)) {
 					// invest has for this sample in
@@ -398,14 +408,14 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		if (deepValidation) {
 			// check all datafiles now
 			if (this.getDatafileCollection() != null) {
-				for (Datafile datafile : this.getDatafileCollection()) {
+				for (final Datafile datafile : this.getDatafileCollection()) {
 					datafile.isValid(manager);
 				}
 			}
 
 			// check all datasetParameter now
 			if (this.getDatasetParameterCollection() != null) {
-				for (DatasetParameter datasetParameter : this.getDatasetParameterCollection()) {
+				for (final DatasetParameter datasetParameter : this.getDatasetParameterCollection()) {
 					datasetParameter.isValid(manager);
 				}
 			}
@@ -416,7 +426,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			// datasetStatus.isValid(manager);
 
 			// check datafile format is valid
-			DatasetStatus status = manager.find(DatasetStatus.class, this.datasetStatus);
+			final DatasetStatus status = manager.find(DatasetStatus.class, this.datasetStatus);
 			if (status == null) {
 				throw new ValidationException(this.datasetStatus + " is not a valid DatasetStatus");
 			}
@@ -427,7 +437,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			// datasetType.isValid(manager);
 
 			// check datafile format is valid
-			DatasetType type = manager.find(DatasetType.class, this.datasetType);
+			final DatasetType type = manager.find(DatasetType.class, this.datasetType);
 			if (type == null) {
 				throw new ValidationException(this.datasetType + " is not a valid DatasetType");
 			}
@@ -446,15 +456,20 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
+	public void postMergeFixup(EntityManager manager) throws NoSuchObjectFoundException {
+		this.investigation = ManagerUtil.find(Investigation.class, this.investigationId, manager);
+	}
+
+	@Override
 	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException {
 		super.preparePersist(modId, manager);
 		this.id = null;
-		for (DatasetParameter datasetParameter : this.datasetParameterCollection) {
+		for (final DatasetParameter datasetParameter : this.datasetParameterCollection) {
 			datasetParameter.preparePersist(modId, manager);
 			datasetParameter.setDataset(this); // Must set the backwards
 												// reference
 		}
-		for (Datafile datafile : this.datafileCollection) {
+		for (final Datafile datafile : this.datafileCollection) {
 			datafile.preparePersist(modId, manager);
 			datafile.setDataset(this); // Must set the backwards reference
 		}
@@ -466,11 +481,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		if (this.investigation == null) {
 			this.investigation = ManagerUtil.find(Investigation.class, this.investigationId, manager);
 		}
-	}
-
-	@Override
-	public void postMergeFixup(EntityManager manager) throws NoSuchObjectFoundException {
-		this.investigation = ManagerUtil.find(Investigation.class, this.investigationId, manager);
 	}
 
 	/**
@@ -527,6 +537,10 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	 */
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
 
 	/**
@@ -587,17 +601,8 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		this.sampleId = sampleId;
 	}
 
-	@Override
-	public void isUnique(EntityManager manager) throws ValidationException, ObjectAlreadyExistsException,
-			IcatInternalException {
-		super.isUnique(manager);
-		if (manager.createNamedQuery(Queries.DATASET_FINDBY_UNIQUE, Dataset.class).setParameter("name", name)
-				.setParameter("sampleId", sampleId).setParameter("investigation", investigation)
-				.setParameter("datasetType", datasetType).getResultList().size() > 0) {
-			throw new ObjectAlreadyExistsException(
-					"Uniqueness constraint on (name, sampleId, investigation, datasetType): " + name + ", " + sampleId
-							+ ", " + investigation + ", " + datasetType);
-		}
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
 	}
 
 	/**

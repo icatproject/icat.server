@@ -41,11 +41,9 @@ import uk.icat3.security.EntityInfoHandler;
 @MappedSuperclass
 public abstract class EntityBaseBean implements Serializable {
 
-	/**
-	 * global static logger
-	 */
-	private static Logger logger = Logger.getLogger(EntityBaseBean.class);
-	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
+	private static final Logger logger = Logger.getLogger(EntityBaseBean.class);
+
+	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
 	@Column(name = "MOD_TIME", nullable = false)
 	@Temporal(value = TemporalType.TIMESTAMP)
@@ -153,6 +151,7 @@ public abstract class EntityBaseBean implements Serializable {
 			Object value;
 			try {
 				Method method = getters.get(field);
+				logger.trace("Getter: " + method);
 				value = method.invoke(this, (Object[]) new Class[] {});
 			} catch (Exception e) {
 				throw new IcatInternalException("" + e);
@@ -205,13 +204,13 @@ public abstract class EntityBaseBean implements Serializable {
 	 */
 	public void merge(Object from, EntityManager manager) throws ValidationException, IcatInternalException,
 			NoSuchObjectFoundException {
-		BeanManager.merge(this,  from,  manager);
+		BeanManager.merge(this, from, manager);
 		this.postMergeFixup(manager);
 	}
 
 	/*
 	 * If this method is overridden it should normally be called as well by
-	 * super.isValid()
+	 * super.postMergeFixup()
 	 */
 	public void postMergeFixup(EntityManager manager) throws NoSuchObjectFoundException {
 		// Do nothing by default
@@ -250,5 +249,12 @@ public abstract class EntityBaseBean implements Serializable {
 	public void addIncludes(Set<Class<? extends EntityBaseBean>> requestedIncludes) throws IcatInternalException {
 		BeanManager.addIncludes(this, requestedIncludes);
 
+	}
+
+	/*
+	 * If this method is overridden it should normally be called as well by
+	 * super.canDelete()
+	 */
+	public void canDelete(EntityManager manager) throws ValidationException {
 	}
 }

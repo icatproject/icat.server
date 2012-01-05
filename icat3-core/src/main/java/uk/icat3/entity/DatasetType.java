@@ -44,22 +44,9 @@ public class DatasetType extends EntityBaseBean implements Serializable {
     @Column(name = "DESCRIPTION")
     private String description;
     
-    /*@OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetType")
-    @XmlTransient
-    private Collection<Dataset> datasetCollection;*/
-    
-    /** Creates a new instance of DatasetType */
     public DatasetType() {
     }
-    
-    /**
-     * Creates a new instance of DatasetType with the specified values.
-     * @param name the name of the DatasetType
-     */
-    public DatasetType(String name) {
-        this.name = name;
-    }
-          
+             
     /**
      * Gets the name of this DatasetType.
      * @return the name

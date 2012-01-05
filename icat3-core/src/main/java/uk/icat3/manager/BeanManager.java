@@ -35,7 +35,7 @@ import uk.icat3.util.AccessType;
 public class BeanManager {
 
 	// Global class logger
-	private static final Logger log = Logger.getLogger(BeanManager.class);
+	private static final Logger logger = Logger.getLogger(BeanManager.class);
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
 	public static Object create(String userId, EntityBaseBean bean, EntityManager manager)
@@ -47,12 +47,13 @@ public class BeanManager {
 
 		bean.preparePersistTop(userId, manager);
 		bean.isUnique(manager);
+
 		try {
-			log.trace(bean + " prepared for persist.");
+			logger.trace(bean + " prepared for persist.");
 			manager.persist(bean);
-			log.trace(bean + " persisted.");
+			logger.trace(bean + " persisted.");
 			manager.flush();
-			log.trace(bean + " flushed.");
+			logger.trace(bean + " flushed.");
 		} catch (EntityExistsException e) {
 			throw new ObjectAlreadyExistsException(e.getMessage());
 		} catch (Throwable e) {
@@ -72,13 +73,13 @@ public class BeanManager {
 			IcatInternalException {
 		EntityBaseBean beanManaged = find(bean, manager);
 		GateKeeper.performAuthorisation(userId, beanManaged, AccessType.DELETE, manager);
+		beanManaged.canDelete(manager);
 		try {
 			manager.remove(beanManaged);
 			manager.flush();
-			log.trace("Deleted bean " + bean + " flushed.");
+			logger.trace("Deleted bean " + bean + " flushed.");
 		} catch (Throwable e) {
 			manager.clear();
-			bean.isValid(manager, false);
 			throw new IcatInternalException("Unexpected DB response " + e.getMessage());
 		}
 	}
@@ -93,7 +94,7 @@ public class BeanManager {
 
 		try {
 			manager.flush();
-			log.trace("Updated bean " + bean + " flushed.");
+			logger.trace("Updated bean " + bean + " flushed.");
 		} catch (Throwable e) {
 			manager.clear();
 			bean.isValid(manager, false);
@@ -134,7 +135,7 @@ public class BeanManager {
 		}
 
 		GateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
-		log.debug("got " + entityClass.getSimpleName() + "[id:" + primaryKey + "]");
+		logger.debug("got " + entityClass.getSimpleName() + "[id:" + primaryKey + "]");
 		return beanManaged;
 	}
 
@@ -172,10 +173,10 @@ public class BeanManager {
 				Method m = getters.get(field);
 				Object value = m.invoke(fromBean, new Object[0]);
 				if (EntityBaseBean.class.isAssignableFrom(field.getType())) {
-					log.debug("Needs special processing as " + value + " is a bean");
+					logger.debug("Needs special processing as " + value + " is a bean");
 					if (value != null) {
 						Object pk = ((EntityBaseBean) value).getPK();
-						log.debug("PK is " + pk);
+						logger.debug("PK is " + pk);
 						value = (EntityBaseBean) manager.find(field.getType(), pk);
 						fieldAndMethod.getValue().invoke(thisBean, new Object[] { value });
 					} else {
@@ -184,7 +185,7 @@ public class BeanManager {
 				} else {
 					fieldAndMethod.getValue().invoke(thisBean, new Object[] { value });
 				}
-				log.trace("Updated " + klass.getSimpleName() + "." + field.getName() + " to " + value);
+				logger.trace("Updated " + klass.getSimpleName() + "." + field.getName() + " to " + value);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new IcatInternalException("" + e);
@@ -198,24 +199,25 @@ public class BeanManager {
 	@SuppressWarnings("unchecked")
 	public static void addIncludes(EntityBaseBean thisBean, Set<Class<? extends EntityBaseBean>> requestedIncludes)
 			throws IcatInternalException {
-		log.debug("addIncludes " + requestedIncludes + " for " + thisBean);
+		logger.debug("addIncludes " + requestedIncludes + " for " + thisBean);
 		Class<? extends EntityBaseBean> entityClass = thisBean.getClass();
 		Set<Relationship> relationships = eiHandler.getRelatedEntities(entityClass);
 		for (Relationship r : relationships) {
-			if (r.isCollection()) {
-				Class<? extends EntityBaseBean> bean = r.getBean();
-				if (requestedIncludes.contains(bean)) {
+			Class<? extends EntityBaseBean> bean = r.getBean();
+			if (requestedIncludes.contains(bean)) {
 
-					// Mark as wanted
-					thisBean.getIncludes().add(bean);
+				// Mark as wanted
+				thisBean.getIncludes().add(bean);
 
-					// Avoid looping forever
-					HashSet<Class<? extends EntityBaseBean>> includeReduced = new HashSet<Class<? extends EntityBaseBean>>(
-							requestedIncludes);
-					includeReduced.remove(bean);
+				// Avoid looping forever
+				HashSet<Class<? extends EntityBaseBean>> includeReduced = new HashSet<Class<? extends EntityBaseBean>>(
+						requestedIncludes);
+				includeReduced.remove(bean);
 
-					// Recurse into collection
-					Map<Field, Method> getters = eiHandler.getGetters(thisBean.getClass());
+				// Recurse into collection or single object
+				Map<Field, Method> getters = eiHandler.getGetters(thisBean.getClass());
+
+				if (r.isCollection()) {
 					Collection<EntityBaseBean> collection = null;
 					Field field = r.getField();
 					try {
@@ -226,10 +228,20 @@ public class BeanManager {
 					for (EntityBaseBean b : collection) {
 						b.addIncludes(includeReduced);
 					}
+				} else {
+					EntityBaseBean b = null;
+					Field field = r.getField();
+					try {
+						b = (EntityBaseBean) getters.get(field).invoke(thisBean, (Object[]) null);
+					} catch (Exception e) {
+						throw new IcatInternalException(e.toString());
+					}
+					if (b != null) {
+						b.addIncludes(includeReduced);
+					}
 				}
 			}
 		}
 
 	}
-
 }
