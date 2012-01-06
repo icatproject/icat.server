@@ -43,7 +43,7 @@ class Session {
 	private final ICAT icatEP;
 	private final String sessionId;
 
-	public Session() throws MalformedURLException, SessionException_Exception {
+	public Session() throws MalformedURLException, SessionException_Exception, IcatInternalException_Exception {
 		final String urlString = "http://localhost:8080";
 		final URL icatUrl = new URL(urlString + "/ICATService/ICAT?wsdl");
 		final ICATService icatService = new ICATService(icatUrl, new QName("client.icat3.uk", "ICATService"));

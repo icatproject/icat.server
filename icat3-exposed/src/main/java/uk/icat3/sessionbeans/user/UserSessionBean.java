@@ -22,11 +22,13 @@ import javax.interceptor.ExcludeClassInterceptors;
 import javax.jws.WebMethod;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 
 import org.apache.log4j.Logger;
 
+import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.sessionbeans.EJBObject;
@@ -65,10 +67,10 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal, User
 	
 	@WebMethod()
 	@ExcludeClassInterceptors
-	public String login(String username, String password) throws SessionException {
+	public String login(String username, String password, HttpServletRequest req) throws SessionException, IcatInternalException {
 		log.trace("login(" + username + ", *******)");
 		UserManager userManager = new UserManager(authClassName, managerUser);
-		return userManager.login(username, password);
+		return userManager.login(username, password, req);
 	}
 
 
@@ -76,10 +78,10 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal, User
 	@ExcludeClassInterceptors
 	@RequestWrapper(className = "uk.icat3.sessionbeans.user.jaxws.loginLifetime")
 	@ResponseWrapper(className = "uk.icat3.sessionbeans.user.jaxws.loginLifetimeResponse")
-	public String login(String username, String password, int lifetime) throws SessionException {
+	public String login(String username, String password, int lifetime, HttpServletRequest req) throws SessionException, IcatInternalException {
 		log.trace("login(" + username + ", *******, " + lifetime + ")");
 		UserManager userManager = new UserManager(authClassName, managerUser);
-		return userManager.login(username, password, lifetime);
+		return userManager.login(username, password, lifetime, req);
 	}
 
 

@@ -1,4 +1,4 @@
-package uk.icat3.userldap.message;
+package uk.icat3.userldap.facility;
 
 /**
  *
@@ -43,7 +43,5 @@ public class LoginInterceptor {
         } catch (Exception e) {
             log.fatal("Error sending message", e);
         }
-
     }
-
 }

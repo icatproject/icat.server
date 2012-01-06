@@ -1,5 +1,8 @@
 package uk.icat3.user;
 
+import javax.servlet.http.HttpServletRequest;
+
+import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.NoSuchUserException;
 
@@ -43,13 +46,15 @@ public interface User {
      * 
      * @param username username/dn of user
      * @param password of user
+     * @param req 
      * @return sessionId authentication token that user can use in corresponding
      *                   methods calls without having to provide username and
      *                   password each time.
      * @throws SessionException   if user provides an invalid username and password
      *                          combination.
+     * @throws IcatInternalException 
      */
-    public String login(String username, String password) throws SessionException;
+    public String login(String username, String password, HttpServletRequest req) throws SessionException, IcatInternalException;
     
     /**
      * Returns a sessionId (authenitcation token) to a user after verification
@@ -59,13 +64,15 @@ public interface User {
      * @param username username/dn of user
      * @param password of user
      * @param lifetime of the sesssion
+     * @param req 
      * @return sessionId authentication token that user can use in corresponding
      *                   methods calls without having to provide username and
      *                   password each time.
      * @throws SessionException   if user provides an invalid username and password
      *                          combination.
+     * @throws IcatInternalException 
      */
-    public String login(String username, String password, int lifetime) throws SessionException;
+    public String login(String username, String password, int lifetime, HttpServletRequest req) throws SessionException, IcatInternalException;
     
     /**
      * Returns a sessionId (authenitcation token) to a user after verification

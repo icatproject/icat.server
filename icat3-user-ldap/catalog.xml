@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
-    <system systemId="http://ndiovmarco:8080/home/AuthProxyServiceService?wsdl" uri="xml-resources/web-service-references/AuthProxyServiceService/wsdl/ndiovmarco_8080/home/AuthProxyServiceService.wsdl"/>
-    <system systemId="http://ndiovmarco:8080/home/AuthProxyServiceService?xsd=1" uri="xml-resources/web-service-references/AuthProxyServiceService/wsdl/ndiovmarco_8080/home/AuthProxyServiceService.xsd_1.xsd"/>
-    <system systemId="http://ndiovmarco:8080/home/AuthProxyService?wsdl" uri="xml-resources/web-service-references/AuthProxyService_1/wsdl/ndiovmarco_8080/home/AuthProxyService.wsdl"/>
-    <system systemId="http://ndiovmarco:8080/home/AuthProxyService?xsd=1" uri="xml-resources/web-service-references/AuthProxyService_1/wsdl/ndiovmarco_8080/home/AuthProxyService.xsd_1.xsd"/>
-</catalog>

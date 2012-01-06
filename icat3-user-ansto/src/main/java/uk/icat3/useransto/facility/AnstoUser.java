@@ -1,15 +1,21 @@
 package uk.icat3.useransto.facility;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Calendar;
+import java.util.Properties;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 
+import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.SessionException;
+import uk.icat3.user.AddressChecker;
 import uk.icat3.user.UserDetails;
 import uk.icat3.useransto.entity.Session;
 import uk.icat3.useransto.entity.UserE;
@@ -18,8 +24,23 @@ public class AnstoUser implements uk.icat3.user.User {
 
 	private final EntityManager manager;
 	private static final Logger log = Logger.getLogger(AnstoUser.class);
+	private AddressChecker anstoAddressChecker;
+	private IcatInternalException icatInternalException;
 
 	public AnstoUser(EntityManager manager) {
+		File f = new File("icat.properties");
+		try {
+			Properties props = new Properties();
+			props.load(new FileInputStream(f));
+			String authips = props.getProperty("auth.ansto.ip");
+			if (authips != null) {
+				anstoAddressChecker = new AddressChecker(authips);
+			}
+		} catch (Exception e) {
+			icatInternalException = new IcatInternalException("Problem with " + f.getAbsolutePath() + "  "
+					+ e.getMessage());
+			log.fatal("Problem with " + f.getAbsolutePath() + "  " + e.getMessage());
+		}
 		this.manager = manager;
 		log.trace("Created AnstoUser with Entitity Manager" + manager);
 	}
@@ -78,14 +99,24 @@ public class AnstoUser implements uk.icat3.user.User {
 	}
 
 	@Override
-	public String login(String username, String password) throws SessionException {
-		return this.login(username, password, 2); // 2 hours
+	public String login(String username, String password, HttpServletRequest req) throws SessionException,
+			IcatInternalException {
+		return this.login(username, password, 2, req); // 2 hours
 	}
 
 	@Override
-	public String login(String username, String password, int lifetime) throws SessionException {
+	public String login(String username, String password, int lifetime, HttpServletRequest req)
+			throws SessionException, IcatInternalException {
 		UserE user = null;
 		log.trace("login(" + username + ", *********, " + lifetime + ")");
+		if (icatInternalException != null) {
+			throw icatInternalException;
+		}
+		if (anstoAddressChecker != null) {
+			if (!anstoAddressChecker.check(req.getRemoteAddr())) {
+				throw new SessionException("You may not log in by 'ansto' from your IP address " + req.getRemoteAddr());
+			}
+		}
 		if (username == null || username.equals("")) {
 			throw new IllegalArgumentException("Username cannot be null or empty.");
 		}

@@ -3,6 +3,7 @@ package uk.icat3.sessionbeans;
 import java.util.Collection;
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -13,8 +14,11 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebResult;
 import javax.jws.WebService;
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
 
 import org.apache.log4j.Logger;
 
@@ -134,6 +138,7 @@ public class ICAT extends EJBObject {
 	@EJB
 	protected BeanManagerLocal beanManagerLocal;
 
+	@Resource WebServiceContext webServiceContext;
 
 	public ICAT() {
 	}
@@ -272,31 +277,17 @@ public class ICAT extends EJBObject {
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////     UserSession methods  /////////////////////////////////////////
-    /**
-     * Logs in, defaults to 2 hours
-     *
-     * @param username
-     * @param password
-     * @return
-     * @throws uk.icat3.exceptions.SessionException
-     */
+ 
     @WebMethod
     @ExcludeClassInterceptors
     public String login(
             @WebParam(name = "username") String username,
-            @WebParam(name = "password") String password) throws SessionException {
-        return user.login(username, password);
+            @WebParam(name = "password") String password) throws SessionException, IcatInternalException {
+    	 MessageContext msgCtxt = webServiceContext.getMessageContext();
+    	    HttpServletRequest req = (HttpServletRequest)msgCtxt.get(MessageContext.SERVLET_REQUEST);
+    	    return user.login(username, password, req);
     }
 
-    /**
-     * Logs in for a certain amount of time
-     *
-     * @param username
-     * @param password
-     * @param lifetime
-     * @return
-     * @throws uk.icat3.exceptions.SessionException
-     */
     @WebMethod(operationName = "loginLifetime")
     @ExcludeClassInterceptors
     @RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.loginLifetime")
@@ -304,9 +295,11 @@ public class ICAT extends EJBObject {
     public String login(
             @WebParam(name = "username") String username,
             @WebParam(name = "password") String password,
-            @WebParam(name = "lifetime") int lifetime) throws SessionException {
-        return user.login(username, password, lifetime);
-
+            @WebParam(name = "lifetime") int lifetime) throws SessionException, IcatInternalException {
+   	 MessageContext msgCtxt = webServiceContext.getMessageContext();
+	    HttpServletRequest req = (HttpServletRequest)msgCtxt.get(MessageContext.SERVLET_REQUEST);
+	    String clientIP = req.getRemoteAddr();
+	    return user.login(username, password, lifetime, req);
     }
 
     /**
