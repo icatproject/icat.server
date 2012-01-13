@@ -12,13 +12,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<uniqueVersion>false</uniqueVersion>
-
-		<sonar.jdbc.url>jdbc:derby://esctest.esc.rl.ac.uk:1527/sonar;create=true</sonar.jdbc.url>
-		<sonar.jdbc.driver>org.apache.derby.jdbc.ClientDriver</sonar.jdbc.driver>
-		<sonar.jdbc.username>sonar</sonar.jdbc.username>
-		<sonar.jdbc.password>sonar</sonar.jdbc.password>
-		<sonar.host.url>http://esctest:7070/sonar/</sonar.host.url>
-		<sonar.skippedModules>icat3-ear</sonar.skippedModules>
 	</properties>
 
 	<modules>
@@ -30,6 +23,7 @@
 		<module>icat3-client</module>
 		<module>icat3-ws-test</module>
 		<module>icat3-xmlingest-client</module>
+		<module>icat3-logging</module>
 		<module>icat3-data</module>
 		<module>icat3-jaxb</module>
 		<module>icat3-logging</module>
@@ -47,34 +41,36 @@
 		</repository>
 	</repositories>
 
-	<dependencies>
+	<dependencyManagement>
+		<dependencies>
 
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
-			<scope>compile</scope>
-		</dependency>
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>1.2.16</version>
+			</dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.6.2</version>
-		</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.8.1</version>
+			</dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.6.2</version>
-		</dependency>
+			<dependency>
+				<groupId>co.uk.icat3</groupId>
+				<artifactId>icat3-client</artifactId>
+				<version>1.0.0-SNAPSHOT</version>
+			</dependency>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.8.1</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+			<dependency>
+				<groupId>co.uk.icat3</groupId>
+				<artifactId>icat3-core</artifactId>
+				<version>1.0.0-SNAPSHOT</version>
+			</dependency>
+
+
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>
@@ -89,6 +85,7 @@
 					<optimize>true</optimize>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -101,6 +98,7 @@
 					<testFailureIgnore>true</testFailureIgnore>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
@@ -108,11 +106,7 @@
 					<preparationGoals>clean verify install</preparationGoals>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>sonar-maven-plugin</artifactId>
-				<version>2.0-beta-2</version>
-			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -126,6 +120,22 @@
 				</executions>
 			</plugin>
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.1.2</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 	</build>
 
 </project>
