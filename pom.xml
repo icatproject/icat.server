@@ -26,7 +26,6 @@
 		<module>icat3-logging</module>
 		<module>icat3-data</module>
 		<module>icat3-jaxb</module>
-		<module>icat3-logging</module>
 		<module>icat3-download</module>
 		<module>icat3-reporting</module>
 	</modules>
@@ -67,7 +66,6 @@
 				<artifactId>icat3-core</artifactId>
 				<version>1.0.0-SNAPSHOT</version>
 			</dependency>
-
 
 		</dependencies>
 	</dependencyManagement>

@@ -14,401 +14,443 @@ import static org.junit.Assert.assertTrue;
 import static uk.icat3.data.DownloadConstants.DATAFILEID_NAME;
 import static uk.icat3.data.DownloadConstants.DATASETID_NAME;
 import static uk.icat3.data.DownloadConstants.SESSIONID_NAME;
-import static uk.icat3.util.TestConstants.INVALID_USER;
-import static uk.icat3.util.TestConstants.READER_USER;
-import static uk.icat3.util.TestConstants.VALID_DATA_FILE_ID;
-import static uk.icat3.util.TestConstants.VALID_DATA_SET_ID;
-import static uk.icat3.util.TestConstants.VALID_USER_FOR_INVESTIGATION;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 import junit.framework.JUnit4TestAdapter;
 
 import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import uk.icat3.data.DownloadConstants.ACTION;
 import uk.icat3.exceptions.ICATAPIException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
-import uk.icat3.util.BaseTestTransaction;
-/**
- *
- * @author gjd37
- */
-public class TestDatafileDownload extends BaseTestTransaction {
 
-    private static Logger log = Logger.getLogger(TestDatafileDownload.class);
+public class TestDatafileDownload {
 
-    /**
-     * Tests datafile download
-     */
-    @Test
-    public void testDataFileDownload() throws ICATAPIException {
-        log.info("Testing download datafile " + VALID_DATA_FILE_ID + " for user " + VALID_USER_FOR_INVESTIGATION);
+	static private EntityManagerFactory emf;
+	static protected EntityManager em;
 
-        String url = DownloadManager.downloadDatafile(VALID_USER_FOR_INVESTIGATION, "sessionId", VALID_DATA_FILE_ID, em);
+	@Before
+	public void beginTX() {
+		em = emf.createEntityManager();
+		em.getTransaction().begin();
+	}
 
-        log.trace("URL returned is " + url);
-        assertNotNull("URL returned cannot be null", url);
-        assertTrue("URL contains sessionid", url.contains(SESSIONID_NAME));
-        assertTrue("URL contains action", url.contains("action"));
-        assertTrue("URL contains "+ACTION.DOWNLOAD.toString(), url.contains(ACTION.DOWNLOAD.toString()));
+	@After
+	public void closeTX() {
+		em.getTransaction().rollback();
+		em.close();
+	}
 
-        //only contains one name parameter
-        int index = url.indexOf(DATAFILEID_NAME);
-        String url2 = url.substring(index + 1, url.length());
-        //int index2 = url2.indexOf("name");
+	@BeforeClass
+	public static void BeforeClassSetUp() {
+		emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
+	}
 
-        assertTrue("URL contains atleast one fileId parameter", index != -1);
-    }
-    
-     /**
-     * Tests datafile download multiple
-     */
-    @Test
-    public void testDataFileDownload2() throws ICATAPIException {
-        log.info("Testing download datafile " + VALID_DATA_FILE_ID + ",57 for user " + VALID_USER_FOR_INVESTIGATION);
+	@AfterClass
+	public static void AfterClassTearDown() {
+		emf.close();
+	}
 
-        Collection<Long> datafileIds = new ArrayList<Long>();
-        datafileIds.add(57L);
-        datafileIds.add(3L);
-        
-        String url = DownloadManager.downloadDatafiles(VALID_USER_FOR_INVESTIGATION, "sessionId", datafileIds, em);
+	private final static String VALID_USER_FOR_INVESTIGATION = "test";
+	private final static Long VALID_DATA_SET_ID = 3L;
+	private final static long VALID_DATA_FILE_ID = 3;
+	private final static String INVALID_USER = "invalidUser" + Math.random();
+	private final static String READER_USER = "test_reader";
+	public final static String PERSISTENCE_UNIT = "icat3-unit-testing-PU";
 
-        log.trace("URL returned is " + url);
-        assertNotNull("URL returned cannot be null", url);
-        assertTrue("URL contains sessionid", url.contains(SESSIONID_NAME));
-        assertTrue("URL contains action", url.contains("action"));
-        assertTrue("URL contains "+ACTION.ZIP.toString(), url.contains(ACTION.ZIP.toString()));
+	private static Logger log = Logger.getLogger(TestDatafileDownload.class);
 
-       //only contains 2 name parameters
-        int index = url.indexOf(DATAFILEID_NAME);
-        String url2 = url.substring(index + 1, url.length());
-        int index2 = url2.indexOf(DATAFILEID_NAME);
-        String url3 = url2.substring(index2 + 1, url2.length());
-        int index3 = url3.indexOf(DATAFILEID_NAME);
-        
-        assertTrue("URL contains 2 fileId parameters", index != -1);
-        assertTrue("URL contains 2 fileId parameters", index2 != -1);
-        assertTrue("URL contains 2 fileId parameters", index3 == -1);
-    }
+	/**
+	 * Tests datafile download
+	 */
+	@Test
+	public void testDataFileDownload() throws ICATAPIException {
+		log.info("Testing download datafile " + VALID_DATA_FILE_ID + " for user " + VALID_USER_FOR_INVESTIGATION);
 
-    /**
-     * Tests datafile download fo invalid user
-     */
-    @Test(expected = InsufficientPrivilegesException.class)
-    public void testDataFileDownloadInvalidUser() throws ICATAPIException {
-        log.info("Testing download datafile " + VALID_DATA_FILE_ID + " for user " + INVALID_USER);
+		String url = DownloadManager
+				.downloadDatafile(VALID_USER_FOR_INVESTIGATION, "sessionId", VALID_DATA_FILE_ID, em);
 
-        try {
-            String url = DownloadManager.downloadDatafile(INVALID_USER, "sessionId", VALID_DATA_FILE_ID, em);
-        } catch (ICATAPIException ex) {
-            log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
-            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            assertTrue("Exception must contain 'READ'", ex.getMessage().contains("READ"));
-            throw ex;
-        }
-    }
+		log.trace("URL returned is " + url);
+		assertNotNull("URL returned cannot be null", url);
+		assertTrue("URL contains sessionid", url.contains(SESSIONID_NAME));
+		assertTrue("URL contains action", url.contains("action"));
+		assertTrue("URL contains " + ACTION.DOWNLOAD.toString(), url.contains(ACTION.DOWNLOAD.toString()));
 
-    /**
-     * Tests datafile download for only reader, not downloader
-     */
-    //@Test(expected = InsufficientPrivilegesException.class)
-    public void testDataFileDownloadReaderUser() throws ICATAPIException {
-        log.info("Testing download datafile " + VALID_DATA_FILE_ID + " for user " + READER_USER);
+		// only contains one name parameter
+		int index = url.indexOf(DATAFILEID_NAME);
 
-        try {
-            String url = DownloadManager.downloadDatafile(READER_USER, "sessionId", VALID_DATA_FILE_ID, em);
-        } catch (ICATAPIException ex) {
-            log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
-            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            assertTrue("Exception must contain 'DOWNLOAD'", ex.getMessage().contains("DOWNLOAD"));
-            throw ex;
-        }
-    }
+		assertTrue("URL contains atleast one fileId parameter", index != -1);
+	}
 
-    /**
-     * Tests dataset download
-     */
-    @Test
-    public void testDataSetDownload() throws ICATAPIException {
-        log.info("Testing download dataset " + VALID_DATA_SET_ID + " for user " + VALID_USER_FOR_INVESTIGATION);
+	/**
+	 * Tests datafile download multiple
+	 */
+	@Test
+	public void testDataFileDownload2() throws ICATAPIException {
+		log.info("Testing download datafile " + VALID_DATA_FILE_ID + ",57 for user " + VALID_USER_FOR_INVESTIGATION);
 
-        String url = DownloadManager.downloadDataset(VALID_USER_FOR_INVESTIGATION, "sessionId", VALID_DATA_FILE_ID, em);
+		Collection<Long> datafileIds = new ArrayList<Long>();
+		datafileIds.add(57L);
+		datafileIds.add(3L);
 
-        log.trace("URL returned is " + url);
-        assertNotNull("URL returned cannot be null", url);
-        assertTrue("URL contains sessionid", url.contains(SESSIONID_NAME));
+		String url = DownloadManager.downloadDatafiles(VALID_USER_FOR_INVESTIGATION, "sessionId", datafileIds, em);
 
-        //only contains 2 name parameters
-        int index = url.indexOf(DATASETID_NAME);
-        String url2 = url.substring(index + 1, url.length());
-        int index2 = url2.indexOf(DATASETID_NAME);
+		log.trace("URL returned is " + url);
+		assertNotNull("URL returned cannot be null", url);
+		assertTrue("URL contains sessionid", url.contains(SESSIONID_NAME));
+		assertTrue("URL contains action", url.contains("action"));
+		assertTrue("URL contains " + ACTION.ZIP.toString(), url.contains(ACTION.ZIP.toString()));
 
-        assertTrue("URL contains 1 "+DATASETID_NAME+" parameters", index != -1);
-        assertTrue("URL contains 1 "+DATASETID_NAME+" parameters", index2 == -1);
-    }
+		// only contains 2 name parameters
+		int index = url.indexOf(DATAFILEID_NAME);
+		String url2 = url.substring(index + 1, url.length());
+		int index2 = url2.indexOf(DATAFILEID_NAME);
+		String url3 = url2.substring(index2 + 1, url2.length());
+		int index3 = url3.indexOf(DATAFILEID_NAME);
 
-    /**
-     * Tests dataset download invalid user
-     */
-    //@Test(expected = InsufficientPrivilegesException.class)
-    public void testDataSetDownloadInvalidUser() throws ICATAPIException {
-        log.info("Testing download dataset " + VALID_DATA_SET_ID + " for user " + INVALID_USER);
+		assertTrue("URL contains 2 fileId parameters", index != -1);
+		assertTrue("URL contains 2 fileId parameters", index2 != -1);
+		assertTrue("URL contains 2 fileId parameters", index3 == -1);
+	}
 
-        try {
-            String url = DownloadManager.downloadDataset(INVALID_USER, "sessionId", VALID_DATA_FILE_ID, em);
-        } catch (ICATAPIException ex) {
-            log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
-            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            assertTrue("Exception must contain 'READ'", ex.getMessage().contains("READ"));
-            throw ex;
-        }
-    }
+	/**
+	 * Tests datafile download fo invalid user
+	 */
+	@Test(expected = InsufficientPrivilegesException.class)
+	public void testDataFileDownloadInvalidUser() throws ICATAPIException {
+		log.info("Testing download datafile " + VALID_DATA_FILE_ID + " for user " + INVALID_USER);
 
-    /**
-     * Tests dataset download reader user
-     */
-    //@Test(expected = InsufficientPrivilegesException.class)
-    public void testDataSetDownloadReaderUser() throws ICATAPIException {
-        log.info("Testing download dataset " + VALID_DATA_SET_ID + " for user " + READER_USER);
+		try {
+			DownloadManager.downloadDatafile(INVALID_USER, "sessionId", VALID_DATA_FILE_ID, em);
+		} catch (ICATAPIException ex) {
+			log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
+			assertTrue("Exception must contain 'does not have permission'",
+					ex.getMessage().contains("does not have permission"));
+			assertTrue("Exception must contain 'READ'", ex.getMessage().contains("READ"));
+			throw ex;
+		}
+	}
 
-        try {
-            String url = DownloadManager.downloadDataset(READER_USER, "sessionId", VALID_DATA_FILE_ID, em);
-        } catch (ICATAPIException ex) {
-            log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
-            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            assertTrue("Exception must contain 'DOWNLOAD'", ex.getMessage().contains("DOWNLOAD"));
-            throw ex;
-        }
-    }
+	/**
+	 * Tests datafile download for only reader, not downloader
+	 */
+	// @Test(expected = InsufficientPrivilegesException.class)
+	public void testDataFileDownloadReaderUser() throws ICATAPIException {
+		log.info("Testing download datafile " + VALID_DATA_FILE_ID + " for user " + READER_USER);
 
-    /**
-     * Tests datafiles download
-     */
-    //@Test
-    public void testDataFilesDownload() throws ICATAPIException {
-        log.info("Testing download datafiles 3,57 for user " + VALID_USER_FOR_INVESTIGATION);
+		try {
+			DownloadManager.downloadDatafile(READER_USER, "sessionId", VALID_DATA_FILE_ID, em);
+		} catch (ICATAPIException ex) {
+			log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
+			assertTrue("Exception must contain 'does not have permission'",
+					ex.getMessage().contains("does not have permission"));
+			assertTrue("Exception must contain 'DOWNLOAD'", ex.getMessage().contains("DOWNLOAD"));
+			throw ex;
+		}
+	}
 
-        Collection<Long> datafileIds = new ArrayList<Long>();
-        datafileIds.add(57L);
-        datafileIds.add(3L);
+	/**
+	 * Tests dataset download
+	 */
+	@Test
+	public void testDataSetDownload() throws ICATAPIException {
+		log.info("Testing download dataset " + VALID_DATA_SET_ID + " for user " + VALID_USER_FOR_INVESTIGATION);
 
-        String url = DownloadManager.downloadDatafiles(VALID_USER_FOR_INVESTIGATION, "sessionId", datafileIds, em);
+		String url = DownloadManager.downloadDataset(VALID_USER_FOR_INVESTIGATION, "sessionId", VALID_DATA_FILE_ID, em);
 
-        log.trace("URL returned is " + url);
-        assertNotNull("URL returned cannot be null", url);
-        assertTrue("URL contains sessionid", url.contains(SESSIONID_NAME));
+		log.trace("URL returned is " + url);
+		assertNotNull("URL returned cannot be null", url);
+		assertTrue("URL contains sessionid", url.contains(SESSIONID_NAME));
 
-        //only contains 2 name parameters
-        int index = url.indexOf(DATAFILEID_NAME);
-        String url2 = url.substring(index + 1, url.length());
-        int index2 = url2.indexOf(DATAFILEID_NAME);
-        String url3 = url2.substring(index2 + 1, url2.length());
-        int index3 = url3.indexOf(DATAFILEID_NAME);
-        
-        assertTrue("URL contains 2 fileId parameters", index != -1);
-        assertTrue("URL contains 2 fileId parameters", index2 != -1);
-        assertTrue("URL contains 2 fileId parameters", index3 == -1);
-    }
+		// only contains 2 name parameters
+		int index = url.indexOf(DATASETID_NAME);
+		String url2 = url.substring(index + 1, url.length());
+		int index2 = url2.indexOf(DATASETID_NAME);
 
-    /**
-     * Tests datafiles download
-     */
-    //@Test(expected = InsufficientPrivilegesException.class)
-    public void testDataFilesDownloadInvalidUser() throws ICATAPIException {
-        log.info("Testing download datafiles 3,57 for user " + INVALID_USER);
+		assertTrue("URL contains 1 " + DATASETID_NAME + " parameters", index != -1);
+		assertTrue("URL contains 1 " + DATASETID_NAME + " parameters", index2 == -1);
+	}
 
-        Collection<Long> datafileIds = new ArrayList<Long>();
-        datafileIds.add(57L);
-        datafileIds.add(3L);
+	/**
+	 * Tests dataset download invalid user
+	 */
+	// @Test(expected = InsufficientPrivilegesException.class)
+	public void testDataSetDownloadInvalidUser() throws ICATAPIException {
+		log.info("Testing download dataset " + VALID_DATA_SET_ID + " for user " + INVALID_USER);
 
-        try {
-            String url = DownloadManager.downloadDatafiles(INVALID_USER, "sessionId", datafileIds, em);
-        } catch (ICATAPIException ex) {
-            log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
-            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            assertTrue("Exception must contain 'READ'", ex.getMessage().contains("READ"));
-            throw ex;
-        }
-    }
+		try {
+			DownloadManager.downloadDataset(INVALID_USER, "sessionId", VALID_DATA_FILE_ID, em);
+		} catch (ICATAPIException ex) {
+			log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
+			assertTrue("Exception must contain 'does not have permission'",
+					ex.getMessage().contains("does not have permission"));
+			assertTrue("Exception must contain 'READ'", ex.getMessage().contains("READ"));
+			throw ex;
+		}
+	}
 
-    /**
-     * Tests datafiles download reader user
-     */
-    //@Test(expected = InsufficientPrivilegesException.class)
-    public void testDataFilesDownloadReaderUser() throws ICATAPIException {
-        log.info("Testing download datafiles 3,57 for user " + READER_USER);
+	/**
+	 * Tests dataset download reader user
+	 */
+	// @Test(expected = InsufficientPrivilegesException.class)
+	public void testDataSetDownloadReaderUser() throws ICATAPIException {
+		log.info("Testing download dataset " + VALID_DATA_SET_ID + " for user " + READER_USER);
 
-        Collection<Long> datafileIds = new ArrayList<Long>();
-        datafileIds.add(57L);
-        datafileIds.add(3L);
+		try {
+			DownloadManager.downloadDataset(READER_USER, "sessionId", VALID_DATA_FILE_ID, em);
+		} catch (ICATAPIException ex) {
+			log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
+			assertTrue("Exception must contain 'does not have permission'",
+					ex.getMessage().contains("does not have permission"));
+			assertTrue("Exception must contain 'DOWNLOAD'", ex.getMessage().contains("DOWNLOAD"));
+			throw ex;
+		}
+	}
 
-        try {
-            String url = DownloadManager.downloadDatafiles(READER_USER, "sessionId", datafileIds, em);
-        } catch (ICATAPIException ex) {
-            log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
-            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            assertTrue("Exception must contain 'DOWNLOAD'", ex.getMessage().contains("DOWNLOAD"));
-            throw ex;
-        }
-    }
+	/**
+	 * Tests datafiles download
+	 */
+	// @Test
+	public void testDataFilesDownload() throws ICATAPIException {
+		log.info("Testing download datafiles 3,57 for user " + VALID_USER_FOR_INVESTIGATION);
 
-    /**
-     * Valid user check access test
-     * 
-     * @throws uk.icat3.exceptions.ICATAPIException
-     */
-    //@Test
-    public void testAccessToDownload() throws ICATAPIException {
-        log.info("Testing download datafile " + VALID_DATA_FILE_ID + ", name SXD015554.RAW for user " + VALID_USER_FOR_INVESTIGATION);
+		Collection<Long> datafileIds = new ArrayList<Long>();
+		datafileIds.add(57L);
+		datafileIds.add(3L);
 
-        Collection<Long> datafileIds = new ArrayList<Long>();
-        datafileIds.add(VALID_DATA_FILE_ID);
-        DownloadInfo access = DownloadManager.checkDatafileDownloadAccess(VALID_USER_FOR_INVESTIGATION, datafileIds, em);
+		String url = DownloadManager.downloadDatafiles(VALID_USER_FOR_INVESTIGATION, "sessionId", datafileIds, em);
 
-        assertNotNull("Access must be true", access);
-        assertNotNull("Collection of file names must not be null", access.getDatafileNames());
-        assertEquals("Collection size must be one", 1, access.getDatafileNames().size());
-        assertEquals("File name must be SXD015554.RAW", "SXD015554.RAW", access.getDatafileNames().iterator().next());
-        assertEquals("User id must be " + VALID_USER_FOR_INVESTIGATION, VALID_USER_FOR_INVESTIGATION, access.getUserId());
-    }
+		log.trace("URL returned is " + url);
+		assertNotNull("URL returned cannot be null", url);
+		assertTrue("URL contains sessionid", url.contains(SESSIONID_NAME));
 
-    /**
-     * Valid user check access test
-     * 
-     * @throws uk.icat3.exceptions.ICATAPIException
-     */
-    //@Test
-    public void testAccessToDownload2() throws ICATAPIException {
-        log.info("Testing download datafile " + VALID_DATA_FILE_ID + ",57 name SXD015554.RAW for user " + VALID_USER_FOR_INVESTIGATION);
+		// only contains 2 name parameters
+		int index = url.indexOf(DATAFILEID_NAME);
+		String url2 = url.substring(index + 1, url.length());
+		int index2 = url2.indexOf(DATAFILEID_NAME);
+		String url3 = url2.substring(index2 + 1, url2.length());
+		int index3 = url3.indexOf(DATAFILEID_NAME);
 
-        Collection<String> fileNames = new ArrayList<String>();
+		assertTrue("URL contains 2 fileId parameters", index != -1);
+		assertTrue("URL contains 2 fileId parameters", index2 != -1);
+		assertTrue("URL contains 2 fileId parameters", index3 == -1);
+	}
 
-        Collection<Long> datafileIds = new ArrayList<Long>();
-        datafileIds.add(VALID_DATA_FILE_ID);
-        datafileIds.add(57L);
+	/**
+	 * Tests datafiles download
+	 */
+	// @Test(expected = InsufficientPrivilegesException.class)
+	public void testDataFilesDownloadInvalidUser() throws ICATAPIException {
+		log.info("Testing download datafiles 3,57 for user " + INVALID_USER);
 
-        DownloadInfo access = DownloadManager.checkDatafileDownloadAccess(VALID_USER_FOR_INVESTIGATION, datafileIds, em);
+		Collection<Long> datafileIds = new ArrayList<Long>();
+		datafileIds.add(57L);
+		datafileIds.add(3L);
 
-        assertNotNull("Access must be true", access);
-        assertNotNull("Collection of file names must not be null", access.getDatafileNames());
-        assertEquals("Collection size must be one", 2, access.getDatafileNames().size());
-        assertEquals("File name must be SXD015554.RAW", "SXD015554.RAW", access.getDatafileNames().iterator().next());
-        assertEquals("User id must be " + VALID_USER_FOR_INVESTIGATION, VALID_USER_FOR_INVESTIGATION, access.getUserId());
+		try {
+			DownloadManager.downloadDatafiles(INVALID_USER, "sessionId", datafileIds, em);
+		} catch (ICATAPIException ex) {
+			log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
+			assertTrue("Exception must contain 'does not have permission'",
+					ex.getMessage().contains("does not have permission"));
+			assertTrue("Exception must contain 'READ'", ex.getMessage().contains("READ"));
+			throw ex;
+		}
+	}
 
-    }
+	/**
+	 * Tests datafiles download reader user
+	 */
+	// @Test(expected = InsufficientPrivilegesException.class)
+	public void testDataFilesDownloadReaderUser() throws ICATAPIException {
+		log.info("Testing download datafiles 3,57 for user " + READER_USER);
 
-    /**
-     * Reader user check access test
-     * 
-     * @throws uk.icat3.exceptions.ICATAPIException
-     */
-    //@Test(expected = InsufficientPrivilegesException.class)
-    public void testAccessToDownloadReaderUser() throws ICATAPIException {
-        log.info("Testing download datafile " + VALID_DATA_FILE_ID + ", name SXD015554.RAW for user " + READER_USER);
+		Collection<Long> datafileIds = new ArrayList<Long>();
+		datafileIds.add(57L);
+		datafileIds.add(3L);
 
-        Collection<Long> datafileIds = new ArrayList<Long>();
-        datafileIds.add(VALID_DATA_FILE_ID);
+		try {
+			DownloadManager.downloadDatafiles(READER_USER, "sessionId", datafileIds, em);
+		} catch (ICATAPIException ex) {
+			log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
+			assertTrue("Exception must contain 'does not have permission'",
+					ex.getMessage().contains("does not have permission"));
+			assertTrue("Exception must contain 'DOWNLOAD'", ex.getMessage().contains("DOWNLOAD"));
+			throw ex;
+		}
+	}
 
-        try {
-            DownloadManager.checkDatafileDownloadAccess(READER_USER, datafileIds, em);
-        } catch (ICATAPIException ex) {
-            log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
-            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            assertTrue("Exception must contain 'DOWNLOAD'", ex.getMessage().contains("DOWNLOAD"));
-            throw ex;
-        }
-    }
+	/**
+	 * Valid user check access test
+	 * 
+	 * @throws uk.icat3.exceptions.ICATAPIException
+	 */
+	// @Test
+	public void testAccessToDownload() throws ICATAPIException {
+		log.info("Testing download datafile " + VALID_DATA_FILE_ID + ", name SXD015554.RAW for user "
+				+ VALID_USER_FOR_INVESTIGATION);
 
-    /**
-     * Invalid user check access test
-     * 
-     * @throws uk.icat3.exceptions.ICATAPIException
-     */
-    //@Test(expected = InsufficientPrivilegesException.class)
-    public void testAccessToDownloadInvalidUser() throws ICATAPIException {
-        log.info("Testing download datafile " + VALID_DATA_FILE_ID + ", name SXD015554.RAW for user " + INVALID_USER);
+		Collection<Long> datafileIds = new ArrayList<Long>();
+		datafileIds.add(VALID_DATA_FILE_ID);
+		DownloadInfo access = DownloadManager
+				.checkDatafileDownloadAccess(VALID_USER_FOR_INVESTIGATION, datafileIds, em);
 
-        Collection<Long> datafileIds = new ArrayList<Long>();
-        datafileIds.add(VALID_DATA_FILE_ID);
+		assertNotNull("Access must be true", access);
+		assertNotNull("Collection of file names must not be null", access.getDatafileNames());
+		assertEquals("Collection size must be one", 1, access.getDatafileNames().size());
+		assertEquals("File name must be SXD015554.RAW", "SXD015554.RAW", access.getDatafileNames().iterator().next());
+		assertEquals("User id must be " + VALID_USER_FOR_INVESTIGATION, VALID_USER_FOR_INVESTIGATION,
+				access.getUserId());
+	}
 
-        try {
-            DownloadManager.checkDatafileDownloadAccess(INVALID_USER, datafileIds, em);
-        } catch (ICATAPIException ex) {
-            log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
-            assertTrue("Exception must contain 'does not have permission'", ex.getMessage().contains("does not have permission"));
-            assertTrue("Exception must contain 'READ'", ex.getMessage().contains("READ"));
-            throw ex;
-        }
-    }
+	/**
+	 * Valid user check access test
+	 * 
+	 * @throws uk.icat3.exceptions.ICATAPIException
+	 */
+	// @Test
+	public void testAccessToDownload2() throws ICATAPIException {
+		log.info("Testing download datafile " + VALID_DATA_FILE_ID + ",57 name SXD015554.RAW for user "
+				+ VALID_USER_FOR_INVESTIGATION);
 
-    /**
-     * Valid user check access for deleted test
-     * 
-     * @throws uk.icat3.exceptions.ICATAPIException
-     */
-    //@Test(expected = NoSuchObjectFoundException.class)
-    public void testAccessToDownloadDeletedFile() throws ICATAPIException {
-        log.info("Testing download datafile 56 name deleted.RAW for user " + VALID_USER_FOR_INVESTIGATION);
+		Collection<Long> datafileIds = new ArrayList<Long>();
+		datafileIds.add(VALID_DATA_FILE_ID);
+		datafileIds.add(57L);
 
-        Collection<Long> datafileIds = new ArrayList<Long>();
-        datafileIds.add(56L);
+		DownloadInfo access = DownloadManager
+				.checkDatafileDownloadAccess(VALID_USER_FOR_INVESTIGATION, datafileIds, em);
 
-        try {
-            DownloadManager.checkDatafileDownloadAccess(VALID_USER_FOR_INVESTIGATION, datafileIds, em);
-        } catch (ICATAPIException ex) {
-            log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
-            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
-            throw ex;
-        }
-    }
+		assertNotNull("Access must be true", access);
+		assertNotNull("Collection of file names must not be null", access.getDatafileNames());
+		assertEquals("Collection size must be one", 2, access.getDatafileNames().size());
+		assertEquals("File name must be SXD015554.RAW", "SXD015554.RAW", access.getDatafileNames().iterator().next());
+		assertEquals("User id must be " + VALID_USER_FOR_INVESTIGATION, VALID_USER_FOR_INVESTIGATION,
+				access.getUserId());
 
-    /**
-     * Valid user check access for deleted test
-     * 
-     * @throws uk.icat3.exceptions.ICATAPIException
-     */
-    //@Test(expected = NoSuchObjectFoundException.class)
-    public void testAccessToDownloadValidAndDeletedFile() throws ICATAPIException {
-        log.info("Testing download datafile 56 name deleted.RAW for user " + VALID_USER_FOR_INVESTIGATION);
+	}
 
-        Collection<Long> datafileIds = new ArrayList<Long>();
-        datafileIds.add(76L);
-        datafileIds.add(VALID_DATA_FILE_ID); //valid file
+	/**
+	 * Reader user check access test
+	 * 
+	 * @throws uk.icat3.exceptions.ICATAPIException
+	 */
+	// @Test(expected = InsufficientPrivilegesException.class)
+	public void testAccessToDownloadReaderUser() throws ICATAPIException {
+		log.info("Testing download datafile " + VALID_DATA_FILE_ID + ", name SXD015554.RAW for user " + READER_USER);
 
-        try {
-            DownloadManager.checkDatafileDownloadAccess(VALID_USER_FOR_INVESTIGATION, datafileIds, em);
-        } catch (ICATAPIException ex) {
-            log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
-            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
-            throw ex;
-        }
-    }
+		Collection<Long> datafileIds = new ArrayList<Long>();
+		datafileIds.add(VALID_DATA_FILE_ID);
 
-    /**
-     * Valid user check access for deleted test
-     * 
-     * @throws uk.icat3.exceptions.ICATAPIException
-     */
-    //@Test(expected = NoSuchObjectFoundException.class)
-    public void testAccessToDownloadInvalideletedFile() throws ICATAPIException {
-        log.info("Testing download invalid datafile name 123456pp.stupid for user " + VALID_USER_FOR_INVESTIGATION);
+		try {
+			DownloadManager.checkDatafileDownloadAccess(READER_USER, datafileIds, em);
+		} catch (ICATAPIException ex) {
+			log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
+			assertTrue("Exception must contain 'does not have permission'",
+					ex.getMessage().contains("does not have permission"));
+			assertTrue("Exception must contain 'DOWNLOAD'", ex.getMessage().contains("DOWNLOAD"));
+			throw ex;
+		}
+	}
 
-        Collection<Long> datafileIds = new ArrayList<Long>();
-        datafileIds.add(2355L);
+	/**
+	 * Invalid user check access test
+	 * 
+	 * @throws uk.icat3.exceptions.ICATAPIException
+	 */
+	// @Test(expected = InsufficientPrivilegesException.class)
+	public void testAccessToDownloadInvalidUser() throws ICATAPIException {
+		log.info("Testing download datafile " + VALID_DATA_FILE_ID + ", name SXD015554.RAW for user " + INVALID_USER);
 
-        try {
-            DownloadManager.checkDatafileDownloadAccess(VALID_USER_FOR_INVESTIGATION, datafileIds, em);
-        } catch (ICATAPIException ex) {
-            log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
-            assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
-            throw ex;
-        }
-    }
+		Collection<Long> datafileIds = new ArrayList<Long>();
+		datafileIds.add(VALID_DATA_FILE_ID);
 
-    public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(TestDatafileDownload.class);
-    }
+		try {
+			DownloadManager.checkDatafileDownloadAccess(INVALID_USER, datafileIds, em);
+		} catch (ICATAPIException ex) {
+			log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
+			assertTrue("Exception must contain 'does not have permission'",
+					ex.getMessage().contains("does not have permission"));
+			assertTrue("Exception must contain 'READ'", ex.getMessage().contains("READ"));
+			throw ex;
+		}
+	}
+
+	/**
+	 * Valid user check access for deleted test
+	 * 
+	 * @throws uk.icat3.exceptions.ICATAPIException
+	 */
+	// @Test(expected = NoSuchObjectFoundException.class)
+	public void testAccessToDownloadDeletedFile() throws ICATAPIException {
+		log.info("Testing download datafile 56 name deleted.RAW for user " + VALID_USER_FOR_INVESTIGATION);
+
+		Collection<Long> datafileIds = new ArrayList<Long>();
+		datafileIds.add(56L);
+
+		try {
+			DownloadManager.checkDatafileDownloadAccess(VALID_USER_FOR_INVESTIGATION, datafileIds, em);
+		} catch (ICATAPIException ex) {
+			log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
+			assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+			throw ex;
+		}
+	}
+
+	/**
+	 * Valid user check access for deleted test
+	 * 
+	 * @throws uk.icat3.exceptions.ICATAPIException
+	 */
+	// @Test(expected = NoSuchObjectFoundException.class)
+	public void testAccessToDownloadValidAndDeletedFile() throws ICATAPIException {
+		log.info("Testing download datafile 56 name deleted.RAW for user " + VALID_USER_FOR_INVESTIGATION);
+
+		Collection<Long> datafileIds = new ArrayList<Long>();
+		datafileIds.add(76L);
+		datafileIds.add(VALID_DATA_FILE_ID); // valid file
+
+		try {
+			DownloadManager.checkDatafileDownloadAccess(VALID_USER_FOR_INVESTIGATION, datafileIds, em);
+		} catch (ICATAPIException ex) {
+			log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
+			assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+			throw ex;
+		}
+	}
+
+	/**
+	 * Valid user check access for deleted test
+	 * 
+	 * @throws uk.icat3.exceptions.ICATAPIException
+	 */
+	// @Test(expected = NoSuchObjectFoundException.class)
+	public void testAccessToDownloadInvalideletedFile() throws ICATAPIException {
+		log.info("Testing download invalid datafile name 123456pp.stupid for user " + VALID_USER_FOR_INVESTIGATION);
+
+		Collection<Long> datafileIds = new ArrayList<Long>();
+		datafileIds.add(2355L);
+
+		try {
+			DownloadManager.checkDatafileDownloadAccess(VALID_USER_FOR_INVESTIGATION, datafileIds, em);
+		} catch (ICATAPIException ex) {
+			log.warn("caught: " + ex.getClass() + " " + ex.getMessage());
+			assertTrue("Exception must contain 'not found'", ex.getMessage().contains("not found"));
+			throw ex;
+		}
+	}
+
+	public static junit.framework.Test suite() {
+		return new JUnit4TestAdapter(TestDatafileDownload.class);
+	}
 }
