@@ -2,7 +2,9 @@ package uk.icat3.useransto.facility;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -19,6 +21,7 @@ import uk.icat3.user.AddressChecker;
 import uk.icat3.user.UserDetails;
 import uk.icat3.useransto.entity.Session;
 import uk.icat3.useransto.entity.UserE;
+import uk.icat3.useransto.message.LoginInterceptor;
 
 public class AnstoUser implements uk.icat3.user.User {
 
@@ -143,9 +146,9 @@ public class AnstoUser implements uk.icat3.user.User {
 		String sid = session.getUserSessionId();
 		log.info("Logged in for user: " + username + " with sessionid:" + sid);
 
-		// final Timestamp loginTime = new Timestamp(new Date().getTime());
-		// log.info("About to send login message");
-		// LoginInterceptor.sendLoginMessage(sid, username, loginTime);
+		final Timestamp loginTime = new Timestamp(new Date().getTime());
+		log.info("About to send login message");
+		LoginInterceptor.sendLoginMessage(sid, username, loginTime);
 
 		return sid;
 	}
