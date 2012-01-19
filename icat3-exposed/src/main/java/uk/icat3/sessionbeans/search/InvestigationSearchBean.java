@@ -42,7 +42,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
 	 * @param sessionId
 	 *            session id of the user.
 	 * @param advancedSearch
-	 *            advanced Search details to search with
+	 *            advanced SearchManager details to search with
 	 * @param startIndex
 	 *            start index of the results found
 	 * @param number_results
@@ -66,7 +66,7 @@ public class InvestigationSearchBean extends EJBObject implements InvestigationS
 	 * @param sessionId
 	 *            session id of the user.
 	 * @param advancedSearch
-	 *            advanced Search details to search with
+	 *            advanced SearchManager details to search with
 	 * @throws uk.icat3.exceptions.SessionException
 	 *             if the session id is invalid
 	 * @return collection of {@link Investigation} investigation objects

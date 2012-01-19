@@ -46,13 +46,12 @@
 		<class>uk.icat3.entity.OutputDataset</class>
 		<class>uk.icat3.entity.InputDatafile</class>
 		<class>uk.icat3.entity.OutputDatafile</class>
+		<class>uk.icat3.entity.NotificationRequest</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="eclipselink.target-server" value="SunAS9" />
-			<property name="eclipselink.logging.level" value="INFO" />
 			<property name="eclipselink.cache.shared.default" value="false" />
-			<property name="eclipselink.cache.type.default" value="NONE" />
-			<property name="eclipselink.cache.size.default" value="0" />
+			<property name="eclipselink.logging.level" value="WARNING" />
 			<property name="eclipselink.ddl-generation" value="create-tables" />
 			<property name="eclipselink.ddl-generation.output_mode"
 				value="both" />
@@ -71,9 +70,7 @@
 		<properties>
 			<property name="eclipselink.target-server" value="SunAS9" />
 			<property name="eclipselink.cache.shared.default" value="false" />
-			<property name="eclipselink.cache.type.default" value="NONE" />
-			<property name="eclipselink.cache.size.default" value="0" />
-			<property name="eclipselink.logging.level" value="INFO" />
+			<property name="eclipselink.logging.level" value="WARNING" />
 			<property name="eclipselink.ddl-generation" value="create-tables" />
 			<property name="eclipselink.ddl-generation.output_mode"
 				value="both" />

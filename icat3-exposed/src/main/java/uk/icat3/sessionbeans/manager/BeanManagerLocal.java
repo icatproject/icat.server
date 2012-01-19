@@ -1,5 +1,7 @@
 package uk.icat3.sessionbeans.manager;
 
+import java.util.List;
+
 import javax.ejb.Local;
 
 import uk.icat3.entity.EntityBaseBean;
@@ -29,6 +31,8 @@ public interface BeanManagerLocal {
 
 	EntityBaseBean get(String sessionId, String query, Object primaryKey) throws SessionException, NoSuchObjectFoundException,
 			InsufficientPrivilegesException, BadParameterException, IcatInternalException;
+	
+	List<?> search(String sessionId, String query) throws SessionException, IcatInternalException, BadParameterException, InsufficientPrivilegesException;
 
 	void dummy(Facility facility);
 
