@@ -19,8 +19,8 @@ import uk.icat3.util.AccessType;
 
 public class GateKeeper {
 
-	static Logger logger = Logger.getLogger(GateKeeper.class);
-	static EntityInfoHandler pkHandler = EntityInfoHandler.getInstance();
+	private final static Logger logger = Logger.getLogger(GateKeeper.class);
+	private final static EntityInfoHandler pkHandler = EntityInfoHandler.getInstance();
 
 	public static Comparator<String> stringsBySize = new Comparator<String>() {
 
@@ -78,7 +78,7 @@ public class GateKeeper {
 			 * shorter query.
 			 */
 			List<String> sortedQueries = new ArrayList<String>();
-			sortedQueries.addAll(query.getResultList());
+			sortedQueries.addAll(restrictions);
 			Collections.sort(sortedQueries, stringsBySize);
 
 			for (String qString : sortedQueries) {

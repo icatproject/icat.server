@@ -96,20 +96,19 @@ public class Rule implements Serializable {
 
 	@Column(name = "BEANS")
 	private String beans;
-	
+
 	@SuppressWarnings("unused")
 	@Column(name = "MOD_TIME", nullable = false)
 	@Temporal(value = TemporalType.TIMESTAMP)
 	@XmlElement
 	private Date modTime;
 
-
 	// Needed for JPA
 	public Rule() {
 	}
 
-	public Rule(String groupName, String what, String crud, String restriction)
-			throws BadParameterException, IcatInternalException {
+	public Rule(String groupName, String what, String crud, String restriction) throws BadParameterException,
+			IcatInternalException {
 		this.groupName = groupName;
 		this.what = what;
 		crud = crud.toUpperCase();

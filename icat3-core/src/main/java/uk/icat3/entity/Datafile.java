@@ -42,6 +42,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
 
+import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
@@ -142,7 +143,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
 	private Collection<DatafileParameter> datafileParameterCollection = new ArrayList<DatafileParameter>();
-	
+
 	@OneToMany(mappedBy = "datafile")
 	private Set<InputDatafile> inputDatafiles;
 
@@ -587,7 +588,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 
 		this.setDatafileParameterCollection(datafileParameters);
 	}
-	
+
 	@XmlTransient
 	public Set<InputDatafile> getInputDatafiles() {
 		return this.inputDatafiles;
@@ -602,7 +603,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 			return null;
 		}
 	}
-	
+
 	@XmlTransient
 	public Set<OutputDatafile> getOutputDatafiles() {
 		return this.outputDatafiles;
@@ -755,7 +756,8 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		}
 	}
 
-	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException {
+	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
+			BadParameterException, IcatInternalException {
 		super.preparePersist(modId, manager);
 		id = null;
 		for (DatafileParameter datafileParameter : datafileParameterCollection) {
@@ -766,7 +768,8 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersistTop(String modId, EntityManager manager) throws NoSuchObjectFoundException {
+	public void preparePersistTop(String modId, EntityManager manager) throws NoSuchObjectFoundException,
+			BadParameterException, IcatInternalException {
 		super.preparePersistTop(modId, manager);
 		if (dataset == null) {
 			dataset = ManagerUtil.find(Dataset.class, datasetId, manager);

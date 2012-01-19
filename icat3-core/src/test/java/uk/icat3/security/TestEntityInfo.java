@@ -18,6 +18,7 @@ import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.FacilityUser;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
+import uk.icat3.entity.Job;
 import uk.icat3.entity.Keyword;
 import uk.icat3.entity.Parameter;
 import uk.icat3.entity.Topic;
@@ -25,7 +26,6 @@ import uk.icat3.entity.TopicList;
 import uk.icat3.security.EntityInfoHandler.KeyType;
 import uk.icat3.security.EntityInfoHandler.Relationship;
 import uk.icat3.util.BaseTestTransaction;
-
 
 public class TestEntityInfo extends BaseTestTransaction {
 
@@ -40,7 +40,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testPKS(Investigator.class, "getInvestigatorPK", "getInvestigationId", "getFacilityUserId");
 		testPKS(FacilityUser.class, "getFacilityUserId");
 		testPKS(Topic.class, "getId");
-//		testPKS(Job.class, "getId");
+		testPKS(Job.class, "getId");
 	}
 
 	private void testPKS(Class<? extends EntityBaseBean> klass, String... pkname) throws Exception {
@@ -62,9 +62,9 @@ public class TestEntityInfo extends BaseTestTransaction {
 				"Publication by publicationCollection many", "Investigator by investigatorCollection many",
 				"FacilityCycle by facilityCycle one");
 
-		testRel(Dataset.class, "DatasetParameter by datasetParameterCollection many",
-				"Datafile by datafileCollection many", "Investigation by investigation one", "Job by withInputs many",
-				"Job by withOutputs many");
+		testRel(Dataset.class, "InputDataset by inputDatasets many",
+				"DatasetParameter by datasetParameterCollection many", "Investigation by investigation one",
+				"Datafile by datafileCollection many", "OutputDataset by outputDatasets many");
 
 		testRel(Keyword.class, "Investigation by investigation one");
 
@@ -73,10 +73,12 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testRel(Investigator.class, "Investigation by investigation one", "FacilityUser by facilityUser one");
 
 		testRel(FacilityUser.class, "Investigator by investigatorCollection many");
-		testRel(Topic.class, "TopicList by topicListCollection many");
-//		testRel(Job.class, "Dataset by inputDatasets many", "Application by application one",
-//				"Datafile by inputDatafiles many", "Dataset by outputDatasets many", "Datafile by outputDatafiles many");
 
+		testRel(Topic.class, "TopicList by topicListCollection many");
+
+		testRel(Job.class, "InputDataset by inputDatasets many", "InputDatafile by inputDatafiles many",
+				"OutputDatafile by outputDatafiles many", "Application by application one",
+				"OutputDataset by outputDatasets many");
 	}
 
 	private void testRel(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {
@@ -102,7 +104,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testNNF(FacilityUser.class, "facilityUserId");
 		testNNF(Topic.class, "id");
 		testNNF(Parameter.class, "valueType");
-//		testNNF(Job.class);
+		testNNF(Job.class, "application");
 	}
 
 	private void testNNF(Class<? extends EntityBaseBean> klass, String... nnfs) throws Exception {
@@ -131,7 +133,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 				"federalId 255", "firstName 255");
 		testSF(Topic.class, "name 255");
 		testSF(Parameter.class, "description 255", "nonNumericValueFormat 255", "unitsLongVersion 255");
-//		testSF(Job.class);
+		testSF(Job.class);
 
 	}
 
@@ -158,7 +160,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testGetters(FacilityUser.class, 8);
 		testGetters(Topic.class, 5);
 		testGetters(Parameter.class, 12);
-//		testGetters(Job.class, 6);
+		testGetters(Job.class, 6);
 	}
 
 	private void testGetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
@@ -183,7 +185,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testSetters(FacilityUser.class, 6);
 		testSetters(Topic.class, 3);
 		testSetters(Parameter.class, 8);
-//		testSetters(Job.class, 1);
+		testSetters(Job.class, 1);
 	}
 
 	private void testSetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
@@ -207,7 +209,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testKeytype(FacilityUser.class, EntityInfoHandler.KeyType.SIMPLE);
 		testKeytype(Topic.class, EntityInfoHandler.KeyType.SIMPLE);
 		testKeytype(Parameter.class, EntityInfoHandler.KeyType.COMPOUND);
-		//		testKeytype(Job.class, EntityInfoHandler.KeyType.GENERATED);
+		testKeytype(Job.class, EntityInfoHandler.KeyType.GENERATED);
 	}
 
 	private void testKeytype(Class<? extends EntityBaseBean> klass, KeyType keyType) throws Exception {

@@ -58,7 +58,7 @@ public class Queries {
 	// Returns investigation id
 	public static final String RETURN_ALL_INVESTIGATION_IDS_JPQL = "SELECT DISTINCT i.id from Investigation i ";
 
-	// Search all investigations WHERE (investigation.instrument = facilityScientist AND
+	// SearchManager all investigations WHERE (investigation.instrument = facilityScientist AND
 	// facilityScientist fedid) OR
 	// OR (userId = SUPER) OR (userId is in icatAuthrosation table and role is select)
 	public static final String QUERY_USERS_INVESTIGATIONS_JPQL = " WHERE 1=1 ";
@@ -121,7 +121,7 @@ public class Queries {
 			+ QUERY_USERS_INVESTIGATIONS_JPQL
 			+ "AND EXISTS (SELECT kw FROM i.keywordCollection kw WHERE kw.keywordPK.name LIKE :keyword)";
 
-	/** Search my keywords (AND and OR and fuzzy) */
+	/** SearchManager my keywords (AND and OR and fuzzy) */
 	public static final String INVESTIGATION_NATIVE_LIST_BY_KEYWORDS = "Investigation.findByKewordsNative";
 
 	public static final String INVESTIGATION_LIST_BY_KEYWORDS_JPQL = LIST_ALL_USERS_INVESTIGATIONS_JPQL;

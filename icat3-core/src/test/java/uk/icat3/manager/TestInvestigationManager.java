@@ -11,7 +11,6 @@ import uk.icat3.entity.Investigation;
 import uk.icat3.entity.InvestigationType;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.search.Search;
 import uk.icat3.util.BaseTestTransaction;
 
 public class TestInvestigationManager extends BaseTestTransaction {
@@ -25,7 +24,7 @@ public class TestInvestigationManager extends BaseTestTransaction {
 		RuleManager.addRule("Group", "Investigation", "CRUD", null, em);
 		RuleManager.addRule("Group", "InvestigationType", "CRUD", null, em);
 		RuleManager.addRule("Group", "Facility", "CRUD", null, em);
-		
+
 		Facility f = new Facility();
 		f.setFacilityShortName("ISIS");
 		f.setDaysUntilRelease(90L);
@@ -38,11 +37,11 @@ public class TestInvestigationManager extends BaseTestTransaction {
 
 	@Test
 	public void testCreateInvestigation() throws Exception {
-		int nInvestigations = Search.search("P1", "Investigation", em).size();
+		int nInvestigations = SearchManager.search("P1", "Investigation", em).getList().size();
 
 		Investigation inv = createInvestigation("42", "Fred", "experiment", "ISIS");
-		inv.setId((Long) BeanManager.create("P1", inv, em));
-		assertEquals("Size", nInvestigations + 1, Search.search("P1", "Investigation", em).size());
+		inv.setId((Long) BeanManager.create("P1", inv, em).getPk());
+		assertEquals("Size", nInvestigations + 1, SearchManager.search("P1", "Investigation", em).getList().size());
 
 		assertEquals("42", inv.getInvNumber());
 		assertNotNull(inv.getId());
@@ -55,18 +54,18 @@ public class TestInvestigationManager extends BaseTestTransaction {
 	 */
 	@Test
 	public void testUpdateInvestigation() throws Exception {
-		int nInvestigations = Search.search("P1", "Investigation", em).size();
+		int nInvestigations = SearchManager.search("P1", "Investigation", em).getList().size();
 		Investigation inv = createInvestigation("42", "Fred", "experiment", "ISIS");
-		inv.setId((Long) BeanManager.create("P1", inv, em));
-		assertEquals("Size", nInvestigations + 1, Search.search("P1", "Investigation", em).size());
+		inv.setId((Long) BeanManager.create("P1", inv, em).getPk());
+		assertEquals("Size", nInvestigations + 1, SearchManager.search("P1", "Investigation", em).getList().size());
 
 		Long invId = inv.getId();
 		inv.setGrantId(7000L);
 
 		BeanManager.update("P2", inv, em);
-		inv = (Investigation) BeanManager.get("P2", "Investigation", invId, em);
+		inv = (Investigation) BeanManager.get("P2", "Investigation", invId, em).getBean();
 
-		assertEquals("Size", nInvestigations + 1, Search.search("P1", "Investigation", em).size());
+		assertEquals("Size", nInvestigations + 1, SearchManager.search("P1", "Investigation", em).getList().size());
 
 		assertEquals("42", inv.getInvNumber());
 		assertEquals(invId, inv.getId());
@@ -81,25 +80,25 @@ public class TestInvestigationManager extends BaseTestTransaction {
 	 */
 	@Test
 	public void testRemoveInvestigation() throws Exception {
-		int nInvestigations = Search.search("P1", "Investigation", em).size();
+		int nInvestigations = SearchManager.search("P1", "Investigation", em).getList().size();
 		Investigation inv = createInvestigation("42", "Fred", "experiment", "ISIS");
-		inv.setId((Long) BeanManager.create("P1", inv, em));
-		assertEquals("Size", nInvestigations + 1, Search.search("P1", "Investigation", em).size());
+		inv.setId((Long) BeanManager.create("P1", inv, em).getPk());
+		assertEquals("Size", nInvestigations + 1, SearchManager.search("P1", "Investigation", em).getList().size());
 
 		Long invId = inv.getId();
 		inv = new Investigation();
 		inv.setId(invId);
 
 		BeanManager.delete("P2", inv, em);
-		assertEquals("Size", nInvestigations, Search.search("P1", "Investigation", em).size());
+		assertEquals("Size", nInvestigations, SearchManager.search("P1", "Investigation", em).getList().size());
 	}
 
 	@Test(expected = InsufficientPrivilegesException.class)
 	public void testRemoveInvestigationBadUser() throws Exception {
-		int nInvestigations = Search.search("P1", "Investigation", em).size();
+		int nInvestigations = SearchManager.search("P1", "Investigation", em).getList().size();
 		Investigation inv = createInvestigation("42", "Fred", "experiment", "ISIS");
-		inv.setId((Long) BeanManager.create("P1", inv, em));
-		assertEquals("Size", nInvestigations + 1, Search.search("P1", "Investigation", em).size());
+		inv.setId((Long) BeanManager.create("P1", inv, em).getPk());
+		assertEquals("Size", nInvestigations + 1, SearchManager.search("P1", "Investigation", em).getList().size());
 
 		Long invId = inv.getId();
 		inv = new Investigation();
@@ -110,14 +109,14 @@ public class TestInvestigationManager extends BaseTestTransaction {
 
 	@Test(expected = NoSuchObjectFoundException.class)
 	public void testUpdateInvestigationNotExists() throws Exception {
-		int nInvestigations = Search.search("P1", "Investigation", em).size();
+		int nInvestigations = SearchManager.search("P1", "Investigation", em).getList().size();
 		Investigation inv = createInvestigation("42", "Fred", "experiment", "ISIS");
-		inv.setId((Long) BeanManager.create("P1", inv, em));
+		inv.setId((Long) BeanManager.create("P1", inv, em).getPk());
 
 		inv = new Investigation();
 
 		inv.setId(7890423782437L);
-		assertEquals("Size", nInvestigations + 1, Search.search("P1", "Investigation", em).size());
+		assertEquals("Size", nInvestigations + 1, SearchManager.search("P1", "Investigation", em).getList().size());
 
 		BeanManager.delete("P2", inv, em);
 	}

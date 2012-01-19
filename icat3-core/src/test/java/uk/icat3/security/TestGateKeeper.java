@@ -144,7 +144,7 @@ public class TestGateKeeper extends BaseTest {
 		inv.setInvStartDate(new Date());
 		inv.setInvEndDate(new Date());
 		inv.setFacility("ISIS");
-		inv.setId((Long) BeanManager.create("uo", inv, em));
+		inv.setId((Long) BeanManager.create("uo", inv, em).getPk());
 		Dataset dataset = new Dataset();
 		dataset.setName("Wibble");
 		dataset.setDatasetType("GQ");
@@ -177,7 +177,7 @@ public class TestGateKeeper extends BaseTest {
 		inv.setInvStartDate(new Date());
 		inv.setInvEndDate(new Date());
 		inv.setFacility("ISIS");
-		inv.setId((Long) BeanManager.create("uo", inv, em));
+		inv.setId((Long) BeanManager.create("uo", inv, em).getPk());
 		Dataset dataset = new Dataset();
 		dataset.setName("Wibble");
 		dataset.setDatasetType("GQ");

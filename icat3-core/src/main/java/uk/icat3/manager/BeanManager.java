@@ -38,9 +38,9 @@ public class BeanManager {
 	private static final Logger logger = Logger.getLogger(BeanManager.class);
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
-	public static Object create(String userId, EntityBaseBean bean, EntityManager manager)
+	public static CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager)
 			throws InsufficientPrivilegesException, ObjectAlreadyExistsException, ValidationException,
-			NoSuchObjectFoundException, IcatInternalException {
+			NoSuchObjectFoundException, IcatInternalException, BadParameterException {
 		// TODO this code can throw a primary key exception if the same object
 		// is being created by two threads. Probably need to use a Bean Managed
 		// Transaction to avoid the problem.
@@ -65,15 +65,17 @@ public class BeanManager {
 		}
 		// Check authz now everything persisted
 		GateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
-		return bean.getPK();
+		NotificationMessages notification = new NotificationMessages(userId, bean, AccessType.CREATE, manager);
+		return new CreateResponse(bean.getPK(), notification);
 	}
 
-	public static void delete(String userId, EntityBaseBean bean, EntityManager manager)
+	public static NotificationMessages delete(String userId, EntityBaseBean bean, EntityManager manager)
 			throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException,
 			IcatInternalException {
 		EntityBaseBean beanManaged = find(bean, manager);
 		GateKeeper.performAuthorisation(userId, beanManaged, AccessType.DELETE, manager);
 		beanManaged.canDelete(manager);
+		NotificationMessages notification = new NotificationMessages(userId, bean, AccessType.DELETE, manager);
 		try {
 			manager.remove(beanManaged);
 			manager.flush();
@@ -82,16 +84,17 @@ public class BeanManager {
 			manager.clear();
 			throw new IcatInternalException("Unexpected DB response " + e.getMessage());
 		}
+		return notification;
+
 	}
 
-	public static void update(String userId, EntityBaseBean bean, EntityManager manager)
+	public static NotificationMessages update(String userId, EntityBaseBean bean, EntityManager manager)
 			throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException,
-			IcatInternalException {
+			IcatInternalException, BadParameterException {
 		EntityBaseBean beanManaged = find(bean, manager);
 		GateKeeper.performAuthorisation(userId, beanManaged, AccessType.UPDATE, manager);
 		beanManaged.setModId(userId);
 		beanManaged.merge(bean, manager);
-
 		try {
 			manager.flush();
 			logger.trace("Updated bean " + bean + " flushed.");
@@ -100,9 +103,11 @@ public class BeanManager {
 			bean.isValid(manager, false);
 			throw new IcatInternalException("Unexpected DB response " + e);
 		}
+		NotificationMessages notification = new NotificationMessages(userId, bean, AccessType.UPDATE, manager);
+		return notification;
 	}
 
-	public static EntityBaseBean get(String userId, String query, Object primaryKey, EntityManager manager)
+	public static GetResponse get(String userId, String query, Object primaryKey, EntityManager manager)
 			throws NoSuchObjectFoundException, InsufficientPrivilegesException, BadParameterException,
 			IcatInternalException {
 
@@ -136,10 +141,11 @@ public class BeanManager {
 
 		GateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
 		logger.debug("got " + entityClass.getSimpleName() + "[id:" + primaryKey + "]");
-		return beanManaged;
+		NotificationMessages notification = new NotificationMessages(userId, beanManaged, AccessType.READ, manager);
+		return new GetResponse(beanManaged, notification);
 	}
 
-	public static EntityBaseBean find(EntityBaseBean bean, EntityManager manager) throws NoSuchObjectFoundException,
+	private static EntityBaseBean find(EntityBaseBean bean, EntityManager manager) throws NoSuchObjectFoundException,
 			IcatInternalException {
 		Object primaryKey = bean.getPK();
 		Class<? extends EntityBaseBean> entityClass = bean.getClass();

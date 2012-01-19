@@ -1,4 +1,4 @@
-package uk.icat3.search;
+package uk.icat3.manager;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -23,18 +23,19 @@ import uk.icat3.security.parser.ParserException;
 import uk.icat3.security.parser.SearchQuery;
 import uk.icat3.security.parser.Token;
 import uk.icat3.security.parser.Tokenizer;
+import uk.icat3.util.AccessType;
 
-public class Search {
+public class SearchManager {
 
 	private static DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 
-	static Logger logger = Logger.getLogger(Search.class);
+	static Logger logger = Logger.getLogger(SearchManager.class);
 	private static final Pattern timestampPattern = Pattern.compile(":ts(\\d{14})");
 
-	public static List<?> search(String userId, String query, EntityManager manager) throws BadParameterException,
+	public static SearchResponse search(String userId, String query, EntityManager manager) throws BadParameterException,
 			IcatInternalException, InsufficientPrivilegesException {
 
-		Search.logger.debug(userId + " searches for " + query);
+		SearchManager.logger.debug(userId + " searches for " + query);
 
 		/* Parse the query */
 		List<Token> tokens = null;
@@ -53,15 +54,15 @@ public class Search {
 
 		/* Get the JPQL which includes authz restrictions */
 		String jpql = q.getJPQL(userId, manager);
-		Search.logger.debug("JPQL: " + jpql);
+		SearchManager.logger.debug("JPQL: " + jpql);
 
 		/* Create query and add parameter values for any timestamps */
-		Matcher m = Search.timestampPattern.matcher(jpql);
+		Matcher m = SearchManager.timestampPattern.matcher(jpql);
 		javax.persistence.Query jpqlQuery = manager.createQuery(jpql);
 		while (m.find()) {
 			Date d = null;
 			try {
-				d = Search.df.parse(m.group(1));
+				d = SearchManager.df.parse(m.group(1));
 			} catch (ParseException e) {
 				// This cannot happen - honest
 			}
@@ -86,7 +87,8 @@ public class Search {
 			}
 		}
 
-		Search.logger.debug("Obtained " + result.size() + " results.");
-		return result;
+		SearchManager.logger.debug("Obtained " + result.size() + " results.");
+		NotificationMessages nms = new NotificationMessages(userId, result.size(), q.getFirstEntity(), query, manager);
+		return new SearchResponse(result, nms);
 	}
 }

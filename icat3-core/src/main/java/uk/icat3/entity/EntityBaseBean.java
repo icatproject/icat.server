@@ -30,6 +30,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import org.apache.log4j.Logger;
 
+import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ObjectAlreadyExistsException;
@@ -203,7 +204,7 @@ public abstract class EntityBaseBean implements Serializable {
 	 * super.merge()
 	 */
 	public void merge(Object from, EntityManager manager) throws ValidationException, IcatInternalException,
-			NoSuchObjectFoundException {
+			NoSuchObjectFoundException, BadParameterException {
 		BeanManager.merge(this, from, manager);
 		this.postMergeFixup(manager);
 	}
@@ -212,7 +213,8 @@ public abstract class EntityBaseBean implements Serializable {
 	 * If this method is overridden it should normally be called as well by
 	 * super.postMergeFixup()
 	 */
-	public void postMergeFixup(EntityManager manager) throws NoSuchObjectFoundException {
+	public void postMergeFixup(EntityManager manager) throws NoSuchObjectFoundException, BadParameterException,
+			IcatInternalException {
 		// Do nothing by default
 	}
 
@@ -236,11 +238,21 @@ public abstract class EntityBaseBean implements Serializable {
 		}
 	}
 
-	public void preparePersistTop(String modId, EntityManager manager) throws NoSuchObjectFoundException {
+	/*
+	 * If this method is overridden it should normally be called as well by
+	 * super.preparePersistTop()
+	 */
+	public void preparePersistTop(String modId, EntityManager manager) throws NoSuchObjectFoundException,
+			BadParameterException, IcatInternalException {
 		preparePersist(modId, manager);
 	}
 
-	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException {
+	/*
+	 * If this method is overridden it should normally be called as well by
+	 * super.preparePersist()
+	 */
+	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
+			BadParameterException, IcatInternalException {
 		this.modId = modId;
 	}
 

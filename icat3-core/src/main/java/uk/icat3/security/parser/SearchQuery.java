@@ -128,7 +128,7 @@ public class SearchQuery {
 		}
 	}
 
-	private Class<? extends EntityBaseBean> getFirstEntity() throws BadParameterException {
+	public Class<? extends EntityBaseBean> getFirstEntity() throws BadParameterException {
 		return EntityInfoHandler.getClass(this.result.getValue().split("\\.")[0]);
 	}
 

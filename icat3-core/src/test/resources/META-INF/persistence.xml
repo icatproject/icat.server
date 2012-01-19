@@ -2,7 +2,6 @@
 <persistence version="1.0"
 	xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
-	<!-- This is used for TestAll Junit tests -->
 	<persistence-unit name="icat3-unit-testing-PU"
 		transaction-type="RESOURCE_LOCAL">
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
@@ -43,6 +42,7 @@
 		<class>uk.icat3.entity.OutputDataset</class>
 		<class>uk.icat3.entity.InputDatafile</class>
 		<class>uk.icat3.entity.OutputDatafile</class>
+		<class>uk.icat3.entity.NotificationRequest</class>
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<property name="eclipselink.logging.level" value="WARNING" />
@@ -54,9 +54,9 @@
 			<property name="eclipselink.jdbc.password" value="password" />
 			<property name="eclipselink.jdbc.driver" value="oracle.jdbc.OracleDriver" />
 			<property name="eclipselink.jdbc.user" value="icat" />
-<!-- 			<property name="eclipselink.ddl-generation" value="create-tables" /> -->
-<!-- 			<property name="eclipselink.ddl-generation.output_mode" -->
-<!-- 				value="both" /> -->
+			<property name="eclipselink.ddl-generation" value="create-tables" />
+			<property name="eclipselink.ddl-generation.output_mode"
+				value="both" />
 		</properties>
 	</persistence-unit>
 </persistence>

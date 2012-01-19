@@ -39,6 +39,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
 
+import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ObjectAlreadyExistsException;
@@ -955,7 +956,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		this.invParamValue = invParamValue;
 	}
 
-	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException {
+	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
+			BadParameterException, IcatInternalException {
 		super.preparePersist(modId, manager);
 		id = null;
 		for (Dataset dataset : datasetCollection) {

@@ -12,7 +12,6 @@ import uk.icat3.entity.InvestigationType;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ObjectAlreadyExistsException;
-import uk.icat3.search.Search;
 import uk.icat3.util.BaseTestTransaction;
 
 public class TestDatasetManager extends BaseTestTransaction {
@@ -29,7 +28,7 @@ public class TestDatasetManager extends BaseTestTransaction {
 		RuleManager.addRule("Group", "DatasetType", "CRUD", null, em);
 		RuleManager.addRule("Group", "InvestigationType", "CRUD", null, em);
 		RuleManager.addRule("Group", "Facility", "CRUD", null, em);
-		
+
 		Facility f = new Facility();
 		f.setFacilityShortName("ISIS");
 		f.setDaysUntilRelease(90L);
@@ -38,40 +37,39 @@ public class TestDatasetManager extends BaseTestTransaction {
 		InvestigationType type = new InvestigationType();
 		type.setName("experiment");
 		BeanManager.create("P1", type, em);
-		
+
 		inv = createInvestigation("42", "Fred", "experiment", "ISIS");
-		inv.setId((Long) BeanManager.create("P1",		inv, em));
+		inv.setId((Long) BeanManager.create("P1", inv, em).getPk());
 		BeanManager.create("P1", createDatasetType("dstype", "wibble"), em);
 	}
 
-
 	@Test
 	public void testCreateDataset() throws Exception {
-		int nDatasets = Search.search("P1", "Dataset", em).size();
-		int nDatafiles = Search.search("P1", "Datafile", em).size();
+		int nDatasets = SearchManager.search("P1", "Dataset", em).getList().size();
+		int nDatafiles = SearchManager.search("P1", "Datafile", em).getList().size();
 		Dataset ds = makeDs();
-		assertEquals("Size", nDatasets + 1, Search.search("P1", "Dataset", em).size());
-		assertEquals("Size", nDatafiles + 2, Search.search("P1", "Datafile", em).size());
+		assertEquals("Size", nDatasets + 1, SearchManager.search("P1", "Dataset", em).getList().size());
+		assertEquals("Size", nDatafiles + 2, SearchManager.search("P1", "Datafile", em).getList().size());
 
 		assertEquals("dsname", ds.getName());
 		assertEquals("dfname1", ds.getDatafileCollection().iterator().next().getName());
 		assertEquals("createId", "P1", ds.getCreateId());
 		assertEquals("modId", "P1", ds.getModId());
 	}
-	
-	@Test (expected = ObjectAlreadyExistsException.class)
+
+	@Test(expected = ObjectAlreadyExistsException.class)
 	public void testCreateDatasetClash() throws Exception {
 		makeDs();
 		makeDs();
-		
+
 	}
-	
+
 	private Dataset makeDs() throws Exception {
 		Dataset ds = createDataset(inv.getId(), "dsname", "dstype");
 		ds.getDatafileCollection().add(createDatafile(null, "dfname1"));
 		ds.getDatafileCollection().add(createDatafile(null, "dfname2"));
-		ds.setId( (Long) BeanManager.create("P1", ds, em));
-		ds = (Dataset) BeanManager.get("P1", "Dataset", ds.getId(), em);
+		ds.setId((Long) BeanManager.create("P1", ds, em).getPk());
+		ds = (Dataset) BeanManager.get("P1", "Dataset", ds.getId(), em).getBean();
 		return ds;
 	}
 
@@ -81,11 +79,11 @@ public class TestDatasetManager extends BaseTestTransaction {
 	@Test
 	public void testUpdateDataset() throws Exception {
 
-		int nDatasets = Search.search("P1", "Dataset", em).size();
-		int nDatafiles = Search.search("P1", "Datafile", em).size();
+		int nDatasets = SearchManager.search("P1", "Dataset", em).getList().size();
+		int nDatafiles = SearchManager.search("P1", "Datafile", em).getList().size();
 		Dataset ds = makeDs();
-		assertEquals("Size", nDatasets + 1, Search.search("P1", "Dataset", em).size());
-		assertEquals("Size", nDatafiles + 2, Search.search("P1", "Datafile", em).size());
+		assertEquals("Size", nDatasets + 1, SearchManager.search("P1", "Dataset", em).getList().size());
+		assertEquals("Size", nDatafiles + 2, SearchManager.search("P1", "Datafile", em).getList().size());
 
 		assertEquals("dsname", ds.getName());
 		assertEquals("dfname1", ds.getDatafileCollection().iterator().next().getName());
@@ -98,10 +96,10 @@ public class TestDatasetManager extends BaseTestTransaction {
 		ds.setLocation("guess");
 
 		BeanManager.update("P2", ds, em);
-		ds = (Dataset) BeanManager.get("P2", "Dataset", ds.getId(), em);
-		
-		assertEquals("Size", nDatasets + 1, Search.search("P1", "Dataset", em).size());
-		assertEquals("Size", nDatafiles + 2, Search.search("P1", "Datafile", em).size());
+		ds = (Dataset) BeanManager.get("P2", "Dataset", ds.getId(), em).getBean();
+
+		assertEquals("Size", nDatasets + 1, SearchManager.search("P1", "Dataset", em).getList().size());
+		assertEquals("Size", nDatafiles + 2, SearchManager.search("P1", "Datafile", em).getList().size());
 
 		assertEquals("guess", ds.getLocation());
 
@@ -113,8 +111,8 @@ public class TestDatasetManager extends BaseTestTransaction {
 
 	@Test
 	public void testDeleteDataset() throws Exception {
-		int nDatasets = Search.search("P1", "Dataset", em).size();
-		int nDatafiles = Search.search("P1", "Datafile", em).size();
+		int nDatasets = SearchManager.search("P1", "Dataset", em).getList().size();
+		int nDatafiles = SearchManager.search("P1", "Datafile", em).getList().size();
 		Dataset ds = makeDs();
 		Long dsid = ds.getId();
 
@@ -122,8 +120,8 @@ public class TestDatasetManager extends BaseTestTransaction {
 		ds.setId(dsid);
 
 		BeanManager.delete("P2", ds, em);
-		assertEquals("Size", nDatasets, Search.search("P1", "Dataset", em).size());
-		assertEquals("Size", nDatafiles, Search.search("P1", "Datafile", em).size());
+		assertEquals("Size", nDatasets, SearchManager.search("P1", "Dataset", em).getList().size());
+		assertEquals("Size", nDatafiles, SearchManager.search("P1", "Datafile", em).getList().size());
 	}
 
 	@Test(expected = InsufficientPrivilegesException.class)

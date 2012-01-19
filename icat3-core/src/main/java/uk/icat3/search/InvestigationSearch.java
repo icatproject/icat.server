@@ -767,7 +767,7 @@ public class InvestigationSearch extends ManagerUtil {
 	}
 
 	/**
-	 * Search by a collection of keywords for investigations that user has access to view
+	 * SearchManager by a collection of keywords for investigations that user has access to view
 	 * 
 	 * @param userId
 	 *            federalId of the user.
@@ -795,7 +795,7 @@ public class InvestigationSearch extends ManagerUtil {
 	}
 
 	/**
-	 * Search by a collection of keywords for investigations that user has access to view
+	 * SearchManager by a collection of keywords for investigations that user has access to view
 	 * 
 	 * @param userId
 	 *            federalId of the user.
@@ -820,7 +820,7 @@ public class InvestigationSearch extends ManagerUtil {
 	}
 
 	/**
-	 * Search by a collection of keywords for investigations that user has access to view
+	 * SearchManager by a collection of keywords for investigations that user has access to view
 	 * 
 	 * @param userId
 	 *            federalId of the user.
@@ -931,7 +931,7 @@ public class InvestigationSearch extends ManagerUtil {
 	}
 
 	/**
-	 * Search by a collection of keywords for investigations that user has access to view
+	 * SearchManager by a collection of keywords for investigations that user has access to view
 	 * 
 	 * @param userId
 	 *            federalId of the user.
@@ -950,7 +950,7 @@ public class InvestigationSearch extends ManagerUtil {
 	}
 
 	/**
-	 * Search by a collection of keywords for investigations that user has access to view
+	 * SearchManager by a collection of keywords for investigations that user has access to view
 	 * 
 	 * @param userId
 	 *            federalId of the user.
@@ -967,7 +967,7 @@ public class InvestigationSearch extends ManagerUtil {
 	}
 
 	/**
-	 * Search by a collection of keywords for investigations that user has access to view
+	 * SearchManager by a collection of keywords for investigations that user has access to view
 	 * 
 	 * @param userId
 	 *            federalId of the user.
@@ -986,7 +986,7 @@ public class InvestigationSearch extends ManagerUtil {
 	}
 
 	/**
-	 * Search by a collection of keywords for investigations that user has access to view
+	 * SearchManager by a collection of keywords for investigations that user has access to view
 	 * 
 	 * @param userId
 	 *            federalId of the user.
@@ -1007,7 +1007,7 @@ public class InvestigationSearch extends ManagerUtil {
 	}
 
 	/**
-	 * Search by a collection of keywords for investigations that user has access to view
+	 * SearchManager by a collection of keywords for investigations that user has access to view
 	 * 
 	 * @param userId
 	 *            federalId of the user.

@@ -1,4 +1,4 @@
-package uk.icat3.search;
+package uk.icat3.manager;
 
 import static org.junit.Assert.assertEquals;
 
@@ -35,9 +35,9 @@ import uk.icat3.manager.RuleManager;
 import uk.icat3.util.ParameterValueType;
 import uk.icat3.util.TestConstants;
 
-public class TestSearch {
+public class TestSearchManager {
 
-	private static Logger log = Logger.getLogger(TestSearch.class);
+	private static Logger log = Logger.getLogger(TestSearchManager.class);
 	private static EntityManagerFactory emf;
 	private EntityManager em;
 	private Date invStartDate;
@@ -94,7 +94,7 @@ public class TestSearch {
 		inv.setInvStartDate(invStartDate);
 		inv.setInvEndDate(invEndDate);
 		inv.setFacility("TestFacility");
-		invId = (Long) BeanManager.create("uo", inv, em);
+		invId = (Long) BeanManager.create("uo", inv, em).getPk();
 
 		ParameterPK ppk = new ParameterPK();
 		ppk.setName("TIMESTAMP");
@@ -117,7 +117,7 @@ public class TestSearch {
 		Datafile bill = new Datafile();
 		bill.setName("bill");
 		dataset.getDatafileCollection().add(bill);
-		dataset.setId((Long) BeanManager.create("CIC", dataset, em));
+		dataset.setId((Long) BeanManager.create("CIC", dataset, em).getPk());
 
 		DatasetParameterPK datasetParameterPK = new DatasetParameterPK();
 		datasetParameterPK.setName("TIMESTAMP");
@@ -137,7 +137,7 @@ public class TestSearch {
 		addMembers();
 		addRules();
 		Long dsid = addData();
-		List<?> results = Search.search("A1", "Dataset.id [id = " + dsid + "]", em);
+		List<?> results = SearchManager.search("A1", "Dataset.id [id = " + dsid + "]", em).getList();
 		assertEquals("Count", 1, results.size());
 		assertEquals("Value", dsid, results.get(0));
 	}
@@ -147,7 +147,7 @@ public class TestSearch {
 		addMembers();
 		addRules();
 		Long dsid = addData();
-		List<?> results = Search.search("B1", "Dataset.id [id = " + dsid + "]", em);
+		List<?> results = SearchManager.search("B1", "Dataset.id [id = " + dsid + "]", em).getList();
 		assertEquals("Count", 0, results.size());
 	}
 
@@ -156,7 +156,7 @@ public class TestSearch {
 		addMembers();
 		addRules();
 		Long dsid = addData();
-		List<?> results = Search.search("A1", "DISTINCT Dataset.id <-> Investigation[invNumber = 'A']", em);
+		List<?> results = SearchManager.search("A1", "DISTINCT Dataset.id <-> Investigation[invNumber = 'A']", em).getList();
 		assertEquals("Count", 1, results.size());
 		assertEquals("Value", dsid, results.get(0));
 	}
@@ -166,7 +166,7 @@ public class TestSearch {
 		addMembers();
 		addRules();
 		addData();
-		List<?> results = Search.search("A1", "DISTINCT Dataset.id <-> Investigation[invNumber = 'B']", em);
+		List<?> results = SearchManager.search("A1", "DISTINCT Dataset.id <-> Investigation[invNumber = 'B']", em).getList();
 		assertEquals("Count", 0, results.size());
 	}
 
@@ -175,9 +175,11 @@ public class TestSearch {
 		addMembers();
 		addRules();
 		addData();
-		List<?> results = Search.search("A1", "Dataset.id "
-				+ "<-> DatasetParameter[datasetParameterPK.name = 'TA3_SHOT_NUM_VALUE' AND numericValue > 4000] "
-				+ "<-> Investigation[invNumber > 12]", em);
+		List<?> results = SearchManager
+				.search("A1",
+						"Dataset.id "
+								+ "<-> DatasetParameter[datasetParameterPK.name = 'TA3_SHOT_NUM_VALUE' AND numericValue > 4000] "
+								+ "<-> Investigation[invNumber > 12]", em).getList();
 		assertEquals("Count", 0, results.size());
 	}
 
@@ -186,9 +188,11 @@ public class TestSearch {
 		addMembers();
 		addRules();
 		addData();
-		List<?> results = Search.search("uo", "Investigation.invNumber ORDER BY id"
-				+ "<-> DatasetParameter[datasetParameterPK.name = 'TA3_SHOT_NUM_VALUE' AND numericValue > 4000] "
-				+ "<-> Dataset", em);
+		List<?> results = SearchManager
+				.search("uo",
+						"Investigation.invNumber ORDER BY id"
+								+ "<-> DatasetParameter[datasetParameterPK.name = 'TA3_SHOT_NUM_VALUE' AND numericValue > 4000] "
+								+ "<-> Dataset", em).getList();
 		assertEquals("Count", 0, results.size());
 	}
 
@@ -197,7 +201,7 @@ public class TestSearch {
 		addMembers();
 		addRules();
 		addData();
-		List<?> results = Search.search("uo", "Datafile [name = 'fred'] <-> Dataset[id = 42]", em);
+		List<?> results = SearchManager.search("uo", "Datafile [name = 'fred'] <-> Dataset[id = 42]", em).getList();
 		assertEquals("Count", 0, results.size());
 	}
 
@@ -209,9 +213,9 @@ public class TestSearch {
 		String query = "Dataset.id ORDER BY id [datasetType IN :types] <-> DatasetParameter[datasetParameterPK.name = 'TIMESTAMP' AND dateTimeValue BETWEEN :lower AND :upper]";
 		query = query.replace(":lower", tsb + dfout.format(invStartDate) + tse)
 				.replace(":upper", tsb + dfout.format(invEndDate) + tse).replace(":types", "('GS', 'GQ')");
-		List<?> results = Search.search("CIC", query, em);
+		List<?> results = SearchManager.search("CIC", query, em).getList();
 		assertEquals("Count", 1, results.size());
-		Dataset ds = (Dataset) BeanManager.get("CIC", "Dataset", results.get(0), em);
+		Dataset ds = (Dataset) BeanManager.get("CIC", "Dataset", results.get(0), em).getBean();
 		assertEquals("Name", "Wibble", ds.getName());
 	}
 
@@ -223,7 +227,7 @@ public class TestSearch {
 		String query = "Dataset.id  ORDER BY id [datasetType IN :types] <-> Investigation[id BETWEEN :lower AND :upper]";
 		query = query.replace(":lower", Long.toString(invId)).replace(":upper", Long.toString(invId))
 				.replace(":types", "('GS', 'GQ')");
-		List<?> results = Search.search("CIC", query, em);
+		List<?> results = SearchManager.search("CIC", query, em).getList();
 		assertEquals("Count", 1, results.size());
 	}
 
@@ -234,7 +238,7 @@ public class TestSearch {
 		addData();
 		String query = "Dataset.id ORDER BY startDate [datasetType IN :types AND name >= :lower AND name <= :upper]";
 		query = query.replace(":lower", "'Wabble'").replace(":upper", "'Wobble'").replace(":types", "('GS', 'GQ')");
-		List<?> results = Search.search("CIC", query, em);
+		List<?> results = SearchManager.search("CIC", query, em).getList();
 		assertEquals("Count", 1, results.size());
 	}
 
@@ -244,7 +248,7 @@ public class TestSearch {
 		addRules();
 		addData();
 		String query = "Parameter.parameterPK.name [description LIKE 'F%']";
-		List<?> results = Search.search("CIC", query, em);
+		List<?> results = SearchManager.search("CIC", query, em).getList();
 		assertEquals("Count", 1, results.size());
 		assertEquals("TIMESTAMP", results.get(0));
 	}
@@ -258,7 +262,7 @@ public class TestSearch {
 			Date date = new Date(System.currentTimeMillis() + 5000);
 			String query = "Dataset.id [datasetType IN :types] <-> DatasetParameter [modTime >= :lower] ";
 			query = query.replace(":lower", tsb + dfout.format(date) + tse).replace(":types", "('GS', 'GQ')");
-			List<?> results = Search.search("CIC", query, em);
+			List<?> results = SearchManager.search("CIC", query, em).getList();
 			assertEquals("Count", 0, results.size());
 		}
 
@@ -266,7 +270,7 @@ public class TestSearch {
 			Date date = new Date(System.currentTimeMillis() - 5000);
 			String query = "Dataset.id [datasetType IN :types] <-> DatasetParameter [modTime >= :lower] ";
 			query = query.replace(":lower", tsb + dfout.format(date) + tse).replace(":types", "('GS', 'GQ')");
-			List<?> results = Search.search("CIC", query, em);
+			List<?> results = SearchManager.search("CIC", query, em).getList();
 			assertEquals("Count", 1, results.size());
 		}
 
@@ -280,7 +284,7 @@ public class TestSearch {
 		String query = "COUNT (Dataset.id)  [datasetType IN :types] <-> DatasetParameter[datasetParameterPK.name = 'TIMESTAMP' AND dateTimeValue BETWEEN :lower AND :upper]";
 		query = query.replace(":lower", tsb + dfout.format(invStartDate) + tse)
 				.replace(":upper", tsb + dfout.format(invEndDate) + tse).replace(":types", "('GS', 'GQ')");
-		List<?> results = Search.search("CIC", query, em);
+		List<?> results = SearchManager.search("CIC", query, em).getList();
 		assertEquals("Count", 1, results.size());
 		assertEquals("Result", 1L, results.get(0));
 	}
@@ -290,22 +294,22 @@ public class TestSearch {
 		addMembers();
 		addRules();
 		addData();
-		List<?> results = Search.search("CIC", "Datafile.name ORDER BY id", em);
+		List<?> results = SearchManager.search("CIC", "Datafile.name ORDER BY id", em).getList();
 		assertEquals("Count", 2, results.size());
 		assertEquals("Result", "fred", results.get(0));
 		assertEquals("Result", "bill", results.get(1));
-		results = Search.search("CIC", ",1 Datafile.name ORDER BY id", em);
+		results = SearchManager.search("CIC", ",1 Datafile.name ORDER BY id", em).getList();
 		assertEquals("Count", 1, results.size());
 		assertEquals("Result", "fred", results.get(0));
-		results = Search.search("CIC", "1, Datafile.name ORDER BY id", em);
+		results = SearchManager.search("CIC", "1, Datafile.name ORDER BY id", em).getList();
 		assertEquals("Count", 1, results.size());
 		assertEquals("Result", "bill", results.get(0));
-		results = Search.search("CIC", "1,1 Datafile.name ORDER BY id", em);
+		results = SearchManager.search("CIC", "1,1 Datafile.name ORDER BY id", em).getList();
 		assertEquals("Count", 1, results.size());
 		assertEquals("Result", "bill", results.get(0));
-		results = Search.search("CIC", "100,1 Datafile.name ORDER BY id", em);
+		results = SearchManager.search("CIC", "100,1 Datafile.name ORDER BY id", em).getList();
 		assertEquals("Count", 0, results.size());
-		results = Search.search("CIC", "0,100 Datafile.name ORDER BY id", em);
+		results = SearchManager.search("CIC", "0,100 Datafile.name ORDER BY id", em).getList();
 		assertEquals("Count", 2, results.size());
 		assertEquals("Result", "fred", results.get(0));
 		assertEquals("Result", "bill", results.get(1));

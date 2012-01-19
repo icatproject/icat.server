@@ -89,7 +89,7 @@ public class TestGet {
 		inv.setInvStartDate(invStartDate);
 		inv.setInvEndDate(invEndDate);
 		inv.setFacility("TestFacility");
-		invId = (Long) BeanManager.create("uo", inv, em);
+		invId = (Long) BeanManager.create("uo", inv, em).getPk();
 
 		ParameterPK ppk = new ParameterPK();
 		ppk.setName("TIMESTAMP");
@@ -112,7 +112,7 @@ public class TestGet {
 		Datafile bill = new Datafile();
 		bill.setName("bill");
 		dataset.getDatafileCollection().add(bill);
-		dataset.setId((Long) BeanManager.create("CIC", dataset, em));
+		dataset.setId((Long) BeanManager.create("CIC", dataset, em).getPk());
 
 		DatasetParameterPK datasetParameterPK = new DatasetParameterPK();
 		datasetParameterPK.setName("TIMESTAMP");
@@ -129,28 +129,29 @@ public class TestGet {
 
 	@Test
 	public void t1() throws Exception {
-		assertEquals("Wibble",  ((Dataset) BeanManager.get("CIC", "Dataset", dsId, em)).getName());
+		assertEquals("Wibble", ((Dataset) BeanManager.get("CIC", "Dataset", dsId, em).getBean()).getName());
 	}
-	
-	@Test (expected = NoSuchObjectFoundException.class)
+
+	@Test(expected = NoSuchObjectFoundException.class)
 	public void t2() throws Exception {
-		BeanManager.get("CIC", "Dataset", dsId+1, em);
+		BeanManager.get("CIC", "Dataset", dsId + 1, em);
 	}
-	
-	@Test 
+
+	@Test
 	public void t3() throws Exception {
-		assertEquals("Wibble",  ((Dataset) BeanManager.get("CIC", "Dataset INCLUDE Datafile, DatasetParameter", dsId, em)).getName());
+		assertEquals("Wibble", ((Dataset) BeanManager
+				.get("CIC", "Dataset INCLUDE Datafile, DatasetParameter", dsId, em).getBean()).getName());
 	}
-	
-	@Test (expected = BadParameterException.class)
+
+	@Test(expected = BadParameterException.class)
 	public void t4() throws Exception {
-		Dataset ds = (Dataset) BeanManager.get("CIC", "Dataset INCLUDE Investigator", dsId, em);
+		Dataset ds = (Dataset) BeanManager.get("CIC", "Dataset INCLUDE Investigator", dsId, em).getBean();
 		System.out.println(ds.getName());
 	}
-	
-	@Test (expected = BadParameterException.class)
+
+	@Test(expected = BadParameterException.class)
 	public void t5() throws Exception {
-		Dataset ds = (Dataset) BeanManager.get("CIC", "Dataset INCLUDE Wible", dsId, em);
+		Dataset ds = (Dataset) BeanManager.get("CIC", "Dataset INCLUDE Wible", dsId, em).getBean();
 		System.out.println(ds.getName());
 	}
 
