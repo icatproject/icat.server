@@ -2,7 +2,9 @@ package uk.icat3.userldap.facility;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -173,9 +175,9 @@ public class LdapUser implements uk.icat3.user.User {
 		String sid = session.getUserSessionId();
 		log.info("Logged in for user: " + username + " with sessionid:" + sid);
 
-		// final Timestamp loginTime = new Timestamp(new Date().getTime());
-		// log.info("About to send login message");
-		// LoginInterceptor.sendLoginMessage(sid, username, loginTime);
+		final Timestamp loginTime = new Timestamp(new Date().getTime());
+		log.info("About to send login message");
+		LoginInterceptor.sendLoginMessage(sid, username, loginTime);
 
 		return sid;
 	}
