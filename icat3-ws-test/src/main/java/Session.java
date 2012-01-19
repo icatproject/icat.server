@@ -14,6 +14,7 @@ import uk.icat3.client.Dataset;
 import uk.icat3.client.DatasetParameter;
 import uk.icat3.client.DatasetParameterPK;
 import uk.icat3.client.DatasetType;
+import uk.icat3.client.DestType;
 import uk.icat3.client.EntityBaseBean;
 import uk.icat3.client.Facility;
 import uk.icat3.client.ICAT;
@@ -26,6 +27,7 @@ import uk.icat3.client.Investigation;
 import uk.icat3.client.InvestigationType;
 import uk.icat3.client.Job;
 import uk.icat3.client.NoSuchObjectFoundException_Exception;
+import uk.icat3.client.NotificationRequest;
 import uk.icat3.client.ObjectAlreadyExistsException_Exception;
 import uk.icat3.client.OutputDatafile;
 import uk.icat3.client.OutputDataset;
@@ -137,6 +139,11 @@ class Session {
 		for (final Object o : lo) {
 			System.out.println("Deleting " + o);
 			this.delete((Facility) o);
+		}
+		lo = this.search("NotificationRequest");
+		for (final Object o : lo) {
+			System.out.println("Deleting " + o);
+			this.delete((NotificationRequest) o);
 		}
 	}
 
@@ -305,12 +312,28 @@ class Session {
 		this.addRule("root", "OutputDataset", "CRUD", null);
 		this.addRule("root", "InputDatafile", "CRUD", null);
 		this.addRule("root", "OutputDatafile", "CRUD", null);
+		this.addRule("root", "NotificationRequest", "CRUD", null);
 	}
 
 	public void update(EntityBaseBean df) throws IcatInternalException_Exception,
 			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
 			SessionException_Exception, ValidationException_Exception {
 		this.icatEP.update(this.sessionId, df);
+	}
+
+	public NotificationRequest createNotificationRequest(String name, DestType destType, String what, String crudFlags, String jmsOptions, String dataTypes)
+			throws IcatInternalException_Exception, InsufficientPrivilegesException_Exception,
+			NoSuchObjectFoundException_Exception, ObjectAlreadyExistsException_Exception, SessionException_Exception,
+			ValidationException_Exception {
+		NotificationRequest notificationRequest = new NotificationRequest();
+		notificationRequest.setName(name);
+		notificationRequest.setDestType(destType);
+		notificationRequest.setWhat(what);
+		notificationRequest.setCrudFlags(crudFlags);
+		notificationRequest.setJmsOptions(jmsOptions);
+		notificationRequest.setDatatypes(dataTypes);
+		icatEP.create(this.sessionId, notificationRequest);
+		return notificationRequest;
 	}
 
 }

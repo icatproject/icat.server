@@ -17,6 +17,7 @@ import uk.icat3.client.Application;
 import uk.icat3.client.Datafile;
 import uk.icat3.client.DatafileFormat;
 import uk.icat3.client.Dataset;
+import uk.icat3.client.DestType;
 import uk.icat3.client.InputDatafile;
 import uk.icat3.client.InputDataset;
 import uk.icat3.client.Investigation;
@@ -112,6 +113,14 @@ public class TestWS {
 		c.setTime(new Date());
 		XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
 		session.createDatasetParameter(date, p, ds);
+	}
+
+	@Test
+	public void notificationRequests() throws Exception {
+		session.clear();
+		session.createNotificationRequest("A", DestType.P_2_P, "Facility", "C", "ptp",
+				"notificationName userId entityName entityKey callArgs");
+		session.createFacility("Test Facility", 90L);
 	}
 
 	@Test
@@ -254,7 +263,7 @@ public class TestWS {
 
 	@AfterClass
 	public static void zap() throws Exception {
-		// session.clear();
+		session.clear();
 	}
 
 }
