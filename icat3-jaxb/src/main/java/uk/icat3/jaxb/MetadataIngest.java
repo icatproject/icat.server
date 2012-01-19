@@ -125,7 +125,7 @@ public class MetadataIngest {
 					// then ingest everything
 				if (investigationId == null) {
 					investigation = getInvestigation(userId, _inv, manager);
-					investigation.setId((Long) BeanManager.create(userId, investigation, manager));
+					investigation.setId((Long) BeanManager.create(userId, investigation, manager).getPk());
 				} // end if
 				invIds.add(investigation.getId());
 
@@ -451,7 +451,7 @@ public class MetadataIngest {
 		}
 
 		/*
-		 * ISIS Specific - Have instead replaced with Date Range Search below
+		 * ISIS Specific - Have instead replaced with Date Range SearchManager below
 		 * //get run number Double runNumber = null; Collection<Parameter>
 		 * params =
 		 * _investigation.getDataset().get(0).getDatafile().get(0).getParameter
@@ -663,7 +663,7 @@ public class MetadataIngest {
 			dataset.setInvestigationId(investigation.getId());
 			dataset.setName(_dataset.getName());
 
-			dataset.setId((Long) BeanManager.create(userId, dataset, manager));
+			dataset.setId((Long) BeanManager.create(userId, dataset, manager).getPk());
 
 			// store dataset parameters
 			getDatasetParameters(userId, _dataset.getParameter(), dataset.getId(), manager);
@@ -742,7 +742,7 @@ public class MetadataIngest {
 			sample.setSafetyInformation(_sample.getSafetyInformation());
 
 			// store in database
-			sample.setId((Long) BeanManager.create(userId, sample, manager));
+			sample.setId((Long) BeanManager.create(userId, sample, manager).getPk());
 
 			// also store sample parameters (if there are any)
 			getSampleParameters(userId, _sample.getParameter(), sample.getId(), investigation, manager);
@@ -810,7 +810,7 @@ public class MetadataIngest {
 		datafile.setDatasetId(dataset.getId());
 
 		// store in database
-		datafile.setId((Long) BeanManager.create(userId, datafile, manager));
+		datafile.setId((Long) BeanManager.create(userId, datafile, manager).getPk());
 
 		// store datafile parameters
 		List<Parameter> _dfParams = _datafile.getParameter();
