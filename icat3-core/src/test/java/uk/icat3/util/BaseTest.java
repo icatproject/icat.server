@@ -5,62 +5,59 @@ import javax.persistence.EntityManager;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetType;
-import uk.icat3.entity.FacilityUser;
+import uk.icat3.entity.Facility;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.InvestigationType;
 import uk.icat3.entity.Investigator;
-import uk.icat3.entity.InvestigatorPK;
-import uk.icat3.entity.Parameter;
-import uk.icat3.entity.ParameterPK;
+import uk.icat3.entity.ParameterType;
+import uk.icat3.entity.ParameterType.ParameterValueType;
+import uk.icat3.entity.User;
 
 public class BaseTest {
 
 	static protected EntityManager em;
 
-	protected Parameter createParameter(String name, String units, boolean searchable, ParameterValueType valueType,
-			boolean isSampleParameter, boolean isDatasetParameter, boolean isDatafileParameter,
-			boolean facilityAcquired, boolean verified) throws Exception {
-		ParameterPK pk = new ParameterPK();
-		pk.setName(name);
-		pk.setUnits(units);
-		Parameter parameter = new Parameter();
-		parameter.setParameterPK(pk);
+	protected ParameterType createParameter(String name, String units, boolean searchable,
+			ParameterValueType valueType, boolean isSampleParameter, boolean isDatasetParameter,
+			boolean isDatafileParameter, boolean facilityAcquired, boolean verified) throws Exception {
+		ParameterType parameter = new ParameterType();
+		parameter.setName(name);
+		parameter.setUnits(units);
 		parameter.setValueType(valueType);
-		parameter.setSampleParameter(isSampleParameter);
-		parameter.setDatasetParameter(isDatasetParameter);
-		parameter.setDatafileParameter(isDatafileParameter);
+		parameter.setApplicableToDatafile(isDatafileParameter);
+		parameter.setApplicableToDataset(isDatasetParameter);
+		parameter.setApplicableToSample(isSampleParameter);
 		parameter.setVerified(verified);
 		return parameter;
 	}
 
-	protected Investigation createInvestigation(String number, String title, String type, String facilityName) {
+	protected Investigation createInvestigation(String number, String title, InvestigationType type, Facility facility) {
 		Investigation investigation = new Investigation();
-		investigation.setInvNumber(number);
+		investigation.setName(number);
 		investigation.setTitle(title);
-		investigation.setInvType(type);
-		investigation.setFacility(facilityName);
+		investigation.setType(type);
+		investigation.setFacility(facility);
 		return investigation;
 	}
 
-	protected FacilityUser createFacilityUser(String facilityUserId) {
-		FacilityUser facilityUser = new FacilityUser();
-		facilityUser.setFacilityUserId(facilityUserId);
+	protected User createFacilityUser(String userId) {
+		User facilityUser = new User();
+		facilityUser.setName(userId);
 		return facilityUser;
 	}
 
-	protected Investigator createInvestigator(String fu, Long inv) {
-		InvestigatorPK pk = new InvestigatorPK();
-		pk.setFacilityUserId(fu);
-		pk.setInvestigationId(inv);
+	protected Investigator createInvestigator(User fu, Investigation inv) {
 		Investigator investigator = new Investigator();
-		investigator.setInvestigatorPK(pk);
+		investigator.setUser(fu);
+		investigator.setInvestigation(inv);
 		return investigator;
 	}
 
-	protected Dataset createDataset(Long investigationId, String dsn, String dst) {
+	protected Dataset createDataset(Investigation investigation, String dsn, DatasetType dst) {
 		Dataset ds = new Dataset();
-		ds.setInvestigationId(investigationId);
+		ds.setInvestigation(investigation);
 		ds.setName(dsn);
-		ds.setDatasetType(dst);
+		ds.setType(dst);
 		return ds;
 	}
 
@@ -71,9 +68,9 @@ public class BaseTest {
 		return dst;
 	}
 
-	protected Datafile createDatafile(Long datasetId, String name) {
+	protected Datafile createDatafile(Dataset dataset, String name) {
 		Datafile df = new Datafile();
-		df.setDatasetId(datasetId);
+		df.setDataset(dataset);
 		df.setName(name);
 		return df;
 	}

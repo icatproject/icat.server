@@ -1,91 +1,99 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package uk.icat3.entity;
 
 import java.io.Serializable;
 
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
+import javax.persistence.UniqueConstraint;
+import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
-/**
- * 
- * @author gjd37
- */
+import uk.icat3.exceptions.BadParameterException;
+import uk.icat3.exceptions.IcatInternalException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
+
+@SuppressWarnings("serial")
 @Entity
-@Table(name = "FACILITY_INSTRUMENT_SCIENTIST")
-@NamedQueries({
-		@NamedQuery(name = "FacilityInstrumentScientist.findByUserAndInstrument", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.facilityInstrumentScientistPK.instrumentName = :instrumentName AND f.facilityInstrumentScientistPK.federalId = :federalId"),
-		@NamedQuery(name = "FacilityInstrumentScientist.findByInstrumentName", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.facilityInstrumentScientistPK.instrumentName = :instrumentName"),
-		@NamedQuery(name = "FacilityInstrumentScientist.findByFederalId", query = "SELECT f FROM FacilityInstrumentScientist f WHERE f.facilityInstrumentScientistPK.federalId = :federalId") })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "USER_ID", "INSTRUMENT_ID" }) })
+@TableGenerator(name = "facilityInstrumentScientistGenerator", pkColumnValue = "FacilityInstrumentScientist")
 public class FacilityInstrumentScientist extends EntityBaseBean implements Serializable {
 
-	/**
-	 * Override logger
-	 */
-	protected static Logger log = Logger.getLogger(FacilityInstrumentScientist.class);
+	private final static Logger logger = Logger.getLogger(FacilityInstrumentScientist.class);
 
-	private static final long serialVersionUID = 1L;
+	@Id
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "facilityInstrumentScientistGenerator")
+	private Long id;
 
-	@EmbeddedId
-	protected FacilityInstrumentScientistPK facilityInstrumentScientistPK;
+	public Long getId() {
+		return id;
+	}
 
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public Instrument getInstrument() {
+		return instrument;
+	}
+
+	public void setInstrument(Instrument instrument) {
+		this.instrument = instrument;
+	}
+
+	@JoinColumn(name = "INSTRUMENT_ID", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Instrument instrument;
+
+	@JoinColumn(name = "USER_ID", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	private User user;
+
+	/* Needed for JPA */
 	public FacilityInstrumentScientist() {
-	}
-
-	public FacilityInstrumentScientist(FacilityInstrumentScientistPK facilityInstrumentScientistPK) {
-		this.facilityInstrumentScientistPK = facilityInstrumentScientistPK;
-	}
-
-	public FacilityInstrumentScientist(String instrumentName, String federalId) {
-		this.facilityInstrumentScientistPK = new FacilityInstrumentScientistPK(instrumentName, federalId);
-	}
-
-	public FacilityInstrumentScientistPK getFacilityInstrumentScientistPK() {
-		return facilityInstrumentScientistPK;
-	}
-
-	public void setFacilityInstrumentScientistPK(FacilityInstrumentScientistPK facilityInstrumentScientistPK) {
-		this.facilityInstrumentScientistPK = facilityInstrumentScientistPK;
-	}
-
-	@Override
-	public int hashCode() {
-		int hash = 0;
-		hash += (facilityInstrumentScientistPK != null ? facilityInstrumentScientistPK.hashCode() : 0);
-		return hash;
-	}
-
-	@Override
-	public boolean equals(Object object) {
-		// TODO: Warning - this method won't work in the case the id fields are not set
-		if (!(object instanceof FacilityInstrumentScientist)) {
-			return false;
-		}
-		FacilityInstrumentScientist other = (FacilityInstrumentScientist) object;
-		if ((this.facilityInstrumentScientistPK == null && other.facilityInstrumentScientistPK != null)
-				|| (this.facilityInstrumentScientistPK != null && !this.facilityInstrumentScientistPK
-						.equals(other.facilityInstrumentScientistPK))) {
-			return false;
-		}
-		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "FacilityInstrumentScientist[facilityInstrumentScientistPK=" + facilityInstrumentScientistPK + "]";
+		return "FacilityInstrumentScientist[id=" + id + "]";
 	}
 
 	@Override
 	public Object getPK() {
-		return facilityInstrumentScientistPK;
+		return id;
+	}
+
+	@Override
+	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
+			BadParameterException, IcatInternalException {
+		super.preparePersist(modId, manager);
+		this.id = null;
+	}
+
+	public void beforeMarshal(Marshaller source) {
+		logger.trace("Marshalling FacilityCycle for " + includes);
+		if (!this.includes.contains(User.class)) {
+			this.user = null;
+		}
+		if (!this.includes.contains(Instrument.class)) {
+			this.instrument = null;
+		}
 	}
 
 }

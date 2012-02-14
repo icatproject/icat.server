@@ -1,216 +1,128 @@
-/*
- * DatafileFormat.java
- *
- * Created on 08 February 2007, 09:48
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.TableGenerator;
+import javax.persistence.UniqueConstraint;
+import javax.xml.bind.Marshaller;
 
-import uk.icat3.exceptions.ValidationException;
-import uk.icat3.util.Queries;
+import org.apache.log4j.Logger;
 
-/**
- * Entity class DatafileFormat
- * 
- * @author gjd37
- */
+import uk.icat3.exceptions.BadParameterException;
+import uk.icat3.exceptions.IcatInternalException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
+
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "DATAFILE_FORMAT")
-@NamedQueries({
-		@NamedQuery(name = "DatafileFormat.findByName", query = "SELECT d FROM DatafileFormat d WHERE d.datafileFormatPK.name = :name"),
-		@NamedQuery(name = "DatafileFormat.findByVersion", query = "SELECT d FROM DatafileFormat d WHERE d.datafileFormatPK.version = :version"),
-		@NamedQuery(name = "DatafileFormat.findByFormatType", query = "SELECT d FROM DatafileFormat d WHERE d.formatType = :formatType"),
-		@NamedQuery(name = "DatafileFormat.findByDescription", query = "SELECT d FROM DatafileFormat d WHERE d.description = :description"),
-		@NamedQuery(name = Queries.ALL_DATAFILE_FORMAT, query = Queries.ALL_DATAFILE_FORMAT_JPQL),
-		@NamedQuery(name = "DatafileFormat.findByModId", query = "SELECT d FROM DatafileFormat d WHERE d.modId = :modId") })
+@TableGenerator(name = "datafileFormatGenerator", pkColumnValue = "DatafileFormat")
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "VERSION" }) })
 public class DatafileFormat extends EntityBaseBean implements Serializable {
 
-	/**
-	 * EmbeddedId primary key field
-	 */
-	@EmbeddedId
-	protected DatafileFormatPK datafileFormatPK;
-
-	@Column(name = "FORMAT_TYPE")
-	private String formatType;
-
-	@Column(name = "DESCRIPTION")
-	private String description;
+	private final static Logger logger = Logger.getLogger(DatafileFormat.class);
 
 	@OneToMany(mappedBy = "datafileFormat")
-	@XmlTransient
-	private Collection<Datafile> datafileCollection;
+	private List<Datafile> datafiles = new ArrayList<Datafile>();
 
-	/** Creates a new instance of DatafileFormat */
+	private String description;
+
+	private String formatType;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datafileFormatGenerator")
+	private Long id;
+
+	@Column(name = "NAME", nullable = false)
+	private String name;
+
+	@Column(name = "VERSION", nullable = false)
+	private String version;
+
+	/* Needed for JPA */
 	public DatafileFormat() {
 	}
 
-	/**
-	 * Creates a new instance of DatafileFormat with the specified values.
-	 * 
-	 * @param datafileFormatPK
-	 *            the datafileFormatPK of the DatafileFormat
-	 */
-	public DatafileFormat(DatafileFormatPK datafileFormatPK) {
-		this.datafileFormatPK = datafileFormatPK;
+	public List<Datafile> getDatafiles() {
+		return this.datafiles;
 	}
 
-	/**
-	 * Creates a new instance of DatafileFormatPK with the specified values.
-	 * 
-	 * @param version
-	 *            the version of the DatafileFormatPK
-	 * @param name
-	 *            the name of the DatafileFormatPK
-	 */
-	public DatafileFormat(String version, String name) {
-		this.datafileFormatPK = new DatafileFormatPK(version, name);
-	}
-
-	/**
-	 * Gets the datafileFormatPK of this DatafileFormat.
-	 * 
-	 * @return the datafileFormatPK
-	 */
-	public DatafileFormatPK getDatafileFormatPK() {
-		return this.datafileFormatPK;
-	}
-
-	/**
-	 * Sets the datafileFormatPK of this DatafileFormat to the specified value.
-	 * 
-	 * @param datafileFormatPK
-	 *            the new datafileFormatPK
-	 */
-	public void setDatafileFormatPK(DatafileFormatPK datafileFormatPK) {
-		this.datafileFormatPK = datafileFormatPK;
-	}
-
-	/**
-	 * Gets the formatType of this DatafileFormat.
-	 * 
-	 * @return the formatType
-	 */
-	public String getFormatType() {
-		return this.formatType;
-	}
-
-	/**
-	 * Sets the formatType of this DatafileFormat to the specified value.
-	 * 
-	 * @param formatType
-	 *            the new formatType
-	 */
-	public void setFormatType(String formatType) {
-		this.formatType = formatType;
-	}
-
-	/**
-	 * Gets the description of this DatafileFormat.
-	 * 
-	 * @return the description
-	 */
 	public String getDescription() {
 		return this.description;
 	}
 
-	/**
-	 * Sets the description of this DatafileFormat to the specified value.
-	 * 
-	 * @param description
-	 *            the new description
-	 */
-	public void setDescription(String description) {
-		this.description = description;
+	public String getFormatType() {
+		return this.formatType;
 	}
 
-	/**
-	 * Gets the datafileCollection of this DatafileFormat.
-	 * 
-	 * @return the datafileCollection
-	 */
-	@XmlTransient
-	public Collection<Datafile> getDatafileCollection() {
-		return this.datafileCollection;
+	public Long getId() {
+		return this.id;
 	}
 
-	/**
-	 * Sets the datafileCollection of this DatafileFormat to the specified value.
-	 * 
-	 * @param datafileCollection
-	 *            the new datafileCollection
-	 */
-	public void setDatafileCollection(Collection<Datafile> datafileCollection) {
-		this.datafileCollection = datafileCollection;
-	}
-
-	/**
-	 * Returns a hash code value for the object. This implementation computes a hash code value
-	 * based on the id fields in this object.
-	 * 
-	 * @return a hash code value for this object.
-	 */
-	@Override
-	public int hashCode() {
-		int hash = 0;
-		hash += (this.datafileFormatPK != null ? this.datafileFormatPK.hashCode() : 0);
-		return hash;
-	}
-
-	/**
-	 * Determines whether another object is equal to this DatafileFormat. The result is
-	 * <code>true</code> if and only if the argument is not null and is a DatafileFormat object that
-	 * has the same id field values as this object.
-	 * 
-	 * @param object
-	 *            the reference object with which to compare
-	 * @return <code>true</code> if this object is the same as the argument; <code>false</code>
-	 *         otherwise.
-	 */
-	@Override
-	public boolean equals(Object object) {
-		// TODO: Warning - this method won't work in the case the id fields are not set
-		if (!(object instanceof DatafileFormat)) {
-			return false;
-		}
-		DatafileFormat other = (DatafileFormat) object;
-		if (this.datafileFormatPK != other.datafileFormatPK
-				&& (this.datafileFormatPK == null || !this.datafileFormatPK.equals(other.datafileFormatPK)))
-			return false;
-		return true;
-	}
-
-	/**
-	 * Returns a string representation of the object. This implementation constructs that
-	 * representation based on the id fields.
-	 * 
-	 * @return a string representation of the object.
-	 */
-	@Override
-	public String toString() {
-		return "DatafileFormat[datafileFormatPK=" + datafileFormatPK + "]";
+	public String getName() {
+		return this.name;
 	}
 
 	@Override
 	public Object getPK() {
-		return datafileFormatPK;
+		return this.id;
+	}
+
+	public String getVersion() {
+		return this.version;
+	}
+
+	public void setDatafiles(List<Datafile> datafiles) {
+		this.datafiles = datafiles;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setFormatType(String formatType) {
+		this.formatType = formatType;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	@Override
+	public String toString() {
+		return "DatafileFormat[id=" + this.id + "]";
+	}
+
+	@Override
+	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
+			BadParameterException, IcatInternalException {
+		super.preparePersist(modId, manager);
+		this.id = null;
+	}
+
+	public void beforeMarshal(Marshaller source) {
+		logger.trace("Marshalling DatafileFormat for " + includes);
+
+		if (!this.includes.contains(Datafile.class)) {
+			this.datafiles = null;
+		}
+
 	}
 
 }

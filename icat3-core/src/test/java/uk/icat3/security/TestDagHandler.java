@@ -10,7 +10,7 @@ import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.EntityBaseBean;
-import uk.icat3.entity.FacilityUser;
+import uk.icat3.entity.User;
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.security.DagHandler.Step;
@@ -35,7 +35,7 @@ public class TestDagHandler extends BaseTestTransaction {
 		es.add(Investigation.class);
 		es.add(Datafile.class);
 		es.add(DatasetParameter.class);
-		es.add(FacilityUser.class);
+		es.add(User.class);
 		DagHandler.fixes(Dataset.class, es);
 	}
 

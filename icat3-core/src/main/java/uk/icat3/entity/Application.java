@@ -1,8 +1,8 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,10 +15,12 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.annotation.XmlElement;
 
 import org.apache.log4j.Logger;
 
+import uk.icat3.exceptions.BadParameterException;
+import uk.icat3.exceptions.IcatInternalException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 
 @SuppressWarnings("serial")
@@ -39,10 +41,16 @@ public class Application extends EntityBaseBean implements Serializable {
 	private String version;
 
 	@OneToMany(mappedBy = "application")
-	@XmlElement
-	private Set<Job> jobs = new HashSet<Job>();
+	private List<Job> jobs = new ArrayList<Job>();
 
 	public Application() {
+	}
+
+	@Override
+	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
+			BadParameterException, IcatInternalException {
+		super.preparePersist(modId, manager);
+		id = null;
 	}
 
 	@Override
@@ -57,12 +65,16 @@ public class Application extends EntityBaseBean implements Serializable {
 		return this.id;
 	}
 
-	public Set<Job> getJobs() {
+	public List<Job> getJobs() {
 		return this.jobs;
 	}
 
 	public String getName() {
 		return this.name;
+	}
+
+	public void setJobs(List<Job> jobs) {
+		this.jobs = jobs;
 	}
 
 	@Override

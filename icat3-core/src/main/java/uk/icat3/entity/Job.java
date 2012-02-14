@@ -1,7 +1,7 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -13,7 +13,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.TableGenerator;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.annotation.XmlElement;
 
 import org.apache.log4j.Logger;
 
@@ -21,7 +20,7 @@ import org.apache.log4j.Logger;
 @Entity
 @TableGenerator(name = "jobGenerator", pkColumnValue = "Job")
 public class Job extends EntityBaseBean implements Serializable {
-	
+
 	private final static Logger logger = Logger.getLogger(Job.class);
 
 	@Id
@@ -59,38 +58,51 @@ public class Job extends EntityBaseBean implements Serializable {
 		}
 	}
 
-	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "job")
-	@XmlElement
-	private Set<InputDataset> inputDatasets;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
+	private List<InputDataset> inputDatasets;
 
-	public Set<InputDataset> getInputDatasets() {
+	public List<InputDataset> getInputDatasets() {
 		return inputDatasets;
 	}
 
-	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "job")
-	@XmlElement
-	private Set<OutputDataset> outputDatasets;
+	public void setInputDatasets(List<InputDataset> inputDatasets) {
+		this.inputDatasets = inputDatasets;
+	}
 
-	public Set<OutputDataset> getOutputDatasets() {
+	public void setOutputDatasets(List<OutputDataset> outputDatasets) {
+		this.outputDatasets = outputDatasets;
+	}
+
+	public void setInputDatafiles(List<InputDatafile> inputDatafiles) {
+		this.inputDatafiles = inputDatafiles;
+	}
+
+	public void setOutputDatafiles(List<OutputDatafile> outputDatafiles) {
+		this.outputDatafiles = outputDatafiles;
+	}
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
+	private List<OutputDataset> outputDatasets;
+
+	public List<OutputDataset> getOutputDatasets() {
 		return outputDatasets;
 	}
 
-	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "job")
-	@XmlElement
-	private Set<InputDatafile> inputDatafiles;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
+	private List<InputDatafile> inputDatafiles;
 
-	public Set<InputDatafile> getInputDatafiles() {
+	public List<InputDatafile> getInputDatafiles() {
 		return inputDatafiles;
 	}
 
-	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "job")
-	@XmlElement
-	private Set<OutputDatafile> outputDatafiles;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
+	private List<OutputDatafile> outputDatafiles;
 
-	public Set<OutputDatafile> getOutputDatafiles() {
+	public List<OutputDatafile> getOutputDatafiles() {
 		return outputDatafiles;
 	}
 
+	// Needed for JPA
 	public Job() {
 	}
 

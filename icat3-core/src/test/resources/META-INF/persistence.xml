@@ -21,21 +21,21 @@
 		<class>uk.icat3.entity.DatasetParameter</class>
 		<class>uk.icat3.entity.Topic</class>
 		<class>uk.icat3.entity.Instrument</class>
-		<class>uk.icat3.entity.RelatedDatafiles</class>
+		<class>uk.icat3.entity.RelatedDatafile</class>
 		<class>uk.icat3.entity.StudyStatus</class>
 		<class>uk.icat3.entity.SampleParameter</class>
 		<class>uk.icat3.entity.Datafile</class>
-		<class>uk.icat3.entity.Parameter</class>
+		<class>uk.icat3.entity.ParameterType</class>
 		<class>uk.icat3.entity.SoftwareVersion</class>
-		<class>uk.icat3.entity.FacilityUser</class>
+		<class>uk.icat3.entity.User</class>
 		<class>uk.icat3.entity.Investigator</class>
 		<class>uk.icat3.entity.Study</class>
 		<class>uk.icat3.entity.DatafileParameter</class>
 		<class>uk.icat3.entity.IcatAuthorisation</class>
 		<class>uk.icat3.entity.Rule</class>
-		<class>uk.icat3.entity.TopicList</class>
+		<class>uk.icat3.entity.TopicInvestigation</class>
 		<class>uk.icat3.entity.FacilityInstrumentScientist</class>
-		<class>uk.icat3.entity.UserGroup</class>
+		<class>uk.icat3.entity.Group</class>
 		<class>uk.icat3.entity.Application</class>
 		<class>uk.icat3.entity.Job</class>
 		<class>uk.icat3.entity.InputDataset</class>
@@ -43,6 +43,8 @@
 		<class>uk.icat3.entity.InputDatafile</class>
 		<class>uk.icat3.entity.OutputDatafile</class>
 		<class>uk.icat3.entity.NotificationRequest</class>
+		<class>uk.icat3.entity.UserGroup</class>
+		<class>uk.icat3.entity.InvestigationParameter</class>
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<property name="eclipselink.logging.level" value="WARNING" />
@@ -54,9 +56,10 @@
 			<property name="eclipselink.jdbc.password" value="password" />
 			<property name="eclipselink.jdbc.driver" value="oracle.jdbc.OracleDriver" />
 			<property name="eclipselink.jdbc.user" value="icat" />
-			<property name="eclipselink.ddl-generation" value="create-tables" />
-			<property name="eclipselink.ddl-generation.output_mode"
-				value="both" />
+			<!-- <property name="eclipselink.ddl-generation" value="drop-and-create-tables" 
+				/> -->
+			<!-- <property name="eclipselink.ddl-generation.output_mode" -->
+			<!-- value="both" /> -->
 		</properties>
 	</persistence-unit>
 </persistence>

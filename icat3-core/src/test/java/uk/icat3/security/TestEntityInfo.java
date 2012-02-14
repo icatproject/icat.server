@@ -15,14 +15,14 @@ import org.junit.Test;
 
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.EntityBaseBean;
-import uk.icat3.entity.FacilityUser;
+import uk.icat3.entity.User;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.Investigator;
 import uk.icat3.entity.Job;
 import uk.icat3.entity.Keyword;
-import uk.icat3.entity.Parameter;
+import uk.icat3.entity.ParameterType;
 import uk.icat3.entity.Topic;
-import uk.icat3.entity.TopicList;
+import uk.icat3.entity.TopicInvestigation;
 import uk.icat3.security.EntityInfoHandler.KeyType;
 import uk.icat3.security.EntityInfoHandler.Relationship;
 import uk.icat3.util.BaseTestTransaction;
@@ -36,9 +36,9 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testPKS(Investigation.class, "getId");
 		testPKS(Dataset.class, "getId");
 		testPKS(Keyword.class, "getKeywordPK", "getInvestigationId", "getName");
-		testPKS(TopicList.class, "getTopicListPK", "getInvestigationId", "getTopicId");
-		testPKS(Investigator.class, "getInvestigatorPK", "getInvestigationId", "getFacilityUserId");
-		testPKS(FacilityUser.class, "getFacilityUserId");
+		testPKS(TopicInvestigation.class, "getTopicListPK", "getInvestigationId", "getTopicId");
+		testPKS(Investigator.class, "getId");
+		testPKS(User.class, "getName");
 		testPKS(Topic.class, "getId");
 		testPKS(Job.class, "getId");
 	}
@@ -56,25 +56,26 @@ public class TestEntityInfo extends BaseTestTransaction {
 	@Test
 	public void testRels() throws Exception {
 
-		testRel(Investigation.class, "Keyword by keywordCollection many", "Sample by sampleCollection many",
-				"TopicList by topicListCollection many", "StudyInvestigation by studyInvestigationCollection many",
-				"Shift by shiftCollection many", "Dataset by datasetCollection many",
-				"Publication by publicationCollection many", "Investigator by investigatorCollection many",
-				"FacilityCycle by facilityCycle one");
+		testRel(Investigation.class, "Keyword by keywords many", "Sample by samples many",
+				"TopicInvestigation by topicLists many", "StudyInvestigation by studyInvestigations many",
+				"Shift by shifts many", "Dataset by datasets many", "Publication by publications many",
+				"Investigator by investigators many", "FacilityCycle by facilityCycle one",
+				"InvestigationType by investigationType one", "Facility by facility one", "InvestigationParameter by investigationParameters many");
 
-		testRel(Dataset.class, "InputDataset by inputDatasets many",
-				"DatasetParameter by datasetParameterCollection many", "Investigation by investigation one",
-				"Datafile by datafileCollection many", "OutputDataset by outputDatasets many");
+		testRel(Dataset.class, "InputDataset by inputDatasets many", "DatasetParameter by datasetParameters many",
+				"Investigation by investigation one", "Datafile by datafiles many",
+				"OutputDataset by outputDatasets many", "DatasetStatus by datasetStatus one",
+				"DatasetType by datasetType one", "Sample by sample one");
 
 		testRel(Keyword.class, "Investigation by investigation one");
 
-		testRel(TopicList.class, "Investigation by investigation one", "Topic by topic one");
+		testRel(TopicInvestigation.class, "Investigation by investigation one", "Topic by topic one");
 
-		testRel(Investigator.class, "Investigation by investigation one", "FacilityUser by facilityUser one");
+		testRel(Investigator.class, "Investigation by investigation one", "User by user one");
 
-		testRel(FacilityUser.class, "Investigator by investigatorCollection many");
+		testRel(User.class, "Investigator by investigatorCollection many", "UserGroup by userGroups many");
 
-		testRel(Topic.class, "TopicList by topicListCollection many");
+		testRel(Topic.class, "TopicInvestigation by topicListCollection many");
 
 		testRel(Job.class, "InputDataset by inputDatasets many", "InputDatafile by inputDatafiles many",
 				"OutputDatafile by outputDatafiles many", "Application by application one",
@@ -87,8 +88,8 @@ public class TestEntityInfo extends BaseTestTransaction {
 		for (Relationship rel : results) {
 			rStrings.add(rel.toString());
 		}
+		System.out.println(results);
 		assertEquals(klass.getSimpleName() + " count", rels.length, results.size());
-
 		for (String rel : rels) {
 			assertTrue(klass.getSimpleName() + " value " + rel, rStrings.contains(rel));
 		}
@@ -96,14 +97,14 @@ public class TestEntityInfo extends BaseTestTransaction {
 
 	@Test
 	public void notNullableFields() throws Exception {
-		testNNF(Investigation.class, "invNumber", "title", "facility", "invType");
+		testNNF(Investigation.class, "name", "title", "facility", "name");
 		testNNF(Dataset.class, "datasetType", "name");
 		testNNF(Keyword.class);
-		testNNF(TopicList.class);
+		testNNF(TopicInvestigation.class);
 		testNNF(Investigator.class);
-		testNNF(FacilityUser.class, "facilityUserId");
+		testNNF(User.class);
 		testNNF(Topic.class, "id");
-		testNNF(Parameter.class, "valueType");
+		testNNF(ParameterType.class, "valueType", "name", "units");
 		testNNF(Job.class, "application");
 	}
 
@@ -122,17 +123,14 @@ public class TestEntityInfo extends BaseTestTransaction {
 
 	@Test
 	public void stringFields() throws Exception {
-		testSF(Investigation.class, "instrument 255", "visitId 255", "invParamName 255", "invAbstract 4000",
-				"invNumber 255", "title 255", "prevInvNumber 255", "invParamValue 255", "bcatInvStr 255",
-				"invType 255", "facility 255");
-		testSF(Dataset.class, "name 255", "description 255", "location 255", "datasetType 255", "datasetStatus 255");
+		testSF(Investigation.class, "instrument 255", "visitId 255", "summary 4000", "name 255", "title 255");
+		testSF(Dataset.class, "name 255", "description 255", "location 255");
 		testSF(Keyword.class);
-		testSF(TopicList.class);
+		testSF(TopicInvestigation.class);
 		testSF(Investigator.class, "role 255");
-		testSF(FacilityUser.class, "title 255", "lastName 255", "middleName 255", "initials 255", "facilityUserId 255",
-				"federalId 255", "firstName 255");
+		testSF(User.class, "title 255", "lastName 255", "middleName 255", "initials 255", "name 255", "firstName 255");
 		testSF(Topic.class, "name 255");
-		testSF(Parameter.class, "description 255", "nonNumericValueFormat 255", "unitsLongVersion 255");
+		testSF(ParameterType.class, "description 255", "nonNumericValueFormat 255", "unitsLongVersion 255", "units 255", "name 255");
 		testSF(Job.class);
 
 	}
@@ -152,14 +150,14 @@ public class TestEntityInfo extends BaseTestTransaction {
 
 	@Test
 	public void getters() throws Exception {
-		testGetters(Investigation.class, 25);
-		testGetters(Dataset.class, 15);
+		testGetters(Investigation.class, 21);
+		testGetters(Dataset.class, 14);
 		testGetters(Keyword.class, 2);
-		testGetters(TopicList.class, 3);
+		testGetters(TopicInvestigation.class, 3);
 		testGetters(Investigator.class, 4);
-		testGetters(FacilityUser.class, 8);
+		testGetters(User.class, 8);
 		testGetters(Topic.class, 5);
-		testGetters(Parameter.class, 12);
+		testGetters(ParameterType.class, 16);
 		testGetters(Job.class, 6);
 	}
 
@@ -177,14 +175,14 @@ public class TestEntityInfo extends BaseTestTransaction {
 
 	@Test
 	public void setters() throws Exception {
-		testSetters(Investigation.class, 16);
+		testSetters(Investigation.class, 11);
 		testSetters(Dataset.class, 9);
 		testSetters(Keyword.class, 0);
-		testSetters(TopicList.class, 1);
-		testSetters(Investigator.class, 1);
-		testSetters(FacilityUser.class, 6);
+		testSetters(TopicInvestigation.class, 1);
+		testSetters(Investigator.class, 3);
+		testSetters(User.class, 5);
 		testSetters(Topic.class, 3);
-		testSetters(Parameter.class, 8);
+		testSetters(ParameterType.class, 11);
 		testSetters(Job.class, 1);
 	}
 
@@ -204,11 +202,11 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testKeytype(Investigation.class, EntityInfoHandler.KeyType.GENERATED);
 		testKeytype(Dataset.class, EntityInfoHandler.KeyType.GENERATED);
 		testKeytype(Keyword.class, EntityInfoHandler.KeyType.COMPOUND);
-		testKeytype(TopicList.class, EntityInfoHandler.KeyType.COMPOUND);
-		testKeytype(Investigator.class, EntityInfoHandler.KeyType.COMPOUND);
-		testKeytype(FacilityUser.class, EntityInfoHandler.KeyType.SIMPLE);
+		testKeytype(TopicInvestigation.class, EntityInfoHandler.KeyType.COMPOUND);
+		testKeytype(Investigator.class, EntityInfoHandler.KeyType.GENERATED);
+		testKeytype(User.class, EntityInfoHandler.KeyType.SIMPLE);
 		testKeytype(Topic.class, EntityInfoHandler.KeyType.SIMPLE);
-		testKeytype(Parameter.class, EntityInfoHandler.KeyType.COMPOUND);
+		testKeytype(ParameterType.class, EntityInfoHandler.KeyType.GENERATED);
 		testKeytype(Job.class, EntityInfoHandler.KeyType.GENERATED);
 	}
 

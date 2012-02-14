@@ -1,204 +1,294 @@
-/*
- * DatasetStatus.java
- *
- * Created on 08 February 2007, 09:48
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.xml.bind.annotation.XmlElement;
+import javax.persistence.TableGenerator;
+import javax.persistence.Column;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import org.apache.log4j.Logger;
 
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.security.parser.Input;
 import uk.icat3.security.parser.LexerException;
 import uk.icat3.security.parser.ParserException;
-import uk.icat3.security.parser.Restriction;
+import uk.icat3.security.parser.RestrictedBean;
 import uk.icat3.security.parser.Token;
 import uk.icat3.security.parser.Tokenizer;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "RULE")
 @NamedQueries({
-		@NamedQuery(name = "Rule.CreateQuery", query = "SELECT DISTINCT r.crudJPQL FROM UserGroup g, Rule r where ((g.member = :member and r.groupName = g.name) or "
-				+ "r.groupName is null) and r.what = :what and r.cAllowed = 'Y'"),
-		@NamedQuery(name = "Rule.ReadQuery", query = "SELECT DISTINCT r.crudJPQL FROM UserGroup g, Rule r where ((g.member = :member and r.groupName = g.name) or "
-				+ "r.groupName is null) and r.what = :what and r.rAllowed = 'Y'"),
-		@NamedQuery(name = "Rule.UpdateQuery", query = "SELECT DISTINCT r.crudJPQL FROM UserGroup g, Rule r where ((g.member = :member and r.groupName = g.name) or "
-				+ "r.groupName is null) and r.what = :what and r.uAllowed = 'Y'"),
-		@NamedQuery(name = "Rule.DeleteQuery", query = "SELECT DISTINCT r.crudJPQL FROM UserGroup g, Rule r where ((g.member = :member and r.groupName = g.name) or "
-				+ "r.groupName is null) and r.what = :what and r.dAllowed = 'Y'"),
-		@NamedQuery(name = "Rule.SearchQuery", query = "SELECT DISTINCT r FROM UserGroup g, Rule r where ((g.member = :member and r.groupName = g.name) or "
-				+ "r.groupName is null) and r.what = :what and r.rAllowed = 'Y'"),
-		@NamedQuery(name = "Rule.All", query = "SELECT r FROM Rule r") })
+		@NamedQuery(name = "Rule.CreateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug WHERE (ug.user.name = :member OR g IS NULL) AND r.bean = :bean AND r.c = TRUE"),
+		@NamedQuery(name = "Rule.ReadQuery",   query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug WHERE (ug.user.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE"),
+		@NamedQuery(name = "Rule.UpdateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug WHERE (ug.user.name = :member OR g IS NULL) AND r.bean = :bean AND r.u = TRUE"),
+		@NamedQuery(name = "Rule.DeleteQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug WHERE (ug.user.name = :member OR g IS NULL) AND r.bean = :bean AND r.d = TRUE"),
+		@NamedQuery(name = "Rule.SearchQuery", query = "SELECT DISTINCT r          FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug WHERE (ug.user.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE") })
 @XmlRootElement
-@SequenceGenerator(name = "RULE_SEQ", sequenceName = "RULE_ID_SEQ", allocationSize = 1)
-public class Rule implements Serializable {
+@TableGenerator(name = "ruleGenerator", pkColumnValue = "Rule")
+public class Rule extends EntityBaseBean implements Serializable {
 
 	public static final String CREATE_QUERY = "Rule.CreateQuery";
 	public static final String READ_QUERY = "Rule.ReadQuery";
 	public static final String UPDATE_QUERY = "Rule.UpdateQuery";
 	public static final String DELETE_QUERY = "Rule.DeleteQuery";
 	public static final String SEARCH_QUERY = "Rule.SearchQuery";
-	public static final String ALL = "Rule.All";
 
-	@Column(name = "C", nullable = false)
-	private String cAllowed = "N";
+	private final static Logger logger = Logger.getLogger(Rule.class);
 
-	@Column(name = "D", nullable = false)
-	private String dAllowed = "N";
+	@XmlTransient
+	private boolean c;
 
-	@Column(name = "GROUP_NAME", nullable = false)
-	private String groupName;
+	@XmlTransient
+	private boolean r;
+
+	@XmlTransient
+	private boolean u;
+
+	@XmlTransient
+	private boolean d;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Group group;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "RULE_SEQ")
-	@Column(name = "ID", nullable = false)
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "ruleGenerator")
 	private Long id;
 
-	@Column(name = "CRUD_JPQL")
+	@XmlTransient
+	@Column(length = 1024)
 	private String crudJPQL;
 
-	@Column(name = "R", nullable = false)
-	private String rAllowed = "N";
-
-	@Column(name = "RESTRICTION")
-	private String restriction;
-
-	@Column(name = "U", nullable = false)
-	private String uAllowed = "N";;
-
-	@Column(name = "WHAT")
 	private String what;
 
-	@Column(name = "SEARCH_JPQL")
+	@XmlTransient
+	@Column(length = 1024)
 	private String searchJPQL;
 
-	@Column(name = "BEANS")
+	@XmlTransient
 	private String beans;
 
-	@SuppressWarnings("unused")
-	@Column(name = "MOD_TIME", nullable = false)
-	@Temporal(value = TemporalType.TIMESTAMP)
-	@XmlElement
-	private Date modTime;
+	@Column(length = 4)
+	private String crudFlags;
+
+	@XmlTransient
+	private boolean restricted;
+
+	@XmlTransient
+	private String bean;
+
+	@XmlTransient
+	public String getBean() {
+		return bean;
+	}
+
+	public void setBean(String bean) {
+		this.bean = bean;
+	}
+
+	@XmlTransient
+	public boolean isRestricted() {
+		return restricted;
+	}
+
+	public void setRestricted(boolean restricted) {
+		this.restricted = restricted;
+	}
 
 	// Needed for JPA
 	public Rule() {
 	}
 
-	public Rule(String groupName, String what, String crud, String restriction) throws BadParameterException,
-			IcatInternalException {
-		this.groupName = groupName;
-		this.what = what;
-		crud = crud.toUpperCase();
-		for (int i = 0; i < crud.length(); i++) {
-			char c = crud.charAt(i);
+	private void fixup() throws BadParameterException, IcatInternalException {
+		this.crudFlags = this.crudFlags.toUpperCase().trim();
+		for (int i = 0; i < this.crudFlags.length(); i++) {
+			final char c = this.crudFlags.charAt(i);
 			if (c == 'C') {
-				this.cAllowed = "Y";
+				this.c = true;
 			} else if (c == 'R') {
-				this.rAllowed = "Y";
+				this.r = true;
 			} else if (c == 'U') {
-				this.uAllowed = "Y";
+				this.u = true;
 			} else if (c == 'D') {
-				this.dAllowed = "Y";
+				this.d = true;
 			} else {
-				throw new BadParameterException("CRUD value " + crud + " contains " + c);
+				throw new BadParameterException("CRUD value " + this.crudFlags + " contains " + c);
 			}
 		}
-		if (restriction != null) {
-			List<Token> tokens = null;
-			try {
-				tokens = Tokenizer.getTokens(restriction);
-			} catch (LexerException e) {
-				throw new BadParameterException(e.getMessage());
-			}
-			Input input = new Input(tokens);
-			Restriction r;
-			try {
-				r = new Restriction(input);
-			} catch (ParserException e) {
-				throw new BadParameterException(e.getMessage());
-			}
-			crudJPQL = r.getQuery(what);
-			searchJPQL = r.getSearchWhere(what);
 
-			StringBuilder sb = new StringBuilder();
-			for (Class<? extends EntityBaseBean> bean : r.getRelatedEntities()) {
-				if (sb.length() > 0) {
-					sb.append(" ");
-				}
-				sb.append(bean.getSimpleName());
-			}
-
-			beans = sb.toString();
+		List<Token> tokens = null;
+		try {
+			tokens = Tokenizer.getTokens(this.what);
+		} catch (final LexerException e) {
+			throw new BadParameterException(e.getMessage());
 		}
-		this.restriction = restriction;
-		this.modTime = new Date();
+		final Input input = new Input(tokens);
+		RestrictedBean r;
+		try {
+			r = new RestrictedBean(input);
+		} catch (final ParserException e) {
+			throw new BadParameterException(e.getMessage());
+		}
+		if (r.getSearchWhere().isEmpty()) {
+			this.crudJPQL = null;
+			this.searchJPQL = null;
+		} else {
+			this.crudJPQL = r.getQuery();
+			this.searchJPQL = r.getSearchWhere();
+		}
+		this.bean = r.getBean();
+
+		final StringBuilder sb = new StringBuilder();
+		for (final Class<? extends EntityBaseBean> bean : r.getRelatedEntities()) {
+			if (sb.length() > 0) {
+				sb.append(" ");
+			}
+			sb.append(bean.getSimpleName());
+		}
+
+		this.beans = sb.toString();
+		this.restricted = r.isRestricted();
+
 	}
 
-	public boolean getdAllowed() {
-		return this.dAllowed == "Y";
+	@XmlTransient
+	public String getBeans() {
+		return this.beans;
 	}
 
-	public String getGroupName() {
-		return this.groupName;
+	public String getCrudFlags() {
+		return this.crudFlags;
+	}
+
+	@XmlTransient
+	public String getCrudJPQL() {
+		return this.crudJPQL;
+	}
+
+	public Group getGroup() {
+		return this.group;
 	}
 
 	public Long getId() {
 		return this.id;
 	}
 
-	public String getCrudJPQL() {
-		return this.crudJPQL;
+	@Override
+	public Object getPK() {
+		return this.id;
 	}
 
-	public String getRestriction() {
-		return this.restriction;
+	@XmlTransient
+	public String getSearchJPQL() {
+		return this.searchJPQL;
 	}
 
 	public String getWhat() {
 		return this.what;
 	}
 
-	public boolean isCAllowed() {
-		return this.cAllowed == "Y";
+	@XmlTransient
+	public boolean isC() {
+		return this.c;
 	}
 
-	public boolean isRAllowed() {
-		return this.rAllowed == "Y";
+	public boolean isD() {
+		return this.d;
 	}
 
-	public boolean isUAllowed() {
-		return this.uAllowed == "Y";
+	@XmlTransient
+	public boolean isR() {
+		return this.r;
 	}
 
-	public String getBeans() {
-		return beans;
+	@XmlTransient
+	public boolean isU() {
+		return this.u;
 	}
 
-	public String getSearchJPQL() {
-		return searchJPQL;
+	@Override
+	public void postMergeFixup(EntityManager manager) throws NoSuchObjectFoundException, BadParameterException,
+			IcatInternalException {
+		super.postMergeFixup(manager);
+		this.c = false;
+		this.r = false;
+		this.u = false;
+		this.d = false;
+		this.fixup();
+		logger.debug("postMergeFixup of Rule for " + this.crudFlags + " of " + this.what);
+	}
+
+	@Override
+	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
+			BadParameterException, IcatInternalException {
+		super.preparePersist(modId, manager);
+		this.fixup();
+		logger.debug("PreparePersist of Rule for " + this.crudFlags + " of " + this.what);
+	}
+
+	public void setBeans(String beans) {
+		this.beans = beans;
+	}
+
+	public void setC(boolean c) {
+		this.c = c;
+	}
+
+	public void setCrudFlags(String crudFlags) {
+		this.crudFlags = crudFlags;
+	}
+
+	public void setCrudJPQL(String crudJPQL) {
+		this.crudJPQL = crudJPQL;
+	}
+
+	public void setD(boolean d) {
+		this.d = d;
+	}
+
+	public void setGroup(Group group) {
+		this.group = group;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public void setR(boolean r) {
+		this.r = r;
+	}
+
+	public void setSearchJPQL(String searchJPQL) {
+		this.searchJPQL = searchJPQL;
+	}
+
+	public void setU(boolean u) {
+		this.u = u;
+	}
+
+	public void setWhat(String what) {
+		this.what = what;
+	}
+
+	public void beforeMarshal(Marshaller source) {
+		logger.trace("Marshalling Rule for " + includes);
+		if (!this.includes.contains(Group.class)) {
+			this.group = null;
+		}
 	}
 
 }

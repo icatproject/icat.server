@@ -25,55 +25,57 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.manager.BeanManager;
 import uk.icat3.manager.CreateResponse;
 import uk.icat3.manager.NotificationMessages.Message;
-import uk.icat3.manager.RuleManager;
+import uk.icat3.util.RuleManager;
 import uk.icat3.util.TestConstants;
 
 public class TestNotificationRequest {
 
 	static private EntityManagerFactory emf;
 	private EntityManager em;
+	private Facility facility;
+	private InvestigationType investigationType;
+	private DatasetType datasetType;
 	private final static Logger logger = Logger.getLogger(TestNotificationRequest.class);
 
 	@Before
 	public void setUpManager() throws Exception {
-		RuleManager.addUserGroupMember("Group", "Person", em);
+		RuleManager.oldAddUserGroupMember("Group", "Person", em);
 
-		RuleManager.addRule("Group", "NotificationRequest", "CRUD", null, em);
-		RuleManager.addRule("Group", "Facility", "CRUD", null, em);
-		RuleManager.addRule("Group", "InvestigationType", "CRUD", null, em);
-		RuleManager.addRule("Group", "DatasetType", "CRUD", null, em);
-		RuleManager.addRule("Group", "Investigation", "CRUD", null, em);
-		RuleManager.addRule("Group", "Dataset", "CRUD", null, em);
+		RuleManager.oldAddRule("Group", "NotificationRequest", "CRUD", null, em);
+		RuleManager.oldAddRule("Group", "Facility", "CRUD", null, em);
+		RuleManager.oldAddRule("Group", "InvestigationType", "CRUD", null, em);
+		RuleManager.oldAddRule("Group", "DatasetType", "CRUD", null, em);
+		RuleManager.oldAddRule("Group", "Investigation", "CRUD", null, em);
+		RuleManager.oldAddRule("Group", "Dataset", "CRUD", null, em);
 
-		Facility f = new Facility();
-		f.setFacilityShortName("TestFacility");
-		f.setDaysUntilRelease(90L);
-		BeanManager.create("Person", f, em);
+		facility = new Facility();
+		facility.setName("TestFacility");
+		facility.setDaysUntilRelease(90);
+		BeanManager.create("Person", facility, em);
 
-		InvestigationType type = new InvestigationType();
-		type.setName("TestExperiment");
-		BeanManager.create("Person", type, em);
+		investigationType = new InvestigationType();
+		investigationType.setName("TestExperiment");
+		BeanManager.create("Person", investigationType, em);
 
-		DatasetType dst = new DatasetType();
-		dst.setName("GQ");
-		BeanManager.create("Person", dst, em);
-
+		datasetType = new DatasetType();
+		datasetType.setName("GQ");
+		BeanManager.create("Person", datasetType, em);
 	}
 
 	private CreateResponse createInvestigation(String invNumber) throws Exception {
 		Investigation inv = new Investigation();
-		inv.setInvNumber(invNumber);
+		inv.setName(invNumber);
 		inv.setTitle("Not null");
-		inv.setInvType("TestExperiment");
-		inv.setFacility("TestFacility");
+		inv.setType(investigationType);
+		inv.setFacility(facility);
 		return BeanManager.create("Person", inv, em);
 	}
 
-	private CreateResponse createDataset(Long invid, String name) throws Exception {
+	private CreateResponse createDataset(Investigation inv, String name) throws Exception {
 		Dataset dataset = new Dataset();
 		dataset.setName(name);
-		dataset.setDatasetType("GQ");
-		dataset.setInvestigationId(invid);
+		dataset.setType(datasetType);
+		dataset.setInvestigation(inv);
 		return BeanManager.create("Person", dataset, em);
 	}
 
@@ -93,10 +95,10 @@ public class TestNotificationRequest {
 		nr.setCrudFlags("C");
 		BeanManager.create("Person", nr, em);
 		CreateResponse resp = createInvestigation("A");
-		long invId = (Long) resp.getPk();
+		Investigation inv = (Investigation) BeanManager.get("Person", "Investigation", resp.getPk(), em).getBean();
 		System.out.println(resp.getPk());
 		System.out.println(resp.getNotificationMessages());
-		resp = createDataset(invId, "Wibble");
+		resp = createDataset(inv, "Wibble");
 		System.out.println(resp.getPk());
 		System.out.println(resp.getNotificationMessages());
 	}
@@ -123,13 +125,13 @@ public class TestNotificationRequest {
 		CreateResponse resp = BeanManager.create("Person", nr, em);
 		nr.setId((Long) resp.getPk());
 		resp = createInvestigation("A");
-
-		long invId = (Long) resp.getPk();
+		Investigation inv = (Investigation) BeanManager.get("Person", "Investigation", (Long) resp.getPk(), em)
+				.getBean();
 		System.out.println();
 		assertEquals(0, resp.getNotificationMessages().getMessages().size());
-		resp = createDataset(invId, "freda");
+		resp = createDataset(inv, "freda");
 		assertEquals(0, resp.getNotificationMessages().getMessages().size());
-		resp = createDataset(invId, "fred");
+		resp = createDataset(inv, "fred");
 		assertEquals(1, resp.getNotificationMessages().getMessages().size());
 		Message msg = resp.getNotificationMessages().getMessages().get(0);
 		assertEquals("T", msg.getNotificationName());
@@ -142,7 +144,7 @@ public class TestNotificationRequest {
 		nr.setDatatypes(null);
 		nr.setWhat("Dataset");
 		BeanManager.update("Person", nr, em);
-		resp = createDataset(invId, "bill");
+		resp = createDataset(inv, "bill");
 		assertEquals(1, resp.getNotificationMessages().getMessages().size());
 		msg = resp.getNotificationMessages().getMessages().get(0);
 		assertNull(msg.getNotificationName());
@@ -159,7 +161,7 @@ public class TestNotificationRequest {
 		nr.setName("T");
 		nr.setDestType(NotificationRequest.DestType.P2P);
 		nr.setCrudFlags("d");
-		nr.setWhat("Dataset <-> Investigation [invNumber = '901234']");
+		nr.setWhat("Dataset <-> Investigation [name = '901234']");
 		BeanManager.create("Person", nr, em);
 	}
 

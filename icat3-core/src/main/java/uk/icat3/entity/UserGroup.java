@@ -1,62 +1,79 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
-import java.util.Date;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.persistence.TableGenerator;
+import javax.persistence.UniqueConstraint;
+import javax.xml.bind.Marshaller;
+
+import org.apache.log4j.Logger;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "USERGROUP")
-@NamedQueries({
-		@NamedQuery(name = "UserGroup.All", query = "SELECT g FROM UserGroup g ORDER BY g.name, g.member"),
-		@NamedQuery(name = "UserGroup.PK", query = "SELECT g FROM UserGroup g WHERE g.name = :name and g.member = :member") })
-@XmlRootElement
-public class UserGroup implements Serializable {
+@TableGenerator(name = "userGroupGenerator", pkColumnValue = "UserGroup")
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "USER_NAME", "GROUP_NAME" }) })
+public class UserGroup extends EntityBaseBean implements Serializable {
 
-	public static final String PK = "UserGroup.PK";
-	public static final String ALL = "UserGroup.All";
+	private final static Logger logger = Logger.getLogger(UserGroup.class);
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "userGroupGenerator")
+	private Long id;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Group group;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private User user;
 
 	// Needed for JPA
 	public UserGroup() {
+	}
+
+	public void beforeMarshal(Marshaller source) {
+		logger.trace("Marshalling UserGroup for " + this.includes);
+		if (!this.includes.contains(User.class)) {
+			this.user = null;
+		}
+		if (!this.includes.contains(Group.class)) {
+			this.group = null;
+		}
+	}
+
+	public User getUser() {
+		return this.user;
+	}
+
+	public Group getGroup() {
+		return this.group;
+	}
+
+	public Long getId() {
+		return this.id;
 	};
 
-	public UserGroup(String name, String member) {
-		this.name = name;
-		this.member = member;
-		modTime = new Date();
+	@Override
+	public Object getPK() {
+		return this.id;
 	}
 
-	public String getName() {
-		return this.name;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
-	public String getMember() {
-		return this.member;
+	public void setGroup(Group group) {
+		this.group = group;
 	}
 
-	@Id
-	@Column(name = "NAME", nullable = false)
-	private String name;
-
-	@Id
-	@Column(name = "MEMBER", nullable = false)
-	private String member;
-	
-	@SuppressWarnings("unused")
-	@Column(name = "MOD_TIME", nullable = false)
-	@Temporal(value = TemporalType.TIMESTAMP)
-	@XmlElement
-	private Date modTime;
-
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 }

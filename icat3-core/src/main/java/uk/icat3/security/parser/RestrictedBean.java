@@ -1,5 +1,8 @@
 package uk.icat3.security.parser;
 
+import java.util.Set;
+
+import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 
@@ -27,6 +30,18 @@ public class RestrictedBean {
 
 	public String getBean() {
 		return tableName;
+	}
+
+	public String getSearchWhere() throws BadParameterException {
+		return restriction.getSearchWhere(tableName);
+	}
+
+	public Set<Class<? extends EntityBaseBean>> getRelatedEntities() throws BadParameterException {
+		return restriction.getRelatedEntities();
+	}
+
+	public boolean isRestricted() {
+		return restriction.isRestricted();
 	}
 
 }

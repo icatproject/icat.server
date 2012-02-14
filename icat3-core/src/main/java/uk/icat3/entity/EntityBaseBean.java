@@ -1,12 +1,3 @@
-/*
- * EntityBaseBean.java
- *
- * Created on 08 February 2007, 09:50
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
 package uk.icat3.entity;
 
 import java.io.Serializable;
@@ -176,7 +167,6 @@ public abstract class EntityBaseBean implements Serializable {
 				throw new IcatInternalException("" + e);
 			}
 			if (value != null) {
-				System.out.println(field);
 				if (((String) value).length() > length) {
 					throw new ValidationException(getClass().getSimpleName() + ": " + field.getName()
 							+ " cannot have length > " + length);
@@ -236,15 +226,6 @@ public abstract class EntityBaseBean implements Serializable {
 						+ "] already present.");
 			}
 		}
-	}
-
-	/*
-	 * If this method is overridden it should normally be called as well by
-	 * super.preparePersistTop()
-	 */
-	public void preparePersistTop(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
-		preparePersist(modId, manager);
 	}
 
 	/*

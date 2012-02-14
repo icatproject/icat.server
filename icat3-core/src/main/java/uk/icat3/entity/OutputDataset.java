@@ -63,7 +63,7 @@ public class OutputDataset extends EntityBaseBean implements Serializable {
 	}
 
 	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Application for " + includes);
+		logger.trace("Marshalling OutputDataset for " + includes);
 		if (!this.includes.contains(Job.class)) {
 			this.job = null;
 		}

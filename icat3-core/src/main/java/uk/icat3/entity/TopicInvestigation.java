@@ -22,31 +22,55 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "STUDY_ID", "INVESTIGATION_ID" }) })
-@TableGenerator(name = "studyInvestigationGenerator", pkColumnValue = "StudyInvestigation")
-public class StudyInvestigation extends EntityBaseBean implements Serializable {
+@TableGenerator(name = "topicInvestigationGenerator", pkColumnValue = "TopicInvestigation")
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "TOPIC_ID", "INVESTIGATION_ID" }) })
+public class TopicInvestigation extends EntityBaseBean implements Serializable {
 
-	private final static Logger logger = Logger.getLogger(StudyInvestigation.class);
+	private final static Logger logger = Logger.getLogger(TopicInvestigation.class);
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "studyInvestigationGenerator")
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "topicInvestigationGenerator")
 	private Long id;
-
-	@JoinColumn(name = "STUDY_ID", nullable = false)
-	@ManyToOne
-	private Study study;
 
 	@JoinColumn(name = "INVESTIGATION_ID", nullable = false)
 	@ManyToOne
 	private Investigation investigation;
 
+	@JoinColumn(name = "TOPIC_ID", nullable = false)
+	@ManyToOne
+	private Topic topic;
+
 	/* Needed for JPA */
-	public StudyInvestigation() {
+	public TopicInvestigation() {
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Investigation getInvestigation() {
+		return investigation;
+	}
+
+	public void setInvestigation(Investigation investigation) {
+		this.investigation = investigation;
+	}
+
+	public Topic getTopic() {
+		return topic;
+	}
+
+	public void setTopic(Topic topic) {
+		this.topic = topic;
 	}
 
 	@Override
 	public String toString() {
-		return "StudyInvestigation[id=" + id + "]";
+		return "TopicInvestigation[id=" + id + "]";
 	}
 
 	@Override
@@ -62,37 +86,13 @@ public class StudyInvestigation extends EntityBaseBean implements Serializable {
 	}
 
 	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling StudyInvestigation for " + includes);
-		if (!this.includes.contains(Study.class)) {
-			this.study = null;
-		}
+		logger.trace("Marshalling TopicInvestigation for " + includes);
 		if (!this.includes.contains(Investigation.class)) {
 			this.investigation = null;
 		}
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Study getStudy() {
-		return study;
-	}
-
-	public void setStudy(Study study) {
-		this.study = study;
-	}
-
-	public Investigation getInvestigation() {
-		return investigation;
-	}
-
-	public void setInvestigation(Investigation investigation) {
-		this.investigation = investigation;
+		if (!this.includes.contains(Topic.class)) {
+			this.topic = null;
+		}
 	}
 
 }

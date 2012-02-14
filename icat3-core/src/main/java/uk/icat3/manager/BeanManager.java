@@ -2,11 +2,17 @@ package uk.icat3.manager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Set;
 
 import javax.persistence.EntityExistsException;
@@ -21,6 +27,7 @@ import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ObjectAlreadyExistsException;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.security.AccessType;
 import uk.icat3.security.EntityInfoHandler;
 import uk.icat3.security.EntityInfoHandler.Relationship;
 import uk.icat3.security.GateKeeper;
@@ -28,15 +35,18 @@ import uk.icat3.security.parser.GetQuery;
 import uk.icat3.security.parser.Input;
 import uk.icat3.security.parser.LexerException;
 import uk.icat3.security.parser.ParserException;
+import uk.icat3.security.parser.SearchQuery;
 import uk.icat3.security.parser.Token;
 import uk.icat3.security.parser.Tokenizer;
-import uk.icat3.util.AccessType;
 
 public class BeanManager {
 
 	// Global class logger
 	private static final Logger logger = Logger.getLogger(BeanManager.class);
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
+	private static DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+
+	private static final Pattern timestampPattern = Pattern.compile(":ts(\\d{14})");
 
 	public static CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager)
 			throws InsufficientPrivilegesException, ObjectAlreadyExistsException, ValidationException,
@@ -45,7 +55,7 @@ public class BeanManager {
 		// is being created by two threads. Probably need to use a Bean Managed
 		// Transaction to avoid the problem.
 
-		bean.preparePersistTop(userId, manager);
+		bean.preparePersist(userId, manager);
 		bean.isUnique(manager);
 
 		try {
@@ -58,7 +68,7 @@ public class BeanManager {
 			throw new ObjectAlreadyExistsException(e.getMessage());
 		} catch (Throwable e) {
 			manager.clear();
-			bean.preparePersistTop(userId, manager);
+			bean.preparePersist(userId, manager);
 			bean.isValid(manager, true);
 			e.printStackTrace(System.err);
 			throw new IcatInternalException("Unexpected DB response " + e.getMessage());
@@ -131,7 +141,7 @@ public class BeanManager {
 		}
 		EntityBaseBean beanManaged = manager.find(entityClass, primaryKey);
 		if (beanManaged == null) {
-			throw new NoSuchObjectFoundException(entityClass.getSimpleName() + "[id:" + primaryKey + "] not found.");
+			throw new NoSuchObjectFoundException(entityClass.getSimpleName() + " [id:" + primaryKey + "] not found.");
 		}
 
 		Set<Class<? extends EntityBaseBean>> includes = q.getIncludes();
@@ -143,6 +153,66 @@ public class BeanManager {
 		logger.debug("got " + entityClass.getSimpleName() + "[id:" + primaryKey + "]");
 		NotificationMessages notification = new NotificationMessages(userId, beanManaged, AccessType.READ, manager);
 		return new GetResponse(beanManaged, notification);
+	}
+
+	public static SearchResponse search(String userId, String query, EntityManager manager)
+			throws BadParameterException, IcatInternalException, InsufficientPrivilegesException {
+
+		logger.debug(userId + " searches for " + query);
+
+		/* Parse the query */
+		List<Token> tokens = null;
+		try {
+			tokens = Tokenizer.getTokens(query);
+		} catch (LexerException e) {
+			throw new BadParameterException(e.getMessage());
+		}
+		Input input = new Input(tokens);
+		SearchQuery q;
+		try {
+			q = new SearchQuery(input);
+		} catch (ParserException e) {
+			throw new BadParameterException(e.getMessage());
+		}
+
+		/* Get the JPQL which includes authz restrictions */
+		String jpql = q.getJPQL(userId, manager);
+		logger.debug("JPQL: " + jpql);
+
+		/* Create query and add parameter values for any timestamps */
+		Matcher m = timestampPattern.matcher(jpql);
+		javax.persistence.Query jpqlQuery = manager.createQuery(jpql);
+		while (m.find()) {
+			Date d = null;
+			try {
+				d = df.parse(m.group(1));
+			} catch (ParseException e) {
+				// This cannot happen - honest
+			}
+			jpqlQuery.setParameter("ts" + m.group(1), d);
+		}
+
+		Integer offset = q.getOffset();
+		if (offset != null) {
+			jpqlQuery.setFirstResult(offset);
+		}
+		Integer number = q.getNumber();
+		if (number != null) {
+			jpqlQuery.setMaxResults(number);
+		}
+
+		List<?> result = jpqlQuery.getResultList();
+
+		Set<Class<? extends EntityBaseBean>> includes = q.getIncludes();
+		if (includes.size() > 0) {
+			for (Object beanManaged : result) {
+				((EntityBaseBean) beanManaged).addIncludes(includes);
+			}
+		}
+
+		logger.debug("Obtained " + result.size() + " results.");
+		NotificationMessages nms = new NotificationMessages(userId, result.size(), q.getFirstEntity(), query, manager);
+		return new SearchResponse(result, nms);
 	}
 
 	private static EntityBaseBean find(EntityBaseBean bean, EntityManager manager) throws NoSuchObjectFoundException,

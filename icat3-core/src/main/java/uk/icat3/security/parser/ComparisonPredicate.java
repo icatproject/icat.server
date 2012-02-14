@@ -132,8 +132,12 @@ public class ComparisonPredicate {
 			try {
 				tb.getDeclaredField(val.split("\\.")[0]);
 			} catch (NoSuchFieldException e) {
-				throw new BadParameterException("Field " + val + " of " + tb
-						+ " does not exist");
+				try {
+					tb.getSuperclass().getDeclaredField(val.split("\\.")[0]);
+				} catch (NoSuchFieldException e1) {
+					throw new BadParameterException("Field " + val + " of " + tb
+							+ " does not exist");
+				}
 			}
 		}
 		val = tb.getSimpleName() + "$." + val;

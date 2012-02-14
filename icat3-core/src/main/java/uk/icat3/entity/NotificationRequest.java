@@ -62,12 +62,16 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 
 	@Column(nullable = false)
 	private String name;
+	
 	@Column(nullable = false)
 	private DestType destType;
+	
 	@Column(nullable = false)
 	private String crudFlags;
+	
 	@Column(nullable = false)
 	private String what;
+	
 	@XmlTransient
 	private String bean;
 
@@ -107,112 +111,6 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 	private boolean notificationNameWanted;
 
 	public NotificationRequest() {
-	}
-
-	@XmlTransient
-	public String getBean() {
-		return this.bean;
-	}
-
-	public String getCrudFlags() {
-		return this.crudFlags;
-	}
-
-	@XmlTransient
-	public String getCrudJPQL() {
-		return this.crudJPQL;
-	}
-
-	public String getDatatypes() {
-		return this.datatypes;
-	}
-
-	public DestType getDestType() {
-		return this.destType;
-	}
-
-	public Long getId() {
-		return this.id;
-	}
-
-	public String getJmsOptions() {
-		return this.jmsOptions;
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	@Override
-	public Object getPK() {
-		return this.id;
-	}
-
-	public String getWhat() {
-		return this.what;
-	}
-
-	@XmlTransient
-	public boolean isArgsWanted() {
-		return this.argsWanted;
-	}
-
-	@XmlTransient
-	public boolean isC() {
-		return this.c;
-	}
-
-	@XmlTransient
-	public boolean isD() {
-		return this.d;
-	}
-
-	@XmlTransient
-	public boolean isNotificationNameWanted() {
-		return this.notificationNameWanted;
-	}
-
-	@XmlTransient
-	public boolean isKeyWanted() {
-		return this.keyWanted;
-	}
-
-	@XmlTransient
-	public boolean isEntityNameWanted() {
-		return this.entityNameWanted;
-	}
-
-	@XmlTransient
-	public boolean isR() {
-		return this.r;
-	}
-
-	@XmlTransient
-	public boolean isU() {
-		return this.u;
-	}
-
-	@XmlTransient
-	public boolean isUseridWanted() {
-		return this.useridWanted;
-	}
-
-	@Override
-	public void postMergeFixup(EntityManager manager) throws NoSuchObjectFoundException, BadParameterException,
-			IcatInternalException {
-		super.postMergeFixup(manager);
-		this.c = false;
-		this.r = false;
-		this.u = false;
-		this.d = false;
-		this.notificationNameWanted = false;
-		this.useridWanted = false;
-		this.entityNameWanted = false;
-		this.keyWanted = false;
-		this.argsWanted = false;
-		fixup();
-		logger.debug("postMergeFixup of NotificationRequest " + this.name + " for " + this.crudFlags + " of "
-				+ this.what);
 	}
 
 	private void fixup() throws BadParameterException, IcatInternalException {
@@ -279,11 +177,117 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 
 	}
 
+	@XmlTransient
+	public String getBean() {
+		return this.bean;
+	}
+
+	public String getCrudFlags() {
+		return this.crudFlags;
+	}
+
+	@XmlTransient
+	public String getCrudJPQL() {
+		return this.crudJPQL;
+	}
+
+	public String getDatatypes() {
+		return this.datatypes;
+	}
+
+	public DestType getDestType() {
+		return this.destType;
+	}
+
+	public Long getId() {
+		return this.id;
+	}
+
+	public String getJmsOptions() {
+		return this.jmsOptions;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	@Override
+	public Object getPK() {
+		return this.id;
+	}
+
+	public String getWhat() {
+		return this.what;
+	}
+
+	@XmlTransient
+	public boolean isArgsWanted() {
+		return this.argsWanted;
+	}
+
+	@XmlTransient
+	public boolean isC() {
+		return this.c;
+	}
+
+	@XmlTransient
+	public boolean isD() {
+		return this.d;
+	}
+
+	@XmlTransient
+	public boolean isEntityNameWanted() {
+		return this.entityNameWanted;
+	}
+
+	@XmlTransient
+	public boolean isKeyWanted() {
+		return this.keyWanted;
+	}
+
+	@XmlTransient
+	public boolean isNotificationNameWanted() {
+		return this.notificationNameWanted;
+	}
+
+	@XmlTransient
+	public boolean isR() {
+		return this.r;
+	}
+
+	@XmlTransient
+	public boolean isU() {
+		return this.u;
+	}
+
+	@XmlTransient
+	public boolean isUseridWanted() {
+		return this.useridWanted;
+	}
+
+	@Override
+	public void postMergeFixup(EntityManager manager) throws NoSuchObjectFoundException, BadParameterException,
+			IcatInternalException {
+		super.postMergeFixup(manager);
+		this.c = false;
+		this.r = false;
+		this.u = false;
+		this.d = false;
+		this.notificationNameWanted = false;
+		this.useridWanted = false;
+		this.entityNameWanted = false;
+		this.keyWanted = false;
+		this.argsWanted = false;
+		this.fixup();
+		logger.debug("postMergeFixup of NotificationRequest " + this.name + " for " + this.crudFlags + " of "
+				+ this.what);
+	}
+
 	@Override
 	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
 			BadParameterException, IcatInternalException {
 		super.preparePersist(modId, manager);
-		fixup();
+		this.fixup();
 		logger.debug("PreparePersist of NotificationRequest " + this.name + " for " + this.crudFlags + " of "
 				+ this.what);
 	}
@@ -321,16 +325,12 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 		this.destType = destType;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public void setNotificationNameWanted(boolean notificationNameWanted) {
-		this.notificationNameWanted = notificationNameWanted;
-	}
-
 	public void setEntityNameWanted(boolean entityNameWanted) {
 		this.entityNameWanted = entityNameWanted;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public void setJmsOptions(String jmsOptions) {
@@ -347,6 +347,10 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 
 	public void setNameWanted(boolean nameWanted) {
 		this.entityNameWanted = nameWanted;
+	}
+
+	public void setNotificationNameWanted(boolean notificationNameWanted) {
+		this.notificationNameWanted = notificationNameWanted;
 	}
 
 	public void setR(boolean r) {

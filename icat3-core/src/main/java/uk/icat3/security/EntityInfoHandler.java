@@ -145,6 +145,15 @@ public class EntityInfoHandler {
 				iter.remove();
 				logger.debug("Ignore injected field " + f);
 			}
+			int modifier =  f.getModifiers();
+			if (Modifier.isStatic(modifier)) {
+				iter.remove();
+				logger.debug("Ignore static field " + f);
+			}
+			if (Modifier.isTransient(modifier)) {
+				iter.remove();
+				logger.debug("Ignore transient field " + f);
+			}
 		}
 
 		this.keyType = null;
@@ -213,79 +222,76 @@ public class EntityInfoHandler {
 		final Map<Field, Integer> stringFields = new HashMap<Field, Integer>();
 		for (final Field field : fields) {
 
-			if (field.getDeclaredAnnotations().length != 0) {
+			Boolean nullable = null;
+			int length = 255;
+			boolean settable = true;
 
-				Boolean nullable = null;
-				int length = 255;
-				boolean settable = true;
+			for (final Annotation note : field.getDeclaredAnnotations()) {
+				final Class<? extends Annotation> aType = note.annotationType();
 
-				for (final Annotation note : field.getDeclaredAnnotations()) {
-					final Class<? extends Annotation> aType = note.annotationType();
-
-					if (aType.equals(GeneratedValue.class)) {
-						nullable = true;
-					} else if (aType.equals(Column.class)) {
-						final Column column = (Column) note;
-						if (nullable == null) {
-							nullable = column.nullable();
-						}
-						length = column.length();
-
-					} else if (aType.equals(JoinColumn.class)) {
-						final JoinColumn column = (JoinColumn) note;
-						if (nullable == null) {
-							nullable = column.nullable();
-						}
-					} else if (aType.equals(EmbeddedId.class)) {
-						nullable = true;
-						settable = false;
-					} else if (aType.equals(XmlTransient.class)) {
-						settable = false;
-					} else if (aType.equals(Id.class)) {
-						settable = false;
+				if (aType.equals(GeneratedValue.class)) {
+					nullable = true;
+				} else if (aType.equals(Column.class)) {
+					final Column column = (Column) note;
+					if (nullable == null) {
+						nullable = column.nullable();
 					}
-					if (field.getGenericType() instanceof ParameterizedType) {
-						settable = false;
+					length = column.length();
+
+				} else if (aType.equals(JoinColumn.class)) {
+					final JoinColumn column = (JoinColumn) note;
+					if (nullable == null) {
+						nullable = column.nullable();
 					}
+				} else if (aType.equals(EmbeddedId.class)) {
+					nullable = true;
+					settable = false;
+				} else if (aType.equals(XmlTransient.class)) {
+					settable = false;
+				} else if (aType.equals(Id.class)) {
+					settable = false;
 				}
-
-				if (nullable != null && !nullable) {
-					notNullableFields.add(field);
+				if (field.getGenericType() instanceof ParameterizedType) {
+					settable = false;
 				}
-
-				final String name = field.getName();
-				final String prop = Character.toUpperCase(name.charAt(0)) + name.substring(1);
-				final Class<?>[] types = new Class[] {};
-				Method method;
-				try {
-					method = objectClass.getMethod("get" + prop, types);
-				} catch (final NoSuchMethodException e) {
-					try {
-						method = objectClass.getMethod("is" + prop, types);
-					} catch (final Exception e1) {
-						throw new IcatInternalException("" + e);
-					}
-				}
-				getters.put(field, method);
-
-				if (settable) {
-					for (final Method m : objectClass.getDeclaredMethods()) {
-						if (m.getName().equals("set" + prop)) {
-							if (setters.put(field, m) != null) {
-								throw new IcatInternalException("set" + prop + " is ambiguous");
-							}
-						}
-					}
-					if (setters.get(field) == null) {
-						throw new IcatInternalException("set" + prop + " not found for " + objectClass.getSimpleName());
-					}
-				}
-
-				if (getters.get(field).getReturnType().equals(String.class)) {
-					stringFields.put(field, length);
-				}
-
 			}
+
+			if (nullable != null && !nullable) {
+				notNullableFields.add(field);
+			}
+
+			final String name = field.getName();
+			final String prop = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+			final Class<?>[] types = new Class[] {};
+			Method method;
+			try {
+				method = objectClass.getMethod("get" + prop, types);
+			} catch (final NoSuchMethodException e) {
+				try {
+					method = objectClass.getMethod("is" + prop, types);
+				} catch (final Exception e1) {
+					throw new IcatInternalException("" + e);
+				}
+			}
+			getters.put(field, method);
+
+			if (settable) {
+				for (final Method m : objectClass.getDeclaredMethods()) {
+					if (m.getName().equals("set" + prop)) {
+						if (setters.put(field, m) != null) {
+							throw new IcatInternalException("set" + prop + " is ambiguous");
+						}
+					}
+				}
+				if (setters.get(field) == null) {
+					throw new IcatInternalException("set" + prop + " not found for " + objectClass.getSimpleName());
+				}
+			}
+
+			if (getters.get(field).getReturnType().equals(String.class)) {
+				stringFields.put(field, length);
+			}
+
 		}
 
 		if (logger.isDebugEnabled()) {

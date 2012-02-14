@@ -19,7 +19,8 @@ import uk.icat3.security.EntityInfoHandler;
 
 public class Restriction {
 
-	// Restriction ::= ( "[" SearchCondition "]" )? ( ("<->")? name "[" SearchCondition "]" )*
+	// Restriction ::= ( "[" SearchCondition "]" )? ( ("<->")? name "["
+	// SearchCondition "]" )*
 
 	public class TableAndSearchCondition {
 
@@ -167,6 +168,10 @@ public class Restriction {
 			}
 		}
 		return sb.toString();
+	}
+
+	public boolean isRestricted() {
+		return searchCondition != null || !tableAndSearchConditions.isEmpty();
 	}
 
 }

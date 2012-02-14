@@ -16,8 +16,8 @@ import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.NotificationRequest;
 import uk.icat3.entity.NotificationRequest.DestType;
 import uk.icat3.exceptions.IcatInternalException;
+import uk.icat3.security.AccessType;
 import uk.icat3.security.EntityInfoHandler;
-import uk.icat3.util.AccessType;
 
 public class NotificationMessages {
 
@@ -73,8 +73,8 @@ public class NotificationMessages {
 
 	private final List<Message> messages = new ArrayList<Message>();
 
-	public NotificationMessages(String userId, EntityBaseBean bean, AccessType accessType, EntityManager manager)
-			throws IcatInternalException {
+	public NotificationMessages(String userId, EntityBaseBean bean, uk.icat3.security.AccessType accessType,
+			EntityManager manager) throws IcatInternalException {
 		String qName = null;
 		if (accessType == AccessType.CREATE) {
 			qName = NotificationRequest.CREATE_QUERY;

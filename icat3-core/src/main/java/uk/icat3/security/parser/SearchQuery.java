@@ -140,7 +140,7 @@ public class SearchQuery {
 
 		String beanName = bean.getSimpleName();
 		TypedQuery<Rule> query = manager.createNamedQuery(Rule.SEARCH_QUERY, Rule.class).setParameter("member", userId)
-				.setParameter("what", beanName);
+				.setParameter("bean", beanName);
 
 		List<Rule> rules = query.getResultList();
 		SearchQuery.logger
@@ -149,10 +149,10 @@ public class SearchQuery {
 		boolean first = true;
 		for (Rule r : rules) {
 			String rBeans = r.getBeans();
-			SearchQuery.logger.debug("Restriction: " + r.getRestriction());
+			SearchQuery.logger.debug("Restriction: " + r.isRestricted());
 			SearchQuery.logger.debug("JPQL: " + r.getSearchJPQL());
 			SearchQuery.logger.debug("Related beans: " + rBeans);
-			if (r.getRestriction() == null) {
+			if (!r.isRestricted()) {
 				SearchQuery.logger.info("Null restriction => Operation permitted");
 				restriction = null;
 				break;

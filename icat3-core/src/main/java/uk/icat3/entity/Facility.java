@@ -1,104 +1,107 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.OneToMany;
+import javax.xml.bind.Marshaller;
+
+import org.apache.log4j.Logger;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "THIS_ICAT")
 public class Facility extends EntityBaseBean implements Serializable {
 
-    @Id
-    @Column(name = "FACILITY_SHORT_NAME", nullable = false)
-    private String facilityShortName;
+	private static Logger logger = Logger.getLogger(Facility.class);
 
-    @Column(name = "FACILITY_LONG_NAME")
-    private String facilityLongName;
+	public String getName() {
+		return name;
+	}
 
-    @Column(name = "FACILITY_URL")
-    private String facilityUrl;
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    @Column(name = "FACILITY_DESCRIPTION")
-    private String facilityDescription;
-   
-    @Column(name = "DAYS_UNTIL_PUBLIC_RELEASE", nullable = false)
-    private Long daysUntilRelease;
-    
-    public Facility() {
-    }
- 
-    public String getFacilityShortName() {
-        return facilityShortName;
-    }
+	public List<Investigation> getInvestigations() {
+		return investigations;
+	}
 
-    public void setFacilityShortName(String facilityShortName) {
-        this.facilityShortName = facilityShortName;
-    }
+	public void setInvestigations(List<Investigation> investigations) {
+		this.investigations = investigations;
+	}
 
-    public String getFacilityLongName() {
-        return facilityLongName;
-    }
+	public String getFullName() {
+		return fullName;
+	}
 
-    public void setFacilityLongName(String facilityLongName) {
-        this.facilityLongName = facilityLongName;
-    }
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
 
-    public String getFacilityUrl() {
-        return facilityUrl;
-    }
+	public String getUrl() {
+		return url;
+	}
 
-    public void setFacilityUrl(String facilityUrl) {
-        this.facilityUrl = facilityUrl;
-    }
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
-    public String getFacilityDescription() {
-        return facilityDescription;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void setFacilityDescription(String facilityDescription) {
-        this.facilityDescription = facilityDescription;
-    }
-    
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (facilityShortName != null ? facilityShortName.hashCode() : 0);
-        return hash;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Facility)) {
-            return false;
-        }
-        Facility other = (Facility) object;
-        if (this.facilityShortName != other.facilityShortName && (this.facilityShortName == null || !this.facilityShortName.equals(other.facilityShortName))) {
-            return false;
-        }
-        return true;
-    }
+	public Integer getDaysUntilRelease() {
+		return daysUntilRelease;
+	}
 
-    @Override
-    public String toString() {
-        return "Facility[facilityShortName=" + facilityShortName + "]";
-    }
+	public void setDaysUntilRelease(Integer daysUntilRelease) {
+		this.daysUntilRelease = daysUntilRelease;
+	}
 
-    public Long getDaysUntilRelease() {
-        return daysUntilRelease;
-    }
+	@Id
+	private String name;
 
-    public void setDaysUntilRelease(Long daysUntilRelease) {
-        this.daysUntilRelease = daysUntilRelease;
-    }
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
+	private List<Investigation> investigations = new ArrayList<Investigation>();
+
+	private String fullName;
+
+	private String url;
+
+	private String description;
+
+	@Column(nullable = false)
+	private Integer daysUntilRelease;
+
+	/* Needed for JPA */
+	public Facility() {
+	}
+
+	@Override
+	public String toString() {
+		return "Facility[name=" + name + "]";
+	}
 
 	@Override
 	public Object getPK() {
-		return facilityShortName;
+		return name;
+	}
+
+	public void beforeMarshal(Marshaller source) {
+		logger.trace("Marshalling Investigation for " + includes);
+		if (!this.includes.contains(Investigation.class)) {
+			this.investigations = null;
+		}
+
 	}
 
 }

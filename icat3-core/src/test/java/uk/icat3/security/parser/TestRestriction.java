@@ -35,25 +35,25 @@ public class TestRestriction {
 	@Test
 	public void testGood1() throws Exception {
 		List<Token> tokens = Tokenizer
-				.getTokens("[id = 20] <-> Investigation <-> Investigator <-> FacilityUser[facilityUserId = :user]");
-		String sw = "(Dataset$.id = 20) AND (FacilityUser$.facilityUserId = :user)";
-		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$ LEFT JOIN Investigation$.investigatorCollection AS Investigator$ LEFT JOIN Investigator$.facilityUser AS FacilityUser$  WHERE (Dataset$.id = :pkid) AND ";
-		testGood(tokens, q, sw, Arrays.asList("Investigation", "Investigator", "FacilityUser"), "Dataset");
+				.getTokens("[id = 20] <-> Investigation <-> Investigator <-> User[name = :user]");
+		String sw = "(Dataset$.id = 20) AND (User$.name = :user)";
+		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$ LEFT JOIN Investigation$.investigators AS Investigator$ LEFT JOIN Investigator$.user AS User$  WHERE (Dataset$.id = :pkid) AND ";
+		testGood(tokens, q, sw, Arrays.asList("Investigation", "Investigator", "User"), "Dataset");
 	}
 
 	@Test
 	public void testGood2() throws Exception {
-		List<Token> tokens = Tokenizer.getTokens("Investigation Investigator [facilityUser.facilityUserId = :user]");
-		String sw = "(Investigator$.facilityUser.facilityUserId = :user)";
-		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$ LEFT JOIN Investigation$.investigatorCollection AS Investigator$  WHERE (Dataset$.id = :pkid) AND ";
+		List<Token> tokens = Tokenizer.getTokens("Investigation Investigator [user.userId = :user]");
+		String sw = "(Investigator$.user.userId = :user)";
+		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$ LEFT JOIN Investigation$.investigators AS Investigator$  WHERE (Dataset$.id = :pkid) AND ";
 		testGood(tokens, q, sw, Arrays.asList("Investigation", "Investigator"), "Dataset");
 	}
 
 	@Test
 	public void testGood3() throws Exception {
-		List<Token> tokens = Tokenizer.getTokens("Dataset Investigation [invNumber = 'A']");
-		String sw = "(Investigation$.invNumber = 'A')";
-		String q = "SELECT COUNT(DatasetParameter$) FROM DatasetParameter AS DatasetParameter$ LEFT JOIN DatasetParameter$.dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$  WHERE (DatasetParameter$.datasetParameterPK.datasetId = :pkid0 AND DatasetParameter$.datasetParameterPK.name = :pkid1 AND DatasetParameter$.datasetParameterPK.units = :pkid2) AND ";
+		List<Token> tokens = Tokenizer.getTokens("Dataset Investigation [name = 'A']");
+		String sw = "(Investigation$.name = 'A')";
+		String q = "SELECT COUNT(DatasetParameter$) FROM DatasetParameter AS DatasetParameter$ LEFT JOIN DatasetParameter$.dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$  WHERE (DatasetParameter$.id = :pkid) AND ";
 		Input input = new Input(tokens);
 		Restriction e = new Restriction(input);
 		assertNull(input.peek(0));
