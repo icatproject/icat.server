@@ -32,7 +32,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="description" type="{}str4000" minOccurs="0"/>
  *         &lt;element name="sample" type="{}Sample" minOccurs="0"/>
  *         &lt;element name="datafile" type="{}Datafile" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="parameter" type="{}Parameter" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="parameter" type="{}ParameterType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -231,7 +231,7 @@ public class Dataset {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Parameter }
+     * {@link ParameterType }
      * 
      * 
      */

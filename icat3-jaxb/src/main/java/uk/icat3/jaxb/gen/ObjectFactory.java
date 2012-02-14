@@ -65,7 +65,7 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Parameter }
+     * Create an instance of {@link ParameterType }
      * 
      */
     public Parameter createParameter() {

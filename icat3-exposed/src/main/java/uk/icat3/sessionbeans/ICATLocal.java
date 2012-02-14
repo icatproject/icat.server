@@ -15,7 +15,7 @@
 //import uk.icat3.entity.InvestigatorPK;
 //import uk.icat3.entity.Keyword;
 //import uk.icat3.entity.KeywordPK;
-//import uk.icat3.entity.Parameter;
+//import uk.icat3.entity.ParameterType;
 //import uk.icat3.entity.Publication;
 //import uk.icat3.entity.Sample;
 //import uk.icat3.entity.SampleParameter;
@@ -182,7 +182,7 @@
 //
 //	Collection<String> listInvestigationTypes(String sessionId) throws SessionException;
 //
-//	Collection<Parameter> listParameters(String sessionId) throws SessionException;
+//	Collection<ParameterType> listParameters(String sessionId) throws SessionException;
 //
 //	String login(String username, String password) throws SessionException;
 //

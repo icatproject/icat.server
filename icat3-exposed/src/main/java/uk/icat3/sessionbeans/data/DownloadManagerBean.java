@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 
 import uk.icat3.data.DownloadInfo;
 import uk.icat3.data.DownloadManager;
+import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.NoSuchUserException;
@@ -44,8 +45,9 @@ public class DownloadManagerBean extends EJBObject implements DownloadManagerLoc
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object     
      * @return URL that will be used to download the data file
+     * @throws IcatInternalException 
      */
-    public String downloadDatafile(String sessionId, Long datafileId) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException {
+    public String downloadDatafile(String sessionId, Long datafileId) throws SessionException, NoSuchObjectFoundException, NoSuchUserException, InsufficientPrivilegesException, IcatInternalException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
@@ -62,8 +64,9 @@ public class DownloadManagerBean extends EJBObject implements DownloadManagerLoc
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object     
      * @return URL that will be used to download the collection of data files
+     * @throws IcatInternalException 
      */
-    public String downloadDatafiles(String sessionId, Collection<Long> datafileIds) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+    public String downloadDatafiles(String sessionId, Collection<Long> datafileIds) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException, IcatInternalException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
@@ -80,8 +83,9 @@ public class DownloadManagerBean extends EJBObject implements DownloadManagerLoc
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object     
      * @return URL that will be used to download the dataset
+     * @throws IcatInternalException 
      */
-    public String downloadDataset(String sessionId, Long datasetId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+    public String downloadDataset(String sessionId, Long datasetId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException, IcatInternalException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
@@ -99,8 +103,9 @@ public class DownloadManagerBean extends EJBObject implements DownloadManagerLoc
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object             
      * @return DownloadInfo download info
+     * @throws IcatInternalException 
      */
-    public DownloadInfo checkDatafileDownloadAccess(String sessionId, Collection<Long> datafileIds) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+    public DownloadInfo checkDatafileDownloadAccess(String sessionId, Collection<Long> datafileIds) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException, IcatInternalException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 
@@ -121,8 +126,9 @@ public class DownloadManagerBean extends EJBObject implements DownloadManagerLoc
      * @throws uk.icat3.exceptions.NoSuchObjectFoundException if entity does not exist in database
      * @throws uk.icat3.exceptions.InsufficientPrivilegesException if user has insufficient privileges to the object             
      * @return DownloadInfo download info
+     * @throws IcatInternalException 
      */
-    public DownloadInfo checkDatasetDownloadAccess(String sessionId, Long datasetId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException {
+    public DownloadInfo checkDatasetDownloadAccess(String sessionId, Long datasetId) throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException, IcatInternalException {
         //for user bean get userId
         String userId = user.getUserIdFromSessionId(sessionId);
 

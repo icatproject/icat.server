@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>co.uk.icat3</groupId>
 		<artifactId>icat3</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>4.1.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>icat3-ear</artifactId>
@@ -22,28 +22,24 @@
 		<dependency>
 			<groupId>co.uk.icat3</groupId>
 			<artifactId>icat3-exposed</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 			<type>ejb</type>
 		</dependency>
 
 		<dependency>
 			<groupId>co.uk.icat3</groupId>
 			<artifactId>icat3-user-ansto</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 			<type>jar</type>
 		</dependency>
 
 		<dependency>
 			<groupId>co.uk.icat3</groupId>
 			<artifactId>icat3-user-ldap</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 			<type>jar</type>
 		</dependency>
 
 		<dependency>
 			<groupId>co.uk.icat3</groupId>
 			<artifactId>icat3-logging</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 			<type>ejb</type>
 		</dependency>
 	</dependencies>

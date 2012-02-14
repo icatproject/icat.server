@@ -9,14 +9,13 @@ import uk.icat3.client.Application;
 import uk.icat3.client.BadParameterException_Exception;
 import uk.icat3.client.Datafile;
 import uk.icat3.client.DatafileFormat;
-import uk.icat3.client.DatafileFormatPK;
 import uk.icat3.client.Dataset;
 import uk.icat3.client.DatasetParameter;
-import uk.icat3.client.DatasetParameterPK;
 import uk.icat3.client.DatasetType;
 import uk.icat3.client.DestType;
 import uk.icat3.client.EntityBaseBean;
 import uk.icat3.client.Facility;
+import uk.icat3.client.Group;
 import uk.icat3.client.ICAT;
 import uk.icat3.client.ICATService;
 import uk.icat3.client.IcatInternalException_Exception;
@@ -31,15 +30,17 @@ import uk.icat3.client.NotificationRequest;
 import uk.icat3.client.ObjectAlreadyExistsException_Exception;
 import uk.icat3.client.OutputDatafile;
 import uk.icat3.client.OutputDataset;
-import uk.icat3.client.Parameter;
-import uk.icat3.client.ParameterPK;
+import uk.icat3.client.ParameterType;
 import uk.icat3.client.ParameterValueType;
+import uk.icat3.client.Rule;
 import uk.icat3.client.SessionException_Exception;
+import uk.icat3.client.User;
+import uk.icat3.client.UserGroup;
 import uk.icat3.client.ValidationException_Exception;
 
 class Session {
-	public enum ParameterType {
-		DATASET, DATAFILE, SAMPLE
+	public enum ParameterApplicability {
+		DATASET, DATAFILE, SAMPLE, INVESTIGATION
 	};
 
 	private final ICAT icatEP;
@@ -89,14 +90,41 @@ class Session {
 		this.icatEP.create(this.sessionId, ods);
 	}
 
-	public void addRule(String groupName, String what, String crud, String restriction)
-			throws BadParameterException_Exception, IcatInternalException_Exception, SessionException_Exception {
-		this.icatEP.addRule(this.sessionId, groupName, what, crud, restriction);
+	public void addRule(String groupName, String what, String crudFlags) throws Exception {
+		Rule rule = new Rule();
+		if (groupName != null) {
+			Group g = (Group) this.icatEP.get(this.sessionId, "Group", groupName);
+			rule.setGroup(g);
+		}
+		rule.setWhat(what);
+		rule.setCrudFlags(crudFlags);
+		this.icatEP.create(this.sessionId, rule);
 	}
 
-	public void addUserGroupMember(String group, String member) throws ObjectAlreadyExistsException_Exception,
-			SessionException_Exception {
-		this.icatEP.addUserGroupMember(this.sessionId, group, member);
+	public void addUserGroupMember(String groupName, String userName) throws Exception {
+		Group group = null;
+		if (groupName != null) {
+			try {
+				group = (Group) this.icatEP.get(this.sessionId, "Group", groupName);
+
+			} catch (NoSuchObjectFoundException_Exception e) {
+				group = new Group();
+				group.setName(groupName);
+				this.icatEP.create(sessionId, group);
+			}
+		}
+		User user = null;
+		try {
+			user = (User) this.icatEP.get(this.sessionId, "User", userName);
+		} catch (NoSuchObjectFoundException_Exception e) {
+			user = new User();
+			user.setName(userName);
+			this.icatEP.create(sessionId, user);
+		}
+		UserGroup userGroup = new UserGroup();
+		userGroup.setUser(user);
+		userGroup.setGroup(group);
+		this.icatEP.create(sessionId, userGroup);
 	}
 
 	public void clear() throws Exception {
@@ -130,10 +158,10 @@ class Session {
 			System.out.println("Deleting " + o);
 			this.delete((InvestigationType) o);
 		}
-		lo = this.search("Parameter");
+		lo = this.search("ParameterType");
 		for (final Object o : lo) {
 			System.out.println("Deleting " + o);
-			this.delete((Parameter) o);
+			this.delete((ParameterType) o);
 		}
 		lo = this.search("Facility");
 		for (final Object o : lo) {
@@ -144,6 +172,30 @@ class Session {
 		for (final Object o : lo) {
 			System.out.println("Deleting " + o);
 			this.delete((NotificationRequest) o);
+		}
+	}
+
+	public void clearAuthz() throws Exception {
+
+		List<Object> lo1 = this.search("Rule");
+		List<Object> lo2 = this.search("UserGroup");
+		List<Object> lo3 = this.search("User");
+		List<Object> lo4 = this.search("Group");
+		for (final Object o : lo1) {
+			System.out.println("Deleting " + o);
+			this.delete((Rule) o);
+		}
+		for (final Object o : lo2) {
+			System.out.println("Deleting " + o);
+			this.delete((UserGroup) o);
+		}
+		for (final Object o : lo3) {
+			System.out.println("Deleting " + o);
+			this.delete((User) o);
+		}
+		for (final Object o : lo4) {
+			System.out.println("Deleting " + o);
+			this.delete((Group) o);
 		}
 	}
 
@@ -164,81 +216,78 @@ class Session {
 		final Datafile datafile = new Datafile();
 		datafile.setDatafileFormat(format);
 		datafile.setName(name);
-		datafile.setDatasetId(ds.getId());
+		datafile.setDataset(ds);
 		datafile.setId((Long) this.icatEP.create(this.sessionId, datafile));
 		return datafile;
 	}
 
 	public DatafileFormat createDatafileFormat(String name, String formatType) throws Exception {
-		final DatafileFormatPK dffpk = new DatafileFormatPK();
-		dffpk.setName(name);
-		dffpk.setVersion("1");
 		final DatafileFormat dff = new DatafileFormat();
-		dff.setDatafileFormatPK(dffpk);
+		dff.setName(name);
+		dff.setVersion("1");
 		dff.setFormatType(formatType);
-		this.icatEP.create(this.sessionId, dff);
+		dff.setId((Long) this.icatEP.create(this.sessionId, dff));
 		return dff;
 	}
 
-	public Dataset createDataset(String name, String type, Investigation inv) throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
-			ObjectAlreadyExistsException_Exception, SessionException_Exception, ValidationException_Exception {
+	public Dataset createDataset(String name, DatasetType type, Investigation inv)
+			throws IcatInternalException_Exception, InsufficientPrivilegesException_Exception,
+			NoSuchObjectFoundException_Exception, ObjectAlreadyExistsException_Exception, SessionException_Exception,
+			ValidationException_Exception {
 		final Dataset dataset = new Dataset();
 		dataset.setName(name);
-		dataset.setDatasetType(type);
-		dataset.setInvestigationId(inv.getId());
+		dataset.setType(type);
+		dataset.setInvestigation(inv);
 		dataset.setId((Long) this.icatEP.create(this.sessionId, dataset));
 		return dataset;
 	}
 
-	public DatasetParameter createDatasetParameter(Object value, Parameter p, Dataset ds)
+	public DatasetParameter createDatasetParameter(Object value, ParameterType p, Dataset ds)
 			throws IcatInternalException_Exception, InsufficientPrivilegesException_Exception,
 			NoSuchObjectFoundException_Exception, ObjectAlreadyExistsException_Exception, SessionException_Exception,
 			ValidationException_Exception {
-		final ParameterPK pk = p.getParameterPK();
-		final DatasetParameterPK dPK = new DatasetParameterPK();
-		dPK.setName(pk.getName());
-		dPK.setUnits(pk.getUnits());
-		dPK.setDatasetId(ds.getId());
 
 		final DatasetParameter dsp = new DatasetParameter();
-		dsp.setDatasetParameterPK(dPK);
 		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
 			dsp.setDateTimeValue((XMLGregorianCalendar) value);
 		}
-		dsp.setParameter(p);
+		dsp.setParameterType(p);
+		dsp.setDataset(ds);
 		this.icatEP.create(this.sessionId, dsp);
 		return dsp;
 	}
 
-	public void createDatasetType(String name) throws Exception {
+	public DatasetType createDatasetType(String name) throws Exception {
 		final DatasetType dst = new DatasetType();
 		dst.setName(name);
 		this.icatEP.create(this.sessionId, dst);
+		return dst;
 	}
 
-	public void createFacility(String shortName, long daysUntilRelease) throws Exception {
+	public Facility createFacility(String shortName, int daysUntilRelease) throws Exception {
 		final Facility f = new Facility();
-		f.setFacilityShortName(shortName);
+		f.setName(shortName);
 		f.setDaysUntilRelease(daysUntilRelease);
 		this.icatEP.create(this.sessionId, f);
+		return f;
 	}
 
-	public Investigation createInvestigation(String facility, String invNumber, String title, String invType)
-			throws Exception {
+	public Investigation createInvestigation(Facility facility, String invNumber, String title,
+			InvestigationType invType) throws Exception {
 		final Investigation i = new Investigation();
 		i.setFacility(facility);
-		i.setInvNumber(invNumber);
+		i.setName(invNumber);
 		i.setTitle(title);
-		i.setInvType(invType);
+		i.setType(invType);
 		i.setId((Long) this.icatEP.create(this.sessionId, i));
 		return i;
 	}
 
-	public void createInvestigationType(String name) throws Exception {
+	public InvestigationType createInvestigationType(String name) throws Exception {
 		final InvestigationType type = new InvestigationType();
 		type.setName(name);
 		this.icatEP.create(this.sessionId, type);
+		return type;
 	}
 
 	public Job createJob(Application application) throws IcatInternalException_Exception,
@@ -250,27 +299,26 @@ class Session {
 		return job;
 	}
 
-	public Parameter createParameterPK(String name, String units, String description, ParameterType pt,
+	public ParameterType createParameterType(String name, String units, String description, ParameterApplicability pt,
 			ParameterValueType pvt) throws IcatInternalException_Exception, InsufficientPrivilegesException_Exception,
 			NoSuchObjectFoundException_Exception, ObjectAlreadyExistsException_Exception, SessionException_Exception,
 			ValidationException_Exception {
 
-		final ParameterPK ppk = new ParameterPK();
-		ppk.setName(name);
-		ppk.setUnits(units);
-		final Parameter p = new Parameter();
-
-		p.setParameterPK(ppk);
+		final ParameterType p = new ParameterType();
+		p.setName(name);
+		p.setUnits(units);
 		p.setDescription(description);
-		if (pt == ParameterType.DATASET) {
-			p.setDatasetParameter(true);
-		} else if (pt == ParameterType.DATAFILE) {
-			p.setDatafileParameter(true);
-		} else if (pt == ParameterType.SAMPLE) {
-			p.setSampleParameter(true);
+		if (pt == ParameterApplicability.DATASET) {
+			p.setApplicableToDataset(true);
+		} else if (pt == ParameterApplicability.DATAFILE) {
+			p.setApplicableToDatafile(true);
+		} else if (pt == ParameterApplicability.SAMPLE) {
+			p.setApplicableToSample(true);
+		} else if (pt == ParameterApplicability.INVESTIGATION) {
+			p.setApplicableToInvestigation(true);
 		}
 		p.setValueType(ParameterValueType.DATE_AND_TIME);
-		this.icatEP.create(this.sessionId, p);
+		p.setId((Long) this.icatEP.create(this.sessionId, p));
 		return p;
 	}
 
@@ -293,26 +341,30 @@ class Session {
 
 	public void setAuthz() throws Exception {
 		this.addUserGroupMember("root", "root");
-		this.addRule("root", "DatafileFormat", "CRUD", null);
-		this.addRule("root", "DatasetType", "CRUD", null);
-		this.addRule("root", "Facility", "CRUD", null);
-		this.addRule("root", "Investigation", "CRUD", null);
-		this.addRule("root", "InvestigationType", "CRUD", null);
-		this.addRule("root", "Parameter", "CRUD", null);
-		this.addRule("root", "Investigation", "CRUD", null);
-		this.addRule("root", "Dataset", "CRUD", null);
-		this.addRule("root", "Parameter", "CRUD", null);
-		this.addRule("root", "DatasetParameter", "CRUD", null);
-		this.addRule("root", "Datafile", "CRUD", null);
-		this.addRule("root", "DatafileFormat", "CRUD", null);
-		this.addRule("root", "DatasetType", "CRUD", null);
-		this.addRule("root", "Application", "CRUD", null);
-		this.addRule("root", "Job", "CRUD", null);
-		this.addRule("root", "InputDataset", "CRUD", null);
-		this.addRule("root", "OutputDataset", "CRUD", null);
-		this.addRule("root", "InputDatafile", "CRUD", null);
-		this.addRule("root", "OutputDatafile", "CRUD", null);
-		this.addRule("root", "NotificationRequest", "CRUD", null);
+		this.addRule("root", "Rule", "CRUD");
+		this.addRule("root", "User", "CRUD");
+		this.addRule("root", "Group", "CRUD");
+		this.addRule("root", "UserGroup", "CRUD");
+		this.addRule("root", "DatafileFormat", "CRUD");
+		this.addRule("root", "DatasetType", "CRUD");
+		this.addRule("root", "Facility", "CRUD");
+		this.addRule("root", "Investigation", "CRUD");
+		this.addRule("root", "InvestigationType", "CRUD");
+		this.addRule("root", "ParameterType", "CRUD");
+		this.addRule("root", "Investigation", "CRUD");
+		this.addRule("root", "Dataset", "CRUD");
+		this.addRule("root", "ParameterType", "CRUD");
+		this.addRule("root", "DatasetParameter", "CRUD");
+		this.addRule("root", "Datafile", "CRUD");
+		this.addRule("root", "DatafileFormat", "CRUD");
+		this.addRule("root", "DatasetType", "CRUD");
+		this.addRule("root", "Application", "CRUD");
+		this.addRule("root", "Job", "CRUD");
+		this.addRule("root", "InputDataset", "CRUD");
+		this.addRule("root", "OutputDataset", "CRUD");
+		this.addRule("root", "InputDatafile", "CRUD");
+		this.addRule("root", "OutputDatafile", "CRUD");
+		this.addRule("root", "NotificationRequest", "CRUD");
 	}
 
 	public void update(EntityBaseBean df) throws IcatInternalException_Exception,
@@ -321,10 +373,10 @@ class Session {
 		this.icatEP.update(this.sessionId, df);
 	}
 
-	public NotificationRequest createNotificationRequest(String name, DestType destType, String what, String crudFlags, String jmsOptions, String dataTypes)
-			throws IcatInternalException_Exception, InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception, ObjectAlreadyExistsException_Exception, SessionException_Exception,
-			ValidationException_Exception {
+	public NotificationRequest createNotificationRequest(String name, DestType destType, String what, String crudFlags,
+			String jmsOptions, String dataTypes) throws IcatInternalException_Exception,
+			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
+			ObjectAlreadyExistsException_Exception, SessionException_Exception, ValidationException_Exception {
 		NotificationRequest notificationRequest = new NotificationRequest();
 		notificationRequest.setName(name);
 		notificationRequest.setDestType(destType);
@@ -334,6 +386,38 @@ class Session {
 		notificationRequest.setDatatypes(dataTypes);
 		icatEP.create(this.sessionId, notificationRequest);
 		return notificationRequest;
+	}
+
+	public Dataset addDataset(Investigation inv, String name, DatasetType type) {
+		Dataset dataset = new Dataset();
+		dataset.setName(name);
+		dataset.setType(type);
+		inv.getDatasets().add(dataset);
+		return dataset;
+	}
+
+	public Datafile addDatafile(Dataset dataset, String name, DatafileFormat format) {
+		Datafile datafile = new Datafile();
+		datafile.setDatafileFormat(format);
+		datafile.setName(name);
+		dataset.getDatafiles().add(datafile);
+		return datafile;
+	}
+
+	public DatasetParameter addDatasetParameter(Dataset dataset, Object o, ParameterType p) {
+		DatasetParameter dsp = new DatasetParameter();
+		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
+			dsp.setDateTimeValue((XMLGregorianCalendar) o);
+		}
+		dsp.setParameterType(p);
+		dataset.getDatasetParameters().add(dsp);
+		return dsp;
+	}
+
+	public void registerInvestigation(Investigation inv) throws IcatInternalException_Exception,
+			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
+			ObjectAlreadyExistsException_Exception, SessionException_Exception, ValidationException_Exception {
+		inv.setId((Long) this.icatEP.create(this.sessionId, inv));
 	}
 
 }

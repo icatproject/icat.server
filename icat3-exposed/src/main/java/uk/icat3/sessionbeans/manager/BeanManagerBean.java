@@ -32,7 +32,6 @@ import uk.icat3.manager.BeanManager;
 import uk.icat3.manager.CreateResponse;
 import uk.icat3.manager.GetResponse;
 import uk.icat3.manager.NotificationMessages;
-import uk.icat3.manager.SearchManager;
 import uk.icat3.manager.SearchResponse;
 import uk.icat3.sessionbeans.EJBObject;
 
@@ -40,7 +39,7 @@ import uk.icat3.sessionbeans.EJBObject;
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 
-	static Logger logger = Logger.getLogger(DatasetManagerBean.class);
+	static Logger logger = Logger.getLogger(BeanManagerBean.class);
 
 	public BeanManagerBean() {
 	}
@@ -218,7 +217,7 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 			BadParameterException, InsufficientPrivilegesException {
 		try {
 			String userId = user.getUserIdFromSessionId(sessionId);
-			SearchResponse searchResponse = SearchManager.search(userId, query, manager);
+			SearchResponse searchResponse = BeanManager.search(userId, query, manager);
 			Transmitter.processMessages(searchResponse.getNotificationMessages(), queueConnection, queue,
 					topicConnection, topic);
 			return searchResponse.getList();

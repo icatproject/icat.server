@@ -23,15 +23,15 @@
         <class>uk.icat3.entity.StudyStatus</class>
         <class>uk.icat3.entity.SampleParameter</class>
         <class>uk.icat3.entity.Datafile</class>
-        <class>uk.icat3.entity.Parameter</class>
+        <class>uk.icat3.entity.ParameterType</class>
         <class>uk.icat3.entity.SoftwareVersion</class>       
-        <class>uk.icat3.entity.FacilityUser</class>
+        <class>uk.icat3.entity.User</class>
         <class>uk.icat3.entity.Investigator</class>
         <class>uk.icat3.entity.Study</class>
         <class>uk.icat3.entity.DatafileParameter</class>
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
-        <class>uk.icat3.entity.TopicList</class>
+        <class>uk.icat3.entity.TopicInvestigation</class>
         <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
         <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
@@ -72,15 +72,15 @@
         <class>uk.icat3.entity.StudyStatus</class>
         <class>uk.icat3.entity.SampleParameter</class>
         <class>uk.icat3.entity.Datafile</class>
-        <class>uk.icat3.entity.Parameter</class>
+        <class>uk.icat3.entity.ParameterType</class>
         <class>uk.icat3.entity.SoftwareVersion</class>       
-        <class>uk.icat3.entity.FacilityUser</class>
+        <class>uk.icat3.entity.User</class>
         <class>uk.icat3.entity.Investigator</class>
         <class>uk.icat3.entity.Study</class>
         <class>uk.icat3.entity.DatafileParameter</class>
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
-        <class>uk.icat3.entity.TopicList</class>
+        <class>uk.icat3.entity.TopicInvestigation</class>
         <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
         <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
@@ -121,15 +121,15 @@
         <class>uk.icat3.entity.StudyStatus</class>
         <class>uk.icat3.entity.SampleParameter</class>
         <class>uk.icat3.entity.Datafile</class>
-        <class>uk.icat3.entity.Parameter</class>
+        <class>uk.icat3.entity.ParameterType</class>
         <class>uk.icat3.entity.SoftwareVersion</class>       
-        <class>uk.icat3.entity.FacilityUser</class>
+        <class>uk.icat3.entity.User</class>
         <class>uk.icat3.entity.Investigator</class>
         <class>uk.icat3.entity.Study</class>
         <class>uk.icat3.entity.DatafileParameter</class>
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
-        <class>uk.icat3.entity.TopicList</class>
+        <class>uk.icat3.entity.TopicInvestigation</class>
         <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
         <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
@@ -175,15 +175,15 @@
         <class>uk.icat3.entity.StudyStatus</class>
         <class>uk.icat3.entity.SampleParameter</class>
         <class>uk.icat3.entity.Datafile</class>
-        <class>uk.icat3.entity.Parameter</class>
+        <class>uk.icat3.entity.ParameterType</class>
         <class>uk.icat3.entity.SoftwareVersion</class>       
-        <class>uk.icat3.entity.FacilityUser</class>
+        <class>uk.icat3.entity.User</class>
         <class>uk.icat3.entity.Investigator</class>
         <class>uk.icat3.entity.Study</class>
         <class>uk.icat3.entity.DatafileParameter</class>
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
-        <class>uk.icat3.entity.TopicList</class>
+        <class>uk.icat3.entity.TopicInvestigation</class>
         <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
         <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
@@ -223,15 +223,15 @@
         <class>uk.icat3.entity.StudyStatus</class>
         <class>uk.icat3.entity.SampleParameter</class>
         <class>uk.icat3.entity.Datafile</class>
-        <class>uk.icat3.entity.Parameter</class>
+        <class>uk.icat3.entity.ParameterType</class>
         <class>uk.icat3.entity.SoftwareVersion</class>       
-        <class>uk.icat3.entity.FacilityUser</class>
+        <class>uk.icat3.entity.User</class>
         <class>uk.icat3.entity.Investigator</class>
         <class>uk.icat3.entity.Study</class>
         <class>uk.icat3.entity.DatafileParameter</class>
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
-        <class>uk.icat3.entity.TopicList</class>
+        <class>uk.icat3.entity.TopicInvestigation</class>
         <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
         <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>

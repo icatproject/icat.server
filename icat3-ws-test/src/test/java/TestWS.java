@@ -17,15 +17,18 @@ import uk.icat3.client.Application;
 import uk.icat3.client.Datafile;
 import uk.icat3.client.DatafileFormat;
 import uk.icat3.client.Dataset;
+import uk.icat3.client.DatasetParameter;
+import uk.icat3.client.DatasetType;
 import uk.icat3.client.DestType;
+import uk.icat3.client.Facility;
 import uk.icat3.client.InputDatafile;
 import uk.icat3.client.InputDataset;
 import uk.icat3.client.Investigation;
+import uk.icat3.client.InvestigationType;
 import uk.icat3.client.Job;
-import uk.icat3.client.ObjectAlreadyExistsException_Exception;
 import uk.icat3.client.OutputDatafile;
 import uk.icat3.client.OutputDataset;
-import uk.icat3.client.Parameter;
+import uk.icat3.client.ParameterType;
 import uk.icat3.client.ParameterValueType;
 
 /**
@@ -38,18 +41,18 @@ public class TestWS {
 
 	private static void create() throws Exception {
 
-		session.createFacility("Test Facility", 90L);
+		Facility facility = session.createFacility("Test Facility", 90);
 
-		session.createInvestigationType("TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
 
-		session.createDatasetType("GQ");
+		DatasetType dst = session.createDatasetType("GQ");
 
-		Investigation inv = session.createInvestigation("Test Facility", "A", "Not null", "TestExperiment");
+		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
 
-		Parameter p = session.createParameterPK("TIMESTAMP", "TIMESTAMP", "F is not a wibble",
-				Session.ParameterType.DATASET, ParameterValueType.DATE_AND_TIME);
+		ParameterType p = session.createParameterType("TIMESTAMP", "TIMESTAMP", "F is not a wibble",
+				Session.ParameterApplicability.DATASET, ParameterValueType.DATE_AND_TIME);
 
-		Dataset wibble = session.createDataset("Wibble", "GQ", inv);
+		Dataset wibble = session.createDataset("Wibble", dst, inv);
 
 		DatafileFormat dft1 = session.createDatafileFormat("png", "binary");
 		DatafileFormat dft2 = session.createDatafileFormat("bmp", "binary");
@@ -62,14 +65,14 @@ public class TestWS {
 		XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
 		session.createDatasetParameter(date, p, wibble);
 
-		Dataset wobble = session.createDataset("Wobble", "GQ", inv);
+		Dataset wobble = session.createDataset("Wobble", dst, inv);
 		session.createDatafile("wob1", dft1, wobble);
 
-		Dataset dfsin = session.createDataset("dfsin", "GQ", inv);
+		Dataset dfsin = session.createDataset("dfsin", dst, inv);
 		Datafile fred = session.createDatafile("fred", dft1, dfsin);
 		Datafile bill = session.createDatafile("bill", dft1, dfsin);
 
-		Dataset dfsout = session.createDataset("dfsout", "GQ", inv);
+		Dataset dfsout = session.createDataset("dfsout", dst, inv);
 		Datafile mog = session.createDatafile("mog", dft1, dfsout);
 
 		Application application = session.createApplication("The one", "1.0");
@@ -85,18 +88,18 @@ public class TestWS {
 	public void updates() throws Exception {
 		session.clear();
 
-		session.createFacility("Test Facility", 90L);
+		Facility facility = session.createFacility("Test Facility", 90);
 
-		session.createInvestigationType("TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
 
-		session.createDatasetType("GQ");
+		DatasetType dst = session.createDatasetType("GQ");
 
-		Investigation inv = session.createInvestigation("Test Facility", "A", "Not null", "TestExperiment");
+		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
 
-		Parameter p = session.createParameterPK("TIMESTAMP", "TIMESTAMP", "F is not a wibble",
-				Session.ParameterType.DATASET, ParameterValueType.DATE_AND_TIME);
+		ParameterType p = session.createParameterType("TIMESTAMP", "TIMESTAMP", "F is not a wibble",
+				Session.ParameterApplicability.DATASET, ParameterValueType.DATE_AND_TIME);
 
-		Dataset ds = session.createDataset("Wibble", "GQ", inv);
+		Dataset ds = session.createDataset("Wibble", dst, inv);
 
 		DatafileFormat dfmt = session.createDatafileFormat("png", "binary");
 
@@ -120,7 +123,7 @@ public class TestWS {
 		session.clear();
 		session.createNotificationRequest("A", DestType.P_2_P, "Facility", "C", "ptp",
 				"notificationName userId entityName entityKey callArgs");
-		session.createFacility("Test Facility", 90L);
+		session.createFacility("Test Facility", 90);
 	}
 
 	@Test
@@ -137,29 +140,41 @@ public class TestWS {
 		assertEquals("Count", 1, results.size());
 		Dataset ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
-		assertEquals("No files", 0, ds.getDatafileCollection().size());
-		assertEquals("No params", 0, ds.getDatasetParameterCollection().size());
+		assertEquals("No files", 0, ds.getDatafiles().size());
+		assertEquals("No params", 0, ds.getDatasetParameters().size());
+		assertNull("No inv", ds.getInvestigation());
 
 		results = session.search("Dataset INCLUDE Datafile [id = " + dsid + "]");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
-		assertEquals("Files", 2, ds.getDatafileCollection().size());
-		assertEquals("No params", 0, ds.getDatasetParameterCollection().size());
+		assertEquals("Files", 2, ds.getDatafiles().size());
+		assertEquals("No params", 0, ds.getDatasetParameters().size());
+		assertNull("No inv", ds.getInvestigation());
 
 		results = session.search("Dataset INCLUDE DatasetParameter [id = " + dsid + "]");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
-		assertEquals("No Files", 0, ds.getDatafileCollection().size());
-		assertEquals("Params", 1, ds.getDatasetParameterCollection().size());
+		assertEquals("No Files", 0, ds.getDatafiles().size());
+		assertEquals("Params", 1, ds.getDatasetParameters().size());
+		assertNull("No inv", ds.getInvestigation());
 
 		results = session.search("Dataset INCLUDE Datafile, DatasetParameter [id = " + dsid + "]");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
-		assertEquals("Files", 2, ds.getDatafileCollection().size());
-		assertEquals("Params", 1, ds.getDatasetParameterCollection().size());
+		assertEquals("Files", 2, ds.getDatafiles().size());
+		assertEquals("Params", 1, ds.getDatasetParameters().size());
+		assertNull("No inv", ds.getInvestigation());
+
+		results = session.search("Dataset INCLUDE Datafile, DatasetParameter, Investigation [id = " + dsid + "]");
+		assertEquals("Count", 1, results.size());
+		ds = (Dataset) results.get(0);
+		assertEquals("Value", dsid, ds.getId());
+		assertEquals("Files", 2, ds.getDatafiles().size());
+		assertEquals("Params", 1, ds.getDatasetParameters().size());
+		assertNotNull("Inv", ds.getInvestigation());
 
 		results = session.search("Job");
 		assertEquals("Count", 1, results.size());
@@ -251,19 +266,82 @@ public class TestWS {
 		assertEquals("Datafile", 1, ndfout);
 	}
 
+	@Test
+	public void bigCreate() throws Exception {
+		session.clear();
+
+		Facility facility = session.createFacility("Test Facility", 90);
+
+		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
+
+		DatasetType dst = session.createDatasetType("GQ");
+
+		ParameterType p = session.createParameterType("TIMESTAMP", "TIMESTAMP", "F is not a wibble",
+				Session.ParameterApplicability.DATASET, ParameterValueType.DATE_AND_TIME);
+
+		DatafileFormat dft1 = session.createDatafileFormat("png", "binary");
+		DatafileFormat dft2 = session.createDatafileFormat("bmp", "binary");
+
+		Investigation inv = new Investigation();
+		inv.setId(42L);
+		inv.setFacility(facility);
+		inv.setName("A");
+		inv.setTitle("Not null");
+		inv.setType(investigationType);
+
+		final Dataset wibble = session.addDataset(inv, "Wibble", dst);
+
+		Datafile datafile = session.addDatafile(wibble, "wib1", dft1);
+
+		datafile = session.addDatafile(wibble, "wib2", dft2);
+
+		GregorianCalendar c = new GregorianCalendar();
+		c.setTime(new Date());
+		XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
+
+		DatasetParameter dsp = session.addDatasetParameter(wibble, date, p);
+
+		Dataset wobble = session.addDataset(inv, "Wobble", dst);
+		datafile = session.addDatafile(wobble, "wob1", dft1);
+
+		session.registerInvestigation(inv);
+		session.get("Investigation INCLUDE Dataset, Datafile, DatasetParameter, Facility", inv.getId());
+
+		// Dataset dfsin = session.createDataset("dfsin", "GQ", inv);
+		// Datafile fred = session.createDatafile("fred", dft1, dfsin);
+		// Datafile bill = session.createDatafile("bill", dft1, dfsin);
+		//
+		// Dataset dfsout = session.createDataset("dfsout", "GQ", inv);
+		// Datafile mog = session.createDatafile("mog", dft1, dfsout);
+		//
+		// Application application = session.createApplication("The one",
+		// "1.0");
+		// Job job = session.createJob(application);
+		// session.addInputDataset(job, wibble);
+		// session.addOutputDataset(job, wobble);
+		// session.addInputDatafile(job, fred);
+		// session.addInputDatafile(job, bill);
+		// session.addOutputDatafile(job, mog);
+
+	}
+
 	@BeforeClass
 	public static void setup() throws Exception {
 		session = new Session();
 		try {
 			session.setAuthz();
-		} catch (ObjectAlreadyExistsException_Exception e) {
-			System.out.println(e.getMessage() + " already exists");
+		} catch (Exception e) {
+			System.out.println(e);
 		}
+		session.clearAuthz();
+		session.setAuthz();
+		session.clear();
 	}
 
 	@AfterClass
 	public static void zap() throws Exception {
-		session.clear();
+		// session.clear();
+		// session.clearAuthz();
 	}
 
 }

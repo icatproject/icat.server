@@ -4,7 +4,7 @@
 
 	<groupId>co.uk.icat3</groupId>
 	<artifactId>icat3</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>4.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>icat3-master-pom</name>
@@ -58,13 +58,57 @@
 			<dependency>
 				<groupId>co.uk.icat3</groupId>
 				<artifactId>icat3-client</artifactId>
-				<version>1.0.0-SNAPSHOT</version>
+				<version>4.1.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>co.uk.icat3</groupId>
 				<artifactId>icat3-core</artifactId>
-				<version>1.0.0-SNAPSHOT</version>
+				<version>4.1.0-SNAPSHOT</version>
+			</dependency>
+
+			<dependency>
+				<groupId>co.uk.icat3</groupId>
+				<artifactId>icat3-data</artifactId>
+				<version>4.1.0-SNAPSHOT</version>
+			</dependency>
+
+			<dependency>
+				<groupId>co.uk.icat3</groupId>
+				<artifactId>icat3-logging</artifactId>
+				<version>4.1.0-SNAPSHOT</version>
+			</dependency>
+
+			<dependency>
+				<groupId>co.uk.icat3</groupId>
+				<artifactId>icat3-jaxb</artifactId>
+				<version>4.1.0-SNAPSHOT</version>
+			</dependency>
+
+			<dependency>
+				<groupId>co.uk.icat3</groupId>
+				<artifactId>icat3-user-ansto</artifactId>
+				<version>4.1.0-SNAPSHOT</version>
+			</dependency>
+
+			<dependency>
+				<groupId>co.uk.icat3</groupId>
+				<artifactId>icat3-user-ldap</artifactId>
+				<version>4.1.0-SNAPSHOT</version>
+			</dependency>
+
+			<dependency>
+				<groupId>co.uk.icat3</groupId>
+				<artifactId>icat3-exposed</artifactId>
+				<version>4.1.0-SNAPSHOT</version>
+				<type>ejb</type>
+			</dependency>
+
+			<dependency>
+				<groupId>co.uk.icat3</groupId>
+				<artifactId>icat3-logging</artifactId>
+				<version>4.1.0-SNAPSHOT</version>
+				<type>ejb</type>
 			</dependency>
 
 			<dependency>

@@ -17,27 +17,29 @@ import static uk.icat3.data.DownloadConstants.SESSIONID_NAME;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
-import uk.icat3.data.DownloadConstants.ACTION;
+import static uk.icat3.data.DownloadConstants.ACTION;
 import uk.icat3.entity.Datafile;
 import uk.icat3.entity.Dataset;
+import uk.icat3.exceptions.BadParameterException;
+import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.manager.BeanManager;
 import uk.icat3.manager.DatafileManager;
-import uk.icat3.manager.DatasetManager;
-import uk.icat3.util.DatasetInclude;
 
 /**
- * All methods for downloading file (ie getting the URL of the download service and giving it to the
- * user of ICAT so they can invoke it, normally a HTTP GET). The user needs READ and DOWNLOAD access
- * for this.
+ * All methods for downloading file (ie getting the URL of the download service
+ * and giving it to the user of ICAT so they can invoke it, normally a HTTP
+ * GET). The user needs READ and DOWNLOAD access for this.
  * 
- * Also a method for the download service to check if the user has access to download what they have
- * requested through the HTTP GET
+ * Also a method for the download service to check if the user has access to
+ * download what they have requested through the HTTP GET
  * 
  * @author gjd37
  */
@@ -46,46 +48,51 @@ public class DownloadManager {
 	static Logger log = Logger.getLogger(DownloadManager.class);
 
 	/**
-	 * Generates the download URL for the download of a single file. The method checks if the users
-	 * has permission to download the file first
+	 * Generates the download URL for the download of a single file. The method
+	 * checks if the users has permission to download the file first
 	 * 
 	 * @param userId
 	 *            federalId of the user.
 	 * @param datafileId
 	 *            datafile id
 	 * @param manager
-	 *            Entity manager object that will facilitate interaction with underlying database
+	 *            Entity manager object that will facilitate interaction with
+	 *            underlying database
 	 * @throws uk.icat3.exceptions.NoSuchObjectFoundException
 	 *             if entity does not exist in database
 	 * @throws uk.icat3.exceptions.InsufficientPrivilegesException
 	 *             if user has insufficient privileges to the object
 	 * @return URL that will be used to download the data file
+	 * @throws IcatInternalException
 	 */
 	public static String downloadDatafile(String userId, String sessionId, Long datafileId, EntityManager manager)
-			throws NoSuchObjectFoundException, InsufficientPrivilegesException {
+			throws NoSuchObjectFoundException, InsufficientPrivilegesException, IcatInternalException {
 		Collection<Long> datafileIds = new ArrayList<Long>();
 		datafileIds.add(datafileId);
 		return downloadDatafiles(userId, sessionId, datafileIds, manager);
 	}
 
 	/**
-	 * Generates the download URL for the download of a collection of files. The method checks if
-	 * the users has permission to download the files first
+	 * Generates the download URL for the download of a collection of files. The
+	 * method checks if the users has permission to download the files first
 	 * 
 	 * @param userId
 	 *            federalId of the user.
 	 * @param datafileIds
 	 *            collection of datafile ids
 	 * @param manager
-	 *            Entity manager object that will facilitate interaction with underlying database
+	 *            Entity manager object that will facilitate interaction with
+	 *            underlying database
 	 * @throws uk.icat3.exceptions.NoSuchObjectFoundException
 	 *             if entity does not exist in database
 	 * @throws uk.icat3.exceptions.InsufficientPrivilegesException
 	 *             if user has insufficient privileges to the object
 	 * @return URL that will be used to download the collection of data files
+	 * @throws IcatInternalException
 	 */
 	public static String downloadDatafiles(String userId, String sessionId, Collection<Long> datafileIds,
-			EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException {
+			EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException,
+			IcatInternalException {
 		log.trace("downloadDatafiles(" + userId + ", " + sessionId + ", " + datafileIds + ", EntityManager)");
 
 		// Check authz
@@ -95,33 +102,39 @@ public class DownloadManager {
 	}
 
 	/**
-	 * Generates the download URL for the download of a data set. The method checks if the users has
-	 * permission to download the dataset files first
+	 * Generates the download URL for the download of a data set. The method
+	 * checks if the users has permission to download the dataset files first
 	 * 
 	 * @param userId
 	 *            federalId of the user.
 	 * @param datasetId
 	 *            dataset id
 	 * @param manager
-	 *            Entity manager object that will facilitate interaction with underlying database
+	 *            Entity manager object that will facilitate interaction with
+	 *            underlying database
 	 * @throws uk.icat3.exceptions.NoSuchObjectFoundException
 	 *             if entity does not exist in database
 	 * @throws uk.icat3.exceptions.InsufficientPrivilegesException
 	 *             if user has insufficient privileges to the object
 	 * @return URL that will be used to download the dataset
+	 * @throws IcatInternalException
 	 */
 	public static String downloadDataset(String userId, String sessionId, Long datasetId, EntityManager manager)
-			throws NoSuchObjectFoundException, InsufficientPrivilegesException {
+			throws NoSuchObjectFoundException, InsufficientPrivilegesException, IcatInternalException {
 		log.trace("downloadDataset(" + userId + ", " + sessionId + ", " + datasetId + ", EntityManager)");
 
 		boolean zip = true;
 
 		// get the dataset and its files.
-		Dataset dataset = DatasetManager.getDataSet(userId, datasetId, DatasetInclude.DATASET_AND_DATAFILES_ONLY,
-				manager);
+		Dataset dataset;
+		try {
+			dataset = (Dataset) BeanManager.get(userId, "Dataset INCLUDE Datafiles", datasetId, manager).getBean();
+		} catch (BadParameterException e) {
+			throw new IcatInternalException(e.getMessage());
+		}
 
 		// if only one file, zip false
-		if (dataset.getDatafileCollection().size() == 1) {
+		if (dataset.getDatafiles().size() == 1) {
 			zip = false;
 		}
 
@@ -185,15 +198,18 @@ public class DownloadManager {
 	 * @param fileNames
 	 *            names of the files that are to be downloaded
 	 * @param manager
-	 *            Entity manager object that will facilitate interaction with underlying database
+	 *            Entity manager object that will facilitate interaction with
+	 *            underlying database
 	 * @throws uk.icat3.exceptions.NoSuchObjectFoundException
 	 *             if entity does not exist in database
 	 * @throws uk.icat3.exceptions.InsufficientPrivilegesException
 	 *             if user has insufficient privileges to the object
 	 * @return DownloadInfo information about the download
+	 * @throws IcatInternalException
 	 */
 	public static DownloadInfo checkDatafileDownloadAccess(String userId, Collection<Long> datafileIds,
-			EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException {
+			EntityManager manager) throws NoSuchObjectFoundException, InsufficientPrivilegesException,
+			IcatInternalException {
 		log.trace("checkFileDownloadAccess(" + userId + ", " + datafileIds + ", EntityManager)");
 
 		// now check that the user has access to read, download
@@ -227,24 +243,30 @@ public class DownloadManager {
 	 * @param fileNames
 	 *            names of the files that are to be downloaded
 	 * @param manager
-	 *            Entity manager object that will facilitate interaction with underlying database
+	 *            Entity manager object that will facilitate interaction with
+	 *            underlying database
 	 * @throws uk.icat3.exceptions.NoSuchObjectFoundException
 	 *             if entity does not exist in database
 	 * @throws uk.icat3.exceptions.InsufficientPrivilegesException
 	 *             if user has insufficient privileges to the object
 	 * @return DownloadInfo information about the download
+	 * @throws IcatInternalException
 	 */
 	public static DownloadInfo checkDatasetDownloadAccess(String userId, Long datasetId, EntityManager manager)
-			throws NoSuchObjectFoundException, InsufficientPrivilegesException {
+			throws NoSuchObjectFoundException, InsufficientPrivilegesException, IcatInternalException {
 		log.trace("checkFileDownloadAccess(" + userId + ", " + datasetId + ", EntityManager)");
 
 		// now check that the user has access to read, download
 		downloadDataset(userId, "sessionIdDummy", datasetId, manager);
 
 		// this should be cached in single entity manager call
-		Dataset dataset = DatasetManager.getDataSet(userId, datasetId, DatasetInclude.DATASET_AND_DATAFILES_ONLY,
-				manager);
-		Collection<Datafile> datafiles = dataset.getDatafileCollection();
+		Dataset dataset;
+		try {
+			dataset = (Dataset) BeanManager.get(userId, "Dataset INCLUDE Datafiles", datasetId, manager).getBean();
+		} catch (BadParameterException e) {
+			throw new IcatInternalException(e.getMessage());
+		}
+		List<Datafile> datafiles = dataset.getDatafiles();
 
 		Collection<String> fileNames = new ArrayList<String>();
 		Collection<String> fileLocations = new ArrayList<String>();
