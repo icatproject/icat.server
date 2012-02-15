@@ -1,13 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package uk.icat3.sessionbeans.interceptor;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+
 import javax.ejb.EJB;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
@@ -20,9 +17,11 @@ import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.InitialContext;
+
 import org.apache.log4j.Logger;
+
 import uk.icat3.sessionbeans.user.UserSession;
-import uk.icat3.logging.util.QueueNames;
+import uk.icat3.sessionbeans.util.QueueNames;
 
 /**
  *
@@ -34,7 +33,7 @@ public class DownloadInterceptor {
     static QueueConnectionFactory cf;
     static Logger log;
     @EJB
-    UserSession user;
+	UserSession user;
 
     @AroundInvoke
     public Object checkArguments(InvocationContext ctx) throws Exception {

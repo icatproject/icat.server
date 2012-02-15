@@ -24,11 +24,10 @@
 			<artifactId>icat3-data</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>co.uk.icat3</groupId>
-			<artifactId>icat3-logging</artifactId>
-			<scope>provided</scope>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>co.uk.icat3</groupId> -->
+<!-- 			<artifactId>icat3-logging</artifactId> -->
+<!-- 		</dependency> -->
 
 		<dependency>
 			<groupId>co.uk.icat3</groupId>

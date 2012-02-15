@@ -35,15 +35,15 @@ public class AdvancedSearchDetails implements Serializable {
 	 * Investigation type
 	 */
 	private String investigationType;
-	/**
-	 * Investigation grant Id
-	 */
-	private Long grantId;
-	/**
-	 * Investigator Name
-	 */
-	private String backCatalogueInvestigatorString; // back catalogue
-													// investigator string
+	// /**
+	// * Investigation grant Id
+	// */
+	// private Long grantId;
+	// /**
+	// * Investigator Name
+	// */
+	// private String backCatalogueInvestigatorString; // back catalogue
+	// // investigator string
 	/**
 	 * List of surnames
 	 */
@@ -207,7 +207,7 @@ public class AdvancedSearchDetails implements Serializable {
 	public Date getDateRangeStart() {
 		// if null, pass in 1901
 		if (dateRangeStart == null) {
-			return new Date(1, 1, 1);
+			return new Date(0);
 		} // 1901/1/1
 		else {
 			return dateRangeStart;
@@ -264,22 +264,25 @@ public class AdvancedSearchDetails implements Serializable {
 		this.instruments = instruments;
 	}
 
-	public String getBackCatalogueInvestigatorString() {
-		if (backCatalogueInvestigatorString != null && backCatalogueInvestigatorString.length() != 0) {
-			String backCatalogueInvestigatorStringFuzzy = backCatalogueInvestigatorString.replace("*", "%");
-			if (caseSensitive) {
-				return backCatalogueInvestigatorStringFuzzy;
-			} else {
-				return backCatalogueInvestigatorStringFuzzy.toLowerCase();
-			}
-		} else {
-			return null;
-		}
-	}
-
-	public void setBackCatalogueInvestigatorString(String backCatalogueInvestigatorString) {
-		this.backCatalogueInvestigatorString = backCatalogueInvestigatorString;
-	}
+	// public String getBackCatalogueInvestigatorString() {
+	// if (backCatalogueInvestigatorString != null &&
+	// backCatalogueInvestigatorString.length() != 0) {
+	// String backCatalogueInvestigatorStringFuzzy =
+	// backCatalogueInvestigatorString.replace("*", "%");
+	// if (caseSensitive) {
+	// return backCatalogueInvestigatorStringFuzzy;
+	// } else {
+	// return backCatalogueInvestigatorStringFuzzy.toLowerCase();
+	// }
+	// } else {
+	// return null;
+	// }
+	// }
+	//
+	// public void setBackCatalogueInvestigatorString(String
+	// backCatalogueInvestigatorString) {
+	// this.backCatalogueInvestigatorString = backCatalogueInvestigatorString;
+	// }
 
 	public String getVisitId() {
 		return visitId;
@@ -314,13 +317,13 @@ public class AdvancedSearchDetails implements Serializable {
 		this.investigationType = investigationType;
 	}
 
-	public Long getGrantId() {
-		return grantId;
-	}
-
-	public void setGrantId(Long grantId) {
-		this.grantId = grantId;
-	}
+	// public Long getGrantId() {
+	// return grantId;
+	// }
+	//
+	// public void setGrantId(Long grantId) {
+	// this.grantId = grantId;
+	// }
 
 	public boolean isCaseSensitive() {
 		return caseSensitive;
@@ -392,13 +395,13 @@ public class AdvancedSearchDetails implements Serializable {
 		}
 	}
 
-	public boolean hasGrantId() {
-		if (grantId != null) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+	// public boolean hasGrantId() {
+	// if (grantId != null) {
+	// return true;
+	// } else {
+	// return false;
+	// }
+	// }
 
 	public boolean hasVisitId() {
 		if (visitId != null && visitId.length() != 0) {
@@ -408,13 +411,14 @@ public class AdvancedSearchDetails implements Serializable {
 		}
 	}
 
-	public boolean hasBackCatalogueInvestigatorString() {
-		if (backCatalogueInvestigatorString != null && backCatalogueInvestigatorString.length() != 0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+	// public boolean hasBackCatalogueInvestigatorString() {
+	// if (backCatalogueInvestigatorString != null &&
+	// backCatalogueInvestigatorString.length() != 0) {
+	// return true;
+	// } else {
+	// return false;
+	// }
+	// }
 
 	public boolean hasInvestigationType() {
 		if (investigationType != null && investigationType.length() != 0) {
@@ -482,16 +486,18 @@ public class AdvancedSearchDetails implements Serializable {
 		}
 	}
 
-	public boolean hasInvestigationParameters() {
-		if (dateRangeEnd != null || dateRangeStart != null || grantId != null
-				|| backCatalogueInvestigatorString != null || experimentNumber != null || investigationAbstract != null
-				|| investigationName != null || investigationType != null || visitId != null) {
-			return true;
-		} else {
-			return false;
-		}
-
-	}
+	// public boolean hasInvestigationParameters() {
+	// if (dateRangeEnd != null || dateRangeStart != null || grantId != null
+	// || backCatalogueInvestigatorString != null || experimentNumber != null ||
+	// investigationAbstract != null
+	// || investigationName != null || investigationType != null || visitId !=
+	// null) {
+	// return true;
+	// } else {
+	// return false;
+	// }
+	//
+	// }
 
 	// /////////// End of methods /////////////////
 	public InvestigationInclude getInvestigationInclude() {

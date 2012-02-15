@@ -20,8 +20,6 @@ import javax.xml.ws.ResponseWrapper;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
-import org.apache.log4j.Logger;
-
 import uk.icat3.data.DownloadInfo;
 import uk.icat3.entity.Application;
 import uk.icat3.entity.Datafile;
@@ -80,16 +78,14 @@ import uk.icat3.user.UserDetails;
 @Stateless
 @WebService(serviceName = "ICATService", targetNamespace = "client.icat3.uk")
 @TransactionAttribute(value = TransactionAttributeType.REQUIRED)
-public class ICAT extends EJBObject {
-
-	static Logger log = Logger.getLogger(ICAT.class);
+public class ICAT extends ICATCompat {
 
 	@EJB
-	protected XMLIngestionManagerLocal xmlIngestionManagerLocal;
+	private XMLIngestionManagerLocal xmlIngestionManagerLocal;
 	@EJB
-	protected DownloadManagerLocal downloadManagerLocal;
+	private DownloadManagerLocal downloadManagerLocal;
 	@EJB
-	protected BeanManagerLocal beanManagerLocal;
+	private BeanManagerLocal beanManagerLocal;
 
 	@Resource
 	WebServiceContext webServiceContext;
@@ -179,12 +175,6 @@ public class ICAT extends EJBObject {
 		return user.login(username, password, lifetime, req);
 	}
 
-	/**
-	 * Logs out
-	 * 
-	 * @param sessionId
-	 * @return
-	 */
 	@WebMethod
 	@Interceptors(LogoutInterceptor.class)
 	public boolean logout(@WebParam(name = "sessionId") String sessionId) {

@@ -37,11 +37,11 @@
 			<type>jar</type>
 		</dependency>
 
-		<dependency>
-			<groupId>co.uk.icat3</groupId>
-			<artifactId>icat3-logging</artifactId>
-			<type>ejb</type>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>co.uk.icat3</groupId> -->
+<!-- 			<artifactId>icat3-logging</artifactId> -->
+<!-- 			<type>ejb</type> -->
+<!-- 		</dependency> -->
 	</dependencies>
 
 

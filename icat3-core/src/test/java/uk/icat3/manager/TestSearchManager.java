@@ -202,7 +202,7 @@ public class TestSearchManager {
 		addMembers();
 		addRules();
 		addData();
-		String query = "Dataset.id ORDER BY id [datasetType.name IN :types] <-> DatasetParameter[parameterType.name = 'TIMESTAMP' AND dateTimeValue BETWEEN :lower AND :upper]";
+		String query = "Dataset.id ORDER BY id [type.name IN :types] <-> DatasetParameter[parameterType.name = 'TIMESTAMP' AND dateTimeValue BETWEEN :lower AND :upper]";
 		query = query.replace(":lower", tsb + dfout.format(invStartDate) + tse)
 				.replace(":upper", tsb + dfout.format(invEndDate) + tse).replace(":types", "('GS', 'GQ')");
 		List<?> results = BeanManager.search("CIC", query, em).getList();
@@ -216,7 +216,7 @@ public class TestSearchManager {
 		addMembers();
 		addRules();
 		addData();
-		String query = "Dataset.id  ORDER BY id [datasetType.name IN :types] <-> Investigation[id BETWEEN :lower AND :upper]";
+		String query = "Dataset.id  ORDER BY id [type.name IN :types] <-> Investigation[id BETWEEN :lower AND :upper]";
 		query = query.replace(":lower", Long.toString(invId)).replace(":upper", Long.toString(invId))
 				.replace(":types", "('GS', 'GQ')");
 		List<?> results = BeanManager.search("CIC", query, em).getList();
@@ -228,7 +228,7 @@ public class TestSearchManager {
 		addMembers();
 		addRules();
 		addData();
-		String query = "Dataset.id ORDER BY startDate [datasetType.name IN :types AND name >= :lower AND name <= :upper]";
+		String query = "Dataset.id ORDER BY startDate [type.name IN :types AND name >= :lower AND name <= :upper]";
 		query = query.replace(":lower", "'Wabble'").replace(":upper", "'Wobble'").replace(":types", "('GS', 'GQ')");
 		List<?> results = BeanManager.search("CIC", query, em).getList();
 		assertEquals("Count", 1, results.size());
@@ -252,7 +252,7 @@ public class TestSearchManager {
 		addData();
 		{
 			Date date = new Date(System.currentTimeMillis() + 5000);
-			String query = "Dataset.id [datasetType.name IN :types] <-> DatasetParameter [modTime >= :lower] ";
+			String query = "Dataset.id [type.name IN :types] <-> DatasetParameter [modTime >= :lower] ";
 			query = query.replace(":lower", tsb + dfout.format(date) + tse).replace(":types", "('GS', 'GQ')");
 			List<?> results = BeanManager.search("CIC", query, em).getList();
 			assertEquals("Count", 0, results.size());
@@ -260,7 +260,7 @@ public class TestSearchManager {
 
 		{
 			Date date = new Date(System.currentTimeMillis() - 5000);
-			String query = "Dataset.id [datasetType.name IN :types] <-> DatasetParameter [modTime >= :lower] ";
+			String query = "Dataset.id [type.name IN :types] <-> DatasetParameter [modTime >= :lower] ";
 			query = query.replace(":lower", tsb + dfout.format(date) + tse).replace(":types", "('GS', 'GQ')");
 			List<?> results = BeanManager.search("CIC", query, em).getList();
 			assertEquals("Count", 1, results.size());
@@ -273,7 +273,7 @@ public class TestSearchManager {
 		addMembers();
 		addRules();
 		addData();
-		String query = "COUNT (Dataset.id)  [datasetType.name IN :types] <-> DatasetParameter[parameterType.name = 'TIMESTAMP' AND dateTimeValue BETWEEN :lower AND :upper]";
+		String query = "COUNT (Dataset.id)  [type.name IN :types] <-> DatasetParameter[parameterType.name = 'TIMESTAMP' AND dateTimeValue BETWEEN :lower AND :upper]";
 		query = query.replace(":lower", tsb + dfout.format(invStartDate) + tse)
 				.replace(":upper", tsb + dfout.format(invEndDate) + tse).replace(":types", "('GS', 'GQ')");
 		List<?> results = BeanManager.search("CIC", query, em).getList();

@@ -17,10 +17,6 @@ import org.apache.log4j.PropertyConfigurator;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.sessionbeans.user.UserSessionLocal;
 
-/**
- * 
- * @author gjd37
- */
 public abstract class EJBObject {
 
 	static Logger log = Logger.getLogger(EJBObject.class);
@@ -29,16 +25,6 @@ public abstract class EJBObject {
 	protected EntityManager manager;
 	@EJB
 	protected UserSessionLocal user;
-
-	/* For junit testing only */
-	public void setUserSession(UserSessionLocal localUserSession) {
-		this.user = localUserSession;
-	}
-
-	/* For junit testing only */
-	public void setEntityManager(EntityManager manager) {
-		this.manager = manager;
-	}
 
 	@PostConstruct
 	protected void init() {

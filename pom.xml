@@ -23,11 +23,11 @@
 		<module>icat3-client</module>
 		<module>icat3-ws-test</module>
 		<module>icat3-xmlingest-client</module>
-		<module>icat3-logging</module>
 		<module>icat3-data</module>
 		<module>icat3-jaxb</module>
 		<module>icat3-download</module>
-		<module>icat3-reporting</module>
+		<!-- <module>icat3-logging</module> -->
+		<!-- <module>icat3-reporting</module> -->
 	</modules>
 
 	<repositories>

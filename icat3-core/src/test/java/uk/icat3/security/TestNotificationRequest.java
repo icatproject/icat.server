@@ -169,6 +169,7 @@ public class TestNotificationRequest {
 	public void beginTX() {
 		em = emf.createEntityManager();
 		em.getTransaction().begin();
+		System.out.println(em);
 	}
 
 	@After

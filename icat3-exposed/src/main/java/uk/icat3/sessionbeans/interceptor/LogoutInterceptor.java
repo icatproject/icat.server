@@ -1,11 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package uk.icat3.sessionbeans.interceptor;
 
-import java.util.Date;
 import java.sql.Timestamp;
+import java.util.Date;
+
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import javax.jms.Message;
@@ -16,9 +13,11 @@ import javax.jms.QueueSender;
 import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.naming.InitialContext;
+
 import org.apache.log4j.Logger;
-import uk.icat3.logging.util.PropertyNames;
-import uk.icat3.logging.util.QueueNames;
+
+import uk.icat3.sessionbeans.util.PropertyNames;
+import uk.icat3.sessionbeans.util.QueueNames;
 
 /**
  *

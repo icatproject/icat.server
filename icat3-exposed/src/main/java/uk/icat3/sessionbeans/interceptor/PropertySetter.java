@@ -5,8 +5,10 @@
 package uk.icat3.sessionbeans.interceptor;
 
 import java.sql.Timestamp;
+
 import javax.jms.Message;
-import uk.icat3.logging.util.PropertyNames;
+
+import uk.icat3.sessionbeans.util.PropertyNames;
 
 /**
  *

@@ -1,57 +1,245 @@
 package uk.icat3.sessionbeans;
 
-import javax.annotation.Resource;
+import java.util.List;
+
 import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.jws.WebService;
-import javax.xml.ws.WebServiceContext;
+import javax.jws.WebMethod;
+import javax.jws.WebParam;
 
-import org.apache.log4j.Logger;
-
-import uk.icat3.sessionbeans.data.DownloadManagerLocal;
+import uk.icat3.entity.Investigation;
+import uk.icat3.exceptions.BadParameterException;
+import uk.icat3.exceptions.IcatInternalException;
+import uk.icat3.exceptions.InsufficientPrivilegesException;
+import uk.icat3.exceptions.SessionException;
+import uk.icat3.sessionbeans.compatibility.AdvancedSearchDetails;
 import uk.icat3.sessionbeans.manager.BeanManagerLocal;
-import uk.icat3.sessionbeans.manager.XMLIngestionManagerLocal;
 
-@Stateless
-@WebService(serviceName = "ICATService", targetNamespace = "client.icat3.uk")
-@TransactionAttribute(value = TransactionAttributeType.REQUIRED)
 public class ICATCompat extends EJBObject {
 
-	static Logger log = Logger.getLogger(ICATCompat.class);
-
 	@EJB
-	protected XMLIngestionManagerLocal xmlIngestionManagerLocal;
-	@EJB
-	protected DownloadManagerLocal downloadManagerLocal;
-	@EJB
-	protected BeanManagerLocal beanManagerLocal;
-
-	@Resource
-	WebServiceContext webServiceContext;
+	private BeanManagerLocal beanManagerLocal;
 
 	public ICATCompat() {
 	}
 
-	// /**
-	// * This gets all the keywords avaliable for that user, they can only see
-	// * keywords associated with their investigations or public investigations
-	// *
-	// * @param sessionId
-	// * federalId of the user.
-	// * @return list of keywords
-	// * @throws uk.icat3.exceptions.SessionException
-	// */
-	// @WebMethod
-	// public Collection<String> getKeywordsForUser(@WebParam(name =
-	// "sessionId") String sessionId)
-	// throws SessionException {
-	// return keywordSearchLocal.getKeywordsForUser(sessionId);
+	private String getIN(List<String> ele) {
+		final StringBuilder infield = new StringBuilder("(");
+		for (final String t : ele) {
+			if (infield.length() != 1) {
+				infield.append(',');
+			}
+			infield.append('\'').append(t).append('\'');
+		}
+		infield.append(')');
+		return infield.toString();
+	}
+
+	/**
+	 * This gets all the keywords available to the user, they can only see
+	 * keywords associated with their investigations or public investigations
+	 * 
+	 * @param sessionId
+	 *            federalId of the user.
+	 * @return list of keywords
+	 * @throws uk.icat3.exceptions.SessionException
+	 * @throws InsufficientPrivilegesException
+	 * @throws BadParameterException
+	 * @throws IcatInternalException
+	 */
+	@SuppressWarnings("unchecked")
+	@WebMethod
+	public List<String> getKeywordsForUser(@WebParam(name = "sessionId") String sessionId) throws SessionException,
+			IcatInternalException, BadParameterException, InsufficientPrivilegesException {
+		return (List<String>) this.beanManagerLocal.search(sessionId, "DISTINCT Keyword.name");
+	}
+
+	/**
+	 * This gets all the keywords available to the user - limited by count
+	 * 
+	 * @param sessionId
+	 *            federalId of the user.
+	 * @param numberReturned
+	 *            number of results found returned
+	 * @return list of keywords
+	 * @throws uk.icat3.exceptions.SessionException
+	 * @throws InsufficientPrivilegesException
+	 * @throws BadParameterException
+	 * @throws IcatInternalException
+	 */
+	@SuppressWarnings("unchecked")
+	@WebMethod(operationName = "getKeywordsForUserMax")
+	public List<String> getKeywordsForUser(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "limit") int limit) throws SessionException, IcatInternalException, BadParameterException,
+			InsufficientPrivilegesException {
+		return (List<String>) this.beanManagerLocal.search(sessionId, "0," + limit + " DISTINCT Keyword.name");
+	}
+
+	/**
+	 * Lists all the investigations for the current user, ie who he is an
+	 * investigator of
+	 * 
+	 * @param sessionId
+	 * @throws uk.icat3.exceptions.SessionException
+	 *             if the session id is invalid
+	 * @return collection
+	 * @throws IcatInternalException
+	 * @throws InsufficientPrivilegesException
+	 * @throws BadParameterException
+	 */
+	@SuppressWarnings("unchecked")
+	@WebMethod
+	public List<Investigation> getMyInvestigations(@WebParam(name = "sessionId") String sessionId)
+			throws SessionException, IcatInternalException, BadParameterException, InsufficientPrivilegesException {
+		return (List<Investigation>) this.beanManagerLocal.search(sessionId, "Investigation");
+	}
+
+	/**
+	 * SearchManager by a collection of keywords for investigations that user
+	 * has access to view, with AND been operator, fuzzy false, no includes
+	 * 
+	 * @param sessionId
+	 *            sessionId of the user.
+	 * @param keywords
+	 *            Collection of keywords to search on
+	 * @return collection of {@link Investigation} investigation objects
+	 * @throws uk.icat3.exceptions.SessionException
+	 * @throws IcatInternalException
+	 * @throws InsufficientPrivilegesException
+	 * @throws BadParameterException
+	 */
+	@SuppressWarnings("unchecked")
+	@WebMethod(operationName = "searchByKeywords")
+	public List<Investigation> searchByKeywords(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "keywords") List<String> keywords) throws SessionException, IcatInternalException,
+			BadParameterException, InsufficientPrivilegesException {
+		final String query = "DISTINCT Investigation <-> Keyword[name IN " + this.getIN(keywords) + "]";
+		return (List<Investigation>) this.beanManagerLocal.search(sessionId, query);
+	}
+
+	/**
+	 * This searches all DB for investigations with the advanced search criteria
+	 * 
+	 * @param sessionId
+	 *            session id of the user.
+	 * @param advancedSearch
+	 *            advanced SearchManager details to search with
+	 * @throws uk.icat3.exceptions.SessionException
+	 *             if the session id is invalid
+	 * @return collection of {@link Investigation} investigation objects
+	 * @throws IcatInternalException
+	 * @throws InsufficientPrivilegesException
+	 * @throws BadParameterException
+	 */
+	@SuppressWarnings("unchecked")
+	@WebMethod
+	public List<Investigation> searchByAdvanced(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "advancedSearchDetails") AdvancedSearchDetails advancedSearch) throws SessionException,
+			IcatInternalException, BadParameterException, InsufficientPrivilegesException {
+		final StringBuilder query = new StringBuilder();
+		if (advancedSearch.hasExperimentNumber()) {
+			augmentQuery(query, "name", advancedSearch.getExperimentNumber());
+		}
+		if (advancedSearch.hasInvestigationType()) {
+			augmentQuery(query, "type.name", advancedSearch.getInvestigationType());
+		}
+		// TODO add rest of these ...
+		if (query.length() == 0) {
+			query.append("DISTINCT Investigation");
+		} else {
+			query.append("]");
+		}
+		return (List<Investigation>) this.beanManagerLocal.search(sessionId, query.toString());
+	}
+
+	private void augmentQuery(StringBuilder query, String field, String value) {
+		if (query.length() == 0) {
+			query.append("DISTINCT Investigation [");
+		} else {
+			query.append(" AND ");
+		}
+		query.append(field + " = '" + value + "'");
+	}
+
+	/**
+	 * This searches all DB for investigations with the advanced search criteria
+	 * 
+	 * @param sessionId
+	 *            session id of the user.
+	 * @param advancedSearch
+	 *            advanced SearchManager details to search with
+	 * @param startIndex
+	 *            start index of the results found, default 0
+	 * @param numberOfResults
+	 *            number of results found from the start index, default
+	 *            {@link Queries}.MAX_QUERY_RESULTSET
+	 * @throws uk.icat3.exceptions.SessionException
+	 *             if the session id is invalid
+	 * @return collection of {@link Investigation} investigation objects
+	 * @throws IcatInternalException
+	 */
+	// @WebMethod(operationName = "searchByAdvancedPagination")
+	// public List<Investigation> searchByAdvanced(@WebParam(name = "sessionId")
+	// String sessionId,
+	// @WebParam(name = "advancedSearchDetails") AdvancedSearchDetails
+	// advancedSearch,
+	// @WebParam(name = "startIndex") int startIndex, @WebParam(name =
+	// "numberOfResults") int numberOfResults)
+	// throws SessionException, IcatInternalException {
+	// return investigationSearchLocal.searchByAdvanced(sessionId,
+	// advancedSearch, startIndex, numberOfResults);
 	// }
-	//
+
+	/**
+	 * Lists all the investigations for the current user, ie who he is an
+	 * investigator of
+	 * 
+	 * @param sessionId
+	 * @param investigationIncludes
+	 * @throws uk.icat3.exceptions.SessionException
+	 *             if the session id is invalid
+	 * @return collection
+	 * @throws IcatInternalException
+	 */
+	// @WebMethod(operationName = "getMyInvestigationsIncludes")
+	// public List<Investigation> getMyInvestigations(@WebParam(name =
+	// "sessionId") String sessionId,
+	// @WebParam(name = "investigationInclude") InvestigationInclude
+	// investigationIncludes)
+	// throws SessionException, IcatInternalException {
+	// return investigationSearchLocal.getMyInvestigations(sessionId,
+	// investigationIncludes);
+	// }
+
+	/**
+	 * Lists all the investigations for the current user, ie who he is an
+	 * investigator of
+	 * 
+	 * @param sessionId
+	 * @param investigationIncludes
+	 * @param startIndex
+	 *            start index of the results found
+	 * @param number_results
+	 *            number of results found from the start index
+	 * @throws uk.icat3.exceptions.SessionException
+	 *             if the session id is invalid
+	 * @return collection
+	 * @throws IcatInternalException
+	 */
+	// @WebMethod(operationName = "getMyInvestigationsIncludesPagination")
+	// public List<Investigation> getMyInvestigations(@WebParam(name =
+	// "sessionId") String sessionId,
+	// @WebParam(name = "investigationInclude") InvestigationInclude
+	// investigationIncludes,
+	// @WebParam(name = "startIndex") int startIndex, @WebParam(name =
+	// "numberOfResults") int number_results)
+	// throws SessionException, IcatInternalException {
+	// return investigationSearchLocal.getMyInvestigations(sessionId,
+	// investigationIncludes, startIndex,
+	// number_results);
+	// }
+
 	// /**
-	// * This gets all the keywords avaliable for that user, beginning with a
+	// * This gets all the keywords available for that user, beginning with a
 	// * keyword, they can only see keywords associated with their
 	// investigations
 	// * or public investigations
@@ -66,11 +254,7 @@ public class ICATCompat extends EJBObject {
 	// * @throws uk.icat3.exceptions.SessionException
 	// */
 	// @WebMethod(operationName = "getKeywordsForUserStartWithMax")
-	// @RequestWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.getKeywordsForUserStartWithMax")
-	// @ResponseWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.getKeywordsForUserStartWithMaxResponse")
-	// public Collection<String> getKeywordsForUser(@WebParam(name =
+	// public List<String> getKeywordsForUser(@WebParam(name =
 	// "sessionId") String sessionId,
 	// @WebParam(name = "startKeyword") String startKeyword, @WebParam(name =
 	// "numberReturned") int numberReturned)
@@ -78,31 +262,7 @@ public class ICATCompat extends EJBObject {
 	// return keywordSearchLocal.getKeywordsForUser(sessionId, startKeyword,
 	// numberReturned);
 	// }
-	//
-	// /**
-	// * This gets all the keywords avaliable for that user that they can only
-	// see
-	// * keywords associated with their investigations or public investigations
-	// *
-	// * @param sessionId
-	// * federalId of the user.
-	// * @param numberReturned
-	// * number of results found returned
-	// * @return list of keywords
-	// * @throws uk.icat3.exceptions.SessionException
-	// */
-	// @WebMethod(operationName = "getKeywordsForUserMax")
-	// @RequestWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.getKeywordsForUserMax")
-	// @ResponseWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.getKeywordsForUserMaxResponse")
-	// public Collection<String> getKeywordsForUser(@WebParam(name =
-	// "sessionId") String sessionId,
-	// @WebParam(name = "numberReturned") int numberReturned) throws
-	// SessionException {
-	// return keywordSearchLocal.getKeywordsForUser(sessionId, numberReturned);
-	// }
-	//
+
 	// /**
 	// * This gets all the keywords avaliable for that user, beginning with a
 	// * keyword, they can only see keywords associated with their
@@ -117,17 +277,14 @@ public class ICATCompat extends EJBObject {
 	// * @return list of keywords
 	// */
 	// @WebMethod(operationName = "getKeywordsForUserType")
-	// @RequestWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.getKeywordsForUserType")
-	// @ResponseWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.getKeywordsForUserTypeResponse")
-	// public Collection<String> getKeywordsForUser(@WebParam(name =
+	//
+	// public List<String> getKeywordsForUser(@WebParam(name =
 	// "sessionId") String sessionId,
 	// @WebParam(name = "keywordType") KeywordType type) throws SessionException
 	// {
 	// return keywordSearchLocal.getKeywordsForUser(sessionId, type);
 	// }
-	//
+
 	// /**
 	// * This gets all the unique keywords in the database
 	// *
@@ -141,205 +298,14 @@ public class ICATCompat extends EJBObject {
 	// * @throws uk.icat3.exceptions.SessionException
 	// */
 	// @WebMethod
-	// public Collection<String> getAllKeywords(@WebParam(name = "sessionId")
+	// public List<String> getAllKeywords(@WebParam(name = "sessionId")
 	// String sessionId,
 	// @WebParam(name = "type") KeywordType type) throws SessionException {
 	// return keywordSearchLocal.getAllKeywords(sessionId, type);
 	// }
-	//
-	// /**
-	// * This searches all DB for investigations with the advanced search
-	// criteria
-	// *
-	// * @param sessionId
-	// * session id of the user.
-	// * @param advancedSearch
-	// * advanced SearchManager details to search with
-	// * @throws uk.icat3.exceptions.SessionException
-	// * if the session id is invalid
-	// * @return collection of {@link Investigation} investigation objects
-	// * @throws IcatInternalException
-	// */
-	// @WebMethod
-	// public Collection<Investigation> searchByAdvanced(@WebParam(name =
-	// "sessionId") String sessionId,
-	// @WebParam(name = "advancedSearchDetails") AdvancedSearchDetails
-	// advancedSearch) throws SessionException,
-	// IcatInternalException {
-	// return investigationSearchLocal.searchByAdvanced(sessionId,
-	// advancedSearch);
-	// }
-	//
-	// /**
-	// * This searches all DB for investigations with the advanced search
-	// criteria
-	// *
-	// * @param sessionId
-	// * session id of the user.
-	// * @param advancedSearch
-	// * advanced SearchManager details to search with
-	// * @param startIndex
-	// * start index of the results found, default 0
-	// * @param numberOfResults
-	// * number of results found from the start index, default
-	// * {@link Queries}.MAX_QUERY_RESULTSET
-	// * @throws uk.icat3.exceptions.SessionException
-	// * if the session id is invalid
-	// * @return collection of {@link Investigation} investigation objects
-	// * @throws IcatInternalException
-	// */
-	// @WebMethod(operationName = "searchByAdvancedPagination")
-	// @RequestWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.searchByAdvancedPagination")
-	// @ResponseWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.searchByAdvancedPaginationResponse")
-	// public Collection<Investigation> searchByAdvanced(@WebParam(name =
-	// "sessionId") String sessionId,
-	// @WebParam(name = "advancedSearchDetails") AdvancedSearchDetails
-	// advancedSearch,
-	// @WebParam(name = "startIndex") int startIndex, @WebParam(name =
-	// "numberOfResults") int numberOfResults)
-	// throws SessionException, IcatInternalException {
-	// return investigationSearchLocal.searchByAdvanced(sessionId,
-	// advancedSearch, startIndex, numberOfResults);
-	// }
-	//
-	// /**
-	// * SearchManager by a collection of keywords for investigations that user
-	// * has access to view, with AND been operator, fuzzy false, no includes
-	// *
-	// * @param sessionId
-	// * sessionId of the user.
-	// * @param keywords
-	// * Collection of keywords to search on
-	// * @return collection of {@link Investigation} investigation objects
-	// * @throws uk.icat3.exceptions.SessionException
-	// * @throws IcatInternalException
-	// */
-	// @WebMethod(operationName = "searchByKeywords")
-	// @RequestWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.searchByKeywords")
-	// @ResponseWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.searchByKeywordsResponse")
-	// @Interceptors(KeywordsInterceptor.class)
-	// public Collection<Investigation> searchByKeywords(@WebParam(name =
-	// "sessionId") String sessionId,
-	// @WebParam(name = "keywords") Collection<String> keywords) throws
-	// SessionException, IcatInternalException {
-	// return investigationSearchLocal.searchByKeywords(sessionId, keywords);
-	// }
-	//
-	//
-	//
-	// /**
-	// * SearchManager by a collection of keywords for investigations that user
-	// * has access to view
-	// *
-	// * @param sessionId
-	// * sessionId of the user.
-	// * @param keywordsDetails
-	// * details of keyword search
-	// * @param startIndex
-	// * start index of the results found, default 0
-	// * @param numberOfResults
-	// * number of results found from the start index, default
-	// * {@link Queries}.MAX_QUERY_RESULTSET
-	// * @return collection of {@link Investigation} investigation objects
-	// * @throws uk.icat3.exceptions.SessionException
-	// * @throws IcatInternalException
-	// */
-	// @WebMethod(operationName = "searchByKeywordsAll")
-	// @RequestWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.searchByKeywordsAll")
-	// @ResponseWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.searchByKeywordsAllResponse")
-	// @Interceptors(KeywordsInterceptor.class)
-	// public Collection<Investigation> searchByKeywords(@WebParam(name =
-	// "sessionId") String sessionId,
-	// @WebParam(name = "keywordDetails") KeywordDetails details, @WebParam(name
-	// = "startIndex") int startIndex,
-	// @WebParam(name = "numberOfResults") int numberOfResults) throws
-	// SessionException, IcatInternalException {
-	// return investigationSearchLocal.searchByKeywords(sessionId, details,
-	// startIndex, numberOfResults);
-	// }
-	//
-	// /**
-	// * Lists all the investigations for the current user, ie who he is an
-	// * investigator of
-	// *
-	// * @param sessionId
-	// * @throws uk.icat3.exceptions.SessionException
-	// * if the session id is invalid
-	// * @return collection
-	// * @throws IcatInternalException
-	// */
-	// @WebMethod
-	// @Interceptors(ViewMyInvestigationsInterceptor.class)
-	// public Collection<Investigation> getMyInvestigations(@WebParam(name =
-	// "sessionId") String sessionId)
-	// throws SessionException, IcatInternalException {
-	// return investigationSearchLocal.getMyInvestigations(sessionId);
-	// }
-	//
-	// /**
-	// * Lists all the investigations for the current user, ie who he is an
-	// * investigator of
-	// *
-	// * @param sessionId
-	// * @param investigationIncludes
-	// * @throws uk.icat3.exceptions.SessionException
-	// * if the session id is invalid
-	// * @return collection
-	// * @throws IcatInternalException
-	// */
-	// @WebMethod(operationName = "getMyInvestigationsIncludes")
-	// @RequestWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludes")
-	// @ResponseWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesResponse")
-	// @Interceptors(ViewMyInvestigationsInterceptor.class)
-	// public Collection<Investigation> getMyInvestigations(@WebParam(name =
-	// "sessionId") String sessionId,
-	// @WebParam(name = "investigationInclude") InvestigationInclude
-	// investigationIncludes)
-	// throws SessionException, IcatInternalException {
-	// return investigationSearchLocal.getMyInvestigations(sessionId,
-	// investigationIncludes);
-	// }
-	//
-	// /**
-	// * Lists all the investigations for the current user, ie who he is an
-	// * investigator of
-	// *
-	// * @param sessionId
-	// * @param investigationIncludes
-	// * @param startIndex
-	// * start index of the results found
-	// * @param number_results
-	// * number of results found from the start index
-	// * @throws uk.icat3.exceptions.SessionException
-	// * if the session id is invalid
-	// * @return collection
-	// * @throws IcatInternalException
-	// */
-	// @WebMethod(operationName = "getMyInvestigationsIncludesPagination")
-	// @RequestWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesPagination")
-	// @ResponseWrapper(className =
-	// "uk.icat3.sessionbeans.jaxws.getMyInvestigationsIncludesPaginationResponse")
-	// @Interceptors(ViewMyInvestigationsInterceptor.class)
-	// public Collection<Investigation> getMyInvestigations(@WebParam(name =
-	// "sessionId") String sessionId,
-	// @WebParam(name = "investigationInclude") InvestigationInclude
-	// investigationIncludes,
-	// @WebParam(name = "startIndex") int startIndex, @WebParam(name =
-	// "numberOfResults") int number_results)
-	// throws SessionException, IcatInternalException {
-	// return investigationSearchLocal.getMyInvestigations(sessionId,
-	// investigationIncludes, startIndex,
-	// number_results);
-	// }
+
+	// =================================================================
+
 	//
 	// /**
 	// * Searches the investigations the user has access to view by user id
@@ -477,8 +443,9 @@ public class ICATCompat extends EJBObject {
 	// * @return collection of rols
 	// */
 	// @WebMethod
-	// public Collection<ParameterType> listParameters(@WebParam(name = "sessionId")
-	// String sessionId) throws SessionException {
+	// public Collection<ParameterType> listParameters(@WebParam(name =
+	// "sessionId") String sessionId)
+	// throws SessionException {
 	// return investigationSearchLocal.listParameters(sessionId);
 	// }
 	//
@@ -864,6 +831,7 @@ public class ICATCompat extends EJBObject {
 	// NoSuchObjectFoundException, IcatInternalException {
 	// return datasetManagerLocal.getDataset(sessionId, datasetId, includes);
 	// }
+	//
 	// /**
 	// * Gets the data set object from a from a list of data set ids, depending
 	// if
@@ -948,6 +916,7 @@ public class ICATCompat extends EJBObject {
 	// IcatInternalException {
 	// return datafileManagerLocal.getDatafiles(sessionId, datafileIds);
 	// }
+	//
 	// /**
 	// * Returns the User for the given userId
 	// *
@@ -990,9 +959,11 @@ public class ICATCompat extends EJBObject {
 	// federalId);
 	// }
 	//
-	// // /////////////////////////////////////////////////////////////////////
+	// //
+	// ///////////////////////////////////////////////////////////////////
 	// // GET PARAMETER METHODS //
-	// // /////////////////////////////////////////////////////////////////////
+	// //
+	// ///////////////////////////////////////////////////////////////////
 	// /**
 	// * Returns parameters matched by name and units. The search parameters are
 	// * insensitive (no different between lowercase or uppercase) and eager
@@ -1057,6 +1028,33 @@ public class ICATCompat extends EJBObject {
 	// "sessionId") String sessionId,
 	// @WebParam(name = "units") String units) throws SessionException {
 	// return parameterSearchLocal.getParameterByUnits(sessionId, units);
+	// }
+	// /**
+	// * SearchManager by a collection of keywords for investigations that user
+	// * has access to view
+	// *
+	// * @param sessionId
+	// * sessionId of the user.
+	// * @param keywordsDetails
+	// * details of keyword search
+	// * @param startIndex
+	// * start index of the results found, default 0
+	// * @param numberOfResults
+	// * number of results found from the start index, default
+	// * {@link Queries}.MAX_QUERY_RESULTSET
+	// * @return collection of {@link Investigation} investigation objects
+	// * @throws uk.icat3.exceptions.SessionException
+	// * @throws IcatInternalException
+	// */
+	// @WebMethod(operationName = "searchByKeywordsAll")
+	// public List<Investigation> searchByKeywords(@WebParam(name = "sessionId")
+	// String sessionId,
+	// @WebParam(name = "keywordDetails") KeywordDetails details, @WebParam(name
+	// = "startIndex") int startIndex,
+	// @WebParam(name = "numberOfResults") int numberOfResults) throws
+	// SessionException, IcatInternalException {
+	// return investigationSearchLocal.searchByKeywords(sessionId, details,
+	// startIndex, numberOfResults);
 	// }
 
 }
