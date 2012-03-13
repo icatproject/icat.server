@@ -11,12 +11,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Set;
 
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
 
 import org.apache.log4j.Logger;
 
@@ -27,99 +33,197 @@ import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ObjectAlreadyExistsException;
 import uk.icat3.exceptions.ValidationException;
-import uk.icat3.security.AccessType;
-import uk.icat3.security.EntityInfoHandler;
-import uk.icat3.security.EntityInfoHandler.Relationship;
-import uk.icat3.security.GateKeeper;
-import uk.icat3.security.parser.GetQuery;
-import uk.icat3.security.parser.Input;
-import uk.icat3.security.parser.LexerException;
-import uk.icat3.security.parser.ParserException;
-import uk.icat3.security.parser.SearchQuery;
-import uk.icat3.security.parser.Token;
-import uk.icat3.security.parser.Tokenizer;
+import uk.icat3.manager.EntityInfoHandler.Relationship;
+import uk.icat3.parser.GetQuery;
+import uk.icat3.parser.Input;
+import uk.icat3.parser.LexerException;
+import uk.icat3.parser.ParserException;
+import uk.icat3.parser.SearchQuery;
+import uk.icat3.parser.Token;
+import uk.icat3.parser.Tokenizer;
 
 public class BeanManager {
 
-	// Global class logger
 	private static final Logger logger = Logger.getLogger(BeanManager.class);
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 	private static DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 
 	private static final Pattern timestampPattern = Pattern.compile(":ts(\\d{14})");
 
-	public static CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager)
-			throws InsufficientPrivilegesException, ObjectAlreadyExistsException, ValidationException,
-			NoSuchObjectFoundException, IcatInternalException, BadParameterException {
-		// TODO this code can throw a primary key exception if the same object
-		// is being created by two threads. Probably need to use a Bean Managed
-		// Transaction to avoid the problem.
-
-		bean.preparePersist(userId, manager);
-		bean.isUnique(manager);
+	public static CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
+			UserTransaction userTransaction) throws InsufficientPrivilegesException, ObjectAlreadyExistsException,
+			ValidationException, NoSuchObjectFoundException, IcatInternalException, BadParameterException {
 
 		try {
-			logger.trace(bean + " prepared for persist.");
-			manager.persist(bean);
-			logger.trace(bean + " persisted.");
-			manager.flush();
-			logger.trace(bean + " flushed.");
-		} catch (EntityExistsException e) {
-			throw new ObjectAlreadyExistsException(e.getMessage());
-		} catch (Throwable e) {
-			manager.clear();
-			bean.preparePersist(userId, manager);
-			bean.isValid(manager, true);
-			e.printStackTrace(System.err);
-			throw new IcatInternalException("Unexpected DB response " + e.getMessage());
+			try {
+				userTransaction.begin();
+			} catch (NotSupportedException e) {
+				throw new IcatInternalException("NotSupportedException" + e.getMessage());
+			}
+			try {
+				bean.preparePersist(userId, manager);
+				logger.trace(bean + " prepared for persist.");
+				manager.persist(bean);
+				logger.trace(bean + " persisted.");
+				manager.flush();
+				logger.trace(bean + " flushed.");
+				// Check authz now everything persisted
+				GateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
+				NotificationMessages notification = new NotificationMessages(userId, bean, AccessType.CREATE, manager);
+				userTransaction.commit();
+				return new CreateResponse(bean.getPK(), notification);
+			} catch (EntityExistsException e) {
+				userTransaction.rollback();
+				throw new ObjectAlreadyExistsException(e.getMessage());
+			} catch (SecurityException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("SecurityException" + e.getMessage());
+			} catch (IllegalStateException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("IllegalStateException" + e.getMessage());
+			} catch (RollbackException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("RollbackException" + e.getMessage());
+			} catch (HeuristicMixedException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("HeuristicMixedException" + e.getMessage());
+			} catch (HeuristicRollbackException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("HeuristicRollbackException" + e.getMessage());
+			} catch (SystemException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("SystemException" + e.getMessage());
+			} catch (Throwable e) {
+				userTransaction.rollback();
+				bean.preparePersist(userId, manager);
+				bean.isUnique(manager);
+				bean.isValid(manager, true);
+				e.printStackTrace(System.err);
+				throw new IcatInternalException("Unexpected DB response " + e.getClass() + " " + e.getMessage());
+			}
+		} catch (IllegalStateException e) {
+			throw new IcatInternalException("IllegalStateException" + e.getMessage());
+		} catch (SecurityException e) {
+			throw new IcatInternalException("SecurityException" + e.getMessage());
+		} catch (SystemException e) {
+			throw new IcatInternalException("SystemException" + e.getMessage());
 		}
-		// Check authz now everything persisted
-		GateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
-		NotificationMessages notification = new NotificationMessages(userId, bean, AccessType.CREATE, manager);
-		return new CreateResponse(bean.getPK(), notification);
+
 	}
 
-	public static NotificationMessages delete(String userId, EntityBaseBean bean, EntityManager manager)
-			throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException,
-			IcatInternalException {
-		EntityBaseBean beanManaged = find(bean, manager);
-		GateKeeper.performAuthorisation(userId, beanManaged, AccessType.DELETE, manager);
-		beanManaged.canDelete(manager);
-		NotificationMessages notification = new NotificationMessages(userId, bean, AccessType.DELETE, manager);
-		try {
-			manager.remove(beanManaged);
-			manager.flush();
-			logger.trace("Deleted bean " + bean + " flushed.");
-		} catch (Throwable e) {
-			manager.clear();
-			throw new IcatInternalException("Unexpected DB response " + e.getMessage());
-		}
-		return notification;
+	public static NotificationMessages delete(String userId, EntityBaseBean bean, EntityManager manager,
+			UserTransaction userTransaction) throws NoSuchObjectFoundException, InsufficientPrivilegesException,
+			ValidationException, IcatInternalException {
 
+		try {
+			try {
+				userTransaction.begin();
+			} catch (NotSupportedException e) {
+				throw new IcatInternalException("NotSupportedException" + e.getMessage());
+			}
+			try {
+				EntityBaseBean beanManaged = find(bean, manager);
+				GateKeeper.performAuthorisation(userId, beanManaged, AccessType.DELETE, manager);
+				NotificationMessages notification = new NotificationMessages(userId, bean, AccessType.DELETE, manager);
+				manager.remove(beanManaged);
+				manager.flush();
+				logger.trace("Deleted bean " + bean + " flushed.");
+				userTransaction.commit();
+				return notification;
+			} catch (SecurityException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("SecurityException" + e.getMessage());
+			} catch (IllegalStateException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("IllegalStateException" + e.getMessage());
+			} catch (RollbackException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("RollbackException" + e.getMessage());
+			} catch (HeuristicMixedException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("HeuristicMixedException" + e.getMessage());
+			} catch (HeuristicRollbackException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("HeuristicRollbackException" + e.getMessage());
+			} catch (SystemException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("SystemException" + e.getMessage());
+			} catch (Throwable e) {
+				userTransaction.rollback();
+				EntityBaseBean beanManaged = find(bean, manager);
+				beanManaged.canDelete(manager);
+				e.printStackTrace(System.err);
+				throw new IcatInternalException("Unexpected DB response " + e.getClass() + " " + e.getMessage());
+			}
+		} catch (IllegalStateException e) {
+			throw new IcatInternalException("IllegalStateException" + e.getMessage());
+		} catch (SecurityException e) {
+			throw new IcatInternalException("SecurityException" + e.getMessage());
+		} catch (SystemException e) {
+			throw new IcatInternalException("SystemException" + e.getMessage());
+		}
 	}
 
-	public static NotificationMessages update(String userId, EntityBaseBean bean, EntityManager manager)
-			throws NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException,
-			IcatInternalException, BadParameterException {
-		EntityBaseBean beanManaged = find(bean, manager);
-		GateKeeper.performAuthorisation(userId, beanManaged, AccessType.UPDATE, manager);
-		beanManaged.setModId(userId);
-		beanManaged.merge(bean, manager);
+	public static NotificationMessages update(String userId, EntityBaseBean bean, EntityManager manager,
+			UserTransaction userTransaction) throws NoSuchObjectFoundException, InsufficientPrivilegesException,
+			ValidationException, IcatInternalException, BadParameterException {
 		try {
-			manager.flush();
-			logger.trace("Updated bean " + bean + " flushed.");
-		} catch (Throwable e) {
-			manager.clear();
-			bean.isValid(manager, false);
-			throw new IcatInternalException("Unexpected DB response " + e);
+			try {
+				userTransaction.begin();
+			} catch (NotSupportedException e) {
+				throw new IcatInternalException("NotSupportedException" + e.getMessage());
+			}
+			try {
+				EntityBaseBean beanManaged = find(bean, manager);
+				GateKeeper.performAuthorisation(userId, beanManaged, AccessType.UPDATE, manager);
+				beanManaged.setModId(userId);
+				beanManaged.merge(bean, manager);
+				manager.flush();
+				logger.trace("Updated bean " + bean + " flushed.");
+				NotificationMessages notification = new NotificationMessages(userId, bean, AccessType.UPDATE, manager);
+				userTransaction.commit();
+				return notification;
+			} catch (SecurityException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("SecurityException" + e.getMessage());
+			} catch (IllegalStateException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("IllegalStateException" + e.getMessage());
+			} catch (RollbackException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("RollbackException" + e.getMessage());
+			} catch (HeuristicMixedException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("HeuristicMixedException" + e.getMessage());
+			} catch (HeuristicRollbackException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("HeuristicRollbackException" + e.getMessage());
+			} catch (SystemException e) {
+				userTransaction.rollback();
+				throw new IcatInternalException("SystemException" + e.getMessage());
+			} catch (Throwable e) {
+				userTransaction.rollback();
+				EntityBaseBean beanManaged = find(bean, manager);
+				beanManaged.setModId(userId);
+				beanManaged.merge(bean, manager);
+				beanManaged.isValid(manager, false);
+				e.printStackTrace(System.err);
+				throw new IcatInternalException("Unexpected DB response " + e.getClass() + " " + e.getMessage());
+			}
+		} catch (IllegalStateException e) {
+			throw new IcatInternalException("IllegalStateException" + e.getMessage());
+		} catch (SecurityException e) {
+			throw new IcatInternalException("SecurityException" + e.getMessage());
+		} catch (SystemException e) {
+			throw new IcatInternalException("SystemException" + e.getMessage());
 		}
-		NotificationMessages notification = new NotificationMessages(userId, bean, AccessType.UPDATE, manager);
-		return notification;
 	}
 
 	public static GetResponse get(String userId, String query, Object primaryKey, EntityManager manager)
 			throws NoSuchObjectFoundException, InsufficientPrivilegesException, BadParameterException,
 			IcatInternalException {
+		// Note that this currently uses no transactions. This is simpler and
+		// should give better performance
 
 		List<Token> tokens = null;
 		try {
@@ -141,7 +245,7 @@ public class BeanManager {
 		}
 		EntityBaseBean beanManaged = manager.find(entityClass, primaryKey);
 		if (beanManaged == null) {
-			throw new NoSuchObjectFoundException(entityClass.getSimpleName() + " [id:" + primaryKey + "] not found.");
+			throw new NoSuchObjectFoundException(entityClass.getSimpleName() + "[id:" + primaryKey + "] not found.");
 		}
 
 		Set<Class<? extends EntityBaseBean>> includes = q.getIncludes();
@@ -157,6 +261,8 @@ public class BeanManager {
 
 	public static SearchResponse search(String userId, String query, EntityManager manager)
 			throws BadParameterException, IcatInternalException, InsufficientPrivilegesException {
+		// Note that this currently uses no transactions. This is simpler and
+		// should give better performance
 
 		logger.debug(userId + " searches for " + query);
 
@@ -252,7 +358,6 @@ public class BeanManager {
 					logger.debug("Needs special processing as " + value + " is a bean");
 					if (value != null) {
 						Object pk = ((EntityBaseBean) value).getPK();
-						logger.debug("PK is " + pk);
 						value = (EntityBaseBean) manager.find(field.getType(), pk);
 						fieldAndMethod.getValue().invoke(thisBean, new Object[] { value });
 					} else {
@@ -319,5 +424,9 @@ public class BeanManager {
 			}
 		}
 
+	}
+
+	public static EntityInfo getEntityInfo(String beanName) throws BadParameterException, IcatInternalException {
+		return eiHandler.getEntityInfo(beanName);
 	}
 }

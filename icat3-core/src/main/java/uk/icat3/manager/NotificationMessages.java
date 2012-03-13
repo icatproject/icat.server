@@ -1,6 +1,7 @@
 package uk.icat3.manager;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,8 +17,6 @@ import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.NotificationRequest;
 import uk.icat3.entity.NotificationRequest.DestType;
 import uk.icat3.exceptions.IcatInternalException;
-import uk.icat3.security.AccessType;
-import uk.icat3.security.EntityInfoHandler;
 
 public class NotificationMessages {
 
@@ -73,7 +72,7 @@ public class NotificationMessages {
 
 	private final List<Message> messages = new ArrayList<Message>();
 
-	public NotificationMessages(String userId, EntityBaseBean bean, uk.icat3.security.AccessType accessType,
+	public NotificationMessages(String userId, EntityBaseBean bean, uk.icat3.manager.AccessType accessType,
 			EntityManager manager) throws IcatInternalException {
 		String qName = null;
 		if (accessType == AccessType.CREATE) {
@@ -99,48 +98,17 @@ public class NotificationMessages {
 				if (jpql.contains(":user")) {
 					q.setParameter("user", userId);
 				}
-				final List<String> keys = entityInfoHandler.getKeysFor(objectClass);
-				if (keys.size() == 1) {
-					Method m = null;
-					try {
-						m = objectClass.getDeclaredMethod(keys.get(0));
-					} catch (final NoSuchMethodException e) {
-						throw new IcatInternalException(e.getMessage());
-					}
-					Object keyVal = null;
-					try {
-						keyVal = m.invoke(bean);
-					} catch (final Exception e) {
-						throw new IcatInternalException(e.getMessage());
-					}
-					q.setParameter("pkid", keyVal);
-				} else {
-					// Is > 1
-					Object startObj = bean;
-					int n = 0;
-					boolean first = true;
-					for (final String key : keys) {
-						Method m = null;
-						try {
-							m = objectClass.getDeclaredMethod(key);
-						} catch (final NoSuchMethodException e) {
-							throw new IcatInternalException(e.getMessage());
-						}
-						Object keyVal = null;
-						try {
-							keyVal = m.invoke(startObj);
-						} catch (final Exception e) {
-							throw new IcatInternalException(e.getMessage());
-						}
-						if (first) {
-							first = false;
-							startObj = keyVal;
-						} else {
-							q.setParameter("pkid" + n++, keyVal);
-						}
-					}
+				final Field key = entityInfoHandler.getKeyFor(objectClass);
+				final Method m = entityInfoHandler.getGetters(objectClass).get(key);
 
+				Object keyVal = null;
+				try {
+					keyVal = m.invoke(bean);
+				} catch (final Exception e) {
+					throw new IcatInternalException(e.getMessage());
 				}
+				q.setParameter("pkid", keyVal);
+
 				if (q.getSingleResult() != 1) {
 					continue;
 				}
@@ -184,50 +152,15 @@ public class NotificationMessages {
 		if (nr.isKeyWanted() && bean != null) {
 			message.pk = new HashMap<String, Serializable>();
 			Class<? extends EntityBaseBean> beanClass = bean.getClass();
-			final List<String> keys = entityInfoHandler.getKeysFor(beanClass);
-			if (keys.size() == 1) {
-				Method m = null;
-				try {
-					m = beanClass.getDeclaredMethod(keys.get(0));
-				} catch (final NoSuchMethodException e) {
-					throw new IcatInternalException(e.getMessage());
-				}
-				Object keyVal = null;
-				try {
-					keyVal = m.invoke(bean);
-				} catch (final Exception e) {
-					throw new IcatInternalException(e.getMessage());
-				}
-				String name = keys.get(0);
-				name = name.substring(3, 4).toUpperCase() + name.substring(4);
-				message.pk.put(name, (Serializable) keyVal);
-			} else {
-				// Is > 1
-				Object startObj = bean;
-				boolean first = true;
-				for (final String key : keys) {
-					Method m = null;
-					try {
-						m = beanClass.getDeclaredMethod(key);
-					} catch (final NoSuchMethodException e) {
-						throw new IcatInternalException(e.getMessage());
-					}
-					Object keyVal = null;
-					try {
-						keyVal = m.invoke(startObj);
-					} catch (final Exception e) {
-						throw new IcatInternalException(e.getMessage());
-					}
-					if (first) {
-						first = false;
-						startObj = keyVal;
-					} else {
-						String name = key.substring(3, 4).toUpperCase() + key.substring(4);
-						message.pk.put(name, (Serializable) keyVal);
-					}
-				}
-
+			final Field key = entityInfoHandler.getKeyFor(beanClass);
+			final Method m = entityInfoHandler.getGetters(beanClass).get(key);
+			Object keyVal = null;
+			try {
+				keyVal = m.invoke(bean);
+			} catch (final Exception e) {
+				throw new IcatInternalException(e.getMessage());
 			}
+			message.pk.put(key.getName(), (Serializable) keyVal);
 		}
 		if (nr.isArgsWanted() && queryString != null) {
 			message.args = queryString;

@@ -12,7 +12,6 @@ import uk.icat3.entity.Datafile;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.security.GateKeeper;
 
 public class DatafileManager {
 
@@ -33,7 +32,7 @@ public class DatafileManager {
 			}
 
 			// check user has read access
-			GateKeeper.performAuthorisation(userId, dataFile, uk.icat3.security.AccessType.READ, manager);
+			GateKeeper.performAuthorisation(userId, dataFile, uk.icat3.manager.AccessType.READ, manager);
 
 			// add to arraylist
 			dataFiles.add(dataFile);
