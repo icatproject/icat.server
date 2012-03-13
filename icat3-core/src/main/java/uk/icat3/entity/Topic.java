@@ -19,6 +19,7 @@ import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 
+@Comment("***** What does a topic bring that a study does not have? Couldn't the Keyword be used")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "topicGenerator", pkColumnValue = "Topic")

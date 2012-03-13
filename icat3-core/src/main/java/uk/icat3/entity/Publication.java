@@ -15,6 +15,7 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
+@Comment("A publication")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "publicationGenerator", pkColumnValue = "Publication")
@@ -22,83 +23,29 @@ public class Publication extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(Publication.class);
 
+	@Comment("A reference in the form to be used for citation")
+	@Column(nullable = false)
+	private String fullReference;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "publicationGenerator")
 	private Long id;
 
-	@Column(nullable = false)
-	private String fullReference;
+	@JoinColumn(nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Investigation investigation;
 
-	public Investigation getInvestigation() {
-		return investigation;
-	}
-
-	public void setInvestigation(Investigation investigation) {
-		this.investigation = investigation;
-	}
-
-	private String url;
-
-	private String repositoryId;
-
+	@Comment("The name of a repository where the publication is held")
 	private String repository;
 
-	@JoinColumn(nullable = false)
-	@ManyToOne(fetch = FetchType.LAZY)	
-	private Investigation investigation;
+	@Comment("The id of the publication within the repository")
+	private String repositoryId;
+
+	@Comment("A URL from which the publication may be downloaded")
+	private String url;
 
 	/* Needed for JPA */
 	public Publication() {
-	}
-
-	public Long getId() {
-		return this.id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getFullReference() {
-		return this.fullReference;
-	}
-
-	public void setFullReference(String fullReference) {
-		this.fullReference = fullReference;
-	}
-
-	public String getUrl() {
-		return this.url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public String getRepositoryId() {
-		return this.repositoryId;
-	}
-
-	public void setRepositoryId(String repositoryId) {
-		this.repositoryId = repositoryId;
-	}
-
-	public String getRepository() {
-		return this.repository;
-	}
-
-	public void setRepository(String repository) {
-		this.repository = repository;
-	}
-
-	@Override
-	public String toString() {
-		return "Publication[id=" + id + "]";
-	}
-
-	@Override
-	public Object getPK() {
-		return id;
 	}
 
 	public void beforeMarshal(Marshaller source) {
@@ -106,6 +53,64 @@ public class Publication extends EntityBaseBean implements Serializable {
 		if (!this.includes.contains(Investigation.class)) {
 			this.investigation = null;
 		}
+	}
+
+	public String getFullReference() {
+		return this.fullReference;
+	}
+
+	public Long getId() {
+		return this.id;
+	}
+
+	public Investigation getInvestigation() {
+		return investigation;
+	}
+
+	@Override
+	public Object getPK() {
+		return id;
+	}
+
+	public String getRepository() {
+		return this.repository;
+	}
+
+	public String getRepositoryId() {
+		return this.repositoryId;
+	}
+
+	public String getUrl() {
+		return this.url;
+	}
+
+	public void setFullReference(String fullReference) {
+		this.fullReference = fullReference;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public void setInvestigation(Investigation investigation) {
+		this.investigation = investigation;
+	}
+
+	public void setRepository(String repository) {
+		this.repository = repository;
+	}
+
+	public void setRepositoryId(String repositoryId) {
+		this.repositoryId = repositoryId;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	@Override
+	public String toString() {
+		return "Publication[id=" + id + "]";
 	}
 
 }

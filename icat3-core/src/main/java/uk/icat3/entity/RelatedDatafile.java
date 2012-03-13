@@ -22,6 +22,7 @@ import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 
+@Comment("Used to represent an arbitrary relationship between data files")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "SOURCE_DATAFILE_ID", "DEST_DATAFILE_ID" }) })
@@ -74,6 +75,7 @@ public class RelatedDatafile extends EntityBaseBean implements Serializable {
 		this.relation = relation;
 	}
 
+	@Comment("Identifies the type of relationship between the two datafiles - e.g. \"COPY\"")
 	@Column(name = "RELATION", nullable = false)
 	private String relation;
 

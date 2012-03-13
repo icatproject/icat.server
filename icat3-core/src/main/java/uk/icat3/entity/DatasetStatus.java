@@ -11,15 +11,18 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
+@Comment("The status of a data set")
 @SuppressWarnings("serial")
 @Entity
 public class DatasetStatus extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(DatasetType.class);
 
+	@Comment("A short name identifying this status type")
 	@Id
 	private String name;
 
+	@Comment("A description of this status type")
 	private String description;
 
 	@OneToMany(mappedBy = "status")

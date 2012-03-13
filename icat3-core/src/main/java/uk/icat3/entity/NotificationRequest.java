@@ -21,17 +21,18 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.security.parser.Input;
-import uk.icat3.security.parser.LexerException;
-import uk.icat3.security.parser.ParserException;
-import uk.icat3.security.parser.RestrictedBean;
-import uk.icat3.security.parser.Token;
-import uk.icat3.security.parser.Tokenizer;
+import uk.icat3.parser.Input;
+import uk.icat3.parser.LexerException;
+import uk.icat3.parser.ParserException;
+import uk.icat3.parser.RestrictedBean;
+import uk.icat3.parser.Token;
+import uk.icat3.parser.Tokenizer;
 
+@Comment("Registers a request for a JMS notification to be sent out")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "notificationRequestGenerator", pkColumnValue = "NotificationRequest")
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @NamedQueries({
 		@NamedQuery(name = "NotificationRequest.CreateQuery", query = "SELECT DISTINCT nr FROM NotificationRequest nr WHERE nr.bean = :bean AND nr.c = TRUE"),
 		@NamedQuery(name = "NotificationRequest.ReadQuery", query = "SELECT DISTINCT nr FROM NotificationRequest nr WHERE nr.bean = :bean AND nr.r = TRUE "),
@@ -60,18 +61,22 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 
 	public static final String SEARCH_QUERY = "NotificationRequest.SearchQuery";
 
-	@Column(nullable = false)
+	@Comment("A unique name for the notification request. It is not the key so it can be updated.")
+	@Column(name = "NAME", nullable = false)
 	private String name;
-	
+
+	@Comment("An enum which may be PUBSUB or P2P")
 	@Column(nullable = false)
 	private DestType destType;
-	
-	@Column(nullable = false)
+
+	@Comment("Contains letters from the set \"CRUD\"")
+	@Column(nullable = false, length=4)
 	private String crudFlags;
-	
+
+	@Comment("When to send notifications")
 	@Column(nullable = false)
 	private String what;
-	
+
 	@XmlTransient
 	private String bean;
 

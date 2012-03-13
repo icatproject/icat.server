@@ -17,6 +17,7 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
+@Comment("A parameter type with unique name and units")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "investigatorGenerator", pkColumnValue = "Investigator")
@@ -33,12 +34,15 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "parameterGenerator")
 	private Long id;
 
+	@Comment("The name of the parameter type")
 	@Column(name = "NAME", nullable = false)
 	private String name;
 
-	@Column(name = "UNITS", nullable = false)
+	@Comment("The name of the parameter type units")
+	@Column(name = "UNITS")
 	private String units;
 
+	@Comment("The formal name of the parameter type units")
 	private String unitsFullName;
 
 	public ParameterValueType getValueType() {
@@ -49,14 +53,23 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 		this.valueType = valueType;
 	}
 
+	@Comment("enum with possible values: NUMERIC, STRING, DATE_AND_TIME")
 	@Column(nullable = false)
 	private ParameterValueType valueType;
 
+	@Comment("If a parameter of this type may be applied to a sample")
 	private boolean applicableToSample;
+
+	@Comment("If a parameter of this type may be applied to a data set")
 	private boolean applicableToDataset;
+
+	@Comment("If a parameter of this type may be applied to a data file")
 	private boolean applicableToDatafile;
+
+	@Comment("If a parameter of this type may be applied to an investigation")
 	private boolean applicableToInvestigation;
 
+	@Comment("Description of the parameter type")
 	private String description;
 
 	public List<SampleParameter> getSampleParameters() {
@@ -87,18 +100,19 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 		this.datasetParameters = datasetParameters;
 	}
 
+	@Comment("If ordinary users are allowed to create their own parameter types this indicates that this one has been approved")
 	private boolean verified;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "parameterType")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<DatasetParameter> datasetParameters;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "parameterType")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<SampleParameter> sampleParameters;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "parameterType")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<DatafileParameter> datafileParameters;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "parameterType")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<InvestigationParameter> investigationParameters;
 
 	/* Needed for JPA */

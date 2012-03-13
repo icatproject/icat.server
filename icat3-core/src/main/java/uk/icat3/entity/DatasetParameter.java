@@ -21,6 +21,7 @@ import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 
+@Comment("A parameter associated with a data set")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "datasetParameterGenerator", pkColumnValue = "DatasetParameter")
@@ -34,6 +35,7 @@ public class DatasetParameter extends Parameter implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datasetParameterGenerator")
 	private Long id;
 
+	@Comment("The associated data set")
 	@JoinColumn(name = "DATASET_ID", nullable = false)
 	@ManyToOne
 	private Dataset dataset;

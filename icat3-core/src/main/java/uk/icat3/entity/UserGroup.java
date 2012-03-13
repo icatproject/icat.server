@@ -7,6 +7,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
@@ -15,6 +16,7 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
+@Comment("Many to many relationship between user and group")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "userGroupGenerator", pkColumnValue = "UserGroup")
@@ -27,9 +29,11 @@ public class UserGroup extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "userGroupGenerator")
 	private Long id;
 
+	@JoinColumn(name = "GROUP_NAME")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Group group;
 
+	@JoinColumn(name = "USER_NAME")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User user;
 

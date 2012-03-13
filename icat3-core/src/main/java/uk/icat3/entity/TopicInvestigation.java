@@ -20,6 +20,7 @@ import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 
+@Comment("Many to many relationship between a topic and an investigation")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "topicInvestigationGenerator", pkColumnValue = "TopicInvestigation")

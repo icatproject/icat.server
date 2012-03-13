@@ -3,6 +3,7 @@ package uk.icat3.entity;
 import java.io.Serializable;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -11,53 +12,26 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
+@Comment("A group of users")
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "\"GROUP\"")
 public class Group extends EntityBaseBean implements Serializable {
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setUserGroups(Set<UserGroup> userGroups) {
-		this.userGroups = userGroups;
-	}
-
 	private final static Logger logger = Logger.getLogger(Group.class);
 
-	// Needed for JPA
-	public Group() {
-	};
-
-	public String getName() {
-		return this.name;
-	}
-
+	@Comment("A short name identifying this group of users")
 	@Id
 	private String name;
 
-	@OneToMany(mappedBy = "group")
-	private Set<UserGroup> userGroups;
-
-	@OneToMany(mappedBy = "group")
+	@OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
 	private Set<Rule> rules;
 
-	public Set<Rule> getRules() {
-		return rules;
-	}
+	@OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+	private Set<UserGroup> userGroups;;
 
-	public void setRules(Set<Rule> rules) {
-		this.rules = rules;
-	}
-
-	public Set<UserGroup> getUserGroups() {
-		return userGroups;
-	}
-
-	@Override
-	public Object getPK() {
-		return this.name;
+	// Needed for JPA
+	public Group() {
 	}
 
 	public void beforeMarshal(Marshaller source) {
@@ -68,5 +42,39 @@ public class Group extends EntityBaseBean implements Serializable {
 		if (!this.includes.contains(Rule.class)) {
 			this.rules = null;
 		}
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	@Override
+	public Object getPK() {
+		return this.name;
+	}
+
+	public Set<Rule> getRules() {
+		return rules;
+	}
+
+	public Set<UserGroup> getUserGroups() {
+		return userGroups;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setRules(Set<Rule> rules) {
+		this.rules = rules;
+	}
+
+	public void setUserGroups(Set<UserGroup> userGroups) {
+		this.userGroups = userGroups;
+	}
+
+	@Override
+	public String toString() {
+		return "Group[name=" + name + "]";
 	}
 }

@@ -14,21 +14,26 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
+@Comment("An operating cycle within a facility")
 @SuppressWarnings("serial")
 @Entity
 public class FacilityCycle extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(FacilityCycle.class);
 
+	@Comment("A short name identifying this facility cycle")
 	@Id
 	private String name;
 
+	@Comment("Start of cycle")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date startDate;
 
+	@Comment("End of cycle")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date endDate;
 
+	@Comment("A description of this facility cycle")
 	private String description;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facilityCycle")

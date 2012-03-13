@@ -21,6 +21,7 @@ import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 
+@Comment("A parameter associated with a data file")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "datafileParameterGenerator", pkColumnValue = "DatafileParameter")
@@ -34,6 +35,7 @@ public class DatafileParameter extends Parameter implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datafileParameterGenerator")
 	private Long id;
 
+	@Comment("The associated data file")
 	@JoinColumn(name = "DATAFILE_ID", nullable = false)
 	@ManyToOne
 	private Datafile datafile;

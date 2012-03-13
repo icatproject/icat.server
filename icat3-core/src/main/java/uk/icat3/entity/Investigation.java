@@ -14,10 +14,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQuery;
-import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
-import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
@@ -31,13 +28,12 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.exceptions.ObjectAlreadyExistsException;
 
+@Comment("An investigation or experiment")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "VISIT_ID", "FACILITY_CYCLE_ID", "INSTRUMENT_ID" }) })
 @XmlRootElement
-@NamedQuery(name = "Investigation.findByUnique", query = "SELECT i FROM Investigation i WHERE (i.name = :name OR i.name is NULL) AND (i.visitId = :visitId OR i.visitId IS NULL) AND (i.facilityCycle = :facilityCycle OR i.facilityCycle IS NULL) AND (i.instrument = :instrument OR i.instrument IS NULL)")
 @TableGenerator(name = "investigationGenerator", pkColumnValue = "Investigation")
 public class Investigation extends EntityBaseBean implements Serializable {
 
@@ -47,9 +43,11 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "investigationGenerator")
 	private Long id;
 
+	@Comment("A short name for the investigation")
 	@Column(name = "NAME", nullable = false)
 	private String name;
 
+	@Comment("Identifier for the visit to which this investigation is related")
 	@Column(name = "VISIT_ID")
 	private String visitId;
 
@@ -61,12 +59,15 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@ManyToOne
 	private Instrument instrument;
 
+	@Comment("Full title of the investigation")
 	@Column(nullable = false)
 	private String title;
 
+	@Comment("Summary or abstract")
 	@Column(length = 4000)
 	private String summary;
 
+	@Comment("When the data will be made freely available")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date releaseDate;
 
@@ -197,13 +198,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		this.studyInvestigations = studyInvestigations;
 	}
 
-	public List<Investigator> getInvestigators() {
-		return investigators;
-	}
 
-	public void setInvestigators(List<Investigator> investigators) {
-		this.investigators = investigators;
-	}
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<Dataset> datasets = new ArrayList<Dataset>();
@@ -218,7 +213,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	private List<StudyInvestigation> studyInvestigations = new ArrayList<StudyInvestigation>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private List<Investigator> investigators = new ArrayList<Investigator>();
+	private List<InvestigationUser> investigationUsers = new ArrayList<InvestigationUser>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<TopicInvestigation> topicInvestigations = new ArrayList<TopicInvestigation>();
@@ -280,7 +275,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		return "Investigation[id=" + id + "]";
 	}
 
-	// TODO restire as needed
+	// TODO restore as needed
 	// public void isValid(EntityManager manager, boolean deepValidation) throws
 	// ValidationException,
 	// IcatInternalException {
@@ -318,49 +313,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	//
 	// }
 	// }
-
-	/**
-	 * Checks weather the investigation is unique in the database.
-	 * 
-	 * @throws ObjectAlreadyExistsException
-	 */
-	public void isUnique(EntityManager manager) throws ObjectAlreadyExistsException {
-		logger.trace("isUnique?");
-		Query query = manager.createNamedQuery("Investigation.findByUnique");
-		query = query.setParameter("name", name);
-		query = query.setParameter("visitId", visitId);
-		query = query.setParameter("facilityCycle", facilityCycle);
-		query = query.setParameter("instrument", instrument);
-
-		try {
-			logger.trace("Looking for: name: " + name);
-			logger.trace("Looking for: visitId: " + visitId);
-			logger.trace("Looking for: facilityCycle: " + facilityCycle);
-			logger.trace("Looking for: instrument: " + instrument);
-
-			Investigation investigationFound = (Investigation) query.getSingleResult();
-			logger.trace("Returned: " + investigationFound);
-			if (investigationFound.getId() != null && investigationFound.getId().equals(this.getId())) {
-				logger.trace("investigation found is this dataset");
-				return;
-			} else {
-				logger.trace("investigation found is not this investigation, so no unique");
-				throw new ObjectAlreadyExistsException(this + " is not unique.  Same unique key as "
-						+ investigationFound);
-			}
-		} catch (NoResultException nre) {
-			logger.trace("No results so unique");
-			// means it is unique
-			return;
-		} catch (Throwable ex) {
-			logger.warn(ex);
-			// means it is unique
-			if (ex instanceof ObjectAlreadyExistsException)
-				throw (ObjectAlreadyExistsException) ex;
-			else
-				throw new ObjectAlreadyExistsException(this + " is not unique.");
-		}
-	}
 
 	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
 			BadParameterException, IcatInternalException {
@@ -406,8 +358,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		if (!this.includes.contains(StudyInvestigation.class)) {
 			this.studyInvestigations = null;
 		}
-		if (!this.includes.contains(Investigator.class)) {
-			this.investigators = null;
+		if (!this.includes.contains(InvestigationUser.class)) {
+			this.investigationUsers = null;
 		}
 		if (!this.includes.contains(TopicInvestigation.class)) {
 			this.topicInvestigations = null;
@@ -418,6 +370,14 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		if (!this.includes.contains(InvestigationType.class)) {
 			this.type = null;
 		}
+	}
+
+	public List<InvestigationUser> getInvestigationUsers() {
+		return investigationUsers;
+	}
+
+	public void setInvestigationUsers(List<InvestigationUser> investigationUsers) {
+		this.investigationUsers = investigationUsers;
 	}
 
 	public List<TopicInvestigation> getTopicInvestigations() {

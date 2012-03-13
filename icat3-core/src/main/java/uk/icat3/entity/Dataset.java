@@ -15,7 +15,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
@@ -30,13 +29,12 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.exceptions.ObjectAlreadyExistsException;
 import uk.icat3.exceptions.ValidationException;
 
+@Comment("A collection of data files and part of an investigation")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "SAMPLE_ID", "INVESTIGATION_ID", "NAME", "TYPE" }) })
-@NamedQuery(name = "Dataset.findByUnique", query = "SELECT d FROM Dataset d WHERE (d.sample = :sample OR d.sample IS NULL) AND d.name = :name AND d.investigation = :investigation AND d.type = :type")
 @XmlRootElement
 @TableGenerator(name = "datasetGenerator", pkColumnValue = "Dataset")
 public class Dataset extends EntityBaseBean implements Serializable {
@@ -47,6 +45,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datasetGenerator")
 	private Long id;
 
+	@Comment("The data files within the dataset")
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<Datafile> datafiles = new ArrayList<Datafile>();
 
@@ -60,14 +59,17 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private DatasetType type;
 
+	@Comment("An informal description of the data set")
 	private String description;
 
 	@JoinColumn(name = "INVESTIGATION_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Investigation investigation;
 
+	@Comment("Identifies a location from which all the files of the data set might be accessed. It might be a directory")
 	private String location;
 
+	@Comment("A short name for the data set")
 	@Column(name = "NAME", nullable = false)
 	private String name;
 
@@ -78,10 +80,10 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date startDate;
 
-	@OneToMany(mappedBy = "dataset")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<InputDataset> inputDatasets;
 
-	@OneToMany(mappedBy = "dataset")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<OutputDataset> outputDatasets;
 
 	@Column(name = "END_DATE")
@@ -127,19 +129,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	public Date getStartDate() {
 		return this.startDate;
-	}
-
-	@Override
-	public void isUnique(EntityManager manager) throws ValidationException, ObjectAlreadyExistsException,
-			IcatInternalException {
-		super.isUnique(manager);
-		if (manager.createNamedQuery("Dataset.findByUnique", Dataset.class).setParameter("name", this.name)
-				.setParameter("sample", this.sample).setParameter("investigation", this.investigation)
-				.setParameter("type", this.type).getResultList().size() > 0) {
-			throw new ObjectAlreadyExistsException(
-					"Uniqueness constraint on (name, sampleId, investigation, datasetType): " + this.name + ", "
-							+ this.sample + ", " + this.investigation + ", " + this.type);
-		}
 	}
 
 	@Override

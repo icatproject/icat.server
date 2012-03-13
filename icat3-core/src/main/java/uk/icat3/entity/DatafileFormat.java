@@ -22,6 +22,7 @@ import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 
+@Comment("A data file format")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "datafileFormatGenerator", pkColumnValue = "DatafileFormat")
@@ -30,21 +31,26 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(DatafileFormat.class);
 
+	@Comment("Files with this format")
 	@OneToMany(mappedBy = "datafileFormat")
 	private List<Datafile> datafiles = new ArrayList<Datafile>();
 
+	@Comment("An informal description of the format")
 	private String description;
 
-	private String formatType;
+	@Comment("Holds the underlying format - such as binary or text")
+	private String type;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datafileFormatGenerator")
 	private Long id;
 
+	@Comment("A short name identifying the format -e.g. \"mp3\"")
 	@Column(name = "NAME", nullable = false)
 	private String name;
 
-	@Column(name = "VERSION", nullable = false)
+	@Comment("The version if needed.  The version code may be part of the basic name")
+	@Column(name = "VERSION")
 	private String version;
 
 	/* Needed for JPA */
@@ -59,8 +65,8 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 		return this.description;
 	}
 
-	public String getFormatType() {
-		return this.formatType;
+	public String getType() {
+		return this.type;
 	}
 
 	public Long getId() {
@@ -88,8 +94,8 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 		this.description = description;
 	}
 
-	public void setFormatType(String formatType) {
-		this.formatType = formatType;
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	public void setId(Long id) {

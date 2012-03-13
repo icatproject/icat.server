@@ -16,17 +16,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.log4j.Logger;
 
+@Comment("Many to many relationship between investigation and user")
 @SuppressWarnings("serial")
 @Entity
 @XmlRootElement
-@TableGenerator(name = "investigatorGenerator", pkColumnValue = "Investigator")
+@TableGenerator(name = "investigationUserGenerator", pkColumnValue = "InvestigationUser")
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "USER_ID", "INVESTIGATION_ID" }) })
-public class Investigator extends EntityBaseBean implements Serializable {
+public class InvestigationUser extends EntityBaseBean implements Serializable {
 
-	private final static Logger logger = Logger.getLogger(Investigator.class);
+	private final static Logger logger = Logger.getLogger(InvestigationUser.class);
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "investigatorGenerator")
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "investigationUserGenerator")
 	private Long id;
 
 	private String role;
@@ -40,7 +41,7 @@ public class Investigator extends EntityBaseBean implements Serializable {
 	private Investigation investigation;
 
 	/* Needed for JPA */
-	public Investigator() {
+	public InvestigationUser() {
 	}
 
 	@Override

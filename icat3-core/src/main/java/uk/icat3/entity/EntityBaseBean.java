@@ -2,6 +2,7 @@ package uk.icat3.entity;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.Query;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlElement;
@@ -27,7 +29,7 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ObjectAlreadyExistsException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.BeanManager;
-import uk.icat3.security.EntityInfoHandler;
+import uk.icat3.manager.EntityInfoHandler;
 
 @SuppressWarnings("serial")
 @MappedSuperclass
@@ -208,16 +210,12 @@ public abstract class EntityBaseBean implements Serializable {
 		// Do nothing by default
 	}
 
-	/*
-	 * If this method is overridden it should normally be called as well by
-	 * super.isUnique()
-	 */
-	public void isUnique(EntityManager manager) throws ValidationException, ObjectAlreadyExistsException,
+	final public void isUnique(EntityManager manager) throws ValidationException, ObjectAlreadyExistsException,
 			IcatInternalException {
 
-		if (eiHandler.getKeytype(this.getClass()) != EntityInfoHandler.KeyType.GENERATED) {
+		Class<? extends EntityBaseBean> entityClass = this.getClass();
+		if (eiHandler.getKeytype(entityClass) != EntityInfoHandler.KeyType.GENERATED) {
 			Object primaryKey = this.getPK();
-			Class<? extends EntityBaseBean> entityClass = this.getClass();
 			if (primaryKey == null) {
 				throw new ValidationException(entityClass.getSimpleName() + "[id:" + primaryKey + "] was null.");
 			}
@@ -225,6 +223,59 @@ public abstract class EntityBaseBean implements Serializable {
 				throw new ObjectAlreadyExistsException(entityClass.getSimpleName() + "[id:" + primaryKey
 						+ "] already present.");
 			}
+		}
+
+		Map<Field, Method> getters = eiHandler.getGetters(entityClass);
+		for (List<Field> constraint : eiHandler.getConstraintFields(entityClass)) {
+			StringBuilder queryString = new StringBuilder();
+			for (Field f : constraint) {
+				if (queryString.length() == 0) {
+					queryString.append("SELECT COUNT(o) FROM " + entityClass.getSimpleName() + " o WHERE (");
+				} else {
+					queryString.append(") AND (");
+				}
+				String name = f.getName();
+				queryString.append("o." + name + " = :" + name + " OR o." + name + " IS NULL");
+			}
+			Query query = manager.createQuery(queryString.toString() + ")");
+			for (Field f : constraint) {
+				Object value;
+				try {
+					value = getters.get(f).invoke(this);
+				} catch (IllegalArgumentException e) {
+					throw new IcatInternalException("IllegalArgumentException " + e.getMessage());
+				} catch (IllegalAccessException e) {
+					throw new IcatInternalException("IllegalAccessException " + e.getMessage());
+				} catch (InvocationTargetException e) {
+					throw new IcatInternalException("InvocationTargetException " + e.getMessage());
+				}
+				query = query.setParameter(f.getName(), value);
+			}
+			logger.debug("Checking uniqueness with " + query);
+			long count = (Long) query.getSingleResult();
+			if (count != 0) {
+				StringBuilder erm = new StringBuilder();
+				for (Field f : constraint) {
+					Object value;
+					try {
+						value = getters.get(f).invoke(this);
+					} catch (IllegalArgumentException e) {
+						throw new IcatInternalException("IllegalArgumentException " + e.getMessage());
+					} catch (IllegalAccessException e) {
+						throw new IcatInternalException("IllegalAccessException " + e.getMessage());
+					} catch (InvocationTargetException e) {
+						throw new IcatInternalException("InvocationTargetException " + e.getMessage());
+					}
+					if (erm.length() == 0) {
+						erm.append(entityClass.getSimpleName() + " exists with ");
+					} else {
+						erm.append(", ");
+					}
+					erm.append(f.getName() + " = '" + value + "'");
+				}
+				throw new ObjectAlreadyExistsException(erm.toString());
+			}
+
 		}
 	}
 

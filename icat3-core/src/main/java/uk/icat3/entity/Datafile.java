@@ -13,12 +13,14 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -28,10 +30,11 @@ import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 
+@Comment("A data file")
 @SuppressWarnings("serial")
 @Entity
-@NamedQuery(name = "Datafile.findByUnique", query = "SELECT d FROM Datafile d where d.name = :name and d.location = :location and d.dataset = :dataset")
 @XmlRootElement
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "LOCATION", "DATASET_ID" }) })
 @TableGenerator(name = "datafileGenerator", pkColumnValue = "Datafile")
 public class Datafile extends EntityBaseBean implements Serializable {
 
@@ -41,29 +44,41 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datafileGenerator")
 	private Long id;
 
-	@Column(nullable = false)
+	@Comment("A name given to the file")
+	@Column(name = "NAME", nullable = false)
 	private String name;
 
+	@Comment("A full description of the file contents")
 	private String description;
 
+	@Comment("**** Do we want this - it is not part of the constraint - not used by ISIS")
 	private String version;
 
+	@Comment("**** Do we want this - it is not part of the constraint - not used by ISIS")
 	private String versionComment;
 
+	@Comment("The logical location of the file - which may also be the physical location")
+	@Column(name = "LOCATION")
 	private String location;
 
+	@Comment("**** Do we want this")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date datafileCreateTime;
 
+	@Comment("**** Do we want this")
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date datafileModifyTime;
+	private Date datafileModTime;
 
+	@Comment("Expressed in bytes")
 	private Long fileSize;
 
+	@Comment("**** Do we want this - not used by ISIS")
 	private String command;
 
+	@Comment("**** Nobody would search for a file with this field")
 	private String checksum;
 
+	@Comment("**** Nobody would search for a file with this field - not used by ISIS")
 	private String signature;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sourceDatafile")
@@ -91,16 +106,18 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private DatafileFormat datafileFormat;
 
+	@Comment("The dataset which holds this file")
+	@JoinColumn(name = "DATASET_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Dataset dataset;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
 	private List<DatafileParameter> datafileParameters = new ArrayList<DatafileParameter>();
 
-	@OneToMany(mappedBy = "datafile")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
 	private List<InputDatafile> inputDatafiles = new ArrayList<InputDatafile>();
 
-	@OneToMany(mappedBy = "datafile")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
 	private List<OutputDatafile> outputDatafiles = new ArrayList<OutputDatafile>();
 
 	/* Needed for JPA */
@@ -134,40 +151,6 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	// throw new ValidationException(datafileFormat +
 	// " is not a valid DatafileFormat");
 	// }
-	// }
-	// }
-
-	// TODO put back
-	// public void isUnique(EntityManager manager) throws ValidationException {
-	// Query query = manager.createNamedQuery("Datafile.findByUnique");
-	// query = query.setParameter("name", name);
-	// query = query.setParameter("location", location);
-	// query = query.setParameter("dataset", dataset);
-	//
-	// try {
-	// log.trace("Looking for: name: " + name);
-	// log.trace("Looking for: location: " + location);
-	// log.trace("Looking for: dataset: " + dataset);
-	// Datafile datafileFound = (Datafile) query.getSingleResult();
-	// log.trace("Returned: " + datafileFound);
-	// if (datafileFound.getId() != null &&
-	// datafileFound.getId().equals(this.getId())) {
-	// System.out.println("Found this same object");
-	// log.trace("Datafile found is this datafile");
-	// return;
-	// } else {
-	// log.trace("Datafile found is not this datafile, so not unique");
-	// throw new ValidationException(this +
-	// " is not unique. Same unique key as " + datafileFound);
-	// }
-	// } catch (NoResultException nre) {
-	// log.trace("No results so unique");
-	// // means it is unique
-	// return;
-	// } catch (Throwable ex) {
-	// log.warn(ex);
-	// // means it is unique
-	// throw new ValidationException(this + " is not unique.");
 	// }
 	// }
 
@@ -237,12 +220,12 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		this.datafileCreateTime = datafileCreateTime;
 	}
 
-	public Date getDatafileModifyTime() {
-		return datafileModifyTime;
+	public Date getDatafileModTime() {
+		return datafileModTime;
 	}
 
-	public void setDatafileModifyTime(Date datafileModifyTime) {
-		this.datafileModifyTime = datafileModifyTime;
+	public void setDatafileModTime(Date datafileModTime) {
+		this.datafileModTime = datafileModTime;
 	}
 
 	public Long getFileSize() {

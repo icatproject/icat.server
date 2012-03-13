@@ -23,13 +23,14 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.security.parser.Input;
-import uk.icat3.security.parser.LexerException;
-import uk.icat3.security.parser.ParserException;
-import uk.icat3.security.parser.RestrictedBean;
-import uk.icat3.security.parser.Token;
-import uk.icat3.security.parser.Tokenizer;
+import uk.icat3.parser.Input;
+import uk.icat3.parser.LexerException;
+import uk.icat3.parser.ParserException;
+import uk.icat3.parser.RestrictedBean;
+import uk.icat3.parser.Token;
+import uk.icat3.parser.Tokenizer;
 
+@Comment("An authorization rule")
 @SuppressWarnings("serial")
 @Entity
 @NamedQueries({
@@ -73,6 +74,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 	@Column(length = 1024)
 	private String crudJPQL;
 
+	@Comment("To what the rules applies")
 	private String what;
 
 	@XmlTransient
@@ -82,7 +84,8 @@ public class Rule extends EntityBaseBean implements Serializable {
 	@XmlTransient
 	private String beans;
 
-	@Column(length = 4)
+	@Comment("Contains letters from the set \"CRUD\"")
+	@Column(nullable = false, length=4)
 	private String crudFlags;
 
 	@XmlTransient

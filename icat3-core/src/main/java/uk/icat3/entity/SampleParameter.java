@@ -21,6 +21,7 @@ import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 
+@Comment("A parameter associated with a sample")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "sampleParameterGenerator", pkColumnValue = "SampleParameter")
@@ -34,6 +35,7 @@ public class SampleParameter extends Parameter implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "sampleParameterGenerator")
 	private Long id;
 
+	@Comment("The associated sample")
 	@JoinColumn(name = "SAMPLE_ID", nullable = false)
 	@ManyToOne
 	private Sample sample;

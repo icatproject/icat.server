@@ -23,10 +23,11 @@ import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 
+@Comment("Some piece of software")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "applicationGenerator", pkColumnValue = "Application")
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "name", "version" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "VERSION" }) })
 public class Application extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(Application.class);
@@ -35,9 +36,11 @@ public class Application extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "applicationGenerator")
 	private Long id;
 
-	@Column
+	@Comment("A short name for the software - e.g. mantid")
+	@Column(name = "NAME")
 	private String name;
 
+	@Column(name = "VERSION")
 	private String version;
 
 	@OneToMany(mappedBy = "application")

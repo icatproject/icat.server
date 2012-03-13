@@ -10,15 +10,18 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
+@Comment("A type of investigation")
 @SuppressWarnings("serial")
 @Entity
 public class InvestigationType extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(InvestigationType.class);
 
+	@Comment("A short name identifying this type of investigation")
 	@Id
 	private String name;
 
+	@Comment("A description of this type of investigation")
 	private String description;
 
 	@OneToMany(mappedBy = "type")

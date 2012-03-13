@@ -11,6 +11,7 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
+@Comment("**** Do we really want this?")
 @SuppressWarnings("serial")
 @Entity
 public class StudyStatus extends EntityBaseBean implements Serializable {

@@ -21,16 +21,17 @@ import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 
+@Comment("Relationship between an ICAT user as an instrument scientist and the instrument")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "USER_ID", "INSTRUMENT_ID" }) })
-@TableGenerator(name = "facilityInstrumentScientistGenerator", pkColumnValue = "FacilityInstrumentScientist")
-public class FacilityInstrumentScientist extends EntityBaseBean implements Serializable {
+@TableGenerator(name = "instrumentScientistGenerator", pkColumnValue = "InstrumentScientist")
+public class InstrumentScientist extends EntityBaseBean implements Serializable {
 
-	private final static Logger logger = Logger.getLogger(FacilityInstrumentScientist.class);
+	private final static Logger logger = Logger.getLogger(InstrumentScientist.class);
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "facilityInstrumentScientistGenerator")
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "instrumentScientistGenerator")
 	private Long id;
 
 	public Long getId() {
@@ -66,12 +67,12 @@ public class FacilityInstrumentScientist extends EntityBaseBean implements Seria
 	private User user;
 
 	/* Needed for JPA */
-	public FacilityInstrumentScientist() {
+	public InstrumentScientist() {
 	}
 
 	@Override
 	public String toString() {
-		return "FacilityInstrumentScientist[id=" + id + "]";
+		return "InstrumentScientist[id=" + id + "]";
 	}
 
 	@Override

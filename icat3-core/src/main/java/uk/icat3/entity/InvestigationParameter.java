@@ -21,6 +21,7 @@ import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 
+@Comment("A parameter associated with an investigation")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "investigationParameterGenerator", pkColumnValue = "InvestigationParameter")
@@ -34,6 +35,7 @@ public class InvestigationParameter extends Parameter implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "investigationParameterGenerator")
 	private Long id;
 
+	@Comment("The associated investigation")
 	@JoinColumn(name = "INVESTIGATION_ID", nullable = false)
 	@ManyToOne
 	private Investigation investigation;

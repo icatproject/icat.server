@@ -19,45 +19,50 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(DatasetParameter.class);
 
+	@Comment("The type of the parameter")
 	@JoinColumn(name = "PARAMETER_TYPE_ID", nullable = false)
 	@ManyToOne
-	ParameterType parameterType;
+	ParameterType type;
 
+	@Comment("The value if the parameter is a string")
 	@Column(name = "STRING_VALUE")
 	private String stringValue;
 
+	@Comment("The value if the parameter is numeric")
 	@Column(name = "NUMERIC_VALUE")
 	private Double numericValue;
 
+	@Comment("The value if the parameter is a date")
 	@Column(name = "DATETIME_VALUE")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date dateTimeValue;
 
-	@Column(name = "RANGE_TOP")
+	@Comment("**** I suggest we change this to be of type Double")
 	private String rangeTop;
 
-	@Column(name = "RANGE_BOTTOM")
+	@Comment("**** I suggest we change this to be of type Double")
 	private String rangeBottom;
 
-	@Column(name = "ERROR")
+	@Comment("**** I suggest we change this to be of type Double")
 	private String error;
-
+	
+	@Comment("**** Do we need this - surely this is part of the parameter type - not needed by ISIS")
 	@Column(name = "DESCRIPTION")
 	private String description;
 
 	public void beforeMarshal(Marshaller source) {
 		logger.trace("Marshalling Parameter for " + includes);
 		if (!this.includes.contains(ParameterType.class)) {
-			this.parameterType = null;
+			this.type = null;
 		}
 	}
 
-	public ParameterType getParameterType() {
-		return parameterType;
+	public ParameterType getType() {
+		return type;
 	}
 
-	public void setParameterType(ParameterType parameterType) {
-		this.parameterType = parameterType;
+	public void setType(ParameterType type) {
+		this.type = type;
 	}
 
 	public String getStringValue() {

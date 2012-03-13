@@ -14,7 +14,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
@@ -22,14 +24,17 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.ValidationException;
 
+@Comment("**** Maybe we need a sample type as well. " + "An individual sample to be used in an investigation")
 @SuppressWarnings("serial")
 @Entity
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "INSTANCE", "INVESTIGATION_ID" }) })
 @TableGenerator(name = "sampleGenerator", pkColumnValue = "Sample")
 public class Sample extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(Sample.class);
 
-	private String chemicalFormula;
+	@Comment("The formula written as a string -e.g. C2H6O2 for ethylene glycol")
+	private String molecularFormula;
 
 	@OneToMany(mappedBy = "sample")
 	private List<Dataset> datasets;
@@ -38,18 +43,19 @@ public class Sample extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "sampleGenerator")
 	private Long id;
 
+	@Comment("To distinguish between different instances of the same material")
+	@Column(name = "INSTANCE")
 	private String instance;
 
-	@JoinColumn(nullable = false)
+	@JoinColumn(nullable = false, name = "INVESTIGATION_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Investigation investigation;
 
-	@Column(nullable = false)
+	@Column(nullable = false, name = "NAME")
 	private String name;
 
-	private Integer proposalSampleId;
-
-	@Column(nullable = false)
+	@Comment("Any safety information related to this sample")
+	@Column(nullable = false, length = 4000)
 	private String safetyInformation;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
@@ -78,10 +84,6 @@ public class Sample extends EntityBaseBean implements Serializable {
 		// investigation
 	}
 
-	public String getChemicalFormula() {
-		return this.chemicalFormula;
-	}
-
 	public List<Dataset> getDatasets() {
 		return this.datasets;
 	}
@@ -107,10 +109,6 @@ public class Sample extends EntityBaseBean implements Serializable {
 		return this.id;
 	}
 
-	public Integer getProposalSampleId() {
-		return this.proposalSampleId;
-	}
-
 	public String getSafetyInformation() {
 		return this.safetyInformation;//
 	}
@@ -132,8 +130,12 @@ public class Sample extends EntityBaseBean implements Serializable {
 		}
 	}
 
-	public void setChemicalFormula(String chemicalFormula) {
-		this.chemicalFormula = chemicalFormula;
+	public String getMolecularFormula() {
+		return molecularFormula;
+	}
+
+	public void setMolecularFormula(String molecularFormula) {
+		this.molecularFormula = molecularFormula;
 	}
 
 	public void setDatasets(List<Dataset> datasets) {
@@ -154,10 +156,6 @@ public class Sample extends EntityBaseBean implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public void setProposalSampleId(Integer proposalSampleId) {
-		this.proposalSampleId = proposalSampleId;
 	}
 
 	public void setSafetyInformation(String safetyInformation) {

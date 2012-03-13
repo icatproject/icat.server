@@ -21,6 +21,7 @@ import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 
+@Comment("Must be related to an investigation")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "INVESTIGATION_ID" }) })
@@ -33,10 +34,12 @@ public class Keyword extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "keywordGenerator")
 	private Long id;
 
+	@Comment("The investigation to whioch this keyword applies")
 	@JoinColumn(name = "INVESTIGATION_ID", nullable = false)
 	@ManyToOne
 	private Investigation investigation;
 
+	@Comment("The name of the keyword")
 	@Column(name = "NAME", nullable = false)
 	private String name;
 

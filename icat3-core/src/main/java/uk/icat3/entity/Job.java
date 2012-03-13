@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,6 +17,7 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
+@Comment("A run of an application with its related inputs and outputs")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "jobGenerator", pkColumnValue = "Job")
@@ -27,7 +29,7 @@ public class Job extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "jobGenerator")
 	private Long id;
 
-	@ManyToOne(optional = false)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(nullable = false)
 	private Application application;
 

@@ -24,10 +24,10 @@ import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 
+@Comment("A period of time related to an investigation")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "INVESTIGATION_ID", "STARTDATE",
-		"ENDDATE" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "INVESTIGATION_ID", "STARTDATE", "ENDDATE" }) })
 @TableGenerator(name = "shiftGenerator", pkColumnValue = "Shift")
 public class Shift extends EntityBaseBean implements Serializable {
 
@@ -49,7 +49,7 @@ public class Shift extends EntityBaseBean implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date endDate;
 
-	@Column(name="\"COMMENT\"")
+	@Column(name = "\"COMMENT\"")
 	private String comment;
 
 	/* Needed for JPA */
