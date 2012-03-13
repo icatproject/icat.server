@@ -1,5 +1,10 @@
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -14,6 +19,7 @@ import uk.icat3.client.DatasetParameter;
 import uk.icat3.client.DatasetType;
 import uk.icat3.client.DestType;
 import uk.icat3.client.EntityBaseBean;
+import uk.icat3.client.EntityInfo;
 import uk.icat3.client.Facility;
 import uk.icat3.client.Group;
 import uk.icat3.client.ICAT;
@@ -42,6 +48,32 @@ class Session {
 	public enum ParameterApplicability {
 		DATASET, DATAFILE, SAMPLE, INVESTIGATION
 	};
+
+	public String dump(EntityBaseBean bean, int i) throws IllegalArgumentException, IllegalAccessException,
+			SecurityException, NoSuchMethodException, InvocationTargetException {
+		StringBuilder result = new StringBuilder();
+		for (Field field : new ArrayList<Field>(Arrays.asList(bean.getClass().getDeclaredFields()))) {
+			String name = field.getName();
+			String getterName = "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
+			Method m = bean.getClass().getMethod(getterName);
+			Object o = m.invoke(bean);
+			if (result.length() != 0) {
+				result.append(", ");
+			}
+			if (o instanceof EntityBaseBean) {
+				if (i > 0) {
+					result.append(name + ":[" + dump((EntityBaseBean) o, i - 1) + "]");
+				} else {
+					result.append(name + ":...");
+				}
+			} else if (o instanceof List) {
+				result.append(name + ":" + ((List<?>) o).size());
+			} else {
+				result.append(name + ": '" + o + "'");
+			}
+		}
+		return result.toString();
+	}
 
 	private final ICAT icatEP;
 	private final String sessionId;
@@ -225,7 +257,7 @@ class Session {
 		final DatafileFormat dff = new DatafileFormat();
 		dff.setName(name);
 		dff.setVersion("1");
-		dff.setFormatType(formatType);
+		dff.setType(formatType);
 		dff.setId((Long) this.icatEP.create(this.sessionId, dff));
 		return dff;
 	}
@@ -251,7 +283,7 @@ class Session {
 		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
 			dsp.setDateTimeValue((XMLGregorianCalendar) value);
 		}
-		dsp.setParameterType(p);
+		dsp.setType(p);
 		dsp.setDataset(ds);
 		this.icatEP.create(this.sessionId, dsp);
 		return dsp;
@@ -409,7 +441,7 @@ class Session {
 		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
 			dsp.setDateTimeValue((XMLGregorianCalendar) o);
 		}
-		dsp.setParameterType(p);
+		dsp.setType(p);
 		dataset.getDatasetParameters().add(dsp);
 		return dsp;
 	}
@@ -418,6 +450,10 @@ class Session {
 			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
 			ObjectAlreadyExistsException_Exception, SessionException_Exception, ValidationException_Exception {
 		inv.setId((Long) this.icatEP.create(this.sessionId, inv));
+	}
+
+	public EntityInfo getEntityInfo(String beanName) throws BadParameterException_Exception, IcatInternalException_Exception {
+		return icatEP.getEntityInfo(beanName);
 	}
 
 }

@@ -1,4 +1,4 @@
-package uk.icat3.security.parser;
+package uk.icat3.parser;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,9 +16,9 @@ import uk.icat3.entity.Rule;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.InsufficientPrivilegesException;
-import uk.icat3.security.DagHandler;
-import uk.icat3.security.DagHandler.Step;
-import uk.icat3.security.EntityInfoHandler;
+import uk.icat3.manager.DagHandler;
+import uk.icat3.manager.EntityInfoHandler;
+import uk.icat3.manager.DagHandler.Step;
 
 public class SearchQuery {
 

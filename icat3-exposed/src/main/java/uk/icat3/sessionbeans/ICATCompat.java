@@ -5,6 +5,8 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
+import javax.xml.ws.RequestWrapper;
+import javax.xml.ws.ResponseWrapper;
 
 import uk.icat3.entity.Investigation;
 import uk.icat3.exceptions.BadParameterException;
@@ -68,6 +70,8 @@ public class ICATCompat extends EJBObject {
 	 */
 	@SuppressWarnings("unchecked")
 	@WebMethod(operationName = "getKeywordsForUserMax")
+	@RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.getKeywordsForUserMax")
+	@ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.getKeywordsForUserMaxResponse")
 	public List<String> getKeywordsForUser(@WebParam(name = "sessionId") String sessionId,
 			@WebParam(name = "limit") int limit) throws SessionException, IcatInternalException, BadParameterException,
 			InsufficientPrivilegesException {

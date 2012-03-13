@@ -1,4 +1,4 @@
-package uk.icat3.security.parser;
+package uk.icat3.parser;
 
 import java.util.Set;
 
@@ -7,8 +7,8 @@ import org.apache.log4j.Logger;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
-import uk.icat3.security.DagHandler;
-import uk.icat3.security.EntityInfoHandler;
+import uk.icat3.manager.DagHandler;
+import uk.icat3.manager.EntityInfoHandler;
 
 public class GetQuery {
 

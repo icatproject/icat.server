@@ -1,6 +1,7 @@
-package uk.icat3.security.parser;
+package uk.icat3.parser;
 
-import uk.icat3.security.parser.Token.Type;
+import uk.icat3.parser.Token.Type;
+
 
 public class SortSpecification {
 

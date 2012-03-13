@@ -6,6 +6,10 @@ import java.util.List;
 
 import org.junit.Test;
 
+import uk.icat3.parser.LexerException;
+import uk.icat3.parser.Token;
+import uk.icat3.parser.Tokenizer;
+
 public class TestTokenizer {
 
 	@Test

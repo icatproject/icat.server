@@ -6,8 +6,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
@@ -16,6 +16,7 @@ import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 import javax.jws.WebMethod;
+import javax.transaction.UserTransaction;
 
 import org.apache.log4j.Logger;
 
@@ -30,13 +31,14 @@ import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
 import uk.icat3.manager.BeanManager;
 import uk.icat3.manager.CreateResponse;
+import uk.icat3.manager.EntityInfo;
 import uk.icat3.manager.GetResponse;
 import uk.icat3.manager.NotificationMessages;
 import uk.icat3.manager.SearchResponse;
 import uk.icat3.sessionbeans.EJBObject;
 
 @Stateless()
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
+@TransactionManagement(TransactionManagementType.BEAN)
 public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 
 	static Logger logger = Logger.getLogger(BeanManagerBean.class);
@@ -57,6 +59,9 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 
 	@Resource(mappedName = "jms/ICATTopic")
 	private Topic topic;
+
+	@Resource
+	private UserTransaction userTransaction;
 
 	private QueueConnection queueConnection;
 	private TopicConnection topicConnection;
@@ -91,7 +96,7 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 			ObjectAlreadyExistsException, IcatInternalException {
 		try {
 			String userId = user.getUserIdFromSessionId(sessionId);
-			CreateResponse createResponse = BeanManager.create(userId, bean, manager);
+			CreateResponse createResponse = BeanManager.create(userId, bean, manager, userTransaction);
 			Transmitter.processMessages(createResponse.getNotificationMessages(), queueConnection, queue,
 					topicConnection, topic);
 			return createResponse.getPk();
@@ -124,7 +129,7 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 			InsufficientPrivilegesException, ValidationException, IcatInternalException {
 		try {
 			String userId = user.getUserIdFromSessionId(sessionId);
-			NotificationMessages nms = BeanManager.delete(userId, bean, manager);
+			NotificationMessages nms = BeanManager.delete(userId, bean, manager, userTransaction);
 			Transmitter.processMessages(nms, queueConnection, queue, topicConnection, topic);
 		} catch (SessionException e) {
 			logger.debug(e.getMessage());
@@ -152,7 +157,7 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 			NoSuchObjectFoundException, ValidationException, IcatInternalException {
 		try {
 			String userId = user.getUserIdFromSessionId(sessionId);
-			NotificationMessages nms = BeanManager.update(userId, bean, manager);
+			NotificationMessages nms = BeanManager.update(userId, bean, manager, userTransaction);
 			Transmitter.processMessages(nms, queueConnection, queue, topicConnection, topic);
 		} catch (SessionException e) {
 			logger.debug(e.getMessage());
@@ -237,6 +242,11 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 			reportThrowable(e);
 			throw new IcatInternalException(e.getMessage());
 		}
+	}
+
+	@Override
+	public EntityInfo getEntityInfo(String beanName) throws BadParameterException, IcatInternalException {
+		return BeanManager.getEntityInfo(beanName);
 	}
 
 }

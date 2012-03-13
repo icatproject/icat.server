@@ -29,13 +29,13 @@
 		<class>uk.icat3.entity.Datafile</class>
 		<class>uk.icat3.entity.ParameterType</class>
 		<class>uk.icat3.entity.FacilityUser</class>
-		<class>uk.icat3.entity.Investigator</class>
+		<class>uk.icat3.entity.InvestigationUser</class>
 		<class>uk.icat3.entity.Study</class>
 		<class>uk.icat3.entity.DatafileParameter</class>
 		<class>uk.icat3.entity.IcatAuthorisation</class>
 		<class>uk.icat3.entity.IcatRole</class>
 		<class>uk.icat3.entity.TopicInvestigation</class>
-		<class>uk.icat3.entity.FacilityInstrumentScientist</class>
+		<class>uk.icat3.entity.InstrumentScientist</class>
 		<class>uk.icat3.entity.UserGroup</class>
 		<class>uk.icat3.entity.Rule</class>
 		<class>uk.icat3.entity.User</class>
@@ -52,11 +52,10 @@
 		<properties>
 			<property name="eclipselink.target-server" value="SunAS9" />
 			<property name="eclipselink.cache.shared.default" value="false" />
-			<property name="eclipselink.logging.level" value="FINEST" />
+			<property name="eclipselink.logging.level" value="WARNING" />
 			<property name="eclipselink.ddl-generation" value="drop-and-create-tables" />
 			<property name="eclipselink.ddl-generation.output_mode"
 				value="both" />
-			<property name="eclipselink.deploy-on-startup" value="FALSE" />
 		</properties>
 	</persistence-unit>
 

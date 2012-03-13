@@ -1,11 +1,11 @@
-package uk.icat3.security.parser;
+package uk.icat3.parser;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.exceptions.BadParameterException;
-import uk.icat3.security.EntityInfoHandler;
+import uk.icat3.manager.EntityInfoHandler;
 
 public class Include {
 

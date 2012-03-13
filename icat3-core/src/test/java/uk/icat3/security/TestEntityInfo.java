@@ -1,6 +1,7 @@
 package uk.icat3.security;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
@@ -15,72 +16,98 @@ import org.junit.Test;
 
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.EntityBaseBean;
-import uk.icat3.entity.User;
 import uk.icat3.entity.Investigation;
-import uk.icat3.entity.Investigator;
+import uk.icat3.entity.InvestigationUser;
 import uk.icat3.entity.Job;
 import uk.icat3.entity.Keyword;
 import uk.icat3.entity.ParameterType;
 import uk.icat3.entity.Topic;
 import uk.icat3.entity.TopicInvestigation;
-import uk.icat3.security.EntityInfoHandler.KeyType;
-import uk.icat3.security.EntityInfoHandler.Relationship;
-import uk.icat3.util.BaseTestTransaction;
+import uk.icat3.entity.User;
+import uk.icat3.exceptions.IcatInternalException;
+import uk.icat3.manager.EntityInfoHandler;
+import uk.icat3.manager.EntityInfoHandler.KeyType;
+import uk.icat3.manager.EntityInfoHandler.Relationship;
 
-public class TestEntityInfo extends BaseTestTransaction {
+public class TestEntityInfo {
 
 	private static EntityInfoHandler pkHandler = EntityInfoHandler.getInstance();
 
 	@Test
 	public void testSimplePKS() throws Exception {
-		testPKS(Investigation.class, "getId");
-		testPKS(Dataset.class, "getId");
-		testPKS(Keyword.class, "getId");
-		testPKS(TopicInvestigation.class, "getId");
-		testPKS(Investigator.class, "getId");
-		testPKS(User.class, "getName");
-		testPKS(Topic.class, "getId");
-		testPKS(Job.class, "getId");
+		testPKS(Investigation.class, "id");
+		testPKS(Dataset.class, "id");
+		testPKS(Keyword.class, "id");
+		testPKS(TopicInvestigation.class, "id");
+		testPKS(InvestigationUser.class, "id");
+		testPKS(User.class, "name");
+		testPKS(Topic.class, "id");
+		testPKS(Job.class, "id");
 	}
 
-	private void testPKS(Class<? extends EntityBaseBean> klass, String... pkname) throws Exception {
-		List<String> results = pkHandler.getKeysFor(klass);
-		assertEquals(klass.getSimpleName() + " count", pkname.length, results.size());
+	@Test
+	public void testConstraints() throws Exception {
+		testConstraint(Investigation.class, "name", "visitId", "facilityCycle", "instrument");
+		testConstraint(Dataset.class, "sample", "investigation", "name", "type");
+		testConstraint(Keyword.class, "name", "investigation");
+		testConstraint(TopicInvestigation.class, "topic", "investigation");
+		testConstraint(InvestigationUser.class, "user", "investigation");
+		testConstraint(User.class);
+		testConstraint(Topic.class);
+		testConstraint(Job.class);
+	}
 
-		int i = 0;
-		for (String re : results) {
-			assertEquals(klass.getSimpleName() + " value " + i, pkname[i++], re);
+	private void testConstraint(Class<? extends EntityBaseBean> klass, String... name) throws IcatInternalException {
+		List<List<Field>> results = pkHandler.getConstraintFields(klass);
+		if (name.length == 0) {
+			assertEquals("One", 0, results.size());
+		} else {
+			assertFalse("One", 0 == results.size());
+			List<Field> result = results.get(0);
+			assertEquals(klass.getSimpleName() + " count", name.length, result.size());
+
+			int i = 0;
+			for (Field re : result) {
+				assertEquals(klass.getSimpleName() + " value " + i, name[i++], re.getName());
+			}
 		}
+	}
+
+	private void testPKS(Class<? extends EntityBaseBean> klass, String pkname) throws Exception {
+		String result = pkHandler.getKeyFor(klass).getName();
+		assertEquals(klass.getSimpleName() + " value ", pkname, result);
 	}
 
 	@Test
 	public void testRels() throws Exception {
 
-		testRel(Investigation.class, "Instrument by instrument one", "Keyword by keywords many",
-				"Sample by samples many", "TopicInvestigation by topicInvestigations many",
-				"StudyInvestigation by studyInvestigations many", "Shift by shifts many", "Dataset by datasets many",
-				"Publication by publications many", "Investigator by investigators many",
-				"FacilityCycle by facilityCycle one", "InvestigationType by type one",
-				"Facility by facility one", "InvestigationParameter by investigationParameters many");
+		testRel(Investigation.class, "Instrument by instrument one", "Keyword by keywords many cascaded",
+				"Sample by samples many cascaded", "TopicInvestigation by topicInvestigations many cascaded",
+				"StudyInvestigation by studyInvestigations many cascaded", "Shift by shifts many cascaded",
+				"Dataset by datasets many cascaded", "Publication by publications many cascaded",
+				"InvestigationUser by investigationUsers many cascaded", "FacilityCycle by facilityCycle one",
+				"InvestigationType by type one", "Facility by facility one",
+				"InvestigationParameter by investigationParameters many cascaded");
 
-		testRel(Dataset.class, "InputDataset by inputDatasets many", "DatasetParameter by datasetParameters many",
-				"Investigation by investigation one", "Datafile by datafiles many",
-				"OutputDataset by outputDatasets many", "DatasetStatus by status one",
-				"DatasetType by type one", "Sample by sample one");
+		testRel(Dataset.class, "InputDataset by inputDatasets many cascaded",
+				"DatasetParameter by datasetParameters many cascaded", "Investigation by investigation one",
+				"Datafile by datafiles many cascaded", "OutputDataset by outputDatasets many cascaded",
+				"DatasetStatus by status one", "DatasetType by type one", "Sample by sample one");
 
 		testRel(Keyword.class, "Investigation by investigation one");
 
 		testRel(TopicInvestigation.class, "Investigation by investigation one", "Topic by topic one");
 
-		testRel(Investigator.class, "Investigation by investigation one", "User by user one");
+		testRel(InvestigationUser.class, "Investigation by investigation one", "User by user one");
 
-		testRel(User.class, "Investigator by investigatorCollection many", "UserGroup by userGroups many");
+		testRel(User.class, "InvestigationUser by investigationUsers many cascaded",
+				"UserGroup by userGroups many cascaded", "InstrumentScientist by instrumentUsers many cascaded");
 
-		testRel(Topic.class, "TopicInvestigation by topicInvestigations many");
+		testRel(Topic.class, "TopicInvestigation by topicInvestigations many cascaded");
 
-		testRel(Job.class, "InputDataset by inputDatasets many", "InputDatafile by inputDatafiles many",
-				"OutputDatafile by outputDatafiles many", "Application by application one",
-				"OutputDataset by outputDatasets many");
+		testRel(Job.class, "InputDataset by inputDatasets many cascaded",
+				"InputDatafile by inputDatafiles many cascaded", "OutputDatafile by outputDatafiles many cascaded",
+				"Application by application one", "OutputDataset by outputDatasets many cascaded");
 	}
 
 	private void testRel(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {
@@ -89,7 +116,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 		for (Relationship rel : results) {
 			rStrings.add(rel.toString());
 		}
-		System.out.println(results);
+		// System.out.println(results);
 		assertEquals(klass.getSimpleName() + " count", rels.length, results.size());
 		for (String rel : rels) {
 			assertTrue(klass.getSimpleName() + " value " + rel, rStrings.contains(rel));
@@ -102,7 +129,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testNNF(Dataset.class, "type", "name");
 		testNNF(Keyword.class, "name", "investigation");
 		testNNF(TopicInvestigation.class, "topic", "investigation");
-		testNNF(Investigator.class);
+		testNNF(InvestigationUser.class);
 		testNNF(User.class);
 		testNNF(Topic.class);
 		testNNF(ParameterType.class, "valueType", "name", "units");
@@ -128,8 +155,8 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testSF(Dataset.class, "name 255", "description 255", "location 255");
 		testSF(Keyword.class, "name 255");
 		testSF(TopicInvestigation.class);
-		testSF(Investigator.class, "role 255");
-		testSF(User.class, "title 255", "lastName 255", "middleName 255", "initials 255", "name 255", "firstName 255");
+		testSF(InvestigationUser.class, "role 255");
+		testSF(User.class, "name 255", "fullName 255");
 		testSF(Topic.class, "name 255");
 		testSF(ParameterType.class, "description 255", "unitsFullName 255", "units 255", "name 255");
 		testSF(Job.class);
@@ -155,8 +182,8 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testGetters(Dataset.class, 14);
 		testGetters(Keyword.class, 3);
 		testGetters(TopicInvestigation.class, 3);
-		testGetters(Investigator.class, 4);
-		testGetters(User.class, 8);
+		testGetters(InvestigationUser.class, 4);
+		testGetters(User.class, 5);
 		testGetters(Topic.class, 3);
 		testGetters(ParameterType.class, 15);
 		testGetters(Job.class, 6);
@@ -180,8 +207,8 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testSetters(Dataset.class, 9);
 		testSetters(Keyword.class, 2);
 		testSetters(TopicInvestigation.class, 2);
-		testSetters(Investigator.class, 3);
-		testSetters(User.class, 5);
+		testSetters(InvestigationUser.class, 3);
+		testSetters(User.class, 1);
 		testSetters(Topic.class, 1);
 		testSetters(ParameterType.class, 10);
 		testSetters(Job.class, 1);
@@ -204,7 +231,7 @@ public class TestEntityInfo extends BaseTestTransaction {
 		testKeytype(Dataset.class, EntityInfoHandler.KeyType.GENERATED);
 		testKeytype(Keyword.class, EntityInfoHandler.KeyType.GENERATED);
 		testKeytype(TopicInvestigation.class, EntityInfoHandler.KeyType.GENERATED);
-		testKeytype(Investigator.class, EntityInfoHandler.KeyType.GENERATED);
+		testKeytype(InvestigationUser.class, EntityInfoHandler.KeyType.GENERATED);
 		testKeytype(User.class, EntityInfoHandler.KeyType.SIMPLE);
 		testKeytype(Topic.class, EntityInfoHandler.KeyType.GENERATED);
 		testKeytype(ParameterType.class, EntityInfoHandler.KeyType.GENERATED);

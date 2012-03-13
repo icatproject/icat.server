@@ -1,9 +1,10 @@
-package uk.icat3.security.parser;
+package uk.icat3.parser;
 
 import java.util.Arrays;
 import java.util.List;
 
-import uk.icat3.security.parser.Token.Type;
+import uk.icat3.parser.Token.Type;
+
 
 public class Input {
 

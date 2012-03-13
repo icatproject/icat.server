@@ -32,7 +32,7 @@
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicInvestigation</class>
-        <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
+        <class>uk.icat3.entity.InstrumentScientist</class>       
         <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
@@ -81,7 +81,7 @@
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicInvestigation</class>
-        <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
+        <class>uk.icat3.entity.InstrumentScientist</class>       
         <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
@@ -130,7 +130,7 @@
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicInvestigation</class>
-        <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
+        <class>uk.icat3.entity.InstrumentScientist</class>       
         <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
@@ -184,7 +184,7 @@
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicInvestigation</class>
-        <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
+        <class>uk.icat3.entity.InstrumentScientist</class>       
         <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
@@ -232,7 +232,7 @@
         <class>uk.icat3.entity.IcatAuthorisation</class>
         <class>uk.icat3.entity.IcatRole</class>       
         <class>uk.icat3.entity.TopicInvestigation</class>
-        <class>uk.icat3.entity.FacilityInstrumentScientist</class>       
+        <class>uk.icat3.entity.InstrumentScientist</class>       
         <class>uk.icat3.entity.FacilityInstrumentScientistPK</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>

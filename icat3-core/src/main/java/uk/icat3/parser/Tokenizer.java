@@ -1,4 +1,4 @@
-package uk.icat3.security.parser;
+package uk.icat3.parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 public class Tokenizer {
 

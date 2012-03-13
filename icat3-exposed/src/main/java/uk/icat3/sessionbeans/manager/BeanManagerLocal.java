@@ -13,6 +13,7 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ObjectAlreadyExistsException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.manager.EntityInfo;
 
 /**
  * This is the business interface for Manager enterprise bean.
@@ -35,5 +36,7 @@ public interface BeanManagerLocal {
 	List<?> search(String sessionId, String query) throws SessionException, IcatInternalException, BadParameterException, InsufficientPrivilegesException;
 
 	void dummy(Facility facility);
+
+	EntityInfo getEntityInfo(String beanName) throws BadParameterException, IcatInternalException;
 
 }

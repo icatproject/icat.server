@@ -10,13 +10,13 @@ import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
 import uk.icat3.entity.EntityBaseBean;
-import uk.icat3.entity.User;
 import uk.icat3.entity.Investigation;
+import uk.icat3.entity.User;
 import uk.icat3.exceptions.BadParameterException;
-import uk.icat3.security.DagHandler.Step;
-import uk.icat3.util.BaseTestTransaction;
+import uk.icat3.manager.DagHandler;
+import uk.icat3.manager.DagHandler.Step;
 
-public class TestDagHandler extends BaseTestTransaction {
+public class TestDagHandler  {
 	
 	@Test
 	public void t1() throws Exception {

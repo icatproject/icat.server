@@ -19,7 +19,7 @@ import uk.icat3.sessionbeans.user.UserSessionLocal;
 
 public abstract class EJBObject {
 
-	static Logger log = Logger.getLogger(EJBObject.class);
+	private static Logger logger = Logger.getLogger(EJBObject.class);
 
 	@PersistenceContext(unitName = "icat3-exposed")
 	protected EntityManager manager;
@@ -39,13 +39,10 @@ public abstract class EJBObject {
 		String log4jFile = "log4j.properties";
 		LogManager.resetConfiguration();
 		PropertyConfigurator.configureAndWatch(log4jFile);
-		log = Logger.getLogger(EJBObject.class);
-		log.info("Loaded log4j properties from : " + log4jFile + " and will watch it.");
+		logger = Logger.getLogger(EJBObject.class);
+		logger.info("Loaded log4j properties from : " + log4jFile + " and will watch it.");
 	}
 
-	/**
-	 * AOP all method, log time of method call.
-	 */
 	@AroundInvoke
 	protected Object logMethods(InvocationContext ctx) throws Exception {
 
@@ -55,7 +52,7 @@ public abstract class EJBObject {
 
 		long start = System.currentTimeMillis();
 
-		log.debug("Invoking " + target);
+		logger.debug("Invoking " + target);
 		try {
 			return ctx.proceed();
 		} catch (IllegalArgumentException e) {
@@ -64,7 +61,7 @@ public abstract class EJBObject {
 			throw e;
 		} finally {
 			long time = System.currentTimeMillis() - start;
-			log.debug("Exiting " + target + " , This method takes " + time / 1000f + "s to execute");
+			logger.debug("Exiting " + target + " , This method takes " + time / 1000f + "s to execute");
 		}
 	}
 
@@ -73,7 +70,7 @@ public abstract class EJBObject {
 		PrintStream s = new PrintStream(baos);
 		e.printStackTrace(s);
 		s.close();
-		log.error("Unexpected failure in Java " + System.getProperties().getProperty("java.version") + " " + baos);
+		logger.error("Unexpected failure in Java " + System.getProperties().getProperty("java.version") + " " + baos);
 	}
 
 }

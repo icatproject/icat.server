@@ -32,14 +32,14 @@ import uk.icat3.entity.DatasetType;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.Facility;
 import uk.icat3.entity.FacilityCycle;
-import uk.icat3.entity.FacilityInstrumentScientist;
 import uk.icat3.entity.Group;
 import uk.icat3.entity.InputDatafile;
 import uk.icat3.entity.InputDataset;
 import uk.icat3.entity.Instrument;
+import uk.icat3.entity.InstrumentScientist;
 import uk.icat3.entity.Investigation;
 import uk.icat3.entity.InvestigationType;
-import uk.icat3.entity.Investigator;
+import uk.icat3.entity.InvestigationUser;
 import uk.icat3.entity.Job;
 import uk.icat3.entity.Keyword;
 import uk.icat3.entity.NotificationRequest;
@@ -67,6 +67,7 @@ import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.ObjectAlreadyExistsException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.manager.EntityInfo;
 import uk.icat3.sessionbeans.data.DownloadManagerLocal;
 import uk.icat3.sessionbeans.interceptor.DownloadInterceptor;
 import uk.icat3.sessionbeans.interceptor.LogoutInterceptor;
@@ -126,6 +127,11 @@ public class ICAT extends ICATCompat {
 			InsufficientPrivilegesException, BadParameterException, IcatInternalException {
 		return beanManagerLocal.get(sessionId, query, primaryKey);
 	}
+	
+	@WebMethod
+	public EntityInfo getEntityInfo(@WebParam(name = "beanName") String beanName) throws BadParameterException, IcatInternalException {
+		return beanManagerLocal.getEntityInfo(beanName);
+	}
 
 	@WebMethod
 	public void dummy(
@@ -134,11 +140,10 @@ public class ICAT extends ICATCompat {
 			@WebParam DatafileParameter datafileParameter, @WebParam Dataset dataset,
 			@WebParam DatasetParameter datasetParameter, @WebParam DatasetStatus datasetStatus,
 			@WebParam DatasetType datasetType, @WebParam Facility facility, @WebParam FacilityCycle facilityCycle,
-			@WebParam FacilityInstrumentScientist facilityInstrumentScientist, @WebParam User user,
-			@WebParam Instrument instrument, @WebParam Investigation investigation,
-			@WebParam InvestigationType investigationType, @WebParam Investigator investigator,
-			@WebParam Keyword keyword, @WebParam ParameterType parameter, @WebParam Publication publication,
-			@WebParam RelatedDatafile relatedDatafile, @WebParam Sample sample,
+			@WebParam InstrumentScientist facilityInstrumentScientist, @WebParam User user, @WebParam Instrument instrument,
+			@WebParam Investigation investigation, @WebParam InvestigationType investigationType,
+			@WebParam InvestigationUser investigator, @WebParam Keyword keyword, @WebParam ParameterType parameter,
+			@WebParam Publication publication, @WebParam RelatedDatafile relatedDatafile, @WebParam Sample sample,
 			@WebParam SampleParameter sampleParameter, @WebParam Shift shift, @WebParam Study study,
 			@WebParam StudyInvestigation studyInvestigation, @WebParam StudyStatus studyStatus, @WebParam Topic topic,
 			@WebParam TopicInvestigation topicInvestigation, @WebParam Application application, @WebParam Job job,

@@ -1,7 +1,8 @@
-package uk.icat3.security.parser;
+package uk.icat3.parser;
 
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.exceptions.BadParameterException;
+import uk.icat3.parser.Token.Type;
 
 public class BooleanFactor {
 

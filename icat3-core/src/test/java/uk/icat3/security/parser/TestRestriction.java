@@ -13,6 +13,11 @@ import org.junit.Test;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
+import uk.icat3.parser.Input;
+import uk.icat3.parser.ParserException;
+import uk.icat3.parser.Restriction;
+import uk.icat3.parser.Token;
+import uk.icat3.parser.Tokenizer;
 
 public class TestRestriction {
 
@@ -35,18 +40,18 @@ public class TestRestriction {
 	@Test
 	public void testGood1() throws Exception {
 		List<Token> tokens = Tokenizer
-				.getTokens("[id = 20] <-> Investigation <-> Investigator <-> User[name = :user]");
+				.getTokens("[id = 20] <-> Investigation <-> InvestigationUser <-> User[name = :user]");
 		String sw = "(Dataset$.id = 20) AND (User$.name = :user)";
-		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$ LEFT JOIN Investigation$.investigators AS Investigator$ LEFT JOIN Investigator$.user AS User$  WHERE (Dataset$.id = :pkid) AND ";
-		testGood(tokens, q, sw, Arrays.asList("Investigation", "Investigator", "User"), "Dataset");
+		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$ LEFT JOIN Investigation$.investigationUsers AS InvestigationUser$ LEFT JOIN InvestigationUser$.user AS User$  WHERE (Dataset$.id = :pkid) AND ";
+		testGood(tokens, q, sw, Arrays.asList("Investigation", "InvestigationUser", "User"), "Dataset");
 	}
 
 	@Test
 	public void testGood2() throws Exception {
-		List<Token> tokens = Tokenizer.getTokens("Investigation Investigator [user.userId = :user]");
-		String sw = "(Investigator$.user.userId = :user)";
-		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$ LEFT JOIN Investigation$.investigators AS Investigator$  WHERE (Dataset$.id = :pkid) AND ";
-		testGood(tokens, q, sw, Arrays.asList("Investigation", "Investigator"), "Dataset");
+		List<Token> tokens = Tokenizer.getTokens("Investigation InvestigationUser [user.userId = :user]");
+		String sw = "(InvestigationUser$.user.userId = :user)";
+		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$ LEFT JOIN Investigation$.investigationUsers AS InvestigationUser$  WHERE (Dataset$.id = :pkid) AND ";
+		testGood(tokens, q, sw, Arrays.asList("Investigation", "InvestigationUser"), "Dataset");
 	}
 
 	@Test

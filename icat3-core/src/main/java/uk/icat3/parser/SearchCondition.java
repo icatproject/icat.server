@@ -1,4 +1,4 @@
-package uk.icat3.security.parser;
+package uk.icat3.parser;
 
 import java.util.ArrayList;
 import java.util.List;

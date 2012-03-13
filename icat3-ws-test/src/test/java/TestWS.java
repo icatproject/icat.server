@@ -2,6 +2,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -14,22 +15,27 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import uk.icat3.client.Application;
+import uk.icat3.client.Constraint;
 import uk.icat3.client.Datafile;
 import uk.icat3.client.DatafileFormat;
 import uk.icat3.client.Dataset;
 import uk.icat3.client.DatasetParameter;
 import uk.icat3.client.DatasetType;
 import uk.icat3.client.DestType;
+import uk.icat3.client.EntityField;
+import uk.icat3.client.EntityInfo;
 import uk.icat3.client.Facility;
 import uk.icat3.client.InputDatafile;
 import uk.icat3.client.InputDataset;
 import uk.icat3.client.Investigation;
 import uk.icat3.client.InvestigationType;
 import uk.icat3.client.Job;
+import uk.icat3.client.KeyType;
 import uk.icat3.client.OutputDatafile;
 import uk.icat3.client.OutputDataset;
 import uk.icat3.client.ParameterType;
 import uk.icat3.client.ParameterValueType;
+import uk.icat3.client.RelType;
 
 /**
  * These tests are for those aspects that cannot be tested by the core tests. In
@@ -99,23 +105,73 @@ public class TestWS {
 		ParameterType p = session.createParameterType("TIMESTAMP", "TIMESTAMP", "F is not a wibble",
 				Session.ParameterApplicability.DATASET, ParameterValueType.DATE_AND_TIME);
 
-		Dataset ds = session.createDataset("Wibble", dst, inv);
+		Dataset wibble = session.createDataset("Wibble", dst, inv);
+		Dataset wobble = session.createDataset("Wobble", dst, inv);
 
 		DatafileFormat dfmt = session.createDatafileFormat("png", "binary");
 
-		Datafile df = session.createDatafile("fred", dfmt, ds);
+		Datafile df = session.createDatafile("fred", dfmt, wibble);
+		String orig = session.dump(df, 1);
+		df = (Datafile) session.get("Datafile INCLUDE Dataset, DatafileFormat", df.getId());
+		// assertEquals(orig, session.dump(df, 1));
+		assertEquals("Wibble", df.getDataset().getName());
+
+		df.setDataset(wobble);
 		df.setLocation("guess");
-		session.update(df);
 		df.setDatafileFormat(session.createDatafileFormat("notpng", "notbinary"));
-		session.update(df);
 		df.setDatafileFormat(null);
 		df.setFileSize(-1L);
 		session.update(df);
+		df = (Datafile) session.get("Datafile INCLUDE Dataset,DatafileFormat", df.getId());
+		assertEquals("Wobble", df.getDataset().getName());
 
-		GregorianCalendar c = new GregorianCalendar();
-		c.setTime(new Date());
-		XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
-		session.createDatasetParameter(date, p, ds);
+	}
+
+	@Test
+	public void testInvestigation() throws Exception {
+		EntityInfo ei = session.getEntityInfo("Investigation");
+		assertEquals("An investigation or experiment", ei.getClassComment());
+		assertEquals("id", ei.getKeyFieldname());
+		assertEquals(KeyType.GENERATED, ei.getKeyType());
+		for (Constraint constraint : ei.getConstraints()) {
+			assertEquals(Arrays.asList("name", "visitId", "facilityCycle", "instrument"), constraint.getFieldNames());
+		}
+		assertEquals(21, ei.getFields().size());
+		int n = 0;
+		for (EntityField field : ei.getFields()) {
+			if (field.getName().equals("id")) {
+				assertEquals("Long", field.getType());
+				assertEquals(false, field.isNotNullable());
+				assertEquals(null, field.getComment());
+				assertEquals(RelType.ATTRIBUTE, field.getRelType());
+				assertEquals(null, field.getStringLength());
+				assertEquals(null, field.isCascaded());
+			} else if (field.getName().equals("facilityCycle")) {
+				assertEquals("FacilityCycle", field.getType());
+				assertEquals(false, field.isNotNullable());
+				assertEquals(null, field.getComment());
+				assertEquals(RelType.ONE, field.getRelType());
+				assertEquals(null, field.getStringLength());
+				assertEquals(false, field.isCascaded());
+			} else if (field.getName().equals("title")) {
+				assertEquals("String", field.getType());
+				assertEquals(true, field.isNotNullable());
+				assertEquals("Full title of the investigation", field.getComment());
+				assertEquals(RelType.ATTRIBUTE, field.getRelType());
+				assertEquals((Integer) 255, field.getStringLength());
+				assertEquals(null, field.isCascaded());
+			} else if (field.getName().equals("investigationUsers")) {
+				assertEquals("InvestigationUser", field.getType());
+				assertEquals(false, field.isNotNullable());
+				assertEquals(null, field.getComment());
+				assertEquals(RelType.MANY, field.getRelType());
+				assertEquals(null, field.getStringLength());
+				assertEquals(true, field.isCascaded());
+			} else {
+				n++;
+			}
+		}
+		assertEquals(17, n);
 	}
 
 	@Test

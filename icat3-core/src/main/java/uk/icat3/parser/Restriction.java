@@ -1,4 +1,4 @@
-package uk.icat3.security.parser;
+package uk.icat3.parser;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -13,9 +13,9 @@ import javax.persistence.Id;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
-import uk.icat3.security.DagHandler;
-import uk.icat3.security.DagHandler.Step;
-import uk.icat3.security.EntityInfoHandler;
+import uk.icat3.manager.DagHandler;
+import uk.icat3.manager.EntityInfoHandler;
+import uk.icat3.manager.DagHandler.Step;
 
 public class Restriction {
 
