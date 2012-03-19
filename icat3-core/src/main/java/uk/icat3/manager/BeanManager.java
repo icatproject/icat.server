@@ -95,6 +95,8 @@ public class BeanManager {
 				throw new IcatInternalException("SystemException" + e.getMessage());
 			} catch (Throwable e) {
 				userTransaction.rollback();
+				logger.trace("Transaction rolled back for creatin of " + bean + " because of " + e.getClass() + " "
+						+ e.getMessage());
 				bean.preparePersist(userId, manager);
 				bean.isUnique(manager);
 				bean.isValid(manager, true);

@@ -32,11 +32,11 @@ public class InvestigationUser extends EntityBaseBean implements Serializable {
 
 	private String role;
 
-	@JoinColumn(name = "USER_ID")
+	@JoinColumn(name = "USER_ID", nullable = false)
 	@ManyToOne
 	private User user;
 
-	@JoinColumn(name = "INVESTIGATION_ID")
+	@JoinColumn(name = "INVESTIGATION_ID", nullable = false)
 	@ManyToOne
 	private Investigation investigation;
 

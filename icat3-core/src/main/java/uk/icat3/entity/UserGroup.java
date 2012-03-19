@@ -29,11 +29,11 @@ public class UserGroup extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "userGroupGenerator")
 	private Long id;
 
-	@JoinColumn(name = "GROUP_NAME")
+	@JoinColumn(name = "GROUP_NAME", nullable=false)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Group group;
 
-	@JoinColumn(name = "USER_NAME")
+	@JoinColumn(name = "USER_NAME", nullable=false)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User user;
 

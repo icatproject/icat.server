@@ -372,7 +372,11 @@ class Session {
 	}
 
 	public void setAuthz() throws Exception {
-		this.addUserGroupMember("root", "root");
+		try {
+			this.addUserGroupMember("root", "root");
+		} catch (ObjectAlreadyExistsException_Exception e) {
+			System.out.println("root is already a member of root - carry on");
+		}
 		this.addRule("root", "Rule", "CRUD");
 		this.addRule("root", "User", "CRUD");
 		this.addRule("root", "Group", "CRUD");
@@ -420,39 +424,14 @@ class Session {
 		return notificationRequest;
 	}
 
-	public Dataset addDataset(Investigation inv, String name, DatasetType type) {
-		Dataset dataset = new Dataset();
-		dataset.setName(name);
-		dataset.setType(type);
-		inv.getDatasets().add(dataset);
-		return dataset;
-	}
-
-	public Datafile addDatafile(Dataset dataset, String name, DatafileFormat format) {
-		Datafile datafile = new Datafile();
-		datafile.setDatafileFormat(format);
-		datafile.setName(name);
-		dataset.getDatafiles().add(datafile);
-		return datafile;
-	}
-
-	public DatasetParameter addDatasetParameter(Dataset dataset, Object o, ParameterType p) {
-		DatasetParameter dsp = new DatasetParameter();
-		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
-			dsp.setDateTimeValue((XMLGregorianCalendar) o);
-		}
-		dsp.setType(p);
-		dataset.getDatasetParameters().add(dsp);
-		return dsp;
-	}
-
 	public void registerInvestigation(Investigation inv) throws IcatInternalException_Exception,
 			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
 			ObjectAlreadyExistsException_Exception, SessionException_Exception, ValidationException_Exception {
 		inv.setId((Long) this.icatEP.create(this.sessionId, inv));
 	}
 
-	public EntityInfo getEntityInfo(String beanName) throws BadParameterException_Exception, IcatInternalException_Exception {
+	public EntityInfo getEntityInfo(String beanName) throws BadParameterException_Exception,
+			IcatInternalException_Exception {
 		return icatEP.getEntityInfo(beanName);
 	}
 

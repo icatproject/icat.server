@@ -50,7 +50,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	private List<Datafile> datafiles = new ArrayList<Datafile>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-	private List<DatasetParameter> datasetParameters = new ArrayList<DatasetParameter>();
+	private List<DatasetParameter> parameters = new ArrayList<DatasetParameter>();
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private DatasetStatus status;
@@ -211,7 +211,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			BadParameterException, IcatInternalException {
 		super.preparePersist(modId, manager);
 		this.id = null;
-		for (final DatasetParameter datasetParameter : this.datasetParameters) {
+		for (final DatasetParameter datasetParameter : this.parameters) {
 			datasetParameter.preparePersist(modId, manager);
 			datasetParameter.setDataset(this);
 		}
@@ -219,6 +219,14 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			datafile.preparePersist(modId, manager);
 			datafile.setDataset(this);
 		}
+	}
+
+	public List<DatasetParameter> getParameters() {
+		return parameters;
+	}
+
+	public void setParameters(List<DatasetParameter> parameters) {
+		this.parameters = parameters;
 	}
 
 	public List<Datafile> getDatafiles() {
@@ -229,13 +237,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		this.datafiles = datafiles;
 	}
 
-	public List<DatasetParameter> getDatasetParameters() {
-		return datasetParameters;
-	}
 
-	public void setDatasetParameters(List<DatasetParameter> datasetParameters) {
-		this.datasetParameters = datasetParameters;
-	}
 
 	public List<InputDataset> getInputDatasets() {
 		return inputDatasets;
@@ -305,7 +307,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			this.datafiles = null;
 		}
 		if (!this.includes.contains(DatasetParameter.class)) {
-			this.datasetParameters = null;
+			this.parameters = null;
 		}
 		if (!this.includes.contains(Sample.class)) {
 			this.sample = null;

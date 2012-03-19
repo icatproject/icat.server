@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -21,7 +20,6 @@ public class Facility extends EntityBaseBean implements Serializable {
 	private static Logger logger = Logger.getLogger(Facility.class);
 
 	@Comment("The number of days before data is made freely available after collecting it.")
-	@Column(nullable = false)
 	private Integer daysUntilRelease;
 
 	@Comment("A description of this facility")

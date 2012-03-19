@@ -87,10 +87,10 @@ public class TestEntityInfo {
 				"Dataset by datasets many cascaded", "Publication by publications many cascaded",
 				"InvestigationUser by investigationUsers many cascaded", "FacilityCycle by facilityCycle one",
 				"InvestigationType by type one", "Facility by facility one",
-				"InvestigationParameter by investigationParameters many cascaded");
+				"InvestigationParameter by parameters many cascaded");
 
 		testRel(Dataset.class, "InputDataset by inputDatasets many cascaded",
-				"DatasetParameter by datasetParameters many cascaded", "Investigation by investigation one",
+				"DatasetParameter by parameters many cascaded", "Investigation by investigation one",
 				"Datafile by datafiles many cascaded", "OutputDataset by outputDatasets many cascaded",
 				"DatasetStatus by status one", "DatasetType by type one", "Sample by sample one");
 
@@ -101,7 +101,7 @@ public class TestEntityInfo {
 		testRel(InvestigationUser.class, "Investigation by investigation one", "User by user one");
 
 		testRel(User.class, "InvestigationUser by investigationUsers many cascaded",
-				"UserGroup by userGroups many cascaded", "InstrumentScientist by instrumentUsers many cascaded");
+				"UserGroup by userGroups many cascaded", "InstrumentScientist by instrumentScientists many cascaded");
 
 		testRel(Topic.class, "TopicInvestigation by topicInvestigations many cascaded");
 
@@ -129,10 +129,10 @@ public class TestEntityInfo {
 		testNNF(Dataset.class, "type", "name");
 		testNNF(Keyword.class, "name", "investigation");
 		testNNF(TopicInvestigation.class, "topic", "investigation");
-		testNNF(InvestigationUser.class);
+		testNNF(InvestigationUser.class, "investigation", "user");
 		testNNF(User.class);
 		testNNF(Topic.class);
-		testNNF(ParameterType.class, "valueType", "name", "units");
+		testNNF(ParameterType.class, "valueType", "name");
 		testNNF(Job.class, "application");
 	}
 

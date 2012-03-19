@@ -1,6 +1,7 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -36,6 +37,8 @@ import uk.icat3.client.OutputDataset;
 import uk.icat3.client.ParameterType;
 import uk.icat3.client.ParameterValueType;
 import uk.icat3.client.RelType;
+import uk.icat3.client.Sample;
+import uk.icat3.client.SampleParameter;
 
 /**
  * These tests are for those aspects that cannot be tested by the core tests. In
@@ -102,18 +105,13 @@ public class TestWS {
 
 		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
 
-		ParameterType p = session.createParameterType("TIMESTAMP", "TIMESTAMP", "F is not a wibble",
-				Session.ParameterApplicability.DATASET, ParameterValueType.DATE_AND_TIME);
-
 		Dataset wibble = session.createDataset("Wibble", dst, inv);
 		Dataset wobble = session.createDataset("Wobble", dst, inv);
 
 		DatafileFormat dfmt = session.createDatafileFormat("png", "binary");
 
 		Datafile df = session.createDatafile("fred", dfmt, wibble);
-		String orig = session.dump(df, 1);
 		df = (Datafile) session.get("Datafile INCLUDE Dataset, DatafileFormat", df.getId());
-		// assertEquals(orig, session.dump(df, 1));
 		assertEquals("Wibble", df.getDataset().getName());
 
 		df.setDataset(wobble);
@@ -197,7 +195,7 @@ public class TestWS {
 		Dataset ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
 		assertEquals("No files", 0, ds.getDatafiles().size());
-		assertEquals("No params", 0, ds.getDatasetParameters().size());
+		assertEquals("No params", 0, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
 		results = session.search("Dataset INCLUDE Datafile [id = " + dsid + "]");
@@ -205,7 +203,7 @@ public class TestWS {
 		ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
 		assertEquals("Files", 2, ds.getDatafiles().size());
-		assertEquals("No params", 0, ds.getDatasetParameters().size());
+		assertEquals("No params", 0, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
 		results = session.search("Dataset INCLUDE DatasetParameter [id = " + dsid + "]");
@@ -213,7 +211,7 @@ public class TestWS {
 		ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
 		assertEquals("No Files", 0, ds.getDatafiles().size());
-		assertEquals("Params", 1, ds.getDatasetParameters().size());
+		assertEquals("Params", 1, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
 		results = session.search("Dataset INCLUDE Datafile, DatasetParameter [id = " + dsid + "]");
@@ -221,7 +219,7 @@ public class TestWS {
 		ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
 		assertEquals("Files", 2, ds.getDatafiles().size());
-		assertEquals("Params", 1, ds.getDatasetParameters().size());
+		assertEquals("Params", 1, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
 		results = session.search("Dataset INCLUDE Datafile, DatasetParameter, Investigation [id = " + dsid + "]");
@@ -229,7 +227,7 @@ public class TestWS {
 		ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
 		assertEquals("Files", 2, ds.getDatafiles().size());
-		assertEquals("Params", 1, ds.getDatasetParameters().size());
+		assertEquals("Params", 1, ds.getParameters().size());
 		assertNotNull("Inv", ds.getInvestigation());
 
 		results = session.search("Job");
@@ -322,6 +320,42 @@ public class TestWS {
 		assertEquals("Datafile", 1, ndfout);
 	}
 
+	private Dataset addDataset(Investigation inv, String name, DatasetType type) {
+		Dataset dataset = new Dataset();
+		dataset.setName(name);
+		dataset.setType(type);
+		inv.getDatasets().add(dataset);
+		return dataset;
+	}
+
+	private Datafile addDatafile(Dataset dataset, String name, DatafileFormat format) {
+		Datafile datafile = new Datafile();
+		datafile.setDatafileFormat(format);
+		datafile.setName(name);
+		dataset.getDatafiles().add(datafile);
+		return datafile;
+	}
+
+	private DatasetParameter addDatasetParameter(Dataset dataset, Object o, ParameterType p) {
+		DatasetParameter dsp = new DatasetParameter();
+		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
+			dsp.setDateTimeValue((XMLGregorianCalendar) o);
+		}
+		dsp.setType(p);
+		dataset.getParameters().add(dsp);
+		return dsp;
+	}
+
+	private SampleParameter addSampleParameter(Sample sample, Object o, ParameterType p) {
+		SampleParameter sp = new SampleParameter();
+		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
+			sp.setDateTimeValue((XMLGregorianCalendar) o);
+		}
+		sp.setType(p);
+		sample.getParameters().add(sp);
+		return sp;
+	}
+
 	@Test
 	public void bigCreate() throws Exception {
 		session.clear();
@@ -345,23 +379,42 @@ public class TestWS {
 		inv.setTitle("Not null");
 		inv.setType(investigationType);
 
-		final Dataset wibble = session.addDataset(inv, "Wibble", dst);
+		final Dataset wibble = addDataset(inv, "Wibble", dst);
 
-		Datafile datafile = session.addDatafile(wibble, "wib1", dft1);
+		addDatafile(wibble, "wib1", dft1);
 
-		datafile = session.addDatafile(wibble, "wib2", dft2);
+		addDatafile(wibble, "wib2", dft2);
 
 		GregorianCalendar c = new GregorianCalendar();
 		c.setTime(new Date());
 		XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
 
-		DatasetParameter dsp = session.addDatasetParameter(wibble, date, p);
+		addDatasetParameter(wibble, date, p);
 
-		Dataset wobble = session.addDataset(inv, "Wobble", dst);
-		datafile = session.addDatafile(wobble, "wob1", dft1);
+		Dataset wobble = addDataset(inv, "Wobble", dst);
+		addDatafile(wobble, "wob1", dft1);
+
+		Sample sample = addSample(inv, "S1");
+		addSample(inv, "S2");
+
+		addSampleParameter(sample, date, p);
 
 		session.registerInvestigation(inv);
-		session.get("Investigation INCLUDE Dataset, Datafile, DatasetParameter, Facility", inv.getId());
+		// TODO try to allow this
+		// inv = (Investigation)
+		// session.get("Investigation INCLUDE Dataset, Datafile, DatasetParameter, Facility, Sample, SampleParameter",
+		// inv.getId());
+		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter", inv.getId());
+		assertEquals(2, inv.getSamples().size());
+		for (Sample s : inv.getSamples()) {
+			if (s.getName().equals("S1")) {
+				assertEquals(1, s.getParameters().size());
+			} else if (s.getName().equals("S2")) {
+				assertEquals(0, s.getParameters().size());
+			} else {
+				fail("Neither S1 nor S2");
+			}
+		}
 
 		// Dataset dfsin = session.createDataset("dfsin", "GQ", inv);
 		// Datafile fred = session.createDatafile("fred", dft1, dfsin);
@@ -381,14 +434,18 @@ public class TestWS {
 
 	}
 
+	private Sample addSample(Investigation inv, String sampleName) {
+		Sample sample = new Sample();
+		sample.setName(sampleName);
+		inv.getSamples().add(sample);
+		return sample;
+
+	}
+
 	@BeforeClass
 	public static void setup() throws Exception {
 		session = new Session();
-		try {
-			session.setAuthz();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
+		session.setAuthz();
 		session.clearAuthz();
 		session.setAuthz();
 		session.clear();

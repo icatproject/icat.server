@@ -1,6 +1,7 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -21,7 +22,9 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
+import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 
 @Comment("**** Maybe we need a sample type as well. " + "An individual sample to be used in an investigation")
@@ -55,11 +58,19 @@ public class Sample extends EntityBaseBean implements Serializable {
 	private String name;
 
 	@Comment("Any safety information related to this sample")
-	@Column(nullable = false, length = 4000)
+	@Column(length = 4000)
 	private String safetyInformation;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
-	private List<SampleParameter> sampleParameters;
+	private List<SampleParameter> parameters = new ArrayList<SampleParameter>();
+
+	public List<SampleParameter> getParameters() {
+		return parameters;
+	}
+
+	public void setParameters(List<SampleParameter> parameters) {
+		this.parameters = parameters;
+	}
 
 	/* Needed for JPA */
 	public Sample() {
@@ -71,7 +82,7 @@ public class Sample extends EntityBaseBean implements Serializable {
 			this.investigation = null;
 		}
 		if (!this.includes.contains(SampleParameter.class)) {
-			this.sampleParameters = null;
+			this.parameters = null;
 		}
 		if (!this.includes.contains(Dataset.class)) {
 			this.datasets = null;
@@ -113,20 +124,28 @@ public class Sample extends EntityBaseBean implements Serializable {
 		return this.safetyInformation;//
 	}
 
-	public List<SampleParameter> getSampleParameters() {
-		return this.sampleParameters;
-	}
+
 
 	@Override
 	public void isValid(EntityManager manager, boolean deepValidation) throws ValidationException,
 			IcatInternalException {
 		super.isValid(manager, deepValidation);
 		if (deepValidation) {
-			if (this.sampleParameters != null) {
-				for (final SampleParameter sampleParameter : this.sampleParameters) {
+			if (this.parameters != null) {
+				for (final SampleParameter sampleParameter : this.parameters) {
 					sampleParameter.isValid(manager);
 				}
 			}
+		}
+	}
+
+	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
+			BadParameterException, IcatInternalException {
+		super.preparePersist(modId, manager);
+		id = null;
+		for (SampleParameter sampleParameter : parameters) {
+			sampleParameter.preparePersist(modId, manager);
+			sampleParameter.setSample(this); // Set back ref
 		}
 	}
 
@@ -160,10 +179,6 @@ public class Sample extends EntityBaseBean implements Serializable {
 
 	public void setSafetyInformation(String safetyInformation) {
 		this.safetyInformation = safetyInformation;
-	}
-
-	public void setSampleParameters(List<SampleParameter> sampleParameters) {
-		this.sampleParameters = sampleParameters;
 	}
 
 	@Override

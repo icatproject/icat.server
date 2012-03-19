@@ -34,7 +34,7 @@ public class Keyword extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "keywordGenerator")
 	private Long id;
 
-	@Comment("The investigation to whioch this keyword applies")
+	@Comment("The investigation to which this keyword applies")
 	@JoinColumn(name = "INVESTIGATION_ID", nullable = false)
 	@ManyToOne
 	private Investigation investigation;

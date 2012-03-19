@@ -81,14 +81,14 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	private List<Publication> publications = new ArrayList<Publication>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private List<InvestigationParameter> investigationParameters = new ArrayList<InvestigationParameter>();
+	private List<InvestigationParameter> parameters = new ArrayList<InvestigationParameter>();
 
-	public List<InvestigationParameter> getInvestigationParameters() {
-		return investigationParameters;
+	public List<InvestigationParameter> getParameters() {
+		return parameters;
 	}
 
-	public void setInvestigationParameters(List<InvestigationParameter> investigationParameters) {
-		this.investigationParameters = investigationParameters;
+	public void setParameters(List<InvestigationParameter> parameters) {
+		this.parameters = parameters;
 	}
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
@@ -197,8 +197,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	public void setStudyInvestigations(List<StudyInvestigation> studyInvestigations) {
 		this.studyInvestigations = studyInvestigations;
 	}
-
-
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<Dataset> datasets = new ArrayList<Dataset>();
@@ -320,13 +318,15 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		id = null;
 		for (Dataset dataset : datasets) {
 			dataset.preparePersist(modId, manager);
-			dataset.setInvestigation(this); // Must set the backwards reference
+			dataset.setInvestigation(this); // Set back ref
 		}
-		for (InvestigationParameter investigationParameter : investigationParameters) {
+		for (InvestigationParameter investigationParameter : parameters) {
 			investigationParameter.preparePersist(modId, manager);
-			investigationParameter.setInvestigation(this); // Must set the
-															// backwards
-															// reference
+			investigationParameter.setInvestigation(this); // Set back ref
+		}
+		for (Sample sample : samples) {
+			sample.preparePersist(modId, manager);
+			sample.setInvestigation(this); // Set back ref
 		}
 	}
 
@@ -365,7 +365,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 			this.topicInvestigations = null;
 		}
 		if (!this.includes.contains(InvestigationParameter.class)) {
-			this.investigationParameters = null;
+			this.parameters = null;
 		}
 		if (!this.includes.contains(InvestigationType.class)) {
 			this.type = null;
