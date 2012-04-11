@@ -7,9 +7,12 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
@@ -26,10 +29,23 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "datafileFormatGenerator", pkColumnValue = "DatafileFormat")
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "VERSION" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME", "VERSION" }) })
 public class DatafileFormat extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(DatafileFormat.class);
+	
+	@Comment("The facility which has defined this format")
+	@JoinColumn(name = "FACILITY_ID", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Facility facility;
+
+	public Facility getFacility() {
+		return facility;
+	}
+
+	public void setFacility(Facility facility) {
+		this.facility = facility;
+	}
 
 	@Comment("Files with this format")
 	@OneToMany(mappedBy = "datafileFormat")
@@ -45,7 +61,7 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datafileFormatGenerator")
 	private Long id;
 
-	@Comment("A short name identifying the format -e.g. \"mp3\"")
+	@Comment("A short name identifying the format -e.g. \"mp3\" within the facility")
 	@Column(name = "NAME", nullable = false)
 	private String name;
 
@@ -128,7 +144,9 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 		if (!this.includes.contains(Datafile.class)) {
 			this.datafiles = null;
 		}
-
+		if (!this.includes.contains(Facility.class)) {
+			this.facility = null;
+		}
 	}
 
 }

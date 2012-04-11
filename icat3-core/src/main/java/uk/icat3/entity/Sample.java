@@ -27,17 +27,15 @@ import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
 import uk.icat3.exceptions.ValidationException;
 
-@Comment("**** Maybe we need a sample type as well. " + "An individual sample to be used in an investigation")
+@Comment("A sample to be used in an investigation")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "INSTANCE", "INVESTIGATION_ID" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME",
+		"SAMPLETYPE_ID", "INVESTIGATION_ID" }) })
 @TableGenerator(name = "sampleGenerator", pkColumnValue = "Sample")
 public class Sample extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(Sample.class);
-
-	@Comment("The formula written as a string -e.g. C2H6O2 for ethylene glycol")
-	private String molecularFormula;
 
 	@OneToMany(mappedBy = "sample")
 	private List<Dataset> datasets;
@@ -46,10 +44,6 @@ public class Sample extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "sampleGenerator")
 	private Long id;
 
-	@Comment("To distinguish between different instances of the same material")
-	@Column(name = "INSTANCE")
-	private String instance;
-
 	@JoinColumn(nullable = false, name = "INVESTIGATION_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Investigation investigation;
@@ -57,20 +51,12 @@ public class Sample extends EntityBaseBean implements Serializable {
 	@Column(nullable = false, name = "NAME")
 	private String name;
 
-	@Comment("Any safety information related to this sample")
-	@Column(length = 4000)
-	private String safetyInformation;
-
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
 	private List<SampleParameter> parameters = new ArrayList<SampleParameter>();
 
-	public List<SampleParameter> getParameters() {
-		return parameters;
-	}
-
-	public void setParameters(List<SampleParameter> parameters) {
-		this.parameters = parameters;
-	}
+	@JoinColumn(name = "SAMPLETYPE_ID")
+	@ManyToOne(fetch = FetchType.LAZY)
+	private SampleType type;
 
 	/* Needed for JPA */
 	public Sample() {
@@ -86,6 +72,9 @@ public class Sample extends EntityBaseBean implements Serializable {
 		}
 		if (!this.includes.contains(Dataset.class)) {
 			this.datasets = null;
+		}
+		if (!this.includes.contains(SampleType.class)) {
+			this.type = null;
 		}
 	}
 
@@ -103,10 +92,6 @@ public class Sample extends EntityBaseBean implements Serializable {
 		return this.id;
 	}
 
-	public String getInstance() {
-		return this.instance;
-	}
-
 	public Investigation getInvestigation() {
 		return this.investigation;
 	}
@@ -115,20 +100,18 @@ public class Sample extends EntityBaseBean implements Serializable {
 		return this.name;
 	}
 
+	public List<SampleParameter> getParameters() {
+		return parameters;
+	}
+
 	@Override
 	public Object getPK() {
 		return this.id;
 	}
 
-	public String getSafetyInformation() {
-		return this.safetyInformation;//
-	}
-
-
-
 	@Override
-	public void isValid(EntityManager manager, boolean deepValidation) throws ValidationException,
-			IcatInternalException {
+	public void isValid(EntityManager manager, boolean deepValidation)
+			throws ValidationException, IcatInternalException {
 		super.isValid(manager, deepValidation);
 		if (deepValidation) {
 			if (this.parameters != null) {
@@ -139,22 +122,15 @@ public class Sample extends EntityBaseBean implements Serializable {
 		}
 	}
 
-	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
+	public void preparePersist(String modId, EntityManager manager)
+			throws NoSuchObjectFoundException, BadParameterException,
+			IcatInternalException {
 		super.preparePersist(modId, manager);
 		id = null;
 		for (SampleParameter sampleParameter : parameters) {
 			sampleParameter.preparePersist(modId, manager);
 			sampleParameter.setSample(this); // Set back ref
 		}
-	}
-
-	public String getMolecularFormula() {
-		return molecularFormula;
-	}
-
-	public void setMolecularFormula(String molecularFormula) {
-		this.molecularFormula = molecularFormula;
 	}
 
 	public void setDatasets(List<Dataset> datasets) {
@@ -165,10 +141,6 @@ public class Sample extends EntityBaseBean implements Serializable {
 		this.id = id;
 	}
 
-	public void setInstance(String instance) {
-		this.instance = instance;
-	}
-
 	public void setInvestigation(Investigation investigation) {
 		this.investigation = investigation;
 	}
@@ -177,8 +149,16 @@ public class Sample extends EntityBaseBean implements Serializable {
 		this.name = name;
 	}
 
-	public void setSafetyInformation(String safetyInformation) {
-		this.safetyInformation = safetyInformation;
+	public void setParameters(List<SampleParameter> parameters) {
+		this.parameters = parameters;
+	}
+
+	public SampleType getType() {
+		return type;
+	}
+
+	public void setType(SampleType type) {
+		this.type = type;
 	}
 
 	@Override

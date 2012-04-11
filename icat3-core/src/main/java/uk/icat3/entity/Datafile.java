@@ -34,107 +34,126 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 @SuppressWarnings("serial")
 @Entity
 @XmlRootElement
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "LOCATION", "DATASET_ID" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME",
+		"LOCATION", "DATASET_ID" }) })
 @TableGenerator(name = "datafileGenerator", pkColumnValue = "Datafile")
 public class Datafile extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(Datafile.class);
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datafileGenerator")
-	private Long id;
+	@Comment("Checksum of file represented as a string")
+	private String checksum;
 
-	@Comment("A name given to the file")
-	@Column(name = "NAME", nullable = false)
-	private String name;
-
-	@Comment("A full description of the file contents")
-	private String description;
-
-	@Comment("**** Do we want this - it is not part of the constraint - not used by ISIS")
-	private String version;
-
-	@Comment("**** Do we want this - it is not part of the constraint - not used by ISIS")
-	private String versionComment;
-
-	@Comment("The logical location of the file - which may also be the physical location")
-	@Column(name = "LOCATION")
-	private String location;
-
-	@Comment("**** Do we want this")
+	@Comment("Date of creation of the actual file rather than storing the metadata")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date datafileCreateTime;
 
-	@Comment("**** Do we want this")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date datafileModTime;
-
-	@Comment("Expressed in bytes")
-	private Long fileSize;
-
-	@Comment("**** Do we want this - not used by ISIS")
-	private String command;
-
-	@Comment("**** Nobody would search for a file with this field")
-	private String checksum;
-
-	@Comment("**** Nobody would search for a file with this field - not used by ISIS")
-	private String signature;
-
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sourceDatafile")
-	private List<RelatedDatafile> sourceDatafiles = new ArrayList<RelatedDatafile>();
-
-	public List<RelatedDatafile> getSourceDatafiles() {
-		return sourceDatafiles;
-	}
-
-	public void setSourceDatafiles(List<RelatedDatafile> sourceDatafiles) {
-		this.sourceDatafiles = sourceDatafiles;
-	}
-
-	public List<RelatedDatafile> getDestDatafiles() {
-		return destDatafiles;
-	}
-
-	public void setDestDatafiles(List<RelatedDatafile> destDatafiles) {
-		this.destDatafiles = destDatafiles;
-	}
-
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "destDatafile")
-	private List<RelatedDatafile> destDatafiles = new ArrayList<RelatedDatafile>();
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	private DatafileFormat datafileFormat;
+
+	@Comment("Date of modification of the actual file rather than of the metadata")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date datafileModTime;
 
 	@Comment("The dataset which holds this file")
 	@JoinColumn(name = "DATASET_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Dataset dataset;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
-	private List<DatafileParameter> parameters = new ArrayList<DatafileParameter>();
+	@Comment("A full description of the file contents")
+	private String description;
 
-	public List<DatafileParameter> getParameters() {
-		return parameters;
-	}
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "destDatafile")
+	private List<RelatedDatafile> destDatafiles = new ArrayList<RelatedDatafile>();
 
-	public void setParameters(List<DatafileParameter> parameters) {
-		this.parameters = parameters;
-	}
+	@Comment("The Digital Object Identifier associated with this data file")
+	private String doi;
+
+	@Comment("Expressed in bytes")
+	private Long fileSize;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datafileGenerator")
+	private Long id;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
 	private List<InputDatafile> inputDatafiles = new ArrayList<InputDatafile>();
 
+	@Comment("The logical location of the file - which may also be the physical location")
+	@Column(name = "LOCATION")
+	private String location;
+
+	@Comment("A name given to the file")
+	@Column(name = "NAME", nullable = false)
+	private String name;
+
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
 	private List<OutputDatafile> outputDatafiles = new ArrayList<OutputDatafile>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
+	private List<DatafileParameter> parameters = new ArrayList<DatafileParameter>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sourceDatafile")
+	private List<RelatedDatafile> sourceDatafiles = new ArrayList<RelatedDatafile>();
 
 	/* Needed for JPA */
 	public Datafile() {
 	}
 
-	@Override
-	public String toString() {
-		return "Datafile[id=" + id + "]";
+	public void beforeMarshal(Marshaller source) {
+		logger.trace("Marshalling Datafile for " + includes);
+		if (!this.includes.contains(RelatedDatafile.class)) {
+			this.sourceDatafiles = null;
+			this.destDatafiles = null;
+		}
+		if (!this.includes.contains(DatafileFormat.class)) {
+			this.datafileFormat = null;
+		}
+		if (!this.includes.contains(Dataset.class)) {
+			this.dataset = null;
+		}
+		if (!this.includes.contains(DatafileParameter.class)) {
+			this.parameters = null;
+		}
+		if (!this.includes.contains(InputDatafile.class)) {
+			this.inputDatafiles = null;
+		}
+		if (!this.includes.contains(OutputDatafile.class)) {
+			this.outputDatafiles = null;
+		}
+
+	}
+
+	public String getChecksum() {
+		return checksum;
+	}
+
+	public Date getDatafileCreateTime() {
+		return datafileCreateTime;
+	}
+
+	public DatafileFormat getDatafileFormat() {
+		return datafileFormat;
+	}
+
+	public Date getDatafileModTime() {
+		return datafileModTime;
+	}
+
+	public Dataset getDataset() {
+		return dataset;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public List<RelatedDatafile> getDestDatafiles() {
+		return destDatafiles;
+	}
+
+	public String getDoi() {
+		return doi;
 	}
 
 	// TODO fix this
@@ -162,8 +181,46 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	// }
 	// }
 
-	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
+	public Long getFileSize() {
+		return fileSize;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public List<InputDatafile> getInputDatafiles() {
+		return inputDatafiles;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public List<OutputDatafile> getOutputDatafiles() {
+		return outputDatafiles;
+	}
+
+	public List<DatafileParameter> getParameters() {
+		return parameters;
+	}
+
+	@Override
+	public Object getPK() {
+		return id;
+	}
+
+	public List<RelatedDatafile> getSourceDatafiles() {
+		return sourceDatafiles;
+	}
+
+	public void preparePersist(String modId, EntityManager manager)
+			throws NoSuchObjectFoundException, BadParameterException,
+			IcatInternalException {
 		super.preparePersist(modId, manager);
 		id = null;
 		for (DatafileParameter datafileParameter : parameters) {
@@ -172,161 +229,73 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		}
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
-	}
-
-	public String getVersionComment() {
-		return versionComment;
-	}
-
-	public void setVersionComment(String versionComment) {
-		this.versionComment = versionComment;
-	}
-
-	public String getLocation() {
-		return location;
-	}
-
-	public void setLocation(String location) {
-		this.location = location;
-	}
-
-	public Date getDatafileCreateTime() {
-		return datafileCreateTime;
+	public void setChecksum(String checksum) {
+		this.checksum = checksum;
 	}
 
 	public void setDatafileCreateTime(Date datafileCreateTime) {
 		this.datafileCreateTime = datafileCreateTime;
 	}
 
-	public Date getDatafileModTime() {
-		return datafileModTime;
+	public void setDatafileFormat(DatafileFormat datafileFormat) {
+		this.datafileFormat = datafileFormat;
 	}
 
 	public void setDatafileModTime(Date datafileModTime) {
 		this.datafileModTime = datafileModTime;
 	}
 
-	public Long getFileSize() {
-		return fileSize;
+	public void setDataset(Dataset dataset) {
+		this.dataset = dataset;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setDestDatafiles(List<RelatedDatafile> destDatafiles) {
+		this.destDatafiles = destDatafiles;
+	}
+
+	public void setDoi(String doi) {
+		this.doi = doi;
 	}
 
 	public void setFileSize(Long fileSize) {
 		this.fileSize = fileSize;
 	}
 
-	public String getCommand() {
-		return command;
-	}
-
-	public void setCommand(String command) {
-		this.command = command;
-	}
-
-	public String getChecksum() {
-		return checksum;
-	}
-
-	public void setChecksum(String checksum) {
-		this.checksum = checksum;
-	}
-
-	public String getSignature() {
-		return signature;
-	}
-
-	public void setSignature(String signature) {
-		this.signature = signature;
-	}
-
-	public DatafileFormat getDatafileFormat() {
-		return datafileFormat;
-	}
-
-	public void setDatafileFormat(DatafileFormat datafileFormat) {
-		this.datafileFormat = datafileFormat;
-	}
-
-	public Dataset getDataset() {
-		return dataset;
-	}
-
-	public void setDataset(Dataset dataset) {
-		this.dataset = dataset;
-	}
-
-	public List<InputDatafile> getInputDatafiles() {
-		return inputDatafiles;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public void setInputDatafiles(List<InputDatafile> inputDatafiles) {
 		this.inputDatafiles = inputDatafiles;
 	}
 
-	public List<OutputDatafile> getOutputDatafiles() {
-		return outputDatafiles;
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public void setOutputDatafiles(List<OutputDatafile> outputDatafiles) {
 		this.outputDatafiles = outputDatafiles;
 	}
 
-	@Override
-	public Object getPK() {
-		return id;
+	public void setParameters(List<DatafileParameter> parameters) {
+		this.parameters = parameters;
 	}
 
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Datafile for " + includes);
-		if (!this.includes.contains(RelatedDatafile.class)) {
-			this.sourceDatafiles = null;
-			this.destDatafiles = null;
-		}
-		if (!this.includes.contains(DatafileFormat.class)) {
-			this.datafileFormat = null;
-		}
-		if (!this.includes.contains(Dataset.class)) {
-			this.dataset = null;
-		}
-		if (!this.includes.contains(DatafileParameter.class)) {
-			this.parameters = null;
-		}
-		if (!this.includes.contains(InputDatafile.class)) {
-			this.inputDatafiles = null;
-		}
-		if (!this.includes.contains(OutputDatafile.class)) {
-			this.outputDatafiles = null;
-		}
+	public void setSourceDatafiles(List<RelatedDatafile> sourceDatafiles) {
+		this.sourceDatafiles = sourceDatafiles;
+	}
 
+	@Override
+	public String toString() {
+		return "Datafile[id=" + id + "]";
 	}
 
 }

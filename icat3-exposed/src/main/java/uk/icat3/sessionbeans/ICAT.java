@@ -27,7 +27,6 @@ import uk.icat3.entity.DatafileFormat;
 import uk.icat3.entity.DatafileParameter;
 import uk.icat3.entity.Dataset;
 import uk.icat3.entity.DatasetParameter;
-import uk.icat3.entity.DatasetStatus;
 import uk.icat3.entity.DatasetType;
 import uk.icat3.entity.EntityBaseBean;
 import uk.icat3.entity.Facility;
@@ -52,10 +51,8 @@ import uk.icat3.entity.Sample;
 import uk.icat3.entity.SampleParameter;
 import uk.icat3.entity.Shift;
 import uk.icat3.entity.Study;
+import uk.icat3.entity.Study.StudyStatus;
 import uk.icat3.entity.StudyInvestigation;
-import uk.icat3.entity.StudyStatus;
-import uk.icat3.entity.Topic;
-import uk.icat3.entity.TopicInvestigation;
 import uk.icat3.entity.User;
 import uk.icat3.entity.UserGroup;
 import uk.icat3.exceptions.BadParameterException;
@@ -67,6 +64,7 @@ import uk.icat3.exceptions.NoSuchUserException;
 import uk.icat3.exceptions.ObjectAlreadyExistsException;
 import uk.icat3.exceptions.SessionException;
 import uk.icat3.exceptions.ValidationException;
+import uk.icat3.jaxb.gen.DatasetStatus;
 import uk.icat3.manager.EntityInfo;
 import uk.icat3.sessionbeans.data.DownloadManagerLocal;
 import uk.icat3.sessionbeans.interceptor.DownloadInterceptor;
@@ -77,7 +75,7 @@ import uk.icat3.sessionbeans.util.Constants;
 import uk.icat3.user.UserDetails;
 
 @Stateless
-@WebService(serviceName = "ICATService", targetNamespace = "client.icat3.uk")
+@WebService(targetNamespace = "http://icatproject.org")
 @TransactionAttribute(value = TransactionAttributeType.REQUIRED)
 public class ICAT extends ICATCompat {
 
@@ -95,77 +93,103 @@ public class ICAT extends ICATCompat {
 	}
 
 	@WebMethod
-	public List<?> search(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "query") String query)
-			throws BadParameterException, IcatInternalException, InsufficientPrivilegesException, SessionException {
+	public List<?> search(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "query") String query)
+			throws BadParameterException, IcatInternalException,
+			InsufficientPrivilegesException, SessionException {
 		return beanManagerLocal.search(sessionId, query);
 	}
 
 	@WebMethod
-	public Object create(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "bean") EntityBaseBean bean)
-			throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException,
+	public Object create(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "bean") EntityBaseBean bean)
+			throws SessionException, InsufficientPrivilegesException,
+			NoSuchObjectFoundException, ValidationException,
 			ObjectAlreadyExistsException, IcatInternalException {
 		return beanManagerLocal.create(sessionId, bean);
 	}
 
 	@WebMethod
-	public void delete(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "bean") EntityBaseBean bean)
-			throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException,
+	public void delete(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "bean") EntityBaseBean bean)
+			throws SessionException, InsufficientPrivilegesException,
+			NoSuchObjectFoundException, ValidationException,
 			ObjectAlreadyExistsException, IcatInternalException {
 		beanManagerLocal.delete(sessionId, bean);
 	}
 
 	@WebMethod
-	public void update(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "bean") EntityBaseBean bean)
-			throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException,
+	public void update(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "bean") EntityBaseBean bean)
+			throws SessionException, InsufficientPrivilegesException,
+			NoSuchObjectFoundException, ValidationException,
 			IcatInternalException {
 		beanManagerLocal.update(sessionId, bean);
 	}
 
 	@WebMethod
-	public EntityBaseBean get(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "query") String query,
-			@WebParam(name = "primaryKey") Object primaryKey) throws SessionException, NoSuchObjectFoundException,
-			InsufficientPrivilegesException, BadParameterException, IcatInternalException {
+	public EntityBaseBean get(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "query") String query,
+			@WebParam(name = "primaryKey") Object primaryKey)
+			throws SessionException, NoSuchObjectFoundException,
+			InsufficientPrivilegesException, BadParameterException,
+			IcatInternalException {
 		return beanManagerLocal.get(sessionId, query, primaryKey);
 	}
-	
+
 	@WebMethod
-	public EntityInfo getEntityInfo(@WebParam(name = "beanName") String beanName) throws BadParameterException, IcatInternalException {
+	public EntityInfo getEntityInfo(@WebParam(name = "beanName") String beanName)
+			throws BadParameterException, IcatInternalException {
 		return beanManagerLocal.getEntityInfo(beanName);
 	}
 
 	@WebMethod
-	public void dummy(
-
-	@WebParam Datafile datafile, @WebParam DatafileFormat datafileFormat,
-			@WebParam DatafileParameter datafileParameter, @WebParam Dataset dataset,
-			@WebParam DatasetParameter datasetParameter, @WebParam DatasetStatus datasetStatus,
-			@WebParam DatasetType datasetType, @WebParam Facility facility, @WebParam FacilityCycle facilityCycle,
-			@WebParam InstrumentScientist facilityInstrumentScientist, @WebParam User user, @WebParam Instrument instrument,
-			@WebParam Investigation investigation, @WebParam InvestigationType investigationType,
-			@WebParam InvestigationUser investigator, @WebParam Keyword keyword, @WebParam ParameterType parameter,
-			@WebParam Publication publication, @WebParam RelatedDatafile relatedDatafile, @WebParam Sample sample,
-			@WebParam SampleParameter sampleParameter, @WebParam Shift shift, @WebParam Study study,
-			@WebParam StudyInvestigation studyInvestigation, @WebParam StudyStatus studyStatus, @WebParam Topic topic,
-			@WebParam TopicInvestigation topicInvestigation, @WebParam Application application, @WebParam Job job,
-			@WebParam InputDataset inputDataset, @WebParam OutputDataset outputDataset,
-			@WebParam InputDatafile inputDatafile, @WebParam OutputDatafile outputDatafile,
-			@WebParam NotificationRequest notificationRequest, @WebParam Group group, @WebParam UserGroup userGroup) {
+	public void dummy(@WebParam Datafile datafile,
+			@WebParam DatafileFormat datafileFormat,
+			@WebParam DatafileParameter datafileParameter,
+			@WebParam Dataset dataset,
+			@WebParam DatasetParameter datasetParameter,
+			@WebParam DatasetStatus datasetStatus,
+			@WebParam DatasetType datasetType, @WebParam Facility facility,
+			@WebParam FacilityCycle facilityCycle,
+			@WebParam InstrumentScientist facilityInstrumentScientist,
+			@WebParam User user, @WebParam Instrument instrument,
+			@WebParam Investigation investigation,
+			@WebParam InvestigationType investigationType,
+			@WebParam InvestigationUser investigator,
+			@WebParam Keyword keyword, @WebParam ParameterType parameter,
+			@WebParam Publication publication,
+			@WebParam RelatedDatafile relatedDatafile, @WebParam Sample sample,
+			@WebParam SampleParameter sampleParameter, @WebParam Shift shift,
+			@WebParam Study study,
+			@WebParam StudyInvestigation studyInvestigation,
+			@WebParam StudyStatus studyStatus,
+			@WebParam Application application, @WebParam Job job,
+			@WebParam InputDataset inputDataset,
+			@WebParam OutputDataset outputDataset,
+			@WebParam InputDatafile inputDatafile,
+			@WebParam OutputDatafile outputDatafile,
+			@WebParam NotificationRequest notificationRequest,
+			@WebParam Group group, @WebParam UserGroup userGroup) {
 		beanManagerLocal.dummy(facility);
 	}
 
 	@WebMethod(operationName = "loginAdmin")
 	@ExcludeClassInterceptors
 	public String loginAdmin(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "runAsUserFedId") String runAsUserFedId) throws SessionException {
+			@WebParam(name = "runAsUserFedId") String runAsUserFedId)
+			throws SessionException {
 		return user.loginAdmin(sessionId, runAsUserFedId);
 	}
 
 	@WebMethod
 	@ExcludeClassInterceptors
-	public String login(@WebParam(name = "username") String username, @WebParam(name = "password") String password)
+	public String login(@WebParam(name = "username") String username,
+			@WebParam(name = "password") String password)
 			throws SessionException, IcatInternalException {
 		MessageContext msgCtxt = webServiceContext.getMessageContext();
-		HttpServletRequest req = (HttpServletRequest) msgCtxt.get(MessageContext.SERVLET_REQUEST);
+		HttpServletRequest req = (HttpServletRequest) msgCtxt
+				.get(MessageContext.SERVLET_REQUEST);
 		return user.login(username, password, req);
 	}
 
@@ -173,10 +197,13 @@ public class ICAT extends ICATCompat {
 	@ExcludeClassInterceptors
 	@RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.loginLifetime")
 	@ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.loginLifetimeResponse")
-	public String login(@WebParam(name = "username") String username, @WebParam(name = "password") String password,
-			@WebParam(name = "lifetime") int lifetime) throws SessionException, IcatInternalException {
+	public String login(@WebParam(name = "username") String username,
+			@WebParam(name = "password") String password,
+			@WebParam(name = "lifetime") int lifetime) throws SessionException,
+			IcatInternalException {
 		MessageContext msgCtxt = webServiceContext.getMessageContext();
-		HttpServletRequest req = (HttpServletRequest) msgCtxt.get(MessageContext.SERVLET_REQUEST);
+		HttpServletRequest req = (HttpServletRequest) msgCtxt
+				.get(MessageContext.SERVLET_REQUEST);
 		return user.login(username, password, lifetime, req);
 	}
 
@@ -187,8 +214,10 @@ public class ICAT extends ICATCompat {
 	}
 
 	@WebMethod(operationName = "getUserDetails")
-	public UserDetails getUserDetails(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "usersName") String usersName) throws SessionException, NoSuchUserException {
+	public UserDetails getUserDetails(
+			@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "usersName") String usersName)
+			throws SessionException, NoSuchUserException {
 		return this.user.getUserDetails(sessionId, usersName);
 
 	}
@@ -203,8 +232,11 @@ public class ICAT extends ICATCompat {
 	}
 
 	@WebMethod
-	public Long[] ingestMetadata(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "xml") String xml)
-			throws SessionException, ValidationException, InsufficientPrivilegesException, ICATAPIException {
+	public Long[] ingestMetadata(
+			@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "xml") String xml) throws SessionException,
+			ValidationException, InsufficientPrivilegesException,
+			ICATAPIException {
 		return xmlIngestionManagerLocal.ingestMetadata(sessionId, xml);
 	}
 
@@ -228,7 +260,8 @@ public class ICAT extends ICATCompat {
 	@Interceptors(DownloadInterceptor.class)
 	public @WebResult(name = "URL")
 	String downloadDatafile(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "datafileId") Long datafileId) throws SessionException, NoSuchObjectFoundException,
+			@WebParam(name = "datafileId") Long datafileId)
+			throws SessionException, NoSuchObjectFoundException,
 			InsufficientPrivilegesException, IcatInternalException {
 		return downloadManagerLocal.downloadDatafile(sessionId, datafileId);
 	}
@@ -252,8 +285,10 @@ public class ICAT extends ICATCompat {
 	@WebMethod
 	@Interceptors(DownloadInterceptor.class)
 	public @WebResult(name = "URL")
-	String downloadDataset(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "datasetId") Long datasetId)
-			throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException, IcatInternalException {
+	String downloadDataset(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "datasetId") Long datasetId)
+			throws SessionException, NoSuchObjectFoundException,
+			InsufficientPrivilegesException, IcatInternalException {
 		return downloadManagerLocal.downloadDataset(sessionId, datasetId);
 	}
 
@@ -277,8 +312,9 @@ public class ICAT extends ICATCompat {
 	@Interceptors(DownloadInterceptor.class)
 	public @WebResult(name = "URL")
 	String downloadDatafiles(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "datafileIds") Collection<Long> datafileIds) throws SessionException,
-			NoSuchObjectFoundException, InsufficientPrivilegesException, IcatInternalException {
+			@WebParam(name = "datafileIds") Collection<Long> datafileIds)
+			throws SessionException, NoSuchObjectFoundException,
+			InsufficientPrivilegesException, IcatInternalException {
 		return downloadManagerLocal.downloadDatafiles(sessionId, datafileIds);
 	}
 
@@ -301,10 +337,13 @@ public class ICAT extends ICATCompat {
 	 */
 	@WebMethod
 	public @WebResult(name = "downloadInfo")
-	DownloadInfo checkDatafileDownloadAccess(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "datafileIds") Collection<Long> datafileIds) throws SessionException,
-			NoSuchObjectFoundException, InsufficientPrivilegesException, IcatInternalException {
-		return downloadManagerLocal.checkDatafileDownloadAccess(sessionId, datafileIds);
+	DownloadInfo checkDatafileDownloadAccess(
+			@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "datafileIds") Collection<Long> datafileIds)
+			throws SessionException, NoSuchObjectFoundException,
+			InsufficientPrivilegesException, IcatInternalException {
+		return downloadManagerLocal.checkDatafileDownloadAccess(sessionId,
+				datafileIds);
 	}
 
 	/**
@@ -327,10 +366,13 @@ public class ICAT extends ICATCompat {
 	 */
 	@WebMethod
 	public @WebResult(name = "downloadInfo")
-	DownloadInfo checkDatasetDownloadAccess(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "datasetId") Long datasetId) throws SessionException, NoSuchObjectFoundException,
+	DownloadInfo checkDatasetDownloadAccess(
+			@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "datasetId") Long datasetId)
+			throws SessionException, NoSuchObjectFoundException,
 			InsufficientPrivilegesException, IcatInternalException {
-		return downloadManagerLocal.checkDatasetDownloadAccess(sessionId, datasetId);
+		return downloadManagerLocal.checkDatasetDownloadAccess(sessionId,
+				datasetId);
 	}
 
 	/**
@@ -345,8 +387,9 @@ public class ICAT extends ICATCompat {
 	 * @return String the Current ICAT API Version (manually updated)
 	 */
 	@WebMethod(operationName = "getICATAPIVersion")
-	public String getICATAPIVersion(@WebParam(name = "sessionId") String sessionId) throws SessionException,
-			InsufficientPrivilegesException {
+	public String getICATAPIVersion(
+			@WebParam(name = "sessionId") String sessionId)
+			throws SessionException, InsufficientPrivilegesException {
 		return Constants.CURRENT_ICAT_API_VERSION;
 	}
 

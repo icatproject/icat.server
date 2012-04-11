@@ -49,6 +49,17 @@ public class User extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private List<InstrumentScientist> instrumentScientists;
+	
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+	private List<Study> studies;
+
+	public List<Study> getStudies() {
+		return studies;
+	}
+
+	public void setStudies(List<Study> studies) {
+		this.studies = studies;
+	}
 
 	public void setUserGroups(List<UserGroup> userGroups) {
 		this.userGroups = userGroups;

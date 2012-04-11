@@ -28,7 +28,7 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 @TableGenerator(name = "keywordGenerator", pkColumnValue = "Keyword")
 public class Keyword extends EntityBaseBean implements Serializable {
 
-	private static Logger logger = Logger.getLogger(Investigation.class);
+	private static Logger logger = Logger.getLogger(Keyword.class);
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "keywordGenerator")

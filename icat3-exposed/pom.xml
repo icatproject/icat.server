@@ -23,6 +23,21 @@
 			<groupId>co.uk.icat3</groupId>
 			<artifactId>icat3-data</artifactId>
 		</dependency>
+		
+<!-- 		 <dependency> -->
+<!-- 			<groupId>org.eclipse.persistence</groupId> -->
+<!-- 			<artifactId>eclipselink</artifactId> -->
+<!-- 			<version>2.3.0</version> -->
+<!-- 			<scope>test</scope> -->
+<!-- 		</dependency> -->
+		
+<!-- 		<dependency> -->
+<!-- 			<groupId>oracle</groupId> -->
+<!-- 			<artifactId>ojdbc</artifactId> -->
+<!-- 			<version>14</version> -->
+<!-- 			<scope>test</scope> -->
+<!-- 		</dependency> -->
+
 
 <!-- 		<dependency> -->
 <!-- 			<groupId>co.uk.icat3</groupId> -->

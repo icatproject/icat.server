@@ -10,6 +10,7 @@
 		<class>uk.icat3.entity.Publication</class>
 		<class>uk.icat3.entity.Facility</class>
 		<class>uk.icat3.entity.Sample</class>
+		<class>uk.icat3.entity.SampleType</class>
 		<class>uk.icat3.entity.Investigation</class>
 		<class>uk.icat3.entity.Dataset</class>
 		<class>uk.icat3.entity.InvestigationType</class>
@@ -18,10 +19,9 @@
 		<class>uk.icat3.entity.Keyword</class>
 		<class>uk.icat3.entity.DatasetType</class>
 		<class>uk.icat3.entity.FacilityCycle</class>
-		<class>uk.icat3.entity.DatasetStatus</class>
 		<class>uk.icat3.entity.StudyInvestigation</class>
 		<class>uk.icat3.entity.DatasetParameter</class>
-		<class>uk.icat3.entity.Topic</class>
+		<class>uk.icat3.entity.PermissibleStringValue</class>
 		<class>uk.icat3.entity.Instrument</class>
 		<class>uk.icat3.entity.RelatedDatafile</class>
 		<class>uk.icat3.entity.StudyStatus</class>
@@ -34,7 +34,6 @@
 		<class>uk.icat3.entity.DatafileParameter</class>
 		<class>uk.icat3.entity.IcatAuthorisation</class>
 		<class>uk.icat3.entity.IcatRole</class>
-		<class>uk.icat3.entity.TopicInvestigation</class>
 		<class>uk.icat3.entity.InstrumentScientist</class>
 		<class>uk.icat3.entity.UserGroup</class>
 		<class>uk.icat3.entity.Rule</class>

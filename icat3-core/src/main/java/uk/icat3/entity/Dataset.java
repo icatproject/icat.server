@@ -34,33 +34,37 @@ import uk.icat3.exceptions.ValidationException;
 @Comment("A collection of data files and part of an investigation")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "SAMPLE_ID", "INVESTIGATION_ID", "NAME", "TYPE" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "SAMPLE_ID",
+		"INVESTIGATION_ID", "NAME", "TYPE" }) })
 @XmlRootElement
 @TableGenerator(name = "datasetGenerator", pkColumnValue = "Dataset")
 public class Dataset extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(Dataset.class);
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datasetGenerator")
-	private Long id;
+	@Comment("May be set to true when all data files and parameters have been added to the data set. The precise meaning is facility dependent.")
+	private boolean complete;
 
 	@Comment("The data files within the dataset")
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<Datafile> datafiles = new ArrayList<Datafile>();
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-	private List<DatasetParameter> parameters = new ArrayList<DatasetParameter>();
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	private DatasetStatus status;
-
-	@JoinColumn(name = "TYPE", nullable = false)
-	@ManyToOne(fetch = FetchType.LAZY)
-	private DatasetType type;
-
 	@Comment("An informal description of the data set")
 	private String description;
+
+	@Comment("The Digital Object Identifier associated with this data set")
+	private String doi;
+
+	@Column(name = "END_DATE")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date endDate;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datasetGenerator")
+	private Long id;
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
+	private List<InputDataset> inputDatasets;
 
 	@JoinColumn(name = "INVESTIGATION_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -73,6 +77,12 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@Column(name = "NAME", nullable = false)
 	private String name;
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
+	private List<OutputDataset> outputDatasets;
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
+	private List<DatasetParameter> parameters = new ArrayList<DatasetParameter>();
+
 	@JoinColumn(name = "SAMPLE_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Sample sample;
@@ -80,30 +90,58 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date startDate;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-	private List<InputDataset> inputDatasets;
-
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-	private List<OutputDataset> outputDatasets;
-
-	@Column(name = "END_DATE")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date endDate;
+	@JoinColumn(name = "TYPE", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	private DatasetType type;
 
 	/* Needed for JPA */
 	public Dataset() {
+	}
+
+	public void beforeMarshal(Marshaller source) {
+		logger.trace("Marshalling Dataset for " + includes);
+		if (!this.includes.contains(InputDataset.class)) {
+			this.inputDatasets = null;
+		}
+		if (!this.includes.contains(OutputDataset.class)) {
+			this.outputDatasets = null;
+		}
+		if (!this.includes.contains(Investigation.class)) {
+			this.investigation = null;
+		}
+		if (!this.includes.contains(Datafile.class)) {
+			this.datafiles = null;
+		}
+		if (!this.includes.contains(DatasetParameter.class)) {
+			this.parameters = null;
+		}
+		if (!this.includes.contains(Sample.class)) {
+			this.sample = null;
+		}
+		if (!this.includes.contains(DatasetType.class)) {
+			this.type = null;
+		}
 	}
 
 	@Override
 	public void canDelete(EntityManager manager) throws ValidationException {
 		super.canDelete(manager);
 		if (!this.inputDatasets.isEmpty()) {
-			throw new ValidationException("Datasets may not be deleted while there are related InputDatasets");
+			throw new ValidationException(
+					"Datasets may not be deleted while there are related InputDatasets");
 		}
+	}
+
+	public List<Datafile> getDatafiles() {
+		return datafiles;
 	}
 
 	public String getDescription() {
 		return this.description;
+	}
+
+	public String getDoi() {
+		return doi;
 	}
 
 	public Date getEndDate() {
@@ -114,6 +152,14 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		return this.id;
 	}
 
+	public List<InputDataset> getInputDatasets() {
+		return inputDatasets;
+	}
+
+	public Investigation getInvestigation() {
+		return investigation;
+	}
+
 	public String getLocation() {
 		return this.location;
 	}
@@ -122,18 +168,38 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		return this.name;
 	}
 
+	public List<OutputDataset> getOutputDatasets() {
+		return outputDatasets;
+	}
+
+	public List<DatasetParameter> getParameters() {
+		return parameters;
+	}
+
 	@Override
 	public Object getPK() {
 		return this.id;
+	}
+
+	public Sample getSample() {
+		return sample;
 	}
 
 	public Date getStartDate() {
 		return this.startDate;
 	}
 
+	public DatasetType getType() {
+		return type;
+	}
+
+	public boolean isComplete() {
+		return complete;
+	}
+
 	@Override
-	public void isValid(EntityManager manager, boolean deepValidation) throws ValidationException,
-			IcatInternalException {
+	public void isValid(EntityManager manager, boolean deepValidation)
+			throws ValidationException, IcatInternalException {
 		super.isValid(manager, deepValidation);
 
 		// TODO put this code back if needed
@@ -198,17 +264,10 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		// }
 	}
 
-	public Sample getSample() {
-		return sample;
-	}
-
-	public void setSample(Sample sample) {
-		this.sample = sample;
-	}
-
 	@Override
-	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
+	public void preparePersist(String modId, EntityManager manager)
+			throws NoSuchObjectFoundException, BadParameterException,
+			IcatInternalException {
 		super.preparePersist(modId, manager);
 		this.id = null;
 		for (final DatasetParameter datasetParameter : this.parameters) {
@@ -221,46 +280,20 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		}
 	}
 
-	public List<DatasetParameter> getParameters() {
-		return parameters;
-	}
-
-	public void setParameters(List<DatasetParameter> parameters) {
-		this.parameters = parameters;
-	}
-
-	public List<Datafile> getDatafiles() {
-		return datafiles;
+	public void setComplete(boolean complete) {
+		this.complete = complete;
 	}
 
 	public void setDatafiles(List<Datafile> datafiles) {
 		this.datafiles = datafiles;
 	}
 
-
-
-	public List<InputDataset> getInputDatasets() {
-		return inputDatasets;
-	}
-
-	public void setInputDatasets(List<InputDataset> inputDatasets) {
-		this.inputDatasets = inputDatasets;
-	}
-
-	public List<OutputDataset> getOutputDatasets() {
-		return outputDatasets;
-	}
-
-	public void setOutputDatasets(List<OutputDataset> outputDatasets) {
-		this.outputDatasets = outputDatasets;
-	}
-
-	public Investigation getInvestigation() {
-		return investigation;
-	}
-
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public void setDoi(String doi) {
+		this.doi = doi;
 	}
 
 	public void setEndDate(Date endDate) {
@@ -269,6 +302,10 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public void setInputDatasets(List<InputDataset> inputDatasets) {
+		this.inputDatasets = inputDatasets;
 	}
 
 	public void setInvestigation(Investigation investigation) {
@@ -283,57 +320,29 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		this.name = name;
 	}
 
+	public void setOutputDatasets(List<OutputDataset> outputDatasets) {
+		this.outputDatasets = outputDatasets;
+	}
+
+	public void setParameters(List<DatasetParameter> parameters) {
+		this.parameters = parameters;
+	}
+
+	public void setSample(Sample sample) {
+		this.sample = sample;
+	}
+
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
+	}
+
+	public void setType(DatasetType type) {
+		this.type = type;
 	}
 
 	@Override
 	public String toString() {
 		return "Dataset[id=" + this.id + "]";
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Dataset for " + includes);
-		if (!this.includes.contains(InputDataset.class)) {
-			this.inputDatasets = null;
-		}
-		if (!this.includes.contains(OutputDataset.class)) {
-			this.outputDatasets = null;
-		}
-		if (!this.includes.contains(Investigation.class)) {
-			this.investigation = null;
-		}
-		if (!this.includes.contains(Datafile.class)) {
-			this.datafiles = null;
-		}
-		if (!this.includes.contains(DatasetParameter.class)) {
-			this.parameters = null;
-		}
-		if (!this.includes.contains(Sample.class)) {
-			this.sample = null;
-		}
-		if (!this.includes.contains(DatasetStatus.class)) {
-			this.status = null;
-		}
-		if (!this.includes.contains(DatasetType.class)) {
-			this.type = null;
-		}
-	}
-
-	public DatasetStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(DatasetStatus status) {
-		this.status = status;
-	}
-
-	public DatasetType getType() {
-		return type;
-	}
-
-	public void setType(DatasetType type) {
-		this.type = type;
 	}
 
 }

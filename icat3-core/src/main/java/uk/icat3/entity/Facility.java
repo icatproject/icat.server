@@ -31,6 +31,50 @@ public class Facility extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
 	private List<Investigation> investigations = new ArrayList<Investigation>();
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
+	private List<DatafileFormat> datafileFormats = new ArrayList<DatafileFormat>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
+	private List<DatasetType> datasetTypes = new ArrayList<DatasetType>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
+	private List<ParameterType> parameterTypes = new ArrayList<ParameterType>();
+	
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
+	private List<SampleType> sampleTypes = new ArrayList<SampleType>();
+
+	public List<SampleType> getSampleTypes() {
+		return sampleTypes;
+	}
+
+	public void setSampleTypes(List<SampleType> sampleTypes) {
+		this.sampleTypes = sampleTypes;
+	}
+
+	public List<ParameterType> getParameterTypes() {
+		return parameterTypes;
+	}
+
+	public void setParameterTypes(List<ParameterType> parameterTypes) {
+		this.parameterTypes = parameterTypes;
+	}
+
+	public List<DatafileFormat> getDatafileFormats() {
+		return datafileFormats;
+	}
+
+	public void setDatafileFormats(List<DatafileFormat> datafileFormats) {
+		this.datafileFormats = datafileFormats;
+	}
+
+	public List<DatasetType> getDatasetTypes() {
+		return datasetTypes;
+	}
+
+	public void setDatasetTypes(List<DatasetType> datasetTypes) {
+		this.datasetTypes = datasetTypes;
+	}
+
 	@Comment("A short name identifying this facility")
 	@Id
 	private String name;
@@ -47,7 +91,18 @@ public class Facility extends EntityBaseBean implements Serializable {
 		if (!this.includes.contains(Investigation.class)) {
 			this.investigations = null;
 		}
-
+		if (!this.includes.contains(DatafileFormat.class)) {
+			this.datafileFormats = null;
+		}
+		if (!this.includes.contains(DatasetType.class)) {
+			this.datasetTypes = null;
+		}
+		if (!this.includes.contains(ParameterType.class)) {
+			this.parameterTypes = null;
+		}
+		if (!this.includes.contains(SampleType.class)) {
+			this.sampleTypes = null;
+		}
 	}
 
 	public Integer getDaysUntilRelease() {

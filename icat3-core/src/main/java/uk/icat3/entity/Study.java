@@ -31,13 +31,9 @@ import uk.icat3.exceptions.NoSuchObjectFoundException;
 @TableGenerator(name = "studyGenerator", pkColumnValue = "Study")
 public class Study extends EntityBaseBean implements Serializable {
 
-	public Long getManager() {
-		return manager;
-	}
-
-	public void setManager(Long manager) {
-		this.manager = manager;
-	}
+	public enum StudyStatus {
+		NEW, IN_PROGRESS, COMPLETE, CANCELLED
+	};
 
 	public String getDescription() {
 		return description;
@@ -49,6 +45,7 @@ public class Study extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(Study.class);
 
+	@Comment("The start date of this study")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date startDate;
 
@@ -56,21 +53,19 @@ public class Study extends EntityBaseBean implements Serializable {
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "studyGenerator")
 	private Long id;
 
-	@Comment("**** What is this and do we need it. Perhaps we need a StudyParameter")
-	private Long manager;
+	@Comment("The user responsible for the study")
+	@ManyToOne(fetch = FetchType.LAZY)
+	private User user;
 
 	@Comment("The name of the study")
 	@Column(nullable = false)
 	private String name;
 
 	@Comment("A description of the study and its purpose")
+	@Column(length = 4000)
 	private String description;
 
-	@Comment("**** This is very vague. Perhaps we need a StudyParameter")
-	private String relatedMaterial;
-
-	@Comment("**** Do we really want this?")
-	@ManyToOne(fetch = FetchType.LAZY)
+	@Comment("The status of the study")
 	private StudyStatus status;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
@@ -85,9 +80,6 @@ public class Study extends EntityBaseBean implements Serializable {
 
 		if (!this.includes.contains(StudyInvestigation.class)) {
 			this.studyInvestigations = null;
-		}
-		if (!this.includes.contains(StudyStatus.class)) {
-			this.status = null;
 		}
 	}
 
@@ -104,10 +96,6 @@ public class Study extends EntityBaseBean implements Serializable {
 		return this.id;
 	}
 
-	public String getRelatedMaterial() {
-		return this.relatedMaterial;
-	}
-
 	public StudyStatus getStatus() {
 		return this.status;
 	}
@@ -117,8 +105,9 @@ public class Study extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
+	public void preparePersist(String modId, EntityManager manager)
+			throws NoSuchObjectFoundException, BadParameterException,
+			IcatInternalException {
 		super.preparePersist(modId, manager);
 		this.id = null;
 	}
@@ -139,15 +128,20 @@ public class Study extends EntityBaseBean implements Serializable {
 		this.name = name;
 	}
 
-	public void setRelatedMaterial(String relatedMaterial) {
-		this.relatedMaterial = relatedMaterial;
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public void setStatus(StudyStatus status) {
 		this.status = status;
 	}
 
-	public void setStudyInvestigations(List<StudyInvestigation> studyInvestigations) {
+	public void setStudyInvestigations(
+			List<StudyInvestigation> studyInvestigations) {
 		this.studyInvestigations = studyInvestigations;
 	}
 

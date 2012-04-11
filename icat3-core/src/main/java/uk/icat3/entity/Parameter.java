@@ -37,18 +37,14 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date dateTimeValue;
 
-	@Comment("**** I suggest we change this to be of type Double")
-	private String rangeTop;
+	@Comment("The maximum value of the numeric parameter that was observed during the measurement period")
+	private Double rangeTop;
 
-	@Comment("**** I suggest we change this to be of type Double")
-	private String rangeBottom;
+	@Comment("The minimum value of the numeric parameter that was observed during the measurement period")
+	private Double rangeBottom;
 
-	@Comment("**** I suggest we change this to be of type Double")
-	private String error;
-	
-	@Comment("**** Do we need this - surely this is part of the parameter type - not needed by ISIS")
-	@Column(name = "DESCRIPTION")
-	private String description;
+	@Comment("The error of the numeric parameter")
+	private Double error;
 
 	public void beforeMarshal(Marshaller source) {
 		logger.trace("Marshalling Parameter for " + includes);
@@ -89,36 +85,28 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 		this.dateTimeValue = dateTimeValue;
 	}
 
-	public String getRangeTop() {
+	public Double getRangeTop() {
 		return rangeTop;
 	}
 
-	public void setRangeTop(String rangeTop) {
+	public void setRangeTop(Double rangeTop) {
 		this.rangeTop = rangeTop;
 	}
 
-	public String getRangeBottom() {
+	public Double getRangeBottom() {
 		return rangeBottom;
 	}
 
-	public void setRangeBottom(String rangeBottom) {
+	public void setRangeBottom(Double rangeBottom) {
 		this.rangeBottom = rangeBottom;
 	}
 
-	public String getError() {
+	public Double getError() {
 		return error;
 	}
 
-	public void setError(String error) {
+	public void setError(Double error) {
 		this.error = error;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 }
