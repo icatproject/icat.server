@@ -65,7 +65,7 @@ public class Study extends EntityBaseBean implements Serializable {
 	@Column(length = 4000)
 	private String description;
 
-	@Comment("The status of the study")
+	@Comment("The status of the study. Possible values are: NEW, IN_PROGRESS, COMPLETE, CANCELLED")
 	private StudyStatus status;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
