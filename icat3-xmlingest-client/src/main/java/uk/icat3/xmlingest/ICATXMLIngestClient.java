@@ -11,12 +11,13 @@ import java.util.Properties;
 
 import javax.xml.namespace.QName;
 
-import uk.icat3.client.ICAT;
-import uk.icat3.client.ICATService;
+import org.icatproject.ICAT;
+import org.icatproject.ICATService;
 
 public class ICATXMLIngestClient {
 
-	public static List<Long> ingestInvestigation(String user, String password, String xml, Properties properties) {
+	public static List<Long> ingestInvestigation(String user, String password,
+			String xml, Properties properties) {
 
 		ICAT icatPort = null;
 		List<Long> ids = null;
@@ -24,11 +25,14 @@ public class ICATXMLIngestClient {
 		try {
 			final String urlString = properties.getProperty("icat.url");
 			if (urlString == null) {
-				System.err.println("icat.url property not set in icatclient.properties");
+				System.err
+						.println("icat.url property not set in icatclient.properties");
 				System.exit(1);
 			}
-			final URL icatURL = new URL(properties.getProperty("icat.url") + "/ICATService/ICAT?wsdl");
-			icatPort = new ICATService(icatURL, new QName("client.icat3.uk", "ICATService")).getICATPort();
+			final URL icatURL = new URL(properties.getProperty("icat.url")
+					+ "/ICATService/ICAT?wsdl");
+			icatPort = new ICATService(icatURL, new QName("client.icat3.uk",
+					"ICATService")).getICATPort();
 
 			System.out.println("Logging in...");
 			final String sessionId = icatPort.login(user, password);
@@ -51,7 +55,8 @@ public class ICATXMLIngestClient {
 	public static void main(String[] args) throws IOException {
 
 		if (args == null || args.length < 3) {
-			System.err.println("[ERROR] - Incorrect number of arguments supplied");
+			System.err
+					.println("[ERROR] - Incorrect number of arguments supplied");
 			printHelp();
 			System.exit(-1);
 		}
@@ -61,11 +66,13 @@ public class ICATXMLIngestClient {
 
 		final String buffer = readXMLFile(args[2]);
 
-		final InputStream fis = ICATXMLIngestClient.class.getResourceAsStream("/icatclient.properties");
+		final InputStream fis = ICATXMLIngestClient.class
+				.getResourceAsStream("/icatclient.properties");
 		final Properties properties = new Properties();
 		properties.load(fis);
 
-		final List<Long> ids = ingestInvestigation(username, password, buffer, properties);
+		final List<Long> ids = ingestInvestigation(username, password, buffer,
+				properties);
 
 		for (final Long id : ids) {
 			System.out.println("Returned : " + id);
@@ -74,20 +81,24 @@ public class ICATXMLIngestClient {
 
 	public static void printHelp() {
 		System.out.println();
-		System.out.println("Usage: java -jar ICATIngestClient.jar [username] [password] [filename]");
-		System.out.println("e.g.   java -jar ICATIngestClient.jar fred secret /tmp/ASTRA00001.XML");
+		System.out
+				.println("Usage: java -jar ICATIngestClient.jar [username] [password] [filename]");
+		System.out
+				.println("e.g.   java -jar ICATIngestClient.jar fred secret /tmp/ASTRA00001.XML");
 	}
 
 	public static String readXMLFile(String _filename) {
 		final StringBuffer _buffer = new StringBuffer();
 		try {
-			final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(_filename)));
+			final BufferedReader br = new BufferedReader(new InputStreamReader(
+					new FileInputStream(_filename)));
 			String line = "";
 			while ((line = br.readLine()) != null) {
 				_buffer.append(line);
 			}// end while
 		} catch (final Exception e) {
-			System.err.println("[ERROR] - Supplied filename does not exist or cannot be read");
+			System.err
+					.println("[ERROR] - Supplied filename does not exist or cannot be read");
 			printHelp();
 			System.exit(-1);
 		}// end try/catch

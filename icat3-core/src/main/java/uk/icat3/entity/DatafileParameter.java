@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
 
 @Comment("A parameter associated with a data file")
 @SuppressWarnings("serial")
@@ -67,9 +68,16 @@ public class DatafileParameter extends Parameter implements Serializable {
 
 	@Override
 	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
+			BadParameterException, IcatInternalException, ValidationException {
 		super.preparePersist(modId, manager);
 		this.id = null;
+		if (type == null) {
+			throw new ValidationException("Type of parameter is not set");
+		}
+		if (!type.isApplicableToDatafile()) {
+			throw new ValidationException("Parameter of type " + type.getName()
+					+ " is not applicable to a Datafile");
+		}
 	}
 
 	public void setDatafile(Datafile datafile) {

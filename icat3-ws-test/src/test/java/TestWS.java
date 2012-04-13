@@ -7,11 +7,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Random;
 
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.icatproject.Application;
+import org.icatproject.BadParameterException_Exception;
 import org.icatproject.Constraint;
 import org.icatproject.Datafile;
 import org.icatproject.DatafileFormat;
@@ -25,16 +27,20 @@ import org.icatproject.Facility;
 import org.icatproject.InputDatafile;
 import org.icatproject.InputDataset;
 import org.icatproject.Investigation;
+import org.icatproject.InvestigationParameter;
 import org.icatproject.InvestigationType;
 import org.icatproject.Job;
 import org.icatproject.KeyType;
+import org.icatproject.NoSuchObjectFoundException_Exception;
 import org.icatproject.OutputDatafile;
 import org.icatproject.OutputDataset;
 import org.icatproject.ParameterType;
 import org.icatproject.ParameterValueType;
+import org.icatproject.PermissibleStringValue;
 import org.icatproject.RelType;
 import org.icatproject.Sample;
 import org.icatproject.SampleParameter;
+import org.icatproject.ValidationException_Exception;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,6 +52,7 @@ import org.junit.Test;
 public class TestWS {
 
 	private static Session session;
+	private static Random random;
 
 	private static void create() throws Exception {
 
@@ -59,10 +66,14 @@ public class TestWS {
 		Investigation inv = session.createInvestigation(facility, "A",
 				"Not null", investigationType);
 
-		ParameterType p = session.createParameterType(facility, "TIMESTAMP",
-				"TIMESTAMP", "F is not a wibble",
-				Session.ParameterApplicability.DATASET,
-				ParameterValueType.DATE_AND_TIME);
+		ParameterType p = new ParameterType();
+		p.setName("TIMESTAMP");
+		p.setUnits("TIMESTAMP");
+		p.setDescription("F is not a wibble");
+		p.setApplicableToDataset(true);
+		p.setValueType(ParameterValueType.DATE_AND_TIME);
+		p.setFacility(facility);
+		p.setId((Long) session.create(p));
 
 		Dataset wibble = session.createDataset("Wibble", dst, inv);
 
@@ -381,6 +392,135 @@ public class TestWS {
 	}
 
 	@Test
+	public void numericParameterRanges() throws Exception {
+		session.clear();
+		Facility facility = session.createFacility("Test Facility", 90);
+		InvestigationType investigationType = session
+				.createInvestigationType("TestExperiment");
+		Investigation inv = session.createInvestigation(facility, "A",
+				"Not null", investigationType);
+
+		ParameterType ptn = new ParameterType();
+		ptn.setName("TestNumeric");
+		ptn.setApplicableToInvestigation(true);
+		ptn.setValueType(ParameterValueType.NUMERIC);
+		ptn.setFacility(facility);
+		ptn.setEnforced(true);
+		ptn.setMinimumNumericValue(50.);
+		ptn.setId((Long) session.create(ptn));
+
+		InvestigationParameter ip = new InvestigationParameter();
+
+		ip.setType(ptn);
+		ip.setInvestigation(inv);
+
+		try {
+			ip.setNumericValue(40.);
+			session.create(ip);
+			fail("No throw");
+		} catch (ValidationException_Exception e) {
+			System.out.println(e.getMessage());
+		}
+
+		ip.setNumericValue(60.);
+		ip.setId((Long) session.create(ip));
+
+		try {
+			ip.setNumericValue(30.);
+			session.update(ip);
+			fail("No throw");
+		} catch (ValidationException_Exception e) {
+			System.out.println(e.getMessage());
+		}
+
+		ip.setNumericValue(70.);
+		session.update(ip);
+
+	}
+
+	@Test
+	public void inapplicableParameterType() throws Exception {
+		session.clear();
+		Facility facility = session.createFacility("Test Facility", 90);
+		InvestigationType investigationType = session
+				.createInvestigationType("TestExperiment");
+		Investigation inv = session.createInvestigation(facility, "A",
+				"Not null", investigationType);
+
+		ParameterType pts = new ParameterType();
+		pts.setName("UselessString");
+		pts.setValueType(ParameterValueType.STRING);
+		pts.setFacility(facility);
+		pts.setId((Long) session.create(pts));
+
+		InvestigationParameter ip = new InvestigationParameter();
+
+		ip.setType(pts);
+		ip.setInvestigation(inv);
+
+		try {
+			ip.setStringValue("bad");
+			session.create(ip);
+			fail("No throw");
+		} catch (ValidationException_Exception e) {
+			assertEquals(
+					"Parameter of type UselessString is not applicable to an Investigation",
+					e.getMessage());
+		}
+	}
+
+	@Test
+	public void stringParameterRanges() throws Exception {
+		session.clear();
+		Facility facility = session.createFacility("Test Facility", 90);
+		InvestigationType investigationType = session
+				.createInvestigationType("TestExperiment");
+		Investigation inv = session.createInvestigation(facility, "A",
+				"Not null", investigationType);
+
+		ParameterType pts = new ParameterType();
+		pts.setName("TestString");
+		pts.setApplicableToInvestigation(true);
+		pts.setValueType(ParameterValueType.STRING);
+		pts.setFacility(facility);
+		pts.setEnforced(true);
+		PermissibleStringValue psv = new PermissibleStringValue();
+		psv.setValue("good1");
+		pts.getPermissibleStringValues().add(psv);
+		psv = new PermissibleStringValue();
+		psv.setValue("good2");
+		pts.getPermissibleStringValues().add(psv);
+		pts.setId((Long) session.create(pts));
+
+		InvestigationParameter ip = new InvestigationParameter();
+
+		ip.setType(pts);
+		ip.setInvestigation(inv);
+
+		try {
+			ip.setStringValue("bad");
+			session.create(ip);
+			fail("No throw");
+		} catch (ValidationException_Exception e) {
+			System.out.println(e.getMessage());
+		}
+
+		ip.setStringValue("good1");
+		ip.setId((Long) session.create(ip));
+
+		try {
+			ip.setStringValue("worse");
+			session.update(ip);
+			fail("No throw");
+		} catch (ValidationException_Exception e) {
+			System.out.println(e.getMessage());
+		}
+
+		ip.setStringValue("good2");
+		session.update(ip);
+	}
+
+	@Test
 	public void bigCreate() throws Exception {
 		session.clear();
 
@@ -391,10 +531,15 @@ public class TestWS {
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
-		ParameterType p = session.createParameterType(facility, "TIMESTAMP",
-				"TIMESTAMP", "F is not a wibble",
-				Session.ParameterApplicability.DATASET,
-				ParameterValueType.DATE_AND_TIME);
+		ParameterType p = new ParameterType();
+		p.setName("TIMESTAMP");
+		p.setUnits("TIMESTAMP");
+		p.setDescription("F is not a wibble");
+		p.setApplicableToSample(true);
+		p.setApplicableToDataset(true);
+		p.setValueType(ParameterValueType.DATE_AND_TIME);
+		p.setFacility(facility);
+		p.setId((Long) session.create(p));
 
 		DatafileFormat dft1 = session.createDatafileFormat(facility, "png",
 				"binary");
@@ -473,8 +618,103 @@ public class TestWS {
 
 	}
 
+	@Test
+	public void gets() throws Exception {
+		session.clear();
+		create();
+		Long dsId = (Long) session.search("Dataset.id [name = 'Wibble']")
+				.get(0);
+		assertEquals("Wibble",
+				((Dataset) session.get("Dataset", dsId)).getName());
+		try {
+			session.get("Dataset", random.nextLong());
+			fail("No throw");
+		} catch (NoSuchObjectFoundException_Exception e) {
+			// Nothing to do
+		}
+		try {
+			session.get("Dataset INCLUDE Investigator", dsId);
+			fail("No throw");
+		} catch (BadParameterException_Exception e) {
+			assertEquals(
+					"uk.icat3.entity.Investigator is not known to the class loader",
+					e.getMessage());
+		}
+		try {
+			session.get("Dataset INCLUDE User", dsId);
+			fail("No throw");
+		} catch (BadParameterException_Exception e) {
+			assertEquals("Unable to reach User", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void searches() throws Exception {
+		session.clear();
+		create();
+
+		Long invId = (Long) session.search("Investigation.id").get(0);
+
+		List<?> results = session
+				.search("Dataset.id "
+						+ "<-> DatasetParameter[type.name = 'TIMESTAMP'] "
+						+ "<-> Investigation[name <> 12]");
+		assertEquals("Count", 1, results.size());
+
+		results = session
+				.search("Datafile [name = 'fred'] <-> Dataset[id <> 42]");
+		assertEquals("Count", 1, results.size());
+
+		String query = "Dataset.id  ORDER BY id [type.name IN :types] <-> Investigation[id BETWEEN :lower AND :upper]";
+
+		query = query.replace(":lower", Long.toString(invId))
+				.replace(":upper", Long.toString(invId))
+				.replace(":types", "('GS', 'GQ')");
+		results = session.search(query);
+		assertEquals("Count", 4, results.size());
+
+		query = "Dataset.id ORDER BY startDate [type.name IN :types AND name >= :lower AND name <= :upper]";
+		query = query.replace(":lower", "'Wabble'")
+				.replace(":upper", "'Wobble'")
+				.replace(":types", "('GS', 'GQ')");
+		results = session.search(query);
+		assertEquals("Count", 2, results.size());
+
+		query = "ParameterType.name [description LIKE 'F%']";
+		results = session.search(query);
+		assertEquals("Count", 1, results.size());
+		assertEquals("TIMESTAMP", results.get(0));
+
+		results = session.search("Datafile.name ORDER BY id");
+		assertEquals("Count", 6, results.size());
+		assertEquals("Result", "wib1", results.get(0));
+		assertEquals("Result", "wib2", results.get(1));
+
+		results = session.search(",1 Datafile.name ORDER BY id");
+		assertEquals("Count", 1, results.size());
+		assertEquals("Result", "wib1", results.get(0));
+		
+		results = session.search("1, Datafile.name ORDER BY id");
+		assertEquals("Count", 5, results.size());
+		assertEquals("Result", "wib2", results.get(0));
+		
+		results = session.search("1,1 Datafile.name ORDER BY id");
+		assertEquals("Count", 1, results.size());
+		assertEquals("Result", "wib2", results.get(0));
+		
+		results = session.search("100,1 Datafile.name ORDER BY id");
+		assertEquals("Count", 0, results.size());
+		
+		results = session.search("0,100 Datafile.name ORDER BY id");
+		assertEquals("Count", 6, results.size());
+		assertEquals("Result", "wib1", results.get(0));
+		assertEquals("Result", "wib2", results.get(1));
+	}
+
 	@BeforeClass
 	public static void setup() throws Exception {
+		random = new Random();
 		session = new Session();
 		session.setAuthz();
 		session.clearAuthz();

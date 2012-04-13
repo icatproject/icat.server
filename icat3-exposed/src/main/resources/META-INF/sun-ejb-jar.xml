@@ -6,7 +6,7 @@
 			<ejb-name>ICAT</ejb-name>
 			<webservice-endpoint>
 				<port-component-name>ICAT</port-component-name>
-				<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+				<transport-guarantee>NONE</transport-guarantee>
 			</webservice-endpoint>
 		</ejb>
 	</enterprise-beans>

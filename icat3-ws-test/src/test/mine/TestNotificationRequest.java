@@ -1,53 +1,35 @@
-package uk.icat3.security;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
-import org.junit.After;
+import org.icatproject.BadParameterException;
+import org.icatproject.CreateResponse;
+import org.icatproject.Dataset;
+import org.icatproject.DatasetType;
+import org.icatproject.Facility;
+import org.icatproject.Investigation;
+import org.icatproject.InvestigationType;
+import org.icatproject.NotificationRequest;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import uk.icat3.entity.Dataset;
-import uk.icat3.entity.DatasetType;
-import uk.icat3.entity.Facility;
-import uk.icat3.entity.Investigation;
-import uk.icat3.entity.InvestigationType;
-import uk.icat3.entity.NotificationRequest;
-import uk.icat3.exceptions.BadParameterException;
-import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.manager.BeanManager;
-import uk.icat3.manager.CreateResponse;
-import uk.icat3.manager.NotificationMessages.Message;
-import uk.icat3.util.RuleManager;
-import uk.icat3.util.TestConstants;
-
 public class TestNotificationRequest {
 
-	static private EntityManagerFactory emf;
-	private EntityManager em;
+	
+	private static Session session;
+	
 	private Facility facility;
 	private InvestigationType investigationType;
 	private DatasetType datasetType;
-	private final static Logger logger = Logger.getLogger(TestNotificationRequest.class);
+
 
 	@Before
 	public void setUpManager() throws Exception {
-		RuleManager.oldAddUserGroupMember("Group", "Person", em);
-
-		RuleManager.oldAddRule("Group", "NotificationRequest", "CRUD", null, em);
-		RuleManager.oldAddRule("Group", "Facility", "CRUD", null, em);
-		RuleManager.oldAddRule("Group", "InvestigationType", "CRUD", null, em);
-		RuleManager.oldAddRule("Group", "DatasetType", "CRUD", null, em);
-		RuleManager.oldAddRule("Group", "Investigation", "CRUD", null, em);
-		RuleManager.oldAddRule("Group", "Dataset", "CRUD", null, em);
-
 		facility = new Facility();
 		facility.setName("TestFacility");
 		facility.setDaysUntilRelease(90);
@@ -165,32 +147,18 @@ public class TestNotificationRequest {
 		BeanManager.create("Person", nr, em);
 	}
 
-	@Before
-	public void beginTX() {
-		em = emf.createEntityManager();
-		em.getTransaction().begin();
-		System.out.println(em);
-	}
-
-	@After
-	public void closeTX() throws NoSuchObjectFoundException {
-		try {
-			em.getTransaction().rollback();
-		} catch (RuntimeException t) {
-			logger.error(t);
-			throw t;
-		} finally {
-			em.close();
-		}
-	}
-
 	@BeforeClass
-	public static void BeforeClassSetUp() {
-		emf = Persistence.createEntityManagerFactory(TestConstants.PERSISTENCE_UNIT);
+	public static void setup() throws Exception {
+		session = new Session();
+		session.setAuthz();
+		session.clearAuthz();
+		session.setAuthz();
+		session.clear();
 	}
 
 	@AfterClass
-	public static void AfterClassTearDown() {
-		emf.close();
+	public static void zap() throws Exception {
+		// session.clear();
+		// session.clearAuthz();
 	}
 }

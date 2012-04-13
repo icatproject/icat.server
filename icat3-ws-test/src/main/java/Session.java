@@ -374,33 +374,6 @@ class Session {
 		return job;
 	}
 
-	public ParameterType createParameterType(Facility facility, String name,
-			String units, String description, ParameterApplicability pt,
-			ParameterValueType pvt) throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
-			ObjectAlreadyExistsException_Exception, SessionException_Exception,
-			ValidationException_Exception {
-
-		final ParameterType p = new ParameterType();
-		p.setName(name);
-		p.setUnits(units);
-		p.setDescription(description);
-		if (pt == ParameterApplicability.DATASET) {
-			p.setApplicableToDataset(true);
-		} else if (pt == ParameterApplicability.DATAFILE) {
-			p.setApplicableToDatafile(true);
-		} else if (pt == ParameterApplicability.SAMPLE) {
-			p.setApplicableToSample(true);
-		} else if (pt == ParameterApplicability.INVESTIGATION) {
-			p.setApplicableToInvestigation(true);
-		}
-		p.setValueType(ParameterValueType.DATE_AND_TIME);
-		p.setFacility(facility);
-		p.setId((Long) this.icatEP.create(this.sessionId, p));
-		return p;
-	}
-
 	public void delete(EntityBaseBean bean)
 			throws IcatInternalException_Exception,
 			InsufficientPrivilegesException_Exception,
@@ -456,6 +429,7 @@ class Session {
 		this.addRule("root", "InputDatafile", "CRUD");
 		this.addRule("root", "OutputDatafile", "CRUD");
 		this.addRule("root", "NotificationRequest", "CRUD");
+		this.addRule("root", "InvestigationParameter", "CRUD");
 	}
 
 	public void update(EntityBaseBean df)
@@ -498,6 +472,15 @@ class Session {
 			throws BadParameterException_Exception,
 			IcatInternalException_Exception {
 		return icatEP.getEntityInfo(beanName);
+	}
+
+	public Object create(EntityBaseBean bean)
+			throws IcatInternalException_Exception,
+			InsufficientPrivilegesException_Exception,
+			NoSuchObjectFoundException_Exception,
+			ObjectAlreadyExistsException_Exception, SessionException_Exception,
+			ValidationException_Exception {
+		return this.icatEP.create(this.sessionId, bean);
 	}
 
 }

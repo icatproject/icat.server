@@ -2,22 +2,32 @@ package uk.icat3.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.NamedQuery;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
+import uk.icat3.entity.ParameterType.ParameterValueType;
+import uk.icat3.exceptions.BadParameterException;
+import uk.icat3.exceptions.IcatInternalException;
+import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
+
 @SuppressWarnings("serial")
 @MappedSuperclass
+@NamedQuery(name = "Parameter.psv", query = "SELECT DISTINCT p.value FROM PermissibleStringValue p LEFT JOIN p.type t WHERE t.id = :tid")
 public abstract class Parameter extends EntityBaseBean implements Serializable {
 
-	private static Logger logger = Logger.getLogger(DatasetParameter.class);
+	private static Logger logger = Logger.getLogger(Parameter.class);
 
 	@Comment("The type of the parameter")
 	@JoinColumn(name = "PARAMETER_TYPE_ID", nullable = false)
@@ -107,6 +117,61 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 
 	public void setError(Double error) {
 		this.error = error;
+	}
+
+	@Override
+	public void preparePersist(String modId, EntityManager manager)
+			throws NoSuchObjectFoundException, BadParameterException,
+			IcatInternalException, ValidationException {
+		super.preparePersist(modId, manager);
+		check(manager);
+	}
+	
+	private void check( EntityManager manager) throws ValidationException {
+		if (type == null) {
+			throw new ValidationException("Type of parameter is not set");
+		}
+		logger.debug("PreparePersist of type " + type.getName() + " "
+				+ type.isEnforced() + " " + type.getValueType());
+		if (!type.isEnforced()) {
+			return;
+		}
+		ParameterValueType pvt = type.getValueType();
+		if (pvt == ParameterValueType.NUMERIC) {
+			logger.debug("Parameter of type " + type.getName()
+					+ " has numeric value " + numericValue + " to be checked");
+			Double min = type.getMinimumNumericValue();
+			Double max = type.getMaximumNumericValue();
+			if (min != null && numericValue < min) {
+				throw new ValidationException("Parameter of type "
+						+ type.getName() + " has value " + numericValue + " < "
+						+ min);
+			}
+			if (max != null && numericValue > max) {
+				throw new ValidationException("Parameter of type "
+						+ type.getName() + " has value " + numericValue + " > "
+						+ max);
+			}
+		} else if (pvt == ParameterValueType.STRING) {
+			logger.debug("Parameter of type " + type.getName()
+					+ " has string value " + stringValue + " to be checked");
+			// The query is used because the ParameterType passed in may not
+			// include its PermissibleStringValues
+			List<String> values = manager
+					.createNamedQuery("Parameter.psv", String.class)
+					.setParameter("tid", type.getId()).getResultList();
+			if (!values.isEmpty() && values.indexOf(stringValue) < 0) {
+				throw new ValidationException("Parameter of type "
+						+ type.getName() + " has value " + stringValue
+						+ " not in allowed set " + values);
+			}
+		}
+	}
+	
+	@Override
+	public void postMergeFixup(EntityManager manager) throws NoSuchObjectFoundException, BadParameterException, IcatInternalException, ValidationException  {
+		 super.postMergeFixup(manager);
+		 check(manager);
 	}
 
 }

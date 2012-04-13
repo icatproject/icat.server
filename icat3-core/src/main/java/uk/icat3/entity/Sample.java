@@ -124,7 +124,7 @@ public class Sample extends EntityBaseBean implements Serializable {
 
 	public void preparePersist(String modId, EntityManager manager)
 			throws NoSuchObjectFoundException, BadParameterException,
-			IcatInternalException {
+			IcatInternalException, ValidationException {
 		super.preparePersist(modId, manager);
 		id = null;
 		for (SampleParameter sampleParameter : parameters) {

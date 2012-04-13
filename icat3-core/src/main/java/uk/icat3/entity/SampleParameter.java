@@ -20,12 +20,14 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
 
 @Comment("A parameter associated with a sample")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "sampleParameterGenerator", pkColumnValue = "SampleParameter")
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "SAMPLE_ID", "PARAMETER_TYPE_ID" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "SAMPLE_ID",
+		"PARAMETER_TYPE_ID" }) })
 @XmlRootElement
 public class SampleParameter extends Parameter implements Serializable {
 
@@ -66,10 +68,18 @@ public class SampleParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
+	public void preparePersist(String modId, EntityManager manager)
+			throws NoSuchObjectFoundException, BadParameterException,
+			IcatInternalException, ValidationException {
 		super.preparePersist(modId, manager);
 		this.id = null;
+		if (type == null) {
+			throw new ValidationException("Type of parameter is not set");
+		}
+		if (!type.isApplicableToSample()) {
+			throw new ValidationException("Parameter of type " + type.getName()
+					+ " is not applicable to a Sample");
+		}
 	}
 
 	public void setId(Long id) {

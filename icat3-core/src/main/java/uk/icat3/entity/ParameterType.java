@@ -1,6 +1,7 @@
 package uk.icat3.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -24,6 +25,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
 
 @Comment("A parameter type with unique name and units")
 @SuppressWarnings("serial")
@@ -40,7 +42,7 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	private final static Logger logger = Logger.getLogger(ParameterType.class);
 
 	@Comment("If a parameter of this type may be applied to a data file")
-	private boolean applicableToDatafile;;
+	private boolean applicableToDatafile;
 
 	@Comment("If a parameter of this type may be applied to a data set")
 	private boolean applicableToDataset;
@@ -84,7 +86,7 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	private String name;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
-	private List<PermissibleStringValue> permissibleStringValues;
+	private List<PermissibleStringValue> permissibleStringValues = new ArrayList<PermissibleStringValue>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<SampleParameter> sampleParameters;
@@ -213,13 +215,17 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	public boolean isVerified() {
 		return verified;
 	}
-
+	
 	@Override
 	public void preparePersist(String modId, EntityManager manager)
 			throws NoSuchObjectFoundException, BadParameterException,
-			IcatInternalException {
+			IcatInternalException, ValidationException {
 		super.preparePersist(modId, manager);
 		this.id = null;
+		for (final PermissibleStringValue permissibleStringValue : this.permissibleStringValues) {
+			permissibleStringValue.preparePersist(modId, manager);
+			permissibleStringValue.setType(this);
+		}
 	}
 
 	public void setApplicableToDatafile(boolean applicableToDatafile) {

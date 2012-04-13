@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
 
 @Comment("Relationship between an ICAT user as an instrument scientist and the instrument")
 @SuppressWarnings("serial")
@@ -82,7 +83,7 @@ public class InstrumentScientist extends EntityBaseBean implements Serializable 
 
 	@Override
 	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
+			BadParameterException, IcatInternalException, ValidationException {
 		super.preparePersist(modId, manager);
 		this.id = null;
 	}

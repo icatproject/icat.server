@@ -20,12 +20,14 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
 
 @Comment("A parameter associated with a data set")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "datasetParameterGenerator", pkColumnValue = "DatasetParameter")
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATASET_ID", "PARAMETER_TYPE_ID" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATASET_ID",
+		"PARAMETER_TYPE_ID" }) })
 @XmlRootElement
 public class DatasetParameter extends Parameter implements Serializable {
 
@@ -66,10 +68,18 @@ public class DatasetParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
+	public void preparePersist(String modId, EntityManager manager)
+			throws NoSuchObjectFoundException, BadParameterException,
+			IcatInternalException, ValidationException {
 		super.preparePersist(modId, manager);
 		this.id = null;
+		if (type == null) {
+			throw new ValidationException("Type of parameter is not set");
+		}
+		if (!type.isApplicableToDataset()) {
+			throw new ValidationException("Parameter of type " + type.getName()
+					+ " is not applicable to a Dataset");
+		}
 	}
 
 	public void setDataset(Dataset dataset) {

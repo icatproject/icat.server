@@ -267,7 +267,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@Override
 	public void preparePersist(String modId, EntityManager manager)
 			throws NoSuchObjectFoundException, BadParameterException,
-			IcatInternalException {
+			IcatInternalException, ValidationException {
 		super.preparePersist(modId, manager);
 		this.id = null;
 		for (final DatasetParameter datasetParameter : this.parameters) {

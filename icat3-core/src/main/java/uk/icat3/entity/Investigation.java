@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
 
 @Comment("An investigation or experiment")
 @SuppressWarnings("serial")
@@ -242,7 +243,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public void preparePersist(String modId, EntityManager manager)
 			throws NoSuchObjectFoundException, BadParameterException,
-			IcatInternalException {
+			IcatInternalException, ValidationException {
 		super.preparePersist(modId, manager);
 		id = null;
 		for (Dataset dataset : datasets) {

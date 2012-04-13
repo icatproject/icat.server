@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
 import uk.icat3.parser.Input;
 import uk.icat3.parser.LexerException;
 import uk.icat3.parser.ParserException;
@@ -272,7 +273,7 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 
 	@Override
 	public void postMergeFixup(EntityManager manager) throws NoSuchObjectFoundException, BadParameterException,
-			IcatInternalException {
+			IcatInternalException, ValidationException {
 		super.postMergeFixup(manager);
 		this.c = false;
 		this.r = false;
@@ -290,7 +291,7 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 
 	@Override
 	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
+			BadParameterException, IcatInternalException, ValidationException {
 		super.preparePersist(modId, manager);
 		this.fixup();
 		logger.debug("PreparePersist of NotificationRequest " + this.name + " for " + this.crudFlags + " of "

@@ -51,7 +51,7 @@ public class Application extends EntityBaseBean implements Serializable {
 
 	@Override
 	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
+			BadParameterException, IcatInternalException, ValidationException {
 		super.preparePersist(modId, manager);
 		id = null;
 	}

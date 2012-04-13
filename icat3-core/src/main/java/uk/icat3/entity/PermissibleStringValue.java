@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
 
 @Comment("Permissible value for string parameter types")
 @SuppressWarnings("serial")
@@ -70,7 +71,6 @@ public class PermissibleStringValue extends EntityBaseBean implements
 		return id;
 	}
 
-
 	@Override
 	public Object getPK() {
 		return id;
@@ -83,7 +83,7 @@ public class PermissibleStringValue extends EntityBaseBean implements
 	@Override
 	public void preparePersist(String modId, EntityManager manager)
 			throws NoSuchObjectFoundException, BadParameterException,
-			IcatInternalException {
+			IcatInternalException, ValidationException {
 		super.preparePersist(modId, manager);
 		this.id = null;
 	}
@@ -92,15 +92,13 @@ public class PermissibleStringValue extends EntityBaseBean implements
 		this.id = id;
 	}
 
-
-
 	public void setValue(String value) {
 		this.value = value;
 	}
 
 	@Override
 	public String toString() {
-		return "PermissibleStringValue[id=" + id + "]";
+		return "PermissibleStringValue[id=" + this.id + "]";
 	}
 
 }

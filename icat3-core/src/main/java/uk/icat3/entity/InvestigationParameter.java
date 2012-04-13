@@ -20,16 +20,19 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
 
 @Comment("A parameter associated with an investigation")
 @SuppressWarnings("serial")
 @Entity
 @TableGenerator(name = "investigationParameterGenerator", pkColumnValue = "InvestigationParameter")
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "INVESTIGATION_ID", "PARAMETER_TYPE_ID" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = {
+		"INVESTIGATION_ID", "PARAMETER_TYPE_ID" }) })
 @XmlRootElement
 public class InvestigationParameter extends Parameter implements Serializable {
 
-	private static Logger logger = Logger.getLogger(InvestigationParameter.class);
+	private static Logger logger = Logger
+			.getLogger(InvestigationParameter.class);
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = "investigationParameterGenerator")
@@ -66,10 +69,18 @@ public class InvestigationParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
+	public void preparePersist(String modId, EntityManager manager)
+			throws NoSuchObjectFoundException, BadParameterException,
+			IcatInternalException, ValidationException {
 		super.preparePersist(modId, manager);
 		this.id = null;
+		if (type == null) {
+			throw new ValidationException("Type of parameter is not set");
+		}
+		if (!type.isApplicableToInvestigation()) {
+			throw new ValidationException("Parameter of type " + type.getName()
+					+ " is not applicable to an Investigation");
+		}
 	}
 
 	public void setId(Long id) {

@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import uk.icat3.exceptions.BadParameterException;
 import uk.icat3.exceptions.IcatInternalException;
 import uk.icat3.exceptions.NoSuchObjectFoundException;
+import uk.icat3.exceptions.ValidationException;
 
 @Comment("A period of time related to an investigation")
 @SuppressWarnings("serial")
@@ -80,7 +81,8 @@ public class Shift extends EntityBaseBean implements Serializable {
 
 	@Override
 	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
+ BadParameterException,
+			IcatInternalException, ValidationException {
 		super.preparePersist(modId, manager);
 		this.id = null;
 	}

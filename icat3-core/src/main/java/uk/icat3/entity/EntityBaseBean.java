@@ -191,11 +191,8 @@ public abstract class EntityBaseBean implements Serializable {
 		isValid();
 	}
 
-	/*
-	 * If this method is overridden it should normally be called as well by
-	 * super.merge()
-	 */
-	public void merge(Object from, EntityManager manager) throws ValidationException, IcatInternalException,
+	
+	final public void merge(Object from, EntityManager manager) throws ValidationException, IcatInternalException,
 			NoSuchObjectFoundException, BadParameterException {
 		BeanManager.merge(this, from, manager);
 		this.postMergeFixup(manager);
@@ -206,7 +203,7 @@ public abstract class EntityBaseBean implements Serializable {
 	 * super.postMergeFixup()
 	 */
 	public void postMergeFixup(EntityManager manager) throws NoSuchObjectFoundException, BadParameterException,
-			IcatInternalException {
+			IcatInternalException, ValidationException {
 		// Do nothing by default
 	}
 
@@ -284,7 +281,7 @@ public abstract class EntityBaseBean implements Serializable {
 	 * super.preparePersist()
 	 */
 	public void preparePersist(String modId, EntityManager manager) throws NoSuchObjectFoundException,
-			BadParameterException, IcatInternalException {
+			BadParameterException, IcatInternalException, ValidationException {
 		this.modId = modId;
 	}
 

@@ -1,31 +1,21 @@
-package uk.icat3.security;
 
 import static org.junit.Assert.fail;
 
 import java.util.Date;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
+import org.icatproject.Dataset;
+import org.icatproject.DatasetType;
+import org.icatproject.Facility;
+import org.icatproject.InsufficientPrivilegesException;
+import org.icatproject.Investigation;
+import org.icatproject.InvestigationType;
+import org.icatproject.NoSuchObjectFoundException;
+import org.icatproject.ObjectAlreadyExistsException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import uk.icat3.entity.Dataset;
-import uk.icat3.entity.DatasetType;
-import uk.icat3.entity.Facility;
-import uk.icat3.entity.Investigation;
-import uk.icat3.entity.InvestigationType;
-import uk.icat3.exceptions.InsufficientPrivilegesException;
-import uk.icat3.exceptions.NoSuchObjectFoundException;
-import uk.icat3.exceptions.ObjectAlreadyExistsException;
-import uk.icat3.manager.BeanManager;
-import uk.icat3.util.BaseTest;
-import uk.icat3.util.RuleManager;
-import uk.icat3.util.TestConstants;
 
 public class TestGateKeeper extends BaseTest {
 
@@ -137,16 +127,24 @@ public class TestGateKeeper extends BaseTest {
 		addRule("CIC-user", "DatasetParameter", "CRUD");
 		addRule(null, "ParameterType", "R");
 		addRule("expt-A", "Dataset <-> Investigation [name = 'A']", "R");
-		addRule("expt-A", "DatasetParameter <-> Dataset <-> Investigation [name = 'A']", "R");
-		addRule("expt-A", "Datafile Dataset <-> Investigation [name = 'A']", "R");
-		addRule("expt-A", "DatafileParameter <-> Datafile <-> Dataset <-> Investigation [name = 'A']", "R");
-		addRule(null, "Dataset <-> Investigation <-> Investigator [user.name = :user]", "R");
+		addRule("expt-A",
+				"DatasetParameter <-> Dataset <-> Investigation [name = 'A']",
+				"R");
+		addRule("expt-A", "Datafile Dataset <-> Investigation [name = 'A']",
+				"R");
+		addRule("expt-A",
+				"DatafileParameter <-> Datafile <-> Dataset <-> Investigation [name = 'A']",
+				"R");
+		addRule(null,
+				"Dataset <-> Investigation <-> Investigator [user.name = :user]",
+				"R");
 		addRule("Group", "InvestigationType", "CRUD");
 		addRule("Group", "Facility", "CRUD");
 		addRule("Group", "DatasetType", "CRUD");
 	}
 
-	private void addRule(String groupName, String what, String crudFlags) throws Exception {
+	private void addRule(String groupName, String what, String crudFlags)
+			throws Exception {
 		RuleManager.addRule("root", groupName, what, crudFlags, em);
 	}
 
@@ -163,7 +161,8 @@ public class TestGateKeeper extends BaseTest {
 
 	@BeforeClass
 	public static void BeforeClassSetUp() {
-		emf = Persistence.createEntityManagerFactory(TestConstants.PERSISTENCE_UNIT);
+		emf = Persistence
+				.createEntityManagerFactory(TestConstants.PERSISTENCE_UNIT);
 	}
 
 	@AfterClass
