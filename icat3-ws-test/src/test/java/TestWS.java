@@ -46,8 +46,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * These tests are for those aspects that cannot be tested by the core tests. In
- * particular does the INCLUDE mechanism work properly.
+ * These tests are for those aspects that cannot be tested by the core tests. In particular does the
+ * INCLUDE mechanism work properly.
  */
 public class TestWS {
 
@@ -58,13 +58,12 @@ public class TestWS {
 
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session
-				.createInvestigationType("TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
-		Investigation inv = session.createInvestigation(facility, "A",
-				"Not null", investigationType);
+		Investigation inv = session.createInvestigation(facility, "A", "Not null",
+				investigationType);
 
 		ParameterType p = new ParameterType();
 		p.setName("TIMESTAMP");
@@ -77,18 +76,15 @@ public class TestWS {
 
 		Dataset wibble = session.createDataset("Wibble", dst, inv);
 
-		DatafileFormat dft1 = session.createDatafileFormat(facility, "png",
-				"binary");
-		DatafileFormat dft2 = session.createDatafileFormat(facility, "bmp",
-				"binary");
+		DatafileFormat dft1 = session.createDatafileFormat(facility, "png", "binary");
+		DatafileFormat dft2 = session.createDatafileFormat(facility, "bmp", "binary");
 
 		session.createDatafile("wib1", dft1, wibble);
 		session.createDatafile("wib2", dft2, wibble);
 
 		GregorianCalendar c = new GregorianCalendar();
 		c.setTime(new Date());
-		XMLGregorianCalendar date = DatatypeFactory.newInstance()
-				.newXMLGregorianCalendar(c);
+		XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
 		session.createDatasetParameter(date, p, wibble);
 
 		Dataset wobble = session.createDataset("Wobble", dst, inv);
@@ -111,39 +107,58 @@ public class TestWS {
 	}
 
 	@Test
+	public void createPerf() throws Exception {
+		Facility facility = session.createFacility("Test Facility", 90);
+
+		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
+
+		DatasetType dst = session.createDatasetType(facility, "GQ");
+
+		Investigation inv = session.createInvestigation(facility, "A", "Not null",
+				investigationType);
+
+		Dataset wibble = session.createDataset("Wibble", dst, inv);
+
+		DatafileFormat dfmt = session.createDatafileFormat(facility, "png", "binary");
+
+		long start = System.currentTimeMillis();
+		int n = 500;
+		for (int i = 0; i < n; i++) {
+			session.createDatafile("fred" + i, dfmt, wibble);
+		}
+		System.out.println("Time per datafile: " + (System.currentTimeMillis() - start) / (n + 0.)
+				+ "ms");
+	}
+
+	@Test
 	public void updates() throws Exception {
 		session.clear();
 
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session
-				.createInvestigationType("TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
-		Investigation inv = session.createInvestigation(facility, "A",
-				"Not null", investigationType);
+		Investigation inv = session.createInvestigation(facility, "A", "Not null",
+				investigationType);
 
 		Dataset wibble = session.createDataset("Wibble", dst, inv);
 		Dataset wobble = session.createDataset("Wobble", dst, inv);
 
-		DatafileFormat dfmt = session.createDatafileFormat(facility, "png",
-				"binary");
+		DatafileFormat dfmt = session.createDatafileFormat(facility, "png", "binary");
 
 		Datafile df = session.createDatafile("fred", dfmt, wibble);
-		df = (Datafile) session.get("Datafile INCLUDE Dataset, DatafileFormat",
-				df.getId());
+		df = (Datafile) session.get("Datafile INCLUDE Dataset, DatafileFormat", df.getId());
 		assertEquals("Wibble", df.getDataset().getName());
 
 		df.setDataset(wobble);
 		df.setLocation("guess");
-		df.setDatafileFormat(session.createDatafileFormat(facility, "notpng",
-				"notbinary"));
+		df.setDatafileFormat(session.createDatafileFormat(facility, "notpng", "notbinary"));
 		df.setDatafileFormat(null);
 		df.setFileSize(-1L);
 		session.update(df);
-		df = (Datafile) session.get("Datafile INCLUDE Dataset,DatafileFormat",
-				df.getId());
+		df = (Datafile) session.get("Datafile INCLUDE Dataset,DatafileFormat", df.getId());
 		assertEquals("Wobble", df.getDataset().getName());
 
 	}
@@ -155,8 +170,8 @@ public class TestWS {
 		assertEquals("id", ei.getKeyFieldname());
 		assertEquals(KeyType.GENERATED, ei.getKeyType());
 		for (Constraint constraint : ei.getConstraints()) {
-			assertEquals(Arrays.asList("name", "visitId", "facilityCycle",
-					"instrument"), constraint.getFieldNames());
+			assertEquals(Arrays.asList("name", "visitId", "facilityCycle", "instrument"),
+					constraint.getFieldNames());
 		}
 		assertEquals(21, ei.getFields().size());
 		int n = 0;
@@ -178,8 +193,7 @@ public class TestWS {
 			} else if (field.getName().equals("title")) {
 				assertEquals("String", field.getType());
 				assertEquals(true, field.isNotNullable());
-				assertEquals("Full title of the investigation",
-						field.getComment());
+				assertEquals("Full title of the investigation", field.getComment());
 				assertEquals(RelType.ATTRIBUTE, field.getRelType());
 				assertEquals((Integer) 255, field.getStringLength());
 				assertEquals(null, field.isCascaded());
@@ -200,8 +214,8 @@ public class TestWS {
 	@Test
 	public void notificationRequests() throws Exception {
 		session.clear();
-		session.createNotificationRequest("A", DestType.P_2_P, "Facility", "C",
-				"ptp", "notificationName userId entityName entityKey callArgs");
+		session.createNotificationRequest("A", DestType.P_2_P, "Facility", "C", "ptp",
+				"notificationName userId entityName entityKey callArgs");
 		session.createFacility("Test Facility", 90);
 	}
 
@@ -223,8 +237,7 @@ public class TestWS {
 		assertEquals("No params", 0, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
-		results = session
-				.search("Dataset INCLUDE Datafile [id = " + dsid + "]");
+		results = session.search("Dataset INCLUDE Datafile [id = " + dsid + "]");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
@@ -232,8 +245,7 @@ public class TestWS {
 		assertEquals("No params", 0, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
-		results = session.search("Dataset INCLUDE DatasetParameter [id = "
-				+ dsid + "]");
+		results = session.search("Dataset INCLUDE DatasetParameter [id = " + dsid + "]");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
@@ -241,9 +253,7 @@ public class TestWS {
 		assertEquals("Params", 1, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
-		results = session
-				.search("Dataset INCLUDE Datafile, DatasetParameter [id = "
-						+ dsid + "]");
+		results = session.search("Dataset INCLUDE Datafile, DatasetParameter [id = " + dsid + "]");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
@@ -251,9 +261,8 @@ public class TestWS {
 		assertEquals("Params", 1, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
-		results = session
-				.search("Dataset INCLUDE Datafile, DatasetParameter, Investigation [id = "
-						+ dsid + "]");
+		results = session.search("Dataset INCLUDE Datafile, DatasetParameter, Investigation [id = "
+				+ dsid + "]");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
@@ -289,8 +298,7 @@ public class TestWS {
 		application = (Application) results.get(0);
 		assertEquals("InputDataset", 1, application.getJobs().size());
 
-		results = session
-				.search("Job INCLUDE InputDataset, InputDatafile, Dataset, Datafile");
+		results = session.search("Job INCLUDE InputDataset, InputDatafile, Dataset, Datafile");
 		assertEquals("Count", 1, results.size());
 		job = (Job) results.get(0);
 		assertEquals("InputDataset", 1, job.getInputDatasets().size());
@@ -360,8 +368,7 @@ public class TestWS {
 		return dataset;
 	}
 
-	private Datafile addDatafile(Dataset dataset, String name,
-			DatafileFormat format) {
+	private Datafile addDatafile(Dataset dataset, String name, DatafileFormat format) {
 		Datafile datafile = new Datafile();
 		datafile.setDatafileFormat(format);
 		datafile.setName(name);
@@ -369,8 +376,7 @@ public class TestWS {
 		return datafile;
 	}
 
-	private DatasetParameter addDatasetParameter(Dataset dataset, Object o,
-			ParameterType p) {
+	private DatasetParameter addDatasetParameter(Dataset dataset, Object o, ParameterType p) {
 		DatasetParameter dsp = new DatasetParameter();
 		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
 			dsp.setDateTimeValue((XMLGregorianCalendar) o);
@@ -380,8 +386,7 @@ public class TestWS {
 		return dsp;
 	}
 
-	private SampleParameter addSampleParameter(Sample sample, Object o,
-			ParameterType p) {
+	private SampleParameter addSampleParameter(Sample sample, Object o, ParameterType p) {
 		SampleParameter sp = new SampleParameter();
 		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
 			sp.setDateTimeValue((XMLGregorianCalendar) o);
@@ -395,10 +400,9 @@ public class TestWS {
 	public void numericParameterRanges() throws Exception {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
-		InvestigationType investigationType = session
-				.createInvestigationType("TestExperiment");
-		Investigation inv = session.createInvestigation(facility, "A",
-				"Not null", investigationType);
+		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
+		Investigation inv = session.createInvestigation(facility, "A", "Not null",
+				investigationType);
 
 		ParameterType ptn = new ParameterType();
 		ptn.setName("TestNumeric");
@@ -442,10 +446,9 @@ public class TestWS {
 	public void inapplicableParameterType() throws Exception {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
-		InvestigationType investigationType = session
-				.createInvestigationType("TestExperiment");
-		Investigation inv = session.createInvestigation(facility, "A",
-				"Not null", investigationType);
+		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
+		Investigation inv = session.createInvestigation(facility, "A", "Not null",
+				investigationType);
 
 		ParameterType pts = new ParameterType();
 		pts.setName("UselessString");
@@ -463,8 +466,7 @@ public class TestWS {
 			session.create(ip);
 			fail("No throw");
 		} catch (ValidationException_Exception e) {
-			assertEquals(
-					"Parameter of type UselessString is not applicable to an Investigation",
+			assertEquals("Parameter of type UselessString is not applicable to an Investigation",
 					e.getMessage());
 		}
 	}
@@ -473,10 +475,9 @@ public class TestWS {
 	public void stringParameterRanges() throws Exception {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
-		InvestigationType investigationType = session
-				.createInvestigationType("TestExperiment");
-		Investigation inv = session.createInvestigation(facility, "A",
-				"Not null", investigationType);
+		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
+		Investigation inv = session.createInvestigation(facility, "A", "Not null",
+				investigationType);
 
 		ParameterType pts = new ParameterType();
 		pts.setName("TestString");
@@ -526,8 +527,7 @@ public class TestWS {
 
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session
-				.createInvestigationType("TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
@@ -541,10 +541,8 @@ public class TestWS {
 		p.setFacility(facility);
 		p.setId((Long) session.create(p));
 
-		DatafileFormat dft1 = session.createDatafileFormat(facility, "png",
-				"binary");
-		DatafileFormat dft2 = session.createDatafileFormat(facility, "bmp",
-				"binary");
+		DatafileFormat dft1 = session.createDatafileFormat(facility, "png", "binary");
+		DatafileFormat dft2 = session.createDatafileFormat(facility, "bmp", "binary");
 
 		Investigation inv = new Investigation();
 		inv.setId(42L);
@@ -561,8 +559,7 @@ public class TestWS {
 
 		GregorianCalendar c = new GregorianCalendar();
 		c.setTime(new Date());
-		XMLGregorianCalendar date = DatatypeFactory.newInstance()
-				.newXMLGregorianCalendar(c);
+		XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
 
 		addDatasetParameter(wibble, date, p);
 
@@ -579,8 +576,8 @@ public class TestWS {
 		// inv = (Investigation)
 		// session.get("Investigation INCLUDE Dataset, Datafile, DatasetParameter, Facility, Sample, SampleParameter",
 		// inv.getId());
-		inv = (Investigation) session.get(
-				"Investigation INCLUDE  Sample, SampleParameter", inv.getId());
+		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter",
+				inv.getId());
 		assertEquals(2, inv.getSamples().size());
 		for (Sample s : inv.getSamples()) {
 			if (s.getName().equals("S1")) {
@@ -622,10 +619,8 @@ public class TestWS {
 	public void gets() throws Exception {
 		session.clear();
 		create();
-		Long dsId = (Long) session.search("Dataset.id [name = 'Wibble']")
-				.get(0);
-		assertEquals("Wibble",
-				((Dataset) session.get("Dataset", dsId)).getName());
+		Long dsId = (Long) session.search("Dataset.id [name = 'Wibble']").get(0);
+		assertEquals("Wibble", ((Dataset) session.get("Dataset", dsId)).getName());
 		try {
 			session.get("Dataset", random.nextLong());
 			fail("No throw");
@@ -636,8 +631,7 @@ public class TestWS {
 			session.get("Dataset INCLUDE Investigator", dsId);
 			fail("No throw");
 		} catch (BadParameterException_Exception e) {
-			assertEquals(
-					"uk.icat3.entity.Investigator is not known to the class loader",
+			assertEquals("uk.icat3.entity.Investigator is not known to the class loader",
 					e.getMessage());
 		}
 		try {
@@ -656,27 +650,23 @@ public class TestWS {
 
 		Long invId = (Long) session.search("Investigation.id").get(0);
 
-		List<?> results = session
-				.search("Dataset.id "
-						+ "<-> DatasetParameter[type.name = 'TIMESTAMP'] "
-						+ "<-> Investigation[name <> 12]");
+		List<?> results = session.search("Dataset.id "
+				+ "<-> DatasetParameter[type.name = 'TIMESTAMP'] "
+				+ "<-> Investigation[name <> 12]");
 		assertEquals("Count", 1, results.size());
 
-		results = session
-				.search("Datafile [name = 'fred'] <-> Dataset[id <> 42]");
+		results = session.search("Datafile [name = 'fred'] <-> Dataset[id <> 42]");
 		assertEquals("Count", 1, results.size());
 
 		String query = "Dataset.id  ORDER BY id [type.name IN :types] <-> Investigation[id BETWEEN :lower AND :upper]";
 
 		query = query.replace(":lower", Long.toString(invId))
-				.replace(":upper", Long.toString(invId))
-				.replace(":types", "('GS', 'GQ')");
+				.replace(":upper", Long.toString(invId)).replace(":types", "('GS', 'GQ')");
 		results = session.search(query);
 		assertEquals("Count", 4, results.size());
 
 		query = "Dataset.id ORDER BY startDate [type.name IN :types AND name >= :lower AND name <= :upper]";
-		query = query.replace(":lower", "'Wabble'")
-				.replace(":upper", "'Wobble'")
+		query = query.replace(":lower", "'Wabble'").replace(":upper", "'Wobble'")
 				.replace(":types", "('GS', 'GQ')");
 		results = session.search(query);
 		assertEquals("Count", 2, results.size());
@@ -694,18 +684,18 @@ public class TestWS {
 		results = session.search(",1 Datafile.name ORDER BY id");
 		assertEquals("Count", 1, results.size());
 		assertEquals("Result", "wib1", results.get(0));
-		
+
 		results = session.search("1, Datafile.name ORDER BY id");
 		assertEquals("Count", 5, results.size());
 		assertEquals("Result", "wib2", results.get(0));
-		
+
 		results = session.search("1,1 Datafile.name ORDER BY id");
 		assertEquals("Count", 1, results.size());
 		assertEquals("Result", "wib2", results.get(0));
-		
+
 		results = session.search("100,1 Datafile.name ORDER BY id");
 		assertEquals("Count", 0, results.size());
-		
+
 		results = session.search("0,100 Datafile.name ORDER BY id");
 		assertEquals("Count", 6, results.size());
 		assertEquals("Result", "wib1", results.get(0));
