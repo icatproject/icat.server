@@ -49,15 +49,13 @@ class Session {
 		DATASET, DATAFILE, SAMPLE, INVESTIGATION
 	};
 
-	public String dump(EntityBaseBean bean, int i)
-			throws IllegalArgumentException, IllegalAccessException,
-			SecurityException, NoSuchMethodException, InvocationTargetException {
+	public String dump(EntityBaseBean bean, int i) throws IllegalArgumentException,
+			IllegalAccessException, SecurityException, NoSuchMethodException,
+			InvocationTargetException {
 		StringBuilder result = new StringBuilder();
-		for (Field field : new ArrayList<Field>(Arrays.asList(bean.getClass()
-				.getDeclaredFields()))) {
+		for (Field field : new ArrayList<Field>(Arrays.asList(bean.getClass().getDeclaredFields()))) {
 			String name = field.getName();
-			String getterName = "get" + name.substring(0, 1).toUpperCase()
-					+ name.substring(1);
+			String getterName = "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
 			Method m = bean.getClass().getMethod(getterName);
 			Object o = m.invoke(bean);
 			if (result.length() != 0) {
@@ -65,8 +63,7 @@ class Session {
 			}
 			if (o instanceof EntityBaseBean) {
 				if (i > 0) {
-					result.append(name + ":[" + dump((EntityBaseBean) o, i - 1)
-							+ "]");
+					result.append(name + ":[" + dump((EntityBaseBean) o, i - 1) + "]");
 				} else {
 					result.append(name + ":...");
 				}
@@ -92,10 +89,8 @@ class Session {
 		this.sessionId = this.icatEP.login("root", "password");
 	}
 
-	public void addInputDatafile(Job job, Datafile df)
-			throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
+	public void addInputDatafile(Job job, Datafile df) throws IcatInternalException_Exception,
+			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
 			ObjectAlreadyExistsException_Exception, SessionException_Exception,
 			ValidationException_Exception {
 		final InputDatafile idf = new InputDatafile();
@@ -104,10 +99,8 @@ class Session {
 		this.icatEP.create(this.sessionId, idf);
 	}
 
-	public void addInputDataset(Job job, Dataset ds)
-			throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
+	public void addInputDataset(Job job, Dataset ds) throws IcatInternalException_Exception,
+			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
 			ObjectAlreadyExistsException_Exception, SessionException_Exception,
 			ValidationException_Exception {
 		final InputDataset ids = new InputDataset();
@@ -116,10 +109,8 @@ class Session {
 		this.icatEP.create(this.sessionId, ids);
 	}
 
-	public void addOutputDatafile(Job job, Datafile df)
-			throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
+	public void addOutputDatafile(Job job, Datafile df) throws IcatInternalException_Exception,
+			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
 			ObjectAlreadyExistsException_Exception, SessionException_Exception,
 			ValidationException_Exception {
 		final OutputDatafile odf = new OutputDatafile();
@@ -128,10 +119,8 @@ class Session {
 		this.icatEP.create(this.sessionId, odf);
 	}
 
-	public void addOutputDataset(Job job, Dataset ds)
-			throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
+	public void addOutputDataset(Job job, Dataset ds) throws IcatInternalException_Exception,
+			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
 			ObjectAlreadyExistsException_Exception, SessionException_Exception,
 			ValidationException_Exception {
 		final OutputDataset ods = new OutputDataset();
@@ -140,12 +129,10 @@ class Session {
 		this.icatEP.create(this.sessionId, ods);
 	}
 
-	public void addRule(String groupName, String what, String crudFlags)
-			throws Exception {
+	public void addRule(String groupName, String what, String crudFlags) throws Exception {
 		Rule rule = new Rule();
 		if (groupName != null) {
-			Group g = (Group) this.icatEP.get(this.sessionId, "Group",
-					groupName);
+			Group g = (Group) this.icatEP.get(this.sessionId, "Group", groupName);
 			rule.setGroup(g);
 		}
 		rule.setWhat(what);
@@ -153,13 +140,11 @@ class Session {
 		this.icatEP.create(this.sessionId, rule);
 	}
 
-	public void addUserGroupMember(String groupName, String userName)
-			throws Exception {
+	public void addUserGroupMember(String groupName, String userName) throws Exception {
 		Group group = null;
 		if (groupName != null) {
 			try {
-				group = (Group) this.icatEP.get(this.sessionId, "Group",
-						groupName);
+				group = (Group) this.icatEP.get(this.sessionId, "Group", groupName);
 
 			} catch (NoSuchObjectFoundException_Exception e) {
 				group = new Group();
@@ -254,25 +239,20 @@ class Session {
 	}
 
 	public Application createApplication(String name, String version)
-			throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
-			ObjectAlreadyExistsException_Exception, SessionException_Exception,
-			ValidationException_Exception {
+			throws IcatInternalException_Exception, InsufficientPrivilegesException_Exception,
+			NoSuchObjectFoundException_Exception, ObjectAlreadyExistsException_Exception,
+			SessionException_Exception, ValidationException_Exception {
 		final Application application = new Application();
 		application.setName(name);
 		application.setVersion(version);
-		application.setId((Long) this.icatEP
-				.create(this.sessionId, application));
+		application.setId((Long) this.icatEP.create(this.sessionId, application));
 		return application;
 	}
 
-	public Datafile createDatafile(String name, DatafileFormat format,
-			Dataset ds) throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
-			ObjectAlreadyExistsException_Exception, SessionException_Exception,
-			ValidationException_Exception {
+	public Datafile createDatafile(String name, DatafileFormat format, Dataset ds)
+			throws IcatInternalException_Exception, InsufficientPrivilegesException_Exception,
+			NoSuchObjectFoundException_Exception, ObjectAlreadyExistsException_Exception,
+			SessionException_Exception, ValidationException_Exception {
 		final Datafile datafile = new Datafile();
 		datafile.setDatafileFormat(format);
 		datafile.setName(name);
@@ -281,8 +261,8 @@ class Session {
 		return datafile;
 	}
 
-	public DatafileFormat createDatafileFormat(Facility facility, String name,
-			String formatType) throws Exception {
+	public DatafileFormat createDatafileFormat(Facility facility, String name, String formatType)
+			throws Exception {
 		final DatafileFormat dff = new DatafileFormat();
 		dff.setName(name);
 		dff.setVersion("1");
@@ -292,12 +272,10 @@ class Session {
 		return dff;
 	}
 
-	public Dataset createDataset(String name, DatasetType type,
-			Investigation inv) throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
-			ObjectAlreadyExistsException_Exception, SessionException_Exception,
-			ValidationException_Exception {
+	public Dataset createDataset(String name, DatasetType type, Investigation inv)
+			throws IcatInternalException_Exception, InsufficientPrivilegesException_Exception,
+			NoSuchObjectFoundException_Exception, ObjectAlreadyExistsException_Exception,
+			SessionException_Exception, ValidationException_Exception {
 		final Dataset dataset = new Dataset();
 		dataset.setName(name);
 		dataset.setType(type);
@@ -306,13 +284,10 @@ class Session {
 		return dataset;
 	}
 
-	public DatasetParameter createDatasetParameter(Object value,
-			ParameterType p, Dataset ds)
-			throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
-			ObjectAlreadyExistsException_Exception, SessionException_Exception,
-			ValidationException_Exception {
+	public DatasetParameter createDatasetParameter(Object value, ParameterType p, Dataset ds)
+			throws IcatInternalException_Exception, InsufficientPrivilegesException_Exception,
+			NoSuchObjectFoundException_Exception, ObjectAlreadyExistsException_Exception,
+			SessionException_Exception, ValidationException_Exception {
 
 		final DatasetParameter dsp = new DatasetParameter();
 		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
@@ -324,8 +299,7 @@ class Session {
 		return dsp;
 	}
 
-	public DatasetType createDatasetType(Facility facility, String name)
-			throws Exception {
+	public DatasetType createDatasetType(Facility facility, String name) throws Exception {
 		final DatasetType dst = new DatasetType();
 		dst.setName(name);
 		dst.setFacility(facility);
@@ -333,8 +307,7 @@ class Session {
 		return dst;
 	}
 
-	public Facility createFacility(String shortName, int daysUntilRelease)
-			throws Exception {
+	public Facility createFacility(String shortName, int daysUntilRelease) throws Exception {
 		final Facility f = new Facility();
 		f.setName(shortName);
 		f.setDaysUntilRelease(daysUntilRelease);
@@ -342,9 +315,8 @@ class Session {
 		return f;
 	}
 
-	public Investigation createInvestigation(Facility facility,
-			String invNumber, String title, InvestigationType invType)
-			throws Exception {
+	public Investigation createInvestigation(Facility facility, String invNumber, String title,
+			InvestigationType invType) throws Exception {
 		final Investigation i = new Investigation();
 		i.setFacility(facility);
 		i.setName(invNumber);
@@ -354,18 +326,17 @@ class Session {
 		return i;
 	}
 
-	public InvestigationType createInvestigationType(String name)
+	public InvestigationType createInvestigationType(Facility facility, String name)
 			throws Exception {
 		final InvestigationType type = new InvestigationType();
+		type.setFacility(facility);
 		type.setName(name);
-		this.icatEP.create(this.sessionId, type);
+		type.setId((Long) this.icatEP.create(this.sessionId, type));
 		return type;
 	}
 
-	public Job createJob(Application application)
-			throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
+	public Job createJob(Application application) throws IcatInternalException_Exception,
+			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
 			ObjectAlreadyExistsException_Exception, SessionException_Exception,
 			ValidationException_Exception {
 		final Job job = new Job();
@@ -374,27 +345,21 @@ class Session {
 		return job;
 	}
 
-	public void delete(EntityBaseBean bean)
-			throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
+	public void delete(EntityBaseBean bean) throws IcatInternalException_Exception,
+			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
 			ObjectAlreadyExistsException_Exception, SessionException_Exception,
 			ValidationException_Exception {
 		this.icatEP.delete(this.sessionId, bean);
 	}
 
-	public EntityBaseBean get(String query, Object key)
-			throws BadParameterException_Exception,
-			IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
+	public EntityBaseBean get(String query, Object key) throws BadParameterException_Exception,
+			IcatInternalException_Exception, InsufficientPrivilegesException_Exception,
 			NoSuchObjectFoundException_Exception, SessionException_Exception {
 		return this.icatEP.get(this.sessionId, query, key);
 	}
 
-	public List<Object> search(String query)
-			throws BadParameterException_Exception,
-			IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
+	public List<Object> search(String query) throws BadParameterException_Exception,
+			IcatInternalException_Exception, InsufficientPrivilegesException_Exception,
 			SessionException_Exception {
 		return this.icatEP.search(this.sessionId, query);
 	}
@@ -432,22 +397,17 @@ class Session {
 		this.addRule("root", "InvestigationParameter", "CRUD");
 	}
 
-	public void update(EntityBaseBean df)
-			throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception, SessionException_Exception,
-			ValidationException_Exception {
+	public void update(EntityBaseBean df) throws IcatInternalException_Exception,
+			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
+			SessionException_Exception, ValidationException_Exception {
 		this.icatEP.update(this.sessionId, df);
 	}
 
-	public NotificationRequest createNotificationRequest(String name,
-			DestType destType, String what, String crudFlags,
-			String jmsOptions, String dataTypes)
-			throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
-			ObjectAlreadyExistsException_Exception, SessionException_Exception,
-			ValidationException_Exception {
+	public NotificationRequest createNotificationRequest(String name, DestType destType,
+			String what, String crudFlags, String jmsOptions, String dataTypes)
+			throws IcatInternalException_Exception, InsufficientPrivilegesException_Exception,
+			NoSuchObjectFoundException_Exception, ObjectAlreadyExistsException_Exception,
+			SessionException_Exception, ValidationException_Exception {
 		NotificationRequest notificationRequest = new NotificationRequest();
 		notificationRequest.setName(name);
 		notificationRequest.setDestType(destType);
@@ -459,28 +419,31 @@ class Session {
 		return notificationRequest;
 	}
 
-	public void registerInvestigation(Investigation inv)
-			throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
+	public void registerInvestigation(Investigation inv) throws IcatInternalException_Exception,
+			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
 			ObjectAlreadyExistsException_Exception, SessionException_Exception,
 			ValidationException_Exception {
 		inv.setId((Long) this.icatEP.create(this.sessionId, inv));
 	}
 
-	public EntityInfo getEntityInfo(String beanName)
-			throws BadParameterException_Exception,
+	public EntityInfo getEntityInfo(String beanName) throws BadParameterException_Exception,
 			IcatInternalException_Exception {
 		return icatEP.getEntityInfo(beanName);
 	}
 
-	public Object create(EntityBaseBean bean)
-			throws IcatInternalException_Exception,
-			InsufficientPrivilegesException_Exception,
-			NoSuchObjectFoundException_Exception,
+	public Object create(EntityBaseBean bean) throws IcatInternalException_Exception,
+			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
 			ObjectAlreadyExistsException_Exception, SessionException_Exception,
 			ValidationException_Exception {
 		return this.icatEP.create(this.sessionId, bean);
+	}
+
+	public List<Object> createMany(List<EntityBaseBean> beans)
+			throws ValidationException_Exception, IcatInternalException_Exception,
+			InsufficientPrivilegesException_Exception, NoSuchObjectFoundException_Exception,
+			ObjectAlreadyExistsException_Exception, SessionException_Exception {
+		return this.icatEP.createMany(this.sessionId, beans);
+
 	}
 
 }

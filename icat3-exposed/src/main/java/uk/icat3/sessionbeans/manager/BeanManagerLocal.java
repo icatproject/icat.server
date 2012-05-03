@@ -21,22 +21,31 @@ import uk.icat3.manager.EntityInfo;
 @Local
 public interface BeanManagerLocal {
 
-	Object create(String sessionId, EntityBaseBean bean) throws SessionException, InsufficientPrivilegesException,
-			NoSuchObjectFoundException, ValidationException, ObjectAlreadyExistsException, IcatInternalException;
+	Object create(String sessionId, EntityBaseBean bean) throws SessionException,
+			InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException,
+			ObjectAlreadyExistsException, IcatInternalException;
 
-	void delete(String sessionId, EntityBaseBean bean) throws SessionException, InsufficientPrivilegesException,
-			NoSuchObjectFoundException, ValidationException, IcatInternalException;
+	void delete(String sessionId, EntityBaseBean bean) throws SessionException,
+			InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException,
+			IcatInternalException;
 
-	void update(String sessionId, EntityBaseBean bean) throws SessionException, InsufficientPrivilegesException,
-			NoSuchObjectFoundException, ValidationException, IcatInternalException;
+	void update(String sessionId, EntityBaseBean bean) throws SessionException,
+			InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException,
+			IcatInternalException;
 
-	EntityBaseBean get(String sessionId, String query, Object primaryKey) throws SessionException, NoSuchObjectFoundException,
-			InsufficientPrivilegesException, BadParameterException, IcatInternalException;
-	
-	List<?> search(String sessionId, String query) throws SessionException, IcatInternalException, BadParameterException, InsufficientPrivilegesException;
+	EntityBaseBean get(String sessionId, String query, Object primaryKey) throws SessionException,
+			NoSuchObjectFoundException, InsufficientPrivilegesException, BadParameterException,
+			IcatInternalException;
+
+	List<?> search(String sessionId, String query) throws SessionException, IcatInternalException,
+			BadParameterException, InsufficientPrivilegesException;
 
 	void dummy(Facility facility);
 
 	EntityInfo getEntityInfo(String beanName) throws BadParameterException, IcatInternalException;
+
+	List<Object> createMany(String sessionId, List<EntityBaseBean> beans) throws SessionException,
+			InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException,
+			ObjectAlreadyExistsException, IcatInternalException;
 
 }

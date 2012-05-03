@@ -3,6 +3,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -21,6 +22,7 @@ import org.icatproject.Dataset;
 import org.icatproject.DatasetParameter;
 import org.icatproject.DatasetType;
 import org.icatproject.DestType;
+import org.icatproject.EntityBaseBean;
 import org.icatproject.EntityField;
 import org.icatproject.EntityInfo;
 import org.icatproject.Facility;
@@ -58,7 +60,8 @@ public class TestWS {
 
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
@@ -108,9 +111,11 @@ public class TestWS {
 
 	@Test
 	public void createPerf() throws Exception {
+		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
@@ -122,12 +127,24 @@ public class TestWS {
 		DatafileFormat dfmt = session.createDatafileFormat(facility, "png", "binary");
 
 		long start = System.currentTimeMillis();
-		int n = 500;
+		int n = 50;
 		for (int i = 0; i < n; i++) {
 			session.createDatafile("fred" + i, dfmt, wibble);
 		}
 		System.out.println("Time per datafile: " + (System.currentTimeMillis() - start) / (n + 0.)
 				+ "ms");
+		List<EntityBaseBean> dfs = new ArrayList<EntityBaseBean>();
+		for (int i = 0; i < n; i++) {
+			final Datafile datafile = new Datafile();
+			datafile.setDatafileFormat(dfmt);
+			datafile.setName("bill" + i);
+			datafile.setDataset(wibble);
+			dfs.add(datafile);
+		}
+		start = System.currentTimeMillis();
+		session.createMany(dfs);
+		System.out.println("Time per datafile in list: " + (System.currentTimeMillis() - start)
+				/ (n + 0.) + "ms");
 	}
 
 	@Test
@@ -136,7 +153,8 @@ public class TestWS {
 
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
@@ -400,7 +418,8 @@ public class TestWS {
 	public void numericParameterRanges() throws Exception {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
-		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
 		Investigation inv = session.createInvestigation(facility, "A", "Not null",
 				investigationType);
 
@@ -446,7 +465,8 @@ public class TestWS {
 	public void inapplicableParameterType() throws Exception {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
-		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
 		Investigation inv = session.createInvestigation(facility, "A", "Not null",
 				investigationType);
 
@@ -475,7 +495,8 @@ public class TestWS {
 	public void stringParameterRanges() throws Exception {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
-		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
 		Investigation inv = session.createInvestigation(facility, "A", "Not null",
 				investigationType);
 
@@ -527,7 +548,8 @@ public class TestWS {
 
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session.createInvestigationType("TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 

@@ -108,6 +108,15 @@ public class ICAT extends ICATCompat {
 			ObjectAlreadyExistsException, IcatInternalException {
 		return beanManagerLocal.create(sessionId, bean);
 	}
+	
+	@WebMethod
+	public List<Object> createMany(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "beans") List<EntityBaseBean> beans)
+			throws SessionException, InsufficientPrivilegesException,
+			NoSuchObjectFoundException, ValidationException,
+			ObjectAlreadyExistsException, IcatInternalException {
+		return beanManagerLocal.createMany(sessionId, beans);
+	}
 
 	@WebMethod
 	public void delete(@WebParam(name = "sessionId") String sessionId,

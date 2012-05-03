@@ -30,6 +30,17 @@ public class Facility extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
 	private List<Investigation> investigations = new ArrayList<Investigation>();
+	
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
+	private List<InvestigationType> investigationTypes = new ArrayList<InvestigationType>();
+
+	public List<InvestigationType> getInvestigationTypes() {
+		return investigationTypes;
+	}
+
+	public void setInvestigationTypes(List<InvestigationType> investigationTypes) {
+		this.investigationTypes = investigationTypes;
+	}
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
 	private List<DatafileFormat> datafileFormats = new ArrayList<DatafileFormat>();

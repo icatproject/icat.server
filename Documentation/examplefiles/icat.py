@@ -56,6 +56,28 @@ print "New facility is now", service.get(sessionId, "Facility", pk)
 
 service.delete(sessionId,(service.get(sessionId, "Facility", pk)))
 
+beans = []
+for i in range(5):
+    facility = factory.create("facility")
+    facility.name = "cucumber" + str(i)
+    beans.append(facility)
+dft = factory.create("datafileFormat")
+beans.append(dft)
+#beans =[]
+#beans.append(factory.create("facility"));
+#print type(beans)
+#for bean in beans:
+#    print bean
+#    service.create(sessionId, bean)
+try:
+    service.createMany(sessionId, beans)
+except WebFault, e:
+    print e
+
+for i in range(5):
+    pk = "cucumber" + str(i)
+    service.delete(sessionId,(service.get(sessionId, "Facility", pk)))
+
 print "Finally ", len(service.search(sessionId, "Facility")), "facilities"
 
 try:

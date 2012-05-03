@@ -1,5 +1,6 @@
 package uk.icat3.sessionbeans.manager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -96,9 +97,10 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 			ObjectAlreadyExistsException, IcatInternalException {
 		try {
 			String userId = user.getUserIdFromSessionId(sessionId);
-			CreateResponse createResponse = BeanManager.create(userId, bean, manager, userTransaction);
-			Transmitter.processMessages(createResponse.getNotificationMessages(), queueConnection, queue,
-					topicConnection, topic);
+			CreateResponse createResponse = BeanManager.create(userId, bean, manager,
+					userTransaction);
+			Transmitter.processMessages(createResponse.getNotificationMessages(), queueConnection,
+					queue, topicConnection, topic);
 			return createResponse.getPk();
 		} catch (SessionException e) {
 			logger.debug(e.getMessage());
@@ -124,9 +126,49 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 		}
 	}
 
+	@Override
+	public List<Object> createMany(String sessionId, List<EntityBaseBean> beans)
+			throws SessionException, InsufficientPrivilegesException, NoSuchObjectFoundException,
+			ValidationException, ObjectAlreadyExistsException, IcatInternalException {
+		try {
+			String userId = user.getUserIdFromSessionId(sessionId);
+			List<CreateResponse> createResponses = BeanManager.createMany(userId, beans, manager,
+					userTransaction);
+			List<Object> lo = new ArrayList<Object>();
+			for (CreateResponse createResponse : createResponses) {
+				Transmitter.processMessages(createResponse.getNotificationMessages(),
+						queueConnection, queue, topicConnection, topic);
+				lo.add(createResponse.getPk());
+			}
+			return lo;
+		} catch (SessionException e) {
+			logger.debug(e.getMessage());
+			throw e;
+		} catch (InsufficientPrivilegesException e) {
+			logger.debug(e.getMessage());
+			throw e;
+		} catch (NoSuchObjectFoundException e) {
+			logger.debug(e.getMessage());
+			throw e;
+		} catch (ValidationException e) {
+			logger.debug(e.getMessage());
+			throw e;
+		} catch (ObjectAlreadyExistsException e) {
+			logger.debug(e.getMessage());
+			throw e;
+		} catch (IcatInternalException e) {
+			logger.debug(e.getMessage());
+			throw e;
+		} catch (Throwable e) {
+			reportThrowable(e);
+			throw new IcatInternalException(e.getMessage());
+		}
+	}
+
 	@WebMethod()
-	public void delete(String sessionId, EntityBaseBean bean) throws SessionException, NoSuchObjectFoundException,
-			InsufficientPrivilegesException, ValidationException, IcatInternalException {
+	public void delete(String sessionId, EntityBaseBean bean) throws SessionException,
+			NoSuchObjectFoundException, InsufficientPrivilegesException, ValidationException,
+			IcatInternalException {
 		try {
 			String userId = user.getUserIdFromSessionId(sessionId);
 			NotificationMessages nms = BeanManager.delete(userId, bean, manager, userTransaction);
@@ -153,8 +195,9 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 	}
 
 	@WebMethod()
-	public void update(String sessionId, EntityBaseBean bean) throws SessionException, InsufficientPrivilegesException,
-			NoSuchObjectFoundException, ValidationException, IcatInternalException {
+	public void update(String sessionId, EntityBaseBean bean) throws SessionException,
+			InsufficientPrivilegesException, NoSuchObjectFoundException, ValidationException,
+			IcatInternalException {
 		try {
 			String userId = user.getUserIdFromSessionId(sessionId);
 			NotificationMessages nms = BeanManager.update(userId, bean, manager, userTransaction);
@@ -186,14 +229,15 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 	}
 
 	@Override
-	public EntityBaseBean get(String sessionId, String query, Object primaryKey) throws SessionException,
-			NoSuchObjectFoundException, InsufficientPrivilegesException, BadParameterException, IcatInternalException {
+	public EntityBaseBean get(String sessionId, String query, Object primaryKey)
+			throws SessionException, NoSuchObjectFoundException, InsufficientPrivilegesException,
+			BadParameterException, IcatInternalException {
 		try {
 			String userId = user.getUserIdFromSessionId(sessionId);
 
 			GetResponse getResponse = BeanManager.get(userId, query, primaryKey, manager);
-			Transmitter.processMessages(getResponse.getNotificationMessages(), queueConnection, queue, topicConnection,
-					topic);
+			Transmitter.processMessages(getResponse.getNotificationMessages(), queueConnection,
+					queue, topicConnection, topic);
 			return getResponse.getBean();
 		} catch (SessionException e) {
 			logger.debug(e.getMessage());
@@ -218,13 +262,13 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 	}
 
 	@Override
-	public List<?> search(String sessionId, String query) throws SessionException, IcatInternalException,
-			BadParameterException, InsufficientPrivilegesException {
+	public List<?> search(String sessionId, String query) throws SessionException,
+			IcatInternalException, BadParameterException, InsufficientPrivilegesException {
 		try {
 			String userId = user.getUserIdFromSessionId(sessionId);
 			SearchResponse searchResponse = BeanManager.search(userId, query, manager);
-			Transmitter.processMessages(searchResponse.getNotificationMessages(), queueConnection, queue,
-					topicConnection, topic);
+			Transmitter.processMessages(searchResponse.getNotificationMessages(), queueConnection,
+					queue, topicConnection, topic);
 			return searchResponse.getList();
 		} catch (SessionException e) {
 			logger.debug(e.getMessage());
@@ -245,7 +289,8 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 	}
 
 	@Override
-	public EntityInfo getEntityInfo(String beanName) throws BadParameterException, IcatInternalException {
+	public EntityInfo getEntityInfo(String beanName) throws BadParameterException,
+			IcatInternalException {
 		return BeanManager.getEntityInfo(beanName);
 	}
 
