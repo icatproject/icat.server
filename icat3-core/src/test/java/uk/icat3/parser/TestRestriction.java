@@ -1,4 +1,4 @@
-package uk.icat3.security.parser;
+package uk.icat3.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

@@ -29,7 +29,7 @@ public class GetQuery {
 		}
 
 		/* Make sure that all is well - and the entities are connected */
-		Set<Class<? extends EntityBaseBean>> es = include.getBeans();
+		Set<Class<? extends EntityBaseBean>> es = include.getBeans(bean);
 		if (es != null) {
 			DagHandler.fixes(bean, es);
 		}
@@ -39,8 +39,8 @@ public class GetQuery {
 		return this.bean;
 	}
 	
-	public Set<Class<? extends EntityBaseBean>> getIncludes() throws BadParameterException {
-		return this.include.getBeans();
+	public Set<Class<? extends EntityBaseBean>> getIncludes() throws BadParameterException, IcatInternalException {
+		return this.include.getBeans(bean);
 	}
 	
 	@Override

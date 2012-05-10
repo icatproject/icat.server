@@ -24,7 +24,7 @@ public class SearchQuery {
 
 	// Query ::= ( [ [num] "," [num] ] [ "DISTINCT" ] name Include Order ) |
 	// ( "MIN" | "MAX" | "AVG" | "COUNT" | "SUM" "(" name ")" )
-	// ( "[" SearchCondition "]" )? ( ("<->")? name ( "[" SearchCondition "]") ?
+	// ( "[" SearchCondition "]" )? ( "<->" name ( "[" SearchCondition "]") ?
 	// )*
 
 	public class TableAndSearchCondition {
@@ -57,10 +57,12 @@ public class SearchQuery {
 
 	public SearchQuery(Input input) throws ParserException, BadParameterException {
 
-		Token t = input.consume(Token.Type.NAME, Token.Type.DISTINCT, Token.Type.INTEGER, Token.Type.COMMA,
-				Token.Type.COUNT, Token.Type.MAX, Token.Type.MIN, Token.Type.AVG, Token.Type.SUM);
-		if (t.getType() == Token.Type.COUNT || t.getType() == Token.Type.MAX || t.getType() == Token.Type.MIN
-				|| t.getType() == Token.Type.AVG || t.getType() == Token.Type.SUM) {
+		Token t = input.consume(Token.Type.NAME, Token.Type.DISTINCT, Token.Type.INTEGER,
+				Token.Type.COMMA, Token.Type.COUNT, Token.Type.MAX, Token.Type.MIN, Token.Type.AVG,
+				Token.Type.SUM);
+		if (t.getType() == Token.Type.COUNT || t.getType() == Token.Type.MAX
+				|| t.getType() == Token.Type.MIN || t.getType() == Token.Type.AVG
+				|| t.getType() == Token.Type.SUM) {
 			aggFunction = t.getValue();
 			input.consume(Token.Type.OPENPAREN);
 			this.result = input.consume(Token.Type.NAME);
@@ -110,9 +112,7 @@ public class SearchQuery {
 			}
 		}
 		while ((t = input.peek(0)) != null) {
-			if (t.getType() == Token.Type.ENTSEP) {
-				input.consume();
-			}
+			input.consume(Token.Type.ENTSEP);
 			t = input.consume(Token.Type.NAME);
 			String name = t.getValue();
 			t = input.peek(0);
@@ -132,19 +132,19 @@ public class SearchQuery {
 		return EntityInfoHandler.getClass(this.result.getValue().split("\\.")[0]);
 	}
 
-	public String getJPQL(String userId, EntityManager manager) throws BadParameterException, IcatInternalException,
-			InsufficientPrivilegesException {
+	public String getJPQL(String userId, EntityManager manager) throws BadParameterException,
+			IcatInternalException, InsufficientPrivilegesException {
 		Set<Class<? extends EntityBaseBean>> es = this.getRelatedEntities();
 
 		Class<? extends EntityBaseBean> bean = this.getFirstEntity();
 
 		String beanName = bean.getSimpleName();
-		TypedQuery<Rule> query = manager.createNamedQuery(Rule.SEARCH_QUERY, Rule.class).setParameter("member", userId)
-				.setParameter("bean", beanName);
+		TypedQuery<Rule> query = manager.createNamedQuery(Rule.SEARCH_QUERY, Rule.class)
+				.setParameter("member", userId).setParameter("bean", beanName);
 
 		List<Rule> rules = query.getResultList();
-		SearchQuery.logger
-				.debug("Got " + rules.size() + " authz queries for search by " + userId + " to a " + beanName);
+		SearchQuery.logger.debug("Got " + rules.size() + " authz queries for search by " + userId
+				+ " to a " + beanName);
 		StringBuilder restriction = new StringBuilder();
 		boolean first = true;
 		for (Rule r : rules) {
@@ -175,7 +175,8 @@ public class SearchQuery {
 		sb.append(' ').append(this.getWhere());
 		if (restriction != null) {
 			if (restriction.length() == 0) {
-				throw new InsufficientPrivilegesException("Read access to this " + beanName + " is not allowed.");
+				throw new InsufficientPrivilegesException("Read access to this " + beanName
+						+ " is not allowed.");
 			}
 			sb.append(" AND(").append(restriction).append(")");
 		}
@@ -194,7 +195,7 @@ public class SearchQuery {
 		return sb;
 	}
 
-	private Set<Class<? extends EntityBaseBean>> getRelatedEntities() throws BadParameterException {
+	Set<Class<? extends EntityBaseBean>> getRelatedEntities() throws BadParameterException {
 		Set<Class<? extends EntityBaseBean>> es = new HashSet<Class<? extends EntityBaseBean>>();
 		for (TableAndSearchCondition ts : this.tableAndSearchConditions) {
 			es.add(EntityInfoHandler.getClass(ts.entityName));
@@ -286,9 +287,10 @@ public class SearchQuery {
 		return sb.toString();
 	}
 
-	public Set<Class<? extends EntityBaseBean>> getIncludes() throws BadParameterException {
+	public Set<Class<? extends EntityBaseBean>> getIncludes() throws BadParameterException,
+			IcatInternalException {
 		if (this.include != null) {
-			return this.include.getBeans();
+			return this.include.getBeans(getFirstEntity());
 		} else {
 			return Collections.emptySet();
 		}

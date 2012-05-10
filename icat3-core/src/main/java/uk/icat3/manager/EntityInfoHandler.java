@@ -60,10 +60,11 @@ public class EntityInfoHandler {
 		private List<List<Field>> constraintFields;
 		private String classComment;
 		private Map<Field, String> fieldComments;
+		private Set<Class<? extends EntityBaseBean>> ones;
 
 		public PrivateEntityInfo(Field pks, Set<Relationship> rels, List<Field> notNullableFields, Map<Field, Method> getters,
 				Map<Field, Integer> stringFields, Map<Field, Method> setters, KeyType keyType,
-				List<List<Field>> constraintFields, String classComment, Map<Field, String> fieldComments) {
+				List<List<Field>> constraintFields, String classComment, Map<Field, String> fieldComments,  Set<Class<? extends EntityBaseBean>> ones) {
 			this.pks = pks;
 			this.relatedEntities = rels;
 			this.notNullableFields = notNullableFields;
@@ -74,6 +75,7 @@ public class EntityInfoHandler {
 			this.constraintFields = constraintFields;
 			this.classComment = classComment;
 			this.fieldComments = fieldComments;
+			this.ones = ones;
 		}
 
 	}
@@ -232,6 +234,13 @@ public class EntityInfoHandler {
 				rels.add(new Relationship(argc2, field, false, all));
 			}
 
+		}
+		
+		final Set<Class<? extends EntityBaseBean>> ones  = new HashSet<Class<? extends EntityBaseBean>>();
+		for (Relationship rel : rels) {
+			if (! rel.collection) {
+				ones.add(rel.bean);
+			}
 		}
 
 		final List<Field> notNullableFields = new ArrayList<Field>();
@@ -414,7 +423,7 @@ public class EntityInfoHandler {
 		String commentString = comment == null ? null : comment.value();
 
 		return new PrivateEntityInfo(key, rels, notNullableFields, getters, stringFields, setters, this.keyType,
-				constraintFields, commentString, comments);
+				constraintFields, commentString, comments, ones);
 	}
 
 	private List<Field> getFields(Class<?> cobj) {
@@ -500,6 +509,19 @@ public class EntityInfoHandler {
 			return ei.relatedEntities;
 		}
 	}
+	
+	public Set<Class<? extends EntityBaseBean>> getOnes(Class<? extends EntityBaseBean> objectClass)
+			throws IcatInternalException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.ones;
+		}
+	}
 
 	public Map<Field, Method> getSetters(Class<? extends EntityBaseBean> objectClass) throws IcatInternalException {
 		PrivateEntityInfo ei = null;
@@ -575,7 +597,6 @@ public class EntityInfoHandler {
 		EntityInfo entityInfo = new EntityInfo();
 		entityInfo.setClassComment(getClassComment(beanClass));
 		for (List<Field> constraint : getConstraintFields(beanClass)) {
-			List<String> fieldNames = new ArrayList<String>();
 			Constraint c = new Constraint();
 			for (Field f : constraint) {
 				c.getFieldNames().add(f.getName());

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import uk.icat3.exceptions.BadParameterException;
-import uk.icat3.parser.Token.Type;
 
 public class ComparisonPredicate {
 

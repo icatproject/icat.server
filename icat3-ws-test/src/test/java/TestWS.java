@@ -262,6 +262,22 @@ public class TestWS {
 		assertEquals("Files", 2, ds.getDatafiles().size());
 		assertEquals("No params", 0, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
+		
+		results = session.search("Dataset INCLUDE Datafile, 1 [id = " + dsid + "]");
+		assertEquals("Count", 1, results.size());
+		ds = (Dataset) results.get(0);
+		assertEquals("Value", dsid, ds.getId());
+		assertEquals("Files", 2, ds.getDatafiles().size());
+		assertEquals("No params", 0, ds.getParameters().size());
+		assertNotNull("Inv", ds.getInvestigation());
+		
+		results = session.search("Dataset INCLUDE 1 [id = " + dsid + "]");
+		assertEquals("Count", 1, results.size());
+		ds = (Dataset) results.get(0);
+		assertEquals("Value", dsid, ds.getId());
+		assertEquals("No files", 0, ds.getDatafiles().size());
+		assertEquals("No params", 0, ds.getParameters().size());
+		assertNotNull("Inv", ds.getInvestigation());
 
 		results = session.search("Dataset INCLUDE DatasetParameter [id = " + dsid + "]");
 		assertEquals("Count", 1, results.size());
