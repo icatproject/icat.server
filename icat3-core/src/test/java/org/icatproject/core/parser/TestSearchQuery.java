@@ -1,4 +1,4 @@
-package uk.icat3.parser;
+package org.icatproject.core.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -8,16 +8,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.parser.Input;
+import org.icatproject.core.parser.SearchQuery;
+import org.icatproject.core.parser.Token;
+import org.icatproject.core.parser.Tokenizer;
 import org.junit.Test;
 
-import uk.icat3.entity.EntityBaseBean;
-import uk.icat3.exceptions.BadParameterException;
-import uk.icat3.exceptions.IcatInternalException;
 
 public class TestSearchQuery {
 
-	private void testGood(List<Token> tokens, List<String> res, String top) throws ParserException,
-			IcatInternalException, BadParameterException {
+	private void testGood(List<Token> tokens, List<String> res, String top) throws Exception {
 		Input input = new Input(tokens);
 		SearchQuery sq = new SearchQuery(input);
 		assertNull(input.peek(0));
@@ -26,7 +27,7 @@ public class TestSearchQuery {
 		for (Class<? extends EntityBaseBean> bean : sq.getRelatedEntities()) {
 			relatedEntityNames.add(bean.getSimpleName());
 		}
-		
+
 		System.out.println(sq.getIncludes());
 
 		assertEquals("Related entities", new HashSet<String>(res), relatedEntityNames);

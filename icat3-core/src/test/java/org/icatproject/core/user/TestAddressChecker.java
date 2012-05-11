@@ -1,8 +1,9 @@
-package uk.icat3.user;
+package org.icatproject.core.user;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.icatproject.core.user.AddressChecker;
 import org.junit.Test;
 
 public class TestAddressChecker {

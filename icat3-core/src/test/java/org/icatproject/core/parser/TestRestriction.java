@@ -1,4 +1,4 @@
-package uk.icat3.parser;
+package org.icatproject.core.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -8,25 +8,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.parser.Input;
+import org.icatproject.core.parser.Restriction;
+import org.icatproject.core.parser.Token;
+import org.icatproject.core.parser.Tokenizer;
 import org.junit.Test;
 
-import uk.icat3.entity.EntityBaseBean;
-import uk.icat3.exceptions.BadParameterException;
-import uk.icat3.exceptions.IcatInternalException;
-import uk.icat3.parser.Input;
-import uk.icat3.parser.ParserException;
-import uk.icat3.parser.Restriction;
-import uk.icat3.parser.Token;
-import uk.icat3.parser.Tokenizer;
 
 public class TestRestriction {
 
 	private void testGood(List<Token> tokens, String q, String sw, List<String> res, String top)
-			throws ParserException, IcatInternalException, BadParameterException {
+			throws Exception {
 		Input input = new Input(tokens);
 		Restriction e = new Restriction(input);
 		assertNull(input.peek(0));
-		
+
 		Set<String> relatedEntityNames = new HashSet<String>();
 		for (Class<? extends EntityBaseBean> bean : e.getRelatedEntities()) {
 			relatedEntityNames.add(bean.getSimpleName());
@@ -43,12 +40,14 @@ public class TestRestriction {
 				.getTokens("[id = 20] <-> Investigation <-> InvestigationUser <-> User[name = :user]");
 		String sw = "(Dataset$.id = 20) AND (User$.name = :user)";
 		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$ LEFT JOIN Investigation$.investigationUsers AS InvestigationUser$ LEFT JOIN InvestigationUser$.user AS User$  WHERE (Dataset$.id = :pkid) AND ";
-		testGood(tokens, q, sw, Arrays.asList("Investigation", "InvestigationUser", "User"), "Dataset");
+		testGood(tokens, q, sw, Arrays.asList("Investigation", "InvestigationUser", "User"),
+				"Dataset");
 	}
 
 	@Test
 	public void testGood2() throws Exception {
-		List<Token> tokens = Tokenizer.getTokens("Investigation InvestigationUser [user.userId = :user]");
+		List<Token> tokens = Tokenizer
+				.getTokens("Investigation InvestigationUser [user.userId = :user]");
 		String sw = "(InvestigationUser$.user.userId = :user)";
 		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$ LEFT JOIN Investigation$.investigationUsers AS InvestigationUser$  WHERE (Dataset$.id = :pkid) AND ";
 		testGood(tokens, q, sw, Arrays.asList("Investigation", "InvestigationUser"), "Dataset");

@@ -1,14 +1,14 @@
-package uk.icat3.parser;
+package org.icatproject.core.parser;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
+import org.icatproject.core.parser.LexerException;
+import org.icatproject.core.parser.Token;
+import org.icatproject.core.parser.Tokenizer;
 import org.junit.Test;
 
-import uk.icat3.parser.LexerException;
-import uk.icat3.parser.Token;
-import uk.icat3.parser.Tokenizer;
 
 public class TestTokenizer {
 
