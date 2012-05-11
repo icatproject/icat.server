@@ -1,7 +1,0 @@
-Authenticate
-CaseSensitiveKeywordSearch
-DirectDSDF
-DrillDown
-GetURLForDownload
-KeywordDisplay
-KeywordSearch
