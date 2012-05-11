@@ -1,3 +1,0 @@
-At this point the script for the beamline population package should be run.
-
-https://esc-cvs.dl.ac.uk/svn/dl/metadata/icat/trunk/propagation/install_scripts/schema_specific_scripts/icatdls/2_after_common_objects/025_populate_beamlines_pkg.sql

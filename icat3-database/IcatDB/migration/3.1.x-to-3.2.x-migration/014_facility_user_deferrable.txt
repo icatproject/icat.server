@@ -1,4 +1,0 @@
-At this point the script to make the constraint INVESTIGATOR_FACILITY_USER_FK1
-deferrable should be run.
-
-https://esc-cvs.dl.ac.uk/svn/dl/metadata/icat/trunk/propagation/install_scripts/general_scripts/schema_mods/004_facility_user_deferrable.sql

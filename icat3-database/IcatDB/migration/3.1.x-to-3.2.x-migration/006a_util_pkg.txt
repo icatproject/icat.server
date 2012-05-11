@@ -1,5 +1,0 @@
-util_pkg.sql must be run at this point
-
-
-https://esc-cvs.dl.ac.uk/svn/dl/metadata/icat/trunk/propagation/install_scripts/general_scripts/common_objects/002_util_pkg.sql
-

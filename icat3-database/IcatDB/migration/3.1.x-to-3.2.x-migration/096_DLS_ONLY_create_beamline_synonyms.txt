@@ -1,3 +1,0 @@
-At this point the script to create the synonyms for tables in the beamlines should be run.
-
-https://esc-cvs.dl.ac.uk/svn/dl/metadata/icat/trunk/propagation/install_scripts/schema_specific_scripts/icatdls/2_after_common_objects/003_create_beamline_synonyms.sql

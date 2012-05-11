@@ -1,3 +1,0 @@
-At this point the script to modify the v_investigation view should be run.
-
-https://esc-cvs.dl.ac.uk/svn/dl/metadata/icat/trunk/propagation/install_scripts/general_scripts/common_objects/010_v_investigation.sql

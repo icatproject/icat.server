@@ -1,7 +1,0 @@
-y	y	y	ADMIN	y	y	y	y	y	y	n	n	n
-y	y	y	CREATOR	y	y	y	y	y	n	n	n	n
-y	y	y	READER	n	y	n	n	n	n	n	n	n
-y	y	y	DOWNLOADER	n	y	y	n	n	n	n	n	n
-y	y	y	UPDATER	n	y	y	y	n	n	n	n	n
-y	y	y	DELETER	n	y	y	y	y	n	n	n	n
-y	y	y	ICAT_ADMIN	y	y	y	y	y	y	y	y	y

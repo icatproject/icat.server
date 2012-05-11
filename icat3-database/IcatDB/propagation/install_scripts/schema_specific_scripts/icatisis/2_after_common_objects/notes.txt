@@ -1,2 +1,0 @@
-non-standard scripts to be applied after the common objects, eg new columns on
-indexes, new tables, changes to those common objects

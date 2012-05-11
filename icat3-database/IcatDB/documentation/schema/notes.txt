@@ -1,4 +1,0 @@
-latex final_report.tex 
-dvipdf final_report.dvi final_report.pdf
-
-# to cleanup temp files - prompt> for i in `ls *.txt | grep -v notes.txt`; do rm -f $i; done

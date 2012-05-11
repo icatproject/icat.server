@@ -1,3 +1,0 @@
-At this point the script to recreate the datafile_parameter table as a partitioned table should be run.
-
-https://esc-cvs.dl.ac.uk/svn/dl/metadata/icat/trunk/propagation/install_scripts/general_scripts/schema_mods/003_partition_datafile_parameter.sql

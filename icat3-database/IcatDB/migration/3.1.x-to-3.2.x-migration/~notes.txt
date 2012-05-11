@@ -1,5 +1,0 @@
-scripts required for upgrading from phase 1 to phase 2
-
-the only schema installed at phase 1 was ICATDLS.
-if other schemas are installed at phase 1 the upgrade requirements should be
-assessed, though should on the whole be the same

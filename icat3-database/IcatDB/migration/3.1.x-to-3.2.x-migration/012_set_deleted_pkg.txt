@@ -1,4 +1,0 @@
-009_set_deleted_pkg.sql must be run at this point
-
-
-https://esc-cvs.dl.ac.uk/svn/dl/metadata/icat/trunk/propagation/install_scripts/general_scripts/common_objects/009_set_deleted_pkg.sql

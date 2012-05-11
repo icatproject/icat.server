@@ -1,2 +1,0 @@
-normally migration only occurs between consecutive minor versions of the schema.
-However in this case DLS will be migrating from an earlier 3.1.x release to a later 3.3.x release and this is funded specific work.
