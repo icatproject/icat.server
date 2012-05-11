@@ -7,7 +7,6 @@
 	<version>4.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>icat3-master-pom</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -15,17 +14,17 @@
 	</properties>
 
 	<modules>
-		<module>icat.core</module>
-		<module>icat3-exposed</module>
-		<module>icat3-ear</module>
-		<module>icat3-client</module>
-		<module>icat3-ws-test</module>
-		<module>icat3-user-ldap</module>
-		<module>icat3-user-ansto</module>
-		<module>icat3-data</module>
-		<module>icat3-jaxb</module>
-		<module>icat3-xmlingest-client</module>
-		<module>icat3-download</module>
+		<module>core</module>
+		<module>exposed</module>
+		<module>ear</module>
+		<module>client</module>
+		<module>ws-test</module>
+		<module>user-ldap</module>
+		<module>user-ansto</module>
+		<module>data</module>
+		<module>jaxb</module>
+		<module>xmlingest-client</module>
+		<module>download</module>
 	</modules>
 
 	<repositories>
@@ -171,6 +170,7 @@
 
 	</build>
 
+	<description>Main pom to build all the icat components</description>
 </project>
 
 

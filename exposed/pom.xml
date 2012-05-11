@@ -3,15 +3,14 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>co.uk.icat3</groupId>
-		<artifactId>icat3</artifactId>
+		<groupId>org.icatproject</groupId>
+		<artifactId>icat</artifactId>
 		<version>4.1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>icat3-exposed</artifactId>
+	<artifactId>icat.exposed</artifactId>
 	<packaging>ejb</packaging>
 
-	<name>icat3-exposed</name>
 
 	<dependencies>
 		<dependency>
