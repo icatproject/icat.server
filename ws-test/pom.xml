@@ -16,8 +16,8 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>co.uk.icat3</groupId>
-			<artifactId>icat3-client</artifactId>
+			<groupId>org.icatproject</groupId>
+			<artifactId>icat.client</artifactId>
 		</dependency>
 
 		<dependency>

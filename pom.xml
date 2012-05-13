@@ -53,44 +53,51 @@
 			</dependency>
 
 			<dependency>
-				<groupId>co.uk.icat3</groupId>
-				<artifactId>icat3-client</artifactId>
+				<groupId>org.icatproject</groupId>
+				<artifactId>icat.client</artifactId>
 				<version>4.1.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
-				<groupId>co.uk.icat3</groupId>
-				<artifactId>icat3-core</artifactId>
+				<groupId>org.icatproject</groupId>
+				<artifactId>icat.core</artifactId>
 				<version>4.1.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
-				<groupId>co.uk.icat3</groupId>
-				<artifactId>icat3-data</artifactId>
+				<groupId>org.icatproject</groupId>
+				<artifactId>icat.ear</artifactId>
+				<version>4.1.0-SNAPSHOT</version>
+				<type>ear</type>
+			</dependency>
+
+			<dependency>
+				<groupId>org.icatproject</groupId>
+				<artifactId>icat.data</artifactId>
 				<version>4.1.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
-				<groupId>co.uk.icat3</groupId>
-				<artifactId>icat3-jaxb</artifactId>
+				<groupId>org.icatproject</groupId>
+				<artifactId>icat.jaxb</artifactId>
 				<version>4.1.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
-				<groupId>co.uk.icat3</groupId>
-				<artifactId>icat3-user-ansto</artifactId>
+				<groupId>org.icatproject</groupId>
+				<artifactId>icat.user-ansto</artifactId>
 				<version>4.1.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
-				<groupId>co.uk.icat3</groupId>
-				<artifactId>icat3-user-ldap</artifactId>
+				<groupId>org.icatproject</groupId>
+				<artifactId>icat.user-ldap</artifactId>
 				<version>4.1.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
-				<groupId>co.uk.icat3</groupId>
-				<artifactId>icat3-exposed</artifactId>
+				<groupId>org.icatproject</groupId>
+				<artifactId>icat.exposed</artifactId>
 				<version>4.1.0-SNAPSHOT</version>
 				<type>ejb</type>
 			</dependency>

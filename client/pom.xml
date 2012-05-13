@@ -73,5 +73,12 @@
 		</plugins>
 	</build>
 
+	<dependencies>
+		<dependency>
+			<groupId>org.icatproject</groupId>
+			<artifactId>icat.ear</artifactId>
+			<type>ear</type>
+		</dependency>
+	</dependencies>
 </project>
 

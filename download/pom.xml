@@ -11,16 +11,11 @@
 	<artifactId>icat.download</artifactId>
 	<packaging>jar</packaging>
 
-	<name>icat3-download</name>
-
-	<properties>
-	</properties>
-
 	<dependencies>
 
 		<dependency>
-			<groupId>co.uk.icat3</groupId>
-			<artifactId>icat3-core</artifactId>
+			<groupId>org.icatproject</groupId>
+			<artifactId>icat.core</artifactId>
 		</dependency>
 
 	</dependencies>

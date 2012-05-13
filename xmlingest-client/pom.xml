@@ -11,16 +11,12 @@
 	<artifactId>icat.xmlingest-client</artifactId>
 	<packaging>jar</packaging>
 
-	<name>icat3-xmlingest-client</name>
-
-	<properties>
-	</properties>
-
+	
 	<dependencies>
 
 		<dependency>
-			<groupId>co.uk.icat3</groupId>
-			<artifactId>icat3-client</artifactId>
+			<groupId>org.icatproject</groupId>
+			<artifactId>icat.client</artifactId>
 		</dependency>
 
 	</dependencies>

@@ -14,38 +14,38 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>co.uk.icat3</groupId>
-			<artifactId>icat3-core</artifactId>
+			<groupId>org.icatproject</groupId>
+			<artifactId>icat.core</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>co.uk.icat3</groupId>
-			<artifactId>icat3-data</artifactId>
+			<groupId>org.icatproject</groupId>
+			<artifactId>icat.data</artifactId>
 		</dependency>
-		
-<!-- 		 <dependency> -->
-<!-- 			<groupId>org.eclipse.persistence</groupId> -->
-<!-- 			<artifactId>eclipselink</artifactId> -->
-<!-- 			<version>2.3.0</version> -->
-<!-- 			<scope>test</scope> -->
-<!-- 		</dependency> -->
-		
-<!-- 		<dependency> -->
-<!-- 			<groupId>oracle</groupId> -->
-<!-- 			<artifactId>ojdbc</artifactId> -->
-<!-- 			<version>14</version> -->
-<!-- 			<scope>test</scope> -->
-<!-- 		</dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.eclipse.persistence</groupId> -->
+		<!-- <artifactId>eclipselink</artifactId> -->
+		<!-- <version>2.3.0</version> -->
+		<!-- <scope>test</scope> -->
+		<!-- </dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>oracle</groupId> -->
+		<!-- <artifactId>ojdbc</artifactId> -->
+		<!-- <version>14</version> -->
+		<!-- <scope>test</scope> -->
+		<!-- </dependency> -->
 
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>co.uk.icat3</groupId> -->
-<!-- 			<artifactId>icat3-logging</artifactId> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>co.uk.icat3</groupId> -->
+		<!-- <artifactId>icat3-logging</artifactId> -->
+		<!-- </dependency> -->
 
 		<dependency>
-			<groupId>co.uk.icat3</groupId>
-			<artifactId>icat3-jaxb</artifactId>
+			<groupId>org.icatproject</groupId>
+			<artifactId>icat.jaxb</artifactId>
 		</dependency>
 
 		<dependency>
