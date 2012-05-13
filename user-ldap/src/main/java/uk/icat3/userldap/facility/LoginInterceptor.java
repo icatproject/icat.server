@@ -1,4 +1,4 @@
-package uk.icat3.userldap.facility;
+package org.icatproject.userldap.facility;
 
 /**
  *

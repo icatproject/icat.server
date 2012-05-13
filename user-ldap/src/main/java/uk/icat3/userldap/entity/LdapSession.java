@@ -1,4 +1,4 @@
-package uk.icat3.userldap.entity;
+package org.icatproject.userldap.entity;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -11,7 +11,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import uk.icat3.exceptions.SessionException;
+import org.icatproject.core.IcatException;
 
 @SuppressWarnings("serial")
 @Entity
@@ -34,9 +34,9 @@ public class LdapSession implements Serializable {
 	public LdapSession() {
 	}
 
-	public void checkValid() throws SessionException {
+	public void checkValid() throws IcatException {
 		if (expireDateTime.before(new Date()))
-			throw new SessionException("LdapSession id:" + getUserSessionId() + " has expired");
+			throw new IcatException(IcatException.Type.SESSION, "LdapSession id:" + getUserSessionId() + " has expired");
 	}
 
 	public LdapSession(String userSessionId, String runAs, Date expireDateTime) {

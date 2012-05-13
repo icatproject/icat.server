@@ -1,4 +1,4 @@
-package uk.icat3.useransto.message;
+package org.icatproject.useransto.message;
 
 /**
  *

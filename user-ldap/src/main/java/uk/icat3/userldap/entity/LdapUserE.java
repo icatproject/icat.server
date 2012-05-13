@@ -1,4 +1,4 @@
-package uk.icat3.userldap.entity;
+package org.icatproject.userldap.entity;
 
 import java.io.Serializable;
 

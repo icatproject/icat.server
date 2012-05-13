@@ -1,4 +1,4 @@
-package uk.icat3.useransto.entity;
+package org.icatproject.useransto.entity;
 
 import java.io.Serializable;
 

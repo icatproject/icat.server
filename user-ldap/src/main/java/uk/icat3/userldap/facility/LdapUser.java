@@ -1,4 +1,4 @@
-package uk.icat3.userldap.facility;
+package org.icatproject.userldap.facility;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,64 +13,63 @@ import javax.persistence.NoResultException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.icatproject.core.IcatException;
+import org.icatproject.core.user.AddressChecker;
+import org.icatproject.core.user.UserDetails;
+import org.icatproject.userldap.entity.LdapSession;
+import org.icatproject.userldap.entity.LdapUserE;
 
-import uk.icat3.exceptions.IcatInternalException;
-import uk.icat3.exceptions.NoSuchUserException;
-import uk.icat3.exceptions.SessionException;
-import uk.icat3.user.AddressChecker;
-import uk.icat3.user.UserDetails;
-import uk.icat3.userldap.entity.LdapSession;
-import uk.icat3.userldap.entity.LdapUserE;
 
-public class LdapUser implements uk.icat3.user.User {
+public class LdapUser implements org.icatproject.core.user.User {
 
 	private final EntityManager manager;
 	private LdapAuthenticator ldapAuthenticator;
 	private static final Logger log = Logger.getLogger(LdapUser.class);
 	private AddressChecker ldapAddressChecker;
 	private AddressChecker anstoAddressChecker;
-	private IcatInternalException icatInternalException;
+	private IcatException icatException;
 
-	public LdapUser(EntityManager manager) throws IcatInternalException {
+	public LdapUser(EntityManager manager) throws IcatException {
 		File f = new File("icat.properties");
 		try {
 			Properties props = new Properties();
 			props.load(new FileInputStream(f));
 			String providerUrl = props.getProperty("auth.ldap.provider_url");
 			if (providerUrl == null) {
-				throw new IcatInternalException("auth.ldap.provider_url not defined");
+				throw new IcatException(IcatException.Type.INTERNAL, "auth.ldap.provider_url not defined");
 			}
 			String securityPrincipal = props.getProperty("auth.ldap.security_principal");
 			if (securityPrincipal == null) {
-				throw new IcatInternalException("auth.ldap.security_principal not defined");
+				throw new IcatException(IcatException.Type.INTERNAL, "auth.ldap.security_principal not defined");
 			}
 			if (securityPrincipal.indexOf('%') < 0) {
-				throw new IcatInternalException("auth.ldap.security_principal value must include a % to be substituted by the user name");
+				throw new IcatException(IcatException.Type.INTERNAL,
+						"auth.ldap.security_principal value must include a % to be substituted by the user name");
 			}
 			ldapAuthenticator = new LdapAuthenticator(providerUrl, securityPrincipal);
 			String authips = props.getProperty("auth.ldap.ip");
 			if (authips != null) {
 				ldapAddressChecker = new AddressChecker(authips);
 			}
-			 authips = props.getProperty("auth.ansto.ip");
+			authips = props.getProperty("auth.ansto.ip");
 			if (authips != null) {
 				anstoAddressChecker = new AddressChecker(authips);
 			}
 		} catch (Exception e) {
 			String msg = "Problem with " + f.getAbsolutePath() + "  " + e.getMessage();
 			log.fatal(msg);
-			icatInternalException = new IcatInternalException(msg);
-			throw icatInternalException;
+			icatException = new IcatException(IcatException.Type.INTERNAL, msg);
+			throw icatException;
 		}
 		this.manager = manager;
 		log.trace("Created AnstoUser with Entitity Manager" + manager);
 	}
 
 	@Override
-	public UserDetails getUserDetails(String sessionId, String user) throws SessionException, NoSuchUserException {
+	public UserDetails getUserDetails(String sessionId, String user) throws IcatException {
 		log.trace("getUserDetails(" + sessionId + ")");
 		if (sessionId == null || sessionId.equals("")) {
-			throw new SessionException("LdapSession Id cannot be null or empty.");
+			throw new IcatException(IcatException.Type.SESSION, "LdapSession Id cannot be null or empty.");
 		}
 
 		try {
@@ -82,20 +81,20 @@ public class LdapUser implements uk.icat3.user.User {
 			userDetails.setFederalId(session.getRunAs());
 			return userDetails;
 		} catch (final NoResultException e) {
-			throw new SessionException("Invalid sessionid: " + sessionId);
-		} catch (final SessionException e) {
+			throw new IcatException(IcatException.Type.SESSION, "Invalid sessionid: " + sessionId);
+		} catch (final IcatException e) {
 			throw e;
 		} catch (final Exception e) {
 			log.warn(e.getMessage());
-			throw new SessionException("Unable to find user by sessionid: " + sessionId);
+			throw new IcatException(IcatException.Type.SESSION, "Unable to find user by sessionid: " + sessionId);
 		}
 	}
 
 	@Override
-	public String getUserIdFromSessionId(String sessionId) throws SessionException {
+	public String getUserIdFromSessionId(String sessionId) throws IcatException {
 		log.trace("getUserIdFromSessionId(" + sessionId + ")");
 		if (sessionId == null || sessionId.equals("")) {
-			throw new SessionException("LdapSession Id cannot be null or empty.");
+			throw new IcatException(IcatException.Type.SESSION, "LdapSession Id cannot be null or empty.");
 		}
 
 		try {
@@ -105,31 +104,30 @@ public class LdapUser implements uk.icat3.user.User {
 			log.debug("user: " + session.getRunAs() + " is associated with: " + sessionId);
 			return session.getRunAs();
 		} catch (final NoResultException e) {
-			throw new SessionException("Invalid sessionid: " + sessionId);
-		} catch (final SessionException e) {
+			throw new IcatException(IcatException.Type.SESSION, "Invalid sessionid: " + sessionId);
+		} catch (IcatException e) {
 			throw e;
 		} catch (final Exception e) {
 			log.warn(e.getMessage());
-			throw new SessionException("Unable to find user by sessionid: " + sessionId);
+			throw new IcatException(IcatException.Type.SESSION, "Unable to find user by sessionid: " + sessionId);
 		}
 	}
 
 	@Override
-	public String login(String credential) throws SessionException {
+	public String login(String credential) throws IcatException {
 		throw new UnsupportedOperationException("Method not supported.");
 	}
 
 	@Override
-	public String login(String username, String password, HttpServletRequest req) throws SessionException,
-			IcatInternalException {
+	public String login(String username, String password, HttpServletRequest req) throws IcatException {
 		return this.login(username, password, 2, req); // 2 hours
 	}
 
 	@Override
-	public String login(String username, String password, int lifetime, HttpServletRequest req) throws SessionException, IcatInternalException {
+	public String login(String username, String password, int lifetime, HttpServletRequest req) throws IcatException {
 		log.trace("login(" + username + ", *********, " + lifetime + ")");
-		if (icatInternalException != null) {
-			throw icatInternalException;
+		if (icatException != null) {
+			throw icatException;
 		}
 		if (username == null || username.equals("")) {
 			throw new IllegalArgumentException("Username cannot be null or empty.");
@@ -140,34 +138,33 @@ public class LdapUser implements uk.icat3.user.User {
 		log.trace("Entitity Manager is " + manager);
 		log.info("Checking password against database");
 		try {
-			LdapUserE user = (uk.icat3.userldap.entity.LdapUserE) this.manager
+			LdapUserE user = (org.icatproject.userldap.entity.LdapUserE) this.manager
 					.createNamedQuery("LdapUserE.findByUserId").setParameter("userId", username).getSingleResult();
 			if (!user.getPassword().equals(password)) {
-				throw new SessionException("Username and password do not match");
+				throw new IcatException(IcatException.Type.SESSION, "Username and password do not match");
 			}
 			if (anstoAddressChecker != null) {
 				if (!anstoAddressChecker.check(req.getRemoteAddr())) {
-					throw new SessionException("You may not log in by 'ansto' from your IP address " + req.getRemoteAddr());
+					throw new IcatException(IcatException.Type.SESSION,
+							"You may not log in by 'ansto' from your IP address " + req.getRemoteAddr());
 				}
 			}
 		} catch (final NoResultException e) {
 			if (!ldapAuthenticator.authenticate(username, password)) {
-				throw new SessionException("Username and password do not match");
+				throw new IcatException(IcatException.Type.SESSION, "Username and password do not match");
 			}
 			if (ldapAddressChecker != null) {
 				if (!ldapAddressChecker.check(req.getRemoteAddr())) {
-					throw new SessionException("You may not log in by 'ldap' from your IP address " + req.getRemoteAddr());
+					throw new IcatException(IcatException.Type.SESSION,
+							"You may not log in by 'ldap' from your IP address " + req.getRemoteAddr());
 				}
 			}
-		} catch (SessionException e) {
-			log.trace(e.getMessage());
-			throw e;
-		} catch (IcatInternalException e) {
+		} catch (IcatException e) {
 			log.trace(e.getMessage());
 			throw e;
 		} catch (final Exception e) {
 			log.trace("Unexpected problem " + e.getMessage());
-			throw new SessionException("Unexpected problem " + e.getMessage());
+			throw new IcatException(IcatException.Type.SESSION, "Unexpected problem " + e.getMessage());
 		}
 
 		final LdapSession session = newSession(username, lifetime);
