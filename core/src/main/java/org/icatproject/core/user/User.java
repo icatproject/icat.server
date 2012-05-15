@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.icatproject.core.IcatException;
 
-
 /*
  * User.java
  *
@@ -80,26 +79,6 @@ public interface User {
 			throws IcatException;
 
 	/**
-	 * Returns a sessionId (authenitcation token) to a user after verification of correct admin
-	 * username and password combination. If user does not provide the correct login credentials a
-	 * {@link IcatException} will be thrown. This login method allows an admin user, on behalf of
-	 * another user, to perform their operations.
-	 * 
-	 * @param adminUsername
-	 *            admin username of user
-	 * @param AdminPassword
-	 *            admin password of user
-	 * @param runAsUser
-	 *            user the admin wants the operations to be performed as
-	 * @return sessionId authentication token that user can use in corresponding methods calls
-	 *         without having to provide username and password each time.
-	 * @throws IcatException
-	 *             if user provides an invalid admin username and password combination.
-	 */
-	public String login(String adminUsername, String AdminPassword, String runAsUser)
-			throws IcatException;
-
-	/**
 	 * Returns a sessionId (authenitcation token) to a user after verification of a string
 	 * representation of a x509 proxy credential. If user does not provide the correct login
 	 * credentials a {@link IcatException} will be thrown, i.e the cerfificate is invalid, not
@@ -115,11 +94,10 @@ public interface User {
 	public String login(String credential) throws IcatException;
 
 	/**
-	 * Removes sessionId authentication token from user database which
-	 * effectively logs user out of the system. Any further attempt to use the
-	 * icat3 api with an 'old' sessionId will fail as it will no longer exist in
-	 * the user database. Any potential exceptions that could be raised should
-	 * be suppressed e.g. logging out a user who is already logged out.
+	 * Removes sessionId authentication token from user database which effectively logs user out of
+	 * the system. Any further attempt to use the icat3 api with an 'old' sessionId will fail as it
+	 * will no longer exist in the user database. Any potential exceptions that could be raised
+	 * should be suppressed e.g. logging out a user who is already logged out.
 	 * 
 	 * @param sessionId
 	 *            authentication token obtained on successful login

@@ -11,7 +11,6 @@ import org.icatproject.core.entity.DatasetParameter;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.User;
-import org.icatproject.core.manager.DagHandler;
 import org.icatproject.core.manager.DagHandler.Step;
 import org.junit.Test;
 

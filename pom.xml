@@ -21,10 +21,6 @@
 		<module>ws-test</module>
 		<module>user-ldap</module>
 		<module>user-ansto</module>
-		<module>data</module>
-		<module>jaxb</module>
-		<module>xmlingest-client</module>
-		<module>download</module>
 	</modules>
 
 	<repositories>
@@ -69,18 +65,6 @@
 				<artifactId>icat.ear</artifactId>
 				<version>4.1.0-SNAPSHOT</version>
 				<type>ear</type>
-			</dependency>
-
-			<dependency>
-				<groupId>org.icatproject</groupId>
-				<artifactId>icat.data</artifactId>
-				<version>4.1.0-SNAPSHOT</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.icatproject</groupId>
-				<artifactId>icat.jaxb</artifactId>
-				<version>4.1.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
@@ -134,7 +118,7 @@
 					<encoding>${project.build.sourceEncoding}</encoding>
 					<forkMode>once</forkMode>
 					<useFile>false</useFile>
-					<testFailureIgnore>true</testFailureIgnore>
+					<testFailureIgnore>false</testFailureIgnore>
 				</configuration>
 			</plugin>
 

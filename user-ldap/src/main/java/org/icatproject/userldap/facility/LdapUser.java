@@ -19,7 +19,6 @@ import org.icatproject.core.user.UserDetails;
 import org.icatproject.userldap.entity.LdapSession;
 import org.icatproject.userldap.entity.LdapUserE;
 
-
 public class LdapUser implements org.icatproject.core.user.User {
 
 	private final EntityManager manager;
@@ -36,11 +35,13 @@ public class LdapUser implements org.icatproject.core.user.User {
 			props.load(new FileInputStream(f));
 			String providerUrl = props.getProperty("auth.ldap.provider_url");
 			if (providerUrl == null) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "auth.ldap.provider_url not defined");
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"auth.ldap.provider_url not defined");
 			}
 			String securityPrincipal = props.getProperty("auth.ldap.security_principal");
 			if (securityPrincipal == null) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "auth.ldap.security_principal not defined");
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"auth.ldap.security_principal not defined");
 			}
 			if (securityPrincipal.indexOf('%') < 0) {
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -69,11 +70,13 @@ public class LdapUser implements org.icatproject.core.user.User {
 	public UserDetails getUserDetails(String sessionId, String user) throws IcatException {
 		log.trace("getUserDetails(" + sessionId + ")");
 		if (sessionId == null || sessionId.equals("")) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "LdapSession Id cannot be null or empty.");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION,
+					"LdapSession Id cannot be null or empty.");
 		}
 
 		try {
-			final LdapSession session = (LdapSession) this.manager.createNamedQuery("LdapSession.findByUserSessionId")
+			final LdapSession session = (LdapSession) this.manager
+					.createNamedQuery("LdapSession.findByUserSessionId")
 					.setParameter("userSessionId", sessionId).getSingleResult();
 			session.checkValid();
 			// TODO do we want to get rid of the getUserDetails call?
@@ -81,12 +84,14 @@ public class LdapUser implements org.icatproject.core.user.User {
 			userDetails.setFederalId(session.getRunAs());
 			return userDetails;
 		} catch (final NoResultException e) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Invalid sessionid: " + sessionId);
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Invalid sessionid: "
+					+ sessionId);
 		} catch (final IcatException e) {
 			throw e;
 		} catch (final Exception e) {
 			log.warn(e.getMessage());
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Unable to find user by sessionid: " + sessionId);
+			throw new IcatException(IcatException.IcatExceptionType.SESSION,
+					"Unable to find user by sessionid: " + sessionId);
 		}
 	}
 
@@ -94,22 +99,26 @@ public class LdapUser implements org.icatproject.core.user.User {
 	public String getUserIdFromSessionId(String sessionId) throws IcatException {
 		log.trace("getUserIdFromSessionId(" + sessionId + ")");
 		if (sessionId == null || sessionId.equals("")) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "LdapSession Id cannot be null or empty.");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION,
+					"LdapSession Id cannot be null or empty.");
 		}
 
 		try {
-			final LdapSession session = (LdapSession) this.manager.createNamedQuery("LdapSession.findByUserSessionId")
+			final LdapSession session = (LdapSession) this.manager
+					.createNamedQuery("LdapSession.findByUserSessionId")
 					.setParameter("userSessionId", sessionId).getSingleResult();
 			session.checkValid();
 			log.debug("user: " + session.getRunAs() + " is associated with: " + sessionId);
 			return session.getRunAs();
 		} catch (final NoResultException e) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Invalid sessionid: " + sessionId);
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Invalid sessionid: "
+					+ sessionId);
 		} catch (IcatException e) {
 			throw e;
 		} catch (final Exception e) {
 			log.warn(e.getMessage());
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Unable to find user by sessionid: " + sessionId);
+			throw new IcatException(IcatException.IcatExceptionType.SESSION,
+					"Unable to find user by sessionid: " + sessionId);
 		}
 	}
 
@@ -119,12 +128,14 @@ public class LdapUser implements org.icatproject.core.user.User {
 	}
 
 	@Override
-	public String login(String username, String password, HttpServletRequest req) throws IcatException {
+	public String login(String username, String password, HttpServletRequest req)
+			throws IcatException {
 		return this.login(username, password, 2, req); // 2 hours
 	}
 
 	@Override
-	public String login(String username, String password, int lifetime, HttpServletRequest req) throws IcatException {
+	public String login(String username, String password, int lifetime, HttpServletRequest req)
+			throws IcatException {
 		log.trace("login(" + username + ", *********, " + lifetime + ")");
 		if (icatException != null) {
 			throw icatException;
@@ -138,25 +149,29 @@ public class LdapUser implements org.icatproject.core.user.User {
 		log.trace("Entitity Manager is " + manager);
 		log.info("Checking password against database");
 		try {
-			LdapUserE user = (LdapUserE) this.manager
-					.createNamedQuery("LdapUserE.findByUserId").setParameter("userId", username).getSingleResult();
+			LdapUserE user = (LdapUserE) this.manager.createNamedQuery("LdapUserE.findByUserId")
+					.setParameter("userId", username).getSingleResult();
 			if (!user.getPassword().equals(password)) {
-				throw new IcatException(IcatException.IcatExceptionType.SESSION, "Username and password do not match");
+				throw new IcatException(IcatException.IcatExceptionType.SESSION,
+						"Username and password do not match");
 			}
 			if (anstoAddressChecker != null) {
 				if (!anstoAddressChecker.check(req.getRemoteAddr())) {
 					throw new IcatException(IcatException.IcatExceptionType.SESSION,
-							"You may not log in by 'ansto' from your IP address " + req.getRemoteAddr());
+							"You may not log in by 'ansto' from your IP address "
+									+ req.getRemoteAddr());
 				}
 			}
 		} catch (final NoResultException e) {
 			if (!ldapAuthenticator.authenticate(username, password)) {
-				throw new IcatException(IcatException.IcatExceptionType.SESSION, "Username and password do not match");
+				throw new IcatException(IcatException.IcatExceptionType.SESSION,
+						"Username and password do not match");
 			}
 			if (ldapAddressChecker != null) {
 				if (!ldapAddressChecker.check(req.getRemoteAddr())) {
 					throw new IcatException(IcatException.IcatExceptionType.SESSION,
-							"You may not log in by 'ldap' from your IP address " + req.getRemoteAddr());
+							"You may not log in by 'ldap' from your IP address "
+									+ req.getRemoteAddr());
 				}
 			}
 		} catch (IcatException e) {
@@ -164,7 +179,8 @@ public class LdapUser implements org.icatproject.core.user.User {
 			throw e;
 		} catch (final Exception e) {
 			log.trace("Unexpected problem " + e.getMessage());
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Unexpected problem " + e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Unexpected problem "
+					+ e.getMessage());
 		}
 
 		final LdapSession session = newSession(username, lifetime);
@@ -177,19 +193,6 @@ public class LdapUser implements org.icatproject.core.user.User {
 		LoginInterceptor.sendLoginMessage(sid, username, loginTime);
 
 		return sid;
-	}
-
-	@Override
-	public String login(String adminUsername, String dummy, String runAsUser) {
-		log.trace("login(admin, *********, " + runAsUser + ")");
-
-		final LdapSession session = newSession(runAsUser, 2);
-		this.manager.persist(session);
-		String sid = session.getUserSessionId();
-		log.info("Logged in for user: " + runAsUser + " running as  " + runAsUser + " with sessionid:" + sid);
-
-		return sid;
-
 	}
 
 	private LdapSession newSession(String effectiveUser, int lifetime) {
@@ -206,7 +209,8 @@ public class LdapUser implements org.icatproject.core.user.User {
 	public boolean logout(String sessionId) {
 		log.trace("logout(" + sessionId + ")");
 		try {
-			final LdapSession session = (LdapSession) this.manager.createNamedQuery("LdapSession.findByUserSessionId")
+			final LdapSession session = (LdapSession) this.manager
+					.createNamedQuery("LdapSession.findByUserSessionId")
 					.setParameter("userSessionId", sessionId).getSingleResult();
 			this.manager.remove(session);
 			return true;

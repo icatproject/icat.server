@@ -2,7 +2,6 @@ package org.icatproject.exposed.user;
 
 import javax.ejb.Local;
 
-import org.icatproject.core.IcatException;
 import org.icatproject.core.user.User;
 
 /**
@@ -12,7 +11,5 @@ import org.icatproject.core.user.User;
 public interface UserSessionLocal extends User {
 
 	public abstract boolean isSessionValid(String sessionId);
-
-	public abstract String loginAdmin(String sessionId, String runAsUserFedId) throws IcatException;
 
 }

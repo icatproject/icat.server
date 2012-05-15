@@ -23,11 +23,13 @@ public class UserManager implements User {
 		return user.getUserIdFromSessionId(sessionId);
 	}
 
-	public String login(String username, String password, HttpServletRequest req) throws IcatException {
+	public String login(String username, String password, HttpServletRequest req)
+			throws IcatException {
 		return user.login(username, password, req);
 	}
 
-	public String login(String username, String password, int lifetime, HttpServletRequest req) throws IcatException {
+	public String login(String username, String password, int lifetime, HttpServletRequest req)
+			throws IcatException {
 		return user.login(username, password, lifetime, req);
 	}
 
@@ -60,10 +62,6 @@ public class UserManager implements User {
 			log.error(e);
 		}
 		return object;
-	}
-
-	public String login(String adminUsername, String adminPassword, String runAsUser) throws IcatException {
-		return this.user.login(adminUsername, adminPassword, runAsUser);
 	}
 
 	public String login(String credential) throws IcatException {

@@ -32,7 +32,6 @@ import org.icatproject.core.user.UserDetails;
 import org.icatproject.core.user.UserManager;
 import org.icatproject.exposed.EJBObject;
 
-
 @Stateless(mappedName = "UserSession")
 @PermitAll
 // requires new transaction for each method call
@@ -64,7 +63,8 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal, User
 
 	@WebMethod()
 	@ExcludeClassInterceptors
-	public String login(String username, String password, HttpServletRequest req) throws IcatException {
+	public String login(String username, String password, HttpServletRequest req)
+			throws IcatException {
 		log.trace("login(" + username + ", *******)");
 		UserManager userManager = new UserManager(authClassName, managerUser);
 		return userManager.login(username, password, req);
@@ -74,7 +74,8 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal, User
 	@ExcludeClassInterceptors
 	@RequestWrapper(className = "uk.icat3.sessionbeans.user.jaxws.loginLifetime")
 	@ResponseWrapper(className = "uk.icat3.sessionbeans.user.jaxws.loginLifetimeResponse")
-	public String login(String username, String password, int lifetime, HttpServletRequest req) throws IcatException {
+	public String login(String username, String password, int lifetime, HttpServletRequest req)
+			throws IcatException {
 		log.trace("login(" + username + ", *******, " + lifetime + ")");
 		UserManager userManager = new UserManager(authClassName, managerUser);
 		return userManager.login(username, password, lifetime, req);
@@ -88,16 +89,6 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal, User
 		UserManager userManager = new UserManager(authClassName, managerUser);
 
 		return userManager.login(credential);
-	}
-
-	@WebMethod(operationName = "loginAdmin")
-	@ExcludeClassInterceptors
-	@RequestWrapper(className = "uk.icat3.sessionbeans.user.jaxws.loginAdmin")
-	@ResponseWrapper(className = "uk.icat3.sessionbeans.user.jaxws.loginAdminResponse")
-	public String login(String username, String password, String runAs) throws IcatException {
-		log.trace("login(" + username + ", *******, " + runAs + ")");
-		UserManager userManager = new UserManager(authClassName, managerUser);
-		return userManager.login(username, password, runAs);
 	}
 
 	@WebMethod()
@@ -135,13 +126,5 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal, User
 		} catch (Exception e) {
 			return false;
 		}
-	}
-
-	@Override
-	public String loginAdmin(String sessionId, String runAs) throws IcatException {
-		if (!ADMIN.equals(getUserIdFromSessionId(sessionId))) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "You must be logged in as " + ADMIN + " to do this");
-		}
-		return login(ADMIN, null, runAs);
 	}
 }

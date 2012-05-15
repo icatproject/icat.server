@@ -148,19 +148,6 @@ public class AnstoUser implements org.icatproject.core.user.User {
 		return sid;
 	}
 
-	@Override
-	public String login(String adminUsername, String dummy, String runAsUser) {
-		log.trace("login(admin, *********, " + runAsUser + ")");
-
-		final Session session = newSession(runAsUser, 2);
-		this.manager.persist(session);
-		String sid = session.getUserSessionId();
-		log.info("Logged in for user: " + runAsUser + " running as  " + runAsUser + " with sessionid:" + sid);
-
-		return sid;
-
-	}
-
 	private Session newSession(String effectiveUser, int lifetime) {
 		final String sid = UUID.randomUUID().toString();
 
