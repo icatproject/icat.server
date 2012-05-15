@@ -115,16 +115,18 @@ public interface User {
 	public String login(String credential) throws IcatException;
 
 	/**
-	 * Removes sessionId authentication token from user database which effectively logs user out of
-	 * the system. Any further attempt to use the icat3 api with an 'old' sessionId will fail as it
-	 * will no longer exist in the user database. Any potential exceptions that could be raised
-	 * should be suppressed e.g. logging out a user who is already logged out.
+	 * Removes sessionId authentication token from user database which
+	 * effectively logs user out of the system. Any further attempt to use the
+	 * icat3 api with an 'old' sessionId will fail as it will no longer exist in
+	 * the user database. Any potential exceptions that could be raised should
+	 * be suppressed e.g. logging out a user who is already logged out.
 	 * 
 	 * @param sessionId
 	 *            authentication token obtained on successful login
 	 * @return boolean if logged out
+	 * @throws IcatException
 	 */
-	public boolean logout(String sessionId);
+	public boolean logout(String sessionId) throws IcatException;
 
 	/**
 	 * Returns a serializable object that contains personal details of a requested <code>user</code>

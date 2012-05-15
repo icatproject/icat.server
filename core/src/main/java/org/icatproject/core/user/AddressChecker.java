@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.icatproject.core.IcatException;
 
-
 public class AddressChecker {
 
 	enum IP {
@@ -24,8 +23,7 @@ public class AddressChecker {
 				ip = IP.IP4;
 				String[] sections = add.split("\\.");
 				if (sections.length != 4) {
-					throw new IcatException(IcatException.Type.INTERNAL,
-							"IP4 addresses must have 4 parts");
+					throw new IcatException(IcatException.Type.INTERNAL, "IP4 addresses must have 4 parts");
 				}
 				number = new BigInteger(sections[0]);
 				for (int i = 1; i < 4; i++) {
@@ -35,8 +33,7 @@ public class AddressChecker {
 				ip = IP.IP6;
 				String[] sections = add.split(":");
 				if (sections.length != 8) {
-					throw new IcatException(IcatException.Type.INTERNAL,
-							"IP6 addresses must have 8 parts");
+					throw new IcatException(IcatException.Type.INTERNAL, "IP6 addresses must have 8 parts");
 				}
 				number = new BigInteger(sections[0], 16);
 				for (int i = 1; i < 8; i++) {
@@ -72,8 +69,7 @@ public class AddressChecker {
 				ip = IP.IP4;
 				String[] sections = add.split("\\.");
 				if (sections.length != 4) {
-					throw new IcatException(IcatException.Type.INTERNAL, prefix
-							+ "IP4 addresses must have 4 parts");
+					throw new IcatException(IcatException.Type.INTERNAL, prefix + "IP4 addresses must have 4 parts");
 				}
 				number = new BigInteger(sections[0]);
 				for (int i = 1; i < 4; i++) {
@@ -87,8 +83,7 @@ public class AddressChecker {
 				ip = IP.IP6;
 				String[] sections = add.split(":");
 				if (sections.length != 8) {
-					throw new IcatException(IcatException.Type.INTERNAL, prefix
-							+ "IP6 addresses must have 8 parts");
+					throw new IcatException(IcatException.Type.INTERNAL, prefix + "IP6 addresses must have 8 parts");
 				}
 				number = new BigInteger(sections[0], 16);
 				for (int i = 1; i < 8; i++) {

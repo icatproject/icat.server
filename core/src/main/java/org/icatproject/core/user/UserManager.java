@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
-
 public class UserManager implements User {
 
 	static Logger log = Logger.getLogger(UserManager.class);
@@ -24,17 +23,15 @@ public class UserManager implements User {
 		return user.getUserIdFromSessionId(sessionId);
 	}
 
-	public String login(String username, String password, HttpServletRequest req)
-			throws IcatException {
+	public String login(String username, String password, HttpServletRequest req) throws IcatException {
 		return user.login(username, password, req);
 	}
 
-	public String login(String username, String password, int lifetime, HttpServletRequest req)
-			throws IcatException {
+	public String login(String username, String password, int lifetime, HttpServletRequest req) throws IcatException {
 		return user.login(username, password, lifetime, req);
 	}
 
-	public boolean logout(String sessionId) {
+	public boolean logout(String sessionId) throws IcatException {
 		return user.logout(sessionId);
 	}
 
@@ -65,8 +62,7 @@ public class UserManager implements User {
 		return object;
 	}
 
-	public String login(String adminUsername, String adminPassword, String runAsUser)
-			throws IcatException {
+	public String login(String adminUsername, String adminPassword, String runAsUser) throws IcatException {
 		return this.user.login(adminUsername, adminPassword, runAsUser);
 	}
 
