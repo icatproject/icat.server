@@ -119,7 +119,7 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 	private void fixup() throws IcatException {
 		this.crudFlags = this.crudFlags.toUpperCase().trim();
 		if (this.crudFlags.isEmpty()) {
-			throw new IcatException(IcatException.Type.BAD_PARAMETER, "CrudFlags is empty");
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "CrudFlags is empty");
 		}
 		for (int i = 0; i < this.crudFlags.length(); i++) {
 			final char ch = this.crudFlags.charAt(i);
@@ -132,7 +132,7 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 			} else if (ch == 'D') {
 				this.d = true;
 			} else {
-				throw new IcatException(IcatException.Type.BAD_PARAMETER, "CrudFlags value "
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "CrudFlags value "
 						+ this.crudFlags + " contains " + ch);
 			}
 		}
@@ -141,14 +141,14 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 		try {
 			tokens = Tokenizer.getTokens(this.what);
 		} catch (final LexerException e) {
-			throw new IcatException(IcatException.Type.BAD_PARAMETER, e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
 		final Input input = new Input(tokens);
 		RestrictedBean r;
 		try {
 			r = new RestrictedBean(input);
 		} catch (final ParserException e) {
-			throw new IcatException(IcatException.Type.BAD_PARAMETER, e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
 		this.crudJPQL = r.getQuery();
 		this.bean = r.getBean();
@@ -166,7 +166,7 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 				} else if (datatype.equals("CALLARGS")) {
 					this.argsWanted = true;
 				} else {
-					throw new IcatException(IcatException.Type.BAD_PARAMETER, "Datatypes value "
+					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "Datatypes value "
 							+ this.datatypes + " contains " + datatype);
 				}
 			}
@@ -175,7 +175,7 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 			for (final String jmsOption : this.jmsOptions.toUpperCase().split("\\s+")) {
 				if (jmsOption.equals("PTP")) {
 				} else {
-					throw new IcatException(IcatException.Type.BAD_PARAMETER, "JmsOptions value "
+					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "JmsOptions value "
 							+ this.jmsOptions + " contains " + jmsOption);
 				}
 			}

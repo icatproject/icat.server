@@ -137,11 +137,11 @@ public class EntityInfoHandler {
 				final Class<? extends EntityBaseBean> eklass = (Class<? extends EntityBaseBean>) klass;
 				return eklass;
 			} else {
-				throw new IcatException(IcatException.Type.BAD_PARAMETER, name
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, name
 						+ " is not an EntityBaseBean");
 			}
 		} catch (final ClassNotFoundException e) {
-			throw new IcatException(IcatException.Type.BAD_PARAMETER, name
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, name
 					+ " is not known to the class loader");
 		}
 	}
@@ -185,12 +185,12 @@ public class EntityInfoHandler {
 		}
 		for (final Field field : fields) {
 			if (field.getAnnotation(EmbeddedId.class) != null) {
-				throw new IcatException(IcatException.Type.INTERNAL,
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"@EmbeddedId annotation is not permitted" + objectClass.getSimpleName());
 			}
 		}
 		if (c != 1) {
-			throw new IcatException(IcatException.Type.INTERNAL, "Unable to determine key for "
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Unable to determine key for "
 					+ objectClass.getSimpleName());
 		}
 
@@ -202,12 +202,12 @@ public class EntityInfoHandler {
 				if (oneToMany != null) {
 					all = Arrays.asList(oneToMany.cascade()).contains(CascadeType.ALL);
 					if (!all && oneToMany.cascade().length != 0) {
-						throw new IcatException(IcatException.Type.INTERNAL,
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 								"Cascade must be all or nothing " + objectClass.getSimpleName()
 										+ "." + field.getName());
 					}
 				} else {
-					throw new IcatException(IcatException.Type.INTERNAL,
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 							"Looks like a one to many relationship but not marked as such "
 									+ objectClass.getSimpleName() + "." + field.getName());
 				}
@@ -230,12 +230,12 @@ public class EntityInfoHandler {
 				if (manyToOne != null) {
 					all = Arrays.asList(manyToOne.cascade()).contains(CascadeType.ALL);
 					if (!all && manyToOne.cascade().length != 0) {
-						throw new IcatException(IcatException.Type.INTERNAL,
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 								"Cascade must be all or nothing " + objectClass.getSimpleName()
 										+ "." + field.getName());
 					}
 				} else {
-					throw new IcatException(IcatException.Type.INTERNAL,
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 							"Looks like a many to one relationship but not marked as such "
 									+ objectClass.getSimpleName() + "." + field.getName());
 				}
@@ -322,7 +322,7 @@ public class EntityInfoHandler {
 				try {
 					method = objc.getMethod("is" + prop, types);
 				} catch (final Exception e1) {
-					throw new IcatException(IcatException.Type.INTERNAL, "" + e);
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
 				}
 			}
 			getters.put(field, method);
@@ -331,13 +331,13 @@ public class EntityInfoHandler {
 				for (final Method m : objc.getDeclaredMethods()) {
 					if (m.getName().equals("set" + prop)) {
 						if (setters.put(field, m) != null) {
-							throw new IcatException(IcatException.Type.INTERNAL, "set" + prop
+							throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "set" + prop
 									+ " is ambiguous");
 						}
 					}
 				}
 				if (setters.get(field) == null) {
-					throw new IcatException(IcatException.Type.INTERNAL, "set" + prop
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "set" + prop
 							+ " not found for " + objc.getSimpleName());
 				}
 			}
@@ -357,7 +357,7 @@ public class EntityInfoHandler {
 
 					Field col = dbCols.get(colNam);
 					if (col == null) {
-						throw new IcatException(IcatException.Type.INTERNAL, "Column " + colNam
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Column " + colNam
 								+ " mentioned in UniqueConstraint of "
 								+ objectClass.getSimpleName() + " table is not present in entity");
 					}
@@ -611,7 +611,7 @@ public class EntityInfoHandler {
 			beanClass = (Class<? extends EntityBaseBean>) Class.forName(Constants.ENTITY_PREFIX
 					+ beanName);
 		} catch (ClassNotFoundException e) {
-			throw new IcatException(IcatException.Type.BAD_PARAMETER, beanName
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, beanName
 					+ " is not an ICAT entity");
 		}
 		EntityInfo entityInfo = new EntityInfo();

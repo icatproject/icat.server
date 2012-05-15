@@ -26,7 +26,7 @@ public class DatafileManager {
 			// check DataFile exist
 			Datafile dataFile = manager.find(Datafile.class, dataFileId);
 			if (dataFile == null) {
-				throw new IcatException(IcatException.Type.NO_SUCH_OBJECT_FOUND, "Datafile [id:"
+				throw new IcatException(IcatException.IcatExceptionType.NO_SUCH_OBJECT_FOUND, "Datafile [id:"
 						+ dataFileId + "] not found.");
 			}
 

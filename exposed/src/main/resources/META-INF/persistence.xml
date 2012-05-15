@@ -6,47 +6,47 @@
 	<persistence-unit name="icat"
 		transaction-type="JTA">
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-		<jta-data-source>jdbc/icat3</jta-data-source>
-		<class>uk.icat3.entity.Publication</class>
-		<class>uk.icat3.entity.Facility</class>
-		<class>uk.icat3.entity.Sample</class>
-		<class>uk.icat3.entity.SampleType</class>
-		<class>uk.icat3.entity.Investigation</class>
-		<class>uk.icat3.entity.Dataset</class>
-		<class>uk.icat3.entity.InvestigationType</class>
-		<class>uk.icat3.entity.DatafileFormat</class>
-		<class>uk.icat3.entity.Shift</class>
-		<class>uk.icat3.entity.Keyword</class>
-		<class>uk.icat3.entity.DatasetType</class>
-		<class>uk.icat3.entity.FacilityCycle</class>
-		<class>uk.icat3.entity.StudyInvestigation</class>
-		<class>uk.icat3.entity.DatasetParameter</class>
-		<class>uk.icat3.entity.PermissibleStringValue</class>
-		<class>uk.icat3.entity.Instrument</class>
-		<class>uk.icat3.entity.RelatedDatafile</class>
-		<class>uk.icat3.entity.StudyStatus</class>
-		<class>uk.icat3.entity.SampleParameter</class>
-		<class>uk.icat3.entity.Datafile</class>
-		<class>uk.icat3.entity.ParameterType</class>
-		<class>uk.icat3.entity.FacilityUser</class>
-		<class>uk.icat3.entity.InvestigationUser</class>
-		<class>uk.icat3.entity.Study</class>
-		<class>uk.icat3.entity.DatafileParameter</class>
-		<class>uk.icat3.entity.IcatAuthorisation</class>
-		<class>uk.icat3.entity.IcatRole</class>
-		<class>uk.icat3.entity.InstrumentScientist</class>
-		<class>uk.icat3.entity.UserGroup</class>
-		<class>uk.icat3.entity.Rule</class>
-		<class>uk.icat3.entity.User</class>
-		<class>uk.icat3.entity.Group</class>
-		<class>uk.icat3.entity.Application</class>
-		<class>uk.icat3.entity.Job</class>
-		<class>uk.icat3.entity.InputDataset</class>
-		<class>uk.icat3.entity.OutputDataset</class>
-		<class>uk.icat3.entity.InputDatafile</class>
-		<class>uk.icat3.entity.OutputDatafile</class>
-		<class>uk.icat3.entity.NotificationRequest</class>
-		<class>uk.icat3.entity.InvestigationParameter</class>
+		<jta-data-source>jdbc/icat</jta-data-source>
+		<class>org.icatproject.core.entity.Publication</class>
+		<class>org.icatproject.core.entity.Facility</class>
+		<class>org.icatproject.core.entity.Sample</class>
+		<class>org.icatproject.core.entity.SampleType</class>
+		<class>org.icatproject.core.entity.Investigation</class>
+		<class>org.icatproject.core.entity.Dataset</class>
+		<class>org.icatproject.core.entity.InvestigationType</class>
+		<class>org.icatproject.core.entity.DatafileFormat</class>
+		<class>org.icatproject.core.entity.Shift</class>
+		<class>org.icatproject.core.entity.Keyword</class>
+		<class>org.icatproject.core.entity.DatasetType</class>
+		<class>org.icatproject.core.entity.FacilityCycle</class>
+		<class>org.icatproject.core.entity.StudyInvestigation</class>
+		<class>org.icatproject.core.entity.DatasetParameter</class>
+		<class>org.icatproject.core.entity.PermissibleStringValue</class>
+		<class>org.icatproject.core.entity.Instrument</class>
+		<class>org.icatproject.core.entity.RelatedDatafile</class>
+		<class>org.icatproject.core.entity.StudyStatus</class>
+		<class>org.icatproject.core.entity.SampleParameter</class>
+		<class>org.icatproject.core.entity.Datafile</class>
+		<class>org.icatproject.core.entity.ParameterType</class>
+		<class>org.icatproject.core.entity.FacilityUser</class>
+		<class>org.icatproject.core.entity.InvestigationUser</class>
+		<class>org.icatproject.core.entity.Study</class>
+		<class>org.icatproject.core.entity.DatafileParameter</class>
+		<class>org.icatproject.core.entity.IcatAuthorisation</class>
+		<class>org.icatproject.core.entity.IcatRole</class>
+		<class>org.icatproject.core.entity.InstrumentScientist</class>
+		<class>org.icatproject.core.entity.UserGroup</class>
+		<class>org.icatproject.core.entity.Rule</class>
+		<class>org.icatproject.core.entity.User</class>
+		<class>org.icatproject.core.entity.Group</class>
+		<class>org.icatproject.core.entity.Application</class>
+		<class>org.icatproject.core.entity.Job</class>
+		<class>org.icatproject.core.entity.InputDataset</class>
+		<class>org.icatproject.core.entity.OutputDataset</class>
+		<class>org.icatproject.core.entity.InputDatafile</class>
+		<class>org.icatproject.core.entity.OutputDatafile</class>
+		<class>org.icatproject.core.entity.NotificationRequest</class>
+		<class>org.icatproject.core.entity.InvestigationParameter</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="eclipselink.target-server" value="SunAS9" />
@@ -61,11 +61,11 @@
 	<persistence-unit name="icatuser"
 		transaction-type="JTA">
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-		<jta-data-source>jdbc/icat3-user</jta-data-source>
-		<class>uk.icat3.useransto.entity.UserE</class>
-		<class>uk.icat3.useransto.entity.Session</class>
-		<class>uk.icat3.userldap.entity.LdapUserE</class>
-		<class>uk.icat3.userldap.entity.LdapSession</class>
+		<jta-data-source>jdbc/icatuser</jta-data-source>
+		<class>org.icatproject.useransto.entity.UserE</class>
+		<class>org.icatproject.useransto.entity.Session</class>
+		<class>org.icatproject.userldap.entity.LdapUserE</class>
+		<class>org.icatproject.userldap.entity.LdapSession</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="eclipselink.target-server" value="SunAS9" />

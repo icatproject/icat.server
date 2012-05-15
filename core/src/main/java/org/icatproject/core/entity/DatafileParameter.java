@@ -68,10 +68,10 @@ public class DatafileParameter extends Parameter implements Serializable {
 		super.preparePersist(modId, manager);
 		this.id = null;
 		if (type == null) {
-			throw new IcatException(IcatException.Type.VALIDATION, "Type of parameter is not set");
+			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
 		}
 		if (!type.isApplicableToDatafile()) {
-			throw new IcatException(IcatException.Type.VALIDATION, "Parameter of type "
+			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Parameter of type "
 					+ type.getName() + " is not applicable to a Datafile");
 		}
 	}

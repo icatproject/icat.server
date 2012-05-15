@@ -128,7 +128,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 			} else if (c == 'D') {
 				this.d = true;
 			} else {
-				throw new IcatException(IcatException.Type.BAD_PARAMETER, "CRUD value "
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "CRUD value "
 						+ this.crudFlags + " contains " + c);
 			}
 		}
@@ -137,14 +137,14 @@ public class Rule extends EntityBaseBean implements Serializable {
 		try {
 			tokens = Tokenizer.getTokens(this.what);
 		} catch (final LexerException e) {
-			throw new IcatException(IcatException.Type.BAD_PARAMETER, e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
 		final Input input = new Input(tokens);
 		RestrictedBean r;
 		try {
 			r = new RestrictedBean(input);
 		} catch (final ParserException e) {
-			throw new IcatException(IcatException.Type.BAD_PARAMETER, e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
 		if (r.getSearchWhere().isEmpty()) {
 			this.crudJPQL = null;

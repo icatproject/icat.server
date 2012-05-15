@@ -105,7 +105,7 @@ public class NotificationMessages {
 				try {
 					keyVal = m.invoke(bean);
 				} catch (final Exception e) {
-					throw new IcatException(IcatException.Type.INTERNAL, e.getMessage());
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
 				}
 				q.setParameter("pkid", keyVal);
 
@@ -159,7 +159,7 @@ public class NotificationMessages {
 			try {
 				keyVal = m.invoke(bean);
 			} catch (final Exception e) {
-				throw new IcatException(IcatException.Type.INTERNAL, e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
 			}
 			message.pk.put(key.getName(), (Serializable) keyVal);
 		}

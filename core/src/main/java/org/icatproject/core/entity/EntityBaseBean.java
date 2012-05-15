@@ -143,11 +143,11 @@ public abstract class EntityBaseBean implements Serializable {
 				logger.trace("Getter: " + method);
 				value = method.invoke(this, (Object[]) new Class[] {});
 			} catch (Exception e) {
-				throw new IcatException(IcatException.Type.INTERNAL, "" + e);
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
 			}
 
 			if (value == null) {
-				throw new IcatException(IcatException.Type.VALIDATION, this.getClass()
+				throw new IcatException(IcatException.IcatExceptionType.VALIDATION, this.getClass()
 						.getSimpleName() + ": " + field.getName() + " cannot be null.");
 			}
 		}
@@ -161,11 +161,11 @@ public abstract class EntityBaseBean implements Serializable {
 			try {
 				value = method.invoke(this, (Object[]) new Class[] {});
 			} catch (Exception e) {
-				throw new IcatException(IcatException.Type.INTERNAL, "" + e);
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
 			}
 			if (value != null) {
 				if (((String) value).length() > length) {
-					throw new IcatException(IcatException.Type.VALIDATION, getClass()
+					throw new IcatException(IcatException.IcatExceptionType.VALIDATION, getClass()
 							.getSimpleName()
 							+ ": "
 							+ field.getName()
@@ -206,11 +206,11 @@ public abstract class EntityBaseBean implements Serializable {
 		if (eiHandler.getKeytype(entityClass) != EntityInfoHandler.KeyType.GENERATED) {
 			Object primaryKey = this.getPK();
 			if (primaryKey == null) {
-				throw new IcatException(IcatException.Type.VALIDATION, entityClass.getSimpleName()
+				throw new IcatException(IcatException.IcatExceptionType.VALIDATION, entityClass.getSimpleName()
 						+ "[id:" + primaryKey + "] was null.");
 			}
 			if (manager.find(entityClass, primaryKey) != null) {
-				throw new IcatException(IcatException.Type.OBJECT_ALREDAY_EXISTS,
+				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS,
 						entityClass.getSimpleName() + "[id:" + primaryKey + "] already present.");
 			}
 		}
@@ -234,13 +234,13 @@ public abstract class EntityBaseBean implements Serializable {
 				try {
 					value = getters.get(f).invoke(this);
 				} catch (IllegalArgumentException e) {
-					throw new IcatException(IcatException.Type.INTERNAL,
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 							"IllegalArgumentException " + e.getMessage());
 				} catch (IllegalAccessException e) {
-					throw new IcatException(IcatException.Type.INTERNAL, "IllegalAccessException "
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalAccessException "
 							+ e.getMessage());
 				} catch (InvocationTargetException e) {
-					throw new IcatException(IcatException.Type.INTERNAL,
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 							"InvocationTargetException " + e.getMessage());
 				}
 				query = query.setParameter(f.getName(), value);
@@ -254,13 +254,13 @@ public abstract class EntityBaseBean implements Serializable {
 					try {
 						value = getters.get(f).invoke(this);
 					} catch (IllegalArgumentException e) {
-						throw new IcatException(IcatException.Type.INTERNAL,
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 								"IllegalArgumentException " + e.getMessage());
 					} catch (IllegalAccessException e) {
-						throw new IcatException(IcatException.Type.INTERNAL,
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 								"IllegalAccessException " + e.getMessage());
 					} catch (InvocationTargetException e) {
-						throw new IcatException(IcatException.Type.INTERNAL,
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 								"InvocationTargetException " + e.getMessage());
 					}
 					if (erm.length() == 0) {
@@ -270,7 +270,7 @@ public abstract class EntityBaseBean implements Serializable {
 					}
 					erm.append(f.getName() + " = '" + value + "'");
 				}
-				throw new IcatException(IcatException.Type.OBJECT_ALREDAY_EXISTS, erm.toString());
+				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS, erm.toString());
 			}
 		}
 	}

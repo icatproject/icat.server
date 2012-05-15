@@ -36,7 +36,7 @@ public class LdapSession implements Serializable {
 
 	public void checkValid() throws IcatException {
 		if (expireDateTime.before(new Date()))
-			throw new IcatException(IcatException.Type.SESSION, "LdapSession id:" + getUserSessionId() + " has expired");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "LdapSession id:" + getUserSessionId() + " has expired");
 	}
 
 	public LdapSession(String userSessionId, String runAs, Date expireDateTime) {

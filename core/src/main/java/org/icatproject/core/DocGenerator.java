@@ -25,7 +25,7 @@ public class DocGenerator {
 	public static void main(String[] args) {
 
 		try {
-			File dir = new File("src/main/java/uk/icat3/entity");
+			File dir = new File("src/main/java/org/icatproject/core/entity");
 			PrintWriter out = new PrintWriter(new File("icat.html"));
 			out.print("<!DOCTYPE HTML><html><head><style type=\"text/css\">h1,h2,h3 {color:sienna;} table { border-collapse:collapse; } td, th { border:1px solid sienna; padding:4px; font-weight:normal; text-align:left} th { color:sienna; }</style><title>ICAT Schema</title><link rel=\"icon\" href=\"http://www.icatproject.org/favicon.ico\"/></head><body><h1>ICAT Schema</h1>");
 			List<String> cnames = new ArrayList<String>();
@@ -58,7 +58,7 @@ public class DocGenerator {
 
 			for (String cname : cnames) {
 				out.print("<hr/><h2 id=\"" + cname + "\">" + cname + "</h2>");
-				Class<?> klass = Class.forName("uk.icat3.entity." + cname);
+				Class<?> klass = Class.forName("org.icatproject.core.entity." + cname);
 				@SuppressWarnings("unchecked")
 				Class<? extends EntityBaseBean> eklass = (Class<? extends EntityBaseBean>) klass;
 				String classComment = eiHandler.getClassComment(eklass);

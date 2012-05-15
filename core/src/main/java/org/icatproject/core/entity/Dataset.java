@@ -124,7 +124,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	public void canDelete(EntityManager manager) throws IcatException {
 		super.canDelete(manager);
 		if (!this.inputDatasets.isEmpty()) {
-			throw new IcatException(IcatException.Type.VALIDATION,
+			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
 					"Datasets may not be deleted while there are related InputDatasets");
 		}
 	}

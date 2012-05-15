@@ -36,7 +36,7 @@ public class Session implements Serializable {
 
 	public void checkValid() throws IcatException {
 		if (expireDateTime.before(new Date()))
-			throw new IcatException(IcatException.Type.SESSION, "Session id:" + getUserSessionId() + " has expired");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session id:" + getUserSessionId() + " has expired");
 	}
 
 	public Session(String userSessionId, String runAs, Date expireDateTime) {

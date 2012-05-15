@@ -102,7 +102,7 @@ public class GateKeeper {
 		try {
 			keyVal = m.invoke(object);
 		} catch (Exception e) {
-			throw new IcatException(IcatException.Type.INTERNAL, e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
 		}
 		for (String qString : sortedQueries) {
 			TypedQuery<Long> q = manager.createQuery(qString, Long.class);
@@ -118,7 +118,7 @@ public class GateKeeper {
 				logger.info("Operation denied by " + qString);
 			}
 		}
-		throw new IcatException(IcatException.Type.INSUFFICIENT_PRIVILEGES, access
+		throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES, access
 				+ " access to this " + objectClass.getSimpleName() + " is not allowed.");
 
 	}

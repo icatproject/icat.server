@@ -10,7 +10,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<uniqueVersion>false</uniqueVersion>
+		<uniqueVersion>true</uniqueVersion>
 	</properties>
 
 	<modules>

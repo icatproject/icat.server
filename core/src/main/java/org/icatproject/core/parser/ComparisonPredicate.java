@@ -66,7 +66,7 @@ public class ComparisonPredicate {
 			boolean two = value2.getType() == Token.Type.NAME
 					&& value1.getType() != Token.Type.NAME;
 			if (!one && !two) {
-				throw new IcatException(IcatException.Type.BAD_PARAMETER,
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 						"Attribute comparisons require one attribute name and one value: "
 								+ value1 + " " + compop + " " + value2);
 			}
@@ -85,7 +85,7 @@ public class ComparisonPredicate {
 			}
 		} else if (compop.getType() == Token.Type.IN) {
 			if (value1.getType() != Token.Type.NAME) {
-				throw new IcatException(IcatException.Type.BAD_PARAMETER,
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 						"\"IN\" comparisons require a name on the LHS rather than "
 								+ Tokenizer.getTypeToPrint(value1.getType()));
 			}
@@ -103,7 +103,7 @@ public class ComparisonPredicate {
 			sb.append(")");
 		} else {
 			if (value1.getType() != Token.Type.NAME) {
-				throw new IcatException(IcatException.Type.BAD_PARAMETER,
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 						"\"BETWEEN\" comparisons require a name on the LHS rather than "
 								+ Tokenizer.getTypeToPrint(value1.getType()));
 			}
@@ -136,7 +136,7 @@ public class ComparisonPredicate {
 				try {
 					tb.getSuperclass().getDeclaredField(val.split("\\.")[0]);
 				} catch (NoSuchFieldException e1) {
-					throw new IcatException(IcatException.Type.BAD_PARAMETER,"Field " + val + " of " + tb
+					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,"Field " + val + " of " + tb
 							+ " does not exist");
 				}
 			}

@@ -24,7 +24,7 @@ public class GetQuery {
 		this.include = new Include(input);
 		Token t;
 		if ((t = input.peek(0)) != null) {
-			throw new IcatException(IcatException.Type.BAD_PARAMETER,
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 					"Trailing tokens at end of query " + t + "...");
 		}
 

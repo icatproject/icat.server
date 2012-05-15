@@ -57,7 +57,7 @@ public class Application extends EntityBaseBean implements Serializable {
 	public void canDelete(EntityManager manager) throws IcatException  {
 		super.canDelete(manager);
 		if (!this.jobs.isEmpty()) {
-			throw new IcatException(IcatException.Type.VALIDATION, 
+			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, 
 					"Applications may not be deleted while there are related jobs");
 		}
 	}

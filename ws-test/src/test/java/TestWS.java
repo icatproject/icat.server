@@ -14,7 +14,6 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.icatproject.Application;
-import org.icatproject.BadParameterException_Exception;
 import org.icatproject.Constraint;
 import org.icatproject.Datafile;
 import org.icatproject.DatafileFormat;
@@ -26,6 +25,8 @@ import org.icatproject.EntityBaseBean;
 import org.icatproject.EntityField;
 import org.icatproject.EntityInfo;
 import org.icatproject.Facility;
+import org.icatproject.IcatExceptionType;
+import org.icatproject.IcatException_Exception;
 import org.icatproject.InputDatafile;
 import org.icatproject.InputDataset;
 import org.icatproject.Investigation;
@@ -33,7 +34,6 @@ import org.icatproject.InvestigationParameter;
 import org.icatproject.InvestigationType;
 import org.icatproject.Job;
 import org.icatproject.KeyType;
-import org.icatproject.NoSuchObjectFoundException_Exception;
 import org.icatproject.OutputDatafile;
 import org.icatproject.OutputDataset;
 import org.icatproject.ParameterType;
@@ -42,7 +42,6 @@ import org.icatproject.PermissibleStringValue;
 import org.icatproject.RelType;
 import org.icatproject.Sample;
 import org.icatproject.SampleParameter;
-import org.icatproject.ValidationException_Exception;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -262,7 +261,7 @@ public class TestWS {
 		assertEquals("Files", 2, ds.getDatafiles().size());
 		assertEquals("No params", 0, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
-		
+
 		results = session.search("Dataset INCLUDE Datafile, 1 [id = " + dsid + "]");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
@@ -270,7 +269,7 @@ public class TestWS {
 		assertEquals("Files", 2, ds.getDatafiles().size());
 		assertEquals("No params", 0, ds.getParameters().size());
 		assertNotNull("Inv", ds.getInvestigation());
-		
+
 		results = session.search("Dataset INCLUDE 1 [id = " + dsid + "]");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
@@ -457,8 +456,12 @@ public class TestWS {
 			ip.setNumericValue(40.);
 			session.create(ip);
 			fail("No throw");
-		} catch (ValidationException_Exception e) {
-			System.out.println(e.getMessage());
+		} catch (IcatException_Exception e) {
+			if (e.getFaultInfo().getType() == IcatExceptionType.VALIDATION) {
+				System.out.println(e.getMessage());
+			} else {
+				throw e;
+			}
 		}
 
 		ip.setNumericValue(60.);
@@ -468,8 +471,12 @@ public class TestWS {
 			ip.setNumericValue(30.);
 			session.update(ip);
 			fail("No throw");
-		} catch (ValidationException_Exception e) {
-			System.out.println(e.getMessage());
+		} catch (IcatException_Exception e) {
+			if (e.getFaultInfo().getType() == IcatExceptionType.VALIDATION) {
+				System.out.println(e.getMessage());
+			} else {
+				throw e;
+			}
 		}
 
 		ip.setNumericValue(70.);
@@ -501,9 +508,14 @@ public class TestWS {
 			ip.setStringValue("bad");
 			session.create(ip);
 			fail("No throw");
-		} catch (ValidationException_Exception e) {
-			assertEquals("Parameter of type UselessString is not applicable to an Investigation",
-					e.getMessage());
+		} catch (IcatException_Exception e) {
+			if (e.getFaultInfo().getType() == IcatExceptionType.VALIDATION) {
+				assertEquals(
+						"Parameter of type UselessString is not applicable to an Investigation",
+						e.getMessage());
+			} else {
+				throw e;
+			}
 		}
 	}
 
@@ -539,8 +551,12 @@ public class TestWS {
 			ip.setStringValue("bad");
 			session.create(ip);
 			fail("No throw");
-		} catch (ValidationException_Exception e) {
-			System.out.println(e.getMessage());
+		} catch (IcatException_Exception e) {
+			if (e.getFaultInfo().getType() == IcatExceptionType.VALIDATION) {
+				System.out.println(e.getMessage());
+			} else {
+				throw e;
+			}
 		}
 
 		ip.setStringValue("good1");
@@ -550,8 +566,12 @@ public class TestWS {
 			ip.setStringValue("worse");
 			session.update(ip);
 			fail("No throw");
-		} catch (ValidationException_Exception e) {
-			System.out.println(e.getMessage());
+		} catch (IcatException_Exception e) {
+			if (e.getFaultInfo().getType() == IcatExceptionType.VALIDATION) {
+				System.out.println(e.getMessage());
+			} else {
+				throw e;
+			}
 		}
 
 		ip.setStringValue("good2");
@@ -662,23 +682,33 @@ public class TestWS {
 		try {
 			session.get("Dataset", random.nextLong());
 			fail("No throw");
-		} catch (NoSuchObjectFoundException_Exception e) {
-			// Nothing to do
+		} catch (IcatException_Exception e) {
+			if (e.getFaultInfo().getType() != IcatExceptionType.NO_SUCH_OBJECT_FOUND) {
+				throw e;
+			}
 		}
+
 		try {
 			session.get("Dataset INCLUDE Investigator", dsId);
 			fail("No throw");
-		} catch (BadParameterException_Exception e) {
-			assertEquals("uk.icat3.entity.Investigator is not known to the class loader",
-					e.getMessage());
+		} catch (IcatException_Exception e) {
+			if (e.getFaultInfo().getType() == IcatExceptionType.BAD_PARAMETER) {
+				assertEquals("org.icatproject.core.entity.Investigator is not known to the class loader",
+						e.getMessage());
+			} else {
+				throw e;
+			}
 		}
 		try {
 			session.get("Dataset INCLUDE User", dsId);
 			fail("No throw");
-		} catch (BadParameterException_Exception e) {
-			assertEquals("Unable to reach User", e.getMessage());
+		} catch (IcatException_Exception e) {
+			if (e.getFaultInfo().getType() == IcatExceptionType.BAD_PARAMETER) {
+				assertEquals("Unable to reach User", e.getMessage());
+			} else {
+				throw e;
+			}
 		}
-
 	}
 
 	@Test

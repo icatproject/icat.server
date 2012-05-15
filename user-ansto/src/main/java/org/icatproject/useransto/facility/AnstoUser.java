@@ -36,7 +36,7 @@ public class AnstoUser implements org.icatproject.core.user.User {
 				anstoAddressChecker = new AddressChecker(authips);
 			}
 		} catch (Exception e) {
-			icatInternalException = new IcatException(IcatException.Type.INTERNAL, "Problem with "
+			icatInternalException = new IcatException(IcatException.IcatExceptionType.INTERNAL, "Problem with "
 					+ f.getAbsolutePath() + "  " + e.getMessage());
 			log.fatal("Problem with " + f.getAbsolutePath() + "  " + e.getMessage());
 		}
@@ -48,7 +48,7 @@ public class AnstoUser implements org.icatproject.core.user.User {
 	public UserDetails getUserDetails(String sessionId, String user) throws IcatException {
 		log.trace("getUserDetails(" + sessionId + ")");
 		if (sessionId == null || sessionId.equals("")) {
-			throw new IcatException(IcatException.Type.SESSION, "Session Id cannot be null or empty.");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session Id cannot be null or empty.");
 		}
 
 		try {
@@ -60,12 +60,12 @@ public class AnstoUser implements org.icatproject.core.user.User {
 			userDetails.setFederalId(session.getRunAs());
 			return userDetails;
 		} catch (final NoResultException e) {
-			throw new IcatException(IcatException.Type.SESSION, "Invalid sessionid: " + sessionId);
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Invalid sessionid: " + sessionId);
 		} catch (final IcatException e) {
 			throw e;
 		} catch (final Exception e) {
 			log.warn(e.getMessage());
-			throw new IcatException(IcatException.Type.SESSION, "Unable to find user by sessionid: " + sessionId);
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Unable to find user by sessionid: " + sessionId);
 		}
 	}
 
@@ -73,7 +73,7 @@ public class AnstoUser implements org.icatproject.core.user.User {
 	public String getUserIdFromSessionId(String sessionId) throws IcatException {
 		log.trace("getUserIdFromSessionId(" + sessionId + ")");
 		if (sessionId == null || sessionId.equals("")) {
-			throw new IcatException(IcatException.Type.SESSION, "Session Id cannot be null or empty.");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session Id cannot be null or empty.");
 		}
 
 		try {
@@ -83,12 +83,12 @@ public class AnstoUser implements org.icatproject.core.user.User {
 			log.debug("user: " + session.getRunAs() + " is associated with: " + sessionId);
 			return session.getRunAs();
 		} catch (final NoResultException e) {
-			throw new IcatException(IcatException.Type.SESSION, "Invalid sessionid: " + sessionId);
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Invalid sessionid: " + sessionId);
 		} catch (final IcatException e) {
 			throw e;
 		} catch (final Exception e) {
 			log.warn(e.getMessage());
-			throw new IcatException(IcatException.Type.SESSION, "Unable to find user by sessionid: " + sessionId);
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Unable to find user by sessionid: " + sessionId);
 		}
 	}
 
@@ -112,7 +112,7 @@ public class AnstoUser implements org.icatproject.core.user.User {
 		}
 		if (anstoAddressChecker != null) {
 			if (!anstoAddressChecker.check(req.getRemoteAddr())) {
-				throw new IcatException(IcatException.Type.SESSION, "You may not log in by 'ansto' from your IP address " + req.getRemoteAddr());
+				throw new IcatException(IcatException.IcatExceptionType.SESSION, "You may not log in by 'ansto' from your IP address " + req.getRemoteAddr());
 			}
 		}
 		if (username == null || username.equals("")) {
@@ -127,13 +127,13 @@ public class AnstoUser implements org.icatproject.core.user.User {
 			user = (UserE) this.manager.createNamedQuery("AnstoUser.findByUserId").setParameter("userId", username)
 					.getSingleResult();
 		} catch (final NoResultException e) {
-			throw new IcatException(IcatException.Type.SESSION, "Username and password do not match");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Username and password do not match");
 		} catch (final Exception e) {
 			log.trace("Unexpected problem " + e.getMessage());
-			throw new IcatException(IcatException.Type.SESSION, "Unexpected problem " + e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Unexpected problem " + e.getMessage());
 		}
 		if (!user.getPassword().equals(password)) {
-			throw new IcatException(IcatException.Type.SESSION, "Username and password do not match");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Username and password do not match");
 		}
 
 		final Session session = newSession(username, lifetime);

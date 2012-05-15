@@ -121,8 +121,8 @@ public class DownloadManager {
 		try {
 			dataset = (Dataset) BeanManager.get(userId, "Dataset INCLUDE Datafiles", datasetId, manager).getBean();
 		} catch (IcatException e) {
-			if (e.getType() == IcatException.Type.BAD_PARAMETER) {
-				e.setType(IcatException.Type.INTERNAL);
+			if (e.getType() == IcatException.IcatExceptionType.BAD_PARAMETER) {
+				e.setType(IcatException.IcatExceptionType.INTERNAL);
 			}
 			throw e;
 		}
@@ -257,8 +257,8 @@ public class DownloadManager {
 		try {
 			dataset = (Dataset) BeanManager.get(userId, "Dataset INCLUDE Datafiles", datasetId, manager).getBean();
 		} catch (IcatException e) {
-			if (e.getType() == IcatException.Type.BAD_PARAMETER) {
-				e.setType(IcatException.Type.INTERNAL);
+			if (e.getType() == IcatException.IcatExceptionType.BAD_PARAMETER) {
+				e.setType(IcatException.IcatExceptionType.INTERNAL);
 			}
 			throw e;
 		}

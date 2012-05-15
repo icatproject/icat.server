@@ -125,7 +125,7 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 
 	private void check(EntityManager manager) throws IcatException  {
 		if (type == null) {
-			throw new IcatException(IcatException.Type.VALIDATION, "Type of parameter is not set");
+			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
 		}
 		logger.debug("PreparePersist of type " + type.getName() + " " + type.isEnforced() + " "
 				+ type.getValueType());
@@ -139,11 +139,11 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 			Double min = type.getMinimumNumericValue();
 			Double max = type.getMaximumNumericValue();
 			if (min != null && numericValue < min) {
-				throw new IcatException(IcatException.Type.VALIDATION, "Parameter of type " + type.getName() + " has value "
+				throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Parameter of type " + type.getName() + " has value "
 						+ numericValue + " < " + min);
 			}
 			if (max != null && numericValue > max) {
-				throw new IcatException(IcatException.Type.VALIDATION, "Parameter of type " + type.getName() + " has value "
+				throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Parameter of type " + type.getName() + " has value "
 						+ numericValue + " > " + max);
 			}
 		} else if (pvt == ParameterValueType.STRING) {
@@ -154,7 +154,7 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 			List<String> values = manager.createNamedQuery("Parameter.psv", String.class)
 					.setParameter("tid", type.getId()).getResultList();
 			if (!values.isEmpty() && values.indexOf(stringValue) < 0) {
-				throw new IcatException(IcatException.Type.VALIDATION, "Parameter of type " + type.getName() + " has value "
+				throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Parameter of type " + type.getName() + " has value "
 						+ stringValue + " not in allowed set " + values);
 			}
 		}

@@ -172,7 +172,7 @@ public class SearchQuery {
 		sb.append(' ').append(this.getWhere());
 		if (restriction != null) {
 			if (restriction.length() == 0) {
-				throw new IcatException(IcatException.Type.INSUFFICIENT_PRIVILEGES,
+				throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
 						"Read access to this " + beanName + " is not allowed.");
 			}
 			sb.append(" AND(").append(restriction).append(")");

@@ -42,7 +42,7 @@ public class Include {
 		} else if (value.equals("1")) {
 			one = true;
 		} else {
-			throw new IcatException(IcatException.Type.BAD_PARAMETER,
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 					"Only integer value allowed in the INCLUDE list is 1");
 		}
 	}

@@ -89,7 +89,7 @@ public class DagHandler {
 				}
 				sb.append(bean.getSimpleName());
 			}
-			throw new IcatException(IcatException.Type.BAD_PARAMETER, "Unable to reach " + sb);
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "Unable to reach " + sb);
 
 		}
 		return step;
@@ -104,7 +104,7 @@ public class DagHandler {
 		for (Relationship relationship : navto) {
 			Class<? extends EntityBaseBean> bean = relationship.getBean();
 			if (used.contains(bean) && !bean.equals(predecessor)) {
-				throw new IcatException(IcatException.Type.BAD_PARAMETER,
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 						"Can't have loop in graph of entities " + bean + " was encountered twice");
 			}
 			if (allBeans.contains(bean) && !used.contains(bean)) {

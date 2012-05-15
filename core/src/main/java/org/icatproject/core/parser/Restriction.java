@@ -108,7 +108,7 @@ public class Restriction {
 			}
 		}
 		if (c != 1) {
-			throw new IcatException(IcatException.Type.BAD_PARAMETER,
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 					"Unable to determine key for " + tableName);
 		}
 		sb.append(')');

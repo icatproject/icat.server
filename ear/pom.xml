@@ -36,11 +36,6 @@
 			<type>jar</type>
 		</dependency>
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>co.uk.icat3</groupId> -->
-<!-- 			<artifactId>icat3-logging</artifactId> -->
-<!-- 			<type>ejb</type> -->
-<!-- 		</dependency> -->
 	</dependencies>
 
 
@@ -74,10 +69,11 @@
 					<executable>asadmin</executable>
 					<arguments>
 						<argument>--echo</argument>
+						<argument>--port=4840</argument>
 						<argument>deploy</argument>
 						<argument>--force=true</argument>
 						<argument>${project.build.directory}/${project.build.finalName}.ear</argument>
-					</arguments>
+				</arguments>
 				</configuration>
 			</plugin>
 		</plugins>
