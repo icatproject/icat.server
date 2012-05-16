@@ -57,4 +57,13 @@ public class Session implements Serializable {
 		return runAs;
 	}
 
+	public double getRemainingTimeMinutes() throws IcatException {
+		long millis = expireDateTime.getTime() - System.currentTimeMillis();
+		if (millis < 0) {
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session id:" + getUserSessionId()
+					+ " has expired");
+		}
+		return millis/60000.0;
+	}
+
 }

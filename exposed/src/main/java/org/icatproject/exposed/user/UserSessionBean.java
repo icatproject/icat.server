@@ -23,12 +23,9 @@ import javax.jws.WebMethod;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.ws.RequestWrapper;
-import javax.xml.ws.ResponseWrapper;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
-import org.icatproject.core.user.UserDetails;
 import org.icatproject.core.user.UserManager;
 import org.icatproject.exposed.EJBObject;
 
@@ -36,7 +33,7 @@ import org.icatproject.exposed.EJBObject;
 @PermitAll
 // requires new transaction for each method call
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-public class UserSessionBean extends EJBObject implements UserSessionLocal, UserSession {
+public class UserSessionBean extends EJBObject implements UserSessionLocal {
 
 	public static final String ADMIN = "root";
 
@@ -65,66 +62,28 @@ public class UserSessionBean extends EJBObject implements UserSessionLocal, User
 	@ExcludeClassInterceptors
 	public String login(String username, String password, HttpServletRequest req)
 			throws IcatException {
-		log.trace("login(" + username + ", *******)");
 		UserManager userManager = new UserManager(authClassName, managerUser);
 		return userManager.login(username, password, req);
 	}
 
-	@WebMethod(operationName = "loginLifetime")
-	@ExcludeClassInterceptors
-	@RequestWrapper(className = "uk.icat3.sessionbeans.user.jaxws.loginLifetime")
-	@ResponseWrapper(className = "uk.icat3.sessionbeans.user.jaxws.loginLifetimeResponse")
-	public String login(String username, String password, int lifetime, HttpServletRequest req)
-			throws IcatException {
-		log.trace("login(" + username + ", *******, " + lifetime + ")");
-		UserManager userManager = new UserManager(authClassName, managerUser);
-		return userManager.login(username, password, lifetime, req);
-	}
-
-	@WebMethod(operationName = "loginCredentials")
-	@RequestWrapper(className = "uk.icat3.sessionbeans.user.jaxws.loginCredentials")
-	@ResponseWrapper(className = "uk.icat3.sessionbeans.user.jaxws.loginCredentialsResponse")
-	public String login(String credential) throws IcatException {
-
-		UserManager userManager = new UserManager(authClassName, managerUser);
-
-		return userManager.login(credential);
-	}
-
 	@WebMethod()
-	public boolean logout(String sid) throws IcatException {
-		UserManager userManager;
-		try {
-			userManager = new UserManager(authClassName, managerUser);
-		} catch (IcatException e) {
-			if (e.getType() == IcatException.IcatExceptionType.SESSION) {
-				return false;
-			} else {
-				throw e;
-			}
-		}
-		return userManager.logout(sid);
-	}
-
-	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-	public String getUserIdFromSessionId(String sid) throws IcatException {
+	public void logout(String sid) throws IcatException {
 		UserManager userManager = new UserManager(authClassName, managerUser);
-		return userManager.getUserIdFromSessionId(sid);
+		userManager.logout(sid);
 	}
 
 	@WebMethod()
 	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-	public UserDetails getUserDetails(String sid, String user) throws IcatException {
+	public String getUserName(String sessionId) throws IcatException {
 		UserManager userManager = new UserManager(authClassName, managerUser);
-		return userManager.getUserDetails(sid, user);
+		return userManager.getUserName(sessionId);
 	}
 
-	public boolean isSessionValid(String sessionId) {
-		try {
-			this.getUserIdFromSessionId(sessionId);
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
+	@Override
+	@WebMethod()
+	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+	public double getRemainingMinutes(String sessionId) throws IcatException {
+		UserManager userManager = new UserManager(authClassName, managerUser);
+		return userManager.getRemainingMinutes(sessionId);
 	}
 }

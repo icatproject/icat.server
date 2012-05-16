@@ -670,7 +670,15 @@ public class TestWS {
 		sample.setName(sampleName);
 		inv.getSamples().add(sample);
 		return sample;
-
+	}
+	
+	@Test
+	public void compat() throws Exception {
+		session.clear();
+		create();
+		List<Investigation> invs = session.getMyInvestigations();
+		assertEquals(1, invs.size());
+		assertEquals("A", invs.get(0).getName());
 	}
 
 	@Test
@@ -693,7 +701,8 @@ public class TestWS {
 			fail("No throw");
 		} catch (IcatException_Exception e) {
 			if (e.getFaultInfo().getType() == IcatExceptionType.BAD_PARAMETER) {
-				assertEquals("org.icatproject.core.entity.Investigator is not known to the class loader",
+				assertEquals(
+						"org.icatproject.core.entity.Investigator is not known to the class loader",
 						e.getMessage());
 			} else {
 				throw e;

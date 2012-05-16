@@ -13,8 +13,6 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.ws.RequestWrapper;
-import javax.xml.ws.ResponseWrapper;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
@@ -54,7 +52,6 @@ import org.icatproject.core.entity.StudyInvestigation;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
 import org.icatproject.core.manager.EntityInfo;
-import org.icatproject.core.user.UserDetails;
 import org.icatproject.exposed.interceptor.LogoutInterceptor;
 import org.icatproject.exposed.manager.BeanManagerLocal;
 import org.icatproject.exposed.util.Constants;
@@ -147,38 +144,23 @@ public class ICAT extends ICATCompat {
 		return user.login(username, password, req);
 	}
 
-	@WebMethod(operationName = "loginLifetime")
-	@ExcludeClassInterceptors
-	@RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.loginLifetime")
-	@ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.loginLifetimeResponse")
-	public String login(@WebParam(name = "username") String username,
-			@WebParam(name = "password") String password, @WebParam(name = "lifetime") int lifetime)
-			throws IcatException {
-		MessageContext msgCtxt = webServiceContext.getMessageContext();
-		HttpServletRequest req = (HttpServletRequest) msgCtxt.get(MessageContext.SERVLET_REQUEST);
-		return user.login(username, password, lifetime, req);
-	}
 
 	@WebMethod
 	@Interceptors(LogoutInterceptor.class)
-	public boolean logout(@WebParam(name = "sessionId") String sessionId) throws IcatException {
-		return user.logout(sessionId);
+	public void logout(@WebParam(name = "sessionId") String sessionId) throws IcatException {
+		user.logout(sessionId);
 	}
 
-	@WebMethod(operationName = "getUserDetails")
-	public UserDetails getUserDetails(@WebParam(name = "sessionId") String sessionId,
+	@WebMethod
+	public String getUserName(@WebParam(name = "sessionId") String sessionId,
 			@WebParam(name = "usersName") String usersName) throws IcatException {
-		return this.user.getUserDetails(sessionId, usersName);
+		return this.user.getUserName(sessionId);
 
 	}
 
 	@WebMethod()
-	public boolean isSessionValid(@WebParam(name = "sessionId") String sessionId) {
-		try {
-			return this.user.isSessionValid(sessionId);
-		} catch (Exception e) {
-			return false;
-		}
+	public double getRemainingMinutes(@WebParam(name = "sessionId") String sessionId) throws IcatException {
+			return this.user.getRemainingMinutes(sessionId);
 	}
 
 	@WebMethod()

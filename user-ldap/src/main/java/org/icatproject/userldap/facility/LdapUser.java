@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.user.AddressChecker;
-import org.icatproject.core.user.UserDetails;
+
 import org.icatproject.userldap.entity.LdapSession;
 import org.icatproject.userldap.entity.LdapUserE;
 
@@ -67,37 +67,8 @@ public class LdapUser implements org.icatproject.core.user.User {
 	}
 
 	@Override
-	public UserDetails getUserDetails(String sessionId, String user) throws IcatException {
-		log.trace("getUserDetails(" + sessionId + ")");
-		if (sessionId == null || sessionId.equals("")) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION,
-					"LdapSession Id cannot be null or empty.");
-		}
-
-		try {
-			final LdapSession session = (LdapSession) this.manager
-					.createNamedQuery("LdapSession.findByUserSessionId")
-					.setParameter("userSessionId", sessionId).getSingleResult();
-			session.checkValid();
-			// TODO do we want to get rid of the getUserDetails call?
-			UserDetails userDetails = new UserDetails();
-			userDetails.setFederalId(session.getRunAs());
-			return userDetails;
-		} catch (final NoResultException e) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Invalid sessionid: "
-					+ sessionId);
-		} catch (final IcatException e) {
-			throw e;
-		} catch (final Exception e) {
-			log.warn(e.getMessage());
-			throw new IcatException(IcatException.IcatExceptionType.SESSION,
-					"Unable to find user by sessionid: " + sessionId);
-		}
-	}
-
-	@Override
-	public String getUserIdFromSessionId(String sessionId) throws IcatException {
-		log.trace("getUserIdFromSessionId(" + sessionId + ")");
+	public String getUserName(String sessionId) throws IcatException {
+		log.trace("getUserName(" + sessionId + ")");
 		if (sessionId == null || sessionId.equals("")) {
 			throw new IcatException(IcatException.IcatExceptionType.SESSION,
 					"LdapSession Id cannot be null or empty.");
@@ -123,20 +94,9 @@ public class LdapUser implements org.icatproject.core.user.User {
 	}
 
 	@Override
-	public String login(String credential) throws IcatException {
-		throw new UnsupportedOperationException("Method not supported.");
-	}
-
-	@Override
 	public String login(String username, String password, HttpServletRequest req)
 			throws IcatException {
-		return this.login(username, password, 2, req); // 2 hours
-	}
-
-	@Override
-	public String login(String username, String password, int lifetime, HttpServletRequest req)
-			throws IcatException {
-		log.trace("login(" + username + ", *********, " + lifetime + ")");
+		log.trace("login:" + username);
 		if (icatException != null) {
 			throw icatException;
 		}
@@ -183,7 +143,7 @@ public class LdapUser implements org.icatproject.core.user.User {
 					+ e.getMessage());
 		}
 
-		final LdapSession session = newSession(username, lifetime);
+		final LdapSession session = newSession(username, 2);
 		this.manager.persist(session);
 		String sid = session.getUserSessionId();
 		log.info("Logged in for user: " + username + " with sessionid:" + sid);
@@ -206,17 +166,32 @@ public class LdapUser implements org.icatproject.core.user.User {
 	}
 
 	@Override
-	public boolean logout(String sessionId) {
+	public void logout(String sessionId) throws IcatException {
 		log.trace("logout(" + sessionId + ")");
 		try {
 			final LdapSession session = (LdapSession) this.manager
 					.createNamedQuery("LdapSession.findByUserSessionId")
 					.setParameter("userSessionId", sessionId).getSingleResult();
 			this.manager.remove(session);
-			return true;
+			session.checkValid();
 		} catch (final NoResultException e) {
-			log.warn(sessionId + " not in DB");
-			return false;
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session id:"
+					+ sessionId + " has expired");
+
+		}
+	}
+
+	@Override
+	public double getRemainingMinutes(String sessionId) throws IcatException {
+		log.trace("getRemainingMinutes");
+		try {
+			final LdapSession session = (LdapSession) this.manager
+					.createNamedQuery("AnstoSession.findByUserSessionId")
+					.setParameter("userSessionId", sessionId).getSingleResult();
+			return session.getRemainingTimeMinutes();
+		} catch (final NoResultException e) {
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session id:"
+					+ sessionId + " has expired");
 		}
 	}
 

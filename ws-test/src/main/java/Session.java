@@ -413,4 +413,8 @@ class Session {
 
 	}
 
+	public List<Investigation> getMyInvestigations() throws IcatException_Exception {
+		return  this.icatEP.getMyInvestigations(this.sessionId);
+	}
+
 }

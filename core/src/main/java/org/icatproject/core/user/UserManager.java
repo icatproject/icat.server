@@ -19,26 +19,13 @@ public class UserManager implements User {
 		user = (org.icatproject.core.user.User) createObject(className, manager);
 	}
 
-	public String getUserIdFromSessionId(String sessionId) throws IcatException {
-		return user.getUserIdFromSessionId(sessionId);
-	}
-
 	public String login(String username, String password, HttpServletRequest req)
 			throws IcatException {
 		return user.login(username, password, req);
 	}
 
-	public String login(String username, String password, int lifetime, HttpServletRequest req)
-			throws IcatException {
-		return user.login(username, password, lifetime, req);
-	}
-
-	public boolean logout(String sessionId) throws IcatException {
-		return user.logout(sessionId);
-	}
-
-	public UserDetails getUserDetails(String sessionId, String user) throws IcatException {
-		return this.user.getUserDetails(sessionId, user);
+	public void logout(String sessionId) throws IcatException {
+		user.logout(sessionId);
 	}
 
 	private static Object createObject(String className, EntityManager manager) {
@@ -64,8 +51,13 @@ public class UserManager implements User {
 		return object;
 	}
 
-	public String login(String credential) throws IcatException {
-		return this.user.login(credential);
+	public String getUserName(String sessionId) throws IcatException {
+		return this.user.getUserName(sessionId);
+	}
+
+	@Override
+	public double getRemainingMinutes(String sessionId) throws IcatException {
+		return this.user.getRemainingMinutes(sessionId);
 	}
 
 }
