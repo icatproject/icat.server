@@ -1,6 +1,7 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -671,7 +672,7 @@ public class TestWS {
 		inv.getSamples().add(sample);
 		return sample;
 	}
-	
+
 	@Test
 	public void compat() throws Exception {
 		session.clear();
@@ -679,6 +680,13 @@ public class TestWS {
 		List<Investigation> invs = session.getMyInvestigations();
 		assertEquals(1, invs.size());
 		assertEquals("A", invs.get(0).getName());
+	}
+
+	@Test
+	public void login() throws Exception {
+		assertTrue(session.getRemainingMinutes() > 0);
+		assertEquals("4.1.0", session.getApiVersion());
+		assertEquals("root", session.getUserName());
 	}
 
 	@Test

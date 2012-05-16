@@ -186,7 +186,7 @@ public class LdapUser implements org.icatproject.core.user.User {
 		log.trace("getRemainingMinutes");
 		try {
 			final LdapSession session = (LdapSession) this.manager
-					.createNamedQuery("AnstoSession.findByUserSessionId")
+					.createNamedQuery("LdapSession.findByUserSessionId")
 					.setParameter("userSessionId", sessionId).getSingleResult();
 			return session.getRemainingTimeMinutes();
 		} catch (final NoResultException e) {

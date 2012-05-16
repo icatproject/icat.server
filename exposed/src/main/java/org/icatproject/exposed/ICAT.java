@@ -144,7 +144,6 @@ public class ICAT extends ICATCompat {
 		return user.login(username, password, req);
 	}
 
-
 	@WebMethod
 	@Interceptors(LogoutInterceptor.class)
 	public void logout(@WebParam(name = "sessionId") String sessionId) throws IcatException {
@@ -152,20 +151,19 @@ public class ICAT extends ICATCompat {
 	}
 
 	@WebMethod
-	public String getUserName(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "usersName") String usersName) throws IcatException {
+	public String getUserName(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		return this.user.getUserName(sessionId);
 
 	}
 
 	@WebMethod()
-	public double getRemainingMinutes(@WebParam(name = "sessionId") String sessionId) throws IcatException {
-			return this.user.getRemainingMinutes(sessionId);
+	public double getRemainingMinutes(@WebParam(name = "sessionId") String sessionId)
+			throws IcatException {
+		return this.user.getRemainingMinutes(sessionId);
 	}
 
 	@WebMethod()
-	public String getApiVersion(@WebParam(name = "sessionId") String sessionId)
-			throws IcatException {
+	public String getApiVersion() throws IcatException {
 		return Constants.API_VERSION;
 	}
 

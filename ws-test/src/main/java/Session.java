@@ -417,4 +417,16 @@ class Session {
 		return  this.icatEP.getMyInvestigations(this.sessionId);
 	}
 
+	public double getRemainingMinutes() throws IcatException_Exception {
+		return  this.icatEP.getRemainingMinutes(this.sessionId);
+	}
+
+	public String getApiVersion() throws IcatException_Exception {
+		return  this.icatEP.getApiVersion();
+	}
+
+	public String getUserName() throws IcatException_Exception {
+		return  this.icatEP.getUserName(this.sessionId);
+	}
+
 }
