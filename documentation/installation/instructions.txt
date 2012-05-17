@@ -1,0 +1,15 @@
+To deploy an ICAT you need to install:
+
+   a suitable container to support EJBs (e.g. glassfish 3)
+	 
+       Note that for a secure deployment of glassfish you should
+       obtain a trusted certificate rather than using the self-signed
+       one in the distribtion
+	 
+   a database system supported by elipselink (such as MySQL, Oracle or Derby)
+       
+       If you are using oracle obtain a copy of ojdbc14.jar and copy
+       it into the lib directory below the domain where you will
+       install icat. We are not allowed to distribute this jar file.
+
+
