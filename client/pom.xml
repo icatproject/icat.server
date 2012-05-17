@@ -11,9 +11,10 @@
 	<artifactId>icat.client</artifactId>
 	<packaging>jar</packaging>
 
-	<!-- <properties><wsdl>http://localhost:8080/ICATService/ICAT?wsdl</wsdl></properties> -->
 	<properties>
-		<wsdl>${basedir}/ICAT.wsdl</wsdl>
+		<wsdl1>${basedir}/ICAT.wsdl</wsdl1>
+		<wsdl2>${basedir}/ICATCompat.wsdl</wsdl2>
+
 	</properties>
 
 	<build>
@@ -24,16 +25,29 @@
 				<version>2.1</version>
 				<executions>
 					<execution>
+						<id>execution1</id>
 						<goals>
 							<goal>wsimport</goal>
 						</goals>
+						<configuration>
+							<wsdlUrls>
+								<wsdlUrl>${wsdl1}</wsdlUrl>
+							</wsdlUrls>
+						</configuration>
+					</execution>
+					<execution>
+						<id>execution2</id>
+						<goals>
+							<goal>wsimport</goal>
+						</goals>
+						<configuration>
+							<wsdlUrls>
+								<wsdlUrl>${wsdl2}</wsdlUrl>
+							</wsdlUrls>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<wsdlUrls>
-						<wsdlUrl>${wsdl}</wsdlUrl>
-					</wsdlUrls>
-				</configuration>
+
 			</plugin>
 
 			<plugin>

@@ -1,10 +1,15 @@
 package org.icatproject.exposed;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
+import javax.jws.WebService;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 
@@ -13,8 +18,18 @@ import org.icatproject.core.entity.Investigation;
 import org.icatproject.exposed.compatibility.AdvancedSearchDetails;
 import org.icatproject.exposed.manager.BeanManagerLocal;
 
-
+@Stateless
+@WebService(targetNamespace = "client.icat3.uk")
+@TransactionAttribute(value = TransactionAttributeType.REQUIRED)
 public class ICATCompat extends EJBObject {
+
+	@SuppressWarnings("serial")
+	public class SessionException extends Exception {
+
+		public SessionException(IcatException icatException) {
+			super(icatException.getMessage());
+		}
+	}
 
 	@EJB
 	private BeanManagerLocal beanManagerLocal;
@@ -35,103 +50,79 @@ public class ICATCompat extends EJBObject {
 	}
 
 	/**
-	 * This gets all the keywords available to the user, they can only see
-	 * keywords associated with their investigations or public investigations
-	 * 
-	 * @param sessionId
-	 *            federalId of the user.
-	 * @return list of keywords
-	 * @throws uk.icat3.exceptions.SessionException
-	 * @throws InsufficientPrivilegesException
-	 * @throws BadParameterException
-	 * @throws IcatInternalException
+	 * This gets all the keywords available to the user, they can only see keywords associated with
+	 * their investigations or public investigations
 	 */
 	@SuppressWarnings("unchecked")
 	@WebMethod
-	public List<String> getKeywordsForUser(@WebParam(name = "sessionId") String sessionId) throws IcatException {
-		return (List<String>) this.beanManagerLocal.search(sessionId, "DISTINCT Keyword.name");
+	public Collection<String> getKeywordsForUser(@WebParam(name = "sessionId") String sessionId)
+			throws SessionException {
+		try {
+			return (List<String>) this.beanManagerLocal.search(sessionId, "DISTINCT Keyword.name");
+		} catch (IcatException e) {
+			throw new SessionException(e);
+		}
 	}
 
 	/**
 	 * This gets all the keywords available to the user - limited by count
-	 * 
-	 * @param sessionId
-	 *            federalId of the user.
-	 * @param numberReturned
-	 *            number of results found returned
-	 * @return list of keywords
-	 * @throws uk.icat3.exceptions.SessionException
-	 * @throws InsufficientPrivilegesException
-	 * @throws BadParameterException
-	 * @throws IcatInternalException
 	 */
 	@SuppressWarnings("unchecked")
 	@WebMethod(operationName = "getKeywordsForUserMax")
 	@RequestWrapper(className = "uk.icat3.sessionbeans.jaxws.getKeywordsForUserMax")
 	@ResponseWrapper(className = "uk.icat3.sessionbeans.jaxws.getKeywordsForUserMaxResponse")
-	public List<String> getKeywordsForUser(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "limit") int limit) throws IcatException {
-		return (List<String>) this.beanManagerLocal.search(sessionId, "0," + limit + " DISTINCT Keyword.name");
+	public Collection<String> getKeywordsForUser(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "limit") int limit) throws SessionException {
+		try {
+			return (List<String>) this.beanManagerLocal.search(sessionId, "0," + limit
+					+ " DISTINCT Keyword.name");
+		} catch (IcatException e) {
+			throw new SessionException(e);
+		}
 	}
 
 	/**
-	 * Lists all the investigations for the current user, ie who he is an
-	 * investigator of
-	 * 
-	 * @param sessionId
-	 * @throws uk.icat3.exceptions.SessionException
-	 *             if the session id is invalid
-	 * @return collection
-	 * @throws IcatInternalException
-	 * @throws InsufficientPrivilegesException
-	 * @throws BadParameterException
+	 * Lists all the investigations for the current user, ie who he is an investigator of
 	 */
 	@SuppressWarnings("unchecked")
 	@WebMethod
-	public List<Investigation> getMyInvestigations(@WebParam(name = "sessionId") String sessionId) throws IcatException {
-		return (List<Investigation>) this.beanManagerLocal.search(sessionId, "Investigation");
+	public Collection<Investigation> getMyInvestigations(
+			@WebParam(name = "sessionId") String sessionId) throws SessionException {
+		try {
+			return (List<Investigation>) this.beanManagerLocal.search(sessionId, "Investigation");
+		} catch (IcatException e) {
+			throw new SessionException(e);
+		}
 	}
 
 	/**
-	 * SearchManager by a collection of keywords for investigations that user
-	 * has access to view, with AND been operator, fuzzy false, no includes
+	 * SearchManager by a collection of keywords for investigations that user has access to view,
+	 * with AND been operator, fuzzy false, no includes
 	 * 
-	 * @param sessionId
-	 *            sessionId of the user.
-	 * @param keywords
-	 *            Collection of keywords to search on
-	 * @return collection of {@link Investigation} investigation objects
-	 * @throws uk.icat3.exceptions.SessionException
-	 * @throws IcatInternalException
-	 * @throws InsufficientPrivilegesException
-	 * @throws BadParameterException
 	 */
 	@SuppressWarnings("unchecked")
 	@WebMethod(operationName = "searchByKeywords")
-	public List<Investigation> searchByKeywords(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "keywords") List<String> keywords) throws IcatException {
-		final String query = "DISTINCT Investigation <-> Keyword[name IN " + this.getIN(keywords) + "]";
-		return (List<Investigation>) this.beanManagerLocal.search(sessionId, query);
+	public Collection<Investigation> searchByKeywords(
+			@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "keywords") List<String> keywords) throws SessionException {
+		final String query = "DISTINCT Investigation <-> Keyword[name IN " + this.getIN(keywords)
+				+ "]";
+		try {
+			return (List<Investigation>) this.beanManagerLocal.search(sessionId, query);
+		} catch (IcatException e) {
+			throw new SessionException(e);
+		}
 	}
 
 	/**
 	 * This searches all DB for investigations with the advanced search criteria
 	 * 
-	 * @param sessionId
-	 *            session id of the user.
-	 * @param advancedSearch
-	 *            advanced SearchManager details to search with
-	 * @throws uk.icat3.exceptions.SessionException
-	 *             if the session id is invalid
-	 * @return collection of {@link Investigation} investigation objects
-	 * @throws IcatInternalException
-	 * @throws InsufficientPrivilegesException
-	 * @throws BadParameterException
 	 */
 	@SuppressWarnings("unchecked")
 	@WebMethod
 	public List<Investigation> searchByAdvanced(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "advancedSearchDetails") AdvancedSearchDetails advancedSearch) throws IcatException {
+			@WebParam(name = "advancedSearchDetails") AdvancedSearchDetails advancedSearch)
+			throws SessionException {
 		final StringBuilder query = new StringBuilder();
 		if (advancedSearch.hasExperimentNumber()) {
 			augmentQuery(query, "name", advancedSearch.getExperimentNumber());
@@ -145,7 +136,11 @@ public class ICATCompat extends EJBObject {
 		} else {
 			query.append("]");
 		}
-		return (List<Investigation>) this.beanManagerLocal.search(sessionId, query.toString());
+		try {
+			return (List<Investigation>) this.beanManagerLocal.search(sessionId, query.toString());
+		} catch (IcatException e) {
+			throw new SessionException(e);
+		}
 	}
 
 	private void augmentQuery(StringBuilder query, String field, String value) {
@@ -167,8 +162,8 @@ public class ICATCompat extends EJBObject {
 	 * @param startIndex
 	 *            start index of the results found, default 0
 	 * @param numberOfResults
-	 *            number of results found from the start index, default
-	 *            {@link Queries}.MAX_QUERY_RESULTSET
+	 *            number of results found from the start index, default {@link Queries}
+	 *            .MAX_QUERY_RESULTSET
 	 * @throws uk.icat3.exceptions.SessionException
 	 *             if the session id is invalid
 	 * @return collection of {@link Investigation} investigation objects
@@ -187,8 +182,7 @@ public class ICATCompat extends EJBObject {
 	// }
 
 	/**
-	 * Lists all the investigations for the current user, ie who he is an
-	 * investigator of
+	 * Lists all the investigations for the current user, ie who he is an investigator of
 	 * 
 	 * @param sessionId
 	 * @param investigationIncludes
@@ -208,8 +202,7 @@ public class ICATCompat extends EJBObject {
 	// }
 
 	/**
-	 * Lists all the investigations for the current user, ie who he is an
-	 * investigator of
+	 * Lists all the investigations for the current user, ie who he is an investigator of
 	 * 
 	 * @param sessionId
 	 * @param investigationIncludes
@@ -290,7 +283,7 @@ public class ICATCompat extends EJBObject {
 	// * @param sessionId
 	// * sessionId of the user.
 	// * @param type
-	// * ALL, ALPHA, ALPHA_NUMERIC, {@link KeywordType}
+	// * ALL, ALPHA, ALPHA_NUMERIC, {@link KeywordType} throws IcatException
 	// * @return list of keywords
 	// * @throws uk.icat3.exceptions.SessionException
 	// */

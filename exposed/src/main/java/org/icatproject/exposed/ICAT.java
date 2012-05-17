@@ -59,7 +59,7 @@ import org.icatproject.exposed.util.Constants;
 @Stateless
 @WebService(targetNamespace = "http://icatproject.org")
 @TransactionAttribute(value = TransactionAttributeType.REQUIRED)
-public class ICAT extends ICATCompat {
+public class ICAT extends EJBObject {
 
 	@EJB
 	private BeanManagerLocal beanManagerLocal;

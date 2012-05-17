@@ -45,6 +45,9 @@ import org.icatproject.Rule;
 import org.icatproject.User;
 import org.icatproject.UserGroup;
 
+import uk.icat3.client.ICATCompat;
+import uk.icat3.client.ICATCompatService;
+
 class Session {
 	public enum ParameterApplicability {
 		DATASET, DATAFILE, SAMPLE, INVESTIGATION
@@ -79,6 +82,7 @@ class Session {
 
 	private final ICAT icatEP;
 	private final String sessionId;
+	private CompatSession compatSession;
 
 	public Session() throws MalformedURLException, IcatException_Exception {
 		final String urlString = "http://localhost:8020";
@@ -87,6 +91,7 @@ class Session {
 				"http://icatproject.org", "ICATService"));
 		this.icatEP = icatService.getICATPort();
 		this.sessionId = this.icatEP.login("root", "password");
+		this.compatSession = new CompatSession(this.sessionId);
 	}
 
 	public void addInputDatafile(Job job, Datafile df) throws IcatException_Exception {
@@ -413,10 +418,6 @@ class Session {
 
 	}
 
-	public List<Investigation> getMyInvestigations() throws IcatException_Exception {
-		return  this.icatEP.getMyInvestigations(this.sessionId);
-	}
-
 	public double getRemainingMinutes() throws IcatException_Exception {
 		return  this.icatEP.getRemainingMinutes(this.sessionId);
 	}
@@ -427,6 +428,10 @@ class Session {
 
 	public String getUserName() throws IcatException_Exception {
 		return  this.icatEP.getUserName(this.sessionId);
+	}
+
+	public CompatSession getCompatSession() {
+		return compatSession;
 	}
 
 }

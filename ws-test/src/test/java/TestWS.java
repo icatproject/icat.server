@@ -55,6 +55,7 @@ public class TestWS {
 
 	private static Session session;
 	private static Random random;
+	private static CompatSession compatSession;
 
 	private static void create() throws Exception {
 
@@ -473,7 +474,7 @@ public class TestWS {
 			session.update(ip);
 			fail("No throw");
 		} catch (IcatException_Exception e) {
-			if (e.getFaultInfo().getType() == IcatExceptionType.VALIDATION) {
+			if (e.getFaultInfo().getType() == org.icatproject.IcatExceptionType.VALIDATION) {
 				System.out.println(e.getMessage());
 			} else {
 				throw e;
@@ -677,7 +678,7 @@ public class TestWS {
 	public void compat() throws Exception {
 		session.clear();
 		create();
-		List<Investigation> invs = session.getMyInvestigations();
+		List<uk.icat3.client.Investigation> invs = compatSession.getMyInvestigations();
 		assertEquals(1, invs.size());
 		assertEquals("A", invs.get(0).getName());
 	}
@@ -791,6 +792,7 @@ public class TestWS {
 	public static void setup() throws Exception {
 		random = new Random();
 		session = new Session();
+		compatSession = session.getCompatSession();
 		session.setAuthz();
 		session.clearAuthz();
 		session.setAuthz();
