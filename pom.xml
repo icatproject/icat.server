@@ -6,6 +6,13 @@
 	<artifactId>icat</artifactId>
 	<version>4.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	
+	<distributionManagement>
+		<site>
+			<id>website</id>
+			<url>scp://www.icatproject.org/var/www/html/mvn</url>
+		</site>
+	</distributionManagement>
 
 
 	<properties>
@@ -146,6 +153,7 @@
 
 		<pluginManagement>
 			<plugins>
+
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
@@ -156,12 +164,30 @@
 						</execution>
 					</executions>
 				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.1</version>
+					<dependencies>
+						<dependency><!-- add support for ssh/scp -->
+							<groupId>org.apache.maven.wagon</groupId>
+							<artifactId>wagon-ssh</artifactId>
+							<version>1.0</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+
 			</plugins>
 		</pluginManagement>
 
 	</build>
 
 	<description>Main pom to build all the icat components</description>
+	<issueManagement>
+		<url>http://code.google.com/p/icatproject/issues/list</url>
+		<system>Google Code</system>
+	</issueManagement>
 </project>
 
 
