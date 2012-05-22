@@ -19,8 +19,7 @@ import org.icatproject.core.manager.DagHandler.Step;
 
 public class Restriction {
 
-	// Restriction ::= ( "[" SearchCondition "]" )? ( ("<->")? name "["
-	// SearchCondition "]" )*
+	// Restriction ::= ( "[" SearchCondition "]" )? ( "<->" name "[" SearchCondition "]" )*
 
 	public class TableAndSearchCondition {
 

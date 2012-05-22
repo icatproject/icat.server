@@ -16,7 +16,7 @@ import org.icatproject.core.parser.Tokenizer;
 import org.junit.Test;
 
 
-public class TestSearchQuery {
+public class TestRelatedEntities {
 
 	private void testGood(List<Token> tokens, List<String> res, String top) throws Exception {
 		Input input = new Input(tokens);

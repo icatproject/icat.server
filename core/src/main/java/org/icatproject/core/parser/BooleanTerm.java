@@ -9,7 +9,7 @@ import org.icatproject.core.entity.EntityBaseBean;
 
 public class BooleanTerm {
 
-	// BooleanTerm ::= Factor ( "AND" Factor ) *
+	// BooleanTerm ::= BooleanFactor ( "AND" BooleanFactor ) *
 
 	private List<BooleanFactor> factors = new ArrayList<BooleanFactor>();
 

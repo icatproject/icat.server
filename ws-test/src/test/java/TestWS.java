@@ -786,6 +786,12 @@ public class TestWS {
 		assertEquals("Count", 6, results.size());
 		assertEquals("Result", "wib1", results.get(0));
 		assertEquals("Result", "wib2", results.get(1));
+		//
+		// TODO - restore code
+		// results = session.search("Dataset <-> Datafile[name = 'fred'] [name = 'bill']");
+		// assertEquals("Count", 6, results.size());
+		// assertEquals("Result", "wib1", results.get(0));
+		// assertEquals("Result", "wib2", results.get(1));
 	}
 
 	@BeforeClass

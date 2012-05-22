@@ -14,24 +14,25 @@ import org.icatproject.core.parser.Restriction;
 import org.icatproject.core.parser.Token;
 import org.icatproject.core.parser.Tokenizer;
 import org.junit.Test;
-
+import org.junit.Ignore;
 
 public class TestRestriction {
 
 	private void testGood(List<Token> tokens, String q, String sw, List<String> res, String top)
 			throws Exception {
 		Input input = new Input(tokens);
-		Restriction e = new Restriction(input);
+		Restriction r = new Restriction(input);
 		assertNull(input.peek(0));
+		System.out.println(r);
 
 		Set<String> relatedEntityNames = new HashSet<String>();
-		for (Class<? extends EntityBaseBean> bean : e.getRelatedEntities()) {
+		for (Class<? extends EntityBaseBean> bean : r.getRelatedEntities()) {
 			relatedEntityNames.add(bean.getSimpleName());
 		}
 
 		assertEquals("Related entities", new HashSet<String>(res), relatedEntityNames);
-		assertEquals("SearchWhere", sw, e.getSearchWhere(top));
-		assertEquals("Query", q + sw, e.getQuery(top));
+		assertEquals("SearchWhere", sw, r.getSearchWhere(top));
+		assertEquals("Query", q + sw, r.getQuery(top));
 	}
 
 	@Test
@@ -47,25 +48,28 @@ public class TestRestriction {
 	@Test
 	public void testGood2() throws Exception {
 		List<Token> tokens = Tokenizer
-				.getTokens("Investigation InvestigationUser [user.userId = :user]");
+				.getTokens("<-> Investigation <-> InvestigationUser [user.userId = :user]");
 		String sw = "(InvestigationUser$.user.userId = :user)";
 		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$ LEFT JOIN Investigation$.investigationUsers AS InvestigationUser$  WHERE (Dataset$.id = :pkid) AND ";
 		testGood(tokens, q, sw, Arrays.asList("Investigation", "InvestigationUser"), "Dataset");
 	}
 
+	@Ignore
 	@Test
 	public void testGood3() throws Exception {
-		List<Token> tokens = Tokenizer.getTokens("Dataset Investigation [name = 'A']");
+		List<Token> tokens = Tokenizer.getTokens("<-> Dataset <-> Investigation [name = 'A']");
 		String sw = "(Investigation$.name = 'A')";
 		String q = "SELECT COUNT(DatasetParameter$) FROM DatasetParameter AS DatasetParameter$ LEFT JOIN DatasetParameter$.dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$  WHERE (DatasetParameter$.id = :pkid) AND ";
-		Input input = new Input(tokens);
-		Restriction e = new Restriction(input);
-		assertNull(input.peek(0));
-		System.out.println(e.getQuery("DatasetParameter"));
-		for (Class<? extends EntityBaseBean> bean : e.getRelatedEntities()) {
-			System.out.println(bean.getSimpleName());
-		}
-		System.out.println(e.getSearchWhere("DatasetParameter"));
+		testGood(tokens, q, sw, Arrays.asList(" <-> Investigation", "Dataset"), "DatasetParameter");
+	}
+
+	@Ignore
+	@Test
+	public void testGood4() throws Exception {
+		List<Token> tokens = Tokenizer
+				.getTokens("<-> Dataset <-> Datafile([name = 'fred'][name = 'bill']");
+		String sw = "(Investigation$.name = 'A')";
+		String q = "SELECT COUNT(DatasetParameter$) FROM DatasetParameter AS DatasetParameter$ LEFT JOIN DatasetParameter$.dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$  WHERE (DatasetParameter$.id = :pkid) AND ";
 		testGood(tokens, q, sw, Arrays.asList("Investigation", "Dataset"), "DatasetParameter");
 	}
 
