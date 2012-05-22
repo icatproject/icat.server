@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>ICAT Java Client User Manual</title>
+	</properties>
+
+	<body>
+
+
+		<section name="Introduction">
+
+
+			<p>The ICAT4 API is a rather thin layer on top of a relational DBMS.
+				The database is wrapped as a web service and the actual tables are
+				not exposed directly. Each table in the database is mapped onto a
+				data structure exposed by the web service. When the web service
+				interface definition (WSDL) is processed for Java then each data
+				structure results in a class definition.
+			</p>
+
+			<subsection name="Setting Up">
+				<p>The web service is accessed via a proxy (conventionally known as
+					a port). The proxy (here given a variable name of icat) may be
+					obtained by the following:
+				</p>
+
+				<code>
+					URL icatUrl = null;
+					<br />
+					icatUrl = new URL(“http://localhost:8080” +
+					"/ICATService/ICAT?wsdl");
+					<br />
+					QName qName = new
+					QName("client.icat3.uk", "ICATService");
+					<br />
+					ICATService service = new
+					ICATService(icatUrl, qName);
+					<br />
+					ICAT icat = service.getICATPort();
+				</code>
+
+			</subsection>
+
+			<subsection name="Session management">
+
+				<p>When you login to ICAT you will be given back a string, the
+					sessionId, which must
+					be used as the first argument of almost all
+					calls. The only
+					exceptions being the login call itself and
+					getRemainingMinutes
+				</p>
+
+				<p class="call">String login(String username, String password)</p>
+
+				<p>This sessionId will be valid for a period determined by the ICAT
+					server.
+					Configuring userName, password pairs is dependent upon the
+					chosen
+					authentication module and is not discussed here.
+				</p>
+
+
+
+				<p class="call">double getRemainingMinutes(String sessionId)</p>
+
+				<p>This returns the number of minutes left in the session. A
+					session
+					may not be extended but a user may have more than one
+					session at
+					once.
+				</p>
+
+				<p class="call">void logout(String sessionId)</p>
+
+				<p>This invalidates the sessionId.</p>
+
+			</subsection>
+
+		</section>
+
+		<section name="Data Manipulation">
+			<p>To understand exactly how the data manipulation calls will work
+				requires an understanding of the schema.
+			</p>
+			<subsection name="Creating an Object">
+				<p>To create an object in ICAT first instantiate the object of
+					interest for example a Dataset and then call the setters to set its
+					attributes and finally make a call to create the object in ICAT.
+				</p>
+				<p>So typical code in Java might look like:</p>
+				<code>
+					Dataset ds = new Dataset();
+					<br />
+					ds.setName(“Name of dataset”);
+					<br />
+					ds.set …
+					<br />
+					Long dsid = icat.create(sessionId, ds);
+				</code>
+				<p>You will see that no convenient constructors are generated,
+					rather each field of the object must be set individually. Most
+					fields are optional and may be left with null values, however some
+					are compulsory and the call to create will fail if they are not
+					set. Each object has a primary key that identifies it in the
+					database - this is a value of type "long" that is generated for you
+					by ICAT and is used to represent relationships in a regular manner.
+				</p>
+				<p>
+					Some fields represent attributes of the object but others are
+					used to represent relationships. The relationships are typically
+					represented in the class definitions by a variable which either
+					holds a reference to a single object or a collection of objects.
+					Take a look at a Dataset class definition. This has a variable
+					investigationId which must be set to the (surrogate) key of the
+					investigation. This implies that the Investigation must be created
+					first. You will see that there are two Collections:
+					datafileCollection and datasetParameterCollection implemented as
+					lists of Datafiles and of DatasetParameters. These collections may
+					be populated before calling create on the Dataset and the whole
+					structure will be created in the database.
+				</p>
+
+				<p>The call to create returns the key of the created object. If you
+					choose to write:
+				</p>
+
+				<code>ds.setId((Long)icat.create(sessionId, ds));</code>
+
+				<p>then the client copy of the dataset will be updated to have the
+					correct key value - however the keys in any other objects below
+					the dataset if you had included a list of datafiles will still be
+					null on the client side.
+				</p>
+
+			</subsection>
+		</section>
+
+		<section name="Information">
+			<p class="call">String getApiVersion()</p>
+
+			<p>Returns the version of the API - this should match the version of
+				the client as it is held in Maven for a released component. In the
+				case of a release candidate such as 4.2.0-rc03 the version returned
+				will still be 4.2.0
+			</p>
+
+		</section>
+	</body>
+
+</document>
