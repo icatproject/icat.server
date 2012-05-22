@@ -10,14 +10,17 @@
 
 	<artifactId>icat.client</artifactId>
 	<packaging>jar</packaging>
+	<name>ICAT Java Client</name>
 
 	<properties>
 		<wsdl1>${basedir}/ICAT.wsdl</wsdl1>
 		<wsdl2>${basedir}/ICATCompat.wsdl</wsdl2>
-
 	</properties>
 
+	
+
 	<build>
+	
 		<plugins>
 			<plugin>
 				<groupId>org.jvnet.jax-ws-commons</groupId>
@@ -84,6 +87,11 @@
 				</executions>
 			</plugin>
 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+			</plugin>
+
 		</plugins>
 	</build>
 
@@ -94,5 +102,10 @@
 			<type>ear</type>
 		</dependency>
 	</dependencies>
+	<description>Provides facilities to login to an ICAT instance after which one can create, read, update or delete entities according to your permissions.</description>
+	<url>http://www.icatproject.org</url>
+	<organization>
+		<name>The ICAT Collaboration</name>
+	</organization>
 </project>
 
