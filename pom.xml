@@ -3,7 +3,7 @@
 
     <groupId>org.icatproject</groupId>
     <artifactId>icat</artifactId>
-    <version>4.1.0-rc-01-SNAPSHOT</version>
+    <version>4.1.0-rc-01</version>
     <packaging>pom</packaging>
 
     <distributionManagement>
