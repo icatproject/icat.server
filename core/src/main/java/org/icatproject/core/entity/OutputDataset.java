@@ -4,12 +4,8 @@ import java.io.Serializable;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.TableGenerator;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
@@ -17,27 +13,9 @@ import org.apache.log4j.Logger;
 @Comment("Many to many relationship between data set as output and a job")
 @SuppressWarnings("serial")
 @Entity
-@TableGenerator(name = "outputDatasetGenerator", pkColumnValue = "OutputDataset")
 public class OutputDataset extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(OutputDataset.class);
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "outputDatasetGenerator")
-	private Long id;
-
-	public Long getId() {
-		return this.id;
-	}
-
-	@Override
-	public Object getPK() {
-		return this.id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public OutputDataset() {
 	}

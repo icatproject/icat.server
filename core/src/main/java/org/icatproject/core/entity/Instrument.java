@@ -3,9 +3,14 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
@@ -13,6 +18,7 @@ import org.apache.log4j.Logger;
 @Comment("Used by a user within an investigation")
 @SuppressWarnings("serial")
 @Entity
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME" }) })
 public class Instrument extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(Instrument.class);
@@ -29,9 +35,22 @@ public class Instrument extends EntityBaseBean implements Serializable {
 	@OneToMany(mappedBy = "instrument")
 	private List<Investigation> investigations;
 
-	@Comment("A short name identifying this instrument")
-	@Id
+	@Comment("A short name identifying this instrument within the facility")
+	@Column(name = "NAME", nullable = false)
 	private String name;
+
+	@Comment("The facility which has this instrument")
+	@JoinColumn(name = "FACILITY_ID", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Facility facility;
+
+	public Facility getFacility() {
+		return facility;
+	}
+
+	public void setFacility(Facility facility) {
+		this.facility = facility;
+	}
 
 	private String type;
 
@@ -46,6 +65,9 @@ public class Instrument extends EntityBaseBean implements Serializable {
 		}
 		if (!this.includes.contains(Investigation.class)) {
 			this.investigations = null;
+		}
+		if (!this.includes.contains(Facility.class)) {
+			this.facility = null;
 		}
 	}
 
@@ -62,11 +84,6 @@ public class Instrument extends EntityBaseBean implements Serializable {
 	}
 
 	public String getName() {
-		return this.name;
-	}
-
-	@Override
-	public Object getPK() {
 		return this.name;
 	}
 

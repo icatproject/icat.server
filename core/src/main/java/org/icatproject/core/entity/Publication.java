@@ -5,12 +5,8 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.TableGenerator;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
@@ -18,7 +14,6 @@ import org.apache.log4j.Logger;
 @Comment("A publication")
 @SuppressWarnings("serial")
 @Entity
-@TableGenerator(name = "publicationGenerator", pkColumnValue = "Publication")
 public class Publication extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(Publication.class);
@@ -26,10 +21,6 @@ public class Publication extends EntityBaseBean implements Serializable {
 	@Comment("A reference in the form to be used for citation")
 	@Column(nullable = false)
 	private String fullReference;
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "publicationGenerator")
-	private Long id;
 
 	@JoinColumn(nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -59,17 +50,8 @@ public class Publication extends EntityBaseBean implements Serializable {
 		return this.fullReference;
 	}
 
-	public Long getId() {
-		return this.id;
-	}
-
 	public Investigation getInvestigation() {
 		return investigation;
-	}
-
-	@Override
-	public Object getPK() {
-		return id;
 	}
 
 	public String getRepository() {
@@ -86,10 +68,6 @@ public class Publication extends EntityBaseBean implements Serializable {
 
 	public void setFullReference(String fullReference) {
 		this.fullReference = fullReference;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public void setInvestigation(Investigation investigation) {

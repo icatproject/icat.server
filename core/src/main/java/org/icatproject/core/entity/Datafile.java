@@ -10,14 +10,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
@@ -27,13 +23,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
-
 @Comment("A data file")
 @SuppressWarnings("serial")
 @Entity
 @XmlRootElement
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "LOCATION", "DATASET_ID" }) })
-@TableGenerator(name = "datafileGenerator", pkColumnValue = "Datafile")
 public class Datafile extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(Datafile.class);
@@ -68,10 +62,6 @@ public class Datafile extends EntityBaseBean implements Serializable {
 
 	@Comment("Expressed in bytes")
 	private Long fileSize;
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datafileGenerator")
-	private Long id;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
 	private List<InputDatafile> inputDatafiles = new ArrayList<InputDatafile>();
@@ -182,10 +172,6 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		return fileSize;
 	}
 
-	public Long getId() {
-		return id;
-	}
-
 	public List<InputDatafile> getInputDatafiles() {
 		return inputDatafiles;
 	}
@@ -206,17 +192,11 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		return parameters;
 	}
 
-	@Override
-	public Object getPK() {
-		return id;
-	}
-
 	public List<RelatedDatafile> getSourceDatafiles() {
 		return sourceDatafiles;
 	}
 
-	public void preparePersist(String modId, EntityManager manager) throws 
-			IcatException {
+	public void preparePersist(String modId, EntityManager manager) throws IcatException {
 		super.preparePersist(modId, manager);
 		id = null;
 		for (DatafileParameter datafileParameter : parameters) {
@@ -259,10 +239,6 @@ public class Datafile extends EntityBaseBean implements Serializable {
 
 	public void setFileSize(Long fileSize) {
 		this.fileSize = fileSize;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public void setInputDatafiles(List<InputDatafile> inputDatafiles) {

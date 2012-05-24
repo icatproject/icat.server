@@ -4,32 +4,22 @@ import java.io.Serializable;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
-
 @Comment("Many to many relationship between study and investigation")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "STUDY_ID", "INVESTIGATION_ID" }) })
-@TableGenerator(name = "studyInvestigationGenerator", pkColumnValue = "StudyInvestigation")
 public class StudyInvestigation extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(StudyInvestigation.class);
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "studyInvestigationGenerator")
-	private Long id;
 
 	@JoinColumn(name = "STUDY_ID", nullable = false)
 	@ManyToOne
@@ -49,11 +39,6 @@ public class StudyInvestigation extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public Object getPK() {
-		return id;
-	}
-
-	@Override
 	public void preparePersist(String modId, EntityManager manager) throws IcatException {
 		super.preparePersist(modId, manager);
 		this.id = null;
@@ -67,14 +52,6 @@ public class StudyInvestigation extends EntityBaseBean implements Serializable {
 		if (!this.includes.contains(Investigation.class)) {
 			this.investigation = null;
 		}
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public Study getStudy() {

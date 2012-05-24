@@ -18,7 +18,6 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -33,7 +32,6 @@ import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.Comment;
 import org.icatproject.core.entity.EntityBaseBean;
-
 
 /**
  * Holds information about primary keys of an Entity In the case of a simple key it is a list with
@@ -54,7 +52,6 @@ public class EntityInfoHandler {
 		private final Map<Field, Method> getters;
 		private final Map<Field, Integer> stringFields;
 		private final Map<Field, Method> setters;
-		private final KeyType keyType;
 		private List<List<Field>> constraintFields;
 		private String classComment;
 		private Map<Field, String> fieldComments;
@@ -62,7 +59,7 @@ public class EntityInfoHandler {
 
 		public PrivateEntityInfo(Field pks, Set<Relationship> rels, List<Field> notNullableFields,
 				Map<Field, Method> getters, Map<Field, Integer> stringFields,
-				Map<Field, Method> setters, KeyType keyType, List<List<Field>> constraintFields,
+				Map<Field, Method> setters, List<List<Field>> constraintFields,
 				String classComment, Map<Field, String> fieldComments,
 				Set<Class<? extends EntityBaseBean>> ones) {
 			this.pks = pks;
@@ -71,17 +68,12 @@ public class EntityInfoHandler {
 			this.getters = getters;
 			this.stringFields = stringFields;
 			this.setters = setters;
-			this.keyType = keyType;
 			this.constraintFields = constraintFields;
 			this.classComment = classComment;
 			this.fieldComments = fieldComments;
 			this.ones = ones;
 		}
 
-	}
-
-	public enum KeyType {
-		SIMPLE, GENERATED
 	}
 
 	public class Relationship {
@@ -152,8 +144,6 @@ public class EntityInfoHandler {
 
 	private final HashMap<Class<? extends EntityBaseBean>, PrivateEntityInfo> map = new HashMap<Class<? extends EntityBaseBean>, PrivateEntityInfo>();;
 
-	private KeyType keyType;
-
 	private EntityInfoHandler() {
 	};
 
@@ -167,31 +157,16 @@ public class EntityInfoHandler {
 			cobj = cobj.getSuperclass();
 		}
 
-		this.keyType = null;
 		Field key = null;
-		int c = 0;
 		for (final Field field : fields) {
 			if (field.getAnnotation(Id.class) != null) {
-				String name = field.getName();
-				name = "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
 				key = field;
-				c++;
-				if (field.getAnnotation(GeneratedValue.class) != null) {
-					this.keyType = KeyType.GENERATED;
-				} else {
-					this.keyType = KeyType.SIMPLE;
-				}
 			}
 		}
-		for (final Field field : fields) {
-			if (field.getAnnotation(EmbeddedId.class) != null) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-						"@EmbeddedId annotation is not permitted" + objectClass.getSimpleName());
-			}
-		}
-		if (c != 1) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Unable to determine key for "
-					+ objectClass.getSimpleName());
+
+		if (key == null) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"Unable to determine key for " + objectClass.getSimpleName());
 		}
 
 		final Set<Relationship> rels = new HashSet<Relationship>();
@@ -331,8 +306,8 @@ public class EntityInfoHandler {
 				for (final Method m : objc.getDeclaredMethods()) {
 					if (m.getName().equals("set" + prop)) {
 						if (setters.put(field, m) != null) {
-							throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "set" + prop
-									+ " is ambiguous");
+							throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "set"
+									+ prop + " is ambiguous");
 						}
 					}
 				}
@@ -357,8 +332,8 @@ public class EntityInfoHandler {
 
 					Field col = dbCols.get(colNam);
 					if (col == null) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Column " + colNam
-								+ " mentioned in UniqueConstraint of "
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Column "
+								+ colNam + " mentioned in UniqueConstraint of "
 								+ objectClass.getSimpleName() + " table is not present in entity");
 					}
 					cf.add(col);
@@ -367,7 +342,6 @@ public class EntityInfoHandler {
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Key: " + keyType + " " + key.getName());
 
 			StringBuilder sb = new StringBuilder("Not null fields: ");
 			boolean first = true;
@@ -438,7 +412,7 @@ public class EntityInfoHandler {
 		String commentString = comment == null ? null : comment.value();
 
 		return new PrivateEntityInfo(key, rels, notNullableFields, getters, stringFields, setters,
-				this.keyType, constraintFields, commentString, comments, ones);
+				constraintFields, commentString, comments, ones);
 	}
 
 	private List<Field> getFields(Class<?> cobj) {
@@ -486,18 +460,6 @@ public class EntityInfoHandler {
 				this.map.put(objectClass, ei);
 			}
 			return ei.pks;
-		}
-	}
-
-	public KeyType getKeytype(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.keyType;
 		}
 	}
 
@@ -623,8 +585,6 @@ public class EntityInfoHandler {
 			}
 			entityInfo.getConstraints().add(c);
 		}
-		entityInfo.setKeyType(getKeytype(beanClass));
-		entityInfo.setKeyFieldname(getKeyFor(beanClass).getName());
 
 		Map<Field, Method> getters = getGetters(beanClass);
 		Map<Field, String> fieldComments = getFieldComments(beanClass);

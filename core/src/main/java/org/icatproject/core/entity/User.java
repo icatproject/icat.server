@@ -4,26 +4,25 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.log4j.Logger;
 
 @Comment("A user of the facility")
 @SuppressWarnings("serial")
 @Entity
-@XmlRootElement
-@Table(name = "\"USER\"")
+@Table(name = "\"USER\"", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 public class User extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(User.class);
 
 	@Comment("The name of the user to match that provided by the authentication mechanism")
-	@Id
+	@Column(name = "NAME", nullable = false)
 	private String name;
 
 	@Comment("May include title")
@@ -49,7 +48,7 @@ public class User extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private List<InstrumentScientist> instrumentScientists;
-	
+
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private List<Study> studies;
 
@@ -79,11 +78,6 @@ public class User extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "User[name=" + name + "]";
-	}
-
-	@Override
-	public Object getPK() {
-		return name;
 	}
 
 	public void beforeMarshal(Marshaller source) {

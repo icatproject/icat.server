@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
@@ -15,6 +17,7 @@ import org.apache.log4j.Logger;
 @Comment("An experimental facility")
 @SuppressWarnings("serial")
 @Entity
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 public class Facility extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(Facility.class);
@@ -30,7 +33,29 @@ public class Facility extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
 	private List<Investigation> investigations = new ArrayList<Investigation>();
-	
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
+	private List<Instrument> instruments = new ArrayList<Instrument>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
+	private List<FacilityCycle> facilityCycles = new ArrayList<FacilityCycle>();
+
+	public List<Instrument> getInstruments() {
+		return instruments;
+	}
+
+	public void setInstruments(List<Instrument> instruments) {
+		this.instruments = instruments;
+	}
+
+	public List<FacilityCycle> getFacilityCycles() {
+		return facilityCycles;
+	}
+
+	public void setFacilityCycles(List<FacilityCycle> facilityCycles) {
+		this.facilityCycles = facilityCycles;
+	}
+
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
 	private List<InvestigationType> investigationTypes = new ArrayList<InvestigationType>();
 
@@ -50,7 +75,7 @@ public class Facility extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
 	private List<ParameterType> parameterTypes = new ArrayList<ParameterType>();
-	
+
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facility")
 	private List<SampleType> sampleTypes = new ArrayList<SampleType>();
 
@@ -87,7 +112,7 @@ public class Facility extends EntityBaseBean implements Serializable {
 	}
 
 	@Comment("A short name identifying this facility")
-	@Id
+	@Column(name = "NAME", nullable = false)
 	private String name;
 
 	@Comment("A URL associated with this facility")
@@ -114,6 +139,12 @@ public class Facility extends EntityBaseBean implements Serializable {
 		if (!this.includes.contains(SampleType.class)) {
 			this.sampleTypes = null;
 		}
+		if (!this.includes.contains(FacilityCycle.class)) {
+			this.facilityCycles = null;
+		}
+		if (!this.includes.contains(Instrument.class)) {
+			this.instruments = null;
+		}
 	}
 
 	public Integer getDaysUntilRelease() {
@@ -133,11 +164,6 @@ public class Facility extends EntityBaseBean implements Serializable {
 	}
 
 	public String getName() {
-		return this.name;
-	}
-
-	@Override
-	public Object getPK() {
 		return this.name;
 	}
 

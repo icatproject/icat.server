@@ -9,12 +9,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.Marshaller;
@@ -22,11 +18,9 @@ import javax.xml.bind.Marshaller;
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
-
 @Comment("A study which may be related to an investigation")
 @SuppressWarnings("serial")
 @Entity
-@TableGenerator(name = "studyGenerator", pkColumnValue = "Study")
 public class Study extends EntityBaseBean implements Serializable {
 
 	public enum StudyStatus {
@@ -46,10 +40,6 @@ public class Study extends EntityBaseBean implements Serializable {
 	@Comment("The start date of this study")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date startDate;
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "studyGenerator")
-	private Long id;
 
 	@Comment("The user responsible for the study")
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -81,17 +71,8 @@ public class Study extends EntityBaseBean implements Serializable {
 		}
 	}
 
-	public Long getId() {
-		return this.id;
-	}
-
 	public String getName() {
 		return this.name;
-	}
-
-	@Override
-	public Object getPK() {
-		return this.id;
 	}
 
 	public StudyStatus getStatus() {
@@ -114,10 +95,6 @@ public class Study extends EntityBaseBean implements Serializable {
 
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public void setName(String name) {

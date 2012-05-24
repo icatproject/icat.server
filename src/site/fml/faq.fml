@@ -8,42 +8,19 @@
   <part id="general">
     <title>General</title>
 
-    <faq id="whats-foo">
+    <faq id="why-empty">
       <question>
-        What is Foo?
+        Why is this empty?
       </question>
       <answer>
-        <p>some markup goes here</p>
+        <p>Because nobody has suggested any questions yet ...</p>
 
-        <source>some source code</source>
+      <!--  <source>some source code</source> -->
 
-        <p>some markup goes here</p>
+        
       </answer>
     </faq>
-
-    <faq id="whats-bar">
-      <question>
-        What is Bar?
-      </question>
-      <answer>
-        <p>some markup goes here</p>
-      </answer>
-    </faq>
-  </part>
-
-  <part id="install">
-
-    <title>Installation</title>
-
-    <faq id="how-install">
-      <question>
-        How do I install Foo?
-      </question>
-      <answer>
-        <p>some markup goes here</p>
-      </answer>
-    </faq>
-
+     
   </part>
 
 </faqs>

@@ -13,6 +13,8 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -25,7 +27,6 @@ import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.BeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
-
 
 @SuppressWarnings("serial")
 @MappedSuperclass
@@ -56,6 +57,18 @@ public abstract class EntityBaseBean implements Serializable {
 
 	public Set<Class<? extends EntityBaseBean>> getIncludes() {
 		return includes;
+	}
+
+	@Id
+	@GeneratedValue
+	protected Long id;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	/**
@@ -203,16 +216,15 @@ public abstract class EntityBaseBean implements Serializable {
 	final public void isUnique(EntityManager manager) throws IcatException {
 
 		Class<? extends EntityBaseBean> entityClass = this.getClass();
-		if (eiHandler.getKeytype(entityClass) != EntityInfoHandler.KeyType.GENERATED) {
-			Object primaryKey = this.getPK();
-			if (primaryKey == null) {
-				throw new IcatException(IcatException.IcatExceptionType.VALIDATION, entityClass.getSimpleName()
-						+ "[id:" + primaryKey + "] was null.");
-			}
-			if (manager.find(entityClass, primaryKey) != null) {
-				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS,
-						entityClass.getSimpleName() + "[id:" + primaryKey + "] already present.");
-			}
+
+		Long primaryKey = this.getId();
+		if (primaryKey == null) {
+			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
+					entityClass.getSimpleName() + "[id:" + primaryKey + "] was null.");
+		}
+		if (manager.find(entityClass, primaryKey) != null) {
+			throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS,
+					entityClass.getSimpleName() + "[id:" + primaryKey + "] already present.");
 		}
 
 		Map<Field, Method> getters = eiHandler.getGetters(entityClass);
@@ -237,8 +249,8 @@ public abstract class EntityBaseBean implements Serializable {
 					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 							"IllegalArgumentException " + e.getMessage());
 				} catch (IllegalAccessException e) {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalAccessException "
-							+ e.getMessage());
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+							"IllegalAccessException " + e.getMessage());
 				} catch (InvocationTargetException e) {
 					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 							"InvocationTargetException " + e.getMessage());
@@ -270,7 +282,8 @@ public abstract class EntityBaseBean implements Serializable {
 					}
 					erm.append(f.getName() + " = '" + value + "'");
 				}
-				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS, erm.toString());
+				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS,
+						erm.toString());
 			}
 		}
 	}
@@ -281,8 +294,6 @@ public abstract class EntityBaseBean implements Serializable {
 	public void preparePersist(String modId, EntityManager manager) throws IcatException {
 		this.modId = modId;
 	}
-
-	public abstract Object getPK();
 
 	public void addIncludes(Set<Class<? extends EntityBaseBean>> requestedIncludes)
 			throws IcatException {

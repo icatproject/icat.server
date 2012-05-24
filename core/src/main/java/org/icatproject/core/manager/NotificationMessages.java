@@ -161,7 +161,7 @@ public class NotificationMessages {
 			} catch (final Exception e) {
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
 			}
-			message.pk.put(key.getName(), (Serializable) keyVal);
+			message.pk.put("id", (Serializable) keyVal);
 		}
 		if (nr.isArgsWanted() && queryString != null) {
 			message.args = queryString;

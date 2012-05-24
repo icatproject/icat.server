@@ -6,13 +6,9 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -25,11 +21,9 @@ import org.icatproject.core.parser.RestrictedBean;
 import org.icatproject.core.parser.Token;
 import org.icatproject.core.parser.Tokenizer;
 
-
 @Comment("Registers a request for a JMS notification to be sent out")
 @SuppressWarnings("serial")
 @Entity
-@TableGenerator(name = "notificationRequestGenerator", pkColumnValue = "NotificationRequest")
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @NamedQueries({
 		@NamedQuery(name = "NotificationRequest.CreateQuery", query = "SELECT DISTINCT nr FROM NotificationRequest nr WHERE nr.bean = :bean AND nr.c = TRUE"),
@@ -42,10 +36,6 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 	public enum DestType {
 		PUBSUB, P2P
 	}
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "notificationRequestGenerator")
-	private Long id;
 
 	private final static Logger logger = Logger.getLogger(NotificationRequest.class);
 
@@ -119,7 +109,8 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 	private void fixup() throws IcatException {
 		this.crudFlags = this.crudFlags.toUpperCase().trim();
 		if (this.crudFlags.isEmpty()) {
-			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "CrudFlags is empty");
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+					"CrudFlags is empty");
 		}
 		for (int i = 0; i < this.crudFlags.length(); i++) {
 			final char ch = this.crudFlags.charAt(i);
@@ -132,8 +123,8 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 			} else if (ch == 'D') {
 				this.d = true;
 			} else {
-				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "CrudFlags value "
-						+ this.crudFlags + " contains " + ch);
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+						"CrudFlags value " + this.crudFlags + " contains " + ch);
 			}
 		}
 
@@ -166,8 +157,8 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 				} else if (datatype.equals("CALLARGS")) {
 					this.argsWanted = true;
 				} else {
-					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "Datatypes value "
-							+ this.datatypes + " contains " + datatype);
+					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+							"Datatypes value " + this.datatypes + " contains " + datatype);
 				}
 			}
 		}
@@ -175,8 +166,8 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 			for (final String jmsOption : this.jmsOptions.toUpperCase().split("\\s+")) {
 				if (jmsOption.equals("PTP")) {
 				} else {
-					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "JmsOptions value "
-							+ this.jmsOptions + " contains " + jmsOption);
+					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+							"JmsOptions value " + this.jmsOptions + " contains " + jmsOption);
 				}
 			}
 		}
@@ -205,21 +196,12 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 		return this.destType;
 	}
 
-	public Long getId() {
-		return this.id;
-	}
-
 	public String getJmsOptions() {
 		return this.jmsOptions;
 	}
 
 	public String getName() {
 		return this.name;
-	}
-
-	@Override
-	public Object getPK() {
-		return this.id;
 	}
 
 	public String getWhat() {
@@ -331,10 +313,6 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 
 	public void setEntityNameWanted(boolean entityNameWanted) {
 		this.entityNameWanted = entityNameWanted;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public void setJmsOptions(String jmsOptions) {

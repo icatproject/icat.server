@@ -1,21 +1,14 @@
 package org.icatproject.core.parser;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.EmbeddedId;
-import javax.persistence.Id;
-
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
-import org.icatproject.core.manager.DagHandler;
 import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.core.manager.DagHandler.Step;
-
+import org.icatproject.core.parser.DagHandler.Step;
 
 public class Restriction {
 
@@ -65,7 +58,7 @@ public class Restriction {
 
 	public String getQuery(String tableName) throws IcatException {
 		Set<Class<? extends EntityBaseBean>> es = getRelatedEntities();
-		Step step = DagHandler.fixes(EntityInfoHandler.getClass(tableName), es);
+		Step step = DagHandler.findSteps(EntityInfoHandler.getClass(tableName), es);
 		StringBuilder sb = getSelect(tableName, step);
 		sb.append(' ');
 		sb.append(getWhere(tableName));
@@ -84,32 +77,7 @@ public class Restriction {
 		Class<? extends EntityBaseBean> bean = EntityInfoHandler.getClass(tableName);
 
 		StringBuilder sb = new StringBuilder("WHERE (");
-		int c = 0;
-		for (Field field : bean.getDeclaredFields()) {
-			if (field.getAnnotation(Id.class) != null) {
-				sb.append(tableName + "$." + field.getName() + " = :pkid");
-				c++;
-			}
-		}
-		for (Field field : bean.getDeclaredFields()) {
-			if (field.getAnnotation(EmbeddedId.class) != null) {
-				int n = 0;
-				for (Field ifield : field.getType().getDeclaredFields()) {
-					if ((ifield.getModifiers() & Modifier.STATIC) == 0) {
-						if (n != 0) {
-							sb.append(" AND ");
-						}
-						sb.append(tableName + "$." + field.getName() + "." + ifield.getName()
-								+ " = :pkid" + n++);
-					}
-				}
-				c++;
-			}
-		}
-		if (c != 1) {
-			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
-					"Unable to determine key for " + tableName);
-		}
+		sb.append(tableName + "$.id = :pkid");
 		sb.append(')');
 
 		if (this.searchCondition != null) {

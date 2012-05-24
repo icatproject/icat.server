@@ -34,7 +34,6 @@ import org.icatproject.Investigation;
 import org.icatproject.InvestigationParameter;
 import org.icatproject.InvestigationType;
 import org.icatproject.Job;
-import org.icatproject.KeyType;
 import org.icatproject.OutputDatafile;
 import org.icatproject.OutputDataset;
 import org.icatproject.ParameterType;
@@ -186,8 +185,6 @@ public class TestWS {
 	public void testInvestigation() throws Exception {
 		EntityInfo ei = session.getEntityInfo("Investigation");
 		assertEquals("An investigation or experiment", ei.getClassComment());
-		assertEquals("id", ei.getKeyFieldname());
-		assertEquals(KeyType.GENERATED, ei.getKeyType());
 		for (Constraint constraint : ei.getConstraints()) {
 			assertEquals(Arrays.asList("name", "visitId", "facilityCycle", "instrument"),
 					constraint.getFieldNames());

@@ -6,13 +6,9 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.TableGenerator;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
@@ -20,14 +16,9 @@ import org.apache.log4j.Logger;
 @Comment("A run of an application with its related inputs and outputs")
 @SuppressWarnings("serial")
 @Entity
-@TableGenerator(name = "jobGenerator", pkColumnValue = "Job")
 public class Job extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(Job.class);
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "jobGenerator")
-	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(nullable = false)
@@ -106,19 +97,6 @@ public class Job extends EntityBaseBean implements Serializable {
 
 	// Needed for JPA
 	public Job() {
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	@Override
-	public Object getPK() {
-		return id;
 	}
 
 }

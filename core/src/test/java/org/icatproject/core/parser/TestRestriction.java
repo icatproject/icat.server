@@ -40,7 +40,7 @@ public class TestRestriction {
 		List<Token> tokens = Tokenizer
 				.getTokens("[id = 20] <-> Investigation <-> InvestigationUser <-> User[name = :user]");
 		String sw = "(Dataset$.id = 20) AND (User$.name = :user)";
-		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$ LEFT JOIN Investigation$.investigationUsers AS InvestigationUser$ LEFT JOIN InvestigationUser$.user AS User$  WHERE (Dataset$.id = :pkid) AND ";
+		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ JOIN Dataset$.investigation AS Investigation$ JOIN Investigation$.investigationUsers AS InvestigationUser$ JOIN InvestigationUser$.user AS User$  WHERE (Dataset$.id = :pkid) AND ";
 		testGood(tokens, q, sw, Arrays.asList("Investigation", "InvestigationUser", "User"),
 				"Dataset");
 	}
@@ -50,7 +50,7 @@ public class TestRestriction {
 		List<Token> tokens = Tokenizer
 				.getTokens("<-> Investigation <-> InvestigationUser [user.userId = :user]");
 		String sw = "(InvestigationUser$.user.userId = :user)";
-		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$ LEFT JOIN Investigation$.investigationUsers AS InvestigationUser$  WHERE (Dataset$.id = :pkid) AND ";
+		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ JOIN Dataset$.investigation AS Investigation$ JOIN Investigation$.investigationUsers AS InvestigationUser$  WHERE (Dataset$.id = :pkid) AND ";
 		testGood(tokens, q, sw, Arrays.asList("Investigation", "InvestigationUser"), "Dataset");
 	}
 

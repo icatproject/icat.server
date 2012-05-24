@@ -37,7 +37,6 @@ import org.icatproject.core.parser.SearchQuery;
 import org.icatproject.core.parser.Token;
 import org.icatproject.core.parser.Tokenizer;
 
-
 public class BeanManager {
 
 	private static final Logger logger = Logger.getLogger(BeanManager.class);
@@ -53,8 +52,8 @@ public class BeanManager {
 			try {
 				userTransaction.begin();
 			} catch (NotSupportedException e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"NotSupportedException" + e.getMessage());
 			}
 			try {
 				bean.preparePersist(userId, manager);
@@ -68,30 +67,31 @@ public class BeanManager {
 				NotificationMessages notification = new NotificationMessages(userId, bean,
 						AccessType.CREATE, manager);
 				userTransaction.commit();
-				return new CreateResponse(bean.getPK(), notification);
+				return new CreateResponse(bean.getId(), notification);
 			} catch (EntityExistsException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS,
+						e.getMessage());
 			} catch (SecurityException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"SecurityException" + e.getMessage());
 			} catch (IllegalStateException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"IllegalStateException" + e.getMessage());
 			} catch (RollbackException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "RollbackException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"RollbackException" + e.getMessage());
 			} catch (HeuristicMixedException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "HeuristicMixedException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"HeuristicMixedException" + e.getMessage());
 			} catch (HeuristicRollbackException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "HeuristicRollbackException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"HeuristicRollbackException" + e.getMessage());
 			} catch (SystemException e) {
 				userTransaction.rollback();
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException"
@@ -110,17 +110,18 @@ public class BeanManager {
 				bean.isUnique(manager);
 				bean.isValid(manager, true);
 				e.printStackTrace(System.err);
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Unexpected DB response "
-						+ e.getClass() + " " + e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
 			}
 		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException"
-					+ e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"IllegalStateException" + e.getMessage());
 		} catch (SecurityException e) {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException"
 					+ e.getMessage());
 		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException" + e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException"
+					+ e.getMessage());
 		}
 
 	}
@@ -131,8 +132,8 @@ public class BeanManager {
 			try {
 				userTransaction.begin();
 			} catch (NotSupportedException e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"NotSupportedException" + e.getMessage());
 			}
 			try {
 				List<CreateResponse> crs = new ArrayList<CreateResponse>();
@@ -147,34 +148,35 @@ public class BeanManager {
 					GateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
 					NotificationMessages notification = new NotificationMessages(userId, bean,
 							AccessType.CREATE, manager);
-					CreateResponse cr = new CreateResponse(bean.getPK(), notification);
+					CreateResponse cr = new CreateResponse(bean.getId(), notification);
 					crs.add(cr);
 				}
 				userTransaction.commit();
 				return crs;
 			} catch (EntityExistsException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS,
+						e.getMessage());
 			} catch (SecurityException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"SecurityException" + e.getMessage());
 			} catch (IllegalStateException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"IllegalStateException" + e.getMessage());
 			} catch (RollbackException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "RollbackException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"RollbackException" + e.getMessage());
 			} catch (HeuristicMixedException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "HeuristicMixedException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"HeuristicMixedException" + e.getMessage());
 			} catch (HeuristicRollbackException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "HeuristicRollbackException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"HeuristicRollbackException" + e.getMessage());
 			} catch (SystemException e) {
 				userTransaction.rollback();
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException"
@@ -195,18 +197,19 @@ public class BeanManager {
 					bean.isValid(manager, true);
 				}
 				e.printStackTrace(System.err);
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Unexpected DB response "
-						+ e.getClass() + " " + e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
 
 			}
 		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException"
-					+ e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"IllegalStateException" + e.getMessage());
 		} catch (SecurityException e) {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException"
 					+ e.getMessage());
 		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException" + e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException"
+					+ e.getMessage());
 		}
 	}
 
@@ -217,8 +220,8 @@ public class BeanManager {
 			try {
 				userTransaction.begin();
 			} catch (NotSupportedException e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"NotSupportedException" + e.getMessage());
 			}
 			try {
 				EntityBaseBean beanManaged = find(bean, manager);
@@ -232,24 +235,24 @@ public class BeanManager {
 				return notification;
 			} catch (SecurityException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"SecurityException" + e.getMessage());
 			} catch (IllegalStateException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"IllegalStateException" + e.getMessage());
 			} catch (RollbackException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "RollbackException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"RollbackException" + e.getMessage());
 			} catch (HeuristicMixedException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "HeuristicMixedException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"HeuristicMixedException" + e.getMessage());
 			} catch (HeuristicRollbackException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "HeuristicRollbackException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"HeuristicRollbackException" + e.getMessage());
 			} catch (SystemException e) {
 				userTransaction.rollback();
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException"
@@ -265,17 +268,18 @@ public class BeanManager {
 				EntityBaseBean beanManaged = find(bean, manager);
 				beanManaged.canDelete(manager);
 				e.printStackTrace(System.err);
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Unexpected DB response "
-						+ e.getClass() + " " + e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
 			}
 		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException"
-					+ e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"IllegalStateException" + e.getMessage());
 		} catch (SecurityException e) {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException"
 					+ e.getMessage());
 		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException" + e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException"
+					+ e.getMessage());
 		}
 	}
 
@@ -285,8 +289,8 @@ public class BeanManager {
 			try {
 				userTransaction.begin();
 			} catch (NotSupportedException e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"NotSupportedException" + e.getMessage());
 			}
 			try {
 				EntityBaseBean beanManaged = find(bean, manager);
@@ -299,26 +303,26 @@ public class BeanManager {
 						AccessType.UPDATE, manager);
 				userTransaction.commit();
 				return notification;
-			}  catch (SecurityException e) {
+			} catch (SecurityException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"SecurityException" + e.getMessage());
 			} catch (IllegalStateException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"IllegalStateException" + e.getMessage());
 			} catch (RollbackException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "RollbackException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"RollbackException" + e.getMessage());
 			} catch (HeuristicMixedException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "HeuristicMixedException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"HeuristicMixedException" + e.getMessage());
 			} catch (HeuristicRollbackException e) {
 				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "HeuristicRollbackException"
-						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"HeuristicRollbackException" + e.getMessage());
 			} catch (SystemException e) {
 				userTransaction.rollback();
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException"
@@ -336,21 +340,22 @@ public class BeanManager {
 				beanManaged.merge(bean, manager);
 				beanManaged.isValid(manager, false);
 				e.printStackTrace(System.err);
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Unexpected DB response "
-						+ e.getClass() + " " + e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
 			}
 		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException"
-					+ e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"IllegalStateException" + e.getMessage());
 		} catch (SecurityException e) {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException"
 					+ e.getMessage());
 		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException" + e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException"
+					+ e.getMessage());
 		}
 	}
 
-	public static GetResponse get(String userId, String query, Object primaryKey,
+	public static GetResponse get(String userId, String query, long primaryKey,
 			EntityManager manager) throws IcatException {
 		// Note that this uses no transactions as it is read only.
 
@@ -369,10 +374,6 @@ public class BeanManager {
 		}
 
 		Class<? extends EntityBaseBean> entityClass = q.getFirstEntity();
-		if (primaryKey == null) {
-			throw new IcatException(IcatException.IcatExceptionType.NO_SUCH_OBJECT_FOUND,
-					entityClass.getSimpleName() + " has null primary key.");
-		}
 		EntityBaseBean beanManaged = manager.find(entityClass, primaryKey);
 		if (beanManaged == null) {
 			throw new IcatException(IcatException.IcatExceptionType.NO_SUCH_OBJECT_FOUND,
@@ -456,7 +457,7 @@ public class BeanManager {
 
 	private static EntityBaseBean find(EntityBaseBean bean, EntityManager manager)
 			throws IcatException {
-		Object primaryKey = bean.getPK();
+		Object primaryKey = bean.getId();
 		Class<? extends EntityBaseBean> entityClass = bean.getClass();
 		if (primaryKey == null) {
 			throw new IcatException(IcatException.IcatExceptionType.NO_SUCH_OBJECT_FOUND,
@@ -466,7 +467,8 @@ public class BeanManager {
 		try {
 			object = manager.find(entityClass, primaryKey);
 		} catch (Throwable e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Unexpected DB response " + e);
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"Unexpected DB response " + e);
 		}
 
 		if (object == null) {
@@ -492,7 +494,7 @@ public class BeanManager {
 				if (EntityBaseBean.class.isAssignableFrom(field.getType())) {
 					logger.debug("Needs special processing as " + value + " is a bean");
 					if (value != null) {
-						Object pk = ((EntityBaseBean) value).getPK();
+						Object pk = ((EntityBaseBean) value).getId();
 						value = (EntityBaseBean) manager.find(field.getType(), pk);
 						fieldAndMethod.getValue().invoke(thisBean, new Object[] { value });
 					} else {
@@ -541,7 +543,8 @@ public class BeanManager {
 						collection = (Collection<EntityBaseBean>) getters.get(field).invoke(
 								thisBean, (Object[]) null);
 					} catch (Exception e) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.toString());
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+								e.toString());
 					}
 					for (EntityBaseBean b : collection) {
 						b.addIncludes(includeReduced);
@@ -552,7 +555,8 @@ public class BeanManager {
 					try {
 						b = (EntityBaseBean) getters.get(field).invoke(thisBean, (Object[]) null);
 					} catch (Exception e) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.toString());
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+								e.toString());
 					}
 					if (b != null) {
 						b.addIncludes(includeReduced);

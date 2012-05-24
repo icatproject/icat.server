@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>ICAT Server Installation</title>
+    </properties>
+
+    <body>
+
+        <section name="Installation">
+
+            <p>To deploy an ICAT you need:
+            </p>
+            <ol>
+                <li> a suitable container to support EJBs,</li>
+                <li> databases on a system supported by eclipselink,</li>
+                <li> to configure glassfish,</li>
+                <li> to install a copy of icat.properties in the correct place,</li>
+                <li> and to deploy the .ear file.</li>
+            </ol>
+
+            <subsection name="EJB Container">
+                <p> In principle you can use any EJB container. Testing has been performed with
+                    glassfish 3.1 and these notes refer to that version.
+                </p>
+
+                <p> You must already have a Java SE installed (i.e. the command "java" is known), then
+                    you can get Get Java EE 6 SDK Update 4 with JDK
+                    6 Update 31 or later from
+                    http://www.oracle.com/technetwork/java/javaee/downloads/index.html and execute
+                    the script.
+                </p>
+
+                <p> Request custom installation, install and configure, and enter proxy details if
+                    necessary on your site. Request a server domain, set
+                    the domain name and set the
+                    admin password. For a secure deployment of glassfish you should obtain a trusted
+                    certificate rather than
+                    using the self-signed one in the distribution
+                </p>
+
+            </subsection>
+
+
+            <subsection name="Databases">
+                <p>
+                    The database system must be supported by eclipselink. This includes most
+                    database systems you are likely to want as explained at
+                    <a href="http://wiki.eclipse.org/EclipseLink/FAQ/JPA#What_databases_are_supported.3F">the
+                        eclipselink web site
+                    </a>
+                    . It has been tested with: MySQL, Oracle and
+                    Derby). You will need two schemas/databases both with permissions for data
+                    definition
+                    operations such as "CREATE TABLE ..." You must place a copy of the
+                    "JDBC Connector" for your database in the lib directory below
+                    the domain where
+                    you will install icat. You should get the connector from the database supplier.
+                    In the case of Oracle this is
+                    ojdbc14.jar or ojdbc16.jar and for MySQL it is
+                    something like mysql-connector-java*.jar. MySQL must be installed with InnoDB
+                    support. Eclipselink will ensure that MySQL tables make use of the InnoDB
+                    engine. In the case of Derby the connector comes
+                    pre-installed with Glassfish
+                    however we would not expect Derby to be used for production work.
+                </p>
+            </subsection>
+
+            <subsection name="Configure Glassfish">
+                <p>Oracle example for local oracle-xe installation</p>
+                <code>
+                    driver=oracle.jdbc.pool.OracleDataSource
+
+                    icatProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icat:password=secret
+
+                    icatuserProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icatuser:password=anotherSecret
+                </code>
+                <p>MySQL example for local installation</p>
+                <code>
+                    driver=com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+
+                    url = jdbc:mysql://localhost:3306
+
+                    property=:databaseName=icat
+                </code>
+
+                <p>Ensure that "Thread Pools" below the Configurations/server-config has an http-thread-pool with a "Max Thread Pool Size" of 128.</p>
+
+            </subsection>
+        </section>
+    </body>
+</document>
+			

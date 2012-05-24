@@ -13,10 +13,9 @@ import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Rule;
-import org.icatproject.core.manager.DagHandler;
 import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.core.manager.DagHandler.Step;
-
+import org.icatproject.core.manager.GateKeeper;
+import org.icatproject.core.parser.DagHandler.Step;
 
 public class SearchQuery {
 
@@ -132,42 +131,47 @@ public class SearchQuery {
 
 	public String getJPQL(String userId, EntityManager manager) throws IcatException {
 		Set<Class<? extends EntityBaseBean>> es = this.getRelatedEntities();
-
 		Class<? extends EntityBaseBean> bean = this.getFirstEntity();
-
 		String beanName = bean.getSimpleName();
-		TypedQuery<Rule> query = manager.createNamedQuery(Rule.SEARCH_QUERY, Rule.class)
-				.setParameter("member", userId).setParameter("bean", beanName);
 
-		List<Rule> rules = query.getResultList();
-		SearchQuery.logger.debug("Got " + rules.size() + " authz queries for search by " + userId
-				+ " to a " + beanName);
-		StringBuilder restriction = new StringBuilder();
-		boolean first = true;
-		for (Rule r : rules) {
-			String rBeans = r.getBeans();
-			SearchQuery.logger.debug("Restriction: " + r.isRestricted());
-			SearchQuery.logger.debug("JPQL: " + r.getSearchJPQL());
-			SearchQuery.logger.debug("Related beans: " + rBeans);
-			if (!r.isRestricted()) {
-				SearchQuery.logger.info("Null restriction => Operation permitted");
-				restriction = null;
-				break;
-			}
-			if (!rBeans.isEmpty()) {
-				for (String b : rBeans.split(" ")) {
-					es.add(EntityInfoHandler.getClass(b));
+		StringBuilder restriction = null;
+		if (userId.equals("root") && GateKeeper.rootSpecials.contains(beanName)) {
+			logger.info("\"Root\" user " + userId + " is allowed READ to " + beanName);
+		} else {
+			TypedQuery<Rule> query = manager.createNamedQuery(Rule.SEARCH_QUERY, Rule.class)
+					.setParameter("member", userId).setParameter("bean", beanName);
+
+			List<Rule> rules = query.getResultList();
+			SearchQuery.logger.debug("Got " + rules.size() + " authz queries for search by "
+					+ userId + " to a " + beanName);
+			restriction = new StringBuilder();
+			boolean first = true;
+			for (Rule r : rules) {
+				String rBeans = r.getBeans();
+				SearchQuery.logger.debug("Restriction: " + r.isRestricted());
+				SearchQuery.logger.debug("JPQL: " + r.getSearchJPQL());
+				SearchQuery.logger.debug("Related beans: " + rBeans);
+				if (!r.isRestricted()) {
+					SearchQuery.logger.info("Null restriction => Operation permitted");
+					restriction = null;
+					break;
 				}
+				if (!rBeans.isEmpty()) {
+					for (String b : rBeans.split(" ")) {
+						es.add(EntityInfoHandler.getClass(b));
+					}
+				}
+				if (first) {
+					first = false;
+				} else {
+					restriction.append(" OR ");
+				}
+				restriction.append("(" + r.getSearchJPQL().replace(":user", "'" + userId + "'")
+						+ ")");
 			}
-			if (first) {
-				first = false;
-			} else {
-				restriction.append(" OR ");
-			}
-			restriction.append("(" + r.getSearchJPQL().replace(":user", "'" + userId + "'") + ")");
 		}
 
-		Step step = DagHandler.fixes(this.getFirstEntity(), es);
+		Step step = DagHandler.findSteps(this.getFirstEntity(), es);
 		StringBuilder sb = this.getSelect(step);
 		sb.append(' ').append(this.getWhere());
 		if (restriction != null) {

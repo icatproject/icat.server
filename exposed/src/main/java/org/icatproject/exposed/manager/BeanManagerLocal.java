@@ -15,13 +15,13 @@ import org.icatproject.core.manager.EntityInfo;
 @Local
 public interface BeanManagerLocal {
 
-	Object create(String sessionId, EntityBaseBean bean) throws IcatException;
+	long create(String sessionId, EntityBaseBean bean) throws IcatException;
 
 	void delete(String sessionId, EntityBaseBean bean) throws IcatException;
 
 	void update(String sessionId, EntityBaseBean bean) throws IcatException;
 
-	EntityBaseBean get(String sessionId, String query, Object primaryKey) throws IcatException;
+	EntityBaseBean get(String sessionId, String query, long primaryKey) throws IcatException;
 
 	List<?> search(String sessionId, String query) throws IcatException;
 
@@ -29,6 +29,6 @@ public interface BeanManagerLocal {
 
 	EntityInfo getEntityInfo(String beanName) throws IcatException;
 
-	List<Object> createMany(String sessionId, List<EntityBaseBean> beans) throws IcatException;
+	List<Long> createMany(String sessionId, List<EntityBaseBean> beans) throws IcatException;
 
 }

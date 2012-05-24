@@ -6,33 +6,23 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
-
 @Comment("Used to represent an arbitrary relationship between data files")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "SOURCE_DATAFILE_ID",
 		"DEST_DATAFILE_ID" }) })
-@TableGenerator(name = "relatedDatafileGenerator", pkColumnValue = "RelatedDatafile")
 public class RelatedDatafile extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(RelatedDatafile.class);
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "relatedDatafileGenerator")
-	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "SOURCE_DATAFILE_ID", nullable = false)
@@ -41,14 +31,6 @@ public class RelatedDatafile extends EntityBaseBean implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "DEST_DATAFILE_ID", nullable = false)
 	private Datafile destDatafile;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public Datafile getSourceDatafile() {
 		return sourceDatafile;
@@ -85,11 +67,6 @@ public class RelatedDatafile extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "RelatedDatafile[id=" + id + "]";
-	}
-
-	@Override
-	public Object getPK() {
-		return id;
 	}
 
 	public void beforeMarshal(Marshaller source) {

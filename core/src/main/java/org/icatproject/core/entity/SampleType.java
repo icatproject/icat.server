@@ -6,14 +6,10 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 
@@ -22,9 +18,7 @@ import org.apache.log4j.Logger;
 @Comment("A sample to be used in an investigation")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME",
-		"FACILITY_ID" }) })
-@TableGenerator(name = "sampleTypeGenerator", pkColumnValue = "SampleType")
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "FACILITY_ID" }) })
 public class SampleType extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(SampleType.class);
@@ -33,10 +27,6 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	@JoinColumn(name = "FACILITY_ID", nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Facility facility;
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "sampleTypeGenerator")
-	private Long id;
 
 	@Comment("The formula written as a string -e.g. C2H6O2 for ethylene glycol")
 	private String molecularFormula;
@@ -69,21 +59,12 @@ public class SampleType extends EntityBaseBean implements Serializable {
 		return facility;
 	}
 
-	public Long getId() {
-		return this.id;
-	}
-
 	public String getMolecularFormula() {
 		return molecularFormula;
 	}
 
 	public String getName() {
 		return this.name;
-	}
-
-	@Override
-	public Object getPK() {
-		return this.id;
 	}
 
 	public String getSafetyInformation() {
@@ -96,10 +77,6 @@ public class SampleType extends EntityBaseBean implements Serializable {
 
 	public void setFacility(Facility facility) {
 		this.facility = facility;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public void setMolecularFormula(String molecularFormula) {

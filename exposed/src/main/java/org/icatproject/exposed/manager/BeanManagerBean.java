@@ -31,7 +31,6 @@ import org.icatproject.core.manager.NotificationMessages;
 import org.icatproject.core.manager.SearchResponse;
 import org.icatproject.exposed.EJBObject;
 
-
 @Stateless()
 @TransactionManagement(TransactionManagementType.BEAN)
 public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
@@ -86,12 +85,13 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 	}
 
 	@WebMethod
-	public Object create(String sessionId, EntityBaseBean bean) throws IcatException {
+	public long create(String sessionId, EntityBaseBean bean) throws IcatException {
 		try {
 			String userId = user.getUserName(sessionId);
-			CreateResponse createResponse = BeanManager.create(userId, bean, manager, userTransaction);
-			Transmitter.processMessages(createResponse.getNotificationMessages(), queueConnection, queue,
-					topicConnection, topic);
+			CreateResponse createResponse = BeanManager.create(userId, bean, manager,
+					userTransaction);
+			Transmitter.processMessages(createResponse.getNotificationMessages(), queueConnection,
+					queue, topicConnection, topic);
 			return createResponse.getPk();
 		} catch (IcatException e) {
 			logger.debug(e.getMessage());
@@ -103,14 +103,15 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 	}
 
 	@Override
-	public List<Object> createMany(String sessionId, List<EntityBaseBean> beans) throws IcatException {
+	public List<Long> createMany(String sessionId, List<EntityBaseBean> beans) throws IcatException {
 		try {
 			String userId = user.getUserName(sessionId);
-			List<CreateResponse> createResponses = BeanManager.createMany(userId, beans, manager, userTransaction);
-			List<Object> lo = new ArrayList<Object>();
+			List<CreateResponse> createResponses = BeanManager.createMany(userId, beans, manager,
+					userTransaction);
+			List<Long> lo = new ArrayList<Long>();
 			for (CreateResponse createResponse : createResponses) {
-				Transmitter.processMessages(createResponse.getNotificationMessages(), queueConnection, queue,
-						topicConnection, topic);
+				Transmitter.processMessages(createResponse.getNotificationMessages(),
+						queueConnection, queue, topicConnection, topic);
 				lo.add(createResponse.getPk());
 			}
 			return lo;
@@ -159,13 +160,13 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 	}
 
 	@Override
-	public EntityBaseBean get(String sessionId, String query, Object primaryKey) throws IcatException {
+	public EntityBaseBean get(String sessionId, String query, long primaryKey) throws IcatException {
 		try {
 			String userId = user.getUserName(sessionId);
 
 			GetResponse getResponse = BeanManager.get(userId, query, primaryKey, manager);
-			Transmitter.processMessages(getResponse.getNotificationMessages(), queueConnection, queue, topicConnection,
-					topic);
+			Transmitter.processMessages(getResponse.getNotificationMessages(), queueConnection,
+					queue, topicConnection, topic);
 			return getResponse.getBean();
 		} catch (IcatException e) {
 			logger.debug(e);
@@ -181,8 +182,8 @@ public class BeanManagerBean extends EJBObject implements BeanManagerLocal {
 		try {
 			String userId = user.getUserName(sessionId);
 			SearchResponse searchResponse = BeanManager.search(userId, query, manager);
-			Transmitter.processMessages(searchResponse.getNotificationMessages(), queueConnection, queue,
-					topicConnection, topic);
+			Transmitter.processMessages(searchResponse.getNotificationMessages(), queueConnection,
+					queue, topicConnection, topic);
 			return searchResponse.getList();
 		} catch (IcatException e) {
 			logger.debug(e.getMessage());

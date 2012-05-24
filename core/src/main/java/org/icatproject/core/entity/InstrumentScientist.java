@@ -5,40 +5,22 @@ import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
-
 @Comment("Relationship between an ICAT user as an instrument scientist and the instrument")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "USER_ID", "INSTRUMENT_ID" }) })
-@TableGenerator(name = "instrumentScientistGenerator", pkColumnValue = "InstrumentScientist")
 public class InstrumentScientist extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(InstrumentScientist.class);
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "instrumentScientistGenerator")
-	private Long id;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public User getUser() {
 		return user;
@@ -71,11 +53,6 @@ public class InstrumentScientist extends EntityBaseBean implements Serializable 
 	@Override
 	public String toString() {
 		return "InstrumentScientist[id=" + id + "]";
-	}
-
-	@Override
-	public Object getPK() {
-		return id;
 	}
 
 	@Override

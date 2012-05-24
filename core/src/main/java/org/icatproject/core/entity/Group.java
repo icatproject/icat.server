@@ -4,10 +4,11 @@ import java.io.Serializable;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
@@ -15,13 +16,13 @@ import org.apache.log4j.Logger;
 @Comment("A group of users")
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "\"GROUP\"")
+@Table(name = "\"GROUP\"", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 public class Group extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(Group.class);
 
 	@Comment("A short name identifying this group of users")
-	@Id
+	@Column(name = "NAME", nullable = false)
 	private String name;
 
 	@OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
@@ -45,11 +46,6 @@ public class Group extends EntityBaseBean implements Serializable {
 	}
 
 	public String getName() {
-		return this.name;
-	}
-
-	@Override
-	public Object getPK() {
 		return this.name;
 	}
 

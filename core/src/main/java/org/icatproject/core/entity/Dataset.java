@@ -10,14 +10,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
@@ -27,14 +23,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
-
 @Comment("A collection of data files and part of an investigation")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "SAMPLE_ID", "INVESTIGATION_ID",
 		"NAME", "TYPE" }) })
 @XmlRootElement
-@TableGenerator(name = "datasetGenerator", pkColumnValue = "Dataset")
 public class Dataset extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(Dataset.class);
@@ -55,10 +49,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@Column(name = "END_DATE")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date endDate;
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datasetGenerator")
-	private Long id;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<InputDataset> inputDatasets;
@@ -145,10 +135,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		return this.endDate;
 	}
 
-	public Long getId() {
-		return this.id;
-	}
-
 	public List<InputDataset> getInputDatasets() {
 		return inputDatasets;
 	}
@@ -171,11 +157,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	public List<DatasetParameter> getParameters() {
 		return parameters;
-	}
-
-	@Override
-	public Object getPK() {
-		return this.id;
 	}
 
 	public Sample getSample() {
@@ -292,10 +273,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public void setInputDatasets(List<InputDataset> inputDatasets) {

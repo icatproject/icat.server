@@ -6,32 +6,22 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
-
 @Comment("Permissible value for string parameter types")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "VALUE", "PARAMETERTYPE_ID" }) })
-@TableGenerator(name = "permissibleStringValueGenerator", pkColumnValue = "PermissibleStringValue")
 public class PermissibleStringValue extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(PermissibleStringValue.class);
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "permissibleStringValueGenerator")
-	private Long id;
 
 	@Comment("The parameter type to which this permissible string value applies")
 	@JoinColumn(name = "PARAMETERTYPE_ID", nullable = false)
@@ -61,15 +51,6 @@ public class PermissibleStringValue extends EntityBaseBean implements Serializab
 		}
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public Object getPK() {
-		return id;
-	}
-
 	public String getValue() {
 		return value;
 	}
@@ -78,10 +59,6 @@ public class PermissibleStringValue extends EntityBaseBean implements Serializab
 	public void preparePersist(String modId, EntityManager manager) throws IcatException {
 		super.preparePersist(modId, manager);
 		this.id = null;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public void setValue(String value) {

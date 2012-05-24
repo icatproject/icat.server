@@ -6,13 +6,9 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
@@ -21,20 +17,14 @@ import javax.xml.bind.Marshaller;
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
-
 @Comment("A period of time related to an investigation")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "INVESTIGATION_ID", "STARTDATE",
 		"ENDDATE" }) })
-@TableGenerator(name = "shiftGenerator", pkColumnValue = "Shift")
 public class Shift extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(Shift.class);
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "shiftGenerator")
-	private Long id;
 
 	@JoinColumn(name = "INVESTIGATION_ID", nullable = false)
 	@ManyToOne
@@ -64,11 +54,6 @@ public class Shift extends EntityBaseBean implements Serializable {
 		return "Shift[id=" + id + "]";
 	}
 
-	@Override
-	public Object getPK() {
-		return id;
-	}
-
 	public void beforeMarshal(Marshaller source) {
 		logger.trace("Marshalling Shift for " + includes);
 
@@ -81,14 +66,6 @@ public class Shift extends EntityBaseBean implements Serializable {
 	public void preparePersist(String modId, EntityManager manager) throws IcatException {
 		super.preparePersist(modId, manager);
 		this.id = null;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public Date getStartDate() {

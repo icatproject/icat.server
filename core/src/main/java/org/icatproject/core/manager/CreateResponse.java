@@ -2,15 +2,15 @@ package org.icatproject.core.manager;
 
 public class CreateResponse {
 
-	private Object pk;
+	private long pk;
 	private NotificationMessages notificationMessage;
 
-	public CreateResponse(Object pk, NotificationMessages notificationMessage) {
+	public CreateResponse(long pk, NotificationMessages notificationMessage) {
 		this.pk = pk;
 		this.notificationMessage = notificationMessage;
 	}
 
-	public Object getPk() {
+	public long getPk() {
 		return pk;
 	}
 

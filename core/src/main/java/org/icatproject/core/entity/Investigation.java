@@ -9,31 +9,23 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
-
 
 @Comment("An investigation or experiment")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "VISIT_ID",
 		"FACILITY_CYCLE_ID", "INSTRUMENT_ID" }) })
-@XmlRootElement
-@TableGenerator(name = "investigationGenerator", pkColumnValue = "Investigation")
 public class Investigation extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(Investigation.class);
@@ -54,10 +46,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@JoinColumn(name = "FACILITY_CYCLE_ID")
 	@ManyToOne
 	private FacilityCycle facilityCycle;
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "investigationGenerator")
-	private Long id;
 
 	@JoinColumn(name = "INSTRUMENT_ID")
 	@ManyToOne
@@ -169,10 +157,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		return this.facilityCycle;
 	}
 
-	public Long getId() {
-		return this.id;
-	}
-
 	public Instrument getInstrument() {
 		return instrument;
 	}
@@ -191,11 +175,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public List<InvestigationParameter> getParameters() {
 		return parameters;
-	}
-
-	@Override
-	public Object getPK() {
-		return id;
 	}
 
 	public List<Publication> getPublications() {
@@ -273,10 +252,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public void setFacilityCycle(FacilityCycle facilityCycle) {
 		this.facilityCycle = facilityCycle;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public void setInstrument(Instrument instrument) {

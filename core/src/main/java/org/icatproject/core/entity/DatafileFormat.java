@@ -15,18 +15,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
-
 @Comment("A data file format")
 @SuppressWarnings("serial")
 @Entity
-@TableGenerator(name = "datafileFormatGenerator", pkColumnValue = "DatafileFormat")
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME", "VERSION" }) })
 public class DatafileFormat extends EntityBaseBean implements Serializable {
 
@@ -55,10 +52,6 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 	@Comment("Holds the underlying format - such as binary or text")
 	private String type;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datafileFormatGenerator")
-	private Long id;
-
 	@Comment("A short name identifying the format -e.g. \"mp3\" within the facility")
 	@Column(name = "NAME", nullable = false)
 	private String name;
@@ -83,17 +76,8 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 		return this.type;
 	}
 
-	public Long getId() {
-		return this.id;
-	}
-
 	public String getName() {
 		return this.name;
-	}
-
-	@Override
-	public Object getPK() {
-		return this.id;
 	}
 
 	public String getVersion() {
@@ -110,10 +94,6 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 
 	public void setType(String type) {
 		this.type = type;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public void setName(String name) {

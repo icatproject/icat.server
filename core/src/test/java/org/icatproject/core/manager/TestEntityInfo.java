@@ -20,11 +20,8 @@ import org.icatproject.core.entity.Job;
 import org.icatproject.core.entity.Keyword;
 import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.User;
-import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.core.manager.EntityInfoHandler.KeyType;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.junit.Test;
-
 
 public class TestEntityInfo {
 
@@ -36,7 +33,7 @@ public class TestEntityInfo {
 		testPKS(Dataset.class, "id");
 		testPKS(Keyword.class, "id");
 		testPKS(InvestigationUser.class, "id");
-		testPKS(User.class, "name");
+		testPKS(User.class, "id");
 		testPKS(Job.class, "id");
 	}
 
@@ -46,7 +43,7 @@ public class TestEntityInfo {
 		testConstraint(Dataset.class, "sample", "investigation", "name", "type");
 		testConstraint(Keyword.class, "name", "investigation");
 		testConstraint(InvestigationUser.class, "user", "investigation");
-		testConstraint(User.class);
+		testConstraint(User.class, "name");
 		testConstraint(Job.class);
 	}
 
@@ -153,7 +150,7 @@ public class TestEntityInfo {
 		testNNF(Dataset.class, "type", "name");
 		testNNF(Keyword.class, "name", "investigation");
 		testNNF(InvestigationUser.class, "investigation", "user");
-		testNNF(User.class);
+		testNNF(User.class, "name");
 		testNNF(ParameterType.class, "valueType", "name", "facility");
 		testNNF(Job.class, "application");
 	}
@@ -203,7 +200,7 @@ public class TestEntityInfo {
 		testGetters(Dataset.class, 15);
 		testGetters(Keyword.class, 3);
 		testGetters(InvestigationUser.class, 4);
-		testGetters(User.class, 6);
+		testGetters(User.class, 7);
 		testGetters(ParameterType.class, 20);
 		testGetters(Job.class, 6);
 	}
@@ -227,7 +224,7 @@ public class TestEntityInfo {
 		testSetters(Dataset.class, 10);
 		testSetters(Keyword.class, 2);
 		testSetters(InvestigationUser.class, 3);
-		testSetters(User.class, 1);
+		testSetters(User.class, 2);
 		testSetters(ParameterType.class, 14);
 		testSetters(Job.class, 1);
 	}
@@ -241,22 +238,6 @@ public class TestEntityInfo {
 			String m = entry.getValue().getName();
 			assertTrue(klass.getSimpleName() + " value ", m.equals("set" + cap));
 		}
-	}
-
-	@Test
-	public void keytype() throws Exception {
-		testKeytype(Investigation.class, EntityInfoHandler.KeyType.GENERATED);
-		testKeytype(Dataset.class, EntityInfoHandler.KeyType.GENERATED);
-		testKeytype(Keyword.class, EntityInfoHandler.KeyType.GENERATED);
-		testKeytype(InvestigationUser.class, EntityInfoHandler.KeyType.GENERATED);
-		testKeytype(User.class, EntityInfoHandler.KeyType.SIMPLE);
-		testKeytype(ParameterType.class, EntityInfoHandler.KeyType.GENERATED);
-		testKeytype(Job.class, EntityInfoHandler.KeyType.GENERATED);
-	}
-
-	private void testKeytype(Class<? extends EntityBaseBean> klass, KeyType keyType)
-			throws Exception {
-		assertEquals(klass.getSimpleName() + " keyType", keyType, pkHandler.getKeytype(klass));
 	}
 
 }

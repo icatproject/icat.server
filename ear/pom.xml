@@ -1,85 +1,90 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.icatproject</groupId>
-		<artifactId>icat</artifactId>
-		<version>4.1.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>org.icatproject</groupId>
+        <artifactId>icat</artifactId>
+        <version>4.1.0-rc-01-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>icat.ear</artifactId>
-	<packaging>ear</packaging>
-
-
-	<properties>
-		<uniqueVersion>false</uniqueVersion>
-	</properties>
-
-	<dependencies>
-
-		<dependency>
-			<groupId>org.icatproject</groupId>
-			<artifactId>icat.exposed</artifactId>
-			<type>ejb</type>
-		</dependency>
-
-		<dependency>
-			<groupId>org.icatproject</groupId>
-			<artifactId>icat.user-ansto</artifactId>
-			<type>jar</type>
-		</dependency>
-
-		<dependency>
-			<groupId>org.icatproject</groupId>
-			<artifactId>icat.user-ldap</artifactId>
-			<type>jar</type>
-		</dependency>
-
-	</dependencies>
+    <artifactId>icat.ear</artifactId>
+    <packaging>ear</packaging>
 
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-ear-plugin</artifactId>
-				<version>2.6</version>
-				<configuration>
-					<defaultJavaBundleDir>lib</defaultJavaBundleDir>
-					<modules>
-					</modules>
-				</configuration>
-			</plugin>
+    <properties>
+        <uniqueVersion>false</uniqueVersion>
+    </properties>
 
-			<plugin>
+    <dependencies>
 
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
-				<executions>
-					<execution>
-						<phase>install</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<executable>asadmin</executable>
-					<arguments>
-						<argument>--echo</argument>
-						<argument>--port=4840</argument>
-						<argument>deploy</argument>
-						<argument>--force=true</argument>
-						<argument>${project.build.directory}/${project.build.finalName}.ear</argument>
-				</arguments>
-				</configuration>
-			</plugin>
-		</plugins>
+        <dependency>
+            <groupId>org.icatproject</groupId>
+            <artifactId>icat.exposed</artifactId>
+            <type>ejb</type>
+        </dependency>
 
-	</build>
+        <dependency>
+            <groupId>org.icatproject</groupId>
+            <artifactId>icat.user-ansto</artifactId>
+            <type>jar</type>
+        </dependency>
 
+        <dependency>
+            <groupId>org.icatproject</groupId>
+            <artifactId>icat.user-ldap</artifactId>
+            <type>jar</type>
+        </dependency>
+
+    </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ear-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <defaultJavaBundleDir>lib</defaultJavaBundleDir>
+                    <modules>
+                    </modules>
+                </configuration>
+            </plugin>
+
+            <plugin>
+
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>asadmin</executable>
+                    <arguments>
+                        <argument>--echo</argument>
+                        <argument>--port=4840</argument>
+                        <argument>deploy</argument>
+                        <argument>--force=true</argument>
+                        <argument>${project.build.directory}/${project.build.finalName}.ear</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+            </plugin>
+
+        </plugins>
+
+    </build>
+
+    <name>ICAT Server ".ear"</name>
 </project>
 
 

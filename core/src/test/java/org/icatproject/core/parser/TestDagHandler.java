@@ -1,4 +1,4 @@
-package org.icatproject.core.manager;
+package org.icatproject.core.parser;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,7 +11,8 @@ import org.icatproject.core.entity.DatasetParameter;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.User;
-import org.icatproject.core.manager.DagHandler.Step;
+import org.icatproject.core.parser.DagHandler;
+import org.icatproject.core.parser.DagHandler.Step;
 import org.junit.Test;
 
 
@@ -24,7 +25,7 @@ public class TestDagHandler {
 		es.add(Datafile.class);
 		es.add(DatasetParameter.class);
 		es.add(DatafileParameter.class);
-		Step s = DagHandler.fixes(Dataset.class, es);
+		Step s = DagHandler.findSteps(Dataset.class, es);
 		System.out.println(s);
 	}
 
@@ -35,7 +36,7 @@ public class TestDagHandler {
 		es.add(Datafile.class);
 		es.add(DatasetParameter.class);
 		es.add(User.class);
-		DagHandler.fixes(Dataset.class, es);
+		DagHandler.findSteps(Dataset.class, es);
 	}
 
 }

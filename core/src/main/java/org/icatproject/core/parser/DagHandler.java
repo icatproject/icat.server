@@ -1,27 +1,36 @@
-package org.icatproject.core.manager;
+package org.icatproject.core.parser;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 
-
+/**
+ * 
+ * Ensures that the entities can only be linked in one way.
+ * 
+ */
 public class DagHandler {
 
 	private static EntityInfoHandler pkHandler = EntityInfoHandler.getInstance();
 
+	/**
+	 * A nested structure with a bean a relationship and the set of steps. It is a set because there
+	 * may be a need to follow more than one chain of entities.
+	 */
 	public static class Step {
 
 		private Class<? extends EntityBaseBean> bean;
 		private Relationship relationship;
-		private Set<Step> to;
+		private Set<Step> steps;
 
-		public Step(Class<? extends EntityBaseBean> bean, Relationship relationship, Set<Step> to) {
+		public Step(Class<? extends EntityBaseBean> bean, Relationship relationship, Set<Step> steps) {
 			this.bean = bean;
 			this.relationship = relationship;
-			this.to = to;
+			this.steps = steps;
 		}
 
 		public String toString() {
@@ -31,11 +40,11 @@ public class DagHandler {
 			} else {
 				sb.append(relationship);
 			}
-			if (!to.isEmpty()) {
+			if (!steps.isEmpty()) {
 				sb.append(" to ");
 			}
 			boolean first = true;
-			for (Step s : to) {
+			for (Step s : steps) {
 				if (first) {
 					first = false;
 				} else {
@@ -47,7 +56,7 @@ public class DagHandler {
 		}
 
 		public String join() {
-			if (to.isEmpty()) {
+			if (steps.isEmpty()) {
 				return "";
 			} else {
 				String alias = null;
@@ -57,8 +66,8 @@ public class DagHandler {
 					alias = relationship.getBean().getSimpleName() + "$";
 				}
 				StringBuilder sb = new StringBuilder();
-				for (Step s : to) {
-					sb.append("LEFT JOIN " + alias + "." + s.relationship.getField().getName()
+				for (Step s : steps) {
+					sb.append("JOIN " + alias + "." + s.relationship.getField().getName()
 							+ " AS " + s.relationship.getBean().getSimpleName() + "$");
 					sb.append(" " + s.join());
 				}
@@ -67,7 +76,11 @@ public class DagHandler {
 		}
 	}
 
-	public static Step fixes(Class<? extends EntityBaseBean> start,
+	/**
+	 * Takes the start entity and the set of other entities and produces a Step, which is a nested
+	 * structure. It will fail if the entities are not properly linked.
+	 */
+	public static Step findSteps(Class<? extends EntityBaseBean> start,
 			Set<Class<? extends EntityBaseBean>> es) throws IcatException {
 		Set<Class<? extends EntityBaseBean>> allBeans = new HashSet<Class<? extends EntityBaseBean>>(
 				es);
@@ -89,7 +102,8 @@ public class DagHandler {
 				}
 				sb.append(bean.getSimpleName());
 			}
-			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "Unable to reach " + sb);
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+					"Unable to reach " + sb);
 
 		}
 		return step;

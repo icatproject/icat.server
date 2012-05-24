@@ -77,13 +77,13 @@ public class ICAT extends EJBObject {
 	}
 
 	@WebMethod
-	public Object create(@WebParam(name = "sessionId") String sessionId,
+	public long create(@WebParam(name = "sessionId") String sessionId,
 			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
 		return beanManagerLocal.create(sessionId, bean);
 	}
 
 	@WebMethod
-	public List<Object> createMany(@WebParam(name = "sessionId") String sessionId,
+	public List<Long> createMany(@WebParam(name = "sessionId") String sessionId,
 			@WebParam(name = "beans") List<EntityBaseBean> beans) throws IcatException {
 		return beanManagerLocal.createMany(sessionId, beans);
 	}
@@ -102,7 +102,7 @@ public class ICAT extends EJBObject {
 
 	@WebMethod
 	public EntityBaseBean get(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "query") String query, @WebParam(name = "primaryKey") Object primaryKey)
+			@WebParam(name = "query") String query, @WebParam(name = "primaryKey") long primaryKey)
 			throws IcatException {
 		return beanManagerLocal.get(sessionId, query, primaryKey);
 	}

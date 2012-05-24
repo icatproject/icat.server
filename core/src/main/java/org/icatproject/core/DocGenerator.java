@@ -14,9 +14,7 @@ import java.util.Set;
 
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.core.manager.EntityInfoHandler.KeyType;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
-
 
 public class DocGenerator {
 
@@ -25,20 +23,21 @@ public class DocGenerator {
 	public static void main(String[] args) {
 
 		try {
-			File dir = new File("src/main/java/org/icatproject/core/entity");
-			PrintWriter out = new PrintWriter(new File("icat.html"));
+			File dir = new File(args[0]);
+			PrintWriter out = new PrintWriter(new File(dir, "src/site/resources/schema.html"));
 			out.print("<!DOCTYPE HTML><html><head><style type=\"text/css\">h1,h2,h3 {color:sienna;} table { border-collapse:collapse; } td, th { border:1px solid sienna; padding:4px; font-weight:normal; text-align:left} th { color:sienna; }</style><title>ICAT Schema</title><link rel=\"icon\" href=\"http://www.icatproject.org/favicon.ico\"/></head><body><h1>ICAT Schema</h1>");
 			List<String> cnames = new ArrayList<String>();
-			for (File f : dir.listFiles(new FileFilter() {
+			for (File f : new File(dir, "src/main/java/org/icatproject/core/entity")
+					.listFiles(new FileFilter() {
 
-				@Override
-				public boolean accept(File pathname) {
-					String name = pathname.getName();
-					return name.endsWith(".java")
-							&& !Arrays.asList("Comment", "EntityBaseBean", "Parameter").contains(
-									name.replace(".java", ""));
-				}
-			})) {
+						@Override
+						public boolean accept(File pathname) {
+							String name = pathname.getName();
+							return name.endsWith(".java")
+									&& !Arrays.asList("Comment", "EntityBaseBean", "Parameter")
+											.contains(name.replace(".java", ""));
+						}
+					})) {
 				String cname = f.getName().replace(".java", "");
 				cnames.add(cname);
 			}
@@ -74,18 +73,10 @@ public class DocGenerator {
 				Map<Field, Integer> stringFields = eiHandler.getStringFields(eklass);
 
 				Field key = eiHandler.getKeyFor(eklass);
-				KeyType keyType = eiHandler.getKeytype(eklass);
-				String comments = fieldComments.get(key);
-				String keyTypeString = "";
-				if (keyType == KeyType.GENERATED) {
-					keyTypeString = " auto generated";
-				}
-				out.print("<p><b>Key</b> " + key.getName() + keyTypeString
-						+ ((comments == null) ? "" : (": " + comments)) + "</p>");
 				fields.remove(key);
 
 				for (List<Field> constraint : eiHandler.getConstraintFields(eklass)) {
-					out.print("<p><b>Constraint</b> ");
+					out.print("<p><b>Uniqueness constraint</b> ");
 					first = true;
 					for (Field f : constraint) {
 						if (first) {
@@ -109,7 +100,7 @@ public class DocGenerator {
 					out.print("<tr><td> " + card + "</td>");
 					out.print("<td><a href = \"#" + beanName + "\">" + beanName + "</a></td><td>"
 							+ f.getName() + "</td><td>" + cascaded + "</td>");
-					comments = fieldComments.get(f);
+					String comments = fieldComments.get(f);
 					out.println("<td>" + ((comments == null) ? "" : comments) + "</td></tr>");
 					fields.remove(f);
 				}
@@ -127,7 +118,7 @@ public class DocGenerator {
 						if (notnullables.contains(f)) {
 							type = type + " NOT NULL";
 						}
-						comments = fieldComments.get(f);
+						String comments = fieldComments.get(f);
 						out.print("<tr><td>" + f.getName() + "</td><td>" + type + "</td>");
 						out.println("<td>" + ((comments == null) ? "" : comments) + "</td></tr>");
 					}

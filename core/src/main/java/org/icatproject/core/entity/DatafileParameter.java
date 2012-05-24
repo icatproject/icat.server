@@ -4,13 +4,9 @@ import java.io.Serializable;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -18,20 +14,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
-
 @Comment("A parameter associated with a data file")
 @SuppressWarnings("serial")
 @Entity
-@TableGenerator(name = "datafileParameterGenerator", pkColumnValue = "DatafileParameter")
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATAFILE_ID", "PARAMETER_TYPE_ID" }) })
 @XmlRootElement
 public class DatafileParameter extends Parameter implements Serializable {
 
 	private static Logger logger = Logger.getLogger(DatafileParameter.class);
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "datafileParameterGenerator")
-	private Long id;
 
 	@Comment("The associated data file")
 	@JoinColumn(name = "DATAFILE_ID", nullable = false)
@@ -54,34 +44,22 @@ public class DatafileParameter extends Parameter implements Serializable {
 		return this.datafile;
 	}
 
-	public Long getId() {
-		return this.id;
-	}
-
-	@Override
-	public Object getPK() {
-		return this.id;
-	}
-
 	@Override
 	public void preparePersist(String modId, EntityManager manager) throws IcatException {
 		super.preparePersist(modId, manager);
 		this.id = null;
 		if (type == null) {
-			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
+			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
+					"Type of parameter is not set");
 		}
 		if (!type.isApplicableToDatafile()) {
-			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Parameter of type "
-					+ type.getName() + " is not applicable to a Datafile");
+			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
+					"Parameter of type " + type.getName() + " is not applicable to a Datafile");
 		}
 	}
 
 	public void setDatafile(Datafile datafile) {
 		this.datafile = datafile;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	@Override

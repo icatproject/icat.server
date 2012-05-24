@@ -7,15 +7,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.TableGenerator;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
@@ -27,8 +22,6 @@ import org.icatproject.core.parser.RestrictedBean;
 import org.icatproject.core.parser.Token;
 import org.icatproject.core.parser.Tokenizer;
 
-
-
 @Comment("An authorization rule")
 @SuppressWarnings("serial")
 @Entity
@@ -38,8 +31,6 @@ import org.icatproject.core.parser.Tokenizer;
 		@NamedQuery(name = "Rule.UpdateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug WHERE (ug.user.name = :member OR g IS NULL) AND r.bean = :bean AND r.u = TRUE"),
 		@NamedQuery(name = "Rule.DeleteQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug WHERE (ug.user.name = :member OR g IS NULL) AND r.bean = :bean AND r.d = TRUE"),
 		@NamedQuery(name = "Rule.SearchQuery", query = "SELECT DISTINCT r          FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug WHERE (ug.user.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE") })
-@XmlRootElement
-@TableGenerator(name = "ruleGenerator", pkColumnValue = "Rule")
 public class Rule extends EntityBaseBean implements Serializable {
 
 	public static final String CREATE_QUERY = "Rule.CreateQuery";
@@ -64,10 +55,6 @@ public class Rule extends EntityBaseBean implements Serializable {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Group group;
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "ruleGenerator")
-	private Long id;
 
 	@XmlTransient
 	@Column(length = 1024)
@@ -128,8 +115,8 @@ public class Rule extends EntityBaseBean implements Serializable {
 			} else if (c == 'D') {
 				this.d = true;
 			} else {
-				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "CRUD value "
-						+ this.crudFlags + " contains " + c);
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+						"CRUD value " + this.crudFlags + " contains " + c);
 			}
 		}
 
@@ -184,15 +171,6 @@ public class Rule extends EntityBaseBean implements Serializable {
 
 	public Group getGroup() {
 		return this.group;
-	}
-
-	public Long getId() {
-		return this.id;
-	}
-
-	@Override
-	public Object getPK() {
-		return this.id;
 	}
 
 	@XmlTransient
@@ -263,10 +241,6 @@ public class Rule extends EntityBaseBean implements Serializable {
 
 	public void setGroup(Group group) {
 		this.group = group;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public void setR(boolean r) {

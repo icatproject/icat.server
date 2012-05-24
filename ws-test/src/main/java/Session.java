@@ -11,7 +11,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 
 import org.icatproject.Application;
-
 import org.icatproject.Datafile;
 import org.icatproject.DatafileFormat;
 import org.icatproject.Dataset;
@@ -26,27 +25,19 @@ import org.icatproject.ICAT;
 import org.icatproject.ICATService;
 import org.icatproject.IcatExceptionType;
 import org.icatproject.IcatException_Exception;
-
 import org.icatproject.InputDatafile;
 import org.icatproject.InputDataset;
-
 import org.icatproject.Investigation;
 import org.icatproject.InvestigationType;
 import org.icatproject.Job;
-
 import org.icatproject.NotificationRequest;
-
 import org.icatproject.OutputDatafile;
 import org.icatproject.OutputDataset;
 import org.icatproject.ParameterType;
 import org.icatproject.ParameterValueType;
 import org.icatproject.Rule;
-
 import org.icatproject.User;
 import org.icatproject.UserGroup;
-
-import uk.icat3.client.ICATCompat;
-import uk.icat3.client.ICATCompatService;
 
 class Session {
 	public enum ParameterApplicability {
@@ -125,7 +116,7 @@ class Session {
 	public void addRule(String groupName, String what, String crudFlags) throws Exception {
 		Rule rule = new Rule();
 		if (groupName != null) {
-			Group g = (Group) this.icatEP.get(this.sessionId, "Group", groupName);
+			Group g = (Group) search("Group [name= '" + groupName + "']").get(0);
 			rule.setGroup(g);
 		}
 		rule.setWhat(what);
@@ -136,30 +127,25 @@ class Session {
 	public void addUserGroupMember(String groupName, String userName) throws Exception {
 		Group group = null;
 		if (groupName != null) {
-			try {
-				group = (Group) this.icatEP.get(this.sessionId, "Group", groupName);
-			} catch (IcatException_Exception e) {
-				if (e.getFaultInfo().getType() == IcatExceptionType.NO_SUCH_OBJECT_FOUND) {
-					group = new Group();
-					group.setName(groupName);
-					this.icatEP.create(sessionId, group);
-				} else {
-					throw e;
-				}
+			List<Object> groups = search("Group [name= '" + groupName + "']");
+			if (groups.isEmpty()) {
+				group = new Group();
+				group.setName(groupName);
+				group.setId(this.icatEP.create(sessionId, group));
+			} else {
+				group = (Group) groups.get(0);
 			}
 		}
 		User user = null;
-		try {
-			user = (User) this.icatEP.get(this.sessionId, "User", userName);
-		} catch (IcatException_Exception e) {
-			if (e.getFaultInfo().getType() == IcatExceptionType.NO_SUCH_OBJECT_FOUND) {
-				user = new User();
-				user.setName(userName);
-				this.icatEP.create(sessionId, user);
-			} else {
-				throw e;
-			}
+		List<Object> users = search("User [name= '" + userName + "']");
+		if (users.isEmpty()) {
+			user = new User();
+			user.setName(userName);
+			user.setId(this.icatEP.create(sessionId, user));
+		} else {
+			user = (User) users.get(0);
 		}
+
 		UserGroup userGroup = new UserGroup();
 		userGroup.setUser(user);
 		userGroup.setGroup(group);
@@ -274,7 +260,7 @@ class Session {
 		dataset.setName(name);
 		dataset.setType(type);
 		dataset.setInvestigation(inv);
-		dataset.setId((Long) this.icatEP.create(this.sessionId, dataset));
+		dataset.setId(this.icatEP.create(this.sessionId, dataset));
 		return dataset;
 	}
 
@@ -295,7 +281,7 @@ class Session {
 		final DatasetType dst = new DatasetType();
 		dst.setName(name);
 		dst.setFacility(facility);
-		dst.setId((Long) this.icatEP.create(this.sessionId, dst));
+		dst.setId(this.icatEP.create(this.sessionId, dst));
 		return dst;
 	}
 
@@ -303,7 +289,7 @@ class Session {
 		final Facility f = new Facility();
 		f.setName(shortName);
 		f.setDaysUntilRelease(daysUntilRelease);
-		this.icatEP.create(this.sessionId, f);
+		f.setId(this.icatEP.create(this.sessionId, f));
 		return f;
 	}
 
@@ -314,7 +300,7 @@ class Session {
 		i.setName(invNumber);
 		i.setTitle(title);
 		i.setType(invType);
-		i.setId((Long) this.icatEP.create(this.sessionId, i));
+		i.setId(this.icatEP.create(this.sessionId, i));
 		return i;
 	}
 
@@ -323,7 +309,7 @@ class Session {
 		final InvestigationType type = new InvestigationType();
 		type.setFacility(facility);
 		type.setName(name);
-		type.setId((Long) this.icatEP.create(this.sessionId, type));
+		type.setId(this.icatEP.create(this.sessionId, type));
 		return type;
 	}
 
@@ -338,7 +324,7 @@ class Session {
 		this.icatEP.delete(this.sessionId, bean);
 	}
 
-	public EntityBaseBean get(String query, Object key) throws IcatException_Exception {
+	public EntityBaseBean get(String query, long key) throws IcatException_Exception {
 		return this.icatEP.get(this.sessionId, query, key);
 	}
 
@@ -413,21 +399,21 @@ class Session {
 		return this.icatEP.create(this.sessionId, bean);
 	}
 
-	public List<Object> createMany(List<EntityBaseBean> beans) throws IcatException_Exception {
+	public List<Long> createMany(List<EntityBaseBean> beans) throws IcatException_Exception {
 		return this.icatEP.createMany(this.sessionId, beans);
 
 	}
 
 	public double getRemainingMinutes() throws IcatException_Exception {
-		return  this.icatEP.getRemainingMinutes(this.sessionId);
+		return this.icatEP.getRemainingMinutes(this.sessionId);
 	}
 
 	public String getApiVersion() throws IcatException_Exception {
-		return  this.icatEP.getApiVersion();
+		return this.icatEP.getApiVersion();
 	}
 
 	public String getUserName() throws IcatException_Exception {
-		return  this.icatEP.getUserName(this.sessionId);
+		return this.icatEP.getUserName(this.sessionId);
 	}
 
 	public CompatSession getCompatSession() {

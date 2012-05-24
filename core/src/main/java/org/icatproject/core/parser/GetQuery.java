@@ -5,7 +5,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
-import org.icatproject.core.manager.DagHandler;
 import org.icatproject.core.manager.EntityInfoHandler;
 
 
@@ -31,7 +30,7 @@ public class GetQuery {
 		/* Make sure that all is well - and the entities are connected */
 		Set<Class<? extends EntityBaseBean>> es = include.getBeans(bean);
 		if (es != null) {
-			DagHandler.fixes(bean, es);
+			DagHandler.findSteps(bean, es);
 		}
 	}
 

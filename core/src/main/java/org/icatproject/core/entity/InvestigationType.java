@@ -6,14 +6,10 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 
@@ -23,7 +19,6 @@ import org.apache.log4j.Logger;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "FACILITY_ID" }) })
-@TableGenerator(name = "investigationTypeGenerator", pkColumnValue = "InvestigationType")
 public class InvestigationType extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(InvestigationType.class);
@@ -44,18 +39,6 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
 	public void setFacility(Facility facility) {
 		this.facility = facility;
 	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "sampleTypeGenerator")
-	private Long id;
 
 	@Comment("A description of this type of investigation")
 	private String description;
@@ -94,11 +77,6 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "InvestigationType[id=" + id + "]";
-	}
-
-	@Override
-	public Object getPK() {
-		return id;
 	}
 
 	public void beforeMarshal(Marshaller source) {

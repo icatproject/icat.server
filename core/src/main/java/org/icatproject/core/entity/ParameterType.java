@@ -9,25 +9,19 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
-
 @Comment("A parameter type with unique name and units")
 @SuppressWarnings("serial")
 @Entity
-@TableGenerator(name = "investigatorGenerator", pkColumnValue = "Investigator")
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME", "UNITS" }) })
 public class ParameterType extends EntityBaseBean implements Serializable {
 
@@ -65,10 +59,6 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	@JoinColumn(name = "FACILITY_ID", nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Facility facility;
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "parameterGenerator")
-	private Long id;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<InvestigationParameter> investigationParameters;
@@ -143,10 +133,6 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 		return facility;
 	}
 
-	public Long getId() {
-		return id;
-	}
-
 	public List<InvestigationParameter> getInvestigationParameters() {
 		return investigationParameters;
 	}
@@ -165,11 +151,6 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 
 	public List<PermissibleStringValue> getPermissibleStringValues() {
 		return permissibleStringValues;
-	}
-
-	@Override
-	public Object getPK() {
-		return id;
 	}
 
 	public List<SampleParameter> getSampleParameters() {
@@ -256,10 +237,6 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 
 	public void setFacility(Facility facility) {
 		this.facility = facility;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public void setInvestigationParameters(List<InvestigationParameter> investigationParameters) {

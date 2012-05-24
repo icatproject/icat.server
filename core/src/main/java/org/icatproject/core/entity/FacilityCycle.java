@@ -5,11 +5,16 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
@@ -17,13 +22,27 @@ import org.apache.log4j.Logger;
 @Comment("An operating cycle within a facility")
 @SuppressWarnings("serial")
 @Entity
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME" }) })
 public class FacilityCycle extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(FacilityCycle.class);
 
-	@Comment("A short name identifying this facility cycle")
-	@Id
+	public Facility getFacility() {
+		return facility;
+	}
+
+	public void setFacility(Facility facility) {
+		this.facility = facility;
+	}
+
+	@Comment("A short name identifying this facility cycle within the facility")
+	@Column(name = "NAME", nullable = false)
 	private String name;
+
+	@Comment("The facility which has this cycle")
+	@JoinColumn(name = "FACILITY_ID", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Facility facility;
 
 	@Comment("Start of cycle")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -88,15 +107,13 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
 		return "FacilityCycle[name=" + name + "]";
 	}
 
-	@Override
-	public Object getPK() {
-		return name;
-	}
-
 	public void beforeMarshal(Marshaller source) {
 		logger.trace("Marshalling FacilityCycle for " + includes);
 		if (!this.includes.contains(Investigation.class)) {
 			this.investigations = null;
+		}
+		if (!this.includes.contains(Facility.class)) {
+			this.facility = null;
 		}
 	}
 
