@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.icatproject</groupId>
 		<artifactId>icat</artifactId>
-		<version>4.1.0-rc-01</version>
+		<version>4.1.0-rc-02-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>icat.user-ldap</artifactId>
