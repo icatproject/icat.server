@@ -39,7 +39,7 @@ import org.icatproject.Rule;
 import org.icatproject.User;
 import org.icatproject.UserGroup;
 
-class Session {
+public class Session {
 	public enum ParameterApplicability {
 		DATASET, DATAFILE, SAMPLE, INVESTIGATION
 	};

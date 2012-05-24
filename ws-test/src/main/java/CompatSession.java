@@ -9,7 +9,7 @@ import uk.icat3.client.ICATCompatService;
 import uk.icat3.client.Investigation;
 import uk.icat3.client.SessionException_Exception;
 
-class CompatSession {
+public class CompatSession {
 
 	private final ICATCompat icatEP;
 	private final String sessionId;
