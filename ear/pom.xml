@@ -20,19 +20,21 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.exposed</artifactId>
+            <version>4.1.0-rc-03-SNAPSHOT</version>
             <type>ejb</type>
+
         </dependency>
 
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.user-ansto</artifactId>
-            <type>jar</type>
+            <version>4.1.0-rc-03-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.user-ldap</artifactId>
-            <type>jar</type>
+             <version>4.1.0-rc-03-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

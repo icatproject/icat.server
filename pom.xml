@@ -78,44 +78,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.icatproject</groupId>
-                <artifactId>icat.client</artifactId>
-                <version>4.1.0-SNAPSHOT</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.icatproject</groupId>
-                <artifactId>icat.core</artifactId>
-                <version>4.1.0-SNAPSHOT</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.icatproject</groupId>
-                <artifactId>icat.ear</artifactId>
-                <version>4.1.0-SNAPSHOT</version>
-                <type>ear</type>
-            </dependency>
-
-            <dependency>
-                <groupId>org.icatproject</groupId>
-                <artifactId>icat.user-ansto</artifactId>
-                <version>4.1.0-SNAPSHOT</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.icatproject</groupId>
-                <artifactId>icat.user-ldap</artifactId>
-                <version>4.1.0-SNAPSHOT</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.icatproject</groupId>
-                <artifactId>icat.exposed</artifactId>
-                <version>4.1.0-SNAPSHOT</version>
-                <type>ejb</type>
-            </dependency>
-
-            <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-api</artifactId>
                 <version>6.0</version>
@@ -242,13 +204,11 @@
 
             </plugins>
         </pluginManagement>
-
     </build>
-
-
 
     <reporting>
         <plugins>
+        
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>

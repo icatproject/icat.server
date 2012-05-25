@@ -17,6 +17,7 @@
 		<dependency>
 			<groupId>org.icatproject</groupId>
 			<artifactId>icat.core</artifactId>
+             <version>4.1.0-rc-03-SNAPSHOT</version>
 		</dependency>
 		
 	</dependencies>

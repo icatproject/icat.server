@@ -1,43 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ejb-jar xmlns = "http://java.sun.com/xml/ns/javaee" 
-         version = "3.0" 
-         xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation = "http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/ejb-jar_3_0.xsd">
+<ejb-jar xmlns="http://java.sun.com/xml/ns/javaee" version="3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/ejb-jar_3_0.xsd">
     <assembly-descriptor>
-        <!--   Annotations outside the EAR/JAR for an EJB application for @ApplicationException(rollback=true) -->
-        <!--   are ignored and therefor is needed to be placed here  -->
         <application-exception id="ICATAPIException">
             <exception-class>uk.icat3.exceptions.ICATAPIException</exception-class>
             <rollback>true</rollback>
         </application-exception>
-        <application-exception id="ValidationException">
-            <exception-class>uk.icat3.exceptions.ValidationException</exception-class>
-            <rollback>true</rollback>
-        </application-exception>
-        <application-exception id="EntityNotModifiableError">
-            <exception-class>uk.icat3.exceptions.EntityNotModifiableError</exception-class>
-            <rollback>true</rollback>
-        </application-exception>
-        <application-exception id="InsufficientPrivilegesException">
-            <exception-class>uk.icat3.exceptions.InsufficientPrivilegesException</exception-class>
-            <rollback>true</rollback>
-        </application-exception>
-        <application-exception id="NoSuchUserException">
-            <exception-class>uk.icat3.exceptions.NoSuchUserException</exception-class>
-            <rollback>true</rollback>
-        </application-exception>
-        <application-exception id="NoSuchObjectFoundException">
-            <exception-class>uk.icat3.exceptions.NoSuchObjectFoundException</exception-class>
-            <rollback>true</rollback>
-        </application-exception>         
-        <application-exception id="ObjectDeletedException">
-            <exception-class>uk.icat3.exceptions.ObjectDeletedException</exception-class>
-            <rollback>true</rollback>
-        </application-exception>
-        <application-exception id="SessionException">
-            <exception-class>uk.icat3.exceptions.SessionException</exception-class>
-            <rollback>true</rollback>
-        </application-exception>
-    </assembly-descriptor>             
+    </assembly-descriptor>
 </ejb-jar>
 

@@ -2,35 +2,11 @@
 
 from suds.client import Client, WebFault
 
-from suds.plugin import MessagePlugin
-
 import logging
-
-import re
-
-class GetPlugin(MessagePlugin):
-    """
-    Needed to patch the outgoing message for the get calls. 
-    
-    It will currently not work if a string key is compatible with a non-negative integer.
-    """ 
-
-    intPat = re.compile("\d+$")
-
-    def marshalled(self, context):
-        body = context.envelope.getChild('Body')
-        method = body[0]
-        if method.name == "get":
-            key = method[2]
-            if self.intPat.match(key.getText()):
-                key.set("xsi:type", "xs:long")
-            else:
-                key.set("xsi:type", "xs:string")
-            key.set("xmlns:xs", "http://www.w3.org/2001/XMLSchema")
 
 logging.basicConfig(level=logging.CRITICAL)
 
-client = Client("http://127.0.0.1:8080/ICATService/ICAT?wsdl", plugins=[GetPlugin()])
+client = Client("http://127.0.0.1:8080/ICATService/ICAT?wsdl")
 service = client.service
 factory = client.factory
 

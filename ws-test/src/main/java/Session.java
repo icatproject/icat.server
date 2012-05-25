@@ -76,7 +76,7 @@ public class Session {
 	private CompatSession compatSession;
 
 	public Session() throws MalformedURLException, IcatException_Exception {
-		final String urlString = "http://localhost:8020";
+		final String urlString = "https://smfisher.esc.rl.ac.uk:52742";
 		final URL icatUrl = new URL(urlString + "/ICATService/ICAT?wsdl");
 		final ICATService icatService = new ICATService(icatUrl, new QName(
 				"http://icatproject.org", "ICATService"));

@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>icat.client</artifactId>
-  <version>4.1.0-rc-03-SNAPSHOT</version>
+    <version>4.1.0-rc-03-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>ICAT Java Client</name>
 
@@ -96,6 +96,7 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.ear</artifactId>
+            <version>4.1.0-rc-03-SNAPSHOT</version>
             <type>ear</type>
         </dependency>
     </dependencies>
