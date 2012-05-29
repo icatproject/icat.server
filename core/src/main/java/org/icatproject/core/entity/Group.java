@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 @Comment("A group of users")
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "\"GROUP\"", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
+@Table(name = "GROUP_", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 public class Group extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(Group.class);

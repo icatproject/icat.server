@@ -67,8 +67,8 @@ public class DagHandler {
 				}
 				StringBuilder sb = new StringBuilder();
 				for (Step s : steps) {
-					sb.append("JOIN " + alias + "." + s.relationship.getField().getName()
-							+ " AS " + s.relationship.getBean().getSimpleName() + "$");
+					sb.append("JOIN " + alias + "." + s.relationship.getField().getName() + " AS "
+							+ s.relationship.getBean().getSimpleName() + "$");
 					sb.append(" " + s.join());
 				}
 				return sb.toString();
@@ -119,7 +119,8 @@ public class DagHandler {
 			Class<? extends EntityBaseBean> bean = relationship.getBean();
 			if (used.contains(bean) && !bean.equals(predecessor)) {
 				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
-						"Can't have loop in graph of entities " + bean + " was encountered twice");
+						"Can't have loop in graph of entities " + bean
+								+ " was encountered twice following " + navto);
 			}
 			if (allBeans.contains(bean) && !used.contains(bean)) {
 				used.add(bean);

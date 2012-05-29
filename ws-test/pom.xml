@@ -24,8 +24,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-
-
         </dependency>
 
     </dependencies>
@@ -40,7 +38,11 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <forkMode>once</forkMode>
                     <useFile>false</useFile>
-                    <testFailureIgnore>true</testFailureIgnore>
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <systemPropertyVariables>
+                        <serverPort>${serverPort}</serverPort>
+                        <serverHost>${serverHost}</serverHost>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>

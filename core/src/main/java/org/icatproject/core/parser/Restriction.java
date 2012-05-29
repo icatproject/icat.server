@@ -38,9 +38,7 @@ public class Restriction {
 			}
 		}
 		while ((t = input.peek(0)) != null) {
-			if (t.getType() == Token.Type.ENTSEP) {
-				input.consume();
-			}
+			input.consume(Token.Type.ENTSEP);
 			t = input.consume(Token.Type.NAME);
 			String name = t.getValue();
 			t = input.peek(0);

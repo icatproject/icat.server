@@ -9,12 +9,11 @@ import org.icatproject.core.entity.DatafileParameter;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.DatasetParameter;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.entity.Facility;
 import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.User;
-import org.icatproject.core.parser.DagHandler;
 import org.icatproject.core.parser.DagHandler.Step;
 import org.junit.Test;
-
 
 public class TestDagHandler {
 
@@ -37,6 +36,16 @@ public class TestDagHandler {
 		es.add(DatasetParameter.class);
 		es.add(User.class);
 		DagHandler.findSteps(Dataset.class, es);
+	}
+
+	@Test
+	public void t3() throws Exception {
+		Set<Class<? extends EntityBaseBean>> es = new HashSet<Class<? extends EntityBaseBean>>();
+		es.add(Dataset.class);
+		es.add(Datafile.class);
+		es.add(DatasetParameter.class);
+		es.add(Facility.class);
+		DagHandler.findSteps(Investigation.class, es);
 	}
 
 }

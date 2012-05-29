@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>ICAT Release Notes</title>
+    </properties>
+
+    <body>
+
+
+        <section name="4.1.0">
+
+            <p>This is the first release of ICAT4 which is meant to be approaching production quality
+            </p>
+            <ul>
+                <li>
+                    More changes to the API - too numerous to list here providing
+                    <ul>
+                        <li> support for pluggable authn,</li>
+                        <li> support for rule based authz,</li>
+                        <li>support for notifications and</li>
+                        <li> a powerful search mechanism</li>
+                    </ul>
+                </li>
+                <li>Database independent</li>
+                <li>More regular schema with simple provenance mechanism</li>
+            </ul>
+
+        </section>
+
+        <section name="4.0">
+            <p> Technology
+                preview release - not for production use
+            </p>
+            <ul>
+                <li> Many changes to the API</li>
+            </ul>
+        </section>
+
+        <section name="3.3.4">
+            <ul>
+                <li> Changed the JPA provider from TopLink to EclipseLink</li>
+                <li>Removed Dataportal from the installation</li>
+            </ul>
+
+        </section>
+
+        <section name="3.3.3">
+            <p>Public release</p>
+        </section>
+
+    </body>
+</document>
+            
+            
+   

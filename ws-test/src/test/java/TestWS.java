@@ -178,7 +178,6 @@ public class TestWS {
 		session.update(df);
 		df = (Datafile) session.get("Datafile INCLUDE Dataset,DatafileFormat", df.getId());
 		assertEquals("Wobble", df.getDataset().getName());
-
 	}
 
 	@Test
@@ -629,7 +628,8 @@ public class TestWS {
 		addSampleParameter(sample, date, p);
 
 		session.registerInvestigation(inv);
-		// TODO try to allow this
+
+		// TODO make this work ...
 		// inv = (Investigation)
 		// session.get("Investigation INCLUDE Dataset, Datafile, DatasetParameter, Facility, Sample, SampleParameter",
 		// inv.getId());
@@ -663,7 +663,7 @@ public class TestWS {
 		// session.addOutputDatafile(job, mog);
 
 	}
-
+	
 	private Sample addSample(Investigation inv, String sampleName) {
 		Sample sample = new Sample();
 		sample.setName(sampleName);

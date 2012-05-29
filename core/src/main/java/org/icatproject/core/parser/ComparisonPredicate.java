@@ -8,7 +8,6 @@ import java.util.Set;
 
 import org.icatproject.core.IcatException;
 
-
 public class ComparisonPredicate {
 
 	// ComparisonPredicate ::= value ( COMPOP value ) | ( "IN" "(" value (","
@@ -21,44 +20,36 @@ public class ComparisonPredicate {
 	private Token value3;
 	private List<Token> inValues;
 
-	private static final Set<String> beanFields = new HashSet<String>(
-			Arrays.asList("createTime", "createId", "modTime", "modId"));
+	private static final Set<String> beanFields = new HashSet<String>(Arrays.asList("createTime",
+			"createId", "modTime", "modId"));
 
 	public ComparisonPredicate(Input input) throws ParserException {
-		value1 = input.consume(Token.Type.NAME, Token.Type.STRING,
-				Token.Type.INTEGER, Token.Type.REAL, Token.Type.PARAMETER,
-				Token.Type.TIMESTAMP);
-		compop = input.consume(Token.Type.COMPOP, Token.Type.IN,
-				Token.Type.BETWEEN);
+		value1 = input.consume(Token.Type.NAME, Token.Type.STRING, Token.Type.INTEGER,
+				Token.Type.REAL, Token.Type.PARAMETER, Token.Type.TIMESTAMP);
+		compop = input.consume(Token.Type.COMPOP, Token.Type.IN, Token.Type.BETWEEN);
 		if (compop.getType() == Token.Type.COMPOP) {
-			value2 = input.consume(Token.Type.NAME, Token.Type.STRING,
-					Token.Type.INTEGER, Token.Type.REAL, Token.Type.PARAMETER,
-					Token.Type.TIMESTAMP);
+			value2 = input.consume(Token.Type.NAME, Token.Type.STRING, Token.Type.INTEGER,
+					Token.Type.REAL, Token.Type.PARAMETER, Token.Type.TIMESTAMP);
 		} else if (compop.getType() == Token.Type.IN) {
 			input.consume(Token.Type.OPENPAREN);
 			inValues = new ArrayList<Token>();
-			inValues.add(input
-					.consume(Token.Type.STRING, Token.Type.INTEGER,
-							Token.Type.REAL, Token.Type.PARAMETER,
-							Token.Type.TIMESTAMP));
-			while (input.consume(Token.Type.COMMA, Token.Type.CLOSEPAREN)
-					.getType().equals(Token.Type.COMMA)) {
-				inValues.add(input.consume(Token.Type.STRING,
-						Token.Type.INTEGER, Token.Type.REAL,
+			inValues.add(input.consume(Token.Type.STRING, Token.Type.INTEGER, Token.Type.REAL,
+					Token.Type.PARAMETER, Token.Type.TIMESTAMP));
+			while (input.consume(Token.Type.COMMA, Token.Type.CLOSEPAREN).getType()
+					.equals(Token.Type.COMMA)) {
+				inValues.add(input.consume(Token.Type.STRING, Token.Type.INTEGER, Token.Type.REAL,
 						Token.Type.PARAMETER, Token.Type.TIMESTAMP));
 			}
 		} else {
-			value2 = input.consume(Token.Type.NAME, Token.Type.STRING,
-					Token.Type.INTEGER, Token.Type.REAL, Token.Type.PARAMETER,
-					Token.Type.TIMESTAMP);
+			value2 = input.consume(Token.Type.NAME, Token.Type.STRING, Token.Type.INTEGER,
+					Token.Type.REAL, Token.Type.PARAMETER, Token.Type.TIMESTAMP);
 			input.consume(Token.Type.AND);
-			value3 = input.consume(Token.Type.NAME, Token.Type.STRING,
-					Token.Type.INTEGER, Token.Type.REAL, Token.Type.PARAMETER,
-					Token.Type.TIMESTAMP);
+			value3 = input.consume(Token.Type.NAME, Token.Type.STRING, Token.Type.INTEGER,
+					Token.Type.REAL, Token.Type.PARAMETER, Token.Type.TIMESTAMP);
 		}
 	}
 
-	public StringBuilder getWhere(Class<?> tb) throws IcatException  {
+	public StringBuilder getWhere(Class<?> tb) throws IcatException {
 		StringBuilder sb = new StringBuilder();
 		if (compop.getType() == Token.Type.COMPOP) {
 			boolean one = value1.getType() == Token.Type.NAME
@@ -67,8 +58,8 @@ public class ComparisonPredicate {
 					&& value1.getType() != Token.Type.NAME;
 			if (!one && !two) {
 				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
-						"Attribute comparisons require one attribute name and one value: "
-								+ value1 + " " + compop + " " + value2);
+						"Attribute comparisons require one attribute name and one value: " + value1
+								+ " " + compop + " " + value2);
 			}
 			if (one) {
 				sb.append(getName(value1, tb));
@@ -107,9 +98,8 @@ public class ComparisonPredicate {
 						"\"BETWEEN\" comparisons require a name on the LHS rather than "
 								+ Tokenizer.getTypeToPrint(value1.getType()));
 			}
-			sb.append(getName(value1, tb)).append(" BETWEEN ")
-					.append(getValue(value2)).append(" AND ")
-					.append(getValue(value3));
+			sb.append(getName(value1, tb)).append(" BETWEEN ").append(getValue(value2))
+					.append(" AND ").append(getValue(value3));
 		}
 		return sb;
 	}
@@ -120,14 +110,13 @@ public class ComparisonPredicate {
 			val = "'" + val.replace("'", "''") + "'";
 		} else if (value.getType() == Token.Type.TIMESTAMP) {
 			val = ":"
-					+ value.getValue().replace(" ", "").replace(":", "")
-							.replace("-", "").replace("{", "").replace("}", "");
+					+ value.getValue().replace(" ", "").replace(":", "").replace("-", "")
+							.replace("{", "").replace("}", "");
 		}
 		return val;
 	}
 
-	private String getName(Token value, Class<?> tb) throws IcatException
-			 {
+	private String getName(Token value, Class<?> tb) throws IcatException {
 		String val = value.getValue();
 		if (!beanFields.contains(val)) {
 			try {
@@ -136,8 +125,8 @@ public class ComparisonPredicate {
 				try {
 					tb.getSuperclass().getDeclaredField(val.split("\\.")[0]);
 				} catch (NoSuchFieldException e1) {
-					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,"Field " + val + " of " + tb
-							+ " does not exist");
+					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "Field "
+							+ val + " of " + tb + " does not exist");
 				}
 			}
 		}
@@ -153,16 +142,17 @@ public class ComparisonPredicate {
 		if (compop.getType() == Token.Type.COMPOP) {
 			sb.append(value2);
 		} else if (compop.getType() == Token.Type.IN) {
-			sb.append(compop.getValue() + "(");
-			boolean first = false;
+			sb.append("(");
+			boolean first = true;
 			for (Token token : inValues) {
 				if (first) {
 					first = false;
 				} else {
-					sb.append(compop.getValue() + ", ");
+					sb.append(", ");
 				}
 				sb.append(getValue(token));
 			}
+			sb.append(")");
 		} else {
 			sb.append(value2).append(" AND ").append(value3);
 		}

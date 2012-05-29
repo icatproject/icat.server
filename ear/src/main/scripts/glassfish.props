@@ -1,17 +1,17 @@
 # Driver
-driver=oracle.jdbc.pool.OracleDataSource
-#driver=com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+#driver=oracle.jdbc.pool.OracleDataSource
+driver=com.mysql.jdbc.jdbc2.optional.MysqlDataSource
 
 # ICAT connection properties
-icatProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icat:password=password
-#icatProperties=url="'"jdbc:mysql://localhost:3306/icat"'":user=icat:password=password:databaseName=icat
+#icatProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icat:password=password
+icatProperties=url="'"jdbc:mysql://localhost:3306/icat"'":user=icat:password=password:databaseName=icat
 
 # ICATUSER connection properties
-icatuserProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icatuser:password=password
-#icatuserProperties=url="'"jdbc:mysql://localhost:3306/icatuser"'":user=icat:password=password:databaseName=icatuser
+#icatuserProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icatuser:password=password
+icatuserProperties=url="'"jdbc:mysql://localhost:3306/icatuser"'":user=icat:password=password:databaseName=icatuser
 
 # Must contain "glassfish/domains"
 glassfish=/home/fisher/pf/glassfish3
 
 # Port for glassfish admin calls (normally 4848)
-port=4840
+port=4848

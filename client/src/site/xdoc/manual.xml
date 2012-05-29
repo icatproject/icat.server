@@ -1,153 +1,505 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
-	<properties>
-		<title>ICAT Java Client User Manual</title>
-	</properties>
+    <properties>
+        <title>ICAT Java Client User Manual</title>
+    </properties>
 
-	<body>
+    <body>
 
-
-		<section name="Introduction">
+        <section name="Introduction">
 
 
-			<p>The ICAT4 API is a rather thin layer on top of a relational DBMS.
-				The database is wrapped as a web service and the actual tables are
-				not exposed directly. Each table in the database is mapped onto a
-				data structure exposed by the web service. When the web service
-				interface definition (WSDL) is processed for Java then each data
-				structure results in a class definition.
-			</p>
+            <p>The ICAT4 API is a rather thin layer on top of a relational DBMS.
+                The database is wrapped as a web service and the actual tables are
+                not
+                exposed directly. Each table in the database is mapped onto a
+                data structure exposed by the web service. When the web service
+                interface
+                definition (WSDL) is processed for Java then each data
+                structure results in a class definition.
+            </p>
 
-			<subsection name="Setting Up">
-				<p>The web service is accessed via a proxy (conventionally known as
-					a port). The proxy (here given a variable name of icat) may be
-					obtained by the following:
-				</p>
+            <subsection name="Setting Up">
+                <p>The web service is accessed via a proxy (conventionally known as
+                    a port). The proxy (here given a variable name of icat) may be
+                    obtained by the following:
+                </p>
 
-				<code>
-					URL icatUrl = null;
-					<br />
-					icatUrl = new URL(“http://localhost:8080” +
-					"/ICATService/ICAT?wsdl");
-					<br />
-					QName qName = new
-					QName("client.icat3.uk", "ICATService");
-					<br />
-					ICATService service = new
-					ICATService(icatUrl, qName);
-					<br />
-					ICAT icat = service.getICATPort();
-				</code>
+                <code>
+                    URL icatUrl = null;
+                    <br />
+                    icatUrl = new URL(“http://localhost:8080” +
+                    "/ICATService/ICAT?wsdl");
+                    <br />
+                    QName qName = new
+                    QName("client.icat3.uk", "ICATService");
+                    <br />
+                    ICATService service = new
+                    ICATService(icatUrl, qName);
+                    <br />
+                    ICAT icat = service.getICATPort();
+                </code>
 
-			</subsection>
+            </subsection>
 
-			<subsection name="Session management">
+            <subsection name="Session management">
 
-				<p>When you login to ICAT you will be given back a string, the
-					sessionId, which must
-					be used as the first argument of almost all
-					calls. The only
-					exceptions being the login call itself and
-					getRemainingMinutes
-				</p>
+                <p>When you login to ICAT you will be given back a string, the
+                    sessionId, which must
+                    be used as the first argument of almost all
+                    calls.
+                    The only
+                    exceptions being the login call itself and
+                    getRemainingMinutes
+                </p>
 
-				<p class="call">String login(String username, String password)</p>
+                <p class="call">String login(String username, String password)</p>
 
-				<p>This sessionId will be valid for a period determined by the ICAT
-					server.
-					Configuring userName, password pairs is dependent upon the
-					chosen
-					authentication module and is not discussed here.
-				</p>
+                <p>This sessionId will be valid for a period determined by the ICAT
+                    server.
+                    Configuring userName, password pairs is dependent upon the
+                    chosen
+                    authentication module and is not discussed here.
+                </p>
 
 
 
-				<p class="call">double getRemainingMinutes(String sessionId)</p>
+                <p class="call">double getRemainingMinutes(String sessionId)</p>
 
-				<p>This returns the number of minutes left in the session. A
-					session
-					may not be extended but a user may have more than one
-					session at
-					once.
-				</p>
+                <p>This returns the number of minutes left in the session. A
+                    session
+                    may not be extended but a user may have more than one
+                    session at
+                    once.
+                </p>
 
-				<p class="call">void logout(String sessionId)</p>
+                <p class="call">void logout(String sessionId)</p>
 
-				<p>This invalidates the sessionId.</p>
+                <p>This invalidates the sessionId.</p>
 
-			</subsection>
+            </subsection>
 
-		</section>
+        </section>
 
-		<section name="Data Manipulation">
-			<p>To understand exactly how the data manipulation calls will work
-				requires an understanding of the schema.
-			</p>
-			<subsection name="Creating an Object">
-				<p>To create an object in ICAT first instantiate the object of
-					interest for example a Dataset and then call the setters to set its
-					attributes and finally make a call to create the object in ICAT.
-				</p>
-				<p>So typical code in Java might look like:</p>
-				<code>
-					Dataset ds = new Dataset();
-					<br />
-					ds.setName(“Name of dataset”);
-					<br />
-					ds.set …
-					<br />
-					Long dsid = icat.create(sessionId, ds);
-				</code>
-				<p>You will see that no convenient constructors are generated,
-					rather each field of the object must be set individually. Most
-					fields are optional and may be left with null values, however some
-					are compulsory and the call to create will fail if they are not
-					set. Each object has a primary key that identifies it in the
-					database - this is a value of type "long" that is generated for you
-					by ICAT and is used to represent relationships in a regular manner.
-				</p>
-				<p>
-					Some fields represent attributes of the object but others are
-					used to represent relationships. The relationships are typically
-					represented in the class definitions by a variable which either
-					holds a reference to a single object or a collection of objects.
-					Take a look at a Dataset class definition. This has a variable
-					investigationId which must be set to the (surrogate) key of the
-					investigation. This implies that the Investigation must be created
-					first. You will see that there are two Collections:
-					datafileCollection and datasetParameterCollection implemented as
-					lists of Datafiles and of DatasetParameters. These collections may
-					be populated before calling create on the Dataset and the whole
-					structure will be created in the database.
-				</p>
+        <section name="Data Manipulation">
+            <p>
+                To understand exactly how the data manipulation calls will work
+                requires an understanding of the
+                <a href="../icat.core/schema.html" target="_blank">schema</a>
+            </p>
+            <p>
+                Each table in the database, representing a set of entities, is mapped onto a class in the API so terminology mixes OO and database
+                concepts.
+                Each class has uniqueness constraints, relationships and other fields. Each object is identified by a field "id" which is
+                managed by ICAT and is returned when you create an object. This is common to all objects and is not described in the schema. The "id"
+                field is used as the primary key in the database. There will normally be some combination of fields, some of which may be
+                relationships, which must be unique across all entries in the table. This is marked as "Uniqueness constraint". For the dataset this
+                is
+                <tt>sample, investigation, name, type</tt>
+                which, apart from the name, are all relationships. No more than one one dataset may exist with those four fields having the same
+                value. This constraint will be enforced by ICAT.
+            </p>
+            <p>The relationship table is shown next. The first column shows the minimum and maximum cardinality of the relationships. A dataset may be
+                related to any number of OutputDatasets, to at most one investigation and to exactly one DatasetType. The next column shows the name
+                of the related class and this is followed by the name of the field which is used to represent the relationship. The basic field name
+                is normally the name of the related class unless it is ambiguous or unnecessarily long. The field name is in the plural for "to many"
+                relationships.
+                The next column is "cascaded". If this is marked yes then create and delete operations are cascaded. If a dataset is
+                deleted then all its OutputDatasets, DatasetParameters, Datafiles and InputDatasets are deleted at the same time by one call to ICAT.
+                In a similar manner a tree, created in memory with a Dataset having a a set of Datafiles and Datasetparameters, can be persisted to
+                ICAT in a single call. This will be explained more later.
+            </p>
+            <subsection name="Creating an Object">
+                <p class="call">long create(String sessionId, EntityBaseBean bean)
+                </p>
+                <p>To create an object in ICAT first instantiate the object of
+                    interest for example a Dataset and then call the setters to set its
+                    attributes and finally make a call to create the object in ICAT.
+                </p>
+                <p>So typical code in Java might look like:</p>
+                <code>
+                    Dataset ds = new Dataset();
+                    <br />
+                    ds.setName(“Name of dataset”);
+                    <br />
+                    ds.set …
+                    <br />
+                    Long dsid = icat.create(sessionId, ds);
+                </code>
+                <p>You will see that no convenient constructors are generated,
+                    rather each field of the object must be set individually. Most
+                    fields are
+                    optional and may be left with null values, however some
+                    are compulsory and the call to create will fail if they are not
+                    set. Each
+                    object has a primary key that identifies it in the
+                    database - this is a value of type "long" that is generated for you
+                    by ICAT and
+                    is used to represent relationships in a regular manner.
+                </p>
+                <p>
+                    Some fields represent attributes of the object but others are
+                    used to represent relationships. The relationships are
+                    represented in
+                    the class definitions by a variable which either
+                    holds a reference to a single object or a list of objects. In the case of a list
+                    it may be "cascaded".
+                    Consider creating an dataset with a set of datafiles. Because the relationship from dataset to datafile is
+                    cascaded they may be created in one call as
+                    outlined below:
+                </p>
+                <code>
+                    Dataset ds = new Dataset();
+                    <br />
+                    ds.setName(name);
+                    <br />
+                    ds.setType(type);
+                    <br />
+                    Datafile datafile = new Datafile();
+                    <br />
+                    datafile.setDatafileFormat(format);
+                    <br />
+                    datafile.setName(name);
+                    <br />
+                    ds.getDatafiles().add(datafile); // Add the datafile to the dataset
+                    <br />
+                    icat.create(sessionId, ds);
+                </code>
 
-				<p>The call to create returns the key of the created object. If you
-					choose to write:
-				</p>
+                <p>The call to create returns the key of the created object. If you
+                    choose to write:
+                </p>
 
-				<code>ds.setId((Long)icat.create(sessionId, ds));</code>
+                <code>ds.setId(icat.create(sessionId, ds));</code>
 
-				<p>then the client copy of the dataset will be updated to have the
-					correct key value - however the keys in any other objects below
-					the dataset if you had included a list of datafiles will still be
-					null on the client side.
-				</p>
+                <p>then the client copy of the dataset will be updated to have the
+                    correct key value - however the keys in any other objects below
+                    the
+                    dataset if you had included a list of datafiles will still be
+                    null on the client side.
+                </p>
 
-			</subsection>
-		</section>
+                <p>
+                    When creating multiple objects in one call the value of the cascaded flag must be noted. The line
+                    <tt>ds.getDatafiles().add(datafile)</tt>
+                    requires that the datafile is not already known to ICAT because the cascade flag is set. If the cascaded flag is set then objects
+                    to be included in the "create" operation must not exist. However if the cascaded flag is not set then objects which are being
+                    referenced must already have been created within ICAT.
+                </p>
 
-		<section name="Information">
-			<p class="call">String getApiVersion()</p>
+                <p>
+                    We now have an example of adding a datafile to an existing dataset,
+                    <tt>ds</tt>
+                </p>
+                <code>
+                    Datafile datafile = new Datafile();
+                    <br />
+                    datafile.setDatafileFormat(format);
+                    <br />
+                    datafile.setName(name);
+                    <br />
+                    datafile.setDataset(ds); // Relate the datafile to the existing dataset
+                    <br />
+                    datafile.setId(icat.create(sessionId, datafile)); // Create datafile and store id on client side
+                </code>
 
-			<p>Returns the version of the API - this should match the version of
-				the client as it is held in Maven for a released component. In the
-				case of a release candidate such as 4.2.0-rc03 the version returned
-				will still be 4.2.0
-			</p>
+                <p class="call">
+                    List
+                    &lt;Long&gt;
+                    createMany(String sessionId, List
+                    &lt;EntityBaseBean&gt;
+                    beans)
+                </p>
 
-		</section>
-	</body>
+                <p>This call, as its name suggests, creates many objects. It takes the list of objects to create and returns a list of
+                    ids. If any of
+                    the individual operations fail the whole call fails and the database will be unchanged. The objects to
+                    be created need not be of
+                    the same type. For an example (where they are of the same type) consider adding many datafiles
+                    to a dataset:
+                </p>
+                <code>
+                    List &lt;Datafile&gt; dfs = new ArrayList&lt;Datafile&gt;();
+                    <br />
+                    for (int i = 0; i &lt; n; i++) {
+                    <br />
+                    &#160; &#160; &#160;final
+                    Datafile datafile = new Datafile();
+                    <br />
+                    &#160; &#160; &#160;datafile.setDatafileFormat(dfmt);
+                    <br />
+                    &#160; &#160; &#160;datafile.setName("bill"
+                    + i);
+                    <br />
+                    &#160; &#160; &#160;datafile.setDataset(wibble);
+                    <br />
+                    &#160; &#160; &#160;dfs.add(datafile);
+                    <br />
+                    }
+                    <br />
+                    icat.createMany(sesionId, dfs);
+                    <br />
+                </code>
+
+            </subsection>
+            <subsection name="Retrieving an object when you know its id">
+                <p class="call">EntityBaseBean get(String sessionId, String query, long id)
+                </p>
+                <p>If dsid is the id of a Dataset then it may be retrieved by the call:</p>
+
+                <code>Dataset ds = (Dataset) icat.get(sessionId, “Dataset”, dsid);</code>
+
+                <p id="get">
+                    The second parameter is a string holding the name of the type of object to retrieve and some other optional information.
+                    <em>By
+                        default only the
+                        requested object is returned and no related objects.
+                    </em>
+                    If you want the Dataset along with its related Datafiles,
+                    DatasetParameters
+                    and DatafileParameters then replace:
+                    <tt>"Dataset"</tt>
+                    with
+                    <tt>"Dataset INCLUDE Datafile,DatasetParameter,DatafileParameter"</tt>
+                </p>
+                <p>
+                    The related types must be all be related to the original type or to some other type in the list. This means that you could not
+                    have
+                    <tt>"Dataset INCLUDE DatafileParameter"</tt>
+                    . Not all relationships can be followed, the rule appears complex but is there to support the
+                    <a href="#authorization">authorization</a>
+                    scheme which is
+                    explained later.
+                    Starting from the first type (before the INCLUDE keyword) cascaded "one to many" relationships
+                    may
+                    be followed
+                    repeatedly. In addition "many to one" relationships can be followed. The idea behind this is that cascaded "one to
+                    many"
+                    relationships represent composition/ownership - i.e. a dataset is made up of datafiles and the "many to one" is allowed as
+                    these
+                    are typically shared objects. This means that starting from a Dataset one could follow the cascaded "one to many"
+                    relationships to
+                    get to Datafile, DatasetParameter and DatafileParameter. From this set of types (Dataset, Datafile,
+                    DatasetParameter and
+                    DatafileParameter) one can follow the "many to one" relationships to reach at most one of each of Facility,
+                    Investigation,
+                    InvestigationType, DatasetType, Instrument, FacilityCycle, ParameterType and DatafileFormat. Finally there must be
+                    only one route
+                    from the original type to each of the included types.
+                </p>
+            </subsection>
+
+            <subsection name="Updating an Object">
+                <p class="call">void update(String sessionId, EntityBaseBean bean)</p>
+                <p>To update an object simply update the fields you want to change and call update. For example:</p>
+                <code>
+                    Dataset ds = (Dataset) icat.get(sessionId, "Dataset INCLUDE 1", dsid);
+                    <br />
+                    ds.setInvestigation(anotherInvestigation);
+                    <br />
+                    icat.update(sessionId, ds);
+                </code>
+                <p>
+                    As suggested by the example
+                    above
+                    "many to one" relationships, such as the investigation relationship to the dataset, will be
+                    updated as will any simple field
+                    values. Consequently it is essential to get the existing values for any "many one to one"
+                    relationships. This is most reliably
+                    achieved by the notation
+                    <tt>INCLUDE 1</tt>
+                    as shown here. The effect of the "1" which may be used with other entries in the INCLUDE list is to include all "many to one" from
+                    the initial type before the INCLUDE keyword and all those after it. It will most probably be mostly used as the only entry in the
+                    INCLUDE list as in this case. "One to many" relationships are ignored by the update mechanism so you need to start at the correct
+                    end of the relationship.
+                </p>
+            </subsection>
+
+            <subsection name="Deleting an Object">
+                <p class="call">void delete(String sessionId, EntityBaseBean bean)</p>
+                <p>The following code will get a dataset and delete it.</p>
+                <code>
+                    Dataset ds = (Dataset) icat.get(sessionId, "Dataset", dsid);
+                    <br />
+                    icat.delete(sessionId, ds);
+                </code>
+
+                <p>
+                    All cascaded "one to many" related objects will also be deleted. In the extreme case, if you delete a facility, you lose
+                    everything
+                    associated with that facility. This privilege should not be given to many - see the
+                    <a href="#authorization">authorization</a>
+                    section later.
+                </p>
+            </subsection>
+
+            <subsection name="Searching for an Object">
+                <p class="call">List&lt;Object&gt; search(String sessionId, String query)
+                </p>
+                <p>A rather powerful search mechanism is provided. It will be introduced by means of examples:</p>
+                <code>List&lt;Object&gt; results = icat.search(sessionId, "Dataset");</code>
+
+                <p>will return all Datasets. If the query is:</p>
+                <code>"Dataset.name"</code>
+
+                <p>this will return all Dataset names. Multiple datasets with the same name are permitted and this call will include duplicates.
+                    Instead
+                </p>
+
+                <code>"DISTINCT Dataset.name”</code>
+
+                <p>
+                    will avoid duplicates. To get related objects returned, then the same INCLUDE syntax that was described for the
+                    <a href="#get">get</a>
+                    call may be used with exactly the same restrictions and semantics:
+                </p>
+
+                <code>"Dataset INCLUDE Datafile,DatasetParameter,DatafileParameter"</code>
+
+                <p>You can specify an order (which may precede or follow an INCLUDE clause):</p>
+
+                <code>"Dataset.id ORDER BY id"</code>
+
+                <p>Restrictions can be placed on the data returned. For example:</p>
+                <code>"Dataset.id [type.name IN ('GS', 'GQ')]"</code>
+                <p>which could also be written:</p>
+                <code>"Dataset.id [type.name = 'GS' OR type.name = 'GQ']"</code>
+                <p>The restriction in the square brackets can be as complex as required - but must only refer to attributes of the object being
+                    restricted - in this case the Dataset. Expressions may use parentheses, AND, OR, &lt;, &lt;=, &gt;, &gt;=, =, &lt;&gt;, !=, NOT,
+                    IN, LIKE and
+                    BETWEEN. Currently the BETWEEN operator does not work on strings. This appears to be a JPA bug.
+                </p>
+                <p>Functions: MAX, MIN, COUNT, AVG and SUM may also be used such as:</p>
+                <code>"MAX (Dataset.id)"</code>
+                <p>Selection may involve more than one related object. To show the relationship a “&lt;-&gt;” token is used. For example:</p>
+                <code>"Dataset.id &lt;-&gt;
+                    DatasetParameter[type.name = 'TIMESTAMP']"
+                </code>
+                <p>
+                    Note also here the use of the JPQL style path:
+                    <tt>type.name</tt>
+                    .
+                    This expressions means ids of Datasets which have a
+                    DatasetParameter which has a type with a name of TIMESTAMP. Multiple
+                    "
+                    <tt>&lt;-&gt;"</tt>
+                    may appear but all the objects involved,
+                    including the first one, must be connectable in only one way.
+                </p>
+                <p>It is also possible to restrict the number of results returned by specifying a pair of numbers at the beginning of the query
+                    string. This construct would normally be used with an ORDER BY clause. The first number is the offset from within the full list of
+                    available results from which to start returning data and the second is the maximum number of results to return. These numbers if
+                    specified must be positive. If the offset is greater than or equal to the number of internal results then no data will be
+                    returned. The default values are 0 and “infinity”. The numbers must be separated by a comma though either may be omitted. The
+                    following are all valid. The last example is rather pointless and does the same as the first. A number without a comma is illegal.
+                </p>
+                <code>
+                    "&#160;&#160;&#160;&#160;Dataset.id ORDER BY id"
+                    <br />
+                    "3,5&#160;Dataset.id ORDER BY id"
+                    <br />
+                    "3,&#160;&#160;Dataset.id ORDER BY id"
+                    <br />
+                    "&#160;,5&#160;Dataset.id ORDER BY id"
+                    <br />
+                    "&#160;,&#160;&#160;Dataset.id ORDER BY id"
+                </code>
+            </subsection>
+        </section>
+
+        <section name="Authorization">
+            <p>The mechanism is rule based. Rules allow groups of
+                users to do things. There are four things that can be
+                done: Create, Read, Update and
+                Delete. It makes use of
+                four tables: Rule, User, Group and UserGroup. The
+                authentication mechanism authenticates a person with a
+                certain
+                name and this name identifies the User in the
+                ICAT User table. Groups have names and the UserGroup
+                performs the function of a "many to
+                many" relationship
+                between Users and Groups. Rules are applied to Groups.
+                The special user "root" is able to manipulate these
+                four
+                tables, but only these four unless root creates
+                rules to give himself further powers. Apart from the
+                special role of "root" these tables
+                behave as other
+                ICAT tables do.
+            </p>
+            <subsection name="Rules">
+                <p>
+                    By default access is denied to all objects, rules allow access to be allowed. It is only necessary to be permitted by one rule
+                    where that rule is only applied to the object referenced directly in the API call. The Rule table has two exposed fields:
+                    <tt>crudFlags</tt>
+                    and
+                    <tt>what</tt>
+                    .
+                    <tt>crudFlags</tt>
+                    contains letters from the set "CRUD" to indicate which types of operation are being allowed (Create, Read, Update and/or Delete).
+                    The other field,
+                    <tt>what</tt>
+                    , is the rule itself. There is also a "many to one" relationship to Group which may be absent.
+                </p>
+                <p>Consider:</p>
+                <code>
+                    rule.group = userOffice;
+                    <br />
+                    rule.crudFlags = "CRUD";
+                    <br />
+                    rule.what = "Investigation";
+                </code>
+                <p>allows members of the userOffice group full access to all Investigations.</p>
+                <code>
+                    rule.group = null;
+                    <br />
+                    rule.crudFlags = "R";
+                    <br />
+                    rule.what = "ParameterType";
+                </code>
+                <p>allows any authenticated user (with a sessionId) to read Parameters. Consider a group of users fredReaders To allow fredReaders
+                    to
+                    read a datafile with a name of “fred” we could have:
+                </p>
+                <code>
+                    rule.group = fredReaders;
+                    <br />
+                    rule.crudFlags = "R";
+                    <br />
+                    rule.what = "Datafile [name='fred']";
+                </code>
+                <p>More complex restrictions can be added using other related objects. For example to allow read access to Datasets belonging to an
+                    Investigation which includes an InvestigationUser which has a user with a name matching the currently authenticated user (from the
+                    sessionId) we can have:
+                </p>
+                <code>
+                    rule.group = null;
+                    <br />
+                    rule.crudFlags = "R";
+                    <br />
+                    rule.what = "Dataset &lt;-&gt; Investigation &lt;-&gt; InvestigationUser [user.name = :user]";
+                </code>
+                <p>where the :user denotes the currently authenticated user (from the
+                    sessionId). You will note that the syntax is very similar to that
+                    used by the search.
+                </p>
+            </subsection>
+        </section>
+
+        <section name="Information">
+            <p class="call">String getApiVersion()</p>
+
+            <p>Returns the version of the API - this should match the
+                version of the client as it is held in Maven for a
+                released component. In the case
+                of a release candidate
+                such as 4.2.0-rc03 the version returned will still be
+                4.2.0
+            </p>
+
+        </section>
+    </body>
 
 </document>

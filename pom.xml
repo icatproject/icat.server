@@ -20,6 +20,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <repoUrl>http://www.icatproject.org/mvn/repo</repoUrl>
+        <serverPort>8181</serverPort>
+        <serverHost>localhost</serverHost>
     </properties>
 
     <description>Main pom to build all the icat components. For help on installation please see the relevant component</description>
@@ -34,8 +36,15 @@
         <url>http://code.google.com/p/icatproject/source/browse/#svn%2Ficat%2Ftrunk</url>
     </scm>
 
+    <licenses>
+        <license>
+            <name>BSD 2-Clause</name>
+            <url>http://www.opensource.org/licenses/BSD-2-Clause</url>
+            <distribution>repo</distribution>
+            <comments>Also know informally as the Simplified BSD or FreeBSD License</comments>
+        </license>
+    </licenses>
 
-    <url>http://www.icatproject.org</url>
     <organization>
         <name>The ICAT Collaboration</name>
     </organization>
@@ -208,7 +217,7 @@
 
     <reporting>
         <plugins>
-        
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -220,6 +229,7 @@
                             <report>summary</report>
                             <report>dependencies</report>
                             <report>issue-tracking</report>
+                            <report>license</report>
                             <report>plugins</report>
                             <report>scm</report>
                         </reports>

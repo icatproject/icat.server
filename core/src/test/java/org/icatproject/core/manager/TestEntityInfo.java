@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Investigation;
@@ -25,16 +26,21 @@ import org.junit.Test;
 
 public class TestEntityInfo {
 
-	private static EntityInfoHandler pkHandler = EntityInfoHandler.getInstance();
+	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
+	
+	@Test(expected = IcatException.class)
+	public void testBadname() throws Exception {
+		eiHandler.getEntityInfo("Fred");
+	}
 
 	@Test
 	public void testSimplePKS() throws Exception {
-		testPKS(Investigation.class, "id");
-		testPKS(Dataset.class, "id");
-		testPKS(Keyword.class, "id");
-		testPKS(InvestigationUser.class, "id");
-		testPKS(User.class, "id");
-		testPKS(Job.class, "id");
+		testPKS(Investigation.class);
+		testPKS(Dataset.class);
+		testPKS(Keyword.class);
+		testPKS(InvestigationUser.class);
+		testPKS(User.class);
+		testPKS(Job.class);
 	}
 
 	@Test
@@ -49,7 +55,7 @@ public class TestEntityInfo {
 
 	private void testConstraint(Class<? extends EntityBaseBean> klass, String... name)
 			throws Exception {
-		List<List<Field>> results = pkHandler.getConstraintFields(klass);
+		List<List<Field>> results = eiHandler.getConstraintFields(klass);
 		if (name.length == 0) {
 			assertEquals("One", 0, results.size());
 		} else {
@@ -64,9 +70,9 @@ public class TestEntityInfo {
 		}
 	}
 
-	private void testPKS(Class<? extends EntityBaseBean> klass, String pkname) throws Exception {
-		String result = pkHandler.getKeyFor(klass).getName();
-		assertEquals(klass.getSimpleName() + " value ", pkname, result);
+	private void testPKS(Class<? extends EntityBaseBean> klass) throws Exception {
+		String result = eiHandler.getKeyFor(klass).getName();
+		assertEquals(klass.getSimpleName() + " value ", "id", result);
 	}
 
 	@Test
@@ -103,7 +109,7 @@ public class TestEntityInfo {
 	}
 
 	private void testRel(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {
-		Set<Relationship> results = pkHandler.getRelatedEntities(klass);
+		Set<Relationship> results = eiHandler.getRelatedEntities(klass);
 		Set<String> rStrings = new HashSet<String>();
 		for (Relationship rel : results) {
 			rStrings.add(rel.toString());
@@ -132,7 +138,7 @@ public class TestEntityInfo {
 	}
 
 	private void testOne(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {
-		Set<Class<? extends EntityBaseBean>> results = pkHandler.getOnes(klass);
+		Set<Class<? extends EntityBaseBean>> results = eiHandler.getOnes(klass);
 		Set<String> rStrings = new HashSet<String>();
 		for (Class<? extends EntityBaseBean> rel : results) {
 			rStrings.add(rel.getSimpleName());
@@ -156,7 +162,7 @@ public class TestEntityInfo {
 	}
 
 	private void testNNF(Class<? extends EntityBaseBean> klass, String... nnfs) throws Exception {
-		List<Field> results = pkHandler.getNotNullableFields(klass);
+		List<Field> results = eiHandler.getNotNullableFields(klass);
 		Set<String> rStrings = new HashSet<String>();
 		for (Field field : results) {
 			rStrings.add(field.getName());
@@ -182,7 +188,7 @@ public class TestEntityInfo {
 	}
 
 	private void testSF(Class<? extends EntityBaseBean> klass, String... sfs) throws Exception {
-		Map<Field, Integer> results = pkHandler.getStringFields(klass);
+		Map<Field, Integer> results = eiHandler.getStringFields(klass);
 		Set<String> rStrings = new HashSet<String>();
 		for (Entry<Field, Integer> entry : results.entrySet()) {
 			rStrings.add(entry.getKey().getName() + " " + entry.getValue());
@@ -206,7 +212,7 @@ public class TestEntityInfo {
 	}
 
 	private void testGetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
-		Map<Field, Method> results = pkHandler.getGetters(klass);
+		Map<Field, Method> results = eiHandler.getGetters(klass);
 		assertEquals(klass.getSimpleName() + " count", count, results.size());
 		for (Entry<Field, Method> entry : results.entrySet()) {
 			String cap = entry.getKey().getName();
@@ -230,7 +236,7 @@ public class TestEntityInfo {
 	}
 
 	private void testSetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
-		Map<Field, Method> results = pkHandler.getSetters(klass);
+		Map<Field, Method> results = eiHandler.getSetters(klass);
 		assertEquals(klass.getSimpleName() + " count", count, results.size());
 		for (Entry<Field, Method> entry : results.entrySet()) {
 			String cap = entry.getKey().getName();

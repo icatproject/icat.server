@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 @Comment("A user of the facility")
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "\"USER\"", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
+@Table(name = "USER_", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 public class User extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(User.class);

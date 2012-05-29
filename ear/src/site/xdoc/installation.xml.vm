@@ -52,7 +52,7 @@
                         eclipselink web site
                     </a>
                     . It has been tested with: MySQL, Oracle and
-                    Derby). You will need two
+                    Derby. You will need two
                     <em>empty</em>
                     schemas/databases both with permissions for data
                     definition
@@ -66,7 +66,7 @@
                     ojdbc14.jar or ojdbc16.jar and for MySQL it is
                     something like
                     mysql-connector-java*.jar. MySQL must be installed with InnoDB
-                    support. Eclipselink, whcih is used by ICAT, will ensure that MySQL
+                    support. Eclipselink, which is used by ICAT, will ensure that MySQL
                     tables make use of the InnoDB
                     engine. In the case of Derby the
                     connector comes
@@ -143,13 +143,6 @@
                     and then
                     <tt>create.sh</tt>
                     again.
-                </p>
-
-                <p>
-                    Now use a web browser to connect to the glassfish admin interface - typically
-                    <a href="http://localhost:4848">http://localhost:4848</a>
-                    though the port may be different and ensure that "Thread Pools" below the Configurations/server-config has an http-thread-pool
-                    with a "Max Thread Pool Size" of 128.
                 </p>
 
             </subsection>

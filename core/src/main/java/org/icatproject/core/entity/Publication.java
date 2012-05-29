@@ -25,9 +25,20 @@ public class Publication extends EntityBaseBean implements Serializable {
 	@JoinColumn(nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Investigation investigation;
+	
+	@Comment("The Digital Object Identifier associated with this publication")
+	private String doi;
 
 	@Comment("The name of a repository where the publication is held")
 	private String repository;
+
+	public String getDoi() {
+		return doi;
+	}
+
+	public void setDoi(String doi) {
+		this.doi = doi;
+	}
 
 	@Comment("The id of the publication within the repository")
 	private String repositoryId;

@@ -76,7 +76,9 @@ public class Session {
 	private CompatSession compatSession;
 
 	public Session() throws MalformedURLException, IcatException_Exception {
-		final String urlString = "https://smfisher.esc.rl.ac.uk:52742";
+		String host = System.getProperty("serverHost");
+		String port = System.getProperty("serverPort");
+		final String urlString = "https://" + host + ":" + port;
 		final URL icatUrl = new URL(urlString + "/ICATService/ICAT?wsdl");
 		final ICATService icatService = new ICATService(icatUrl, new QName(
 				"http://icatproject.org", "ICATService"));
@@ -388,7 +390,7 @@ public class Session {
 	}
 
 	public void registerInvestigation(Investigation inv) throws IcatException_Exception {
-		inv.setId((Long) this.icatEP.create(this.sessionId, inv));
+		inv.setId(this.icatEP.create(this.sessionId, inv));
 	}
 
 	public EntityInfo getEntityInfo(String beanName) throws IcatException_Exception {
@@ -418,6 +420,10 @@ public class Session {
 
 	public CompatSession getCompatSession() {
 		return compatSession;
+	}
+
+	public void registerDatafile(Datafile datafile) throws IcatException_Exception {
+		datafile.setId(this.icatEP.create(this.sessionId, datafile));
 	}
 
 }

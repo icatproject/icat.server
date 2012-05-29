@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 public class Tokenizer {
 
 	enum State {
@@ -18,10 +17,12 @@ public class Tokenizer {
 	private final static Pattern tsRegExp = Pattern
 			.compile("\\{\\s*ts\\s+(\\d{4}-\\d{2}-\\d{2})\\s+(\\d{2}:\\d{2}:\\d{2})\\s*\\}");
 
-	private final static Set<String> boolops = new HashSet<String>(Arrays.asList("AND", "OR", "NOT"));
-	private final static Set<String> keyWords = new HashSet<String>(Arrays.asList("DISTINCT", "ORDER", "BY", "ASC",
-			"DESC", "IN", "BETWEEN", "INCLUDE"));
-	private final static Set<String> functions = new HashSet<String>(Arrays.asList("MIN", "MAX", "AVG", "COUNT", "SUM"));
+	private final static Set<String> boolops = new HashSet<String>(
+			Arrays.asList("AND", "OR", "NOT"));
+	private final static Set<String> keyWords = new HashSet<String>(Arrays.asList("DISTINCT",
+			"ORDER", "BY", "ASC", "DESC", "IN", "BETWEEN", "INCLUDE"));
+	private final static Set<String> functions = new HashSet<String>(Arrays.asList("MIN", "MAX",
+			"AVG", "COUNT", "SUM"));
 
 	public static List<Token> getTokens(String input) throws LexerException {
 		List<Token> tokens = new ArrayList<Token>();
@@ -43,7 +44,7 @@ public class Tokenizer {
 				} else if (Character.isLetter(ch)) {
 					state = State.NAME;
 					start = i;
-				} else if (Character.isDigit(ch)) {
+				} else if (Character.isDigit(ch) || ch == '-') {
 					state = State.INTEGER;
 					start = i;
 				} else if (ch == ':') {
@@ -86,7 +87,8 @@ public class Tokenizer {
 				if (ch == '\'') {
 					state = State.INQUOTES;
 				} else {
-					tokens.add(new Token(Token.Type.STRING, input.substring(start + 1, i - 1).replace("''", "'")));
+					tokens.add(new Token(Token.Type.STRING, input.substring(start + 1, i - 1)
+							.replace("''", "'")));
 					state = State.RESET;
 				}
 			} else if (state == State.GT) {
@@ -121,7 +123,8 @@ public class Tokenizer {
 				if (!Character.isLetterOrDigit(ch) && ch != '_' && ch != '.') {
 					String name = input.substring(start, i);
 					String nameUp = name.toUpperCase();
-					if (boolops.contains(nameUp) || keyWords.contains(nameUp) || functions.contains(nameUp)) {
+					if (boolops.contains(nameUp) || keyWords.contains(nameUp)
+							|| functions.contains(nameUp)) {
 						tokens.add(new Token(Token.Type.valueOf(nameUp), nameUp));
 					} else if (nameUp.equals("LIKE")) {
 						tokens.add(new Token(Token.Type.COMPOP, "LIKE"));
@@ -138,7 +141,8 @@ public class Tokenizer {
 					state = State.RESET;
 				}
 			} else if (state == State.REAL) {
-				if (!Character.isDigit(ch) && ch != 'e' && ch != 'E' && ch != '.' && ch != '+' && ch != '-') {
+				if (!Character.isDigit(ch) && ch != 'e' && ch != 'E' && ch != '.' && ch != '+'
+						&& ch != '-') {
 					Double d = null;
 					try {
 						d = Double.parseDouble(input.substring(start, i));
@@ -165,9 +169,11 @@ public class Tokenizer {
 					String ts = input.substring(start, i) + "}";
 					Matcher matcher = tsRegExp.matcher(ts);
 					if (!matcher.matches()) {
-						throw new LexerException("Timestamp " + ts + " is not of form {ts yyyy-mm-dd hh:mm:ss}.");
+						throw new LexerException("Timestamp " + ts
+								+ " is not of form {ts yyyy-mm-dd hh:mm:ss}.");
 					}
-					tokens.add(new Token(Token.Type.TIMESTAMP, "{ts " + matcher.group(1) + " " + matcher.group(2) + "}"));
+					tokens.add(new Token(Token.Type.TIMESTAMP, "{ts " + matcher.group(1) + " "
+							+ matcher.group(2) + "}"));
 					state = State.NONE;
 				}
 			}
@@ -176,14 +182,16 @@ public class Tokenizer {
 		return tokens;
 	}
 
-	private static void reportError(char ch, State state, int i, String input) throws LexerException {
+	private static void reportError(char ch, State state, int i, String input)
+			throws LexerException {
 		int i1 = Math.max(0, i - 4);
 		int i2 = Math.min(i + 5, input.length());
 		if (ch != 0) {
-			throw new LexerException("Unexpected character '" + ch + "' near \"" + input.substring(i1, i2)
-					+ "\" in state " + state + " for string: " + input);
+			throw new LexerException("Unexpected character '" + ch + "' near \""
+					+ input.substring(i1, i2) + "\" in state " + state + " for string: " + input);
 		} else {
-			throw new LexerException("Unexpected end of string in state " + state + " for string: " + input);
+			throw new LexerException("Unexpected end of string in state " + state + " for string: "
+					+ input);
 		}
 	}
 

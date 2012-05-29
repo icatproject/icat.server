@@ -23,7 +23,7 @@ public class TestRestriction {
 		Input input = new Input(tokens);
 		Restriction r = new Restriction(input);
 		assertNull(input.peek(0));
-		System.out.println(r);
+		//		System.out.println(r);
 
 		Set<String> relatedEntityNames = new HashSet<String>();
 		for (Class<? extends EntityBaseBean> bean : r.getRelatedEntities()) {
@@ -53,10 +53,18 @@ public class TestRestriction {
 		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ JOIN Dataset$.investigation AS Investigation$ JOIN Investigation$.investigationUsers AS InvestigationUser$  WHERE (Dataset$.id = :pkid) AND ";
 		testGood(tokens, q, sw, Arrays.asList("Investigation", "InvestigationUser"), "Dataset");
 	}
+	
+	@Test
+	public void testGood3() throws Exception {
+		List<Token> tokens = Tokenizer
+				.getTokens("<-> Investigation <-> InvestigationUser [user.userId IN( -1, -23, 4, -4.12, 4.12, 1.0E99, -1.0E99, 1.0E-99, -1.0E-99) ]");
+		String sw = "(InvestigationUser$.user.userId IN (-1, -23, 4, -4.12, 4.12, 1.0E99, -1.0E99, 1.0E-99, -1.0E-99))";
+		String q = "SELECT COUNT(Dataset$) FROM Dataset AS Dataset$ JOIN Dataset$.investigation AS Investigation$ JOIN Investigation$.investigationUsers AS InvestigationUser$  WHERE (Dataset$.id = :pkid) AND ";
+		testGood(tokens, q, sw, Arrays.asList("Investigation", "InvestigationUser"), "Dataset");	}
 
 	@Ignore
 	@Test
-	public void testGood3() throws Exception {
+	public void testGood4() throws Exception {
 		List<Token> tokens = Tokenizer.getTokens("<-> Dataset <-> Investigation [name = 'A']");
 		String sw = "(Investigation$.name = 'A')";
 		String q = "SELECT COUNT(DatasetParameter$) FROM DatasetParameter AS DatasetParameter$ LEFT JOIN DatasetParameter$.dataset AS Dataset$ LEFT JOIN Dataset$.investigation AS Investigation$  WHERE (DatasetParameter$.id = :pkid) AND ";
@@ -65,7 +73,7 @@ public class TestRestriction {
 
 	@Ignore
 	@Test
-	public void testGood4() throws Exception {
+	public void testGood5() throws Exception {
 		List<Token> tokens = Tokenizer
 				.getTokens("<-> Dataset <-> Datafile([name = 'fred'][name = 'bill']");
 		String sw = "(Investigation$.name = 'A')";
