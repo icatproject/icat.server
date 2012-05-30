@@ -16,7 +16,6 @@ import org.icatproject.DatafileFormat;
 import org.icatproject.Dataset;
 import org.icatproject.DatasetParameter;
 import org.icatproject.DatasetType;
-import org.icatproject.DestType;
 import org.icatproject.EntityBaseBean;
 import org.icatproject.EntityInfo;
 import org.icatproject.Facility;
@@ -231,7 +230,7 @@ public class Session {
 		final Application application = new Application();
 		application.setName(name);
 		application.setVersion(version);
-		application.setId((Long) this.icatEP.create(this.sessionId, application));
+		application.setId(this.icatEP.create(this.sessionId, application));
 		return application;
 	}
 
@@ -241,7 +240,7 @@ public class Session {
 		datafile.setDatafileFormat(format);
 		datafile.setName(name);
 		datafile.setDataset(ds);
-		datafile.setId((Long) this.icatEP.create(this.sessionId, datafile));
+		datafile.setId(this.icatEP.create(this.sessionId, datafile));
 		return datafile;
 	}
 
@@ -252,7 +251,7 @@ public class Session {
 		dff.setVersion("1");
 		dff.setType(formatType);
 		dff.setFacility(facility);
-		dff.setId((Long) this.icatEP.create(this.sessionId, dff));
+		dff.setId(this.icatEP.create(this.sessionId, dff));
 		return dff;
 	}
 
@@ -373,20 +372,6 @@ public class Session {
 
 	public void update(EntityBaseBean df) throws IcatException_Exception {
 		this.icatEP.update(this.sessionId, df);
-	}
-
-	public NotificationRequest createNotificationRequest(String name, DestType destType,
-			String what, String crudFlags, String jmsOptions, String dataTypes)
-			throws IcatException_Exception {
-		NotificationRequest notificationRequest = new NotificationRequest();
-		notificationRequest.setName(name);
-		notificationRequest.setDestType(destType);
-		notificationRequest.setWhat(what);
-		notificationRequest.setCrudFlags(crudFlags);
-		notificationRequest.setJmsOptions(jmsOptions);
-		notificationRequest.setDatatypes(dataTypes);
-		icatEP.create(this.sessionId, notificationRequest);
-		return notificationRequest;
 	}
 
 	public void registerInvestigation(Investigation inv) throws IcatException_Exception {

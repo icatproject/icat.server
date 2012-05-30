@@ -38,7 +38,7 @@
                     the domain name and set the
                     admin password. For a secure deployment of glassfish you should obtain a trusted
                     certificate rather than
-                    using the self-signed one in the distribution
+                    using the self-signed one in the distribution.
                 </p>
 
             </subsection>
@@ -49,9 +49,9 @@
                     The database system must be supported by eclipselink. This includes most
                     database systems you are likely to want as explained at
                     <a href="http://wiki.eclipse.org/EclipseLink/FAQ/JPA#What_databases_are_supported.3F">the
-                        eclipselink web site
+                        eclipselink web site.
                     </a>
-                    . It has been tested with: MySQL, Oracle and
+                    It has been tested with: MySQL, Oracle and
                     Derby. You will need two
                     <em>empty</em>
                     schemas/databases both with permissions for data
@@ -71,8 +71,9 @@
                     engine. In the case of Derby the
                     connector comes
                     pre-installed with Glassfish
-                    however we would not
-                    expect Derby to be used for production work.
+                    however we do not
+                    expect
+                    Derby to be used for production work.
                 </p>
             </subsection>
 
@@ -126,19 +127,20 @@
                 <p>
                     Having prepared the glassfish.props file you should run the command:
                     <tt>asadmin login</tt>
-                    to login as admin. This will save your glassfish admin password to avoid being prompted by it again. If you do not do this the
+                    to login as admin. This will prompt you for your glassfish admin password to avoid being prompted for it later. If you do not do
+                    this the
                     next step will fail. You will find the asadmin executable in the bin directory below the directory you have identified in
                     glassfish.props as "glassfish" - i.e. $GLASSFISH_HOME/bin/asadmin. There is no logout command but you can delete
                     <tt>~/.asadminpass</tt>
                     if you wish
-                    once you have the
+                    once you have run the
                     <tt>create.sh</tt>
-                    script run successfully. Now check that your domain is running with
+                    script successfully. Now check that your domain is running with
                     <tt>asadmin list-domains</tt>
                     and try running
                     <tt>create.sh</tt>
                     . It expects to find glassfish.props in the current directory. Amongst other things the script will try to "ping" the database. If
-                    you have problems modify the glassfish.props, run
+                    you have problems, modify the glassfish.props, run
                     <tt>drop.sh</tt>
                     and then
                     <tt>create.sh</tt>
@@ -170,7 +172,7 @@
                     <dd>is also only required for ldap authentication. The % character in the
                         security_principal will be replaced by the specified user
                         name. If you
-                        just use % then the user must enter a complete security_principal as his
+                        just use % then the user must enter a complete security_principal as the
                         user name.
                     </dd>
                     <dt>auth.ldap.ip</dt>
@@ -211,10 +213,11 @@
                     <tt>test.py</tt>
                     . This is a python script which requires that the suds client is available. On CENTOS this is packaged as a
                     <tt>python-suds</tt>
-                    RPM. Invoke the script with two parameters: the (secure) port on which the service is deployed and the root ICAT password you
+                    RPM. Invoke the script with two parameters: the hostname and port separated by a colon on which the service is deployed securely (typically
+                    localhost:8181) and the root ICAT password you
                     stored in the database. It should report:
                 </p>
-                <code>It seems to work...
+                <code>Login, search, create, delete and logout operations were all successful.
                 </code>
                 <p>This script can be run at any time as it is almost harmless - it simply creates a "Group" with an unlikely name and removes it
                     again.

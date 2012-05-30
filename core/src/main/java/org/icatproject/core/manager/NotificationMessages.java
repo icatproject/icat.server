@@ -1,12 +1,9 @@
 package org.icatproject.core.manager;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -16,7 +13,6 @@ import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.NotificationRequest;
 import org.icatproject.core.entity.NotificationRequest.DestType;
-
 
 public class NotificationMessages {
 
@@ -29,12 +25,12 @@ public class NotificationMessages {
 
 		public String entityName;
 
-		public Map<String, Serializable> pk;;
+		public Long pk;
 
-		public String args;
+		public String query;
 
-		public String getArgs() {
-			return this.args;
+		public String getQuery() {
+			return this.query;
 		}
 
 		public DestType getDestType() {
@@ -49,7 +45,7 @@ public class NotificationMessages {
 			return this.notificationName;
 		}
 
-		public Map<String, Serializable> getPk() {
+		public Long getPk() {
 			return this.pk;
 		}
 
@@ -73,7 +69,8 @@ public class NotificationMessages {
 	private final List<Message> messages = new ArrayList<Message>();
 
 	public NotificationMessages(String userId, EntityBaseBean bean,
-			org.icatproject.core.manager.AccessType accessType, EntityManager manager) throws IcatException {
+			org.icatproject.core.manager.AccessType accessType, EntityManager manager)
+			throws IcatException {
 		String qName = null;
 		if (accessType == AccessType.CREATE) {
 			qName = NotificationRequest.CREATE_QUERY;
@@ -105,7 +102,8 @@ public class NotificationMessages {
 				try {
 					keyVal = m.invoke(bean);
 				} catch (final Exception e) {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+							e.getMessage());
 				}
 				q.setParameter("pkid", keyVal);
 
@@ -119,7 +117,7 @@ public class NotificationMessages {
 	}
 
 	public NotificationMessages(String userId, int size, Class<? extends EntityBaseBean> beanClass,
-			String queryString, EntityManager manager) throws IcatException  {
+			String queryString, EntityManager manager) throws IcatException {
 
 		String beanClassName = beanClass.getSimpleName();
 		final TypedQuery<NotificationRequest> query = manager.createNamedQuery(
@@ -150,21 +148,11 @@ public class NotificationMessages {
 			message.entityName = nr.getBean();
 		}
 
-		if (nr.isKeyWanted() && bean != null) {
-			message.pk = new HashMap<String, Serializable>();
-			Class<? extends EntityBaseBean> beanClass = bean.getClass();
-			final Field key = entityInfoHandler.getKeyFor(beanClass);
-			final Method m = entityInfoHandler.getGetters(beanClass).get(key);
-			Object keyVal = null;
-			try {
-				keyVal = m.invoke(bean);
-			} catch (final Exception e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
-			}
-			message.pk.put("id", (Serializable) keyVal);
+		if (nr.isIdWanted() && bean != null) {
+			message.pk = bean.getId();
 		}
-		if (nr.isArgsWanted() && queryString != null) {
-			message.args = queryString;
+		if (nr.isQueryWanted() && queryString != null) {
+			message.query = queryString;
 		}
 
 	}

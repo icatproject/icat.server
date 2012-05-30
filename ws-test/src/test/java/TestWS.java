@@ -34,6 +34,7 @@ import org.icatproject.Investigation;
 import org.icatproject.InvestigationParameter;
 import org.icatproject.InvestigationType;
 import org.icatproject.Job;
+import org.icatproject.NotificationRequest;
 import org.icatproject.OutputDatafile;
 import org.icatproject.OutputDataset;
 import org.icatproject.ParameterType;
@@ -227,11 +228,36 @@ public class TestWS {
 	}
 
 	@Test
-	public void notificationRequests() throws Exception {
+	public void notifications() throws Exception {
 		session.clear();
-		session.createNotificationRequest("A", DestType.P_2_P, "Facility", "C", "ptp",
-				"notificationName userId entityName entityKey callArgs");
-		session.createFacility("Test Facility", 90);
+
+		{
+			try {
+				NotificationRequest notificationRequest = new NotificationRequest();
+				notificationRequest
+						.setDatatypes("notificationName userId entityName entityId callArgs");
+				notificationRequest.setCrudFlags("C");
+				notificationRequest.setDestType(DestType.P_2_P);
+				notificationRequest.setWhat("Facility");
+				notificationRequest.setName("A");
+				session.create(notificationRequest);
+				fail("No expection thrown");
+			} catch (IcatException_Exception e) {
+				assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+			}
+		}
+
+		{
+			NotificationRequest notificationRequest = new NotificationRequest();
+			notificationRequest.setDatatypes("notificationName userId entityName entityId");
+			notificationRequest.setCrudFlags("C");
+			notificationRequest.setDestType(DestType.PUBSUB);
+			notificationRequest.setWhat("Datafile");
+			notificationRequest.setName("Test");
+			session.create(notificationRequest);
+		}
+
+		create();
 	}
 
 	@Test
@@ -663,7 +689,7 @@ public class TestWS {
 		// session.addOutputDatafile(job, mog);
 
 	}
-	
+
 	private Sample addSample(Investigation inv, String sampleName) {
 		Sample sample = new Sample();
 		sample.setName(sampleName);

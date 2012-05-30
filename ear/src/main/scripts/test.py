@@ -9,13 +9,13 @@ logging.basicConfig(level=logging.CRITICAL)
 
 args = sys.argv
 if len(args) != 3:
-    print >> sys.stderr, "This must have two arguments: port and password"
+    print >> sys.stderr, "This must have two arguments: hostname:port and password"
     sys.exit(1)
 
-port = args[1]
+hostAndPort = args[1]
 password = args[2]
 
-client = Client("https://127.0.0.1:" + port + "/ICATService/ICAT?wsdl")
+client = Client("https://" + hostAndPort + "/ICATService/ICAT?wsdl")
 service = client.service
 factory = client.factory
 
@@ -44,4 +44,6 @@ if len(groups):
     print >> sys.stderr, "There are now", len(groups), "groups instead of 0 - something is wrong"
     sys.exit(1)
     
-print "It seems to work..."
+service.logout(sessionId)
+    
+print "Login, search, create, delete and logout operations were all successful."

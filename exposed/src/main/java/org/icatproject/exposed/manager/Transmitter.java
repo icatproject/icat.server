@@ -1,7 +1,5 @@
 package org.icatproject.exposed.manager;
 
-import java.io.Serializable;
-
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
@@ -47,9 +45,9 @@ public class Transmitter {
 				jmsg = session.createObjectMessage();
 			}
 
-			String name = message.getNotificationName();
-			if (name != null) {
-				jmsg.setStringProperty("notificationName", name);
+			String notificationName = message.getNotificationName();
+			if (notificationName != null) {
+				jmsg.setStringProperty("notificationName", notificationName);
 			}
 
 			String userId = message.getUserId();
@@ -57,17 +55,20 @@ public class Transmitter {
 				jmsg.setStringProperty("userId", userId);
 			}
 
-			name = message.getEntityName();
-			if (name != null) {
-				jmsg.setStringProperty("entityName", name);
+			String entityName = message.getEntityName();
+			if (entityName != null) {
+				jmsg.setStringProperty("entityName", entityName);
 			}
 
-			String args = message.getArgs();
-			if (args != null) {
-				jmsg.setStringProperty("entityArgs", args);
+			String query = message.getQuery();
+			if (query != null) {
+				jmsg.setStringProperty("query", query);
 			}
 
-			jmsg.setObject((Serializable) message.getPk());
+			Long pk = message.getPk();
+			if (pk != null) {
+				jmsg.setLongProperty("query", pk);
+			}
 			producer.send(jmsg);
 		}
 

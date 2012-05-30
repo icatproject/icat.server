@@ -20,6 +20,11 @@
                 structure results in a class definition.
             </p>
 
+            <p>
+                Please also consult the
+                <a href="apidocs">javadoc</a>
+            </p>
+
             <subsection name="Setting Up">
                 <p>The web service is accessed via a proxy (conventionally known as
                     a port). The proxy (here given a variable name of icat) may be
@@ -78,6 +83,37 @@
 
                 <p>This invalidates the sessionId.</p>
 
+            </subsection>
+
+            <subsection name="Exceptions">
+                <p>There is only one exception which should be thrown by ICAT when it is behaving as it should. This is the IcatException_Exception
+                    which is a wrapper around the real exception which in turn includes an enumerated code for failure and the usual message. For
+                    example to print what has happened you might use the following:
+                </p>
+                <code>
+                    String sessionId;
+                    <br />
+                    try {
+                    <br />
+                    &#160;&#160;&#160;sessionId = login("me", "myPassword");
+                    <br />
+                    } catch (IcatException_Exception e) {
+                    <br />
+                    &#160;&#160;&#160;IcatException ue = e.getFaultInfo();
+                    <br />
+                    &#160;&#160;&#160;System.out.println("IcatException " + ue.getType() + " " + ue.getMessage()
+                    <br />
+                    &#160;&#160;&#160; + (ue.getOffset() >= 0 ? " at offset " + ue.getOffset() : ""));
+                    <br />
+                    }
+                </code>
+                <p>Operations which work on a list of objects, such as createMany, may fail because of failure to process one of the objects. In this
+                    In this case the state of the database will be rolled back and the offset where the error occured will be stored in the
+                    IcatException. For
+                    other calls the offset will be negative, as it is with certain internal exceptions which are not associated with
+                    any specific object
+                    in a list.
+                </p>
             </subsection>
 
         </section>
@@ -224,17 +260,17 @@
                     <br />
                     for (int i = 0; i &lt; n; i++) {
                     <br />
-                    &#160; &#160; &#160;final
+                    &#160;&#160;&#160;final
                     Datafile datafile = new Datafile();
                     <br />
-                    &#160; &#160; &#160;datafile.setDatafileFormat(dfmt);
+                    &#160;&#160;&#160;datafile.setDatafileFormat(dfmt);
                     <br />
-                    &#160; &#160; &#160;datafile.setName("bill"
+                    &#160;&#160;&#160;datafile.setName("bill"
                     + i);
                     <br />
-                    &#160; &#160; &#160;datafile.setDataset(wibble);
+                    &#160;&#160;&#160;datafile.setDataset(wibble);
                     <br />
-                    &#160; &#160; &#160;dfs.add(datafile);
+                    &#160;&#160;&#160;dfs.add(datafile);
                     <br />
                     }
                     <br />
@@ -274,11 +310,14 @@
                     Starting from the first type (before the INCLUDE keyword) cascaded "one to many" relationships
                     may
                     be followed
-                    repeatedly. In addition "many to one" relationships can be followed. The idea behind this is that cascaded "one to
+                    repeatedly. In addition "&#160;&#160;&#160;many to one" relationships can be followed. The idea behind this is that
+                    cascaded "one to
                     many"
-                    relationships represent composition/ownership - i.e. a dataset is made up of datafiles and the "many to one" is allowed as
+                    relationships represent composition/ownership - i.e. a dataset is made up of datafiles and the "many to one"
+                    is allowed as
                     these
-                    are typically shared objects. This means that starting from a Dataset one could follow the cascaded "one to many"
+                    are typically shared objects. This means that starting from a Dataset one could follow the cascaded "one to
+                    many"
                     relationships to
                     get to Datafile, DatasetParameter and DatafileParameter. From this set of types (Dataset, Datafile,
                     DatasetParameter and
@@ -429,7 +468,7 @@
                 behave as other
                 ICAT tables do.
             </p>
-            <subsection name="Rules">
+            <subsection name="Rules" id="rules">
                 <p>
                     By default access is denied to all objects, rules allow access to be allowed. It is only necessary to be permitted by one rule
                     where that rule is only applied to the object referenced directly in the API call. The Rule table has two exposed fields:
@@ -488,16 +527,96 @@
             </subsection>
         </section>
 
+        <section name="Notifications">
+            <p>
+                ICAT is able to send JMS messages. To do this the table "NotificationRequest" should be populated as needed. This table includes two
+                columns:
+                <tt>crudFlags</tt>
+                and
+                <tt>what</tt>
+                which are treated in the same way as columns of the same name in the
+                <a href="#rules">authorization rules</a>
+                to choose the conditions for sending a message. For example:
+            </p>
+            <code>
+                NotificationRequest notificationRequest = new NotificationRequest();
+                <br />
+                notificationRequest.setDatatypes("notificationName userId entityName entityId");
+                <br />
+                notificationRequest.setCrudFlags("C");
+                <br />
+                notificationRequest.setDestType(DestType.PUBSUB);
+                <br />
+                notificationRequest.setWhat("Datafile");
+                <br />
+                notificationRequest.setName("Test");
+                <br />
+            </code>
+            <p>will send a notification message containing the name of the notification ("Test" in this case"), the userId, the entityName (which will
+                always be "Datafile" in this case) and its id for every call where a Datafile is created. Pubsub mode will be used rather than P2P. To
+                see who is reading which datasets belonging to some investigation called "Fred" one could have:
+            </p>
+            <code>
+                NotificationRequest notificationRequest = new NotificationRequest();
+                <br />
+                notificationRequest.setDatatypes("userId entityId");
+                <br />
+                notificationRequest.setCrudFlags("R");
+                <br />
+                notificationRequest.setDestType(DestType.PUBSUB);
+                <br />
+                notificationRequest.setWhat("Dataset &gt;-&lt; Investigation [name = "Fred"]");
+                <br />
+                notificationRequest.setName("Fred readers");
+                <br />
+            </code>
+            <subsection name="security  concerns with notification">
+                <p>Though the notification mechanism is powerful it does allow information to be published from ICAT which is not protected by the
+                    normal ICAT authorization mechanism. Please publish only the information required to meet you needs and take care that the
+                    authorization for the
+                    NotificationRequest table is well controlled.
+                </p>
+            </subsection>
+        </section>
+
         <section name="Information">
             <p class="call">String getApiVersion()</p>
 
-            <p>Returns the version of the API - this should match the
+            <p>returns the version of the API - this should match the
                 version of the client as it is held in Maven for a
                 released component. In the case
                 of a release candidate
                 such as 4.2.0-rc03 the version returned will still be
                 4.2.0
             </p>
+
+            <p class="call"> EntityInfo getEntityInfo ( String beanName )</p>
+
+
+            <p>returns full information about a table given its name. For example:</p>
+            <code>
+                EntityInfo ei = icat.getEntityInfo("Investigation");
+                <br />
+                System.out.println(ei.getClassComment());
+                <br />
+                for (Constraint c : ei.getConstraints()) {
+                <br />
+                &#160;&#160;&#160;System.out.println("Constraint columns: " + c.getFieldNames());
+                <br />
+                }
+                <br />
+                for (EntityField f : ei.getFields()) {
+                <br />
+                &#160;&#160;&#160;System.out.println("Field names: " + f.getName());
+                <br />
+                }
+                <br />
+            </code>
+            <p>
+                Prints out some information about the Investigation table. To see full information please consult the
+                <a href="apidocs/org/icatproject/EntityInfo.html">javadoc</a>
+            </p>
+
 
         </section>
     </body>

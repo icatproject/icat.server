@@ -11,6 +11,7 @@ public class IcatException extends Exception {
 	}
 
 	private IcatExceptionType type;
+	private int offset = -1;
 
 	@Override
 	public String toString() {
@@ -20,6 +21,19 @@ public class IcatException extends Exception {
 	public IcatException(IcatExceptionType type, String msg) {
 		super(msg);
 		this.type = type;
+	}
+
+	public IcatException(IcatExceptionType type, String msg, int offset) {
+		this(type, msg);
+		this.offset = offset;
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
+	public void setOffset(int offset) {
+		this.offset = offset;
 	}
 
 	public IcatExceptionType getType() {

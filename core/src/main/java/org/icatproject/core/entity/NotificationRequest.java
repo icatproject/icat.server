@@ -68,6 +68,7 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 	@XmlTransient
 	private String bean;
 
+	@Comment("Currently no options are supported")
 	@Column
 	private String jmsOptions;
 
@@ -86,6 +87,12 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 	@XmlTransient
 	private String crudJPQL;
 
+	@Comment("A blank separated list of keywords showing what to publish in the notification message. Possible keywords are: "
+			+ "NOTIFICATIONNAME - the name given to the notification, "
+			+ "USERID - the user name of the person making the API call, "
+			+ "ENTITYNAME - the name of the entitity involved in the call, "
+			+ "ENTITYID - the id of the entity and "
+			+ "QUERY - the search/get string when available")
 	private String datatypes;
 
 	@XmlTransient
@@ -95,10 +102,10 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 	private boolean entityNameWanted;
 
 	@XmlTransient
-	private boolean keyWanted;
+	private boolean idWanted;
 
 	@XmlTransient
-	private boolean argsWanted;
+	private boolean queryWanted;
 
 	@XmlTransient
 	private boolean notificationNameWanted;
@@ -152,10 +159,10 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 					this.useridWanted = true;
 				} else if (datatype.equals("ENTITYNAME")) {
 					this.entityNameWanted = true;
-				} else if (datatype.equals("ENTITYKEY")) {
-					this.keyWanted = true;
-				} else if (datatype.equals("CALLARGS")) {
-					this.argsWanted = true;
+				} else if (datatype.equals("ENTITYID")) {
+					this.idWanted = true;
+				} else if (datatype.equals("QUERY")) {
+					this.queryWanted = true;
 				} else {
 					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 							"Datatypes value " + this.datatypes + " contains " + datatype);
@@ -209,8 +216,8 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 	}
 
 	@XmlTransient
-	public boolean isArgsWanted() {
-		return this.argsWanted;
+	public boolean isQueryWanted() {
+		return this.queryWanted;
 	}
 
 	@XmlTransient
@@ -229,8 +236,8 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 	}
 
 	@XmlTransient
-	public boolean isKeyWanted() {
-		return this.keyWanted;
+	public boolean isIdWanted() {
+		return this.idWanted;
 	}
 
 	@XmlTransient
@@ -263,8 +270,8 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 		this.notificationNameWanted = false;
 		this.useridWanted = false;
 		this.entityNameWanted = false;
-		this.keyWanted = false;
-		this.argsWanted = false;
+		this.idWanted = false;
+		this.queryWanted = false;
 		this.fixup();
 		logger.debug("postMergeFixup of NotificationRequest " + this.name + " for "
 				+ this.crudFlags + " of " + this.what);
@@ -278,8 +285,8 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 				+ this.crudFlags + " of " + this.what);
 	}
 
-	public void setArgsWanted(boolean argsWanted) {
-		this.argsWanted = argsWanted;
+	public void setQueryWanted(boolean queryWanted) {
+		this.queryWanted = queryWanted;
 	}
 
 	public void setBean(String bean) {
@@ -319,8 +326,8 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 		this.jmsOptions = jmsOptions;
 	}
 
-	public void setKeyWanted(boolean keyWanted) {
-		this.keyWanted = keyWanted;
+	public void setKeyWanted(boolean idWanted) {
+		this.idWanted = idWanted;
 	}
 
 	public void setName(String name) {

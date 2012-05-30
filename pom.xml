@@ -9,7 +9,7 @@
     <distributionManagement>
         <site>
             <id>website</id>
-            <url>scp://www.icatproject.org/var/www/html/mvn/site/${project.version}</url>
+            <url>scp://www.icatproject.org/var/www/html/mvn/site/icat/${project.version}</url>
         </site>
         <repository>
             <id>repo</id>

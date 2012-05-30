@@ -6,6 +6,7 @@
     
     <item name="Java Client User Manual" href="manual.html"/>
       <item name="Java Client Installation" href="installation.html"/>
+       <item name="Java Client Javadoc" href="apidocs/index.html"/>
     </menu>
    
     <menu ref="reports"/>

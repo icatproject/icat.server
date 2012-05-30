@@ -57,20 +57,22 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>Hack the wsdl</id>
                         <phase>initialize</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <arguments>
+                                <argument>wsdl.sh</argument>
+                                <argument>${serverHost}</argument>
+                                <argument>${serverPort}</argument>
+                            </arguments>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <executable>sh</executable>
-                    <arguments>
-                        <argument>wsdl.sh</argument>
-                        <argument>${serverHost}</argument>
-                        <argument>${serverPort}</argument>
-                    </arguments>
-                </configuration>
+
             </plugin>
 
             <plugin>
@@ -102,6 +104,16 @@
             <type>ear</type>
         </dependency>
     </dependencies>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.8.1</version>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <description>Provides facilities to login to an ICAT instance after which one can create, read, update or delete entities according to your permissions.</description>
 
