@@ -3,6 +3,7 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -43,7 +44,7 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
 	@Comment("A description of this type of investigation")
 	private String description;
 
-	@OneToMany(mappedBy = "type")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<Investigation> investigations;
 
 	public List<Investigation> getInvestigations() {

@@ -117,15 +117,75 @@ public class DagHandler {
 		Set<Relationship> navto = pkHandler.getRelatedEntities(from);
 		for (Relationship relationship : navto) {
 			Class<? extends EntityBaseBean> bean = relationship.getBean();
-			if (used.contains(bean) && !bean.equals(predecessor)) {
-				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
-						"Can't have loop in graph of entities " + bean
-								+ " was encountered twice following " + navto);
+			if (allBeans.contains(bean) && !bean.equals(predecessor)) {
+				if (used.contains(bean)) {
+					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+							"Can't have loop in graph of entities. '" + bean.getSimpleName()
+									+ "' was encountered twice following "
+									+ predecessor.getSimpleName() + " -> " + from.getSimpleName()
+									+ " -> " + bean.getSimpleName());
+				} else {
+					used.add(bean);
+					Step s = new Step(bean, relationship, follow(from, bean, allBeans, used));
+					steps.add(s);
+				}
 			}
-			if (allBeans.contains(bean) && !used.contains(bean)) {
-				used.add(bean);
-				Step s = new Step(bean, relationship, follow(from, bean, allBeans, used));
-				steps.add(s);
+		}
+		return steps;
+	}
+
+	public static void checkIncludes(Class<? extends EntityBaseBean> start,
+			Set<Class<? extends EntityBaseBean>> es) throws IcatException {
+		Set<Class<? extends EntityBaseBean>> allBeans = new HashSet<Class<? extends EntityBaseBean>>(
+				es);
+		allBeans.add(start);
+
+		Set<Class<? extends EntityBaseBean>> used = new HashSet<Class<? extends EntityBaseBean>>();
+		used.add(start);
+
+		new Step(start, null, followIncludes(null, start, allBeans, used, true));
+		allBeans.removeAll(used);
+		if (!allBeans.isEmpty()) {
+			boolean first = true;
+			StringBuilder sb = new StringBuilder();
+			for (Class<? extends EntityBaseBean> bean : allBeans) {
+				if (first) {
+					first = false;
+				} else {
+					sb.append(", ");
+				}
+				sb.append(bean.getSimpleName());
+			}
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+					"Unable to reach " + sb + " in list of INCLUDES.");
+
+		}
+
+	}
+
+	private static Set<Step> followIncludes(Class<? extends EntityBaseBean> predecessor,
+			Class<? extends EntityBaseBean> from, Set<Class<? extends EntityBaseBean>> allBeans,
+			Set<Class<? extends EntityBaseBean>> used, boolean followCascades) throws IcatException {
+		Set<Step> steps = new HashSet<Step>();
+		Set<Relationship> navto = pkHandler.getIncludesToFollow(from);
+		for (Relationship relationship : navto) {
+			if (!relationship.isCascaded() || followCascades) {
+				Class<? extends EntityBaseBean> bean = relationship.getBean();
+				if (allBeans.contains(bean) && !bean.equals(predecessor)) {
+					if (used.contains(bean)) {
+						throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+								"Can't have loop in graph of entities. '" + bean.getSimpleName()
+										+ "' was encountered twice following "
+										+ predecessor.getSimpleName() + " -> "
+										+ from.getSimpleName() + " -> " + bean.getSimpleName()
+										+ " in list of INCLUDES.");
+					} else {
+						used.add(bean);
+						Step s = new Step(bean, relationship, followIncludes(from, bean, allBeans,
+								used, relationship.isCollection()));
+						steps.add(s);
+					}
+				}
 			}
 		}
 		return steps;

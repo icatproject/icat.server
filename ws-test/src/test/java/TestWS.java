@@ -26,17 +26,14 @@ import org.icatproject.EntityBaseBean;
 import org.icatproject.EntityField;
 import org.icatproject.EntityInfo;
 import org.icatproject.Facility;
+import org.icatproject.IcatException;
 import org.icatproject.IcatExceptionType;
 import org.icatproject.IcatException_Exception;
-import org.icatproject.InputDatafile;
-import org.icatproject.InputDataset;
 import org.icatproject.Investigation;
 import org.icatproject.InvestigationParameter;
 import org.icatproject.InvestigationType;
 import org.icatproject.Job;
 import org.icatproject.NotificationRequest;
-import org.icatproject.OutputDatafile;
-import org.icatproject.OutputDataset;
 import org.icatproject.ParameterType;
 import org.icatproject.ParameterValueType;
 import org.icatproject.PermissibleStringValue;
@@ -286,13 +283,16 @@ public class TestWS {
 		assertEquals("No params", 0, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
-		results = session.search("Dataset INCLUDE Datafile, 1 [id = " + dsid + "]");
-		assertEquals("Count", 1, results.size());
-		ds = (Dataset) results.get(0);
-		assertEquals("Value", dsid, ds.getId());
-		assertEquals("Files", 2, ds.getDatafiles().size());
-		assertEquals("No params", 0, ds.getParameters().size());
-		assertNotNull("Inv", ds.getInvestigation());
+		try {
+			results = session.search("Dataset INCLUDE Datafile, 1 [id = " + dsid + "]");
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(-1, ue.getOffset());
+			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
+			assertEquals("Expected token from types [NAME] at token 1 in Datafile , < 1 > [ id ",
+					ue.getMessage());
+		}
 
 		results = session.search("Dataset INCLUDE 1 [id = " + dsid + "]");
 		assertEquals("Count", 1, results.size());
@@ -355,66 +355,25 @@ public class TestWS {
 		application = (Application) results.get(0);
 		assertEquals("InputDataset", 1, application.getJobs().size());
 
-		results = session.search("Job INCLUDE InputDataset, InputDatafile, Dataset, Datafile");
-		assertEquals("Count", 1, results.size());
-		job = (Job) results.get(0);
-		assertEquals("InputDataset", 1, job.getInputDatasets().size());
-		assertEquals("OutputDataset", 0, job.getOutputDatasets().size());
-		assertEquals("InputDatafile", 2, job.getInputDatafiles().size());
-		assertEquals("OutputDatafile", 0, job.getOutputDatafiles().size());
+		try {
+			results = session.search("Job INCLUDE InputDataset, InputDatafile, Dataset, Datafile");
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(-1, ue.getOffset());
+			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
+		}
 
-		int ndsin = 0;
-		for (InputDataset ids : job.getInputDatasets()) {
-			if (ids.getDataset() != null) {
-				ndsin++;
-			}
+		try {
+			results = session
+					.search("Job INCLUDE InputDataset, InputDatafile, OutputDataset, OutputDatafile, Dataset, Datafile");
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(-1, ue.getOffset());
+			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 		}
-		int ndfin = 0;
-		for (InputDatafile idf : job.getInputDatafiles()) {
-			if (idf.getDatafile() != null) {
-				ndfin++;
-			}
-		}
-		assertEquals("Dataset", 1, ndsin);
-		assertEquals("Datafile", 2, ndfin);
 
-		results = session
-				.search("Job INCLUDE InputDataset, InputDatafile, OutputDataset, OutputDatafile, Dataset, Datafile");
-		assertEquals("Count", 1, results.size());
-		job = (Job) results.get(0);
-		assertEquals("InputDataset", 1, job.getInputDatasets().size());
-		assertEquals("OutputDataset", 1, job.getOutputDatasets().size());
-		assertEquals("InputDatafile", 2, job.getInputDatafiles().size());
-		assertEquals("OutputDatafile", 1, job.getOutputDatafiles().size());
-
-		ndsin = 0;
-		for (InputDataset ids : job.getInputDatasets()) {
-			if (ids.getDataset() != null) {
-				ndsin++;
-			}
-		}
-		ndfin = 0;
-		for (InputDatafile idf : job.getInputDatafiles()) {
-			if (idf.getDatafile() != null) {
-				ndfin++;
-			}
-		}
-		int ndsout = 0;
-		for (OutputDataset ods : job.getOutputDatasets()) {
-			if (ods.getDataset() != null) {
-				ndsout++;
-			}
-		}
-		int ndfout = 0;
-		for (OutputDatafile odf : job.getOutputDatafiles()) {
-			if (odf.getDatafile() != null) {
-				ndfout++;
-			}
-		}
-		assertEquals("Dataset", 1, ndsin);
-		assertEquals("Datafile", 2, ndfin);
-		assertEquals("Dataset", 1, ndsout);
-		assertEquals("Datafile", 1, ndfout);
 	}
 
 	private Dataset addDataset(Investigation inv, String name, DatasetType type) {
@@ -481,11 +440,7 @@ public class TestWS {
 			session.create(ip);
 			fail("No throw");
 		} catch (IcatException_Exception e) {
-			if (e.getFaultInfo().getType() == IcatExceptionType.VALIDATION) {
-				System.out.println(e.getMessage());
-			} else {
-				throw e;
-			}
+			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
 		}
 
 		ip.setNumericValue(60.);
@@ -496,11 +451,7 @@ public class TestWS {
 			session.update(ip);
 			fail("No throw");
 		} catch (IcatException_Exception e) {
-			if (e.getFaultInfo().getType() == org.icatproject.IcatExceptionType.VALIDATION) {
-				System.out.println(e.getMessage());
-			} else {
-				throw e;
-			}
+			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
 		}
 
 		ip.setNumericValue(70.);
@@ -533,13 +484,9 @@ public class TestWS {
 			session.create(ip);
 			fail("No throw");
 		} catch (IcatException_Exception e) {
-			if (e.getFaultInfo().getType() == IcatExceptionType.VALIDATION) {
-				assertEquals(
-						"Parameter of type UselessString is not applicable to an Investigation",
-						e.getMessage());
-			} else {
-				throw e;
-			}
+			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
+			assertEquals("Parameter of type UselessString is not applicable to an Investigation",
+					e.getMessage());
 		}
 	}
 
@@ -576,11 +523,7 @@ public class TestWS {
 			session.create(ip);
 			fail("No throw");
 		} catch (IcatException_Exception e) {
-			if (e.getFaultInfo().getType() == IcatExceptionType.VALIDATION) {
-				System.out.println(e.getMessage());
-			} else {
-				throw e;
-			}
+			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
 		}
 
 		ip.setStringValue("good1");
@@ -591,11 +534,7 @@ public class TestWS {
 			session.update(ip);
 			fail("No throw");
 		} catch (IcatException_Exception e) {
-			if (e.getFaultInfo().getType() == IcatExceptionType.VALIDATION) {
-				System.out.println(e.getMessage());
-			} else {
-				throw e;
-			}
+			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
 		}
 
 		ip.setStringValue("good2");
@@ -655,10 +594,6 @@ public class TestWS {
 
 		session.registerInvestigation(inv);
 
-		// TODO make this work ...
-		// inv = (Investigation)
-		// session.get("Investigation INCLUDE Dataset, Datafile, DatasetParameter, Facility, Sample, SampleParameter",
-		// inv.getId());
 		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter",
 				inv.getId());
 		assertEquals(2, inv.getSamples().size());
@@ -671,23 +606,6 @@ public class TestWS {
 				fail("Neither S1 nor S2");
 			}
 		}
-
-		// Dataset dfsin = session.createDataset("dfsin", "GQ", inv);
-		// Datafile fred = session.createDatafile("fred", dft1, dfsin);
-		// Datafile bill = session.createDatafile("bill", dft1, dfsin);
-		//
-		// Dataset dfsout = session.createDataset("dfsout", "GQ", inv);
-		// Datafile mog = session.createDatafile("mog", dft1, dfsout);
-		//
-		// Application application = session.createApplication("The one",
-		// "1.0");
-		// Job job = session.createJob(application);
-		// session.addInputDataset(job, wibble);
-		// session.addOutputDataset(job, wobble);
-		// session.addInputDatafile(job, fred);
-		// session.addInputDatafile(job, bill);
-		// session.addOutputDatafile(job, mog);
-
 	}
 
 	private Sample addSample(Investigation inv, String sampleName) {
@@ -732,23 +650,24 @@ public class TestWS {
 			session.get("Dataset INCLUDE Investigator", dsId);
 			fail("No throw");
 		} catch (IcatException_Exception e) {
-			if (e.getFaultInfo().getType() == IcatExceptionType.BAD_PARAMETER) {
-				assertEquals(
-						"org.icatproject.core.entity.Investigator is not known to the class loader",
-						e.getMessage());
-			} else {
-				throw e;
-			}
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+			assertEquals(
+					"org.icatproject.core.entity.Investigator is not known to the class loader",
+					e.getMessage());
+		}
+		try {
+			session.get("Dataset INCLUDE Investigation, Facility, Instrument", dsId);
+			fail("No throw");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
 		}
 		try {
 			session.get("Dataset INCLUDE User", dsId);
 			fail("No throw");
 		} catch (IcatException_Exception e) {
-			if (e.getFaultInfo().getType() == IcatExceptionType.BAD_PARAMETER) {
-				assertEquals("Unable to reach User", e.getMessage());
-			} else {
-				throw e;
-			}
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+			assertEquals("Unable to reach User in list of INCLUDES.", e.getMessage());
+
 		}
 	}
 

@@ -27,7 +27,7 @@ import org.junit.Test;
 public class TestEntityInfo {
 
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-	
+
 	@Test(expected = IcatException.class)
 	public void testBadname() throws Exception {
 		eiHandler.getEntityInfo("Fred");
@@ -138,10 +138,10 @@ public class TestEntityInfo {
 	}
 
 	private void testOne(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {
-		Set<Class<? extends EntityBaseBean>> results = eiHandler.getOnes(klass);
+		Set<Relationship> results = eiHandler.getOnes(klass);
 		Set<String> rStrings = new HashSet<String>();
-		for (Class<? extends EntityBaseBean> rel : results) {
-			rStrings.add(rel.getSimpleName());
+		for (Relationship rel : results) {
+			rStrings.add(rel.getBean().getSimpleName());
 		}
 		// System.out.println(results);
 		assertEquals(klass.getSimpleName() + " count", rels.length, results.size());

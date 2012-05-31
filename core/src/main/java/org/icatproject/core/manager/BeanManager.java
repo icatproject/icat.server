@@ -27,6 +27,7 @@ import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.parser.GetQuery;
+import org.icatproject.core.parser.Include;
 import org.icatproject.core.parser.Input;
 import org.icatproject.core.parser.LexerException;
 import org.icatproject.core.parser.ParserException;
@@ -261,9 +262,14 @@ public class BeanManager {
 					entityClass.getSimpleName() + "[id:" + primaryKey + "] not founded.");
 		}
 
-		Set<Class<? extends EntityBaseBean>> includes = q.getIncludes();
-		if (includes.size() > 0) {
-			beanManaged.addIncludes(includes);
+		Include include = q.getInclude();
+		if (include != null) {
+			if (include.isOne()) {
+				beanManaged.addOne();
+			} else {
+				Set<Class<? extends EntityBaseBean>> includes = include.getBeans();
+				beanManaged.addIncludes(includes, true);
+			}
 		}
 
 		GateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
@@ -323,10 +329,17 @@ public class BeanManager {
 
 		List<?> result = jpqlQuery.getResultList();
 
-		Set<Class<? extends EntityBaseBean>> includes = q.getIncludes();
-		if (includes.size() > 0) {
-			for (Object beanManaged : result) {
-				((EntityBaseBean) beanManaged).addIncludes(includes);
+		Include include = q.getInclude();
+		if (include != null) {
+			if (include.isOne()) {
+				for (Object beanManaged : result) {
+					((EntityBaseBean) beanManaged).addOne();
+				}
+			} else {
+				Set<Class<? extends EntityBaseBean>> includes = include.getBeans();
+				for (Object beanManaged : result) {
+					((EntityBaseBean) beanManaged).addIncludes(includes, true);
+				}
 			}
 		}
 
@@ -396,56 +409,71 @@ public class BeanManager {
 
 	// This code might be in EntityBaseBean however this would mean that it
 	// would be processed by JPA which gets confused by it.
+	public static void addOne(EntityBaseBean thisBean) throws IcatException {
+		logger.debug("addOne for " + thisBean);
+		Class<? extends EntityBaseBean> entityClass = thisBean.getClass();
+		for (Relationship r : eiHandler.getOnes(entityClass)) {
+			Class<? extends EntityBaseBean> bean = r.getBean();
+			thisBean.getIncludes().add(bean);
+		}
+	}
+
+	// This code might be in EntityBaseBean however this would mean that it
+	// would be processed by JPA which gets confused by it.
 	@SuppressWarnings("unchecked")
 	public static void addIncludes(EntityBaseBean thisBean,
-			Set<Class<? extends EntityBaseBean>> requestedIncludes) throws IcatException {
-		logger.debug("addIncludes " + requestedIncludes + " for " + thisBean);
+			Set<Class<? extends EntityBaseBean>> includes, boolean followCascades)
+			throws IcatException {
+		logger.debug("addIncludes " + includes + " for " + thisBean);
 		Class<? extends EntityBaseBean> entityClass = thisBean.getClass();
-		Set<Relationship> relationships = eiHandler.getRelatedEntities(entityClass);
+
+		Set<Relationship> relationships = eiHandler.getIncludesToFollow(entityClass);
 		for (Relationship r : relationships) {
-			Class<? extends EntityBaseBean> bean = r.getBean();
-			if (requestedIncludes.contains(bean)) {
+			if (!r.isCascaded() || followCascades) {
+				Class<? extends EntityBaseBean> bean = r.getBean();
+				if (includes.contains(bean)) {
 
-				// Mark as wanted
-				thisBean.getIncludes().add(bean);
+					// Mark as wanted
+					thisBean.getIncludes().add(bean);
 
-				// Avoid looping forever
-				HashSet<Class<? extends EntityBaseBean>> includeReduced = new HashSet<Class<? extends EntityBaseBean>>(
-						requestedIncludes);
-				includeReduced.remove(bean);
+					// Avoid looping forever
+					Set<Class<? extends EntityBaseBean>> includeReduced = new HashSet<Class<? extends EntityBaseBean>>(
+							includes);
+					includeReduced.remove(bean);
 
-				// Recurse into collection or single object
-				Map<Field, Method> getters = eiHandler.getGetters(thisBean.getClass());
+					// Recurse into collection or single object
+					Map<Field, Method> getters = eiHandler.getGetters(thisBean.getClass());
 
-				if (r.isCollection()) {
-					Collection<EntityBaseBean> collection = null;
-					Field field = r.getField();
-					try {
-						collection = (Collection<EntityBaseBean>) getters.get(field).invoke(
-								thisBean, (Object[]) null);
-					} catch (Exception e) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-								e.toString());
-					}
-					for (EntityBaseBean b : collection) {
-						b.addIncludes(includeReduced);
-					}
-				} else {
-					EntityBaseBean b = null;
-					Field field = r.getField();
-					try {
-						b = (EntityBaseBean) getters.get(field).invoke(thisBean, (Object[]) null);
-					} catch (Exception e) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-								e.toString());
-					}
-					if (b != null) {
-						b.addIncludes(includeReduced);
+					if (r.isCollection()) {
+						Collection<EntityBaseBean> collection = null;
+						Field field = r.getField();
+						try {
+							collection = (Collection<EntityBaseBean>) getters.get(field).invoke(
+									thisBean, (Object[]) null);
+						} catch (Exception e) {
+							throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+									e.toString());
+						}
+						for (EntityBaseBean b : collection) {
+							b.addIncludes(includeReduced, true);
+						}
+					} else {
+						EntityBaseBean b = null;
+						Field field = r.getField();
+						try {
+							b = (EntityBaseBean) getters.get(field).invoke(thisBean,
+									(Object[]) null);
+						} catch (Exception e) {
+							throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+									e.toString());
+						}
+						if (b != null) {
+							b.addIncludes(includeReduced, false);
+						}
 					}
 				}
 			}
 		}
-
 	}
 
 	public static EntityInfo getEntityInfo(String beanName) throws IcatException {

@@ -3,6 +3,7 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -38,7 +39,7 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	@Column(length = 4000)
 	private String safetyInformation;
 
-	@OneToMany(mappedBy = "type")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<Sample> samples;
 
 	/* Needed for JPA */

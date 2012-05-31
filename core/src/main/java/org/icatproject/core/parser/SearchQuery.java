@@ -1,7 +1,6 @@
 package org.icatproject.core.parser;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +51,8 @@ public class SearchQuery {
 
 	private String aggFunction;
 
+	private Class<? extends EntityBaseBean> firstBean;
+
 	public SearchQuery(Input input) throws ParserException, IcatException {
 
 		Token t = input.consume(Token.Type.NAME, Token.Type.DISTINCT, Token.Type.INTEGER,
@@ -88,13 +89,27 @@ public class SearchQuery {
 				this.result = t;
 			}
 
+			String resultValue = this.result.getValue();
+			String[] eles = resultValue.split("\\.");
+			this.firstBean = EntityInfoHandler.getClass(eles[0]);
+			boolean simple = aggFunction == null && eles.length == 1;
 			t = input.peek(0);
 			if (t != null) {
 				if (t.getType() == Token.Type.ORDER) {
 					this.order = new Order(input);
-					this.include = new Include(input);
+					if (simple) {
+						t = input.peek(0);
+						if (t != null && t.getType() == Token.Type.INCLUDE) {
+							this.include = new Include(getFirstEntity(), input);
+						}
+					}
 				} else {
-					this.include = new Include(input);
+					if (simple) {
+						t = input.peek(0);
+						if (t != null && t.getType() == Token.Type.INCLUDE) {
+							this.include = new Include(getFirstEntity(), input);
+						}
+					}
 					this.order = new Order(input);
 				}
 			}
@@ -126,7 +141,7 @@ public class SearchQuery {
 	}
 
 	public Class<? extends EntityBaseBean> getFirstEntity() throws IcatException {
-		return EntityInfoHandler.getClass(this.result.getValue().split("\\.")[0]);
+		return firstBean;
 	}
 
 	public String getJPQL(String userId, EntityManager manager) throws IcatException {
@@ -288,12 +303,8 @@ public class SearchQuery {
 		return sb.toString();
 	}
 
-	public Set<Class<? extends EntityBaseBean>> getIncludes() throws IcatException {
-		if (this.include != null) {
-			return this.include.getBeans(getFirstEntity());
-		} else {
-			return Collections.emptySet();
-		}
+	public Include getInclude() throws IcatException {
+		return this.include;
 	}
 
 	public Integer getOffset() {

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -30,7 +31,7 @@ public class Application extends EntityBaseBean implements Serializable {
 	@Column(name = "VERSION")
 	private String version;
 
-	@OneToMany(mappedBy = "application")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "application")
 	private List<Job> jobs = new ArrayList<Job>();
 
 	public Application() {
@@ -50,8 +51,6 @@ public class Application extends EntityBaseBean implements Serializable {
 					"Applications may not be deleted while there are related jobs");
 		}
 	}
-
-
 
 	public List<Job> getJobs() {
 		return this.jobs;

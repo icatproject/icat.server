@@ -2,6 +2,8 @@ package org.icatproject.core.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -18,6 +20,7 @@ import org.icatproject.core.entity.Facility;
 import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.Sample;
 import org.icatproject.core.entity.SampleParameter;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestIncludes {
@@ -29,22 +32,25 @@ public class TestIncludes {
 		assertNull(input.peek(0));
 		Set<Class<? extends EntityBaseBean>> incSet = new HashSet<Class<? extends EntityBaseBean>>(
 				Arrays.asList(incArray));
-		assertEquals("Included entities", incSet, sq.getIncludes());
+		assertEquals("Included entities", incSet, sq.getInclude().getBeans());
+		assertTrue("One", !sq.getInclude().isOne());
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test
+	@Test(expected = ParserException.class)
 	public void testGood1() throws Exception {
 		List<Token> tokens = Tokenizer.getTokens("Dataset INCLUDE Datafile, 1 [id = 5]");
 		testGood(tokens, Datafile.class, DatasetType.class, Sample.class, DatafileFormat.class,
 				Investigation.class);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGood2() throws Exception {
 		List<Token> tokens = Tokenizer.getTokens("Dataset INCLUDE 1 [id != 5]");
-		testGood(tokens, DatasetType.class, Sample.class, Investigation.class);
+		Input input = new Input(tokens);
+		SearchQuery sq = new SearchQuery(input);
+		assertNull(input.peek(0));
+		assertTrue("One", sq.getInclude().isOne());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -54,13 +60,16 @@ public class TestIncludes {
 		testGood(tokens, Datafile.class);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGood4() throws Exception {
 		List<Token> tokens = Tokenizer.getTokens("Dataset [id != 573]");
-		testGood(tokens);
+		Input input = new Input(tokens);
+		SearchQuery sq = new SearchQuery(input);
+		assertNull(input.peek(0));
+		assertNull("No Include", sq.getInclude());
 	}
 
+	@Ignore
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testGood5() throws Exception {
@@ -68,5 +77,19 @@ public class TestIncludes {
 				.getTokens("Investigation INCLUDE Dataset, Datafile, DatasetParameter, Facility, Sample, SampleParameter");
 		testGood(tokens, Dataset.class, Datafile.class, DatasetParameter.class, Facility.class,
 				Sample.class, SampleParameter.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testBad1() throws Exception {
+		List<Token> tokens = Tokenizer.getTokens("Dataset.id INCLUDE Datafile [id != 53]");
+		try {
+			testGood(tokens, Datafile.class);
+			fail("Exception not thrown");
+		} catch (ParserException e) {
+			assertEquals(
+					"Expected token from types [ENTSEP] at token INCLUDE in Dataset.id < INCLUDE > Datafile [ ",
+					e.getMessage());
+		}
 	}
 }

@@ -295,15 +295,18 @@ public abstract class EntityBaseBean implements Serializable {
 		this.modId = modId;
 	}
 
-	public void addIncludes(Set<Class<? extends EntityBaseBean>> requestedIncludes)
-			throws IcatException {
-		BeanManager.addIncludes(this, requestedIncludes);
-
-	}
-
 	/*
 	 * If this method is overridden it should normally be called as well by super.canDelete()
 	 */
 	public void canDelete(EntityManager manager) throws IcatException {
+	}
+
+	public void addOne() throws IcatException {
+		BeanManager.addOne(this);
+	}
+
+	public void addIncludes(Set<Class<? extends EntityBaseBean>> includes, boolean followCascades)
+			throws IcatException {
+		BeanManager.addIncludes(this, includes, followCascades);
 	}
 }

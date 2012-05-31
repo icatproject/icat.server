@@ -1,5 +1,7 @@
 package org.icatproject.core.parser;
 
+import static org.junit.Assert.fail;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,42 +12,104 @@ import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.DatasetParameter;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Facility;
+import org.icatproject.core.entity.InputDatafile;
+import org.icatproject.core.entity.InputDataset;
+import org.icatproject.core.entity.Instrument;
 import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.entity.Job;
+import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.User;
-import org.icatproject.core.parser.DagHandler.Step;
 import org.junit.Test;
 
 public class TestDagHandler {
 
 	@Test
-	public void t1() throws Exception {
+	public void good1() throws Exception {
 		Set<Class<? extends EntityBaseBean>> es = new HashSet<Class<? extends EntityBaseBean>>();
 		es.add(Investigation.class);
 		es.add(Datafile.class);
 		es.add(DatasetParameter.class);
 		es.add(DatafileParameter.class);
-		Step s = DagHandler.findSteps(Dataset.class, es);
-		System.out.println(s);
+		DagHandler.findSteps(Dataset.class, es);
+		DagHandler.checkIncludes(Dataset.class, es);
 	}
 
 	@Test(expected = IcatException.class)
-	public void t2() throws Exception {
+	public void good2() throws Exception {
 		Set<Class<? extends EntityBaseBean>> es = new HashSet<Class<? extends EntityBaseBean>>();
 		es.add(Investigation.class);
 		es.add(Datafile.class);
 		es.add(DatasetParameter.class);
 		es.add(User.class);
 		DagHandler.findSteps(Dataset.class, es);
+		DagHandler.checkIncludes(Dataset.class, es);
 	}
 
 	@Test
-	public void t3() throws Exception {
+	public void good3() throws Exception {
 		Set<Class<? extends EntityBaseBean>> es = new HashSet<Class<? extends EntityBaseBean>>();
 		es.add(Dataset.class);
 		es.add(Datafile.class);
 		es.add(DatasetParameter.class);
 		es.add(Facility.class);
 		DagHandler.findSteps(Investigation.class, es);
+		DagHandler.checkIncludes(Investigation.class, es);
 	}
 
+	@Test
+	public void good4() throws Exception {
+		Set<Class<? extends EntityBaseBean>> es = new HashSet<Class<? extends EntityBaseBean>>();
+		es.add(InputDataset.class);
+		es.add(InputDatafile.class);
+		es.add(Dataset.class);
+		es.add(Datafile.class);
+		try {
+			DagHandler.findSteps(Job.class, es);
+			fail("Exception not thrown");
+		} catch (IcatException e) {
+			System.out.println(e);
+		}
+		try {
+			DagHandler.checkIncludes(Job.class, es);
+			fail("Exception not thrown");
+		} catch (IcatException e) {
+			System.out.println(e);
+		}
+
+	}
+
+	@Test
+	public void good5() throws Exception {
+		Set<Class<? extends EntityBaseBean>> es = new HashSet<Class<? extends EntityBaseBean>>();
+		es.add(Instrument.class);
+		es.add(Facility.class);
+		es.add(Investigation.class);
+		try {
+			DagHandler.findSteps(Dataset.class, es);
+			fail("Exception not thrown");
+		} catch (IcatException e) {
+			// Nothing for now
+		}
+		try {
+			DagHandler.checkIncludes(Dataset.class, es);
+			fail("Exception not thrown");
+		} catch (IcatException e) {
+			// Nothing for now
+		}
+	}
+
+	@Test
+	public void good6() throws Exception {
+		Set<Class<? extends EntityBaseBean>> es = new HashSet<Class<? extends EntityBaseBean>>();
+		es.add(Datafile.class);
+		es.add(Dataset.class);
+		es.add(DatasetParameter.class);
+		DagHandler.findSteps(ParameterType.class, es);
+		try {
+			DagHandler.checkIncludes(ParameterType.class, es);
+			fail("Exception not thrown");
+		} catch (IcatException e) {
+			// Nothing for now
+		}
+	}
 }

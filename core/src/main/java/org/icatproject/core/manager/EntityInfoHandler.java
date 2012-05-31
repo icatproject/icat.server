@@ -46,22 +46,23 @@ public class EntityInfoHandler {
 
 	private class PrivateEntityInfo {
 
+		private String classComment;
+		private List<List<Field>> constraintFields;
+		private Map<Field, String> fieldComments;
+		private final Map<Field, Method> getters;
+		private Set<Relationship> includesToFollow;
+		private final List<Field> notNullableFields;
+		private Set<Relationship> ones;
 		private final Field pks;
 		private final Set<Relationship> relatedEntities;
-		private final List<Field> notNullableFields;
-		private final Map<Field, Method> getters;
-		private final Map<Field, Integer> stringFields;
 		private final Map<Field, Method> setters;
-		private List<List<Field>> constraintFields;
-		private String classComment;
-		private Map<Field, String> fieldComments;
-		private Set<Class<? extends EntityBaseBean>> ones;
+		private final Map<Field, Integer> stringFields;
 
 		public PrivateEntityInfo(Field pks, Set<Relationship> rels, List<Field> notNullableFields,
 				Map<Field, Method> getters, Map<Field, Integer> stringFields,
 				Map<Field, Method> setters, List<List<Field>> constraintFields,
-				String classComment, Map<Field, String> fieldComments,
-				Set<Class<? extends EntityBaseBean>> ones) {
+				String classComment, Map<Field, String> fieldComments, Set<Relationship> ones,
+				Set<Relationship> includesToFollow) {
 			this.pks = pks;
 			this.relatedEntities = rels;
 			this.notNullableFields = notNullableFields;
@@ -72,21 +73,19 @@ public class EntityInfoHandler {
 			this.classComment = classComment;
 			this.fieldComments = fieldComments;
 			this.ones = ones;
+			this.includesToFollow = includesToFollow;
 		}
 
 	}
 
 	public class Relationship {
 
-		public boolean isCascaded() {
-			return cascaded;
-		}
-
 		private final Class<? extends EntityBaseBean> bean;
-		private final Field field;
 
-		private final boolean collection;
 		private final boolean cascaded;
+		private final boolean collection;
+
+		private final Field field;
 
 		public Relationship(Class<? extends EntityBaseBean> bean, Field field, boolean collection,
 				boolean cascaded) {
@@ -104,6 +103,10 @@ public class EntityInfoHandler {
 			return this.field;
 		}
 
+		public boolean isCascaded() {
+			return cascaded;
+		}
+
 		public boolean isCollection() {
 			return this.collection;
 		}
@@ -116,9 +119,9 @@ public class EntityInfoHandler {
 
 	}
 
-	protected final static Logger logger = Logger.getLogger(EntityInfoHandler.class);
-
 	public static EntityInfoHandler instance = new EntityInfoHandler();
+
+	protected final static Logger logger = Logger.getLogger(EntityInfoHandler.class);
 
 	public static Class<? extends EntityBaseBean> getClass(String tableName) throws IcatException {
 		final String name = Constants.ENTITY_PREFIX + tableName;
@@ -222,10 +225,17 @@ public class EntityInfoHandler {
 
 		}
 
-		final Set<Class<? extends EntityBaseBean>> ones = new HashSet<Class<? extends EntityBaseBean>>();
+		final Set<Relationship> ones = new HashSet<Relationship>();
 		for (Relationship rel : rels) {
 			if (!rel.collection) {
-				ones.add(rel.bean);
+				ones.add(rel);
+			}
+		}
+
+		final Set<Relationship> includesToFollow = new HashSet<Relationship>();
+		for (Relationship rel : rels) {
+			if (!rel.collection || rel.cascaded) {
+				includesToFollow.add(rel);
 			}
 		}
 
@@ -412,133 +422,7 @@ public class EntityInfoHandler {
 		String commentString = comment == null ? null : comment.value();
 
 		return new PrivateEntityInfo(key, rels, notNullableFields, getters, stringFields, setters,
-				constraintFields, commentString, comments, ones);
-	}
-
-	private List<Field> getFields(Class<?> cobj) {
-		List<Field> fields = new ArrayList<Field>(Arrays.asList(cobj.getDeclaredFields()));
-		final Iterator<Field> iter = fields.iterator();
-		while (iter.hasNext()) {
-			final Field f = iter.next();
-			int modifier = f.getModifiers();
-			if (f.getName().startsWith("_")) {
-				iter.remove();
-				logger.debug("Ignore injected field " + f);
-			} else if (Modifier.isStatic(modifier)) {
-				iter.remove();
-				logger.debug("Ignore static field " + f);
-			} else if (Modifier.isTransient(modifier)) {
-				iter.remove();
-				logger.debug("Ignore transient field " + f);
-			} else if (f.isAnnotationPresent(XmlTransient.class)) {
-				iter.remove();
-				logger.debug("Ignore XmlTransient field " + f);
-			}
-		}
-		return fields;
-	}
-
-	public Map<Field, Method> getGetters(Class<? extends EntityBaseBean> objectClass)
-			throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.getters;
-		}
-	}
-
-	public Field getKeyFor(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.pks;
-		}
-	}
-
-	public List<Field> getNotNullableFields(Class<? extends EntityBaseBean> objectClass)
-			throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.notNullableFields;
-		}
-	}
-
-	public Set<Relationship> getRelatedEntities(Class<? extends EntityBaseBean> objectClass)
-			throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.relatedEntities;
-		}
-	}
-
-	public Set<Class<? extends EntityBaseBean>> getOnes(Class<? extends EntityBaseBean> objectClass)
-			throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.ones;
-		}
-	}
-
-	public Map<Field, Method> getSetters(Class<? extends EntityBaseBean> objectClass)
-			throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.setters;
-		}
-	}
-
-	public Map<Field, Integer> getStringFields(Class<? extends EntityBaseBean> objectClass)
-			throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.stringFields;
-		}
-	}
-
-	public List<List<Field>> getConstraintFields(Class<? extends EntityBaseBean> objectClass)
-			throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.constraintFields;
-		}
+				constraintFields, commentString, comments, ones, includesToFollow);
 	}
 
 	public String getClassComment(Class<? extends EntityBaseBean> objectClass) throws IcatException {
@@ -553,7 +437,7 @@ public class EntityInfoHandler {
 		}
 	}
 
-	public Map<Field, String> getFieldComments(Class<? extends EntityBaseBean> objectClass)
+	public List<List<Field>> getConstraintFields(Class<? extends EntityBaseBean> objectClass)
 			throws IcatException {
 		PrivateEntityInfo ei = null;
 		synchronized (this.map) {
@@ -562,7 +446,7 @@ public class EntityInfoHandler {
 				ei = this.buildEi(objectClass);
 				this.map.put(objectClass, ei);
 			}
-			return ei.fieldComments;
+			return ei.constraintFields;
 		}
 	}
 
@@ -615,5 +499,144 @@ public class EntityInfoHandler {
 		}
 		return entityInfo;
 
+	}
+
+	public Map<Field, String> getFieldComments(Class<? extends EntityBaseBean> objectClass)
+			throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.fieldComments;
+		}
+	}
+
+	private List<Field> getFields(Class<?> cobj) {
+		List<Field> fields = new ArrayList<Field>(Arrays.asList(cobj.getDeclaredFields()));
+		final Iterator<Field> iter = fields.iterator();
+		while (iter.hasNext()) {
+			final Field f = iter.next();
+			int modifier = f.getModifiers();
+			if (f.getName().startsWith("_")) {
+				iter.remove();
+				logger.debug("Ignore injected field " + f);
+			} else if (Modifier.isStatic(modifier)) {
+				iter.remove();
+				logger.debug("Ignore static field " + f);
+			} else if (Modifier.isTransient(modifier)) {
+				iter.remove();
+				logger.debug("Ignore transient field " + f);
+			} else if (f.isAnnotationPresent(XmlTransient.class)) {
+				iter.remove();
+				logger.debug("Ignore XmlTransient field " + f);
+			}
+		}
+		return fields;
+	}
+
+	public Map<Field, Method> getGetters(Class<? extends EntityBaseBean> objectClass)
+			throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.getters;
+		}
+	}
+
+	public Set<Relationship> getIncludesToFollow(Class<? extends EntityBaseBean> objectClass)
+			throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.includesToFollow;
+		}
+	}
+
+	public Field getKeyFor(Class<? extends EntityBaseBean> objectClass) throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.pks;
+		}
+	}
+
+	public List<Field> getNotNullableFields(Class<? extends EntityBaseBean> objectClass)
+			throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.notNullableFields;
+		}
+	}
+
+	public Set<Relationship> getOnes(Class<? extends EntityBaseBean> objectClass)
+			throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.ones;
+		}
+	}
+
+	public Set<Relationship> getRelatedEntities(Class<? extends EntityBaseBean> objectClass)
+			throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.relatedEntities;
+		}
+	}
+
+	public Map<Field, Method> getSetters(Class<? extends EntityBaseBean> objectClass)
+			throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.setters;
+		}
+	}
+
+	public Map<Field, Integer> getStringFields(Class<? extends EntityBaseBean> objectClass)
+			throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.stringFields;
+		}
 	}
 }

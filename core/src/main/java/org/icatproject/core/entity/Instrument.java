@@ -3,6 +3,7 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -29,10 +30,10 @@ public class Instrument extends EntityBaseBean implements Serializable {
 	@Comment("The formal name of this instrument")
 	private String fullName;
 
-	@OneToMany(mappedBy = "instrument")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrument")
 	private List<InstrumentScientist> instrumentScientists;
 
-	@OneToMany(mappedBy = "instrument")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrument")
 	private List<Investigation> investigations;
 
 	@Comment("A short name identifying this instrument within the facility")

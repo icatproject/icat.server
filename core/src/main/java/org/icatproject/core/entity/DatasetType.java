@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -26,7 +27,7 @@ public class DatasetType extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(DatasetType.class);
 
-	@OneToMany(mappedBy = "type")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<Dataset> datasets = new ArrayList<Dataset>();
 
 	@Comment("A description of this data set type")

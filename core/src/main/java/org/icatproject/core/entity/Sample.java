@@ -28,7 +28,7 @@ public class Sample extends EntityBaseBean implements Serializable {
 
 	private static Logger logger = Logger.getLogger(Sample.class);
 
-	@OneToMany(mappedBy = "sample")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
 	private List<Dataset> datasets;
 
 	@JoinColumn(nullable = false, name = "INVESTIGATION_ID")
