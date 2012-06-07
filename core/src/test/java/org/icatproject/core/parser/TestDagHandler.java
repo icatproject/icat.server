@@ -1,5 +1,7 @@
 package org.icatproject.core.parser;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.HashSet;
@@ -67,13 +69,15 @@ public class TestDagHandler {
 			DagHandler.findSteps(Job.class, es);
 			fail("Exception not thrown");
 		} catch (IcatException e) {
-			System.out.println(e);
+			assertEquals(IcatException.IcatExceptionType.BAD_PARAMETER, e.getType());
+			assertTrue(e.getMessage().startsWith("Can't have loop in graph of entities."));
 		}
 		try {
 			DagHandler.checkIncludes(Job.class, es);
 			fail("Exception not thrown");
 		} catch (IcatException e) {
-			System.out.println(e);
+			assertEquals(IcatException.IcatExceptionType.BAD_PARAMETER, e.getType());
+			assertTrue(e.getMessage().startsWith("Can't have loop in graph of entities."));
 		}
 
 	}

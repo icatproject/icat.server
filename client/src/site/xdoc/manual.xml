@@ -199,6 +199,10 @@
                     persisted to
                     ICAT in a single call. This will be explained more later.
                 </p>
+                <p>Note that currently all "one to many" relationships are cascaded but no "many to one" relationships. Do not assume that this will
+                    always be true.
+                </p>
+                <p>Note also that all relationships are navigable in both directions.</p>
             </subsection>
 
             <subsection name="Creating an Object">
@@ -244,7 +248,7 @@
                 <code>
                     Dataset ds = new Dataset();
                     <br />
-                    ds.setName(name);
+                    ds.setName(dsName);
                     <br />
                     ds.setType(type);
                     <br />
@@ -252,7 +256,7 @@
                     <br />
                     datafile.setDatafileFormat(format);
                     <br />
-                    datafile.setName(name);
+                    datafile.setName(dfName);
                     <br />
                     ds.getDatafiles().add(datafile); // Add the datafile to the dataset
                     <br />
@@ -266,18 +270,17 @@
                 <code>ds.setId(icat.create(sessionId, ds));</code>
 
                 <p>then the client copy of the Dataset will be updated to have the
-                    correct key value - however the keys in any other objects below
-                    the
-                    Dataset if you had included a list of Datafiles will still be
-                    null on the client side.
+                    correct key value - however the keys in any other objects "within"
+                    the Dataset will still be
+                    null on the client side. In this case datafile.getId() will remain null.
                 </p>
 
                 <p>
-                    When creating multiple objects in one call the value of the cascaded flag must be noted. The line
+                    When creating multiple objects in one call, the value of the cascaded flag must be noted. The line
                     <tt>ds.getDatafiles().add(datafile)</tt>
                     requires that the datafile is not already known to ICAT because the cascade flag is set. If the cascaded flag is set then objects
                     to be included in the "create" operation must not exist. However if the cascaded flag is not set then objects which are being
-                    referenced must already have been created within ICAT.
+                    referenced must already exist in ICAT.
                 </p>
 
                 <p>
@@ -291,7 +294,7 @@
                     <br />
                     datafile.setName(name);
                     <br />
-                    datafile.setDataset(ds); // Relate the datafile to the existing dataset
+                    datafile.setDataset(ds); // Relate the datafile to an existing dataset
                     <br />
                     datafile.setId(icat.create(sessionId, datafile)); // Create datafile and store id on client side
                 </code>
@@ -309,7 +312,7 @@
                     the individual operations fail the whole call fails and the database will be unchanged. The objects to
                     be created need not be of
                     the same type. For an example (where they are of the same type) consider adding many Datafiles
-                    to a existing Dataset:
+                    to a existing Dataset, ds:
                 </p>
                 <code>
                     List &lt;Datafile&gt; dfs = new ArrayList&lt;Datafile&gt;();
@@ -324,13 +327,13 @@
                     &#160;&#160;&#160;datafile.setName("bill"
                     + i);
                     <br />
-                    &#160;&#160;&#160;datafile.setDataset(wibble);
+                    &#160;&#160;&#160;datafile.setDataset(ds);
                     <br />
                     &#160;&#160;&#160;dfs.add(datafile);
                     <br />
                     }
                     <br />
-                    icat.createMany(sesionId, dfs);
+                    icat.createMany(sesionId, dfs); // many datafiles are stored in one call
                     <br />
                 </code>
 
@@ -366,16 +369,18 @@
                     Starting from the first type (before the INCLUDE keyword) cascaded "one to many" relationships
                     may
                     be followed
-                    repeatedly. In addition "&#160;&#160;&#160;many to one" relationships can be followed. The idea behind this is that
+                    repeatedly. In addition "many to one" relationships can be followed. The idea behind this is that
                     cascaded "one to
                     many"
                     relationships represent composition/ownership - i.e. a dataset is made up of datafiles and the "many to one"
                     is allowed as
                     these
-                    are typically shared objects. This means that starting from a Dataset one could follow the cascaded "one to
+                    are
+                    typically shared objects. This means that starting from a Dataset, one could follow the cascaded "one to
                     many"
                     relationships to
-                    get to Datafile, DatasetParameter and DatafileParameter. From this set of types (Dataset, Datafile,
+                    get
+                    to Datafile, DatasetParameter and DatafileParameter. From this set of types (Dataset, Datafile,
                     DatasetParameter and
                     DatafileParameter) one can follow the "many to one" relationships to reach at most one of each of Facility,
                     Investigation,
@@ -400,14 +405,14 @@
                     above
                     "many to one" relationships, such as the investigation relationship to the dataset, will be
                     updated as will any simple field
-                    values. Consequently it is essential to get the existing values for any "many one to one"
+                    values. Consequently it is essential to get the existing values for any "many to one"
                     relationships. This is most reliably
                     achieved by the notation
                     <tt>INCLUDE 1</tt>
-                    as shown here. The effect of the "1" which may be used with other entries in the INCLUDE list is to include all "many to one" from
-                    the initial type before the INCLUDE keyword and all those after it. It will most probably be mostly used as the only entry in the
-                    INCLUDE list as in this case. "One to many" relationships are ignored by the update mechanism so you need to start at the correct
-                    end of the relationship.
+                    as shown here. The effect of the "1" is to include all "many to one" related types. "One to many" relationships are ignored by the
+                    update mechanism so you need to start at the correct
+                    end of the
+                    relationship to have the desired effect.
                 </p>
             </subsection>
 
@@ -526,12 +531,15 @@
             </p>
             <subsection name="Rules" id="rules">
                 <p>
-                    By default access is denied to all objects, rules allow access to be allowed. It is only necessary to be permitted by one rule
-                    where that rule is only applied to the object referenced directly in the API call. The Rule table has two exposed fields:
+                    By default access is denied to all objects, rules allow access. It is only necessary to be permitted by one rule
+                    where that rule is
+                    only applied to the object referenced directly in the API call. The Rule table has two exposed fields:
                     <tt>crudFlags</tt>
                     and
                     <tt>what</tt>
                     .
+
+                    The field
                     <tt>crudFlags</tt>
                     contains letters from the set "CRUD" to indicate which types of operation are being allowed (Create, Read, Update and/or Delete).
                     The other field,
@@ -540,52 +548,75 @@
                 </p>
                 <p>Consider:</p>
                 <code>
-                    rule.group = userOffice;
+                    Rule rule = new Rule();
                     <br />
-                    rule.crudFlags = "CRUD";
+                    rule.setGroup(userOffice);
                     <br />
-                    rule.what = "Investigation";
+                    rule.setCrudFlags("CRUD");
+                    <br />
+                    rule.setWhat("Investigation");
+                    <br />
+                    icat.create(sessionId, rule);
                 </code>
-                <p>allows members of the userOffice group full access to all Investigations.</p>
+                <p>allows members of the userOffice group full access to all Investigations. Note that the id field of the rule on the client side
+                    is
+                    not set on the assumption that the client side copy of the rule will not be needed further.
+                </p>
                 <code>
-                    rule.group = null;
+                    Rule rule = new Rule();
                     <br />
-                    rule.crudFlags = "R";
+                    rule.setGroup(null); // Not necessary as it will be null on a newly created rule
                     <br />
-                    rule.what = "ParameterType";
+                    rule.setCrudFlags("R");
+                    <br />
+                    rule.setWhat("ParameterType");
+                    <br />
+                    icat.create(sessionId, rule);
                 </code>
                 <p>allows any authenticated user (with a sessionId) to read Parameters. Consider a group of users fredReaders To allow fredReaders
                     to
                     read a datafile with a name of "fred" we could have:
                 </p>
                 <code>
-                    rule.group = fredReaders;
+                    Rule rule = new Rule();
                     <br />
-                    rule.crudFlags = "R";
+                    rule.setGroup(fredReaders;
                     <br />
-                    rule.what = "Datafile [name='fred']";
+                    rule.setCrudFlags("R");
+                    <br />
+                    rule.setWhat("Datafile [name='fred']");
+                    <br />
+                    icat.create(sessionId, rule);
                 </code>
                 <p>More complex restrictions can be added using other related objects. For example to allow read access to Datasets belonging to an
                     Investigation which includes an InvestigationUser which has a user with a name matching the currently authenticated user (from the
                     sessionId) we can have:
                 </p>
                 <code>
-                    rule.group = null;
+                    Rule rule = new Rule();
                     <br />
-                    rule.crudFlags = "R";
+                    rule.setGroup(null);
                     <br />
-                    rule.what = "Dataset &lt;-&gt; Investigation &lt;-&gt; InvestigationUser [user.name = :user]";
+                    rule.setCrudFlags("R");
+                    <br />
+                    rule.setWhat("Dataset &lt;-&gt; Investigation &lt;-&gt; InvestigationUser [user.name = :user]");
+                    <br />
+                    icat.create(sessionId, rule);
                 </code>
-                <p>where the :user denotes the currently authenticated user (from the
+                <p>
+                    where the
+                    <tt>:user</tt>
+                    denotes the currently authenticated user (derived from the
                     sessionId). You will note that the syntax is very similar to that
-                    used by the search.
+                    used by
+                    the search.
                 </p>
             </subsection>
         </section>
 
         <section name="Notifications">
             <p>
-                ICAT is able to send JMS messages. To do this the table "NotificationRequest" should be populated as needed. This table includes two
+                ICAT is able to send JMS messages. To do this, the table "NotificationRequest" should be populated as needed. This table includes two
                 columns:
                 <tt>crudFlags</tt>
                 and
@@ -607,11 +638,15 @@
                 <br />
                 notificationRequest.setName("Test");
                 <br />
+                icat.create(sessionId, notificationRequest);
             </code>
             <p>will send a notification message containing the name of the notification ("Test" in this case"), the userId, the entityName (which will
                 always be "Datafile" in this case) and its id for every call where a Datafile is created. "Publish/Subscribe" mode will be used rather
-                than "Point-to-Point". To
-                see who is reading which datasets belonging to some investigation called "Fred" one could have:
+                than "Point-to-Point". Note that the id field of the notificationRequest on the client side
+                is not set on the assumption that the
+                client side copy of the notificationRequest will not be needed further. To
+                see who is reading which datasets belonging to some
+                investigation called "Fred" one could have:
             </p>
             <code>
                 NotificationRequest notificationRequest = new NotificationRequest();
@@ -626,9 +661,10 @@
                 <br />
                 notificationRequest.setName("Fred readers");
                 <br />
+                icat.create(sessionId, notificationRequest);
             </code>
             <subsection name="security  concerns with notification">
-                <p>Though the notification mechanism is powerful it does allow information to be published from ICAT which is not protected by the
+                <p>Though the notification mechanism is powerful, it does allow information to be published from ICAT which is not protected by the
                     normal ICAT authorization mechanism. Please publish only the information required to meet your needs and take care that the
                     authorization for the
                     NotificationRequest table is well controlled.
@@ -647,7 +683,7 @@
                 4.2.0 .
             </p>
 
-            <p class="call"> EntityInfo getEntityInfo ( String beanName )</p>
+            <p class="call"> EntityInfo getEntityInfo(String beanName)</p>
 
 
             <p>returns full information about a table given its name. For example:</p>
@@ -670,8 +706,11 @@
                 <br />
             </code>
             <p>
-                Prints out some information about the Investigation table. To see full information please consult the
-                <a href="apidocs/org/icatproject/EntityInfo.html">javadoc</a>
+                Prints out some information about the Investigation table. For a list of all available fields in EntityInfo and the objects it
+                references please
+                consult the
+                <a href="apidocs/org/icatproject/EntityInfo.html">javadoc for EntityInfo</a>
+                .
             </p>
 
 

@@ -217,16 +217,6 @@ public abstract class EntityBaseBean implements Serializable {
 
 		Class<? extends EntityBaseBean> entityClass = this.getClass();
 
-		Long primaryKey = this.getId();
-		if (primaryKey == null) {
-			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
-					entityClass.getSimpleName() + "[id:" + primaryKey + "] was null.");
-		}
-		if (manager.find(entityClass, primaryKey) != null) {
-			throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS,
-					entityClass.getSimpleName() + "[id:" + primaryKey + "] already present.");
-		}
-
 		Map<Field, Method> getters = eiHandler.getGetters(entityClass);
 		for (List<Field> constraint : eiHandler.getConstraintFields(entityClass)) {
 			StringBuilder queryString = new StringBuilder();
@@ -289,14 +279,15 @@ public abstract class EntityBaseBean implements Serializable {
 	}
 
 	/*
-	 * If this method is overridden it should normally be called as well by super.preparePersist()
+	 * If this method is overridden it should be called as well by super.preparePersist()
 	 */
 	public void preparePersist(String modId, EntityManager manager) throws IcatException {
+		this.id = null;
 		this.modId = modId;
 	}
 
 	/*
-	 * If this method is overridden it should normally be called as well by super.canDelete()
+	 * If this method is overridden it should be called as well by super.canDelete()
 	 */
 	public void canDelete(EntityManager manager) throws IcatException {
 	}

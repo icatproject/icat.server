@@ -382,7 +382,7 @@ public class Session {
 		return icatEP.getEntityInfo(beanName);
 	}
 
-	public Object create(EntityBaseBean bean) throws IcatException_Exception {
+	public Long create(EntityBaseBean bean) throws IcatException_Exception {
 		return this.icatEP.create(this.sessionId, bean);
 	}
 

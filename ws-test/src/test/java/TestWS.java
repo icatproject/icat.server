@@ -542,6 +542,23 @@ public class TestWS {
 	}
 
 	@Test
+	public void duplicates() throws Exception {
+		session.clear();
+
+		Facility f = new Facility();
+		f.setName("TestDuplicates");
+		session.create(f);
+		try {
+			session.create(f);
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
+			assertEquals("Facility exists with name = 'TestDuplicates'", ue.getMessage());
+		}
+	}
+
+	@Test
 	public void bigCreate() throws Exception {
 		session.clear();
 

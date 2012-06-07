@@ -7,6 +7,7 @@
     <packaging>pom</packaging>
 
     <distributionManagement>
+    <downloadUrl>http://www.icatproject.org/mvn/repo</downloadUrl>
         <site>
             <id>website</id>
             <url>scp://www.icatproject.org/var/www/html/mvn/site/icat/${project.version}</url>
@@ -47,6 +48,7 @@
 
     <organization>
         <name>The ICAT Collaboration</name>
+        <url>http://www.icatproject.org</url>
     </organization>
 
     <name>ICAT</name>
@@ -105,7 +107,6 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <source>1.6</source>
                     <target>1.6</target>
-                    <optimize>true</optimize>
                 </configuration>
             </plugin>
 
