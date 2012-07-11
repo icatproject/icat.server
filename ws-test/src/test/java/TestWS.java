@@ -693,6 +693,19 @@ public class TestWS {
 		session.clear();
 		create();
 
+		assertEquals(4L, session.search("COUNT(Dataset)").get(0));
+
+		long max = -999999999999999L;
+		long min = 999999999999999L;
+		for (Object result : session.search("Dataset")) {
+			Dataset ds = (Dataset) result;
+			max = Math.max(ds.getId(), max);
+			min = Math.min(ds.getId(), min);
+		}
+
+		assertEquals(min, session.search("MIN(Dataset.id) [id > 0]").get(0));
+		assertEquals(max, session.search("MAX(Dataset.id) [id > 0]").get(0));
+
 		Long invId = (Long) session.search("Investigation.id").get(0);
 
 		List<?> results = session.search("Dataset.id "

@@ -96,7 +96,7 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	}
 
 	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Investigator for " + includes);
+		logger.trace("Marshalling ParameterType for " + includes);
 		if (!this.includes.contains(DatasetParameter.class)) {
 			this.datasetParameters = null;
 		}

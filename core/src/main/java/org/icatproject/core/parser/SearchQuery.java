@@ -64,6 +64,9 @@ public class SearchQuery {
 			aggFunction = t.getValue();
 			input.consume(Token.Type.OPENPAREN);
 			this.result = input.consume(Token.Type.NAME);
+			String resultValue = this.result.getValue();
+			String[] eles = resultValue.split("\\.");
+			this.firstBean = EntityInfoHandler.getClass(eles[0]);
 			input.consume(Token.Type.CLOSEPAREN);
 		} else {
 			if (t.getType() == Token.Type.INTEGER) {
@@ -92,7 +95,7 @@ public class SearchQuery {
 			String resultValue = this.result.getValue();
 			String[] eles = resultValue.split("\\.");
 			this.firstBean = EntityInfoHandler.getClass(eles[0]);
-			boolean simple = aggFunction == null && eles.length == 1;
+			boolean simple = eles.length == 1;
 			t = input.peek(0);
 			if (t != null) {
 				if (t.getType() == Token.Type.ORDER) {
@@ -277,7 +280,12 @@ public class SearchQuery {
 		if (this.distinct) {
 			sb.append("DISTINCT ");
 		}
-		sb.append(this.result);
+
+		if (aggFunction == null) {
+			sb.append(result);
+		} else {
+			sb.append(aggFunction + "(" + result + ")");
+		}
 
 		if (this.include != null) {
 			sb.append(this.include);
