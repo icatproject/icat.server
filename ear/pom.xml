@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.icatproject</groupId>
         <artifactId>icat</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>icat.ear</artifactId>
@@ -20,7 +20,7 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.exposed</artifactId>
-            <version>4.2.0-SNAPSHOT</version>
+            <version>4.1.1-SNAPSHOT</version>
             <type>ejb</type>
 
         </dependency>
@@ -28,13 +28,13 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.user-ansto</artifactId>
-            <version>4.2.0-SNAPSHOT</version>
+            <version>4.1.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.user-ldap</artifactId>
-             <version>4.2.0-SNAPSHOT</version>
+            <version>4.1.1-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
@@ -69,7 +69,7 @@
                     <executable>asadmin</executable>
                     <arguments>
                         <argument>--echo</argument>
-                        <argument>--port=4840</argument>
+                        <argument>--port=4848</argument>
                         <argument>deploy</argument>
                         <argument>--force=true</argument>
                         <argument>${project.build.directory}/${project.build.finalName}.ear</argument>

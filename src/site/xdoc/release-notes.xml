@@ -7,10 +7,18 @@
 
     <body>
 
+        <section name="4.1.1">
+            <p>This is a bug fix to release 4.1.0.</p>
+            <ul>
+                <li>Aggregate functions (MIN, MAX, AVG, COUNT etc) no longer generate an internal exception.</li>
+                <li>Minor improvements to the installation documentation.</li>
+            </ul>
+        </section>
+
 
         <section name="4.1.0">
 
-            <p>This is the first release of ICAT4 which is meant to be approaching production quality
+            <p>This is the first release of ICAT4 which is meant to be approaching production quality.
             </p>
             <ul>
                 <li>

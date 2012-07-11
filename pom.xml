@@ -3,7 +3,7 @@
 
     <groupId>org.icatproject</groupId>
     <artifactId>icat</artifactId>
-    <version>4.2.0-SNAPSHOT</version>
+    <version>4.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <distributionManagement>
@@ -25,7 +25,7 @@
         <serverHost>localhost</serverHost>
     </properties>
 
-    <description>Main pom to build all the icat components. For help on installation please see the relevant component</description>
+    <description>Main pom to build all the icat components. For more information please see the individual components.</description>
     <issueManagement>
         <url>http://code.google.com/p/icatproject/issues/list</url>
         <system>Google Code</system>
@@ -126,7 +126,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.3</version>
+                <version>2.3.2</version>
                 <configuration>
                     <preparationGoals>clean install</preparationGoals>
                     <tagNameFormat>v@{project.version}</tagNameFormat>

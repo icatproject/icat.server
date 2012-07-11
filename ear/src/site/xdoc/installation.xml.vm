@@ -77,7 +77,7 @@
                 </p>
             </subsection>
 
-            <subsection name="Glassfish Configuration">
+            <subsection name="Preparing glassfish.props">
 
                 <p>
                     Obtain
@@ -104,10 +104,11 @@
                 </p>
                 <code>
                     driver=oracle.jdbc.pool.OracleDataSource
-
+                    <br />
                     icatProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icat:password=secret
-
+                    <br />
                     icatuserProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icatuser:password=anotherSecret
+                    <br />
                 </code>
                 <p>
                     Note the
@@ -117,13 +118,15 @@
                 <p>For MySQL:</p>
                 <code>
                     driver=com.mysql.jdbc.jdbc2.optional.MysqlDataSource
-
-                    icatProperties=url="'"jdbc:mysql://localhost:3306/icat"'":user=icat:password=secret:databaseName=icat
-
-                    icatuserProperties=url="'"jdbc:mysql://localhost:3306/icatuser"'":user=icat:password=password:databaseName=icatuser
+                    <br />
+                    icatProperties=user=icat:password=secret:databaseName=icat
+                    <br />
+                    icatuserProperties=user=icat:password=anotherSecret:databaseName=icatuser
+                    <br />
                 </code>
-                <p>Note here that the database name appears twice - once at the end of the url and again as a property.</p>
+            </subsection>
 
+            <subsection name="Using glassfish.props to configure Glassfish">
                 <p>
                     Having prepared the glassfish.props file you should run the command:
                     <tt>asadmin login</tt>
@@ -213,7 +216,8 @@
                     <tt>test.py</tt>
                     . This is a python script which requires that the suds client is available. On CENTOS this is packaged as a
                     <tt>python-suds</tt>
-                    RPM. Invoke the script with two parameters: the hostname and port separated by a colon on which the service is deployed securely (typically
+                    RPM. Invoke the script with two parameters: the hostname and port separated by a colon on which the service is deployed securely
+                    (typically
                     localhost:8181) and the root ICAT password you
                     stored in the database. It should report:
                 </p>

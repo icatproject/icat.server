@@ -8,16 +8,16 @@
   <part id="general">
     <title>General</title>
 
-    <faq id="why-empty">
+    <faq id="DB Schema Creation">
       <question>
-        Why is this empty?
+        Where is the script to create the database schema?
       </question>
       <answer>
-        <p>Because nobody has suggested any questions yet ...</p>
-
-      <!--  <source>some source code</source> -->
-
-        
+        <p>The schema is created automatically when the icat ear file is deployed. 
+        This works fine if no tables exist. If tables do exist it will try to create 
+        them and report an error for each table. If any table exists and has the 
+        wrong structure, it will not be replaced or updated, and ICAT will not work
+        properly.</p>
       </answer>
     </faq>
      
