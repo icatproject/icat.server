@@ -16,7 +16,7 @@ import javax.xml.ws.ResponseWrapper;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.Investigation;
 import org.icatproject.exposed.compatibility.AdvancedSearchDetails;
-import org.icatproject.exposed.manager.BeanManagerLocal;
+import org.icatproject.exposed.manager.BeanManagerBean;
 
 @Stateless
 @WebService(targetNamespace = "client.icat3.uk")
@@ -32,7 +32,7 @@ public class ICATCompat extends EJBObject {
 	}
 
 	@EJB
-	private BeanManagerLocal beanManagerLocal;
+	private BeanManagerBean beanManagerLocal;
 
 	public ICATCompat() {
 	}

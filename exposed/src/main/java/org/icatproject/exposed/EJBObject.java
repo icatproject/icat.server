@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import javax.persistence.EntityManager;
@@ -14,8 +13,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.icatproject.core.IcatException;
-import org.icatproject.exposed.user.UserSessionLocal;
-
 
 public abstract class EJBObject {
 
@@ -23,18 +20,14 @@ public abstract class EJBObject {
 
 	@PersistenceContext(unitName = "icat")
 	protected EntityManager manager;
-	@EJB
-	protected UserSessionLocal user;
 
 	@PostConstruct
 	protected void init() {
 		/*
-		 * Set up log4j. Note that even if the requested log4j.properties file
-		 * is not found or is corrupt log4j will do its best to produce some
-		 * output. The file will be checked for changes every minute. Existing
-		 * properties will NOT be removed - so to reduce logging you may need to
-		 * specify a logging level of INHERIT to take values from further up the
-		 * tree.
+		 * Set up log4j. Note that even if the requested log4j.properties file is not found or is
+		 * corrupt log4j will do its best to produce some output. The file will be checked for
+		 * changes every minute. Existing properties will NOT be removed - so to reduce logging you
+		 * may need to specify a logging level of INHERIT to take values from further up the tree.
 		 */
 		String log4jFile = "log4j.properties";
 		LogManager.resetConfiguration();
@@ -70,7 +63,8 @@ public abstract class EJBObject {
 		PrintStream s = new PrintStream(baos);
 		e.printStackTrace(s);
 		s.close();
-		logger.error("Unexpected failure in Java " + System.getProperties().getProperty("java.version") + " " + baos);
+		logger.error("Unexpected failure in Java "
+				+ System.getProperties().getProperty("java.version") + " " + baos);
 	}
 
 }

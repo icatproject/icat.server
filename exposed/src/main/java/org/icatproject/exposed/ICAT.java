@@ -1,14 +1,13 @@
 package org.icatproject.exposed;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.interceptor.ExcludeClassInterceptors;
-import javax.interceptor.Interceptors;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -52,8 +51,7 @@ import org.icatproject.core.entity.StudyInvestigation;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
 import org.icatproject.core.manager.EntityInfo;
-import org.icatproject.exposed.interceptor.LogoutInterceptor;
-import org.icatproject.exposed.manager.BeanManagerLocal;
+import org.icatproject.exposed.manager.BeanManagerBean;
 import org.icatproject.exposed.util.Constants;
 
 @Stateless
@@ -62,7 +60,7 @@ import org.icatproject.exposed.util.Constants;
 public class ICAT extends EJBObject {
 
 	@EJB
-	private BeanManagerLocal beanManagerLocal;
+	private BeanManagerBean beanManagerLocal;
 
 	@Resource
 	WebServiceContext webServiceContext;
@@ -136,30 +134,28 @@ public class ICAT extends EJBObject {
 	}
 
 	@WebMethod
-	@ExcludeClassInterceptors
-	public String login(@WebParam(name = "username") String username,
-			@WebParam(name = "password") String password) throws IcatException {
+	public String login(@WebParam(name = "plugin") String plugin,
+			@WebParam(name = "credentials") Map<String, String> credentials) throws IcatException {
 		MessageContext msgCtxt = webServiceContext.getMessageContext();
 		HttpServletRequest req = (HttpServletRequest) msgCtxt.get(MessageContext.SERVLET_REQUEST);
-		return user.login(username, password, req);
+		return beanManagerLocal.login(plugin, credentials, req);
 	}
 
 	@WebMethod
-	@Interceptors(LogoutInterceptor.class)
 	public void logout(@WebParam(name = "sessionId") String sessionId) throws IcatException {
-		user.logout(sessionId);
+		beanManagerLocal.logout(sessionId);
 	}
 
 	@WebMethod
 	public String getUserName(@WebParam(name = "sessionId") String sessionId) throws IcatException {
-		return this.user.getUserName(sessionId);
+		return beanManagerLocal.getUserName(sessionId);
 
 	}
 
 	@WebMethod()
 	public double getRemainingMinutes(@WebParam(name = "sessionId") String sessionId)
 			throws IcatException {
-		return this.user.getRemainingMinutes(sessionId);
+		return beanManagerLocal.getRemainingMinutes(sessionId);
 	}
 
 	@WebMethod()

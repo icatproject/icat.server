@@ -7,7 +7,7 @@
     <packaging>pom</packaging>
 
     <distributionManagement>
-    <downloadUrl>http://www.icatproject.org/mvn/repo</downloadUrl>
+        <downloadUrl>http://www.icatproject.org/mvn/repo</downloadUrl>
         <site>
             <id>website</id>
             <url>scp://www.icatproject.org/var/www/html/mvn/site/icat/${project.version}</url>
@@ -59,8 +59,6 @@
         <module>ear</module>
         <module>client</module>
         <module>ws-test</module>
-        <module>user-ldap</module>
-        <module>user-ansto</module>
     </modules>
 
     <repositories>

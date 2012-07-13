@@ -24,11 +24,6 @@ $asadmin delete-jdbc-resource jdbc/icatuser
 $asadmin delete-jdbc-connection-pool icat
 $asadmin delete-jdbc-connection-pool icatuser
 
-$asadmin delete-jms-resource jms/icat/QueueConnectionFactory
-$asadmin delete-jms-resource jms/login/Queue
-$asadmin delete-jms-resource jms/logout/Queue
-$asadmin delete-jms-resource jms/download/Queue
-
 $asadmin delete-jms-resource jms/ICATQueueConnectionFactory
 $asadmin delete-jms-resource jms/ICATTopicConnectionFactory
 $asadmin delete-jms-resource jms/ICATQueue

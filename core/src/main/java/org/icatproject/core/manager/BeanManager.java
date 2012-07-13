@@ -24,7 +24,9 @@ import javax.transaction.UserTransaction;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.authentication.Authentication;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.parser.GetQuery;
 import org.icatproject.core.parser.Include;
@@ -478,6 +480,101 @@ public class BeanManager {
 
 	public static EntityInfo getEntityInfo(String beanName) throws IcatException {
 		return eiHandler.getEntityInfo(beanName);
+	}
+
+	public static String getUserName(String sessionId, EntityManager manager) throws IcatException {
+		logger.debug("getUserIdFromSessionId(" + sessionId + ")");
+		Session session = getSession(sessionId, manager);
+		String userName = session.checkValid();
+		logger.debug("user: " + userName + " is associated with: " + sessionId);
+		return userName;
+	}
+
+	public static double getRemainingMinutes(String sessionId, EntityManager manager)
+			throws IcatException {
+		logger.debug("getRemainingMinutes for sessionId " + sessionId);
+		Session session = getSession(sessionId, manager);
+		return session.getRemainingMinutes();
+	}
+
+	private static Session getSession(String sessionId, EntityManager manager) throws IcatException {
+		Session session = null;
+		if (sessionId == null || sessionId.equals("")) {
+			throw new IcatException(IcatException.IcatExceptionType.SESSION,
+					"Session Id cannot be null or empty.");
+		}
+		session = (Session) manager.find(Session.class, sessionId);
+		if (session == null) {
+			throw new IcatException(IcatException.IcatExceptionType.SESSION,
+					"Unable to find user by sessionid: " + sessionId);
+		}
+		return session;
+	}
+
+	public static void logout(String sessionId, EntityManager manager,
+			UserTransaction userTransaction) throws IcatException {
+		logger.debug("logout for sessionId " + sessionId);
+		Session session = getSession(sessionId, manager);
+		try {
+			userTransaction.begin();
+			try {
+				manager.remove(session);
+				manager.flush();
+				userTransaction.commit();
+				logger.debug("Session " + session.getId() + " removed.");
+			} catch (Throwable e) {
+				userTransaction.rollback();
+				logger.trace("Transaction rolled back for logout because of " + e.getClass() + " "
+						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
+			}
+		} catch (IllegalStateException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"IllegalStateException" + e.getMessage());
+		} catch (SecurityException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException"
+					+ e.getMessage());
+		} catch (SystemException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException"
+					+ e.getMessage());
+		} catch (NotSupportedException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"NotSupportedException" + e.getMessage());
+		}
+	}
+
+	public static String login(Authentication authentication, int lifetimeMinutes,
+			EntityManager manager, UserTransaction userTransaction) throws IcatException {
+		Session session = new Session(authentication, lifetimeMinutes);
+		try {
+			userTransaction.begin();
+			try {
+				manager.persist(session);
+				manager.flush();
+				userTransaction.commit();
+				logger.debug("Session " + session.getId() + " persisted.");
+				return session.getId();
+			} catch (Throwable e) {
+				userTransaction.rollback();
+				logger.trace("Transaction rolled back for login because of " + e.getClass() + " "
+						+ e.getMessage());
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
+			}
+		} catch (IllegalStateException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"IllegalStateException" + e.getMessage());
+		} catch (SecurityException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException"
+					+ e.getMessage());
+		} catch (SystemException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException"
+					+ e.getMessage());
+		} catch (NotSupportedException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"NotSupportedException" + e.getMessage());
+		}
 	}
 
 }

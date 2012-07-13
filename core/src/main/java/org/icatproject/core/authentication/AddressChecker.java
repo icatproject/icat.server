@@ -1,4 +1,4 @@
-package org.icatproject.core.user;
+package org.icatproject.core.authentication;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

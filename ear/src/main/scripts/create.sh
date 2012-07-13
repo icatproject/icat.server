@@ -35,11 +35,6 @@ $asadmin create-jdbc-connection-pool \
    icatuser
 $asadmin create-jdbc-resource --connectionpoolid icatuser jdbc/icatuser
 
-$asadmin create-jms-resource --restype javax.jms.QueueConnectionFactory jms/icat/QueueConnectionFactory
-$asadmin create-jms-resource --restype javax.jms.Queue jms/login/Queue
-$asadmin create-jms-resource --restype javax.jms.Queue jms/logout/Queue
-$asadmin create-jms-resource --restype javax.jms.Queue jms/download/Queue
-
 $asadmin create-jms-resource --restype javax.jms.QueueConnectionFactory jms/ICATQueueConnectionFactory
 $asadmin create-jms-resource --restype javax.jms.TopicConnectionFactory jms/ICATTopicConnectionFactory
 $asadmin create-jms-resource --restype javax.jms.Queue jms/ICATQueue

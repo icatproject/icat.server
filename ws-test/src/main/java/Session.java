@@ -29,6 +29,8 @@ import org.icatproject.InputDataset;
 import org.icatproject.Investigation;
 import org.icatproject.InvestigationType;
 import org.icatproject.Job;
+import org.icatproject.Login.Credentials;
+import org.icatproject.Login.Credentials.Entry;
 import org.icatproject.NotificationRequest;
 import org.icatproject.OutputDatafile;
 import org.icatproject.OutputDataset;
@@ -82,7 +84,22 @@ public class Session {
 		final ICATService icatService = new ICATService(icatUrl, new QName(
 				"http://icatproject.org", "ICATService"));
 		this.icatEP = icatService.getICATPort();
-		this.sessionId = this.icatEP.login("root", "password");
+
+		Credentials credentials = new Credentials();
+		List<Entry> entries = credentials.getEntry();
+		Entry e;
+
+		e = new Entry();
+		e.setKey("username");
+		e.setValue("root");
+		entries.add(e);
+
+		e = new Entry();
+		e.setKey("password");
+		e.setValue("password");
+		entries.add(e);
+
+		this.sessionId = this.icatEP.login("db", credentials);
 		this.compatSession = new CompatSession(this.sessionId);
 	}
 
