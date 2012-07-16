@@ -19,7 +19,17 @@ client = Client("https://" + hostAndPort + "/ICATService/ICAT?wsdl")
 service = client.service
 factory = client.factory
 
-sessionId = service.login("root", password)
+credentials = factory.create("credentials")
+entry = factory.create("credentials.entry")
+entry.key = "username"
+entry.value = "root"
+credentials.entry.append(entry)
+entry = factory.create("credentials.entry")
+entry.key = "password"
+entry.value = password
+credentials.entry.append(entry)
+
+sessionId = service.login("db", credentials,)
 
 groups = service.search(sessionId, "Group[name='annoying animals']")
 if len(groups): 

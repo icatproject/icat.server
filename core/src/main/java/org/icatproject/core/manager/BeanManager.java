@@ -514,10 +514,10 @@ public class BeanManager {
 	public static void logout(String sessionId, EntityManager manager,
 			UserTransaction userTransaction) throws IcatException {
 		logger.debug("logout for sessionId " + sessionId);
-		Session session = getSession(sessionId, manager);
 		try {
 			userTransaction.begin();
 			try {
+				Session session = getSession(sessionId, manager);
 				manager.remove(session);
 				manager.flush();
 				userTransaction.commit();
