@@ -12,9 +12,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("A period of time related to an investigation")
@@ -23,8 +21,6 @@ import org.icatproject.core.IcatException;
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "INVESTIGATION_ID", "STARTDATE",
 		"ENDDATE" }) })
 public class Shift extends EntityBaseBean implements Serializable {
-
-	private static Logger logger = Logger.getLogger(Shift.class);
 
 	@JoinColumn(name = "INVESTIGATION_ID", nullable = false)
 	@ManyToOne
@@ -52,14 +48,6 @@ public class Shift extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "Shift[id=" + id + "]";
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Shift for " + includes);
-
-		if (!this.includes.contains(Investigation.class)) {
-			this.investigation = null;
-		}
 	}
 
 	@Override

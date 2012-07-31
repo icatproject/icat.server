@@ -14,9 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("A data file format")
@@ -24,8 +22,6 @@ import org.icatproject.core.IcatException;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME", "VERSION" }) })
 public class DatafileFormat extends EntityBaseBean implements Serializable {
-
-	private final static Logger logger = Logger.getLogger(DatafileFormat.class);
 
 	@Comment("The facility which has defined this format")
 	@JoinColumn(name = "FACILITY_ID", nullable = false)
@@ -111,17 +107,6 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 	public void preparePersist(String modId, EntityManager manager) throws IcatException {
 		super.preparePersist(modId, manager);
 		this.id = null;
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling DatafileFormat for " + includes);
-
-		if (!this.includes.contains(Datafile.class)) {
-			this.datafiles = null;
-		}
-		if (!this.includes.contains(Facility.class)) {
-			this.facility = null;
-		}
 	}
 
 }

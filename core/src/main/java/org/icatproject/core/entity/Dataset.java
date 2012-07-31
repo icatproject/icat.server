@@ -17,10 +17,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("A collection of data files and part of an investigation")
@@ -30,8 +28,6 @@ import org.icatproject.core.IcatException;
 		"NAME", "TYPE" }) })
 @XmlRootElement
 public class Dataset extends EntityBaseBean implements Serializable {
-
-	private final static Logger logger = Logger.getLogger(Dataset.class);
 
 	@Comment("May be set to true when all data files and parameters have been added to the data set. The precise meaning is facility dependent.")
 	private boolean complete;
@@ -83,31 +79,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	/* Needed for JPA */
 	public Dataset() {
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Dataset for " + includes);
-		if (!this.includes.contains(InputDataset.class)) {
-			this.inputDatasets = null;
-		}
-		if (!this.includes.contains(OutputDataset.class)) {
-			this.outputDatasets = null;
-		}
-		if (!this.includes.contains(Investigation.class)) {
-			this.investigation = null;
-		}
-		if (!this.includes.contains(Datafile.class)) {
-			this.datafiles = null;
-		}
-		if (!this.includes.contains(DatasetParameter.class)) {
-			this.parameters = null;
-		}
-		if (!this.includes.contains(Sample.class)) {
-			this.sample = null;
-		}
-		if (!this.includes.contains(DatasetType.class)) {
-			this.type = null;
-		}
 	}
 
 	@Override

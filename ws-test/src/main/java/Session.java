@@ -31,7 +31,6 @@ import org.icatproject.InvestigationType;
 import org.icatproject.Job;
 import org.icatproject.Login.Credentials;
 import org.icatproject.Login.Credentials.Entry;
-import org.icatproject.NotificationRequest;
 import org.icatproject.OutputDatafile;
 import org.icatproject.OutputDataset;
 import org.icatproject.ParameterType;
@@ -171,75 +170,33 @@ public class Session {
 	}
 
 	public void clear() throws Exception {
-		List<Object> lo = this.search("Job");
-		for (final Object o : lo) {
-			System.out.println("Deleting " + o);
-			this.delete((Job) o);
+
+		List<EntityBaseBean> toDelete = new ArrayList<EntityBaseBean>();
+		for (String type : Arrays.asList("Facility", "Job", "Application", "NotificationRequest")) {
+			List<Object> lo = this.search(type);
+			if (lo.size() > 0) {
+				System.out.println("Will delete " + lo.size() + " objects of type " + type);
+				for (Object o : lo) {
+					toDelete.add((EntityBaseBean) o);
+				}
+			}
 		}
-		lo = this.search("Application");
-		for (final Object o : lo) {
-			System.out.println("Deleting " + o);
-			this.delete((Application) o);
-		}
-		lo = this.search("Investigation");
-		for (final Object o : lo) {
-			System.out.println("Deleting " + o);
-			this.delete((Investigation) o);
-		}
-		lo = this.search("DatasetType");
-		for (final Object o : lo) {
-			System.out.println("Deleting " + o);
-			this.delete((DatasetType) o);
-		}
-		lo = this.search("DatafileFormat");
-		for (final Object o : lo) {
-			System.out.println("Deleting " + o);
-			this.delete((DatafileFormat) o);
-		}
-		lo = this.search("InvestigationType");
-		for (final Object o : lo) {
-			System.out.println("Deleting " + o);
-			this.delete((InvestigationType) o);
-		}
-		lo = this.search("ParameterType");
-		for (final Object o : lo) {
-			System.out.println("Deleting " + o);
-			this.delete((ParameterType) o);
-		}
-		lo = this.search("Facility");
-		for (final Object o : lo) {
-			System.out.println("Deleting " + o);
-			this.delete((Facility) o);
-		}
-		lo = this.search("NotificationRequest");
-		for (final Object o : lo) {
-			System.out.println("Deleting " + o);
-			this.delete((NotificationRequest) o);
-		}
+		this.deleteMany(toDelete);
 	}
 
 	public void clearAuthz() throws Exception {
 
-		List<Object> lo1 = this.search("Rule");
-		List<Object> lo2 = this.search("UserGroup");
-		List<Object> lo3 = this.search("User");
-		List<Object> lo4 = this.search("Group");
-		for (final Object o : lo1) {
-			System.out.println("Deleting " + o);
-			this.delete((Rule) o);
+		List<EntityBaseBean> toDelete = new ArrayList<EntityBaseBean>();
+		for (String type : Arrays.asList("Rule", "UserGroup", "User", "Group")) {
+			List<Object> lo = this.search(type);
+			if (lo.size() > 0) {
+				System.out.println("Will delete " + lo.size() + " objects of type " + type);
+				for (Object o : lo) {
+					toDelete.add((EntityBaseBean) o);
+				}
+			}
 		}
-		for (final Object o : lo2) {
-			System.out.println("Deleting " + o);
-			this.delete((UserGroup) o);
-		}
-		for (final Object o : lo3) {
-			System.out.println("Deleting " + o);
-			this.delete((User) o);
-		}
-		for (final Object o : lo4) {
-			System.out.println("Deleting " + o);
-			this.delete((Group) o);
-		}
+		this.deleteMany(toDelete);
 	}
 
 	public Application createApplication(String name, String version)
@@ -426,6 +383,10 @@ public class Session {
 
 	public void registerDatafile(Datafile datafile) throws IcatException_Exception {
 		datafile.setId(this.icatEP.create(this.sessionId, datafile));
+	}
+
+	public void deleteMany(List<EntityBaseBean> beans) throws IcatException_Exception {
+		this.icatEP.deleteMany(sessionId, beans);
 	}
 
 }

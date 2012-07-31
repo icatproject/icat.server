@@ -9,9 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("Must be related to an investigation")
@@ -19,8 +17,6 @@ import org.icatproject.core.IcatException;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "INVESTIGATION_ID" }) })
 public class Keyword extends EntityBaseBean implements Serializable {
-
-	private static Logger logger = Logger.getLogger(Keyword.class);
 
 	@Comment("The investigation to which this keyword applies")
 	@JoinColumn(name = "INVESTIGATION_ID", nullable = false)
@@ -38,14 +34,6 @@ public class Keyword extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "Keyword[id=" + id + "]";
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Keyword for " + includes);
-
-		if (!this.includes.contains(Investigation.class)) {
-			this.investigation = null;
-		}
 	}
 
 	@Override

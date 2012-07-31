@@ -6,16 +6,11 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.xml.bind.Marshaller;
-
-import org.apache.log4j.Logger;
 
 @Comment("Many to many relationship between data set as input and a job")
 @SuppressWarnings("serial")
 @Entity
 public class InputDataset extends EntityBaseBean implements Serializable {
-
-	private final static Logger logger = Logger.getLogger(InputDataset.class);
 
 	public InputDataset() {
 	}
@@ -42,16 +37,6 @@ public class InputDataset extends EntityBaseBean implements Serializable {
 
 	public void setDataset(Dataset dataset) {
 		this.dataset = dataset;
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Application for " + includes);
-		if (!this.includes.contains(Job.class)) {
-			this.job = null;
-		}
-		if (!this.includes.contains(Dataset.class)) {
-			this.dataset = null;
-		}
 	}
 
 }

@@ -9,16 +9,11 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.xml.bind.Marshaller;
-
-import org.apache.log4j.Logger;
 
 @Comment("A run of an application with its related inputs and outputs")
 @SuppressWarnings("serial")
 @Entity
 public class Job extends EntityBaseBean implements Serializable {
-
-	private final static Logger logger = Logger.getLogger(Job.class);
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(nullable = false)
@@ -30,25 +25,6 @@ public class Job extends EntityBaseBean implements Serializable {
 
 	public void setApplication(Application application) {
 		this.application = application;
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Job for " + includes);
-		if (!includes.contains(Application.class)) {
-			this.application = null;
-		}
-		if (!includes.contains(InputDataset.class)) {
-			this.inputDatasets = null;
-		}
-		if (!includes.contains(OutputDataset.class)) {
-			this.outputDatasets = null;
-		}
-		if (!includes.contains(InputDatafile.class)) {
-			this.inputDatafiles = null;
-		}
-		if (!includes.contains(OutputDatafile.class)) {
-			this.outputDatafiles = null;
-		}
 	}
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")

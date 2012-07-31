@@ -108,7 +108,7 @@ public class TestWS {
 	}
 
 	@Test
-	public void createPerf() throws Exception {
+	public void performance() throws Exception {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
 
@@ -125,12 +125,12 @@ public class TestWS {
 		DatafileFormat dfmt = session.createDatafileFormat(facility, "png", "binary");
 
 		long start = System.currentTimeMillis();
-		int n = 50;
+		int n = 100;
 		for (int i = 0; i < n; i++) {
 			session.createDatafile("fred" + i, dfmt, wibble);
 		}
-		System.out.println("Time per datafile: " + (System.currentTimeMillis() - start) / (n + 0.)
-				+ "ms");
+		System.out.println("Time per datafile to write: " + (System.currentTimeMillis() - start)
+				/ (n + 0.) + "ms");
 		List<EntityBaseBean> dfs = new ArrayList<EntityBaseBean>();
 		for (int i = 0; i < n; i++) {
 			final Datafile datafile = new Datafile();
@@ -141,8 +141,27 @@ public class TestWS {
 		}
 		start = System.currentTimeMillis();
 		session.createMany(dfs);
-		System.out.println("Time per datafile in list: " + (System.currentTimeMillis() - start)
-				/ (n + 0.) + "ms");
+		System.out.println("Time per datafile using createMany: "
+				+ (System.currentTimeMillis() - start) / (n + 0.) + "ms");
+
+		start = System.currentTimeMillis();
+		List<Object> datafiles = session.search("Datafile INCLUDE DatafileFormat, Dataset");
+		System.out.println("Time per datafile to retrieve: " + datafiles.size() + " datafiles "
+				+ (System.currentTimeMillis() - start) / (datafiles.size() + 0.) + "ms");
+
+		dfs.clear();
+		for (Object odf : datafiles) {
+			Datafile df = (Datafile) odf;
+			df.setDataset(null);
+			df.setDatafileFormat(null);
+			dfs.add(df);
+		}
+
+		start = System.currentTimeMillis();
+		session.deleteMany(dfs);
+		System.out.println("Time per datafile to delete: " + datafiles.size()
+				+ " datafiles with deleteMany: " + (System.currentTimeMillis() - start)
+				/ (datafiles.size() + 0.) + "ms");
 	}
 
 	@Test

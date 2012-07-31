@@ -12,7 +12,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
@@ -21,8 +20,6 @@ import org.apache.log4j.Logger;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "FACILITY_ID" }) })
 public class InvestigationType extends EntityBaseBean implements Serializable {
-
-	private static Logger logger = Logger.getLogger(InvestigationType.class);
 
 	@Comment("A short name identifying this type of investigation")
 	@Column(nullable = false, name = "NAME")
@@ -78,16 +75,6 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "InvestigationType[id=" + id + "]";
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling InvestigationType for " + includes);
-		if (!this.includes.contains(Investigation.class)) {
-			this.investigations = null;
-		}
-		if (!this.includes.contains(Facility.class)) {
-			this.facility = null;
-		}
 	}
 
 }

@@ -9,17 +9,12 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
-
-import org.apache.log4j.Logger;
 
 @Comment("A group of users")
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "GROUP_", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 public class Group extends EntityBaseBean implements Serializable {
-
-	private final static Logger logger = Logger.getLogger(Group.class);
 
 	@Comment("A short name identifying this group of users")
 	@Column(name = "NAME", nullable = false)
@@ -33,16 +28,6 @@ public class Group extends EntityBaseBean implements Serializable {
 
 	// Needed for JPA
 	public Group() {
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Group for " + includes);
-		if (!this.includes.contains(UserGroup.class)) {
-			this.userGroups = null;
-		}
-		if (!this.includes.contains(Rule.class)) {
-			this.rules = null;
-		}
 	}
 
 	public String getName() {

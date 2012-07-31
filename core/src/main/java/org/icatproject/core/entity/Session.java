@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -15,6 +16,7 @@ import org.icatproject.core.authentication.Authentication;
 
 @SuppressWarnings("serial")
 @Entity
+@Table(name = "SESSION_")
 public class Session implements Serializable {
 
 	@Id

@@ -8,10 +8,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("A parameter associated with a data file")
@@ -21,8 +19,6 @@ import org.icatproject.core.IcatException;
 @XmlRootElement
 public class DatafileParameter extends Parameter implements Serializable {
 
-	private static Logger logger = Logger.getLogger(DatafileParameter.class);
-
 	@Comment("The associated data file")
 	@JoinColumn(name = "DATAFILE_ID", nullable = false)
 	@ManyToOne
@@ -30,14 +26,6 @@ public class DatafileParameter extends Parameter implements Serializable {
 
 	/* Needed for JPA */
 	public DatafileParameter() {
-	}
-
-	@Override
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling DatafileParameter for " + this.includes);
-		if (!this.includes.contains(Datafile.class)) {
-			this.datafile = null;
-		}
 	}
 
 	public Datafile getDatafile() {

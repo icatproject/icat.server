@@ -13,9 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("A study which may be related to an investigation")
@@ -34,8 +32,6 @@ public class Study extends EntityBaseBean implements Serializable {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
-	private final static Logger logger = Logger.getLogger(Study.class);
 
 	@Comment("The start date of this study")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -61,14 +57,6 @@ public class Study extends EntityBaseBean implements Serializable {
 
 	/* Needed for JPA */
 	public Study() {
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Study for " + this.includes);
-
-		if (!this.includes.contains(StudyInvestigation.class)) {
-			this.studyInvestigations = null;
-		}
 	}
 
 	public String getName() {

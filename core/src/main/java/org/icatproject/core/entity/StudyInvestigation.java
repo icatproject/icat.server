@@ -8,9 +8,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("Many to many relationship between study and investigation")
@@ -18,8 +16,6 @@ import org.icatproject.core.IcatException;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "STUDY_ID", "INVESTIGATION_ID" }) })
 public class StudyInvestigation extends EntityBaseBean implements Serializable {
-
-	private final static Logger logger = Logger.getLogger(StudyInvestigation.class);
 
 	@JoinColumn(name = "STUDY_ID", nullable = false)
 	@ManyToOne
@@ -42,16 +38,6 @@ public class StudyInvestigation extends EntityBaseBean implements Serializable {
 	public void preparePersist(String modId, EntityManager manager) throws IcatException {
 		super.preparePersist(modId, manager);
 		this.id = null;
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling StudyInvestigation for " + includes);
-		if (!this.includes.contains(Study.class)) {
-			this.study = null;
-		}
-		if (!this.includes.contains(Investigation.class)) {
-			this.investigation = null;
-		}
 	}
 
 	public Study getStudy() {

@@ -7,17 +7,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
-
-import org.apache.log4j.Logger;
 
 @Comment("Many to many relationship between investigation and user")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "USER_ID", "INVESTIGATION_ID" }) })
 public class InvestigationUser extends EntityBaseBean implements Serializable {
-
-	private final static Logger logger = Logger.getLogger(InvestigationUser.class);
 
 	private String role;
 
@@ -36,16 +31,6 @@ public class InvestigationUser extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "Investigator[id=" + id + "]";
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Investigator for " + includes);
-		if (!this.includes.contains(User.class)) {
-			this.user = null;
-		}
-		if (!this.includes.contains(Investigation.class)) {
-			this.investigation = null;
-		}
 	}
 
 	public String getRole() {

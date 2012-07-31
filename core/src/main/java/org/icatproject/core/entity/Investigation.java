@@ -16,9 +16,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("An investigation or experiment")
@@ -28,7 +26,6 @@ import org.icatproject.core.IcatException;
 		"FACILITY_CYCLE_ID", "INSTRUMENT_ID" }) })
 public class Investigation extends EntityBaseBean implements Serializable {
 
-	private static Logger logger = Logger.getLogger(Investigation.class);
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<Dataset> datasets = new ArrayList<Dataset>();
@@ -103,39 +100,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	public Investigation() {
 	}
 
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Investigation for " + includes);
-		if (!this.includes.contains(FacilityCycle.class)) {
-			this.facilityCycle = null;
-		}
-		if (!this.includes.contains(Publication.class)) {
-			this.publications = null;
-		}
-		if (!this.includes.contains(Sample.class)) {
-			this.samples = null;
-		}
-		if (!this.includes.contains(Dataset.class)) {
-			this.datasets = null;
-		}
-		if (!this.includes.contains(Shift.class)) {
-			this.shifts = null;
-		}
-		if (!this.includes.contains(Keyword.class)) {
-			this.keywords = null;
-		}
-		if (!this.includes.contains(StudyInvestigation.class)) {
-			this.studyInvestigations = null;
-		}
-		if (!this.includes.contains(InvestigationUser.class)) {
-			this.investigationUsers = null;
-		}
-		if (!this.includes.contains(InvestigationParameter.class)) {
-			this.parameters = null;
-		}
-		if (!this.includes.contains(InvestigationType.class)) {
-			this.type = null;
-		}
-	}
 
 	public List<Dataset> getDatasets() {
 		return datasets;

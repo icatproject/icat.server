@@ -10,9 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("Used to represent an arbitrary relationship between data files")
@@ -21,8 +19,6 @@ import org.icatproject.core.IcatException;
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "SOURCE_DATAFILE_ID",
 		"DEST_DATAFILE_ID" }) })
 public class RelatedDatafile extends EntityBaseBean implements Serializable {
-
-	private final static Logger logger = Logger.getLogger(RelatedDatafile.class);
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "SOURCE_DATAFILE_ID", nullable = false)
@@ -67,15 +63,6 @@ public class RelatedDatafile extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "RelatedDatafile[id=" + id + "]";
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling RelatedDatafile for " + includes);
-
-		if (!this.includes.contains(Datafile.class)) {
-			this.sourceDatafile = null;
-			this.destDatafile = null;
-		}
 	}
 
 	@Override

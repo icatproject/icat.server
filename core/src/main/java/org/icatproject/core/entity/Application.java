@@ -11,9 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("Some piece of software")
@@ -21,8 +19,6 @@ import org.icatproject.core.IcatException;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "VERSION" }) })
 public class Application extends EntityBaseBean implements Serializable {
-
-	private final static Logger logger = Logger.getLogger(Application.class);
 
 	@Comment("A short name for the software - e.g. mantid")
 	@Column(name = "NAME")
@@ -74,13 +70,6 @@ public class Application extends EntityBaseBean implements Serializable {
 
 	public void setVersion(String version) {
 		this.version = version;
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Application for " + includes);
-		if (!this.includes.contains(Job.class)) {
-			this.jobs = null;
-		}
 	}
 
 }

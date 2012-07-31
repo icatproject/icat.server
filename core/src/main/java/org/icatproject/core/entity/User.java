@@ -9,17 +9,12 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
-
-import org.apache.log4j.Logger;
 
 @Comment("A user of the facility")
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "USER_", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 public class User extends EntityBaseBean implements Serializable {
-
-	private static Logger logger = Logger.getLogger(User.class);
 
 	@Comment("The name of the user to match that provided by the authentication mechanism")
 	@Column(name = "NAME", nullable = false)
@@ -78,19 +73,6 @@ public class User extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "User[name=" + name + "]";
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling User for " + includes);
-		if (!this.includes.contains(InvestigationUser.class)) {
-			this.investigationUsers = null;
-		}
-		if (!this.includes.contains(UserGroup.class)) {
-			this.userGroups = null;
-		}
-		if (!this.includes.contains(InstrumentScientist.class)) {
-			this.instrumentScientists = null;
-		}
 	}
 
 	public List<InvestigationUser> getInvestigationUsers() {

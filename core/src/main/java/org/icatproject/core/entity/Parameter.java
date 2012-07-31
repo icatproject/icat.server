@@ -12,12 +12,10 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.NamedQuery;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.ParameterType.ParameterValueType;
-
 
 @SuppressWarnings("serial")
 @MappedSuperclass
@@ -52,13 +50,6 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 
 	@Comment("The error of the numeric parameter")
 	private Double error;
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Parameter for " + includes);
-		if (!this.includes.contains(ParameterType.class)) {
-			this.type = null;
-		}
-	}
 
 	public ParameterType getType() {
 		return type;
@@ -117,15 +108,15 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager) throws 
-			IcatException {
+	public void preparePersist(String modId, EntityManager manager) throws IcatException {
 		super.preparePersist(modId, manager);
 		check(manager);
 	}
 
-	private void check(EntityManager manager) throws IcatException  {
+	private void check(EntityManager manager) throws IcatException {
 		if (type == null) {
-			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
+			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
+					"Type of parameter is not set");
 		}
 		logger.debug("PreparePersist of type " + type.getName() + " " + type.isEnforced() + " "
 				+ type.getValueType());
@@ -139,12 +130,14 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 			Double min = type.getMinimumNumericValue();
 			Double max = type.getMaximumNumericValue();
 			if (min != null && numericValue < min) {
-				throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Parameter of type " + type.getName() + " has value "
-						+ numericValue + " < " + min);
+				throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
+						"Parameter of type " + type.getName() + " has value " + numericValue
+								+ " < " + min);
 			}
 			if (max != null && numericValue > max) {
-				throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Parameter of type " + type.getName() + " has value "
-						+ numericValue + " > " + max);
+				throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
+						"Parameter of type " + type.getName() + " has value " + numericValue
+								+ " > " + max);
 			}
 		} else if (pvt == ParameterValueType.STRING) {
 			logger.debug("Parameter of type " + type.getName() + " has string value " + stringValue
@@ -154,14 +147,15 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 			List<String> values = manager.createNamedQuery("Parameter.psv", String.class)
 					.setParameter("tid", type.getId()).getResultList();
 			if (!values.isEmpty() && values.indexOf(stringValue) < 0) {
-				throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Parameter of type " + type.getName() + " has value "
-						+ stringValue + " not in allowed set " + values);
+				throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
+						"Parameter of type " + type.getName() + " has value " + stringValue
+								+ " not in allowed set " + values);
 			}
 		}
 	}
 
 	@Override
-	public void postMergeFixup(EntityManager manager) throws  IcatException {
+	public void postMergeFixup(EntityManager manager) throws IcatException {
 		super.postMergeFixup(manager);
 		check(manager);
 	}

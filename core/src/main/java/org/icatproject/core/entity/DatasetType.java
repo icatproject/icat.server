@@ -14,9 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("A type of data set")
@@ -24,8 +22,6 @@ import org.icatproject.core.IcatException;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME" }) })
 public class DatasetType extends EntityBaseBean implements Serializable {
-
-	private final static Logger logger = Logger.getLogger(DatasetType.class);
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<Dataset> datasets = new ArrayList<Dataset>();
@@ -44,16 +40,6 @@ public class DatasetType extends EntityBaseBean implements Serializable {
 
 	/* Needed for JPA */
 	public DatasetType() {
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling DatasetType for " + this.includes);
-		if (!this.includes.contains(Dataset.class)) {
-			this.datasets = null;
-		}
-		if (!this.includes.contains(Facility.class)) {
-			this.facility = null;
-		}
 	}
 
 	public Facility getFacility() {

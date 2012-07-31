@@ -10,7 +10,6 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
@@ -257,13 +256,6 @@ public class Rule extends EntityBaseBean implements Serializable {
 
 	public void setWhat(String what) {
 		this.what = what;
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Rule for " + includes);
-		if (!this.includes.contains(Group.class)) {
-			this.group = null;
-		}
 	}
 
 }

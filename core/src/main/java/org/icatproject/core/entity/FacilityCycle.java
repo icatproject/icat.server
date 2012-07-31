@@ -15,17 +15,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
-
-import org.apache.log4j.Logger;
 
 @Comment("An operating cycle within a facility")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME" }) })
 public class FacilityCycle extends EntityBaseBean implements Serializable {
-
-	private static Logger logger = Logger.getLogger(FacilityCycle.class);
 
 	public Facility getFacility() {
 		return facility;
@@ -105,16 +100,6 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "FacilityCycle[name=" + name + "]";
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling FacilityCycle for " + includes);
-		if (!this.includes.contains(Investigation.class)) {
-			this.investigations = null;
-		}
-		if (!this.includes.contains(Facility.class)) {
-			this.facility = null;
-		}
 	}
 
 }

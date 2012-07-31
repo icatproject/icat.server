@@ -10,9 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("Permissible value for string parameter types")
@@ -20,8 +18,6 @@ import org.icatproject.core.IcatException;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "VALUE", "PARAMETERTYPE_ID" }) })
 public class PermissibleStringValue extends EntityBaseBean implements Serializable {
-
-	private static Logger logger = Logger.getLogger(PermissibleStringValue.class);
 
 	@Comment("The parameter type to which this permissible string value applies")
 	@JoinColumn(name = "PARAMETERTYPE_ID", nullable = false)
@@ -42,13 +38,6 @@ public class PermissibleStringValue extends EntityBaseBean implements Serializab
 
 	/* Needed for JPA */
 	public PermissibleStringValue() {
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling PermissibleStringValue for " + includes);
-		if (!this.includes.contains(ParameterType.class)) {
-			this.type = null;
-		}
 	}
 
 	public String getValue() {

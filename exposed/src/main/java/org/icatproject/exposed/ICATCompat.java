@@ -16,12 +16,11 @@ import javax.xml.ws.ResponseWrapper;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.Investigation;
 import org.icatproject.exposed.compatibility.AdvancedSearchDetails;
-import org.icatproject.exposed.manager.BeanManagerBean;
 
 @Stateless
 @WebService(targetNamespace = "client.icat3.uk")
 @TransactionAttribute(value = TransactionAttributeType.REQUIRED)
-public class ICATCompat extends EJBObject {
+public class ICATCompat {
 
 	@SuppressWarnings("serial")
 	public class SessionException extends Exception {

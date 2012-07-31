@@ -1,4 +1,4 @@
-package org.icatproject.exposed.util;
+package org.icatproject.exposed;
 
 public class Constants {
 

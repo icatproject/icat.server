@@ -12,17 +12,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
-
-import org.apache.log4j.Logger;
 
 @Comment("Used by a user within an investigation")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME" }) })
 public class Instrument extends EntityBaseBean implements Serializable {
-
-	private final static Logger logger = Logger.getLogger(Instrument.class);
 
 	@Comment("A description of this instrument")
 	private String description;
@@ -57,19 +52,6 @@ public class Instrument extends EntityBaseBean implements Serializable {
 
 	// Needed for JPA
 	public Instrument() {
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Instrument for " + this.includes);
-		if (!this.includes.contains(InstrumentScientist.class)) {
-			this.instrumentScientists = null;
-		}
-		if (!this.includes.contains(Investigation.class)) {
-			this.investigations = null;
-		}
-		if (!this.includes.contains(Facility.class)) {
-			this.facility = null;
-		}
 	}
 
 	public String getDescription() {

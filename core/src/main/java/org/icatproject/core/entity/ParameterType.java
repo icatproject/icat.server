@@ -14,9 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("A parameter type with unique name and units")
@@ -28,8 +26,6 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	public enum ParameterValueType {
 		DATE_AND_TIME, NUMERIC, STRING
 	}
-
-	private final static Logger logger = Logger.getLogger(ParameterType.class);
 
 	@Comment("If a parameter of this type may be applied to a data file")
 	private boolean applicableToDatafile;
@@ -93,28 +89,6 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 
 	/* Needed for JPA */
 	public ParameterType() {
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling ParameterType for " + includes);
-		if (!this.includes.contains(DatasetParameter.class)) {
-			this.datasetParameters = null;
-		}
-		if (!this.includes.contains(DatafileParameter.class)) {
-			this.datafileParameters = null;
-		}
-		if (!this.includes.contains(SampleParameter.class)) {
-			this.sampleParameters = null;
-		}
-		if (!this.includes.contains(InvestigationParameter.class)) {
-			this.investigationParameters = null;
-		}
-		if (!this.includes.contains(Facility.class)) {
-			this.facility = null;
-		}
-		if (!this.includes.contains(PermissibleStringValue.class)) {
-			this.permissibleStringValues = null;
-		}
 	}
 
 	public List<DatafileParameter> getDatafileParameters() {

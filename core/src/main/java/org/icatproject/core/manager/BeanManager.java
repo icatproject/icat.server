@@ -131,14 +131,13 @@ public class BeanManager {
 				userTransaction.rollback();
 				logger.trace("Transaction rolled back for creation because of " + e.getClass()
 						+ " " + e.getMessage());
-				for (EntityBaseBean bean : beans) {
-					bean.preparePersist(userId, manager);
-					bean.isUnique(manager);
-					bean.isValid(manager, true);
-				}
-				e.printStackTrace(System.err);
+				int pos = crs.size();
+				EntityBaseBean bean = beans.get(pos);
+				bean.preparePersist(userId, manager);
+				bean.isUnique(manager);
+				bean.isValid(manager, true);
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-						"Unexpected DB response " + e.getClass() + " " + e.getMessage(), crs.size());
+						"Unexpected DB response " + e.getClass() + " " + e.getMessage(), pos);
 
 			}
 		} catch (IllegalStateException e) {
@@ -278,7 +277,7 @@ public class BeanManager {
 		logger.debug("got " + entityClass.getSimpleName() + "[id:" + primaryKey + "]");
 		NotificationMessages notification = new NotificationMessages(userId, beanManaged,
 				AccessType.READ, manager);
-		return new GetResponse(beanManaged, notification);
+		return new GetResponse(beanManaged.pruned(), notification);
 	}
 
 	public static SearchResponse search(String userId, String query, EntityManager manager)
@@ -332,7 +331,9 @@ public class BeanManager {
 		List<?> result = jpqlQuery.getResultList();
 
 		Include include = q.getInclude();
+
 		if (include != null) {
+			logger.debug("To include: " + include);
 			if (include.isOne()) {
 				for (Object beanManaged : result) {
 					((EntityBaseBean) beanManaged).addOne();
@@ -348,7 +349,17 @@ public class BeanManager {
 		logger.debug("Obtained " + result.size() + " results.");
 		NotificationMessages nms = new NotificationMessages(userId, result.size(),
 				q.getFirstEntity(), query, manager);
-		return new SearchResponse(result, nms);
+
+		if (result.size() > 0 && result.get(0) instanceof EntityBaseBean) {
+			List<Object> clones = new ArrayList<Object>();
+			for (Object beanManaged : result) {
+				clones.add(((EntityBaseBean) beanManaged).pruned());
+			}
+			return new SearchResponse(clones, nms);
+		} else {
+			return new SearchResponse(result, nms);
+		}
+
 	}
 
 	private static EntityBaseBean find(EntityBaseBean bean, EntityManager manager)
@@ -379,7 +390,7 @@ public class BeanManager {
 	public static void merge(EntityBaseBean thisBean, Object fromBean, EntityManager manager)
 			throws IcatException {
 		Class<? extends EntityBaseBean> klass = thisBean.getClass();
-		Map<Field, Method> setters = eiHandler.getSetters(klass);
+		Map<Field, Method> setters = eiHandler.getSettersForUpdate(klass);
 		Map<Field, Method> getters = eiHandler.getGetters(klass);
 
 		for (Entry<Field, Method> fieldAndMethod : setters.entrySet()) {
@@ -426,7 +437,6 @@ public class BeanManager {
 	public static void addIncludes(EntityBaseBean thisBean,
 			Set<Class<? extends EntityBaseBean>> includes, boolean followCascades)
 			throws IcatException {
-		logger.debug("addIncludes " + includes + " for " + thisBean);
 		Class<? extends EntityBaseBean> entityClass = thisBean.getClass();
 
 		Set<Relationship> relationships = eiHandler.getIncludesToFollow(entityClass);
@@ -574,6 +584,59 @@ public class BeanManager {
 		} catch (NotSupportedException e) {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 					"NotSupportedException" + e.getMessage());
+		}
+	}
+
+	public static List<NotificationMessages> deleteMany(String userId, List<EntityBaseBean> beans,
+			EntityManager manager, UserTransaction userTransaction) throws IcatException {
+		try {
+			logger.error("Before begin " + userTransaction.getStatus());
+			userTransaction.begin();
+			logger.error("after begin " + userTransaction.getStatus());
+			List<NotificationMessages> nms = new ArrayList<NotificationMessages>();
+			try {
+				for (EntityBaseBean bean : beans) {
+
+					EntityBaseBean beanManaged = find(bean, manager);
+					GateKeeper
+							.performAuthorisation(userId, beanManaged, AccessType.DELETE, manager);
+					NotificationMessages notification = new NotificationMessages(userId, bean,
+							AccessType.DELETE, manager);
+					logger.error("before remove " + userTransaction.getStatus());
+					manager.remove(beanManaged);
+					manager.flush();
+					logger.trace("Deleted bean " + bean + " flushed.");
+					nms.add(notification);
+				}
+				userTransaction.commit();
+				return nms;
+			} catch (IcatException e) {
+				userTransaction.rollback();
+				e.setOffset(nms.size());
+				throw e;
+			} catch (Throwable e) {
+				userTransaction.rollback();
+				logger.trace("Transaction rolled back for deletion because of " + e.getClass()
+						+ " " + e.getMessage());
+				int pos = nms.size();
+				EntityBaseBean bean = beans.get(pos);
+				EntityBaseBean beanManaged = find(bean, manager);
+				beanManaged.canDelete(manager);
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"Unexpected DB response " + e.getClass() + " " + e.getMessage(), pos);
+			}
+		} catch (IllegalStateException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"IllegalStateException " + e.getMessage(), -1);
+		} catch (SecurityException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException "
+					+ e.getMessage(), -1);
+		} catch (SystemException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException "
+					+ e.getMessage(), -1);
+		} catch (NotSupportedException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"NotSupportedException " + e.getMessage(), -1);
 		}
 	}
 

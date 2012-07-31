@@ -17,10 +17,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("A data file")
@@ -29,8 +27,6 @@ import org.icatproject.core.IcatException;
 @XmlRootElement
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "LOCATION", "DATASET_ID" }) })
 public class Datafile extends EntityBaseBean implements Serializable {
-
-	private static Logger logger = Logger.getLogger(Datafile.class);
 
 	@Comment("Checksum of file represented as a string")
 	private String checksum;
@@ -87,28 +83,50 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	public Datafile() {
 	}
 
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Datafile for " + includes);
-		if (!this.includes.contains(RelatedDatafile.class)) {
-			this.sourceDatafiles = null;
-			this.destDatafiles = null;
-		}
-		if (!this.includes.contains(DatafileFormat.class)) {
-			this.datafileFormat = null;
-		}
-		if (!this.includes.contains(Dataset.class)) {
-			this.dataset = null;
-		}
-		if (!this.includes.contains(DatafileParameter.class)) {
-			this.parameters = null;
-		}
-		if (!this.includes.contains(InputDatafile.class)) {
-			this.inputDatafiles = null;
-		}
-		if (!this.includes.contains(OutputDatafile.class)) {
-			this.outputDatafiles = null;
-		}
+	public EntityBaseBean prunedOld() throws IcatException {
+		// logger.trace("Pruning Datafile for " + includes);
+		Datafile clone = new Datafile();
+		super.addToClone(clone);
 
+		clone.checksum = checksum;
+		clone.datafileCreateTime = datafileCreateTime;
+		clone.datafileModTime = datafileModTime;
+		clone.description = description;
+		clone.doi = doi;
+		clone.fileSize = fileSize;
+		clone.location = location;
+		clone.name = name;
+
+		if (this.includes.contains(RelatedDatafile.class)) {
+			for (RelatedDatafile df : this.sourceDatafiles) {
+				clone.sourceDatafiles.add((RelatedDatafile) df.pruned());
+			}
+			for (RelatedDatafile df : this.destDatafiles) {
+				clone.destDatafiles.add((RelatedDatafile) df.pruned());
+			}
+		}
+		if (this.includes.contains(DatafileFormat.class)) {
+			clone.datafileFormat = (DatafileFormat) datafileFormat.pruned();
+		}
+		if (this.includes.contains(Dataset.class)) {
+			clone.dataset = (Dataset) dataset.pruned();
+		}
+		if (this.includes.contains(DatafileParameter.class)) {
+			for (DatafileParameter df : this.parameters) {
+				clone.parameters.add((DatafileParameter) df.pruned());
+			}
+		}
+		if (this.includes.contains(InputDatafile.class)) {
+			for (InputDatafile df : this.inputDatafiles) {
+				clone.inputDatafiles.add((InputDatafile) df.pruned());
+			}
+		}
+		if (this.includes.contains(OutputDatafile.class)) {
+			for (OutputDatafile df : this.outputDatafiles) {
+				clone.outputDatafiles.add((OutputDatafile) df.pruned());
+			}
+		}
+		return clone;
 	}
 
 	public String getChecksum() {

@@ -8,10 +8,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("A parameter associated with an investigation")
@@ -22,8 +20,6 @@ import org.icatproject.core.IcatException;
 @XmlRootElement
 public class InvestigationParameter extends Parameter implements Serializable {
 
-	private static Logger logger = Logger.getLogger(InvestigationParameter.class);
-
 	@Comment("The associated investigation")
 	@JoinColumn(name = "INVESTIGATION_ID", nullable = false)
 	@ManyToOne
@@ -31,14 +27,6 @@ public class InvestigationParameter extends Parameter implements Serializable {
 
 	/* Needed for JPA */
 	public InvestigationParameter() {
-	}
-
-	@Override
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling InvestigationParameter for " + this.includes);
-		if (!this.includes.contains(Investigation.class)) {
-			this.investigation = null;
-		}
 	}
 
 	public Investigation getInvestigation() {

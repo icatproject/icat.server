@@ -7,16 +7,11 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.xml.bind.Marshaller;
-
-import org.apache.log4j.Logger;
 
 @Comment("A publication")
 @SuppressWarnings("serial")
 @Entity
 public class Publication extends EntityBaseBean implements Serializable {
-
-	private static Logger logger = Logger.getLogger(Publication.class);
 
 	@Comment("A reference in the form to be used for citation")
 	@Column(nullable = false)
@@ -25,7 +20,7 @@ public class Publication extends EntityBaseBean implements Serializable {
 	@JoinColumn(nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Investigation investigation;
-	
+
 	@Comment("The Digital Object Identifier associated with this publication")
 	private String doi;
 
@@ -48,13 +43,6 @@ public class Publication extends EntityBaseBean implements Serializable {
 
 	/* Needed for JPA */
 	public Publication() {
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling InvestigationType for " + includes);
-		if (!this.includes.contains(Investigation.class)) {
-			this.investigation = null;
-		}
 	}
 
 	public String getFullReference() {

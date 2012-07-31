@@ -8,10 +8,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("A parameter associated with a data set")
@@ -21,8 +19,6 @@ import org.icatproject.core.IcatException;
 @XmlRootElement
 public class DatasetParameter extends Parameter implements Serializable {
 
-	private static Logger logger = Logger.getLogger(DatasetParameter.class);
-
 	@Comment("The associated data set")
 	@JoinColumn(name = "DATASET_ID", nullable = false)
 	@ManyToOne
@@ -30,14 +26,6 @@ public class DatasetParameter extends Parameter implements Serializable {
 
 	/* Needed for JPA */
 	public DatasetParameter() {
-	}
-
-	@Override
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling DatasetParameter for " + this.includes);
-		if (!this.includes.contains(Dataset.class)) {
-			this.dataset = null;
-		}
 	}
 
 	public Dataset getDataset() {

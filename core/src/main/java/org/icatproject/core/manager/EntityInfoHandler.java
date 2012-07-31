@@ -57,12 +57,13 @@ public class EntityInfoHandler {
 		private final Set<Relationship> relatedEntities;
 		private final Map<Field, Method> setters;
 		private final Map<Field, Integer> stringFields;
+		public Set<Field> attributes;
 
 		public PrivateEntityInfo(Field pks, Set<Relationship> rels, List<Field> notNullableFields,
 				Map<Field, Method> getters, Map<Field, Integer> stringFields,
 				Map<Field, Method> setters, List<List<Field>> constraintFields,
 				String classComment, Map<Field, String> fieldComments, Set<Relationship> ones,
-				Set<Relationship> includesToFollow) {
+				Set<Relationship> includesToFollow, Set<Field> attributes) {
 			this.pks = pks;
 			this.relatedEntities = rels;
 			this.notNullableFields = notNullableFields;
@@ -74,6 +75,7 @@ public class EntityInfoHandler {
 			this.fieldComments = fieldComments;
 			this.ones = ones;
 			this.includesToFollow = includesToFollow;
+			this.attributes = attributes;
 		}
 
 	}
@@ -172,6 +174,8 @@ public class EntityInfoHandler {
 					"Unable to determine key for " + objectClass.getSimpleName());
 		}
 
+		final Set<Field> attributes = new HashSet<Field>();
+
 		final Set<Relationship> rels = new HashSet<Relationship>();
 		for (final Field field : fields) {
 			if (field.getGenericType() instanceof ParameterizedType) {
@@ -221,6 +225,9 @@ public class EntityInfoHandler {
 				final Class<? extends EntityBaseBean> argc2 = (Class<? extends EntityBaseBean>) field
 						.getType();
 				rels.add(new Relationship(argc2, field, false, all));
+			} else if (!Arrays.asList("modTime", "createTime", "createId", "modId", "id").contains(
+					field.getName())) {
+				attributes.add(field);
 			}
 
 		}
@@ -422,7 +429,7 @@ public class EntityInfoHandler {
 		String commentString = comment == null ? null : comment.value();
 
 		return new PrivateEntityInfo(key, rels, notNullableFields, getters, stringFields, setters,
-				constraintFields, commentString, comments, ones, includesToFollow);
+				constraintFields, commentString, comments, ones, includesToFollow, attributes);
 	}
 
 	public String getClassComment(Class<? extends EntityBaseBean> objectClass) throws IcatException {
@@ -614,7 +621,7 @@ public class EntityInfoHandler {
 		}
 	}
 
-	public Map<Field, Method> getSetters(Class<? extends EntityBaseBean> objectClass)
+	public Map<Field, Method> getSettersForUpdate(Class<? extends EntityBaseBean> objectClass)
 			throws IcatException {
 		PrivateEntityInfo ei = null;
 		synchronized (this.map) {
@@ -637,6 +644,19 @@ public class EntityInfoHandler {
 				this.map.put(objectClass, ei);
 			}
 			return ei.stringFields;
+		}
+	}
+
+	public Set<Field> getAttributes(Class<? extends EntityBaseBean> objectClass)
+			throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.attributes;
 		}
 	}
 }

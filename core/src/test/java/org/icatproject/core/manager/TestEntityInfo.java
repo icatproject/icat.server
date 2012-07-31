@@ -236,7 +236,7 @@ public class TestEntityInfo {
 	}
 
 	private void testSetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
-		Map<Field, Method> results = eiHandler.getSetters(klass);
+		Map<Field, Method> results = eiHandler.getSettersForUpdate(klass);
 		assertEquals(klass.getSimpleName() + " count", count, results.size());
 		for (Entry<Field, Method> entry : results.entrySet()) {
 			String cap = entry.getKey().getName();

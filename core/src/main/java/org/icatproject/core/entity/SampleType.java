@@ -12,17 +12,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
-
-import org.apache.log4j.Logger;
 
 @Comment("A sample to be used in an investigation")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "FACILITY_ID" }) })
 public class SampleType extends EntityBaseBean implements Serializable {
-
-	private static Logger logger = Logger.getLogger(SampleType.class);
 
 	@Comment("The facility which has defined this sample type")
 	@JoinColumn(name = "FACILITY_ID", nullable = false)
@@ -44,16 +39,6 @@ public class SampleType extends EntityBaseBean implements Serializable {
 
 	/* Needed for JPA */
 	public SampleType() {
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Sample for " + this.includes);
-		if (!this.includes.contains(Sample.class)) {
-			this.samples = null;
-		}
-		if (!this.includes.contains(Facility.class)) {
-			this.facility = null;
-		}
 	}
 
 	public Facility getFacility() {

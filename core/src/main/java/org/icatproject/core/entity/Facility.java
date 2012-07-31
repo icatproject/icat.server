@@ -10,17 +10,12 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
-
-import org.apache.log4j.Logger;
 
 @Comment("An experimental facility")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 public class Facility extends EntityBaseBean implements Serializable {
-
-	private static Logger logger = Logger.getLogger(Facility.class);
 
 	@Comment("The number of days before data is made freely available after collecting it.")
 	private Integer daysUntilRelease;
@@ -120,31 +115,6 @@ public class Facility extends EntityBaseBean implements Serializable {
 
 	/* Needed for JPA */
 	public Facility() {
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Investigation for " + this.includes);
-		if (!this.includes.contains(Investigation.class)) {
-			this.investigations = null;
-		}
-		if (!this.includes.contains(DatafileFormat.class)) {
-			this.datafileFormats = null;
-		}
-		if (!this.includes.contains(DatasetType.class)) {
-			this.datasetTypes = null;
-		}
-		if (!this.includes.contains(ParameterType.class)) {
-			this.parameterTypes = null;
-		}
-		if (!this.includes.contains(SampleType.class)) {
-			this.sampleTypes = null;
-		}
-		if (!this.includes.contains(FacilityCycle.class)) {
-			this.facilityCycles = null;
-		}
-		if (!this.includes.contains(Instrument.class)) {
-			this.instruments = null;
-		}
 	}
 
 	public Integer getDaysUntilRelease() {

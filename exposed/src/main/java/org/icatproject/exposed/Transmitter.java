@@ -1,4 +1,4 @@
-package org.icatproject.exposed.manager;
+package org.icatproject.exposed;
 
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;

@@ -14,9 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 
 @Comment("A sample to be used in an investigation")
@@ -25,8 +23,6 @@ import org.icatproject.core.IcatException;
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "SAMPLETYPE_ID",
 		"INVESTIGATION_ID" }) })
 public class Sample extends EntityBaseBean implements Serializable {
-
-	private static Logger logger = Logger.getLogger(Sample.class);
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
 	private List<Dataset> datasets;
@@ -47,22 +43,6 @@ public class Sample extends EntityBaseBean implements Serializable {
 
 	/* Needed for JPA */
 	public Sample() {
-	}
-
-	public void beforeMarshal(Marshaller source) {
-		logger.trace("Marshalling Sample for " + this.includes);
-		if (!this.includes.contains(Investigation.class)) {
-			this.investigation = null;
-		}
-		if (!this.includes.contains(SampleParameter.class)) {
-			this.parameters = null;
-		}
-		if (!this.includes.contains(Dataset.class)) {
-			this.datasets = null;
-		}
-		if (!this.includes.contains(SampleType.class)) {
-			this.type = null;
-		}
 	}
 
 	@Override
