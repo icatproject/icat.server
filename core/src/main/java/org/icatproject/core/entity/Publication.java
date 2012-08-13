@@ -14,7 +14,7 @@ import javax.persistence.ManyToOne;
 public class Publication extends EntityBaseBean implements Serializable {
 
 	@Comment("A reference in the form to be used for citation")
-	@Column(nullable = false)
+	@Column(nullable = false, length=511)
 	private String fullReference;
 
 	@JoinColumn(nullable = false)

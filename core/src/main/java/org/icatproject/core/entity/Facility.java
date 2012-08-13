@@ -21,6 +21,7 @@ public class Facility extends EntityBaseBean implements Serializable {
 	private Integer daysUntilRelease;
 
 	@Comment("A description of this facility")
+	@Column(length = 1023)
 	private String description;
 
 	@Comment("The full name of the facility")

@@ -30,7 +30,7 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	ParameterType type;
 
 	@Comment("The value if the parameter is a string")
-	@Column(name = "STRING_VALUE")
+	@Column(name = "STRING_VALUE", length=4000)
 	private String stringValue;
 
 	@Comment("The value if the parameter is numeric")

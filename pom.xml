@@ -54,6 +54,7 @@
     <name>ICAT</name>
 
     <modules>
+        <module>authentication</module>
         <module>core</module>
         <module>exposed</module>
         <module>ear</module>

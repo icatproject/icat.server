@@ -67,7 +67,7 @@ public class Transmitter {
 
 			Long pk = message.getPk();
 			if (pk != null) {
-				jmsg.setLongProperty("query", pk);
+				jmsg.setLongProperty("pk", pk);
 			}
 			producer.send(jmsg);
 		}

@@ -20,6 +20,7 @@ import javax.persistence.UniqueConstraint;
 public class Instrument extends EntityBaseBean implements Serializable {
 
 	@Comment("A description of this instrument")
+	@Column(length=4000)
 	private String description;
 
 	@Comment("The formal name of this instrument")
