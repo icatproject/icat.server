@@ -7,8 +7,12 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <outputDirectory>icat.ear.config</outputDirectory>
+            <outputDirectory>authn_db.ear.config</outputDirectory>
             <directory>${basedir}/src/main/scripts</directory>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>authn_db.ear.config</outputDirectory>
+            <directory>${basedir}/src/main/config</directory>
         </fileSet>
     </fileSets>
 </assembly>
