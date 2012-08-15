@@ -2,27 +2,27 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
     <properties>
-        <title>ICAT Server Installation</title>
+        <title>Authn DB Plugin Installation</title>
     </properties>
 
     <body>
 
         <section name="Installation">
 
-            <p>To deploy an ICAT you need:
+            <p>To deploy an Authn DB Plugin you need:
             </p>
             <ol>
                 <li> a suitable container to support EJBs,</li>
                 <li> databases on a system supported by eclipselink,</li>
                 <li> to configure glassfish,</li>
-                <li> to install a copy of icat.properties and log4j.properties in the correct place,</li>
-                <li> deploy the .ear file,</li>
+                <li> to install a copy of authn_db.properties in the correct place,</li>
+                <li> to deploy the .ear file,</li>
                 <li> and see if it works.</li>
             </ol>
 
             <subsection name="EJB Container">
                 <p> In principle you can use any EJB container. Testing has been performed with
-                    glassfish 3.1 and these notes refer to that version.
+                    glassfish 3.1.2 and these notes refer to that version.
                 </p>
 
                 <p> You must already have a Java SE installed (i.e. the command "java" is known), then
@@ -52,9 +52,9 @@
                         eclipselink web site.
                     </a>
                     It has been tested with: MySQL, Oracle and
-                    Derby. You will need two
+                    Derby. You will need an
                     <em>empty</em>
-                    schemas/databases both with permissions for data
+                    schema/database with permission for data
                     definition
                     operations such as "CREATE TABLE ..." You must place a copy of the
                     "JDBC
@@ -81,16 +81,14 @@
 
                 <p>
                     Obtain
-                    <a href="${repoUrl}/org/icatproject/icat.ear/${project.version}/icat.ear-${project.version}-config.zip">icat.ear-${project.version}-config.zip</a>
+                    <a href="${repoUrl}/org/icatproject/authn_db.ear/${project.version}/authn_db.ear-${project.version}-config.zip">authn_db.ear-${project.version}-config.zip</a>
                     and unzip it. You must first edit glassfish.props to match your system.
                 </p>
                 <dl>
                     <dt>driver</dt>
                     <dd>is the name of the jdbc driver and must match the jar file for your database that you stored in the previous step.</dd>
-                    <dt>icatProperties</dt>
-                    <dd>identifies the main icat database and how to connect to it.</dd>
-                    <dt>icatuserProperties</dt>
-                    <dd>identifies the authentication database and how to connect to it</dd>
+                    <dt>authn_dbProperties</dt>
+                    <dd>identifies the password database and how to connect to it.</dd>
                     <dt>glassfish</dt>
                     <dd>is the top level of the glassfish installation. It must contain "glassfish/domains", and will be referred to here as
                         GLASSFISH_HOME as if an environment variable had been set.
@@ -99,15 +97,13 @@
                     <dd>is the administration port of the chosen glassfish domain which is typically 4848.</dd>
                 </dl>
 
-                <p>For a local oracle-xe installation the following values of driver, icatProperties and icatuserProperties should be good except for
+                <p>For a local oracle-xe installation the following values of driver, authn_dbProperties should be good except for
                     the user and password values:
                 </p>
                 <code>
                     driver=oracle.jdbc.pool.OracleDataSource
                     <br />
-                    icatProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icat:password=secret
-                    <br />
-                    icatuserProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icatuser:password=anotherSecret
+                    authn_dbProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=authn_db:password=anotherSecret
                     <br />
                 </code>
                 <p>
@@ -119,9 +115,7 @@
                 <code>
                     driver=com.mysql.jdbc.jdbc2.optional.MysqlDataSource
                     <br />
-                    icatProperties=user=icat:password=secret:databaseName=icat
-                    <br />
-                    icatuserProperties=user=icat:password=anotherSecret:databaseName=icatuser
+                    icatuserProperties=user=icat:password=anotherSecret:databaseName=authn_db
                     <br />
                 </code>
             </subsection>
@@ -130,7 +124,7 @@
                 <p>
                     Having prepared the glassfish.props file you should run the command:
                     <tt>asadmin login</tt>
-                    to login as admin. This will prompt you for your glassfish admin password to avoid being prompted for it later. If you do not do
+                    to login as admin. This might prompt you for your glassfish admin password to avoid being prompted for it later. If you do not do
                     this the
                     next step will fail. You will find the asadmin executable in the bin directory below the directory you have identified in
                     glassfish.props as "glassfish" - i.e. $GLASSFISH_HOME/bin/asadmin. There is no logout command but you can delete
@@ -150,83 +144,64 @@
                     again.
                 </p>
 
-            </subsection>
-            <subsection name="icat.properties and log4j.properties">
-                <p>
-                    In the unpacked icat.ear-${project.version}-config.zip file you will find two properties files which should both be copied to the
-                    config directory for your chosen glassfish domain. You will find your domain directory at $GLASSFISH_HOME/glassfish/domains. The
-                    log4j.properties file should not need modification initially. It will result in an icat.log file being written to the logs
-                    directory
-                    below your domain. The icat.properties file will probably need changing:
 
+
+            </subsection>
+
+            <subsection name="authn_db.properties">
+                <p>
+                    In the unpacked authn_db.ear-${project.version}-config.zip file you will find a property file, authn_db.properties, which should
+                    both be copied to the
+                    config
+                    directory for your chosen glassfish domain. You will find your domain directory at
+                    $GLASSFISH_HOME/glassfish/domains. The
+                    authn_db.properties file may need changing:
                 </p>
+
                 <dl>
-                    <dt>auth.classname</dt>
-                    <dd>
-                        is the class name of the chosen authentication plugin.
-                        <tt>org.icatproject.useransto.facility.AnstoUser</tt>
-                        gives you just an authentication table (USER_TABLE_ANSTO in the icatuser database) while
-                        <tt>org.icatproject.userldap.facility.LdapUser</tt>
-                        provides an LDAP authentication mechanism in addition to the authentication table (USER_TABLE in the icatuser database).
+                    <dt>ip</dt>
+                    <dd>If access to the DB authentication should only be allowed from certain
+                        IP addresses then provide a space separated list of
+                        allowed values. These
+                        take the form of an IPV4 or IPV6 address followed by the number of bits
+                        (starting from the most
+                        significant) to consider.
                     </dd>
-                    <dt>auth.ldap.provider_url</dt>
-                    <dd>is the url of the ldap authenticator and is only required if you have selected ldap authentication.</dd>
-                    <dt>auth.ldap.security_principal</dt>
-                    <dd>is also only required for ldap authentication. The % character in the
-                        security_principal will be replaced by the specified user
-                        name. If you
-                        just use % then the user must enter a complete security_principal as the
-                        user name.
+
+                    <dt>mechanism</dt>
+                    <dd>if specified is a label to appear before the user name as it is made available to ICAT for authorization. For example if this
+                        is set to 'db' then the user 'root' will be provided to ICAT as 'db/root', but of no mechanism is specified it will be
+                        provided simply as 'root'.
                     </dd>
-                    <dt>auth.ldap.ip</dt>
-                    <dd>if set applies only to the ldap authentication and restricts the IP addresses from which a user may authenticate. The value is
-                        a
-                        space separated list of IPV4 or IPV6 addresses followed by the number of bits
-                        (starting from the most significant) to
-                        consider. For
-                        example 172.16.68.0/24 allows access from 172.16.68.0 to 172.16.68.255.
-                    </dd>
-                    <dt>auth.ansto.ip</dt>
-                    <dd>behaves as auth.ldap.ip if the "Ansto" (database table only) authentication has been selected.</dd>
                 </dl>
 
             </subsection>
             <subsection name="Installing the .ear file">
                 <p>
-                    If you already have an icat installed then you should first remove it with
+                    If you already have an authn_db installed then you should first remove it with
                     <tt>asadmin --port 4848 undeploy &lt;ear&gt;</tt>
                     where the value of "ear" can be found by:
                     <tt>asadmin --port 4848 list-applications</tt>
                     Obtain
-                    <a href="${repoUrl}/org/icatproject/icat.ear/${project.version}/icat.ear-${project.version}.ear">icat.ear-${project.version}.ear</a>
+                    <a href="${repoUrl}/org/icatproject/authn_db.ear/${project.version}/authn_db.ear-${project.version}.ear">authn_db.ear-${project.version}.ear</a>
                     and install it with the command:
-                    <tt>asadmin --port 4848 deploy icat.ear-${project.version}.ear</tt>
+                    <tt>asadmin --port 4848 deploy authn_db.ear-${project.version}.ear</tt>
                     . If you have only one domain you may not need to specify the port and if the admin port is not 4848 then specify the correct
                     value.
                 </p>
-                <p>As the file is deployed the databases are created. Login in to the icatuser database and add one line to the USER_TABLE (for ldap
-                    authentication) or otherwise to the USER_TABLE_ANSTO. The user_id must be "root" in lower case and the password is one of your
-                    choosing. You can add other users here if you wish. If you are using ldap authentication you will probably only want "root" to be
-                    entered this way.
+                <p>As the file is deployed the database is created. There is currently no mechanism to add entries to the password database so you
+                    must use the a database utility to do this directly. Currently passwords are stored in plain text.
                 </p>
             </subsection>
-            <subsection name="Check that ICAT works">
+            <subsection name="Check that authn_db works">
                 <p>
-                    There is one more file in the unpacked icat.ear-${project.version}-config.zip file:
-                    <tt>test.py</tt>
-                    . This is a python script which requires that the suds client is available. On CENTOS this is packaged as a
-                    <tt>python-suds</tt>
-                    RPM. Invoke the script with two parameters: the hostname and port separated by a colon on which the service is deployed securely
-                    (typically
-                    localhost:8181) and the root ICAT password you
-                    stored in the database. It should report:
+                    There is currently no stand alone mechanism to check that authn_db is working properly. Please use the test.py script that comes
+                    with the ICAT
+                    installation if one of your root users can be authorized with this plugin.
                 </p>
-                <code>Login, search, create, delete and logout operations were all successful.
-                </code>
-                <p>This script can be run at any time as it is almost harmless - it simply creates a "Group" with an unlikely name and removes it
-                    again.
-                </p>
-                <p>In case of problems look at the log files: server.log and icat.log which can both be found in the logs directory below your domain.
+
+                <p>In case of problems look at the log files: server.log and authn_db.log which can both be found in the logs directory below your
+                    domain.
                 </p>
             </subsection>
 

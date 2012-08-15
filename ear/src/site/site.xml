@@ -4,7 +4,7 @@
   <body>
     <menu name="Contents">
     
-    <item name="Server Installation" href="installation.html"/>
+    <item name="Authn DB Plugin Installation" href="installation.html"/>
     </menu>
    
     <menu ref="reports"/>
