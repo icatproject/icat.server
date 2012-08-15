@@ -24,7 +24,7 @@ import javax.transaction.UserTransaction;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
-import org.icatproject.core.authentication.Authentication;
+import org.icatproject.core.PropertyHandler;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
@@ -495,7 +495,7 @@ public class BeanManager {
 	public static String getUserName(String sessionId, EntityManager manager) throws IcatException {
 		logger.debug("getUserIdFromSessionId(" + sessionId + ")");
 		Session session = getSession(sessionId, manager);
-		String userName = session.checkValid();
+		String userName = session.getUserName();
 		logger.debug("user: " + userName + " is associated with: " + sessionId);
 		return userName;
 	}
@@ -554,9 +554,9 @@ public class BeanManager {
 		}
 	}
 
-	public static String login(Authentication authentication, int lifetimeMinutes,
-			EntityManager manager, UserTransaction userTransaction) throws IcatException {
-		Session session = new Session(authentication, lifetimeMinutes);
+	public static String login(String userName, int lifetimeMinutes, EntityManager manager,
+			UserTransaction userTransaction) throws IcatException {
+		Session session = new Session(userName, lifetimeMinutes);
 		try {
 			userTransaction.begin();
 			try {

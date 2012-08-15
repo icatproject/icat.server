@@ -19,8 +19,9 @@ import org.icatproject.core.manager.NotificationMessages.Message;
 
 public class Transmitter {
 
-	public static void processMessages(NotificationMessages notificationMessages, QueueConnection queueConnection,
-			Queue queue, TopicConnection topicConnection, Topic topic) throws JMSException {
+	public static void processMessages(NotificationMessages notificationMessages,
+			QueueConnection queueConnection, Queue queue, TopicConnection topicConnection,
+			Topic topic) throws JMSException {
 		QueueSender qs = null;
 		TopicPublisher tp = null;
 		for (Message message : notificationMessages.getMessages()) {
@@ -32,7 +33,7 @@ public class Transmitter {
 					session = queueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
 					qs = session.createSender(queue);
 				}
-				producer = session.createProducer(queue);
+				producer = qs;
 				jmsg = session.createObjectMessage();
 
 			} else {
@@ -41,7 +42,7 @@ public class Transmitter {
 					session = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 					tp = session.createPublisher(topic);
 				}
-				producer = session.createProducer(topic);
+				producer = tp;
 				jmsg = session.createObjectMessage();
 			}
 

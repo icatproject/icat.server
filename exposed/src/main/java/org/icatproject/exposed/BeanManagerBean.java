@@ -1,15 +1,11 @@
 package org.icatproject.exposed;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -17,9 +13,6 @@ import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.ExcludeDefaultInterceptors;
-import javax.interceptor.InvocationContext;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
@@ -27,10 +20,6 @@ import javax.jms.QueueConnectionFactory;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
-import javax.jws.WebMethod;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
@@ -39,9 +28,9 @@ import javax.transaction.UserTransaction;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.IcatException;
-import org.icatproject.core.authentication.Authentication;
-import org.icatproject.core.authentication.Authenticator;
+import org.icatproject.core.PropertyHandler;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Facility;
 import org.icatproject.core.manager.BeanManager;
@@ -53,7 +42,6 @@ import org.icatproject.core.manager.SearchResponse;
 
 @Stateless()
 @TransactionManagement(TransactionManagementType.BEAN)
-@ExcludeDefaultInterceptors
 public class BeanManagerBean {
 
 	static Logger logger = Logger.getLogger(BeanManagerBean.class);
@@ -77,6 +65,7 @@ public class BeanManagerBean {
 
 	@Resource(mappedName = "jms/ICATTopic")
 	private Topic topic;
+
 	private TopicConnection topicConnection;
 
 	@Resource(name = "jms/ICATTopicConnectionFactory")
@@ -88,7 +77,6 @@ public class BeanManagerBean {
 	public BeanManagerBean() {
 	}
 
-	@WebMethod
 	public long create(String sessionId, EntityBaseBean bean) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
@@ -127,7 +115,6 @@ public class BeanManagerBean {
 		}
 	}
 
-	@WebMethod()
 	public void delete(String sessionId, EntityBaseBean bean) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
@@ -229,88 +216,9 @@ public class BeanManagerBean {
 			throw new IllegalStateException(e.getMessage());
 		}
 
-		File f = new File("icat.properties");
-		Properties props = new Properties();
-		try {
-			props.load(new FileInputStream(f));
-		} catch (Exception e) {
-			logger.fatal("Problem with " + f.getAbsolutePath() + "  " + e.getMessage());
-			throw new IllegalStateException(e.getMessage());
-		}
-		Context ctx = null;
-		try {
-			ctx = new InitialContext();
-		} catch (NamingException e) {
-			throw new IllegalStateException(e.getClass() + " " + e.getMessage());
-		}
-
-		String name = "java:global/authn_db.ear-1.0.0-SNAPSHOT/authn_db.ejb-1.0.0-SNAPSHOT/DB_Authenticator";
-		try {
-			Authenticator authenticator = (Authenticator) ctx.lookup(name);
-			logger.debug("Found Authenticator: " + authenticator.getClass() + " " + authenticator);
-		} catch (NamingException e) {
-			throw new IllegalStateException(e.getClass() + " " + e.getMessage());
-		}
-		for (Entry<Object, Object> entry : props.entrySet()) {
-			if (((String) entry.getKey()).startsWith("authn")) {
-				String[] bits = ((String) entry.getValue()).split("\\s+");
-				if (bits.length != 2) {
-					String msg = "authn entries must have two values (the mnemonic and the class) : "
-							+ entry.getValue() + " was split into:";
-					for (String bit : bits) {
-						msg = msg + " (" + bit + ")";
-					}
-					logger.fatal(msg);
-					throw new IllegalStateException(msg);
-				}
-				try {
-					Authenticator authenticator = (Authenticator) ctx.lookup(bits[1]);
-					logger.debug("Found Authenticator: " + authenticator.getClass() + " "
-							+ authenticator);
-					authPlugins.put(bits[0], authenticator);
-				} catch (NamingException e) {
-					throw new IllegalStateException(e.getClass() + " " + e.getMessage());
-				}
-			}
-		}
-		String ltm = props.getProperty("lifetimeMinutes");
-		if (ltm == null) {
-			String msg = "lifetimeMinutes is not set";
-			logger.fatal(msg);
-			throw new IllegalStateException(msg);
-		}
-
-		try {
-			lifetimeMinutes = Integer.parseInt(ltm);
-		} catch (NumberFormatException e) {
-			String msg = "lifetimeMinutes does not represent an integer";
-			logger.fatal(msg);
-			throw new IllegalStateException(msg);
-		}
-
-	}
-
-	@SuppressWarnings("unused")
-	@AroundInvoke
-	private Object logMethods(InvocationContext ctx) throws IcatException {
-
-		String className = ctx.getTarget().getClass().getName();
-		String methodName = ctx.getMethod().getName();
-		String target = className + "." + methodName + "()";
-
-		long start = System.currentTimeMillis();
-
-		logger.debug("Invoking " + target);
-		try {
-			return ctx.proceed();
-		} catch (IcatException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
-		} finally {
-			long time = System.currentTimeMillis() - start;
-			logger.debug("Method " + target + " took " + time / 1000f + "s to execute");
-		}
+		PropertyHandler p = PropertyHandler.getInstance();
+		authPlugins = p.getAuthPlugins();
+		lifetimeMinutes = p.getLifetimeMinutes();
 	}
 
 	public String login(String plugin, Map<String, String> credentials, HttpServletRequest req)
@@ -322,10 +230,10 @@ public class BeanManagerBean {
 					"Authenticator mnemonic " + plugin + " not recognised");
 		}
 
-		Authentication authentication = authenticator
-				.authenticate(credentials, req.getRemoteAddr());
+		String userName = authenticator.authenticate(credentials, req.getRemoteAddr())
+				.getUserName();
 		logger.debug("About to call the BeanManager");
-		return BeanManager.login(authentication, lifetimeMinutes, manager, userTransaction);
+		return BeanManager.login(userName, lifetimeMinutes, manager, userTransaction);
 	}
 
 	public void logout(String sessionId) throws IcatException {

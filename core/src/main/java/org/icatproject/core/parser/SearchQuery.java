@@ -10,6 +10,7 @@ import javax.persistence.TypedQuery;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.PropertyHandler;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Rule;
 import org.icatproject.core.manager.EntityInfoHandler;
@@ -36,6 +37,8 @@ public class SearchQuery {
 	}
 
 	static Logger logger = Logger.getLogger(SearchQuery.class);
+	private final static Set<String> rootUserNames = PropertyHandler.getInstance()
+			.getRootUserNames();
 
 	private boolean distinct;
 	private Order order;
@@ -153,7 +156,7 @@ public class SearchQuery {
 		String beanName = bean.getSimpleName();
 
 		StringBuilder restriction = null;
-		if (userId.equals("root") && GateKeeper.rootSpecials.contains(beanName)) {
+		if (rootUserNames.contains(userId) && GateKeeper.rootSpecials.contains(beanName)) {
 			logger.info("\"Root\" user " + userId + " is allowed READ to " + beanName);
 		} else {
 			TypedQuery<Rule> query = manager.createNamedQuery(Rule.SEARCH_QUERY, Rule.class)

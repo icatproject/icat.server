@@ -663,7 +663,7 @@ public class TestWS {
 	@Test
 	public void login() throws Exception {
 		assertTrue(session.getRemainingMinutes() > 0);
-		assertEquals("4.1.0", session.getApiVersion());
+		assertEquals("4.2.0", session.getApiVersion());
 		assertEquals("root", session.getUserName());
 	}
 

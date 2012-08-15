@@ -1,26 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<faqs xmlns="http://maven.apache.org/FML/1.0.1"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/FML/1.0.1 http://maven.apache.org/xsd/fml-1.0.1.xsd"
-  title="Frequently Asked Questions"
-  toplink="false">
+<faqs xmlns="http://maven.apache.org/FML/1.0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/FML/1.0.1 http://maven.apache.org/xsd/fml-1.0.1.xsd"
+    title="Frequently Asked Questions" toplink="false">
 
-  <part id="general">
-    <title>General</title>
+    <part id="general">
+        <title>General</title>
 
-    <faq id="DB Schema Creation">
-      <question>
-        Where is the script to create the database schema?
-      </question>
-      <answer>
-        <p>The schema is created automatically when the icat ear file is deployed. 
-        This works fine if no tables exist. If tables do exist it will try to create 
-        them and report an error for each table. If any table exists and has the 
-        wrong structure, it will not be replaced or updated, and ICAT will not work
-        properly.</p>
-      </answer>
-    </faq>
-     
-  </part>
+        <faq id="How do I">
+            <question>
+                How do I xxx?
+            </question>
+            <answer>
+                Please read the documentation below
+                <a href="http://www.icatproject.org/mvn/site/">http://www.icatproject.org/mvn/site/</a>
+                . It is structured by major component and then by version. If you don't find what you need in the documentation please submit this to
+                the
+                <a href="http://code.google.com/p/icatproject/issues/list">issue tracker</a>
+                or discuss it on either the
+                <a href="https://groups.google.com/forum/?fromgroups#!forum/icatgroup">main ICAT list</a>
+                or the
+                <a href="https://groups.google.com/forum/?fromgroups#!forum/icat-developers">developers' list</a>
+                .
+            </answer>
+
+        </faq>
+
+        <faq id="Not working">
+
+            <question>
+                What should I do when "it doesn't work"?
+            </question>
+            <answer>
+                <p>The answer may well be in the logs. Below the logs directory of your chosen domain
+                    are a number of log files including "server.log"
+                    which will show at least installation
+                    problems, "icat.log" which is the log of icat operations and there should also be log files
+                    from the authentication plugins.
+                </p>
+            </answer>
+        </faq>
+
+    </part>
+
+    <part id="db">
+        <title>Database issues</title>
+
+        <faq id="dbs supported">
+            <question>
+                Which database systems are supported?
+            </question>
+            <answer>
+                <p>Any JPA supported system should work - which means almost any RDBMS. If you find exceptions please let us know.
+                </p>
+            </answer>
+        </faq>
+
+        <faq id="DB Schema Creation">
+            <question>
+                Where is the script to create the database schema?
+            </question>
+            <answer>
+                <p>The schema is created automatically when the icat ear file is deployed.
+                    This works fine if no tables exist. If tables do exist it
+                    will try to create
+                    them and report an error for each table. If any table exists and has the
+                    wrong structure, it will not be replaced
+                    or updated, and ICAT will not work
+                    properly.
+                </p>
+            </answer>
+
+
+
+        </faq>
+
+    </part>
 
 </faqs>

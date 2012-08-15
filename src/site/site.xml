@@ -20,6 +20,10 @@
     <item name="Java Client Installation" href="icat.client/installation.html"/>
     <item name="Server Installation" href="icat.ear/installation.html"/>
     </menu>
+    
+    <menu name="Information for Developers">
+    <item name="Authentication" href="icat.authentication/authentication.html"/>
+    </menu>
    
     <menu ref="reports"/>
     <menu ref="modules"/>

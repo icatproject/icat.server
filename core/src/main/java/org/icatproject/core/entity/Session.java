@@ -12,7 +12,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.icatproject.core.IcatException;
-import org.icatproject.core.authentication.Authentication;
 
 @SuppressWarnings("serial")
 @Entity
@@ -27,22 +26,19 @@ public class Session implements Serializable {
 
 	private String userName;
 
-	private String mechanism;
-
 	// Needed by JPA
 	public Session() {
 	}
 
-	public Session(Authentication authentication, int lifetimeMinutes) {
+	public Session(String userName, int lifetimeMinutes) {
 		this.id = UUID.randomUUID().toString();
-		this.userName = authentication.getUserName();
-		this.mechanism = authentication.getMechanism();
+		this.userName = userName;
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.MINUTE, lifetimeMinutes);
 		this.expireDateTime = cal.getTime();
 	}
 
-	public String checkValid() throws IcatException {
+	public String getUserName() throws IcatException {
 		if (expireDateTime.before(new Date()))
 			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session id:" + id
 					+ " has expired");
@@ -50,8 +46,7 @@ public class Session implements Serializable {
 	}
 
 	public String toString() {
-		return userName + "(" + mechanism + ") "
-				+ (expireDateTime.before(new Date()) ? "expired" : "valid");
+		return userName + (expireDateTime.before(new Date()) ? "expired" : "valid");
 	}
 
 	public double getRemainingMinutes() throws IcatException {

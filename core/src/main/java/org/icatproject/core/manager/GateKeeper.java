@@ -15,6 +15,7 @@ import javax.persistence.TypedQuery;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.PropertyHandler;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Rule;
 
@@ -23,6 +24,7 @@ public class GateKeeper {
 
 	private final static Logger logger = Logger.getLogger(GateKeeper.class);
 	private final static EntityInfoHandler pkHandler = EntityInfoHandler.getInstance();
+	private final static Set<String> rootUserNames = PropertyHandler.getInstance().getRootUserNames();
 
 	public static Comparator<String> stringsBySize = new Comparator<String>() {
 
@@ -53,7 +55,7 @@ public class GateKeeper {
 
 		Class<? extends EntityBaseBean> objectClass = object.getClass();
 		String simpleName = objectClass.getSimpleName();
-		if (user.equals("root")) {
+		if (rootUserNames.contains(user)) {
 			if (rootSpecials.contains(simpleName)) {
 				logger.info("\"Root\" user " + user + " is allowed " + access + " to " + simpleName);
 				return;

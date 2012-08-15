@@ -1,4 +1,4 @@
-package org.icatproject.core.authentication;
+package org.icatproject.authentication;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -6,13 +6,18 @@ import java.util.List;
 
 import org.icatproject.core.IcatException;
 
+/**
+ * Utility to check IP4 and IP6 addresses for acceptability.
+ * 
+ * This may be called by an {@link Authenticator}.
+ */
 public class AddressChecker {
 
 	enum IP {
 		IP4, IP6
 	}
 
-	public class Actual {
+	private class Actual {
 
 		private BigInteger number;
 		private IP ip;
@@ -23,7 +28,8 @@ public class AddressChecker {
 				ip = IP.IP4;
 				String[] sections = add.split("\\.");
 				if (sections.length != 4) {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IP4 addresses must have 4 parts");
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+							"IP4 addresses must have 4 parts");
 				}
 				number = new BigInteger(sections[0]);
 				for (int i = 1; i < 4; i++) {
@@ -33,7 +39,8 @@ public class AddressChecker {
 				ip = IP.IP6;
 				String[] sections = add.split(":");
 				if (sections.length != 8) {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IP6 addresses must have 8 parts");
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+							"IP6 addresses must have 8 parts");
 				}
 				number = new BigInteger(sections[0], 16);
 				for (int i = 1; i < 8; i++) {
@@ -50,7 +57,7 @@ public class AddressChecker {
 		}
 	}
 
-	public class Pattern {
+	private class Pattern {
 
 		private BigInteger number;
 		private BigInteger mask;
@@ -69,7 +76,8 @@ public class AddressChecker {
 				ip = IP.IP4;
 				String[] sections = add.split("\\.");
 				if (sections.length != 4) {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, prefix + "IP4 addresses must have 4 parts");
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, prefix
+							+ "IP4 addresses must have 4 parts");
 				}
 				number = new BigInteger(sections[0]);
 				for (int i = 1; i < 4; i++) {
@@ -83,7 +91,8 @@ public class AddressChecker {
 				ip = IP.IP6;
 				String[] sections = add.split(":");
 				if (sections.length != 8) {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, prefix + "IP6 addresses must have 8 parts");
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, prefix
+							+ "IP6 addresses must have 8 parts");
 				}
 				number = new BigInteger(sections[0], 16);
 				for (int i = 1; i < 8; i++) {
@@ -101,6 +110,13 @@ public class AddressChecker {
 
 	private List<Pattern> patterns = new ArrayList<Pattern>();
 
+	/**
+	 * Takes a space separated list of patterns to accept
+	 * 
+	 * @param patternString
+	 *            a space separated list of patterns to accept
+	 * @throws IcatException
+	 */
 	public AddressChecker(String patternString) throws IcatException {
 		for (String s : patternString.trim().split("\\s+")) {
 			patterns.add(new Pattern(s));
@@ -108,6 +124,14 @@ public class AddressChecker {
 
 	}
 
+	/**
+	 * Check that an IP address matches one of the desired patterns
+	 * 
+	 * @param addr
+	 *            the input address
+	 * @return true if it matches
+	 * @throws IcatException
+	 */
 	public boolean check(String addr) throws IcatException {
 		Actual act = new Actual(addr);
 		for (Pattern pattern : patterns) {
