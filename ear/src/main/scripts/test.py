@@ -9,11 +9,13 @@ logging.basicConfig(level=logging.CRITICAL)
 
 args = sys.argv
 if len(args) != 3:
-    print >> sys.stderr, "This must have two arguments: hostname:port and password"
+    print >> sys.stderr, "This must have four arguments: hostname:port, plugin mnemonic, username and password"
     sys.exit(1)
 
 hostAndPort = args[1]
-password = args[2]
+plugin = args[2]
+username = args[3]
+password = args[4]
 
 client = Client("https://" + hostAndPort + "/ICATService/ICAT?wsdl")
 service = client.service
@@ -22,14 +24,14 @@ factory = client.factory
 credentials = factory.create("credentials")
 entry = factory.create("credentials.entry")
 entry.key = "username"
-entry.value = "root"
+entry.value = username
 credentials.entry.append(entry)
 entry = factory.create("credentials.entry")
 entry.key = "password"
 entry.value = password
 credentials.entry.append(entry)
 
-sessionId = service.login("db", credentials,)
+sessionId = service.login(plugin, credentials,)
 
 groups = service.search(sessionId, "Group[name='annoying animals']")
 if len(groups): 
