@@ -9,8 +9,18 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
+import javax.jms.MessageConsumer;
+import javax.jms.Queue;
+import javax.jms.QueueConnection;
+import javax.jms.QueueConnectionFactory;
+import javax.jms.Topic;
+import javax.jms.TopicConnection;
+import javax.jms.TopicConnectionFactory;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -42,6 +52,7 @@ import org.icatproject.Sample;
 import org.icatproject.SampleParameter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -165,6 +176,59 @@ public class TestWS {
 	}
 
 	@Test
+	public void authz() throws Exception {
+		session.clear();
+
+		Facility facility = session.createFacility("Test Facility", 90);
+
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
+
+		DatasetType dstPB = session.createDatasetType(facility, "PB");
+		DatasetType dstQQ = session.createDatasetType(facility, "QQ");
+
+		Investigation inv = session.createInvestigation(facility, "A", "Not null",
+				investigationType);
+
+		Dataset dsPB = session.createDataset("PB", dstPB, inv);
+		Dataset dsQQ = session.createDataset("QQ", dstQQ, inv);
+
+		DatafileFormat dfmt = session.createDatafileFormat(facility, "png", "binary");
+
+		session.createDatafile("PB", dfmt, dsPB);
+		session.createDatafile("QQ", dfmt, dsQQ);
+
+		String q1 = "COUNT(Dataset.name) [type.name = 'PB'] <-> Datafile[name = 'PB']";
+		String q2 = "COUNT(Dataset.name)";
+		String q3 = "COUNT(Dataset)";
+
+		assertEquals(1L, session.search(q1).get(0));
+		assertEquals(2L, session.search(q2).get(0));
+		assertEquals(2L, session.search(q3).get(0));
+
+		try {
+			session.delRule("root", "Dataset", "CRUD");
+			// The space between the single quotes is necessary - I suspect a bug in eclipselink
+			session.addRule("root", "Dataset [type.name = ' ']", "R");
+
+			assertEquals(0L, session.search(q1).get(0));
+			assertEquals(0L, session.search(q2).get(0));
+			assertEquals(0L, session.search(q3).get(0));
+
+			session.delRule("root", "Dataset [type.name = ' ']", "R");
+			session.addRule("root", "Dataset [type.name = 'PB']", "R");
+
+			assertEquals(1L, session.search(q1).get(0));
+			assertEquals(1L, session.search(q2).get(0));
+			assertEquals(1L, session.search(q3).get(0));
+
+			session.delRule("root", "Dataset [type.name = 'PB']", "R");
+		} finally {
+			session.addRule("root", "Dataset", "CRUD");
+		}
+	}
+
+	@Test
 	public void updates() throws Exception {
 		session.clear();
 
@@ -243,24 +307,60 @@ public class TestWS {
 		assertEquals(17, n);
 	}
 
+	@Ignore("Need to include gf-client.jar from glassfish3/glassfish/lib/ - no good maven solution found yet")
 	@Test
 	public void notifications() throws Exception {
 		session.clear();
 
+		Context context = new InitialContext();
+		TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) context
+				.lookup("jms/ICATTopicConnectionFactory");
+
+		Topic topic = (Topic) context.lookup("jms/ICATTopic");
+
+		TopicConnection topicConnection = topicConnectionFactory.createTopicConnection();
+		javax.jms.Session jsession = topicConnection.createSession(false,
+				javax.jms.Session.AUTO_ACKNOWLEDGE);
+		MessageConsumer consumer = jsession.createConsumer(topic);
+		Listener topicListener = new Listener();
+		consumer.setMessageListener(topicListener);
+		topicConnection.start();
+
+		QueueConnectionFactory queueConnectionFactory = (QueueConnectionFactory) context
+				.lookup("jms/ICATQueueConnectionFactory");
+
+		Queue queue = (Queue) context.lookup("jms/ICATQueue");
+
+		QueueConnection queueConnection = queueConnectionFactory.createQueueConnection();
+		javax.jms.Session qSession = queueConnection.createSession(false,
+				javax.jms.Session.AUTO_ACKNOWLEDGE);
+		MessageConsumer queueConsumer = qSession.createConsumer(queue);
+		Listener queueListener = new Listener();
+		queueConsumer.setMessageListener(queueListener);
+		queueConnection.start();
+
+		try {
+			NotificationRequest notificationRequest = new NotificationRequest();
+			notificationRequest
+					.setDatatypes("notificationName userId entityName entityId callArgs");
+			notificationRequest.setCrudFlags("C");
+			notificationRequest.setDestType(DestType.P_2_P);
+			notificationRequest.setWhat("Facility");
+			notificationRequest.setName("A");
+			session.create(notificationRequest);
+			fail("No expection thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+		}
+
 		{
-			try {
-				NotificationRequest notificationRequest = new NotificationRequest();
-				notificationRequest
-						.setDatatypes("notificationName userId entityName entityId callArgs");
-				notificationRequest.setCrudFlags("C");
-				notificationRequest.setDestType(DestType.P_2_P);
-				notificationRequest.setWhat("Facility");
-				notificationRequest.setName("A");
-				session.create(notificationRequest);
-				fail("No expection thrown");
-			} catch (IcatException_Exception e) {
-				assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
-			}
+			NotificationRequest notificationRequest = new NotificationRequest();
+			notificationRequest.setDatatypes("notificationName userId entityName entityId query");
+			notificationRequest.setCrudFlags("C");
+			notificationRequest.setDestType(DestType.P_2_P);
+			notificationRequest.setWhat("Facility");
+			notificationRequest.setName("A");
+			session.create(notificationRequest);
 		}
 
 		{
@@ -274,6 +374,109 @@ public class TestWS {
 		}
 
 		create();
+		Long fsid = ((Facility) session.search("Facility").get(0)).getId();
+
+		{
+			NotificationRequest notificationRequest = new NotificationRequest();
+			notificationRequest.setDatatypes("notificationName userId entityName entityId");
+			notificationRequest.setCrudFlags("R");
+			notificationRequest.setDestType(DestType.PUBSUB);
+			notificationRequest.setWhat("Facility [id = " + fsid + "]");
+			notificationRequest.setName("ID matches");
+			session.create(notificationRequest);
+		}
+
+		{
+			NotificationRequest notificationRequest = new NotificationRequest();
+			notificationRequest.setDatatypes("notificationName userId entityName entityId");
+			notificationRequest.setCrudFlags("R");
+			notificationRequest.setDestType(DestType.PUBSUB);
+			notificationRequest.setWhat("Facility [id != " + fsid + "]");
+			notificationRequest.setName("Id not match");
+			session.create(notificationRequest);
+		}
+
+		{
+			NotificationRequest notificationRequest = new NotificationRequest();
+			notificationRequest.setDatatypes("notificationName userId entityName entityId query");
+			notificationRequest.setCrudFlags("R");
+			notificationRequest.setDestType(DestType.PUBSUB);
+			notificationRequest.setWhat("Facility");
+			notificationRequest.setName("ID all");
+			session.create(notificationRequest);
+		}
+
+		{
+			NotificationRequest notificationRequest = new NotificationRequest();
+			notificationRequest.setDatatypes("notificationName userId entityName entityId");
+			notificationRequest.setCrudFlags("UD");
+			notificationRequest.setDestType(DestType.PUBSUB);
+			notificationRequest.setWhat("Facility");
+			notificationRequest.setName("U and D");
+			session.create(notificationRequest);
+		}
+
+		session.search("Facility INCLUDE Investigation");
+		Facility facility = (Facility) session.get("Facility INCLUDE Investigation", fsid);
+		facility.setDaysUntilRelease(700);
+		session.update(facility);
+		session.delete(facility);
+
+		List<EntityBaseBean> toDelete = new ArrayList<EntityBaseBean>();
+
+		List<Object> lo = session.search("NotificationRequest");
+		for (Object o : lo) {
+			toDelete.add((EntityBaseBean) o);
+		}
+		session.deleteMany(toDelete);
+
+		// Wait for a second - though it does not appear to be needed
+		Thread.sleep(1000);
+
+		int n = 0;
+		int pks = 0;
+		while (true) {
+			Map<String, String> msg = topicListener.getMessage();
+			if (msg == null) {
+				break;
+			}
+			n++;
+
+			assertEquals("root", msg.get("userId"));
+			if (msg.get("notificationName").equals("Test")) {
+				assertEquals("Datafile", msg.get("entityName"));
+				assertNotNull(msg.get("pk"));
+				assertNull(msg.get("query"));
+			} else if (msg.get("notificationName").equals("ID all")) {
+				assertEquals("Facility", msg.get("entityName"));
+				if (msg.get("pk") != null) {
+					pks++;
+					assertNull(msg.get("query"));
+				} else {
+					assertEquals("Facility INCLUDE Investigation", msg.get("query"));
+				}
+			} else {
+				assertEquals("Facility", msg.get("entityName"));
+				assertNull(msg.get("query"));
+			}
+		}
+		assertEquals(11, n);
+		assertEquals(1, pks);
+
+		n = 0;
+		while (true) {
+			Map<String, String> msg = queueListener.getMessage();
+			if (msg == null) {
+				break;
+			}
+			n++;
+			assertEquals("A", msg.get("notificationName"));
+			assertEquals("root", msg.get("userId"));
+			assertEquals("Facility", msg.get("entityName"));
+			assertNotNull(msg.get("pk"));
+			assertNull(msg.get("query"));
+		}
+		assertEquals(1, n);
 	}
 
 	@Test
@@ -783,10 +986,25 @@ public class TestWS {
 		// assertEquals("Count", 6, results.size());
 		// assertEquals("Result", "wib1", results.get(0));
 		// assertEquals("Result", "wib2", results.get(1));
+
+		results = session.search("Facility");
+		Facility facility = (Facility) results.get(0);
+
+		results = session.search("DISTINCT ParameterType.valueType");
+		ParameterValueType pvt = (ParameterValueType) results.get(0);
+
+		results = session.search("ParameterType [facility.id=" + facility.getId()
+				+ " AND valueType=" + pvt + "]");
+		assertEquals(1, results.size());
+
+		results = session.search("ParameterType [facility.id=" + facility.getId() + " AND " + pvt
+				+ "= valueType]");
+		assertEquals(1, results.size());
+
 	}
 
 	@BeforeClass
-	public static void setup() throws Exception {
+	public static void beforeClass() throws Exception {
 		random = new Random();
 		session = new Session();
 		compatSession = session.getCompatSession();
@@ -797,7 +1015,7 @@ public class TestWS {
 	}
 
 	@AfterClass
-	public static void zap() throws Exception {
+	public static void afterClass() throws Exception {
 		// session.clear();
 		// session.clearAuthz();
 	}

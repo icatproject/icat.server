@@ -45,6 +45,17 @@ public class TestTokenizer {
 			assertEquals(tostrings[i++], t.toString());
 		}
 	}
+	
+	@Test
+	public void testQuotes() throws Exception {
+		List<Token> tokens = Tokenizer.getTokens("c='aaa', d='bbb''qqq', e = ' ', f = '', g = ''''''");
+		String[] tostrings = { "c", "=", "aaa" , ",", "d", "=", "bbb'qqq",  ",",  "e", "=", " ", ",", "f", "=", "",  ",", "g", "=", "''"};
+		assertEquals(tostrings.length, tokens.size());
+		int i = 0;
+		for (Token t : tokens) {
+			assertEquals(tostrings[i++], t.toString());
+		}
+	}
 
 	@Test(expected = LexerException.class)
 	public void testBad1() throws Exception {

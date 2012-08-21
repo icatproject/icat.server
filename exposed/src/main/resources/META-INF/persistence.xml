@@ -50,7 +50,7 @@
         <properties>
             <property name="eclipselink.target-server" value="SunAS9" />
             <property name="eclipselink.cache.shared.default" value="false" />
-            <property name="eclipselink.logging.level" value="WARNING" />
+            <property name="eclipselink.logging.level" value="SEVERE" />
             <property name="eclipselink.ddl-generation" value="create-tables" />
             <property name="eclipselink.ddl-generation.output_mode" value="both" />
         </properties>

@@ -8,7 +8,7 @@ import sys
 logging.basicConfig(level=logging.CRITICAL)
 
 args = sys.argv
-if len(args) != 3:
+if len(args) != 5:
     print >> sys.stderr, "This must have four arguments: hostname:port, plugin mnemonic, username and password"
     sys.exit(1)
 

@@ -23,8 +23,9 @@
                     assigned correctly to the properties "query" and "pk".
                 </li>
                 <li>You will need an up-to-date version of JAX-WS such as the one packaged with Glassfish 3.1.2</li>
-                <li>The main database schema is almost unchanged. The only difference is that some text fields have been made larger.
-                </li>
+                <li>The main database schema is almost unchanged. The only difference is that some text fields have been made larger. </li>
+                <li>A bug has been fixed in the handling of enum types in expressions.</li>
+               
             </ul>
         </section>
 

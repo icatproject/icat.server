@@ -141,6 +141,18 @@ public class Session {
 		this.icatEP.create(this.sessionId, rule);
 	}
 
+	public void delRule(String groupName, String what, String crudFlags) throws Exception {
+		what = what.replace("'","''");
+		List<Object> rules = search("Rule [what = '" + what
+				+ "' and crudFlags = '" + crudFlags + "'] <-> Group [name= '" + groupName + "']");
+		if (rules.size() == 1) {
+			delete((EntityBaseBean) rules.get(0));
+		} else {
+			throw new Exception(rules.size() + " rules match " + groupName + ", " + what + ", "
+					+ crudFlags);
+		}
+	}
+
 	public void addUserGroupMember(String groupName, String userName) throws Exception {
 		Group group = null;
 		if (groupName != null) {
@@ -362,7 +374,6 @@ public class Session {
 
 	public List<Long> createMany(List<EntityBaseBean> beans) throws IcatException_Exception {
 		return this.icatEP.createMany(this.sessionId, beans);
-
 	}
 
 	public double getRemainingMinutes() throws IcatException_Exception {

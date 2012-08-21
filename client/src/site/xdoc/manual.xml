@@ -65,13 +65,52 @@
                     exceptions being the login call itself, getEntityInfo and getApiVersion - none of which require authentication.
                 </p>
 
-                <p class="call">String login(String username, String password)</p>
+                <p class="call">String login(String plugin, Credentials credentials)</p>
 
-                <p>This sessionId will be valid for a period determined by the ICAT
-                    server.
-                    Configuring userName, password pairs is dependent upon the
-                    authentication module and is not discussed here.
+                <p>
+                    where the
+                    <tt>plugin</tt>
+                    is the mnemonic defined in the ICAT installation for the authentication plugin you wish to use and
+                    <tt>credentials</tt>
+                    is essentially a map. The names of the keys and their meaning is defined by the plugin.
                 </p>
+
+                <p>This sessionId returned will be valid for a period determined by the ICAT
+                    server.
+                </p>
+
+                <p>The example below shows how it works for the authn_db plugin at the time of writing, where the plugin has been given the mnemonic
+                    "db".
+                </p>
+
+                <code>
+                    Credentials credentials = new Credentials();
+                    <br />
+                    List&lt;Entry&gt; entries = credentials.getEntry();
+                    <br />
+                    Entry e;
+                    <br />
+                    <br />
+                    e = new Entry();
+                    <br />
+                    e.setKey("username");
+                    <br />
+                    e.setValue("root");
+                    <br />
+                    entries.add(e);
+                    <br />
+
+                    e = new Entry();
+                    <br />
+                    e.setKey("password");
+                    <br />
+                    e.setValue("secret");
+                    <br />
+                    entries.add(e);
+                    <br />
+                    <br />
+                    String sessionId = icat.login("db", credentials);
+                </code>
 
 
 
@@ -123,7 +162,7 @@
                     <br />
                     try {
                     <br />
-                    &#160;&#160;&#160;sessionId = login("me", "myPassword");
+                    &#160;&#160;&#160;sessionId = icat.login("db", credentials);
                     <br />
                     } catch (IcatException_Exception e) {
                     <br />
@@ -521,13 +560,14 @@
                 performs the function of a "many to
                 many" relationship
                 between Users and Groups. Rules are applied to Groups.
-                The special user "root" is able to manipulate these
+                There are special "root users" able to manipulate these
                 four
-                tables, but only these four unless root creates
+                tables, but only these four unless a "root user" creates
                 rules to give himself further powers. Apart from the
-                special role of "root" these tables
+                special role of "root
+                users" these tables
                 behave as other
-                ICAT tables do.
+                ICAT tables do. The set of "root users" is a configuration parameter of the ICAT installation.
             </p>
             <subsection name="Rules" id="rules">
                 <p>
@@ -621,9 +661,48 @@
                 <tt>crudFlags</tt>
                 and
                 <tt>what</tt>
-                which are treated in the same way as columns of the same name in the
+                which are treated in a similar way to columns of the same name in the
                 <a href="#rules">authorization rules</a>
-                to choose the conditions for sending a message. For example:
+                to choose the conditions for sending a message. However if the
+                <tt>what</tt>
+                field is more than just the name of the entity the request will not be honoured for search calls. The
+                <tt>name</tt>
+                field identifies the NotificationRequest and must be unique. The
+                <tt>datatypes</tt>
+                field determines what to include in the message. Possible entries in the space separated list are:
+            </p>
+            <dl>
+                <dt>notificationName</dt>
+                <dd>
+                    the name as provided in the
+                    <tt>name</tt>
+                    field of the request.
+                </dd>
+                <dt>userId</dt>
+                <dd>the name of the authenticated user performing the operation resulting in this notification.</dd>
+
+                <dt>entityName</dt>
+                <dd>the name of the main entity being referenced. This excludes any INCLUDE fields from a search or get call and also excludes
+                    entities besides the top one for create calls.
+                </dd>
+                <dt>entityId</dt>
+                <dd>
+                    the primary key of the main entity. The field in the message is called
+                    <tt>pk</tt>
+                    rather than
+                    <tt>entityId</tt>
+                    .
+                </dd>
+                <dt>query</dt>
+                <dd>the query string for a search call.</dd>
+            </dl>
+            <p>The final field is the destType which must be either DestType.PUBSUB or DestType.P_2_P. The first case publishes the message as a JMS
+                topic where it may be read by multiple consumers and the second puts it onto a queue where it will be consumed by the first consumer
+                to take it.
+            </p>
+
+            <p>
+                For example:
             </p>
             <code>
                 NotificationRequest notificationRequest = new NotificationRequest();
@@ -640,12 +719,17 @@
                 <br />
                 icat.create(sessionId, notificationRequest);
             </code>
-            <p>will send a notification message containing the name of the notification ("Test" in this case"), the userId, the entityName (which will
-                always be "Datafile" in this case) and its id for every call where a Datafile is created. "Publish/Subscribe" mode will be used rather
+            <p>
+                will send a notification message containing the name of the notification ("Test" in this case"), the userId, the entityName (which
+                will
+                always be "Datafile" in this case) and its id for every call where a Datafile is created. "Publish/Subscribe" mode will be used
+                rather
                 than "Point-to-Point". Note that the id field of the notificationRequest on the client side
                 is not set on the assumption that the
                 client side copy of the notificationRequest will not be needed further. To
-                see who is reading which datasets belonging to some
+                see who is reading which datasets (with
+                <tt>get</tt>
+                calls) belonging to some
                 investigation called "Fred" one could have:
             </p>
             <code>
@@ -663,13 +747,50 @@
                 <br />
                 icat.create(sessionId, notificationRequest);
             </code>
-            <subsection name="security  concerns with notification">
-                <p>Though the notification mechanism is powerful, it does allow information to be published from ICAT which is not protected by the
-                    normal ICAT authorization mechanism. Please publish only the information required to meet your needs and take care that the
-                    authorization for the
-                    NotificationRequest table is well controlled.
-                </p>
-            </subsection>
+
+
+            <p>Though the notification mechanism is powerful, it does allow information to be published from ICAT which is not protected by the
+                normal
+                ICAT authorization mechanism. Please publish only the information required to meet your needs and take care that the
+                authorization for
+                the
+                NotificationRequest table is well controlled.
+            </p>
+
+
+
+            <p>
+                Each
+                <tt>create</tt>
+                ,
+                <tt>get</tt>
+                ,
+                <tt>update</tt>
+                and
+                <tt>delete</tt>
+                call will result in one message for each matching request if the operation is succesful. The
+                <tt>createMany</tt>
+                and
+                <tt>deleteMany</tt>
+                calls produce one notification message for each matching NotificationRequest, for each entity, if the operation is succesful. The
+                <tt>search</tt>
+                operation produces one message per notification request if the operation is succesful. The message will contain the query string
+                if
+                this was requested. The
+                <tt>what</tt>
+                field in the NotificationRequest must be just the entity name other the notification will not match.
+            </p>
+            <p>
+                The message is sent as an ObjectMessage - but without an Object being attached. All the information is sent as properties with the
+                same name as requested in the
+                <tt>dataTypes</tt>
+                except that the primary key is returned as
+                <tt>pk</tt>
+                rather than
+                <tt>entityId</tt>
+                .
+            </p>
+
         </section>
 
         <section name="Information">

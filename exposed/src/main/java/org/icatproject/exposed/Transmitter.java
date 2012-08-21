@@ -5,46 +5,52 @@ import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
-import javax.jms.QueueSender;
-import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
-import javax.jms.TopicPublisher;
-import javax.jms.TopicSession;
 
+import org.apache.log4j.Logger;
 import org.icatproject.core.entity.NotificationRequest.DestType;
 import org.icatproject.core.manager.NotificationMessages;
 import org.icatproject.core.manager.NotificationMessages.Message;
 
 public class Transmitter {
 
+	private static Logger logger = Logger.getLogger(Transmitter.class);
+
 	public static void processMessages(NotificationMessages notificationMessages,
 			QueueConnection queueConnection, Queue queue, TopicConnection topicConnection,
 			Topic topic) throws JMSException {
-		QueueSender qs = null;
-		TopicPublisher tp = null;
-		for (Message message : notificationMessages.getMessages()) {
-			MessageProducer producer;
-			ObjectMessage jmsg;
-			if (message.getDestType() == DestType.P2P) {
-				QueueSession session = null;
-				if (qs == null) {
-					session = queueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-					qs = session.createSender(queue);
-				}
-				producer = qs;
-				jmsg = session.createObjectMessage();
 
-			} else {
-				TopicSession session = null;
-				if (tp == null) {
-					session = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-					tp = session.createPublisher(topic);
+		Session qSession = null;
+		Session tSession = null;
+		MessageProducer qProducer = null;
+		MessageProducer tProducer = null;
+
+		/* Ensure that we have at most one session of each type with one producer */
+		for (Message message : notificationMessages.getMessages()) {
+
+			Session session = null;
+			MessageProducer producer = null;
+			if (message.getDestType() == DestType.P2P) {
+				if (qSession == null) {
+					qSession = queueConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+					qProducer = qSession.createProducer(queue);
+					logger.debug("QueueSession created");
 				}
-				producer = tp;
-				jmsg = session.createObjectMessage();
+				session = qSession;
+				producer = qProducer;
+			} else {
+				if (tSession == null) {
+					tSession = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+					tProducer = tSession.createProducer(topic);
+					logger.debug("TopicSession created");
+				}
+				session = tSession;
+				producer = tProducer;
 			}
+
+			ObjectMessage jmsg = session.createObjectMessage();
 
 			String notificationName = message.getNotificationName();
 			if (notificationName != null) {
@@ -73,11 +79,13 @@ public class Transmitter {
 			producer.send(jmsg);
 		}
 
-		if (qs != null) {
-			qs.close();
+		if (qSession != null) {
+			qSession.close();
+			logger.debug("QueueSession closed");
 		}
-		if (tp != null) {
-			tp.close();
+		if (tSession != null) {
+			tSession.close();
+			logger.debug("TopicSession closed");
 		}
 
 	}

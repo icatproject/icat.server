@@ -3,12 +3,8 @@
 driver=com.mysql.jdbc.jdbc2.optional.MysqlDataSource
 
 # ICAT connection properties
-#icatProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icat:password=password
-icatProperties=url="'"jdbc:mysql://localhost:3306/icat"'":user=icat:password=password:databaseName=icat
-
-# ICATUSER connection properties
-#icatuserProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icatuser:password=password
-icatuserProperties=url="'"jdbc:mysql://localhost:3306/icatuser"'":user=icat:password=password:databaseName=icatuser
+#icatProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icat:password=secret 
+icatProperties=user=icat:password=secret:databaseName=icat
 
 # Must contain "glassfish/domains"
 glassfish=/home/fisher/pf/glassfish3

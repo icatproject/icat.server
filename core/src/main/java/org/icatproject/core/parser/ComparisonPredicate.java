@@ -1,12 +1,19 @@
 package org.icatproject.core.parser;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.manager.BeanManager;
+import org.icatproject.core.manager.EntityInfo;
+import org.icatproject.core.manager.EntityInfoHandler;
 
 public class ComparisonPredicate {
 
@@ -22,6 +29,8 @@ public class ComparisonPredicate {
 
 	private static final Set<String> beanFields = new HashSet<String>(Arrays.asList("createTime",
 			"createId", "modTime", "modId"));
+
+	private static final EntityInfoHandler ei = EntityInfoHandler.getInstance();
 
 	public ComparisonPredicate(Input input) throws ParserException {
 		value1 = input.consume(Token.Type.NAME, Token.Type.STRING, Token.Type.INTEGER,
@@ -49,7 +58,9 @@ public class ComparisonPredicate {
 		}
 	}
 
-	public StringBuilder getWhere(Class<?> tb) throws IcatException {
+	private static final Logger logger = Logger.getLogger(ComparisonPredicate.class);
+
+	public StringBuilder getWhere(Class<? extends EntityBaseBean> tb) throws IcatException {
 		StringBuilder sb = new StringBuilder();
 		if (compop.getType() == Token.Type.COMPOP) {
 			boolean one = value1.getType() == Token.Type.NAME
@@ -57,9 +68,37 @@ public class ComparisonPredicate {
 			boolean two = value2.getType() == Token.Type.NAME
 					&& value1.getType() != Token.Type.NAME;
 			if (!one && !two) {
-				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
-						"Attribute comparisons require one attribute name and one value: " + value1
-								+ " " + compop + " " + value2);
+				if (value1.getType() == Token.Type.NAME && value2.getType() == Token.Type.NAME) {
+					Map<String, Field> enums = ei.getEnums(tb);
+					one = enums.containsKey(value1.getValue());
+					two = enums.containsKey(value2.getValue());
+					if (!one && !two) {
+						throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+								"Attribute comparisons require one attribute name and one value: "
+										+ value1 + " " + compop + " " + value2);
+					}
+					if (one) {
+						sb.append(getName(value1, tb));
+					} else {
+						sb.append(enums.get(value2.getValue()).getType().getCanonicalName() + "."
+								+ getValue(value1));
+					}
+
+					sb.append(" " + compop.getValue() + " ");
+
+					if (two) {
+						sb.append(getName(value2, tb));
+					} else {
+						sb.append(enums.get(value1.getValue()).getType().getCanonicalName() + "."
+								+ getValue(value2));
+					}
+					return sb;
+				} else {
+					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+							"Attribute comparisons require one attribute name and one value: "
+									+ value1 + " " + compop + " " + value2);
+				}
+
 			}
 			if (one) {
 				sb.append(getName(value1, tb));

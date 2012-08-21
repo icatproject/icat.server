@@ -148,7 +148,13 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 		} catch (final ParserException e) {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
-		this.crudJPQL = r.getQuery();
+		if (r.getSearchWhere().isEmpty()) {
+			this.crudJPQL = null;
+
+		} else {
+			this.crudJPQL = r.getQuery();
+
+		}
 		this.bean = r.getBean();
 
 		if (this.datatypes != null) {

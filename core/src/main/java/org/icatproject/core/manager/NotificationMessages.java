@@ -69,7 +69,7 @@ public class NotificationMessages {
 	private final List<Message> messages = new ArrayList<Message>();
 
 	public NotificationMessages(String userId, EntityBaseBean bean,
-			org.icatproject.core.manager.AccessType accessType, EntityManager manager)
+			AccessType accessType, EntityManager manager)
 			throws IcatException {
 		String qName = null;
 		if (accessType == AccessType.CREATE) {
@@ -112,11 +112,10 @@ public class NotificationMessages {
 				}
 			}
 			this.generateMessage(nr, userId, bean, null);
-
 		}
 	}
 
-	public NotificationMessages(String userId, int size, Class<? extends EntityBaseBean> beanClass,
+	public NotificationMessages(String userId, Class<? extends EntityBaseBean> beanClass,
 			String queryString, EntityManager manager) throws IcatException {
 
 		String beanClassName = beanClass.getSimpleName();
@@ -151,7 +150,7 @@ public class NotificationMessages {
 		if (nr.isIdWanted() && bean != null) {
 			message.pk = bean.getId();
 		}
-		if (nr.isQueryWanted() && queryString != null) {
+		if (nr.isQueryWanted()) {
 			message.query = queryString;
 		}
 

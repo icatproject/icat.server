@@ -24,7 +24,6 @@ import javax.transaction.UserTransaction;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
-import org.icatproject.core.PropertyHandler;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
@@ -312,7 +311,9 @@ public class BeanManager {
 		while (m.find()) {
 			Date d = null;
 			try {
-				d = df.parse(m.group(1));
+				synchronized (df) { // Access to data formats must be synchronized
+					d = df.parse(m.group(1));
+				}
 			} catch (ParseException e) {
 				// This cannot happen - honest
 			}
@@ -347,7 +348,7 @@ public class BeanManager {
 		}
 
 		logger.debug("Obtained " + result.size() + " results.");
-		NotificationMessages nms = new NotificationMessages(userId, result.size(),
+		NotificationMessages nms = new NotificationMessages(userId,
 				q.getFirstEntity(), query, manager);
 
 		if (result.size() > 0 && result.get(0) instanceof EntityBaseBean) {

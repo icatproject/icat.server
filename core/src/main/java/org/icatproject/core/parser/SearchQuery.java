@@ -194,13 +194,22 @@ public class SearchQuery {
 
 		Step step = DagHandler.findSteps(this.getFirstEntity(), es);
 		StringBuilder sb = this.getSelect(step);
-		sb.append(' ').append(this.getWhere());
+		StringBuilder where = this.getWhere();
+		boolean whereThere = where.length() > 0;
+		if (whereThere) {
+			sb.append(' ').append(this.getWhere());
+		}
 		if (restriction != null) {
 			if (restriction.length() == 0) {
 				throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
 						"Read access to this " + beanName + " is not allowed.");
 			}
-			sb.append(" AND(").append(restriction).append(")");
+			if (whereThere) {
+				sb.append(" AND(");
+			} else {
+				sb.append(" WHERE(");
+			}
+			sb.append(restriction).append(")");
 		}
 		sb.append(' ').append(this.getOrderBy());
 		return sb.toString();
