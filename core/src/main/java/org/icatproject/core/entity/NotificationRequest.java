@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.NotificationMessages;
 import org.icatproject.core.parser.Input;
 import org.icatproject.core.parser.LexerException;
 import org.icatproject.core.parser.ParserException;
@@ -158,16 +159,16 @@ public class NotificationRequest extends EntityBaseBean implements Serializable 
 		this.bean = r.getBean();
 
 		if (this.datatypes != null) {
-			for (final String datatype : this.datatypes.toUpperCase().split("\\s+")) {
-				if (datatype.equals("NOTIFICATIONNAME")) {
+			for (final String datatype : this.datatypes.split("\\s+")) {
+				if (datatype.equals(NotificationMessages.NOTIFICATIONNAME)) {
 					this.notificationNameWanted = true;
-				} else if (datatype.equals("USERID")) {
+				} else if (datatype.equals(NotificationMessages.USERID)) {
 					this.useridWanted = true;
-				} else if (datatype.equals("ENTITYNAME")) {
+				} else if (datatype.equals(NotificationMessages.ENTITYNAME)) {
 					this.entityNameWanted = true;
-				} else if (datatype.equals("ENTITYID")) {
+				} else if (datatype.equals(NotificationMessages.ENTITYID)) {
 					this.idWanted = true;
-				} else if (datatype.equals("QUERY")) {
+				} else if (datatype.equals(NotificationMessages.QUERY)) {
 					this.queryWanted = true;
 				} else {
 					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,

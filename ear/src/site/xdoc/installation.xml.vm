@@ -196,14 +196,13 @@
                     <dt>authn.list</dt>
                     <dd>
                         is a space separated set of mnemonics for user to select the plugin in the login call.
-
                     </dd>
                     <dt>
                         authn.&lt;mnemonic&gt;.jndi
                     </dt>
                     <dd>is the jndi name to locate the plugin. When you installed the plugin a message would have appeared in the server.log stating
                         the JNDI names. For example for authn_db you would expect to see
-                        java:global/authn_db.ear-1.0.0-SNAPSHOT/authn_db.ejb-1.0.0-SNAPSHOT/DB_Authenticator. There must be one such entry for each
+                        java:global/authn_db.ear-1.0.0/authn_db.ejb-1.0.0/DB_Authenticator. There must be one such entry for each
                         plugin.
                     </dd>
                 </dl>
@@ -239,17 +238,25 @@
                     . This is a python script which requires that the suds client is available. On CENTOS this is packaged as a
                     <tt>python-suds</tt>
                     RPM. This connects as one of the root users you defined as 'rootUserNames' in the icat.properties file. Invoke the script with
-                    four parameters: the hostname and port separated by a colon on which the service is deployed securely
+                    three fixed parameters: the hostname and port on which the service is deployed securely
                     (something like
-                    example.com:8181), the mnemonic for the chosen authentication plugin and the user name and password for one of the root ICAT
-                    users. It should report:
+                    example.com:8181), the
+                    mnemonic for the chosen authentication plugin followed by the credentials for one of the root user names supported
+                    by that plugin. These
+                    credentials should be passed in as pairs of parameters with key followed by value. For example, assuming that your working directory
+                    is in the PATH:
+                    <code>test.py example.com 8181 db username root password secret</code>
+                </p>
+                <p>It should report:
                 </p>
                 <code>Login, search, create, delete and logout operations were all successful.
                 </code>
                 <p>This script can be run at any time as it is almost harmless - it simply creates a "Group" with an unlikely name and removes it
                     again.
                 </p>
-                <p>In case of problems look at the log files: server.log and icat.log which can both be found in the logs directory below your domain.
+                <p>In case of problems, first erase the directory /tmp/suds and try the test.py again. If it still fails, look at the log files:
+                    server.log and icat.log which can both be found in the logs directory below your domain. Look also at the relevant authenticator
+                    log.
                 </p>
             </subsection>
 

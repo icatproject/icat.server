@@ -54,27 +54,27 @@ public class Transmitter {
 
 			String notificationName = message.getNotificationName();
 			if (notificationName != null) {
-				jmsg.setStringProperty("notificationName", notificationName);
+				jmsg.setStringProperty(NotificationMessages.NOTIFICATIONNAME, notificationName);
 			}
 
 			String userId = message.getUserId();
 			if (userId != null) {
-				jmsg.setStringProperty("userId", userId);
+				jmsg.setStringProperty(NotificationMessages.USERID, userId);
 			}
 
 			String entityName = message.getEntityName();
 			if (entityName != null) {
-				jmsg.setStringProperty("entityName", entityName);
+				jmsg.setStringProperty(NotificationMessages.ENTITYNAME, entityName);
 			}
 
 			String query = message.getQuery();
 			if (query != null) {
-				jmsg.setStringProperty("query", query);
+				jmsg.setStringProperty(NotificationMessages.QUERY, query);
 			}
 
 			Long pk = message.getPk();
 			if (pk != null) {
-				jmsg.setLongProperty("pk", pk);
+				jmsg.setLongProperty(NotificationMessages.ENTITYID, pk);
 			}
 			producer.send(jmsg);
 		}

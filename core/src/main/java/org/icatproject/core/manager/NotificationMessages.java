@@ -19,19 +19,15 @@ public class NotificationMessages {
 	public class Message {
 		private DestType destType;
 
-		public String userId;
+		public String entityName;
 
 		public String notificationName;
-
-		public String entityName;
 
 		public Long pk;
 
 		public String query;
 
-		public String getQuery() {
-			return this.query;
-		}
+		public String userId;
 
 		public DestType getDestType() {
 			return this.destType;
@@ -49,14 +45,24 @@ public class NotificationMessages {
 			return this.pk;
 		}
 
+		public String getQuery() {
+			return this.query;
+		}
+
 		public String getUserId() {
 			return this.userId;
 		}
 
 	}
-
-	private final static Logger logger = Logger.getLogger(NotificationMessages.class);
+	
 	private final static EntityInfoHandler entityInfoHandler = EntityInfoHandler.getInstance();
+	private final static Logger logger = Logger.getLogger(NotificationMessages.class);
+	
+	public final static String ENTITYID="entityId";
+	public final static String ENTITYNAME="entityName";
+	public final static String NOTIFICATIONNAME="notificationName";
+	public final static String QUERY="query";
+	public final static String USERID="userId";
 
 	public static EntityInfoHandler getEntityinfohandler() {
 		return entityInfoHandler;
@@ -67,6 +73,20 @@ public class NotificationMessages {
 	}
 
 	private final List<Message> messages = new ArrayList<Message>();
+
+	public NotificationMessages(String userId, Class<? extends EntityBaseBean> beanClass,
+			String queryString, EntityManager manager) throws IcatException {
+
+		String beanClassName = beanClass.getSimpleName();
+		final TypedQuery<NotificationRequest> query = manager.createNamedQuery(
+				NotificationRequest.SEARCH_QUERY, NotificationRequest.class).setParameter("bean",
+				beanClassName);
+
+		for (final NotificationRequest nr : query.getResultList()) {
+			this.generateMessage(nr, userId, null, queryString);
+		}
+
+	}
 
 	public NotificationMessages(String userId, EntityBaseBean bean,
 			AccessType accessType, EntityManager manager)
@@ -113,20 +133,6 @@ public class NotificationMessages {
 			}
 			this.generateMessage(nr, userId, bean, null);
 		}
-	}
-
-	public NotificationMessages(String userId, Class<? extends EntityBaseBean> beanClass,
-			String queryString, EntityManager manager) throws IcatException {
-
-		String beanClassName = beanClass.getSimpleName();
-		final TypedQuery<NotificationRequest> query = manager.createNamedQuery(
-				NotificationRequest.SEARCH_QUERY, NotificationRequest.class).setParameter("bean",
-				beanClassName);
-
-		for (final NotificationRequest nr : query.getResultList()) {
-			this.generateMessage(nr, userId, null, queryString);
-		}
-
 	}
 
 	private void generateMessage(NotificationRequest nr, String userId, EntityBaseBean bean,

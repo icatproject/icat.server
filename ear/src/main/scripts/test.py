@@ -8,28 +8,23 @@ import sys
 logging.basicConfig(level=logging.CRITICAL)
 
 args = sys.argv
-if len(args) != 5:
-    print >> sys.stderr, "This must have four arguments: hostname:port, plugin mnemonic, username and password"
+if len(args) < 4 or len(args) % 2 != 0:
+    print >> sys.stderr, "\nThis must have three fixed arguments: hostname, port and plugin mnemonic\nfollowed by pairs of arguments to represent the credentials. For example\n\n    ", args[0], "example.com 8181 db username root password guess\n"
     sys.exit(1)
 
-hostAndPort = args[1]
-plugin = args[2]
-username = args[3]
-password = args[4]
+hostAndPort = args[1] + ":" + args[2]
+plugin = args[3]
 
 client = Client("https://" + hostAndPort + "/ICATService/ICAT?wsdl")
 service = client.service
 factory = client.factory
 
 credentials = factory.create("credentials")
-entry = factory.create("credentials.entry")
-entry.key = "username"
-entry.value = username
-credentials.entry.append(entry)
-entry = factory.create("credentials.entry")
-entry.key = "password"
-entry.value = password
-credentials.entry.append(entry)
+for i in range (4, len(args), 2):
+    entry = factory.create("credentials.entry")
+    entry.key = args[i]
+    entry.value = args[i + 1]
+    credentials.entry.append(entry)
 
 sessionId = service.login(plugin, credentials,)
 

@@ -687,11 +687,7 @@
                 </dd>
                 <dt>entityId</dt>
                 <dd>
-                    the primary key of the main entity. The field in the message is called
-                    <tt>pk</tt>
-                    rather than
-                    <tt>entityId</tt>
-                    .
+                    the id (primary key) of the main entity.
                 </dd>
                 <dt>query</dt>
                 <dd>the query string for a search call.</dd>
@@ -784,10 +780,6 @@
                 The message is sent as an ObjectMessage - but without an Object being attached. All the information is sent as properties with the
                 same name as requested in the
                 <tt>dataTypes</tt>
-                except that the primary key is returned as
-                <tt>pk</tt>
-                rather than
-                <tt>entityId</tt>
                 .
             </p>
 

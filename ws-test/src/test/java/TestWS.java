@@ -445,11 +445,11 @@ public class TestWS {
 			assertEquals("root", msg.get("userId"));
 			if (msg.get("notificationName").equals("Test")) {
 				assertEquals("Datafile", msg.get("entityName"));
-				assertNotNull(msg.get("pk"));
+				assertNotNull(msg.get("entityId"));
 				assertNull(msg.get("query"));
 			} else if (msg.get("notificationName").equals("ID all")) {
 				assertEquals("Facility", msg.get("entityName"));
-				if (msg.get("pk") != null) {
+				if (msg.get("entityId") != null) {
 					pks++;
 					assertNull(msg.get("query"));
 				} else {
@@ -473,7 +473,7 @@ public class TestWS {
 			assertEquals("A", msg.get("notificationName"));
 			assertEquals("root", msg.get("userId"));
 			assertEquals("Facility", msg.get("entityName"));
-			assertNotNull(msg.get("pk"));
+			assertNotNull(msg.get("entityId"));
 			assertNull(msg.get("query"));
 		}
 		assertEquals(1, n);

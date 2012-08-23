@@ -19,10 +19,8 @@ done
 asadmin="$glassfish/bin/asadmin --port $port"
 
 $asadmin delete-jdbc-resource jdbc/icat
-$asadmin delete-jdbc-resource jdbc/icatuser
 
 $asadmin delete-jdbc-connection-pool icat
-$asadmin delete-jdbc-connection-pool icatuser
 
 $asadmin delete-jms-resource jms/ICATQueueConnectionFactory
 $asadmin delete-jms-resource jms/ICATTopicConnectionFactory

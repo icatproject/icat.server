@@ -20,7 +20,7 @@
                     search and get. This bug in the marshalling of the XML has now been addressed.
                 </li>
                 <li>Previously JMS messages had the property "query" set to the primary key and the actual query value was not available. They are now
-                    assigned correctly to the properties "query" and "pk".
+                    assigned correctly to the properties "query" and "entityId".
                 </li>
                 <li>You will need an up-to-date version of JAX-WS such as the one packaged with Glassfish 3.1.2</li>
                 <li>The main database schema is almost unchanged. The only difference is that some text fields have been made larger. </li>
