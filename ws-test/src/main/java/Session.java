@@ -71,7 +71,12 @@ public class Session {
 		return result.toString();
 	}
 
-	private final ICAT icatEP;
+	private final ICAT icat;
+
+	public ICAT getIcat() {
+		return icat;
+	}
+
 	private final String sessionId;
 	private CompatSession compatSession;
 
@@ -82,52 +87,53 @@ public class Session {
 		final URL icatUrl = new URL(urlString + "/ICATService/ICAT?wsdl");
 		final ICATService icatService = new ICATService(icatUrl, new QName(
 				"http://icatproject.org", "ICATService"));
-		this.icatEP = icatService.getICATPort();
+		this.icat = icatService.getICATPort();
 
+		this.sessionId = login("db", "username", "root", "password", "password");
+
+		this.compatSession = new CompatSession(this.sessionId);
+	}
+
+	public String login(String plugin, String... credbits) throws IcatException_Exception {
 		Credentials credentials = new Credentials();
 		List<Entry> entries = credentials.getEntry();
-		Entry e;
-
-		e = new Entry();
-		e.setKey("username");
-		e.setValue("root");
-		entries.add(e);
-
-		e = new Entry();
-		e.setKey("password");
-		e.setValue("password");
-		entries.add(e);
-
-		this.sessionId = this.icatEP.login("db", credentials);
-		this.compatSession = new CompatSession(this.sessionId);
+		int i = 0;
+		while (i < credbits.length) {
+			Entry e = new Entry();
+			e.setKey(credbits[i]);
+			e.setValue(credbits[i + 1]);
+			entries.add(e);
+			i += 2;
+		}
+		return this.icat.login(plugin, credentials);
 	}
 
 	public void addInputDatafile(Job job, Datafile df) throws IcatException_Exception {
 		final InputDatafile idf = new InputDatafile();
 		idf.setDatafile(df);
 		idf.setJob(job);
-		this.icatEP.create(this.sessionId, idf);
+		this.icat.create(this.sessionId, idf);
 	}
 
 	public void addInputDataset(Job job, Dataset ds) throws IcatException_Exception {
 		final InputDataset ids = new InputDataset();
 		ids.setDataset(ds);
 		ids.setJob(job);
-		this.icatEP.create(this.sessionId, ids);
+		this.icat.create(this.sessionId, ids);
 	}
 
 	public void addOutputDatafile(Job job, Datafile df) throws IcatException_Exception {
 		final OutputDatafile odf = new OutputDatafile();
 		odf.setDatafile(df);
 		odf.setJob(job);
-		this.icatEP.create(this.sessionId, odf);
+		this.icat.create(this.sessionId, odf);
 	}
 
 	public void addOutputDataset(Job job, Dataset ds) throws IcatException_Exception {
 		final OutputDataset ods = new OutputDataset();
 		ods.setDataset(ds);
 		ods.setJob(job);
-		this.icatEP.create(this.sessionId, ods);
+		this.icat.create(this.sessionId, ods);
 	}
 
 	public void addRule(String groupName, String what, String crudFlags) throws Exception {
@@ -138,13 +144,13 @@ public class Session {
 		}
 		rule.setWhat(what);
 		rule.setCrudFlags(crudFlags);
-		this.icatEP.create(this.sessionId, rule);
+		this.icat.create(this.sessionId, rule);
 	}
 
 	public void delRule(String groupName, String what, String crudFlags) throws Exception {
-		what = what.replace("'","''");
-		List<Object> rules = search("Rule [what = '" + what
-				+ "' and crudFlags = '" + crudFlags + "'] <-> Group [name= '" + groupName + "']");
+		what = what.replace("'", "''");
+		List<Object> rules = search("Rule [what = '" + what + "' and crudFlags = '" + crudFlags
+				+ "'] <-> Group [name= '" + groupName + "']");
 		if (rules.size() == 1) {
 			delete((EntityBaseBean) rules.get(0));
 		} else {
@@ -160,7 +166,7 @@ public class Session {
 			if (groups.isEmpty()) {
 				group = new Group();
 				group.setName(groupName);
-				group.setId(this.icatEP.create(sessionId, group));
+				group.setId(this.icat.create(sessionId, group));
 			} else {
 				group = (Group) groups.get(0);
 			}
@@ -170,7 +176,7 @@ public class Session {
 		if (users.isEmpty()) {
 			user = new User();
 			user.setName(userName);
-			user.setId(this.icatEP.create(sessionId, user));
+			user.setId(this.icat.create(sessionId, user));
 		} else {
 			user = (User) users.get(0);
 		}
@@ -178,7 +184,7 @@ public class Session {
 		UserGroup userGroup = new UserGroup();
 		userGroup.setUser(user);
 		userGroup.setGroup(group);
-		this.icatEP.create(sessionId, userGroup);
+		this.icat.create(sessionId, userGroup);
 	}
 
 	public void clear() throws Exception {
@@ -216,7 +222,7 @@ public class Session {
 		final Application application = new Application();
 		application.setName(name);
 		application.setVersion(version);
-		application.setId(this.icatEP.create(this.sessionId, application));
+		application.setId(this.icat.create(this.sessionId, application));
 		return application;
 	}
 
@@ -226,7 +232,7 @@ public class Session {
 		datafile.setDatafileFormat(format);
 		datafile.setName(name);
 		datafile.setDataset(ds);
-		datafile.setId(this.icatEP.create(this.sessionId, datafile));
+		datafile.setId(this.icat.create(this.sessionId, datafile));
 		return datafile;
 	}
 
@@ -237,7 +243,7 @@ public class Session {
 		dff.setVersion("1");
 		dff.setType(formatType);
 		dff.setFacility(facility);
-		dff.setId(this.icatEP.create(this.sessionId, dff));
+		dff.setId(this.icat.create(this.sessionId, dff));
 		return dff;
 	}
 
@@ -247,7 +253,7 @@ public class Session {
 		dataset.setName(name);
 		dataset.setType(type);
 		dataset.setInvestigation(inv);
-		dataset.setId(this.icatEP.create(this.sessionId, dataset));
+		dataset.setId(this.icat.create(this.sessionId, dataset));
 		return dataset;
 	}
 
@@ -260,7 +266,7 @@ public class Session {
 		}
 		dsp.setType(p);
 		dsp.setDataset(ds);
-		this.icatEP.create(this.sessionId, dsp);
+		this.icat.create(this.sessionId, dsp);
 		return dsp;
 	}
 
@@ -268,7 +274,7 @@ public class Session {
 		final DatasetType dst = new DatasetType();
 		dst.setName(name);
 		dst.setFacility(facility);
-		dst.setId(this.icatEP.create(this.sessionId, dst));
+		dst.setId(this.icat.create(this.sessionId, dst));
 		return dst;
 	}
 
@@ -276,18 +282,18 @@ public class Session {
 		final Facility f = new Facility();
 		f.setName(shortName);
 		f.setDaysUntilRelease(daysUntilRelease);
-		f.setId(this.icatEP.create(this.sessionId, f));
+		f.setId(this.icat.create(this.sessionId, f));
 		return f;
 	}
 
-	public Investigation createInvestigation(Facility facility, String invNumber, String title,
+	public Investigation createInvestigation(Facility facility, String name, String title,
 			InvestigationType invType) throws Exception {
 		final Investigation i = new Investigation();
 		i.setFacility(facility);
-		i.setName(invNumber);
+		i.setName(name);
 		i.setTitle(title);
 		i.setType(invType);
-		i.setId(this.icatEP.create(this.sessionId, i));
+		i.setId(this.icat.create(this.sessionId, i));
 		return i;
 	}
 
@@ -296,27 +302,27 @@ public class Session {
 		final InvestigationType type = new InvestigationType();
 		type.setFacility(facility);
 		type.setName(name);
-		type.setId(this.icatEP.create(this.sessionId, type));
+		type.setId(this.icat.create(this.sessionId, type));
 		return type;
 	}
 
 	public Job createJob(Application application) throws IcatException_Exception {
 		final Job job = new Job();
 		job.setApplication(application);
-		job.setId((Long) this.icatEP.create(this.sessionId, job));
+		job.setId((Long) this.icat.create(this.sessionId, job));
 		return job;
 	}
 
 	public void delete(EntityBaseBean bean) throws IcatException_Exception {
-		this.icatEP.delete(this.sessionId, bean);
+		this.icat.delete(this.sessionId, bean);
 	}
 
 	public EntityBaseBean get(String query, long key) throws IcatException_Exception {
-		return this.icatEP.get(this.sessionId, query, key);
+		return this.icat.get(this.sessionId, query, key);
 	}
 
 	public List<Object> search(String query) throws IcatException_Exception {
-		return this.icatEP.search(this.sessionId, query);
+		return this.icat.search(this.sessionId, query);
 	}
 
 	public void setAuthz() throws Exception {
@@ -337,6 +343,7 @@ public class Session {
 		this.addRule("root", "DatasetType", "CRUD");
 		this.addRule("root", "Facility", "CRUD");
 		this.addRule("root", "Investigation", "CRUD");
+		this.addRule("root", "InvestigationUser", "CRUD");
 		this.addRule("root", "InvestigationType", "CRUD");
 		this.addRule("root", "ParameterType", "CRUD");
 		this.addRule("root", "Investigation", "CRUD");
@@ -357,35 +364,35 @@ public class Session {
 	}
 
 	public void update(EntityBaseBean df) throws IcatException_Exception {
-		this.icatEP.update(this.sessionId, df);
+		this.icat.update(this.sessionId, df);
 	}
 
 	public void registerInvestigation(Investigation inv) throws IcatException_Exception {
-		inv.setId(this.icatEP.create(this.sessionId, inv));
+		inv.setId(this.icat.create(this.sessionId, inv));
 	}
 
 	public EntityInfo getEntityInfo(String beanName) throws IcatException_Exception {
-		return icatEP.getEntityInfo(beanName);
+		return icat.getEntityInfo(beanName);
 	}
 
 	public Long create(EntityBaseBean bean) throws IcatException_Exception {
-		return this.icatEP.create(this.sessionId, bean);
+		return this.icat.create(this.sessionId, bean);
 	}
 
 	public List<Long> createMany(List<EntityBaseBean> beans) throws IcatException_Exception {
-		return this.icatEP.createMany(this.sessionId, beans);
+		return this.icat.createMany(this.sessionId, beans);
 	}
 
 	public double getRemainingMinutes() throws IcatException_Exception {
-		return this.icatEP.getRemainingMinutes(this.sessionId);
+		return this.icat.getRemainingMinutes(this.sessionId);
 	}
 
 	public String getApiVersion() throws IcatException_Exception {
-		return this.icatEP.getApiVersion();
+		return this.icat.getApiVersion();
 	}
 
 	public String getUserName() throws IcatException_Exception {
-		return this.icatEP.getUserName(this.sessionId);
+		return this.icat.getUserName(this.sessionId);
 	}
 
 	public CompatSession getCompatSession() {
@@ -393,11 +400,11 @@ public class Session {
 	}
 
 	public void registerDatafile(Datafile datafile) throws IcatException_Exception {
-		datafile.setId(this.icatEP.create(this.sessionId, datafile));
+		datafile.setId(this.icat.create(this.sessionId, datafile));
 	}
 
 	public void deleteMany(List<EntityBaseBean> beans) throws IcatException_Exception {
-		this.icatEP.deleteMany(sessionId, beans);
+		this.icat.deleteMany(sessionId, beans);
 	}
 
 }

@@ -232,7 +232,6 @@ public class BeanManagerBean {
 
 		String userName = authenticator.authenticate(credentials, req.getRemoteAddr())
 				.getUserName();
-		logger.debug("About to call the BeanManager");
 		return BeanManager.login(userName, lifetimeMinutes, manager, userTransaction);
 	}
 

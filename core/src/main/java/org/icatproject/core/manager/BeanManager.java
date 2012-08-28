@@ -348,8 +348,8 @@ public class BeanManager {
 		}
 
 		logger.debug("Obtained " + result.size() + " results.");
-		NotificationMessages nms = new NotificationMessages(userId,
-				q.getFirstEntity(), query, manager);
+		NotificationMessages nms = new NotificationMessages(userId, q.getFirstEntity(), query,
+				manager);
 
 		if (result.size() > 0 && result.get(0) instanceof EntityBaseBean) {
 			List<Object> clones = new ArrayList<Object>();
@@ -494,11 +494,16 @@ public class BeanManager {
 	}
 
 	public static String getUserName(String sessionId, EntityManager manager) throws IcatException {
-		logger.debug("getUserIdFromSessionId(" + sessionId + ")");
-		Session session = getSession(sessionId, manager);
-		String userName = session.getUserName();
-		logger.debug("user: " + userName + " is associated with: " + sessionId);
-		return userName;
+		try {
+			Session session = getSession(sessionId, manager);
+			String userName = session.getUserName();
+			logger.debug("user: " + userName + " is associated with: " + sessionId);
+			return userName;
+		} catch (IcatException e) {
+			logger.debug("sessionId " + sessionId + " is not associated with valid session "
+					+ e.getMessage());
+			throw e;
+		}
 	}
 
 	public static double getRemainingMinutes(String sessionId, EntityManager manager)

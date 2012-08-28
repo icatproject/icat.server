@@ -169,14 +169,14 @@ public class SearchQuery {
 			boolean first = true;
 			for (Rule r : rules) {
 				String rBeans = r.getBeans();
-				SearchQuery.logger.debug("Restriction: " + r.isRestricted());
-				SearchQuery.logger.debug("JPQL: " + r.getSearchJPQL());
-				SearchQuery.logger.debug("Related beans: " + rBeans);
 				if (!r.isRestricted()) {
 					SearchQuery.logger.info("Null restriction => Operation permitted");
 					restriction = null;
 					break;
 				}
+				String jpql = r.getSearchJPQL().replace(":user", "'" + userId + "'");
+				SearchQuery.logger.debug("Substituted SearchJPQL: " + jpql);
+				SearchQuery.logger.debug("Related beans: " + rBeans);
 				if (!rBeans.isEmpty()) {
 					for (String b : rBeans.split(" ")) {
 						es.add(EntityInfoHandler.getClass(b));
@@ -187,17 +187,16 @@ public class SearchQuery {
 				} else {
 					restriction.append(" OR ");
 				}
-				restriction.append("(" + r.getSearchJPQL().replace(":user", "'" + userId + "'")
-						+ ")");
+				restriction.append("(" + jpql + ")");
 			}
 		}
 
 		Step step = DagHandler.findSteps(this.getFirstEntity(), es);
 		StringBuilder sb = this.getSelect(step);
-		StringBuilder where = this.getWhere();
-		boolean whereThere = where.length() > 0;
+		String where = this.getWhere().toString();
+		boolean whereThere = !where.isEmpty();
 		if (whereThere) {
-			sb.append(' ').append(this.getWhere());
+			sb.append(' ').append(where.replace(":user", "'" + userId + "'"));
 		}
 		if (restriction != null) {
 			if (restriction.length() == 0) {

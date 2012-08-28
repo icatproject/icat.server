@@ -25,11 +25,11 @@ import org.icatproject.core.parser.Tokenizer;
 @SuppressWarnings("serial")
 @Entity
 @NamedQueries({
-		@NamedQuery(name = "Rule.CreateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug WHERE (ug.user.name = :member OR g IS NULL) AND r.bean = :bean AND r.c = TRUE"),
-		@NamedQuery(name = "Rule.ReadQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug WHERE (ug.user.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE"),
-		@NamedQuery(name = "Rule.UpdateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug WHERE (ug.user.name = :member OR g IS NULL) AND r.bean = :bean AND r.u = TRUE"),
-		@NamedQuery(name = "Rule.DeleteQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug WHERE (ug.user.name = :member OR g IS NULL) AND r.bean = :bean AND r.d = TRUE"),
-		@NamedQuery(name = "Rule.SearchQuery", query = "SELECT DISTINCT r          FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug WHERE (ug.user.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE") })
+		@NamedQuery(name = "Rule.CreateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.c = TRUE"),
+		@NamedQuery(name = "Rule.ReadQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE"),
+		@NamedQuery(name = "Rule.UpdateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.u = TRUE"),
+		@NamedQuery(name = "Rule.DeleteQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.d = TRUE"),
+		@NamedQuery(name = "Rule.SearchQuery", query = "SELECT DISTINCT r          FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE") })
 public class Rule extends EntityBaseBean implements Serializable {
 
 	public static final String CREATE_QUERY = "Rule.CreateQuery";

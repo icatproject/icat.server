@@ -36,20 +36,25 @@ import org.icatproject.EntityBaseBean;
 import org.icatproject.EntityField;
 import org.icatproject.EntityInfo;
 import org.icatproject.Facility;
+import org.icatproject.Group;
 import org.icatproject.IcatException;
 import org.icatproject.IcatExceptionType;
 import org.icatproject.IcatException_Exception;
 import org.icatproject.Investigation;
 import org.icatproject.InvestigationParameter;
 import org.icatproject.InvestigationType;
+import org.icatproject.InvestigationUser;
 import org.icatproject.Job;
 import org.icatproject.NotificationRequest;
 import org.icatproject.ParameterType;
 import org.icatproject.ParameterValueType;
 import org.icatproject.PermissibleStringValue;
 import org.icatproject.RelType;
+import org.icatproject.Rule;
 import org.icatproject.Sample;
 import org.icatproject.SampleParameter;
+import org.icatproject.User;
+import org.icatproject.UserGroup;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -226,6 +231,93 @@ public class TestWS {
 		} finally {
 			session.addRule("root", "Dataset", "CRUD");
 		}
+	}
+
+	@Test
+	public void authz2() throws Exception {
+		session.clear();
+
+		Facility facility = session.createFacility("Test Facility", 90);
+
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
+
+		Rule rule = new Rule();
+		rule.setCrudFlags("R");
+		rule.setWhat("Investigation <-> InvestigationUser <-> User [name = :user]");
+		session.create(rule);
+
+		User piOne = new User();
+		piOne.setName("piOne");
+		piOne.setId(session.create(piOne));
+
+		User piTwo = new User();
+		piTwo.setName("piTwo");
+		piTwo.setId(session.create(piTwo));
+
+		Investigation invOne = session.createInvestigation(facility, "InvestigationOne",
+				"Investigation one", investigationType);
+
+		Investigation invTwo = session.createInvestigation(facility, "InvestigationTwo",
+				"Investigation two", investigationType);
+
+		InvestigationUser iuOne = new InvestigationUser();
+		iuOne.setInvestigation(invOne);
+		iuOne.setUser(piOne);
+		iuOne.setRole("Principal Investigator");
+		iuOne.setId(session.create(iuOne));
+
+		InvestigationUser iuTwo = new InvestigationUser();
+		iuTwo.setInvestigation(invTwo);
+		iuTwo.setUser(piTwo);
+		iuTwo.setRole("Principal Investigator");
+		iuTwo.setId(session.create(iuTwo));
+
+		String piOneSessionId = session.login("db", "username", "piOne", "password", "piOne");
+		String piTwoSessionId = session.login("db", "username", "piTwo", "password", "piTwo");
+
+		List<Object> invsOne = session.getIcat().search(piOneSessionId, "Investigation");
+		assertEquals(1, invsOne.size());
+		assertEquals("InvestigationOne", ((Investigation) invsOne.get(0)).getName());
+
+		List<Object> invsTwo = session.getIcat().search(piTwoSessionId, "Investigation");
+		assertEquals(1, invsTwo.size());
+		assertEquals("InvestigationTwo", ((Investigation) invsTwo.get(0)).getName());
+
+		// Create new user for PIs to relate to his investigation
+		User aone = new User();
+		aone.setName("aone");
+		aone.setId(session.create(aone));
+
+		Group oneControllers = new Group();
+		oneControllers.setName("OneControllers");
+		oneControllers.setId(session.create(oneControllers));
+
+		UserGroup userGroup = new UserGroup();
+		userGroup.setUser(piOne);
+		userGroup.setGroup(oneControllers);
+		session.create(userGroup);
+
+		rule = new Rule();
+		rule.setCrudFlags("CRUD");
+		rule.setGroup(oneControllers);
+		rule.setWhat("InvestigationUser <-> Investigation [name = 'InvestigationOne']");
+		session.create(rule);
+
+		try {
+			InvestigationUser iuaone = new InvestigationUser();
+			iuaone.setInvestigation(invTwo);
+			iuaone.setUser(aone);
+			iuaone.setId(session.getIcat().create(piOneSessionId, iuaone));
+			fail("Should not get here as can't grant access to inv two");
+		} catch (Exception e) {
+		}
+
+		InvestigationUser iuaone = new InvestigationUser();
+		iuaone.setInvestigation(invOne);
+		iuaone.setUser(aone);
+		iuaone.setId(session.getIcat().create(piOneSessionId, iuaone));
+
 	}
 
 	@Test
