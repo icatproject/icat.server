@@ -188,33 +188,35 @@ public class Session {
 	}
 
 	public void clear() throws Exception {
+		deleteAll(Arrays.asList("Facility", "Job", "Application", "NotificationRequest"));
+	}
 
+	private void deleteAll(List<String> names) throws IcatException_Exception {
 		List<EntityBaseBean> toDelete = new ArrayList<EntityBaseBean>();
-		for (String type : Arrays.asList("Facility", "Job", "Application", "NotificationRequest")) {
+		StringBuilder sb = new StringBuilder();
+		for (String type : names) {
 			List<Object> lo = this.search(type);
 			if (lo.size() > 0) {
-				System.out.println("Will delete " + lo.size() + " objects of type " + type);
+				if (sb.length() == 0) {
+					sb.append("Will delete");
+				} else {
+					sb.append(" and");
+				}
+				sb.append(" " + lo.size() + " object"  + (lo.size() == 1 ? "" : "s") + " of type "
+						+ type);
 				for (Object o : lo) {
 					toDelete.add((EntityBaseBean) o);
 				}
 			}
+		}
+		if (sb.length() != 0) {
+			System.out.println(sb);
 		}
 		this.deleteMany(toDelete);
 	}
 
 	public void clearAuthz() throws Exception {
-
-		List<EntityBaseBean> toDelete = new ArrayList<EntityBaseBean>();
-		for (String type : Arrays.asList("Rule", "UserGroup", "User", "Group")) {
-			List<Object> lo = this.search(type);
-			if (lo.size() > 0) {
-				System.out.println("Will delete " + lo.size() + " objects of type " + type);
-				for (Object o : lo) {
-					toDelete.add((EntityBaseBean) o);
-				}
-			}
-		}
-		this.deleteMany(toDelete);
+		deleteAll(Arrays.asList("Rule", "UserGroup", "User", "Group"));
 	}
 
 	public Application createApplication(String name, String version)

@@ -259,7 +259,7 @@ public class BeanManager {
 		EntityBaseBean beanManaged = manager.find(entityClass, primaryKey);
 		if (beanManaged == null) {
 			throw new IcatException(IcatException.IcatExceptionType.NO_SUCH_OBJECT_FOUND,
-					entityClass.getSimpleName() + "[id:" + primaryKey + "] not founded.");
+					entityClass.getSimpleName() + "[id:" + primaryKey + "] not found.");
 		}
 
 		Include include = q.getInclude();

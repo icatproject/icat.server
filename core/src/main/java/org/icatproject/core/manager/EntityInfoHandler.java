@@ -58,13 +58,12 @@ public class EntityInfoHandler {
 		private final Map<Field, Method> setters;
 		private final Map<Field, Integer> stringFields;
 		public Set<Field> attributes;
-		public Map<String, Field> enums;
 
 		public PrivateEntityInfo(Field pks, Set<Relationship> rels, List<Field> notNullableFields,
 				Map<Field, Method> getters, Map<Field, Integer> stringFields,
 				Map<Field, Method> setters, List<List<Field>> constraintFields,
 				String classComment, Map<Field, String> fieldComments, Set<Relationship> ones,
-				Set<Relationship> includesToFollow, Set<Field> attributes, Map<String, Field> enums) {
+				Set<Relationship> includesToFollow, Set<Field> attributes) {
 			this.pks = pks;
 			this.relatedEntities = rels;
 			this.notNullableFields = notNullableFields;
@@ -77,7 +76,6 @@ public class EntityInfoHandler {
 			this.ones = ones;
 			this.includesToFollow = includesToFollow;
 			this.attributes = attributes;
-			this.enums = enums;
 		}
 
 	}
@@ -256,7 +254,6 @@ public class EntityInfoHandler {
 		final Map<String, Field> dbCols = new HashMap<String, Field>();
 		final List<List<Field>> constraintFields = new ArrayList<List<Field>>();
 		final Map<Field, String> comments = new HashMap<Field, String>();
-		final Map<String, Field> enums = new HashMap<String, Field>();
 
 		for (final Field field : fields) {
 			if (Arrays.asList("modTime", "createTime", "createId", "modId").contains(
@@ -343,9 +340,6 @@ public class EntityInfoHandler {
 				stringFields.put(field, length);
 			}
 
-			if (field.getType().isEnum()) {
-				enums.put(field.getName(), field);
-			}
 		}
 
 		Table tableAnnot = objectClass.getAnnotation(Table.class);
@@ -430,27 +424,13 @@ public class EntityInfoHandler {
 				}
 				logger.debug(sb);
 			}
-
-			sb = new StringBuilder("Enums: ");
-			first = true;
-			for (final String f : enums.keySet()) {
-				if (first) {
-					first = false;
-				} else {
-					sb.append(", ");
-				}
-				sb.append(f);
-			}
-			logger.debug(sb);
-
 		}
 
 		Comment comment = objectClass.getAnnotation(Comment.class);
 		String commentString = comment == null ? null : comment.value();
 
 		return new PrivateEntityInfo(key, rels, notNullableFields, getters, stringFields, setters,
-				constraintFields, commentString, comments, ones, includesToFollow, attributes,
-				enums);
+				constraintFields, commentString, comments, ones, includesToFollow, attributes);
 	}
 
 	public String getClassComment(Class<? extends EntityBaseBean> objectClass) throws IcatException {
@@ -678,19 +658,6 @@ public class EntityInfoHandler {
 				this.map.put(objectClass, ei);
 			}
 			return ei.attributes;
-		}
-	}
-
-	public Map<String, Field> getEnums(Class<? extends EntityBaseBean> objectClass)
-			throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.enums;
 		}
 	}
 }

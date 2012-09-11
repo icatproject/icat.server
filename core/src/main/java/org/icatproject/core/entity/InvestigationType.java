@@ -13,8 +13,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.apache.log4j.Logger;
-
 @Comment("A type of investigation")
 @SuppressWarnings("serial")
 @Entity

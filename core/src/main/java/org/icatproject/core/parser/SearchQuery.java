@@ -177,7 +177,9 @@ public class SearchQuery {
 				String jpql = r.getSearchJPQL().replace(":user", "'" + userId + "'");
 				SearchQuery.logger.debug("Substituted SearchJPQL: " + jpql);
 				SearchQuery.logger.debug("Related beans: " + rBeans);
-				if (!rBeans.isEmpty()) {
+				// The complication here is because Oracle stores empty strings as null values
+				// whereas MySQL gets it right
+				if (rBeans != null && !rBeans.isEmpty()) {
 					for (String b : rBeans.split(" ")) {
 						es.add(EntityInfoHandler.getClass(b));
 					}

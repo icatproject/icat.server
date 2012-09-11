@@ -7,6 +7,22 @@
 
     <body>
 
+        <section name="4.2.1">
+            <p>This is a bug fix release. If you already have 4.2.0 installed, then simply remove the old ear file and deploy the new one.</p>
+            <ul>
+                <li>Authorization rules without explicit relationships to groups (of the form "Investigation &lt;-&gt; InvestigationUser &lt;-&gt;
+                    User [name =
+                    :user]") now work properly.
+                </li>
+                <li>It is now possible to use boolean values in queries. Attributes can be compared against literal values of TRUE and
+                    FALSE (not case
+                    sensitive) as in "ParameterType [enforced = TRUE]"
+                </li>
+                <li>Null pointer exceptions were being throw with some authorization rules when using an Oracle database. This has now been fixed.
+                </li>
+            </ul>
+        </section>
+
         <section name="4.2.0">
             <p>This introduces a clean mechanism for handling authentication plugins and provides significant speed enhancements.</p>
             <ul>
@@ -25,12 +41,12 @@
                 <li>You will need an up-to-date version of JAX-WS such as the one packaged with Glassfish 3.1.2</li>
                 <li>The main database schema is almost unchanged. The only difference is that some text fields have been made larger. </li>
                 <li>A bug has been fixed in the handling of enum types in expressions.</li>
-               
+
             </ul>
         </section>
 
         <section name="4.1.1">
-            <p>This is a bug fix to release 4.1.0.</p>
+            <p>This is a bug fix release.</p>
             <ul>
                 <li>Aggregate functions (MIN, MAX, AVG, COUNT etc) no longer generate an internal exception.</li>
                 <li>Minor improvements to the installation documentation.</li>

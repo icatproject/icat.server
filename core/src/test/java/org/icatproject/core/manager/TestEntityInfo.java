@@ -19,7 +19,6 @@ import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.InvestigationUser;
 import org.icatproject.core.entity.Job;
 import org.icatproject.core.entity.Keyword;
-import org.icatproject.core.entity.NotificationRequest;
 import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
@@ -42,22 +41,6 @@ public class TestEntityInfo {
 		testPKS(InvestigationUser.class);
 		testPKS(User.class);
 		testPKS(Job.class);
-	}
-	
-	@Test
-	public void testEnums() throws Exception {
-		testEnum(Investigation.class);
-		testEnum(ParameterType.class, "valueType");
-		testEnum(NotificationRequest.class, "destType");
-	}
-
-	private void testEnum(Class<? extends EntityBaseBean> klass, String... enumNames) throws Exception {
-		Map<String, Field> result = eiHandler.getEnums(klass);
-		assertEquals(klass.getSimpleName() + " enums",  enumNames.length, result.size());
-		for (String enumName: enumNames) { 
-		assertTrue(klass.getSimpleName() + " enum ", result.containsKey(enumName));
-		}
-		
 	}
 
 	@Test
@@ -131,7 +114,7 @@ public class TestEntityInfo {
 		for (Relationship rel : results) {
 			rStrings.add(rel.toString());
 		}
-//		System.out.println(results);
+		// System.out.println(results);
 		assertEquals(klass.getSimpleName() + " count", rels.length, results.size());
 		for (String rel : rels) {
 			assertTrue(klass.getSimpleName() + " value " + rel, rStrings.contains(rel));

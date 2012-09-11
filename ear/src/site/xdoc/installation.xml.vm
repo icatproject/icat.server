@@ -21,6 +21,12 @@
                 <li> and see if it works.</li>
             </ol>
 
+            <p>
+                If you already have ICAT 4.2.0 deployed then skip on to
+                <a href="#ear">installing the .ear file</a>
+                .
+            </p>
+
             <subsection name="EJB Container">
                 <p> In principle you can use any EJB container. Testing has been performed with
                     glassfish 3.1.2 and these notes refer to that version.
@@ -48,8 +54,11 @@
             <subsection name="Databases">
                 <p>
                     <em>
-                        The database schema is almost identical to that used for ICAT 4.1 (the only difference is that some text columns are wider) so
-                        if you already have a 4.1 database installed there is no need to start with an empty schema.
+                        The database schema is almost identical to that used for ICAT 4.1 (the only difference is that some text columns are wider)
+                        and is identical to that used for ICAT 4.2.0. So
+                        if you already have a 4.1 or 4.2 database installed there is no need to start
+                        with
+                        an empty schema, and you can skip this section.
                     </em>
                 </p>
                 <p>
@@ -163,7 +172,7 @@
                     or you may wish to build your own following the instructions for
                     <a href="../icat.authentication/authentication.html">Authentication plugins</a>
                     .
-                    Each plugin has its own configuration mechanism. Make sure that all plugins are are listed in the icat.properties file which is
+                    Each plugin has its own configuration mechanism. Make sure that all plugins are listed in the icat.properties file which is
                     described in the next section. If you install or modify a plugin after the icat ear file then you will need to reload the icat
                     application.
                 </p>
@@ -195,7 +204,8 @@
 
                     <dt>authn.list</dt>
                     <dd>
-                        is a space separated set of mnemonics for user to select the plugin in the login call.
+                        is a space separated set of mnemonics for user to select the plugin in the login call. This must not reference plugins which
+                        are not installed as plugins are checked when ICAT performs its initialisation; if plugins are missing ICAT will not start.
                     </dd>
                     <dt>
                         authn.&lt;mnemonic&gt;.jndi
@@ -214,6 +224,8 @@
                 </p>
 
             </subsection>
+
+            <a name="ear" />
             <subsection name="Installing the .ear file">
                 <p>
                     If you already have an icat installed then you should first remove it with
@@ -227,7 +239,8 @@
                     . If you have only one domain you may not need to specify the port and if the admin port is not 4848 then specify the correct
                     value.
                 </p>
-                <p>As the file is deployed the database is created. If you already have an ICAT 4.1 database you may get some messages as it tries to
+                <p>As the file is deployed the database is created. If you already have an ICAT 4.1 or 4.2.0 database you may get some messages as it
+                    tries to
                     create tables that already exist.
                 </p>
             </subsection>
@@ -242,8 +255,10 @@
                     (something like
                     example.com:8181), the
                     mnemonic for the chosen authentication plugin followed by the credentials for one of the root user names supported
-                    by that plugin. These
-                    credentials should be passed in as pairs of parameters with key followed by value. For example, assuming that your working directory
+                    by that plugin.
+                    These
+                    credentials should be passed in as pairs of parameters with key followed by value. For example, assuming that your working
+                    directory
                     is in the PATH:
                     <code>test.py example.com 8181 db username root password secret</code>
                 </p>

@@ -317,6 +317,9 @@ public class TestWS {
 		iuaone.setInvestigation(invOne);
 		iuaone.setUser(aone);
 		iuaone.setId(session.getIcat().create(piOneSessionId, iuaone));
+		
+		session.clearAuthz();
+		session.setAuthz();
 
 	}
 
@@ -958,7 +961,7 @@ public class TestWS {
 	@Test
 	public void login() throws Exception {
 		assertTrue(session.getRemainingMinutes() > 0);
-		assertEquals("4.2.0", session.getApiVersion());
+		assertEquals("4.2.1", session.getApiVersion());
 		assertEquals("root", session.getUserName());
 	}
 
@@ -1093,6 +1096,10 @@ public class TestWS {
 				+ "= valueType]");
 		assertEquals(1, results.size());
 
+		results = session.search("Dataset [complete = TRUE]");
+		assertEquals(0, results.size());
+		results = session.search("Dataset [complete = FALSE]");
+		assertEquals(4, results.size());
 	}
 
 	@BeforeClass
@@ -1108,8 +1115,8 @@ public class TestWS {
 
 	@AfterClass
 	public static void afterClass() throws Exception {
-		// session.clear();
-		// session.clearAuthz();
+		 session.clear();
+		 session.clearAuthz();
 	}
 
 }

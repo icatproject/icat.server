@@ -39,19 +39,22 @@
                 </p>
 
                 <code>
-                    URL icatUrl = null;
+                    URL hostUrl = new URL("https://&lt;hostname&gt;:8181")
                     <br />
-                    icatUrl = new URL("https://localhost:8181" +
-                    "/ICATService/ICAT?wsdl");
+                    URL icatUrl = new URL(hostUrl, "ICATService/ICAT?wsdl");
                     <br />
                     QName qName = new
-                    QName("icatproject.org", "ICATService");
+                    QName("http://icatproject.org", "ICATService");
                     <br />
                     ICATService service = new
                     ICATService(icatUrl, qName);
                     <br />
                     ICAT icat = service.getICATPort();
                 </code>
+
+                <p>where &lt;hostname&gt; should be the full name of the ICAT server. For a secure installation, just specifying localhost will not
+                    work, the name must match what is on the host certificate.
+                </p>
 
             </subsection>
 
@@ -737,7 +740,7 @@
                 <br />
                 notificationRequest.setDestType(DestType.PUBSUB);
                 <br />
-                notificationRequest.setWhat("Dataset &gt;-&lt; Investigation [name = "Fred"]");
+                notificationRequest.setWhat("Dataset &lt;-&gt; Investigation [name = "Fred"]");
                 <br />
                 notificationRequest.setName("Fred readers");
                 <br />
