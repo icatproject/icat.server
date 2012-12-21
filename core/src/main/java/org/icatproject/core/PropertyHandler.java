@@ -50,15 +50,16 @@ public class PropertyHandler {
 		Properties props = new Properties();
 		try {
 			props.load(new FileInputStream(f));
+			logger.info("Property file " + f + " loaded");
 		} catch (Exception e) {
 			String msg = "Problem with " + f.getAbsolutePath() + "  " + e.getMessage();
 			logger.fatal(msg);
 			throw new IllegalStateException(msg);
 		}
 
-		String authnList = props.getProperty("authn.list");
-		if (authnList == null) {
-			String msg = "Property 'authn.list' is not set";
+		String authnList = props.getProperty("authn.list").trim();
+		if (authnList == null || authnList.isEmpty()) {
+			String msg = "Property 'authn.list' must be set and must contains something";
 			logger.fatal(msg);
 			throw new IllegalStateException(msg);
 		}
@@ -70,7 +71,7 @@ public class PropertyHandler {
 		}
 		for (String mnemonic : authnList.split("\\s+")) {
 			String key = "authn." + mnemonic + ".jndi";
-			String jndi = props.getProperty(key);
+			String jndi = props.getProperty(key).trim();
 			if (jndi == null) {
 				String msg = "Property '" + key + "' is not set";
 				logger.fatal(msg);
@@ -78,11 +79,12 @@ public class PropertyHandler {
 			}
 			try {
 				Authenticator authenticator = (Authenticator) ctx.lookup(jndi);
-				logger.debug("Found Authenticator: " + authenticator.getClass() + " "
-						+ authenticator);
+				logger.debug("Found Authenticator: " + mnemonic + " with jndi " + jndi);
 				authPlugins.put(mnemonic, authenticator);
-			} catch (NamingException e) {
-				throw new IllegalStateException(e.getClass() + " " + e.getMessage());
+			} catch (Throwable e) {
+				String msg = e.getClass() + " reports " + e.getMessage();
+				logger.fatal(msg);
+				throw new IllegalStateException(msg);
 			}
 		}
 
@@ -96,12 +98,12 @@ public class PropertyHandler {
 		try {
 			lifetimeMinutes = Integer.parseInt(ltm);
 		} catch (NumberFormatException e) {
-			String msg = "lifetimeMinutes does not represent an integer";
+			String msg = "lifetimeMinutes '" + ltm + "' does not represent an integer";
 			logger.fatal(msg);
 			throw new IllegalStateException(msg);
 		}
 
-		String names = props.getProperty("rootUserNames");
+		String names = props.getProperty("rootUserNames").trim();
 		if (names == null) {
 			String msg = "rootUserNames is not set";
 			logger.fatal(msg);
