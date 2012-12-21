@@ -616,14 +616,14 @@
                     <br />
                     icat.create(sessionId, rule);
                 </code>
-                <p>allows any authenticated user (with a sessionId) to read Parameters. Consider a group of users fredReaders To allow fredReaders
-                    to
+                <p>allows any authenticated user (with a sessionId) to read Parameters. Consider a group of users: fredReaders.
+                    To allow fredReaders to
                     read a datafile with a name of "fred" we could have:
                 </p>
                 <code>
                     Rule rule = new Rule();
                     <br />
-                    rule.setGroup(fredReaders;
+                    rule.setGroup(fredReaders);
                     <br />
                     rule.setCrudFlags("R");
                     <br />
