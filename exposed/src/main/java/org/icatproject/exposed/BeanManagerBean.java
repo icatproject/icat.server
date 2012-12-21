@@ -206,6 +206,7 @@ public class BeanManagerBean {
 		LogManager.resetConfiguration();
 		PropertyConfigurator.configureAndWatch(log4jFile);
 		logger = Logger.getLogger(BeanManagerBean.class);
+		logger.info("BeanManagerBean post construct method called");
 		logger.info("Loaded log4j properties from : " + log4jFile + " and will watch it.");
 
 		try {
@@ -230,6 +231,7 @@ public class BeanManagerBean {
 					"Authenticator mnemonic " + plugin + " not recognised");
 		}
 
+		logger.debug("Using " + plugin + " to authenticate");
 		String userName = authenticator.authenticate(credentials, req.getRemoteAddr())
 				.getUserName();
 		return BeanManager.login(userName, lifetimeMinutes, manager, userTransaction);
