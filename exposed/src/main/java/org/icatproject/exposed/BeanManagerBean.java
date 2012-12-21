@@ -147,7 +147,6 @@ public class BeanManagerBean {
 
 	}
 
-	@SuppressWarnings("unused")
 	@PreDestroy()
 	private void destroyBMB() {
 		try {
@@ -193,7 +192,6 @@ public class BeanManagerBean {
 		return BeanManager.getUserName(sessionId, manager);
 	}
 
-	@SuppressWarnings("unused")
 	@PostConstruct()
 	private void init() {
 		/*
