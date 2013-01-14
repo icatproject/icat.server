@@ -166,30 +166,36 @@ public class SearchQuery {
 			SearchQuery.logger.debug("Got " + rules.size() + " authz queries for search by "
 					+ userId + " to a " + beanName);
 			restriction = new StringBuilder();
-			boolean first = true;
+
 			for (Rule r : rules) {
-				String rBeans = r.getBeans();
 				if (!r.isRestricted()) {
 					SearchQuery.logger.info("Null restriction => Operation permitted");
 					restriction = null;
 					break;
 				}
-				String jpql = r.getSearchJPQL().replace(":user", "'" + userId + "'");
-				SearchQuery.logger.debug("Substituted SearchJPQL: " + jpql);
-				SearchQuery.logger.debug("Related beans: " + rBeans);
-				// The complication here is because Oracle stores empty strings as null values
-				// whereas MySQL gets it right
-				if (rBeans != null && !rBeans.isEmpty()) {
-					for (String b : rBeans.split(" ")) {
-						es.add(EntityInfoHandler.getClass(b));
+			}
+
+			if (restriction != null) {
+				boolean first = true;
+				for (Rule r : rules) {
+					String rBeans = r.getBeans();
+					String jpql = r.getSearchJPQL().replace(":user", "'" + userId + "'");
+					SearchQuery.logger.debug("Substituted SearchJPQL: " + jpql);
+					SearchQuery.logger.debug("Related beans: " + rBeans);
+					// The complication here is because Oracle stores empty strings as null values
+					// whereas MySQL gets it right
+					if (rBeans != null && !rBeans.isEmpty()) {
+						for (String b : rBeans.split(" ")) {
+							es.add(EntityInfoHandler.getClass(b));
+						}
 					}
+					if (first) {
+						first = false;
+					} else {
+						restriction.append(" OR ");
+					}
+					restriction.append("(" + jpql + ")");
 				}
-				if (first) {
-					first = false;
-				} else {
-					restriction.append(" OR ");
-				}
-				restriction.append("(" + jpql + ")");
 			}
 		}
 

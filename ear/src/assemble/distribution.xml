@@ -10,7 +10,7 @@
             <outputDirectory>icat.ear.config</outputDirectory>
             <directory>${basedir}/src/main/scripts</directory>
         </fileSet>
-         <fileSet>
+        <fileSet>
             <outputDirectory>icat.ear.config</outputDirectory>
             <directory>${basedir}/src/main/config</directory>
         </fileSet>

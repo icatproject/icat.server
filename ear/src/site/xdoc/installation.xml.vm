@@ -22,7 +22,7 @@
             </ol>
 
             <p>
-                If you already have ICAT 4.2.0 deployed then skip on to
+                If you already have ICAT 4.2.0 or 4.2.1 deployed then skip on to
                 <a href="#ear">installing the .ear file</a>
                 .
             </p>

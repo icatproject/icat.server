@@ -313,11 +313,87 @@ public class TestWS {
 		} catch (Exception e) {
 		}
 
-		InvestigationUser iuaone = new InvestigationUser();
-		iuaone.setInvestigation(invOne);
-		iuaone.setUser(aone);
-		iuaone.setId(session.getIcat().create(piOneSessionId, iuaone));
-		
+		{
+			InvestigationUser iuaone = new InvestigationUser();
+			iuaone.setInvestigation(invOne);
+			iuaone.setUser(aone);
+			iuaone.setId(session.getIcat().create(piOneSessionId, iuaone));
+		}
+
+		assertEquals(2, (session.getIcat().search(piOneSessionId, "InvestigationUser")).size());
+
+		try {
+			session.getIcat().search(piTwoSessionId, "InvestigationUser");
+			fail("Should not get here as not allowed to read");
+		} catch (Exception e) {
+		}
+
+		// Create a simple rule allowing oneControllers full access to InvestigationUser and ensure
+		// that reading works.
+
+		rule = new Rule();
+		rule.setCrudFlags("CRUD");
+		rule.setGroup(oneControllers);
+		rule.setWhat("InvestigationUser");
+		session.create(rule);
+
+		assertEquals(3, (session.getIcat().search(piOneSessionId, "InvestigationUser")).size());
+
+		try {
+			session.getIcat().search(piTwoSessionId, "InvestigationUser");
+		} catch (Exception e) {
+		}
+
+		session.clearAuthz();
+		session.setAuthz();
+
+	}
+
+	/**
+	 * To test with the case when an operation is allowed by a general rule but an unrestricted rule
+	 * also exists. This used to give a problem if the unrestricted rule was not processed first.
+	 */
+	@Test
+	public void authz3() throws Exception {
+		session.clear();
+
+		Facility facility = session.createFacility("Test Facility", 90);
+
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
+
+		List<Object> objects = session.search("Rule [bean='Investigation']<-> Group[name='root']");
+		for (Object o : objects) {
+			session.delete((Rule) o);
+		}
+
+		Group rootG = (Group) session.search("Group [name=:user]").get(0);
+
+		Rule rule = new Rule();
+		rule.setCrudFlags("C");
+		rule.setGroup(rootG);
+		rule.setWhat("Investigation");
+		session.create(rule);
+
+		rule = new Rule();
+		rule.setCrudFlags("R");
+		rule.setWhat("Investigation <-> InvestigationUser <-> User [name = :user]");
+		session.create(rule);
+
+		session.createInvestigation(facility, "InvestigationOne", "Investigation one",
+				investigationType);
+
+		session.createInvestigation(facility, "InvestigationTwo", "Investigation two",
+				investigationType);
+
+		rule = new Rule();
+		rule.setCrudFlags("CRUD");
+		rule.setGroup(rootG);
+		rule.setWhat("Investigation");
+		session.create(rule);
+
+		assertEquals(2, (session.search("Investigation")).size());
+
 		session.clearAuthz();
 		session.setAuthz();
 
@@ -1115,8 +1191,8 @@ public class TestWS {
 
 	@AfterClass
 	public static void afterClass() throws Exception {
-		 session.clear();
-		 session.clearAuthz();
+		session.clear();
+		session.clearAuthz();
 	}
 
 }

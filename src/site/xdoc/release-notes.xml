@@ -7,6 +7,15 @@
 
     <body>
 
+        <section name="4.2.2">
+            <p>This is a bug fix release. If you already have 4.2.0 or 4.2.1 installed, then simply remove the old ear file and deploy the new one.
+            </p>
+            <ul>
+                <li>A bug causing read access to be denied in certain circumstances, when it should have been permitted, has been fixed.
+                </li>
+            </ul>
+        </section>
+
         <section name="4.2.1">
             <p>This is a bug fix release. If you already have 4.2.0 installed, then simply remove the old ear file and deploy the new one.</p>
             <ul>
