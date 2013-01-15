@@ -13,6 +13,7 @@
             <ul>
                 <li>A bug causing read access to be denied in certain circumstances, when it should have been permitted, has been fixed.
                 </li>
+                <li>When attempting to format an error message about an invalid list of INCLUDES a null pointer exception is no longer thrown.</li>
             </ul>
         </section>
 

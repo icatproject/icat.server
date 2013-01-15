@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.DatafileFormat;
 import org.icatproject.core.entity.Dataset;
@@ -69,19 +70,26 @@ public class TestIncludes {
 		assertNull("No Include", sq.getInclude());
 	}
 
-	@Ignore
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testGood5() throws Exception {
+	public void testBad1() throws Exception {
 		List<Token> tokens = Tokenizer
-				.getTokens("Investigation INCLUDE Dataset, Datafile, DatasetParameter, Facility, Sample, SampleParameter");
-		testGood(tokens, Dataset.class, Datafile.class, DatasetParameter.class, Facility.class,
-				Sample.class, SampleParameter.class);
+				.getTokens("Investigation INCLUDE Facility, Instrument  [name='1210380']");
+		try {
+			testGood(tokens, Dataset.class, Datafile.class, DatasetParameter.class, Facility.class,
+					Sample.class, SampleParameter.class);
+			fail("Exception not thrown");
+		} catch (IcatException e) {
+			assertTrue(e
+					.getMessage()
+					.startsWith(
+							"Can't have loop in graph of entities. 'Facility' was encountered twice following"));
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testBad1() throws Exception {
+	public void testBad2() throws Exception {
 		List<Token> tokens = Tokenizer.getTokens("Dataset.id INCLUDE Datafile [id != 53]");
 		try {
 			testGood(tokens, Datafile.class);

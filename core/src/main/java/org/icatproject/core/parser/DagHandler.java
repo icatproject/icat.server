@@ -176,9 +176,9 @@ public class DagHandler {
 						throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 								"Can't have loop in graph of entities. '" + bean.getSimpleName()
 										+ "' was encountered twice following "
-										+ predecessor.getSimpleName() + " -> "
-										+ from.getSimpleName() + " -> " + bean.getSimpleName()
-										+ " in list of INCLUDES.");
+										+ (predecessor == null ? "" : predecessor.getSimpleName())
+										+ " -> " + from.getSimpleName() + " -> "
+										+ bean.getSimpleName() + " in list of INCLUDES.");
 					} else {
 						used.add(bean);
 						Step s = new Step(bean, relationship, followIncludes(from, bean, allBeans,
