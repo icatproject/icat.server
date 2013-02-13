@@ -1,6 +1,7 @@
 package org.icatproject.core.manager;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -132,9 +133,47 @@ public class BeanManager {
 						+ " " + e.getMessage());
 				int pos = crs.size();
 				EntityBaseBean bean = beans.get(pos);
-				bean.preparePersist(userId, manager);
-				bean.isUnique(manager);
-				bean.isValid(manager, true);
+				try {
+					bean.preparePersist(userId, manager);
+					bean.isUnique(manager);
+					bean.isValid(manager, true);
+				} catch (IcatException e1) {
+					e1.setOffset(pos);
+					throw e1;
+				}
+				/* Now look for duplicates within the list of objects provided */
+				Class<? extends EntityBaseBean> entityClass = bean.getClass();
+				Map<Field, Method> getters = eiHandler.getGetters(entityClass);
+
+				for (List<Field> constraint : eiHandler.getConstraintFields(entityClass)) {
+					for (int i = 0; i < pos; i++) {
+						boolean diff = false;
+						for (Field f : constraint) {
+							Object value = getValue(getters, f, bean);
+							Object value2 = getValue(getters, f, beans.get(i));
+							if (!value.equals(value2)) {
+								logger.debug("No problem with object " + i + " as " + f.getName()
+										+ " has value " + value2 + " and not " + value);
+								diff = true;
+								break;
+							}
+						}
+						if (!diff) {
+							StringBuilder erm = new StringBuilder();
+							for (Field f : constraint) {
+								if (erm.length() == 0) {
+									erm.append(entityClass.getSimpleName() + " exists with ");
+								} else {
+									erm.append(", ");
+								}
+								erm.append(f.getName() + " = '" + getValue(getters, f, bean) + "'");
+							}
+							throw new IcatException(
+									IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS,
+									erm.toString(), pos);
+						}
+					}
+				}
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage(), pos);
 
@@ -152,6 +191,31 @@ public class BeanManager {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 					"NotSupportedException" + e.getMessage(), -1);
 		}
+	}
+
+	private static Object getValue(Map<Field, Method> getters, Field f, EntityBaseBean bean)
+			throws IcatException {
+		Object value;
+		try {
+			value = getters.get(f).invoke(bean);
+		} catch (IllegalArgumentException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"IllegalArgumentException " + e.getMessage());
+		} catch (IllegalAccessException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"IllegalAccessException " + e.getMessage());
+		} catch (InvocationTargetException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"InvocationTargetException " + e.getMessage());
+		}
+		// TODO Change when null values are not allowed in uniqueness constraints
+		if (value == null) {
+			value = "Ad Hoc NULL Value";
+		}
+		if (value instanceof EntityBaseBean) {
+			value = "id:" + ((EntityBaseBean) value).getId();
+		}
+		return value;
 	}
 
 	public static NotificationMessages delete(String userId, EntityBaseBean bean,
@@ -625,9 +689,15 @@ public class BeanManager {
 				logger.trace("Transaction rolled back for deletion because of " + e.getClass()
 						+ " " + e.getMessage());
 				int pos = nms.size();
+
 				EntityBaseBean bean = beans.get(pos);
-				EntityBaseBean beanManaged = find(bean, manager);
-				beanManaged.canDelete(manager);
+				try {
+					EntityBaseBean beanManaged = find(bean, manager);
+					beanManaged.canDelete(manager);
+				} catch (IcatException e1) {
+					e1.setOffset(pos);
+					throw e1;
+				}
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage(), pos);
 			}
