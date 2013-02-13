@@ -7,6 +7,19 @@
 
     <body>
 
+        <section name="4.2.3">
+            <p>This is a bug fix release. If you already have 4.2.0, 4.2.1 or 4.2.2 installed, then simply remove the old ear file and deploy the new
+                one.
+            </p>
+            <ul>
+                <li>Two different error conditions were not being handled correctly in calls to createMany when a user attempted to violate a
+                    uniqueness constraint. In the case of a conflict with a pre-existing entry in ICAT the offset returned was -1. In the case that
+                    there were duplicates in the list passed in the call to createMany - rather than conflicts with existing database entries - an
+                    IcatException of type INTERNAL was being thrown, also with an offset of -1. These bugs are now fixed.
+                </li>
+            </ul>
+        </section>
+
         <section name="4.2.2">
             <p>This is a bug fix release. If you already have 4.2.0 or 4.2.1 installed, then simply remove the old ear file and deploy the new one.
             </p>

@@ -22,7 +22,7 @@
             </ol>
 
             <p>
-                If you already have ICAT 4.2.0 or 4.2.1 deployed then skip on to
+                If you already have ICAT 4.2.0, 4.2.1 or 4.2.2 deployed then skip on to
                 <a href="#ear">installing the .ear file</a>
                 .
             </p>
@@ -239,7 +239,7 @@
                     . If you have only one domain you may not need to specify the port and if the admin port is not 4848 then specify the correct
                     value.
                 </p>
-                <p>As the file is deployed the database is created. If you already have an ICAT 4.1 or 4.2.0 database you may get some messages as it
+                <p>As the file is deployed the database is created. If you already have an ICAT 4.1 or 4.2.n database you may get some messages as it
                     tries to
                     create tables that already exist.
                 </p>

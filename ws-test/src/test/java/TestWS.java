@@ -948,7 +948,147 @@ public class TestWS {
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
 			assertEquals("Facility exists with name = 'TestDuplicates'", ue.getMessage());
+			assertEquals(-1, ue.getOffset());
 		}
+	}
+
+	@Test
+	public void duplicatesMany() throws Exception {
+		session.clear();
+
+		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
+		Facility f = new Facility();
+		f.setName("One");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Two");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Three");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Two");
+		beans.add(f);
+		f = new Facility();
+		f.setName("One");
+		beans.add(f);
+		try {
+			session.createMany(beans);
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
+			assertEquals("Facility exists with name = 'Two'", ue.getMessage());
+			assertEquals(3, ue.getOffset());
+		}
+	}
+
+	@Test
+	public void duplicatesMany2() throws Exception {
+		session.clear();
+
+		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
+		Facility f = new Facility();
+		f.setName("One");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Two");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Three");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Two");
+		beans.add(f);
+		f = new Facility();
+		f.setName("One");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Two");
+		session.create(f);
+		try {
+			session.createMany(beans);
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
+			assertEquals("Facility exists with name = 'Two'", ue.getMessage());
+			assertEquals(1, ue.getOffset());
+		}
+	}
+
+	@Test
+	public void duplicatesMany3() throws Exception {
+		session.clear();
+		Facility f = new Facility();
+		f.setName("Two");
+		f.setId(session.create(f));
+		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
+		InvestigationType i = new InvestigationType();
+		i.setName("One");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("Two");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("Three");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("Two");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("One");
+		i.setFacility(f);
+		beans.add(i);
+		try {
+			session.createMany(beans);
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
+			assertTrue(ue.getMessage().startsWith(
+					"InvestigationType exists with name = 'Two', facility = 'id:"));
+			assertEquals(3, ue.getOffset());
+		}
+	}
+
+	@Test
+	public void noDuplicates() throws Exception {
+		session.clear();
+		Facility f = new Facility();
+		f.setName("Two");
+		f.setId(session.create(f));
+		Facility f2 = new Facility();
+		f2.setName("Three");
+		f2.setId(session.create(f2));
+		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
+		InvestigationType i = new InvestigationType();
+		i.setName("One");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("Two");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("Three");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("Four");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("One");
+		i.setFacility(f2);
+		beans.add(i);
+
+		session.createMany(beans);
+
 	}
 
 	@Test

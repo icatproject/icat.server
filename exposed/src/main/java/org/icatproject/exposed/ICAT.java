@@ -172,7 +172,6 @@ public class ICAT {
 		return Constants.API_VERSION;
 	}
 
-	@SuppressWarnings("unused")
 	@AroundInvoke
 	private Object logMethods(InvocationContext ctx) throws IcatException {
 
