@@ -15,10 +15,9 @@ public class CompatSession {
 	private final String sessionId;
 
 	public CompatSession(String sessionId) throws MalformedURLException {
-		String host = System.getProperty("serverHost");
-		String port = System.getProperty("serverPort");
-		final String urlString = "https://" + host + ":" + port;
-		final URL icatCompatUrl = new URL(urlString + "/ICATCompatService/ICATCompat?wsdl");
+		String url = System.getProperty("serverUrl");
+		System.out.println("Using compat service at " + url);
+		final URL icatCompatUrl = new URL(url + "/ICATCompatService/ICATCompat?wsdl");
 		final ICATCompatService icatCompatService = new ICATCompatService(icatCompatUrl, new QName(
 				"client.icat3.uk", "ICATCompatService"));
 		this.icatEP = icatCompatService.getICATCompatPort();

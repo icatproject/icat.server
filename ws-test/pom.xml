@@ -45,9 +45,9 @@
                     <useFile>false</useFile>
                     <testFailureIgnore>false</testFailureIgnore>
                     <systemPropertyVariables>
-                        <serverPort>${serverPort}</serverPort>
-                        <serverHost>${serverHost}</serverHost>
+                        <serverUrl>${serverUrl}</serverUrl>
                         <javax.net.ssl.trustStore>${javax.net.ssl.trustStore}</javax.net.ssl.trustStore>
+                        <projectVersion>${project.version}</projectVersion>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

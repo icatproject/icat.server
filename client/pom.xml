@@ -66,8 +66,7 @@
                             <executable>sh</executable>
                             <arguments>
                                 <argument>wsdl.sh</argument>
-                                <argument>${serverHost}</argument>
-                                <argument>${serverPort}</argument>
+                                <argument>${serverUrl}</argument>
                             </arguments>
                         </configuration>
                     </execution>

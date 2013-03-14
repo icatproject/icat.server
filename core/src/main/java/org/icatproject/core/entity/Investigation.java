@@ -26,7 +26,6 @@ import org.icatproject.core.IcatException;
 		"FACILITY_CYCLE_ID", "INSTRUMENT_ID" }) })
 public class Investigation extends EntityBaseBean implements Serializable {
 
-
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<Dataset> datasets = new ArrayList<Dataset>();
 
@@ -99,7 +98,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	/* Needed for JPA */
 	public Investigation() {
 	}
-
 
 	public List<Dataset> getDatasets() {
 		return datasets;
@@ -195,6 +193,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		for (Sample sample : samples) {
 			sample.preparePersist(modId, manager);
 			sample.setInvestigation(this); // Set back ref
+		}
+		for (InvestigationUser investigationUser : investigationUsers) {
+			investigationUser.preparePersist(modId, manager);
+			investigationUser.setInvestigation(this); // Set back ref
 		}
 	}
 

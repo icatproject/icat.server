@@ -124,6 +124,32 @@ public class TestWS {
 	}
 
 	@Test
+	public void createCascade() throws Exception {
+		session.clear();
+		Facility facility = session.createFacility("Test Facility", 90);
+
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
+
+		List<Object> objects = session.search("User [name = 'root']");
+		User u = (User) objects.get(0);
+		InvestigationUser iu = new InvestigationUser();
+		iu.setUser(u);
+		Investigation i = new Investigation();
+		i.setFacility(facility);
+		i.setName("Frederick");
+		i.setTitle("the Great");
+		i.setType(investigationType);
+		i.getInvestigationUsers().add(iu);
+		session.create(i);
+		objects = session.search("Investigation INCLUDE InvestigationUser, User [name='Frederick']" );
+		assertEquals(1, objects.size());
+		i = (Investigation) objects.get(0);
+		assertEquals(1, i.getInvestigationUsers().size());
+		assertEquals("root", i.getInvestigationUsers().get(0).getUser().getName());
+	}
+
+	@Test
 	public void performance() throws Exception {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
@@ -1177,7 +1203,8 @@ public class TestWS {
 	@Test
 	public void login() throws Exception {
 		assertTrue(session.getRemainingMinutes() > 0);
-		assertEquals("4.2.2", session.getApiVersion());
+		assertEquals(System.getProperty("projectVersion").replace("-SNAPSHOT", ""),
+				session.getApiVersion());
 		assertEquals("root", session.getUserName());
 	}
 
@@ -1320,13 +1347,18 @@ public class TestWS {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		random = new Random();
-		session = new Session();
-		compatSession = session.getCompatSession();
-		session.setAuthz();
-		session.clearAuthz();
-		session.setAuthz();
-		session.clear();
+		try {
+			random = new Random();
+			session = new Session();
+			compatSession = session.getCompatSession();
+			session.setAuthz();
+			session.clearAuthz();
+			session.setAuthz();
+			session.clear();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@AfterClass

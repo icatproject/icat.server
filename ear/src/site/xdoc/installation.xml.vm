@@ -22,7 +22,7 @@
             </ol>
 
             <p>
-                If you already have ICAT 4.2.0, 4.2.1 or 4.2.2 deployed then skip on to
+                If you already have ICAT 4.2.0, 4.2.1, 4.2.2 or 4.2.3 deployed then skip on to
                 <a href="#ear">installing the .ear file</a>
                 .
             </p>
@@ -62,7 +62,9 @@
                     </em>
                 </p>
                 <p>
-                    The database system must be supported by eclipselink. This includes most
+                    The database system must be supported by eclipselink and must support transactions and enforce foreign key constraints.
+                    This
+                    includes most
                     database systems you are likely to want as explained at
                     <a href="http://wiki.eclipse.org/EclipseLink/FAQ/JPA#What_databases_are_supported.3F">the
                         eclipselink web site.
@@ -81,12 +83,21 @@
                     In the case of Oracle this is
                     ojdbc14.jar or ojdbc16.jar and for MySQL it is
                     something like
-                    mysql-connector-java*.jar. MySQL must be installed with InnoDB
-                    support. Eclipselink, which is used by ICAT, will ensure that MySQL
-                    tables make use of the InnoDB
-                    engine. In the case of Derby the
-                    connector comes
-                    pre-installed with Glassfish
+                    mysql-connector-java*.jar.
+                </p>
+                <p>
+                    MySQL must be installed with InnoDB
+                    support and you must ensure that while installing ICAT the default engine is InnoDB. You can
+                    see
+                    the default engine with "show engines;". To fix an
+                    existing system you can use the ALTER TABLE command as explained in:
+                    <a href="http://dev.mysql.com/doc/refman/5.1/en/storage-engine-setting.html">storage-engine-setting</a>
+                </p>
+                <p>In the case of Derby the
+                    connector
+                    comes
+                    pre-installed with
+                    Glassfish
                     however we do not
                     expect
                     Derby to be used for production work.

@@ -1,7 +1,8 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -21,10 +22,10 @@ public class Group extends EntityBaseBean implements Serializable {
 	private String name;
 
 	@OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
-	private Set<Rule> rules;
+	private List<Rule> rules = new ArrayList<Rule>();
 
 	@OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
-	private Set<UserGroup> userGroups;;
+	private List<UserGroup> userGroups = new ArrayList<UserGroup>();
 
 	// Needed for JPA
 	public Group() {
@@ -34,11 +35,11 @@ public class Group extends EntityBaseBean implements Serializable {
 		return this.name;
 	}
 
-	public Set<Rule> getRules() {
+	public List<Rule> getRules() {
 		return rules;
 	}
 
-	public Set<UserGroup> getUserGroups() {
+	public List<UserGroup> getUserGroups() {
 		return userGroups;
 	}
 
@@ -46,11 +47,11 @@ public class Group extends EntityBaseBean implements Serializable {
 		this.name = name;
 	}
 
-	public void setRules(Set<Rule> rules) {
+	public void setRules(List<Rule> rules) {
 		this.rules = rules;
 	}
 
-	public void setUserGroups(Set<UserGroup> userGroups) {
+	public void setUserGroups(List<UserGroup> userGroups) {
 		this.userGroups = userGroups;
 	}
 

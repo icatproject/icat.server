@@ -7,6 +7,21 @@
 
     <body>
 
+        <section name="4.2.4">
+            <p>This is a bug fix release. If you already have 4.2.0, 4.2.1, 4.2.2 or 4.2.3 installed, then simply remove the old ear file and deploy
+                the new one.
+            </p>
+            <ul>
+                <li>Version number updated to 4.2.4 and test updated to ensure that the version corresponds to the maven project version.
+                </li>
+                <li>LICENSE.txt file added to top directory of the source tree.
+                </li>
+                <li>Creating an Investigation which refers to a new InvestigationUser now works properly.</li>
+                <li>Using INCLUDE with User and Group now works properly. Previously it could throw a null pointer exception.</li>
+                <li>Database requirements have been made more precise in the deployment instructions.</li>
+            </ul>
+        </section>
+
         <section name="4.2.3">
             <p>This is a bug fix release. If you already have 4.2.0, 4.2.1 or 4.2.2 installed, then simply remove the old ear file and deploy the new
                 one.

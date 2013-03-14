@@ -1,6 +1,7 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -32,20 +33,20 @@ public class User extends EntityBaseBean implements Serializable {
 	}
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-	private List<UserGroup> userGroups;
+	private List<UserGroup> userGroups = new ArrayList<UserGroup>();
 
 	public List<UserGroup> getUserGroups() {
 		return userGroups;
 	}
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-	private List<InvestigationUser> investigationUsers;
+	private List<InvestigationUser> investigationUsers = new ArrayList<InvestigationUser>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-	private List<InstrumentScientist> instrumentScientists;
+	private List<InstrumentScientist> instrumentScientists = new ArrayList<InstrumentScientist>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-	private List<Study> studies;
+	private List<Study> studies = new ArrayList<Study>();
 
 	public List<Study> getStudies() {
 		return studies;

@@ -81,16 +81,15 @@ public class Session {
 	private CompatSession compatSession;
 
 	public Session() throws MalformedURLException, IcatException_Exception {
-		String host = System.getProperty("serverHost");
-		String port = System.getProperty("serverPort");
-		final String urlString = "https://" + host + ":" + port;
-		final URL icatUrl = new URL(urlString + "/ICATService/ICAT?wsdl");
+		String url = System.getProperty("serverUrl");
+		System.out.println("Using ICAT service at " + url);
+		final URL icatUrl = new URL(url + "/ICATService/ICAT?wsdl");
 		final ICATService icatService = new ICATService(icatUrl, new QName(
 				"http://icatproject.org", "ICATService"));
 		this.icat = icatService.getICATPort();
 
 		this.sessionId = login("db", "username", "root", "password", "password");
-
+		System.out.println("Logged in");
 		this.compatSession = new CompatSession(this.sessionId);
 	}
 
@@ -202,7 +201,7 @@ public class Session {
 				} else {
 					sb.append(" and");
 				}
-				sb.append(" " + lo.size() + " object"  + (lo.size() == 1 ? "" : "s") + " of type "
+				sb.append(" " + lo.size() + " object" + (lo.size() == 1 ? "" : "s") + " of type "
 						+ type);
 				for (Object o : lo) {
 					toDelete.add((EntityBaseBean) o);

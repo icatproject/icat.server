@@ -30,7 +30,7 @@ public class InvestigationUser extends EntityBaseBean implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Investigator[id=" + id + "]";
+		return "InvestigationUser[id=" + id + "]";
 	}
 
 	public String getRole() {
