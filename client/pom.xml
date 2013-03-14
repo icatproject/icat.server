@@ -4,11 +4,11 @@
     <parent>
         <groupId>org.icatproject</groupId>
         <artifactId>icat</artifactId>
-        <version>4.2.4-SNAPSHOT</version>
+        <version>4.2.4</version>
     </parent>
 
     <artifactId>icat.client</artifactId>
-    <version>4.2.4-SNAPSHOT</version>
+    <version>4.2.4</version>
     <packaging>jar</packaging>
     <name>ICAT Java Client</name>
 
@@ -99,7 +99,7 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.ear</artifactId>
-            <version>4.2.4-SNAPSHOT</version>
+            <version>4.2.4</version>
             <type>ear</type>
         </dependency>
     </dependencies>
