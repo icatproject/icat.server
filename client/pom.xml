@@ -8,13 +8,11 @@
     </parent>
 
     <artifactId>icat.client</artifactId>
-    <version>4.3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>ICAT Java Client</name>
 
     <properties>
-        <wsdl1>${basedir}/ICAT.wsdl</wsdl1>
-        <wsdl2>${basedir}/ICATCompat.wsdl</wsdl2>
+        <wsdl>${basedir}/ICAT.wsdl</wsdl>
     </properties>
 
     <build>
@@ -32,18 +30,7 @@
                         </goals>
                         <configuration>
                             <wsdlUrls>
-                                <wsdlUrl>${wsdl1}</wsdlUrl>
-                            </wsdlUrls>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>execution2</id>
-                        <goals>
-                            <goal>wsimport</goal>
-                        </goals>
-                        <configuration>
-                            <wsdlUrls>
-                                <wsdlUrl>${wsdl2}</wsdlUrl>
+                                <wsdlUrl>${wsdl}</wsdlUrl>
                             </wsdlUrls>
                         </configuration>
                     </execution>
@@ -52,7 +39,6 @@
             </plugin>
 
             <plugin>
-
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>

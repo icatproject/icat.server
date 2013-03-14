@@ -7,6 +7,16 @@
 
     <body>
 
+        <section name="4.3.0">
+            <p>This includes schema changes and a number of speculative features.
+            </p>
+            <ul>
+                <li>The "ICATCompat" service for backwards compatibility with ICAT 3.x has now been removed.
+                </li>
+
+            </ul>
+        </section>
+
         <section name="4.2.4">
             <p>This is a bug fix release. If you already have 4.2.0, 4.2.1, 4.2.2 or 4.2.3 installed, then simply remove the old ear file and deploy
                 the new one.

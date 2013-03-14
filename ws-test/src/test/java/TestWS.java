@@ -68,7 +68,6 @@ public class TestWS {
 
 	private static Session session;
 	private static Random random;
-	private static CompatSession compatSession;
 
 	private static void create() throws Exception {
 
@@ -142,7 +141,8 @@ public class TestWS {
 		i.setType(investigationType);
 		i.getInvestigationUsers().add(iu);
 		session.create(i);
-		objects = session.search("Investigation INCLUDE InvestigationUser, User [name='Frederick']" );
+		objects = session
+				.search("Investigation INCLUDE InvestigationUser, User [name='Frederick']");
 		assertEquals(1, objects.size());
 		i = (Investigation) objects.get(0);
 		assertEquals(1, i.getInvestigationUsers().size());
@@ -1192,15 +1192,6 @@ public class TestWS {
 	}
 
 	@Test
-	public void compat() throws Exception {
-		session.clear();
-		create();
-		List<uk.icat3.client.Investigation> invs = compatSession.getMyInvestigations();
-		assertEquals(1, invs.size());
-		assertEquals("A", invs.get(0).getName());
-	}
-
-	@Test
 	public void login() throws Exception {
 		assertTrue(session.getRemainingMinutes() > 0);
 		assertEquals(System.getProperty("projectVersion").replace("-SNAPSHOT", ""),
@@ -1350,7 +1341,6 @@ public class TestWS {
 		try {
 			random = new Random();
 			session = new Session();
-			compatSession = session.getCompatSession();
 			session.setAuthz();
 			session.clearAuthz();
 			session.setAuthz();

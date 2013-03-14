@@ -9,12 +9,5 @@
 				<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 			</webservice-endpoint>
 		</ejb>
-        <ejb>
-            <ejb-name>ICATCompat</ejb-name>
-            <webservice-endpoint>
-                <port-component-name>ICATCompat</port-component-name>
-                <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-            </webservice-endpoint>
-        </ejb>
 	</enterprise-beans>
 </sun-ejb-jar>

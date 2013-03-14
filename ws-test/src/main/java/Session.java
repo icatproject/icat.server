@@ -78,7 +78,6 @@ public class Session {
 	}
 
 	private final String sessionId;
-	private CompatSession compatSession;
 
 	public Session() throws MalformedURLException, IcatException_Exception {
 		String url = System.getProperty("serverUrl");
@@ -90,7 +89,6 @@ public class Session {
 
 		this.sessionId = login("db", "username", "root", "password", "password");
 		System.out.println("Logged in");
-		this.compatSession = new CompatSession(this.sessionId);
 	}
 
 	public String login(String plugin, String... credbits) throws IcatException_Exception {
@@ -394,10 +392,6 @@ public class Session {
 
 	public String getUserName() throws IcatException_Exception {
 		return this.icat.getUserName(this.sessionId);
-	}
-
-	public CompatSession getCompatSession() {
-		return compatSession;
 	}
 
 	public void registerDatafile(Datafile datafile) throws IcatException_Exception {
