@@ -53,7 +53,6 @@ import org.icatproject.core.entity.StudyInvestigation;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
 import org.icatproject.core.manager.EntityInfo;
-import org.icatproject.core.manager.NotificationRequest;
 
 @Stateless
 @WebService(targetNamespace = "http://icatproject.org")
@@ -111,8 +110,7 @@ public class ICAT {
 			@WebParam StudyStatus studyStatus, @WebParam Application application,
 			@WebParam Job job, @WebParam InputDataset inputDataset,
 			@WebParam OutputDataset outputDataset, @WebParam InputDatafile inputDatafile,
-			@WebParam OutputDatafile outputDatafile,
-			@WebParam NotificationRequest notificationRequest, @WebParam Group group,
+			@WebParam OutputDatafile outputDatafile, @WebParam Group group,
 			@WebParam UserGroup userGroup) {
 		beanManagerBean.dummy(facility);
 	}
