@@ -185,7 +185,7 @@ public class Session {
 	}
 
 	public void clear() throws Exception {
-		deleteAll(Arrays.asList("Facility", "Job", "Application", "NotificationRequest"));
+		deleteAll(Arrays.asList("Facility", "Job", "Application"));
 	}
 
 	private void deleteAll(List<String> names) throws IcatException_Exception {
@@ -358,7 +358,6 @@ public class Session {
 		this.addRule("root", "OutputDataset", "CRUD");
 		this.addRule("root", "InputDatafile", "CRUD");
 		this.addRule("root", "OutputDatafile", "CRUD");
-		this.addRule("root", "NotificationRequest", "CRUD");
 		this.addRule("root", "InvestigationParameter", "CRUD");
 	}
 
@@ -400,6 +399,10 @@ public class Session {
 
 	public void deleteMany(List<EntityBaseBean> beans) throws IcatException_Exception {
 		this.icat.deleteMany(sessionId, beans);
+	}
+
+	public void refresh() throws IcatException_Exception {
+		this.icat.refresh(sessionId);
 	}
 
 }

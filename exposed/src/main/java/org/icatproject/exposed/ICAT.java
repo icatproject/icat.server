@@ -39,7 +39,6 @@ import org.icatproject.core.entity.InvestigationType;
 import org.icatproject.core.entity.InvestigationUser;
 import org.icatproject.core.entity.Job;
 import org.icatproject.core.entity.Keyword;
-import org.icatproject.core.entity.NotificationRequest;
 import org.icatproject.core.entity.OutputDatafile;
 import org.icatproject.core.entity.OutputDataset;
 import org.icatproject.core.entity.ParameterType;
@@ -54,6 +53,7 @@ import org.icatproject.core.entity.StudyInvestigation;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
 import org.icatproject.core.manager.EntityInfo;
+import org.icatproject.core.manager.NotificationRequest;
 
 @Stateless
 @WebService(targetNamespace = "http://icatproject.org")
@@ -72,12 +72,6 @@ public class ICAT {
 	}
 
 	@WebMethod
-	public List<?> search(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "query") String query) throws IcatException {
-		return beanManagerBean.search(sessionId, query);
-	}
-
-	@WebMethod
 	public long create(@WebParam(name = "sessionId") String sessionId,
 			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
 		return beanManagerBean.create(sessionId, bean);
@@ -90,34 +84,15 @@ public class ICAT {
 	}
 
 	@WebMethod
-	public void deleteMany(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "beans") List<EntityBaseBean> beans) throws IcatException {
-		beanManagerBean.deleteMany(sessionId, beans);
-	}
-
-	@WebMethod
 	public void delete(@WebParam(name = "sessionId") String sessionId,
 			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
 		beanManagerBean.delete(sessionId, bean);
 	}
 
 	@WebMethod
-	public void update(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
-		beanManagerBean.update(sessionId, bean);
-	}
-
-	@WebMethod
-	public EntityBaseBean get(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "query") String query, @WebParam(name = "primaryKey") long primaryKey)
-			throws IcatException {
-		return beanManagerBean.get(sessionId, query, primaryKey);
-	}
-
-	@WebMethod
-	public EntityInfo getEntityInfo(@WebParam(name = "beanName") String beanName)
-			throws IcatException {
-		return beanManagerBean.getEntityInfo(beanName);
+	public void deleteMany(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "beans") List<EntityBaseBean> beans) throws IcatException {
+		beanManagerBean.deleteMany(sessionId, beans);
 	}
 
 	@WebMethod
@@ -143,6 +118,36 @@ public class ICAT {
 	}
 
 	@WebMethod
+	public EntityBaseBean get(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "query") String query, @WebParam(name = "primaryKey") long primaryKey)
+			throws IcatException {
+		return beanManagerBean.get(sessionId, query, primaryKey);
+	}
+
+	@WebMethod()
+	public String getApiVersion() throws IcatException {
+		return Constants.API_VERSION;
+	}
+
+	@WebMethod
+	public EntityInfo getEntityInfo(@WebParam(name = "beanName") String beanName)
+			throws IcatException {
+		return beanManagerBean.getEntityInfo(beanName);
+	}
+
+	@WebMethod()
+	public double getRemainingMinutes(@WebParam(name = "sessionId") String sessionId)
+			throws IcatException {
+		return beanManagerBean.getRemainingMinutes(sessionId);
+	}
+
+	@WebMethod
+	public String getUserName(@WebParam(name = "sessionId") String sessionId) throws IcatException {
+		return beanManagerBean.getUserName(sessionId);
+
+	}
+
+	@WebMethod
 	public String login(@WebParam(name = "plugin") String plugin,
 			@WebParam(name = "credentials") Map<String, String> credentials) throws IcatException {
 		MessageContext msgCtxt = webServiceContext.getMessageContext();
@@ -156,20 +161,38 @@ public class ICAT {
 	}
 
 	@WebMethod
-	public String getUserName(@WebParam(name = "sessionId") String sessionId) throws IcatException {
-		return beanManagerBean.getUserName(sessionId);
-
+	public void refresh(@WebParam(name = "sessionId") String sessionId) throws IcatException {
+		beanManagerBean.refresh(sessionId);
 	}
 
-	@WebMethod()
-	public double getRemainingMinutes(@WebParam(name = "sessionId") String sessionId)
-			throws IcatException {
-		return beanManagerBean.getRemainingMinutes(sessionId);
+	@WebMethod
+	public List<?> search(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "query") String query) throws IcatException {
+		return beanManagerBean.search(sessionId, query);
 	}
 
-	@WebMethod()
-	public String getApiVersion() throws IcatException {
-		return Constants.API_VERSION;
+	@WebMethod
+	public void testCreate(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
+		beanManagerBean.testCreate(sessionId, bean);
+	}
+
+	@WebMethod
+	public void testDelete(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
+		beanManagerBean.testDelete(sessionId, bean);
+	}
+
+	@WebMethod
+	public void testUpdate(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
+		beanManagerBean.testUpdate(sessionId, bean);
+	}
+
+	@WebMethod
+	public void update(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
+		beanManagerBean.update(sessionId, bean);
 	}
 
 	@AroundInvoke

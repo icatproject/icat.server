@@ -14,9 +14,6 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
@@ -36,9 +33,7 @@ import org.icatproject.core.entity.Facility;
 import org.icatproject.core.manager.BeanManager;
 import org.icatproject.core.manager.CreateResponse;
 import org.icatproject.core.manager.EntityInfo;
-import org.icatproject.core.manager.GetResponse;
 import org.icatproject.core.manager.NotificationMessages;
-import org.icatproject.core.manager.SearchResponse;
 
 @Stateless()
 @TransactionManagement(TransactionManagementType.BEAN)
@@ -55,14 +50,6 @@ public class BeanManagerBean {
 
 	// TODO - this use of mappedName rather than name lags elegance - but it
 	// works
-	@Resource(mappedName = "jms/ICATQueue")
-	private Queue queue;
-
-	private QueueConnection queueConnection;
-
-	@Resource(name = "jms/ICATQueueConnectionFactory")
-	private QueueConnectionFactory queueConnectionFactory;
-
 	@Resource(mappedName = "jms/ICATTopic")
 	private Topic topic;
 
@@ -82,8 +69,8 @@ public class BeanManagerBean {
 			String userId = getUserName(sessionId);
 			CreateResponse createResponse = BeanManager.create(userId, bean, manager,
 					userTransaction);
-			Transmitter.processMessages(createResponse.getNotificationMessages(), queueConnection,
-					queue, topicConnection, topic);
+			Transmitter.processMessages(createResponse.getNotificationMessages(), topicConnection,
+					topic);
 			return createResponse.getPk();
 		} catch (IcatException e) {
 			reportIcatException(e);
@@ -102,7 +89,7 @@ public class BeanManagerBean {
 			List<Long> lo = new ArrayList<Long>();
 			for (CreateResponse createResponse : createResponses) {
 				Transmitter.processMessages(createResponse.getNotificationMessages(),
-						queueConnection, queue, topicConnection, topic);
+						topicConnection, topic);
 				lo.add(createResponse.getPk());
 			}
 			return lo;
@@ -119,7 +106,7 @@ public class BeanManagerBean {
 		try {
 			String userId = getUserName(sessionId);
 			NotificationMessages nms = BeanManager.delete(userId, bean, manager, userTransaction);
-			Transmitter.processMessages(nms, queueConnection, queue, topicConnection, topic);
+			Transmitter.processMessages(nms, topicConnection, topic);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -135,7 +122,7 @@ public class BeanManagerBean {
 			List<NotificationMessages> nms = BeanManager.deleteMany(userId, beans, manager,
 					userTransaction);
 			for (NotificationMessages nm : nms) {
-				Transmitter.processMessages(nm, queueConnection, queue, topicConnection, topic);
+				Transmitter.processMessages(nm, topicConnection, topic);
 			}
 		} catch (IcatException e) {
 			reportIcatException(e);
@@ -150,8 +137,6 @@ public class BeanManagerBean {
 	@PreDestroy()
 	private void destroyBMB() {
 		try {
-			queueConnection.close();
-			queueConnection = null;
 			topicConnection.close();
 			topicConnection = null;
 		} catch (JMSException e) {
@@ -166,11 +151,7 @@ public class BeanManagerBean {
 	public EntityBaseBean get(String sessionId, String query, long primaryKey) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-
-			GetResponse getResponse = BeanManager.get(userId, query, primaryKey, manager);
-			Transmitter.processMessages(getResponse.getNotificationMessages(), queueConnection,
-					queue, topicConnection, topic);
-			return getResponse.getBean();
+			return BeanManager.get(userId, query, primaryKey, manager);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -208,7 +189,6 @@ public class BeanManagerBean {
 		logger.info("Loaded log4j properties from : " + log4jFile + " and will watch it.");
 
 		try {
-			queueConnection = queueConnectionFactory.createQueueConnection();
 			topicConnection = topicConnectionFactory.createTopicConnection();
 		} catch (JMSException e) {
 			logger.fatal("Problem with JMS " + e);
@@ -256,10 +236,7 @@ public class BeanManagerBean {
 	public List<?> search(String sessionId, String query) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			SearchResponse searchResponse = BeanManager.search(userId, query, manager);
-			Transmitter.processMessages(searchResponse.getNotificationMessages(), queueConnection,
-					queue, topicConnection, topic);
-			return searchResponse.getList();
+			return BeanManager.search(userId, query, manager);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -273,7 +250,7 @@ public class BeanManagerBean {
 		try {
 			String userId = getUserName(sessionId);
 			NotificationMessages nms = BeanManager.update(userId, bean, manager, userTransaction);
-			Transmitter.processMessages(nms, queueConnection, queue, topicConnection, topic);
+			Transmitter.processMessages(nms, topicConnection, topic);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -281,6 +258,25 @@ public class BeanManagerBean {
 			reportThrowable(e);
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
 		}
+	}
+
+	public void refresh(String sessionId) throws IcatException {
+		BeanManager.refresh(sessionId, lifetimeMinutes, manager, userTransaction);
+	}
+
+	public void testCreate(String sessionId, EntityBaseBean bean) throws IcatException {
+		String userId = getUserName(sessionId);
+		BeanManager.testCreate(userId, bean, manager, userTransaction);
+	}
+
+	public void testUpdate(String sessionId, EntityBaseBean bean) throws IcatException {
+		String userId = getUserName(sessionId);
+		BeanManager.testUpdate(userId, bean, manager, userTransaction);
+	}
+
+	public void testDelete(String sessionId, EntityBaseBean bean) throws IcatException {
+		String userId = getUserName(sessionId);
+		BeanManager.testDelete(userId, bean, manager, userTransaction);
 	}
 
 }

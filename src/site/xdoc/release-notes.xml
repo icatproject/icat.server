@@ -13,6 +13,15 @@
             <ul>
                 <li>The "ICATCompat" service for backwards compatibility with ICAT 3.x has now been removed.
                 </li>
+                <li>A method "void refresh(String sid)" has been added to refresh an ICAT session.
+                </li>
+                <li>The notification mechanism has been completely changed.</li>
+                <li>It is not legal in queries with an INCLUDE to use a "1" in conjunction with and entity name. This will now reliably throw an
+                    exception.
+                </li>
+                <li>New calls testCreate, testUpdate and testDelete created. They are exactly equivalent to the corresponding create, update and
+                    delete calls but return void and result in no change of state. They will throw the same exceptions as the real call will throw.
+                </li>
 
             </ul>
         </section>

@@ -1,38 +1,22 @@
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Queue;
 
-import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
 
 public class Listener implements MessageListener {
 
-	Queue<Map<String, String>> q = new LinkedList<Map<String, String>>();
+	Queue<ObjectMessage> q = new LinkedList<ObjectMessage>();
 
 	@Override
 	public void onMessage(Message message) {
-		try {
-			Map<String, String> msg = new HashMap<String, String>();
-			@SuppressWarnings("rawtypes")
-			Enumeration names = message.getPropertyNames();
-			while (names.hasMoreElements()) {
-				String name = (String) names.nextElement();
-				msg.put(name, message.getStringProperty(name));
-
-			}
-			synchronized (q) {
-				q.add(msg);
-			}
-		} catch (JMSException e) {
-			e.printStackTrace();
+		synchronized (q) {
+			q.add((ObjectMessage) message);
 		}
-
 	}
 
-	public Map<String, String> getMessage() {
+	public ObjectMessage getMessage() {
 		synchronized (q) {
 			return q.poll();
 		}

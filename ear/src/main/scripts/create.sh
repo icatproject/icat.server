@@ -28,9 +28,7 @@ $asadmin create-jdbc-connection-pool \
    icat
 $asadmin create-jdbc-resource --connectionpoolid icat jdbc/icat
 
-$asadmin create-jms-resource --restype javax.jms.QueueConnectionFactory jms/ICATQueueConnectionFactory
 $asadmin create-jms-resource --restype javax.jms.TopicConnectionFactory jms/ICATTopicConnectionFactory
-$asadmin create-jms-resource --restype javax.jms.Queue jms/ICATQueue
 $asadmin create-jms-resource --restype javax.jms.Topic jms/ICATTopic
 
 $asadmin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=128

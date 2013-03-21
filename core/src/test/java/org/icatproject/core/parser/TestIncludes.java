@@ -21,7 +21,6 @@ import org.icatproject.core.entity.Facility;
 import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.Sample;
 import org.icatproject.core.entity.SampleParameter;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestIncludes {

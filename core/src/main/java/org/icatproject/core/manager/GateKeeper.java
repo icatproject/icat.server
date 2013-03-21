@@ -19,12 +19,12 @@ import org.icatproject.core.PropertyHandler;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Rule;
 
-
 public class GateKeeper {
 
 	private final static Logger logger = Logger.getLogger(GateKeeper.class);
 	private final static EntityInfoHandler pkHandler = EntityInfoHandler.getInstance();
-	private final static Set<String> rootUserNames = PropertyHandler.getInstance().getRootUserNames();
+	private final static Set<String> rootUserNames = PropertyHandler.getInstance()
+			.getRootUserNames();
 
 	public static Comparator<String> stringsBySize = new Comparator<String>() {
 
@@ -65,7 +65,7 @@ public class GateKeeper {
 		String qName = null;
 		if (access == AccessType.CREATE) {
 			qName = Rule.CREATE_QUERY;
-		} else if (access == AccessType.READ || access == AccessType.DOWNLOAD) {
+		} else if (access == AccessType.READ) {
 			qName = Rule.READ_QUERY;
 		} else if (access == AccessType.UPDATE) {
 			qName = Rule.UPDATE_QUERY;

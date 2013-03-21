@@ -2,8 +2,10 @@ package org.icatproject.core;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -14,8 +16,19 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 import org.icatproject.authentication.Authenticator;
+import org.icatproject.core.manager.NotificationRequest;
 
 public class PropertyHandler {
+
+	public enum Operation {
+		CREATE, UPDATE, DELETE
+	}
+
+	public enum Entity {
+		DATAFILE, DATASET
+	}
+
+
 
 	private static PropertyHandler instance = null;
 	private static final Logger logger = Logger.getLogger(PropertyHandler.class);
@@ -34,6 +47,8 @@ public class PropertyHandler {
 	}
 
 	private Set<String> rootUserNames = new HashSet<String>();
+
+	private List<NotificationRequest> notificationRequests = new ArrayList<NotificationRequest>();
 
 	public Set<String> getRootUserNames() {
 		return rootUserNames;
@@ -103,15 +118,47 @@ public class PropertyHandler {
 			throw new IllegalStateException(msg);
 		}
 
-		String names = props.getProperty("rootUserNames").trim();
+		String names = props.getProperty("rootUserNames");
 		if (names == null) {
 			String msg = "rootUserNames is not set";
 			logger.fatal(msg);
 			throw new IllegalStateException(msg);
 		}
-		for (String name : names.split("\\s+")) {
+		for (String name : names.trim().split("\\s+")) {
 			rootUserNames.add(name);
 		}
 
+		/* Sort out the notification requests */
+		String notificationList = props.getProperty("notification.list");
+		if (notificationList == null) {
+			String msg = "Property 'notification.list' must be set but may be empty";
+			logger.fatal(msg);
+			throw new IllegalStateException(msg);
+		}
+		notificationList = notificationList.trim();
+		if (!notificationList.isEmpty()) {
+			for (String mnemonic : notificationList.split("\\s+")) {
+				String operation = checkProp(props, mnemonic, "operation");
+				String entity = checkProp(props, mnemonic, "entity");
+				notificationRequests.add(new NotificationRequest(Operation.valueOf(Operation.class,
+						operation), Entity.valueOf(Entity.class, entity)));
+			}
+		}
+
+	}
+
+	private String checkProp(Properties props, String mnemonic, String keyele) {
+		String key = "notification." + mnemonic + "." + keyele;
+		String value = props.getProperty(key);
+		if (value == null) {
+			String msg = "Property '" + key + "' is not set";
+			logger.fatal(msg);
+			throw new IllegalStateException(msg);
+		}
+		return value.trim().toUpperCase();
+	}
+
+	public List<NotificationRequest> getNotificationRequests() {
+		return notificationRequests;
 	}
 }

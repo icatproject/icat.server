@@ -62,4 +62,10 @@ public class Session implements Serializable {
 		return id;
 	}
 
+	public void refresh(int lifetimeMinutes) {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MINUTE, lifetimeMinutes);
+		this.expireDateTime = cal.getTime();
+	}
+
 }

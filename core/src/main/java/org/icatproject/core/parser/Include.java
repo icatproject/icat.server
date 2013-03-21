@@ -23,21 +23,21 @@ public class Include {
 		String value = name.getValue();
 		if (name.getType() == Token.Type.NAME) {
 			this.includes.add(EntityInfoHandler.getClass(value));
+			Token t;
+			while ((t = input.peek(0)) != null && t.getType() == Token.Type.COMMA) {
+				input.consume();
+				name = input.consume(Token.Type.NAME);
+				value = name.getValue();
+				this.includes.add(EntityInfoHandler.getClass(value));
+			}
+			DagHandler.checkIncludes(bean, getBeans());
 		} else if (value.equals("1")) {
 			one = true;
 		} else {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 					"Only integer value allowed in the INCLUDE list is 1");
 		}
-		Token t;
-		while ((t = input.peek(0)) != null && t.getType() == Token.Type.COMMA) {
-			input.consume();
-			name = input.consume(Token.Type.NAME);
-			value = name.getValue();
-			this.includes.add(EntityInfoHandler.getClass(value));
-		}
 
-		DagHandler.checkIncludes(bean, getBeans());
 	}
 
 	@Override

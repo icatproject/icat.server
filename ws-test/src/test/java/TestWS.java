@@ -9,13 +9,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import javax.jms.MessageConsumer;
-import javax.jms.Queue;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
+import javax.jms.ObjectMessage;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
@@ -31,7 +28,6 @@ import org.icatproject.DatafileFormat;
 import org.icatproject.Dataset;
 import org.icatproject.DatasetParameter;
 import org.icatproject.DatasetType;
-import org.icatproject.DestType;
 import org.icatproject.EntityBaseBean;
 import org.icatproject.EntityField;
 import org.icatproject.EntityInfo;
@@ -45,7 +41,6 @@ import org.icatproject.InvestigationParameter;
 import org.icatproject.InvestigationType;
 import org.icatproject.InvestigationUser;
 import org.icatproject.Job;
-import org.icatproject.NotificationRequest;
 import org.icatproject.ParameterType;
 import org.icatproject.ParameterValueType;
 import org.icatproject.PermissibleStringValue;
@@ -57,8 +52,8 @@ import org.icatproject.User;
 import org.icatproject.UserGroup;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Ignore;
 
 /**
  * These tests are for those aspects that cannot be tested by the core tests. In particular does the
@@ -523,157 +518,178 @@ public class TestWS {
 		consumer.setMessageListener(topicListener);
 		topicConnection.start();
 
-		QueueConnectionFactory queueConnectionFactory = (QueueConnectionFactory) context
-				.lookup("jms/ICATQueueConnectionFactory");
-
-		Queue queue = (Queue) context.lookup("jms/ICATQueue");
-
-		QueueConnection queueConnection = queueConnectionFactory.createQueueConnection();
-		javax.jms.Session qSession = queueConnection.createSession(false,
-				javax.jms.Session.AUTO_ACKNOWLEDGE);
-		MessageConsumer queueConsumer = qSession.createConsumer(queue);
-		Listener queueListener = new Listener();
-		queueConsumer.setMessageListener(queueListener);
-		queueConnection.start();
-
-		try {
-			NotificationRequest notificationRequest = new NotificationRequest();
-			notificationRequest
-					.setDatatypes("notificationName userId entityName entityId callArgs");
-			notificationRequest.setCrudFlags("C");
-			notificationRequest.setDestType(DestType.P_2_P);
-			notificationRequest.setWhat("Facility");
-			notificationRequest.setName("A");
-			session.create(notificationRequest);
-			fail("No expection thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
-		}
-
-		{
-			NotificationRequest notificationRequest = new NotificationRequest();
-			notificationRequest.setDatatypes("notificationName userId entityName entityId query");
-			notificationRequest.setCrudFlags("C");
-			notificationRequest.setDestType(DestType.P_2_P);
-			notificationRequest.setWhat("Facility");
-			notificationRequest.setName("A");
-			session.create(notificationRequest);
-		}
-
-		{
-			NotificationRequest notificationRequest = new NotificationRequest();
-			notificationRequest.setDatatypes("notificationName userId entityName entityId");
-			notificationRequest.setCrudFlags("C");
-			notificationRequest.setDestType(DestType.PUBSUB);
-			notificationRequest.setWhat("Datafile");
-			notificationRequest.setName("Test");
-			session.create(notificationRequest);
-		}
-
 		create();
-		Long fsid = ((Facility) session.search("Facility").get(0)).getId();
 
-		{
-			NotificationRequest notificationRequest = new NotificationRequest();
-			notificationRequest.setDatatypes("notificationName userId entityName entityId");
-			notificationRequest.setCrudFlags("R");
-			notificationRequest.setDestType(DestType.PUBSUB);
-			notificationRequest.setWhat("Facility [id = " + fsid + "]");
-			notificationRequest.setName("ID matches");
-			session.create(notificationRequest);
-		}
+		Long dfid = ((EntityBaseBean) session.search("Datafile ORDER BY id").get(0)).getId();
+		Datafile datafile = (Datafile) session.get("Datafile INCLUDE 1", dfid);
+		datafile.setDescription("Junk");
+		session.update(datafile);
+		session.delete(datafile);
 
-		{
-			NotificationRequest notificationRequest = new NotificationRequest();
-			notificationRequest.setDatatypes("notificationName userId entityName entityId");
-			notificationRequest.setCrudFlags("R");
-			notificationRequest.setDestType(DestType.PUBSUB);
-			notificationRequest.setWhat("Facility [id != " + fsid + "]");
-			notificationRequest.setName("Id not match");
-			session.create(notificationRequest);
-		}
-
-		{
-			NotificationRequest notificationRequest = new NotificationRequest();
-			notificationRequest.setDatatypes("notificationName userId entityName entityId query");
-			notificationRequest.setCrudFlags("R");
-			notificationRequest.setDestType(DestType.PUBSUB);
-			notificationRequest.setWhat("Facility");
-			notificationRequest.setName("ID all");
-			session.create(notificationRequest);
-		}
-
-		{
-			NotificationRequest notificationRequest = new NotificationRequest();
-			notificationRequest.setDatatypes("notificationName userId entityName entityId");
-			notificationRequest.setCrudFlags("UD");
-			notificationRequest.setDestType(DestType.PUBSUB);
-			notificationRequest.setWhat("Facility");
-			notificationRequest.setName("U and D");
-			session.create(notificationRequest);
-		}
-
-		session.search("Facility INCLUDE Investigation");
-		Facility facility = (Facility) session.get("Facility INCLUDE Investigation", fsid);
-		facility.setDaysUntilRelease(700);
-		session.update(facility);
-		session.delete(facility);
-
-		List<EntityBaseBean> toDelete = new ArrayList<EntityBaseBean>();
-
-		List<Object> lo = session.search("NotificationRequest");
-		for (Object o : lo) {
-			toDelete.add((EntityBaseBean) o);
-		}
-		session.deleteMany(toDelete);
+		Long dsid = ((EntityBaseBean) session.search("Dataset ORDER BY id").get(0)).getId();
+		Dataset dataset = (Dataset) session.get("Dataset INCLUDE 1", dsid);
+		dataset.setDescription("Obscure junk");
+		session.update(dataset);
+		session.delete(dataset);
 
 		// Wait for a second - though it does not appear to be needed
 		Thread.sleep(1000);
 
-		int n = 0;
-		int pks = 0;
+		int ncreate = 0;
+		int nupdate = 0;
+		int ndelete = 0;
+		int ndataset = 0;
+		int ndatafile = 0;
+
 		while (true) {
-			Map<String, String> msg = topicListener.getMessage();
+			ObjectMessage msg = topicListener.getMessage();
 			if (msg == null) {
 				break;
 			}
-			n++;
+			String operation = msg.getStringProperty("operation");
+			String entity = msg.getStringProperty("entity");
+			Long id = (Long) msg.getObject();
 
-			assertEquals("root", msg.get("userId"));
-			if (msg.get("notificationName").equals("Test")) {
-				assertEquals("Datafile", msg.get("entityName"));
-				assertNotNull(msg.get("entityId"));
-				assertNull(msg.get("query"));
-			} else if (msg.get("notificationName").equals("ID all")) {
-				assertEquals("Facility", msg.get("entityName"));
-				if (msg.get("entityId") != null) {
-					pks++;
-					assertNull(msg.get("query"));
-				} else {
-					assertEquals("Facility INCLUDE Investigation", msg.get("query"));
-				}
-			} else {
-				assertEquals("Facility", msg.get("entityName"));
-				assertNull(msg.get("query"));
+			System.out.println(operation + " " + entity + " " + id);
+			if (operation.equals("CREATE")) {
+				ncreate++;
+			} else if (operation.equals("UPDATE")) {
+				nupdate++;
+			} else if (operation.equals("DELETE")) {
+				ndelete++;
 			}
-		}
-		assertEquals(11, n);
-		assertEquals(1, pks);
+			if (entity.equals("DATAFILE")) {
+				ndatafile++;
+			} else if (entity.equals("DATASET")) {
+				ndataset++;
+			}
 
-		n = 0;
-		while (true) {
-			Map<String, String> msg = queueListener.getMessage();
-			if (msg == null) {
-				break;
-			}
-			n++;
-			assertEquals("A", msg.get("notificationName"));
-			assertEquals("root", msg.get("userId"));
-			assertEquals("Facility", msg.get("entityName"));
-			assertNotNull(msg.get("entityId"));
-			assertNull(msg.get("query"));
 		}
-		assertEquals(1, n);
+		assertEquals(10, ncreate);
+		assertEquals(2, nupdate);
+		assertEquals(2, ndelete);
+		assertEquals(8, ndatafile);
+		assertEquals(6, ndataset);
+	}
+
+	@Test
+	public void testTestCalls() throws Exception {
+		session.clear();
+
+		/* Create user and rules */
+		User piOne = new User();
+		piOne.setName("piOne");
+		piOne.setId(session.create(piOne));
+
+		User piTwo = new User();
+		piTwo.setName("piTwo");
+		piTwo.setId(session.create(piTwo));
+
+		Group ones = new Group();
+		ones.setName("Ones");
+		ones.setId(session.create(ones));
+
+		UserGroup userGroup = new UserGroup();
+		userGroup.setUser(piOne);
+		userGroup.setGroup(ones);
+		session.create(userGroup);
+
+		Rule rule = new Rule();
+		rule.setGroup(ones);
+		rule.setCrudFlags("CRUD");
+		rule.setWhat("Facility");
+		session.create(rule);
+
+		String piOneSessionId = session.login("db", "username", "piOne", "password", "piOne");
+		String piTwoSessionId = session.login("db", "username", "piTwo", "password", "piTwo");
+
+		Facility facility = new Facility();
+		facility.setName("A Facility");
+		
+		/* testCreate */
+		session.getIcat().testCreate(piOneSessionId, facility);
+
+		try {
+			session.getIcat().testCreate(piTwoSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+			assertEquals("CREATE access to this Facility is not allowed.", e.getMessage());
+		}
+
+		facility.setId(session.getIcat().create(piOneSessionId, facility));
+
+		try {
+			session.getIcat().testCreate(piOneSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getFaultInfo().getType());
+			assertEquals("Facility exists with name = 'A Facility'", e.getMessage());
+		}
+
+		try {
+			session.getIcat().testCreate(piTwoSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getFaultInfo().getType());
+			assertEquals("Facility exists with name = 'A Facility'", e.getMessage());
+		}
+
+		/* testUpdate */
+		facility.setName("Banana");
+		session.getIcat().testUpdate(piOneSessionId, facility);
+
+		try {
+			session.getIcat().testUpdate(piTwoSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+			assertEquals("UPDATE access to this Facility is not allowed.", e.getMessage());
+		}
+
+		session.getIcat().update(piOneSessionId, facility);
+
+		session.getIcat().testUpdate(piOneSessionId, facility);
+
+		try {
+			session.getIcat().testUpdate(piTwoSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+			assertEquals("UPDATE access to this Facility is not allowed.", e.getMessage());
+		}
+		
+		/* testDelete */
+		session.getIcat().testDelete(piOneSessionId, facility);
+
+		try {
+			session.getIcat().testDelete(piTwoSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+			assertEquals("DELETE access to this Facility is not allowed.", e.getMessage());
+		}
+		
+		session.getIcat().delete(piOneSessionId, facility);
+		
+		try {
+			session.getIcat().testDelete(piOneSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getFaultInfo().getType());
+			assertEquals("Facility[id:"+facility.getId()+"] not found.", e.getMessage());
+		}
+		
+		try {
+			session.getIcat().testDelete(piTwoSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getFaultInfo().getType());
+			assertEquals("Facility[id:"+facility.getId()+"] not found.", e.getMessage());
+		}
+
+		session.clearAuthz();
+		session.setAuthz();
 	}
 
 	@Test
@@ -701,6 +717,18 @@ public class TestWS {
 		assertEquals("Files", 2, ds.getDatafiles().size());
 		assertEquals("No params", 0, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
+
+		try {
+			results = session.search("Dataset INCLUDE 1, Datafile [id = " + dsid + "]");
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(-1, ue.getOffset());
+			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
+			assertEquals(
+					"Expected token from types [ENTSEP] at token , in INCLUDE 1 < , > Datafile [ ",
+					ue.getMessage());
+		}
 
 		try {
 			results = session.search("Dataset INCLUDE Datafile, 1 [id = " + dsid + "]");
@@ -1193,10 +1221,15 @@ public class TestWS {
 
 	@Test
 	public void login() throws Exception {
-		assertTrue(session.getRemainingMinutes() > 0);
+		double rm = session.getRemainingMinutes();
+		assertTrue(rm > 0);
 		assertEquals(System.getProperty("projectVersion").replace("-SNAPSHOT", ""),
 				session.getApiVersion());
 		assertEquals("root", session.getUserName());
+		Thread.sleep(10);
+		rm = session.getRemainingMinutes();
+		session.refresh();
+		assertTrue(session.getRemainingMinutes() > rm);
 	}
 
 	@Test

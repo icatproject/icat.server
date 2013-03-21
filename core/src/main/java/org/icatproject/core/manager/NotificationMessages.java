@@ -1,68 +1,48 @@
 package org.icatproject.core.manager;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.PropertyHandler;
+import org.icatproject.core.PropertyHandler.Entity;
+import org.icatproject.core.PropertyHandler.Operation;
 import org.icatproject.core.entity.EntityBaseBean;
-import org.icatproject.core.entity.NotificationRequest;
-import org.icatproject.core.entity.NotificationRequest.DestType;
 
 public class NotificationMessages {
 
 	public class Message {
-		private DestType destType;
+		private Operation operation;
+		private Entity entityName;
+		private Long entityId;
 
-		public String entityName;
-
-		public String notificationName;
-
-		public Long pk;
-
-		public String query;
-
-		public String userId;
-
-		public DestType getDestType() {
-			return this.destType;
+		public Message(Operation operation, Entity entityName, Long entityId) {
+			this.operation = operation;
+			this.entityName = entityName;
+			this.entityId = entityId;
 		}
 
 		public String getEntityName() {
-			return this.entityName;
+			return entityName.name();
 		}
 
-		public String getNotificationName() {
-			return this.notificationName;
+		public long getEntityId() {
+			return entityId;
 		}
 
-		public Long getPk() {
-			return this.pk;
+		public String getOperation() {
+			return operation.name();
 		}
-
-		public String getQuery() {
-			return this.query;
-		}
-
-		public String getUserId() {
-			return this.userId;
-		}
-
 	}
-	
+
 	private final static EntityInfoHandler entityInfoHandler = EntityInfoHandler.getInstance();
 	private final static Logger logger = Logger.getLogger(NotificationMessages.class);
-	
-	public final static String ENTITYID="entityId";
-	public final static String ENTITYNAME="entityName";
-	public final static String NOTIFICATIONNAME="notificationName";
-	public final static String QUERY="query";
-	public final static String USERID="userId";
+
+	private final static List<NotificationRequest> notificationRequests = PropertyHandler
+			.getInstance().getNotificationRequests();
 
 	public static EntityInfoHandler getEntityinfohandler() {
 		return entityInfoHandler;
@@ -74,92 +54,22 @@ public class NotificationMessages {
 
 	private final List<Message> messages = new ArrayList<Message>();
 
-	public NotificationMessages(String userId, Class<? extends EntityBaseBean> beanClass,
-			String queryString, EntityManager manager) throws IcatException {
-
-		String beanClassName = beanClass.getSimpleName();
-		final TypedQuery<NotificationRequest> query = manager.createNamedQuery(
-				NotificationRequest.SEARCH_QUERY, NotificationRequest.class).setParameter("bean",
-				beanClassName);
-
-		for (final NotificationRequest nr : query.getResultList()) {
-			this.generateMessage(nr, userId, null, queryString);
-		}
-
-	}
-
-	public NotificationMessages(String userId, EntityBaseBean bean,
-			AccessType accessType, EntityManager manager)
+	public NotificationMessages(Operation operation, EntityBaseBean bean, EntityManager manager)
 			throws IcatException {
-		String qName = null;
-		if (accessType == AccessType.CREATE) {
-			qName = NotificationRequest.CREATE_QUERY;
-		} else if (accessType == AccessType.READ || accessType == AccessType.DOWNLOAD) {
-			qName = NotificationRequest.READ_QUERY;
-		} else if (accessType == AccessType.UPDATE) {
-			qName = NotificationRequest.UPDATE_QUERY;
-		} else if (accessType == AccessType.DELETE) {
-			qName = NotificationRequest.DELETE_QUERY;
-		} else {
-			throw new RuntimeException(accessType + " is not handled yet");
-		}
-		final Class<? extends EntityBaseBean> objectClass = bean.getClass();
 
-		final TypedQuery<NotificationRequest> query = manager.createNamedQuery(qName,
-				NotificationRequest.class).setParameter("bean", objectClass.getSimpleName());
-
-		for (final NotificationRequest nr : query.getResultList()) {
-			final String jpql = nr.getCrudJPQL();
-			if (jpql != null) {
-				final TypedQuery<Long> q = manager.createQuery(jpql, Long.class);
-				if (jpql.contains(":user")) {
-					q.setParameter("user", userId);
-				}
-				final Field key = entityInfoHandler.getKeyFor(objectClass);
-				final Method m = entityInfoHandler.getGetters(objectClass).get(key);
-
-				Object keyVal = null;
-				try {
-					keyVal = m.invoke(bean);
-				} catch (final Exception e) {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							e.getMessage());
-				}
-				q.setParameter("pkid", keyVal);
-
-				if (q.getSingleResult() != 1) {
-					continue;
+		/* Only go in here for datafile and dataset operations - to save time */
+		String beanClassName = bean.getClass().getSimpleName();
+		if (beanClassName.equals("Datafile") || beanClassName.equals("Dataset")) {
+			for (NotificationRequest nr : notificationRequests) {
+				Entity nrentity = nr.getEntity();
+				if (nrentity.name().equals(beanClassName.toUpperCase())) {
+					Operation nroperation = nr.getOperation();
+					if (nroperation == operation) {
+						this.messages.add(new Message(nroperation, nrentity, bean.getId()));
+					}
 				}
 			}
-			this.generateMessage(nr, userId, bean, null);
 		}
-	}
-
-	private void generateMessage(NotificationRequest nr, String userId, EntityBaseBean bean,
-			String queryString) throws IcatException {
-		logger.info("Notification required by " + nr.getWhat());
-
-		final Message message = new Message();
-		this.messages.add(message);
-		message.destType = nr.getDestType();
-
-		if (nr.isNotificationNameWanted()) {
-			message.notificationName = nr.getName();
-		}
-		if (nr.isUseridWanted()) {
-			message.userId = userId;
-		}
-		if (nr.isEntityNameWanted()) {
-			message.entityName = nr.getBean();
-		}
-
-		if (nr.isIdWanted() && bean != null) {
-			message.pk = bean.getId();
-		}
-		if (nr.isQueryWanted()) {
-			message.query = queryString;
-		}
-
 	}
 
 	public List<Message> getMessages() {

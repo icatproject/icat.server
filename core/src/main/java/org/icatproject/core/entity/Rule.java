@@ -186,6 +186,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 		return this.c;
 	}
 
+	@XmlTransient
 	public boolean isD() {
 		return this.d;
 	}

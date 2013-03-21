@@ -43,7 +43,6 @@
         <class>org.icatproject.core.entity.OutputDataset</class>
         <class>org.icatproject.core.entity.InputDatafile</class>
         <class>org.icatproject.core.entity.OutputDatafile</class>
-        <class>org.icatproject.core.entity.NotificationRequest</class>
         <class>org.icatproject.core.entity.InvestigationParameter</class>
         <class>org.icatproject.core.entity.Session</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
