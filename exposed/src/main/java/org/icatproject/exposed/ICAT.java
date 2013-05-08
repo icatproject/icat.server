@@ -67,9 +67,6 @@ public class ICAT {
 	@Resource
 	WebServiceContext webServiceContext;
 
-	public ICAT() {
-	}
-
 	@WebMethod
 	public long create(@WebParam(name = "sessionId") String sessionId,
 			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
