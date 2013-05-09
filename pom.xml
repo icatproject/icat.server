@@ -3,7 +3,7 @@
 
     <groupId>org.icatproject</groupId>
     <artifactId>icat</artifactId>
-    <version>4.2.5</version>
+    <version>4.2.6-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <distributionManagement>
@@ -32,9 +32,9 @@
     </issueManagement>
 
     <scm>
-        <connection>scm:svn:http://icatproject.googlecode.com/svn/icat/tags/v4.2.5</connection>
-        <developerConnection>scm:svn:https://icatproject.googlecode.com/svn/icat/tags/v4.2.5</developerConnection>
-        <url>http://code.google.com/p/icatproject/source/browse/#svn%2Ficat%2Fbranches%2Fv4.2.4/tags/v4.2.5</url>
+        <connection>scm:svn:http://icatproject.googlecode.com/svn/icat/branches/v4.2.4</connection>
+        <developerConnection>scm:svn:https://icatproject.googlecode.com/svn/icat/branches/v4.2.4</developerConnection>
+        <url>http://code.google.com/p/icatproject/source/browse/#svn%2Ficat%2Fbranches%2Fv4.2.4</url>
     </scm>
 
     <licenses>
