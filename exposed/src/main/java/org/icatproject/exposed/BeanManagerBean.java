@@ -194,19 +194,7 @@ public class BeanManagerBean {
 
 	@PostConstruct()
 	private void init() {
-		/*
-		 * Set up log4j. Note that even if the requested log4j.properties file is not found or is
-		 * corrupt log4j will do its best to produce some output. The file will be checked for
-		 * changes every minute. Existing properties will NOT be removed - so to reduce logging you
-		 * may need to specify a logging level of INHERIT to take values from further up the tree.
-		 */
-		String log4jFile = "log4j.properties";
-		LogManager.resetConfiguration();
-		PropertyConfigurator.configureAndWatch(log4jFile);
-		logger = Logger.getLogger(BeanManagerBean.class);
-		logger.info("BeanManagerBean post construct method called");
-		logger.info("Loaded log4j properties from : " + log4jFile + " and will watch it.");
-
+		
 		try {
 			queueConnection = queueConnectionFactory.createQueueConnection();
 			topicConnection = topicConnectionFactory.createTopicConnection();

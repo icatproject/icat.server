@@ -22,9 +22,14 @@
             </ol>
 
             <p>
-                If you already have ICAT 4.2.0, 4.2.1, 4.2.2 or 4.2.3 deployed then skip on to
+                If you already have ICAT 4.2.0, 4.2.1, 4.2.2, 4.2.3 or 4.2.4 deployed and have not modified log4j.properties
+                then skip on to
                 <a href="#ear">installing the .ear file</a>
-                .
+            </p>
+            <p>
+                If you already have ICAT 4.2.0, 4.2.1, 4.2.2, 4.2.3 or 4.2.4 deployed but have modified log4j.properties
+                then skip on to the section preceding
+                <a href="#ear">installing the .ear file</a>
             </p>
 
             <subsection name="EJB Container">
@@ -191,11 +196,18 @@
 
             <subsection name="icat.properties and log4j.properties">
                 <p>
-                    In the unpacked icat.ear-${project.version}-config.zip file you will find two properties files which should both be copied to the
-                    config directory for your chosen glassfish domain. You will find your domain directory at $GLASSFISH_HOME/glassfish/domains. The
-                    log4j.properties file should not need modification initially. It will result in an icat.log file being written to the logs
-                    directory below your domain. The icat.properties file will probably need changing:
-
+                    In the unpacked icat.ear-${project.version}-config.zip file you will find an icat.properties properties files which should be
+                    copied to the
+                    config directory for your chosen glassfish domain. You will find your domain directory at
+                    $GLASSFISH_HOME/glassfish/domains. There is also a file called
+                    log4j.properties.example to configure the icat logging. A copy of
+                    this file already exists in the .ear file so
+                    unless you wish to modify the logging configuration this file is not needed. If
+                    you do
+                    wish to modify logging, then place a copy of the file somewhere with a name of your choice (icat.log4j.properties
+                    might be a good name) and
+                    update the icat.properties file to reference it as explained below. The icat.properties file may need
+                    other changes:
                 </p>
                 <dl>
                     <dt>lifetimeMinutes</dt>
@@ -226,13 +238,14 @@
                         java:global/authn_db.ear-1.0.0/authn_db.ejb-1.0.0/DB_Authenticator. There must be one such entry for each
                         plugin.
                     </dd>
+                    <dt>log4j.properties</dt>
+                    <dd>This is optional. If present it must specify the path to a log4j.properties file. The path may be absolute or relative to
+                        the
+                        config directory.
+                    </dd>
                 </dl>
 
-                <p>The log4j.properties file is re-read periodically so there is no need to restart ICAT if you want to change the logging levels. If
-                    you enable some logging, you will then need to explicitly disable it when you longer wish to receive that information, rather than
-                    just removing the request. This is because the system is not
-                    re-initialised each time the log4j.properties file is read.
-                </p>
+
 
             </subsection>
 
