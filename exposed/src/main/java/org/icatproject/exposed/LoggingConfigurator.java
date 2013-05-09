@@ -10,7 +10,6 @@ import javax.ejb.Startup;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.apache.log4j.helpers.Loader;
 
 @Singleton
 @Startup
@@ -38,16 +37,18 @@ public class LoggingConfigurator {
 			PropertyConfigurator.configure(path);
 
 		} else {
+			/*
+			 * This seems to be necessary even though the default initialisation is to load from the
+			 * Classpath
+			 */
 			PropertyConfigurator.configure(LoggingConfigurator.class.getClassLoader().getResource(
 					"log4j.properties"));
 		}
 
 		Logger logger = Logger.getLogger(LoggingConfigurator.class);
 		if (path != null) {
-			System.out.println("Logging configuration read from " + path);
 			logger.info("Logging configuration read from " + path);
 		} else {
-			System.out.println("Using log4j default configuration");
 			logger.info("Using log4j default configuration");
 		}
 
