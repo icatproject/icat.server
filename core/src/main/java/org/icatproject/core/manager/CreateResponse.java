@@ -3,9 +3,9 @@ package org.icatproject.core.manager;
 public class CreateResponse {
 
 	private long pk;
-	private NotificationMessages notificationMessage;
+	private NotificationMessage notificationMessage;
 
-	public CreateResponse(long pk, NotificationMessages notificationMessage) {
+	public CreateResponse(long pk, NotificationMessage notificationMessage) {
 		this.pk = pk;
 		this.notificationMessage = notificationMessage;
 	}
@@ -14,7 +14,7 @@ public class CreateResponse {
 		return pk;
 	}
 
-	public NotificationMessages getNotificationMessages() {
+	public NotificationMessage getNotificationMessage() {
 		return notificationMessage;
 	}
 

@@ -8,25 +8,26 @@ import sys
 logging.basicConfig(level=logging.CRITICAL)
 
 args = sys.argv
-if len(args) < 4 or len(args) % 2 != 0:
+if len(args) < 3 or len(args) % 2 != 1:
     print >> sys.stderr, "\nThis must have three fixed arguments: hostname, port and plugin mnemonic\nfollowed by pairs of arguments to represent the credentials. For example\n\n    ", args[0], "example.com 8181 db username root password guess\n"
     sys.exit(1)
 
-hostAndPort = args[1] + ":" + args[2]
-plugin = args[3]
+hostAndPort = args[1]
+plugin = args[2]
 
 client = Client("https://" + hostAndPort + "/ICATService/ICAT?wsdl")
 service = client.service
 factory = client.factory
 
 credentials = factory.create("credentials")
-for i in range (4, len(args), 2):
+for i in range (3, len(args), 2):
     entry = factory.create("credentials.entry")
     entry.key = args[i]
     entry.value = args[i + 1]
     credentials.entry.append(entry)
 
 sessionId = service.login(plugin, credentials,)
+print "Logged in with", service.getRemainingMinutes(sessionId), "minutes to go"
 
 groups = service.search(sessionId, "Group[name='annoying animals']")
 if len(groups): 

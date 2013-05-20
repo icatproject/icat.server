@@ -1,19 +1,18 @@
 package org.icatproject.core.manager;
 
-import org.icatproject.core.PropertyHandler.Entity;
 import org.icatproject.core.PropertyHandler.Operation;
 
 public class NotificationRequest {
 
 	private Operation operation;
-	private Entity entity;
+	private String entity;
 
-	public NotificationRequest(Operation operation, Entity entity) {
+	public NotificationRequest(Operation operation, String entity) {
 		this.operation = operation;
 		this.entity = entity;
 	}
 
-	public Entity getEntity() {
+	public String getEntity() {
 		return entity;
 	}
 

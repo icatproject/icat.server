@@ -12,14 +12,14 @@ import javax.persistence.UniqueConstraint;
 @Comment("Many to many relationship between user and group")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "USER_NAME", "GROUP_NAME" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "USER_ID", "GROUP_ID" }) })
 public class UserGroup extends EntityBaseBean implements Serializable {
 
-	@JoinColumn(name = "GROUP_NAME", nullable = false)
+	@JoinColumn(name = "GROUP_ID", nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Group group;
 
-	@JoinColumn(name = "USER_NAME", nullable = false)
+	@JoinColumn(name = "USER_ID", nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User user;
 

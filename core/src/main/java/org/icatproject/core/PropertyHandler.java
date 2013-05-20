@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -16,19 +18,14 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 import org.icatproject.authentication.Authenticator;
+import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.NotificationRequest;
 
 public class PropertyHandler {
 
 	public enum Operation {
-		CREATE, UPDATE, DELETE
+		C, U, D
 	}
-
-	public enum Entity {
-		DATAFILE, DATASET
-	}
-
-
 
 	private static PropertyHandler instance = null;
 	private static final Logger logger = Logger.getLogger(PropertyHandler.class);
@@ -40,6 +37,8 @@ public class PropertyHandler {
 		return instance;
 	}
 
+	private final static Pattern cruPattern = Pattern.compile("[CUD]*");
+
 	private Map<String, Authenticator> authPlugins = new HashMap<String, Authenticator>();
 
 	public Map<String, Authenticator> getAuthPlugins() {
@@ -48,7 +47,7 @@ public class PropertyHandler {
 
 	private Set<String> rootUserNames = new HashSet<String>();
 
-	private List<NotificationRequest> notificationRequests = new ArrayList<NotificationRequest>();
+	private Map<String, NotificationRequest> notificationRequests = new HashMap<String, NotificationRequest>();
 
 	public Set<String> getRootUserNames() {
 		return rootUserNames;
@@ -128,37 +127,53 @@ public class PropertyHandler {
 			rootUserNames.add(name);
 		}
 
-		/* Sort out the notification requests */
 		String notificationList = props.getProperty("notification.list");
 		if (notificationList == null) {
 			String msg = "Property 'notification.list' must be set but may be empty";
 			logger.fatal(msg);
 			throw new IllegalStateException(msg);
 		}
+
 		notificationList = notificationList.trim();
 		if (!notificationList.isEmpty()) {
-			for (String mnemonic : notificationList.split("\\s+")) {
-				String operation = checkProp(props, mnemonic, "operation");
-				String entity = checkProp(props, mnemonic, "entity");
-				notificationRequests.add(new NotificationRequest(Operation.valueOf(Operation.class,
-						operation), Entity.valueOf(Entity.class, entity)));
+			EntityInfoHandler ei = EntityInfoHandler.getInstance();
+			for (String entity : notificationList.split("\\s+")) {
+				try {
+					ei.getEntityInfo(entity);
+				} catch (IcatException e) {
+					String msg = "Value '" + entity
+							+ "' specified in 'notification.list' is not an ICAT entity";
+					logger.fatal(msg);
+					throw new IllegalStateException(msg);
+				}
+				String propertyName = "notification." + entity;
+				String notificationOps = props.getProperty(propertyName);
+				if (notificationOps == null) {
+					String msg = "Property '" + propertyName + "' must be set but may be empty";
+					logger.fatal(msg);
+					throw new IllegalStateException(msg);
+				}
+				notificationOps = notificationOps.trim();
+				if (!notificationOps.isEmpty()) {
+					Matcher m = cruPattern.matcher(notificationOps);
+					if (!m.matches()) {
+						String msg = "Property  '" + propertyName
+								+ "' must only contain the letters C, U and D";
+						logger.fatal(msg);
+						throw new IllegalStateException(msg);
+					}
+					for (String c : new String[] { "C", "U", "D" }) {
+						if (notificationOps.indexOf(c) >= 0) {
+							notificationRequests.put(entity + ":" + c, new NotificationRequest(
+									Operation.valueOf(Operation.class, c), entity));
+						}
+					}
+				}
 			}
 		}
-
 	}
 
-	private String checkProp(Properties props, String mnemonic, String keyele) {
-		String key = "notification." + mnemonic + "." + keyele;
-		String value = props.getProperty(key);
-		if (value == null) {
-			String msg = "Property '" + key + "' is not set";
-			logger.fatal(msg);
-			throw new IllegalStateException(msg);
-		}
-		return value.trim().toUpperCase();
-	}
-
-	public List<NotificationRequest> getNotificationRequests() {
+	public Map<String, NotificationRequest> getNotificationRequests() {
 		return notificationRequests;
 	}
 }

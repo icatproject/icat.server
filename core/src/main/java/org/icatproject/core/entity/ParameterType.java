@@ -59,8 +59,10 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<InvestigationParameter> investigationParameters;
 
+	@Column(precision = 38, scale = 127)
 	private Double maximumNumericValue;
 
+	@Column(precision = 38, scale = 127)
 	private Double minimumNumericValue;
 
 	@Comment("The name of the parameter type")

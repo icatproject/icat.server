@@ -22,9 +22,35 @@
                 <li>New calls testCreate, testUpdate and testDelete created. They are exactly equivalent to the corresponding create, update and
                     delete calls but return void and result in no change of state. They will throw the same exceptions as the real call will throw.
                 </li>
+                <li>Column names in the Database table for UserGroup have been changed as they were inconsistent.</li>
+                <li>The Rule entities are now store in a database table called RULE_. for compatibility with Microsoft SQLServer.</li>
+                <li>A file indices.sql is being distributed with the .ear file with indices which may improve performance. You should assess whether
+                    or not each index will be useful to your installation for while an index can give a huge improvement to a query there is also a
+                    cost in maintaining an index.</li>
+                <li>JPA mappings for floating point numbers now use maximum precision.</li>
 
             </ul>
         </section>
+
+        <section name="4.2.5">
+            <p>
+                This is a bug fix release. If you already have 4.2.0, 4.2.1, 4.2.2, 4.2.3 or 4.2.4 installed, then simply remove the old ear file and
+                deploy the new one. If you have changed log4j.properties from the one supplied then add an entry to your icat.properties:
+                <tt>log4j.properties = log4j.properties</tt>
+                which tells the ICAT to use the existing log4j.properties file in the config directory rather than the built in one. If you have not
+                changed it then it is preferable to delete the log4j.properties from the config directory to avoid any possible confusion. The
+                log4j.properties file is no longer reread, if you have configured your own copy and wish to change it then you must at least reload
+                ICAT for the properties file to be read again.
+            </p>
+            <ul>
+                <li>
+                    A significant leak has been fixed which was causing an unlimited number of threads to be created. This has been addressed by
+                    changing the way in which the log4j.properties file is read. Only if you have a line in the icat.properties identifying a specific
+                    log4j.properties file will that file be used, otherwise a default file packaged within the .ear file will be used.
+                </li>
+            </ul>
+        </section>
+
 
         <section name="4.2.4">
             <p>This is a bug fix release. If you already have 4.2.0, 4.2.1, 4.2.2 or 4.2.3 installed, then simply remove the old ear file and deploy

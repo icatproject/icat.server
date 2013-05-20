@@ -500,6 +500,9 @@ public class TestWS {
 	}
 
 	@Ignore("Need to include gf-client.jar from glassfish3/glassfish/lib/ - no good maven solution found yet")
+	// Need to have notification.list = Dataset Datafile
+	// notification.Dataset = CUD
+	// notification.Datafile = CUD
 	@Test
 	public void notifications() throws Exception {
 		session.clear();
@@ -551,16 +554,16 @@ public class TestWS {
 			Long id = (Long) msg.getObject();
 
 			System.out.println(operation + " " + entity + " " + id);
-			if (operation.equals("CREATE")) {
+			if (operation.equals("C")) {
 				ncreate++;
-			} else if (operation.equals("UPDATE")) {
+			} else if (operation.equals("U")) {
 				nupdate++;
-			} else if (operation.equals("DELETE")) {
+			} else if (operation.equals("D")) {
 				ndelete++;
 			}
-			if (entity.equals("DATAFILE")) {
+			if (entity.equals("Datafile")) {
 				ndatafile++;
-			} else if (entity.equals("DATASET")) {
+			} else if (entity.equals("Dataset")) {
 				ndataset++;
 			}
 
@@ -605,7 +608,7 @@ public class TestWS {
 
 		Facility facility = new Facility();
 		facility.setName("A Facility");
-		
+
 		/* testCreate */
 		session.getIcat().testCreate(piOneSessionId, facility);
 
@@ -658,7 +661,7 @@ public class TestWS {
 			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
 			assertEquals("UPDATE access to this Facility is not allowed.", e.getMessage());
 		}
-		
+
 		/* testDelete */
 		session.getIcat().testDelete(piOneSessionId, facility);
 
@@ -669,23 +672,23 @@ public class TestWS {
 			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
 			assertEquals("DELETE access to this Facility is not allowed.", e.getMessage());
 		}
-		
+
 		session.getIcat().delete(piOneSessionId, facility);
-		
+
 		try {
 			session.getIcat().testDelete(piOneSessionId, facility);
 			fail("No exception thrown");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getFaultInfo().getType());
-			assertEquals("Facility[id:"+facility.getId()+"] not found.", e.getMessage());
+			assertEquals("Facility[id:" + facility.getId() + "] not found.", e.getMessage());
 		}
-		
+
 		try {
 			session.getIcat().testDelete(piTwoSessionId, facility);
 			fail("No exception thrown");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getFaultInfo().getType());
-			assertEquals("Facility[id:"+facility.getId()+"] not found.", e.getMessage());
+			assertEquals("Facility[id:" + facility.getId() + "] not found.", e.getMessage());
 		}
 
 		session.clearAuthz();

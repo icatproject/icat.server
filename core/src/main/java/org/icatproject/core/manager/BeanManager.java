@@ -60,8 +60,8 @@ public class BeanManager {
 				logger.trace(bean + " flushed.");
 				// Check authz now everything persisted
 				GateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
-				NotificationMessages notification = new NotificationMessages(Operation.CREATE,
-						bean, manager);
+				NotificationMessage notification = new NotificationMessage(Operation.C, bean,
+						manager);
 				userTransaction.commit();
 				return new CreateResponse(bean.getId(), notification);
 			} catch (EntityExistsException e) {
@@ -113,8 +113,8 @@ public class BeanManager {
 					logger.trace(bean + " flushed.");
 					// Check authz now everything persisted
 					GateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
-					NotificationMessages notification = new NotificationMessages(Operation.CREATE,
-							bean, manager);
+					NotificationMessage notification = new NotificationMessage(Operation.C, bean,
+							manager);
 					CreateResponse cr = new CreateResponse(bean.getId(), notification);
 					crs.add(cr);
 				}
@@ -219,15 +219,15 @@ public class BeanManager {
 		return value;
 	}
 
-	public static NotificationMessages delete(String userId, EntityBaseBean bean,
+	public static NotificationMessage delete(String userId, EntityBaseBean bean,
 			EntityManager manager, UserTransaction userTransaction) throws IcatException {
 		try {
 			userTransaction.begin();
 			try {
 				EntityBaseBean beanManaged = find(bean, manager);
 				GateKeeper.performAuthorisation(userId, beanManaged, AccessType.DELETE, manager);
-				NotificationMessages notification = new NotificationMessages(Operation.DELETE,
-						bean, manager);
+				NotificationMessage notification = new NotificationMessage(Operation.D, bean,
+						manager);
 				manager.remove(beanManaged);
 				manager.flush();
 				logger.trace("Deleted bean " + bean + " flushed.");
@@ -259,7 +259,7 @@ public class BeanManager {
 		}
 	}
 
-	public static NotificationMessages update(String userId, EntityBaseBean bean,
+	public static NotificationMessage update(String userId, EntityBaseBean bean,
 			EntityManager manager, UserTransaction userTransaction) throws IcatException {
 		try {
 			userTransaction.begin();
@@ -270,8 +270,8 @@ public class BeanManager {
 				beanManaged.merge(bean, manager);
 				manager.flush();
 				logger.trace("Updated bean " + bean + " flushed.");
-				NotificationMessages notification = new NotificationMessages(Operation.UPDATE,
-						bean, manager);
+				NotificationMessage notification = new NotificationMessage(Operation.U, bean,
+						manager);
 				userTransaction.commit();
 				return notification;
 			} catch (IcatException e) {
@@ -687,21 +687,21 @@ public class BeanManager {
 		}
 	}
 
-	public static List<NotificationMessages> deleteMany(String userId, List<EntityBaseBean> beans,
+	public static List<NotificationMessage> deleteMany(String userId, List<EntityBaseBean> beans,
 			EntityManager manager, UserTransaction userTransaction) throws IcatException {
 		try {
 			logger.error("Before begin " + userTransaction.getStatus());
 			userTransaction.begin();
 			logger.error("after begin " + userTransaction.getStatus());
-			List<NotificationMessages> nms = new ArrayList<NotificationMessages>();
+			List<NotificationMessage> nms = new ArrayList<NotificationMessage>();
 			try {
 				for (EntityBaseBean bean : beans) {
 
 					EntityBaseBean beanManaged = find(bean, manager);
 					GateKeeper
 							.performAuthorisation(userId, beanManaged, AccessType.DELETE, manager);
-					NotificationMessages notification = new NotificationMessages(Operation.DELETE,
-							bean, manager);
+					NotificationMessage notification = new NotificationMessage(Operation.D, bean,
+							manager);
 					logger.error("before remove " + userTransaction.getStatus());
 					manager.remove(beanManaged);
 					manager.flush();
@@ -791,7 +791,6 @@ public class BeanManager {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 					"NotSupportedException" + e.getMessage());
 		}
-
 
 	}
 

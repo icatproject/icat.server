@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
@@ -31,7 +32,7 @@ import org.icatproject.core.entity.Facility;
 import org.icatproject.core.manager.BeanManager;
 import org.icatproject.core.manager.CreateResponse;
 import org.icatproject.core.manager.EntityInfo;
-import org.icatproject.core.manager.NotificationMessages;
+import org.icatproject.core.manager.NotificationMessage;
 
 @Stateless()
 @TransactionManagement(TransactionManagementType.BEAN)
@@ -46,15 +47,8 @@ public class BeanManagerBean {
 	@PersistenceContext(unitName = "icat")
 	protected EntityManager manager;
 
-	// TODO - this use of mappedName rather than name lags elegance - but it
-	// works
-	@Resource(mappedName = "jms/ICATTopic")
-	private Topic topic;
-
-	private TopicConnection topicConnection;
-
-	@Resource(name = "jms/ICATTopicConnectionFactory")
-	private TopicConnectionFactory topicConnectionFactory;
+	@EJB
+	Transmitter transmitter;
 
 	@Resource
 	private UserTransaction userTransaction;
@@ -67,8 +61,7 @@ public class BeanManagerBean {
 			String userId = getUserName(sessionId);
 			CreateResponse createResponse = BeanManager.create(userId, bean, manager,
 					userTransaction);
-			Transmitter.processMessages(createResponse.getNotificationMessages(), topicConnection,
-					topic);
+			transmitter.processMessage(createResponse.getNotificationMessage());
 			return createResponse.getPk();
 		} catch (IcatException e) {
 			reportIcatException(e);
@@ -86,8 +79,7 @@ public class BeanManagerBean {
 					userTransaction);
 			List<Long> lo = new ArrayList<Long>();
 			for (CreateResponse createResponse : createResponses) {
-				Transmitter.processMessages(createResponse.getNotificationMessages(),
-						topicConnection, topic);
+				transmitter.processMessage(createResponse.getNotificationMessage());
 				lo.add(createResponse.getPk());
 			}
 			return lo;
@@ -103,8 +95,7 @@ public class BeanManagerBean {
 	public void delete(String sessionId, EntityBaseBean bean) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			NotificationMessages nms = BeanManager.delete(userId, bean, manager, userTransaction);
-			Transmitter.processMessages(nms, topicConnection, topic);
+			transmitter.processMessage(BeanManager.delete(userId, bean, manager, userTransaction));
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -117,10 +108,10 @@ public class BeanManagerBean {
 	public void deleteMany(String sessionId, List<EntityBaseBean> beans) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			List<NotificationMessages> nms = BeanManager.deleteMany(userId, beans, manager,
+			List<NotificationMessage> nms = BeanManager.deleteMany(userId, beans, manager,
 					userTransaction);
-			for (NotificationMessages nm : nms) {
-				Transmitter.processMessages(nm, topicConnection, topic);
+			for (NotificationMessage nm : nms) {
+				transmitter.processMessage(nm);
 			}
 		} catch (IcatException e) {
 			reportIcatException(e);
@@ -130,16 +121,6 @@ public class BeanManagerBean {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
 		}
 
-	}
-
-	@PreDestroy()
-	private void destroyBMB() {
-		try {
-			topicConnection.close();
-			topicConnection = null;
-		} catch (JMSException e) {
-			throw new IllegalStateException(e.getMessage());
-		}
 	}
 
 	public void dummy(Facility facility) {
@@ -173,13 +154,6 @@ public class BeanManagerBean {
 
 	@PostConstruct()
 	private void init() {
-
-		try {
-			topicConnection = topicConnectionFactory.createTopicConnection();
-		} catch (JMSException e) {
-			logger.fatal("Problem with JMS " + e);
-			throw new IllegalStateException(e.getMessage());
-		}
 
 		PropertyHandler p = PropertyHandler.getInstance();
 		authPlugins = p.getAuthPlugins();
@@ -235,8 +209,7 @@ public class BeanManagerBean {
 	public void update(String sessionId, EntityBaseBean bean) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			NotificationMessages nms = BeanManager.update(userId, bean, manager, userTransaction);
-			Transmitter.processMessages(nms, topicConnection, topic);
+			transmitter.processMessage(BeanManager.update(userId, bean, manager, userTransaction));
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
