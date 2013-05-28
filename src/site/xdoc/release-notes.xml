@@ -26,8 +26,11 @@
                 <li>The Rule entities are now store in a database table called RULE_. for compatibility with Microsoft SQLServer.</li>
                 <li>A file indices.sql is being distributed with the .ear file with indices which may improve performance. You should assess whether
                     or not each index will be useful to your installation for while an index can give a huge improvement to a query there is also a
-                    cost in maintaining an index.</li>
+                    cost in maintaining an index.
+                </li>
                 <li>JPA mappings for floating point numbers now use maximum precision.</li>
+                <li>test.py expects hostname:port rather than a pair of parameters</li>
+                <li>Call logging has been added either to file or to a log table or both.</li>
 
             </ul>
         </section>

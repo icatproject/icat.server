@@ -8,16 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
-import javax.jms.JMSException;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
@@ -130,7 +125,7 @@ public class BeanManagerBean {
 	public EntityBaseBean get(String sessionId, String query, long primaryKey) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			return BeanManager.get(userId, query, primaryKey, manager);
+			return BeanManager.get(userId, query, primaryKey, manager, userTransaction);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -196,7 +191,7 @@ public class BeanManagerBean {
 	public List<?> search(String sessionId, String query) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			return BeanManager.search(userId, query, manager);
+			return BeanManager.search(userId, query, manager, userTransaction);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;

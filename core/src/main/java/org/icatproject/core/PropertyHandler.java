@@ -2,10 +2,8 @@ package org.icatproject.core;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -28,16 +26,18 @@ public class PropertyHandler {
 	}
 
 	private static PropertyHandler instance = null;
-	private static final Logger logger = Logger.getLogger(PropertyHandler.class);
+	private static Logger logger;
 
 	synchronized public static PropertyHandler getInstance() {
 		if (instance == null) {
+			logger = Logger.getLogger(PropertyHandler.class);
 			instance = new PropertyHandler();
 		}
 		return instance;
 	}
 
-	private final static Pattern cruPattern = Pattern.compile("[CUD]*");
+	private final static Pattern cudPattern = Pattern.compile("[CUD]*");
+	private final static Pattern srwPattern = Pattern.compile("[SRW]*");
 
 	private Map<String, Authenticator> authPlugins = new HashMap<String, Authenticator>();
 
@@ -58,6 +58,8 @@ public class PropertyHandler {
 	}
 
 	private int lifetimeMinutes;
+
+	private Set<String> logRequests = new HashSet<String>();
 
 	private PropertyHandler() {
 		File f = new File("icat.properties");
@@ -127,6 +129,8 @@ public class PropertyHandler {
 			rootUserNames.add(name);
 		}
 
+		/* Notification Setup */
+
 		String notificationList = props.getProperty("notification.list");
 		if (notificationList == null) {
 			String msg = "Property 'notification.list' must be set but may be empty";
@@ -155,7 +159,7 @@ public class PropertyHandler {
 				}
 				notificationOps = notificationOps.trim();
 				if (!notificationOps.isEmpty()) {
-					Matcher m = cruPattern.matcher(notificationOps);
+					Matcher m = cudPattern.matcher(notificationOps);
 					if (!m.matches()) {
 						String msg = "Property  '" + propertyName
 								+ "' must only contain the letters C, U and D";
@@ -171,9 +175,60 @@ public class PropertyHandler {
 				}
 			}
 		}
+
+		/* Call Logging Setup */
+
+		String callLogs = props.getProperty("log.list");
+		if (callLogs == null) {
+			String msg = "Property 'log.list' must be set but may be empty";
+			logger.fatal(msg);
+			throw new IllegalStateException(msg);
+		}
+		callLogs = callLogs.trim();
+		if (!callLogs.isEmpty()) {
+			for (String logDest : callLogs.split("\\s+")) {
+				if (logDest.equals("file") || logDest.equals("table")) {
+					String propertyName = "log." + logDest;
+					String logOps = props.getProperty(propertyName);
+
+					if (logOps == null) {
+						String msg = "Property '" + propertyName + "' must be set but may be empty";
+						logger.fatal(msg);
+						throw new IllegalStateException(msg);
+					}
+					logOps = logOps.trim();
+					if (!logOps.isEmpty()) {
+						Matcher m = srwPattern.matcher(logOps);
+						if (!m.matches()) {
+							String msg = "Property  '" + propertyName
+									+ "' must only contain the letters S, R and W";
+							logger.fatal(msg);
+							throw new IllegalStateException(msg);
+						}
+						for (String c : new String[] { "S", "R", "W" }) {
+							if (logOps.indexOf(c) >= 0) {
+								logRequests.add(logDest + ":" + c);
+								logger.debug("Log request added " + logDest + ":" + c);
+							}
+						}
+					}
+				} else {
+					String msg = "Value '" + logDest
+							+ "' specified in 'log.list' is neither 'file' nor 'tables'";
+					logger.fatal(msg);
+					throw new IllegalStateException(msg);
+				}
+			}
+		}
+		logger.debug("There are " + logRequests.size() + " log requests");
 	}
 
 	public Map<String, NotificationRequest> getNotificationRequests() {
 		return notificationRequests;
 	}
+
+	public Set<String> getLogRequests() {
+		return logRequests;
+	}
+
 }

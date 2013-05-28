@@ -28,7 +28,8 @@
             </p>
             <p>
                 If you already have ICAT 4.2.0, 4.2.1, 4.2.2, 4.2.3 or 4.2.4 deployed but have modified log4j.properties
-                then skip on to the section preceding
+                then skip on to the section
+                preceding
                 <a href="#ear">installing the .ear file</a>
             </p>
 
@@ -205,7 +206,8 @@
                     unless you wish to modify the logging configuration this file is not needed. If
                     you do
                     wish to modify logging, then place a copy of the file somewhere with a name of your choice (icat.log4j.properties
-                    might be a good name) and
+                    might be a good
+                    name) and
                     update the icat.properties file to reference it as explained below. The icat.properties file may need
                     other changes:
                 </p>
@@ -243,9 +245,28 @@
                         the
                         config directory.
                     </dd>
+                    <dt>notification.list</dt>
+                    <dd>is a space separated set of Entity names for which you with to generate notifications. For each one there must be another line
+                        saying under what conditions you wish to generate a notification for the entity.
+                    </dd>
+                    <dt>
+                        notification.&lt;entity name&gt; </dt>
+                    <dd>a string of letters taken from the set "C", "U" and "D" indicating for which operations (create, update and delete) you with
+                        to be notified for that kind of operation on the entity.
+                    </dd>
+                    <dt>log.list</dt>
+                    <dd>s a space separated set of call logging destinations - currently valid destinations are "table" and "file". For each one there
+                        must
+                        be another line
+                        saying under what group of calls you wish to log.
+                    </dd>
+                    <dt>
+                        log.&lt;destination&gt; </dt>
+                    <dd>a string of letters taken from the set "S", "R" and "W" indicating for which group of calls you wish to generate a log entry.
+                        "S" denotes session calls (login, refresh and logout); "R" is used for the various read calls and "W" is used for all write
+                        calls (create, update and delete).
+                    </dd>
                 </dl>
-
-
 
             </subsection>
 

@@ -37,9 +37,6 @@ public class NotificationMessage {
 
 	private final static EntityInfoHandler entityInfoHandler = EntityInfoHandler.getInstance();
 
-	private final static Map<String, NotificationRequest> notificationRequests = PropertyHandler
-			.getInstance().getNotificationRequests();
-
 	public static EntityInfoHandler getEntityinfohandler() {
 		return entityInfoHandler;
 	}
@@ -48,6 +45,8 @@ public class NotificationMessage {
 
 	public NotificationMessage(Operation operation, EntityBaseBean bean, EntityManager manager)
 			throws IcatException {
+		Map<String, NotificationRequest> notificationRequests = PropertyHandler.getInstance()
+				.getNotificationRequests();
 		String entity = bean.getClass().getSimpleName();
 		String key = entity + ":" + operation.name();
 		NotificationRequest nr = notificationRequests.get(key);

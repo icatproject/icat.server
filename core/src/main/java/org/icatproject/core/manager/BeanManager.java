@@ -1,5 +1,9 @@
 package org.icatproject.core.manager;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -7,8 +11,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +31,10 @@ import javax.transaction.UserTransaction;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.PropertyHandler;
 import org.icatproject.core.PropertyHandler.Operation;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.entity.Log;
 import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.parser.GetQuery;
@@ -42,7 +50,18 @@ public class BeanManager {
 
 	private static final Logger logger = Logger.getLogger(BeanManager.class);
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
+	private static boolean log;
+	private static Set<String> logRequests;
+
+	static {
+		PropertyHandler propertyHandler = PropertyHandler.getInstance();
+		logRequests = propertyHandler.getLogRequests();
+		log = !logRequests.isEmpty();
+	}
+
 	private static DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+	private static long next;
+	private static BufferedWriter logFile;
 
 	private static final Pattern timestampPattern = Pattern.compile(":ts(\\d{14})");
 
@@ -52,6 +71,7 @@ public class BeanManager {
 		try {
 			userTransaction.begin();
 			try {
+				long time = log ? System.currentTimeMillis() : 0;
 				bean.preparePersist(userId, manager);
 				logger.trace(bean + " prepared for persist.");
 				manager.persist(bean);
@@ -63,7 +83,12 @@ public class BeanManager {
 				NotificationMessage notification = new NotificationMessage(Operation.C, bean,
 						manager);
 				userTransaction.commit();
-				return new CreateResponse(bean.getId(), notification);
+				long beanId = bean.getId();
+				if (log) {
+					logWrite(time, userId, "create", bean.getClass().getSimpleName(), beanId,
+							manager, userTransaction);
+				}
+				return new CreateResponse(beanId, notification);
 			} catch (EntityExistsException e) {
 				userTransaction.rollback();
 				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS,
@@ -104,6 +129,7 @@ public class BeanManager {
 			userTransaction.begin();
 			List<CreateResponse> crs = new ArrayList<CreateResponse>();
 			try {
+				long time = log ? System.currentTimeMillis() : 0;
 				for (EntityBaseBean bean : beans) {
 					bean.preparePersist(userId, manager);
 					logger.trace(bean + " prepared for persist.");
@@ -119,6 +145,11 @@ public class BeanManager {
 					crs.add(cr);
 				}
 				userTransaction.commit();
+
+				if (log && !crs.isEmpty()) {
+					logWrite(time, userId, "createMany", beans.get(0).getClass().getSimpleName(),
+							crs.get(0).getPk(), manager, userTransaction);
+				}
 				return crs;
 			} catch (EntityExistsException e) {
 				userTransaction.rollback();
@@ -224,6 +255,7 @@ public class BeanManager {
 		try {
 			userTransaction.begin();
 			try {
+				long time = log ? System.currentTimeMillis() : 0;
 				EntityBaseBean beanManaged = find(bean, manager);
 				GateKeeper.performAuthorisation(userId, beanManaged, AccessType.DELETE, manager);
 				NotificationMessage notification = new NotificationMessage(Operation.D, bean,
@@ -232,6 +264,10 @@ public class BeanManager {
 				manager.flush();
 				logger.trace("Deleted bean " + bean + " flushed.");
 				userTransaction.commit();
+				if (log) {
+					logWrite(time, userId, "delete", bean.getClass().getSimpleName(), bean.getId(),
+							manager, userTransaction);
+				}
 				return notification;
 			} catch (IcatException e) {
 				userTransaction.rollback();
@@ -264,6 +300,7 @@ public class BeanManager {
 		try {
 			userTransaction.begin();
 			try {
+				long time = log ? System.currentTimeMillis() : 0;
 				EntityBaseBean beanManaged = find(bean, manager);
 				GateKeeper.performAuthorisation(userId, beanManaged, AccessType.UPDATE, manager);
 				beanManaged.setModId(userId);
@@ -273,6 +310,10 @@ public class BeanManager {
 				NotificationMessage notification = new NotificationMessage(Operation.U, bean,
 						manager);
 				userTransaction.commit();
+				if (log) {
+					logWrite(time, userId, "update", bean.getClass().getSimpleName(), bean.getId(),
+							manager, userTransaction);
+				}
 				return notification;
 			} catch (IcatException e) {
 				userTransaction.rollback();
@@ -303,9 +344,10 @@ public class BeanManager {
 	}
 
 	public static EntityBaseBean get(String userId, String query, long primaryKey,
-			EntityManager manager) throws IcatException {
-		// Note that this uses no transactions as it is read only.
+			EntityManager manager, UserTransaction userTransaction) throws IcatException {
+		// Note that this uses no transactions (except for loggging) as it is read only.
 
+		long time = log ? System.currentTimeMillis() : 0;
 		List<Token> tokens = null;
 		try {
 			tokens = Tokenizer.getTokens(query);
@@ -339,14 +381,20 @@ public class BeanManager {
 
 		GateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
 		logger.debug("got " + entityClass.getSimpleName() + "[id:" + primaryKey + "]");
-		return beanManaged.pruned();
+		EntityBaseBean result = beanManaged.pruned();
+		if (log) {
+			logRead(time, userId, "get", result.getClass().getSimpleName(), result.getId(), query,
+					manager, userTransaction);
+		}
+		return result;
 	}
 
-	public static List<?> search(String userId, String query, EntityManager manager)
-			throws IcatException {
+	public static List<?> search(String userId, String query, EntityManager manager,
+			UserTransaction userTransaction) throws IcatException {
 		// Note that this currently uses no transactions. This is simpler and
 		// should give better performance
 
+		long time = log ? System.currentTimeMillis() : 0;
 		logger.debug(userId + " searches for " + query);
 
 		/* Parse the query */
@@ -417,8 +465,16 @@ public class BeanManager {
 			for (Object beanManaged : result) {
 				clones.add(((EntityBaseBean) beanManaged).pruned());
 			}
+			if (log) {
+				EntityBaseBean bean = (EntityBaseBean) clones.get(0);
+				logRead(time, userId, "search", bean.getClass().getSimpleName(), bean.getId(),
+						query, manager, userTransaction);
+			}
 			return clones;
 		} else {
+			if (log) {
+				logRead(time, userId, "search", null, null, query, manager, userTransaction);
+			}
 			return result;
 		}
 
@@ -594,11 +650,15 @@ public class BeanManager {
 		try {
 			userTransaction.begin();
 			try {
+				long time = log ? System.currentTimeMillis() : 0;
 				Session session = getSession(sessionId, manager);
 				manager.remove(session);
 				manager.flush();
 				userTransaction.commit();
 				logger.debug("Session " + session.getId() + " removed.");
+				if (log) {
+					logSession(time, session.getUserName(), "logout", manager, userTransaction);
+				}
 			} catch (Throwable e) {
 				userTransaction.rollback();
 				logger.trace("Transaction rolled back for logout because of " + e.getClass() + " "
@@ -627,11 +687,15 @@ public class BeanManager {
 		try {
 			userTransaction.begin();
 			try {
+				long time = log ? System.currentTimeMillis() : 0;
 				Session session = getSession(sessionId, manager);
 				session.refresh(lifetimeMinutes);
 				manager.flush();
 				userTransaction.commit();
 				logger.debug("Session " + session.getId() + " refreshed.");
+				if (log) {
+					logSession(time, session.getUserName(), "refresh", manager, userTransaction);
+				}
 			} catch (Throwable e) {
 				userTransaction.rollback();
 				logger.trace("Transaction rolled back for logout because of " + e.getClass() + " "
@@ -660,11 +724,16 @@ public class BeanManager {
 		try {
 			userTransaction.begin();
 			try {
+				long time = log ? System.currentTimeMillis() : 0;
 				manager.persist(session);
 				manager.flush();
 				userTransaction.commit();
-				logger.debug("Session " + session.getId() + " persisted.");
-				return session.getId();
+				String result = session.getId();
+				logger.debug("Session " + result + " persisted.");
+				if (log) {
+					logSession(time, userName, "login", manager, userTransaction);
+				}
+				return result;
 			} catch (Throwable e) {
 				userTransaction.rollback();
 				logger.trace("Transaction rolled back for login because of " + e.getClass() + " "
@@ -674,17 +743,135 @@ public class BeanManager {
 			}
 		} catch (IllegalStateException e) {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-					"IllegalStateException" + e.getMessage());
+					"IllegalStateException " + e.getMessage());
 		} catch (SecurityException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException"
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException "
 					+ e.getMessage());
 		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException"
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException "
 					+ e.getMessage());
 		} catch (NotSupportedException e) {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-					"NotSupportedException" + e.getMessage());
+					"NotSupportedException " + e.getMessage());
 		}
+	}
+
+	private static void logSession(long time, String userName, String operation,
+			EntityManager manager, UserTransaction userTransaction) throws IcatException {
+		long now = System.currentTimeMillis();
+		if (logRequests.contains("file:S")) {
+			writeLogFile(now, userName + "\t" + operation + "\t" + time + "\t" + (now - time));
+		}
+		if (logRequests.contains("table:S")) {
+			writeTable(now, userName, operation, now - time, null, null, null, manager,
+					userTransaction);
+		}
+	}
+
+	private static void logWrite(long time, String userName, String operation, String entityName,
+			long entityId, EntityManager manager, UserTransaction userTransaction)
+			throws IcatException {
+		long now = System.currentTimeMillis();
+		if (logRequests.contains("file:W")) {
+			writeLogFile(now, userName + "\t" + operation + "\t" + time + "\t" + (now - time)
+					+ "\t" + entityName + "\t" + entityId);
+		}
+		if (logRequests.contains("table:W")) {
+			writeTable(now, userName, operation, now - time, entityName, entityId, null, manager,
+					userTransaction);
+		}
+	}
+
+	private static void logRead(long time, String userName, String operation, String entityName,
+			Long entityId, String query, EntityManager manager, UserTransaction userTransaction)
+			throws IcatException {
+		long now = System.currentTimeMillis();
+		if (logRequests.contains("file:R")) {
+			writeLogFile(now, userName + "\t" + operation + "\t" + time + "\t" + (now - time)
+					+ "\t" + entityName + "\t" + entityId + "\t" + query);
+		}
+		if (logRequests.contains("table:R")) {
+			writeTable(now, userName, operation, now - time, entityName, entityId, query, manager,
+					userTransaction);
+		}
+	}
+
+	private static void writeTable(long timeStamp, String userId, String operation, long duration,
+			String entityName, Long entityId, String query, EntityManager manager,
+			UserTransaction userTransaction) throws IcatException {
+
+		try {
+			userTransaction.begin();
+			Log logEntry = null;
+			try {
+				logEntry = new Log(operation, duration, entityName, entityId, query);
+				logEntry = new Log(operation, duration, "w", 17L, "y");
+				logEntry.preparePersist(userId, manager);
+				manager.persist(logEntry);
+				manager.flush();
+				userTransaction.commit();
+			} catch (Throwable e) {
+				userTransaction.rollback();
+				logger.error("Transaction rolled back for creation of " + logEntry + " because of "
+						+ e.getClass() + " " + e.getMessage());
+
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
+			}
+		} catch (IllegalStateException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"IllegalStateException " + e.getMessage());
+		} catch (SecurityException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException "
+					+ e.getMessage());
+		} catch (SystemException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException "
+					+ e.getMessage());
+		} catch (NotSupportedException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"NotSupportedException " + e.getMessage());
+		}
+
+	}
+
+	private synchronized static void writeLogFile(long now, String entry) {
+		if (now > next) {
+			if (next != 0) {
+				try {
+					logFile.close();
+				} catch (IOException e1) {
+					logger.warn("Unable to close file " + logFile);
+				}
+			}
+			GregorianCalendar nextCal = new GregorianCalendar();
+			String fileName = "icat.call.log." + nextCal.get(Calendar.YEAR) + "-"
+					+ (nextCal.get(Calendar.MONTH) + 1) + "-" + nextCal.get(Calendar.DAY_OF_MONTH);
+
+			nextCal.add(Calendar.DATE, 1);
+			nextCal.set(Calendar.HOUR_OF_DAY, 0);
+			nextCal.set(Calendar.MINUTE, 0);
+			nextCal.set(Calendar.SECOND, 0);
+			nextCal.set(Calendar.MILLISECOND, 0);
+			next = nextCal.getTimeInMillis();
+
+			try {
+				logFile = new BufferedWriter(new FileWriter(new File(new File("..", "logs"),
+						fileName), true));
+			} catch (IOException e) {
+				logger.warn("Unable to open file " + fileName + " for appending");
+				next = 0;
+			}
+		}
+		try {
+			if (next != 0) {
+				logFile.write(entry, 0, entry.length());
+				logFile.newLine();
+				logFile.flush();
+			}
+		} catch (IOException e) {
+			logger.warn("Unable to write to " + logFile);
+		}
+
 	}
 
 	public static List<NotificationMessage> deleteMany(String userId, List<EntityBaseBean> beans,

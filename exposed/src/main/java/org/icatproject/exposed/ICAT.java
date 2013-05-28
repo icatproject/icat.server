@@ -39,6 +39,7 @@ import org.icatproject.core.entity.InvestigationType;
 import org.icatproject.core.entity.InvestigationUser;
 import org.icatproject.core.entity.Job;
 import org.icatproject.core.entity.Keyword;
+import org.icatproject.core.entity.Log;
 import org.icatproject.core.entity.OutputDatafile;
 import org.icatproject.core.entity.OutputDataset;
 import org.icatproject.core.entity.ParameterType;
@@ -108,7 +109,7 @@ public class ICAT {
 			@WebParam Job job, @WebParam InputDataset inputDataset,
 			@WebParam OutputDataset outputDataset, @WebParam InputDatafile inputDatafile,
 			@WebParam OutputDatafile outputDatafile, @WebParam Group group,
-			@WebParam UserGroup userGroup) {
+			@WebParam UserGroup userGroup, @WebParam Log log) {
 		beanManagerBean.dummy(facility);
 	}
 
