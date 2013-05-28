@@ -1233,6 +1233,9 @@ public class TestWS {
 		rm = session.getRemainingMinutes();
 		session.refresh();
 		assertTrue(session.getRemainingMinutes() > rm);
+		
+		String piOneSessionId = session.login("db", "username", "piOne", "password", "piOne");
+		session.logout(piOneSessionId);
 	}
 
 	@Test
