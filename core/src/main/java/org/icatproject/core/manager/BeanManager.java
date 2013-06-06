@@ -66,7 +66,7 @@ public class BeanManager {
 	private static final Pattern timestampPattern = Pattern.compile(":ts(\\d{14})");
 
 	public static CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
-			UserTransaction userTransaction) throws IcatException {
+			UserTransaction userTransaction, LuceneSingleton lucene) throws IcatException {
 
 		try {
 			userTransaction.begin();
@@ -84,6 +84,10 @@ public class BeanManager {
 						manager);
 				userTransaction.commit();
 				long beanId = bean.getId();
+				
+				if (lucene != null) {
+					lucene.addDocument(bean);
+				}
 				if (log) {
 					logWrite(time, userId, "create", bean.getClass().getSimpleName(), beanId,
 							manager, userTransaction);

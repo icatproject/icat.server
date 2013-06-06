@@ -283,8 +283,6 @@ public abstract class EntityBaseBean implements Serializable {
 
 	/**
 	 * Automatically updates deleted, modTime, createTime and modId when entity is created
-	 * 
-	 * @throws IcatInternalException
 	 */
 	@PrePersist
 	public void prePersist() {
@@ -297,8 +295,6 @@ public abstract class EntityBaseBean implements Serializable {
 
 	/**
 	 * Automatically updates modTime when entity is persisted or merged
-	 * 
-	 * @throws uk.icat3.exceptions.EntityNotModifiableError
 	 */
 	@PreUpdate
 	public void preUpdate() {

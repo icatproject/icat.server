@@ -60,6 +60,7 @@ public class PropertyHandler {
 	private int lifetimeMinutes;
 
 	private Set<String> logRequests = new HashSet<String>();
+	private String luceneDirectory;
 
 	private PropertyHandler() {
 		File f = new File("icat.properties");
@@ -221,6 +222,9 @@ public class PropertyHandler {
 			}
 		}
 		logger.debug("There are " + logRequests.size() + " log requests");
+		
+		/* Lucene Directory */
+		luceneDirectory = props.getProperty("lucene.directory");
 	}
 
 	public Map<String, NotificationRequest> getNotificationRequests() {
@@ -229,6 +233,10 @@ public class PropertyHandler {
 
 	public Set<String> getLogRequests() {
 		return logRequests;
+	}
+
+	public String getLuceneDirectory() {
+		return luceneDirectory;
 	}
 
 }
