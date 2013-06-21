@@ -1,6 +1,7 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -40,7 +41,7 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
 	private String description;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
-	private List<Investigation> investigations;
+	private List<Investigation> investigations = new ArrayList<Investigation>();
 
 	public List<Investigation> getInvestigations() {
 		return investigations;

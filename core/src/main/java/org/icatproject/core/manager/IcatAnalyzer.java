@@ -14,11 +14,11 @@ import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.util.StopwordAnalyzerBase;
 import org.apache.lucene.util.Version;
 
-public class ESNAnalyzer extends StopwordAnalyzerBase {
+public class IcatAnalyzer extends StopwordAnalyzerBase {
 
 	private Version matchVersion;
 
-	public ESNAnalyzer(Version matchVersion) {
+	public IcatAnalyzer(Version matchVersion) {
 		super(matchVersion, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
 		this.matchVersion = matchVersion;
 	}

@@ -4,13 +4,10 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import org.icatproject.core.IcatException;
 
 @Comment("Must be related to an investigation")
 @SuppressWarnings("serial")
@@ -34,12 +31,6 @@ public class Keyword extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "Keyword[id=" + id + "]";
-	}
-
-	@Override
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
-		this.id = null;
 	}
 
 	public Investigation getInvestigation() {

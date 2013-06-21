@@ -7,15 +7,12 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import org.icatproject.core.IcatException;
 
 @Comment("A data file format")
 @SuppressWarnings("serial")
@@ -101,12 +98,6 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "DatafileFormat[id=" + this.id + "]";
-	}
-
-	@Override
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
-		this.id = null;
 	}
 
 }

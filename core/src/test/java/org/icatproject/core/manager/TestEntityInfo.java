@@ -27,7 +27,7 @@ import org.junit.Test;
 public class TestEntityInfo {
 
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-
+	
 	@Test(expected = IcatException.class)
 	public void testBadname() throws Exception {
 		eiHandler.getEntityInfo("Fred");
@@ -79,33 +79,33 @@ public class TestEntityInfo {
 	public void testRels() throws Exception {
 
 		testRel(Investigation.class, "Instrument by instrument one",
-				"Keyword by keywords many cascaded", "Sample by samples many cascaded",
-				"StudyInvestigation by studyInvestigations many cascaded",
-				"Shift by shifts many cascaded", "Dataset by datasets many cascaded",
-				"Publication by publications many cascaded",
-				"InvestigationUser by investigationUsers many cascaded",
+				"Keyword by keywords many cascaded setInvestigation", "Sample by samples many cascaded setInvestigation",
+				"StudyInvestigation by studyInvestigations many cascaded setInvestigation",
+				"Shift by shifts many cascaded setInvestigation", "Dataset by datasets many cascaded setInvestigation",
+				"Publication by publications many cascaded setInvestigation",
+				"InvestigationUser by investigationUsers many cascaded setInvestigation",
 				"FacilityCycle by facilityCycle one", "InvestigationType by type one",
-				"Facility by facility one", "InvestigationParameter by parameters many cascaded");
+				"Facility by facility one", "InvestigationParameter by parameters many cascaded setInvestigation");
 
-		testRel(Dataset.class, "InputDataset by inputDatasets many cascaded",
-				"DatasetParameter by parameters many cascaded",
-				"Investigation by investigation one", "Datafile by datafiles many cascaded",
-				"OutputDataset by outputDatasets many cascaded", "DatasetType by type one",
+		testRel(Dataset.class, "InputDataset by inputDatasets many cascaded setDataset",
+				"DatasetParameter by parameters many cascaded setDataset",
+				"Investigation by investigation one", "Datafile by datafiles many cascaded setDataset",
+				"OutputDataset by outputDatasets many cascaded setDataset", "DatasetType by type one",
 				"Sample by sample one");
 
 		testRel(Keyword.class, "Investigation by investigation one");
 
 		testRel(InvestigationUser.class, "Investigation by investigation one", "User by user one");
 
-		testRel(User.class, "InvestigationUser by investigationUsers many cascaded",
-				"UserGroup by userGroups many cascaded",
-				"InstrumentScientist by instrumentScientists many cascaded",
-				"Study by studies many cascaded");
+		testRel(User.class, "InvestigationUser by investigationUsers many cascaded setUser",
+				"UserGroup by userGroups many cascaded setUser",
+				"InstrumentScientist by instrumentScientists many cascaded setUser",
+				"Study by studies many cascaded setUser");
 
-		testRel(Job.class, "InputDataset by inputDatasets many cascaded",
-				"InputDatafile by inputDatafiles many cascaded",
-				"OutputDatafile by outputDatafiles many cascaded",
-				"Application by application one", "OutputDataset by outputDatasets many cascaded");
+		testRel(Job.class, "InputDataset by inputDatasets many cascaded setJob",
+				"InputDatafile by inputDatafiles many cascaded setJob",
+				"OutputDatafile by outputDatafiles many cascaded setJob",
+				"Application by application one", "OutputDataset by outputDatasets many cascaded setJob");
 	}
 
 	private void testRel(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {
@@ -114,7 +114,7 @@ public class TestEntityInfo {
 		for (Relationship rel : results) {
 			rStrings.add(rel.toString());
 		}
-		// System.out.println(results);
+		 System.out.println(results);
 		assertEquals(klass.getSimpleName() + " count", rels.length, results.size());
 		for (String rel : rels) {
 			assertTrue(klass.getSimpleName() + " value " + rel, rStrings.contains(rel));

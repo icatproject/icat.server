@@ -28,9 +28,11 @@ import javax.xml.bind.annotation.XmlElement;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.manager.BeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
+import org.icatproject.core.manager.LuceneSingleton;
 
 @SuppressWarnings("serial")
 @MappedSuperclass
@@ -279,6 +281,29 @@ public abstract class EntityBaseBean implements Serializable {
 	public void preparePersist(String modId, EntityManager manager) throws IcatException {
 		this.id = null;
 		this.modId = modId;
+		Class<? extends EntityBaseBean> klass = this.getClass();
+		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		for (Relationship r : rs) {
+			if (r.isCascaded()) {
+				Method m = getters.get(r.getField());
+				try {
+					@SuppressWarnings("unchecked")
+					List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(this);
+					if (!collection.isEmpty()) {
+						Method rev = r.getInverseSetter();
+						for (EntityBaseBean bean : collection) {
+							bean.preparePersist(modId, manager);
+							rev.invoke(bean, this);
+						}
+					}
+				} catch (Exception e) {
+					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+				}
+			}
+
+		}
+
 	}
 
 	/**
@@ -373,6 +398,81 @@ public abstract class EntityBaseBean implements Serializable {
 	 */
 	public void setModId(String modId) {
 		this.modId = modId;
+	}
+
+	public void addToLucene(LuceneSingleton lucene) throws IcatException {
+		lucene.addDocument(this);
+		Class<? extends EntityBaseBean> klass = this.getClass();
+		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		for (Relationship r : rs) {
+			if (r.isCascaded()) {
+				Method m = getters.get(r.getField());
+				try {
+					@SuppressWarnings("unchecked")
+					List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(this);
+					if (!collection.isEmpty()) {
+						for (EntityBaseBean bean : collection) {
+							bean.addToLucene(lucene);
+						}
+					}
+				} catch (Exception e) {
+					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+				}
+			}
+
+		}
+
+	}
+
+	public void removeFromLucene(LuceneSingleton lucene) throws IcatException {
+		lucene.deleteDocument(this);
+		Class<? extends EntityBaseBean> klass = this.getClass();
+		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		for (Relationship r : rs) {
+			if (r.isCascaded()) {
+				Method m = getters.get(r.getField());
+				try {
+					@SuppressWarnings("unchecked")
+					List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(this);
+					if (!collection.isEmpty()) {
+						for (EntityBaseBean bean : collection) {
+							bean.removeFromLucene(lucene);
+						}
+					}
+				} catch (Exception e) {
+					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+				}
+			}
+
+		}
+
+	}
+
+	public void updateInLucene(LuceneSingleton lucene) throws IcatException {
+		lucene.updateDocument(this);
+		Class<? extends EntityBaseBean> klass = this.getClass();
+		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		for (Relationship r : rs) {
+			if (r.isCascaded()) {
+				Method m = getters.get(r.getField());
+				try {
+					@SuppressWarnings("unchecked")
+					List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(this);
+					if (!collection.isEmpty()) {
+						for (EntityBaseBean bean : collection) {
+							bean.updateInLucene(lucene);
+						}
+					}
+				} catch (Exception e) {
+					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+				}
+			}
+
+		}
+		
 	}
 
 }

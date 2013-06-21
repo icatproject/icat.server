@@ -410,4 +410,14 @@ public class Session {
 		this.icat.logout(sessionId);
 	}
 
+	public List<Object> searchText(String query, int maxCount, String entity)
+			throws IcatException_Exception {
+		return this.icat.searchText(sessionId, query, maxCount, entity);
+	}
+
+	// This assumes that the lucene.commitSeconds is set to 1 for testing purposes
+	public void synchLucene() throws InterruptedException {
+		Thread.sleep(2000);
+	}
+
 }

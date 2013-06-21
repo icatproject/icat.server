@@ -34,12 +34,6 @@ public class Application extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
-		id = null;
-	}
-
-	@Override
 	public void canDelete(EntityManager manager) throws IcatException {
 		super.canDelete(manager);
 		if (!this.jobs.isEmpty()) {

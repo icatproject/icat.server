@@ -89,12 +89,20 @@ public class EntityInfoHandler {
 
 		private final Field field;
 
+		private Method inverseSetter;
+
 		public Relationship(Class<? extends EntityBaseBean> bean, Field field, boolean collection,
-				boolean cascaded) {
+				boolean cascaded, Method inverseSetter) {
+			if (this.collection != this.cascaded) {
+				throw new RuntimeException(
+						"Collection and Cascaded must match for this code to work " + bean + " "
+								+ field);
+			}
 			this.bean = bean;
 			this.field = field;
 			this.collection = collection;
 			this.cascaded = cascaded;
+			this.inverseSetter = inverseSetter;
 		}
 
 		public Class<? extends EntityBaseBean> getBean() {
@@ -116,7 +124,12 @@ public class EntityInfoHandler {
 		@Override
 		public String toString() {
 			return this.bean.getSimpleName() + " by " + this.field.getName()
-					+ (this.collection ? " many" : " one") + (this.cascaded ? " cascaded" : "");
+					+ (this.collection ? " many" : " one") + (this.cascaded ? " cascaded" : "")
+					+ (this.inverseSetter == null ? "" : " " + this.inverseSetter.getName());
+		}
+
+		public Method getInverseSetter() {
+			return inverseSetter;
 		}
 
 	}
@@ -182,12 +195,19 @@ public class EntityInfoHandler {
 			if (field.getGenericType() instanceof ParameterizedType) {
 				OneToMany oneToMany = field.getAnnotation(OneToMany.class);
 				boolean all;
+				String mappedBy;
 				if (oneToMany != null) {
 					all = Arrays.asList(oneToMany.cascade()).contains(CascadeType.ALL);
 					if (!all && oneToMany.cascade().length != 0) {
 						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 								"Cascade must be all or nothing " + objectClass.getSimpleName()
 										+ "." + field.getName());
+					}
+					mappedBy = oneToMany.mappedBy();
+					if (mappedBy == null) {
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+								"MappedBy must be set for " + objectClass.getSimpleName() + "."
+										+ field.getName());
 					}
 				} else {
 					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -203,7 +223,19 @@ public class EntityInfoHandler {
 						if (EntityBaseBean.class.isAssignableFrom(argc)) {
 							@SuppressWarnings("unchecked")
 							final Class<? extends EntityBaseBean> argc2 = (Class<? extends EntityBaseBean>) argc;
-							rels.add(new Relationship(argc2, field, true, all));
+							try {
+								String name = "set" + Character.toUpperCase(mappedBy.charAt(0))
+										+ mappedBy.substring(1);
+								Method[] ms = argc2.getMethods();
+								for (Method m : ms) {
+									if (m.getName().equals(name)) {
+										rels.add(new Relationship(argc2, field, true, all, m));
+									}
+								}
+							} catch (SecurityException e) {
+								throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+										e.getMessage());
+							}
 						}
 					}
 				}
@@ -225,7 +257,7 @@ public class EntityInfoHandler {
 				@SuppressWarnings("unchecked")
 				final Class<? extends EntityBaseBean> argc2 = (Class<? extends EntityBaseBean>) field
 						.getType();
-				rels.add(new Relationship(argc2, field, false, all));
+				rels.add(new Relationship(argc2, field, false, all, null));
 			} else if (!Arrays.asList("modTime", "createTime", "createId", "modId", "id").contains(
 					field.getName())) {
 				attributes.add(field);

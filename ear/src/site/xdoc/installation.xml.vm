@@ -266,6 +266,16 @@
                         "S" denotes session calls (login, refresh and logout); "R" is used for the various read calls and "W" is used for all write
                         calls (create, update and delete).
                     </dd>
+                    <dt>lucene.directory</dt>
+                    <dd>the path to a directory (whose parent must exist) in which to store the lucene index. If this is specified then
+                        lucene.commitSeconds must also be specified. If it is omitted then lucene indices will not be created and the searchText()
+                        call will return nothing.
+                    </dd>
+                    <dt>lucene.commitSeconds</dt>
+                    <dd>the interval in seconds between committing lucene changes to disk and updating the index. If you set it to 300 then
+                        searchText() calls will see what was available at some time in the past (up to 5 minutes ago) and which is also currently
+                        present.
+                    </dd>
                 </dl>
 
             </subsection>
@@ -305,7 +315,7 @@
                     credentials should be passed in as pairs of parameters with key followed by value. For example, assuming that your working
                     directory
                     is in the PATH:
-                    <code>test.py example.com 8181 db username root password secret</code>
+                    <code>test.py example.com:8181 db username root password secret</code>
                 </p>
                 <p>It should report:
                 </p>
@@ -319,7 +329,53 @@
                     log.
                 </p>
             </subsection>
-
+            <subsection name="The admin interface">
+                <p>
+                    An admin interface is now available. Copy the ica executable to somewhere in the path - such as /usr/sbin. It should be invoked
+                    as:
+                </p>
+                <blockquote>
+                    <code>ica &lt;username&gt; &lt;password&gt; &lt;command&gt; &lt;args&gt;...</code>
+                </blockquote>
+                <p>to run a single command or</p>
+                <blockquote>
+                    <code>ica &lt;username&gt; &lt;password&gt; </code>
+                </blockquote>
+                <p>to be prompted for a series of commands as shown below.
+                </p>
+                <dl>
+                    <dt>props</dt>
+                    <dd>lists the active contents of the icat.properties file. It does this by examining the properties after they have been read in
+                        so any superfluous defintions in the original properties file will not be seen.
+                    </dd>
+                    <dt>commit</dt>
+                    <dd>instructs lucene to update indices. Normally this is not needed as it is will be done periodically according to the value of
+                        lucene.commitSeconds
+                    </dd>
+                    <dt>clear</dt>
+                    <dd>clears the lucene indices</dd>
+                    <dt>populate &lt;entity name&gt;...</dt>
+                    <dd>clears all lucene entries of the specified entity type and scans the corresponding icat entries to repopulate lucene. This is
+                        useful if the database has been modified directly rather than by using the ICAT API. Note that because of caching, ICAT should
+                        be reloaded after any direct database modifications are made.
+                    </dd>
+                    <dt>search &lt;query&gt; [&lt;maxCount&gt;] [&lt;entityName&gt;]</dt>
+                    <dd>
+                        searches lucene indices and returns a list of entity_name:entity_id values. Arguments are
+                        <dl>
+                            <dt>query</dt>
+                            <dd>a lucene query which should be enclosed in quotes if it contains more than one word. Queries can contain AND and OR in
+                                upper case as well as parentheses. The default operator is OR. Wildcards of * and ? are also supported. Other features
+                                are described in the user documentation for the searchText call.
+                            </dd>
+                            <dt>maxCount</dt>
+                            <dd>maximum number of values to return (defaults to 100)</dd>
+                            <dt>entityName</dt>
+                            <dd>if specified, this restrict results to entities with this name</dd>
+                        </dl>
+                    </dd>
+                </dl>
+            </subsection>
 
         </section>
     </body>

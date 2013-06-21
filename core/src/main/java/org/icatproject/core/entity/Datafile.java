@@ -8,7 +8,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -212,15 +211,6 @@ public class Datafile extends EntityBaseBean implements Serializable {
 
 	public List<RelatedDatafile> getSourceDatafiles() {
 		return sourceDatafiles;
-	}
-
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
-		id = null;
-		for (DatafileParameter datafileParameter : parameters) {
-			datafileParameter.preparePersist(modId, manager);
-			datafileParameter.setDatafile(this);
-		}
 	}
 
 	public void setChecksum(String checksum) {

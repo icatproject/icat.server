@@ -25,7 +25,7 @@ import org.icatproject.core.IcatException;
 public class Sample extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
-	private List<Dataset> datasets;
+	private List<Dataset> datasets = new ArrayList<Dataset>();
 
 	@JoinColumn(nullable = false, name = "INVESTIGATION_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -76,15 +76,6 @@ public class Sample extends EntityBaseBean implements Serializable {
 					sampleParameter.isValid(manager);
 				}
 			}
-		}
-	}
-
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
-		id = null;
-		for (SampleParameter sampleParameter : parameters) {
-			sampleParameter.preparePersist(modId, manager);
-			sampleParameter.setSample(this); // Set back ref
 		}
 	}
 

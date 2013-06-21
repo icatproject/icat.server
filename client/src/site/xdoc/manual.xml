@@ -126,8 +126,10 @@
                     once.
                 </p>
 
-                <p class="call">void logout(String sessionId)</p>
+                <p class="call">void refresh(String sessionId)</p>
+                <p>This resets the time to live of the session as it was when the session was first obtained.</p>
 
+                <p class="call">void logout(String sessionId)</p>
                 <p>This invalidates the sessionId.</p>
 
             </subsection>
@@ -476,7 +478,7 @@
                 </p>
             </subsection>
 
-            <subsection name="Searching for an Object">
+            <subsection name="Searching for an Object - Database related syntax">
                 <p class="call">List&lt;Object&gt; search(String sessionId, String query)
                 </p>
                 <p>A rather powerful search mechanism is provided. It will be introduced by means of examples:</p>
@@ -548,6 +550,46 @@
                     "&#160;,&#160;&#160;Dataset.id ORDER BY id"
                 </code>
             </subsection>
+
+            <subsection name="Searching for an Object - Free text syntax">
+                <p class="call">List&lt;Object&gt; search(String sessionId, String query, int maxCount, String entityName)
+                </p>
+                <p>This treats each ICAT entry as a document. The contents of that document is formed by concatenating all the non-blank text fields
+                    (with a space bewteen them). These documents are then indexed by Lucene. Each create, update or delete call updates the set of
+                    available "documents". The indices are updated periodically - so new entries will not be immediately visible. The freshness of the
+                    data is determined by the ICAT configuration and may be adjusted. As with the other search call you will only see the data you are
+                    allowed to see by the authorization rules. Please see the following examples.
+                </p>
+                <code>List&lt;Object&gt; results = icat.searchText(sessionId, "king", 50, null);</code>
+                <p>This obtains the 50 "best" documents with the work "king" in them.</p>
+
+                <code>List&lt;Object&gt; results = icat.searchText(sessionId, "king queen", 50, null);</code>
+                <p>returns documents with "king" or "queen" in them.</p>
+
+                <code>List&lt;Object&gt; results = icat.searchText(sessionId, "king AND (queen OR harp", 50, null);</code>
+                <p>returns documents with "king" and either "queen" or "harp".</p>
+
+                <p>Case is ignored and there is no need to put in words with different endings but the same stem as common suffices are removed both
+                    when storing the document indices and when looking them up. Wild cards may be used - the ? for a single character and * for zero
+                    or
+                    more. The last argument my be the simple name of an entity as shown below.
+                </p>
+
+                <code>List&lt;Object&gt; results = icat.searchText(sessionId, "king", 50, "Investigation");</code>
+                <p>This restricts the search to the "Investigation" set of entities.</p>
+
+            </subsection>
+
+        </section>
+
+        <section name="Testing calls">
+
+            <p>There a number of calls to test whether or not a call will be succesful. These can be used in a GUI which is making ICAT calls to avoid
+                offering users options that will fail. They have names testCreate, testUpdate and testDelete and have just the same calling sequence
+                as the corresponding create, update and delete calls but return void. In each case they do nothing except that if the corresponding
+                call would throw an exception then this does too.
+            </p>
+
         </section>
 
         <section name="Authorization">

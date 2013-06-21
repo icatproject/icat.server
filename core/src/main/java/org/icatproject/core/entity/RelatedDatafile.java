@@ -4,14 +4,11 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import org.icatproject.core.IcatException;
 
 @Comment("Used to represent an arbitrary relationship between data files")
 @SuppressWarnings("serial")
@@ -63,12 +60,6 @@ public class RelatedDatafile extends EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return "RelatedDatafile[id=" + id + "]";
-	}
-
-	@Override
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
-		this.id = null;
 	}
 
 }

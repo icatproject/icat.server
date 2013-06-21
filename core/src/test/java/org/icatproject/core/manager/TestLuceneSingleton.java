@@ -2,17 +2,19 @@ package org.icatproject.core.manager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 
+import org.icatproject.core.IcatException;
+import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.Investigation;
-import org.junit.Ignore;
+import org.icatproject.core.manager.LuceneSingleton.LuceneSearchResult;
 import org.junit.Test;
 
 public class TestLuceneSingleton {
 
-	@Ignore
 	@Test()
 	public void testInit() throws Exception {
 		LuceneSingleton lucene = LuceneSingleton.getInstance();
@@ -28,8 +30,9 @@ public class TestLuceneSingleton {
 	public void one() throws Exception {
 		LuceneSingleton lucene = LuceneSingleton.getInstance();
 		lucene.clear();
-		lucene.close();
-		lucene = LuceneSingleton.getInstance();
+
+		// Commit after clear
+		lucene.commit();
 
 		Investigation investigation = new Investigation();
 
@@ -49,93 +52,109 @@ public class TestLuceneSingleton {
 		dataset.setId(44L);
 		lucene.addDocument(dataset);
 
-		lucene.close();
-		lucene = LuceneSingleton.getInstance();
+		// Commit after addition of 3 entries
+		lucene.commit();
 
 		String query = "first AND investigation";
-		int n = lucene.getCount(query);
-		assertEquals(1, n);
-		List<String> results = lucene.search(query, 0, n);
+		List<String> results = lucene.search(query, 10, null).getResults();
+		assertEquals(1, results.size());
 		assertTrue(results.contains("Investigation:42"));
 
-		query = "first  investigation";
-		n = lucene.getCount(query);
-		assertEquals(3, n);
-		results = lucene.search(query, 0, n);
+		query = "first investigation";
+		results = lucene.search(query, 10, null).getResults();
+		assertEquals(3, results.size());
 		assertTrue(results.contains("Investigation:42"));
 		assertTrue(results.contains("Investigation:43"));
 		assertTrue(results.contains("Dataset:44"));
 
+		LuceneSearchResult luceneResult = lucene.search(query, 1, null);
+		assertEquals(1, luceneResult.getResults().size());
+		assertEquals("Investigation:42", luceneResult.getResults().get(0));
+
+		luceneResult = lucene.searchAfter(luceneResult, 1);
+		assertEquals(1, luceneResult.getResults().size());
+		assertEquals("Investigation:43", luceneResult.getResults().get(0));
+
+		luceneResult = lucene.searchAfter(luceneResult, 1);
+		assertEquals(1, luceneResult.getResults().size());
+		assertEquals("Dataset:44", luceneResult.getResults().get(0));
+
+		luceneResult = lucene.searchAfter(luceneResult, 1);
+		assertEquals(0, luceneResult.getResults().size());
+
 		query = "first";
-		n = lucene.getCount(query);
-		assertEquals(2, n);
-		results = lucene.search(query, 0, n);
+		results = lucene.search(query, 10, null).getResults();
+		assertEquals(2, results.size());
 		assertTrue(results.contains("Investigation:42"));
 		assertTrue(results.contains("Dataset:44"));
 
-		query = "Dataset:first";
-		n = lucene.getCount(query);
-		assertEquals(1, n);
-		results = lucene.search(query, 0, n);
+		query = "first";
+		results = lucene.search(query, 10, "Dataset").getResults();
+		assertEquals(1, results.size());
 		assertTrue(results.contains("Dataset:44"));
+
+		query = "first";
+
+		try {
+			results = lucene.search(query, 10, "dataset").getResults();
+			fail("Must throw a bad paremeter exception");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
+		}
 
 		dataset = new Dataset();
 		dataset.setName("DS 1");
-		dataset.setLocation("Location of dataset");
+		dataset.setLocation("Location of special dataset");
 		dataset.setId(44L);
 		lucene.updateDocument(dataset);
 
-		lucene.close();
-		lucene = LuceneSingleton.getInstance();
+		// Commit after update of 1 entry
+		lucene.commit();
 
 		query = "first AND investigation";
-		n = lucene.getCount(query);
-		assertEquals(1, n);
-		results = lucene.search(query, 0, n);
+		results = lucene.search(query, 10, null).getResults();
+		assertEquals(1, results.size());
 		assertTrue(results.contains("Investigation:42"));
 
 		query = "first  investigation";
-		n = lucene.getCount(query);
-		assertEquals(2, n);
-		results = lucene.search(query, 0, n);
+		results = lucene.search(query, 10, null).getResults();
+		assertEquals(2, results.size());
 		assertTrue(results.contains("Investigation:42"));
 		assertTrue(results.contains("Investigation:43"));
 
 		query = "first";
-		n = lucene.getCount(query);
-		assertEquals(1, n);
-		results = lucene.search(query, 0, n);
+		results = lucene.search(query, 10, null).getResults();
+		assertEquals(1, results.size());
 		assertTrue(results.contains("Investigation:42"));
 
 		query = "Dataset:first";
-		n = lucene.getCount(query);
-		assertEquals(0, n);
-		
+		results = lucene.search(query, 10, null).getResults();
+		assertEquals(0, results.size());
+
 		investigation.setName("Inv 1");
 		investigation.setTitle("Title of first investigation");
 		investigation.setId(42L);
 		lucene.deleteDocument(investigation);
-		
-		lucene.close();
-		lucene = LuceneSingleton.getInstance();
+
+		// Commit after deletion of 1 entry
+		lucene.commit();
 
 		query = "first AND investigation";
-		n = lucene.getCount(query);
-		assertEquals(0, n);
+		results = lucene.search(query, 10, null).getResults();
+		assertEquals(0, results.size());
 
 		query = "first  investigation";
-		n = lucene.getCount(query);
-		assertEquals(1, n);
-		results = lucene.search(query, 0, n);
+		results = lucene.search(query, 10, null).getResults();
+		assertEquals(1, results.size());
 		assertTrue(results.contains("Investigation:43"));
 
 		query = "first";
-		n = lucene.getCount(query);
-		assertEquals(0, n);
+		results = lucene.search(query, 10, null).getResults();
+		assertEquals(0, results.size());
 
 		query = "Dataset:first";
-		n = lucene.getCount(query);
-		assertEquals(0, n);
+		results = lucene.search(query, 10, null).getResults();
+		assertEquals(0, results.size());
 
 		lucene.close();
 

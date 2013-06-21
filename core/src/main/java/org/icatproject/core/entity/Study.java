@@ -7,14 +7,11 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import org.icatproject.core.IcatException;
 
 @Comment("A study which may be related to an investigation")
 @SuppressWarnings("serial")
@@ -69,12 +66,6 @@ public class Study extends EntityBaseBean implements Serializable {
 
 	public List<StudyInvestigation> getStudyInvestigations() {
 		return this.studyInvestigations;
-	}
-
-	@Override
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
-		this.id = null;
 	}
 
 	public Date getStartDate() {

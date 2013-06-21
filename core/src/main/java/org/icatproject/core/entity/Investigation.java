@@ -8,7 +8,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -16,8 +15,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-
-import org.icatproject.core.IcatException;
 
 @Comment("An investigation or experiment")
 @SuppressWarnings("serial")
@@ -177,27 +174,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public String getVisitId() {
 		return this.visitId;
-	}
-
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
-		id = null;
-		for (Dataset dataset : datasets) {
-			dataset.preparePersist(modId, manager);
-			dataset.setInvestigation(this); // Set back ref
-		}
-		for (InvestigationParameter investigationParameter : parameters) {
-			investigationParameter.preparePersist(modId, manager);
-			investigationParameter.setInvestigation(this); // Set back ref
-		}
-		for (Sample sample : samples) {
-			sample.preparePersist(modId, manager);
-			sample.setInvestigation(this); // Set back ref
-		}
-		for (InvestigationUser investigationUser : investigationUsers) {
-			investigationUser.preparePersist(modId, manager);
-			investigationUser.setInvestigation(this); // Set back ref
-		}
 	}
 
 	public void setDatasets(List<Dataset> datasets) {

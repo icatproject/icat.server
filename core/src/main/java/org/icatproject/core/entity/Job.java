@@ -1,6 +1,7 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -28,7 +29,7 @@ public class Job extends EntityBaseBean implements Serializable {
 	}
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
-	private List<InputDataset> inputDatasets;
+	private List<InputDataset> inputDatasets = new ArrayList<InputDataset>();
 
 	public List<InputDataset> getInputDatasets() {
 		return inputDatasets;
@@ -51,21 +52,21 @@ public class Job extends EntityBaseBean implements Serializable {
 	}
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
-	private List<OutputDataset> outputDatasets;
+	private List<OutputDataset> outputDatasets = new ArrayList<OutputDataset>();
 
 	public List<OutputDataset> getOutputDatasets() {
 		return outputDatasets;
 	}
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
-	private List<InputDatafile> inputDatafiles;
+	private List<InputDatafile> inputDatafiles = new ArrayList<InputDatafile>();
 
 	public List<InputDatafile> getInputDatafiles() {
 		return inputDatafiles;
 	}
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
-	private List<OutputDatafile> outputDatafiles;
+	private List<OutputDatafile> outputDatafiles = new ArrayList<OutputDatafile>();
 
 	public List<OutputDatafile> getOutputDatafiles() {
 		return outputDatafiles;

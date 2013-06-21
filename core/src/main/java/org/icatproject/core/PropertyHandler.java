@@ -2,8 +2,10 @@ package org.icatproject.core;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -61,6 +63,9 @@ public class PropertyHandler {
 
 	private Set<String> logRequests = new HashSet<String>();
 	private String luceneDirectory;
+	private int luceneCommitSeconds;
+
+	private List<String> formattedProps = new ArrayList<String>();
 
 	private PropertyHandler() {
 		File f = new File("icat.properties");
@@ -73,13 +78,21 @@ public class PropertyHandler {
 			logger.fatal(msg);
 			throw new IllegalStateException(msg);
 		}
+		
+		/* log4j.properties */
+		String path = props.getProperty("log4j.properties");
+		if (path != null) {
+			formattedProps.add("log4j.properties " + path);
+		}
 
+		/* The authn.list */
 		String authnList = props.getProperty("authn.list").trim();
 		if (authnList == null || authnList.isEmpty()) {
 			String msg = "Property 'authn.list' must be set and must contains something";
 			logger.fatal(msg);
 			throw new IllegalStateException(msg);
 		}
+		formattedProps.add("authn.list " + authnList);
 		Context ctx = null;
 		try {
 			ctx = new InitialContext();
@@ -105,6 +118,7 @@ public class PropertyHandler {
 			}
 		}
 
+		/* lifetimeMinutes */
 		String ltm = props.getProperty("lifetimeMinutes");
 		if (ltm == null) {
 			String msg = "lifetimeMinutes is not set";
@@ -119,7 +133,9 @@ public class PropertyHandler {
 			logger.fatal(msg);
 			throw new IllegalStateException(msg);
 		}
+		formattedProps.add("lifetimeMinutes " + lifetimeMinutes);
 
+		/* rootUserNames */
 		String names = props.getProperty("rootUserNames");
 		if (names == null) {
 			String msg = "rootUserNames is not set";
@@ -129,15 +145,16 @@ public class PropertyHandler {
 		for (String name : names.trim().split("\\s+")) {
 			rootUserNames.add(name);
 		}
+		formattedProps.add("rootUserNames " + names);
 
-		/* Notification Setup */
-
+		/* notification.list */
 		String notificationList = props.getProperty("notification.list");
 		if (notificationList == null) {
 			String msg = "Property 'notification.list' must be set but may be empty";
 			logger.fatal(msg);
 			throw new IllegalStateException(msg);
 		}
+		formattedProps.add("notification.list " + notificationList);
 
 		notificationList = notificationList.trim();
 		if (!notificationList.isEmpty()) {
@@ -159,6 +176,7 @@ public class PropertyHandler {
 					throw new IllegalStateException(msg);
 				}
 				notificationOps = notificationOps.trim();
+				formattedProps.add(propertyName + " " + notificationOps);
 				if (!notificationOps.isEmpty()) {
 					Matcher m = cudPattern.matcher(notificationOps);
 					if (!m.matches()) {
@@ -177,15 +195,13 @@ public class PropertyHandler {
 			}
 		}
 
-		/* Call Logging Setup */
-
+		/* log.list */
 		String callLogs = props.getProperty("log.list");
 		if (callLogs == null) {
-			String msg = "Property 'log.list' must be set but may be empty";
-			logger.fatal(msg);
-			throw new IllegalStateException(msg);
+			abend("Property 'log.list' must be set but may be empty");
 		}
 		callLogs = callLogs.trim();
+		formattedProps.add("log.list " + callLogs);
 		if (!callLogs.isEmpty()) {
 			for (String logDest : callLogs.split("\\s+")) {
 				if (logDest.equals("file") || logDest.equals("table")) {
@@ -193,18 +209,15 @@ public class PropertyHandler {
 					String logOps = props.getProperty(propertyName);
 
 					if (logOps == null) {
-						String msg = "Property '" + propertyName + "' must be set but may be empty";
-						logger.fatal(msg);
-						throw new IllegalStateException(msg);
+						abend("Property '" + propertyName + "' must be set but may be empty");
 					}
 					logOps = logOps.trim();
+					formattedProps.add(propertyName + " " + logOps);
 					if (!logOps.isEmpty()) {
 						Matcher m = srwPattern.matcher(logOps);
 						if (!m.matches()) {
-							String msg = "Property  '" + propertyName
-									+ "' must only contain the letters S, R and W";
-							logger.fatal(msg);
-							throw new IllegalStateException(msg);
+							abend("Property  '" + propertyName
+									+ "' must only contain the letters S, R and W");
 						}
 						for (String c : new String[] { "S", "R", "W" }) {
 							if (logOps.indexOf(c) >= 0) {
@@ -214,17 +227,38 @@ public class PropertyHandler {
 						}
 					}
 				} else {
-					String msg = "Value '" + logDest
-							+ "' specified in 'log.list' is neither 'file' nor 'tables'";
-					logger.fatal(msg);
-					throw new IllegalStateException(msg);
+					abend("Value '" + logDest
+							+ "' specified in 'log.list' is neither 'file' nor 'tables'");
 				}
 			}
 		}
 		logger.debug("There are " + logRequests.size() + " log requests");
-		
+
 		/* Lucene Directory */
 		luceneDirectory = props.getProperty("lucene.directory");
+		if (luceneDirectory != null) {
+			String luceneCommitString = props.getProperty("lucene.commitSeconds");
+			if (luceneCommitString == null) {
+				abend("Value of 'lucene.commitSeconds' may not be null when the lucene.diretcory is set");
+			}
+			formattedProps.add("lucene.directory " + luceneDirectory);
+			try {
+				luceneCommitSeconds = Integer.parseInt(luceneCommitString);
+				formattedProps.add("lucene.commitSeconds " + luceneCommitSeconds);
+				if (luceneCommitSeconds <= 0) {
+					abend("Value of 'lucene.commitSeconds'" + luceneCommitString
+							+ "' is not an integer greater than 0");
+				}
+			} catch (NumberFormatException e) {
+				abend("Value of 'lucene.commitSeconds'" + luceneCommitString
+						+ "' is not an integer greater than 0");
+			}
+		}
+	}
+
+	private void abend(String msg) {
+		logger.fatal(msg);
+		throw new IllegalStateException(msg);
 	}
 
 	public Map<String, NotificationRequest> getNotificationRequests() {
@@ -237,6 +271,14 @@ public class PropertyHandler {
 
 	public String getLuceneDirectory() {
 		return luceneDirectory;
+	}
+
+	public int getLuceneRefreshSeconds() {
+		return luceneCommitSeconds;
+	}
+
+	public List<String> props() {
+		return formattedProps;
 	}
 
 }

@@ -31,6 +31,7 @@
                 <li>JPA mappings for floating point numbers now use maximum precision.</li>
                 <li>test.py expects hostname:port rather than a pair of parameters</li>
                 <li>Call logging has been added either to file or to a log table or both.</li>
+                <li>Lucene free text search has been included via the new searchText call.</li>
 
             </ul>
         </section>

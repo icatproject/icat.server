@@ -47,7 +47,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	private Date endDate;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-	private List<InputDataset> inputDatasets;
+	private List<InputDataset> inputDatasets = new ArrayList<InputDataset>();
 
 	@JoinColumn(name = "INVESTIGATION_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -61,7 +61,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	private String name;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-	private List<OutputDataset> outputDatasets;
+	private List<OutputDataset> outputDatasets = new ArrayList<OutputDataset>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<DatasetParameter> parameters = new ArrayList<DatasetParameter>();
@@ -210,20 +210,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		// " is not a valid DatasetType");
 		// }
 		// }
-	}
-
-	@Override
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
-		this.id = null;
-		for (final DatasetParameter datasetParameter : this.parameters) {
-			datasetParameter.preparePersist(modId, manager);
-			datasetParameter.setDataset(this);
-		}
-		for (final Datafile datafile : this.datafiles) {
-			datafile.preparePersist(modId, manager);
-			datafile.setDataset(this);
-		}
 	}
 
 	public void setComplete(boolean complete) {
