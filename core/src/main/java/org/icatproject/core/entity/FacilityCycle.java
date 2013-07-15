@@ -1,6 +1,7 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
 	private String description;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facilityCycle")
-	private List<Investigation> investigations;
+	private List<Investigation> investigations = new ArrayList<Investigation>();
 
 	public String getName() {
 		return name;

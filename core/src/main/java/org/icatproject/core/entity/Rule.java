@@ -62,6 +62,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 	private String crudJPQL;
 
 	@Comment("To what the rules applies")
+	@Column(nullable = false)
 	private String what;
 
 	@XmlTransient
@@ -122,6 +123,10 @@ public class Rule extends EntityBaseBean implements Serializable {
 		}
 
 		List<Token> tokens = null;
+		if (what == null) {
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+					"'what' must not be null");
+		}
 		try {
 			tokens = Tokenizer.getTokens(this.what);
 		} catch (final LexerException e) {

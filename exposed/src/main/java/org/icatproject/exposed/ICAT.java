@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.PropertyHandler;
+import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.Application;
 import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.DatafileFormat;
@@ -366,7 +367,10 @@ public class ICAT {
 		} catch (IcatException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			e.printStackTrace(new PrintStream(baos));
+			logger.debug("Other exception " + baos.toString());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, baos.toString());
 		} finally {
 			long time = System.currentTimeMillis() - start;
 			logger.debug("Method " + target + " took " + time / 1000f + "s to execute");
@@ -374,8 +378,14 @@ public class ICAT {
 	}
 
 	private void reportIcatException(IcatException e) throws IcatException {
-		logger.debug("IcatException " + e.getType() + " " + e.getMessage()
-				+ (e.getOffset() >= 0 ? " at offset " + e.getOffset() : ""));
+		if (e.getType() == IcatExceptionType.INTERNAL) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			e.printStackTrace(new PrintStream(baos));
+			logger.debug("Internal exception " + baos.toString());
+		} else {
+			logger.debug("IcatException " + e.getType() + " " + e.getMessage()
+					+ (e.getOffset() >= 0 ? " at offset " + e.getOffset() : ""));
+		}
 	}
 
 	private void reportThrowable(Throwable e) {

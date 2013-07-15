@@ -1,6 +1,7 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -20,17 +21,17 @@ import javax.persistence.UniqueConstraint;
 public class Instrument extends EntityBaseBean implements Serializable {
 
 	@Comment("A description of this instrument")
-	@Column(length=4000)
+	@Column(length = 4000)
 	private String description;
 
 	@Comment("The formal name of this instrument")
 	private String fullName;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrument")
-	private List<InstrumentScientist> instrumentScientists;
+	private List<InstrumentScientist> instrumentScientists = new ArrayList<InstrumentScientist>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrument")
-	private List<Investigation> investigations;
+	private List<Investigation> investigations = new ArrayList<Investigation>();
 
 	@Comment("A short name identifying this instrument within the facility")
 	@Column(name = "NAME", nullable = false)

@@ -298,12 +298,11 @@ public abstract class EntityBaseBean implements Serializable {
 						}
 					}
 				} catch (Exception e) {
-					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+					throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " "
+							+ e.getMessage());
 				}
 			}
-
 		}
-
 	}
 
 	/**
@@ -472,7 +471,7 @@ public abstract class EntityBaseBean implements Serializable {
 			}
 
 		}
-		
+
 	}
 
 }

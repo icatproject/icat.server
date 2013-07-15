@@ -15,6 +15,7 @@ import java.util.Set;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.entity.Instrument;
 import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.InvestigationUser;
 import org.icatproject.core.entity.Job;
@@ -106,6 +107,8 @@ public class TestEntityInfo {
 				"InputDatafile by inputDatafiles many cascaded setJob",
 				"OutputDatafile by outputDatafiles many cascaded setJob",
 				"Application by application one", "OutputDataset by outputDatasets many cascaded setJob");
+		
+		testRel(Instrument.class, "Facility by facility one", "InstrumentScientist by instrumentScientists many cascaded setInstrument", "Investigation by investigations many cascaded setInstrument");
 	}
 
 	private void testRel(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {

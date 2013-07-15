@@ -227,10 +227,20 @@ public class EntityInfoHandler {
 								String name = "set" + Character.toUpperCase(mappedBy.charAt(0))
 										+ mappedBy.substring(1);
 								Method[] ms = argc2.getMethods();
+								boolean inv = false;
 								for (Method m : ms) {
 									if (m.getName().equals(name)) {
 										rels.add(new Relationship(argc2, field, true, all, m));
+										inv = true;
+										break;
 									}
+								}
+								if (!inv) {
+									throw new IcatException(
+											IcatException.IcatExceptionType.INTERNAL,
+											"Inverse relationship not found "
+													+ objectClass.getSimpleName() + "."
+													+ field.getName());
 								}
 							} catch (SecurityException e) {
 								throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
