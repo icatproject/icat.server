@@ -8,6 +8,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -19,8 +20,7 @@ import javax.persistence.UniqueConstraint;
 @Comment("An investigation or experiment")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "VISIT_ID",
-		"FACILITY_CYCLE_ID", "INSTRUMENT_ID" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME", "VISIT_ID" }) })
 public class Investigation extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
@@ -32,17 +32,12 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date endDate;
 
-	@JoinColumn(nullable = false)
-	@ManyToOne
+	@JoinColumn(name = "FACILITY_ID", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Facility facility;
 
-	@JoinColumn(name = "FACILITY_CYCLE_ID")
-	@ManyToOne
-	private FacilityCycle facilityCycle;
-
-	@JoinColumn(name = "INSTRUMENT_ID")
-	@ManyToOne
-	private Instrument instrument;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
+	private List<InvestigationInstrument> investigationInstruments = new ArrayList<InvestigationInstrument>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
 	private List<InvestigationUser> investigationUsers = new ArrayList<InvestigationUser>();
@@ -89,7 +84,7 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	private InvestigationType type;
 
 	@Comment("Identifier for the visit to which this investigation is related")
-	@Column(name = "VISIT_ID")
+	@Column(name = "VISIT_ID", nullable = false)
 	private String visitId;
 
 	/* Needed for JPA */
@@ -112,12 +107,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		return facility;
 	}
 
-	public FacilityCycle getFacilityCycle() {
-		return this.facilityCycle;
-	}
-
-	public Instrument getInstrument() {
-		return instrument;
+	public List<InvestigationInstrument> getInvestigationInstruments() {
+		return investigationInstruments;
 	}
 
 	public List<InvestigationUser> getInvestigationUsers() {
@@ -192,12 +183,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		this.facility = facility;
 	}
 
-	public void setFacilityCycle(FacilityCycle facilityCycle) {
-		this.facilityCycle = facilityCycle;
-	}
-
-	public void setInstrument(Instrument instrument) {
-		this.instrument = instrument;
+	public void setInvestigationInstruments(List<InvestigationInstrument> investigationInstruments) {
+		this.investigationInstruments = investigationInstruments;
 	}
 
 	public void setInvestigationUsers(List<InvestigationUser> investigationUsers) {
@@ -240,45 +227,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 		this.studyInvestigations = studyInvestigations;
 	}
 
-	// TODO restore as needed
-	// public void isValid(EntityManager manager, boolean deepValidation) throws
-	// ValidationException,
-	// IcatInternalException {
-	// super.isValid(manager, deepValidation);
-	//
-	// if (deepValidation) {
-	//
-	// if (this.instrument != null) {
-	// // this.instrument.isValid(manager);
-	// // check instrument is correct.
-	// // check investigation type is correct.
-	// Instrument instrument = manager.find(Instrument.class, this.instrument);
-	// if (instrument == null)
-	// throw new ValidationException(this.instrument +
-	// " is not a valid instrument.");
-	// }
-	//
-	// if (this.type != null) {
-	// // this.invType.isValid(manager);
-	//
-	// // check investigation type is correct.
-	// InvestigationType investigationType =
-	// manager.find(InvestigationType.class,
-	// this.type.getName());
-	// if (investigationType == null)
-	// throw new ValidationException(this.type +
-	// " is not a valid investigation type.");
-	// }
-	//
-	// // check all datasets now
-	//
-	// for (Dataset dataset : datasets) {
-	// dataset.isValid(manager);
-	// }
-	//
-	// }
-	// }
-
 	public void setSummary(String summary) {
 		this.summary = summary;
 	}
@@ -293,11 +241,6 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public void setVisitId(String visitId) {
 		this.visitId = visitId;
-	}
-
-	@Override
-	public String toString() {
-		return "Investigation[id=" + id + "]";
 	}
 
 }

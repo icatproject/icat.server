@@ -384,6 +384,8 @@ public class EntityInfoHandler {
 
 		}
 
+		Set<Field> nnf = new HashSet<Field>(notNullableFields);
+
 		Table tableAnnot = objectClass.getAnnotation(Table.class);
 		if (tableAnnot != null) {
 			for (UniqueConstraint constraint : Arrays.asList(tableAnnot.uniqueConstraints())) {
@@ -396,6 +398,12 @@ public class EntityInfoHandler {
 						throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Column "
 								+ colNam + " mentioned in UniqueConstraint of "
 								+ objectClass.getSimpleName() + " table is not present in entity");
+					}
+					if (!nnf.contains(col)) {
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Column "
+								+ colNam + " mentioned in UniqueConstraint of "
+								+ objectClass.getSimpleName()
+								+ " table must be annotated as 'nullable = false'");
 					}
 					cf.add(col);
 				}

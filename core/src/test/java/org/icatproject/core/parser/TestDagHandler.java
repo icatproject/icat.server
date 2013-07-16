@@ -18,6 +18,7 @@ import org.icatproject.core.entity.InputDatafile;
 import org.icatproject.core.entity.InputDataset;
 import org.icatproject.core.entity.Instrument;
 import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.entity.InvestigationInstrument;
 import org.icatproject.core.entity.Job;
 import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.User;
@@ -86,6 +87,7 @@ public class TestDagHandler {
 	public void good5() throws Exception {
 		Set<Class<? extends EntityBaseBean>> es = new HashSet<Class<? extends EntityBaseBean>>();
 		es.add(Instrument.class);
+		es.add(InvestigationInstrument.class);
 		es.add(Facility.class);
 		es.add(Investigation.class);
 		try {

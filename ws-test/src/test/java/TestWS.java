@@ -108,7 +108,7 @@ public class TestWS {
 		Dataset dfsout = session.createDataset("dfsout", dst, inv);
 		Datafile mog = session.createDatafile("mog", dft1, dfsout);
 
-		Application application = session.createApplication("The one", "1.0");
+		Application application = session.createApplication(facility, "The one", "1.0");
 		Job job = session.createJob(application);
 		session.addInputDataset(job, wibble);
 		session.addOutputDataset(job, wobble);
@@ -133,6 +133,7 @@ public class TestWS {
 		i.setFacility(facility);
 		i.setName("Frederick");
 		i.setTitle("the Great");
+		i.setVisitId("42");
 		i.setType(investigationType);
 		i.getInvestigationUsers().add(iu);
 		Long invid = session.create(i);
@@ -506,10 +507,9 @@ public class TestWS {
 		EntityInfo ei = session.getEntityInfo("Investigation");
 		assertEquals("An investigation or experiment", ei.getClassComment());
 		for (Constraint constraint : ei.getConstraints()) {
-			assertEquals(Arrays.asList("name", "visitId", "facilityCycle", "instrument"),
-					constraint.getFieldNames());
+			assertEquals(Arrays.asList("facility", "name", "visitId"), constraint.getFieldNames());
 		}
-		assertEquals(21, ei.getFields().size());
+		assertEquals(20, ei.getFields().size());
 		int n = 0;
 		for (EntityField field : ei.getFields()) {
 			if (field.getName().equals("id")) {
@@ -926,6 +926,7 @@ public class TestWS {
 		ptn.setFacility(facility);
 		ptn.setEnforced(true);
 		ptn.setMinimumNumericValue(50.);
+		ptn.setUnits("bushel");
 		ptn.setId((Long) session.create(ptn));
 
 		InvestigationParameter ip = new InvestigationParameter();
@@ -970,6 +971,7 @@ public class TestWS {
 		pts.setName("UselessString");
 		pts.setValueType(ParameterValueType.STRING);
 		pts.setFacility(facility);
+		pts.setUnits("peck");
 		pts.setId((Long) session.create(pts));
 
 		InvestigationParameter ip = new InvestigationParameter();
@@ -1009,6 +1011,7 @@ public class TestWS {
 		psv = new PermissibleStringValue();
 		psv.setValue("good2");
 		pts.getPermissibleStringValues().add(psv);
+		pts.setUnits("chain");
 		pts.setId((Long) session.create(pts));
 
 		InvestigationParameter ip = new InvestigationParameter();
@@ -1226,6 +1229,7 @@ public class TestWS {
 		inv.setName("A");
 		inv.setTitle("Not null");
 		inv.setType(investigationType);
+		inv.setVisitId("57");
 
 		final Dataset wibble = addDataset(inv, "Wibble", dst);
 

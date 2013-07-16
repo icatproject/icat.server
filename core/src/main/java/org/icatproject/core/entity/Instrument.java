@@ -24,6 +24,11 @@ public class Instrument extends EntityBaseBean implements Serializable {
 	@Column(length = 4000)
 	private String description;
 
+	@Comment("The facility which has this instrument")
+	@JoinColumn(name = "FACILITY_ID", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Facility facility;
+
 	@Comment("The formal name of this instrument")
 	private String fullName;
 
@@ -31,24 +36,11 @@ public class Instrument extends EntityBaseBean implements Serializable {
 	private List<InstrumentScientist> instrumentScientists = new ArrayList<InstrumentScientist>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrument")
-	private List<Investigation> investigations = new ArrayList<Investigation>();
+	private List<InvestigationInstrument> investigationInstruments = new ArrayList<InvestigationInstrument>();
 
 	@Comment("A short name identifying this instrument within the facility")
 	@Column(name = "NAME", nullable = false)
 	private String name;
-
-	@Comment("The facility which has this instrument")
-	@JoinColumn(name = "FACILITY_ID", nullable = false)
-	@ManyToOne(fetch = FetchType.LAZY)
-	private Facility facility;
-
-	public Facility getFacility() {
-		return facility;
-	}
-
-	public void setFacility(Facility facility) {
-		this.facility = facility;
-	}
 
 	private String type;
 
@@ -60,12 +52,20 @@ public class Instrument extends EntityBaseBean implements Serializable {
 		return this.description;
 	}
 
+	public Facility getFacility() {
+		return facility;
+	}
+
 	public String getFullName() {
 		return this.fullName;
 	}
 
-	public List<Investigation> getInvestigations() {
-		return this.investigations;
+	public List<InstrumentScientist> getInstrumentScientists() {
+		return instrumentScientists;
+	}
+
+	public List<InvestigationInstrument> getInvestigationInstruments() {
+		return investigationInstruments;
 	}
 
 	public String getName() {
@@ -80,20 +80,20 @@ public class Instrument extends EntityBaseBean implements Serializable {
 		this.description = description;
 	}
 
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
+	public void setFacility(Facility facility) {
+		this.facility = facility;
 	}
 
-	public List<InstrumentScientist> getInstrumentScientists() {
-		return instrumentScientists;
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
 	}
 
 	public void setInstrumentScientists(List<InstrumentScientist> instrumentScientists) {
 		this.instrumentScientists = instrumentScientists;
 	}
 
-	public void setInvestigations(List<Investigation> investigations) {
-		this.investigations = investigations;
+	public void setInvestigationInstruments(List<InvestigationInstrument> investigationInstruments) {
+		this.investigationInstruments = investigationInstruments;
 	}
 
 	public void setName(String name) {

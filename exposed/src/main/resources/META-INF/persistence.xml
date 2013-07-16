@@ -46,6 +46,7 @@
         <class>org.icatproject.core.entity.InvestigationParameter</class>
         <class>org.icatproject.core.entity.Session</class>
         <class>org.icatproject.core.entity.Log</class>
+        <class>org.icatproject.core.entity.InvestigationInstrument</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.target-server" value="SunAS9" />

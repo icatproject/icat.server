@@ -51,9 +51,6 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
 	@Comment("A description of this facility cycle")
 	private String description;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "facilityCycle")
-	private List<Investigation> investigations = new ArrayList<Investigation>();
-
 	public String getName() {
 		return name;
 	}
@@ -84,14 +81,6 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public List<Investigation> getInvestigations() {
-		return investigations;
-	}
-
-	public void setInvestigations(List<Investigation> investigations) {
-		this.investigations = investigations;
 	}
 
 	/* Needed for JPA */

@@ -24,12 +24,12 @@ import org.icatproject.core.IcatException;
 @Comment("A collection of data files and part of an investigation")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "SAMPLE_ID", "INVESTIGATION_ID",
-		"NAME", "TYPE" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "INVESTIGATION_ID", "NAME" }) })
 @XmlRootElement
 public class Dataset extends EntityBaseBean implements Serializable {
 
 	@Comment("May be set to true when all data files and parameters have been added to the data set. The precise meaning is facility dependent.")
+	@Column(nullable = false)
 	private boolean complete;
 
 	@Comment("The data files within the dataset")
@@ -49,7 +49,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<InputDataset> inputDatasets = new ArrayList<InputDataset>();
 
-	@JoinColumn(name = "INVESTIGATION_ID")
+	@JoinColumn(name = "INVESTIGATION_ID", nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Investigation investigation;
 
@@ -66,14 +66,13 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<DatasetParameter> parameters = new ArrayList<DatasetParameter>();
 
-	@JoinColumn(name = "SAMPLE_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Sample sample;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date startDate;
 
-	@JoinColumn(name = "TYPE", nullable = false)
+	@JoinColumn(nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private DatasetType type;
 

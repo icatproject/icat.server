@@ -24,7 +24,7 @@ import org.icatproject.core.IcatException;
 @SuppressWarnings("serial")
 @Entity
 @XmlRootElement
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "LOCATION", "DATASET_ID" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "DATASET_ID", "NAME" }) })
 public class Datafile extends EntityBaseBean implements Serializable {
 
 	@Comment("Checksum of file represented as a string")
@@ -42,7 +42,7 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	private Date datafileModTime;
 
 	@Comment("The dataset which holds this file")
-	@JoinColumn(name = "DATASET_ID")
+	@JoinColumn(name = "DATASET_ID", nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Dataset dataset;
 
@@ -62,7 +62,6 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	private List<InputDatafile> inputDatafiles = new ArrayList<InputDatafile>();
 
 	@Comment("The logical location of the file - which may also be the physical location")
-	@Column(name = "LOCATION")
 	private String location;
 
 	@Comment("A name given to the file")
@@ -159,31 +158,6 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	public String getDoi() {
 		return doi;
 	}
-
-	// TODO fix this
-	// @Override
-	// public void isValid(EntityManager manager) throws ValidationException,
-	// IcatInternalException {
-	// super.isValid(manager);
-	// if (getDatafileParameterCollection() != null) {
-	// for (DatafileParameter datafileParameter :
-	// getDatafileParameterCollection()) {
-	// datafileParameter.isValid(manager);
-	// }
-	// }
-	//
-	// if (datafileFormat != null) {
-	// datafileFormat.isValid(manager);
-	//
-	// // check datafile format is valid
-	// DatafileFormat format = manager.find(DatafileFormat.class,
-	// datafileFormat.getDatafileFormatPK());
-	// if (format == null) {
-	// throw new ValidationException(datafileFormat +
-	// " is not a valid DatafileFormat");
-	// }
-	// }
-	// }
 
 	public Long getFileSize() {
 		return fileSize;

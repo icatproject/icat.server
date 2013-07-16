@@ -185,7 +185,7 @@ public class Session {
 	}
 
 	public void clear() throws Exception {
-		deleteAll(Arrays.asList("Facility", "Job", "Application", "Log"));
+		deleteAll(Arrays.asList("Facility",  "Log"));
 	}
 
 	private void deleteAll(List<String> names) throws IcatException_Exception {
@@ -216,9 +216,10 @@ public class Session {
 		deleteAll(Arrays.asList("Rule", "UserGroup", "User", "Group"));
 	}
 
-	public Application createApplication(String name, String version)
+	public Application createApplication(Facility facility, String name, String version)
 			throws IcatException_Exception {
 		final Application application = new Application();
+		application.setFacility(facility);
 		application.setName(name);
 		application.setVersion(version);
 		application.setId(this.icat.create(this.sessionId, application));
@@ -292,6 +293,7 @@ public class Session {
 		i.setName(name);
 		i.setTitle(title);
 		i.setType(invType);
+		i.setVisitId("42");
 		i.setId(this.icat.create(this.sessionId, i));
 		return i;
 	}

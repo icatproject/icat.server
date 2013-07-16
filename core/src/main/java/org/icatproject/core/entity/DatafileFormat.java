@@ -48,7 +48,7 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 	private String name;
 
 	@Comment("The version if needed.  The version code may be part of the basic name")
-	@Column(name = "VERSION")
+	@Column(name = "VERSION", nullable = false)
 	private String version;
 
 	/* Needed for JPA */

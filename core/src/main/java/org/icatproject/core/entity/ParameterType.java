@@ -73,7 +73,7 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	private List<SampleParameter> sampleParameters = new ArrayList<SampleParameter>();
 
 	@Comment("The name of the parameter type units")
-	@Column(name = "UNITS")
+	@Column(name = "UNITS", nullable = false)
 	private String units;
 
 	@Comment("The formal name of the parameter type units")

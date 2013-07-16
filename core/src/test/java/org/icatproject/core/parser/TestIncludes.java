@@ -73,7 +73,7 @@ public class TestIncludes {
 	@Test
 	public void testBad1() throws Exception {
 		List<Token> tokens = Tokenizer
-				.getTokens("Investigation INCLUDE Facility, Instrument  [name='1210380']");
+				.getTokens("Investigation INCLUDE Facility, Instrument, InvestigationInstrument  [name='1210380']");
 		try {
 			testGood(tokens, Dataset.class, Datafile.class, DatasetParameter.class, Facility.class,
 					Sample.class, SampleParameter.class);

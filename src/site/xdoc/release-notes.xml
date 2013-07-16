@@ -32,7 +32,33 @@
                 <li>test.py expects hostname:port rather than a pair of parameters</li>
                 <li>Call logging has been added either to file or to a log table or both.</li>
                 <li>Lucene free text search has been included via the new searchText call.</li>
-
+                <li>
+                    Changed uniqueness constraints to:
+                    <dl>
+                        <dt>Datafile</dt>
+                        <dd>dataset, name (-location)</dd>
+                        <dt>Dataset</dt>
+                        <dd>investigation, name (-sample -type)</dd>
+                        <dt>Application</dt>
+                        <dd>facility, name, version (+facility)</dd>
+                        <dt>Sample</dt>
+                        <dd>investigation, name (-type)</dd>
+                        <dt>Investigation</dt>
+                        <dd>facility, name, visitid (-facilityCycle)</dd>
+                        <dt>SampleType</dt>
+                        <dd>facility, name, molecularFormula (+molecularFormula)</dd>
+                    </dl>
+                </li>
+                <li>Made all constraint fields not nullable. This is checked by ICAT to ensure that future changes do not break this rule.</li>
+                <li>Add a string attribute: "arguments" to the job to
+                    store the program arguments that were used.
+                </li>
+                <li>Relationship between
+                    FacilityCycle and Investigation removed.
+                </li>
+                <li>Table between Investigation and
+                    Instrument added to represent many-to-many relationships between them.
+                </li>
             </ul>
         </section>
 

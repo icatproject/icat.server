@@ -28,7 +28,7 @@ import org.junit.Test;
 public class TestEntityInfo {
 
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
-	
+
 	@Test(expected = IcatException.class)
 	public void testBadname() throws Exception {
 		eiHandler.getEntityInfo("Fred");
@@ -46,8 +46,8 @@ public class TestEntityInfo {
 
 	@Test
 	public void testConstraints() throws Exception {
-		testConstraint(Investigation.class, "name", "visitId", "facilityCycle", "instrument");
-		testConstraint(Dataset.class, "sample", "investigation", "name", "type");
+		testConstraint(Investigation.class, "facility", "name", "visitId");
+		testConstraint(Dataset.class, "investigation", "name");
 		testConstraint(Keyword.class, "name", "investigation");
 		testConstraint(InvestigationUser.class, "user", "investigation");
 		testConstraint(User.class, "name");
@@ -79,20 +79,24 @@ public class TestEntityInfo {
 	@Test
 	public void testRels() throws Exception {
 
-		testRel(Investigation.class, "Instrument by instrument one",
-				"Keyword by keywords many cascaded setInvestigation", "Sample by samples many cascaded setInvestigation",
+		testRel(Investigation.class,
+				"Keyword by keywords many cascaded setInvestigation",
+				"Sample by samples many cascaded setInvestigation",
 				"StudyInvestigation by studyInvestigations many cascaded setInvestigation",
-				"Shift by shifts many cascaded setInvestigation", "Dataset by datasets many cascaded setInvestigation",
+				"Shift by shifts many cascaded setInvestigation",
+				"Dataset by datasets many cascaded setInvestigation",
 				"Publication by publications many cascaded setInvestigation",
 				"InvestigationUser by investigationUsers many cascaded setInvestigation",
-				"FacilityCycle by facilityCycle one", "InvestigationType by type one",
-				"Facility by facility one", "InvestigationParameter by parameters many cascaded setInvestigation");
+				"InvestigationInstrument by investigationInstruments many cascaded setInvestigation",
+				"InvestigationType by type one", "Facility by facility one",
+				"InvestigationParameter by parameters many cascaded setInvestigation");
 
 		testRel(Dataset.class, "InputDataset by inputDatasets many cascaded setDataset",
 				"DatasetParameter by parameters many cascaded setDataset",
-				"Investigation by investigation one", "Datafile by datafiles many cascaded setDataset",
-				"OutputDataset by outputDatasets many cascaded setDataset", "DatasetType by type one",
-				"Sample by sample one");
+				"Investigation by investigation one",
+				"Datafile by datafiles many cascaded setDataset",
+				"OutputDataset by outputDatasets many cascaded setDataset",
+				"DatasetType by type one", "Sample by sample one");
 
 		testRel(Keyword.class, "Investigation by investigation one");
 
@@ -106,9 +110,12 @@ public class TestEntityInfo {
 		testRel(Job.class, "InputDataset by inputDatasets many cascaded setJob",
 				"InputDatafile by inputDatafiles many cascaded setJob",
 				"OutputDatafile by outputDatafiles many cascaded setJob",
-				"Application by application one", "OutputDataset by outputDatasets many cascaded setJob");
-		
-		testRel(Instrument.class, "Facility by facility one", "InstrumentScientist by instrumentScientists many cascaded setInstrument", "Investigation by investigations many cascaded setInstrument");
+				"Application by application one",
+				"OutputDataset by outputDatasets many cascaded setJob");
+
+		testRel(Instrument.class, "Facility by facility one",
+				"InstrumentScientist by instrumentScientists many cascaded setInstrument",
+				"InvestigationInstrument by investigationInstruments many cascaded setInstrument");
 	}
 
 	private void testRel(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {
@@ -117,7 +124,7 @@ public class TestEntityInfo {
 		for (Relationship rel : results) {
 			rStrings.add(rel.toString());
 		}
-		 System.out.println(results);
+		// System.out.println(results);
 		assertEquals(klass.getSimpleName() + " count", rels.length, results.size());
 		for (String rel : rels) {
 			assertTrue(klass.getSimpleName() + " value " + rel, rStrings.contains(rel));
@@ -127,7 +134,7 @@ public class TestEntityInfo {
 	@Test
 	public void testOnes() throws Exception {
 
-		testOne(Investigation.class, "Instrument", "FacilityCycle", "InvestigationType", "Facility");
+		testOne(Investigation.class, "InvestigationType", "Facility");
 
 		testOne(Dataset.class, "Investigation", "DatasetType", "Sample");
 
@@ -155,12 +162,12 @@ public class TestEntityInfo {
 
 	@Test
 	public void notNullableFields() throws Exception {
-		testNNF(Investigation.class, "name", "title", "facility", "name");
-		testNNF(Dataset.class, "type", "name");
+		testNNF(Investigation.class, "name", "title", "facility", "visitId", "type");
+		testNNF(Dataset.class, "type", "name", "complete", "investigation");
 		testNNF(Keyword.class, "name", "investigation");
 		testNNF(InvestigationUser.class, "investigation", "user");
 		testNNF(User.class, "name");
-		testNNF(ParameterType.class, "valueType", "name", "facility");
+		testNNF(ParameterType.class, "valueType", "name", "facility", "units");
 		testNNF(Job.class, "application");
 	}
 
@@ -186,7 +193,7 @@ public class TestEntityInfo {
 		testSF(InvestigationUser.class, "role 255");
 		testSF(User.class, "name 255", "fullName 255");
 		testSF(ParameterType.class, "description 255", "unitsFullName 255", "units 255", "name 255");
-		testSF(Job.class);
+		testSF(Job.class, "arguments 255");
 
 	}
 
@@ -205,13 +212,13 @@ public class TestEntityInfo {
 
 	@Test
 	public void getters() throws Exception {
-		testGetters(Investigation.class, 21);
+		testGetters(Investigation.class, 20);
 		testGetters(Dataset.class, 15);
 		testGetters(Keyword.class, 3);
 		testGetters(InvestigationUser.class, 4);
 		testGetters(User.class, 7);
 		testGetters(ParameterType.class, 20);
-		testGetters(Job.class, 6);
+		testGetters(Job.class, 7);
 	}
 
 	private void testGetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
@@ -229,13 +236,13 @@ public class TestEntityInfo {
 
 	@Test
 	public void setters() throws Exception {
-		testSetters(Investigation.class, 12);
+		testSetters(Investigation.class, 10);
 		testSetters(Dataset.class, 10);
 		testSetters(Keyword.class, 2);
 		testSetters(InvestigationUser.class, 3);
 		testSetters(User.class, 2);
 		testSetters(ParameterType.class, 14);
-		testSetters(Job.class, 1);
+		testSetters(Job.class, 2);
 	}
 
 	private void testSetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {

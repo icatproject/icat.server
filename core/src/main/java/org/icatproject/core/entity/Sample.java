@@ -20,8 +20,7 @@ import org.icatproject.core.IcatException;
 @Comment("A sample to be used in an investigation")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "SAMPLETYPE_ID",
-		"INVESTIGATION_ID" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "INVESTIGATION_ID", "NAME" }) })
 public class Sample extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
