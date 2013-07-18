@@ -8,14 +8,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.icatproject.core.IcatException;
+import org.icatproject.core.entity.DataCollection;
+import org.icatproject.core.entity.DataCollectionDatafile;
+import org.icatproject.core.entity.DataCollectionDataset;
 import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.DatafileParameter;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.DatasetParameter;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Facility;
-import org.icatproject.core.entity.InputDatafile;
-import org.icatproject.core.entity.InputDataset;
 import org.icatproject.core.entity.Instrument;
 import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.InvestigationInstrument;
@@ -62,8 +63,9 @@ public class TestDagHandler {
 	@Test
 	public void good4() throws Exception {
 		Set<Class<? extends EntityBaseBean>> es = new HashSet<Class<? extends EntityBaseBean>>();
-		es.add(InputDataset.class);
-		es.add(InputDatafile.class);
+		es.add(DataCollectionDataset.class);
+		es.add(DataCollectionDatafile.class);
+		es.add(DataCollection.class);
 		es.add(Dataset.class);
 		es.add(Datafile.class);
 		try {

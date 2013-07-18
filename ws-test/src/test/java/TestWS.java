@@ -23,6 +23,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.icatproject.Application;
 import org.icatproject.Constraint;
+import org.icatproject.DataCollection;
 import org.icatproject.Datafile;
 import org.icatproject.DatafileFormat;
 import org.icatproject.Dataset;
@@ -109,12 +110,11 @@ public class TestWS {
 		Datafile mog = session.createDatafile("mog", dft1, dfsout);
 
 		Application application = session.createApplication(facility, "The one", "1.0");
-		Job job = session.createJob(application);
-		session.addInputDataset(job, wibble);
-		session.addOutputDataset(job, wobble);
-		session.addInputDatafile(job, fred);
-		session.addInputDatafile(job, bill);
-		session.addOutputDatafile(job, mog);
+
+		DataCollection input = session.createDataCollection(wibble, fred, bill);
+		DataCollection output = session.createDataCollection(wobble, mog);
+
+		session.createJob(application, input, output);
 	}
 
 	@Test
@@ -828,10 +828,8 @@ public class TestWS {
 		results = session.search("Job");
 		assertEquals("Count", 1, results.size());
 		Job job = (Job) results.get(0);
-		assertEquals("InputDataset", 0, job.getInputDatasets().size());
-		assertEquals("OutputDataset", 0, job.getOutputDatasets().size());
-		assertEquals("InputDatafile", 0, job.getInputDatafiles().size());
-		assertEquals("OutputDatafile", 0, job.getOutputDatafiles().size());
+		assertNull("InputDataset", job.getInputDataCollection());
+		assertNull("OutputDataset", job.getOutputDataCollection());
 
 		results = session.search("Job");
 		assertEquals("Count", 1, results.size());
@@ -1442,7 +1440,7 @@ public class TestWS {
 		}
 	}
 
-	@AfterClass
+//	@AfterClass
 	public static void afterClass() throws Exception {
 		session.clear();
 		session.clearAuthz();

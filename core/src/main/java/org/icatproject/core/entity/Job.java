@@ -1,15 +1,11 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 
 @Comment("A run of an application with its related inputs and outputs")
 @SuppressWarnings("serial")
@@ -22,17 +18,13 @@ public class Job extends EntityBaseBean implements Serializable {
 
 	private String arguments;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
-	private List<InputDatafile> inputDatafiles = new ArrayList<InputDatafile>();
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(nullable = false)
+	private DataCollection inputDataCollection;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
-	private List<InputDataset> inputDatasets = new ArrayList<InputDataset>();
-
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
-	private List<OutputDatafile> outputDatafiles = new ArrayList<OutputDatafile>();
-
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
-	private List<OutputDataset> outputDatasets = new ArrayList<OutputDataset>();
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(nullable = false)
+	private DataCollection outputDataCollection;
 
 	// Needed for JPA
 	public Job() {
@@ -46,20 +38,12 @@ public class Job extends EntityBaseBean implements Serializable {
 		return arguments;
 	}
 
-	public List<InputDatafile> getInputDatafiles() {
-		return inputDatafiles;
+	public DataCollection getInputDataCollection() {
+		return inputDataCollection;
 	}
 
-	public List<InputDataset> getInputDatasets() {
-		return inputDatasets;
-	}
-
-	public List<OutputDatafile> getOutputDatafiles() {
-		return outputDatafiles;
-	}
-
-	public List<OutputDataset> getOutputDatasets() {
-		return outputDatasets;
+	public DataCollection getOutputDataCollection() {
+		return outputDataCollection;
 	}
 
 	public void setApplication(Application application) {
@@ -70,20 +54,12 @@ public class Job extends EntityBaseBean implements Serializable {
 		this.arguments = arguments;
 	}
 
-	public void setInputDatafiles(List<InputDatafile> inputDatafiles) {
-		this.inputDatafiles = inputDatafiles;
+	public void setInputDataCollection(DataCollection inputDataCollection) {
+		this.inputDataCollection = inputDataCollection;
 	}
 
-	public void setInputDatasets(List<InputDataset> inputDatasets) {
-		this.inputDatasets = inputDatasets;
-	}
-
-	public void setOutputDatafiles(List<OutputDatafile> outputDatafiles) {
-		this.outputDatafiles = outputDatafiles;
-	}
-
-	public void setOutputDatasets(List<OutputDataset> outputDatasets) {
-		this.outputDatasets = outputDatasets;
+	public void setOutputDataCollection(DataCollection outputDataCollection) {
+		this.outputDataCollection = outputDataCollection;
 	}
 
 }

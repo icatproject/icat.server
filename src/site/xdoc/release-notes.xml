@@ -59,6 +59,8 @@
                 <li>Table between Investigation and
                     Instrument added to represent many-to-many relationships between them.
                 </li>
+                <li>
+    Added DataCollection and changed Job to make use if it.</li>
             </ul>
         </section>
 

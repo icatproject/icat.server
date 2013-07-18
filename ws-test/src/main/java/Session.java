@@ -11,6 +11,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 
 import org.icatproject.Application;
+import org.icatproject.DataCollection;
+import org.icatproject.DataCollectionDataset;
+import org.icatproject.DataCollectionDatafile;
 import org.icatproject.Datafile;
 import org.icatproject.DatafileFormat;
 import org.icatproject.Dataset;
@@ -24,15 +27,11 @@ import org.icatproject.ICAT;
 import org.icatproject.ICATService;
 import org.icatproject.IcatExceptionType;
 import org.icatproject.IcatException_Exception;
-import org.icatproject.InputDatafile;
-import org.icatproject.InputDataset;
 import org.icatproject.Investigation;
 import org.icatproject.InvestigationType;
 import org.icatproject.Job;
 import org.icatproject.Login.Credentials;
 import org.icatproject.Login.Credentials.Entry;
-import org.icatproject.OutputDatafile;
-import org.icatproject.OutputDataset;
 import org.icatproject.ParameterType;
 import org.icatproject.ParameterValueType;
 import org.icatproject.Rule;
@@ -105,33 +104,34 @@ public class Session {
 		return this.icat.login(plugin, credentials);
 	}
 
-	public void addInputDatafile(Job job, Datafile df) throws IcatException_Exception {
-		final InputDatafile idf = new InputDatafile();
-		idf.setDatafile(df);
-		idf.setJob(job);
-		this.icat.create(this.sessionId, idf);
-	}
-
-	public void addInputDataset(Job job, Dataset ds) throws IcatException_Exception {
-		final InputDataset ids = new InputDataset();
-		ids.setDataset(ds);
-		ids.setJob(job);
-		this.icat.create(this.sessionId, ids);
-	}
-
-	public void addOutputDatafile(Job job, Datafile df) throws IcatException_Exception {
-		final OutputDatafile odf = new OutputDatafile();
-		odf.setDatafile(df);
-		odf.setJob(job);
-		this.icat.create(this.sessionId, odf);
-	}
-
-	public void addOutputDataset(Job job, Dataset ds) throws IcatException_Exception {
-		final OutputDataset ods = new OutputDataset();
-		ods.setDataset(ds);
-		ods.setJob(job);
-		this.icat.create(this.sessionId, ods);
-	}
+	// TODO restore code
+	// public void addInputDatafile(Job job, Datafile df) throws IcatException_Exception {
+	// final InputDatafile idf = new InputDatafile();
+	// idf.setDatafile(df);
+	// idf.setJob(job);
+	// this.icat.create(this.sessionId, idf);
+	// }
+	//
+	// public void addInputDataset(Job job, Dataset ds) throws IcatException_Exception {
+	// final InputDataset ids = new InputDataset();
+	// ids.setDataset(ds);
+	// ids.setJob(job);
+	// this.icat.create(this.sessionId, ids);
+	// }
+	//
+	// public void addOutputDatafile(Job job, Datafile df) throws IcatException_Exception {
+	// final OutputDatafile odf = new OutputDatafile();
+	// odf.setDatafile(df);
+	// odf.setJob(job);
+	// this.icat.create(this.sessionId, odf);
+	// }
+	//
+	// public void addOutputDataset(Job job, Dataset ds) throws IcatException_Exception {
+	// final OutputDataset ods = new OutputDataset();
+	// ods.setDataset(ds);
+	// ods.setJob(job);
+	// this.icat.create(this.sessionId, ods);
+	// }
 
 	public void addRule(String groupName, String what, String crudFlags) throws Exception {
 		Rule rule = new Rule();
@@ -185,7 +185,7 @@ public class Session {
 	}
 
 	public void clear() throws Exception {
-		deleteAll(Arrays.asList("Facility",  "Log"));
+		deleteAll(Arrays.asList("Facility", "Log", "DataCollection"));
 	}
 
 	private void deleteAll(List<String> names) throws IcatException_Exception {
@@ -307,9 +307,12 @@ public class Session {
 		return type;
 	}
 
-	public Job createJob(Application application) throws IcatException_Exception {
+	public Job createJob(Application application, DataCollection input, DataCollection output)
+			throws IcatException_Exception {
 		final Job job = new Job();
 		job.setApplication(application);
+		job.setInputDataCollection(input);
+		job.setOutputDataCollection(output);
 		job.setId((Long) this.icat.create(this.sessionId, job));
 		return job;
 	}
@@ -356,10 +359,10 @@ public class Session {
 		this.addRule("root", "DatasetType", "CRUD");
 		this.addRule("root", "Application", "CRUD");
 		this.addRule("root", "Job", "CRUD");
-		this.addRule("root", "InputDataset", "CRUD");
-		this.addRule("root", "OutputDataset", "CRUD");
-		this.addRule("root", "InputDatafile", "CRUD");
-		this.addRule("root", "OutputDatafile", "CRUD");
+		this.addRule("root", "DataCollection", "CRUD");
+		this.addRule("root", "DataCollectionParameter", "CRUD");
+		this.addRule("root", "DataCollectionDataset", "CRUD");
+		this.addRule("root", "DataCollectionDatafile", "CRUD");
 		this.addRule("root", "InvestigationParameter", "CRUD");
 		this.addRule("root", "Log", "CRUD");
 	}
@@ -420,6 +423,26 @@ public class Session {
 	// This assumes that the lucene.commitSeconds is set to 1 for testing purposes
 	public void synchLucene() throws InterruptedException {
 		Thread.sleep(2000);
+	}
+
+	public DataCollection createDataCollection(EntityBaseBean... beans)
+			throws IcatException_Exception {
+		DataCollection dataCollection = new DataCollection();
+		for (EntityBaseBean bean : beans) {
+			if (bean instanceof Datafile) {
+				DataCollectionDatafile dataCollectionDatafile = new DataCollectionDatafile();
+				dataCollectionDatafile.setDatafile((Datafile) bean);
+				dataCollection.getDataCollectionDatafiles().add(dataCollectionDatafile);
+			} else if (bean instanceof Dataset) {
+				DataCollectionDataset dataCollectionDataset = new DataCollectionDataset();
+				dataCollectionDataset.setDataset((Dataset) bean);
+				dataCollection.getDataCollectionDatasets().add(dataCollectionDataset);
+			} else {
+				throw new IllegalArgumentException(bean + " must be a Dataset or a Datafile");
+			}
+		}
+		dataCollection.setId(this.icat.create(this.sessionId, dataCollection));
+		return dataCollection;
 	}
 
 }

@@ -24,6 +24,9 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 		DATE_AND_TIME, NUMERIC, STRING
 	}
 
+	@Comment("If a parameter of this type may be applied to a DataCollection")
+	private boolean applicableToDataCollection;
+
 	@Comment("If a parameter of this type may be applied to a data file")
 	private boolean applicableToDatafile;
 
@@ -142,6 +145,10 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 		return valueType;
 	}
 
+	public boolean isApplicableToDataCollection() {
+		return applicableToDataCollection;
+	}
+
 	public boolean isApplicableToDatafile() {
 		return applicableToDatafile;
 	}
@@ -164,6 +171,10 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 
 	public boolean isVerified() {
 		return verified;
+	}
+
+	public void setApplicableToDataCollection(boolean applicableToDataCollection) {
+		this.applicableToDataCollection = applicableToDataCollection;
 	}
 
 	public void setApplicableToDatafile(boolean applicableToDatafile) {

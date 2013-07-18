@@ -39,10 +39,10 @@
         <class>org.icatproject.core.entity.Group</class>
         <class>org.icatproject.core.entity.Application</class>
         <class>org.icatproject.core.entity.Job</class>
-        <class>org.icatproject.core.entity.InputDataset</class>
-        <class>org.icatproject.core.entity.OutputDataset</class>
-        <class>org.icatproject.core.entity.InputDatafile</class>
-        <class>org.icatproject.core.entity.OutputDatafile</class>
+        <class>org.icatproject.core.entity.DataCollection</class>
+        <class>org.icatproject.core.entity.DataCollectionDataset</class>
+        <class>org.icatproject.core.entity.DataCollectionDatafile</class>
+        <class>org.icatproject.core.entity.DataCollectionParameter</class>
         <class>org.icatproject.core.entity.InvestigationParameter</class>
         <class>org.icatproject.core.entity.Session</class>
         <class>org.icatproject.core.entity.Log</class>

@@ -8,7 +8,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -18,8 +17,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.icatproject.core.IcatException;
 
 @Comment("A collection of data files and part of an investigation")
 @SuppressWarnings("serial")
@@ -46,12 +43,17 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date endDate;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-	private List<InputDataset> inputDatasets = new ArrayList<InputDataset>();
-
 	@JoinColumn(name = "INVESTIGATION_ID", nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Investigation investigation;
+
+	public List<DataCollectionDataset> getDataCollectionDatasets() {
+		return dataCollectionDatasets;
+	}
+
+	public void setDataCollectionDatasets(List<DataCollectionDataset> dataCollectionDatasets) {
+		this.dataCollectionDatasets = dataCollectionDatasets;
+	}
 
 	@Comment("Identifies a location from which all the files of the data set might be accessed. It might be a directory")
 	private String location;
@@ -61,7 +63,7 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	private String name;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-	private List<OutputDataset> outputDatasets = new ArrayList<OutputDataset>();
+	private List<DataCollectionDataset> dataCollectionDatasets = new ArrayList<DataCollectionDataset>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
 	private List<DatasetParameter> parameters = new ArrayList<DatasetParameter>();
@@ -80,15 +82,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 	public Dataset() {
 	}
 
-	@Override
-	public void canDelete(EntityManager manager) throws IcatException {
-		super.canDelete(manager);
-		if (!this.inputDatasets.isEmpty()) {
-			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
-					"Datasets may not be deleted while there are related InputDatasets");
-		}
-	}
-
 	public List<Datafile> getDatafiles() {
 		return datafiles;
 	}
@@ -105,10 +98,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		return this.endDate;
 	}
 
-	public List<InputDataset> getInputDatasets() {
-		return inputDatasets;
-	}
-
 	public Investigation getInvestigation() {
 		return investigation;
 	}
@@ -119,10 +108,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	public String getName() {
 		return this.name;
-	}
-
-	public List<OutputDataset> getOutputDatasets() {
-		return outputDatasets;
 	}
 
 	public List<DatasetParameter> getParameters() {
@@ -145,72 +130,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		return complete;
 	}
 
-	@Override
-	public void isValid(EntityManager manager, boolean deepValidation) throws IcatException {
-		super.isValid(manager, deepValidation);
-
-		// TODO put this code back if needed
-
-		// // check sample info, sample id must be a part of an investigations
-		// as
-		// // well
-		// outer: if (this.sample != null) {
-		// // check valid sample id
-		//
-		// final List<Sample> samples = this.investigation.getSamples();
-		// for (final Sample sample : samples) {
-		// Dataset.logger.trace("Sample for Investigation is: " + sample);
-		// if (sample.getId().equals(this.sampleId)) {
-		// // invest has for this sample in
-		// break outer;
-		// }
-		// }
-		// // if here not got sample in
-		// throw new ValidationException("Sample[id=" + this.sampleId +
-		// "] is not associated with Dataset[id="
-		// + this.id + "]'s investigation.");
-		// }
-
-		// if (deepValidation) {
-		// // check all datafiles now
-		// for (final Datafile datafile : datafiles) {
-		// datafile.isValid(manager);
-		// }
-		//
-		// // check all datasetParameter now
-		// for (final DatasetParameter datasetParameter :
-		// this.datasetParameters) {
-		// datasetParameter.isValid(manager);
-		// }
-		// }
-		//
-		// // check is valid status
-		// if (this.datasetStatus != null) {
-		// // datasetStatus.isValid(manager);
-		//
-		// // check datafile format is valid
-		// final DatasetStatus status = manager.find(DatasetStatus.class,
-		// this.datasetStatus);
-		// if (status == null) {
-		// throw new ValidationException(this.datasetStatus +
-		// " is not a valid DatasetStatus");
-		// }
-		// }
-		//
-		// // check is valid status
-		// if (this.datasetType != null) {
-		// // datasetType.isValid(manager);
-		//
-		// // check datafile format is valid
-		// final DatasetType type = manager.find(DatasetType.class,
-		// this.datasetType);
-		// if (type == null) {
-		// throw new ValidationException(this.datasetType +
-		// " is not a valid DatasetType");
-		// }
-		// }
-	}
-
 	public void setComplete(boolean complete) {
 		this.complete = complete;
 	}
@@ -231,10 +150,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		this.endDate = endDate;
 	}
 
-	public void setInputDatasets(List<InputDataset> inputDatasets) {
-		this.inputDatasets = inputDatasets;
-	}
-
 	public void setInvestigation(Investigation investigation) {
 		this.investigation = investigation;
 	}
@@ -245,10 +160,6 @@ public class Dataset extends EntityBaseBean implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public void setOutputDatasets(List<OutputDataset> outputDatasets) {
-		this.outputDatasets = outputDatasets;
 	}
 
 	public void setParameters(List<DatasetParameter> parameters) {

@@ -91,12 +91,12 @@ public class TestEntityInfo {
 				"InvestigationType by type one", "Facility by facility one",
 				"InvestigationParameter by parameters many cascaded setInvestigation");
 
-		testRel(Dataset.class, "InputDataset by inputDatasets many cascaded setDataset",
+		testRel(Dataset.class,
+				"DataCollectionDataset by dataCollectionDatasets many cascaded setDataset",
 				"DatasetParameter by parameters many cascaded setDataset",
 				"Investigation by investigation one",
-				"Datafile by datafiles many cascaded setDataset",
-				"OutputDataset by outputDatasets many cascaded setDataset",
-				"DatasetType by type one", "Sample by sample one");
+				"Datafile by datafiles many cascaded setDataset", "DatasetType by type one",
+				"Sample by sample one");
 
 		testRel(Keyword.class, "Investigation by investigation one");
 
@@ -107,11 +107,8 @@ public class TestEntityInfo {
 				"InstrumentScientist by instrumentScientists many cascaded setUser",
 				"Study by studies many cascaded setUser");
 
-		testRel(Job.class, "InputDataset by inputDatasets many cascaded setJob",
-				"InputDatafile by inputDatafiles many cascaded setJob",
-				"OutputDatafile by outputDatafiles many cascaded setJob",
-				"Application by application one",
-				"OutputDataset by outputDatasets many cascaded setJob");
+		testRel(Job.class, "DataCollection by inputDataCollection one",
+				"Application by application one", "DataCollection by outputDataCollection one");
 
 		testRel(Instrument.class, "Facility by facility one",
 				"InstrumentScientist by instrumentScientists many cascaded setInstrument",
@@ -144,7 +141,7 @@ public class TestEntityInfo {
 
 		testOne(User.class);
 
-		testOne(Job.class, "Application");
+		testOne(Job.class, "Application", "DataCollection", "DataCollection");
 	}
 
 	private void testOne(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {
@@ -168,11 +165,12 @@ public class TestEntityInfo {
 		testNNF(InvestigationUser.class, "investigation", "user");
 		testNNF(User.class, "name");
 		testNNF(ParameterType.class, "valueType", "name", "facility", "units");
-		testNNF(Job.class, "application");
+		testNNF(Job.class, "application", "inputDataCollection", "outputDataCollection");
 	}
 
 	private void testNNF(Class<? extends EntityBaseBean> klass, String... nnfs) throws Exception {
 		List<Field> results = eiHandler.getNotNullableFields(klass);
+//		System.out.println(results);
 		Set<String> rStrings = new HashSet<String>();
 		for (Field field : results) {
 			rStrings.add(field.getName());
@@ -213,12 +211,12 @@ public class TestEntityInfo {
 	@Test
 	public void getters() throws Exception {
 		testGetters(Investigation.class, 20);
-		testGetters(Dataset.class, 15);
+		testGetters(Dataset.class, 14);
 		testGetters(Keyword.class, 3);
 		testGetters(InvestigationUser.class, 4);
 		testGetters(User.class, 7);
-		testGetters(ParameterType.class, 20);
-		testGetters(Job.class, 7);
+		testGetters(ParameterType.class, 21);
+		testGetters(Job.class, 5);
 	}
 
 	private void testGetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
@@ -241,8 +239,8 @@ public class TestEntityInfo {
 		testSetters(Keyword.class, 2);
 		testSetters(InvestigationUser.class, 3);
 		testSetters(User.class, 2);
-		testSetters(ParameterType.class, 14);
-		testSetters(Job.class, 2);
+		testSetters(ParameterType.class, 15);
+		testSetters(Job.class, 4);
 	}
 
 	private void testSetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {

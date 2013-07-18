@@ -30,6 +30,9 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	@Comment("Checksum of file represented as a string")
 	private String checksum;
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
+	private List<DataCollectionDatafile> dataCollectionDatafiles = new ArrayList<DataCollectionDatafile>();
+
 	@Comment("Date of creation of the actual file rather than storing the metadata")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date datafileCreateTime;
@@ -58,18 +61,12 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	@Comment("Expressed in bytes")
 	private Long fileSize;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
-	private List<InputDatafile> inputDatafiles = new ArrayList<InputDatafile>();
-
 	@Comment("The logical location of the file - which may also be the physical location")
 	private String location;
 
 	@Comment("A name given to the file")
 	@Column(name = "NAME", nullable = false)
 	private String name;
-
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
-	private List<OutputDatafile> outputDatafiles = new ArrayList<OutputDatafile>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datafile")
 	private List<DatafileParameter> parameters = new ArrayList<DatafileParameter>();
@@ -81,54 +78,12 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	public Datafile() {
 	}
 
-	public EntityBaseBean prunedOld() throws IcatException {
-		// logger.trace("Pruning Datafile for " + includes);
-		Datafile clone = new Datafile();
-		super.addToClone(clone);
-
-		clone.checksum = checksum;
-		clone.datafileCreateTime = datafileCreateTime;
-		clone.datafileModTime = datafileModTime;
-		clone.description = description;
-		clone.doi = doi;
-		clone.fileSize = fileSize;
-		clone.location = location;
-		clone.name = name;
-
-		if (this.includes.contains(RelatedDatafile.class)) {
-			for (RelatedDatafile df : this.sourceDatafiles) {
-				clone.sourceDatafiles.add((RelatedDatafile) df.pruned());
-			}
-			for (RelatedDatafile df : this.destDatafiles) {
-				clone.destDatafiles.add((RelatedDatafile) df.pruned());
-			}
-		}
-		if (this.includes.contains(DatafileFormat.class)) {
-			clone.datafileFormat = (DatafileFormat) datafileFormat.pruned();
-		}
-		if (this.includes.contains(Dataset.class)) {
-			clone.dataset = (Dataset) dataset.pruned();
-		}
-		if (this.includes.contains(DatafileParameter.class)) {
-			for (DatafileParameter df : this.parameters) {
-				clone.parameters.add((DatafileParameter) df.pruned());
-			}
-		}
-		if (this.includes.contains(InputDatafile.class)) {
-			for (InputDatafile df : this.inputDatafiles) {
-				clone.inputDatafiles.add((InputDatafile) df.pruned());
-			}
-		}
-		if (this.includes.contains(OutputDatafile.class)) {
-			for (OutputDatafile df : this.outputDatafiles) {
-				clone.outputDatafiles.add((OutputDatafile) df.pruned());
-			}
-		}
-		return clone;
-	}
-
 	public String getChecksum() {
 		return checksum;
+	}
+
+	public List<DataCollectionDatafile> getDataCollectionDatafiles() {
+		return dataCollectionDatafiles;
 	}
 
 	public Date getDatafileCreateTime() {
@@ -163,20 +118,12 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		return fileSize;
 	}
 
-	public List<InputDatafile> getInputDatafiles() {
-		return inputDatafiles;
-	}
-
 	public String getLocation() {
 		return location;
 	}
 
 	public String getName() {
 		return name;
-	}
-
-	public List<OutputDatafile> getOutputDatafiles() {
-		return outputDatafiles;
 	}
 
 	public List<DatafileParameter> getParameters() {
@@ -189,6 +136,10 @@ public class Datafile extends EntityBaseBean implements Serializable {
 
 	public void setChecksum(String checksum) {
 		this.checksum = checksum;
+	}
+
+	public void setDataCollectionDatafiles(List<DataCollectionDatafile> dataCollectionDatafiles) {
+		this.dataCollectionDatafiles = dataCollectionDatafiles;
 	}
 
 	public void setDatafileCreateTime(Date datafileCreateTime) {
@@ -223,20 +174,12 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		this.fileSize = fileSize;
 	}
 
-	public void setInputDatafiles(List<InputDatafile> inputDatafiles) {
-		this.inputDatafiles = inputDatafiles;
-	}
-
 	public void setLocation(String location) {
 		this.location = location;
 	}
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public void setOutputDatafiles(List<OutputDatafile> outputDatafiles) {
-		this.outputDatafiles = outputDatafiles;
 	}
 
 	public void setParameters(List<DatafileParameter> parameters) {

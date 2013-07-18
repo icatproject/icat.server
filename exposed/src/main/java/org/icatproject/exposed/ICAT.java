@@ -29,9 +29,13 @@ import javax.xml.ws.handler.MessageContext;
 import org.apache.log4j.Logger;
 import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.IcatException;
-import org.icatproject.core.PropertyHandler;
 import org.icatproject.core.IcatException.IcatExceptionType;
+import org.icatproject.core.PropertyHandler;
 import org.icatproject.core.entity.Application;
+import org.icatproject.core.entity.DataCollection;
+import org.icatproject.core.entity.DataCollectionDatafile;
+import org.icatproject.core.entity.DataCollectionDataset;
+import org.icatproject.core.entity.DataCollectionParameter;
 import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.DatafileFormat;
 import org.icatproject.core.entity.DatafileParameter;
@@ -42,8 +46,6 @@ import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Facility;
 import org.icatproject.core.entity.FacilityCycle;
 import org.icatproject.core.entity.Group;
-import org.icatproject.core.entity.InputDatafile;
-import org.icatproject.core.entity.InputDataset;
 import org.icatproject.core.entity.Instrument;
 import org.icatproject.core.entity.InstrumentScientist;
 import org.icatproject.core.entity.Investigation;
@@ -52,8 +54,6 @@ import org.icatproject.core.entity.InvestigationUser;
 import org.icatproject.core.entity.Job;
 import org.icatproject.core.entity.Keyword;
 import org.icatproject.core.entity.Log;
-import org.icatproject.core.entity.OutputDatafile;
-import org.icatproject.core.entity.OutputDataset;
 import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.Publication;
 import org.icatproject.core.entity.RelatedDatafile;
@@ -204,9 +204,10 @@ public class ICAT {
 			@WebParam SampleParameter sampleParameter, @WebParam Shift shift,
 			@WebParam Study study, @WebParam StudyInvestigation studyInvestigation,
 			@WebParam StudyStatus studyStatus, @WebParam Application application,
-			@WebParam Job job, @WebParam InputDataset inputDataset,
-			@WebParam OutputDataset outputDataset, @WebParam InputDatafile inputDatafile,
-			@WebParam OutputDatafile outputDatafile, @WebParam Group group,
+			@WebParam Job job, @WebParam DataCollection dataCollection,
+			@WebParam DataCollectionParameter dataCollectionParameter,
+			@WebParam DataCollectionDataset dataCollectionDataset,
+			@WebParam DataCollectionDatafile dataCollectionDatafile, @WebParam Group group,
 			@WebParam UserGroup userGroup, @WebParam Log log) {
 	}
 
