@@ -165,7 +165,7 @@ public class TestEntityInfo {
 		testNNF(InvestigationUser.class, "investigation", "user");
 		testNNF(User.class, "name");
 		testNNF(ParameterType.class, "valueType", "name", "facility", "units");
-		testNNF(Job.class, "application", "inputDataCollection", "outputDataCollection");
+		testNNF(Job.class, "application");
 	}
 
 	private void testNNF(Class<? extends EntityBaseBean> klass, String... nnfs) throws Exception {

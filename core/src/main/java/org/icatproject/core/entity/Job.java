@@ -19,11 +19,9 @@ public class Job extends EntityBaseBean implements Serializable {
 	private String arguments;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(nullable = false)
 	private DataCollection inputDataCollection;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(nullable = false)
 	private DataCollection outputDataCollection;
 
 	// Needed for JPA
