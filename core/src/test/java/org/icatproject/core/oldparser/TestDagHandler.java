@@ -1,4 +1,4 @@
-package org.icatproject.core.parser;
+package org.icatproject.core.oldparser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -23,6 +23,7 @@ import org.icatproject.core.entity.InvestigationInstrument;
 import org.icatproject.core.entity.Job;
 import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.User;
+import org.icatproject.core.oldparser.DagHandler;
 import org.junit.Test;
 
 public class TestDagHandler {

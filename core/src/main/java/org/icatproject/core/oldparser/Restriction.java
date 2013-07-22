@@ -1,4 +1,4 @@
-package org.icatproject.core.parser;
+package org.icatproject.core.oldparser;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -8,7 +8,7 @@ import java.util.Set;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.core.parser.DagHandler.Step;
+import org.icatproject.core.oldparser.DagHandler.Step;
 
 public class Restriction {
 

@@ -1,4 +1,4 @@
-package org.icatproject.core.parser;
+package org.icatproject.core.oldparser;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;

@@ -1,4 +1,4 @@
-package org.icatproject.core.parser;
+package org.icatproject.core.oldparser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -10,6 +10,10 @@ import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.DatasetParameter;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.ParameterType;
+import org.icatproject.core.oldparser.ComparisonPredicate;
+import org.icatproject.core.oldparser.Input;
+import org.icatproject.core.oldparser.Token;
+import org.icatproject.core.oldparser.Tokenizer;
 import org.junit.Test;
 
 public class TestComparisonPredicate {

@@ -1,6 +1,6 @@
-package org.icatproject.core.parser;
+package org.icatproject.core.oldparser;
 
-import org.icatproject.core.parser.Token.Type;
+import org.icatproject.core.oldparser.Token.Type;
 
 
 public class SortSpecification {

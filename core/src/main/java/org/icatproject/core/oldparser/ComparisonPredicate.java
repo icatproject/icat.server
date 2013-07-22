@@ -1,4 +1,4 @@
-package org.icatproject.core.parser;
+package org.icatproject.core.oldparser;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
-import org.icatproject.core.parser.Token.Type;
+import org.icatproject.core.oldparser.Token.Type;
 
 public class ComparisonPredicate {
 

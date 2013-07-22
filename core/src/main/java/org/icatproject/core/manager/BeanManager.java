@@ -41,14 +41,14 @@ import org.icatproject.core.entity.Log;
 import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.LuceneSingleton.LuceneSearchResult;
-import org.icatproject.core.parser.GetQuery;
-import org.icatproject.core.parser.Include;
-import org.icatproject.core.parser.Input;
-import org.icatproject.core.parser.LexerException;
-import org.icatproject.core.parser.ParserException;
-import org.icatproject.core.parser.SearchQuery;
-import org.icatproject.core.parser.Token;
-import org.icatproject.core.parser.Tokenizer;
+import org.icatproject.core.oldparser.GetQuery;
+import org.icatproject.core.oldparser.Include;
+import org.icatproject.core.oldparser.Input;
+import org.icatproject.core.oldparser.LexerException;
+import org.icatproject.core.oldparser.ParserException;
+import org.icatproject.core.oldparser.SearchQuery;
+import org.icatproject.core.oldparser.Token;
+import org.icatproject.core.oldparser.Tokenizer;
 
 public class BeanManager {
 

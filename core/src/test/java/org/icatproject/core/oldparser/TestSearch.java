@@ -1,10 +1,14 @@
-package org.icatproject.core.parser;
+package org.icatproject.core.oldparser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.util.List;
 
+import org.icatproject.core.oldparser.Input;
+import org.icatproject.core.oldparser.SearchQuery;
+import org.icatproject.core.oldparser.Token;
+import org.icatproject.core.oldparser.Tokenizer;
 import org.junit.Test;
 
 public class TestSearch {

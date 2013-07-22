@@ -15,12 +15,12 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
-import org.icatproject.core.parser.Input;
-import org.icatproject.core.parser.LexerException;
-import org.icatproject.core.parser.ParserException;
-import org.icatproject.core.parser.RestrictedBean;
-import org.icatproject.core.parser.Token;
-import org.icatproject.core.parser.Tokenizer;
+import org.icatproject.core.oldparser.Input;
+import org.icatproject.core.oldparser.LexerException;
+import org.icatproject.core.oldparser.ParserException;
+import org.icatproject.core.oldparser.RestrictedBean;
+import org.icatproject.core.oldparser.Token;
+import org.icatproject.core.oldparser.Tokenizer;
 
 @Comment("An authorization rule")
 @SuppressWarnings("serial")

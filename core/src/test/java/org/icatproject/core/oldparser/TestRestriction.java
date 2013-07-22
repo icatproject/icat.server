@@ -1,4 +1,4 @@
-package org.icatproject.core.parser;
+package org.icatproject.core.oldparser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.icatproject.core.entity.EntityBaseBean;
-import org.icatproject.core.parser.Input;
-import org.icatproject.core.parser.Restriction;
-import org.icatproject.core.parser.Token;
-import org.icatproject.core.parser.Tokenizer;
+import org.icatproject.core.oldparser.Input;
+import org.icatproject.core.oldparser.Restriction;
+import org.icatproject.core.oldparser.Token;
+import org.icatproject.core.oldparser.Tokenizer;
 import org.junit.Test;
 import org.junit.Ignore;
 

@@ -1,4 +1,4 @@
-package org.icatproject.core.parser;
+package org.icatproject.core.oldparser;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;

@@ -1,9 +1,9 @@
-package org.icatproject.core.parser;
+package org.icatproject.core.oldparser;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.icatproject.core.parser.Token.Type;
+import org.icatproject.core.oldparser.Token.Type;
 
 
 

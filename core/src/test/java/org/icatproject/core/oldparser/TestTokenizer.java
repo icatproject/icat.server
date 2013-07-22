@@ -1,12 +1,12 @@
-package org.icatproject.core.parser;
+package org.icatproject.core.oldparser;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-import org.icatproject.core.parser.LexerException;
-import org.icatproject.core.parser.Token;
-import org.icatproject.core.parser.Tokenizer;
+import org.icatproject.core.oldparser.LexerException;
+import org.icatproject.core.oldparser.Token;
+import org.icatproject.core.oldparser.Tokenizer;
 import org.junit.Test;
 
 

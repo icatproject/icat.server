@@ -1,4 +1,4 @@
-package org.icatproject.core.parser;
+package org.icatproject.core.oldparser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -21,6 +21,11 @@ import org.icatproject.core.entity.Facility;
 import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.Sample;
 import org.icatproject.core.entity.SampleParameter;
+import org.icatproject.core.oldparser.Input;
+import org.icatproject.core.oldparser.ParserException;
+import org.icatproject.core.oldparser.SearchQuery;
+import org.icatproject.core.oldparser.Token;
+import org.icatproject.core.oldparser.Tokenizer;
 import org.junit.Test;
 
 public class TestIncludes {
