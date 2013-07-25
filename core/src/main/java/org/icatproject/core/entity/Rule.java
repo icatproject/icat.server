@@ -15,12 +15,12 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
-import org.icatproject.core.oldparser.Input;
-import org.icatproject.core.oldparser.LexerException;
-import org.icatproject.core.oldparser.ParserException;
-import org.icatproject.core.oldparser.RestrictedBean;
-import org.icatproject.core.oldparser.Token;
-import org.icatproject.core.oldparser.Tokenizer;
+import org.icatproject.core.parser.Input;
+import org.icatproject.core.parser.LexerException;
+import org.icatproject.core.parser.ParserException;
+import org.icatproject.core.parser.RuleWhat;
+import org.icatproject.core.parser.Token;
+import org.icatproject.core.parser.Tokenizer;
 
 @Comment("An authorization rule")
 @SuppressWarnings("serial")
@@ -133,31 +133,32 @@ public class Rule extends EntityBaseBean implements Serializable {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
 		final Input input = new Input(tokens);
-		RestrictedBean r;
+		RuleWhat r;
 		try {
-			r = new RestrictedBean(input);
+			r = new RuleWhat(input);
 		} catch (final ParserException e) {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
-		if (r.getSearchWhere().isEmpty()) {
-			this.crudJPQL = null;
-			this.searchJPQL = null;
-		} else {
-			this.crudJPQL = r.getQuery();
-			this.searchJPQL = r.getSearchWhere();
-		}
-		this.bean = r.getBean();
+		// TODO fix commented out code
+		// if (r.getSearchWhere().isEmpty()) {
+		// this.crudJPQL = null;
+		// this.searchJPQL = null;
+		// } else {
+		// this.crudJPQL = r.getQuery();
+		// this.searchJPQL = r.getSearchWhere();
+		// }
+		this.bean = r.getBean().getSimpleName();
 
 		final StringBuilder sb = new StringBuilder();
-		for (final Class<? extends EntityBaseBean> bean : r.getRelatedEntities()) {
-			if (sb.length() > 0) {
-				sb.append(" ");
-			}
-			sb.append(bean.getSimpleName());
-		}
+		// for (final Class<? extends EntityBaseBean> bean : r.getRelatedEntities()) {
+		// if (sb.length() > 0) {
+		// sb.append(" ");
+		// }
+		// sb.append(bean.getSimpleName());
+		// }
 
 		this.beans = sb.toString();
-		this.restricted = r.isRestricted();
+		// this.restricted = r.isRestricted();
 
 	}
 

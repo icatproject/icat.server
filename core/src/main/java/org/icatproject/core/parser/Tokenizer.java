@@ -1,4 +1,4 @@
-package org.icatproject.core.oldparser;
+package org.icatproject.core.parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class Tokenizer {
 
 	enum State {
-		RESET, NONE, INQUOTES, CLOSEDQUOTES, LT, LTMINUS, NAME, INTEGER, REAL, NOT, PARAMETER, TIMESTAMP, GT
+		RESET, NONE, INQUOTES, CLOSEDQUOTES, LT, NAME, INTEGER, REAL, NOT, PARAMETER, TIMESTAMP, GT
 	}
 
 	private final static Pattern tsRegExp = Pattern
@@ -19,10 +19,17 @@ public class Tokenizer {
 
 	private final static Set<String> boolops = new HashSet<String>(
 			Arrays.asList("AND", "OR", "NOT"));
-	private final static Set<String> keyWords = new HashSet<String>(Arrays.asList("DISTINCT",
-			"ORDER", "BY", "ASC", "DESC", "IN", "BETWEEN", "INCLUDE"));
-	private final static Set<String> functions = new HashSet<String>(Arrays.asList("MIN", "MAX",
+	private final static Set<String> keyWords = new HashSet<String>(Arrays.asList("ALL", "ANY",
+			"AND", "AS", "ASC", "BETWEEN", "BOTH", "BY", "DESC", "DISTINCT", "DIV", "EMPTY",
+			"FETCH", "FROM", "GROUP", "HAVING", "IN", "INNER", "IS", "JOIN", "LEADING", "LEFT",
+			"MEMBER", "MINUS", "MULT", "NOT", "NULL", "OR", "ORDER", "OUTER", "PLUS", "REAL",
+			"SELECT", "TRAILING", "WHERE", "INCLUDE", "LIMIT", "TIMESTAMP"));
+	private final static Set<String> aggFunctions = new HashSet<String>(Arrays.asList("MIN", "MAX",
 			"AVG", "COUNT", "SUM"));
+
+	private final static Set<String> otherFunctions = new HashSet<String>(Arrays.asList("CONCAT",
+			"LENGTH", "LOCATE", "SUBSTRING", "TRIM", "ABS", "MOD", "SQRT", "SIZE", "CURRENT_DATE",
+			"CURRENT_TIME", "CURRENT_TIMESTAMP"));
 
 	public static List<Token> getTokens(String input) throws LexerException {
 		List<Token> tokens = new ArrayList<Token>();
@@ -41,10 +48,10 @@ public class Tokenizer {
 			if (state == State.NONE) {
 				if (ch == ' ' || ch == 0) {
 					// Ignore
-				} else if (Character.isLetter(ch)) {
+				} else if (Character.isLetter(ch) || ch == '$' || ch == '_') {
 					state = State.NAME;
 					start = i;
-				} else if (Character.isDigit(ch) || ch == '-') {
+				} else if (Character.isDigit(ch)) {
 					state = State.INTEGER;
 					start = i;
 				} else if (ch == ':') {
@@ -53,10 +60,6 @@ public class Tokenizer {
 				} else if (ch == '\'') {
 					state = State.INQUOTES;
 					start = i;
-				} else if (ch == '[') {
-					tokens.add(new Token(Token.Type.BRA, ch));
-				} else if (ch == ']') {
-					tokens.add(new Token(Token.Type.KET, ch));
 				} else if (ch == '(') {
 					tokens.add(new Token(Token.Type.OPENPAREN, ch));
 				} else if (ch == ')') {
@@ -74,6 +77,14 @@ public class Tokenizer {
 				} else if (ch == '{') {
 					state = State.TIMESTAMP;
 					start = i;
+				} else if (ch == '+') {
+					tokens.add(new Token(Token.Type.PLUS, ch));
+				} else if (ch == '-') {
+					tokens.add(new Token(Token.Type.MINUS, ch));
+				} else if (ch == '*') {
+					tokens.add(new Token(Token.Type.MULT, ch));
+				} else if (ch == '/') {
+					tokens.add(new Token(Token.Type.DIV, ch));
 				} else {
 					reportError(ch, state, i, input);
 				}
@@ -100,9 +111,7 @@ public class Tokenizer {
 					state = State.RESET;
 				}
 			} else if (state == State.LT) {
-				if (ch == '-') {
-					state = State.LTMINUS;
-				} else if (ch == '>') {
+				if (ch == '>') {
 					tokens.add(new Token(Token.Type.COMPOP, "<>"));
 					state = State.NONE;
 				} else if (ch == '=') {
@@ -112,19 +121,12 @@ public class Tokenizer {
 					tokens.add(new Token(Token.Type.COMPOP, "<"));
 					state = State.RESET;
 				}
-			} else if (state == State.LTMINUS) {
-				if (ch == '>') {
-					tokens.add(new Token(Token.Type.ENTSEP, "<->"));
-					state = State.NONE;
-				} else {
-					reportError(ch, state, i, input);
-				}
 			} else if (state == State.NAME) {
-				if (!Character.isLetterOrDigit(ch) && ch != '_' && ch != '.') {
+				if (!Character.isLetterOrDigit(ch) && ch != '_' && ch != '.' && ch != '$') {
 					String name = input.substring(start, i);
 					String nameUp = name.toUpperCase();
 					if (boolops.contains(nameUp) || keyWords.contains(nameUp)
-							|| functions.contains(nameUp)) {
+							|| aggFunctions.contains(nameUp) || otherFunctions.contains(nameUp)) {
 						tokens.add(new Token(Token.Type.valueOf(nameUp), nameUp));
 					} else if (nameUp.equals("LIKE")) {
 						tokens.add(new Token(Token.Type.COMPOP, "LIKE"));

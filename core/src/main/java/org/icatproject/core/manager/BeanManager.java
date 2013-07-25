@@ -43,12 +43,18 @@ import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.LuceneSingleton.LuceneSearchResult;
 import org.icatproject.core.oldparser.GetQuery;
 import org.icatproject.core.oldparser.Include;
-import org.icatproject.core.oldparser.Input;
-import org.icatproject.core.oldparser.LexerException;
-import org.icatproject.core.oldparser.ParserException;
-import org.icatproject.core.oldparser.SearchQuery;
-import org.icatproject.core.oldparser.Token;
-import org.icatproject.core.oldparser.Tokenizer;
+import org.icatproject.core.oldparser.OldInput;
+import org.icatproject.core.oldparser.OldLexerException;
+import org.icatproject.core.oldparser.OldParserException;
+import org.icatproject.core.oldparser.OldSearchQuery;
+import org.icatproject.core.oldparser.OldToken;
+import org.icatproject.core.oldparser.OldTokenizer;
+import org.icatproject.core.parser.Input;
+import org.icatproject.core.parser.LexerException;
+import org.icatproject.core.parser.ParserException;
+import org.icatproject.core.parser.SearchQuery;
+import org.icatproject.core.parser.Token;
+import org.icatproject.core.parser.Tokenizer;
 
 public class BeanManager {
 
@@ -460,17 +466,17 @@ public class BeanManager {
 		// Note that this uses no transactions (except for loggging) as it is read only.
 
 		long time = log ? System.currentTimeMillis() : 0;
-		List<Token> tokens = null;
+		List<OldToken> tokens = null;
 		try {
-			tokens = Tokenizer.getTokens(query);
-		} catch (LexerException e) {
+			tokens = OldTokenizer.getTokens(query);
+		} catch (OldLexerException e) {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
-		Input input = new Input(tokens);
+		OldInput input = new OldInput(tokens);
 		GetQuery q;
 		try {
 			q = new GetQuery(input);
-		} catch (ParserException e) {
+		} catch (OldParserException e) {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
 
@@ -759,7 +765,30 @@ public class BeanManager {
 		long time = log ? System.currentTimeMillis() : 0;
 		logger.debug(userId + " searches for " + query);
 
-		/* Parse the query */
+		if (!query.toUpperCase().trim().startsWith("SELECT")) {
+
+			/* Parse the query */
+			List<OldToken> oldTokens = null;
+			try {
+				oldTokens = OldTokenizer.getTokens(query);
+			} catch (OldLexerException e) {
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+						e.getMessage());
+			}
+			OldInput input = new OldInput(oldTokens);
+			OldSearchQuery q;
+			try {
+				q = new OldSearchQuery(input);
+			} catch (OldParserException e) {
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+						e.getMessage());
+			}
+
+			query = q.getNewQuery(manager);
+			logger.debug("New style query: " + query);
+
+		}
+		/* New style query - parse it */
 		List<Token> tokens = null;
 		try {
 			tokens = Tokenizer.getTokens(query);
@@ -804,21 +833,22 @@ public class BeanManager {
 
 		List<?> result = jpqlQuery.getResultList();
 
-		Include include = q.getInclude();
-
-		if (include != null) {
-			logger.debug("To include: " + include);
-			if (include.isOne()) {
-				for (Object beanManaged : result) {
-					((EntityBaseBean) beanManaged).addOne();
-				}
-			} else {
-				Set<Class<? extends EntityBaseBean>> includes = include.getBeans();
-				for (Object beanManaged : result) {
-					((EntityBaseBean) beanManaged).addIncludes(includes, true);
-				}
-			}
-		}
+		// TODO restore includes
+		// Include include = q.getInclude();
+		//
+		// if (include != null) {
+		// logger.debug("To include: " + include);
+		// if (include.isOne()) {
+		// for (Object beanManaged : result) {
+		// ((EntityBaseBean) beanManaged).addOne();
+		// }
+		// } else {
+		// Set<Class<? extends EntityBaseBean>> includes = include.getBeans();
+		// for (Object beanManaged : result) {
+		// ((EntityBaseBean) beanManaged).addIncludes(includes, true);
+		// }
+		// }
+		// }
 
 		logger.debug("Obtained " + result.size() + " results.");
 

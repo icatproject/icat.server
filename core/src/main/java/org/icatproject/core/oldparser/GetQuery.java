@@ -15,10 +15,10 @@ public class GetQuery {
 
 	private Include include;
 
-	public GetQuery(Input input) throws ParserException, IcatException {
-		this.bean = EntityInfoHandler.getClass(input.consume(Token.Type.NAME).getValue());
-		Token t = input.peek(0);
-		if (t != null && t.getType() == Token.Type.INCLUDE) {
+	public GetQuery(OldInput input) throws OldParserException, IcatException {
+		this.bean = EntityInfoHandler.getClass(input.consume(OldToken.Type.NAME).getValue());
+		OldToken t = input.peek(0);
+		if (t != null && t.getType() == OldToken.Type.INCLUDE) {
 			this.include = new Include(bean, input);
 			t = input.peek(0);
 		}

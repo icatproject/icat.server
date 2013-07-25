@@ -12,18 +12,18 @@ public class BooleanFactor {
 
 	// BooleanFactor ::= ("NOT")? Predicate | ( "(" SearchCondition ")" )
 
-	public BooleanFactor(Input input) throws ParserException {
-		Token t = input.peek(0);
-		if (t.getType() == Token.Type.NOT) {
+	public BooleanFactor(OldInput input) throws OldParserException {
+		OldToken t = input.peek(0);
+		if (t.getType() == OldToken.Type.NOT) {
 			input.consume();
 			this.not = true;
 		}
 
 		t = input.peek(0);
-		if (t.getType() == Token.Type.OPENPAREN) {
+		if (t.getType() == OldToken.Type.OPENPAREN) {
 			input.consume();
 			this.searchCondition = new SearchCondition(input);
-			input.consume(Token.Type.CLOSEPAREN);
+			input.consume(OldToken.Type.CLOSEPAREN);
 		} else {
 			this.predicate = new ComparisonPredicate(input);
 		}

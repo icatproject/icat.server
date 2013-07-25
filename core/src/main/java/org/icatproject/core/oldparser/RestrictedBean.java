@@ -13,8 +13,8 @@ public class RestrictedBean {
 	private String tableName;
 	private Restriction restriction;
 
-	public RestrictedBean(Input input) throws ParserException {
-		Token t = input.consume(Token.Type.NAME);
+	public RestrictedBean(OldInput input) throws OldParserException {
+		OldToken t = input.consume(OldToken.Type.NAME);
 		tableName = t.getValue();
 		restriction = new Restriction(input);
 	}

@@ -3,14 +3,14 @@ package org.icatproject.core.oldparser;
 import java.util.Arrays;
 import java.util.List;
 
-import org.icatproject.core.oldparser.Token.Type;
+import org.icatproject.core.oldparser.OldToken.Type;
 
 
 
 @SuppressWarnings("serial")
-public class ParserException extends Exception {
+public class OldParserException extends Exception {
 
-	private static String getMsg(Input input, List<Type> types) {
+	private static String getMsg(OldInput input, List<Type> types) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Expected token from types [");
 		boolean first = true;
@@ -26,14 +26,14 @@ public class ParserException extends Exception {
 
 		sb.append(input.peek(0).getValue()).append(" in ");
 		for (int i = -2; i < 0; i++) {
-			Token t = input.peek(i);
+			OldToken t = input.peek(i);
 			if (t != null) {
 				sb.append(t.getValue()).append(' ');
 			}
 		}
 		sb.append("< " + input.peek(0).getValue() + " > ");
 		for (int i = 1; i < 3; i++) {
-			Token t = input.peek(i);
+			OldToken t = input.peek(i);
 			if (t != null) {
 				sb.append(t.getValue()).append(' ');
 			}
@@ -41,11 +41,11 @@ public class ParserException extends Exception {
 		return sb.toString();
 	}
 
-	public ParserException(Input input, Type[] types) {
+	public OldParserException(OldInput input, Type[] types) {
 		super(getMsg(input, Arrays.asList(types)));
 	}
 
-	public ParserException(String msg) {
+	public OldParserException(String msg) {
 		super(msg);
 	}
 

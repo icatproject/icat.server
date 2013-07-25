@@ -1,11 +1,9 @@
-package org.icatproject.core.oldparser;
+package org.icatproject.core.parser;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.icatproject.core.oldparser.Token.Type;
-
-
+import org.icatproject.core.parser.Token.Type;
 
 public class Input {
 
@@ -16,7 +14,7 @@ public class Input {
 		this.tokens = tokens;
 		this.pos = 0;
 	}
-	
+
 	public Token consume(Type... types) throws ParserException {
 		if (pos < tokens.size()) {
 			if (Arrays.asList(types).contains(tokens.get(pos).getType())) {

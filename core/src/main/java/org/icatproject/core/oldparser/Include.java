@@ -15,18 +15,18 @@ public class Include {
 
 	private boolean one;
 
-	public Include(Class<? extends EntityBaseBean> bean, Input input) throws ParserException,
+	public Include(Class<? extends EntityBaseBean> bean, OldInput input) throws OldParserException,
 			IcatException {
 
-		input.consume(Token.Type.INCLUDE);
-		Token name = input.consume(Token.Type.NAME, Token.Type.INTEGER);
+		input.consume(OldToken.Type.INCLUDE);
+		OldToken name = input.consume(OldToken.Type.NAME, OldToken.Type.INTEGER);
 		String value = name.getValue();
-		if (name.getType() == Token.Type.NAME) {
+		if (name.getType() == OldToken.Type.NAME) {
 			this.includes.add(EntityInfoHandler.getClass(value));
-			Token t;
-			while ((t = input.peek(0)) != null && t.getType() == Token.Type.COMMA) {
+			OldToken t;
+			while ((t = input.peek(0)) != null && t.getType() == OldToken.Type.COMMA) {
 				input.consume();
-				name = input.consume(Token.Type.NAME);
+				name = input.consume(OldToken.Type.NAME);
 				value = name.getValue();
 				this.includes.add(EntityInfoHandler.getClass(value));
 			}

@@ -16,8 +16,9 @@ import org.icatproject.core.entity.Rule;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.oldparser.DagHandler.Step;
+import org.icatproject.core.oldparser.OldParserException;
 
-public class SearchQuery {
+public class OldSearchQuery {
 
 	// Query ::= ( [ [num] "," [num] ] [ "DISTINCT" ] name Include Order ) |
 	// ( "MIN" | "MAX" | "AVG" | "COUNT" | "SUM" "(" name ")" )
@@ -36,13 +37,11 @@ public class SearchQuery {
 
 	}
 
-	static Logger logger = Logger.getLogger(SearchQuery.class);
-	private final static Set<String> rootUserNames = PropertyHandler.getInstance()
-			.getRootUserNames();
+	static Logger logger = Logger.getLogger(OldSearchQuery.class);
 
 	private boolean distinct;
 	private Order order;
-	private Token result;
+	private OldToken result;
 	private SearchCondition searchCondition;
 	private List<TableAndSearchCondition> tableAndSearchConditions = new ArrayList<TableAndSearchCondition>();
 
@@ -56,41 +55,43 @@ public class SearchQuery {
 
 	private Class<? extends EntityBaseBean> firstBean;
 
-	public SearchQuery(Input input) throws ParserException, IcatException {
+	public OldSearchQuery(OldInput input) throws OldParserException, IcatException {
 
-		Token t = input.consume(Token.Type.NAME, Token.Type.DISTINCT, Token.Type.INTEGER,
-				Token.Type.COMMA, Token.Type.COUNT, Token.Type.MAX, Token.Type.MIN, Token.Type.AVG,
-				Token.Type.SUM);
-		if (t.getType() == Token.Type.COUNT || t.getType() == Token.Type.MAX
-				|| t.getType() == Token.Type.MIN || t.getType() == Token.Type.AVG
-				|| t.getType() == Token.Type.SUM) {
+		OldToken t = input.consume(OldToken.Type.NAME, OldToken.Type.DISTINCT,
+				OldToken.Type.INTEGER, OldToken.Type.COMMA, OldToken.Type.COUNT, OldToken.Type.MAX,
+				OldToken.Type.MIN, OldToken.Type.AVG, OldToken.Type.SUM);
+		if (t.getType() == OldToken.Type.COUNT || t.getType() == OldToken.Type.MAX
+				|| t.getType() == OldToken.Type.MIN || t.getType() == OldToken.Type.AVG
+				|| t.getType() == OldToken.Type.SUM) {
 			aggFunction = t.getValue();
-			input.consume(Token.Type.OPENPAREN);
-			this.result = input.consume(Token.Type.NAME);
+			input.consume(OldToken.Type.OPENPAREN);
+			this.result = input.consume(OldToken.Type.NAME);
 			String resultValue = this.result.getValue();
 			String[] eles = resultValue.split("\\.");
 			this.firstBean = EntityInfoHandler.getClass(eles[0]);
-			input.consume(Token.Type.CLOSEPAREN);
+			input.consume(OldToken.Type.CLOSEPAREN);
 		} else {
-			if (t.getType() == Token.Type.INTEGER) {
+			if (t.getType() == OldToken.Type.INTEGER) {
 				this.offset = Integer.parseInt(t.getValue());
-				input.consume(Token.Type.COMMA);
-				t = input.consume(Token.Type.NAME, Token.Type.DISTINCT, Token.Type.INTEGER);
-				if (t.getType() == Token.Type.INTEGER) {
+				input.consume(OldToken.Type.COMMA);
+				t = input
+						.consume(OldToken.Type.NAME, OldToken.Type.DISTINCT, OldToken.Type.INTEGER);
+				if (t.getType() == OldToken.Type.INTEGER) {
 					this.number = Integer.parseInt(t.getValue());
-					t = input.consume(Token.Type.NAME, Token.Type.DISTINCT);
+					t = input.consume(OldToken.Type.NAME, OldToken.Type.DISTINCT);
 				}
-			} else if (t.getType() == Token.Type.COMMA) {
-				t = input.consume(Token.Type.NAME, Token.Type.DISTINCT, Token.Type.INTEGER);
-				if (t.getType() == Token.Type.INTEGER) {
+			} else if (t.getType() == OldToken.Type.COMMA) {
+				t = input
+						.consume(OldToken.Type.NAME, OldToken.Type.DISTINCT, OldToken.Type.INTEGER);
+				if (t.getType() == OldToken.Type.INTEGER) {
 					this.number = Integer.parseInt(t.getValue());
-					t = input.consume(Token.Type.NAME, Token.Type.DISTINCT);
+					t = input.consume(OldToken.Type.NAME, OldToken.Type.DISTINCT);
 				}
 			}
 
-			if (t.getType() == Token.Type.DISTINCT) {
+			if (t.getType() == OldToken.Type.DISTINCT) {
 				this.distinct = true;
-				this.result = input.consume(Token.Type.NAME);
+				this.result = input.consume(OldToken.Type.NAME);
 			} else {
 				this.result = t;
 			}
@@ -101,18 +102,18 @@ public class SearchQuery {
 			boolean simple = eles.length == 1;
 			t = input.peek(0);
 			if (t != null) {
-				if (t.getType() == Token.Type.ORDER) {
+				if (t.getType() == OldToken.Type.ORDER) {
 					this.order = new Order(input);
 					if (simple) {
 						t = input.peek(0);
-						if (t != null && t.getType() == Token.Type.INCLUDE) {
+						if (t != null && t.getType() == OldToken.Type.INCLUDE) {
 							this.include = new Include(getFirstEntity(), input);
 						}
 					}
 				} else {
 					if (simple) {
 						t = input.peek(0);
-						if (t != null && t.getType() == Token.Type.INCLUDE) {
+						if (t != null && t.getType() == OldToken.Type.INCLUDE) {
 							this.include = new Include(getFirstEntity(), input);
 						}
 					}
@@ -123,103 +124,52 @@ public class SearchQuery {
 
 		t = input.peek(0);
 		if (t != null) {
-			if (t.getType() == Token.Type.BRA) {
+			if (t.getType() == OldToken.Type.BRA) {
 				input.consume();
 				this.searchCondition = new SearchCondition(input);
-				input.consume(Token.Type.KET);
+				input.consume(OldToken.Type.KET);
 			}
 		}
 		while ((t = input.peek(0)) != null) {
-			input.consume(Token.Type.ENTSEP);
-			t = input.consume(Token.Type.NAME);
+			input.consume(OldToken.Type.ENTSEP);
+			t = input.consume(OldToken.Type.NAME);
 			String name = t.getValue();
 			t = input.peek(0);
 			SearchCondition sc = null;
 			if (t != null) {
-				if (t.getType() == Token.Type.BRA) {
+				if (t.getType() == OldToken.Type.BRA) {
 					input.consume();
 					sc = new SearchCondition(input);
-					input.consume(Token.Type.KET);
+					input.consume(OldToken.Type.KET);
 				}
 			}
 			this.tableAndSearchConditions.add(new TableAndSearchCondition(name, sc));
 		}
 	}
 
-	public Class<? extends EntityBaseBean> getFirstEntity() throws IcatException {
+	private Class<? extends EntityBaseBean> getFirstEntity() throws IcatException {
 		return firstBean;
 	}
 
-	public String getJPQL(String userId, EntityManager manager) throws IcatException {
+	public String getNewQuery() throws IcatException {
 		Set<Class<? extends EntityBaseBean>> es = this.getRelatedEntities();
-		Class<? extends EntityBaseBean> bean = this.getFirstEntity();
-		String beanName = bean.getSimpleName();
-
-		StringBuilder restriction = null;
-		if (rootUserNames.contains(userId) && GateKeeper.rootSpecials.contains(beanName)) {
-			logger.info("\"Root\" user " + userId + " is allowed READ to " + beanName);
-		} else {
-			TypedQuery<Rule> query = manager.createNamedQuery(Rule.SEARCH_QUERY, Rule.class)
-					.setParameter("member", userId).setParameter("bean", beanName);
-
-			List<Rule> rules = query.getResultList();
-			SearchQuery.logger.debug("Got " + rules.size() + " authz queries for search by "
-					+ userId + " to a " + beanName);
-			restriction = new StringBuilder();
-
-			for (Rule r : rules) {
-				if (!r.isRestricted()) {
-					SearchQuery.logger.info("Null restriction => Operation permitted");
-					restriction = null;
-					break;
-				}
-			}
-
-			if (restriction != null) {
-				boolean first = true;
-				for (Rule r : rules) {
-					String rBeans = r.getBeans();
-					String jpql = r.getSearchJPQL().replace(":user", "'" + userId + "'");
-					SearchQuery.logger.debug("Substituted SearchJPQL: " + jpql);
-					SearchQuery.logger.debug("Related beans: " + rBeans);
-					// The complication here is because Oracle stores empty strings as null values
-					// whereas MySQL gets it right
-					if (rBeans != null && !rBeans.isEmpty()) {
-						for (String b : rBeans.split(" ")) {
-							es.add(EntityInfoHandler.getClass(b));
-						}
-					}
-					if (first) {
-						first = false;
-					} else {
-						restriction.append(" OR ");
-					}
-					restriction.append("(" + jpql + ")");
-				}
-			}
-		}
-
 		Step step = DagHandler.findSteps(this.getFirstEntity(), es);
 		StringBuilder sb = this.getSelect(step);
-		String where = this.getWhere().toString();
-		boolean whereThere = !where.isEmpty();
-		if (whereThere) {
-			sb.append(' ').append(where.replace(":user", "'" + userId + "'"));
+		if (sb.charAt(sb.length() - 1) != ' ') {
+			sb.append(' ');
 		}
-		if (restriction != null) {
-			if (restriction.length() == 0) {
-				throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
-						"Read access to this " + beanName + " is not allowed.");
-			}
-			if (whereThere) {
-				sb.append(" AND(");
-			} else {
-				sb.append(" WHERE(");
-			}
-			sb.append(restriction).append(")");
-		}
+		sb.append(this.getWhere().toString());
 		sb.append(' ').append(this.getOrderBy());
-		return sb.toString();
+		if (include != null) {
+			sb.append(include);
+		}
+		if (offset != null || number != null) {
+			sb.append(" LIMIT");
+			sb.append(offset == null ? " 0" : " " + offset);
+			sb.append(",");
+			sb.append(number == null ? "*" : number);
+		}
+		return sb.toString().trim();
 	}
 
 	private StringBuilder getOrderBy() throws IcatException {
@@ -291,55 +241,6 @@ public class SearchQuery {
 			}
 		}
 		return sb;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		if (this.distinct) {
-			sb.append("DISTINCT ");
-		}
-
-		if (aggFunction == null) {
-			sb.append(result);
-		} else {
-			sb.append(aggFunction + "(" + result + ")");
-		}
-
-		if (this.include != null) {
-			sb.append(this.include);
-		}
-
-		if (this.order != null) {
-			sb.append(this.order);
-		}
-
-		if (this.searchCondition != null) {
-			sb.append('[');
-			sb.append(this.searchCondition);
-			sb.append(']');
-		}
-		for (TableAndSearchCondition ts : this.tableAndSearchConditions) {
-			sb.append(ts.entityName).append(" <-> ");
-			if (ts.searchCondition != null) {
-				sb.append('[');
-				sb.append(ts.searchCondition);
-				sb.append(']');
-			}
-		}
-		return sb.toString();
-	}
-
-	public Include getInclude() throws IcatException {
-		return this.include;
-	}
-
-	public Integer getOffset() {
-		return this.offset;
-	}
-
-	public Integer getNumber() {
-		return this.number;
 	}
 
 }

@@ -13,11 +13,11 @@ public class SearchCondition {
 
 	// SearchCondition ::= BooleanTerm ( "OR" BooleanTerm ) *
 
-	public SearchCondition(Input input) throws ParserException {
+	public SearchCondition(OldInput input) throws OldParserException {
 		this.booleanTerms.add(new BooleanTerm(input));
-		Token t = null;
+		OldToken t = null;
 		while ((t = input.peek(0)) != null) {
-			if (t.getType() == Token.Type.OR) {
+			if (t.getType() == OldToken.Type.OR) {
 				input.consume();
 				this.booleanTerms.add(new BooleanTerm(input));
 			} else {

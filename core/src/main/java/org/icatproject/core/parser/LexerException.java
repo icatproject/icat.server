@@ -1,4 +1,4 @@
-package org.icatproject.core.oldparser;
+package org.icatproject.core.parser;
 
 @SuppressWarnings("serial")
 public class LexerException extends Exception {

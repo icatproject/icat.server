@@ -21,19 +21,19 @@ import org.icatproject.core.entity.Facility;
 import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.Sample;
 import org.icatproject.core.entity.SampleParameter;
-import org.icatproject.core.oldparser.Input;
-import org.icatproject.core.oldparser.ParserException;
-import org.icatproject.core.oldparser.SearchQuery;
-import org.icatproject.core.oldparser.Token;
-import org.icatproject.core.oldparser.Tokenizer;
+import org.icatproject.core.oldparser.OldInput;
+import org.icatproject.core.oldparser.OldParserException;
+import org.icatproject.core.oldparser.OldSearchQuery;
+import org.icatproject.core.oldparser.OldToken;
+import org.icatproject.core.oldparser.OldTokenizer;
 import org.junit.Test;
 
 public class TestIncludes {
 
-	private void testGood(List<Token> tokens, Class<? extends EntityBaseBean>... incArray)
+	private void testGood(List<OldToken> tokens, Class<? extends EntityBaseBean>... incArray)
 			throws Exception {
-		Input input = new Input(tokens);
-		SearchQuery sq = new SearchQuery(input);
+		OldInput input = new OldInput(tokens);
+		OldSearchQuery sq = new OldSearchQuery(input);
 		assertNull(input.peek(0));
 		Set<Class<? extends EntityBaseBean>> incSet = new HashSet<Class<? extends EntityBaseBean>>(
 				Arrays.asList(incArray));
@@ -42,18 +42,18 @@ public class TestIncludes {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test(expected = ParserException.class)
+	@Test(expected = OldParserException.class)
 	public void testGood1() throws Exception {
-		List<Token> tokens = Tokenizer.getTokens("Dataset INCLUDE Datafile, 1 [id = 5]");
+		List<OldToken> tokens = OldTokenizer.getTokens("Dataset INCLUDE Datafile, 1 [id = 5]");
 		testGood(tokens, Datafile.class, DatasetType.class, Sample.class, DatafileFormat.class,
 				Investigation.class);
 	}
 
 	@Test
 	public void testGood2() throws Exception {
-		List<Token> tokens = Tokenizer.getTokens("Dataset INCLUDE 1 [id != 5]");
-		Input input = new Input(tokens);
-		SearchQuery sq = new SearchQuery(input);
+		List<OldToken> tokens = OldTokenizer.getTokens("Dataset INCLUDE 1 [id != 5]");
+		OldInput input = new OldInput(tokens);
+		OldSearchQuery sq = new OldSearchQuery(input);
 		assertNull(input.peek(0));
 		assertTrue("One", sq.getInclude().isOne());
 	}
@@ -61,15 +61,15 @@ public class TestIncludes {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testGood3() throws Exception {
-		List<Token> tokens = Tokenizer.getTokens("Dataset INCLUDE Datafile [id != 53]");
+		List<OldToken> tokens = OldTokenizer.getTokens("Dataset INCLUDE Datafile [id != 53]");
 		testGood(tokens, Datafile.class);
 	}
 
 	@Test
 	public void testGood4() throws Exception {
-		List<Token> tokens = Tokenizer.getTokens("Dataset [id != 573]");
-		Input input = new Input(tokens);
-		SearchQuery sq = new SearchQuery(input);
+		List<OldToken> tokens = OldTokenizer.getTokens("Dataset [id != 573]");
+		OldInput input = new OldInput(tokens);
+		OldSearchQuery sq = new OldSearchQuery(input);
 		assertNull(input.peek(0));
 		assertNull("No Include", sq.getInclude());
 	}
@@ -77,7 +77,7 @@ public class TestIncludes {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testBad1() throws Exception {
-		List<Token> tokens = Tokenizer
+		List<OldToken> tokens = OldTokenizer
 				.getTokens("Investigation INCLUDE Facility, Instrument, InvestigationInstrument  [name='1210380']");
 		try {
 			testGood(tokens, Dataset.class, Datafile.class, DatasetParameter.class, Facility.class,
@@ -94,11 +94,11 @@ public class TestIncludes {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testBad2() throws Exception {
-		List<Token> tokens = Tokenizer.getTokens("Dataset.id INCLUDE Datafile [id != 53]");
+		List<OldToken> tokens = OldTokenizer.getTokens("Dataset.id INCLUDE Datafile [id != 53]");
 		try {
 			testGood(tokens, Datafile.class);
 			fail("Exception not thrown");
-		} catch (ParserException e) {
+		} catch (OldParserException e) {
 			assertEquals(
 					"Expected token from types [ENTSEP] at token INCLUDE in Dataset.id < INCLUDE > Datafile [ ",
 					e.getMessage());

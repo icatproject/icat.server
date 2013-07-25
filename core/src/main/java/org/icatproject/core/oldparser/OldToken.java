@@ -2,13 +2,13 @@ package org.icatproject.core.oldparser;
 
 
 
-public class Token {
+public class OldToken {
 
 	enum Type {
 		 STRING, NAME, OPENPAREN, CLOSEPAREN, BRA, KET, COMPOP, ENTSEP, INTEGER, AND, OR, NOT, REAL, PARAMETER, DISTINCT, ORDER, BY, ASC, DESC, COMMA, IN, BETWEEN, TIMESTAMP, INCLUDE, MIN, MAX, AVG, COUNT, SUM;
 		 
 		 public String toString() {
-			return Tokenizer.getTypeToPrint(this);
+			return OldTokenizer.getTypeToPrint(this);
 		 }
 	};
 	
@@ -20,12 +20,12 @@ public class Token {
 		return value;
 	}
 
-	Token(Type type, String value) {
+	OldToken(Type type, String value) {
 		this.type = type;
 		this.value = value;
 	}
 
-	public Token(Type type, char value) {
+	public OldToken(Type type, char value) {
 		this.type = type;
 		this.value = Character.toString(value);
 	}

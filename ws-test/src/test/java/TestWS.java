@@ -1329,7 +1329,7 @@ public class TestWS {
 	}
 
 	@Test
-	public void searches() throws Exception {
+	public void oldSearches() throws Exception {
 		session.clear();
 		create();
 
@@ -1398,12 +1398,6 @@ public class TestWS {
 		assertEquals("Count", 6, results.size());
 		assertEquals("Result", "wib1", results.get(0));
 		assertEquals("Result", "wib2", results.get(1));
-		//
-		// TODO - restore code
-		// results = session.search("Dataset <-> Datafile[name = 'fred'] [name = 'bill']");
-		// assertEquals("Count", 6, results.size());
-		// assertEquals("Result", "wib1", results.get(0));
-		// assertEquals("Result", "wib2", results.get(1));
 
 		results = session.search("Facility");
 		Facility facility = (Facility) results.get(0);
@@ -1425,6 +1419,110 @@ public class TestWS {
 		assertEquals(4, results.size());
 	}
 
+	@Test
+	public void searches() throws Exception {
+		session.clear();
+		create();
+
+		assertEquals(4L, session.search("SELECT COUNT(ds) FROM Dataset ds").get(0));
+
+		long max = -999999999999999L;
+		long min = 999999999999999L;
+		for (Object result : session.search("SELECT ds FROM Dataset ds")) {
+			Dataset ds = (Dataset) result;
+			max = Math.max(ds.getId(), max);
+			min = Math.min(ds.getId(), min);
+		}
+
+		assertEquals(min,
+				session.search("SELECT MIN(ds.id) FROM  Dataset ds WHERE ds.id > 0").get(0));
+		assertEquals(max,
+				session.search("SELECT MAX(ds.id) FROM  Dataset ds WHERE ds.id > 0").get(0));
+
+		Long invId = (Long) session.search("SELECT inv.id FROM Investigation inv").get(0);
+
+		List<?> results = session
+				.search("SELECT ds.id FROM Dataset ds JOIN ds.parameters dsp JOIN ds.investigation inv"
+						+ " WHERE dsp.type.name = 'TIMESTAMP' AND inv.name <> 12");
+		assertEquals("Count", 1, results.size());
+
+		results = session
+				.search("SELECT df FROM Datafile df JOIN df.dataset ds WHERE df.name = 'fred' AND ds.id <> 42");
+		assertEquals("Count", 1, results.size());
+
+		String query = "SELECT ds.id FROM Dataset ds JOIN ds.investigation inv "
+				+ "WHERE ds.type.name IN :types AND inv.id BETWEEN :lower AND :upper "
+				+ "ORDER BY ds.id";
+		query = query.replace(":lower", Long.toString(invId))
+				.replace(":upper", Long.toString(invId)).replace(":types", "('GS', 'GQ')");
+		results = session.search(query);
+		assertEquals("Count", 4, results.size());
+
+		query = "SELECT ds.id FROM Dataset ds WHERE ds.type.name IN :types AND ds.name >= :lower AND ds.name <= :upper ORDER BY ds.startDate";
+		query = query.replace(":lower", "'Wabble'").replace(":upper", "'Wobble'")
+				.replace(":types", "('GS', 'GQ')");
+		results = session.search(query);
+		assertEquals("Count", 2, results.size());
+
+		query = "SELECT pt.name FROM ParameterType pt WHERE pt.description LIKE 'F%'";
+		results = session.search(query);
+		assertEquals("Count", 1, results.size());
+		assertEquals("TIMESTAMP", results.get(0));
+
+		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.id");
+		assertEquals("Count", 6, results.size());
+		assertEquals("Result", "wib1", results.get(0));
+		assertEquals("Result", "wib2", results.get(1));
+
+		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.id LIMIT 0,1");
+		assertEquals("Count", 1, results.size());
+		assertEquals("Result", "wib1", results.get(0));
+
+		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.id LIMIT 1,100");
+		assertEquals("Count", 5, results.size());
+		assertEquals("Result", "wib2", results.get(0));
+
+		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.id LIMIT 1,1");
+		assertEquals("Count", 1, results.size());
+		assertEquals("Result", "wib2", results.get(0));
+
+		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.id LIMIT 100,1");
+		assertEquals("Count", 0, results.size());
+
+		results = session.search("SELECT df.name FROM Datafile df ORDER BY df.id LIMIT 0,100");
+		assertEquals("Count", 6, results.size());
+		assertEquals("Result", "wib1", results.get(0));
+		assertEquals("Result", "wib2", results.get(1));
+
+		results = session
+				.search("SELECT ds.name from Dataset ds JOIN ds.datafiles df1 JOIN ds.datafiles df2 "
+						+ "WHERE df1.name = 'fred' AND df2.name = 'bill'");
+		assertEquals("Count", 1, results.size());
+		assertEquals("Result", "dfsin", results.get(0));
+
+		results = session.search("SELECT f FROM Facility f");
+		Facility facility = (Facility) results.get(0);
+
+		results = session.search("SELECT DISTINCT pt.valueType FROM ParameterType pt");
+		ParameterValueType pvt = (ParameterValueType) results.get(0);
+		
+		// org.icatproject.core.entity.ParameterType.ParameterValueType.NUMERIC
+		
+
+		results = session.search("SELECT pt FROM ParameterType pt WHERE pt.facility.id="
+				+ facility.getId() + " AND pt.valueType=" + pvt);
+		assertEquals(1, results.size());
+
+		results = session.search("SELECT pt FROM ParameterType pt WHERE pt.facility.id="
+				+ facility.getId() + " AND " + pvt + "= pt.valueType");
+		assertEquals(1, results.size());
+
+		results = session.search("SELECT ds FROM Dataset ds WHERE ds.complete = TRUE");
+		assertEquals(0, results.size());
+		results = session.search("SELECT ds FROM Dataset ds WHERE ds.complete = FALSE");
+		assertEquals(4, results.size());
+	}
+
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		try {
@@ -1440,7 +1538,7 @@ public class TestWS {
 		}
 	}
 
-//	@AfterClass
+	// @AfterClass
 	public static void afterClass() throws Exception {
 		session.clear();
 		session.clearAuthz();

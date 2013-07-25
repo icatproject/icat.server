@@ -317,8 +317,10 @@ public class LuceneSingleton {
 			try {
 				int cached = iwriter.numRamDocs();
 				iwriter.commit();
-				logger.debug("Synch has committed " + cached + " changes to Lucene - now have "
-						+ iwriter.numDocs() + " documents indexed");
+				if (cached != 0) {
+					logger.debug("Synch has committed " + cached + " changes to Lucene - now have "
+							+ iwriter.numDocs() + " documents indexed");
+				}
 			} catch (IOException e) {
 				throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
 			}

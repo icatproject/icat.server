@@ -339,32 +339,32 @@ public class Session {
 				throw e;
 			}
 		}
-		this.addRule("root", "Rule", "CRUD");
-		this.addRule("root", "User", "CRUD");
-		this.addRule("root", "Group", "CRUD");
-		this.addRule("root", "UserGroup", "CRUD");
-		this.addRule("root", "DatafileFormat", "CRUD");
-		this.addRule("root", "DatasetType", "CRUD");
-		this.addRule("root", "Facility", "CRUD");
-		this.addRule("root", "Investigation", "CRUD");
-		this.addRule("root", "InvestigationUser", "CRUD");
-		this.addRule("root", "InvestigationType", "CRUD");
-		this.addRule("root", "ParameterType", "CRUD");
-		this.addRule("root", "Investigation", "CRUD");
-		this.addRule("root", "Dataset", "CRUD");
-		this.addRule("root", "ParameterType", "CRUD");
-		this.addRule("root", "DatasetParameter", "CRUD");
-		this.addRule("root", "Datafile", "CRUD");
-		this.addRule("root", "DatafileFormat", "CRUD");
-		this.addRule("root", "DatasetType", "CRUD");
-		this.addRule("root", "Application", "CRUD");
-		this.addRule("root", "Job", "CRUD");
-		this.addRule("root", "DataCollection", "CRUD");
-		this.addRule("root", "DataCollectionParameter", "CRUD");
-		this.addRule("root", "DataCollectionDataset", "CRUD");
-		this.addRule("root", "DataCollectionDatafile", "CRUD");
-		this.addRule("root", "InvestigationParameter", "CRUD");
-		this.addRule("root", "Log", "CRUD");
+		this.addRule("root", "SELECT x FROM Rule x", "CRUD");
+		this.addRule("root", "SELECT x FROM User x", "CRUD");
+		this.addRule("root", "SELECT x FROM Group x", "CRUD");
+		this.addRule("root", "SELECT x FROM UserGroup x", "CRUD");
+		this.addRule("root", "SELECT x FROM DatafileFormat x", "CRUD");
+		this.addRule("root", "SELECT x FROM DatasetType x", "CRUD");
+		this.addRule("root", "SELECT x FROM Facility x", "CRUD");
+		this.addRule("root", "SELECT x FROM Investigation x", "CRUD");
+		this.addRule("root", "SELECT x FROM InvestigationUser x", "CRUD");
+		this.addRule("root", "SELECT x FROM InvestigationType x", "CRUD");
+		this.addRule("root", "SELECT x FROM ParameterType x", "CRUD");
+		this.addRule("root", "SELECT x FROM Investigation x", "CRUD");
+		this.addRule("root", "SELECT x FROM Dataset x", "CRUD");
+		this.addRule("root", "SELECT x FROM ParameterType x", "CRUD");
+		this.addRule("root", "SELECT x FROM DatasetParameter x", "CRUD");
+		this.addRule("root", "SELECT x FROM Datafile x", "CRUD");
+		this.addRule("root", "SELECT x FROM DatafileFormat x", "CRUD");
+		this.addRule("root", "SELECT x FROM DatasetType x", "CRUD");
+		this.addRule("root", "SELECT x FROM Application x", "CRUD");
+		this.addRule("root", "SELECT x FROM Job x", "CRUD");
+		this.addRule("root", "SELECT x FROM DataCollection x", "CRUD");
+		this.addRule("root", "SELECT x FROM DataCollectionParameter x", "CRUD");
+		this.addRule("root", "SELECT x FROM DataCollectionDataset x", "CRUD");
+		this.addRule("root", "SELECT x FROM DataCollectionDatafile x", "CRUD");
+		this.addRule("root", "SELECT x FROM InvestigationParameter x", "CRUD");
+		this.addRule("root", "SELECT x FROM Log x", "CRUD");
 	}
 
 	public void update(EntityBaseBean df) throws IcatException_Exception {

@@ -13,11 +13,11 @@ public class BooleanTerm {
 
 	private List<BooleanFactor> factors = new ArrayList<BooleanFactor>();
 
-	public BooleanTerm(Input input) throws ParserException {
+	public BooleanTerm(OldInput input) throws OldParserException {
 		this.factors.add(new BooleanFactor(input));
-		Token t = null;
+		OldToken t = null;
 		while ((t = input.peek(0)) != null) {
-			if (t.getType() == Token.Type.AND) {
+			if (t.getType() == OldToken.Type.AND) {
 				input.consume();
 				this.factors.add(new BooleanFactor(input));
 			} else {

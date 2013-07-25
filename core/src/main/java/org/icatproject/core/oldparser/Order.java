@@ -12,15 +12,15 @@ public class Order {
 
 	// Order ::= ( "ORDER" "BY" SortSpecification ("," SortSpecification )* ) ?
 
-	public Order(Input input) throws ParserException {
-		Token t = null;
+	public Order(OldInput input) throws OldParserException {
+		OldToken t = null;
 
 		if ((t = input.peek(0)) != null) {
-			if (t.getType() == Token.Type.ORDER) {
+			if (t.getType() == OldToken.Type.ORDER) {
 				input.consume();
-				input.consume(Token.Type.BY);
+				input.consume(OldToken.Type.BY);
 				this.sortSpecifications.add(new SortSpecification(input));
-				while ((t = input.peek(0)) != null && t.getType() == Token.Type.COMMA) {
+				while ((t = input.peek(0)) != null && t.getType() == OldToken.Type.COMMA) {
 					input.consume();
 					this.sortSpecifications.add(new SortSpecification(input));
 				}

@@ -11,9 +11,9 @@ import org.icatproject.core.entity.DatasetParameter;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.oldparser.ComparisonPredicate;
-import org.icatproject.core.oldparser.Input;
-import org.icatproject.core.oldparser.Token;
-import org.icatproject.core.oldparser.Tokenizer;
+import org.icatproject.core.oldparser.OldInput;
+import org.icatproject.core.oldparser.OldToken;
+import org.icatproject.core.oldparser.OldTokenizer;
 import org.junit.Test;
 
 public class TestComparisonPredicate {
@@ -89,15 +89,15 @@ public class TestComparisonPredicate {
 
 	private void test(Class<? extends EntityBaseBean> klass, String input, String output)
 			throws Exception {
-		List<Token> tokens = Tokenizer.getTokens(input);
-		ComparisonPredicate cp = new ComparisonPredicate(new Input(tokens));
+		List<OldToken> tokens = OldTokenizer.getTokens(input);
+		ComparisonPredicate cp = new ComparisonPredicate(new OldInput(tokens));
 		assertEquals(output, cp.getWhere(klass).toString());
 	}
 
 	private void testBad(Class<? extends EntityBaseBean> klass, String input, String msg)
 			throws Exception {
-		List<Token> tokens = Tokenizer.getTokens(input);
-		ComparisonPredicate cp = new ComparisonPredicate(new Input(tokens));
+		List<OldToken> tokens = OldTokenizer.getTokens(input);
+		ComparisonPredicate cp = new ComparisonPredicate(new OldInput(tokens));
 
 		try {
 			cp.getWhere(klass).toString();

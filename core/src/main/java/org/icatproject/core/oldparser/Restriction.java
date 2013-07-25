@@ -28,26 +28,26 @@ public class Restriction {
 	private SearchCondition searchCondition;
 	private List<TableAndSearchCondition> tableAndSearchConditions = new ArrayList<TableAndSearchCondition>();
 
-	public Restriction(Input input) throws ParserException {
-		Token t = input.peek(0);
+	public Restriction(OldInput input) throws OldParserException {
+		OldToken t = input.peek(0);
 		if (t != null) {
-			if (t.getType() == Token.Type.BRA) {
+			if (t.getType() == OldToken.Type.BRA) {
 				input.consume();
 				this.searchCondition = new SearchCondition(input);
-				input.consume(Token.Type.KET);
+				input.consume(OldToken.Type.KET);
 			}
 		}
 		while ((t = input.peek(0)) != null) {
-			input.consume(Token.Type.ENTSEP);
-			t = input.consume(Token.Type.NAME);
+			input.consume(OldToken.Type.ENTSEP);
+			t = input.consume(OldToken.Type.NAME);
 			String name = t.getValue();
 			t = input.peek(0);
 			SearchCondition sc = null;
 			if (t != null) {
-				if (t.getType() == Token.Type.BRA) {
+				if (t.getType() == OldToken.Type.BRA) {
 					input.consume();
 					sc = new SearchCondition(input);
-					input.consume(Token.Type.KET);
+					input.consume(OldToken.Type.KET);
 				}
 			}
 			this.tableAndSearchConditions.add(new TableAndSearchCondition(name, sc));
