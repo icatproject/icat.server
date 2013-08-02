@@ -34,7 +34,8 @@ public class DocGenerator {
 						String name = pathname.getName();
 						return name.endsWith(".java")
 								&& !Arrays.asList("Comment", "EntityBaseBean", "Parameter",
-										"Session").contains(name.replace(".java", ""));
+										"Session", "ParameterValueType", "StudyStatus").contains(
+										name.replace(".java", ""));
 					}
 				})) {
 			String cname = f.getName().replace(".java", "");

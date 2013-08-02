@@ -12,8 +12,8 @@ import javax.xml.namespace.QName;
 
 import org.icatproject.Application;
 import org.icatproject.DataCollection;
-import org.icatproject.DataCollectionDataset;
 import org.icatproject.DataCollectionDatafile;
+import org.icatproject.DataCollectionDataset;
 import org.icatproject.Datafile;
 import org.icatproject.DatafileFormat;
 import org.icatproject.Dataset;
@@ -22,7 +22,7 @@ import org.icatproject.DatasetType;
 import org.icatproject.EntityBaseBean;
 import org.icatproject.EntityInfo;
 import org.icatproject.Facility;
-import org.icatproject.Group;
+import org.icatproject.Grouping;
 import org.icatproject.ICAT;
 import org.icatproject.ICATService;
 import org.icatproject.IcatExceptionType;
@@ -136,8 +136,8 @@ public class Session {
 	public void addRule(String groupName, String what, String crudFlags) throws Exception {
 		Rule rule = new Rule();
 		if (groupName != null) {
-			Group g = (Group) search("Group [name= '" + groupName + "']").get(0);
-			rule.setGroup(g);
+			Grouping g = (Grouping) search("Grouping [name= '" + groupName + "']").get(0);
+			rule.setGrouping(g);
 		}
 		rule.setWhat(what);
 		rule.setCrudFlags(crudFlags);
@@ -147,7 +147,7 @@ public class Session {
 	public void delRule(String groupName, String what, String crudFlags) throws Exception {
 		what = what.replace("'", "''");
 		List<Object> rules = search("Rule [what = '" + what + "' and crudFlags = '" + crudFlags
-				+ "'] <-> Group [name= '" + groupName + "']");
+				+ "'] <-> Grouping [name= '" + groupName + "']");
 		if (rules.size() == 1) {
 			delete((EntityBaseBean) rules.get(0));
 		} else {
@@ -157,15 +157,15 @@ public class Session {
 	}
 
 	public void addUserGroupMember(String groupName, String userName) throws Exception {
-		Group group = null;
+		Grouping group = null;
 		if (groupName != null) {
-			List<Object> groups = search("Group [name= '" + groupName + "']");
+			List<Object> groups = search("Grouping [name= '" + groupName + "']");
 			if (groups.isEmpty()) {
-				group = new Group();
+				group = new Grouping();
 				group.setName(groupName);
 				group.setId(this.icat.create(sessionId, group));
 			} else {
-				group = (Group) groups.get(0);
+				group = (Grouping) groups.get(0);
 			}
 		}
 		User user = null;
@@ -180,7 +180,7 @@ public class Session {
 
 		UserGroup userGroup = new UserGroup();
 		userGroup.setUser(user);
-		userGroup.setGroup(group);
+		userGroup.setGrouping(group);
 		this.icat.create(sessionId, userGroup);
 	}
 
@@ -213,7 +213,7 @@ public class Session {
 	}
 
 	public void clearAuthz() throws Exception {
-		deleteAll(Arrays.asList("Rule", "UserGroup", "User", "Group"));
+		deleteAll(Arrays.asList("Rule", "UserGroup", "User", "Grouping"));
 	}
 
 	public Application createApplication(Facility facility, String name, String version)
@@ -341,7 +341,7 @@ public class Session {
 		}
 		this.addRule("root", "SELECT x FROM Rule x", "CRUD");
 		this.addRule("root", "SELECT x FROM User x", "CRUD");
-		this.addRule("root", "SELECT x FROM Group x", "CRUD");
+		this.addRule("root", "SELECT x FROM Grouping x", "CRUD");
 		this.addRule("root", "SELECT x FROM UserGroup x", "CRUD");
 		this.addRule("root", "SELECT x FROM DatafileFormat x", "CRUD");
 		this.addRule("root", "SELECT x FROM DatasetType x", "CRUD");
@@ -351,7 +351,7 @@ public class Session {
 		this.addRule("root", "SELECT x FROM InvestigationType x", "CRUD");
 		this.addRule("root", "SELECT x FROM ParameterType x", "CRUD");
 		this.addRule("root", "SELECT x FROM Investigation x", "CRUD");
-		this.addRule("root", "SELECT x FROM Dataset x", "CRUD");
+		this.addRule("root", "Dataset", "CRUD");
 		this.addRule("root", "SELECT x FROM ParameterType x", "CRUD");
 		this.addRule("root", "SELECT x FROM DatasetParameter x", "CRUD");
 		this.addRule("root", "SELECT x FROM Datafile x", "CRUD");

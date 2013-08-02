@@ -36,7 +36,7 @@
         <class>org.icatproject.core.entity.UserGroup</class>
         <class>org.icatproject.core.entity.Rule</class>
         <class>org.icatproject.core.entity.User</class>
-        <class>org.icatproject.core.entity.Group</class>
+        <class>org.icatproject.core.entity.Grouping</class>
         <class>org.icatproject.core.entity.Application</class>
         <class>org.icatproject.core.entity.Job</class>
         <class>org.icatproject.core.entity.DataCollection</class>
@@ -52,6 +52,9 @@
             <property name="eclipselink.target-server" value="SunAS9" />
             <property name="eclipselink.cache.shared.default" value="false" />
             <property name="eclipselink.logging.level" value="SEVERE" />
+    <!-- <property name="eclipselink.logging.level" value="FINE" /> -->
+    <!-- <property name="eclipselink.logging.level.sql" value="FINE" /> -->
+    <!-- <property name="eclipselink.logging.parameters" value="true" /> -->
             <property name="eclipselink.ddl-generation" value="create-tables" />
             <property name="eclipselink.ddl-generation.output_mode" value="both" />
         </properties>

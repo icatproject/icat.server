@@ -33,7 +33,7 @@ import org.icatproject.EntityBaseBean;
 import org.icatproject.EntityField;
 import org.icatproject.EntityInfo;
 import org.icatproject.Facility;
-import org.icatproject.Group;
+import org.icatproject.Grouping;
 import org.icatproject.IcatException;
 import org.icatproject.IcatExceptionType;
 import org.icatproject.IcatException_Exception;
@@ -51,10 +51,9 @@ import org.icatproject.Sample;
 import org.icatproject.SampleParameter;
 import org.icatproject.User;
 import org.icatproject.UserGroup;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * These tests are for those aspects that cannot be tested by the core tests. In particular does the
@@ -282,7 +281,7 @@ public class TestWS {
 		assertEquals(2L, session.search(q3).get(0));
 
 		try {
-			session.delRule("root", "Dataset", "CRUD");
+			session.delRule("root", "SELECT Dataset$ FROM Dataset AS Dataset$", "CRUD");
 			// The space between the single quotes is necessary - I suspect a bug in eclipselink
 			session.addRule("root", "Dataset [type.name = ' ']", "R");
 
@@ -299,7 +298,8 @@ public class TestWS {
 
 			session.delRule("root", "Dataset [type.name = 'PB']", "R");
 		} finally {
-			session.addRule("root", "Dataset", "CRUD");
+			
+//			session.addRule("root", "Dataset", "CRUD");
 		}
 	}
 
@@ -359,18 +359,18 @@ public class TestWS {
 		aone.setName("aone");
 		aone.setId(session.create(aone));
 
-		Group oneControllers = new Group();
+		Grouping oneControllers = new Grouping();
 		oneControllers.setName("OneControllers");
 		oneControllers.setId(session.create(oneControllers));
 
 		UserGroup userGroup = new UserGroup();
 		userGroup.setUser(piOne);
-		userGroup.setGroup(oneControllers);
+		userGroup.setGrouping(oneControllers);
 		session.create(userGroup);
 
 		rule = new Rule();
 		rule.setCrudFlags("CRUD");
-		rule.setGroup(oneControllers);
+		rule.setGrouping(oneControllers);
 		rule.setWhat("InvestigationUser <-> Investigation [name = 'InvestigationOne']");
 		session.create(rule);
 
@@ -403,7 +403,7 @@ public class TestWS {
 
 		rule = new Rule();
 		rule.setCrudFlags("CRUD");
-		rule.setGroup(oneControllers);
+		rule.setGrouping(oneControllers);
 		rule.setWhat("InvestigationUser");
 		session.create(rule);
 
@@ -437,11 +437,11 @@ public class TestWS {
 			session.delete((Rule) o);
 		}
 
-		Group rootG = (Group) session.search("Group [name=:user]").get(0);
+		Grouping rootG = (Grouping) session.search("Group [name=:user]").get(0);
 
 		Rule rule = new Rule();
 		rule.setCrudFlags("C");
-		rule.setGroup(rootG);
+		rule.setGrouping(rootG);
 		rule.setWhat("Investigation");
 		session.create(rule);
 
@@ -458,7 +458,7 @@ public class TestWS {
 
 		rule = new Rule();
 		rule.setCrudFlags("CRUD");
-		rule.setGroup(rootG);
+		rule.setGrouping(rootG);
 		rule.setWhat("Investigation");
 		session.create(rule);
 
@@ -636,17 +636,17 @@ public class TestWS {
 		piTwo.setName("piTwo");
 		piTwo.setId(session.create(piTwo));
 
-		Group ones = new Group();
+		Grouping ones = new Grouping();
 		ones.setName("Ones");
 		ones.setId(session.create(ones));
 
 		UserGroup userGroup = new UserGroup();
 		userGroup.setUser(piOne);
-		userGroup.setGroup(ones);
+		userGroup.setGrouping(ones);
 		session.create(userGroup);
 
 		Rule rule = new Rule();
-		rule.setGroup(ones);
+		rule.setGrouping(ones);
 		rule.setCrudFlags("CRUD");
 		rule.setWhat("Facility");
 		session.create(rule);
@@ -1505,16 +1505,19 @@ public class TestWS {
 
 		results = session.search("SELECT DISTINCT pt.valueType FROM ParameterType pt");
 		ParameterValueType pvt = (ParameterValueType) results.get(0);
-		
+
 		// org.icatproject.core.entity.ParameterType.ParameterValueType.NUMERIC
-		
+
+		System.out.println(pvt.getClass().getName() + "." + pvt);
 
 		results = session.search("SELECT pt FROM ParameterType pt WHERE pt.facility.id="
 				+ facility.getId() + " AND pt.valueType=" + pvt);
 		assertEquals(1, results.size());
 
 		results = session.search("SELECT pt FROM ParameterType pt WHERE pt.facility.id="
-				+ facility.getId() + " AND " + pvt + "= pt.valueType");
+				+ facility.getId()
+				+ " AND org.icatproject.core.entity.ParameterType.ParameterValueType." + pvt
+				+ "= pt.valueType");
 		assertEquals(1, results.size());
 
 		results = session.search("SELECT ds FROM Dataset ds WHERE ds.complete = TRUE");

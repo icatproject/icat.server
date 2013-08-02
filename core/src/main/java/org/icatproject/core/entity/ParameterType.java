@@ -20,10 +20,6 @@ import javax.persistence.UniqueConstraint;
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME", "UNITS" }) })
 public class ParameterType extends EntityBaseBean implements Serializable {
 
-	public enum ParameterValueType {
-		DATE_AND_TIME, NUMERIC, STRING
-	}
-
 	@Comment("If a parameter of this type may be applied to a DataCollection")
 	private boolean applicableToDataCollection;
 

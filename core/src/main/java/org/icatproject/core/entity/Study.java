@@ -18,10 +18,6 @@ import javax.persistence.TemporalType;
 @Entity
 public class Study extends EntityBaseBean implements Serializable {
 
-	public enum StudyStatus {
-		NEW, IN_PROGRESS, COMPLETE, CANCELLED
-	};
-
 	public String getDescription() {
 		return description;
 	}

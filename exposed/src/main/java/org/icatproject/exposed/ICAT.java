@@ -45,7 +45,7 @@ import org.icatproject.core.entity.DatasetType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Facility;
 import org.icatproject.core.entity.FacilityCycle;
-import org.icatproject.core.entity.Group;
+import org.icatproject.core.entity.Grouping;
 import org.icatproject.core.entity.Instrument;
 import org.icatproject.core.entity.InstrumentScientist;
 import org.icatproject.core.entity.Investigation;
@@ -61,8 +61,8 @@ import org.icatproject.core.entity.Sample;
 import org.icatproject.core.entity.SampleParameter;
 import org.icatproject.core.entity.Shift;
 import org.icatproject.core.entity.Study;
-import org.icatproject.core.entity.Study.StudyStatus;
 import org.icatproject.core.entity.StudyInvestigation;
+import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
 import org.icatproject.core.manager.BeanManager;
@@ -207,7 +207,7 @@ public class ICAT {
 			@WebParam Job job, @WebParam DataCollection dataCollection,
 			@WebParam DataCollectionParameter dataCollectionParameter,
 			@WebParam DataCollectionDataset dataCollectionDataset,
-			@WebParam DataCollectionDatafile dataCollectionDatafile, @WebParam Group group,
+			@WebParam DataCollectionDatafile dataCollectionDatafile, @WebParam Grouping group,
 			@WebParam UserGroup userGroup, @WebParam Log log) {
 	}
 

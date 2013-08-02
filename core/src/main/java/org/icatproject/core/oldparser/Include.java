@@ -40,35 +40,6 @@ public class Include {
 
 	}
 
-	@Override
-	public String toString() {
-
-		if (one) {
-			return " INCLUDE 1";
-		}
-
-		if (includes.isEmpty()) {
-			return "";
-		}
-
-		StringBuilder sb = new StringBuilder();
-		sb.append(" INCLUDE ");
-		boolean first = true;
-		if (one) {
-			sb.append("1 ");
-			first = false;
-		}
-		for (Class<? extends EntityBaseBean> bean : includes) {
-			if (first) {
-				first = false;
-			} else {
-				sb.append(", ");
-			}
-			sb.append(bean.getSimpleName());
-		}
-		return sb.toString();
-	}
-
 	public Set<Class<? extends EntityBaseBean>> getBeans() {
 		return includes;
 	}

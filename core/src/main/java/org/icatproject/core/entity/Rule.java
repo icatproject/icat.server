@@ -15,6 +15,11 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.oldparser.OldInput;
+import org.icatproject.core.oldparser.OldLexerException;
+import org.icatproject.core.oldparser.OldParserException;
+import org.icatproject.core.oldparser.OldSearchQuery;
+import org.icatproject.core.oldparser.OldTokenizer;
 import org.icatproject.core.parser.Input;
 import org.icatproject.core.parser.LexerException;
 import org.icatproject.core.parser.ParserException;
@@ -27,39 +32,56 @@ import org.icatproject.core.parser.Tokenizer;
 @Entity
 @Table(name = "RULE_")
 @NamedQueries({
-		@NamedQuery(name = "Rule.CreateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.c = TRUE"),
-		@NamedQuery(name = "Rule.ReadQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE"),
-		@NamedQuery(name = "Rule.UpdateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.u = TRUE"),
-		@NamedQuery(name = "Rule.DeleteQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.d = TRUE"),
-		@NamedQuery(name = "Rule.SearchQuery", query = "SELECT DISTINCT r          FROM Rule r LEFT JOIN r.group g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE") })
+		@NamedQuery(name = "Rule.CreateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.c = TRUE"),
+		@NamedQuery(name = "Rule.ReadQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE"),
+		@NamedQuery(name = "Rule.UpdateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.u = TRUE"),
+		@NamedQuery(name = "Rule.DeleteQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.d = TRUE"),
+		@NamedQuery(name = "Rule.SearchQuery", query = "SELECT DISTINCT r          FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE") })
 public class Rule extends EntityBaseBean implements Serializable {
+	
+	private final static Logger logger = Logger.getLogger(Rule.class);
 
 	public static final String CREATE_QUERY = "Rule.CreateQuery";
-	public static final String READ_QUERY = "Rule.ReadQuery";
-	public static final String UPDATE_QUERY = "Rule.UpdateQuery";
 	public static final String DELETE_QUERY = "Rule.DeleteQuery";
+	public static final String READ_QUERY = "Rule.ReadQuery";
 	public static final String SEARCH_QUERY = "Rule.SearchQuery";
+	public static final String UPDATE_QUERY = "Rule.UpdateQuery";
 
-	private final static Logger logger = Logger.getLogger(Rule.class);
+	@XmlTransient
+	private String bean;
 
 	@XmlTransient
 	private boolean c;
+
+	@Comment("Contains letters from the set \"CRUD\"")
+	@Column(nullable = false, length = 4)
+	private String crudFlags;
+
+	@XmlTransient
+	@Column(length = 1024)
+	private String crudJPQL;
+
+	@XmlTransient
+	private boolean d;
+
+	@XmlTransient
+	@Column(length = 1024)
+	private String fromJPQL;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Grouping grouping;
 
 	@XmlTransient
 	private boolean r;
 
 	@XmlTransient
+	private boolean restricted;
+
+	@XmlTransient
 	private boolean u;
 
 	@XmlTransient
-	private boolean d;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	private Group group;
-
-	@XmlTransient
-	@Column(length = 1024)
-	private String crudJPQL;
+	private int varCount;
 
 	@Comment("To what the rules applies")
 	@Column(nullable = false)
@@ -67,38 +89,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 
 	@XmlTransient
 	@Column(length = 1024)
-	private String searchJPQL;
-
-	@XmlTransient
-	private String beans;
-
-	@Comment("Contains letters from the set \"CRUD\"")
-	@Column(nullable = false, length = 4)
-	private String crudFlags;
-
-	@XmlTransient
-	private boolean restricted;
-
-	@XmlTransient
-	private String bean;
-
-	@XmlTransient
-	public String getBean() {
-		return bean;
-	}
-
-	public void setBean(String bean) {
-		this.bean = bean;
-	}
-
-	@XmlTransient
-	public boolean isRestricted() {
-		return restricted;
-	}
-
-	public void setRestricted(boolean restricted) {
-		this.restricted = restricted;
-	}
+	private String whereJPQL;
 
 	// Needed for JPA
 	public Rule() {
@@ -127,8 +118,27 @@ public class Rule extends EntityBaseBean implements Serializable {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 					"'what' must not be null");
 		}
+
+		String query = what;
+		if (!query.toUpperCase().trim().startsWith("SELECT")) {
+
+			/* Parse the old style rule */
+			try {
+				OldSearchQuery oldSearchQuery = new OldSearchQuery(new OldInput(
+						OldTokenizer.getTokens(query)));
+				query = oldSearchQuery.getNewQuery();
+			} catch (OldLexerException e) {
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+						e.getMessage());
+			} catch (OldParserException e) {
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+						e.getMessage());
+			}
+			logger.debug("New style rule: " + query);
+		}
+
 		try {
-			tokens = Tokenizer.getTokens(this.what);
+			tokens = Tokenizer.getTokens(query);
 		} catch (final LexerException e) {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
@@ -139,69 +149,74 @@ public class Rule extends EntityBaseBean implements Serializable {
 		} catch (final ParserException e) {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
-		// TODO fix commented out code
-		// if (r.getSearchWhere().isEmpty()) {
-		// this.crudJPQL = null;
-		// this.searchJPQL = null;
-		// } else {
-		// this.crudJPQL = r.getQuery();
-		// this.searchJPQL = r.getSearchWhere();
-		// }
-		this.bean = r.getBean().getSimpleName();
 
-		final StringBuilder sb = new StringBuilder();
-		// for (final Class<? extends EntityBaseBean> bean : r.getRelatedEntities()) {
-		// if (sb.length() > 0) {
-		// sb.append(" ");
-		// }
-		// sb.append(bean.getSimpleName());
-		// }
+		crudJPQL = query;
+		fromJPQL = r.getFrom();
+		whereJPQL = r.getWhere();
 
-		this.beans = sb.toString();
-		// this.restricted = r.isRestricted();
+		varCount = r.getVarCount();
+
+		bean = r.getBean().getSimpleName();
+
+		restricted = r.getWhere() != null;
 
 	}
 
 	@XmlTransient
-	public String getBeans() {
-		return this.beans;
+	public String getBean() {
+		return bean;
 	}
 
 	public String getCrudFlags() {
-		return this.crudFlags;
+		return crudFlags;
 	}
 
 	@XmlTransient
 	public String getCrudJPQL() {
-		return this.crudJPQL;
-	}
-
-	public Group getGroup() {
-		return this.group;
+		return crudJPQL;
 	}
 
 	@XmlTransient
-	public String getSearchJPQL() {
-		return this.searchJPQL;
+	public String getFromJPQL() {
+		return fromJPQL;
+	}
+
+	public Grouping getGrouping() {
+		return grouping;
+	}
+
+	@XmlTransient
+	public int getVarCount() {
+		return varCount;
 	}
 
 	public String getWhat() {
-		return this.what;
+		return what;
+	}
+
+	@XmlTransient
+	public String getWhereJPQL() {
+		return whereJPQL;
 	}
 
 	@XmlTransient
 	public boolean isC() {
-		return this.c;
+		return c;
 	}
 
 	@XmlTransient
 	public boolean isD() {
-		return this.d;
+		return d;
 	}
 
 	@XmlTransient
 	public boolean isR() {
-		return this.r;
+		return r;
+	}
+
+	@XmlTransient
+	public boolean isRestricted() {
+		return restricted;
 	}
 
 	@XmlTransient
@@ -227,8 +242,8 @@ public class Rule extends EntityBaseBean implements Serializable {
 		logger.debug("PreparePersist of Rule for " + this.crudFlags + " of " + this.what);
 	}
 
-	public void setBeans(String beans) {
-		this.beans = beans;
+	public void setBean(String bean) {
+		this.bean = bean;
 	}
 
 	public void setC(boolean c) {
@@ -247,24 +262,36 @@ public class Rule extends EntityBaseBean implements Serializable {
 		this.d = d;
 	}
 
-	public void setGroup(Group group) {
-		this.group = group;
+	public void setFromJPQL(String fromJPQL) {
+		this.fromJPQL = fromJPQL;
+	}
+
+	public void setGrouping(Grouping grouping) {
+		this.grouping = grouping;
 	}
 
 	public void setR(boolean r) {
 		this.r = r;
 	}
 
-	public void setSearchJPQL(String searchJPQL) {
-		this.searchJPQL = searchJPQL;
+	public void setRestricted(boolean restricted) {
+		this.restricted = restricted;
 	}
 
 	public void setU(boolean u) {
 		this.u = u;
 	}
 
+	public void setVarCount(int varCount) {
+		this.varCount = varCount;
+	}
+
 	public void setWhat(String what) {
 		this.what = what;
+	}
+
+	public void setWhereJPQL(String whereJPQL) {
+		this.whereJPQL = whereJPQL;
 	}
 
 }

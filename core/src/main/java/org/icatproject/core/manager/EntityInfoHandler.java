@@ -30,8 +30,45 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.apache.log4j.Logger;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.entity.Application;
 import org.icatproject.core.entity.Comment;
+import org.icatproject.core.entity.DataCollection;
+import org.icatproject.core.entity.DataCollectionDatafile;
+import org.icatproject.core.entity.DataCollectionDataset;
+import org.icatproject.core.entity.DataCollectionParameter;
+import org.icatproject.core.entity.Datafile;
+import org.icatproject.core.entity.DatafileFormat;
+import org.icatproject.core.entity.DatafileParameter;
+import org.icatproject.core.entity.Dataset;
+import org.icatproject.core.entity.DatasetParameter;
+import org.icatproject.core.entity.DatasetType;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.entity.Facility;
+import org.icatproject.core.entity.FacilityCycle;
+import org.icatproject.core.entity.Grouping;
+import org.icatproject.core.entity.Instrument;
+import org.icatproject.core.entity.InstrumentScientist;
+import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.entity.InvestigationInstrument;
+import org.icatproject.core.entity.InvestigationParameter;
+import org.icatproject.core.entity.InvestigationType;
+import org.icatproject.core.entity.InvestigationUser;
+import org.icatproject.core.entity.Job;
+import org.icatproject.core.entity.Keyword;
+import org.icatproject.core.entity.Log;
+import org.icatproject.core.entity.ParameterType;
+import org.icatproject.core.entity.PermissibleStringValue;
+import org.icatproject.core.entity.Publication;
+import org.icatproject.core.entity.RelatedDatafile;
+import org.icatproject.core.entity.Rule;
+import org.icatproject.core.entity.Sample;
+import org.icatproject.core.entity.SampleParameter;
+import org.icatproject.core.entity.SampleType;
+import org.icatproject.core.entity.Shift;
+import org.icatproject.core.entity.Study;
+import org.icatproject.core.entity.StudyInvestigation;
+import org.icatproject.core.entity.User;
+import org.icatproject.core.entity.UserGroup;
 
 /**
  * Holds information about primary keys of an Entity In the case of a simple key it is a list with
@@ -43,6 +80,28 @@ import org.icatproject.core.entity.EntityBaseBean;
 // extra complexity and
 // that the instance is created statically as we know it will be needed.
 public class EntityInfoHandler {
+
+	private static Set<String> entityNames = new HashSet<>();
+	private static List<Class<? extends EntityBaseBean>> entities = Arrays.asList(
+			Application.class, DataCollection.class, DataCollectionDatafile.class,
+			DataCollectionDataset.class, DataCollectionParameter.class, Datafile.class,
+			DatafileFormat.class, DatafileParameter.class, Dataset.class, DatasetParameter.class,
+			DatasetType.class, Facility.class, FacilityCycle.class, Grouping.class,
+			Instrument.class, InstrumentScientist.class, Investigation.class,
+			InvestigationInstrument.class, InvestigationParameter.class, InvestigationType.class,
+			InvestigationUser.class, Job.class, Keyword.class, Log.class, ParameterType.class,
+			PermissibleStringValue.class, Publication.class, RelatedDatafile.class, Rule.class,
+			Sample.class, SampleParameter.class, SampleType.class, Shift.class, Study.class,
+			StudyInvestigation.class, User.class, UserGroup.class);
+	static {
+		for (Class<? extends EntityBaseBean> entity : entities) {
+			entityNames.add(entity.getSimpleName());
+		}
+	}
+
+	public static Set<String> getEntityNames() {
+		return entityNames;
+	}
 
 	private class PrivateEntityInfo {
 

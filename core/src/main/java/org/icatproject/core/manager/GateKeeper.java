@@ -42,7 +42,7 @@ public class GateKeeper {
 		}
 	};
 
-	public static Set<String> rootSpecials = new HashSet<String>(Arrays.asList("User", "Group",
+	public static Set<String> rootSpecials = new HashSet<String>(Arrays.asList("User", "Grouping",
 			"UserGroup", "Rule"));
 
 	/**

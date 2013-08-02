@@ -1,22 +1,23 @@
 package org.icatproject.core.parser;
 
-import org.apache.log4j.Logger;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.parser.Token.Type;
 
 public class RuleWhat {
 
 	// RuleWhat ::= ( [ "DISTINCT" ] name ) from_clause [where_clause]
 
-	static Logger logger = Logger.getLogger(RuleWhat.class);
-
 	private String idVar;
-
-	private String string;
 
 	private FromClause fromClause;
 
 	private WhereClause whereClause;
+
+	private int varCount;
 
 	public RuleWhat(Input input) throws ParserException, IcatException {
 
@@ -31,32 +32,37 @@ public class RuleWhat {
 			resultValue = t.getValue();
 		}
 		sb.append(resultValue);
-		idVar = resultValue.split("\\.")[0];
-		string = sb.toString();
-		logger.debug(string + " gives " + idVar);
-		fromClause = new FromClause(input, idVar);
+		idVar = resultValue.split("\\.")[0].toUpperCase();
+
+		Map<String, Integer> idVarMap = new HashMap<>();
+		idVarMap.put(idVar, 0);
+		boolean isQuery = false;
+		fromClause = new FromClause(input, idVar, idVarMap, isQuery);
 		t = input.peek(0);
 		if (t != null && t.getType() == Token.Type.WHERE) {
-			whereClause = new WhereClause(input);
+			whereClause = new WhereClause(input, idVarMap);
 			t = input.peek(0);
 		}
 		if (t != null) {
-			throw new ParserException("Attempt to read beyond end");
+			throw new ParserException(input, new Type[0]);
 		}
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder(string);
-		sb.append(" " + fromClause.toString());
-		if (whereClause != null) {
-			sb.append(" " + whereClause.toString());
-		}
-		return sb.toString();
+		varCount = idVarMap.size();
 	}
 
 	public Class<? extends EntityBaseBean> getBean() {
 		return fromClause.getBean();
+	}
+
+	public String getWhere() {
+		return whereClause == null ? "" : whereClause.toString();
+	}
+
+	public String getFrom() {
+		return fromClause == null ? "" : fromClause.toString();
+	}
+
+	public int getVarCount() {
+		return varCount;
 	}
 
 }

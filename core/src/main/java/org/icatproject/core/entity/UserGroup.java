@@ -17,7 +17,7 @@ public class UserGroup extends EntityBaseBean implements Serializable {
 
 	@JoinColumn(name = "GROUP_ID", nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
-	private Group group;
+	private Grouping grouping;
 
 	@JoinColumn(name = "USER_ID", nullable = false)
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -27,20 +27,20 @@ public class UserGroup extends EntityBaseBean implements Serializable {
 	public UserGroup() {
 	}
 
+	public Grouping getGrouping() {
+		return this.grouping;
+	}
+
 	public User getUser() {
 		return this.user;
 	}
 
-	public Group getGroup() {
-		return this.group;
+	public void setGrouping(Grouping grouping) {
+		this.grouping = grouping;
 	}
 
 	public void setUser(User user) {
 		this.user = user;
-	}
-
-	public void setGroup(Group group) {
-		this.group = group;
 	}
 
 }

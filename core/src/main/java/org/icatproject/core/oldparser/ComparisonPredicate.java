@@ -95,7 +95,7 @@ public class ComparisonPredicate {
 					}
 					klass = nextField.getType();
 				}
-				sb.append(nextField.getType().getCanonicalName() + "." + valueToken.getValue());
+				sb.append(nextField.getType().getCanonicalName().replace(".core.entity", "") + "." + valueToken.getValue());
 			}
 		} else if (compop.getType() == OldToken.Type.IN) {
 			if (value1.getType() != OldToken.Type.NAME) {

@@ -14,21 +14,21 @@ import javax.persistence.UniqueConstraint;
 @Comment("A group of users")
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "GROUP_", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
-public class Group extends EntityBaseBean implements Serializable {
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
+public class Grouping extends EntityBaseBean implements Serializable {
 
 	@Comment("A short name identifying this group of users")
 	@Column(name = "NAME", nullable = false)
 	private String name;
 
-	@OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "grouping", cascade = CascadeType.ALL)
 	private List<Rule> rules = new ArrayList<Rule>();
 
-	@OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "grouping", cascade = CascadeType.ALL)
 	private List<UserGroup> userGroups = new ArrayList<UserGroup>();
 
 	// Needed for JPA
-	public Group() {
+	public Grouping() {
 	}
 
 	public String getName() {
@@ -55,8 +55,4 @@ public class Group extends EntityBaseBean implements Serializable {
 		this.userGroups = userGroups;
 	}
 
-	@Override
-	public String toString() {
-		return "Group[name=" + name + "]";
-	}
 }

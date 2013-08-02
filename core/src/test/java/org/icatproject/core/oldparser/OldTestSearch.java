@@ -18,9 +18,8 @@ public class OldTestSearch {
 
 	@Test
 	public void testGood2() throws Exception {
-		String query = "Dataset INCLUDE Datafile, DatasetParameter";
-		String expect = "SELECT Dataset$ FROM Dataset AS Dataset$";
-		test(query, expect);
+		String query = "Dataset INCLUDE Datafile, DatasetParameter, DatafileParameter, DatasetType";
+		syntest(query);
 	}
 
 	@Test
@@ -41,18 +40,15 @@ public class OldTestSearch {
 	public void testGood5() throws Exception {
 		String query = "Dataset.id " + "<-> DatasetParameter[type.name = 'TIMESTAMP'] "
 				+ "<-> Investigation[name <> 12]";
-		String expect = "SELECT Dataset$.id "
-				+ "FROM Dataset AS Dataset$ JOIN Dataset$.investigation AS Investigation$ JOIN Dataset$.parameters AS DatasetParameter$ "
-				+ "WHERE (DatasetParameter$.type.name = 'TIMESTAMP') AND (Investigation$.name <> 12)";
-		syntest(query, expect);
+		syntest(query);
 	}
 
 	@Test
 	public void testGood6() throws Exception {
-		String query = "Datafile [name = 'fred'] <-> Dataset[id <> 42]";
+		String query = "Datafile INCLUDE 1 [name = 'fred'] <-> Dataset[id <> 42]";
 		String expect = "SELECT Datafile$ "
 				+ "FROM Datafile AS Datafile$ JOIN Datafile$.dataset AS Dataset$ "
-				+ "WHERE (Datafile$.name = 'fred') AND (Dataset$.id <> 42)";
+				+ "WHERE (Datafile$.name = 'fred') AND (Dataset$.id <> 42) INCLUDE 1";
 		test(query, expect);
 	}
 
@@ -127,7 +123,7 @@ public class OldTestSearch {
 	public void testGood16() throws Exception {
 		String query = "ParameterType [facility.id=42 AND valueType=NUMERIC]";
 		String expect = "SELECT ParameterType$ FROM ParameterType AS ParameterType$ "
-				+ "WHERE (ParameterType$.facility.id = 42 AND ParameterType$.valueType = org.icatproject.core.entity.ParameterType.ParameterValueType.NUMERIC)";
+				+ "WHERE (ParameterType$.facility.id = 42 AND ParameterType$.valueType = org.icatproject.ParameterValueType.NUMERIC)";
 		test(query, expect);
 	}
 
@@ -135,7 +131,7 @@ public class OldTestSearch {
 	public void testGood17() throws Exception {
 		String query = "ParameterType [facility.id=42 AND NUMERIC=valueType]";
 		String expect = "SELECT ParameterType$ FROM ParameterType AS ParameterType$ "
-				+ "WHERE (ParameterType$.facility.id = 42 AND ParameterType$.valueType = org.icatproject.core.entity.ParameterType.ParameterValueType.NUMERIC)";
+				+ "WHERE (ParameterType$.facility.id = 42 AND ParameterType$.valueType = org.icatproject.ParameterValueType.NUMERIC)";
 		test(query, expect);
 	}
 
@@ -146,11 +142,10 @@ public class OldTestSearch {
 		new SearchQuery(new Input(Tokenizer.getTokens(query)));
 	}
 
-	private void syntest(String query, String expect) throws Exception {
+	private void syntest(String query) throws Exception {
 		OldSearchQuery q = new OldSearchQuery(new OldInput(OldTokenizer.getTokens(query)));
-		query = q.getNewQuery();
-		new SearchQuery(new Input(Tokenizer.getTokens(query)));
-
+		System.out.println(q.getNewQuery());
+		new SearchQuery(new Input(Tokenizer.getTokens(q.getNewQuery())));
 	}
 
 }

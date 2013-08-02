@@ -41,22 +41,18 @@ public class TestComparisonPredicate {
 
 	@Test
 	public void testEnum() throws Exception {
-		test(ParameterType.class,
-				"valueType = DATE_AND_TIME",
-				"ParameterType$.valueType = org.icatproject.core.entity.ParameterType.ParameterValueType.DATE_AND_TIME");
-		test(ParameterType.class,
-				"DATE_AND_TIME= valueType",
-				"ParameterType$.valueType = org.icatproject.core.entity.ParameterType.ParameterValueType.DATE_AND_TIME");
+		test(ParameterType.class, "valueType = DATE_AND_TIME",
+				"ParameterType$.valueType = org.icatproject.ParameterValueType.DATE_AND_TIME");
+		test(ParameterType.class, "DATE_AND_TIME= valueType",
+				"ParameterType$.valueType = org.icatproject.ParameterValueType.DATE_AND_TIME");
 	}
 
 	@Test
 	public void testEnumNav() throws Exception {
-		test(DatasetParameter.class,
-				"type.valueType = DATE_AND_TIME",
-				"DatasetParameter$.type.valueType = org.icatproject.core.entity.ParameterType.ParameterValueType.DATE_AND_TIME");
-		test(DatasetParameter.class,
-				"DATE_AND_TIME= type.valueType",
-				"DatasetParameter$.type.valueType = org.icatproject.core.entity.ParameterType.ParameterValueType.DATE_AND_TIME");
+		test(DatasetParameter.class, "type.valueType = DATE_AND_TIME",
+				"DatasetParameter$.type.valueType = org.icatproject.ParameterValueType.DATE_AND_TIME");
+		test(DatasetParameter.class, "DATE_AND_TIME= type.valueType",
+				"DatasetParameter$.type.valueType = org.icatproject.ParameterValueType.DATE_AND_TIME");
 	}
 
 	@Test
@@ -66,7 +62,7 @@ public class TestComparisonPredicate {
 		test(ParameterType.class, "12.43 = maximumNumericValue",
 				"ParameterType$.maximumNumericValue = 12.43");
 	}
-	
+
 	@Test
 	public void testNumNav() throws Exception {
 		test(DatasetParameter.class, "type.maximumNumericValue = 12.43",
@@ -80,11 +76,13 @@ public class TestComparisonPredicate {
 		test(ParameterType.class, "enforced = TRUE", "ParameterType$.enforced = TRUE");
 		test(ParameterType.class, "TRUE = enforced", "ParameterType$.enforced = TRUE");
 	}
-	
+
 	@Test
 	public void testBoolNav() throws Exception {
-		test(DatasetParameter.class, "type.enforced = TRUE", "DatasetParameter$.type.enforced = TRUE");
-		test(DatasetParameter.class, "TRUE = type.enforced", "DatasetParameter$.type.enforced = TRUE");
+		test(DatasetParameter.class, "type.enforced = TRUE",
+				"DatasetParameter$.type.enforced = TRUE");
+		test(DatasetParameter.class, "TRUE = type.enforced",
+				"DatasetParameter$.type.enforced = TRUE");
 	}
 
 	private void test(Class<? extends EntityBaseBean> klass, String input, String output)

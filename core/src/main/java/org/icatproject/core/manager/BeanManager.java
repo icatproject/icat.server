@@ -560,10 +560,6 @@ public class BeanManager {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 					"InvocationTargetException " + e.getMessage());
 		}
-		// TODO Change when null values are not allowed in uniqueness constraints
-		if (value == null) {
-			value = "Ad Hoc NULL Value";
-		}
 		if (value instanceof EntityBaseBean) {
 			value = "id:" + ((EntityBaseBean) value).getId();
 		}
@@ -768,24 +764,19 @@ public class BeanManager {
 		if (!query.toUpperCase().trim().startsWith("SELECT")) {
 
 			/* Parse the query */
-			List<OldToken> oldTokens = null;
+
 			try {
-				oldTokens = OldTokenizer.getTokens(query);
+				OldSearchQuery oldSearchQuery = new OldSearchQuery(new OldInput(
+						OldTokenizer.getTokens(query)));
+				query = oldSearchQuery.getNewQuery();
 			} catch (OldLexerException e) {
 				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 						e.getMessage());
-			}
-			OldInput input = new OldInput(oldTokens);
-			OldSearchQuery q;
-			try {
-				q = new OldSearchQuery(input);
 			} catch (OldParserException e) {
 				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
 						e.getMessage());
 			}
-
-			query = q.getNewQuery(manager);
-			logger.debug("New style query: " + query);
+			logger.debug("new style query: " + query);
 
 		}
 		/* New style query - parse it */

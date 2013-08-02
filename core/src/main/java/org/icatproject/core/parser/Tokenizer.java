@@ -20,10 +20,10 @@ public class Tokenizer {
 	private final static Set<String> boolops = new HashSet<String>(
 			Arrays.asList("AND", "OR", "NOT"));
 	private final static Set<String> keyWords = new HashSet<String>(Arrays.asList("ALL", "ANY",
-			"AND", "AS", "ASC", "BETWEEN", "BOTH", "BY", "DESC", "DISTINCT", "DIV", "EMPTY",
+			"AND", "AS", "ASC", "BETWEEN", "BOTH", "BY", "DESC", "DISTINCT", "DIV", "EMPTY", "FALSE",
 			"FETCH", "FROM", "GROUP", "HAVING", "IN", "INNER", "IS", "JOIN", "LEADING", "LEFT",
 			"MEMBER", "MINUS", "MULT", "NOT", "NULL", "OR", "ORDER", "OUTER", "PLUS", "REAL",
-			"SELECT", "TRAILING", "WHERE", "INCLUDE", "LIMIT", "TIMESTAMP"));
+			"SELECT", "TRAILING", "WHERE", "INCLUDE", "LIMIT", "TIMESTAMP", "TRUE"));
 	private final static Set<String> aggFunctions = new HashSet<String>(Arrays.asList("MIN", "MAX",
 			"AVG", "COUNT", "SUM"));
 

@@ -15,7 +15,6 @@ import javax.persistence.TemporalType;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
-import org.icatproject.core.entity.ParameterType.ParameterValueType;
 
 @SuppressWarnings("serial")
 @MappedSuperclass
@@ -43,15 +42,15 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	private Date dateTimeValue;
 
 	@Comment("The maximum value of the numeric parameter that was observed during the measurement period")
-	@Column (precision = 38, scale = 127)
+	@Column(precision = 38, scale = 127)
 	private Double rangeTop;
 
 	@Comment("The minimum value of the numeric parameter that was observed during the measurement period")
-	@Column (precision = 38, scale = 127)
+	@Column(precision = 38, scale = 127)
 	private Double rangeBottom;
 
 	@Comment("The error of the numeric parameter")
-	@Column (precision = 38, scale = 127)
+	@Column(precision = 38, scale = 127)
 	private Double error;
 
 	public ParameterType getType() {
