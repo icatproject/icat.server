@@ -13,11 +13,13 @@ public class RuleWhat {
 
 	private String idVar;
 
-	private FromClause fromClause;
+	private FromClause crudFromClause;
 
 	private WhereClause whereClause;
 
 	private int varCount;
+
+	private FromClause fromClause;
 
 	public RuleWhat(Input input) throws ParserException, IcatException {
 
@@ -38,6 +40,20 @@ public class RuleWhat {
 		idVarMap.put(idVar, 0);
 		boolean isQuery = false;
 		fromClause = new FromClause(input, idVar, idVarMap, isQuery);
+
+		/* Rewind input and skip down to the from clause again */
+		input.reset();
+		t = input.peek(0);
+		while (t.getType() != Token.Type.FROM) {
+			input.consume();
+			t = input.peek(0);
+		}
+		
+	    idVarMap = new HashMap<>();
+		idVarMap.put(idVar, 0);
+		isQuery = true;
+		crudFromClause = new FromClause(input, idVar, idVarMap, isQuery);
+
 		t = input.peek(0);
 		if (t != null && t.getType() == Token.Type.WHERE) {
 			whereClause = new WhereClause(input, idVarMap);
@@ -50,13 +66,17 @@ public class RuleWhat {
 	}
 
 	public Class<? extends EntityBaseBean> getBean() {
-		return fromClause.getBean();
+		return crudFromClause.getBean();
 	}
 
 	public String getWhere() {
 		return whereClause == null ? "" : whereClause.toString();
 	}
 
+	public String getCrudFrom() {
+		return crudFromClause == null ? "" : crudFromClause.toString();
+	}
+	
 	public String getFrom() {
 		return fromClause == null ? "" : fromClause.toString();
 	}

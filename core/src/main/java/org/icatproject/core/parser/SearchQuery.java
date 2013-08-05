@@ -65,8 +65,13 @@ public class SearchQuery {
 			}
 			result = input.consume(Token.Type.NAME);
 			resultValue = result.getValue();
+			int dot = resultValue.indexOf('.');
 			input.consume(Token.Type.CLOSEPAREN);
-			sb.append("$0$)");
+			sb.append("$0$");
+			if (dot > 0) {
+				sb.append(resultValue.substring(dot));
+			}
+			sb.append(")");
 		} else {
 			if (t.getType() == Token.Type.DISTINCT) {
 				sb.append("DISTINCT ");
@@ -94,7 +99,7 @@ public class SearchQuery {
 		if (t != null
 				&& (t.getType() == Token.Type.GROUP || t.getType() == Token.Type.HAVING || t
 						.getType() == Token.Type.ORDER)) {
-			otherJpqlClauses = new OtherJpqlClauses(input);
+			otherJpqlClauses = new OtherJpqlClauses(input, idVarMap);
 			t = input.peek(0);
 		}
 		if (t != null && t.getType() == Token.Type.INCLUDE) {
@@ -136,55 +141,72 @@ public class SearchQuery {
 	}
 
 	public String getJPQL(String userId, EntityManager manager) {
+		logger.debug("Processing " + this);
 		StringBuilder sb = new StringBuilder(string);
 		sb.append(" FROM" + fromClause.toString());
 		String beanName = fromClause.getBean().getSimpleName();
 
-		StringBuilder restriction = null;
+		boolean restricted;
+		List<Rule> rules = null;
 		if (rootUserNames.contains(userId) && GateKeeper.rootSpecials.contains(beanName)) {
 			logger.info("\"Root\" user " + userId + " is allowed READ to " + beanName);
+			restricted = false;
 		} else {
 			TypedQuery<Rule> query = manager.createNamedQuery(Rule.SEARCH_QUERY, Rule.class)
 					.setParameter("member", userId).setParameter("bean", beanName);
-			List<Rule> rules = query.getResultList();
+			rules = query.getResultList();
 			SearchQuery.logger.debug("Got " + rules.size() + " authz queries for search by "
 					+ userId + " to a " + beanName);
-			restriction = new StringBuilder();
+			if (rules.size() == 0) {
+				return null;
+			}
+			restricted = true;
 
 			for (Rule r : rules) {
 				if (!r.isRestricted()) {
 					logger.info("Null restriction => Operation permitted");
-					restriction = null;
+					restricted = false;
 					break;
 				}
 			}
+		}
 
-			if (restriction != null) {
-				// String jpql = r.getSearchJPQL().replace(":user", "'" + userId + "'");
+		StringBuilder ruleWhere = new StringBuilder();
 
-				StringBuilder w = new StringBuilder();
-				if (whereClause != null) {
-					w.append(whereClause);
+		if (restricted) {
+			/* Can only get here if rules has been set */
+			for (Rule r : rules) {
+				String jpql = r.getFromJPQL();
+				String jwhere = r.getWhereJPQL();
+				logger.info("Include rule " + r.getWhat() + " FROM: " + jpql + " WHERE: " + jwhere);
+				int n = varCount;
+
+				for (int i = 1; i < r.getVarCount(); i++) {
+					jpql = jpql.replace("$" + i + "$", "$" + i + n + "$");
+					jwhere = jwhere.replace("$" + i + "$", "$" + i + n + "$");
 				}
-				
-				for (Rule r : rules) {
-					logger.info("Include rule " + r.getWhat());
-					String jpql = r.getFromJPQL();
-					String jwhere = r.getWhereJPQL();
-					int n = varCount;
 
-					for (int i = 0; i < r.getVarCount(); i++) {
-						jpql = jpql.replace("$" + i + "$", "$" + i + n + "$");
-						jwhere = jwhere.replace("$" + i + "$", "$" + i + n + "$");
+				sb.append(" " + jpql);
+				if (!jwhere.isEmpty()) {
+					if (ruleWhere.length() > 0) {
+						ruleWhere.append(" OR ");
 					}
-					sb.append(" " + jpql);
-					w.append(jwhere);
+					ruleWhere.append("(" + jwhere + ")");
 				}
-				
-				if (w.length() > 0) {
-					sb.append(" WHERE " + w.toString());
-				}				
 			}
+		}
+
+		if (whereClause != null || ruleWhere.length() > 0) {
+			sb.append(" WHERE ");
+		}
+		if (whereClause != null) {
+			sb.append(whereClause);
+		}
+		if (whereClause != null && ruleWhere.length() > 0) {
+			sb.append(" AND ");
+		}
+		if (ruleWhere.length() > 0) {
+			sb.append(ruleWhere);
 		}
 
 		if (otherJpqlClauses != null) {
@@ -192,37 +214,6 @@ public class SearchQuery {
 		}
 		return sb.toString();
 	}
-
-	// TODO Code mine
-	// public String oldGetJPQL(String userId, EntityManager manager) throws IcatException {
-	// Set<Class<? extends EntityBaseBean>> es = this.getRelatedEntities();
-	// Class<? extends EntityBaseBean> bean = this.getFirstEntity();
-	// String beanName = bean.getSimpleName();
-	//
-	//
-	//
-	// Step step = DagHandler.findSteps(this.getFirstEntity(), es);
-	// StringBuilder sb = this.getSelect(step);
-	// String where = this.getWhere().toString();
-	// boolean whereThere = !where.isEmpty();
-	// if (whereThere) {
-	// sb.append(' ').append(where.replace(":user", "'" + userId + "'"));
-	// }
-	// if (restriction != null) {
-	// if (restriction.length() == 0) {
-	// throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
-	// "Read access to this " + beanName + " is not allowed.");
-	// }
-	// if (whereThere) {
-	// sb.append(" AND(");
-	// } else {
-	// sb.append(" WHERE(");
-	// }
-	// sb.append(restriction).append(")");
-	// }
-	// sb.append(' ').append(this.getOrderBy());
-	// return sb.toString();
-	// }
 
 	public Integer getOffset() {
 		return limitClause == null ? null : limitClause.getOffset();

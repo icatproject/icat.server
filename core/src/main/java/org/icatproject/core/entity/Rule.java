@@ -38,7 +38,7 @@ import org.icatproject.core.parser.Tokenizer;
 		@NamedQuery(name = "Rule.DeleteQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.d = TRUE"),
 		@NamedQuery(name = "Rule.SearchQuery", query = "SELECT DISTINCT r          FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE") })
 public class Rule extends EntityBaseBean implements Serializable {
-	
+
 	private final static Logger logger = Logger.getLogger(Rule.class);
 
 	public static final String CREATE_QUERY = "Rule.CreateQuery";
@@ -150,15 +150,16 @@ public class Rule extends EntityBaseBean implements Serializable {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
 
-		crudJPQL = query;
 		fromJPQL = r.getFrom();
 		whereJPQL = r.getWhere();
+		crudJPQL = "SELECT COUNT($0$) FROM " + r.getCrudFrom() + " WHERE $0$.id = :pkid"
+				+ (whereJPQL.isEmpty() ? "" : " AND (" + whereJPQL + ")");
 
 		varCount = r.getVarCount();
 
 		bean = r.getBean().getSimpleName();
 
-		restricted = r.getWhere() != null;
+		restricted = !r.getWhere().isEmpty();
 
 	}
 

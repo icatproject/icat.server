@@ -4,6 +4,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -281,7 +283,7 @@ public class TestWS {
 		assertEquals(2L, session.search(q3).get(0));
 
 		try {
-			session.delRule("root", "SELECT Dataset$ FROM Dataset AS Dataset$", "CRUD");
+			session.delRule("root", "Dataset", "CRUD");
 			// The space between the single quotes is necessary - I suspect a bug in eclipselink
 			session.addRule("root", "Dataset [type.name = ' ']", "R");
 
@@ -298,8 +300,7 @@ public class TestWS {
 
 			session.delRule("root", "Dataset [type.name = 'PB']", "R");
 		} finally {
-			
-//			session.addRule("root", "Dataset", "CRUD");
+			session.addRule("root", "Dataset", "CRUD");
 		}
 	}
 
@@ -391,12 +392,7 @@ public class TestWS {
 		}
 
 		assertEquals(2, (session.getIcat().search(piOneSessionId, "InvestigationUser")).size());
-
-		try {
-			session.getIcat().search(piTwoSessionId, "InvestigationUser");
-			fail("Should not get here as not allowed to read");
-		} catch (Exception e) {
-		}
+		assertEquals(0, (session.getIcat().search(piTwoSessionId, "InvestigationUser")).size());
 
 		// Create a simple rule allowing oneControllers full access to InvestigationUser and ensure
 		// that reading works.
@@ -432,12 +428,13 @@ public class TestWS {
 		InvestigationType investigationType = session.createInvestigationType(facility,
 				"TestExperiment");
 
-		List<Object> objects = session.search("Rule [bean='Investigation']<-> Group[name='root']");
+		List<Object> objects = session
+				.search("Rule [bean='Investigation']<-> Grouping[name='root']");
 		for (Object o : objects) {
 			session.delete((Rule) o);
 		}
 
-		Grouping rootG = (Grouping) session.search("Group [name=:user]").get(0);
+		Grouping rootG = (Grouping) session.search("Grouping [name=:user]").get(0);
 
 		Rule rule = new Rule();
 		rule.setCrudFlags("C");
@@ -1424,6 +1421,13 @@ public class TestWS {
 		session.clear();
 		create();
 
+		Date now = new Date();
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
+		String nowString = "{ts " + df.format(now) + "}";
+		String baseq = "SELECT p FROM DatasetParameter p WHERE p.dateTimeValue";
+		assertEquals(0, session.search(baseq + " > " + nowString).size());
+		assertEquals(1, session.search(baseq + "<= " + nowString).size());
+
 		assertEquals(4L, session.search("SELECT COUNT(ds) FROM Dataset ds").get(0));
 
 		long max = -999999999999999L;
@@ -1506,17 +1510,12 @@ public class TestWS {
 		results = session.search("SELECT DISTINCT pt.valueType FROM ParameterType pt");
 		ParameterValueType pvt = (ParameterValueType) results.get(0);
 
-		// org.icatproject.core.entity.ParameterType.ParameterValueType.NUMERIC
-
-		System.out.println(pvt.getClass().getName() + "." + pvt);
-
 		results = session.search("SELECT pt FROM ParameterType pt WHERE pt.facility.id="
-				+ facility.getId() + " AND pt.valueType=" + pvt);
+				+ facility.getId() + " AND pt.valueType=" + pvt.getClass().getName() + "." + pvt);
 		assertEquals(1, results.size());
 
 		results = session.search("SELECT pt FROM ParameterType pt WHERE pt.facility.id="
-				+ facility.getId()
-				+ " AND org.icatproject.core.entity.ParameterType.ParameterValueType." + pvt
+				+ facility.getId() + " AND " + pvt.getClass().getName() + "." + pvt
 				+ "= pt.valueType");
 		assertEquals(1, results.size());
 

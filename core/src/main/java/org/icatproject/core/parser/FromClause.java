@@ -49,8 +49,6 @@ public class FromClause {
 						}
 					}
 				}
-			} else if (!isQuery && t.getType() == Token.Type.IN) {
-				throw new ParserException("IN keyword not allowed in FROM clause of a Rule");
 			} else if (t.getType() == Token.Type.FETCH || t.getType() == Token.Type.INNER
 					|| t.getType() == Token.Type.OUTER || t.getType() == Token.Type.FETCH) {
 				// Skip token

@@ -89,7 +89,7 @@ public class TestSearch {
 		Input input = new Input(tokens);
 		SearchQuery sq = new SearchQuery(input);
 		assertEquals("SELECT $0$ FROM Dataset $0$ JOIN $0$.parameters $1$ "
-				+ "WHERE $1$.type.name != 'TIMESTAMP' ORDER BY ds.name ASC", sq.toString());
+				+ "WHERE $1$.type.name != 'TIMESTAMP'  ORDER BY $0$.name ASC", sq.toString());
 		assertNull(sq.getOffset());
 		assertNull(sq.getNumber());
 		assertEquals(Dataset.class, sq.getBean());
@@ -102,7 +102,7 @@ public class TestSearch {
 				.getTokens("SELECT df.name FROM Datafile df ORDER BY df.id LIMIT 0,1");
 		Input input = new Input(tokens);
 		SearchQuery sq = new SearchQuery(input);
-		assertEquals("SELECT $0$.name FROM Datafile $0$ ORDER BY df.id LIMIT 0,1", sq.toString());
+		assertEquals("SELECT $0$.name FROM Datafile $0$  ORDER BY $0$.id LIMIT 0,1", sq.toString());
 		assertEquals((Integer) 0, sq.getOffset());
 		assertEquals((Integer) 1, sq.getNumber());
 		assertEquals(Datafile.class, sq.getBean());

@@ -60,7 +60,11 @@
                     Instrument added to represent many-to-many relationships between them.
                 </li>
                 <li>
-    Added DataCollection and changed Job to make use if it.</li>
+                    Added DataCollection and changed Job to make use if it.
+                </li>
+                <li>Added new alternate query syntax that may be used in queries and authz rules. It is distinguished by starting with the keyword
+                    "SELECT".</li>
+                <li>It is no longer considered an error to have no authz rules matching a search call - you just get no data back.</li>
             </ul>
         </section>
 

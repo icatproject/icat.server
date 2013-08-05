@@ -14,6 +14,10 @@ public class Input {
 		this.tokens = tokens;
 		this.pos = 0;
 	}
+	
+	public void reset() {
+		this.pos = 0;
+	}
 
 	public Token consume(Type... types) throws ParserException {
 		if (pos < tokens.size()) {

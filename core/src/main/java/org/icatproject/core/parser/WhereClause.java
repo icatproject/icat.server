@@ -2,18 +2,15 @@ package org.icatproject.core.parser;
 
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.Constants;
 import org.icatproject.core.manager.EntityInfoHandler;
 
 public class WhereClause {
-	static Logger logger = Logger.getLogger(WhereClause.class);
+	// static Logger logger = Logger.getLogger(WhereClause.class);
 
 	private String string;
 
 	private SubSelectClause subSelectClause;
-
-	private static String prefix = "org.icatproject.";
 
 	public WhereClause(Input input, Map<String, Integer> idVarMap) throws ParserException {
 		StringBuilder sb = new StringBuilder();
@@ -29,15 +26,15 @@ public class WhereClause {
 				t = input.consume(Token.Type.CLOSEPAREN);
 				sb.append("(" + subSelectClause + ")");
 			} else if (t.getType() == Token.Type.NAME) {
-				if (val.startsWith(prefix)) {
-					int n = prefix.split("\\.").length;
+				if (val.startsWith(Constants.ENUMPREFIX)) {
+					int n = Constants.ENUMPREFIX.split("\\.").length;
 					String vals[] = val.split("\\.");
 					if (vals.length != n + 2) {
 						throw new ParserException("Enum literal " + val + " must contain exactly "
 								+ (n + 2) + " parts");
 					}
 					sb.append(" " + Constants.ENTITY_PREFIX
-							+ t.getValue().substring(prefix.length()));
+							+ t.getValue().substring(Constants.ENUMPREFIX.length()));
 				} else if (EntityInfoHandler.getEntityNames().contains(val)) {
 					sb.append(" " + val);
 				} else {
@@ -67,7 +64,6 @@ public class WhereClause {
 			t = input.peek(0);
 		}
 		string = sb.toString();
-		logger.debug(string);
 	}
 
 	@Override

@@ -798,6 +798,11 @@ public class BeanManager {
 		String jpql = q.getJPQL(userId, manager);
 		logger.debug("JPQL: " + jpql);
 
+		/* Null query indicates that nothing accepted by authz */
+		if (jpql == null) {
+			return Collections.emptyList();
+		}
+
 		/* Create query and add parameter values for any timestamps */
 		Matcher m = timestampPattern.matcher(jpql);
 		javax.persistence.Query jpqlQuery = manager.createQuery(jpql);
@@ -811,6 +816,11 @@ public class BeanManager {
 				// This cannot happen - honest
 			}
 			jpqlQuery.setParameter("ts" + m.group(1), d);
+		}
+		try {
+			jpqlQuery.setParameter("user", userId);
+		} catch (IllegalArgumentException e) {
+			// Ignore
 		}
 
 		Integer offset = q.getOffset();
