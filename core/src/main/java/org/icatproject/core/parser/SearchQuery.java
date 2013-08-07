@@ -96,6 +96,7 @@ public class SearchQuery {
 			whereClause = new WhereClause(input, idVarMap);
 			t = input.peek(0);
 		}
+		varCount = idVarMap.size(); // Just count the variables up to the end of where clause
 		if (t != null
 				&& (t.getType() == Token.Type.GROUP || t.getType() == Token.Type.HAVING || t
 						.getType() == Token.Type.ORDER)) {
@@ -103,7 +104,7 @@ public class SearchQuery {
 			t = input.peek(0);
 		}
 		if (t != null && t.getType() == Token.Type.INCLUDE) {
-			includeClause = new IncludeClause(input, idVarMap);
+			includeClause = new IncludeClause(getBean(), input, idVarMap);
 			t = input.peek(0);
 		}
 		if (t != null && t.getType() == Token.Type.LIMIT) {
@@ -112,13 +113,12 @@ public class SearchQuery {
 
 		}
 		if (includeClause == null && t != null && t.getType() == Token.Type.INCLUDE) {
-			includeClause = new IncludeClause(input, idVarMap);
+			includeClause = new IncludeClause(getBean(), input, idVarMap);
 			t = input.peek(0);
 		}
 		if (t != null) {
 			throw new ParserException(input, new Type[0]);
 		}
-		varCount = idVarMap.size();
 	}
 
 	@Override
@@ -179,11 +179,10 @@ public class SearchQuery {
 				String jpql = r.getFromJPQL();
 				String jwhere = r.getWhereJPQL();
 				logger.info("Include rule " + r.getWhat() + " FROM: " + jpql + " WHERE: " + jwhere);
-				int n = varCount;
 
 				for (int i = 1; i < r.getVarCount(); i++) {
-					jpql = jpql.replace("$" + i + "$", "$" + i + n + "$");
-					jwhere = jwhere.replace("$" + i + "$", "$" + i + n + "$");
+					jpql = jpql.replace("$" + i + "$", "$" + i + varCount + "$");
+					jwhere = jwhere.replace("$" + i + "$", "$" + i + varCount + "$");
 				}
 
 				sb.append(" " + jpql);
@@ -225,6 +224,10 @@ public class SearchQuery {
 
 	public Class<? extends EntityBaseBean> getBean() {
 		return fromClause.getBean();
+	}
+
+	public IncludeClause getIncludeClause() {
+		return includeClause;
 	}
 
 }

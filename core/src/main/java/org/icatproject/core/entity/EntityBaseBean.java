@@ -8,7 +8,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,6 +32,7 @@ import org.icatproject.core.manager.BeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.LuceneSingleton;
+import org.icatproject.core.parser.IncludeClause.Step;
 
 @SuppressWarnings("serial")
 @MappedSuperclass
@@ -55,8 +55,6 @@ public abstract class EntityBaseBean implements Serializable {
 	@GeneratedValue
 	protected Long id;
 
-	protected transient Set<Class<? extends EntityBaseBean>> includes;
-
 	@Column(name = "MOD_ID", nullable = false)
 	protected String modId;
 
@@ -64,15 +62,6 @@ public abstract class EntityBaseBean implements Serializable {
 	@Temporal(value = TemporalType.TIMESTAMP)
 	@XmlElement
 	protected Date modTime;
-
-	public void addIncludes(Set<Class<? extends EntityBaseBean>> includes, boolean followCascades)
-			throws IcatException {
-		BeanManager.addIncludes(this, includes, followCascades);
-	}
-
-	public void addOne() throws IcatException {
-		BeanManager.addOne(this);
-	}
 
 	/*
 	 * If this method is overridden it should be called as well by super.addToClone()
@@ -111,13 +100,6 @@ public abstract class EntityBaseBean implements Serializable {
 
 	public Long getId() {
 		return id;
-	}
-
-	public Set<Class<? extends EntityBaseBean>> getIncludes() {
-		if (includes == null) {
-			includes = new HashSet<Class<? extends EntityBaseBean>>();
-		}
-		return includes;
 	}
 
 	/**
@@ -325,8 +307,32 @@ public abstract class EntityBaseBean implements Serializable {
 		modTime = new Date();
 	}
 
-	public EntityBaseBean pruned() throws IcatException {
+	/**
+	 * Clone a pruned copy of tree
+	 * 
+	 * @param one
+	 *            true if INCLUDE 1 specified
+	 * @param hereVarNum
+	 *            current idVarNum. If steps is null this value is irrelevant.
+	 * @param steps
+	 *            list of steps to consider. This may be null. Steps starting with hereVarNum will
+	 *            be followed. Steps hold the starting idVarNum, the field to navigate and the
+	 *            destination idVarNum.
+	 * @return
+	 * @throws IcatException
+	 */
+	public EntityBaseBean pruned(boolean one, int hereVarNum, List<Step> steps)
+			throws IcatException {
 		Class<? extends EntityBaseBean> klass = this.getClass();
+		if (logger.isDebugEnabled()) {
+			if (one) {
+				logger.debug("Pruning " + klass.getSimpleName() + " INCLUDE 1");
+			} else if (steps != null) {
+				logger.debug("Pruning " + klass.getSimpleName() + " INCLUDE from " + hereVarNum);
+			} else {
+				logger.debug("Pruning " + klass.getSimpleName());
+			}
+		}
 		try {
 			Constructor<? extends EntityBaseBean> con = klass.getConstructor();
 			EntityBaseBean clone = con.newInstance();
@@ -335,7 +341,6 @@ public abstract class EntityBaseBean implements Serializable {
 			clone.createId = this.createId;
 			clone.modTime = this.modTime;
 			clone.modId = this.modId;
-			Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
 			Set<Field> atts = eiHandler.getAttributes(klass);
 			Map<Field, Method> getters = eiHandler.getGetters(klass);
 			Map<Field, Method> setters = eiHandler.getSettersForUpdate(klass);
@@ -345,26 +350,42 @@ public abstract class EntityBaseBean implements Serializable {
 					setters.get(att).invoke(clone, new Object[] { value });
 				}
 			}
-			for (Relationship r : rs) {
-				if (this.includes != null && this.includes.contains(r.getBean())) {
-					if (r.isCollection()) {
-						Field att = r.getField();
-						@SuppressWarnings("unchecked")
-						List<EntityBaseBean> values = (List<EntityBaseBean>) getters.get(att)
-								.invoke(this);
-						@SuppressWarnings("unchecked")
-						List<EntityBaseBean> cloneList = (List<EntityBaseBean>) getters.get(att)
-								.invoke(clone);
-						for (EntityBaseBean value : values) {
-							value = value.pruned();
-							cloneList.add(value);
-						}
-					} else {
-						Field att = r.getField();
-						EntityBaseBean value = (EntityBaseBean) getters.get(att).invoke(this);
-						if (value != null) {
-							value = value.pruned();
-							setters.get(att).invoke(clone, new Object[] { value });
+			if (one) {
+				for (Relationship r : eiHandler.getOnes(klass)) {
+					Field att = r.getField();
+					EntityBaseBean value = (EntityBaseBean) getters.get(att).invoke(this);
+					if (value != null) {
+						value = value.pruned(false, 0, null);
+						setters.get(att).invoke(clone, new Object[] { value });
+					}
+				}
+			} else if (steps != null) {
+				Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
+				for (Relationship r : rs) {
+					Field field = r.getField();
+					String fieldName = field.getName();
+					for (Step step : steps) {
+						if (step.getHereVarNum() == hereVarNum
+								&& step.getFieldName().equals(fieldName)) {
+							if (r.isCollection()) {
+								@SuppressWarnings("unchecked")
+								List<EntityBaseBean> values = (List<EntityBaseBean>) getters.get(
+										field).invoke(this);
+								@SuppressWarnings("unchecked")
+								List<EntityBaseBean> cloneList = (List<EntityBaseBean>) getters
+										.get(field).invoke(clone);
+								for (EntityBaseBean value : values) {
+									value = value.pruned(false, step.getThereVarNum(), steps);
+									cloneList.add(value);
+								}
+							} else {
+								EntityBaseBean value = (EntityBaseBean) getters.get(field).invoke(
+										this);
+								if (value != null) {
+									value = value.pruned(false, step.getThereVarNum(), steps);
+									setters.get(field).invoke(clone, new Object[] { value });
+								}
+							}
 						}
 					}
 				}

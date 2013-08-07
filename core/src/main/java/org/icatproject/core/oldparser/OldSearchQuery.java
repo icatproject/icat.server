@@ -9,12 +9,11 @@ import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.oldparser.DagHandler.Step;
 
 public class OldSearchQuery {
 
-	// Query ::= ( [ [num] "," [num] ] [ "DISTINCT" ] name Include Order ) |
+	// OldSearchQuery ::= ( [ [num] "," [num] ] [ "DISTINCT" ] name OldInclude Order ) |
 	// ( "MIN" | "MAX" | "AVG" | "COUNT" | "SUM" "(" name ")" )
 	// ( "[" SearchCondition "]" )? ( "<->" name ( "[" SearchCondition "]") ?
 	// )*
@@ -31,17 +30,7 @@ public class OldSearchQuery {
 
 	}
 
-	private enum FollowCascades {
-		TRUE, FALSE
-	};
-
-	private enum Position {
-		FIRST, LOWER
-	};
-
 	static Logger logger = Logger.getLogger(OldSearchQuery.class);
-
-	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
 	private boolean distinct;
 	private Order order;
@@ -49,7 +38,7 @@ public class OldSearchQuery {
 	private SearchCondition searchCondition;
 	private List<TableAndSearchCondition> tableAndSearchConditions = new ArrayList<TableAndSearchCondition>();
 
-	private Include include;
+	private OldInclude include;
 
 	private Integer offset;
 
@@ -111,14 +100,14 @@ public class OldSearchQuery {
 					if (simple) {
 						t = input.peek(0);
 						if (t != null && t.getType() == OldToken.Type.INCLUDE) {
-							this.include = new Include(firstBean, input);
+							this.include = new OldInclude(firstBean, input);
 						}
 					}
 				} else {
 					if (simple) {
 						t = input.peek(0);
 						if (t != null && t.getType() == OldToken.Type.INCLUDE) {
-							this.include = new Include(firstBean, input);
+							this.include = new OldInclude(firstBean, input);
 						}
 					}
 					this.order = new Order(input);
@@ -164,15 +153,7 @@ public class OldSearchQuery {
 			if (sb.charAt(sb.length() - 1) != ' ') {
 				sb.append(' ');
 			}
-			if (include.isOne()) {
-				sb.append("INCLUDE 1");
-			} else {
-				StringBuilder sbinc = new StringBuilder();
-				addIncludes(sbinc, firstBean, include.getBeans(),
-						FollowCascades.TRUE, Position.FIRST);
-				logger.debug(sbinc.toString());
-				sb.append(sbinc);
-			}
+			sb.append(include.getNewInclude(firstBean));
 		}
 
 		if (offset != null || number != null) {
@@ -226,42 +207,6 @@ public class OldSearchQuery {
 		}
 		sb.append(" FROM " + beanName + " AS " + beanName + "$ " + step.join());
 		return sb;
-	}
-
-	private static String addIncludes(StringBuilder sb, Class<? extends EntityBaseBean> entityClass,
-			Set<Class<? extends EntityBaseBean>> includes, FollowCascades followCascades,
-			Position position) throws IcatException {
-		boolean first = position == Position.FIRST;
-		String suffix = first ? "$" : "_$";
-		Set<Relationship> relationships = eiHandler.getIncludesToFollow(entityClass);
-		for (Relationship r : relationships) {
-			if (!r.isCascaded() || followCascades == FollowCascades.TRUE) {
-				Class<? extends EntityBaseBean> bean = r.getBean();
-				if (includes.contains(bean)) {
-
-					if (sb.length() == 0) {
-						sb.append("INCLUDE ");
-					} else {
-						sb.append(", ");
-					}
-
-					sb.append(entityClass.getSimpleName() + suffix + "." + r.getField().getName()
-							+ " AS " + bean.getSimpleName() + "_$");
-
-					// Avoid looping forever
-					Set<Class<? extends EntityBaseBean>> includeReduced = new HashSet<Class<? extends EntityBaseBean>>(
-							includes);
-					includeReduced.remove(bean);
-
-					if (r.isCollection()) {
-						addIncludes(sb, bean, includeReduced, FollowCascades.TRUE, Position.LOWER);
-					} else {
-						addIncludes(sb, bean, includeReduced, FollowCascades.FALSE, Position.LOWER);
-					}
-				}
-			}
-		}
-		return sb.toString();
 	}
 
 	private StringBuilder getWhere() throws IcatException {

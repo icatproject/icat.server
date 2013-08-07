@@ -1,50 +1,103 @@
 package org.icatproject.core.parser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
+import org.icatproject.core.IcatException;
+import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.manager.EntityInfo;
+import org.icatproject.core.manager.EntityInfoHandler;
+import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 
 public class IncludeClause {
 
-	static Logger logger = Logger.getLogger(IncludeClause.class);
+	public class Step {
 
-	private class Step {
+		private String fieldName;
+		private int hereVarNum;
+		private int thereVarNum;
 
-		private String path;
-		private String var;
+		public Step(int hereVarNum, String fieldName, int thereVarNum) throws IcatException,
+				ParserException {
+			boolean found = false;
+			for (Relationship r : eiHandler.getRelatedEntities(types.get(hereVarNum))) {
+				if (r.getField().getName().equals(fieldName)) {
+					types.put(thereVarNum, r.getBean());
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				throw new ParserException("Problem with INCLUDE clause: " + fieldName
+						+ " is not a field of " + types.get(hereVarNum).getSimpleName());
+			}
+			this.hereVarNum = hereVarNum;
+			this.fieldName = fieldName;
+			this.thereVarNum = thereVarNum;
+		}
 
-		public Step(String path, String var) {
-			this.path = path;
-			this.var = var;
+		public String getFieldName() {
+			return fieldName;
+		}
+
+		public int getHereVarNum() {
+			return hereVarNum;
+		}
+
+		public int getThereVarNum() {
+			return thereVarNum;
 		}
 
 	}
 
+	static Logger logger = Logger.getLogger(IncludeClause.class);
+
+	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
+
+	Map<Integer, Class<? extends EntityBaseBean>> types = new HashMap<>();
+
 	private boolean one;
 	private List<Step> steps = new ArrayList<Step>();
 
-	public IncludeClause(Input input, Map<String, Integer> idVarMap) throws ParserException {
+	public IncludeClause(Class<? extends EntityBaseBean> bean, Input input,
+			Map<String, Integer> idVarMap) throws ParserException, IcatException {
+		for (Entry<String, Integer> entry : idVarMap.entrySet()) {
+			logger.debug("idVarMap entry " + entry.getKey() + " -> " + entry.getValue());
+		}
+		types.put(0, bean);
+		int fabricatedStepCount = 0;
 		input.consume(Token.Type.INCLUDE);
 		Token t = input.peek(0);
 		if (t.getValue().equals("1")) {
 			input.consume(Token.Type.INTEGER);
 			one = true;
 		} else {
-			processStep(input, idVarMap);
+			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount);
 		}
 
 		t = input.peek(0);
 		while (t != null && t.getType() == Token.Type.COMMA) {
 			t = input.consume(Token.Type.COMMA);
-			processStep(input, idVarMap);
+			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount);
 			t = input.peek(0);
 		}
 		logger.debug(this);
 	}
 
-	private void processStep(Input input, Map<String, Integer> idVarMap) throws ParserException {
+	public List<Step> getSteps() {
+		return steps;
+	}
+
+	public boolean isOne() {
+		return one;
+	}
+
+	private int processStep(Input input, Map<String, Integer> idVarMap, int fabricatedStepCount)
+			throws ParserException, IcatException {
 		Token t = input.consume(Token.Type.NAME);
 		String path = t.getValue();
 		String var = null;
@@ -59,17 +112,23 @@ public class IncludeClause {
 		}
 
 		/* Check the path */
-		int dot = path.indexOf('.');
-		if (dot <= 0) {
+		String[] eles = path.split("\\.");
+		if (eles.length < 2) {
 			throw new ParserException("Path " + path + " must contain a '.'");
 		}
-		String idv = path.substring(0, dot).toUpperCase();
-		Integer intVal = idVarMap.get(idv);
-		if (intVal == null) {
+		String idv = eles[0].toUpperCase();
+		Integer hereVarNum = idVarMap.get(idv);
+		Integer thereVarNum;
+		if (hereVarNum == null) {
 			throw new ParserException("variable " + idv
 					+ " mentioned in INCLUDE clause is not defined");
 		}
-		path = " $" + intVal + "$" + path.substring(dot);
+		for (int i = 1; i < eles.length - 1; i++) {
+			thereVarNum = idVarMap.size() + fabricatedStepCount;
+			steps.add(new Step(hereVarNum, eles[i], thereVarNum));
+			fabricatedStepCount++;
+			hereVarNum = thereVarNum;
+		}
 
 		/* Check the var */
 		if (var != null) {
@@ -77,18 +136,20 @@ public class IncludeClause {
 				throw new ParserException("Variable " + var + " must not contain a '.'");
 			}
 			idv = var.toUpperCase();
-			intVal = idVarMap.get(idv);
-			if (intVal != null) {
+			thereVarNum = idVarMap.get(idv);
+			if (thereVarNum != null) {
 				throw new ParserException("variable " + idv
 						+ " mentioned in INCLUDE clause is already defined");
 			}
-			intVal = idVarMap.size();
-			idVarMap.put(idv, intVal);
-			var = " $" + intVal + "$";
+			thereVarNum = idVarMap.size() + fabricatedStepCount;
+			idVarMap.put(idv, thereVarNum);
+			steps.add(new Step(hereVarNum, eles[eles.length - 1], thereVarNum));
+		} else {
+			thereVarNum = idVarMap.size() + fabricatedStepCount;
+			steps.add(new Step(hereVarNum, eles[eles.length - 1], thereVarNum));
+			fabricatedStepCount++;
 		}
-
-		steps.add(new Step(path, var));
-
+		return fabricatedStepCount;
 	}
 
 	@Override
@@ -103,10 +164,7 @@ public class IncludeClause {
 				} else {
 					sb.append(", ");
 				}
-				sb.append(step.path);
-				if (step.var != null) {
-					sb.append(" " + step.var);
-				}
+				sb.append(step.hereVarNum + "." + step.fieldName + " -> " + step.thereVarNum);
 			}
 			return sb.toString();
 		}

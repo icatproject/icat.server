@@ -12,11 +12,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,16 +37,16 @@ import org.icatproject.core.PropertyHandler.Operation;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Log;
 import org.icatproject.core.entity.Session;
-import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.LuceneSingleton.LuceneSearchResult;
-import org.icatproject.core.oldparser.GetQuery;
-import org.icatproject.core.oldparser.Include;
+import org.icatproject.core.oldparser.OldGetQuery;
 import org.icatproject.core.oldparser.OldInput;
 import org.icatproject.core.oldparser.OldLexerException;
 import org.icatproject.core.oldparser.OldParserException;
 import org.icatproject.core.oldparser.OldSearchQuery;
-import org.icatproject.core.oldparser.OldToken;
 import org.icatproject.core.oldparser.OldTokenizer;
+import org.icatproject.core.parser.GetQuery;
+import org.icatproject.core.parser.IncludeClause;
+import org.icatproject.core.parser.IncludeClause.Step;
 import org.icatproject.core.parser.Input;
 import org.icatproject.core.parser.LexerException;
 import org.icatproject.core.parser.ParserException;
@@ -77,70 +75,60 @@ public class BeanManager {
 
 	// This code might be in EntityBaseBean however this would mean that it
 	// would be processed by JPA which gets confused by it.
-	@SuppressWarnings("unchecked")
+	@Deprecated
 	public static void addIncludes(EntityBaseBean thisBean,
 			Set<Class<? extends EntityBaseBean>> includes, boolean followCascades)
 			throws IcatException {
-		Class<? extends EntityBaseBean> entityClass = thisBean.getClass();
-
-		Set<Relationship> relationships = eiHandler.getIncludesToFollow(entityClass);
-		for (Relationship r : relationships) {
-			if (!r.isCascaded() || followCascades) {
-				Class<? extends EntityBaseBean> bean = r.getBean();
-				if (includes.contains(bean)) {
-
-					// Mark as wanted
-					thisBean.getIncludes().add(bean);
-
-					// Avoid looping forever
-					Set<Class<? extends EntityBaseBean>> includeReduced = new HashSet<Class<? extends EntityBaseBean>>(
-							includes);
-					includeReduced.remove(bean);
-
-					// Recurse into collection or single object
-					Map<Field, Method> getters = eiHandler.getGetters(thisBean.getClass());
-
-					if (r.isCollection()) {
-						Collection<EntityBaseBean> collection = null;
-						Field field = r.getField();
-						try {
-							collection = (Collection<EntityBaseBean>) getters.get(field).invoke(
-									thisBean, (Object[]) null);
-						} catch (Exception e) {
-							throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-									e.toString());
-						}
-						for (EntityBaseBean b : collection) {
-							b.addIncludes(includeReduced, true);
-						}
-					} else {
-						EntityBaseBean b = null;
-						Field field = r.getField();
-						try {
-							b = (EntityBaseBean) getters.get(field).invoke(thisBean,
-									(Object[]) null);
-						} catch (Exception e) {
-							throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-									e.toString());
-						}
-						if (b != null) {
-							b.addIncludes(includeReduced, false);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	// This code might be in EntityBaseBean however this would mean that it
-	// would be processed by JPA which gets confused by it.
-	public static void addOne(EntityBaseBean thisBean) throws IcatException {
-		logger.debug("addOne for " + thisBean);
-		Class<? extends EntityBaseBean> entityClass = thisBean.getClass();
-		for (Relationship r : eiHandler.getOnes(entityClass)) {
-			Class<? extends EntityBaseBean> bean = r.getBean();
-			thisBean.getIncludes().add(bean);
-		}
+		// Class<? extends EntityBaseBean> entityClass = thisBean.getClass();
+		//
+		// Set<Relationship> relationships = eiHandler.getIncludesToFollow(entityClass);
+		// for (Relationship r : relationships) {
+		// if (!r.isCascaded() || followCascades) {
+		// Class<? extends EntityBaseBean> bean = r.getBean();
+		// if (includes.contains(bean)) {
+		//
+		// // Mark as wanted
+		// // thisBean.getIncludes().add(bean);
+		//
+		// // Avoid looping forever
+		// Set<Class<? extends EntityBaseBean>> includeReduced = new HashSet<Class<? extends
+		// EntityBaseBean>>(
+		// includes);
+		// includeReduced.remove(bean);
+		//
+		// // Recurse into collection or single object
+		// Map<Field, Method> getters = eiHandler.getGetters(thisBean.getClass());
+		//
+		// if (r.isCollection()) {
+		// Collection<EntityBaseBean> collection = null;
+		// Field field = r.getField();
+		// try {
+		// collection = (Collection<EntityBaseBean>) getters.get(field).invoke(
+		// thisBean, (Object[]) null);
+		// } catch (Exception e) {
+		// throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+		// e.toString());
+		// }
+		// for (EntityBaseBean b : collection) {
+		// b.addIncludes(includeReduced, true);
+		// }
+		// } else {
+		// EntityBaseBean b = null;
+		// Field field = r.getField();
+		// try {
+		// b = (EntityBaseBean) getters.get(field).invoke(thisBean,
+		// (Object[]) null);
+		// } catch (Exception e) {
+		// throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+		// e.toString());
+		// }
+		// if (b != null) {
+		// b.addIncludes(includeReduced, false);
+		// }
+		// }
+		// }
+		// }
+		// }
 	}
 
 	public static CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
@@ -463,43 +451,51 @@ public class BeanManager {
 
 	public static EntityBaseBean get(String userId, String query, long primaryKey,
 			EntityManager manager, UserTransaction userTransaction) throws IcatException {
-		// Note that this uses no transactions (except for loggging) as it is read only.
+		// Note that this uses no transactions (except for logging) as it is read only.
 
 		long time = log ? System.currentTimeMillis() : 0;
-		List<OldToken> tokens = null;
-		try {
-			tokens = OldTokenizer.getTokens(query);
-		} catch (OldLexerException e) {
-			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
+		logger.debug(userId + " issues get for " + query);
+		String[] words = query.trim().split("\\s+");
+		if (words.length > 1 && words[1].equals("INCLUDE")) {
+			try {
+				query = new OldGetQuery(new OldInput(OldTokenizer.getTokens(query))).getNewQuery();
+				logger.debug("new style query: " + query);
+			} catch (OldLexerException e) {
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+						e.getMessage());
+			} catch (OldParserException e) {
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+						e.getMessage());
+			}
 		}
-		OldInput input = new OldInput(tokens);
-		GetQuery q;
+		GetQuery getQuery;
 		try {
-			q = new GetQuery(input);
-		} catch (OldParserException e) {
+			getQuery = new GetQuery(new Input(Tokenizer.getTokens(query)));
+		} catch (LexerException e) {
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
+		} catch (ParserException e) {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
 
-		Class<? extends EntityBaseBean> entityClass = q.getFirstEntity();
+		Class<? extends EntityBaseBean> entityClass = getQuery.getBean();
 		EntityBaseBean beanManaged = manager.find(entityClass, primaryKey);
 		if (beanManaged == null) {
 			throw new IcatException(IcatException.IcatExceptionType.NO_SUCH_OBJECT_FOUND,
 					entityClass.getSimpleName() + "[id:" + primaryKey + "] not found.");
 		}
 
-		Include include = q.getInclude();
-		if (include != null) {
-			if (include.isOne()) {
-				beanManaged.addOne();
-			} else {
-				Set<Class<? extends EntityBaseBean>> includes = include.getBeans();
-				beanManaged.addIncludes(includes, true);
-			}
-		}
-
 		GateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
 		logger.debug("got " + entityClass.getSimpleName() + "[id:" + primaryKey + "]");
-		EntityBaseBean result = beanManaged.pruned();
+
+		IncludeClause include = getQuery.getInclude();
+		boolean one = false;
+		List<Step> steps = null;
+		if (include != null) {
+			one = include.isOne();
+			steps = include.getSteps();
+		}
+
+		EntityBaseBean result = beanManaged.pruned(one, 0, steps);
 		if (log) {
 			logRead(time, userId, "get", result.getClass().getSimpleName(), result.getId(), query,
 					manager, userTransaction);
@@ -834,29 +830,19 @@ public class BeanManager {
 
 		List<?> result = jpqlQuery.getResultList();
 
-		// TODO restore includes
-		// Include include = q.getInclude();
-		//
-		// if (include != null) {
-		// logger.debug("To include: " + include);
-		// if (include.isOne()) {
-		// for (Object beanManaged : result) {
-		// ((EntityBaseBean) beanManaged).addOne();
-		// }
-		// } else {
-		// Set<Class<? extends EntityBaseBean>> includes = include.getBeans();
-		// for (Object beanManaged : result) {
-		// ((EntityBaseBean) beanManaged).addIncludes(includes, true);
-		// }
-		// }
-		// }
-
 		logger.debug("Obtained " + result.size() + " results.");
 
 		if (result.size() > 0 && result.get(0) instanceof EntityBaseBean) {
+			IncludeClause include = q.getIncludeClause();
+			boolean one = false;
+			List<Step> steps = null;
+			if (include != null) {
+				one = include.isOne();
+				steps = include.getSteps();
+			}
 			List<Object> clones = new ArrayList<Object>();
 			for (Object beanManaged : result) {
-				clones.add(((EntityBaseBean) beanManaged).pruned());
+				clones.add(((EntityBaseBean) beanManaged).pruned(one, 0, steps));
 			}
 			if (log) {
 				EntityBaseBean bean = (EntityBaseBean) clones.get(0);
@@ -908,7 +894,7 @@ public class BeanManager {
 							try {
 								GateKeeper.performAuthorisation(userId, beanManaged,
 										AccessType.READ, manager);
-								results.add(beanManaged.pruned());
+								results.add(beanManaged.pruned(false, -1, null));
 								if (results.size() == maxCount) {
 									break;
 								}

@@ -63,8 +63,29 @@ import org.junit.Test;
  */
 public class TestWS {
 
-	private static Session session;
 	private static Random random;
+	private static Session session;
+
+	// @AfterClass
+	public static void afterClass() throws Exception {
+		session.clear();
+		session.clearAuthz();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		try {
+			random = new Random();
+			session = new Session();
+			session.setAuthz();
+			session.clearAuthz();
+			session.setAuthz();
+			session.clear();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
 
 	private static void create() throws Exception {
 
@@ -118,137 +139,47 @@ public class TestWS {
 		session.createJob(application, input, output);
 	}
 
-	@Test
-	public void createCascade() throws Exception {
-		session.clear();
-		Facility facility = session.createFacility("Test Facility", 90);
-
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
-
-		List<Object> objects = session.search("User [name = 'root']");
-		User u = (User) objects.get(0);
-		InvestigationUser iu = new InvestigationUser();
-		iu.setUser(u);
-		Investigation i = new Investigation();
-		i.setFacility(facility);
-		i.setName("Frederick");
-		i.setTitle("the Great");
-		i.setVisitId("42");
-		i.setType(investigationType);
-		i.getInvestigationUsers().add(iu);
-		Long invid = session.create(i);
-		objects = session
-				.search("Investigation INCLUDE InvestigationUser, User [name='Frederick']");
-		assertEquals(1, objects.size());
-		i = (Investigation) objects.get(0);
-		assertEquals(1, i.getInvestigationUsers().size());
-		assertEquals("root", i.getInvestigationUsers().get(0).getUser().getName());
-		session.synchLucene();
-
-		List<Object> results = session.searchText("frederick AND great", 10, null);
-		assertEquals(1, results.size());
-		EntityBaseBean result = (EntityBaseBean) results.get(0);
-		assertEquals("Investigation", result.getClass().getSimpleName());
-		assertEquals(invid, result.getId());
-
-		results = session.searchText("frederick AND great", 10, "Investigation");
-		assertEquals(1, results.size());
-		result = (EntityBaseBean) results.get(0);
-		assertEquals("Investigation", result.getClass().getSimpleName());
-		assertEquals(invid, result.getId());
-
-		results = session.searchText("frederick AND wimp", 10, null);
-		assertEquals(0, results.size());
-
-		i = (Investigation) session.get("Investigation INCLUDE 1", invid);
-		i.setTitle("the Wimp");
-		session.update(i);
-		session.synchLucene();
-
-		results = session.searchText("frederick AND wimp", 10, null);
-		assertEquals(1, results.size());
-		result = (EntityBaseBean) results.get(0);
-		assertEquals("Investigation", result.getClass().getSimpleName());
-		assertEquals(invid, result.getId());
-
-		results = session.searchText("frederick AND wimp", 10, "Investigation");
-		assertEquals(1, results.size());
-		result = (EntityBaseBean) results.get(0);
-		assertEquals("Investigation", result.getClass().getSimpleName());
-		assertEquals(invid, result.getId());
-
-		results = session.searchText("frederick AND great", 10, null);
-		assertEquals(0, results.size());
-
-		session.delete(i);
-		session.synchLucene();
-
-		results = session.searchText("frederick AND wimp", 10, null);
-		assertEquals(0, results.size());
-
-		results = session.searchText("frederick AND wimp", 10, "Investigation");
-		assertEquals(0, results.size());
-
-		results = session.searchText("frederick AND great", 10, null);
-		assertEquals(0, results.size());
+	private Datafile addDatafile(Dataset dataset, String name, DatafileFormat format) {
+		Datafile datafile = new Datafile();
+		datafile.setDatafileFormat(format);
+		datafile.setName(name);
+		dataset.getDatafiles().add(datafile);
+		return datafile;
 	}
 
-	@Test
-	public void performance() throws Exception {
-		session.clear();
-		Facility facility = session.createFacility("Test Facility", 90);
+	private Dataset addDataset(Investigation inv, String name, DatasetType type) {
+		Dataset dataset = new Dataset();
+		dataset.setName(name);
+		dataset.setType(type);
+		inv.getDatasets().add(dataset);
+		return dataset;
+	}
 
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
-
-		DatasetType dst = session.createDatasetType(facility, "GQ");
-
-		Investigation inv = session.createInvestigation(facility, "A", "Not null",
-				investigationType);
-
-		Dataset wibble = session.createDataset("Wibble", dst, inv);
-
-		DatafileFormat dfmt = session.createDatafileFormat(facility, "png", "binary");
-
-		long start = System.currentTimeMillis();
-		int n = 100;
-		for (int i = 0; i < n; i++) {
-			session.createDatafile("fred" + i, dfmt, wibble);
+	private DatasetParameter addDatasetParameter(Dataset dataset, Object o, ParameterType p) {
+		DatasetParameter dsp = new DatasetParameter();
+		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
+			dsp.setDateTimeValue((XMLGregorianCalendar) o);
 		}
-		System.out.println("Time per datafile to write: " + (System.currentTimeMillis() - start)
-				/ (n + 0.) + "ms");
-		List<EntityBaseBean> dfs = new ArrayList<EntityBaseBean>();
-		for (int i = 0; i < n; i++) {
-			final Datafile datafile = new Datafile();
-			datafile.setDatafileFormat(dfmt);
-			datafile.setName("bill" + i);
-			datafile.setDataset(wibble);
-			dfs.add(datafile);
+		dsp.setType(p);
+		dataset.getParameters().add(dsp);
+		return dsp;
+	}
+
+	private Sample addSample(Investigation inv, String sampleName) {
+		Sample sample = new Sample();
+		sample.setName(sampleName);
+		inv.getSamples().add(sample);
+		return sample;
+	}
+
+	private SampleParameter addSampleParameter(Sample sample, Object o, ParameterType p) {
+		SampleParameter sp = new SampleParameter();
+		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
+			sp.setDateTimeValue((XMLGregorianCalendar) o);
 		}
-		start = System.currentTimeMillis();
-		session.createMany(dfs);
-		System.out.println("Time per datafile using createMany: "
-				+ (System.currentTimeMillis() - start) / (n + 0.) + "ms");
-
-		start = System.currentTimeMillis();
-		List<Object> datafiles = session.search("Datafile INCLUDE DatafileFormat, Dataset");
-		System.out.println("Time per datafile to retrieve: " + datafiles.size() + " datafiles "
-				+ (System.currentTimeMillis() - start) / (datafiles.size() + 0.) + "ms");
-
-		dfs.clear();
-		for (Object odf : datafiles) {
-			Datafile df = (Datafile) odf;
-			df.setDataset(null);
-			df.setDatafileFormat(null);
-			dfs.add(df);
-		}
-
-		start = System.currentTimeMillis();
-		session.deleteMany(dfs);
-		System.out.println("Time per datafile to delete: " + datafiles.size()
-				+ " datafiles with deleteMany: " + (System.currentTimeMillis() - start)
-				/ (datafiles.size() + 0.) + "ms");
+		sp.setType(p);
+		sample.getParameters().add(sp);
+		return sp;
 	}
 
 	@Test
@@ -467,7 +398,7 @@ public class TestWS {
 	}
 
 	@Test
-	public void updates() throws Exception {
+	public void bigCreate() throws Exception {
 		session.clear();
 
 		Facility facility = session.createFacility("Test Facility", 90);
@@ -477,267 +408,346 @@ public class TestWS {
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
+		ParameterType p = new ParameterType();
+		p.setName("TIMESTAMP");
+		p.setUnits("TIMESTAMP");
+		p.setDescription("F is not a wibble");
+		p.setApplicableToSample(true);
+		p.setApplicableToDataset(true);
+		p.setValueType(ParameterValueType.DATE_AND_TIME);
+		p.setFacility(facility);
+		p.setId((Long) session.create(p));
+
+		DatafileFormat dft1 = session.createDatafileFormat(facility, "png", "binary");
+		DatafileFormat dft2 = session.createDatafileFormat(facility, "bmp", "binary");
+
+		Investigation inv = new Investigation();
+		inv.setId(42L);
+		inv.setFacility(facility);
+		inv.setName("A");
+		inv.setTitle("Not null");
+		inv.setType(investigationType);
+		inv.setVisitId("57");
+
+		final Dataset wibble = addDataset(inv, "Wibble", dst);
+
+		addDatafile(wibble, "wib1", dft1);
+
+		addDatafile(wibble, "wib2", dft2);
+
+		GregorianCalendar c = new GregorianCalendar();
+		c.setTime(new Date());
+		XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
+
+		addDatasetParameter(wibble, date, p);
+
+		Dataset wobble = addDataset(inv, "Wobble", dst);
+		addDatafile(wobble, "wob1", dft1);
+
+		Sample sample = addSample(inv, "S1");
+		addSample(inv, "S2");
+
+		addSampleParameter(sample, date, p);
+
+		session.registerInvestigation(inv);
+
+		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter",
+				inv.getId());
+		assertEquals(2, inv.getSamples().size());
+		for (Sample s : inv.getSamples()) {
+			if (s.getName().equals("S1")) {
+				assertEquals(1, s.getParameters().size());
+			} else if (s.getName().equals("S2")) {
+				assertEquals(0, s.getParameters().size());
+			} else {
+				fail("Neither S1 nor S2");
+			}
+		}
+	}
+
+	@Test
+	public void createCascade() throws Exception {
+		session.clear();
+		Facility facility = session.createFacility("Test Facility", 90);
+
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
+
+		List<Object> objects = session.search("User [name = 'root']");
+		User u = (User) objects.get(0);
+		InvestigationUser iu = new InvestigationUser();
+		iu.setUser(u);
+		Investigation i = new Investigation();
+		i.setFacility(facility);
+		i.setName("Frederick");
+		i.setTitle("the Great");
+		i.setVisitId("42");
+		i.setType(investigationType);
+		i.getInvestigationUsers().add(iu);
+		Long invid = session.create(i);
+		objects = session
+				.search("Investigation INCLUDE InvestigationUser, User [name='Frederick']");
+		assertEquals(1, objects.size());
+		i = (Investigation) objects.get(0);
+		assertEquals(1, i.getInvestigationUsers().size());
+		assertEquals("root", i.getInvestigationUsers().get(0).getUser().getName());
+		session.synchLucene();
+
+		List<Object> results = session.searchText("frederick AND great", 10, null);
+		assertEquals(1, results.size());
+		EntityBaseBean result = (EntityBaseBean) results.get(0);
+		assertEquals("Investigation", result.getClass().getSimpleName());
+		assertEquals(invid, result.getId());
+
+		results = session.searchText("frederick AND great", 10, "Investigation");
+		assertEquals(1, results.size());
+		result = (EntityBaseBean) results.get(0);
+		assertEquals("Investigation", result.getClass().getSimpleName());
+		assertEquals(invid, result.getId());
+
+		results = session.searchText("frederick AND wimp", 10, null);
+		assertEquals(0, results.size());
+
+		i = (Investigation) session.get("Investigation INCLUDE 1", invid);
+		i.setTitle("the Wimp");
+		session.update(i);
+		session.synchLucene();
+
+		results = session.searchText("frederick AND wimp", 10, null);
+		assertEquals(1, results.size());
+		result = (EntityBaseBean) results.get(0);
+		assertEquals("Investigation", result.getClass().getSimpleName());
+		assertEquals(invid, result.getId());
+
+		results = session.searchText("frederick AND wimp", 10, "Investigation");
+		assertEquals(1, results.size());
+		result = (EntityBaseBean) results.get(0);
+		assertEquals("Investigation", result.getClass().getSimpleName());
+		assertEquals(invid, result.getId());
+
+		results = session.searchText("frederick AND great", 10, null);
+		assertEquals(0, results.size());
+
+		session.delete(i);
+		session.synchLucene();
+
+		results = session.searchText("frederick AND wimp", 10, null);
+		assertEquals(0, results.size());
+
+		results = session.searchText("frederick AND wimp", 10, "Investigation");
+		assertEquals(0, results.size());
+
+		results = session.searchText("frederick AND great", 10, null);
+		assertEquals(0, results.size());
+	}
+
+	@Test
+	public void duplicates() throws Exception {
+		session.clear();
+
+		Facility f = new Facility();
+		f.setName("TestDuplicates");
+		session.create(f);
+		try {
+			session.create(f);
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
+			assertEquals("Facility exists with name = 'TestDuplicates'", ue.getMessage());
+			assertEquals(-1, ue.getOffset());
+		}
+	}
+
+	@Test
+	public void duplicatesMany() throws Exception {
+		session.clear();
+
+		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
+		Facility f = new Facility();
+		f.setName("One");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Two");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Three");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Two");
+		beans.add(f);
+		f = new Facility();
+		f.setName("One");
+		beans.add(f);
+		try {
+			session.createMany(beans);
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
+			assertEquals("Facility exists with name = 'Two'", ue.getMessage());
+			assertEquals(3, ue.getOffset());
+		}
+	}
+
+	@Test
+	public void duplicatesMany2() throws Exception {
+		session.clear();
+
+		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
+		Facility f = new Facility();
+		f.setName("One");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Two");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Three");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Two");
+		beans.add(f);
+		f = new Facility();
+		f.setName("One");
+		beans.add(f);
+		f = new Facility();
+		f.setName("Two");
+		session.create(f);
+		try {
+			session.createMany(beans);
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
+			assertEquals("Facility exists with name = 'Two'", ue.getMessage());
+			assertEquals(1, ue.getOffset());
+		}
+	}
+
+	@Test
+	public void duplicatesMany3() throws Exception {
+		session.clear();
+		Facility f = new Facility();
+		f.setName("Two");
+		f.setId(session.create(f));
+		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
+		InvestigationType i = new InvestigationType();
+		i.setName("One");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("Two");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("Three");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("Two");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("One");
+		i.setFacility(f);
+		beans.add(i);
+		try {
+			session.createMany(beans);
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
+			assertTrue(ue.getMessage().startsWith(
+					"InvestigationType exists with name = 'Two', facility = 'id:"));
+			assertEquals(3, ue.getOffset());
+		}
+	}
+
+	@Test
+	public void gets() throws Exception {
+		session.clear();
+		create();
+		Long dsId = (Long) session.search("Dataset.id [name = 'Wibble']").get(0);
+
+		assertEquals("Wibble", ((Dataset) session.get("Dataset", dsId)).getName());
+
+		Dataset ds = (Dataset) session.get("Dataset ds INCLUDE ds.datafiles df, df.format", dsId);
+		assertEquals("Wibble", ds.getName());
+		assertEquals(2, ds.getDatafiles().size());
+		for (Datafile df : ds.getDatafiles()) {
+			assertTrue(df.getName().equals("wib1") || df.getName().equals("wib2"));
+			String tn = df.getDatafileFormat().getName();
+			if (df.getName().equals("wib1")) {
+				assertEquals(tn, "png");
+			} else {
+				assertEquals(tn, "bmp");
+			}
+		}
+
+		try {
+			session.get("Dataset", random.nextLong());
+			fail("No throw");
+		} catch (IcatException_Exception e) {
+			if (e.getFaultInfo().getType() != IcatExceptionType.NO_SUCH_OBJECT_FOUND) {
+				throw e;
+			}
+		}
+
+		try {
+			session.get("Dataset INCLUDE Investigator", dsId);
+			fail("No throw");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+			assertEquals(
+					"org.icatproject.core.entity.Investigator is not known to the class loader",
+					e.getMessage());
+		}
+		try {
+			session.get("Dataset INCLUDE Investigation, Facility, Instrument", dsId);
+			fail("No throw");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+		}
+		try {
+			session.get("Dataset INCLUDE User", dsId);
+			fail("No throw");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+			assertEquals("Unable to reach User in list of INCLUDES.", e.getMessage());
+
+		}
+	}
+
+	@Test
+	public void inapplicableParameterType() throws Exception {
+		session.clear();
+		Facility facility = session.createFacility("Test Facility", 90);
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
 		Investigation inv = session.createInvestigation(facility, "A", "Not null",
 				investigationType);
 
-		Dataset wibble = session.createDataset("Wibble", dst, inv);
-		Dataset wobble = session.createDataset("Wobble", dst, inv);
+		ParameterType pts = new ParameterType();
+		pts.setName("UselessString");
+		pts.setValueType(ParameterValueType.STRING);
+		pts.setFacility(facility);
+		pts.setUnits("peck");
+		pts.setId((Long) session.create(pts));
 
-		DatafileFormat dfmt = session.createDatafileFormat(facility, "png", "binary");
+		InvestigationParameter ip = new InvestigationParameter();
 
-		Datafile df = session.createDatafile("fred", dfmt, wibble);
-		df = (Datafile) session.get("Datafile INCLUDE Dataset, DatafileFormat", df.getId());
-		assertEquals("Wibble", df.getDataset().getName());
-
-		df.setDataset(wobble);
-		df.setLocation("guess");
-		df.setDatafileFormat(session.createDatafileFormat(facility, "notpng", "notbinary"));
-		df.setDatafileFormat(null);
-		df.setFileSize(-1L);
-		session.update(df);
-		df = (Datafile) session.get("Datafile INCLUDE Dataset,DatafileFormat", df.getId());
-		assertEquals("Wobble", df.getDataset().getName());
-	}
-
-	@Test
-	public void testInvestigation() throws Exception {
-		EntityInfo ei = session.getEntityInfo("Investigation");
-		assertEquals("An investigation or experiment", ei.getClassComment());
-		for (Constraint constraint : ei.getConstraints()) {
-			assertEquals(Arrays.asList("facility", "name", "visitId"), constraint.getFieldNames());
-		}
-		assertEquals(20, ei.getFields().size());
-		int n = 0;
-		for (EntityField field : ei.getFields()) {
-			if (field.getName().equals("id")) {
-				assertEquals("Long", field.getType());
-				assertEquals(false, field.isNotNullable());
-				assertEquals(null, field.getComment());
-				assertEquals(RelType.ATTRIBUTE, field.getRelType());
-				assertEquals(null, field.getStringLength());
-				assertEquals(null, field.isCascaded());
-			} else if (field.getName().equals("facilityCycle")) {
-				assertEquals("FacilityCycle", field.getType());
-				assertEquals(false, field.isNotNullable());
-				assertEquals(null, field.getComment());
-				assertEquals(RelType.ONE, field.getRelType());
-				assertEquals(null, field.getStringLength());
-				assertEquals(false, field.isCascaded());
-			} else if (field.getName().equals("title")) {
-				assertEquals("String", field.getType());
-				assertEquals(true, field.isNotNullable());
-				assertEquals("Full title of the investigation", field.getComment());
-				assertEquals(RelType.ATTRIBUTE, field.getRelType());
-				assertEquals((Integer) 255, field.getStringLength());
-				assertEquals(null, field.isCascaded());
-			} else if (field.getName().equals("investigationUsers")) {
-				assertEquals("InvestigationUser", field.getType());
-				assertEquals(false, field.isNotNullable());
-				assertEquals(null, field.getComment());
-				assertEquals(RelType.MANY, field.getRelType());
-				assertEquals(null, field.getStringLength());
-				assertEquals(true, field.isCascaded());
-			} else {
-				n++;
-			}
-		}
-		assertEquals(17, n);
-	}
-
-	@Ignore("Need to include gf-client.jar from glassfish3/glassfish/lib/ - no good maven solution found yet")
-	// Need to have notification.list = Dataset Datafile
-	// notification.Dataset = CUD
-	// notification.Datafile = CUD
-	@Test
-	public void notifications() throws Exception {
-		session.clear();
-
-		Context context = new InitialContext();
-		TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) context
-				.lookup("jms/ICATTopicConnectionFactory");
-
-		Topic topic = (Topic) context.lookup("jms/ICATTopic");
-
-		TopicConnection topicConnection = topicConnectionFactory.createTopicConnection();
-		javax.jms.Session jsession = topicConnection.createSession(false,
-				javax.jms.Session.AUTO_ACKNOWLEDGE);
-		MessageConsumer consumer = jsession.createConsumer(topic);
-		Listener topicListener = new Listener();
-		consumer.setMessageListener(topicListener);
-		topicConnection.start();
-
-		create();
-
-		Long dfid = ((EntityBaseBean) session.search("Datafile ORDER BY id").get(0)).getId();
-		Datafile datafile = (Datafile) session.get("Datafile INCLUDE 1", dfid);
-		datafile.setDescription("Junk");
-		session.update(datafile);
-		session.delete(datafile);
-
-		Long dsid = ((EntityBaseBean) session.search("Dataset ORDER BY id").get(0)).getId();
-		Dataset dataset = (Dataset) session.get("Dataset INCLUDE 1", dsid);
-		dataset.setDescription("Obscure junk");
-		session.update(dataset);
-		session.delete(dataset);
-
-		// Wait for a second - though it does not appear to be needed
-		Thread.sleep(1000);
-
-		int ncreate = 0;
-		int nupdate = 0;
-		int ndelete = 0;
-		int ndataset = 0;
-		int ndatafile = 0;
-
-		while (true) {
-			ObjectMessage msg = topicListener.getMessage();
-			if (msg == null) {
-				break;
-			}
-			String operation = msg.getStringProperty("operation");
-			String entity = msg.getStringProperty("entity");
-			Long id = (Long) msg.getObject();
-
-			System.out.println(operation + " " + entity + " " + id);
-			if (operation.equals("C")) {
-				ncreate++;
-			} else if (operation.equals("U")) {
-				nupdate++;
-			} else if (operation.equals("D")) {
-				ndelete++;
-			}
-			if (entity.equals("Datafile")) {
-				ndatafile++;
-			} else if (entity.equals("Dataset")) {
-				ndataset++;
-			}
-
-		}
-		assertEquals(10, ncreate);
-		assertEquals(2, nupdate);
-		assertEquals(2, ndelete);
-		assertEquals(8, ndatafile);
-		assertEquals(6, ndataset);
-	}
-
-	@Test
-	public void testTestCalls() throws Exception {
-		session.clear();
-
-		/* Create user and rules */
-		User piOne = new User();
-		piOne.setName("piOne");
-		piOne.setId(session.create(piOne));
-
-		User piTwo = new User();
-		piTwo.setName("piTwo");
-		piTwo.setId(session.create(piTwo));
-
-		Grouping ones = new Grouping();
-		ones.setName("Ones");
-		ones.setId(session.create(ones));
-
-		UserGroup userGroup = new UserGroup();
-		userGroup.setUser(piOne);
-		userGroup.setGrouping(ones);
-		session.create(userGroup);
-
-		Rule rule = new Rule();
-		rule.setGrouping(ones);
-		rule.setCrudFlags("CRUD");
-		rule.setWhat("Facility");
-		session.create(rule);
-
-		String piOneSessionId = session.login("db", "username", "piOne", "password", "piOne");
-		String piTwoSessionId = session.login("db", "username", "piTwo", "password", "piTwo");
-
-		Facility facility = new Facility();
-		facility.setName("A Facility");
-
-		/* testCreate */
-		session.getIcat().testCreate(piOneSessionId, facility);
+		ip.setType(pts);
+		ip.setInvestigation(inv);
 
 		try {
-			session.getIcat().testCreate(piTwoSessionId, facility);
-			fail("No exception thrown");
+			ip.setStringValue("bad");
+			session.create(ip);
+			fail("No throw");
 		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
-			assertEquals("CREATE access to this Facility is not allowed.", e.getMessage());
+			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
+			assertEquals("Parameter of type UselessString is not applicable to an Investigation",
+					e.getMessage());
 		}
-
-		facility.setId(session.getIcat().create(piOneSessionId, facility));
-
-		try {
-			session.getIcat().testCreate(piOneSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getFaultInfo().getType());
-			assertEquals("Facility exists with name = 'A Facility'", e.getMessage());
-		}
-
-		try {
-			session.getIcat().testCreate(piTwoSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getFaultInfo().getType());
-			assertEquals("Facility exists with name = 'A Facility'", e.getMessage());
-		}
-
-		/* testUpdate */
-		facility.setName("Banana");
-		session.getIcat().testUpdate(piOneSessionId, facility);
-
-		try {
-			session.getIcat().testUpdate(piTwoSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
-			assertEquals("UPDATE access to this Facility is not allowed.", e.getMessage());
-		}
-
-		session.getIcat().update(piOneSessionId, facility);
-
-		session.getIcat().testUpdate(piOneSessionId, facility);
-
-		try {
-			session.getIcat().testUpdate(piTwoSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
-			assertEquals("UPDATE access to this Facility is not allowed.", e.getMessage());
-		}
-
-		/* testDelete */
-		session.getIcat().testDelete(piOneSessionId, facility);
-
-		try {
-			session.getIcat().testDelete(piTwoSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
-			assertEquals("DELETE access to this Facility is not allowed.", e.getMessage());
-		}
-
-		session.getIcat().delete(piOneSessionId, facility);
-
-		try {
-			session.getIcat().testDelete(piOneSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getFaultInfo().getType());
-			assertEquals("Facility[id:" + facility.getId() + "] not found.", e.getMessage());
-		}
-
-		try {
-			session.getIcat().testDelete(piTwoSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getFaultInfo().getType());
-			assertEquals("Facility[id:" + facility.getId() + "] not found.", e.getMessage());
-		}
-
-		session.clearAuthz();
-		session.setAuthz();
 	}
 
 	@Test
@@ -869,40 +879,131 @@ public class TestWS {
 
 	}
 
-	private Dataset addDataset(Investigation inv, String name, DatasetType type) {
-		Dataset dataset = new Dataset();
-		dataset.setName(name);
-		dataset.setType(type);
-		inv.getDatasets().add(dataset);
-		return dataset;
+	@Test
+	public void login() throws Exception {
+		double rm = session.getRemainingMinutes();
+		assertTrue(rm > 0);
+		assertEquals(System.getProperty("projectVersion").replace("-SNAPSHOT", ""),
+				session.getApiVersion());
+		assertEquals("root", session.getUserName());
+		Thread.sleep(10);
+		rm = session.getRemainingMinutes();
+		session.refresh();
+		assertTrue(session.getRemainingMinutes() > rm);
+
+		String piOneSessionId = session.login("db", "username", "piOne", "password", "piOne");
+		session.logout(piOneSessionId);
 	}
 
-	private Datafile addDatafile(Dataset dataset, String name, DatafileFormat format) {
-		Datafile datafile = new Datafile();
-		datafile.setDatafileFormat(format);
-		datafile.setName(name);
-		dataset.getDatafiles().add(datafile);
-		return datafile;
+	@Test
+	public void noDuplicates() throws Exception {
+		session.clear();
+		Facility f = new Facility();
+		f.setName("Two");
+		f.setId(session.create(f));
+		Facility f2 = new Facility();
+		f2.setName("Three");
+		f2.setId(session.create(f2));
+		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
+		InvestigationType i = new InvestigationType();
+		i.setName("One");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("Two");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("Three");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("Four");
+		i.setFacility(f);
+		beans.add(i);
+		i = new InvestigationType();
+		i.setName("One");
+		i.setFacility(f2);
+		beans.add(i);
+
+		session.createMany(beans);
+
 	}
 
-	private DatasetParameter addDatasetParameter(Dataset dataset, Object o, ParameterType p) {
-		DatasetParameter dsp = new DatasetParameter();
-		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
-			dsp.setDateTimeValue((XMLGregorianCalendar) o);
+	@Ignore("Need to include gf-client.jar from glassfish3/glassfish/lib/ - no good maven solution found yet")
+	// Need to have notification.list = Dataset Datafile
+	// notification.Dataset = CUD
+	// notification.Datafile = CUD
+	@Test
+	public void notifications() throws Exception {
+		session.clear();
+
+		Context context = new InitialContext();
+		TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) context
+				.lookup("jms/ICATTopicConnectionFactory");
+
+		Topic topic = (Topic) context.lookup("jms/ICATTopic");
+
+		TopicConnection topicConnection = topicConnectionFactory.createTopicConnection();
+		javax.jms.Session jsession = topicConnection.createSession(false,
+				javax.jms.Session.AUTO_ACKNOWLEDGE);
+		MessageConsumer consumer = jsession.createConsumer(topic);
+		Listener topicListener = new Listener();
+		consumer.setMessageListener(topicListener);
+		topicConnection.start();
+
+		create();
+
+		Long dfid = ((EntityBaseBean) session.search("Datafile ORDER BY id").get(0)).getId();
+		Datafile datafile = (Datafile) session.get("Datafile INCLUDE 1", dfid);
+		datafile.setDescription("Junk");
+		session.update(datafile);
+		session.delete(datafile);
+
+		Long dsid = ((EntityBaseBean) session.search("Dataset ORDER BY id").get(0)).getId();
+		Dataset dataset = (Dataset) session.get("Dataset INCLUDE 1", dsid);
+		dataset.setDescription("Obscure junk");
+		session.update(dataset);
+		session.delete(dataset);
+
+		// Wait for a second - though it does not appear to be needed
+		Thread.sleep(1000);
+
+		int ncreate = 0;
+		int nupdate = 0;
+		int ndelete = 0;
+		int ndataset = 0;
+		int ndatafile = 0;
+
+		while (true) {
+			ObjectMessage msg = topicListener.getMessage();
+			if (msg == null) {
+				break;
+			}
+			String operation = msg.getStringProperty("operation");
+			String entity = msg.getStringProperty("entity");
+			Long id = (Long) msg.getObject();
+
+			System.out.println(operation + " " + entity + " " + id);
+			if (operation.equals("C")) {
+				ncreate++;
+			} else if (operation.equals("U")) {
+				nupdate++;
+			} else if (operation.equals("D")) {
+				ndelete++;
+			}
+			if (entity.equals("Datafile")) {
+				ndatafile++;
+			} else if (entity.equals("Dataset")) {
+				ndataset++;
+			}
+
 		}
-		dsp.setType(p);
-		dataset.getParameters().add(dsp);
-		return dsp;
-	}
-
-	private SampleParameter addSampleParameter(Sample sample, Object o, ParameterType p) {
-		SampleParameter sp = new SampleParameter();
-		if (p.getValueType() == ParameterValueType.DATE_AND_TIME) {
-			sp.setDateTimeValue((XMLGregorianCalendar) o);
-		}
-		sp.setType(p);
-		sample.getParameters().add(sp);
-		return sp;
+		assertEquals(10, ncreate);
+		assertEquals(2, nupdate);
+		assertEquals(2, ndelete);
+		assertEquals(8, ndatafile);
+		assertEquals(6, ndataset);
 	}
 
 	@Test
@@ -954,343 +1055,13 @@ public class TestWS {
 	}
 
 	@Test
-	public void inapplicableParameterType() throws Exception {
-		session.clear();
-		Facility facility = session.createFacility("Test Facility", 90);
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
-		Investigation inv = session.createInvestigation(facility, "A", "Not null",
-				investigationType);
-
-		ParameterType pts = new ParameterType();
-		pts.setName("UselessString");
-		pts.setValueType(ParameterValueType.STRING);
-		pts.setFacility(facility);
-		pts.setUnits("peck");
-		pts.setId((Long) session.create(pts));
-
-		InvestigationParameter ip = new InvestigationParameter();
-
-		ip.setType(pts);
-		ip.setInvestigation(inv);
-
-		try {
-			ip.setStringValue("bad");
-			session.create(ip);
-			fail("No throw");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
-			assertEquals("Parameter of type UselessString is not applicable to an Investigation",
-					e.getMessage());
-		}
-	}
-
-	@Test
-	public void stringParameterRanges() throws Exception {
-		session.clear();
-		Facility facility = session.createFacility("Test Facility", 90);
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
-		Investigation inv = session.createInvestigation(facility, "A", "Not null",
-				investigationType);
-
-		ParameterType pts = new ParameterType();
-		pts.setName("TestString");
-		pts.setApplicableToInvestigation(true);
-		pts.setValueType(ParameterValueType.STRING);
-		pts.setFacility(facility);
-		pts.setEnforced(true);
-		PermissibleStringValue psv = new PermissibleStringValue();
-		psv.setValue("good1");
-		pts.getPermissibleStringValues().add(psv);
-		psv = new PermissibleStringValue();
-		psv.setValue("good2");
-		pts.getPermissibleStringValues().add(psv);
-		pts.setUnits("chain");
-		pts.setId((Long) session.create(pts));
-
-		InvestigationParameter ip = new InvestigationParameter();
-
-		ip.setType(pts);
-		ip.setInvestigation(inv);
-
-		try {
-			ip.setStringValue("bad");
-			session.create(ip);
-			fail("No throw");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
-		}
-
-		ip.setStringValue("good1");
-		ip.setId((Long) session.create(ip));
-
-		try {
-			ip.setStringValue("worse");
-			session.update(ip);
-			fail("No throw");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
-		}
-
-		ip.setStringValue("good2");
-		session.update(ip);
-	}
-
-	@Test
-	public void duplicates() throws Exception {
-		session.clear();
-
-		Facility f = new Facility();
-		f.setName("TestDuplicates");
-		session.create(f);
-		try {
-			session.create(f);
-			fail("Exception not thrown");
-		} catch (IcatException_Exception e) {
-			IcatException ue = e.getFaultInfo();
-			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals("Facility exists with name = 'TestDuplicates'", ue.getMessage());
-			assertEquals(-1, ue.getOffset());
-		}
-	}
-
-	@Test
-	public void duplicatesMany() throws Exception {
-		session.clear();
-
-		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
-		Facility f = new Facility();
-		f.setName("One");
-		beans.add(f);
-		f = new Facility();
-		f.setName("Two");
-		beans.add(f);
-		f = new Facility();
-		f.setName("Three");
-		beans.add(f);
-		f = new Facility();
-		f.setName("Two");
-		beans.add(f);
-		f = new Facility();
-		f.setName("One");
-		beans.add(f);
-		try {
-			session.createMany(beans);
-			fail("Exception not thrown");
-		} catch (IcatException_Exception e) {
-			IcatException ue = e.getFaultInfo();
-			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals("Facility exists with name = 'Two'", ue.getMessage());
-			assertEquals(3, ue.getOffset());
-		}
-	}
-
-	@Test
-	public void duplicatesMany2() throws Exception {
-		session.clear();
-
-		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
-		Facility f = new Facility();
-		f.setName("One");
-		beans.add(f);
-		f = new Facility();
-		f.setName("Two");
-		beans.add(f);
-		f = new Facility();
-		f.setName("Three");
-		beans.add(f);
-		f = new Facility();
-		f.setName("Two");
-		beans.add(f);
-		f = new Facility();
-		f.setName("One");
-		beans.add(f);
-		f = new Facility();
-		f.setName("Two");
-		session.create(f);
-		try {
-			session.createMany(beans);
-			fail("Exception not thrown");
-		} catch (IcatException_Exception e) {
-			IcatException ue = e.getFaultInfo();
-			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals("Facility exists with name = 'Two'", ue.getMessage());
-			assertEquals(1, ue.getOffset());
-		}
-	}
-
-	@Test
-	public void duplicatesMany3() throws Exception {
-		session.clear();
-		Facility f = new Facility();
-		f.setName("Two");
-		f.setId(session.create(f));
-		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
-		InvestigationType i = new InvestigationType();
-		i.setName("One");
-		i.setFacility(f);
-		beans.add(i);
-		i = new InvestigationType();
-		i.setName("Two");
-		i.setFacility(f);
-		beans.add(i);
-		i = new InvestigationType();
-		i.setName("Three");
-		i.setFacility(f);
-		beans.add(i);
-		i = new InvestigationType();
-		i.setName("Two");
-		i.setFacility(f);
-		beans.add(i);
-		i = new InvestigationType();
-		i.setName("One");
-		i.setFacility(f);
-		beans.add(i);
-		try {
-			session.createMany(beans);
-			fail("Exception not thrown");
-		} catch (IcatException_Exception e) {
-			IcatException ue = e.getFaultInfo();
-			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertTrue(ue.getMessage().startsWith(
-					"InvestigationType exists with name = 'Two', facility = 'id:"));
-			assertEquals(3, ue.getOffset());
-		}
-	}
-
-	@Test
-	public void noDuplicates() throws Exception {
-		session.clear();
-		Facility f = new Facility();
-		f.setName("Two");
-		f.setId(session.create(f));
-		Facility f2 = new Facility();
-		f2.setName("Three");
-		f2.setId(session.create(f2));
-		List<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
-		InvestigationType i = new InvestigationType();
-		i.setName("One");
-		i.setFacility(f);
-		beans.add(i);
-		i = new InvestigationType();
-		i.setName("Two");
-		i.setFacility(f);
-		beans.add(i);
-		i = new InvestigationType();
-		i.setName("Three");
-		i.setFacility(f);
-		beans.add(i);
-		i = new InvestigationType();
-		i.setName("Four");
-		i.setFacility(f);
-		beans.add(i);
-		i = new InvestigationType();
-		i.setName("One");
-		i.setFacility(f2);
-		beans.add(i);
-
-		session.createMany(beans);
-
-	}
-
-	@Test
-	public void bigCreate() throws Exception {
-		session.clear();
-
-		Facility facility = session.createFacility("Test Facility", 90);
-
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
-
-		DatasetType dst = session.createDatasetType(facility, "GQ");
-
-		ParameterType p = new ParameterType();
-		p.setName("TIMESTAMP");
-		p.setUnits("TIMESTAMP");
-		p.setDescription("F is not a wibble");
-		p.setApplicableToSample(true);
-		p.setApplicableToDataset(true);
-		p.setValueType(ParameterValueType.DATE_AND_TIME);
-		p.setFacility(facility);
-		p.setId((Long) session.create(p));
-
-		DatafileFormat dft1 = session.createDatafileFormat(facility, "png", "binary");
-		DatafileFormat dft2 = session.createDatafileFormat(facility, "bmp", "binary");
-
-		Investigation inv = new Investigation();
-		inv.setId(42L);
-		inv.setFacility(facility);
-		inv.setName("A");
-		inv.setTitle("Not null");
-		inv.setType(investigationType);
-		inv.setVisitId("57");
-
-		final Dataset wibble = addDataset(inv, "Wibble", dst);
-
-		addDatafile(wibble, "wib1", dft1);
-
-		addDatafile(wibble, "wib2", dft2);
-
-		GregorianCalendar c = new GregorianCalendar();
-		c.setTime(new Date());
-		XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
-
-		addDatasetParameter(wibble, date, p);
-
-		Dataset wobble = addDataset(inv, "Wobble", dst);
-		addDatafile(wobble, "wob1", dft1);
-
-		Sample sample = addSample(inv, "S1");
-		addSample(inv, "S2");
-
-		addSampleParameter(sample, date, p);
-
-		session.registerInvestigation(inv);
-
-		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter",
-				inv.getId());
-		assertEquals(2, inv.getSamples().size());
-		for (Sample s : inv.getSamples()) {
-			if (s.getName().equals("S1")) {
-				assertEquals(1, s.getParameters().size());
-			} else if (s.getName().equals("S2")) {
-				assertEquals(0, s.getParameters().size());
-			} else {
-				fail("Neither S1 nor S2");
-			}
-		}
-	}
-
-	private Sample addSample(Investigation inv, String sampleName) {
-		Sample sample = new Sample();
-		sample.setName(sampleName);
-		inv.getSamples().add(sample);
-		return sample;
-	}
-
-	@Test
-	public void login() throws Exception {
-		double rm = session.getRemainingMinutes();
-		assertTrue(rm > 0);
-		assertEquals(System.getProperty("projectVersion").replace("-SNAPSHOT", ""),
-				session.getApiVersion());
-		assertEquals("root", session.getUserName());
-		Thread.sleep(10);
-		rm = session.getRemainingMinutes();
-		session.refresh();
-		assertTrue(session.getRemainingMinutes() > rm);
-
-		String piOneSessionId = session.login("db", "username", "piOne", "password", "piOne");
-		session.logout(piOneSessionId);
-	}
-
-	@Test
-	public void gets() throws Exception {
+	public void oldGets() throws Exception {
 		session.clear();
 		create();
 		Long dsId = (Long) session.search("Dataset.id [name = 'Wibble']").get(0);
+
 		assertEquals("Wibble", ((Dataset) session.get("Dataset", dsId)).getName());
+
 		try {
 			session.get("Dataset", random.nextLong());
 			fail("No throw");
@@ -1417,6 +1188,76 @@ public class TestWS {
 	}
 
 	@Test
+	public void performance() throws Exception {
+		session.clear();
+		Facility facility = session.createFacility("Test Facility", 90);
+
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
+
+		DatasetType dst = session.createDatasetType(facility, "GQ");
+
+		Investigation inv = session.createInvestigation(facility, "A", "Not null",
+				investigationType);
+
+		Dataset wibble = session.createDataset("Wibble", dst, inv);
+
+		DatafileFormat dfmt = session.createDatafileFormat(facility, "png", "binary");
+
+		long start = System.currentTimeMillis();
+		int n = 100;
+		for (int i = 0; i < n; i++) {
+			session.createDatafile("fred" + i, dfmt, wibble);
+		}
+		System.out.println("Time per datafile to write: " + (System.currentTimeMillis() - start)
+				/ (n + 0.) + "ms");
+		List<EntityBaseBean> dfs = new ArrayList<EntityBaseBean>();
+		for (int i = 0; i < n; i++) {
+			final Datafile datafile = new Datafile();
+			datafile.setDatafileFormat(dfmt);
+			datafile.setName("bill" + i);
+			datafile.setDataset(wibble);
+			dfs.add(datafile);
+		}
+		start = System.currentTimeMillis();
+		session.createMany(dfs);
+		System.out.println("Time per datafile using createMany: "
+				+ (System.currentTimeMillis() - start) / (n + 0.) + "ms");
+
+		start = System.currentTimeMillis();
+		List<Object> results = session
+				.search("SELECT df FROM Datafile df INCLUDE df.datafileFormat, df.dataset");
+		System.out.println("Time per datafile to retrieve: " + results.size() + " datafiles "
+				+ (System.currentTimeMillis() - start) / (results.size() + 0.) + "ms");
+
+		start = System.currentTimeMillis();
+		results = session.search("SELECT df FROM Datafile df");
+		System.out.println("Time per datafile to retrieve no includes: " + results.size()
+				+ " datafiles " + (System.currentTimeMillis() - start) / (results.size() + 0.)
+				+ "ms");
+
+		start = System.currentTimeMillis();
+		@SuppressWarnings("unused")
+		List<Object> ids = session.search("SELECT df.id FROM Datafile df");
+		System.out.println("Time per datafile to retrieve ids: " + results.size() + " datafiles "
+				+ (System.currentTimeMillis() - start) / (results.size() + 0.) + "ms");
+
+		dfs.clear();
+		for (Object odf : results) {
+			Datafile df = (Datafile) odf;
+			df.setDataset(null);
+			df.setDatafileFormat(null);
+			dfs.add(df);
+		}
+
+		start = System.currentTimeMillis();
+		session.deleteMany(dfs);
+		System.out.println("Time per datafile to delete: " + results.size()
+				+ " datafiles with deleteMany: " + (System.currentTimeMillis() - start)
+				/ (results.size() + 0.) + "ms");
+	}
+
+	@Test
 	public void searches() throws Exception {
 		session.clear();
 		create();
@@ -1525,25 +1366,254 @@ public class TestWS {
 		assertEquals(4, results.size());
 	}
 
-	@BeforeClass
-	public static void beforeClass() throws Exception {
+	@Test
+	public void stringParameterRanges() throws Exception {
+		session.clear();
+		Facility facility = session.createFacility("Test Facility", 90);
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
+		Investigation inv = session.createInvestigation(facility, "A", "Not null",
+				investigationType);
+
+		ParameterType pts = new ParameterType();
+		pts.setName("TestString");
+		pts.setApplicableToInvestigation(true);
+		pts.setValueType(ParameterValueType.STRING);
+		pts.setFacility(facility);
+		pts.setEnforced(true);
+		PermissibleStringValue psv = new PermissibleStringValue();
+		psv.setValue("good1");
+		pts.getPermissibleStringValues().add(psv);
+		psv = new PermissibleStringValue();
+		psv.setValue("good2");
+		pts.getPermissibleStringValues().add(psv);
+		pts.setUnits("chain");
+		pts.setId((Long) session.create(pts));
+
+		InvestigationParameter ip = new InvestigationParameter();
+
+		ip.setType(pts);
+		ip.setInvestigation(inv);
+
 		try {
-			random = new Random();
-			session = new Session();
-			session.setAuthz();
-			session.clearAuthz();
-			session.setAuthz();
-			session.clear();
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
+			ip.setStringValue("bad");
+			session.create(ip);
+			fail("No throw");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
 		}
+
+		ip.setStringValue("good1");
+		ip.setId((Long) session.create(ip));
+
+		try {
+			ip.setStringValue("worse");
+			session.update(ip);
+			fail("No throw");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
+		}
+
+		ip.setStringValue("good2");
+		session.update(ip);
 	}
 
-	// @AfterClass
-	public static void afterClass() throws Exception {
+	@Test
+	public void testInvestigation() throws Exception {
+		EntityInfo ei = session.getEntityInfo("Investigation");
+		assertEquals("An investigation or experiment", ei.getClassComment());
+		for (Constraint constraint : ei.getConstraints()) {
+			assertEquals(Arrays.asList("facility", "name", "visitId"), constraint.getFieldNames());
+		}
+		assertEquals(20, ei.getFields().size());
+		int n = 0;
+		for (EntityField field : ei.getFields()) {
+			if (field.getName().equals("id")) {
+				assertEquals("Long", field.getType());
+				assertEquals(false, field.isNotNullable());
+				assertEquals(null, field.getComment());
+				assertEquals(RelType.ATTRIBUTE, field.getRelType());
+				assertEquals(null, field.getStringLength());
+				assertEquals(null, field.isCascaded());
+			} else if (field.getName().equals("facilityCycle")) {
+				assertEquals("FacilityCycle", field.getType());
+				assertEquals(false, field.isNotNullable());
+				assertEquals(null, field.getComment());
+				assertEquals(RelType.ONE, field.getRelType());
+				assertEquals(null, field.getStringLength());
+				assertEquals(false, field.isCascaded());
+			} else if (field.getName().equals("title")) {
+				assertEquals("String", field.getType());
+				assertEquals(true, field.isNotNullable());
+				assertEquals("Full title of the investigation", field.getComment());
+				assertEquals(RelType.ATTRIBUTE, field.getRelType());
+				assertEquals((Integer) 255, field.getStringLength());
+				assertEquals(null, field.isCascaded());
+			} else if (field.getName().equals("investigationUsers")) {
+				assertEquals("InvestigationUser", field.getType());
+				assertEquals(false, field.isNotNullable());
+				assertEquals(null, field.getComment());
+				assertEquals(RelType.MANY, field.getRelType());
+				assertEquals(null, field.getStringLength());
+				assertEquals(true, field.isCascaded());
+			} else {
+				n++;
+			}
+		}
+		assertEquals(17, n);
+	}
+
+	@Test
+	public void testTestCalls() throws Exception {
 		session.clear();
+
+		/* Create user and rules */
+		User piOne = new User();
+		piOne.setName("piOne");
+		piOne.setId(session.create(piOne));
+
+		User piTwo = new User();
+		piTwo.setName("piTwo");
+		piTwo.setId(session.create(piTwo));
+
+		Grouping ones = new Grouping();
+		ones.setName("Ones");
+		ones.setId(session.create(ones));
+
+		UserGroup userGroup = new UserGroup();
+		userGroup.setUser(piOne);
+		userGroup.setGrouping(ones);
+		session.create(userGroup);
+
+		Rule rule = new Rule();
+		rule.setGrouping(ones);
+		rule.setCrudFlags("CRUD");
+		rule.setWhat("Facility");
+		session.create(rule);
+
+		String piOneSessionId = session.login("db", "username", "piOne", "password", "piOne");
+		String piTwoSessionId = session.login("db", "username", "piTwo", "password", "piTwo");
+
+		Facility facility = new Facility();
+		facility.setName("A Facility");
+
+		/* testCreate */
+		session.getIcat().testCreate(piOneSessionId, facility);
+
+		try {
+			session.getIcat().testCreate(piTwoSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+			assertEquals("CREATE access to this Facility is not allowed.", e.getMessage());
+		}
+
+		facility.setId(session.getIcat().create(piOneSessionId, facility));
+
+		try {
+			session.getIcat().testCreate(piOneSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getFaultInfo().getType());
+			assertEquals("Facility exists with name = 'A Facility'", e.getMessage());
+		}
+
+		try {
+			session.getIcat().testCreate(piTwoSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getFaultInfo().getType());
+			assertEquals("Facility exists with name = 'A Facility'", e.getMessage());
+		}
+
+		/* testUpdate */
+		facility.setName("Banana");
+		session.getIcat().testUpdate(piOneSessionId, facility);
+
+		try {
+			session.getIcat().testUpdate(piTwoSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+			assertEquals("UPDATE access to this Facility is not allowed.", e.getMessage());
+		}
+
+		session.getIcat().update(piOneSessionId, facility);
+
+		session.getIcat().testUpdate(piOneSessionId, facility);
+
+		try {
+			session.getIcat().testUpdate(piTwoSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+			assertEquals("UPDATE access to this Facility is not allowed.", e.getMessage());
+		}
+
+		/* testDelete */
+		session.getIcat().testDelete(piOneSessionId, facility);
+
+		try {
+			session.getIcat().testDelete(piTwoSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+			assertEquals("DELETE access to this Facility is not allowed.", e.getMessage());
+		}
+
+		session.getIcat().delete(piOneSessionId, facility);
+
+		try {
+			session.getIcat().testDelete(piOneSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getFaultInfo().getType());
+			assertEquals("Facility[id:" + facility.getId() + "] not found.", e.getMessage());
+		}
+
+		try {
+			session.getIcat().testDelete(piTwoSessionId, facility);
+			fail("No exception thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getFaultInfo().getType());
+			assertEquals("Facility[id:" + facility.getId() + "] not found.", e.getMessage());
+		}
+
 		session.clearAuthz();
+		session.setAuthz();
+	}
+
+	@Test
+	public void updates() throws Exception {
+		session.clear();
+
+		Facility facility = session.createFacility("Test Facility", 90);
+
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
+
+		DatasetType dst = session.createDatasetType(facility, "GQ");
+
+		Investigation inv = session.createInvestigation(facility, "A", "Not null",
+				investigationType);
+
+		Dataset wibble = session.createDataset("Wibble", dst, inv);
+		Dataset wobble = session.createDataset("Wobble", dst, inv);
+
+		DatafileFormat dfmt = session.createDatafileFormat(facility, "png", "binary");
+
+		Datafile df = session.createDatafile("fred", dfmt, wibble);
+		df = (Datafile) session.get("Datafile INCLUDE Dataset, DatafileFormat", df.getId());
+		assertEquals("Wibble", df.getDataset().getName());
+
+		df.setDataset(wobble);
+		df.setLocation("guess");
+		df.setDatafileFormat(session.createDatafileFormat(facility, "notpng", "notbinary"));
+		df.setDatafileFormat(null);
+		df.setFileSize(-1L);
+		session.update(df);
+		df = (Datafile) session.get("Datafile INCLUDE Dataset,DatafileFormat", df.getId());
+		assertEquals("Wobble", df.getDataset().getName());
 	}
 
 }

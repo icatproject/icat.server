@@ -23,13 +23,13 @@ public class TestSearch {
 		List<Token> tokens = Tokenizer
 				.getTokens("SELECT ds FROM Dataset ds JOIN ds.parameters p "
 						+ "WHERE p.type.name = 'TIMESTAMP' "
-						+ "INCLUDE ds.datafile.parameters ps, ps.type, ds.parameters, ds.investigation AS i LIMIT 12, 50");
+						+ "INCLUDE ds.datafiles.parameters ps, ps.type, ds.parameters, ds.investigation AS i LIMIT 12, 50");
 		Input input = new Input(tokens);
 		SearchQuery sq = new SearchQuery(input);
 		assertEquals(
 				"SELECT $0$ FROM Dataset $0$ JOIN $0$.parameters $1$ "
 						+ "WHERE $1$.type.name = 'TIMESTAMP' "
-						+ "INCLUDE  $0$.datafile.parameters  $2$,  $2$.type,  $0$.parameters,  $0$.investigation  $3$ LIMIT 12,50",
+						+ "INCLUDE 0.datafiles -> 2, 2.parameters -> 3, 3.type -> 4, 0.parameters -> 5, 0.investigation -> 6 LIMIT 12,50",
 				sq.toString());
 		assertEquals((Integer) 12, sq.getOffset());
 		assertEquals((Integer) 50, sq.getNumber());

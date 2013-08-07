@@ -5,21 +5,21 @@ import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
 
-public class GetQuery {
+public class OldGetQuery {
 
 	// GetQuery ::= name Include?
 
-	static Logger logger = Logger.getLogger(GetQuery.class);
+	static Logger logger = Logger.getLogger(OldGetQuery.class);
 
 	private Class<? extends EntityBaseBean> bean;
 
-	private Include include;
+	private OldInclude include;
 
-	public GetQuery(OldInput input) throws OldParserException, IcatException {
+	public OldGetQuery(OldInput input) throws OldParserException, IcatException {
 		this.bean = EntityInfoHandler.getClass(input.consume(OldToken.Type.NAME).getValue());
 		OldToken t = input.peek(0);
 		if (t != null && t.getType() == OldToken.Type.INCLUDE) {
-			this.include = new Include(bean, input);
+			this.include = new OldInclude(bean, input);
 			t = input.peek(0);
 		}
 		if (t != null) {
@@ -28,20 +28,11 @@ public class GetQuery {
 		}
 	}
 
-	public Class<? extends EntityBaseBean> getFirstEntity() {
-		return this.bean;
-	}
-
-	public Include getInclude() throws IcatException {
-		return this.include;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(this.bean.getSimpleName());
+	public String getNewQuery() throws IcatException {
+		StringBuilder sb = new StringBuilder(bean.getSimpleName() + " AS " + bean.getSimpleName()
+				+ "$");
 		if (include != null) {
-			sb.append(this.include);
+			sb.append(" " + include.getNewInclude(bean));
 		}
 		return sb.toString();
 	}

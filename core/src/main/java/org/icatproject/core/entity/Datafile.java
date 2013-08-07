@@ -18,8 +18,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.icatproject.core.IcatException;
-
 @Comment("A data file")
 @SuppressWarnings("serial")
 @Entity
