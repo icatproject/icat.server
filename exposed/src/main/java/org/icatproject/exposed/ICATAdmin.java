@@ -77,7 +77,7 @@ public class ICATAdmin {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
 		}
 	}
-	
+
 	@WebMethod
 	public List<String> props() {
 		return BeanManager.props();

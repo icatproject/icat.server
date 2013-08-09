@@ -29,8 +29,8 @@ public class OldInclude {
 
 	private boolean one;
 
-	public OldInclude(Class<? extends EntityBaseBean> bean, OldInput input) throws OldParserException,
-			IcatException {
+	public OldInclude(Class<? extends EntityBaseBean> bean, OldInput input)
+			throws OldParserException, IcatException {
 
 		input.consume(OldToken.Type.INCLUDE);
 		OldToken name = input.consume(OldToken.Type.NAME, OldToken.Type.INTEGER);
@@ -73,10 +73,10 @@ public class OldInclude {
 			Position position) throws IcatException {
 		boolean first = position == Position.FIRST;
 		String suffix = first ? "$" : "_$";
-		Set<Relationship> relationships = eiHandler.getIncludesToFollow(entityClass);
+		Set<Relationship> relationships = eiHandler.getRelatedEntities(entityClass);
 		for (Relationship r : relationships) {
-			if (!r.isCascaded() || followCascades == FollowCascades.TRUE) {
-				Class<? extends EntityBaseBean> bean = r.getBean();
+			if (!r.isCollection() || followCascades == FollowCascades.TRUE) {
+				Class<? extends EntityBaseBean> bean = r.getDestinationBean();
 				if (includes.contains(bean)) {
 
 					if (sb.length() == 0) {

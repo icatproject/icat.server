@@ -1,6 +1,7 @@
 package org.icatproject.core.manager;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -8,6 +9,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -69,6 +71,7 @@ import org.icatproject.core.entity.Study;
 import org.icatproject.core.entity.StudyInvestigation;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
+import org.icatproject.core.entity.PublicStep;
 
 /**
  * Holds information about primary keys of an Entity In the case of a simple key it is a list with
@@ -82,6 +85,7 @@ import org.icatproject.core.entity.UserGroup;
 public class EntityInfoHandler {
 
 	private static Set<String> entityNames = new HashSet<>();
+	private static List<String> entityNamesList;
 	private static List<Class<? extends EntityBaseBean>> entities = Arrays.asList(
 			Application.class, DataCollection.class, DataCollectionDatafile.class,
 			DataCollectionDataset.class, DataCollectionParameter.class, Datafile.class,
@@ -90,17 +94,24 @@ public class EntityInfoHandler {
 			Instrument.class, InstrumentScientist.class, Investigation.class,
 			InvestigationInstrument.class, InvestigationParameter.class, InvestigationType.class,
 			InvestigationUser.class, Job.class, Keyword.class, Log.class, ParameterType.class,
-			PermissibleStringValue.class, Publication.class, RelatedDatafile.class, Rule.class,
-			Sample.class, SampleParameter.class, SampleType.class, Shift.class, Study.class,
-			StudyInvestigation.class, User.class, UserGroup.class);
+			PermissibleStringValue.class, Publication.class, PublicStep.class,
+			RelatedDatafile.class, Rule.class, Sample.class, SampleParameter.class,
+			SampleType.class, Shift.class, Study.class, StudyInvestigation.class, User.class,
+			UserGroup.class);
 	static {
 		for (Class<? extends EntityBaseBean> entity : entities) {
 			entityNames.add(entity.getSimpleName());
 		}
+		entityNamesList = new ArrayList<>(entityNames);
+		Collections.sort(entityNamesList);
 	}
 
 	public static Set<String> getEntityNames() {
 		return entityNames;
+	}
+
+	public static List<String> getEntityNamesList() {
+		return entityNamesList;
 	}
 
 	private class PrivateEntityInfo {
@@ -109,20 +120,20 @@ public class EntityInfoHandler {
 		private List<List<Field>> constraintFields;
 		private Map<Field, String> fieldComments;
 		private final Map<Field, Method> getters;
-		private Set<Relationship> includesToFollow;
 		private final List<Field> notNullableFields;
 		private Set<Relationship> ones;
 		private final Field pks;
 		private final Set<Relationship> relatedEntities;
 		private final Map<Field, Method> setters;
 		private final Map<Field, Integer> stringFields;
-		public Set<Field> attributes;
+		private Set<Field> attributes;
+		private Constructor<? extends EntityBaseBean> constructor;
 
 		public PrivateEntityInfo(Field pks, Set<Relationship> rels, List<Field> notNullableFields,
 				Map<Field, Method> getters, Map<Field, Integer> stringFields,
 				Map<Field, Method> setters, List<List<Field>> constraintFields,
 				String classComment, Map<Field, String> fieldComments, Set<Relationship> ones,
-				Set<Relationship> includesToFollow, Set<Field> attributes) {
+				Set<Field> attributes, Constructor<? extends EntityBaseBean> constructor) {
 			this.pks = pks;
 			this.relatedEntities = rels;
 			this.notNullableFields = notNullableFields;
@@ -133,62 +144,64 @@ public class EntityInfoHandler {
 			this.classComment = classComment;
 			this.fieldComments = fieldComments;
 			this.ones = ones;
-			this.includesToFollow = includesToFollow;
 			this.attributes = attributes;
+			this.constructor = constructor;
 		}
 
 	}
 
 	public class Relationship {
 
-		private final Class<? extends EntityBaseBean> bean;
+		private final Class<? extends EntityBaseBean> destinationBean;
 
-		private final boolean cascaded;
 		private final boolean collection;
 
 		private final Field field;
 
 		private Method inverseSetter;
 
-		public Relationship(Class<? extends EntityBaseBean> bean, Field field, boolean collection,
+		private Class<? extends EntityBaseBean> originBean;
+
+		public Relationship(Class<? extends EntityBaseBean> originBean, Field field,
+				Class<? extends EntityBaseBean> destinationBean, boolean collection,
 				boolean cascaded, Method inverseSetter) {
-			if (this.collection != this.cascaded) {
+			if (collection != cascaded) {
 				throw new RuntimeException(
-						"Collection and Cascaded must match for this code to work " + bean + " "
-								+ field);
+						"Collection and Cascaded must match for this code to work "
+								+ destinationBean + " " + field);
 			}
-			this.bean = bean;
+			this.originBean = originBean;
+			this.destinationBean = destinationBean;
 			this.field = field;
 			this.collection = collection;
-			this.cascaded = cascaded;
 			this.inverseSetter = inverseSetter;
 		}
 
-		public Class<? extends EntityBaseBean> getBean() {
-			return this.bean;
+		public Class<? extends EntityBaseBean> getDestinationBean() {
+			return destinationBean;
 		}
 
 		public Field getField() {
-			return this.field;
-		}
-
-		public boolean isCascaded() {
-			return cascaded;
+			return field;
 		}
 
 		public boolean isCollection() {
-			return this.collection;
+			return collection;
 		}
 
 		@Override
 		public String toString() {
-			return this.bean.getSimpleName() + " by " + this.field.getName()
-					+ (this.collection ? " many" : " one") + (this.cascaded ? " cascaded" : "")
-					+ (this.inverseSetter == null ? "" : " " + this.inverseSetter.getName());
+			return "From " + originBean.getSimpleName() + " to " + destinationBean.getSimpleName()
+					+ " by " + this.field.getName() + (collection ? " many" : " one")
+					+ (inverseSetter == null ? "" : " " + this.inverseSetter.getName());
 		}
 
 		public Method getInverseSetter() {
 			return inverseSetter;
+		}
+
+		public Class<? extends EntityBaseBean> getOriginBean() {
+			return originBean;
 		}
 
 	}
@@ -289,7 +302,8 @@ public class EntityInfoHandler {
 								boolean inv = false;
 								for (Method m : ms) {
 									if (m.getName().equals(name)) {
-										rels.add(new Relationship(argc2, field, true, all, m));
+										rels.add(new Relationship(objectClass, field, argc2, true,
+												all, m));
 										inv = true;
 										break;
 									}
@@ -326,7 +340,7 @@ public class EntityInfoHandler {
 				@SuppressWarnings("unchecked")
 				final Class<? extends EntityBaseBean> argc2 = (Class<? extends EntityBaseBean>) field
 						.getType();
-				rels.add(new Relationship(argc2, field, false, all, null));
+				rels.add(new Relationship(objectClass, field, argc2, false, all, null));
 			} else if (!Arrays.asList("modTime", "createTime", "createId", "modId", "id").contains(
 					field.getName())) {
 				attributes.add(field);
@@ -343,9 +357,7 @@ public class EntityInfoHandler {
 
 		final Set<Relationship> includesToFollow = new HashSet<Relationship>();
 		for (Relationship rel : rels) {
-			if (!rel.collection || rel.cascaded) {
-				includesToFollow.add(rel);
-			}
+			includesToFollow.add(rel);
 		}
 
 		final List<Field> notNullableFields = new ArrayList<Field>();
@@ -538,8 +550,16 @@ public class EntityInfoHandler {
 		Comment comment = objectClass.getAnnotation(Comment.class);
 		String commentString = comment == null ? null : comment.value();
 
+		Constructor<? extends EntityBaseBean> constructor = null;
+		try {
+			constructor = objectClass.getConstructor();
+		} catch (Exception e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " "
+					+ e.getMessage());
+		}
+
 		return new PrivateEntityInfo(key, rels, notNullableFields, getters, stringFields, setters,
-				constraintFields, commentString, comments, ones, includesToFollow, attributes);
+				constraintFields, commentString, comments, ones, attributes, constructor);
 	}
 
 	public String getClassComment(Class<? extends EntityBaseBean> objectClass) throws IcatException {
@@ -606,8 +626,7 @@ public class EntityInfoHandler {
 		}
 		for (Relationship rel : re) {
 			EntityField ef = eiMap.get(rel.getField());
-			ef.setType(rel.getBean().getSimpleName());
-			ef.setCascaded(rel.isCascaded());
+			ef.setType(rel.getDestinationBean().getSimpleName());
 			if (rel.isCollection()) {
 				ef.setRelType(EntityField.RelType.MANY);
 			} else {
@@ -664,19 +683,6 @@ public class EntityInfoHandler {
 				this.map.put(objectClass, ei);
 			}
 			return ei.getters;
-		}
-	}
-
-	public Set<Relationship> getIncludesToFollow(Class<? extends EntityBaseBean> objectClass)
-			throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.includesToFollow;
 		}
 	}
 
@@ -769,4 +775,18 @@ public class EntityInfoHandler {
 			return ei.attributes;
 		}
 	}
+
+	public Constructor<? extends EntityBaseBean> getConstructor(
+			Class<? extends EntityBaseBean> objectClass) throws IcatException {
+		PrivateEntityInfo ei = null;
+		synchronized (this.map) {
+			ei = this.map.get(objectClass);
+			if (ei == null) {
+				ei = this.buildEi(objectClass);
+				this.map.put(objectClass, ei);
+			}
+			return ei.constructor;
+		}
+	}
+
 }

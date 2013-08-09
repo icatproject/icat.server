@@ -9,39 +9,39 @@ import java.util.Map.Entry;
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
-import org.icatproject.core.manager.EntityInfo;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
+import org.icatproject.core.manager.GateKeeper;
 
 public class IncludeClause {
 
 	public class Step {
 
-		private String fieldName;
+		private Relationship relationship;
 		private int hereVarNum;
 		private int thereVarNum;
+		private boolean allowed;
 
 		public Step(int hereVarNum, String fieldName, int thereVarNum) throws IcatException,
 				ParserException {
-			boolean found = false;
 			for (Relationship r : eiHandler.getRelatedEntities(types.get(hereVarNum))) {
 				if (r.getField().getName().equals(fieldName)) {
-					types.put(thereVarNum, r.getBean());
-					found = true;
+					types.put(thereVarNum, r.getDestinationBean());
+					relationship = r;
 					break;
 				}
 			}
-			if (!found) {
+			if (relationship == null) {
 				throw new ParserException("Problem with INCLUDE clause: " + fieldName
 						+ " is not a field of " + types.get(hereVarNum).getSimpleName());
 			}
 			this.hereVarNum = hereVarNum;
-			this.fieldName = fieldName;
 			this.thereVarNum = thereVarNum;
+			this.allowed = GateKeeper.allowed(this);
 		}
 
-		public String getFieldName() {
-			return fieldName;
+		public Relationship getRelationship() {
+			return relationship;
 		}
 
 		public int getHereVarNum() {
@@ -52,16 +52,20 @@ public class IncludeClause {
 			return thereVarNum;
 		}
 
-	}
+		public boolean isAllowed() {
+			return allowed;
+		}
 
-	static Logger logger = Logger.getLogger(IncludeClause.class);
+	}
 
 	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
-	Map<Integer, Class<? extends EntityBaseBean>> types = new HashMap<>();
+	static Logger logger = Logger.getLogger(IncludeClause.class);
 
 	private boolean one;
+
 	private List<Step> steps = new ArrayList<Step>();
+	Map<Integer, Class<? extends EntityBaseBean>> types = new HashMap<>();
 
 	public IncludeClause(Class<? extends EntityBaseBean> bean, Input input,
 			Map<String, Integer> idVarMap) throws ParserException, IcatException {
@@ -164,7 +168,8 @@ public class IncludeClause {
 				} else {
 					sb.append(", ");
 				}
-				sb.append(step.hereVarNum + "." + step.fieldName + " -> " + step.thereVarNum);
+				sb.append(step.hereVarNum + "." + step.relationship.getField().getName() + " -> "
+						+ step.thereVarNum);
 			}
 			return sb.toString();
 		}

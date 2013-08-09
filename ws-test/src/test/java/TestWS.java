@@ -183,6 +183,13 @@ public class TestWS {
 	}
 
 	@Test
+	public void entities() throws Exception {
+		List<String> entities = session.getIcat().getEntityNames();
+		assertEquals(38, entities.size());
+		assertTrue(entities.contains("Application"));
+	}
+
+	@Test
 	public void authz() throws Exception {
 		session.clear();
 
@@ -671,7 +678,8 @@ public class TestWS {
 
 		assertEquals("Wibble", ((Dataset) session.get("Dataset", dsId)).getName());
 
-		Dataset ds = (Dataset) session.get("Dataset ds INCLUDE ds.datafiles df, df.format", dsId);
+		Dataset ds = (Dataset) session.get("Dataset ds INCLUDE ds.datafiles df, df.datafileFormat",
+				dsId);
 		assertEquals("Wibble", ds.getName());
 		assertEquals(2, ds.getDatafiles().size());
 		for (Datafile df : ds.getDatafiles()) {
@@ -1225,8 +1233,15 @@ public class TestWS {
 				+ (System.currentTimeMillis() - start) / (n + 0.) + "ms");
 
 		start = System.currentTimeMillis();
-		List<Object> results = session
-				.search("SELECT df FROM Datafile df INCLUDE df.datafileFormat, df.dataset");
+		List<Object> results = null;
+		;
+		// int m = 10000000;
+		int m = 1;
+		for (int i = 0; i < m; i++) {
+			results = session
+					.search("SELECT df FROM Datafile df INCLUDE df.datafileFormat, df.dataset");
+		}
+
 		System.out.println("Time per datafile to retrieve: " + results.size() + " datafiles "
 				+ (System.currentTimeMillis() - start) / (results.size() + 0.) + "ms");
 
@@ -1434,28 +1449,24 @@ public class TestWS {
 				assertEquals(null, field.getComment());
 				assertEquals(RelType.ATTRIBUTE, field.getRelType());
 				assertEquals(null, field.getStringLength());
-				assertEquals(null, field.isCascaded());
 			} else if (field.getName().equals("facilityCycle")) {
 				assertEquals("FacilityCycle", field.getType());
 				assertEquals(false, field.isNotNullable());
 				assertEquals(null, field.getComment());
 				assertEquals(RelType.ONE, field.getRelType());
 				assertEquals(null, field.getStringLength());
-				assertEquals(false, field.isCascaded());
 			} else if (field.getName().equals("title")) {
 				assertEquals("String", field.getType());
 				assertEquals(true, field.isNotNullable());
 				assertEquals("Full title of the investigation", field.getComment());
 				assertEquals(RelType.ATTRIBUTE, field.getRelType());
 				assertEquals((Integer) 255, field.getStringLength());
-				assertEquals(null, field.isCascaded());
 			} else if (field.getName().equals("investigationUsers")) {
 				assertEquals("InvestigationUser", field.getType());
 				assertEquals(false, field.isNotNullable());
 				assertEquals(null, field.getComment());
 				assertEquals(RelType.MANY, field.getRelType());
 				assertEquals(null, field.getStringLength());
-				assertEquals(true, field.isCascaded());
 			} else {
 				n++;
 			}

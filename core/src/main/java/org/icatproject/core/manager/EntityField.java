@@ -2,74 +2,68 @@ package org.icatproject.core.manager;
 
 public class EntityField {
 
-	private String name;
-	private String type;
-	private boolean notNullable;
-	private Integer stringLength;
-	private String comment;
-
 	public enum RelType {
-		MANY, ONE, ATTRIBUTE
+		ATTRIBUTE, MANY, ONE
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
+	private String comment;
+	private String name;
+	private boolean notNullable;
 	private RelType relType;
-	private Boolean cascaded;
+	private Integer stringLength;
+	private String type;
 
-	public Boolean isCascaded() {
-		return cascaded;
-	}
-
-	public RelType getRelType() {
-		return relType;
-	}
-
-	public void setRelType(RelType relType) {
-		this.relType = relType;
-	}
-
-	public void setType(String type) {
-		this.type = type;
+	public String getComment() {
+		return comment;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public String getType() {
-		return type;
-	}
-
-	public boolean isNotNullable() {
-		return notNullable;
+	public RelType getRelType() {
+		return relType;
 	}
 
 	public Integer getStringLength() {
 		return stringLength;
 	}
 
-	public String getComment() {
-		return comment;
+	public String getType() {
+		return type;
 	}
 
-	public void setNotNullable(boolean notNullable) {
-		this.notNullable = notNullable;
+	// TODO get rid of this
+	public Boolean isCascaded() {
+		return relType == RelType.MANY;
 	}
 
-	public void setStringLength(Integer stringLength) {
-		this.stringLength = stringLength;
+	public boolean isNotNullable() {
+		return notNullable;
 	}
 
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
 
-	public void setCascaded(Boolean cascaded) {
-		this.cascaded = cascaded;
+	public void setName(String name) {
+		this.name = name;
+	}
 
+	public void setNotNullable(boolean notNullable) {
+		this.notNullable = notNullable;
+	}
+
+	public void setRelType(RelType relType) {
+		this.relType = relType;
+	}
+
+	public void setStringLength(Integer stringLength) {
+		this.stringLength = stringLength;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 }

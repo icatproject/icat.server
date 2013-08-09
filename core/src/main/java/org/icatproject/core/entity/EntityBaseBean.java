@@ -74,6 +74,43 @@ public abstract class EntityBaseBean implements Serializable {
 		clone.modTime = modTime;
 	}
 
+	public void addToLucene(LuceneSingleton lucene) throws IcatException {
+		lucene.addDocument(this);
+		Class<? extends EntityBaseBean> klass = this.getClass();
+		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		for (Relationship r : rs) {
+			if (r.isCollection()) {
+				Method m = getters.get(r.getField());
+				try {
+					@SuppressWarnings("unchecked")
+					List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(this);
+					if (!collection.isEmpty()) {
+						for (EntityBaseBean bean : collection) {
+							bean.addToLucene(lucene);
+						}
+					}
+				} catch (Exception e) {
+					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+				}
+			}
+
+		}
+
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<EntityBaseBean> allowedMany(Step step, Map<Field, Method> getters)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Field field = step.getRelationship().getField();
+		if (step.isAllowed()) {
+			return (List<EntityBaseBean>) getters.get(field).invoke(this);
+		} else {
+			// TODO fix this
+			return (List<EntityBaseBean>) getters.get(field).invoke(this);
+		}
+	}
+
 	/*
 	 * If this method is overridden it should be called as well by super.canDelete()
 	 */
@@ -267,7 +304,7 @@ public abstract class EntityBaseBean implements Serializable {
 		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
 		Map<Field, Method> getters = eiHandler.getGetters(klass);
 		for (Relationship r : rs) {
-			if (r.isCascaded()) {
+			if (r.isCollection()) {
 				Method m = getters.get(r.getField());
 				try {
 					@SuppressWarnings("unchecked")
@@ -334,7 +371,7 @@ public abstract class EntityBaseBean implements Serializable {
 			}
 		}
 		try {
-			Constructor<? extends EntityBaseBean> con = klass.getConstructor();
+			Constructor<? extends EntityBaseBean> con = eiHandler.getConstructor(klass);
 			EntityBaseBean clone = con.newInstance();
 			clone.id = this.id;
 			clone.createTime = this.createTime;
@@ -360,31 +397,24 @@ public abstract class EntityBaseBean implements Serializable {
 					}
 				}
 			} else if (steps != null) {
-				Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
-				for (Relationship r : rs) {
-					Field field = r.getField();
-					String fieldName = field.getName();
-					for (Step step : steps) {
-						if (step.getHereVarNum() == hereVarNum
-								&& step.getFieldName().equals(fieldName)) {
-							if (r.isCollection()) {
-								@SuppressWarnings("unchecked")
-								List<EntityBaseBean> values = (List<EntityBaseBean>) getters.get(
-										field).invoke(this);
-								@SuppressWarnings("unchecked")
-								List<EntityBaseBean> cloneList = (List<EntityBaseBean>) getters
-										.get(field).invoke(clone);
-								for (EntityBaseBean value : values) {
-									value = value.pruned(false, step.getThereVarNum(), steps);
-									cloneList.add(value);
-								}
-							} else {
-								EntityBaseBean value = (EntityBaseBean) getters.get(field).invoke(
-										this);
-								if (value != null) {
-									value = value.pruned(false, step.getThereVarNum(), steps);
-									setters.get(field).invoke(clone, new Object[] { value });
-								}
+				for (Step step : steps) {
+					if (step.getHereVarNum() == hereVarNum) {
+						Relationship r = step.getRelationship();
+						Field field = r.getField();
+						if (r.isCollection()) {
+							List<EntityBaseBean> values = allowedMany(step, getters);
+							@SuppressWarnings("unchecked")
+							List<EntityBaseBean> cloneList = (List<EntityBaseBean>) getters.get(
+									field).invoke(clone);
+							for (EntityBaseBean value : values) {
+								value = value.pruned(false, step.getThereVarNum(), steps);
+								cloneList.add(value);
+							}
+						} else {
+							EntityBaseBean value = (EntityBaseBean) getters.get(field).invoke(this);
+							if (value != null) {
+								value = value.pruned(false, step.getThereVarNum(), steps);
+								setters.get(field).invoke(clone, new Object[] { value });
 							}
 						}
 					}
@@ -398,60 +428,13 @@ public abstract class EntityBaseBean implements Serializable {
 
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	private void reportUnexpected(Throwable e) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintStream s = new PrintStream(baos);
-		e.printStackTrace(s);
-		s.close();
-		logger.error("Internal exception: " + baos);
-	}
-
-	/**
-	 * Sets the modId of this entity to the specified value.
-	 * 
-	 * @param modId
-	 *            the new modId
-	 */
-	public void setModId(String modId) {
-		this.modId = modId;
-	}
-
-	public void addToLucene(LuceneSingleton lucene) throws IcatException {
-		lucene.addDocument(this);
-		Class<? extends EntityBaseBean> klass = this.getClass();
-		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-		for (Relationship r : rs) {
-			if (r.isCascaded()) {
-				Method m = getters.get(r.getField());
-				try {
-					@SuppressWarnings("unchecked")
-					List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(this);
-					if (!collection.isEmpty()) {
-						for (EntityBaseBean bean : collection) {
-							bean.addToLucene(lucene);
-						}
-					}
-				} catch (Exception e) {
-					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
-				}
-			}
-
-		}
-
-	}
-
 	public void removeFromLucene(LuceneSingleton lucene) throws IcatException {
 		lucene.deleteDocument(this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
 		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
 		Map<Field, Method> getters = eiHandler.getGetters(klass);
 		for (Relationship r : rs) {
-			if (r.isCascaded()) {
+			if (r.isCollection()) {
 				Method m = getters.get(r.getField());
 				try {
 					@SuppressWarnings("unchecked")
@@ -470,13 +453,35 @@ public abstract class EntityBaseBean implements Serializable {
 
 	}
 
+	private void reportUnexpected(Throwable e) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintStream s = new PrintStream(baos);
+		e.printStackTrace(s);
+		s.close();
+		logger.error("Internal exception: " + baos);
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * Sets the modId of this entity to the specified value.
+	 * 
+	 * @param modId
+	 *            the new modId
+	 */
+	public void setModId(String modId) {
+		this.modId = modId;
+	}
+
 	public void updateInLucene(LuceneSingleton lucene) throws IcatException {
 		lucene.updateDocument(this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
 		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
 		Map<Field, Method> getters = eiHandler.getGetters(klass);
 		for (Relationship r : rs) {
-			if (r.isCascaded()) {
+			if (r.isCollection()) {
 				Method m = getters.get(r.getField());
 				try {
 					@SuppressWarnings("unchecked")

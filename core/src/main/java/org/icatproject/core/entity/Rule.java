@@ -160,7 +160,6 @@ public class Rule extends EntityBaseBean implements Serializable {
 		bean = r.getBean().getSimpleName();
 
 		restricted = !r.getWhere().isEmpty();
-
 	}
 
 	@XmlTransient

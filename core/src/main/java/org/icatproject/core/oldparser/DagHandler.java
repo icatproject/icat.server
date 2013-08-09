@@ -63,12 +63,12 @@ public class DagHandler {
 				if (relationship == null) {
 					alias = bean.getSimpleName() + "$";
 				} else {
-					alias = relationship.getBean().getSimpleName() + "$";
+					alias = relationship.getDestinationBean().getSimpleName() + "$";
 				}
 				StringBuilder sb = new StringBuilder();
 				for (Step s : steps) {
 					sb.append("JOIN " + alias + "." + s.relationship.getField().getName() + " AS "
-							+ s.relationship.getBean().getSimpleName() + "$");
+							+ s.relationship.getDestinationBean().getSimpleName() + "$");
 					sb.append(" " + s.join());
 				}
 				return sb.toString();
@@ -116,7 +116,7 @@ public class DagHandler {
 		Set<Step> steps = new HashSet<Step>();
 		Set<Relationship> navto = pkHandler.getRelatedEntities(from);
 		for (Relationship relationship : navto) {
-			Class<? extends EntityBaseBean> bean = relationship.getBean();
+			Class<? extends EntityBaseBean> bean = relationship.getDestinationBean();
 			if (allBeans.contains(bean) && !bean.equals(predecessor)) {
 				if (used.contains(bean)) {
 					throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
@@ -167,10 +167,10 @@ public class DagHandler {
 			Class<? extends EntityBaseBean> from, Set<Class<? extends EntityBaseBean>> allBeans,
 			Set<Class<? extends EntityBaseBean>> used, boolean followCascades) throws IcatException {
 		Set<Step> steps = new HashSet<Step>();
-		Set<Relationship> navto = pkHandler.getIncludesToFollow(from);
+		Set<Relationship> navto = pkHandler.getRelatedEntities(from);
 		for (Relationship relationship : navto) {
-			if (!relationship.isCascaded() || followCascades) {
-				Class<? extends EntityBaseBean> bean = relationship.getBean();
+			if (!relationship.isCollection() || followCascades) {
+				Class<? extends EntityBaseBean> bean = relationship.getDestinationBean();
 				if (allBeans.contains(bean) && !bean.equals(predecessor)) {
 					if (used.contains(bean)) {
 						throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,

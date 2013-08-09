@@ -80,39 +80,40 @@ public class TestEntityInfo {
 	public void testRels() throws Exception {
 
 		testRel(Investigation.class,
-				"Keyword by keywords many cascaded setInvestigation",
-				"Sample by samples many cascaded setInvestigation",
-				"StudyInvestigation by studyInvestigations many cascaded setInvestigation",
-				"Shift by shifts many cascaded setInvestigation",
-				"Dataset by datasets many cascaded setInvestigation",
-				"Publication by publications many cascaded setInvestigation",
-				"InvestigationUser by investigationUsers many cascaded setInvestigation",
-				"InvestigationInstrument by investigationInstruments many cascaded setInvestigation",
-				"InvestigationType by type one", "Facility by facility one",
-				"InvestigationParameter by parameters many cascaded setInvestigation");
+				"From Investigation to Keyword by keywords many setInvestigation",
+				"From Investigation to Sample by samples many setInvestigation",
+				"From Investigation to StudyInvestigation by studyInvestigations many setInvestigation",
+				"From Investigation to Shift by shifts many setInvestigation",
+				"From Investigation to Dataset by datasets many setInvestigation",
+				"From Investigation to Publication by publications many setInvestigation",
+				"From Investigation to InvestigationUser by investigationUsers many setInvestigation",
+				"From Investigation to InvestigationInstrument by investigationInstruments many setInvestigation",
+				"From Investigation to InvestigationType by type one",
+				"From Investigation to Facility by facility one",
+				"From Investigation to InvestigationParameter by parameters many setInvestigation");
 
 		testRel(Dataset.class,
-				"DataCollectionDataset by dataCollectionDatasets many cascaded setDataset",
-				"DatasetParameter by parameters many cascaded setDataset",
-				"Investigation by investigation one",
-				"Datafile by datafiles many cascaded setDataset", "DatasetType by type one",
-				"Sample by sample one");
+				"From Dataset to DataCollectionDataset by dataCollectionDatasets many setDataset",
+				"From Dataset to DatasetParameter by parameters many setDataset",
+				"From Dataset to Investigation by investigation one",
+				"From Dataset to Datafile by datafiles many setDataset",
+				"From Dataset to DatasetType by type one", "From Dataset to Sample by sample one");
 
-		testRel(Keyword.class, "Investigation by investigation one");
+		testRel(Keyword.class, "From Keyword to Investigation by investigation one");
 
-		testRel(InvestigationUser.class, "Investigation by investigation one", "User by user one");
+		testRel(InvestigationUser.class, "From InvestigationUser to Investigation by investigation one", "From InvestigationUser to User by user one");
 
-		testRel(User.class, "InvestigationUser by investigationUsers many cascaded setUser",
-				"UserGroup by userGroups many cascaded setUser",
-				"InstrumentScientist by instrumentScientists many cascaded setUser",
-				"Study by studies many cascaded setUser");
+		testRel(User.class, "From User to InvestigationUser by investigationUsers many setUser",
+				"From User to UserGroup by userGroups many setUser",
+				"From User to InstrumentScientist by instrumentScientists many setUser",
+				"From User to Study by studies many setUser");
 
-		testRel(Job.class, "DataCollection by inputDataCollection one",
-				"Application by application one", "DataCollection by outputDataCollection one");
+		testRel(Job.class, "From Job to DataCollection by inputDataCollection one",
+				"From Job to Application by application one", "From Job to DataCollection by outputDataCollection one");
 
-		testRel(Instrument.class, "Facility by facility one",
-				"InstrumentScientist by instrumentScientists many cascaded setInstrument",
-				"InvestigationInstrument by investigationInstruments many cascaded setInstrument");
+		testRel(Instrument.class, "From Instrument to Facility by facility one",
+				"From Instrument to InstrumentScientist by instrumentScientists many setInstrument",
+				"From Instrument to InvestigationInstrument by investigationInstruments many setInstrument");
 	}
 
 	private void testRel(Class<? extends EntityBaseBean> klass, String... rels) throws Exception {
@@ -121,7 +122,7 @@ public class TestEntityInfo {
 		for (Relationship rel : results) {
 			rStrings.add(rel.toString());
 		}
-		// System.out.println(results);
+		System.out.println(results);
 		assertEquals(klass.getSimpleName() + " count", rels.length, results.size());
 		for (String rel : rels) {
 			assertTrue(klass.getSimpleName() + " value " + rel, rStrings.contains(rel));
@@ -148,7 +149,7 @@ public class TestEntityInfo {
 		Set<Relationship> results = eiHandler.getOnes(klass);
 		Set<String> rStrings = new HashSet<String>();
 		for (Relationship rel : results) {
-			rStrings.add(rel.getBean().getSimpleName());
+			rStrings.add(rel.getDestinationBean().getSimpleName());
 		}
 		// System.out.println(results);
 		assertEquals(klass.getSimpleName() + " count", rels.length, results.size());
@@ -170,7 +171,7 @@ public class TestEntityInfo {
 
 	private void testNNF(Class<? extends EntityBaseBean> klass, String... nnfs) throws Exception {
 		List<Field> results = eiHandler.getNotNullableFields(klass);
-//		System.out.println(results);
+		// System.out.println(results);
 		Set<String> rStrings = new HashSet<String>();
 		for (Field field : results) {
 			rStrings.add(field.getName());

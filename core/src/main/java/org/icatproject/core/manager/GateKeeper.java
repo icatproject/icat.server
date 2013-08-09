@@ -8,7 +8,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -18,6 +21,8 @@ import org.icatproject.core.IcatException;
 import org.icatproject.core.PropertyHandler;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Rule;
+import org.icatproject.core.manager.EntityInfoHandler.Relationship;
+import org.icatproject.core.parser.IncludeClause.Step;
 
 public class GateKeeper {
 
@@ -42,8 +47,16 @@ public class GateKeeper {
 		}
 	};
 
+	public static Set<String> publicTables = new ConcurrentSkipListSet<>();
+	public static Map<String, Set<String>> publicSteps = new ConcurrentSkipListMap<>();
+
 	public static Set<String> rootSpecials = new HashSet<String>(Arrays.asList("User", "Grouping",
-			"UserGroup", "Rule"));
+			"UserGroup", "Rule", "AllowedSteps"));
+	
+	static {
+		updatePublicSteps();
+		updatePublicTables();
+	}
 
 	/**
 	 * Perform authorization check for any object
@@ -123,6 +136,30 @@ public class GateKeeper {
 		throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES, access
 				+ " access to this " + objectClass.getSimpleName() + " is not allowed.");
 
+	}
+
+	public static void updatePublicTables() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public static void updatePublicSteps() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public static boolean allowed(Step step) {
+		Relationship r = step.getRelationship();
+		String beanName = r.getDestinationBean().getSimpleName();
+		if (publicTables.contains(beanName)) {
+			return true;
+		}
+		String originBeanName = r.getOriginBean().getSimpleName();
+		Set<String> fieldNames = publicSteps.get(originBeanName);
+		if (fieldNames != null && fieldNames.contains(r.getField().getName())) {
+			return true;
+		}
+		return false;
 	}
 
 }

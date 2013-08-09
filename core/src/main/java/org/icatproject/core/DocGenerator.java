@@ -1,12 +1,8 @@
 package org.icatproject.core;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,23 +21,7 @@ public class DocGenerator {
 		File dir = new File(args[0]);
 		PrintWriter out = new PrintWriter(new File(dir, "src/site/resources/schema.html"));
 		out.print("<!DOCTYPE HTML><html><head><style type=\"text/css\">h1,h2,h3 {color:sienna;} table { border-collapse:collapse; } td, th { border:1px solid sienna; padding:4px; font-weight:normal; text-align:left} th { color:sienna; }</style><title>ICAT Schema</title><link rel=\"icon\" href=\"http://www.icatproject.org/favicon.ico\"/></head><body><h1>ICAT Schema</h1>");
-		List<String> cnames = new ArrayList<String>();
-		for (File f : new File(dir, "src/main/java/org/icatproject/core/entity")
-				.listFiles(new FileFilter() {
-
-					@Override
-					public boolean accept(File pathname) {
-						String name = pathname.getName();
-						return name.endsWith(".java")
-								&& !Arrays.asList("Comment", "EntityBaseBean", "Parameter",
-										"Session", "ParameterValueType", "StudyStatus").contains(
-										name.replace(".java", ""));
-					}
-				})) {
-			String cname = f.getName().replace(".java", "");
-			cnames.add(cname);
-		}
-		Collections.sort(cnames);
+		List<String> cnames = EntityInfoHandler.getEntityNamesList();
 
 		out.print("<p style=\"max-width:50em;\">");
 		boolean first = true;
@@ -94,9 +74,9 @@ public class DocGenerator {
 				Field f = r.getField();
 				boolean notnullable = notnullables.contains(f);
 				boolean many = r.isCollection();
-				String beanName = r.getBean().getSimpleName();
+				String beanName = r.getDestinationBean().getSimpleName();
 				String card = (notnullable ? "1" : "0") + "," + (many ? "*" : "1");
-				String cascaded = (r.isCascaded() ? "Yes" : "");
+				String cascaded = (r.isCollection() ? "Yes" : "");
 				out.print("<tr><td> " + card + "</td>");
 				out.print("<td><a href = \"#" + beanName + "\">" + beanName + "</a></td><td>"
 						+ f.getName() + "</td><td>" + cascaded + "</td>");

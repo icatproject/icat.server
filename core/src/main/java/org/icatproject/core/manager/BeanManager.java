@@ -73,64 +73,6 @@ public class BeanManager {
 		log = !logRequests.isEmpty();
 	}
 
-	// This code might be in EntityBaseBean however this would mean that it
-	// would be processed by JPA which gets confused by it.
-	@Deprecated
-	public static void addIncludes(EntityBaseBean thisBean,
-			Set<Class<? extends EntityBaseBean>> includes, boolean followCascades)
-			throws IcatException {
-		// Class<? extends EntityBaseBean> entityClass = thisBean.getClass();
-		//
-		// Set<Relationship> relationships = eiHandler.getIncludesToFollow(entityClass);
-		// for (Relationship r : relationships) {
-		// if (!r.isCascaded() || followCascades) {
-		// Class<? extends EntityBaseBean> bean = r.getBean();
-		// if (includes.contains(bean)) {
-		//
-		// // Mark as wanted
-		// // thisBean.getIncludes().add(bean);
-		//
-		// // Avoid looping forever
-		// Set<Class<? extends EntityBaseBean>> includeReduced = new HashSet<Class<? extends
-		// EntityBaseBean>>(
-		// includes);
-		// includeReduced.remove(bean);
-		//
-		// // Recurse into collection or single object
-		// Map<Field, Method> getters = eiHandler.getGetters(thisBean.getClass());
-		//
-		// if (r.isCollection()) {
-		// Collection<EntityBaseBean> collection = null;
-		// Field field = r.getField();
-		// try {
-		// collection = (Collection<EntityBaseBean>) getters.get(field).invoke(
-		// thisBean, (Object[]) null);
-		// } catch (Exception e) {
-		// throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-		// e.toString());
-		// }
-		// for (EntityBaseBean b : collection) {
-		// b.addIncludes(includeReduced, true);
-		// }
-		// } else {
-		// EntityBaseBean b = null;
-		// Field field = r.getField();
-		// try {
-		// b = (EntityBaseBean) getters.get(field).invoke(thisBean,
-		// (Object[]) null);
-		// } catch (Exception e) {
-		// throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-		// e.toString());
-		// }
-		// if (b != null) {
-		// b.addIncludes(includeReduced, false);
-		// }
-		// }
-		// }
-		// }
-		// }
-	}
-
 	public static CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
 			UserTransaction userTransaction, LuceneSingleton lucene) throws IcatException {
 

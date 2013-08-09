@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -55,6 +56,7 @@ import org.icatproject.core.entity.Job;
 import org.icatproject.core.entity.Keyword;
 import org.icatproject.core.entity.Log;
 import org.icatproject.core.entity.ParameterType;
+import org.icatproject.core.entity.PublicStep;
 import org.icatproject.core.entity.Publication;
 import org.icatproject.core.entity.RelatedDatafile;
 import org.icatproject.core.entity.Sample;
@@ -68,6 +70,7 @@ import org.icatproject.core.entity.UserGroup;
 import org.icatproject.core.manager.BeanManager;
 import org.icatproject.core.manager.CreateResponse;
 import org.icatproject.core.manager.EntityInfo;
+import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.LuceneSingleton;
 import org.icatproject.core.manager.NotificationMessage;
 
@@ -208,7 +211,7 @@ public class ICAT {
 			@WebParam DataCollectionParameter dataCollectionParameter,
 			@WebParam DataCollectionDataset dataCollectionDataset,
 			@WebParam DataCollectionDatafile dataCollectionDatafile, @WebParam Grouping group,
-			@WebParam UserGroup userGroup, @WebParam Log log) {
+			@WebParam UserGroup userGroup, @WebParam Log log, @WebParam PublicStep publicStep) {
 	}
 
 	@WebMethod
@@ -230,6 +233,11 @@ public class ICAT {
 	@WebMethod()
 	public String getApiVersion() throws IcatException {
 		return Constants.API_VERSION;
+	}	
+	
+	@WebMethod()
+	public List<String> getEntityNames() throws IcatException {
+		return EntityInfoHandler.getEntityNamesList();
 	}
 
 	@WebMethod
