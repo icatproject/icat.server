@@ -66,9 +66,9 @@ public class LuceneSingleton {
 	final static SearcherFactory searcherFactory = new SearcherFactory();
 	private static int users;
 
-	public synchronized static LuceneSingleton getInstance() {
+	public synchronized static LuceneSingleton getInstance(PropertyHandler propertyHandler) {
 		if (instance == null) {
-			instance = new LuceneSingleton();
+			instance = new LuceneSingleton(propertyHandler);
 		} else if (instance.directory == null) {
 			instance.refresh();
 			logger.debug("Refreshed LuceneSingleton");
@@ -145,10 +145,10 @@ public class LuceneSingleton {
 	private EntityInfoHandler ei;
 	private long luceneRefreshSeconds;
 
-	private LuceneSingleton() {
+	private LuceneSingleton(PropertyHandler propertyHandler) {
 		ei = EntityInfoHandler.getInstance();
-		luceneDirectory = PropertyHandler.getInstance().getLuceneDirectory();
-		luceneRefreshSeconds = PropertyHandler.getInstance().getLuceneRefreshSeconds() * 1000L;
+		luceneDirectory = propertyHandler.getLuceneDirectory();
+		luceneRefreshSeconds = propertyHandler.getLuceneRefreshSeconds() * 1000L;
 		refresh();
 		logger.debug("Created LuceneSingleton");
 	}

@@ -1,4 +1,4 @@
-package org.icatproject.exposed;
+package org.icatproject.core;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,6 +51,5 @@ public class LoggingConfigurator {
 		} else {
 			logger.info("Using log4j default configuration");
 		}
-
 	}
 }

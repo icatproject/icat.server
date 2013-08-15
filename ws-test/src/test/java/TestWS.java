@@ -47,6 +47,7 @@ import org.icatproject.Job;
 import org.icatproject.ParameterType;
 import org.icatproject.ParameterValueType;
 import org.icatproject.PermissibleStringValue;
+import org.icatproject.PublicStep;
 import org.icatproject.RelType;
 import org.icatproject.Rule;
 import org.icatproject.Sample;
@@ -180,6 +181,45 @@ public class TestWS {
 		sp.setType(p);
 		sample.getParameters().add(sp);
 		return sp;
+	}
+
+	@Test
+	public void publicTable() throws Exception {
+		session.addRule(null, "DatafileFormat", "R");
+		session.addRule(null, "DatasetType", "R");
+		session.delRule(null, "DatafileFormat", "R");
+		session.delRule(null, "DatasetType", "R");
+	}
+
+	@Test
+	public void publicStep() throws Exception {
+		PublicStep ps = new PublicStep();
+		ps.setOrigin("Application");
+		ps.setField("jobs");
+		session.create(ps);
+
+		ps = new PublicStep();
+		ps.setOrigin("Applicatio");
+		ps.setField("jobs");
+		try {
+			session.create(ps);
+			fail("Should have thrown exception");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+			assertEquals("Applicatio is not an EntityBaseBean", e.getMessage());
+		}
+
+		ps = new PublicStep();
+		ps.setOrigin("Application");
+		ps.setField("Jobs");
+		try {
+			session.create(ps);
+			fail("Should have thrown exception");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+			assertEquals("Field value Jobs does not implement a relationship from Application",
+					e.getMessage());
+		}
 	}
 
 	@Test
@@ -460,6 +500,21 @@ public class TestWS {
 
 		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter",
 				inv.getId());
+		assertEquals(0, inv.getSamples().size());
+
+		session.addRule("root", "Sample", "R");
+
+		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter",
+				inv.getId());
+		assertEquals(2, inv.getSamples().size());
+		for (Sample s : inv.getSamples()) {
+			assertEquals(0, s.getParameters().size());
+		}
+
+		session.addRule("root", "SampleParameter", "R");
+
+		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter",
+				inv.getId());
 		assertEquals(2, inv.getSamples().size());
 		for (Sample s : inv.getSamples()) {
 			if (s.getName().equals("S1")) {
@@ -706,9 +761,7 @@ public class TestWS {
 			fail("No throw");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
-			assertEquals(
-					"org.icatproject.core.entity.Investigator is not known to the class loader",
-					e.getMessage());
+			assertEquals("Investigator is not an EntityBaseBean", e.getMessage());
 		}
 		try {
 			session.get("Dataset INCLUDE Investigation, Facility, Instrument", dsId);
@@ -1084,9 +1137,7 @@ public class TestWS {
 			fail("No throw");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
-			assertEquals(
-					"org.icatproject.core.entity.Investigator is not known to the class loader",
-					e.getMessage());
+			assertEquals("Investigator is not an EntityBaseBean", e.getMessage());
 		}
 		try {
 			session.get("Dataset INCLUDE Investigation, Facility, Instrument", dsId);

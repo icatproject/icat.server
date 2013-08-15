@@ -85,7 +85,6 @@ public class Session {
 		final ICATService icatService = new ICATService(icatUrl, new QName(
 				"http://icatproject.org", "ICATService"));
 		this.icat = icatService.getICATPort();
-
 		this.sessionId = login("db", "username", "root", "password", "password");
 		System.out.println("Logged in");
 	}
@@ -146,8 +145,14 @@ public class Session {
 
 	public void delRule(String groupName, String what, String crudFlags) throws Exception {
 		what = what.replace("'", "''");
-		List<Object> rules = search("Rule [what = '" + what + "' and crudFlags = '" + crudFlags
-				+ "'] <-> Grouping [name= '" + groupName + "']");
+		List<Object> rules = null;
+		if (groupName == null) {
+			rules = search("select r FROM Rule r WHERE r.what = '" + what + "' AND r.crudFlags = '"
+					+ crudFlags + "' AND r.grouping IS NULL");
+		} else {
+			rules = search("Rule [what = '" + what + "' and crudFlags = '" + crudFlags
+					+ "'] <-> Grouping [name= '" + groupName + "']");
+		}
 		if (rules.size() == 1) {
 			delete((EntityBaseBean) rules.get(0));
 		} else {
@@ -213,7 +218,7 @@ public class Session {
 	}
 
 	public void clearAuthz() throws Exception {
-		deleteAll(Arrays.asList("Rule", "UserGroup", "User", "Grouping"));
+		deleteAll(Arrays.asList("Rule", "UserGroup", "User", "Grouping", "PublicStep"));
 	}
 
 	public Application createApplication(Facility facility, String name, String version)

@@ -1,11 +1,10 @@
-package org.icatproject.exposed;
+package org.icatproject.core;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
-import javax.ejb.Startup;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
@@ -20,7 +19,6 @@ import org.icatproject.core.manager.NotificationMessage.Message;
 
 @DependsOn("LoggingConfigurator")
 @Singleton
-@Startup
 public class Transmitter {
 
 	private static Logger logger = Logger.getLogger(Transmitter.class);

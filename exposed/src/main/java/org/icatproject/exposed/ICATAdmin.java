@@ -25,6 +25,7 @@ import javax.xml.ws.WebServiceContext;
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.PropertyHandler;
+import org.icatproject.core.Transmitter;
 import org.icatproject.core.manager.BeanManager;
 import org.icatproject.core.manager.LuceneSingleton;
 
@@ -37,10 +38,16 @@ public class ICATAdmin {
 	private static Logger logger = Logger.getLogger(ICATAdmin.class);
 
 	@PersistenceContext(unitName = "icat")
-	protected EntityManager manager;
+	private EntityManager manager;
 
 	@EJB
 	Transmitter transmitter;
+
+	@EJB
+	PropertyHandler propertyHandler;
+
+	@EJB
+	BeanManager beanManager;
 
 	@Resource
 	private UserTransaction userTransaction;
@@ -52,9 +59,8 @@ public class ICATAdmin {
 
 	@PostConstruct
 	private void init() {
-		PropertyHandler p = PropertyHandler.getInstance();
-		if (p.getLuceneDirectory() != null) {
-			lucene = LuceneSingleton.getInstance();
+		if (propertyHandler.getLuceneDirectory() != null) {
+			lucene = LuceneSingleton.getInstance(propertyHandler);
 		}
 	}
 
@@ -80,7 +86,7 @@ public class ICATAdmin {
 
 	@WebMethod
 	public List<String> props() {
-		return BeanManager.props();
+		return beanManager.props();
 	}
 
 	@WebMethod

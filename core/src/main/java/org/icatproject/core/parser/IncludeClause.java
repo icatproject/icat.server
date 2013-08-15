@@ -22,8 +22,8 @@ public class IncludeClause {
 		private int thereVarNum;
 		private boolean allowed;
 
-		public Step(int hereVarNum, String fieldName, int thereVarNum) throws IcatException,
-				ParserException {
+		public Step(int hereVarNum, String fieldName, int thereVarNum, GateKeeper gateKeeper)
+				throws IcatException, ParserException {
 			for (Relationship r : eiHandler.getRelatedEntities(types.get(hereVarNum))) {
 				if (r.getField().getName().equals(fieldName)) {
 					types.put(thereVarNum, r.getDestinationBean());
@@ -37,7 +37,7 @@ public class IncludeClause {
 			}
 			this.hereVarNum = hereVarNum;
 			this.thereVarNum = thereVarNum;
-			this.allowed = GateKeeper.allowed(this);
+			this.allowed = gateKeeper.allowed(relationship);
 		}
 
 		public Relationship getRelationship() {
@@ -68,7 +68,8 @@ public class IncludeClause {
 	Map<Integer, Class<? extends EntityBaseBean>> types = new HashMap<>();
 
 	public IncludeClause(Class<? extends EntityBaseBean> bean, Input input,
-			Map<String, Integer> idVarMap) throws ParserException, IcatException {
+			Map<String, Integer> idVarMap, GateKeeper gateKeeper) throws ParserException,
+			IcatException {
 		for (Entry<String, Integer> entry : idVarMap.entrySet()) {
 			logger.debug("idVarMap entry " + entry.getKey() + " -> " + entry.getValue());
 		}
@@ -80,13 +81,13 @@ public class IncludeClause {
 			input.consume(Token.Type.INTEGER);
 			one = true;
 		} else {
-			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount);
+			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount, gateKeeper);
 		}
 
 		t = input.peek(0);
 		while (t != null && t.getType() == Token.Type.COMMA) {
 			t = input.consume(Token.Type.COMMA);
-			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount);
+			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount, gateKeeper);
 			t = input.peek(0);
 		}
 		logger.debug(this);
@@ -100,8 +101,8 @@ public class IncludeClause {
 		return one;
 	}
 
-	private int processStep(Input input, Map<String, Integer> idVarMap, int fabricatedStepCount)
-			throws ParserException, IcatException {
+	private int processStep(Input input, Map<String, Integer> idVarMap, int fabricatedStepCount,
+			GateKeeper gateKeeper) throws ParserException, IcatException {
 		Token t = input.consume(Token.Type.NAME);
 		String path = t.getValue();
 		String var = null;
@@ -129,7 +130,7 @@ public class IncludeClause {
 		}
 		for (int i = 1; i < eles.length - 1; i++) {
 			thereVarNum = idVarMap.size() + fabricatedStepCount;
-			steps.add(new Step(hereVarNum, eles[i], thereVarNum));
+			steps.add(new Step(hereVarNum, eles[i], thereVarNum, gateKeeper));
 			fabricatedStepCount++;
 			hereVarNum = thereVarNum;
 		}
@@ -147,10 +148,10 @@ public class IncludeClause {
 			}
 			thereVarNum = idVarMap.size() + fabricatedStepCount;
 			idVarMap.put(idv, thereVarNum);
-			steps.add(new Step(hereVarNum, eles[eles.length - 1], thereVarNum));
+			steps.add(new Step(hereVarNum, eles[eles.length - 1], thereVarNum, gateKeeper));
 		} else {
 			thereVarNum = idVarMap.size() + fabricatedStepCount;
-			steps.add(new Step(hereVarNum, eles[eles.length - 1], thereVarNum));
+			steps.add(new Step(hereVarNum, eles[eles.length - 1], thereVarNum, gateKeeper));
 			fabricatedStepCount++;
 		}
 		return fabricatedStepCount;

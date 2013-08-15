@@ -35,16 +35,6 @@ public class TestEntityInfo {
 	}
 
 	@Test
-	public void testSimplePKS() throws Exception {
-		testPKS(Investigation.class);
-		testPKS(Dataset.class);
-		testPKS(Keyword.class);
-		testPKS(InvestigationUser.class);
-		testPKS(User.class);
-		testPKS(Job.class);
-	}
-
-	@Test
 	public void testConstraints() throws Exception {
 		testConstraint(Investigation.class, "facility", "name", "visitId");
 		testConstraint(Dataset.class, "investigation", "name");
@@ -69,11 +59,6 @@ public class TestEntityInfo {
 				assertEquals(klass.getSimpleName() + " value " + i, name[i++], re.getName());
 			}
 		}
-	}
-
-	private void testPKS(Class<? extends EntityBaseBean> klass) throws Exception {
-		String result = eiHandler.getKeyFor(klass).getName();
-		assertEquals(klass.getSimpleName() + " value ", "id", result);
 	}
 
 	@Test
@@ -101,7 +86,9 @@ public class TestEntityInfo {
 
 		testRel(Keyword.class, "From Keyword to Investigation by investigation one");
 
-		testRel(InvestigationUser.class, "From InvestigationUser to Investigation by investigation one", "From InvestigationUser to User by user one");
+		testRel(InvestigationUser.class,
+				"From InvestigationUser to Investigation by investigation one",
+				"From InvestigationUser to User by user one");
 
 		testRel(User.class, "From User to InvestigationUser by investigationUsers many setUser",
 				"From User to UserGroup by userGroups many setUser",
@@ -109,9 +96,11 @@ public class TestEntityInfo {
 				"From User to Study by studies many setUser");
 
 		testRel(Job.class, "From Job to DataCollection by inputDataCollection one",
-				"From Job to Application by application one", "From Job to DataCollection by outputDataCollection one");
+				"From Job to Application by application one",
+				"From Job to DataCollection by outputDataCollection one");
 
-		testRel(Instrument.class, "From Instrument to Facility by facility one",
+		testRel(Instrument.class,
+				"From Instrument to Facility by facility one",
 				"From Instrument to InstrumentScientist by instrumentScientists many setInstrument",
 				"From Instrument to InvestigationInstrument by investigationInstruments many setInstrument");
 	}

@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>icat.core</artifactId>
-    <packaging>jar</packaging>
+    <packaging>ejb</packaging>
 
     <name>ICAT Core</name>
 

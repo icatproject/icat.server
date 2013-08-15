@@ -44,12 +44,6 @@ public class Sample extends EntityBaseBean implements Serializable {
 	public Sample() {
 	}
 
-	@Override
-	public void canDelete(EntityManager manager) {
-		// TODO add code to ensure that sample is not part of a dataset nor an
-		// investigation
-	}
-
 	public List<Dataset> getDatasets() {
 		return this.datasets;
 	}

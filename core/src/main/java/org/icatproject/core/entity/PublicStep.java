@@ -1,15 +1,24 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.util.Set;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.NamedQuery;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.EntityInfoHandler;
+import org.icatproject.core.manager.SingletonFinder;
+import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.GateKeeper;
 
 @Comment("An allowed step for an INCLUDE identifed by the origin entity and the field name for navigation. "
@@ -21,6 +30,9 @@ import org.icatproject.core.manager.GateKeeper;
 public class PublicStep extends EntityBaseBean implements Serializable {
 
 	public static final String GET_ALL_QUERY = "AllowedStep.GetAllQuery";
+	private static final Logger logger = Logger.getLogger(PublicStep.class);
+
+	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
 	public String getOrigin() {
 		return origin;
@@ -50,20 +62,51 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 	public PublicStep() {
 	}
 
-	private void fixup() throws IcatException {
-		GateKeeper.updatePublicSteps();
+	private void fixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
+		Class<? extends EntityBaseBean> bean = EntityInfoHandler.getClass(origin);
+		Set<Relationship> rs = eiHandler.getRelatedEntities(bean);
+		boolean found = false;
+		for (Relationship r : rs) {
+			if (r.getField().getName().equals(field)) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "Field value "
+					+ this.field + " does not implement a relationship from " + origin);
+		}
 	}
 
 	@Override
-	public void postMergeFixup(EntityManager manager) throws IcatException {
-		super.postMergeFixup(manager);
-		this.fixup();
+	public void postMergeFixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
+		super.postMergeFixup(manager, gateKeeper);
+		this.fixup(manager, gateKeeper);
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
-		this.fixup();
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper)
+			throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper);
+		this.fixup(manager, gateKeeper);
+	}
+
+	@PostRemove()
+	void postRemove() {
+		try {
+			SingletonFinder.getGateKeeper().updatePublicSteps();
+		} catch (Throwable e) {
+			logger.error(e.getClass() + " " + e.getMessage());
+		}
+	}
+
+	@PostPersist()
+	void postPersist() {
+		try {
+			SingletonFinder.getGateKeeper().updatePublicSteps();
+		} catch (Throwable e) {
+			logger.error(e.getClass() + " " + e.getMessage());
+		}
 	}
 
 }

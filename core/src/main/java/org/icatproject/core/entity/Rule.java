@@ -10,11 +10,15 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.GateKeeper;
+import org.icatproject.core.manager.SingletonFinder;
 import org.icatproject.core.oldparser.OldInput;
 import org.icatproject.core.oldparser.OldLexerException;
 import org.icatproject.core.oldparser.OldParserException;
@@ -34,9 +38,11 @@ import org.icatproject.core.parser.Tokenizer;
 @NamedQueries({
 		@NamedQuery(name = "Rule.CreateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.c = TRUE"),
 		@NamedQuery(name = "Rule.ReadQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE"),
+		@NamedQuery(name = "Rule.IncludeQuery", query = "SELECT DISTINCT r.includeJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE"),
 		@NamedQuery(name = "Rule.UpdateQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.u = TRUE"),
 		@NamedQuery(name = "Rule.DeleteQuery", query = "SELECT DISTINCT r.crudJPQL FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.d = TRUE"),
-		@NamedQuery(name = "Rule.SearchQuery", query = "SELECT DISTINCT r          FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE") })
+		@NamedQuery(name = "Rule.SearchQuery", query = "SELECT DISTINCT r          FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE"),
+		@NamedQuery(name = "Rule.PublicQuery", query = "SELECT DISTINCT r.bean     FROM Rule r LEFT JOIN r.grouping g WHERE r.restricted = FALSE AND g IS NULL") })
 public class Rule extends EntityBaseBean implements Serializable {
 
 	private final static Logger logger = Logger.getLogger(Rule.class);
@@ -44,8 +50,10 @@ public class Rule extends EntityBaseBean implements Serializable {
 	public static final String CREATE_QUERY = "Rule.CreateQuery";
 	public static final String DELETE_QUERY = "Rule.DeleteQuery";
 	public static final String READ_QUERY = "Rule.ReadQuery";
+	public static final String INCLUDE_QUERY = "Rule.IncludeQuery";
 	public static final String SEARCH_QUERY = "Rule.SearchQuery";
 	public static final String UPDATE_QUERY = "Rule.UpdateQuery";
+	public static final String PUBLIC_QUERY = "Rule.PublicQuery";
 
 	@XmlTransient
 	private String bean;
@@ -91,11 +99,15 @@ public class Rule extends EntityBaseBean implements Serializable {
 	@Column(length = 1024)
 	private String whereJPQL;
 
+	@XmlTransient
+	@Column(length = 1024)
+	private String includeJPQL;
+
 	// Needed for JPA
 	public Rule() {
 	}
 
-	private void fixup() throws IcatException {
+	private void fixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
 		this.crudFlags = this.crudFlags.toUpperCase().trim();
 		for (int i = 0; i < this.crudFlags.length(); i++) {
 			final char c = this.crudFlags.charAt(i);
@@ -153,6 +165,8 @@ public class Rule extends EntityBaseBean implements Serializable {
 		fromJPQL = r.getFrom();
 		whereJPQL = r.getWhere();
 		crudJPQL = "SELECT COUNT($0$) FROM " + r.getCrudFrom() + " WHERE $0$.id = :pkid"
+				+ (whereJPQL.isEmpty() ? "" : " AND (" + whereJPQL + ")");
+		includeJPQL = "SELECT $0$.id FROM " + r.getCrudFrom() + " WHERE $0$.id IN (:pkids)"
 				+ (whereJPQL.isEmpty() ? "" : " AND (" + whereJPQL + ")");
 
 		varCount = r.getVarCount();
@@ -225,20 +239,21 @@ public class Rule extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void postMergeFixup(EntityManager manager) throws IcatException {
-		super.postMergeFixup(manager);
+	public void postMergeFixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
+		super.postMergeFixup(manager, gateKeeper);
 		this.c = false;
 		this.r = false;
 		this.u = false;
 		this.d = false;
-		this.fixup();
+		this.fixup(manager, gateKeeper);
 		logger.debug("postMergeFixup of Rule for " + this.crudFlags + " of " + this.what);
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
-		this.fixup();
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper)
+			throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper);
+		this.fixup(manager, gateKeeper);
 		logger.debug("PreparePersist of Rule for " + this.crudFlags + " of " + this.what);
 	}
 
@@ -292,6 +307,24 @@ public class Rule extends EntityBaseBean implements Serializable {
 
 	public void setWhereJPQL(String whereJPQL) {
 		this.whereJPQL = whereJPQL;
+	}
+
+	@PostRemove()
+	void postRemove() {
+		try {
+			SingletonFinder.getGateKeeper().updatePublicTables();
+		} catch (Throwable e) {
+			logger.error(e.getClass() + " " + e.getMessage());
+		}
+	}
+
+	@PostPersist()
+	void postPersist() {
+		try {
+			SingletonFinder.getGateKeeper().updatePublicTables();
+		} catch (Throwable e) {
+			logger.error(e.getClass() + " " + e.getMessage());
+		}
 	}
 
 }

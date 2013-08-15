@@ -11,6 +11,7 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.GateKeeper;
 
 @Comment("A parameter associated with a sample")
 @SuppressWarnings("serial")
@@ -33,8 +34,9 @@ public class SampleParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper)
+			throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper);
 		this.id = null;
 		if (type == null) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,

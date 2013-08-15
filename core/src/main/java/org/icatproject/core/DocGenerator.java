@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,8 +53,14 @@ public class DocGenerator {
 			Set<Field> notnullables = new HashSet<Field>(eiHandler.getNotNullableFields(eklass));
 			Map<Field, Integer> stringFields = eiHandler.getStringFields(eklass);
 
-			Field key = eiHandler.getKeyFor(eklass);
-			fields.remove(key);
+			Iterator<Field> iter = fields.iterator();
+			while (iter.hasNext()) {
+				Field f = iter.next();
+				if (f.getName().equals("id")) {
+					iter.remove();
+					break;
+				}
+			}
 
 			for (List<Field> constraint : eiHandler.getConstraintFields(eklass)) {
 				out.print("<p><b>Uniqueness constraint</b> ");

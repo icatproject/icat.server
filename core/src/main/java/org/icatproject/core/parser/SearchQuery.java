@@ -3,14 +3,12 @@ package org.icatproject.core.parser;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
-import org.icatproject.core.PropertyHandler;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Rule;
 import org.icatproject.core.manager.GateKeeper;
@@ -24,9 +22,6 @@ public class SearchQuery {
 	// (([include_clause] [limit_clause]) | ([limit_clause] [include_clause]))
 
 	private static Logger logger = Logger.getLogger(SearchQuery.class);
-
-	private final static Set<String> rootUserNames = PropertyHandler.getInstance()
-			.getRootUserNames();
 
 	private String idVar;
 
@@ -44,7 +39,10 @@ public class SearchQuery {
 
 	private int varCount;
 
-	public SearchQuery(Input input) throws ParserException, IcatException {
+	private GateKeeper gateKeeper;
+
+	public SearchQuery(Input input, GateKeeper gateKeeper) throws ParserException, IcatException {
+		this.gateKeeper = gateKeeper;
 
 		input.consume(Token.Type.SELECT);
 		StringBuilder sb = new StringBuilder("SELECT ");
@@ -104,7 +102,7 @@ public class SearchQuery {
 			t = input.peek(0);
 		}
 		if (t != null && t.getType() == Token.Type.INCLUDE) {
-			includeClause = new IncludeClause(getBean(), input, idVarMap);
+			includeClause = new IncludeClause(getBean(), input, idVarMap, gateKeeper);
 			t = input.peek(0);
 		}
 		if (t != null && t.getType() == Token.Type.LIMIT) {
@@ -113,7 +111,7 @@ public class SearchQuery {
 
 		}
 		if (includeClause == null && t != null && t.getType() == Token.Type.INCLUDE) {
-			includeClause = new IncludeClause(getBean(), input, idVarMap);
+			includeClause = new IncludeClause(getBean(), input, idVarMap, gateKeeper);
 			t = input.peek(0);
 		}
 		if (t != null) {
@@ -148,10 +146,14 @@ public class SearchQuery {
 
 		boolean restricted;
 		List<Rule> rules = null;
-		if (rootUserNames.contains(userId) && GateKeeper.rootSpecials.contains(beanName)) {
+		if (gateKeeper.getRootUserNames().contains(userId)
+				&& gateKeeper.getRootSpecials().contains(beanName)) {
 			logger.info("\"Root\" user " + userId + " is allowed READ to " + beanName);
 			restricted = false;
-		} else {
+		} else if (gateKeeper.getPublicTables().contains(beanName)) {
+			logger.info("All are allowed READ to " + beanName);
+			restricted = false;
+		} else {	
 			TypedQuery<Rule> query = manager.createNamedQuery(Rule.SEARCH_QUERY, Rule.class)
 					.setParameter("member", userId).setParameter("bean", beanName);
 			rules = query.getResultList();

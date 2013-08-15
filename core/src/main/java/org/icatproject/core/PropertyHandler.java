@@ -12,32 +12,28 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
+import javax.ejb.DependsOn;
+import javax.ejb.Singleton;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 import org.icatproject.authentication.Authenticator;
+import org.icatproject.core.manager.BeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.NotificationRequest;
 
+@DependsOn("LoggingConfigurator")
+@Singleton
 public class PropertyHandler {
 
 	public enum Operation {
 		C, U, D
 	}
 
-	private static PropertyHandler instance = null;
-	private static Logger logger;
-
-	synchronized public static PropertyHandler getInstance() {
-		if (instance == null) {
-			logger = Logger.getLogger(PropertyHandler.class);
-			instance = new PropertyHandler();
-		}
-		return instance;
-	}
-
+	private final static Logger logger = Logger.getLogger(PropertyHandler.class);;
 	private final static Pattern cudPattern = Pattern.compile("[CUD]*");
 	private final static Pattern srwPattern = Pattern.compile("[SRW]*");
 
@@ -67,7 +63,8 @@ public class PropertyHandler {
 
 	private List<String> formattedProps = new ArrayList<String>();
 
-	private PropertyHandler() {
+	@PostConstruct
+	private void init() {
 		File f = new File("icat.properties");
 		Properties props = new Properties();
 		try {
@@ -78,7 +75,7 @@ public class PropertyHandler {
 			logger.fatal(msg);
 			throw new IllegalStateException(msg);
 		}
-		
+
 		/* log4j.properties */
 		String path = props.getProperty("log4j.properties");
 		if (path != null) {

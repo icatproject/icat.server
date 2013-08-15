@@ -15,6 +15,7 @@ import javax.persistence.TemporalType;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.GateKeeper;
 
 @SuppressWarnings("serial")
 @MappedSuperclass
@@ -110,8 +111,9 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper)
+			throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper);
 		check(manager);
 	}
 
@@ -157,8 +159,8 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void postMergeFixup(EntityManager manager) throws IcatException {
-		super.postMergeFixup(manager);
+	public void postMergeFixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
+		super.postMergeFixup(manager, gateKeeper);
 		check(manager);
 	}
 

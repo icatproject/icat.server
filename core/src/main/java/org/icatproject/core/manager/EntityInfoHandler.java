@@ -73,12 +73,6 @@ import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
 import org.icatproject.core.entity.PublicStep;
 
-/**
- * Holds information about primary keys of an Entity In the case of a simple key it is a list with
- * the accessor method entry, otherwise the first entry is the accessor method of the embedded PK
- * object and subsequent entries are the accessor methods within the PK object. It also holds the
- * set of related entities.
- * */
 // Note that this does not use a Singleton Bean as there is no need for the
 // extra complexity and
 // that the instance is created statically as we know it will be needed.
@@ -122,19 +116,17 @@ public class EntityInfoHandler {
 		private final Map<Field, Method> getters;
 		private final List<Field> notNullableFields;
 		private Set<Relationship> ones;
-		private final Field pks;
 		private final Set<Relationship> relatedEntities;
 		private final Map<Field, Method> setters;
 		private final Map<Field, Integer> stringFields;
 		private Set<Field> attributes;
 		private Constructor<? extends EntityBaseBean> constructor;
 
-		public PrivateEntityInfo(Field pks, Set<Relationship> rels, List<Field> notNullableFields,
+		public PrivateEntityInfo(Set<Relationship> rels, List<Field> notNullableFields,
 				Map<Field, Method> getters, Map<Field, Integer> stringFields,
 				Map<Field, Method> setters, List<List<Field>> constraintFields,
 				String classComment, Map<Field, String> fieldComments, Set<Relationship> ones,
 				Set<Field> attributes, Constructor<? extends EntityBaseBean> constructor) {
-			this.pks = pks;
 			this.relatedEntities = rels;
 			this.notNullableFields = notNullableFields;
 			this.getters = getters;
@@ -211,20 +203,19 @@ public class EntityInfoHandler {
 	protected final static Logger logger = Logger.getLogger(EntityInfoHandler.class);
 
 	public static Class<? extends EntityBaseBean> getClass(String tableName) throws IcatException {
-		final String name = Constants.ENTITY_PREFIX + tableName;
 		try {
-			final Class<?> klass = Class.forName(name);
+			final Class<?> klass = Class.forName(Constants.ENTITY_PREFIX + tableName);
 			if (EntityBaseBean.class.isAssignableFrom(klass)) {
 				@SuppressWarnings("unchecked")
 				final Class<? extends EntityBaseBean> eklass = (Class<? extends EntityBaseBean>) klass;
 				return eklass;
 			} else {
-				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, name
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, tableName
 						+ " is not an EntityBaseBean");
 			}
 		} catch (final ClassNotFoundException e) {
-			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, name
-					+ " is not known to the class loader");
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, tableName
+					+ " is not an EntityBaseBean");
 		}
 	}
 
@@ -245,18 +236,6 @@ public class EntityInfoHandler {
 		while (cobj != null) {
 			fields.addAll(getFields(cobj));
 			cobj = cobj.getSuperclass();
-		}
-
-		Field key = null;
-		for (final Field field : fields) {
-			if (field.getAnnotation(Id.class) != null) {
-				key = field;
-			}
-		}
-
-		if (key == null) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-					"Unable to determine key for " + objectClass.getSimpleName());
 		}
 
 		final Set<Field> attributes = new HashSet<Field>();
@@ -369,8 +348,8 @@ public class EntityInfoHandler {
 		final Map<Field, String> comments = new HashMap<Field, String>();
 
 		for (final Field field : fields) {
-			if (Arrays.asList("modTime", "createTime", "createId", "modId").contains(
-					field.getName())) {
+			if (Arrays.asList("modTime", "createTime", "createId", "modId", "beanManager")
+					.contains(field.getName())) {
 				continue;
 			}
 
@@ -558,7 +537,7 @@ public class EntityInfoHandler {
 					+ e.getMessage());
 		}
 
-		return new PrivateEntityInfo(key, rels, notNullableFields, getters, stringFields, setters,
+		return new PrivateEntityInfo(rels, notNullableFields, getters, stringFields, setters,
 				constraintFields, commentString, comments, ones, attributes, constructor);
 	}
 
@@ -683,18 +662,6 @@ public class EntityInfoHandler {
 				this.map.put(objectClass, ei);
 			}
 			return ei.getters;
-		}
-	}
-
-	public Field getKeyFor(Class<? extends EntityBaseBean> objectClass) throws IcatException {
-		PrivateEntityInfo ei = null;
-		synchronized (this.map) {
-			ei = this.map.get(objectClass);
-			if (ei == null) {
-				ei = this.buildEi(objectClass);
-				this.map.put(objectClass, ei);
-			}
-			return ei.pks;
 		}
 	}
 

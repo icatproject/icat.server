@@ -10,6 +10,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.icatproject.core.IcatException;
+import org.icatproject.core.manager.GateKeeper;
 
 @Comment("A parameter associated with a DataCollection")
 @SuppressWarnings("serial")
@@ -32,8 +33,9 @@ public class DataCollectionParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager) throws IcatException {
-		super.preparePersist(modId, manager);
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper)
+			throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper);
 		if (!type.isApplicableToDataCollection()) { // type has been checked as not null by super
 													// call
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,

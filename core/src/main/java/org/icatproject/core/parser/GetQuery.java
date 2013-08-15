@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
+import org.icatproject.core.manager.GateKeeper;
 
 public class GetQuery {
 
@@ -18,7 +19,7 @@ public class GetQuery {
 
 	private IncludeClause include;
 
-	public GetQuery(Input input) throws ParserException, IcatException {
+	public GetQuery(Input input, GateKeeper gateKeeper) throws ParserException, IcatException {
 		this.bean = EntityInfoHandler.getClass(input.consume(Token.Type.NAME).getValue());
 		Token t = input.peek(0);
 		if (t != null && t.getType() == Token.Type.AS) {
@@ -33,7 +34,7 @@ public class GetQuery {
 			t = input.peek(0);
 		}
 		if (t != null && t.getType() == Token.Type.INCLUDE) {
-			include = new IncludeClause(bean, input, idVarMap);
+			include = new IncludeClause(bean, input, idVarMap, gateKeeper);
 			t = input.peek(0);
 		}
 		if (t != null) {

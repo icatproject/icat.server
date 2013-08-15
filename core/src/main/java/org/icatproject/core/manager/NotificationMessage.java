@@ -43,10 +43,8 @@ public class NotificationMessage {
 
 	private Message message;
 
-	public NotificationMessage(Operation operation, EntityBaseBean bean, EntityManager manager)
-			throws IcatException {
-		Map<String, NotificationRequest> notificationRequests = PropertyHandler.getInstance()
-				.getNotificationRequests();
+	public NotificationMessage(Operation operation, EntityBaseBean bean, EntityManager manager,
+			Map<String, NotificationRequest> notificationRequests) throws IcatException {
 		String entity = bean.getClass().getSimpleName();
 		String key = entity + ":" + operation.name();
 		NotificationRequest nr = notificationRequests.get(key);
