@@ -17,7 +17,7 @@ import javax.persistence.UniqueConstraint;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "FACILITY_ID", "NAME",
-		"MOLECULAR_FORMULA" }) })
+		"MOLECULARFORMULA" }) })
 public class SampleType extends EntityBaseBean implements Serializable {
 
 	@Comment("The facility which has defined this sample type")
@@ -26,7 +26,7 @@ public class SampleType extends EntityBaseBean implements Serializable {
 	private Facility facility;
 
 	@Comment("The formula written as a string -e.g. C2H6O2 for ethylene glycol")
-	@Column(nullable = false, name = "MOLECULAR_FORMULA")
+	@Column(nullable = false, name = "MOLECULARFORMULA")
 	private String molecularFormula;
 
 	@Column(nullable = false, name = "NAME")

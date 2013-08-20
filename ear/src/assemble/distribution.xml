@@ -7,12 +7,17 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <outputDirectory>icat.ear.config</outputDirectory>
+            <outputDirectory>icat</outputDirectory>
             <directory>${basedir}/src/main/scripts</directory>
         </fileSet>
         <fileSet>
-            <outputDirectory>icat.ear.config</outputDirectory>
+            <outputDirectory>icat</outputDirectory>
             <directory>${basedir}/src/main/config</directory>
+        </fileSet>
+         <fileSet>
+            <outputDirectory>icat</outputDirectory>
+            <directory>${basedir}/target</directory>
+            <include>*.ear</include>
         </fileSet>
     </fileSets>
 </assembly>
