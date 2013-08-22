@@ -1,13 +1,25 @@
 #!/bin/env python
 
-import MySQLdb as mdb
-from optparse import OptionParser
 import sys
+try:
+    import cx_Oracle
+except:
+    print "import cx_Oracle failed becuase shared library missing. Try something like: "
+    print "export LD_LIBRARY_PATH=/u01/app/oracle/product/11.2.0/xe/lib/"
+    sys.exit(1)
 
-username = 'icat'
+from optparse import OptionParser
+
+username = 'CLF_ICAT_AG2'
 password = 'icat'
-schema = 'icat'
-con = mdb.connect('localhost', username, password, schema);
+db = '//localhost:1521/XE'
+
+conString = username + "/" + password + '@' + db
+try:
+    con = cx_Oracle.connect(conString)
+except:
+    print "connect to " + conString + " failed";
+    sys.exit(1) 
 
 parser = OptionParser()
 parser.add_option("--facility", "-f", help="Name of facility to relate to applications - not needed if exactly one exists")
@@ -21,22 +33,22 @@ def abort(msg):
     sys.exit(1)
     
 def change():
-    cur.execute("ALTER TABLE APPLICATION ADD FACILITY_ID BIGINT")   
+    cur.execute("ALTER TABLE APPLICATION ADD FACILITY_ID NUMBER(19)")   
     cur.execute("UPDATE APPLICATION SET FACILITY_ID = " + str(facility_id))
-    cur.execute("ALTER TABLE APPLICATION CHANGE FACILITY_ID FACILITY_ID BIGINT NOT NULL")
-    cur.execute("ALTER TABLE APPLICATION CHANGE NAME NAME VARCHAR(255) NOT NULL")
-    cur.execute("ALTER TABLE APPLICATION CHANGE VERSION VERSION VARCHAR(255) NOT NULL")
-    cur.execute("CREATE TABLE DATACOLLECTIONDATAFILE (ID BIGINT NOT NULL, CREATE_ID VARCHAR(255) NOT NULL, CREATE_TIME DATETIME NOT NULL, MOD_ID VARCHAR(255) NOT NULL, MOD_TIME DATETIME NOT NULL, DATACOLLECTION_ID BIGINT NOT NULL, DATAFILE_ID BIGINT NOT NULL, PRIMARY KEY (ID))")
-    cur.execute("CREATE TABLE DATACOLLECTIONDATASET (ID BIGINT NOT NULL, CREATE_ID VARCHAR(255) NOT NULL, CREATE_TIME DATETIME NOT NULL, MOD_ID VARCHAR(255) NOT NULL, MOD_TIME DATETIME NOT NULL, DATACOLLECTION_ID BIGINT NOT NULL, DATASET_ID BIGINT NOT NULL, PRIMARY KEY (ID))")
-    cur.execute("CREATE TABLE DATACOLLECTION (ID BIGINT NOT NULL, CREATE_ID VARCHAR(255) NOT NULL, CREATE_TIME DATETIME NOT NULL, MOD_ID VARCHAR(255) NOT NULL, MOD_TIME DATETIME NOT NULL, PRIMARY KEY (ID))")
-    cur.execute("CREATE TABLE DATACOLLECTIONPARAMETER (ID BIGINT NOT NULL, CREATE_ID VARCHAR(255) NOT NULL, CREATE_TIME DATETIME NOT NULL, DATETIME_VALUE DATETIME, ERROR DOUBLE, MOD_ID VARCHAR(255) NOT NULL, MOD_TIME DATETIME NOT NULL, NUMERIC_VALUE DOUBLE, RANGEBOTTOM DOUBLE, RANGETOP DOUBLE, STRING_VALUE VARCHAR(4000), DATACOLLECTION_ID BIGINT NOT NULL, PARAMETER_TYPE_ID BIGINT NOT NULL, PRIMARY KEY (ID))")
-    cur.execute("ALTER TABLE DATAFILEFORMAT CHANGE VERSION VERSION VARCHAR(255) NOT NULL")  
-    cur.execute("ALTER TABLE DATAFILE CHANGE DATASET_ID DATASET_ID BIGINT NOT NULL")
-    cur.execute("ALTER TABLE DATASET CHANGE INVESTIGATION_ID INVESTIGATION_ID BIGINT NOT NULL")
-    cur.execute("ALTER TABLE DATASET CHANGE TYPE TYPE_ID BIGINT NOT NULL")
-    cur.execute("ALTER TABLE DATASET CHANGE COMPLETE COMPLETE TINYINT(1) default 0 NOT NULL")
-    cur.execute("ALTER TABLE GROUP_ RENAME GROUPING")     
-    cur.execute("CREATE TABLE INVESTIGATIONINSTRUMENT (ID BIGINT NOT NULL, CREATE_ID VARCHAR(255) NOT NULL, CREATE_TIME DATETIME NOT NULL, MOD_ID VARCHAR(255) NOT NULL, MOD_TIME DATETIME NOT NULL, INSTRUMENT_ID BIGINT NOT NULL, INVESTIGATION_ID BIGINT NOT NULL, PRIMARY KEY (ID))")
+    cur.execute("ALTER TABLE APPLICATION MODIFY FACILITY_ID NUMBER(19) NOT NULL")
+    cur.execute("ALTER TABLE APPLICATION MODIFY NAME VARCHAR2(255) NOT NULL")
+    cur.execute("ALTER TABLE APPLICATION MODIFY VERSION VARCHAR2(255) NOT NULL")
+    cur.execute("CREATE TABLE DATACOLLECTION (ID NUMBER(19) NOT NULL, CREATE_ID VARCHAR2(255) NOT NULL, CREATE_TIME TIMESTAMP NOT NULL, MOD_ID VARCHAR2(255) NOT NULL, MOD_TIME TIMESTAMP NOT NULL, PRIMARY KEY (ID))")
+    cur.execute("CREATE TABLE DATACOLLECTIONDATAFILE (ID NUMBER(19) NOT NULL, CREATE_ID VARCHAR2(255) NOT NULL, CREATE_TIME TIMESTAMP NOT NULL, MOD_ID VARCHAR2(255) NOT NULL, MOD_TIME TIMESTAMP NOT NULL, DATACOLLECTION_ID NUMBER(19) NOT NULL, DATAFILE_ID NUMBER(19) NOT NULL, PRIMARY KEY (ID))")
+    cur.execute("CREATE TABLE DATACOLLECTIONDATASET (ID NUMBER(19) NOT NULL, CREATE_ID VARCHAR2(255) NOT NULL, CREATE_TIME TIMESTAMP NOT NULL, MOD_ID VARCHAR2(255) NOT NULL, MOD_TIME TIMESTAMP NOT NULL, DATACOLLECTION_ID NUMBER(19) NOT NULL, DATASET_ID NUMBER(19) NOT NULL, PRIMARY KEY (ID))")
+    cur.execute("CREATE TABLE DATACOLLECTIONPARAMETER (ID NUMBER(19) NOT NULL, CREATE_ID VARCHAR2(255) NOT NULL, CREATE_TIME TIMESTAMP NOT NULL, DATETIME_VALUE TIMESTAMP NULL, ERROR NUMBER(38,127) NULL, MOD_ID VARCHAR2(255) NOT NULL, MOD_TIME TIMESTAMP NOT NULL, NUMERIC_VALUE NUMBER(38,127) NULL, RANGEBOTTOM NUMBER(38,127) NULL, RANGETOP NUMBER(38,127) NULL, STRING_VALUE VARCHAR2(4000) NULL, DATACOLLECTION_ID NUMBER(19) NOT NULL, PARAMETER_TYPE_ID NUMBER(19) NOT NULL, PRIMARY KEY (ID))")
+    cur.execute("ALTER TABLE DATAFILEFORMAT MODIFY VERSION VARCHAR2(255) NOT NULL")  
+    cur.execute("ALTER TABLE DATAFILE MODIFY DATASET_ID NUMBER(19) NOT NULL")
+    cur.execute("ALTER TABLE DATASET MODIFY INVESTIGATION_ID NUMBER(19) NOT NULL") 
+    cur.execute("ALTER TABLE DATASET RENAME COLUMN TYPE TO TYPE_ID")
+    cur.execute("ALTER TABLE DATASET MODIFY COMPLETE NUMBER(1) default 0 NOT NULL")
+    cur.execute('ALTER TABLE GROUP_ RENAME TO GROUPING')     
+    cur.execute("CREATE TABLE INVESTIGATIONINSTRUMENT (ID NUMBER(19) NOT NULL, CREATE_ID VARCHAR2(255) NOT NULL, CREATE_TIME TIMESTAMP NOT NULL, MOD_ID VARCHAR2(255) NOT NULL, MOD_TIME TIMESTAMP NOT NULL, INSTRUMENT_ID NUMBER(19) NOT NULL, INVESTIGATION_ID NUMBER(19) NOT NULL, PRIMARY KEY (ID))")
     cur.execute("SELECT CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, ID, INSTRUMENT_ID FROM INVESTIGATION WHERE INSTRUMENT_ID IS NOT NULL")
     rowsout = []
     rows = cur.fetchall()
@@ -47,16 +59,16 @@ def change():
             ID += 1       
         cur.executemany("insert into INVESTIGATIONINSTRUMENT(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, INVESTIGATION_ID, INSTRUMENT_ID) values (%s, %s, %s, %s, %s, %s, %s)", rowsout)
         con.commit()
-    cur.execute("ALTER TABLE INVESTIGATION CHANGE VISIT_ID VISIT_ID VARCHAR(255) NOT NULL")
-    cur.execute("ALTER TABLE INVESTIGATION DROP FACILITY_CYCLE_ID")
-    cur.execute("ALTER TABLE INVESTIGATION DROP INSTRUMENT_ID")
+    cur.execute("ALTER TABLE INVESTIGATION MODIFY VISIT_ID VARCHAR2(255) NOT NULL")
+    cur.execute("ALTER TABLE INVESTIGATION DROP COLUMN FACILITY_CYCLE_ID")
+    cur.execute("ALTER TABLE INVESTIGATION DROP COLUMN INSTRUMENT_ID")
     cur.execute("ALTER TABLE JOB ADD ARGUMENTS VARCHAR(255)")
-    cur.execute("ALTER TABLE JOB ADD INPUTDATACOLLECTION_ID BIGINT")
-    cur.execute("ALTER TABLE JOB ADD OUTPUTDATACOLLECTION_ID BIGINT")
-    
+    cur.execute("ALTER TABLE JOB ADD INPUTDATACOLLECTION_ID NUMBER(19)")
+    cur.execute("ALTER TABLE JOB ADD OUTPUTDATACOLLECTION_ID NUMBER(19)")
+      
     cur.execute("SELECT ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME FROM JOB")
     jobs = cur.fetchall();
-
+   
     ID = 0L
     IDS = 0L
     IDF = 0L
@@ -78,7 +90,7 @@ def change():
                 cur.execute("INSERT INTO DATACOLLECTIONDATAFILE(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, DATACOLLECTION_ID, DATAFILE_ID)  values (%s, %s, %s, %s, %s, %s, %s)", (IDF, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, ID, dfid))
                 IDF += 1
             ID += 1
-    
+      
         cur.execute("SELECT DATASET_ID FROM OUTPUTDATASET WHERE JOB_ID =" + str(jobId))
         datasets = cur.fetchall()
         cur.execute("SELECT DATAFILE_ID FROM OUTPUTDATAFILE WHERE JOB_ID =" + str(jobId))
@@ -95,16 +107,16 @@ def change():
                 cur.execute("INSERT INTO DATACOLLECTIONDATAFILE(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, DATACOLLECTION_ID, DATAFILE_ID)  values (%s, %s, %s, %s, %s, %s, %s)", (IDF, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, ID, dfid))
                 IDF += 1
             ID += 1
-    
-    cur.execute("CREATE TABLE LOG (ID BIGINT NOT NULL, CREATE_ID VARCHAR(255) NOT NULL, CREATE_TIME DATETIME NOT NULL, DURATION BIGINT, ENTITYID BIGINT, ENTITYNAME VARCHAR(255), MOD_ID VARCHAR(255) NOT NULL, MOD_TIME DATETIME NOT NULL, OPERATION VARCHAR(255), QUERY VARCHAR(255), PRIMARY KEY (ID))")
-    cur.execute("ALTER TABLE PARAMETERTYPE ADD APPLICABLETODATACOLLECTION TINYINT(1) default 0")
-    cur.execute("ALTER TABLE PARAMETERTYPE CHANGE UNITS UNITS VARCHAR(255) NOT NULL")
-    cur.execute("CREATE TABLE PUBLICSTEP (ID BIGINT NOT NULL, CREATE_ID VARCHAR(255) NOT NULL, CREATE_TIME DATETIME NOT NULL, FIELD VARCHAR(32) NOT NULL, MOD_ID VARCHAR(255) NOT NULL, MOD_TIME DATETIME NOT NULL, ORIGIN VARCHAR(32) NOT NULL, PRIMARY KEY (ID))")
+      
+    cur.execute("CREATE TABLE LOG (ID NUMBER(19) NOT NULL, CREATE_ID VARCHAR2(255) NOT NULL, CREATE_TIME TIMESTAMP NOT NULL, DURATION NUMBER(19) NULL, ENTITYID NUMBER(19) NULL, ENTITYNAME VARCHAR2(255) NULL, MOD_ID VARCHAR2(255) NOT NULL, MOD_TIME TIMESTAMP NOT NULL, OPERATION VARCHAR2(255) NULL, QUERY VARCHAR2(255) NULL, PRIMARY KEY (ID))")
+    cur.execute("ALTER TABLE PARAMETERTYPE ADD APPLICABLETODATACOLLECTION NUMBER(1) default 0")
+    cur.execute("ALTER TABLE PARAMETERTYPE MODIFY UNITS VARCHAR2(255) NOT NULL")
+    cur.execute("CREATE TABLE PUBLICSTEP (ID NUMBER(19) NOT NULL, CREATE_ID VARCHAR2(255) NOT NULL, CREATE_TIME TIMESTAMP NOT NULL, FIELD VARCHAR2(32) NOT NULL, MOD_ID VARCHAR2(255) NOT NULL, MOD_TIME TIMESTAMP NOT NULL, ORIGIN VARCHAR2(32) NOT NULL, PRIMARY KEY (ID))")
     cur.execute("DROP TABLE RULE")
-    cur.execute("CREATE TABLE RULE_ (ID BIGINT NOT NULL, BEAN VARCHAR(255), C TINYINT(1) default 0, CREATE_ID VARCHAR(255) NOT NULL, CREATE_TIME DATETIME NOT NULL, CRUDFLAGS VARCHAR(4) NOT NULL, CRUDJPQL VARCHAR(1024), D TINYINT(1) default 0, FROMJPQL VARCHAR(1024), INCLUDEJPQL VARCHAR(1024), MOD_ID VARCHAR(255) NOT NULL, MOD_TIME DATETIME NOT NULL, R TINYINT(1) default 0, RESTRICTED TINYINT(1) default 0, U TINYINT(1) default 0, VARCOUNT INTEGER, WHAT VARCHAR(255) NOT NULL, WHEREJPQL VARCHAR(1024), GROUPING_ID BIGINT, PRIMARY KEY (ID))")
-    cur.execute("ALTER TABLE SAMPLETYPE CHANGE MOLECULARFORMULA MOLECULARFORMULA VARCHAR(255) NOT NULL")
-    cur.execute("ALTER TABLE USERGROUP CHANGE GROUP_NAME GROUP_ID BIGINT NOT NULL")
-    cur.execute("ALTER TABLE USERGROUP CHANGE USER_NAME USER_ID BIGINT NOT NULL")
+    cur.execute("CREATE TABLE RULE_ (ID NUMBER(19) NOT NULL, BEAN VARCHAR2(255) NULL, C NUMBER(1) default 0 NULL, CREATE_ID VARCHAR2(255) NOT NULL, CREATE_TIME TIMESTAMP NOT NULL, CRUDFLAGS VARCHAR2(4) NOT NULL, CRUDJPQL VARCHAR2(1024) NULL, D NUMBER(1) default 0 NULL, FROMJPQL VARCHAR2(1024) NULL, INCLUDEJPQL VARCHAR2(1024) NULL, MOD_ID VARCHAR2(255) NOT NULL, MOD_TIME TIMESTAMP NOT NULL, R NUMBER(1) default 0 NULL, RESTRICTED NUMBER(1) default 0 NULL, U NUMBER(1) default 0 NULL, VARCOUNT NUMBER(10) NULL, WHAT VARCHAR2(255) NOT NULL, WHEREJPQL VARCHAR2(1024) NULL, GROUPING_ID NUMBER(19) NULL, PRIMARY KEY (ID))")
+    cur.execute("ALTER TABLE SAMPLETYPE MODIFY MOLECULARFORMULA VARCHAR2(255) NOT NULL")
+    cur.execute("ALTER TABLE USERGROUP RENAME COLUMN GROUP_NAME TO GROUP_ID")
+    cur.execute("ALTER TABLE USERGROUP RENAME COLUMN USER_NAME TO USER_ID")
 
 def dropTables():
     cur.execute("DROP TABLE NOTIFICATIONREQUEST")
@@ -113,38 +125,39 @@ def dropTables():
     cur.execute("DROP TABLE OUTPUTDATAFILE")
     cur.execute("DROP TABLE OUTPUTDATASET")
     
-def dropKeys():
-    for table in tables:
-        cur.execute("SHOW CREATE TABLE " + table) 
-        rows = cur.fetchall()
-        for row in rows:
-            create = row[1]
-            if not "InnoDB" in create:
-                query = "ALTER TABLE " + table + " ENGINE InnoDB"
+def dropOld():
+    for table in ['LOG', 'PUBLICSTEP', 'RULE_', 'GROUP', 'DATACOLLECTIONDATAFILE', 'DATACOLLECTIONDATASET', 'DATACOLLECTION',
+                  'DATACOLLECTIONPARAMETER', 'INVESTIGATIONINSTRUMENT']:
+        try:
+            query = 'DROP TABLE ' + table
+            cur.execute(query)
+            print query
+        except:
+            pass
+    
+def dropKeys():       
+    query = "select TABLE_NAME, CONSTRAINT_NAME, INDEX_NAME from USER_CONSTRAINTS where CONSTRAINT_TYPE IN ('R','U') and OWNER = '" + username + "'";
+    cur.execute(query)
+    rows = cur.fetchall()
+    for row in rows:
+        table, constraint, index = row
+        if table in tables:
+            query = "ALTER TABLE " + table + " DROP CONSTRAINT " + constraint
+            print query
+            cur.execute(query)
+            if index:
+                query = "DROP INDEX " + index
                 print query
-                cur.execute(query)
-           
-    query = "select table_name, constraint_name from information_schema.KEY_COLUMN_USAGE where table_schema = '" + schema + "' and referenced_table_name is not null;"
+                cur.execute(query) 
+            
+    query = "select TABLE_NAME, INDEX_NAME from ALL_INDEXES where OWNER = 'CLF_ICAT_AG2' and not UNIQUENESS = 'UNIQUE'"
     cur.execute(query)
     rows = cur.fetchall()
     for row in rows:
         table = row[0]
         if table in tables:
-            query = "ALTER TABLE " + table + " DROP FOREIGN KEY " + row[1]
-            print query
-            cur.execute(query)
-        else:
-            print "Don't touch", table
-                       
-    for table in tables:
-        cur.execute("SHOW INDEX IN " + table)   
-        rows = cur.fetchall()
-        names = {}
-        for row in rows:
-            names[row[2]] = None
-        del names["PRIMARY"]
-        for index in names.keys():          
-            query = "ALTER TABLE " + table + " DROP INDEX " + index
+            index = row[1]
+            query = "DROP INDEX " + index
             print query
             cur.execute(query)
                            
@@ -177,11 +190,11 @@ def checkUnique(table, *column):
     columns = ",".join(column)
     query = "SELECT " + columns + ",count(*) FROM " + table + " GROUP BY " + columns + " HAVING COUNT(*) > 1"
     print "Looking for duplicates with", query
-    count = cur.execute(query)
-    if count:
+    cur.execute(query)
+    rows = cur.fetchall()
+    if rows:
         fail = True
         print "Please eliminate duplicates:"
-        rows = cur.fetchall()
         for row in rows:
             print row
       
@@ -189,11 +202,11 @@ def checkNotNull(table, column, replace=None):
     global fail
     query = "SELECT * FROM " + table + " WHERE " + column + " IS NULL"
     print "Looking for nulls with", query
-    count = cur.execute(query)
-    if count:
+    cur.execute(query)
+    rows = cur.fetchall()
+    if rows:
         fail = True
         print "The following entries in table", table, "have null values for", column
-        rows = cur.fetchall()
         for row in rows:
             print row
         if replace:
@@ -202,19 +215,20 @@ def checkNotNull(table, column, replace=None):
 
 cur = con.cursor()
     
-cur.execute("SELECT VERSION()")
-print "Database version", cur.fetchone()[0]
+cur.execute("SELECT * FROM PRODUCT_COMPONENT_VERSION WHERE PRODUCT LIKE 'Oracle%'") 
+print "Database version", cur.fetchone()
 
 facility_id = None
-count = cur.execute("SELECT ID, NAME FROM FACILITY")
+cur.execute("SELECT ID, NAME FROM FACILITY")
+facilities = cur.fetchall()
+count = len(facilities)
 if count == 1 and not facility_name:
-    facility = cur.fetchone()
+    facility = facilities[0]
     facility_id = facility[0]
     print "Existing applications will be associated with Facility:", facility[1]
 elif count == 0:
     abort("No Facilities defined - why are you you migrating this?")
 else:
-    facilities = cur.fetchall()
     if not facility_name:
         print "Available facilities are:",
         for facility in facilities:
@@ -237,15 +251,16 @@ tables = ["APPLICATION", "DATAFILE", "DATAFILEFORMAT", "DATAFILEPARAMETER", "DAT
 
 print "Will now start checking"
 fail = False
-check()
+# check()
 if fail:
     print "Please fix above errors and try again ;-)"
 if not fail: 
     print "All checks passed"
-    dropKeys()
-    change()
+#     dropOld() 
+#     dropKeys()
+#     change()
     dropTables()
-    f = open("upgrade_mysql_4_2_5.sql")
+    f = open("upgrade_oracle_4_2_5.sql")
     for line in f:
         line = line.strip()
         if line:

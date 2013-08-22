@@ -39,7 +39,7 @@ def reportProblem(wf):
         fatal(fault.faultstring)
 
 def getService():
-    client = Client(hostUrl + "/ICATAdminService/ICATAdmin?wsdl", username=username, password = password)
+    client = Client(hostUrl + "/ICATAdminService/ICATAdmin?wsdl", username=username, password=password)
     return client.service
 
 def props(args):
