@@ -1096,7 +1096,6 @@ public class BeanManager {
 			Log logEntry = null;
 			try {
 				logEntry = new Log(operation, duration, entityName, entityId, query);
-				logEntry = new Log(operation, duration, "w", 17L, "y");
 				logEntry.preparePersist(userId, manager, gateKeeper);
 				manager.persist(logEntry);
 				manager.flush();
