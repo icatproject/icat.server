@@ -29,5 +29,8 @@ for i in range (3, len(args), 2):
 sessionId = service.login(plugin, credentials,)
 
 rules = service.search(sessionId, "Rule INCLUDE Grouping")
+f = open("rules.authz", "w")
 for rule in rules:
-    print "adduser", rule.grouping.name, rule.what, rule.crudFlags
+    print >> f, "adduser", rule.grouping.name, rule.what, rule.crudFlags
+f.close()
+print len(rules), "rules have been written to rules.authz"
