@@ -22,7 +22,7 @@ public class Passwd implements Serializable
 
     public Passwd(String user, String pass)
     {
-	userName = pass;
+	userName = user;
 	encodedPassword = pass;
     }
 
