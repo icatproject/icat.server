@@ -9,113 +9,82 @@
 
         <section name="Installation">
 
-            <p>To deploy an ICAT you need:
-            </p>
-            <ol>
-                <li> a suitable container to support EJBs,</li>
-                <li> databases on a system supported by eclipselink,</li>
-                <li> to configure glassfish,</li>
-                <li> to install and configure suitable authentication plugins,</li>
-                <li> to install a copy of icat.properties and log4j.properties in the correct place,</li>
-                <li> to deploy the .ear file,</li>
-                <li> and see if it works.</li>
-            </ol>
+            <subsection name="Prerequisites">
 
-            <p>
-                If you already have ICAT 4.2.0, 4.2.1, 4.2.2, 4.2.3 or 4.2.4 deployed and have not modified log4j.properties
-                then skip on to
-                <a href="#ear">installing the .ear file</a>
-            </p>
-            <p>
-                If you already have ICAT 4.2.0, 4.2.1, 4.2.2, 4.2.3 or 4.2.4 deployed but have modified log4j.properties
-                then skip on to the section
-                preceding
-                <a href="#ear">installing the .ear file</a>
-            </p>
+                <ul>
+                    <li>
+                        The icat distribution:
+                        <a href="${repoUrl}/org/icatproject/icat.ear/${project.version}/icat.ear-${project.version}-distro.zip">ice-${project.version}-distro.zip</a>
+                    </li>
+                    <li>
+                        A suitable deployed container (here assumed to be glassfish though tomcat should be sufficient) to support a web
+                        application.
+                        Testing has been carried out with Glassfish 3.1.2.
+                        <a href="https://code.google.com/p/icatproject/wiki/Glassfish">Glassfish installation instructions</a>
+                        are available.
+                    </li>
+                    <li>
+                        A database as described in
+                        <a href="https://code.google.com/p/icatproject/wiki/Database">Database installation instructions</a>
+                        installed on the server
+                    </li>
+                    <li>
+                        Deployed ICAT authenticators.
+                    </li>
+                    <li>
+                        Python (version 2.4 to 2.7) and the python-suds package installed on the server.
+                    </li>
+                </ul>
+            </subsection>
 
-            <subsection name="EJB Container">
-                <p> In principle you can use any EJB container. Testing has been performed with
-                    glassfish 3.1.2 and these notes refer to that version.
-                </p>
+            <subsection name="Summary of steps">
 
-                <p> You must already have a Java SE installed (i.e. the command "java" is known), then
-                    you can get Java EE 6 SDK Update 4 with JDK
-                    6
-                    Update 31 or later from
-                    http://www.oracle.com/technetwork/java/javaee/downloads/index.html and execute
-                    the script.
-                </p>
-
-                <p> Request custom installation, install and configure, and enter proxy details if
-                    necessary on your site. Request a server domain, set
-                    the domain name and set the
-                    admin password. For a secure deployment of glassfish you should obtain a trusted
-                    certificate rather than
-                    using the self-signed one in the distribution.
-                </p>
+                <ol>
+                    <li>Upgrade the database schema if you already have a 4.2.x version which you wish to use with ICAT 4.3.0</li>
+                    <li> Download and unpack the distribution,</li>
+                    <li> Rename icat-setup.properties.example to icat-setup.properties and edit it to meet requirements,</li>
+                    <li> Rename icat.properties.example to icat.properties and edit it to meet requirements,</li>
+                    <li> If you want to modify the logging then rename icat.log4j.properties.example to icat.log4j.properties and edit it to meet
+                        requirements,
+                    </li>
+                    <li> Run "setup.py install",</li>
+                    <li> and see if it works.</li>
+                </ol>
 
             </subsection>
 
+            <subsection name="Schema upgrade">
 
-            <subsection name="Databases">
-                <p>
-                    <em>
-                        The database schema is almost identical to that used for ICAT 4.1 (the only difference is that some text columns are wider)
-                        and is identical to that used for ICAT 4.2.0. So
-                        if you already have a 4.1 or 4.2 database installed there is no need to start
-                        with
-                        an empty schema, and you can skip this section.
-                    </em>
-                </p>
-                <p>
-                    The database system must be supported by eclipselink and must support transactions and enforce foreign key constraints.
-                    This
-                    includes most
-                    database systems you are likely to want as explained at
-                    <a href="http://wiki.eclipse.org/EclipseLink/FAQ/JPA#What_databases_are_supported.3F">the
-                        eclipselink web site.
-                    </a>
-                    It has been tested with: MySQL, Oracle and
-                    Derby. You will need an
-                    <em>empty</em>
-                    schema/database with permissions for data
-                    definition
-                    operations such as "CREATE TABLE ..." You must place a copy of the
-                    "JDBC
-                    Connector" for your database in the lib directory below
-                    the domain where
-                    you will install icat. You should get the connector from
-                    the database supplier.
-                    In the case of Oracle this is
-                    ojdbc14.jar or ojdbc16.jar and for MySQL it is
-                    something like
-                    mysql-connector-java*.jar.
-                </p>
-                <p>
-                    MySQL must be installed with InnoDB
-                    support and you must ensure that while installing ICAT the default engine is InnoDB. You can
-                    see
-                    the default engine with "show engines;". To fix an
-                    existing system you can use the ALTER TABLE command as explained in:
-                    <a href="http://dev.mysql.com/doc/refman/5.1/en/storage-engine-setting.html">storage-engine-setting</a>
-                </p>
-                <p>In the case of Derby the
-                    connector
-                    comes
-                    pre-installed with
-                    Glassfish
-                    however we do not
-                    expect
-                    Derby to be used for production work.
-                </p>
+                <ol>
+                    <li>Back up the database in case it all goes horribly wrong</li>
+                    <li>
+                        .Run the get_rules program to save the rules in the format accepted by icat-setup. This must be run as somebody who has read
+                        access to the rules. For example:
+                        <code>./get_rules.py https://example.com:8181 db username root password password</code>
+                        The program should report how many rules it has saved and where.
+                    </li>
+                    <li>Ensure that nobody tries to use ICAT while it is being upgraded - the simplest approach is to undeploy the old one which can
+                        be done from the command line or by using a web browser and connecting on the admin port (typically 4848) and undeploying from
+                        there.
+                    </li>
+                    <li>
+                        Try running
+                        <tt>./upgrade_mysql_4_2_5.py</tt>
+                        or
+                        <tt>./upgrade_oracle_4_2_5.py</tt>
+                        as appropriate. Note that the procedure has been tested on ICAT 4.2.5 but should work for earlier 4.2 versions. The script
+                        will first check that everything should go work. If it reports problems fix them and try again. Once it gets past the checking
+                        stage it starts the conversion which can take a long time. At the end you should have a 4.3.0 database. Any indices which had
+                        been created manually will have been removed.
+                    </li>
+                </ol>
+
             </subsection>
 
-            <subsection name="Preparing glassfish.props">
+            <subsection name="Preparing icat.setup.properties">
 
-                <p>
-                    Obtain
-                    <a href="${repoUrl}/org/icatproject/icat.ear/${project.version}/icat.ear-${project.version}-config.zip">icat.ear-${project.version}-config.zip</a>
-                    and unzip it. You must first edit glassfish.props to match your system.
+                <p>Rename icat-setup.properties.example to icat-setup.properties and edit it to meet requirements.
+
                 </p>
                 <dl>
                     <dt>driver</dt>
@@ -130,7 +99,7 @@
                     <dd>is the administration port of the chosen glassfish domain which is typically 4848.</dd>
                 </dl>
 
-                <p>For a local oracle-xe installation the following values of driver, icatProperties should be good except for
+                <p>For a local oracle-xe installation the following values of driver and icatProperties should be good except for
                     the user and password
                     values:
                 </p>
@@ -154,61 +123,15 @@
                 </code>
             </subsection>
 
-            <subsection name="Using glassfish.props to configure Glassfish">
+            <subsection name="icat.properties and icat.log4j.properties">
                 <p>
-                    Having prepared the glassfish.props file you should run the command:
-                    <tt>asadmin login</tt>
-                    to login as admin. This will prompt you for your glassfish admin password to avoid being prompted for it later. If you do not do
-                    this the
-                    next step will fail. You will find the asadmin executable in the bin directory below the directory you have identified in
-                    glassfish.props as "glassfish" - i.e. $GLASSFISH_HOME/bin/asadmin. There is no logout command but you can delete
-                    <tt>~/.asadminpass</tt>
-                    if you wish
-                    once you have run the
-                    <tt>create.sh</tt>
-                    script successfully. Now check that your domain is running with
-                    <tt>asadmin list-domains</tt>
-                    and try running
-                    <tt>create.sh</tt>
-                    . It expects to find glassfish.props in the current directory. Amongst other things the script will try to "ping" the database. If
-                    you have problems, modify the glassfish.props, run
-                    <tt>drop.sh</tt>
-                    and then
-                    <tt>create.sh</tt>
-                    again.
-                </p>
+                    Rename icat.properties.example to icat.properties and edit it to meet requirements.
 
-            </subsection>
-
-            <subsection name="Install and configure authentication plugins">
-                <p>
-                    You should obtain appropriate authentication plugins - such as
-                    <a href="/mvn/site/authn_db">authn_db</a>
-                    or
-                    <a href="/mvn/site/authn_ldap">authn_ldap</a>
-                    or you may wish to build your own following the instructions for
-                    <a href="../icat.authentication/authentication.html">Authentication plugins</a>
-                    .
-                    Each plugin has its own configuration mechanism. Make sure that all plugins are listed in the icat.properties file which is
-                    described in the next section. If you install or modify a plugin after the icat ear file then you will need to reload the icat
-                    application.
-                </p>
-            </subsection>
-
-            <subsection name="icat.properties and log4j.properties">
-                <p>
-                    In the unpacked icat.ear-${project.version}-config.zip file you will find an icat.properties properties files which should be
-                    copied to the
-                    config directory for your chosen glassfish domain. You will find your domain directory at
-                    $GLASSFISH_HOME/glassfish/domains. There is also a file called
-                    log4j.properties.example to configure the icat logging. A copy of
-                    this file already exists in the .ear file so
-                    unless you wish to modify the logging configuration this file is not needed. If
-                    you do
-                    wish to modify logging, then place a copy of the file somewhere with a name of your choice (icat.log4j.properties
-                    might be a good
-                    name) and
-                    update the icat.properties file to reference it as explained below. The icat.properties file may need
+                    If you wish to modify the provided logging
+                    levels then rename
+                    icat.log4j.properties.example to icat.log4j.properties and update the icat.properties
+                    file to reference it as
+                    explained below. The icat.properties file may need
                     other changes:
                 </p>
                 <dl>
@@ -280,42 +203,40 @@
 
             </subsection>
 
-            <a name="ear" />
-            <subsection name="Installing the .ear file">
+            <subsection name="Run setup.py install">
                 <p>
-                    If you already have an icat installed then you should first remove it with
-                    <tt>asadmin --port 4848 undeploy &lt;ear&gt;</tt>
-                    where the value of "ear" can be found by:
-                    <tt>asadmin --port 4848 list-applications</tt>
-                    Obtain
-                    <a href="${repoUrl}/org/icatproject/icat.ear/${project.version}/icat.ear-${project.version}.ear">icat.ear-${project.version}.ear</a>
-                    and install it with the command:
-                    <tt>asadmin --port 4848 deploy icat.ear-${project.version}.ear</tt>
-                    . If you have only one domain you may not need to specify the port and if the admin port is not 4848 then specify the correct
-                    value.
-                </p>
-                <p>As the file is deployed the database is created. If you already have an ICAT 4.1 or 4.2.n database you may get some messages as it
-                    tries to
-                    create tables that already exist.
+                    Simply type
+                    <tt>./setup install</tt>
+                    . It has a few options for which some help is available with
+                    <tt>./setup.py -h</tt>
+                    . To uninstall you can use
+                    <tt>./setup uninstall</tt>
+                    however this is not necessary before doing an install as the install command will clear out any earlier version.
                 </p>
             </subsection>
             <subsection name="Check that ICAT works">
                 <p>
-                    There is one more file in the unpacked icat.ear-${project.version}-config.zip file:
-                    <tt>test.py</tt>
-                    . This is a python script which requires that the suds client is available. On CENTOS this is packaged as a
-                    <tt>python-suds</tt>
-                    RPM. This connects as one of the root users you defined as 'rootUserNames' in the icat.properties file. Invoke the script with
-                    three fixed parameters: the hostname and port on which the service is deployed securely
+                    A small test program,
+                    <tt>testicat, </tt>
+                    will have been installed for you.
+                    This is a python script which requires that the suds client is available. This connects as one of
+                    the root users you defined as 'rootUserNames' in
+                    the icat.properties file. Invoke the
+                    script the url of the machine on which the
+                    ICAT service is deployed
                     (something like
-                    example.com:8181), the
-                    mnemonic for the chosen authentication plugin followed by the credentials for one of the root user names supported
+                    https://example.com:8181), the
+                    mnemonic for the chosen authentication plugin followed by the
+                    credentials for one of the root user names
+                    supported
                     by that plugin.
                     These
-                    credentials should be passed in as pairs of parameters with key followed by value. For example, assuming that your working
+                    credentials should be passed in as pairs of parameters with
+                    key followed by value. For example,
+                    assuming that your working
                     directory
                     is in the PATH:
-                    <code>test.py example.com:8181 db username root password secret</code>
+                    <code>test.py https://example.com:8181 db username root password secret</code>
                 </p>
                 <p>It should report:
                 </p>
@@ -331,15 +252,17 @@
             </subsection>
             <subsection name="The admin interface">
                 <p>
-                    An admin interface is now available. Copy the ica executable to somewhere in the path - such as /usr/sbin. It should be invoked
+                    An admin interface is now available and will have been installed by the
+                    <tt>setup.py</tt>
+                    script. It should be invoked
                     as:
                 </p>
                 <blockquote>
-                    <code>ica &lt;username&gt; &lt;password&gt; &lt;command&gt; &lt;args&gt;...</code>
+                    <code>icatadmin &lt;username&gt; &lt;password&gt; &lt;command&gt; &lt;args&gt;...</code>
                 </blockquote>
                 <p>to run a single command or</p>
                 <blockquote>
-                    <code>ica &lt;username&gt; &lt;password&gt; </code>
+                    <code>icatadmin &lt;username&gt; &lt;password&gt; </code>
                 </blockquote>
                 <p>to be prompted for a series of commands as shown below.
                 </p>

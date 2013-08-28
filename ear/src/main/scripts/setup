@@ -1,0 +1,155 @@
+#!/usr/bin/env python
+from optparse import OptionParser
+import shutil
+import glob
+from setup_utils import *
+
+root = os.getuid() == 0 
+
+parser = OptionParser("usage: %prog [options] install | uninstall")
+
+if root: default = '/usr/bin'
+else: default = '~/bin'
+parser.add_option("--binDir", "-b", help="location to store executables [" + default + "]", default=default)
+
+parser.add_option("--verbose", "-v", help="produce more output - this may appear twice to get even more", action="count")
+parser.add_option("--force", "-f", help="overwrite existing configuration files", action="store_true", default=False)
+
+options, args = parser.parse_args()
+
+if len(args) != 1:abort("Must have one argument: 'install' or 'uninstall'")
+
+arg = args[0].upper()
+if arg not in ["INSTALL", "UNINSTALL"]: abort("Must have one argument: 'install' or 'uninstall'")
+verbosity = options.verbose
+overwrite = options.force
+
+binDir = os.path.expanduser(options.binDir)
+
+if not os.path.exists ("setup.py"): abort ("This must be run from the unpacked distribution directory")
+
+files = ["testicat", "icatadmin"]
+
+actions = Actions(verbosity, overwrite) 
+
+props = actions.getProperties("icat-setup.properties", ["icatProperties", "glassfish", "driver", "port"])
+
+icatProperties = actions.getProperties("icat.properties", ["lifetimeMinutes", "rootUserNames", "authn.list", "notification.list", "log.list"])
+log4jProperties = icatProperties.get("log4j.properties")
+
+asadminCommand = os.path.join(props["glassfish"], "bin", "asadmin") + " --port " + props["port"]
+actions.setAsadminCommand(asadminCommand)
+
+cmd = asadminCommand + " get property.administrative.domain.name"
+if verbosity: print "\nexecute: " + cmd 
+out, err, rc = actions.execute(cmd)
+if rc: abort(err)
+domain = out.split("\n")[0].split("=")[1]
+
+domain_path = os.path.join(props["glassfish"], "glassfish", "domains", domain)
+if not os.path.exists(domain_path): abort("Domain directory " + domain_path + " does not exist")
+config_path = os.path.join(domain_path, "config")
+
+if arg == "INSTALL":
+       
+    for v in icatProperties["authn.list"].split():
+        if "authn." + v + ".jndi" not in icatProperties:
+            abort ("authn.list included " + v + " but authn." + v + ".jndi is not defined") 
+    
+    for v in icatProperties["notification.list"].split():
+        if "notification." + v not in icatProperties:
+            abort ("notification.list included " + v + " but notification." + v + " is not defined") 
+   
+    for v in icatProperties["log.list"].split():
+        if "log." + v not in icatProperties:
+            abort ("log.list included " + v + " but log." + v + " is not defined")
+     
+    if  log4jProperties:
+        dir, file = os.path.split(log4jProperties)
+        if not os.path.exists(file): abort("log4j.properties file " + file + " not found")
+        
+    actions.installFile("icat.properties", config_path)
+    if log4jProperties:
+        dir, file = os.path.split(log4jProperties)
+        if dir:
+            actions.installFile(file, dir)
+        else:
+            actions.installFile(file, config_path)
+    
+    try:
+        
+        app = actions.getAppName("icat.ear")
+        if app: actions.asadmin("undeploy " + app)
+        
+        actions.asadmin("delete-jdbc-resource jdbc/icat", tolerant=True)
+        actions.asadmin("delete-jdbc-connection-pool icat", tolerant=True)
+        actions.asadmin("delete-jms-resource jms/ICATTopicConnectionFactory", tolerant=True)
+        actions.asadmin("delete-jms-resource jms/ICATTopic", tolerant=True)
+        
+        actions.asadmin('create-jdbc-connection-pool --datasourceclassname ' + props["driver"] + 
+                ' --restype javax.sql.DataSource --failconnection=true --steadypoolsize 2' + 
+                ' --maxpoolsize 8 --ping --property ' + props["icatProperties"] + ' icat', printOutput=True)
+        
+        actions.asadmin("create-jdbc-resource --connectionpoolid icat jdbc/icat")
+    
+        actions.asadmin("create-jms-resource --restype javax.jms.TopicConnectionFactory jms/ICATTopicConnectionFactory")
+    
+        actions.asadmin("create-jms-resource --restype javax.jms.Topic jms/ICATTopic")
+        
+        cmd = asadminCommand + " " + "deploy " + glob.glob("icat.ear-*.ear")[0]
+        if verbosity: print "\nexecute: " + cmd 
+        out, err, rc = actions.execute(cmd)
+        if verbosity > 1:
+            if out: print out
+        if err:
+            for line in err.split("\n"):
+                line = line.strip()
+                if line:
+                    if line.startswith("PER01"): continue
+                    print line
+     
+        for file in files:   
+            os.chmod(file, 0755)    
+            shutil.copy(file , binDir)
+            if verbosity:
+                print "\n", file, "copied to", binDir
+                
+    except Exception, e:
+        abort(str(e))
+        
+    if actions.clashes:
+        print "*****************************************************************************************************************"
+        print "There have been", actions.clashes, "instances of files not copied where one was already present and --force not specified"
+        print "*****************************************************************************************************************"
+        
+else:  # UNINSTALL
+    
+    actions.removeFile("icat.properties", config_path)
+    if log4jProperties:
+        dir, file = os.path.split(log4jProperties)
+        if dir:
+            actions.removeFile(file, dir)
+        else:
+            actions.removeFile(file, config_path)
+    
+    try:
+        
+        app = actions.getAppName("icat.ear")
+        if app: actions.asadmin("undeploy " + app)
+        actions.asadmin("delete-jdbc-resource jdbc/icat", tolerant=True)
+        actions.asadmin("delete-jdbc-connection-pool icat", tolerant=True)
+        actions.asadmin("delete-jms-resource jms/ICATTopicConnectionFactory", tolerant=True)
+        actions.asadmin("delete-jms-resource jms/ICATTopic", tolerant=True)
+        
+        for file in files:
+            path = os.path.join(binDir, file)    
+            if os.path.exists(path): 
+                os.remove(path)
+                if verbosity:
+                    print file, "removed from", binDir
+     
+    except Exception, e:
+        abort(str(e))       
+    
+            
+    

@@ -29,7 +29,7 @@
                     cost in maintaining an index.
                 </li>
                 <li>JPA mappings for floating point numbers now use maximum precision.</li>
-                <li>test.py expects hostname:port rather than a pair of parameters</li>
+                <li>testicat.py (which replaces test.py) expects https://hostname:port rather than a pair of parameters</li>
                 <li>Call logging has been added either to file or to a log table or both.</li>
                 <li>Lucene free text search has been included via the new searchText call.</li>
                 <li>
@@ -63,8 +63,10 @@
                     Added DataCollection and changed Job to make use if it.
                 </li>
                 <li>Added new alternate query syntax that may be used in queries and authz rules. It is distinguished by starting with the keyword
-                    "SELECT".</li>
+                    "SELECT".
+                </li>
                 <li>It is no longer considered an error to have no authz rules matching a search call - you just get no data back.</li>
+                <li>Packaging now conforms to http://code.google.com/p/icatproject/wiki/ComponentGuidelines</li>
             </ul>
         </section>
 
