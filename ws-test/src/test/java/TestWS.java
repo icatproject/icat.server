@@ -1,4 +1,5 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -23,6 +24,7 @@ import javax.naming.InitialContext;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.icatproject.AccessType;
 import org.icatproject.Application;
 import org.icatproject.Constraint;
 import org.icatproject.DataCollection;
@@ -1560,86 +1562,36 @@ public class TestWS {
 		facility.setName("A Facility");
 
 		/* testCreate */
-		session.getIcat().testCreate(piOneSessionId, facility);
+		assertTrue(session.getIcat().isAccessAllowed(piOneSessionId, facility, AccessType.CREATE));
 
-		try {
-			session.getIcat().testCreate(piTwoSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
-			assertEquals("CREATE access to this Facility is not allowed.", e.getMessage());
-		}
+		assertFalse(session.getIcat().isAccessAllowed(piTwoSessionId, facility, AccessType.CREATE));
 
 		facility.setId(session.getIcat().create(piOneSessionId, facility));
 
-		try {
-			session.getIcat().testCreate(piOneSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getFaultInfo().getType());
-			assertEquals("Facility exists with name = 'A Facility'", e.getMessage());
-		}
-
-		try {
-			session.getIcat().testCreate(piTwoSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getFaultInfo().getType());
-			assertEquals("Facility exists with name = 'A Facility'", e.getMessage());
-		}
-
 		/* testUpdate */
 		facility.setName("Banana");
-		session.getIcat().testUpdate(piOneSessionId, facility);
+		assertTrue(session.getIcat().isAccessAllowed(piOneSessionId, facility, AccessType.UPDATE));
 
-		try {
-			session.getIcat().testUpdate(piTwoSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
-			assertEquals("UPDATE access to this Facility is not allowed.", e.getMessage());
-		}
+		assertFalse(session.getIcat().isAccessAllowed(piTwoSessionId, facility, AccessType.UPDATE));
 
 		session.getIcat().update(piOneSessionId, facility);
 
-		session.getIcat().testUpdate(piOneSessionId, facility);
+		assertTrue(session.getIcat().isAccessAllowed(piOneSessionId, facility, AccessType.UPDATE));
 
-		try {
-			session.getIcat().testUpdate(piTwoSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
-			assertEquals("UPDATE access to this Facility is not allowed.", e.getMessage());
-		}
+		assertFalse(session.getIcat().isAccessAllowed(piTwoSessionId, facility, AccessType.UPDATE));
 
 		/* testDelete */
-		session.getIcat().testDelete(piOneSessionId, facility);
+		session.getIcat().isAccessAllowed(piOneSessionId, facility, AccessType.DELETE);
 
-		try {
-			session.getIcat().testDelete(piTwoSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
-			assertEquals("DELETE access to this Facility is not allowed.", e.getMessage());
-		}
+		assertFalse(session.getIcat().isAccessAllowed(piTwoSessionId, facility, AccessType.DELETE));
 
 		session.getIcat().delete(piOneSessionId, facility);
 
-		try {
-			session.getIcat().testDelete(piOneSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getFaultInfo().getType());
-			assertEquals("Facility[id:" + facility.getId() + "] not found.", e.getMessage());
-		}
+		// Object doesn't exist
+		assertFalse(session.getIcat().isAccessAllowed(piOneSessionId, facility, AccessType.DELETE));
 
-		try {
-			session.getIcat().testDelete(piTwoSessionId, facility);
-			fail("No exception thrown");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getFaultInfo().getType());
-			assertEquals("Facility[id:" + facility.getId() + "] not found.", e.getMessage());
-		}
+		// Object doesn't exist
+		assertFalse(session.getIcat().isAccessAllowed(piTwoSessionId, facility, AccessType.DELETE));
 
 		session.clearAuthz();
 		session.setAuthz();
