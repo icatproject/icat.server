@@ -7,6 +7,20 @@
 
     <body>
 
+        <section name="Overview">
+            <p>
+                This document is made up of three sections, describing
+                <a href="#installation">installation</a>
+                ,
+                <a href="#post">post-installation work</a>
+                ,
+                <a href="#performance">performance</a>
+                and the
+                <a href="#icatadmin">admin interface</a>
+            </p>
+        </section>
+
+        <a name="installation" />
         <section name="Installation">
 
             <subsection name="Prerequisites">
@@ -25,7 +39,7 @@
                     </li>
                     <li>
                         A database as described in
-                        <a href="https://code.google.com/p/icatproject/wiki/Database">Database installation instructions</a>
+                        <a href="https://code.google.com/p/icatproject/wiki/Databases">Database installation instructions</a>
                         installed on the server
                     </li>
                     <li>
@@ -34,13 +48,24 @@
                     <li>
                         Python (version 2.4 to 2.7) and the python-suds package installed on the server.
                     </li>
+                    <li>MySQL-python must be installed if you have an MySQL 4.2.x schema you need to upgrade.</li>
+                    <li>cx_Oracle must be installed if you have an Oracle 4.2.x schema you need to upgrade.</li>
+                    <li>
+                        <a href="http://www.icatproject.org/mvn/site/tools/icat-setup/">icat-setup</a>
+                        must be installed if you have a 4.2.x schema you need to upgrade and you wish to preserve existing rules but is also generally
+                        a useful component to install.
+                    </li>
+                    <li>
+                        <a href="http://www.icatproject.org/mvn/site/tools/ice/">ice</a>
+                        , the ICAT editor will make it easier to configure your ICAT.
+                    </li>
                 </ul>
             </subsection>
 
             <subsection name="Summary of steps">
 
                 <ol>
-                    <li>Upgrade the database schema if you already have a 4.2.x version which you wish to use with ICAT 4.3.0</li>
+                    <li> Upgrade the database schema if you already have a 4.2.x version which you wish to use with ICAT 4.3.0</li>
                     <li> Download and unpack the distribution,</li>
                     <li> Rename icat-setup.properties.example to icat-setup.properties and edit it to meet requirements,</li>
                     <li> Rename icat.properties.example to icat.properties and edit it to meet requirements,</li>
@@ -48,7 +73,7 @@
                         requirements,
                     </li>
                     <li> Run "setup.py install",</li>
-                    <li> and see if it works.</li>
+                    <li> See if it works.</li>
                 </ol>
 
             </subsection>
@@ -56,9 +81,9 @@
             <subsection name="Schema upgrade">
 
                 <ol>
-                    <li>Back up the database in case it all goes horribly wrong</li>
+                    <li>Back up the database in case it should get into a state from which recovery is impractical.</li>
                     <li>
-                        .Run the get_rules program to save the rules in the format accepted by icat-setup. This must be run as somebody who has read
+                        Run the get_rules program to save the rules in the format accepted by icat-setup. This must be run as somebody who has read
                         access to the rules. For example:
                         <code>./get_rules.py https://example.com:8181 db username root password password</code>
                         The program should report how many rules it has saved and where.
@@ -74,9 +99,11 @@
                         <tt>./upgrade_oracle_4_2_5.py</tt>
                         as appropriate. Note that the procedure has been tested on ICAT 4.2.5 but should work for earlier 4.2 versions. The script
                         will first check that everything should go work. If it reports problems fix them and try again. Once it gets past the checking
-                        stage it starts the conversion which can take a long time. At the end you should have a 4.3.0 database. Any indices which had
+                        stage it starts the conversion which can take a long time (many hours for a production system). At the end you should have a
+                        4.3.0 database. Any indices which had
                         been created manually will have been removed.
                     </li>
+
                 </ol>
 
             </subsection>
@@ -97,6 +124,10 @@
                     </dd>
                     <dt>port</dt>
                     <dd>is the administration port of the chosen glassfish domain which is typically 4848.</dd>
+                    <dt>admin.username</dt>
+                    <dd>the username to be added to the Glassfish security file realm and to be used when connecting via the icatadmin tool.</dd>
+                    <dt>admin.password</dt>
+                    <dd>the password to be associated with admin.username</dd>
                 </dl>
 
                 <p>For a local oracle-xe installation the following values of driver and icatProperties should be good except for
@@ -163,11 +194,6 @@
                         java:global/authn_db.ear-1.0.0/authn_db.ejb-1.0.0/DB_Authenticator. There must be one such entry for each
                         plugin.
                     </dd>
-                    <dt>log4j.properties</dt>
-                    <dd>This is optional. If present it must specify the path to a log4j.properties file. The path may be absolute or relative to
-                        the
-                        config directory.
-                    </dd>
                     <dt>notification.list</dt>
                     <dd>is a space separated set of Entity names for which you with to generate notifications. For each one there must be another line
                         saying under what conditions you wish to generate a notification for the entity.
@@ -178,20 +204,30 @@
                         to be notified for that kind of operation on the entity.
                     </dd>
                     <dt>log.list</dt>
-                    <dd>s a space separated set of call logging destinations - currently valid destinations are "table" and "file". For each one there
+                    <dd>is a space separated set of call logging destinations - currently valid destinations are "table" and "file". For each one
+                        there
                         must
                         be another line
                         saying under what group of calls you wish to log.
                     </dd>
-                    <dt>
-                        log.&lt;destination&gt; </dt>
+
+                    <dt>log.&lt;destination&gt; </dt>
                     <dd>a string of letters taken from the set "S", "R" and "W" indicating for which group of calls you wish to generate a log entry.
                         "S" denotes session calls (login, refresh and logout); "R" is used for the various read calls and "W" is used for all write
                         calls (create, update and delete).
                     </dd>
+
+                    <dt>log4j.properties</dt>
+                    <dd>This is optional. If present it must specify the path to a log4j.properties file. The path may be absolute or relative to
+                        the
+                        config directory.
+                    </dd>
+
                     <dt>lucene.directory</dt>
-                    <dd>the path to a directory (whose parent must exist) in which to store the lucene index. If this is specified then
-                        lucene.commitSeconds must also be specified. If it is omitted then lucene indices will not be created and the searchText()
+                    <dd>This is optional. It is the path to a directory (whose parent must exist) in which to store the lucene index. If this is
+                        specified then
+                        lucene.commitSeconds must also be specified. If it is omitted then lucene indices will not be created and the
+                        searchText()
                         call will return nothing.
                     </dd>
                     <dt>lucene.commitSeconds</dt>
@@ -214,6 +250,7 @@
                     however this is not necessary before doing an install as the install command will clear out any earlier version.
                 </p>
             </subsection>
+
             <subsection name="Check that ICAT works">
                 <p>
                     A small test program,
@@ -232,11 +269,8 @@
                     by that plugin.
                     These
                     credentials should be passed in as pairs of parameters with
-                    key followed by value. For example,
-                    assuming that your working
-                    directory
-                    is in the PATH:
-                    <code>test.py https://example.com:8181 db username root password secret</code>
+                    key followed by value. For example:
+                    <code>testicat https://example.com:8181 db username root password secret</code>
                 </p>
                 <p>It should report:
                 </p>
@@ -245,60 +279,126 @@
                 <p>This script can be run at any time as it is almost harmless - it simply creates a "Group" with an unlikely name and removes it
                     again.
                 </p>
-                <p>In case of problems, first erase the directory /tmp/suds and try the test.py again. If it still fails, look at the log files:
+                <p>In case of problems, first erase the directory /tmp/suds and try the testicat again. If it still fails, look at the log files:
                     server.log and icat.log which can both be found in the logs directory below your domain. Look also at the relevant authenticator
                     log.
                 </p>
             </subsection>
-            <subsection name="The admin interface">
+        </section>
+
+        <a name="post" />
+        <section name="Post-installation work">
+            <subsection name="Fresh Install">
                 <p>
-                    An admin interface is now available and will have been installed by the
-                    <tt>setup.py</tt>
-                    script. It should be invoked
-                    as:
+                    If this is a fresh install then you can use
+                    <tt>icat-setup</tt>
+                    to add rules to ICAT, then use ice to create a Facility and other high level
+                    entities.
                 </p>
-                <blockquote>
-                    <code>icatadmin &lt;username&gt; &lt;password&gt; &lt;command&gt; &lt;args&gt;...</code>
-                </blockquote>
-                <p>to run a single command or</p>
-                <blockquote>
-                    <code>icatadmin &lt;username&gt; &lt;password&gt; </code>
-                </blockquote>
-                <p>to be prompted for a series of commands as shown below.
-                </p>
-                <dl>
-                    <dt>props</dt>
-                    <dd>lists the active contents of the icat.properties file. It does this by examining the properties after they have been read in
-                        so any superfluous defintions in the original properties file will not be seen.
-                    </dd>
-                    <dt>commit</dt>
-                    <dd>instructs lucene to update indices. Normally this is not needed as it is will be done periodically according to the value of
-                        lucene.commitSeconds
-                    </dd>
-                    <dt>clear</dt>
-                    <dd>clears the lucene indices</dd>
-                    <dt>populate &lt;entity name&gt;...</dt>
-                    <dd>clears all lucene entries of the specified entity type and scans the corresponding icat entries to repopulate lucene. This is
-                        useful if the database has been modified directly rather than by using the ICAT API. Note that because of caching, ICAT should
-                        be reloaded after any direct database modifications are made.
-                    </dd>
-                    <dt>search &lt;query&gt; [&lt;maxCount&gt;] [&lt;entityName&gt;]</dt>
-                    <dd>
-                        searches lucene indices and returns a list of entity_name:entity_id values. Arguments are
-                        <dl>
-                            <dt>query</dt>
-                            <dd>a lucene query which should be enclosed in quotes if it contains more than one word. Queries can contain AND and OR in
-                                upper case as well as parentheses. The default operator is OR. Wildcards of * and ? are also supported. Other features
-                                are described in the user documentation for the searchText call.
-                            </dd>
-                            <dt>maxCount</dt>
-                            <dd>maximum number of values to return (defaults to 100)</dd>
-                            <dt>entityName</dt>
-                            <dd>if specified, this restrict results to entities with this name</dd>
-                        </dl>
-                    </dd>
-                </dl>
             </subsection>
+            <subsection name="Upgrade">
+                <p>
+                    If you have performed a schema upgrade then you should restore the rules using the
+                    <tt>icat-setup</tt>
+                    tool. For example:
+                </p>
+
+                <blockquote>
+                    <code>
+                        icat-seup -f rules.authz https://example.com:8181 db username root password secret
+                    </code>
+                </blockquote>
+                This assumes that you are in the directory where ran get_rules.py which will created a file rules.authz. The credentials (keyword
+                value
+                pairs following the authenticator mnemonic) should be those
+                of one of the users specified in the rootUserNames of the
+                icat.properties file.
+            </subsection>
+        </section>
+
+        <a name="performance" />
+        <section name="Performance">
+            To improve performance:
+            <ul>
+                <li>Consider creating the indices defined in indices.sql. Indices can make a huge difference to the database performance but there
+                    is
+                    also a small cost for each index.
+                </li>
+                <li>Make entities readable by anyone if they contain no sensitive information. This is generally the case for those entities that
+                    implement an many-to-many relationship. For example InvestigationUser relates Investigation to User but has no attributes. By
+                    making it world readable no access to Investigation or User is granted. An in memory cache of world readable entities is
+                    maintained by ICAT.
+                </li>
+                <li>Add entries to PublicStep to allow the INCLUDE mechanism to be less costly. PublicStep is
+                    explained in the ICAT Java
+                    Client User
+                    Manual. Its contents are also held in an in-memory cache for performance.
+                </li>
+            </ul>
+        </section>
+
+        <a name="icatadmin" />
+        <section name="The administration interface">
+            <p>
+                An administration interface is now available and will be accessible via the icatadmin tool which will have been installed by the
+                <tt>setup.py</tt>
+                script. It should be invoked
+                as:
+            </p>
+            <blockquote>
+                <code>icatadmin &lt;url&gt; &lt;username&gt; &lt;password&gt; &lt;command&gt; &lt;args&gt;...</code>
+            </blockquote>
+            <p>to run a single command or</p>
+            <blockquote>
+                <code>icatadmin &lt;url&gt; &lt;username&gt; &lt;password&gt; </code>
+            </blockquote>
+            <p>to be prompted for a series of commands as shown below. In either case if you specify '-' as the password you will be prompted for
+                it.
+                If you allow the tool to prompt you for commands you will not be able to benefit from command line editing.
+            </p>
+            <dl>
+                <dt>props</dt>
+                <dd>lists the active contents of the icat.properties file. It does this by examining the properties after they have been read in
+                    so any
+                    superfluous definitions in the original properties file will not be seen.
+                </dd>
+                <dt>commit</dt>
+                <dd>instructs lucene to update indices. Normally this is not needed as it is will be done periodically according to the value of
+                    lucene.commitSeconds
+                </dd>
+                <dt>clear</dt>
+                <dd>clears the lucene indices</dd>
+                <dt>populate &lt;entity name&gt;...</dt>
+                <dd>
+                    clears all lucene entries of the specified entity type and scans the corresponding icat entries to re-populate lucene. This is
+                    useful if the database has been modified directly rather than by using the ICAT API. Note that because of caching, ICAT should
+                    be
+                    reloaded after any direct database modifications are made. As this call can take a long time your request may be aborted by
+                    a
+                    timeout (which defaults to 90 seconds). The timeout may be overridden by, for example:
+                    <blockquote>
+                        <code>icatadmin &lt;url&gt; &lt;username&gt; &lt;password&gt; populate Dataset --timeout 300</code>
+                    </blockquote>
+
+                </dd>
+                <dt>search &lt;query&gt; [&lt;maxCount&gt; [&lt;entityName&gt;]]</dt>
+                <dd>
+                    searches lucene indices and returns a list of entity_name:entity_id values. Arguments are
+                    <dl>
+                        <dt>query</dt>
+                        <dd>a lucene query which should be enclosed in quotes if it contains more than one word. Queries can contain AND and OR in
+                            upper case as well as parentheses. The default operator is OR. Wildcards of * and ? are also supported. Other features
+                            are
+                            described in the user documentation for the searchText call.
+                        </dd>
+                        <dt>maxCount</dt>
+                        <dd>maximum number of values to return (defaults to 100)</dd>
+                        <dt>entityName</dt>
+                        <dd>if specified, this restrict results to entities with this name</dd>
+                    </dl>
+                </dd>
+            </dl>
+
 
         </section>
     </body>

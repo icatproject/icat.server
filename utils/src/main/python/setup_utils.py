@@ -9,6 +9,7 @@ import shutil
 import filecmp
 
 def abort(msg):
+    """Print to stderr and stop with exit 1"""
     print >> sys.stderr, msg
     sys.exit(1)
     
@@ -24,6 +25,7 @@ class Actions(object):
         self.asadminCommand = command     
     
     def getProperties(self, fileName, needed):
+        """Read properties files and check that the properties in the needed list are present"""
     
         if not os.path.exists(fileName): 
             abort (fileName + " file not found - please use " + fileName 
@@ -123,7 +125,19 @@ class Actions(object):
         for line in out.split("\n"):
             if (line.startswith(app + "-")):
                 return line.split()[0]
-
+            
+    def getAsadminProperty(self, name):
+        cmd = self.asadminCommand + " get " + name
+        if self.verbosity: print "\nexecute: " + cmd 
+        out, err, rc = self.execute(cmd)
+        if rc: abort(err)
+        return out.split("\n")[0].split("=")[1]
+    
+    def setAsadminProperty(self, name, value):
+        cmd = self.asadminCommand + " set " + name + "=" + value
+        if self.verbosity: print "\nexecute: " + cmd 
+        out, err, rc = self.execute(cmd)
+        if rc: abort(err)
 
 class Tee(threading.Thread):
     

@@ -60,6 +60,7 @@
         <module>ear</module>
         <module>client</module>
         <module>ws-test</module>
+        <module>utils</module>
     </modules>
 
     <repositories>

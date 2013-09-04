@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -16,7 +17,10 @@ import org.icatproject.core.IcatException;
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "SESSION_")
+@NamedQuery(name = "Session.DeleteExpired", query = "DELETE FROM Session s WHERE s.expireDateTime < CURRENT_TIMESTAMP")
 public class Session implements Serializable {
+
+	public final static String DELETE_EXPIRED = "Session.DeleteExpired";
 
 	@Id
 	private String id;

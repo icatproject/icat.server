@@ -9,7 +9,7 @@ import static org.apache.commons.codec.digest.Crypt.crypt;
 public class PasswordChecker {
 
 	/**
-	 * @param pass
+	 * @param password
 	 *            the password as entered by the user
 	 * @param encodedPassword
 	 *            the password to compare against. It is not necessarily encoded

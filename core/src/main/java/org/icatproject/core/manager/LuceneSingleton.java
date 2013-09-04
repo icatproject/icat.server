@@ -39,7 +39,6 @@ import org.apache.lucene.util.Version;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
-import org.icatproject.core.PropertyHandler;
 import org.icatproject.core.entity.EntityBaseBean;
 
 public class LuceneSingleton {

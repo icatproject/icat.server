@@ -115,19 +115,20 @@
                     String sessionId = icat.login("db", credentials);
                 </code>
 
-
-
                 <p class="call">double getRemainingMinutes(String sessionId)</p>
 
                 <p>This returns the number of minutes left in the session. A
-                    session
-                    may not be extended but a user may have more than one
+                    user may have more than one
                     session at
                     once.
                 </p>
 
+                <p class="call">String getUserName(String sessionId)</p>
+
+                <p>This returns the string identifying the user of the session as provided by the authentication plugin.</p>
+
                 <p class="call">void refresh(String sessionId)</p>
-                <p>This resets the time to live of the session as it was when the session was first obtained.</p>
+                <p>This resets the time-to-live of the session as it was when the session was first obtained.</p>
 
                 <p class="call">void logout(String sessionId)</p>
                 <p>This invalidates the sessionId.</p>
@@ -207,20 +208,18 @@
                 </p>
                 <p>
                     Each table in the database, representing a set of entities, is mapped onto a class in the API so terminology mixes OO and database
-                    concepts.
-                    Each class has uniqueness constraints, relationships and other fields. Each object is identified by a field "id" which is
-                    managed by ICAT and is returned when you create an object. This is common to all objects and is not described in the schema. The
-                    "id"
-                    field is used as the primary key in the database. There will normally be some combinations of fields, some of which may be
-                    relationships, which must be unique across all entries in the table. This is marked as "Uniqueness constraint". For Dataset
-                    this
+                    concepts. Each class has uniqueness constraints, relationships and other fields. Each object is identified by a field "id" which
                     is
-                    <tt>sample, investigation, name, type</tt>
-                    which, apart from
-                    <tt>name,</tt>
-                    are all relationships. No more than one one Dataset may exist with those four fields having the same
-                    value. These constraints are
-                    enforced by ICAT.
+                    managed by ICAT and is returned when you create an object. This is common to all objects and is not described in the schema. The
+                    "id" field is used as the primary key in the database. There will normally be some combinations of fields, some of which may be
+                    relationships, which must be unique across all entries in the table. This is marked as "Uniqueness constraint". For Dataset
+                    this is
+                    <tt>investigation, name</tt>
+                    where
+                    <tt>name</tt>
+                    represents a relationship. No more than one one Dataset may exist with those two fields having the same
+                    value. These constraints
+                    are enforced by ICAT.
                 </p>
                 <p>The relationship table is shown next. The first column shows the minimum and maximum cardinality of the relationships. A Dataset
                     may be
@@ -235,16 +234,16 @@
                     If
                     a
                     Dataset is
-                    deleted then all its OutputDatasets, DatasetParameters, Datafiles and InputDatasets are deleted at the same time by
+                    deleted then all its DataCollectionDatasets, DatasetParameters and Datafiles are deleted at the same time by
                     one
-                    call to ICAT.
+                    call to
+                    ICAT.
                     In a similar manner a tree, created in memory with a Dataset having a a set of Datafiles and Datasetparameters,
                     can be
                     persisted to
                     ICAT in a single call. This will be explained more later.
                 </p>
-                <p>Note that currently all "one to many" relationships are cascaded but no "many to one" relationships. Do not assume that this will
-                    always be true.
+                <p>Note that all "one to many" relationships are cascaded but no "many to one" relationships.
                 </p>
                 <p>Note also that all relationships are navigable in both directions.</p>
             </subsection>
@@ -383,6 +382,8 @@
 
             </subsection>
             <subsection name="Retrieving an object when you know its id">
+                <p>There are alternative syntaxes for the query, the concise syntax and the JPQL inspired syntax</p>
+                <h4>Concise syntax</h4>
                 <p class="call">EntityBaseBean get(String sessionId, String query, long id)
                 </p>
                 <p>If dsid is the id of a Dataset then it may be retrieved by the call:</p>
@@ -432,6 +433,17 @@
                     only one route
                     from the original type to each of the included types.
                 </p>
+                <h4>JPQL inspired syntax</h4>
+                <p>This syntax is only relevant if you have an INCLUDE clause as it allows more flexibility in specifying exactly what you want to get
+                    back. The previous query to get a Dataset with all its Datafiles, DatasetParameters and DatafileParameters becomes:
+                </p>
+                <code>Dataset ds INCLUDE ds.datafiles.parameters, ds.parameters</code>
+                <p>
+                    Note that the variable "ds" has been introduced and is then used in the INCLUDE clause. This form of the INCLUDE clause is
+                    explained in more
+                    <a href="#newinclude">detail</a>
+                    later
+                </p>
             </subsection>
 
             <subsection name="Updating an Object">
@@ -478,10 +490,15 @@
                 </p>
             </subsection>
 
-            <subsection name="Searching for an Object - Database related syntax">
+            <subsection name="Searching for an Object">
+                <p>One call supports two alternative query syntaxes that can be used - concise or JPQL. The concise syntax is convenient if it does
+                    what you
+                    want, otherwise you have the full power of JPQL queries to use. In addition there is a free text search mechanism.
+                </p>
+                <h4>Concise syntax</h4>
                 <p class="call">List&lt;Object&gt; search(String sessionId, String query)
                 </p>
-                <p>A rather powerful search mechanism is provided. It will be introduced by means of examples:</p>
+                <p>The concise syntax will be introduced by means of examples:</p>
                 <code>List&lt;Object&gt; results = icat.search(sessionId, "Dataset");</code>
 
                 <p>will return all Datasets. If the query is:</p>
@@ -549,12 +566,83 @@
                     <br />
                     "&#160;,&#160;&#160;Dataset.id ORDER BY id"
                 </code>
-            </subsection>
 
-            <subsection name="Searching for an Object - Free text syntax">
+                <h4>JPQL syntax</h4>
+                <p>
+                    This is simply JPQL including the SELECT keyword.
+                    For example the concise query "Dataset" in the call
+                    <tt>List&lt;Object&gt; results = icat.search(sessionId, "Dataset")</tt>
+                    can be replaced by:
+                </p>
+                <code>
+                    SELECT ds.id
+                    <br />
+                    FROM Dataset ds
+                </code>
+                <p>
+                    and the concise query
+                    <tt>Dataset.id &lt;-&gt; DatasetParameter[type.name = 'TIMESTAMP']</tt>
+                    becomes:
+                </p>
+
+                <code>
+                    SELECT ds.id
+                    <br />
+                    FROM Dataset ds JOIN ds.parameters p
+                    <br />
+                    WHERE p.type.name = 'TIMESTAMP'
+                </code>
+
+                <p>The only restriction is that the returned item must be a set of entities, the result of an aggregate function (such as COUNT
+                    or
+                    MAX)
+                    or a set of values of one field of an entity type. Currently nested selects are not supported - but when they are supported please
+                    define new variables for use within such a construct.
+                </p>
+
+                <p>
+
+                    There are also two extensions to JPQL a LIMIT clause and an INCLUDE clause which may come in either order after the standard
+                    JPQL.
+                    The LIMIT clase follows MySQL syntax and takes the form:
+                    <code>LIMIT 10, 100</code>
+                    which will skip 10 results and return the next 100. A LIMIT clause will normally be used with an ORDER BY clause.
+
+                    <h5>
+                        JQPL Inspired INCLUDE syntax
+                        <a name="newinclude" />
+                    </h5>
+                    An example of an
+                    INCLUDE clause is:
+                </p>
+
+                <code>
+                    SELECT ds
+                    <br />
+                    FROM Dataset ds
+                    <br />
+                    INCLUDE ds.datafiles.parameters, ds.parameters
+                </code>
+                <p>
+                    This uses the variable "ds" defined in the FROM clause. It means that the "Dataset" field "datafiles"
+                    will be followed to include
+                    all those "Datafiles" and that for each "Datafile" the "parameters" field
+                    will be followed to get the "DatafileParameters". In
+                    addition the "DatasetParameters" will be included. Those entities which the user is not allowed to read are silently ignored. The
+                    above INCLUDE clause could also be written:
+                </p>
+                <code>
+
+                    INCLUDE ds.datafiles AS dsp, dsp.parameters, ds.parameters
+                </code>
+                <p>This introduces a new variable dsp which is used later in the clause. The keyword "AS" is optional.</p>
+                <p>It is permissible to visit an entity type more than once in an INCLUDE - for example following a provenance chain.</p>
+
+                <h4>Free text syntax</h4>
                 <p class="call">List&lt;Object&gt; search(String sessionId, String query, int maxCount, String entityName)
                 </p>
-                <p>This treats each ICAT entry as a document. The contents of that document is formed by concatenating all the non-blank text fields
+                <p>This treats each ICAT entry as a document. The contents of that document is formed by concatenating all the non-blank text
+                    fields
                     (with a space bewteen them). These documents are then indexed by Lucene. Each create, update or delete call updates the set of
                     available "documents". The indices are updated periodically - so new entries will not be immediately visible. The freshness of the
                     data is determined by the ICAT configuration and may be adjusted. As with the other search call you will only see the data you are
@@ -569,7 +657,8 @@
                 <code>List&lt;Object&gt; results = icat.searchText(sessionId, "king AND (queen OR harp", 50, null);</code>
                 <p>returns documents with "king" and either "queen" or "harp".</p>
 
-                <p>Case is ignored and there is no need to put in words with different endings but the same stem as common suffices are removed both
+                <p>Case is ignored and there is no need to put in words with different endings but the same stem as common suffices are removed
+                    both
                     when storing the document indices and when looking them up. Wild cards may be used - the ? for a single character and * for zero
                     or
                     more. The last argument my be the simple name of an entity as shown below.
@@ -582,36 +671,34 @@
 
         </section>
 
-        <section name="Testing calls">
-
-            <p>There a number of calls to test whether or not a call will be succesful. These can be used in a GUI which is making ICAT calls to avoid
-                offering users options that will fail. They have names testCreate, testUpdate and testDelete and have just the same calling sequence
-                as the corresponding create, update and delete calls but return void. In each case they do nothing except that if the corresponding
-                call would throw an exception then this does too.
-            </p>
-
-        </section>
-
         <section name="Authorization">
-            <p>The mechanism is rule based. Rules allow groups of
+            <p>
+                <a name="authorization" />
+                The mechanism is rule based. Rules allow groupings of
                 users to do things. There are four things that can be
-                done: Create, Read, Update and
+                done: Create, Read, Update
+                and
                 Delete. It makes use of
-                four tables: Rule, User, Group and UserGroup. The
+                five tables: Rule, User, Grouping, UserGroup and PublicStep. The name "Grouping" has been introduced as
+                "Group" is a reserved word in JPQL. The
                 authentication mechanism authenticates a person with a
                 certain
-                name and this name identifies the User in the
-                ICAT User table. Groups have names and the UserGroup
+                name and this name identifies the
+                User in the
+                ICAT User table. Groupings have names and the UserGroup
                 performs the function of a "many to
                 many" relationship
-                between Users and Groups. Rules are applied to Groups.
+                between Users
+                and Groupings. Rules are applied to Groupings.
                 There are special "root users" able to manipulate these
                 four
-                tables, but only these four unless a "root user" creates
+                tables, but only these five
+                unless a "root user" creates
                 rules to give himself further powers. Apart from the
                 special role of "root
                 users" these tables
-                behave as other
+                behave as
+                other
                 ICAT tables do. The set of "root users" is a configuration parameter of the ICAT installation.
             </p>
             <subsection name="Rules" id="rules">
@@ -694,139 +781,103 @@
                     denotes the currently authenticated user (derived from the
                     sessionId). You will note that the syntax is very similar to that
                     used by
-                    the search.
+                    the search except that INCLUDE, LIMIT and ORDER BY clauses may not be used. The syntax of the "What" may be either the old concise
+                    syntax or the new JPQL syntax.
+                </p>
+
+                <p>Rules which allow every one to read a table are good for performance. For example:</p>
+                <code>
+                    Rule rule = new Rule();
+                    <br />
+                    rule.setGroup(null);
+                    <br />
+                    rule.setCrudFlags("R");
+                    <br />
+                    rule.setWhat("DatasetType");
+                    <br />
+                    icat.create(sessionId, rule);
+                </code>
+                <p>Such rules are also cached in memory.</p>
+
+                <h4>PublicStep</h4>
+                <p>This table has two columns (origin and field). An entry in this table affects the way in which INCLUDE authorizationis carried out.
+                    Each entry permits all users to make a step from the origin entity by the specifed relationship field without any further
+                    checking. This
+                    information is held in memory for speed.
+                </p>
+
+            </subsection>
+            <subsection name="Checking accessibility">
+                <p class="call">boolean isAccessAllowed(String sessionId, EntityBaseBean bean, AccessType accessType)</p>
+                <p>This call returns true if the access to the bean specified by the accessType is permitted. For example:
+                </p>
+                <code>
+                    Dataset ds = new Dataset();
+                    <br />
+                    ds.setName("Name of dataset");
+                    <br />
+                    ds.set ...
+                    <br />
+                    System.out.println(isAccessAllowed(sessionId, ds, AccessType.CREATE))
+                </code>
+                <p>This code sets up a Dataset and then prints whether or not it would be allowed to create it.</p>
+                <p>This call is expected to be made from GUIs so that they can avoid offering operations that will fail. As such, though
+                    READ acess may
+                    be queried it is unlikely to be useful as the GUI user will not have found out about the object to be
+                    checked. If READ, DELETE or
+                    UPDATE access is queried for an object that does not exist it will return false.
+                </p>
+                <p>
+                    In the case of
+                    CREATE, the entity is created
+                    within a database transaction, the check is made and the transaction is rolled back. Do
+                    not populate
+                    any one-to-many collections
+                    for the entity being tested - this will cause an exception to be raised. Also note that if
+                    a
+                    <tt>create</tt>
+                    operation would result in a duplicate this may cause an exception to be thrown but this cannot be relied upon.
                 </p>
             </subsection>
         </section>
-
+        <section name="Logging">
+            <p>Logging to a table with the entity name Log (and/or a file in the logs directory) may be enabled in the icat.properties file of the
+                ICAT server. Records of the type requested in the
+                icat.properites file are added to this table for each eligible call. The information
+                in the table may be regarded as sensitive so appropriate authorization rules should be created.
+            </p>
+        </section>
         <section name="Notifications">
             <p>
-                ICAT is able to send JMS messages. To do this, the table "NotificationRequest" should be populated as needed. This table includes two
-                columns:
-                <tt>crudFlags</tt>
-                and
-                <tt>what</tt>
-                which are treated in a similar way to columns of the same name in the
-                <a href="#rules">authorization rules</a>
-                to choose the conditions for sending a message. However if the
-                <tt>what</tt>
-                field is more than just the name of the entity the request will not be honoured for search calls. The
-                <tt>name</tt>
-                field identifies the NotificationRequest and must be unique. The
-                <tt>datatypes</tt>
-                field determines what to include in the message. Possible entries in the space separated list are:
-            </p>
-            <dl>
-                <dt>notificationName</dt>
-                <dd>
-                    the name as provided in the
-                    <tt>name</tt>
-                    field of the request.
-                </dd>
-                <dt>userId</dt>
-                <dd>the name of the authenticated user performing the operation resulting in this notification.</dd>
+                ICAT is able to send JMS messages for create, update and delete of sslected entities. This is controlled by the icat.properties file
+                of the ICAT server which can specify a list of the entity types to consider, and for each type which action to generate a message for.
+                The JMS message is always PubSub rather than point to point. This means that there can be multiple listeners for a message.
 
-                <dt>entityName</dt>
-                <dd>the name of the main entity being referenced. This excludes any INCLUDE fields from a search or get call and also excludes
-                    entities besides the top one for create calls.
-                </dd>
-                <dt>entityId</dt>
-                <dd>
-                    the id (primary key) of the main entity.
-                </dd>
-                <dt>query</dt>
-                <dd>the query string for a search call.</dd>
-            </dl>
-            <p>The final field is the destType which must be either DestType.PUBSUB or DestType.P_2_P. The first case publishes the message as a JMS
-                topic where it may be read by multiple consumers and the second puts it onto a queue where it will be consumed by the first consumer
-                to take it.
+                Any
+                receiver must be set up to receive messages with a topic of "jms/ICATTopic". The messages all have properties of "entity" which is the
+                type of the
+                entity such as
+                <tt>Dataset</tt>
+                and "operation" which is one of the letters: C, U and D (for create, update and delete respectively). The body of the message is an
+                object which holds the entity id as a Long. For the "xxxMany" calls multiple notifications will be generated. A receiver typically
+                implemented as an MDB (Message Driven Bean) should filter the messages it processes by using the properties of the message.
+
+            </p>
+
+            <p>It should be noted that by the time you can react to a deletion notification the entity id you are sent will refer to an object which
+                no longer exists.
+            </p>
+
+            <p>This mechanism does not leak information becuase all the user receives is an entity id. To read the entity with that id the user must
+                have read access to that entity instance.
             </p>
 
             <p>
-                For example:
-            </p>
-            <code>
-                NotificationRequest notificationRequest = new NotificationRequest();
-                <br />
-                notificationRequest.setDatatypes("notificationName userId entityName entityId");
-                <br />
-                notificationRequest.setCrudFlags("C");
-                <br />
-                notificationRequest.setDestType(DestType.PUBSUB); // Publish/Subscribe
-                <br />
-                notificationRequest.setWhat("Datafile");
-                <br />
-                notificationRequest.setName("Test");
-                <br />
-                icat.create(sessionId, notificationRequest);
-            </code>
-            <p>
-                will send a notification message containing the name of the notification ("Test" in this case"), the userId, the entityName (which
-                will
-                always be "Datafile" in this case) and its id for every call where a Datafile is created. "Publish/Subscribe" mode will be used
-                rather
-                than "Point-to-Point". Note that the id field of the notificationRequest on the client side
-                is not set on the assumption that the
-                client side copy of the notificationRequest will not be needed further. To
-                see who is reading which datasets (with
-                <tt>get</tt>
-                calls) belonging to some
-                investigation called "Fred" one could have:
-            </p>
-            <code>
-                NotificationRequest notificationRequest = new NotificationRequest();
-                <br />
-                notificationRequest.setDatatypes("userId entityId");
-                <br />
-                notificationRequest.setCrudFlags("R");
-                <br />
-                notificationRequest.setDestType(DestType.PUBSUB);
-                <br />
-                notificationRequest.setWhat("Dataset &lt;-&gt; Investigation [name = "Fred"]");
-                <br />
-                notificationRequest.setName("Fred readers");
-                <br />
-                icat.create(sessionId, notificationRequest);
-            </code>
-
-
-            <p>Though the notification mechanism is powerful, it does allow information to be published from ICAT which is not protected by the
-                normal
-                ICAT authorization mechanism. Please publish only the information required to meet your needs and take care that the
-                authorization for
-                the
-                NotificationRequest table is well controlled.
+                There is an
+                <a href="http://code.google.com/p/icatproject/source/browse/contrib/notification-receiver-example">example MDB</a>
+                available which should make this easier to understand.
             </p>
 
-
-
-            <p>
-                Each
-                <tt>create</tt>
-                ,
-                <tt>get</tt>
-                ,
-                <tt>update</tt>
-                and
-                <tt>delete</tt>
-                call will result in one message for each matching request if the operation is succesful. The
-                <tt>createMany</tt>
-                and
-                <tt>deleteMany</tt>
-                calls produce one notification message for each matching NotificationRequest, for each entity, if the operation is succesful. The
-                <tt>search</tt>
-                operation produces one message per notification request if the operation is succesful. The message will contain the query string
-                if
-                this was requested. The
-                <tt>what</tt>
-                field in the NotificationRequest must be just the entity name other the notification will not match.
-            </p>
-            <p>
-                The message is sent as an ObjectMessage - but without an Object being attached. All the information is sent as properties with the
-                same name as requested in the
-                <tt>dataTypes</tt>
-                .
-            </p>
 
         </section>
 
@@ -840,6 +891,10 @@
                 such as 4.2.0-rc03 the version returned will still be
                 4.2.0 .
             </p>
+
+            <p class="call"> List&lt;String&gt; getEntityNames()</p>
+
+            <p>Returns an alphabetic list of all the entity names known to ICAT. This is of most value for tools.</p>
 
             <p class="call"> EntityInfo getEntityInfo(String beanName)</p>
 

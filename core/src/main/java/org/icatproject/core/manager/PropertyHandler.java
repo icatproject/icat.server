@@ -1,4 +1,4 @@
-package org.icatproject.core;
+package org.icatproject.core.manager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,9 +21,7 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 import org.icatproject.authentication.Authenticator;
-import org.icatproject.core.manager.BeanManager;
-import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.core.manager.NotificationRequest;
+import org.icatproject.core.IcatException;
 
 @DependsOn("LoggingConfigurator")
 @Singleton

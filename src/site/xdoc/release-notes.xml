@@ -19,9 +19,9 @@
                 <li>It is not legal in queries with an INCLUDE to use a "1" in conjunction with and entity name. This will now reliably throw an
                     exception.
                 </li>
-                <li>New calls testCreate, testUpdate and testDelete created. They are exactly equivalent to the corresponding create, update and
-                    delete calls but return void and result in no change of state. They will throw the same exceptions as the real call will throw.
+                <li>A new call "boolean isAccessAllowed" has been created to test whether a specific access type is allowed.
                 </li>
+                <li>A call has been provided to return all the available entity names. This is of more use to tools than regular users.</li>
                 <li>Column names in the Database table for UserGroup have been changed as they were inconsistent.</li>
                 <li>The Rule entities are now store in a database table called RULE_. for compatibility with Microsoft SQLServer.</li>
                 <li>A file indices.sql is being distributed with the .ear file with indices which may improve performance. You should assess whether
@@ -67,6 +67,12 @@
                 </li>
                 <li>It is no longer considered an error to have no authz rules matching a search call - you just get no data back.</li>
                 <li>Packaging now conforms to http://code.google.com/p/icatproject/wiki/ComponentGuidelines</li>
+                <li>
+                    A command
+                    <tt>icatadmin</tt>
+                    has been introduced to perform operations for which the rule based authorization is not appropriate.
+                </li>
+                <li>Expired sessions are cleaned out of the database every hour.</li>
             </ul>
         </section>
 

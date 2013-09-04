@@ -3,8 +3,6 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.Set;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -17,9 +15,9 @@ import javax.persistence.UniqueConstraint;
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.core.manager.SingletonFinder;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.GateKeeper;
+import org.icatproject.core.manager.SingletonFinder;
 
 @Comment("An allowed step for an INCLUDE identifed by the origin entity and the field name for navigation. "
 		+ "Including an entry here is much more efficient than having to use the authorization rules.")

@@ -22,7 +22,6 @@ import javax.persistence.TypedQuery;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
-import org.icatproject.core.PropertyHandler;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.PublicStep;
 import org.icatproject.core.entity.Rule;

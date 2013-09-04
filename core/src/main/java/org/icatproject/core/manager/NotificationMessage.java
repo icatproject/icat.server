@@ -5,9 +5,8 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 
 import org.icatproject.core.IcatException;
-import org.icatproject.core.PropertyHandler;
-import org.icatproject.core.PropertyHandler.Operation;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.manager.PropertyHandler.Operation;
 
 public class NotificationMessage {
 

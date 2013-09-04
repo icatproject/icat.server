@@ -31,8 +31,6 @@ import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
-import org.icatproject.core.PropertyHandler;
-import org.icatproject.core.Transmitter;
 import org.icatproject.core.entity.Application;
 import org.icatproject.core.entity.DataCollection;
 import org.icatproject.core.entity.DataCollectionDatafile;
@@ -68,12 +66,15 @@ import org.icatproject.core.entity.StudyInvestigation;
 import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
+import org.icatproject.core.manager.AccessType;
 import org.icatproject.core.manager.BeanManager;
 import org.icatproject.core.manager.CreateResponse;
 import org.icatproject.core.manager.EntityInfo;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.LuceneSingleton;
 import org.icatproject.core.manager.NotificationMessage;
+import org.icatproject.core.manager.PropertyHandler;
+import org.icatproject.core.manager.Transmitter;
 
 @Stateless
 @WebService(targetNamespace = "http://icatproject.org")
@@ -321,11 +322,12 @@ public class ICAT {
 	}
 
 	@WebMethod
-	public void testCreate(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
+	public boolean isAccessAllowed(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "bean") EntityBaseBean bean,
+			@WebParam(name = "accessType") AccessType accessType) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			beanManager.testCreate(userId, bean, manager, userTransaction);
+			return beanManager.isAccessAllowed(userId, bean, manager, userTransaction, accessType);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -333,20 +335,6 @@ public class ICAT {
 			reportThrowable(e);
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
 		}
-	}
-
-	@WebMethod
-	public void testDelete(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
-		String userId = getUserName(sessionId);
-		beanManager.testDelete(userId, bean, manager, userTransaction);
-	}
-
-	@WebMethod
-	public void testUpdate(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
-		String userId = getUserName(sessionId);
-		beanManager.testUpdate(userId, bean, manager, userTransaction);
 	}
 
 	@WebMethod

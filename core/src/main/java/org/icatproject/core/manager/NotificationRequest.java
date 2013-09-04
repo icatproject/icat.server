@@ -1,6 +1,6 @@
 package org.icatproject.core.manager;
 
-import org.icatproject.core.PropertyHandler.Operation;
+import org.icatproject.core.manager.PropertyHandler.Operation;
 
 public class NotificationRequest {
 

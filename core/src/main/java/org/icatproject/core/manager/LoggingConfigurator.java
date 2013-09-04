@@ -1,4 +1,4 @@
-package org.icatproject.core;
+package org.icatproject.core.manager;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -24,10 +24,10 @@ import javax.xml.ws.WebServiceContext;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
-import org.icatproject.core.PropertyHandler;
-import org.icatproject.core.Transmitter;
 import org.icatproject.core.manager.BeanManager;
 import org.icatproject.core.manager.LuceneSingleton;
+import org.icatproject.core.manager.PropertyHandler;
+import org.icatproject.core.manager.Transmitter;
 
 @Stateless
 @WebService(targetNamespace = "http://icatproject.org")

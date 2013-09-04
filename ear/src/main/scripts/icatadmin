@@ -13,10 +13,6 @@ from suds.client import Client, WebFault
 import subprocess
 import shlex
 
-logging.basicConfig(level=logging.CRITICAL)
-
-hostUrl = None
-
 def readServices(path):
     try:
         result = {}
@@ -38,30 +34,35 @@ def reportProblem(wf):
     except:
         fatal(fault.faultstring)
 
-def getService():
-    client = Client(hostUrl + "/ICATAdminService/ICATAdmin?wsdl", username=username, password=password)
+def getService(timeout=90):
+    hurl = url
+    suffix = "/ICATAdminService/ICATAdmin?wsdl"
+    if not url.endswith(suffix): hurl = hurl + suffix
+    client = Client(hurl, username=username, password=password, timeout=timeout)
     return client.service
 
 def props(args):
-    parser.set_usage("usage: %prog props")
-    parser.set_description("Display icat properties")
+    parser.set_usage(usagebase + "props")
+    parser.set_description("Display icat properties") 
+    options, args = parser.parse_args(args)
 
     if len(args) > 0:
         fatal("Must have no arguments after the operation 'props'")
 
     try:
         for prop in getService().props(): print prop
-    except WebFault as wf:
+    except WebFault, wf:
         exc = wf.fault.detail.IcatException
         fatal(exc.type + " exception: " + exc.message)
-    except Exception as e:
-        fatal("Probably bad password")
+    except Exception, e:
+        fatal(e)
     
     
 def search(args):
-    parser.set_usage("usage: %prog search")
+    parser.set_usage(usagebase + "search <query> [<maxCount> [<entityName>]]")
     parser.set_description("Perform a lucene search")
-
+    options, args = parser.parse_args(args)
+    
     query = None
     if len(args) >= 1:
         query = args[0]
@@ -75,82 +76,74 @@ def search(args):
     if len(args) >= 3:
         entityName = args[2]
     if len(args) > 3 or not query:
-        fatal("Must have two or three arguments after the operation 'search' - query, maxCount, entityName")
+        fatal("Must have one, two or three arguments after the operation 'search' - query, maxCount, entityName")
 
     try:
         print getService().luceneSearch(query, maxCount, entityName)
-    except WebFault as wf:
+    except WebFault, wf:
         reportProblem(wf)
-    except Exception as e:
-        fatal("Probably bad password")
+    except Exception, e:
+        fatal(e)
 
 def clear(args):
-    parser.set_usage("usage: %prog clear")
+    parser.set_usage(usagebase + "clear")
     parser.set_description("Clear all lucene indices")
+    options, args = parser.parse_args(args)
 
     if len(args) > 0:
         fatal("Must have no arguments after the operation 'clear'")
 
     try:
         getService().luceneClear()
-    except WebFault as wf:
+    except WebFault, wf:
         exc = wf.fault.detail.IcatException
         fatal(exc.type + " exception: " + exc.message)
-    except Exception as e:
-        fatal("Probably bad password")
+    except Exception, e:
+        fatal(e)
 
 def commit(args): 
-    parser.set_usage("usage: %prog commit")
+    parser.set_usage(usagebase + "commit")
     parser.set_description("Commit all lucene indices")
+    options, args = parser.parse_args(args)
 
     if len(args) > 0:
         fatal("Must have no arguments after the operation 'commit'")
 
     try:
         getService().luceneCommit()
-    except WebFault as wf:
+    except WebFault, wf:
         exc = wf.fault.detail.IcatException
         fatal(exc.type + " exception: " + exc.message)
-    except Exception as e:
-        fatal("Probably bad password")
+    except Exception, e:
+        fatal(e)
 
 def populate(args):
-    parser.set_usage("usage: %prog populate")
+    parser.set_usage(usagebase + "populate <name>")
     parser.set_description("Populate lucene for that entry name")
+    parser.add_option("--timeout", "-t", type='int', default=90, help="timeout in seconds [90]")
+    options, args = parser.parse_args(args)
 
     if len(args) != 1:
         fatal("Must have one arguments after the operation 'populate' - the name of the entity")
  
     try:
-        getService().lucenePopulate(args[0])
-    except WebFault as wf:
+        getService(options.timeout).lucenePopulate(args[0])
+    except WebFault, wf:
         exc = wf.fault.detail.IcatException
         fatal(exc.type + " exception: " + exc.message)
-    except Exception as e:
-        fatal("Probably bad password")
+    except Exception, e:
+        fatal(e)
 
 def help(args):
-    parser.set_usage("usage: %prog subcommand [parameters...] [options...]")
+    parser.set_usage(usagebase + "[subcommand [parameters...] [options...]]")
     parser.set_description("Interact with the ICATAdmin interface. Subcommands are " + str(subcommands.keys()) + 
                             """ All subcommands accept a '-h' or '--help'. """) 
     parser.print_help()
-   
-services = None
-fLocal = os.path.join(os.environ["HOME"], ".glassfish.services")
-fSystem = "/usr/local/etc/glassfish.services"
-if os.path.isfile(fLocal):
-    services = readServices(fLocal)
-elif os.path.isfile(fSystem):
-    services = readServices(fSystem)
-if not services and not hostUrl:
-    hostUrl = raw_input("Please specify the url of the server you wish to use in the form https://example.com:8181 ")
-    with open (fLocal, "w") as ss:
-        print >> ss, "url", hostUrl
-    print "This has been recorded in ~/.glassfish.services"
-elif services:
-        hostUrl = services["url"]
-host = urlparse(hostUrl).netloc
-        
+
+logging.basicConfig(level=logging.CRITICAL)
+
+usagebase = "usage: %prog <url> <username> <password> "
+           
 subcommands = {}
 subcommands["search"] = search
 subcommands["props"] = props
@@ -166,17 +159,26 @@ def fatal(msg):
 
 parser = OptionParser()
 
-if len(sys.argv) >= 3:
-    username, password = sys.argv[1:3]
+if len(sys.argv) >= 4:
+    url, username, password = sys.argv[1:4]
     if password == "-":
         password = getpass.getpass()
 
-if len(sys.argv) == 3:
+if len(sys.argv) == 4:
     print "Use CTRL-D or 'exit' to exit"
     run = True
+    try:
+        getService().props()
+    except WebFault, wf:
+        reportProblem(wf)
+    except AttributeError, e:
+        fatal("Bad username/password")
+    except Exception, e:
+        fatal(e)
+   
     while run:
         try:
-            command = raw_input("ica> ")
+            command = raw_input("icatadmin> ")
             if command:
                 if command == "exit":
                     run = False
@@ -194,11 +196,11 @@ if len(sys.argv) == 3:
     sys.exit()
 
 op = None
-if len(sys.argv) > 3:
-    command = sys.argv[3]
+if len(sys.argv) > 4:
+    command = sys.argv[4]
     op = subcommands.get(command)
 
 if not op:
-    fatal("First arguments must be username and password followed by one of " + str(subcommands.keys()))
+    fatal("First arguments must be url, username and password (or '-' to be prompted) optionally followed by one of " + str(subcommands.keys()))
 
-op(sys.argv[4:])
+op(sys.argv[5:])

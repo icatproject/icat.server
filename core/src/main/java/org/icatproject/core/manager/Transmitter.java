@@ -1,4 +1,4 @@
-package org.icatproject.core;
+package org.icatproject.core.manager;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -14,7 +14,6 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 
 import org.apache.log4j.Logger;
-import org.icatproject.core.manager.NotificationMessage;
 import org.icatproject.core.manager.NotificationMessage.Message;
 
 @DependsOn("LoggingConfigurator")

@@ -3,6 +3,8 @@ from optparse import OptionParser
 import shutil
 import glob
 from setup_utils import *
+import stat
+import os
 
 root = os.getuid() == 0 
 
@@ -26,13 +28,16 @@ overwrite = options.force
 
 binDir = os.path.expanduser(options.binDir)
 
-if not os.path.exists ("setup.py"): abort ("This must be run from the unpacked distribution directory")
+if not os.path.exists ("setup"): abort ("This must be run from the unpacked distribution directory")
 
 files = ["testicat", "icatadmin"]
 
 actions = Actions(verbosity, overwrite) 
 
-props = actions.getProperties("icat-setup.properties", ["icatProperties", "glassfish", "driver", "port"])
+fileName = "icat-setup.properties"
+props = actions.getProperties(fileName, ["icatProperties", "glassfish", "driver", "port", "admin.user", "admin.password"])
+if os.stat(fileName).st_mode & stat.S_IROTH:
+    abort("'" + fileName + "' must not be world readable")
 
 icatProperties = actions.getProperties("icat.properties", ["lifetimeMinutes", "rootUserNames", "authn.list", "notification.list", "log.list"])
 log4jProperties = icatProperties.get("log4j.properties")
@@ -40,11 +45,7 @@ log4jProperties = icatProperties.get("log4j.properties")
 asadminCommand = os.path.join(props["glassfish"], "bin", "asadmin") + " --port " + props["port"]
 actions.setAsadminCommand(asadminCommand)
 
-cmd = asadminCommand + " get property.administrative.domain.name"
-if verbosity: print "\nexecute: " + cmd 
-out, err, rc = actions.execute(cmd)
-if rc: abort(err)
-domain = out.split("\n")[0].split("=")[1]
+domain = actions.getAsadminProperty("property.administrative.domain.name")
 
 domain_path = os.path.join(props["glassfish"], "glassfish", "domains", domain)
 if not os.path.exists(domain_path): abort("Domain directory " + domain_path + " does not exist")
@@ -68,6 +69,15 @@ if arg == "INSTALL":
         dir, file = os.path.split(log4jProperties)
         if not os.path.exists(file): abort("log4j.properties file " + file + " not found")
         
+    ld = icatProperties.get("lucene.Directory")
+    if ld:
+        parent = os.path.basename(os.path.normpath(ld))
+        if not os.path.exists(parent):
+            about("Parent deirectory " + parent + " of lucene directory specified in icat.properties does not exist")
+            
+        if not icatProperties.get("lucene.commitSeconds"):
+            abort("'lucene.commitSeconds' not specified in icat.properties")
+        
     actions.installFile("icat.properties", config_path)
     if log4jProperties:
         dir, file = os.path.split(log4jProperties)
@@ -78,6 +88,28 @@ if arg == "INSTALL":
     
     try:
         
+        if actions.getAsadminProperty("configs.config.server-config.security-service.activate-default-principal-to-role-mapping") == "false":
+            actions.setAsadminProperty("configs.config.server-config.security-service.activate-default-principal-to-role-mapping", "true")
+            actions.asadmin("stop-domain " + domain)
+            actions.asadmin("start-domain " + domain)
+            
+        pw = props["admin.password"]
+        digit = False
+        lc = False
+        uc = False
+        for c in pw:
+            if c.isdigit(): digit = True
+            elif c.islower(): lc = True
+            elif c.isupper(): uc = True
+        if not (digit and lc and uc) : abort("admin.password must contain at least one digit, a lower case character and an upper case character")
+            
+        actions.asadmin("delete-file-user " + props["admin.user"], tolerant=True)
+        f = open("pw", "w")
+        print >> f, "AS_ADMIN_USERPASSWORD=" + pw
+        f.close() 
+        actions.asadmin("--passwordfile pw create-file-user --groups ICATAdmin " + props["admin.user"])
+        os.remove("pw")
+            
         app = actions.getAppName("icat.ear")
         if app: actions.asadmin("undeploy " + app)
         
@@ -134,6 +166,7 @@ else:  # UNINSTALL
     
     try:
         
+        actions.asadmin("delete-file-user " + props["admin.user"], tolerant=True)
         app = actions.getAppName("icat.ear")
         if app: actions.asadmin("undeploy " + app)
         actions.asadmin("delete-jdbc-resource jdbc/icat", tolerant=True)
