@@ -4,6 +4,7 @@ from suds.client import Client
 
 import logging
 import sys
+import getpass
 
 logging.basicConfig(level=logging.CRITICAL)
 
@@ -24,8 +25,11 @@ factory = client.factory
 credentials = factory.create("credentials")
 for i in range (3, len(args), 2):
     entry = factory.create("credentials.entry")
-    entry.key = args[i]
-    entry.value = args[i + 1]
+    entry.key = args[i]   
+    if args[i + 1] == "-":
+        entry.value = getpass.getpass()
+    else:
+        entry.value = args[i + 1]
     credentials.entry.append(entry)
 
 sessionId = service.login(plugin, credentials,)

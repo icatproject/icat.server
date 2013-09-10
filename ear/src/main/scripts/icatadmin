@@ -118,13 +118,30 @@ def commit(args):
         fatal(e)
 
 def populate(args):
-    parser.set_usage(usagebase + "populate <name>")
-    parser.set_description("Populate lucene for that entry name")
+    parser.set_usage(usagebase + "populate [<name>]")
+    parser.set_description("Populate lucene (for that entry name)")
     parser.add_option("--timeout", "-t", type='int', default=90, help="timeout in seconds [90]")
     options, args = parser.parse_args(args)
 
+    if len(args) == 0: 
+        hurl = url
+        suffix = "/ICATService/ICAT?wsdl"
+        if not url.endswith(suffix): hurl = hurl + suffix
+        client = Client(hurl)
+        service = client.service
+        try:
+            for entity in service.getEntityNames():
+                print entity
+                getService(options.timeout).lucenePopulate(entity)
+        except WebFault, wf:
+            exc = wf.fault.detail.IcatException
+            fatal(exc.type + " exception: " + exc.message)
+        except Exception, e:
+            fatal(e)
+        return    
+        
     if len(args) != 1:
-        fatal("Must have one arguments after the operation 'populate' - the name of the entity")
+        fatal("Must have zero arguments after the operation 'populate' or one - the name of the entity")
  
     try:
         getService(options.timeout).lucenePopulate(args[0])

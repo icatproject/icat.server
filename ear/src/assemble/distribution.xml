@@ -18,9 +18,10 @@
             <outputDirectory>icat</outputDirectory>
             <directory>${basedir}/src/main/config</directory>
         </fileSet>
-         <fileSet>
+        <fileSet>
             <outputDirectory>icat</outputDirectory>
             <directory>${basedir}</directory>
+            <filtered>true</filtered>
             <includes>
                 <include>*.txt</include>
             </includes>
@@ -34,6 +35,20 @@
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <includes>
                 <include>org.icatproject:icat.ear</include>
+            </includes>
+        </dependencySet>
+
+        <dependencySet>
+            <outputDirectory>icat</outputDirectory>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <includes>
+                    <include>*.py</include>
+                </includes>
+            </unpackOptions>
+            <includes>
+                <include>org.icatproject:icat.utils</include>
             </includes>
         </dependencySet>
 

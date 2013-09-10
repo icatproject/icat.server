@@ -28,7 +28,7 @@
                 <ul>
                     <li>
                         The icat distribution:
-                        <a href="${repoUrl}/org/icatproject/icat.ear/${project.version}/icat.ear-${project.version}-distro.zip">ice-${project.version}-distro.zip</a>
+                        <a href="${repoUrl}/org/icatproject/icat.ear/${project.version}/icat.ear-${project.version}-distro.zip">icat.ear-${project.version}-distro.zip</a>
                     </li>
                     <li>
                         A suitable deployed container (here assumed to be glassfish though tomcat should be sufficient) to support a web
@@ -52,7 +52,9 @@
                     <li>cx_Oracle must be installed if you have an Oracle 4.2.x schema you need to upgrade.</li>
                     <li>
                         <a href="http://www.icatproject.org/mvn/site/tools/icat-setup/">icat-setup</a>
-                        must be installed if you have a 4.2.x schema you need to upgrade and you wish to preserve existing rules but is also generally
+                        version 1.1.x or higher
+                        must be installed if you have a 4.2.x schema you need to upgrade and you wish to preserve existing
+                        rules but is also generally
                         a useful component to install.
                     </li>
                     <li>
@@ -66,13 +68,12 @@
 
                 <ol>
                     <li> Upgrade the database schema if you already have a 4.2.x version which you wish to use with ICAT 4.3.0</li>
-                    <li> Download and unpack the distribution,</li>
-                    <li> Rename icat-setup.properties.example to icat-setup.properties and edit it to meet requirements,</li>
-                    <li> Rename icat.properties.example to icat.properties and edit it to meet requirements,</li>
-                    <li> If you want to modify the logging then rename icat.log4j.properties.example to icat.log4j.properties and edit it to meet
-                        requirements,
+                    <li>
+                        <li>
+                            Please follow
+                            <a href="http://code.google.com/p/icatproject/wiki/Installation"> the generic installation instructions</a>
+                        </li>
                     </li>
-                    <li> Run "setup.py install",</li>
                     <li> See if it works.</li>
                 </ol>
 
@@ -108,11 +109,8 @@
 
             </subsection>
 
-            <subsection name="Preparing icat.setup.properties">
+            <subsection name="The icat.setup.properties file">
 
-                <p>Rename icat-setup.properties.example to icat-setup.properties and edit it to meet requirements.
-
-                </p>
                 <dl>
                     <dt>driver</dt>
                     <dd>is the name of the jdbc driver and must match the jar file for your database that you stored in the previous step.</dd>
@@ -154,13 +152,12 @@
                 </code>
             </subsection>
 
-            <subsection name="icat.properties and icat.log4j.properties">
+            <subsection name="The icat.properties and icat.log4j.properties files">
                 <p>
-                    Rename icat.properties.example to icat.properties and edit it to meet requirements.
-
                     If you wish to modify the provided logging
                     levels then rename
-                    icat.log4j.properties.example to icat.log4j.properties and update the icat.properties
+                    icat.log4j.properties.example to icat.log4j.properties and update the
+                    icat.properties
                     file to reference it as
                     explained below. The icat.properties file may need
                     other changes:
@@ -239,18 +236,6 @@
 
             </subsection>
 
-            <subsection name="Run setup.py install">
-                <p>
-                    Simply type
-                    <tt>./setup install</tt>
-                    . It has a few options for which some help is available with
-                    <tt>./setup.py -h</tt>
-                    . To uninstall you can use
-                    <tt>./setup uninstall</tt>
-                    however this is not necessary before doing an install as the install command will clear out any earlier version.
-                </p>
-            </subsection>
-
             <subsection name="Check that ICAT works">
                 <p>
                     A small test program,
@@ -308,11 +293,18 @@
                         icat-seup -f rules.authz https://example.com:8181 db username root password secret
                     </code>
                 </blockquote>
-                This assumes that you are in the directory where ran get_rules.py which will created a file rules.authz. The credentials (keyword
-                value
-                pairs following the authenticator mnemonic) should be those
-                of one of the users specified in the rootUserNames of the
-                icat.properties file.
+                <p>This assumes that you are in the directory where ran get_rules.py which will created a file rules.authz. The credentials (keyword
+                    value
+                    pairs following the authenticator mnemonic) should be those
+                    of one of the users specified in the rootUserNames of the
+                    icat.properties file.
+                </p>
+                <p>Finally you should run the icatadmin populate command to populate lucene for all existing data as in the example below:</p>
+                <blockquote>
+                    <code>
+                        icatadmin https://example.com:8181 adminuser secret populate --timeout 3600
+                    </code>
+                </blockquote>
             </subsection>
         </section>
 
@@ -368,7 +360,7 @@
                 </dd>
                 <dt>clear</dt>
                 <dd>clears the lucene indices</dd>
-                <dt>populate &lt;entity name&gt;...</dt>
+                <dt>populate [&lt;entity name&gt;]</dt>
                 <dd>
                     clears all lucene entries of the specified entity type and scans the corresponding icat entries to re-populate lucene. This is
                     useful if the database has been modified directly rather than by using the ICAT API. Note that because of caching, ICAT should
@@ -379,6 +371,7 @@
                     <blockquote>
                         <code>icatadmin &lt;url&gt; &lt;username&gt; &lt;password&gt; populate Dataset --timeout 300</code>
                     </blockquote>
+                    It may also be run without and entity name in which case it will process all entities.
 
                 </dd>
                 <dt>search &lt;query&gt; [&lt;maxCount&gt; [&lt;entityName&gt;]]</dt>
