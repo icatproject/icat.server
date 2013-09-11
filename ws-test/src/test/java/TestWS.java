@@ -1003,9 +1003,9 @@ public class TestWS {
 
 		Context context = new InitialContext();
 		TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) context
-				.lookup("jms/ICATTopicConnectionFactory");
+				.lookup("jms/ICAT/TopicConnectionFactory");
 
-		Topic topic = (Topic) context.lookup("jms/ICATTopic");
+		Topic topic = (Topic) context.lookup("jms/ICAT/Topic");
 
 		TopicConnection topicConnection = topicConnectionFactory.createTopicConnection();
 		javax.jms.Session jsession = topicConnection.createSession(false,

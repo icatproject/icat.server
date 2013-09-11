@@ -24,10 +24,10 @@ public class Transmitter {
 
 	// TODO - this use of mappedName rather than name lags elegance - but it
 	// works
-	@Resource(mappedName = "jms/ICATTopic")
+	@Resource(mappedName = "jms/ICAT/Topic")
 	private Topic topic;
 
-	@Resource(name = "jms/ICATTopicConnectionFactory")
+	@Resource(name = "jms/ICAT/TopicConnectionFactory")
 	private TopicConnectionFactory topicConnectionFactory;
 
 	private TopicConnection topicConnection;

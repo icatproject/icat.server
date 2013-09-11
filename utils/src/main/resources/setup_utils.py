@@ -38,7 +38,7 @@ def getActions(binDir=False, appDir=False):
     if len(args) != 1:abort("Must have one argument: 'configure, install' or 'uninstall'")
     
     arg = args[0].upper()
-    if arg not in ["CONFIGURE", "INSTALL", "UNINSTALL"]: abort("Must have one argument: 'install' or 'uninstall'")
+    if arg not in ["CONFIGURE", "INSTALL", "UNINSTALL"]: abort("Must have one argument: 'configure, install' or 'uninstall'")
     return Actions(options.verbose), options, arg
 
 class Actions(object):
@@ -65,11 +65,13 @@ class Actions(object):
         elif config:
             shutil.copy(config_file_path, file_name)
             if self.verbosity: "Copied " + config_file_path + " to " + file_name
+            print "\nPlease edit", file_name, "to meet your requirements"
         elif local:
             pass
         else:
             shutil.copy(file_name + ".example", file_name)
             if self.verbosity: "Copied " + config_file_path + " to " + file_name
+            print "\nPlease edit", file_name, "to meet your requirements"
         props = self.getProperties(file_name, [])
         example = self.getProperties(file_name + ".example", [])
         for key in expected:
@@ -80,11 +82,11 @@ class Actions(object):
         first = True
         for key in props.keys():
             if key in example:
-                if props[key] != example[key]: print "Value for" , key, "in", file_name, "is", "'" + props[key] + "'", "which differs from example:", "'" + example[key] + "'"
-            else:  print "Value for" , key, "in", file_name, "is", "'" + props[key] + "'", "is not in example"
+                if props[key] != example[key]: print "\nValue for" , key, "in", file_name, "is", "'" + props[key] + "'", "which differs from example:", "'" + example[key] + "'"
+            else:  print "\nValue for" , key, "in", file_name, "is", "'" + props[key] + "'", "is not in example"
         for key in example.keys():
-            if key not in props: print "Value for" , key, "not in", file_name, "but is in example:", "'" + example[key] + "'"
-        print "\nPlease edit", file_name, "to meet your requirements"
+            if key not in props: print "\nValue for" , key, "not in", file_name, "but is in example:", "'" + example[key] + "'"
+        
                 
     def setConfigured(self):
         if self.clashes:
@@ -101,7 +103,7 @@ class Actions(object):
             shutil.copy(file_name + ".example", file_name)
             abort ("\nPlease edit " + file_name + " to meet your requirements then re-run the command")
         if os.stat(file_name).st_mode & stat.S_IROTH:
-            abort("'" + fileName + "' must not be world readable")
+            abort("'" + file_name + "' must not be world readable")
         props = self.getProperties(file_name, required)
         
         glassfish = props["glassfish"]
@@ -120,11 +122,27 @@ class Actions(object):
     
     def deleteFileRealmUser(self, username):
         self.asadmin("delete-file-user " + username, tolerant=True)
-    
+        
+    def stopDomain(self):
+        cmd = self.asadminCommand + " stop-domain " + self.domain
+        if self.verbosity: print "\nexecute: " + cmd 
+        out, err, rc = self.execute(cmd)
+        if rc:
+            print cmd, " ->" + err
+            out, err, rc = self.execute("jps")
+            if rc:
+                abort(err)
+            for line in out.split("\n"):
+                line = line.strip().split()
+                if line[1] == "ASMain":
+                    cmd = "kill -9 " + line[0]
+                    if self.verbosity: print "\nexecute: " + cmd 
+                    self.execute(cmd)
+                 
     def addFileRealmUser(self, username, password):
         if self.getAsadminProperty("configs.config.server-config.security-service.activate-default-principal-to-role-mapping") == "false":
             self.setAsadminProperty("configs.config.server-config.security-service.activate-default-principal-to-role-mapping", "true")
-            self.asadmin("stop-domain " + self.domain)
+            self.stopDomain()
             self.asadmin("start-domain " + self.domain)
             
         digit = False
@@ -143,10 +161,13 @@ class Actions(object):
         self.asadmin("--passwordfile pw create-file-user --groups ICATAdmin " + username)
         os.remove("pw")
         
-    def deploy(self, file):
+    def deploy(self, file, contextroot=None):
         files = glob.glob(file)
         if len(files) != 1: abort("Exactly one file must match " + file)
-        cmd = self.asadminCommand + " " + "deploy " + files[0]
+        if contextroot:
+            cmd = self.asadminCommand + " " + "deploy --contextroot " + contextroot + " " + files[0]
+        else:
+            cmd = self.asadminCommand + " " + "deploy " + files[0]
         if self.verbosity: print "\nexecute: " + cmd 
         out, err, rc = self.execute(cmd)
         if self.verbosity > 1:

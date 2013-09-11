@@ -854,7 +854,7 @@
                 The JMS message is always PubSub rather than point to point. This means that there can be multiple listeners for a message.
 
                 Any
-                receiver must be set up to receive messages with a topic of "jms/ICATTopic". The messages all have properties of "entity" which is the
+                receiver must be set up to receive messages with a topic of "jms/ICAT/Topic". The messages all have properties of "entity" which is the
                 type of the
                 entity such as
                 <tt>Dataset</tt>

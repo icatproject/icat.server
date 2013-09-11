@@ -22,7 +22,7 @@ if arg == "CONFIGURE":
 elif arg == "INSTALL":
     
     actions.checkConfigured()
-    
+        
     icatProperties = actions.getProperties(prop_name, prop_list)
     log4jProperties = icatProperties.get("log4j.properties")
        
@@ -68,8 +68,8 @@ elif arg == "INSTALL":
         
         actions.asadmin("delete-jdbc-resource jdbc/icat", tolerant=True)
         actions.asadmin("delete-jdbc-connection-pool icat", tolerant=True)
-        actions.asadmin("delete-jms-resource jms/ICATTopicConnectionFactory", tolerant=True)
-        actions.asadmin("delete-jms-resource jms/ICATTopic", tolerant=True)
+        actions.asadmin("delete-jms-resource jms/ICAT/TopicConnectionFactory", tolerant=True)
+        actions.asadmin("delete-jms-resource jms/ICAT/Topic", tolerant=True)
         
         actions.asadmin('create-jdbc-connection-pool --datasourceclassname ' + props["driver"] + 
                 ' --restype javax.sql.DataSource --failconnection=true --steadypoolsize 2' + 
@@ -77,9 +77,9 @@ elif arg == "INSTALL":
         
         actions.asadmin("create-jdbc-resource --connectionpoolid icat jdbc/icat")
     
-        actions.asadmin("create-jms-resource --restype javax.jms.TopicConnectionFactory jms/ICATTopicConnectionFactory")
+        actions.asadmin("create-jms-resource --restype javax.jms.TopicConnectionFactory jms/ICAT/TopicConnectionFactory")
     
-        actions.asadmin("create-jms-resource --restype javax.jms.Topic jms/ICATTopic")
+        actions.asadmin("create-jms-resource --restype javax.jms.Topic jms/ICAT/Topic")
         
         actions.deploy("icat.ear-*.ear")
         
@@ -112,8 +112,8 @@ else:  # UNINSTALL
         if app: actions.asadmin("undeploy " + app)
         actions.asadmin("delete-jdbc-resource jdbc/icat", tolerant=True)
         actions.asadmin("delete-jdbc-connection-pool icat", tolerant=True)
-        actions.asadmin("delete-jms-resource jms/ICATTopicConnectionFactory", tolerant=True)
-        actions.asadmin("delete-jms-resource jms/ICATTopic", tolerant=True)
+        actions.asadmin("delete-jms-resource jms/ICAT/TopicConnectionFactory", tolerant=True)
+        actions.asadmin("delete-jms-resource jms/ICAT/Topic", tolerant=True)
         
         for file in files:
             path = os.path.join(binDir, file)    
