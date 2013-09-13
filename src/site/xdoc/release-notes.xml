@@ -28,7 +28,9 @@
                     or not each index will be useful to your installation for while an index can give a huge improvement to a query there is also a
                     cost in maintaining an index.
                 </li>
-                <li>JPA mappings for floating point numbers now use maximum precision.</li>
+                <li>JPA mappings for floating point numbers now use precision 38 and scale 19. This is still not good on Oracle as mentioned in the
+                    installation instructions.
+                </li>
                 <li>testicat.py (which replaces test.py) expects https://hostname:port rather than a pair of parameters</li>
                 <li>Call logging has been added either to file or to a log table or both.</li>
                 <li>Lucene free text search has been included via the new searchText call.</li>
@@ -62,6 +64,7 @@
                 <li>
                     Added DataCollection and changed Job to make use if it.
                 </li>
+                <li>Group has been changed to Grouping as Group is a JPQL keyword.</li>
                 <li>Added new alternate query syntax that may be used in queries and authz rules. It is distinguished by starting with the keyword
                     "SELECT".
                 </li>

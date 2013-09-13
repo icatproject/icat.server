@@ -1330,12 +1330,13 @@ public class TestWS {
 		session.clear();
 		create();
 
-		Date now = new Date();
+		Date now = new Date(new Date().getTime() + 1001); // Move on a second
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
 		String nowString = "{ts " + df.format(now) + "}";
 		String baseq = "SELECT p FROM DatasetParameter p WHERE p.dateTimeValue";
+		
 		assertEquals(0, session.search(baseq + " > " + nowString).size());
-		assertEquals(1, session.search(baseq + "<= " + nowString).size());
+		assertEquals(1, session.search(baseq + " <= " + nowString).size());
 
 		assertEquals(4L, session.search("SELECT COUNT(ds) FROM Dataset ds").get(0));
 

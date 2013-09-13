@@ -91,6 +91,7 @@ public class BeanManager {
 	public CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
 			UserTransaction userTransaction, LuceneSingleton lucene) throws IcatException {
 
+		logger.info(userId + " creating " + bean.getClass().getSimpleName());
 		try {
 			userTransaction.begin();
 			try {
@@ -700,7 +701,7 @@ public class BeanManager {
 		// should give better performance
 
 		long time = log ? System.currentTimeMillis() : 0;
-		logger.debug(userId + " searches for " + query);
+		logger.info(userId + " searching for " + query);
 
 		if (!query.toUpperCase().trim().startsWith("SELECT")) {
 
