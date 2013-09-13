@@ -10,7 +10,4 @@
     <artifactId>icat.utils</artifactId>
     <packaging>jar</packaging>
     <name>ICAT Utils</name>
-
-
-
 </project>
