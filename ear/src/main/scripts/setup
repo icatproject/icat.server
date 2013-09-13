@@ -16,7 +16,7 @@ if arg == "CONFIGURE":
     actions.configure(prop_name, prop_list) 
     icatProperties = actions.getProperties(prop_name, prop_list)
     log4jProperties = icatProperties.get("log4j.properties")
-    if log4jProperties:actions.configure("log4j.properties", [], log4jProperties)
+    if log4jProperties:actions.configure(os.path.basename(log4jProperties), [], log4jProperties)
     actions.setConfigured()
 
 elif arg == "INSTALL":

@@ -94,12 +94,15 @@
                         there.
                     </li>
                     <li>
-                        Try running
+                        For MySQL edit username, password and schema at the top of the file
                         <tt>./upgrade_mysql_4_2_5.py</tt>
-                        or
+                        and run it or
+                        or for Oracle, edit username , password and db at the top of the file
                         <tt>./upgrade_oracle_4_2_5.py</tt>
-                        as appropriate. Note that the procedure has been tested on ICAT 4.2.5 but should work for earlier 4.2 versions. The script
-                        will first check that everything should go work. If it reports problems fix them and try again. Once it gets past the checking
+                        and run that.
+                        Note that the procedure has been tested on ICAT 4.2.5 but should work for earlier 4.2 versions. The script
+                        will
+                        first check that everything should go work. If it reports problems fix them and try again. Once it gets past the checking
                         stage it starts the conversion which can take a long time (many hours for a production system). At the end you should have a
                         4.3.0 database. Any indices which had
                         been created manually will have been removed.
@@ -279,6 +282,12 @@
                     <tt>icat-setup</tt>
                     to add rules to ICAT, then use ice to create a Facility and other high level
                     entities.
+                </p>
+
+                <p>
+                    If you are using Oracle the type NUMBER(38, 19) will have been used for all floating point numbers. This constrains the values
+                    that can be stored - they may be truncated or rejected. To fix this please execute the SQL statements in
+                    <tt>fix_floats_oracle.sql</tt>
                 </p>
             </subsection>
             <subsection name="Upgrade">

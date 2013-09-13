@@ -153,7 +153,7 @@ public class SearchQuery {
 		} else if (gateKeeper.getPublicTables().contains(beanName)) {
 			logger.info("All are allowed READ to " + beanName);
 			restricted = false;
-		} else {	
+		} else {
 			TypedQuery<Rule> query = manager.createNamedQuery(Rule.SEARCH_QUERY, Rule.class)
 					.setParameter("member", userId).setParameter("bean", beanName);
 			rules = query.getResultList();
@@ -179,8 +179,12 @@ public class SearchQuery {
 			/* Can only get here if rules has been set */
 			for (Rule r : rules) {
 				String jpql = r.getFromJPQL();
+				if (jpql == null) {
+					jpql = ""; // For Oracle
+				}
 				String jwhere = r.getWhereJPQL();
-				logger.info("Include rule " + r.getWhat() + " FROM: " + jpql + " WHERE: " + jwhere);
+				logger.info("Include authz rule " + r.getWhat() + " FROM: " + jpql + " WHERE: "
+						+ jwhere);
 
 				for (int i = 1; i < r.getVarCount(); i++) {
 					jpql = jpql.replace("$" + i + "$", "$" + i + varCount + "$");

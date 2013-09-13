@@ -7,6 +7,7 @@ import sys
 username = 'icat'
 password = 'icat'
 schema = 'icat'
+
 con = mdb.connect('localhost', username, password, schema);
 
 parser = OptionParser()
