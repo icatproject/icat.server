@@ -34,7 +34,7 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	private String stringValue;
 
 	@Comment("The value if the parameter is numeric")
-	@Column(name = "NUMERIC_VALUE", precision = 38, scale = 127)
+	@Column(name = "NUMERIC_VALUE", precision = 38, scale = 19)
 	private Double numericValue;
 
 	@Comment("The value if the parameter is a date")
@@ -43,15 +43,15 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	private Date dateTimeValue;
 
 	@Comment("The maximum value of the numeric parameter that was observed during the measurement period")
-	@Column(precision = 38, scale = 127)
+	@Column(precision = 38, scale = 19)
 	private Double rangeTop;
 
 	@Comment("The minimum value of the numeric parameter that was observed during the measurement period")
-	@Column(precision = 38, scale = 127)
+	@Column(precision = 38, scale = 19)
 	private Double rangeBottom;
 
 	@Comment("The error of the numeric parameter")
-	@Column(precision = 38, scale = 127)
+	@Column(precision = 38, scale = 19)
 	private Double error;
 
 	public ParameterType getType() {
