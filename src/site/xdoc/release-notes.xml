@@ -46,7 +46,7 @@
                         <dt>Sample</dt>
                         <dd>investigation, name (-type)</dd>
                         <dt>Investigation</dt>
-                        <dd>facility, name, visitid (-facilityCycle)</dd>
+                        <dd>facility, name, visitid (-facilityCycle -instrument)</dd>
                         <dt>SampleType</dt>
                         <dd>facility, name, molecularFormula (+molecularFormula)</dd>
                     </dl>

@@ -57,7 +57,7 @@ def change():
         for CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, INVESTIGATION_ID, INSTRUMENT_ID in rows:
             rowsout.append((ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, INVESTIGATION_ID, INSTRUMENT_ID))
             ID += 1       
-        cur.executemany("insert into INVESTIGATIONINSTRUMENT(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, INVESTIGATION_ID, INSTRUMENT_ID) values (%s, %s, %s, %s, %s, %s, %s)", rowsout)
+        cur.executemany("insert into INVESTIGATIONINSTRUMENT(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, INVESTIGATION_ID, INSTRUMENT_ID) values (:1, :2, :3, :4, :5, :6, :7)", rowsout)
         con.commit()
     cur.execute("ALTER TABLE INVESTIGATION MODIFY VISIT_ID VARCHAR2(255) NOT NULL")
     cur.execute("ALTER TABLE INVESTIGATION DROP COLUMN FACILITY_CYCLE_ID")
@@ -79,15 +79,15 @@ def change():
         cur.execute("SELECT DATAFILE_ID FROM INPUTDATAFILE WHERE JOB_ID =" + str(jobId))
         datafiles = cur.fetchall()
         if datasets or datafiles:
-            cur.execute("INSERT INTO DATACOLLECTION(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME) values (%s, %s, %s, %s, %s)", (ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME))
+            cur.execute("INSERT INTO DATACOLLECTION(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME) values (:1, :2, :3, :4, :5)", (ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME))
             cur.execute("UPDATE JOB SET INPUTDATACOLLECTION_ID = " + str(ID) + " WHERE ID = " + str(jobId)) 
             for dataset in datasets:
                 dsid = dataset[0]
-                cur.execute("INSERT INTO DATACOLLECTIONDATASET(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, DATACOLLECTION_ID, DATASET_ID)  values (%s, %s, %s, %s, %s, %s, %s)", (IDS, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, ID, dsid))
+                cur.execute("INSERT INTO DATACOLLECTIONDATASET(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, DATACOLLECTION_ID, DATASET_ID)  values (:1, :2, :3, :4, :5, :6, :7)", (IDS, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, ID, dsid))
                 IDS += 1
             for datafile in datafiles:
                 dfid = datafile[0]
-                cur.execute("INSERT INTO DATACOLLECTIONDATAFILE(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, DATACOLLECTION_ID, DATAFILE_ID)  values (%s, %s, %s, %s, %s, %s, %s)", (IDF, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, ID, dfid))
+                cur.execute("INSERT INTO DATACOLLECTIONDATAFILE(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, DATACOLLECTION_ID, DATAFILE_ID)  values (:1, :2, :3, :4, :5, :6, :7)", (IDF, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, ID, dfid))
                 IDF += 1
             ID += 1
       
@@ -96,15 +96,15 @@ def change():
         cur.execute("SELECT DATAFILE_ID FROM OUTPUTDATAFILE WHERE JOB_ID =" + str(jobId))
         datafiles = cur.fetchall()
         if datasets or datafiles:
-            cur.execute("INSERT INTO DATACOLLECTION(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME) values (%s, %s, %s, %s, %s)", (ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME)) 
+            cur.execute("INSERT INTO DATACOLLECTION(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME) values (:1, :2, :3, :4, :5)", (ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME)) 
             cur.execute("UPDATE JOB SET OUTPUTDATACOLLECTION_ID = " + str(ID) + " WHERE ID = " + str(jobId))
             for dataset in datasets:
                 dsid = dataset[0] 
-                cur.execute("INSERT INTO DATACOLLECTIONDATASET(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, DATACOLLECTION_ID, DATASET_ID)  values (%s, %s, %s, %s, %s, %s, %s)", (IDS, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, ID, dsid))
+                cur.execute("INSERT INTO DATACOLLECTIONDATASET(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, DATACOLLECTION_ID, DATASET_ID)  values (:1, :2, :3, :4, :5, :6, :7)", (IDS, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, ID, dsid))
                 IDS += 1
             for datafile in datafiles:
                 dfid = datafile[0]
-                cur.execute("INSERT INTO DATACOLLECTIONDATAFILE(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, DATACOLLECTION_ID, DATAFILE_ID)  values (%s, %s, %s, %s, %s, %s, %s)", (IDF, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, ID, dfid))
+                cur.execute("INSERT INTO DATACOLLECTIONDATAFILE(ID, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, DATACOLLECTION_ID, DATAFILE_ID)  values (:1, :2, :3, :4, :5, :6, :7)", (IDF, CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, ID, dfid))
                 IDF += 1
             ID += 1
       

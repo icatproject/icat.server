@@ -49,7 +49,7 @@
                         Python (version 2.4 to 2.7) and the python-suds package installed on the server.
                     </li>
                     <li>MySQL-python must be installed if you have an MySQL 4.2.x schema you need to upgrade.</li>
-                    <li>cx_Oracle must be installed if you have an Oracle 4.2.x schema you need to upgrade.</li>
+                    <li>cx_Oracle must be installed (in addition to an Oracle client) if you have an Oracle 4.2.x schema you need to upgrade.</li>
                     <li>
                         <a href="http://www.icatproject.org/mvn/site/tools/icat-setup/">icat-setup</a>
                         version 1.1.x or higher

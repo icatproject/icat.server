@@ -64,14 +64,14 @@ class Actions(object):
                     print "Won't overwrite " + file_name + " with the newer file " + config_file_path
         elif config:
             shutil.copy(config_file_path, file_name)
-            if self.verbosity: "Copied " + config_file_path + " to " + file_name
-            print "\nPlease edit", file_name, "to meet your requirements"
+            print "\nCopied " + config_file_path + " to " + file_name
+            print "Please edit", file_name, "to meet your requirements"
         elif local:
             pass
         else:
             shutil.copy(file_name + ".example", file_name)
-            if self.verbosity: "Copied " + config_file_path + " to " + file_name
-            print "\nPlease edit", file_name, "to meet your requirements"
+            print "\nCopied " + config_file_path + " to " + file_name
+            print "Please edit", file_name, "to meet your requirements"
         props = self.getProperties(file_name, [])
         example = self.getProperties(file_name + ".example", [])
         for key in expected:
