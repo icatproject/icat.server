@@ -4,7 +4,7 @@ import sys
 try:
     import cx_Oracle
 except:
-    print "import cx_Oracle failed becuase shared library missing. Try something like: "
+    print "import cx_Oracle failed because shared library missing. Try something like: "
     print "export LD_LIBRARY_PATH=/u01/app/oracle/product/11.2.0/xe/lib/"
     sys.exit(1)
 
