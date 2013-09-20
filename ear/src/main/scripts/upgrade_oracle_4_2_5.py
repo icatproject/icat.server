@@ -136,7 +136,7 @@ def dropOld():
             pass
     
 def dropKeys():       
-    query = "select TABLE_NAME, CONSTRAINT_NAME, INDEX_NAME from USER_CONSTRAINTS where CONSTRAINT_TYPE IN ('R','U') and OWNER = '" + username + "'";
+    query = "select TABLE_NAME, CONSTRAINT_NAME, INDEX_NAME from USER_CONSTRAINTS where CONSTRAINT_TYPE IN ('R','U') and UPPER(OWNER) = '" + username.upper() + "'"
     cur.execute(query)
     rows = cur.fetchall()
     for row in rows:
@@ -145,12 +145,8 @@ def dropKeys():
             query = "ALTER TABLE " + table + " DROP CONSTRAINT " + constraint
             print query
             cur.execute(query)
-            if index:
-                query = "DROP INDEX " + index
-                print query
-                cur.execute(query) 
             
-    query = "select TABLE_NAME, INDEX_NAME from ALL_INDEXES where OWNER = 'CLF_ICAT_AG2' and not UNIQUENESS = 'UNIQUE'"
+    query = "select TABLE_NAME, INDEX_NAME from ALL_INDEXES where UPPER(OWNER) = '" + username.upper() + "' and not UNIQUENESS = 'UNIQUE'"
     cur.execute(query)
     rows = cur.fetchall()
     for row in rows:
