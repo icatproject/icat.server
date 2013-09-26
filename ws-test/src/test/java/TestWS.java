@@ -1334,7 +1334,7 @@ public class TestWS {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
 		String nowString = "{ts " + df.format(now) + "}";
 		String baseq = "SELECT p FROM DatasetParameter p WHERE p.dateTimeValue";
-		
+
 		assertEquals(0, session.search(baseq + " > " + nowString).size());
 		assertEquals(1, session.search(baseq + " <= " + nowString).size());
 
@@ -1433,6 +1433,22 @@ public class TestWS {
 		assertEquals(0, results.size());
 		results = session.search("SELECT ds FROM Dataset ds WHERE ds.complete = FALSE");
 		assertEquals(4, results.size());
+
+		// Bad query
+
+		try {
+			results = session
+					.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafile df) = 2");
+			fail("Should have thrown an expception");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+			assertTrue(e.getMessage().indexOf("Please check your ICAT query") > 0);
+		}
+
+		// Nested select
+		results = session
+				.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafiles df) = 2");
+		assertEquals(2, results.size());
 	}
 
 	@Test

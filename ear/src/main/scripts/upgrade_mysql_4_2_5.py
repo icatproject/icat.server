@@ -165,7 +165,7 @@ def check():
     
     checkNotNull("RULE", "WHAT")
     
-    checkNotNull("SAMPLETYPE", "MOLECULARFORMULA", "Not specified")
+    checkNotNull("SAMPLETYPE", "MOLECULARFORMULA", "'Not specified'")
     
     checkUnique("DATAFILE", "DATASET_ID", "NAME")
     checkUnique("DATASET", "INVESTIGATION_ID", "NAME")
@@ -190,17 +190,17 @@ def checkNotNull(table, column, replace=None):
     global fail
     query = "SELECT * FROM " + table + " WHERE " + column + " IS NULL"
     print "Looking for nulls with", query
-    count = cur.execute(query)
-    if count:
+    count = cur.execute(query) 
+    rows = cur.fetchall()
+    if rows:
         fail = True
-        print "The following entries in table", table, "have null values for", column
-        rows = cur.fetchall()
-        for row in rows:
+        print "There are" , len(rows), "entries in table", table, "with null values for", column + ". Some are shown below:"
+        for row in rows[:10]:
             print row
         if replace:
             print "Try: UPDATE", table, "SET", column, "=", replace, "WHERE", column, "IS NULL;"
-        
-
+  
+  
 cur = con.cursor()
     
 cur.execute("SELECT VERSION()")

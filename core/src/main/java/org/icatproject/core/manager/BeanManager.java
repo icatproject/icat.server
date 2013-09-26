@@ -745,9 +745,17 @@ public class BeanManager {
 			return Collections.emptyList();
 		}
 
-		/* Create query and add parameter values for any timestamps */
+		/* Create query - which may go wrong */
+		javax.persistence.Query jpqlQuery;
+		try {
+			jpqlQuery = manager.createQuery(jpql);
+		} catch (IllegalArgumentException e) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage()
+					+ " Please check your ICAT query");
+		}
+
+		/* add parameter values for any timestamps */
 		Matcher m = timestampPattern.matcher(jpql);
-		javax.persistence.Query jpqlQuery = manager.createQuery(jpql);
 		while (m.find()) {
 			Date d = null;
 			try {

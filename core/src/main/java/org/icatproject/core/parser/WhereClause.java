@@ -22,7 +22,7 @@ public class WhereClause {
 			t = input.consume();
 			String val = t.getValue();
 			if (t.getType() == Token.Type.OPENPAREN && input.peek(0).getType() == Token.Type.SELECT) {
-				subSelectClause = new SubSelectClause(input);
+				subSelectClause = new SubSelectClause(input, idVarMap);
 				t = input.consume(Token.Type.CLOSEPAREN);
 				sb.append("(" + subSelectClause + ")");
 			} else if (t.getType() == Token.Type.NAME) {
@@ -41,13 +41,13 @@ public class WhereClause {
 					int dot = val.indexOf('.');
 					if (dot < 0) {
 						throw new ParserException("path " + val
-								+ " mentioned in FROM clause contains no dots");
+								+ " mentioned in WHERE clause contains no dots");
 					}
 					String idv = val.substring(0, dot).toUpperCase();
 					Integer intVal = idVarMap.get(idv);
 					if (intVal == null) {
 						throw new ParserException("variable " + idv
-								+ " mentioned in FROM clause is not defined");
+								+ " mentioned in WHERE clause is not defined");
 					}
 					sb.append(" $" + intVal + "$" + val.substring(dot));
 				}

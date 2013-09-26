@@ -69,10 +69,8 @@
                 <ol>
                     <li> Upgrade the database schema if you already have a 4.2.x version which you wish to use with ICAT 4.3.0</li>
                     <li>
-                        <li>
-                            Please follow
-                            <a href="http://code.google.com/p/icatproject/wiki/Installation"> the generic installation instructions</a>
-                        </li>
+                        Please follow
+                        <a href="http://code.google.com/p/icatproject/wiki/Installation"> the generic installation instructions</a>
                     </li>
                     <li> See if it works.</li>
                 </ol>
@@ -247,7 +245,7 @@
                     This is a python script which requires that the suds client is available. This connects as one of
                     the root users you defined as 'rootUserNames' in
                     the icat.properties file. Invoke the
-                    script the url of the machine on which the
+                    script specifying the url of the machine on which the
                     ICAT service is deployed
                     (something like
                     https://example.com:8181), the
