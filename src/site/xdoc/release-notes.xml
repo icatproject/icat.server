@@ -65,6 +65,7 @@
                     Added DataCollection and changed Job to make use if it.
                 </li>
                 <li>Group has been changed to Grouping as Group is a JPQL keyword.</li>
+                <li>Add attribute 'url' to Instrument.</li>
                 <li>Added new alternate query syntax that may be used in queries and authz rules. It is distinguished by starting with the keyword
                     "SELECT".
                 </li>

@@ -42,7 +42,18 @@ public class Instrument extends EntityBaseBean implements Serializable {
 	@Column(name = "NAME", nullable = false)
 	private String name;
 
+	@Comment("A URL associated with this instrument")
+	private String url;
+
 	private String type;
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
 	// Needed for JPA
 	public Instrument() {

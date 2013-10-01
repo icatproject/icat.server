@@ -47,7 +47,8 @@ def change():
     cur.execute("ALTER TABLE DATASET MODIFY INVESTIGATION_ID NUMBER(19) NOT NULL") 
     cur.execute("ALTER TABLE DATASET RENAME COLUMN TYPE TO TYPE_ID")
     cur.execute("ALTER TABLE DATASET MODIFY COMPLETE NUMBER(1) default 0 NOT NULL")
-    cur.execute('ALTER TABLE GROUP_ RENAME TO GROUPING')     
+    cur.execute('ALTER TABLE GROUP_ RENAME TO GROUPING')
+    cur.execute("ALTER TABLE INSTRUMENT ADD URL VARCHAR2(255)")    
     cur.execute("CREATE TABLE INVESTIGATIONINSTRUMENT (ID NUMBER(19) NOT NULL, CREATE_ID VARCHAR2(255) NOT NULL, CREATE_TIME TIMESTAMP NOT NULL, MOD_ID VARCHAR2(255) NOT NULL, MOD_TIME TIMESTAMP NOT NULL, INSTRUMENT_ID NUMBER(19) NOT NULL, INVESTIGATION_ID NUMBER(19) NOT NULL, PRIMARY KEY (ID))")
     cur.execute("SELECT CREATE_ID, CREATE_TIME, MOD_ID, MOD_TIME, ID, INSTRUMENT_ID FROM INVESTIGATION WHERE INSTRUMENT_ID IS NOT NULL")
     rowsout = []
@@ -145,6 +146,10 @@ def dropKeys():
             query = "ALTER TABLE " + table + " DROP CONSTRAINT " + constraint
             print query
             cur.execute(query)
+            if index:
+                query = "DROP INDEX " + index
+                print query
+                cur.execute(query) 
             
     query = "select TABLE_NAME, INDEX_NAME from ALL_INDEXES where UPPER(OWNER) = '" + username.upper() + "' and not UNIQUENESS = 'UNIQUE'"
     cur.execute(query)
