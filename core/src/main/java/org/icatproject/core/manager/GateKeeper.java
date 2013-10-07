@@ -22,6 +22,7 @@ import javax.persistence.TypedQuery;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.PublicStep;
 import org.icatproject.core.entity.Rule;
@@ -272,6 +273,15 @@ public class GateKeeper {
 			}
 		}
 		return results;
+	}
+
+	public void checkRule(String query) throws IcatException {
+		try {
+			manager.createQuery(query);
+		} catch (Exception e) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
+		}
+		
 	}
 
 }

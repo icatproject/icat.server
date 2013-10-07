@@ -3,6 +3,7 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -13,6 +14,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
@@ -44,6 +46,11 @@ import org.icatproject.core.parser.Tokenizer;
 		@NamedQuery(name = "Rule.SearchQuery", query = "SELECT DISTINCT r          FROM Rule r LEFT JOIN r.grouping g LEFT JOIN g.userGroups ug LEFT JOIN ug.user u WHERE (u.name = :member OR g IS NULL) AND r.bean = :bean AND r.r = TRUE"),
 		@NamedQuery(name = "Rule.PublicQuery", query = "SELECT DISTINCT r.bean     FROM Rule r LEFT JOIN r.grouping g WHERE r.restricted = FALSE AND g IS NULL") })
 public class Rule extends EntityBaseBean implements Serializable {
+
+	@EJB
+	@XmlTransient
+	@Transient
+	private GateKeeper gatekeeper;
 
 	private final static Logger logger = Logger.getLogger(Rule.class);
 
@@ -147,6 +154,9 @@ public class Rule extends EntityBaseBean implements Serializable {
 						e.getMessage());
 			}
 			logger.debug("New style rule: " + query);
+		} else {
+			/* This should be pure JPQL so can check it */
+			gateKeeper.checkRule(query);
 		}
 
 		try {

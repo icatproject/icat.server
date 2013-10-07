@@ -2,6 +2,7 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -24,6 +25,7 @@ public class Log extends EntityBaseBean implements Serializable {
 	private Long entityId;
 
 	@Comment("The query specified in a read operation")
+	@Column(length = 4000)
 	private String query;
 
 	/* Needed for JPA */
