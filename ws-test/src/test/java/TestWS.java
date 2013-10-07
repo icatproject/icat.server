@@ -447,6 +447,49 @@ public class TestWS {
 	}
 
 	@Test
+	public void badRule() {
+		try {
+			Rule rule = new Rule();
+			rule.setCrudFlags("C");
+			rule.setWhat("SELECT i FROM Investigation i where i.investigationInstrument IS NULL");
+			session.create(rule);
+			fail("Should have thrown exception");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+			assertTrue(e.getMessage().startsWith(
+					"An exception occurred while creating a query in EntityManager:"));
+		}
+	}
+
+	@Test
+	public void goodRuleWithTime() throws Exception {
+		Rule rule = new Rule();
+		rule.setCrudFlags("C");
+		rule.setWhat("SELECT i FROM Investigation i where i.modTime = {ts 1950-01-21 06:00:00}");
+		session.create(rule);
+	}
+
+	@Test
+	public void authz4() throws Exception {
+		// Samples - via investigation
+		Rule isSampleInv = new Rule();
+		isSampleInv.setCrudFlags("CRU");
+		isSampleInv
+				.setWhat("SELECT s FROM Sample s JOIN s.investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci WHERE instSci.user.name = :user");
+		session.create(isSampleInv);
+
+		// Samples - via dataset
+		Rule isSampleDs = new Rule();
+		isSampleDs.setCrudFlags("CRU");
+		isSampleDs
+				.setWhat("SELECT s FROM Sample AS s JOIN s.datasets AS ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst JOIN inst.instrumentScientists AS instSci WHERE instSci.user.name = :user");
+		session.create(isSampleDs);
+
+		// Test
+		session.search("SELECT COUNT(s) FROM Sample AS s JOIN s.datasets as ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst WHERE (inst.name = 'WISH')");
+	}
+
+	@Test
 	public void bigCreate() throws Exception {
 		session.clear();
 

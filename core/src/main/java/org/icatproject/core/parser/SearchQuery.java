@@ -94,7 +94,8 @@ public class SearchQuery {
 			whereClause = new WhereClause(input, idVarMap);
 			t = input.peek(0);
 		}
-		varCount = idVarMap.size(); // Just count the variables up to the end of where clause
+
+		varCount = idVarMap.size() - 1; // variables up to end of where clause without the $0
 		if (t != null
 				&& (t.getType() == Token.Type.GROUP || t.getType() == Token.Type.HAVING || t
 						.getType() == Token.Type.ORDER)) {
@@ -187,8 +188,8 @@ public class SearchQuery {
 						+ jwhere);
 
 				for (int i = 1; i < r.getVarCount(); i++) {
-					jpql = jpql.replace("$" + i + "$", "$" + i + varCount + "$");
-					jwhere = jwhere.replace("$" + i + "$", "$" + i + varCount + "$");
+					jpql = jpql.replace("$" + i + "$", "$" + (i + varCount) + "$");
+					jwhere = jwhere.replace("$" + i + "$", "$" + (i + varCount) + "$");
 				}
 
 				sb.append(" " + jpql);
@@ -198,6 +199,7 @@ public class SearchQuery {
 					}
 					ruleWhere.append("(" + jwhere + ")");
 				}
+				varCount += r.getVarCount() - 1;
 			}
 		}
 

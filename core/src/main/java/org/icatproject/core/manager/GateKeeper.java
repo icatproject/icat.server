@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
@@ -32,6 +34,9 @@ import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 @Singleton
 @Startup
 public class GateKeeper {
+
+	private final static Pattern tsRegExp = Pattern
+			.compile("\\{\\s*ts\\s+\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\s*\\}");
 
 	public Set<String> getRootSpecials() {
 		return rootSpecials;
@@ -276,12 +281,23 @@ public class GateKeeper {
 	}
 
 	public void checkRule(String query) throws IcatException {
+
+		Matcher m = tsRegExp.matcher(query);
+
+		query = m.replaceAll(" CURRENT_TIMESTAMP ");
 		try {
 			manager.createQuery(query);
 		} catch (Exception e) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
+			m.reset();
+			if (m.find()) {
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+						"Timestamp literals have been replaced... " + e.getMessage());
+			} else {
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
+			}
+
 		}
-		
+
 	}
 
 }
