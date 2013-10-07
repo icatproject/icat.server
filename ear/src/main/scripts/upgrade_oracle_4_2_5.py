@@ -147,9 +147,12 @@ def dropKeys():
             print query
             cur.execute(query)
             if index:
-                query = "DROP INDEX " + index
-                print query
-                cur.execute(query) 
+                query = "select INDEX_NAME from ALL_INDEXES where INDEX_NAME = '" + index + "'"
+                cur.execute(query)
+                if cur.fetchall(): 
+                    query = "DROP INDEX " + index
+                    print query
+                    cur.execute(query) 
             
     query = "select TABLE_NAME, INDEX_NAME from ALL_INDEXES where UPPER(OWNER) = '" + username.upper() + "' and not UNIQUENESS = 'UNIQUE'"
     cur.execute(query)
@@ -161,7 +164,7 @@ def dropKeys():
             query = "DROP INDEX " + index
             print query
             cur.execute(query)
-                           
+
 def check():
     checkNotNull("APPLICATION", "NAME")
     checkNotNull("APPLICATION", "VERSION")

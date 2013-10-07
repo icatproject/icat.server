@@ -1,4 +1,0 @@
-asadmin delete-jms-resource jms/ICATQueueConnectionFactory
-asadmin delete-jms-resource jms/ICATQueue
-
-drop table NOTIFICATIONMESSAGES

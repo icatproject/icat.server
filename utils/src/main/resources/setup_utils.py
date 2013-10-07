@@ -15,7 +15,7 @@ def abort(msg):
     """Print to stderr and stop with exit 1"""
     print >> sys.stderr, msg, "\n"
     sys.exit(1)
-    
+        
 def getActions(binDir=False, appDir=False):
     if not os.path.exists ("setup"): abort ("This must be run from the unpacked distribution directory")
     parser = OptionParser("usage: %prog [options] configure | install | uninstall")
@@ -48,7 +48,11 @@ class Actions(object):
         self.asadminCommand = None
         self.domain = None
         self.config_path = None
+        self.lib_path = None
         self.clashes = 0
+        
+    def configFileExists(self, file):
+        return os.path.exists(os.path.join(self.config_path, file))
         
     def configure(self, file_name, expected, config_file_path=None):
         if not config_file_path: config_file_path = os.path.join(self.config_path, file_name)
@@ -117,7 +121,9 @@ class Actions(object):
         if not os.path.exists(domain_path): abort("Domain directory " + domain_path + " does not exist")
         self.config_path = os.path.join(domain_path, "config") 
         if not os.path.exists(self.config_path): abort("Domain's config directory " + self.config_path + " does not exist")
-
+        self.lib_path = os.path.join(domain_path, "lib", "applibs")
+        if not os.path.exists(self.lib_path): abort("Domain's lib directory " + self.lib_path + " does not exist")
+        
         return props
     
     def deleteFileRealmUser(self, username):
@@ -138,6 +144,25 @@ class Actions(object):
                     cmd = "kill -9 " + line[0]
                     if self.verbosity: print "\nexecute: " + cmd 
                     self.execute(cmd)
+                    
+    def startDomain(self):
+        self.asadmin("start-domain " + self.domain)
+        
+    def installToApplibs(self, jar):
+        files = glob.glob(jar)
+        if len(files) != 1: abort("Exactly one file must match " + jar)
+        shutil.copy(files[0] , self.lib_path)
+        if self.verbosity:
+            print "\n", files[0], "copied to", self.lib_path
+        
+    def removeFromAppLibs(self, jar):
+        dest = os.path.join(self.lib_path, jar)
+        files = glob.glob(dest)
+        if len(files) > 1: abort("Exactly one file must match " + dest)
+        if len(files) == 1: 
+            os.remove(files[0])
+            if self.verbosity:
+                print "\n", os.path.basename(files[0]), "removed from", self.lib_path 
                  
     def addFileRealmUser(self, username, password):
         if self.getAsadminProperty("configs.config.server-config.security-service.activate-default-principal-to-role-mapping") == "false":
@@ -161,13 +186,25 @@ class Actions(object):
         self.asadmin("--passwordfile pw create-file-user --groups ICATAdmin " + username)
         os.remove("pw")
         
-    def deploy(self, file, contextroot=None):
+    def deploy(self, file, contextroot=None, libraries=[]):
         files = glob.glob(file)
         if len(files) != 1: abort("Exactly one file must match " + file)
+        cmd = self.asadminCommand + " " + "deploy"
         if contextroot:
-            cmd = self.asadminCommand + " " + "deploy --contextroot " + contextroot + " " + files[0]
-        else:
-            cmd = self.asadminCommand + " " + "deploy " + files[0]
+            cmd = cmd + " --contextroot " + contextroot
+        if libraries:
+            libstring = ""
+            for library in libraries:
+                path = os.path.join(self.lib_path, library)
+                libs = glob.glob(path)
+                if len(libs) != 1: abort("Exactly one library must match " + path)
+                libadd = os.path.basename(libs[0])
+                if libstring:
+                    libstring += "," + libadd
+                else:
+                    libstring = "--libraries " + libadd
+            cmd = cmd + " " + libstring
+        cmd = cmd + " " + files[0]
         if self.verbosity: print "\nexecute: " + cmd 
         out, err, rc = self.execute(cmd)
         if self.verbosity > 1:
