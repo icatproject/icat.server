@@ -5,7 +5,7 @@ import os
 # icat
 
 actions, options, arg = getActions(binDir=True)
-props = actions.getGlassfish("icat-setup.properties", ["icatProperties", "glassfish", "driver", "port", "admin.user", "admin.password"])
+props = actions.getGlassfish("icat-setup.properties", ["icatProperties", "glassfish", "driver", "port"])
 
 binDir = os.path.expanduser(options.binDir)
 files = ["testicat", "icatadmin"]
@@ -46,7 +46,7 @@ elif arg == "INSTALL":
     if ld:
         parent = os.path.basename(os.path.normpath(ld))
         if not os.path.exists(parent):
-            about("Parent deirectory " + parent + " of lucene directory specified in icat.properties does not exist")
+            abort("Parent directory " + parent + " of lucene directory specified in icat.properties does not exist")
             
         if not icatProperties.get("lucene.commitSeconds"):
             abort("'lucene.commitSeconds' not specified in icat.properties")
@@ -59,10 +59,7 @@ elif arg == "INSTALL":
         else:
             actions.installFile(file)
     
-    try:
-        
-        actions.addFileRealmUser(props["admin.user"], props["admin.password"])
-            
+    try:           
         app = actions.getAppName("icat.ear")
         if app: actions.asadmin("undeploy " + app)
         
@@ -83,6 +80,7 @@ elif arg == "INSTALL":
         
         actions.deploy("icat.ear-*.ear")
         
+        if not os.path.isdir(binDir): abort ("Please create directory " + binDir + " and try again.")
         for file in files:   
             os.chmod(file, 0755)    
             shutil.copy(file , binDir)
@@ -107,7 +105,6 @@ else:  # UNINSTALL
             actions.removeFile(file)
     
     try:
-        actions.deleteFileRealmUser(props["admin.user"])
         app = actions.getAppName("icat.ear")
         if app: actions.asadmin("undeploy " + app)
         actions.asadmin("delete-jdbc-resource jdbc/icat", tolerant=True)

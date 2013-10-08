@@ -288,6 +288,7 @@ class Actions(object):
     
     def installFile(self, file, dir=None):
         if not dir: dir = self.config_path
+        if not os.path.isdir(dir): abort ("Please create directory " + dir + " to install " + file)
         if not os.path.exists(file): abort (file + " not found")
         dest = os.path.join(dir, file)
         if os.path.exists(dest):

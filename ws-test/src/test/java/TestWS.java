@@ -1690,4 +1690,27 @@ public class TestWS {
 		assertEquals("Wobble", df.getDataset().getName());
 	}
 
+	@Test
+	public void lucene() throws Exception {
+		session.clear();
+		create();
+		List<String> props = session.getProperties();
+		assertTrue(props.contains("lucene.commitSeconds 1"));
+
+		session.luceneClear();
+
+		session.luceneCommit();
+		assertEquals(0, session.luceneSearch("*f*", 100, null).size());
+		assertEquals(0, session.luceneSearch("*f*", 100, "Dataset").size());
+
+		session.lucenePopulate("Facility");
+		session.lucenePopulate("Investigation");
+		session.lucenePopulate("Dataset");
+		session.lucenePopulate("Datafile");
+		
+		session.luceneCommit();
+		assertEquals(4, session.luceneSearch("*f*", 100, null).size());
+		assertEquals(2, session.luceneSearch("*f*", 100, "Dataset").size());
+	}
+
 }

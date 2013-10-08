@@ -123,10 +123,6 @@
                     </dd>
                     <dt>port</dt>
                     <dd>is the administration port of the chosen glassfish domain which is typically 4848.</dd>
-                    <dt>admin.username</dt>
-                    <dd>the username to be added to the Glassfish security file realm and to be used when connecting via the icatadmin tool.</dd>
-                    <dt>admin.password</dt>
-                    <dd>the password to be associated with admin.username</dd>
                 </dl>
 
                 <p>For a local oracle-xe installation the following values of driver and icatProperties should be good except for
@@ -245,23 +241,31 @@
                     This is a python script which requires that the suds client is available. This connects as one of
                     the root users you defined as 'rootUserNames' in
                     the icat.properties file. Invoke the
-                    script specifying the url of the machine on which the
+                    script specifying the url of the machine on
+                    which the
                     ICAT service is deployed
                     (something like
                     https://example.com:8181), the
-                    mnemonic for the chosen authentication plugin followed by the
+                    mnemonic for the chosen authentication plugin
+                    followed by the
                     credentials for one of the root user names
                     supported
                     by that plugin.
                     These
-                    credentials should be passed in as pairs of parameters with
+                    credentials should be passed in as pairs of
+                    parameters with
                     key followed by value. For example:
                     <code>testicat https://example.com:8181 db username root password secret</code>
                 </p>
                 <p>It should report:
                 </p>
-                <code>Login, search, create, delete and logout operations were all successful.
-                </code>
+                <blockquote>
+                    <code>
+                        Logged in with 119.9... minutes to go
+                        <br />
+                        Login, search, create, delete and logout operations were all successful.
+                    </code>
+                </blockquote>
                 <p>This script can be run at any time as it is almost harmless - it simply creates a "Group" with an unlikely name and removes it
                     again.
                 </p>
@@ -309,7 +313,7 @@
                 <p>Finally you should run the icatadmin populate command to populate lucene for all existing data as in the example below:</p>
                 <blockquote>
                     <code>
-                        icatadmin https://example.com:8181 adminuser secret populate --timeout 3600
+                        icatadmin https://example.com:8181 db username root password secret -- populate --timeout 3600
                     </code>
                 </blockquote>
             </subsection>
@@ -337,23 +341,28 @@
         </section>
 
         <a name="icatadmin" />
-        <section name="The administration interface">
+        <section name="The icatadmin tool">
             <p>
-                An administration interface is now available and will be accessible via the icatadmin tool which will have been installed by the
+                Administration operations have been added to the ICAT API and are accessible via the icatadmin tool which will have been installed by
+                the
                 <tt>setup.py</tt>
-                script. It should be invoked
-                as:
+                script. It should be invoked as:
             </p>
             <blockquote>
-                <code>icatadmin &lt;url&gt; &lt;username&gt; &lt;password&gt; &lt;command&gt; &lt;args&gt;...</code>
+                <code>icatadmin &lt;url&gt; &lt;plugin&gt; &lt;credentials&gt;... -- &lt;command&gt; &lt;args&gt;...</code>
             </blockquote>
             <p>to run a single command or</p>
             <blockquote>
-                <code>icatadmin &lt;url&gt; &lt;username&gt; &lt;password&gt; </code>
+                <code>icatadmin &lt;url&gt; &lt;plugin&gt; &lt;credentials&gt;... </code>
             </blockquote>
-            <p>to be prompted for a series of commands as shown below. In either case if you specify '-' as the password you will be prompted for
+            <p>
+                to be prompted for a series of commands as shown below. In either case if you specify '-' as the password you will be prompted for
                 it.
-                If you allow the tool to prompt you for commands you will not be able to benefit from command line editing.
+                Note that in the single command case the "--" marker is needed to terminate the list of credentials. For example:
+                <blockquote>
+                    <code>icatadmin https://example.com:8181 db username root password secret -- properties</code>
+                </blockquote>
+                . Only users mentioned in the rootUserNames of the icat.properties file are authorized to use this command.
             </p>
             <dl>
                 <dt>props</dt>

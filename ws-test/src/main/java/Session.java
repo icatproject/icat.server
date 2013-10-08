@@ -450,4 +450,25 @@ public class Session {
 		return dataCollection;
 	}
 
+	public List<String> getProperties() throws IcatException_Exception {
+		return icat.getProperties(sessionId);
+	}
+
+	public void luceneClear() throws IcatException_Exception {
+		icat.luceneClear(sessionId);
+	}
+
+	public void luceneCommit() throws IcatException_Exception {
+		icat.luceneCommit(sessionId);
+	}
+
+	public void lucenePopulate(String entityName) throws IcatException_Exception {
+		icat.lucenePopulate(sessionId, entityName);
+	}
+
+	public List<String> luceneSearch(String query, int maxCount, String entityName)
+			throws IcatException_Exception {
+		return icat.luceneSearch(sessionId, query, maxCount, entityName);
+	}
+
 }

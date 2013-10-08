@@ -738,7 +738,7 @@ public class BeanManager {
 
 		/* Get the JPQL which includes authz restrictions */
 		String jpql = q.getJPQL(userId, manager);
-		logger.debug("JPQL: " + jpql);
+		logger.info("JPQL: " + jpql);
 
 		/* Null query indicates that nothing accepted by authz */
 		if (jpql == null) {
@@ -1114,7 +1114,7 @@ public class BeanManager {
 
 	}
 
-	public List<String> props() {
+	public List<String> getProperties() {
 		return propertyHandler.props();
 	}
 

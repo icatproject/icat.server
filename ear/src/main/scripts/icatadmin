@@ -12,6 +12,7 @@ import getpass
 from suds.client import Client, WebFault
 import subprocess
 import shlex
+import readline
 
 def readServices(path):
     try:
@@ -36,21 +37,36 @@ def reportProblem(wf):
 
 def getService(timeout=90):
     hurl = url
-    suffix = "/ICATAdminService/ICATAdmin?wsdl"
+    suffix = "/ICATService/ICAT?wsdl"
     if not url.endswith(suffix): hurl = hurl + suffix
-    client = Client(hurl, username=username, password=password, timeout=timeout)
-    return client.service
+ 
+    client = Client(hurl, timeout=timeout)
+    service = client.service
+    factory = client.factory
+    credentials = factory.create("credentials")
+    for i in range (0, len(creds), 2):
+        entry = factory.create("credentials.entry")
+        entry.key = creds[i]   
+        if creds[i + 1] == "-":
+            entry.value = getpass.getpass()
+        else:
+            entry.value = creds[i + 1]
+        credentials.entry.append(entry)
+    sessionId = service.login(plugin, credentials)
+    return client.service, sessionId
+ 
 
-def props(args):
-    parser.set_usage(usagebase + "props")
+def getProperties(args):
+    parser.set_usage(usagebase + "properties")
     parser.set_description("Display icat properties") 
     options, args = parser.parse_args(args)
 
     if len(args) > 0:
-        fatal("Must have no arguments after the operation 'props'")
+        fatal("Must have no arguments after the operation 'properties'")
 
     try:
-        for prop in getService().props(): print prop
+        service, sessionId = getService()
+        for prop in service.getProperties(sessionId): print prop
     except WebFault, wf:
         exc = wf.fault.detail.IcatException
         fatal(exc.type + " exception: " + exc.message)
@@ -79,7 +95,8 @@ def search(args):
         fatal("Must have one, two or three arguments after the operation 'search' - query, maxCount, entityName")
 
     try:
-        print getService().luceneSearch(query, maxCount, entityName)
+        service, sessionId = getService()
+        print service.luceneSearch(sessionId, query, maxCount, entityName)
     except WebFault, wf:
         reportProblem(wf)
     except Exception, e:
@@ -94,7 +111,8 @@ def clear(args):
         fatal("Must have no arguments after the operation 'clear'")
 
     try:
-        getService().luceneClear()
+        service, sessionId = getService()
+        service.luceneClear(sessionId)
     except WebFault, wf:
         exc = wf.fault.detail.IcatException
         fatal(exc.type + " exception: " + exc.message)
@@ -110,7 +128,8 @@ def commit(args):
         fatal("Must have no arguments after the operation 'commit'")
 
     try:
-        getService().luceneCommit()
+        service, sessionId = getService()
+        service.luceneCommit(sessionId)
     except WebFault, wf:
         exc = wf.fault.detail.IcatException
         fatal(exc.type + " exception: " + exc.message)
@@ -124,15 +143,12 @@ def populate(args):
     options, args = parser.parse_args(args)
 
     if len(args) == 0: 
-        hurl = url
-        suffix = "/ICATService/ICAT?wsdl"
-        if not url.endswith(suffix): hurl = hurl + suffix
-        client = Client(hurl)
-        service = client.service
         try:
+            service, sessionId = getService()
             for entity in service.getEntityNames():
                 print entity
-                getService(options.timeout).lucenePopulate(entity)
+                service, sessionId = getService(options.timeout)
+                service.lucenePopulate(sessionId, entity)
         except WebFault, wf:
             exc = wf.fault.detail.IcatException
             fatal(exc.type + " exception: " + exc.message)
@@ -144,7 +160,8 @@ def populate(args):
         fatal("Must have zero arguments after the operation 'populate' or one - the name of the entity")
  
     try:
-        getService(options.timeout).lucenePopulate(args[0])
+        service, sessionId = getService(options.timeout)
+        service.lucenePopulate(sessionId, args[0])
     except WebFault, wf:
         exc = wf.fault.detail.IcatException
         fatal(exc.type + " exception: " + exc.message)
@@ -163,7 +180,7 @@ usagebase = "usage: %prog <url> <username> <password> "
            
 subcommands = {}
 subcommands["search"] = search
-subcommands["props"] = props
+subcommands["properties"] = getProperties
 subcommands["populate"] = populate
 subcommands["commit"] = commit
 subcommands["clear"] = clear
@@ -176,48 +193,52 @@ def fatal(msg):
 
 parser = OptionParser()
 
-if len(sys.argv) >= 4:
-    url, username, password = sys.argv[1:4]
-    if password == "-":
-        password = getpass.getpass()
+try:
+    pos = sys.argv.index("--")
+    start = sys.argv[1:pos]
+    end = sys.argv[pos + 1:]
+except ValueError:
+    start = sys.argv[1:]
+    end = []
+ 
+if len(start) > 2:
+    url, plugin = start[:2]
+    creds = start[2:]
 
-if len(sys.argv) == 4:
-    print "Use CTRL-D or 'exit' to exit"
-    run = True
-    try:
-        getService().props()
-    except WebFault, wf:
-        reportProblem(wf)
-    except AttributeError, e:
-        fatal("Bad username/password")
-    except Exception, e:
-        fatal(e)
-   
-    while run:
+    if not end:
+        
         try:
-            command = raw_input("icatadmin> ")
-            if command:
-                if command == "exit":
-                    run = False
-                    continue
-                tokens = shlex.split(command)
-                op = subcommands.get(tokens[0])
-                if not op:
-                    fatal("First argument must be one of " + str(subcommands.keys()))
-                op(tokens[1:])
-        except EOFError:
-            print
-            sys.exit()
-        except:
-            pass
-    sys.exit()
+            service, sessionId = getService()
+            service.getProperties(sessionId)
+        except Exception, e:
+            fatal(e)
+       
+        print "Use CTRL-D or 'exit' to exit"
+        run = True
+        while run:
+            try:
+                command = input("icatadmin> ")
+                if command:
+                    if command == "exit":
+                        run = False
+                        continue
+                    tokens = shlex.split(command)
+                    op = subcommands.get(tokens[0])
+                    if not op:
+                        fatal("First argument must be one of " + str(subcommands.keys()))
+                    op(tokens[1:])
+            except EOFError:
+                print
+                sys.exit()
+            except:
+                pass
+        sys.exit()
 
-op = None
-if len(sys.argv) > 4:
-    command = sys.argv[4]
-    op = subcommands.get(command)
+    op = subcommands.get(end[0])
+    if op:
+        op(end[1:])
+    else:
+        fatal("Subcommand " + end[0] + " must be one of " + str(subcommands.keys()))
 
-if not op:
-    fatal("First arguments must be url, username and password (or '-' to be prompted) optionally followed by one of " + str(subcommands.keys()))
-
-op(sys.argv[5:])
+else:
+    fatal("First arguments must be url and plugin mnemonic followed by pairs of arguments to represent the\ncredentials (with '-' to be prompted) optionally followed by '--' and one of\n" + str(subcommands.keys()))

@@ -32,7 +32,7 @@ for i in range (3, len(args), 2):
         entry.value = args[i + 1]
     credentials.entry.append(entry)
 
-sessionId = service.login(plugin, credentials,)
+sessionId = service.login(plugin, credentials)
 print "Logged in with", service.getRemainingMinutes(sessionId), "minutes to go"
 
 groups = service.search(sessionId, "Grouping[name='annoying animals']")

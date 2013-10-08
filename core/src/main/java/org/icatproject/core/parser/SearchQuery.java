@@ -213,7 +213,7 @@ public class SearchQuery {
 			sb.append(" AND ");
 		}
 		if (ruleWhere.length() > 0) {
-			sb.append(ruleWhere);
+			sb.append("(" + ruleWhere + ")");
 		}
 
 		if (otherJpqlClauses != null) {

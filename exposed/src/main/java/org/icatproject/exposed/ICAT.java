@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -71,6 +72,7 @@ import org.icatproject.core.manager.BeanManager;
 import org.icatproject.core.manager.CreateResponse;
 import org.icatproject.core.manager.EntityInfo;
 import org.icatproject.core.manager.EntityInfoHandler;
+import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.LuceneSingleton;
 import org.icatproject.core.manager.NotificationMessage;
 import org.icatproject.core.manager.PropertyHandler;
@@ -83,43 +85,42 @@ public class ICAT {
 
 	private static Logger logger = Logger.getLogger(ICAT.class);
 
-	@PersistenceContext(unitName = "icat")
-	private EntityManager manager;
-
-	@EJB
-	Transmitter transmitter;
+	private Map<String, Authenticator> authPlugins = new HashMap<String, Authenticator>();
 
 	@EJB
 	BeanManager beanManager;
 
-	@Resource
-	private UserTransaction userTransaction;
-
-	@Resource
-	WebServiceContext webServiceContext;
-
-	private Map<String, Authenticator> authPlugins = new HashMap<String, Authenticator>();
+	@EJB
+	GateKeeper gatekeeper;
 
 	private int lifetimeMinutes;
 
 	private LuceneSingleton lucene;
 
+	@PersistenceContext(unitName = "icat")
+	private EntityManager manager;
+
 	@EJB
 	PropertyHandler propertyHandler;
 
-	@PostConstruct
-	private void init() {
-		authPlugins = propertyHandler.getAuthPlugins();
-		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
-		if (propertyHandler.getLuceneDirectory() != null) {
-			lucene = LuceneSingleton.getInstance(propertyHandler);
-		}
-	}
+	private Set<String> rootUserNames;
 
-	@PreDestroy
-	private void exit() {
-		if (lucene != null) {
-			lucene.close();
+	@EJB
+	Transmitter transmitter;
+
+	@Resource
+	private UserTransaction userTransaction;
+
+	// private Set<String> rootUserNames;
+
+	@Resource
+	WebServiceContext webServiceContext;
+
+	private void checkRoot(String sessionId) throws IcatException {
+		String userId = beanManager.getUserName(sessionId, manager);
+		if (!rootUserNames.contains(userId)) {
+			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES,
+					"user must be in rootUserNames");
 		}
 	}
 
@@ -220,6 +221,13 @@ public class ICAT {
 			@WebParam UserGroup userGroup, @WebParam Log log, @WebParam PublicStep publicStep) {
 	}
 
+	@PreDestroy
+	private void exit() {
+		if (lucene != null) {
+			lucene.close();
+		}
+	}
+
 	@WebMethod
 	public EntityBaseBean get(@WebParam(name = "sessionId") String sessionId,
 			@WebParam(name = "query") String query, @WebParam(name = "primaryKey") long primaryKey)
@@ -241,15 +249,22 @@ public class ICAT {
 		return Constants.API_VERSION;
 	}
 
+	@WebMethod
+	public EntityInfo getEntityInfo(@WebParam(name = "beanName") String beanName)
+			throws IcatException {
+		return beanManager.getEntityInfo(beanName);
+	}
+
 	@WebMethod()
 	public List<String> getEntityNames() throws IcatException {
 		return EntityInfoHandler.getEntityNamesList();
 	}
 
 	@WebMethod
-	public EntityInfo getEntityInfo(@WebParam(name = "beanName") String beanName)
+	public List<String> getProperties(@WebParam(name = "sessionId") String sessionId)
 			throws IcatException {
-		return beanManager.getEntityInfo(beanName);
+		checkRoot(sessionId);
+		return beanManager.getProperties();
 	}
 
 	@WebMethod()
@@ -261,6 +276,32 @@ public class ICAT {
 	@WebMethod
 	public String getUserName(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		return beanManager.getUserName(sessionId, manager);
+	}
+
+	@PostConstruct
+	private void init() {
+		authPlugins = propertyHandler.getAuthPlugins();
+		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
+		if (propertyHandler.getLuceneDirectory() != null) {
+			lucene = LuceneSingleton.getInstance(propertyHandler);
+		}
+		rootUserNames = gatekeeper.getRootUserNames();
+	}
+
+	@WebMethod
+	public boolean isAccessAllowed(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "bean") EntityBaseBean bean,
+			@WebParam(name = "accessType") AccessType accessType) throws IcatException {
+		try {
+			String userId = getUserName(sessionId);
+			return beanManager.isAccessAllowed(userId, bean, manager, userTransaction, accessType);
+		} catch (IcatException e) {
+			reportIcatException(e);
+			throw e;
+		} catch (Throwable e) {
+			reportThrowable(e);
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
+		}
 	}
 
 	@WebMethod
@@ -279,14 +320,118 @@ public class ICAT {
 		return beanManager.login(userName, lifetimeMinutes, manager, userTransaction);
 	}
 
+	@AroundInvoke
+	private Object logMethods(InvocationContext ctx) throws IcatException {
+
+		String className = ctx.getTarget().getClass().getName();
+		String methodName = ctx.getMethod().getName();
+		String target = className + "." + methodName + "()";
+
+		long start = System.currentTimeMillis();
+
+		logger.debug("Invoking " + target);
+		try {
+			return ctx.proceed();
+		} catch (IcatException e) {
+			throw e;
+		} catch (Exception e) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			e.printStackTrace(new PrintStream(baos));
+			logger.debug("Other exception " + baos.toString());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, baos.toString());
+		} finally {
+			long time = System.currentTimeMillis() - start;
+			logger.debug("Method " + target + " took " + time / 1000f + "s to execute");
+		}
+	}
+
 	@WebMethod
 	public void logout(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		beanManager.logout(sessionId, manager, userTransaction);
 	}
 
 	@WebMethod
+	public void luceneClear(@WebParam(name = "sessionId") String sessionId) throws IcatException {
+		try {
+			checkRoot(sessionId);
+			BeanManager.luceneClear(lucene);
+		} catch (IcatException e) {
+			reportIcatException(e);
+			throw e;
+		} catch (Throwable e) {
+			reportThrowable(e);
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
+		}
+	}
+
+	@WebMethod
+	public void luceneCommit(@WebParam(name = "sessionId") String sessionId) throws IcatException {
+		try {
+			checkRoot(sessionId);
+			BeanManager.luceneCommit(lucene);
+		} catch (IcatException e) {
+			reportIcatException(e);
+			throw e;
+		} catch (Throwable e) {
+			reportThrowable(e);
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
+		}
+	}
+
+	@WebMethod
+	public void lucenePopulate(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "entityName") String entityName) throws IcatException {
+		try {
+			checkRoot(sessionId);
+			BeanManager.lucenePopulate(entityName, manager, lucene);
+		} catch (IcatException e) {
+			reportIcatException(e);
+			throw e;
+		} catch (Throwable e) {
+			reportThrowable(e);
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
+		}
+	}
+
+	@WebMethod
+	public List<String> luceneSearch(@WebParam(name = "sessionId") String sessionId,
+			@WebParam(name = "query") String query, @WebParam(name = "maxCount") int maxCount,
+			@WebParam(name = "entityName") String entityName) throws IcatException {
+		try {
+			checkRoot(sessionId);
+			return BeanManager.luceneSearch(query, maxCount, entityName, manager, lucene);
+		} catch (IcatException e) {
+			reportIcatException(e);
+			throw e;
+		} catch (Throwable e) {
+			reportThrowable(e);
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
+		}
+	}
+
+	@WebMethod
 	public void refresh(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		beanManager.refresh(sessionId, lifetimeMinutes, manager, userTransaction);
+	}
+
+	private void reportIcatException(IcatException e) throws IcatException {
+		if (e.getType() == IcatExceptionType.INTERNAL) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			e.printStackTrace(new PrintStream(baos));
+			logger.debug("Internal exception " + baos.toString());
+		} else {
+			logger.debug("IcatException " + e.getType() + " " + e.getMessage()
+					+ (e.getOffset() >= 0 ? " at offset " + e.getOffset() : ""));
+		}
+	}
+
+	private void reportThrowable(Throwable e) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintStream s = new PrintStream(baos);
+		e.printStackTrace(s);
+		s.close();
+		logger.error("Unexpected failure in Java "
+				+ System.getProperties().getProperty("java.version") + " " + baos);
 	}
 
 	@WebMethod
@@ -322,22 +467,6 @@ public class ICAT {
 	}
 
 	@WebMethod
-	public boolean isAccessAllowed(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "bean") EntityBaseBean bean,
-			@WebParam(name = "accessType") AccessType accessType) throws IcatException {
-		try {
-			String userId = getUserName(sessionId);
-			return beanManager.isAccessAllowed(userId, bean, manager, userTransaction, accessType);
-		} catch (IcatException e) {
-			reportIcatException(e);
-			throw e;
-		} catch (Throwable e) {
-			reportThrowable(e);
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
-		}
-	}
-
-	@WebMethod
 	public void update(@WebParam(name = "sessionId") String sessionId,
 			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
 		try {
@@ -351,51 +480,6 @@ public class ICAT {
 			reportThrowable(e);
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
 		}
-	}
-
-	@AroundInvoke
-	private Object logMethods(InvocationContext ctx) throws IcatException {
-
-		String className = ctx.getTarget().getClass().getName();
-		String methodName = ctx.getMethod().getName();
-		String target = className + "." + methodName + "()";
-
-		long start = System.currentTimeMillis();
-
-		logger.debug("Invoking " + target);
-		try {
-			return ctx.proceed();
-		} catch (IcatException e) {
-			throw e;
-		} catch (Exception e) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			e.printStackTrace(new PrintStream(baos));
-			logger.debug("Other exception " + baos.toString());
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, baos.toString());
-		} finally {
-			long time = System.currentTimeMillis() - start;
-			logger.debug("Method " + target + " took " + time / 1000f + "s to execute");
-		}
-	}
-
-	private void reportIcatException(IcatException e) throws IcatException {
-		if (e.getType() == IcatExceptionType.INTERNAL) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			e.printStackTrace(new PrintStream(baos));
-			logger.debug("Internal exception " + baos.toString());
-		} else {
-			logger.debug("IcatException " + e.getType() + " " + e.getMessage()
-					+ (e.getOffset() >= 0 ? " at offset " + e.getOffset() : ""));
-		}
-	}
-
-	private void reportThrowable(Throwable e) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintStream s = new PrintStream(baos);
-		e.printStackTrace(s);
-		s.close();
-		logger.error("Unexpected failure in Java "
-				+ System.getProperties().getProperty("java.version") + " " + baos);
 	}
 
 }
