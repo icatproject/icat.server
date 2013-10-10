@@ -53,14 +53,10 @@ public class FromClause {
 					|| t.getType() == Token.Type.OUTER || t.getType() == Token.Type.FETCH) {
 				// Skip token
 			} else {
-				Token next = input.peek(0);
 				if (t.getType() == Token.Type.LEFT) {
 					state = State.LEFT;
 				} else if (t.getType() == Token.Type.JOIN) {
-					if (state == State.LEFT
-							|| (!isQuery && next != null && state == State.NONE
-									&& next.getType() == Token.Type.NAME && next.getValue()
-									.toUpperCase().startsWith(idVar + "."))) {
+					if (state == State.LEFT || !isQuery) {
 						state = State.LJOIN;
 						sb.append(" LEFT JOIN");
 					} else {

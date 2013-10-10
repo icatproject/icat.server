@@ -140,7 +140,9 @@ public class SearchQuery {
 	}
 
 	public String getJPQL(String userId, EntityManager manager) {
-		logger.debug("Processing " + this);
+		logger.debug("Processing: " + this);
+		logger.debug("=> fromClause: " + fromClause);
+		logger.debug("=> whereClause: " + whereClause);
 		StringBuilder sb = new StringBuilder(string);
 		sb.append(" FROM" + fromClause.toString());
 		String beanName = fromClause.getBean().getSimpleName();
@@ -187,7 +189,7 @@ public class SearchQuery {
 				logger.info("Include authz rule " + r.getWhat() + " FROM: " + jpql + " WHERE: "
 						+ jwhere);
 
-				for (int i = 1; i < r.getVarCount(); i++) {
+				for (int i = r.getVarCount() - 1; i > 0; i--) {
 					jpql = jpql.replace("$" + i + "$", "$" + (i + varCount) + "$");
 					jwhere = jwhere.replace("$" + i + "$", "$" + (i + varCount) + "$");
 				}

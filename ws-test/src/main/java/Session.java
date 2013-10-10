@@ -27,8 +27,12 @@ import org.icatproject.ICAT;
 import org.icatproject.ICATService;
 import org.icatproject.IcatExceptionType;
 import org.icatproject.IcatException_Exception;
+import org.icatproject.Instrument;
+import org.icatproject.InstrumentScientist;
 import org.icatproject.Investigation;
+import org.icatproject.InvestigationInstrument;
 import org.icatproject.InvestigationType;
+import org.icatproject.InvestigationUser;
 import org.icatproject.Job;
 import org.icatproject.Login.Credentials;
 import org.icatproject.Login.Credentials.Entry;
@@ -355,7 +359,6 @@ public class Session {
 		this.addRule("root", "SELECT x FROM InvestigationUser x", "CRUD");
 		this.addRule("root", "SELECT x FROM InvestigationType x", "CRUD");
 		this.addRule("root", "SELECT x FROM ParameterType x", "CRUD");
-		this.addRule("root", "SELECT x FROM Investigation x", "CRUD");
 		this.addRule("root", "Dataset", "CRUD");
 		this.addRule("root", "SELECT x FROM ParameterType x", "CRUD");
 		this.addRule("root", "SELECT x FROM DatasetParameter x", "CRUD");
@@ -370,6 +373,9 @@ public class Session {
 		this.addRule("root", "SELECT x FROM DataCollectionDatafile x", "CRUD");
 		this.addRule("root", "SELECT x FROM InvestigationParameter x", "CRUD");
 		this.addRule("root", "SELECT x FROM Log x", "CRUD");
+		this.addRule("root", "Instrument", "CRUD");
+		this.addRule("root", "InvestigationInstrument", "CRUD");
+		this.addRule("root", "InstrumentScientist", "CRUD");
 	}
 
 	public void update(EntityBaseBean df) throws IcatException_Exception {
@@ -469,6 +475,43 @@ public class Session {
 	public List<String> luceneSearch(String query, int maxCount, String entityName)
 			throws IcatException_Exception {
 		return icat.luceneSearch(sessionId, query, maxCount, entityName);
+	}
+
+	public Instrument createInstrument(Facility facility, String name)
+			throws IcatException_Exception {
+		Instrument ins = new Instrument();
+		ins.setFacility(facility);
+		ins.setName(name);
+		ins.setId(icat.create(sessionId, ins));
+		return ins;
+	}
+
+	public InvestigationInstrument createInvestigationInstrument(Investigation inv, Instrument ins)
+			throws IcatException_Exception {
+		InvestigationInstrument ii = new InvestigationInstrument();
+		ii.setInvestigation(inv);
+		ii.setInstrument(ins);
+		ii.setId(icat.create(sessionId, ii));
+		return ii;
+	}
+
+	public InstrumentScientist createInstrumentScientist(Instrument ins, User user)
+			throws IcatException_Exception {
+		InstrumentScientist is = new InstrumentScientist();
+		is.setInstrument(ins);
+		is.setUser(user);
+		is.setId(icat.create(sessionId, is));
+		return is;
+
+	}
+
+	public InvestigationUser createInvestigationUser(Investigation inv, User user)
+			throws IcatException_Exception {
+		InvestigationUser iu = new InvestigationUser();
+		iu.setInvestigation(inv);
+		iu.setUser(user);
+		iu.setId(icat.create(sessionId, iu));
+		return iu;
 	}
 
 }

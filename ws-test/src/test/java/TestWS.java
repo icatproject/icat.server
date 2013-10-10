@@ -41,7 +41,9 @@ import org.icatproject.Grouping;
 import org.icatproject.IcatException;
 import org.icatproject.IcatExceptionType;
 import org.icatproject.IcatException_Exception;
+import org.icatproject.Instrument;
 import org.icatproject.Investigation;
+import org.icatproject.InvestigationInstrument;
 import org.icatproject.InvestigationParameter;
 import org.icatproject.InvestigationType;
 import org.icatproject.InvestigationUser;
@@ -99,8 +101,25 @@ public class TestWS {
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
-		Investigation inv = session.createInvestigation(facility, "A", "Not null",
+		Investigation invA = session.createInvestigation(facility, "A", "Not null",
 				investigationType);
+
+		Investigation invB = session.createInvestigation(facility, "B", "Not null",
+				investigationType);
+
+		Investigation invC = session.createInvestigation(facility, "C", "Not null",
+				investigationType);
+
+		Instrument wish = session.createInstrument(facility, "wish");
+
+		session.createInvestigationInstrument(invA, wish);
+		session.createInvestigationInstrument(invB, wish);
+
+		User root = (User) session.search("User[name='root']").get(0);
+		session.createInstrumentScientist(wish, root);
+
+		session.createInvestigationUser(invA, root);
+		session.createInvestigationUser(invC, root);
 
 		ParameterType p = new ParameterType();
 		p.setName("TIMESTAMP");
@@ -111,7 +130,7 @@ public class TestWS {
 		p.setFacility(facility);
 		p.setId((Long) session.create(p));
 
-		Dataset wibble = session.createDataset("Wibble", dst, inv);
+		Dataset wibble = session.createDataset("Wibble", dst, invA);
 
 		DatafileFormat dft1 = session.createDatafileFormat(facility, "png", "binary");
 		DatafileFormat dft2 = session.createDatafileFormat(facility, "bmp", "binary");
@@ -124,14 +143,14 @@ public class TestWS {
 		XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
 		session.createDatasetParameter(date, p, wibble);
 
-		Dataset wobble = session.createDataset("Wobble", dst, inv);
+		Dataset wobble = session.createDataset("Wobble", dst, invA);
 		session.createDatafile("wob1", dft1, wobble);
 
-		Dataset dfsin = session.createDataset("dfsin", dst, inv);
+		Dataset dfsin = session.createDataset("dfsin", dst, invA);
 		Datafile fred = session.createDatafile("fred", dft1, dfsin);
 		Datafile bill = session.createDatafile("bill", dft1, dfsin);
 
-		Dataset dfsout = session.createDataset("dfsout", dst, inv);
+		Dataset dfsout = session.createDataset("dfsout", dst, invA);
 		Datafile mog = session.createDatafile("mog", dft1, dfsout);
 
 		Application application = session.createApplication(facility, "The one", "1.0");
@@ -466,7 +485,8 @@ public class TestWS {
 		Rule rule = new Rule();
 		rule.setCrudFlags("C");
 		rule.setWhat("SELECT i FROM Investigation i where i.modTime = {ts 1950-01-21 06:00:00}");
-		session.create(rule);
+		rule.setId(session.create(rule));
+		session.delete(rule);
 	}
 
 	@Test
@@ -476,17 +496,125 @@ public class TestWS {
 		isSampleInv.setCrudFlags("CRU");
 		isSampleInv
 				.setWhat("SELECT s FROM Sample s JOIN s.investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci WHERE instSci.user.name = :user");
-		session.create(isSampleInv);
+		isSampleInv.setId(session.create(isSampleInv));
 
 		// Samples - via dataset
 		Rule isSampleDs = new Rule();
 		isSampleDs.setCrudFlags("CRU");
 		isSampleDs
 				.setWhat("SELECT s FROM Sample AS s JOIN s.datasets AS ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst JOIN inst.instrumentScientists AS instSci WHERE instSci.user.name = :user");
-		session.create(isSampleDs);
+		isSampleDs.setId(session.create(isSampleDs));
 
 		// Test
 		session.search("SELECT COUNT(s) FROM Sample AS s JOIN s.datasets as ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst WHERE (inst.name = 'WISH')");
+		session.delete(isSampleInv);
+		session.delete(isSampleDs);
+	}
+
+	@Test
+	public void authz5() throws Exception {
+		session.delRule("root", "SELECT x FROM Investigation x", "CRUD");
+		try {
+			Rule isInv = new Rule();
+			isInv.setCrudFlags("CRU");
+			isInv.setWhat("SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci WHERE instSci.user.name = :user");
+			isInv.setId(session.create(isInv));
+
+			session.search("SELECT COUNT(i) FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst WHERE inst.name='WISH'");
+			session.delete(isInv);
+		} finally {
+			session.addRule("root", "SELECT x FROM Investigation x", "CRUD");
+		}
+	}
+
+	@Test
+	public void authz6() throws Exception {
+		session.clear();
+		create();
+		session.delRule("root", "SELECT x FROM Investigation x", "CRUD");
+		try {
+			// Create a rule for me as an Instrument Scientist on WISH
+			System.out.println("Adding InstrumentScientist Rule");
+			Rule isInv = new Rule();
+			isInv.setCrudFlags("CRU");
+			// isInv.setWhat("SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci WHERE instSci.user.name = :user");
+
+			isInv.setWhat("SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user");
+			isInv.setId(session.create(isInv));
+
+			assertEquals(2L, session.search("SELECT COUNT(i) FROM Investigation i").get(0));
+			checkInvestigationNames("Investigation ORDER BY name", "A", "B");
+
+			assertEquals(
+					2L,
+					session.search(
+							"COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']")
+							.get(0));
+			checkInvestigationNames(
+					"Investigation ORDER BY name <-> InvestigationInstrument <-> Instrument[name='WISH']",
+					"A", "B");
+
+			// Delete the rule
+			session.delete(isInv);
+
+			// Create a rule so I can see 'My' Investigations (those where I am an investigator)
+			Rule invUserinv = new Rule();
+			invUserinv.setCrudFlags("R");
+			invUserinv.setWhat("Investigation <-> InvestigationUser <-> User [name = :user]");
+			invUserinv.setId(session.create(invUserinv));
+
+			assertEquals(2L, session.search("SELECT COUNT(i) FROM Investigation i").get(0));
+			checkInvestigationNames("Investigation ORDER BY name", "A", "C");
+
+			assertEquals(
+					2L,
+					session.search(
+							"COUNT(Investigation) <-> InvestigationUser <-> User[name=:user]").get(
+							0));
+			checkInvestigationNames(
+					"Investigation ORDER BY name <-> InvestigationUser <-> User[name=:user]", "A",
+					"C");
+
+			assertEquals(
+					1L,
+					session.search(
+							"COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']")
+							.get(0));
+			checkInvestigationNames(
+					"Investigation <-> InvestigationInstrument <-> Instrument[name='WISH']", "A");
+
+			// Add the InstrumentScientist rule back in.
+			isInv.setId(session.create(isInv));
+
+			assertEquals(3L, session.search("SELECT COUNT(i) FROM Investigation i").get(0));
+			checkInvestigationNames("Investigation ORDER BY name", "A", "B", "C");
+
+			assertEquals(2L, session.search(
+					"COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']")
+					.get(0));
+			checkInvestigationNames(
+					"Investigation <-> InvestigationInstrument <-> Instrument[name='WISH']", "A", "B");
+
+			assertEquals(2L, session.search(
+					"COUNT(Investigation) <-> InvestigationUser <-> User[name=:user]").get(0));
+			checkInvestigationNames(
+					"Investigation ORDER BY name <-> InvestigationUser <-> User[name=:user]", "A", "C");
+
+			session.delete(isInv);
+			session.delete(invUserinv);
+		} finally {
+			 session.addRule("root", "SELECT x FROM Investigation x", "CRUD");
+		}
+	}
+
+	private void checkInvestigationNames(String query, String... names)
+			throws IcatException_Exception {
+		List<Object> objects = session.search(query);
+		assertEquals(names.length, objects.size());
+		int i = 0;
+		for (Object o : objects) {
+			assertEquals(names[i++], ((Investigation) o).getName());
+		}
 	}
 
 	@Test
@@ -1707,7 +1835,7 @@ public class TestWS {
 		session.lucenePopulate("Investigation");
 		session.lucenePopulate("Dataset");
 		session.lucenePopulate("Datafile");
-		
+
 		session.luceneCommit();
 		assertEquals(4, session.luceneSearch("*f*", 100, null).size());
 		assertEquals(2, session.luceneSearch("*f*", 100, "Dataset").size());
