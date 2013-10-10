@@ -194,7 +194,7 @@
                     </dd>
                     <dt>
                         notification.&lt;entity name&gt; </dt>
-                    <dd>a string of letters taken from the set "C", "U" and "D" indicating for which operations (create, update and delete) you with
+                    <dd>a string of letters taken from the set "C", "U" and "D" indicating for which operations (create, update and delete) you wish
                         to be notified for that kind of operation on the entity.
                     </dd>
                     <dt>log.list</dt>
