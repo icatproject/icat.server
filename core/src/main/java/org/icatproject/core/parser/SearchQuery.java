@@ -103,7 +103,7 @@ public class SearchQuery {
 			t = input.peek(0);
 		}
 		if (t != null && t.getType() == Token.Type.INCLUDE) {
-			includeClause = new IncludeClause(getBean(), input, idVarMap, gateKeeper);
+			includeClause = new IncludeClause(getBean(), input, idVar, gateKeeper);
 			t = input.peek(0);
 		}
 		if (t != null && t.getType() == Token.Type.LIMIT) {
@@ -112,7 +112,7 @@ public class SearchQuery {
 
 		}
 		if (includeClause == null && t != null && t.getType() == Token.Type.INCLUDE) {
-			includeClause = new IncludeClause(getBean(), input, idVarMap, gateKeeper);
+			includeClause = new IncludeClause(getBean(), input, idVar, gateKeeper);
 			t = input.peek(0);
 		}
 		if (t != null) {

@@ -407,29 +407,7 @@
                     The related types must be all be related to the original type or to some other type in the list. This means that you could not
                     have
                     <tt>"Dataset INCLUDE DatafileParameter"</tt>
-                    . Not all relationships can be followed, the rule appears complex but is there to support the
-                    <a href="#authorization">authorization</a>
-                    scheme which is
-                    explained later.
-                    Starting from the first type (before the INCLUDE keyword) cascaded "one to many" relationships
-                    may
-                    be followed
-                    repeatedly. In addition "many to one" relationships can be followed. The idea behind this is that
-                    cascaded "one to
-                    many"
-                    relationships represent composition/ownership - i.e. a dataset is made up of datafiles and the "many to one"
-                    is allowed as
-                    these
-                    are
-                    typically shared objects. This means that starting from a Dataset, one could follow the cascaded "one to
-                    many"
-                    relationships to
-                    get
-                    to Datafile, DatasetParameter and DatafileParameter. From this set of types (Dataset, Datafile,
-                    DatasetParameter and
-                    DatafileParameter) one can follow the "many to one" relationships to reach at most one of each of Facility,
-                    Investigation,
-                    InvestigationType, DatasetType, Instrument, FacilityCycle, ParameterType and DatafileFormat. Finally there must be
+                    . There must be
                     only one route
                     from the original type to each of the included types.
                 </p>
@@ -636,6 +614,9 @@
                     INCLUDE ds.datafiles AS dsp, dsp.parameters, ds.parameters
                 </code>
                 <p>This introduces a new variable dsp which is used later in the clause. The keyword "AS" is optional.</p>
+                <p>The variables defined outside the INCLUDE clause are not available inside the INCLUDE clause except for the variable identifying
+                    the main object being returned. In this case the pre-defined variable is "ds".
+                </p>
                 <p>It is permissible to visit an entity type more than once in an INCLUDE - for example following a provenance chain.</p>
 
                 <h4>Free text syntax</h4>
@@ -854,7 +835,8 @@
                 The JMS message is always PubSub rather than point to point. This means that there can be multiple listeners for a message.
 
                 Any
-                receiver must be set up to receive messages with a topic of "jms/ICAT/Topic". The messages all have properties of "entity" which is the
+                receiver must be set up to receive messages with a topic of "jms/ICAT/Topic". The messages all have properties of "entity" which is
+                the
                 type of the
                 entity such as
                 <tt>Dataset</tt>

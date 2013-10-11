@@ -589,21 +589,28 @@ public class TestWS {
 			assertEquals(3L, session.search("SELECT COUNT(i) FROM Investigation i").get(0));
 			checkInvestigationNames("Investigation ORDER BY name", "A", "B", "C");
 
-			assertEquals(2L, session.search(
-					"COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']")
-					.get(0));
+			assertEquals(
+					2L,
+					session.search(
+							"COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']")
+							.get(0));
 			checkInvestigationNames(
-					"Investigation <-> InvestigationInstrument <-> Instrument[name='WISH']", "A", "B");
+					"Investigation <-> InvestigationInstrument <-> Instrument[name='WISH']", "A",
+					"B");
 
-			assertEquals(2L, session.search(
-					"COUNT(Investigation) <-> InvestigationUser <-> User[name=:user]").get(0));
+			assertEquals(
+					2L,
+					session.search(
+							"COUNT(Investigation) <-> InvestigationUser <-> User[name=:user]").get(
+							0));
 			checkInvestigationNames(
-					"Investigation ORDER BY name <-> InvestigationUser <-> User[name=:user]", "A", "C");
+					"Investigation ORDER BY name <-> InvestigationUser <-> User[name=:user]", "A",
+					"C");
 
 			session.delete(isInv);
 			session.delete(invUserinv);
 		} finally {
-			 session.addRule("root", "SELECT x FROM Investigation x", "CRUD");
+			session.addRule("root", "SELECT x FROM Investigation x", "CRUD");
 		}
 	}
 
@@ -1109,6 +1116,18 @@ public class TestWS {
 			IcatException ue = e.getFaultInfo();
 			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
+		}
+
+		try {
+			results = session
+					.search("SELECT DISTINCT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst " +
+							"WHERE inst.name='WISH' ORDER BY i.id ASC INCLUDE ii.instruments, i.parameters LIMIT 100, 100");
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(-1, ue.getOffset());
+			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
+			System.out.println(e.getMessage());
 		}
 
 	}

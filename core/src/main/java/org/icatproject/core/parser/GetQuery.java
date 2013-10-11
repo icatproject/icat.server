@@ -1,8 +1,5 @@
 package org.icatproject.core.parser;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
@@ -26,16 +23,14 @@ public class GetQuery {
 			input.consume();
 			t = input.peek(0);
 		}
-		Map<String, Integer> idVarMap = new HashMap<>();
 		if (t != null && t.getType() == Token.Type.NAME) {
-
-			idVarMap.put(t.getValue().toUpperCase(), 0);
+			String idVar = t.getValue().toUpperCase();
 			input.consume();
 			t = input.peek(0);
-		}
-		if (t != null && t.getType() == Token.Type.INCLUDE) {
-			include = new IncludeClause(bean, input, idVarMap, gateKeeper);
-			t = input.peek(0);
+			if (t != null && t.getType() == Token.Type.INCLUDE) {
+				include = new IncludeClause(bean, input, idVar, gateKeeper);
+				t = input.peek(0);
+			}
 		}
 		if (t != null) {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,

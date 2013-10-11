@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
@@ -67,12 +66,10 @@ public class IncludeClause {
 	private List<Step> steps = new ArrayList<Step>();
 	Map<Integer, Class<? extends EntityBaseBean>> types = new HashMap<>();
 
-	public IncludeClause(Class<? extends EntityBaseBean> bean, Input input,
-			Map<String, Integer> idVarMap, GateKeeper gateKeeper) throws ParserException,
-			IcatException {
-		for (Entry<String, Integer> entry : idVarMap.entrySet()) {
-			logger.debug("idVarMap entry " + entry.getKey() + " -> " + entry.getValue());
-		}
+	public IncludeClause(Class<? extends EntityBaseBean> bean, Input input, String idVar,
+			GateKeeper gateKeeper) throws ParserException, IcatException {
+		Map<String, Integer> idVarMap = new HashMap<>();
+		idVarMap.put(idVar, 0);
 		types.put(0, bean);
 		int fabricatedStepCount = 0;
 		input.consume(Token.Type.INCLUDE);
