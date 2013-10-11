@@ -376,6 +376,7 @@ public class Session {
 		this.addRule("root", "Instrument", "CRUD");
 		this.addRule("root", "InvestigationInstrument", "CRUD");
 		this.addRule("root", "InstrumentScientist", "CRUD");
+		this.addRule("root", "SampleType", "CRUD");
 	}
 
 	public void update(EntityBaseBean df) throws IcatException_Exception {

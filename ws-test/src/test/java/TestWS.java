@@ -43,7 +43,6 @@ import org.icatproject.IcatExceptionType;
 import org.icatproject.IcatException_Exception;
 import org.icatproject.Instrument;
 import org.icatproject.Investigation;
-import org.icatproject.InvestigationInstrument;
 import org.icatproject.InvestigationParameter;
 import org.icatproject.InvestigationType;
 import org.icatproject.InvestigationUser;
@@ -56,6 +55,7 @@ import org.icatproject.RelType;
 import org.icatproject.Rule;
 import org.icatproject.Sample;
 import org.icatproject.SampleParameter;
+import org.icatproject.SampleType;
 import org.icatproject.User;
 import org.icatproject.UserGroup;
 import org.junit.BeforeClass;
@@ -95,6 +95,12 @@ public class TestWS {
 	private static void create() throws Exception {
 
 		Facility facility = session.createFacility("Test Facility", 90);
+
+		SampleType sampleType = new SampleType();
+		sampleType.setFacility(facility);
+		sampleType.setName("somename");
+		sampleType.setMolecularFormula("Someformula");
+		session.create(sampleType);
 
 		InvestigationType investigationType = session.createInvestigationType(facility,
 				"TestExperiment");
@@ -1120,8 +1126,8 @@ public class TestWS {
 
 		try {
 			results = session
-					.search("SELECT DISTINCT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst " +
-							"WHERE inst.name='WISH' ORDER BY i.id ASC INCLUDE ii.instruments, i.parameters LIMIT 100, 100");
+					.search("SELECT DISTINCT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst "
+							+ "WHERE inst.name='WISH' ORDER BY i.id ASC INCLUDE ii.instruments, i.parameters LIMIT 100, 100");
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();

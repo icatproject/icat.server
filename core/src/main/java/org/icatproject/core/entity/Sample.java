@@ -24,7 +24,7 @@ import org.icatproject.core.IcatException;
 public class Sample extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
-	private List<Dataset> datasets = new ArrayList<Dataset>();
+	private List<Dataset> datasets = new ArrayList<>();
 
 	@JoinColumn(nullable = false, name = "INVESTIGATION_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -34,7 +34,7 @@ public class Sample extends EntityBaseBean implements Serializable {
 	private String name;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "sample")
-	private List<SampleParameter> parameters = new ArrayList<SampleParameter>();
+	private List<SampleParameter> parameters = new ArrayList<>();
 
 	@JoinColumn(name = "SAMPLETYPE_ID")
 	@ManyToOne(fetch = FetchType.LAZY)
