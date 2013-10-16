@@ -31,3 +31,4 @@ log.table = S
 # Lucene
 lucene.directory = ../data/icat/lucene
 lucene.commitSeconds = 1
+lucene.commitCount = 1000

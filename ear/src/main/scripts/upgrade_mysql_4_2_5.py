@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 import MySQLdb as mdb
 from optparse import OptionParser
@@ -7,8 +7,9 @@ import sys
 username = 'icat'
 password = 'icat'
 schema = 'icat'
+dbhost = 'localhost'
 
-con = mdb.connect('localhost', username, password, schema);
+con = mdb.connect(dbhost, username, password, schema);
 
 parser = OptionParser()
 parser.add_option("--facility", "-f", help="Name of facility to relate to applications - not needed if exactly one exists")
@@ -135,8 +136,6 @@ def dropKeys():
             query = "ALTER TABLE " + table + " DROP FOREIGN KEY " + row[1]
             print query
             cur.execute(query)
-        else:
-            print "Don't touch", table
                        
     for table in tables:
         cur.execute("SHOW INDEX IN " + table)   

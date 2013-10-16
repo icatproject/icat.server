@@ -12,7 +12,10 @@ import getpass
 from suds.client import Client, WebFault
 import subprocess
 import shlex
-import readline
+try:
+    import readline
+except:  # Probably windows
+    pass
 
 def readServices(path):
     try:
@@ -217,7 +220,7 @@ if len(start) > 2:
         run = True
         while run:
             try:
-                command = input("icatadmin> ")
+                command = raw_input("icatadmin> ")
                 if command:
                     if command == "exit":
                         run = False
@@ -225,8 +228,9 @@ if len(start) > 2:
                     tokens = shlex.split(command)
                     op = subcommands.get(tokens[0])
                     if not op:
-                        fatal("First argument must be one of " + str(subcommands.keys()))
-                    op(tokens[1:])
+                        print "First argument must be one of " + str(subcommands.keys())
+                    else:
+                        op(tokens[1:])
             except EOFError:
                 print
                 sys.exit()

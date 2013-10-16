@@ -1,9 +1,9 @@
-# Driver
+# Driver and connection properties for Oracle
 #driver=oracle.jdbc.pool.OracleDataSource
-driver=com.mysql.jdbc.jdbc2.optional.MysqlDataSource
-
-# ICAT connection properties
 #icatProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icat:password=secret 
+
+# Driver and connection properties for MySQL
+driver=com.mysql.jdbc.jdbc2.optional.MysqlDataSource
 icatProperties=user=icat:password=secret:databaseName=icat
 
 # Must contain "glassfish/domains"
