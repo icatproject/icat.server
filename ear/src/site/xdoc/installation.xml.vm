@@ -92,7 +92,7 @@
                         there.
                     </li>
                     <li>
-                        For MySQL edit username, password and schema at the top of the file
+                        For MySQL edit username, password, schema and dbhost at the top of the file
                         <tt>./upgrade_mysql_4_2_5.py</tt>
                         and run it or
                         or for Oracle, edit username , password and db at the top of the file
@@ -224,10 +224,17 @@
                         searchText()
                         call will return nothing.
                     </dd>
+
                     <dt>lucene.commitSeconds</dt>
                     <dd>the interval in seconds between committing lucene changes to disk and updating the index. If you set it to 300 then
                         searchText() calls will see what was available at some time in the past (up to 5 minutes ago) and which is also currently
                         present.
+                    </dd>
+
+                    <dt>lucene.commitCount</dt>
+                    <dd>the number of changes to accumulate before committing them to disk. If the number is too high there can be memory
+                        problems.
+                        Currently this is only used by the call to lucenePopulate.
                     </dd>
                 </dl>
 
@@ -301,7 +308,7 @@
 
                 <blockquote>
                     <code>
-                        icat-seup -f rules.authz https://example.com:8181 db username root password secret
+                        icat-setup -f rules.authz https://example.com:8181 db username root password secret
                     </code>
                 </blockquote>
                 <p>This assumes that you are in the directory where ran get_rules.py which will created a file rules.authz. The credentials (keyword
@@ -309,6 +316,10 @@
                     pairs following the authenticator mnemonic) should be those
                     of one of the users specified in the rootUserNames of the
                     icat.properties file.
+                </p>
+                <p>Please check the rules.authz first as it will not work if it references entities that no longer exist. For example "Group" must be
+                    replaced by "Grouping" and InputDatafile is no longer part of ICAT. Also because some problems have been found with conditions
+                    containing dots (such as "InvestigationUser [user.name='fred']") in rules these must now be re-expressed without dots.
                 </p>
                 <p>Finally you should run the icatadmin populate command to populate lucene for all existing data as in the example below:</p>
                 <blockquote>
