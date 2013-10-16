@@ -354,7 +354,7 @@ public class ICAT {
 	public void luceneClear(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		try {
 			checkRoot(sessionId);
-			BeanManager.luceneClear(lucene);
+			beanManager.luceneClear(lucene);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -368,7 +368,7 @@ public class ICAT {
 	public void luceneCommit(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		try {
 			checkRoot(sessionId);
-			BeanManager.luceneCommit(lucene);
+			beanManager.luceneCommit(lucene);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -383,7 +383,7 @@ public class ICAT {
 			@WebParam(name = "entityName") String entityName) throws IcatException {
 		try {
 			checkRoot(sessionId);
-			BeanManager.lucenePopulate(entityName, manager, lucene);
+			beanManager.lucenePopulate(entityName, manager, lucene);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -399,7 +399,7 @@ public class ICAT {
 			@WebParam(name = "entityName") String entityName) throws IcatException {
 		try {
 			checkRoot(sessionId);
-			return BeanManager.luceneSearch(query, maxCount, entityName, manager, lucene);
+			return beanManager.luceneSearch(query, maxCount, entityName, manager, lucene);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;

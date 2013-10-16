@@ -10,6 +10,7 @@ import filecmp
 from optparse import OptionParser
 import stat
 import glob
+import platform
 
 def abort(msg):
     """Print to stderr and stop with exit 1"""
@@ -19,7 +20,10 @@ def abort(msg):
 def getActions(binDir=False, appDir=False):
     if not os.path.exists ("setup"): abort ("This must be run from the unpacked distribution directory")
     parser = OptionParser("usage: %prog [options] configure | install | uninstall")
-    root = os.getuid() == 0 
+    try:
+        root = os.getuid() == 0
+    except:  # Probably windows
+        root = 1 
    
     if binDir: 
         if root: default = '/usr/bin'
@@ -39,6 +43,10 @@ def getActions(binDir=False, appDir=False):
     
     arg = args[0].upper()
     if arg not in ["CONFIGURE", "INSTALL", "UNINSTALL"]: abort("Must have one argument: 'configure, install' or 'uninstall'")
+    
+    if binDir and not os.path.isdir(os.path.expanduser(options.binDir)): abort("Please create directory " + options.binDir + " or specify --binDir")
+    if appDir and not os.path.isdir(os.path.expanduser(options.appDir)): abort("Please create directory " + options.appDir + " or specify --appDir")
+    
     return Actions(options.verbose), options, arg
 
 class Actions(object):
@@ -60,22 +68,15 @@ class Actions(object):
         if config: config = os.path.getmtime(config_file_path)
         local = os.path.exists(file_name)
         if local: local = os.path.getmtime(file_name)
-        if local and config: 
-            if not filecmp.cmp(file_name, config_file_path):
-                if local > config:
-                    print "Won't overwrite " + file_name + " with the older file " + config_file_path
-                else:
-                    print "Won't overwrite " + file_name + " with the newer file " + config_file_path
-        elif config:
-            shutil.copy(config_file_path, file_name)
-            print "\nCopied " + config_file_path + " to " + file_name
-            print "Please edit", file_name, "to meet your requirements"
-        elif local:
-            pass
-        else:
-            shutil.copy(file_name + ".example", file_name)
-            print "\nCopied " + config_file_path + " to " + file_name
-            print "Please edit", file_name, "to meet your requirements"
+        if not local:
+            if config:
+                shutil.copy(config_file_path, file_name)
+                print "\nCopied " + config_file_path + " to " + file_name
+                print "Please edit", file_name, "to meet your requirements"
+            else:
+                shutil.copy(file_name + ".example", file_name)
+                print "\nCopied " + file_name + ".example" + " to " + file_name
+                print "Please edit", file_name, "to meet your requirements"
         props = self.getProperties(file_name, [])
         example = self.getProperties(file_name + ".example", [])
         for key in expected:
@@ -107,7 +108,10 @@ class Actions(object):
             shutil.copy(file_name + ".example", file_name)
             abort ("\nPlease edit " + file_name + " to meet your requirements then re-run the command")
         if os.stat(file_name).st_mode & stat.S_IROTH:
-            abort("'" + file_name + "' must not be world readable")
+            if platform.system() == "Windows":
+                print "Warning: '" + file_name + "' should not be world readable"
+            else:
+                abort("'" + file_name + "' must not be world readable")
         props = self.getProperties(file_name, required)
         
         glassfish = props["glassfish"]
@@ -138,7 +142,7 @@ class Actions(object):
             out, err, rc = self.execute("jps")
             if rc:
                 abort(err)
-            for line in out.split("\n"):
+            for line in out.splitlines():
                 line = line.strip().split()
                 if line[1] == "ASMain":
                     cmd = "kill -9 " + line[0]
@@ -210,7 +214,7 @@ class Actions(object):
         if self.verbosity > 1:
             if out: print out
         if err:
-            for line in err.split("\n"):
+            for line in err.splitlines():
                 line = line.strip()
                 if line:
                     if line.startswith("PER01"): continue
@@ -252,8 +256,13 @@ class Actions(object):
         return props
     
     def execute(self, cmd):
-        cmd = shlex.split(cmd)
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        if platform.system() == "Windows": 
+            cmd = cmd.split()
+            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        else:
+            cmd = shlex.split(cmd)
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stringOut = StringIO.StringIO()
        
         mstdout = Tee(proc.stdout, stringOut)
@@ -266,10 +275,10 @@ class Actions(object):
         mstdout.join()
         mstderr.join()
         
-        out = stringOut.getvalue()
+        out = stringOut.getvalue().strip()
         stringOut.close()
         
-        err = stringErr.getvalue()
+        err = stringErr.getvalue().strip()
         stringErr.close()
         
         return out, err, rc
@@ -316,7 +325,7 @@ class Actions(object):
         cmd = self.asadminCommand + " " + "list-applications"
         out, err, rc = self.execute(cmd)
         if rc: abort(err)
-        for line in out.split("\n"):
+        for line in out.splitlines():
             if (line.startswith(app + "-")):
                 return line.split()[0]
             
@@ -325,7 +334,7 @@ class Actions(object):
         if self.verbosity: print "\nexecute: " + cmd 
         out, err, rc = self.execute(cmd)
         if rc: abort(err)
-        return out.split("\n")[0].split("=")[1]
+        return out.splitlines()[0].split("=")[1]
     
     def setAsadminProperty(self, name, value):
         cmd = self.asadminCommand + " set " + name + "=" + value

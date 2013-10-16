@@ -288,22 +288,30 @@ public class TestWS {
 		assertEquals(2L, session.search(q3).get(0));
 
 		try {
+			session.addRule("root", "Dataset [type.name = ' ']", "R");
+			fail("Exception should be thrown");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+		}
+
+		try {
 			session.delRule("root", "Dataset", "CRUD");
 			// The space between the single quotes is necessary - I suspect a bug in eclipselink
-			session.addRule("root", "Dataset [type.name = ' ']", "R");
+
+			session.addRule("root", "Dataset <-> DatasetType [name = ' ']", "R");
 
 			assertEquals(0L, session.search(q1).get(0));
 			assertEquals(0L, session.search(q2).get(0));
 			assertEquals(0L, session.search(q3).get(0));
 
-			session.delRule("root", "Dataset [type.name = ' ']", "R");
-			session.addRule("root", "Dataset [type.name = 'PB']", "R");
+			session.delRule("root", "Dataset <-> DatasetType [name = ' ']", "R");
+			session.addRule("root", "Dataset  <-> DatasetType[name = 'PB']", "R");
 
 			assertEquals(1L, session.search(q1).get(0));
 			assertEquals(1L, session.search(q2).get(0));
 			assertEquals(1L, session.search(q3).get(0));
 
-			session.delRule("root", "Dataset [type.name = 'PB']", "R");
+			session.delRule("root", "Dataset  <-> DatasetType[name = 'PB']", "R");
 		} finally {
 			session.addRule("root", "Dataset", "CRUD");
 		}
@@ -501,14 +509,14 @@ public class TestWS {
 		Rule isSampleInv = new Rule();
 		isSampleInv.setCrudFlags("CRU");
 		isSampleInv
-				.setWhat("SELECT s FROM Sample s JOIN s.investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci WHERE instSci.user.name = :user");
+				.setWhat("SELECT s FROM Sample s JOIN s.investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user");
 		isSampleInv.setId(session.create(isSampleInv));
 
 		// Samples - via dataset
 		Rule isSampleDs = new Rule();
 		isSampleDs.setCrudFlags("CRU");
 		isSampleDs
-				.setWhat("SELECT s FROM Sample AS s JOIN s.datasets AS ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst JOIN inst.instrumentScientists AS instSci WHERE instSci.user.name = :user");
+				.setWhat("SELECT s FROM Sample AS s JOIN s.datasets AS ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst JOIN inst.instrumentScientists AS instSci JOIN instSci.user user WHERE user.name = :user");
 		isSampleDs.setId(session.create(isSampleDs));
 
 		// Test
@@ -523,7 +531,7 @@ public class TestWS {
 		try {
 			Rule isInv = new Rule();
 			isInv.setCrudFlags("CRU");
-			isInv.setWhat("SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci WHERE instSci.user.name = :user");
+			isInv.setWhat("SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user");
 			isInv.setId(session.create(isInv));
 
 			session.search("SELECT COUNT(i) FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst WHERE inst.name='WISH'");
@@ -1645,6 +1653,13 @@ public class TestWS {
 		results = session
 				.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafiles df) = 2");
 		assertEquals(2, results.size());
+
+		results = session
+				.search("SELECT i.id FROM Investigation i JOIN i.samples s JOIN s.type st "
+						+ "WHERE i.type.name = 'Data' "
+						+ "AND st.id = (SELECT st2.id FROM SampleType st2 JOIN st2.samples s2 JOIN s2.investigation i2 WHERE i2.id=i.id) "
+						+ "ORDER BY st.name");
+
 	}
 
 	@Test
