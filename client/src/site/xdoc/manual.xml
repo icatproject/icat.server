@@ -752,7 +752,7 @@
                     <br />
                     rule.setCrudFlags("R");
                     <br />
-                    rule.setWhat("Dataset &lt;-&gt; Investigation &lt;-&gt; InvestigationUser [user.name = :user]");
+                    rule.setWhat("Dataset &lt;-&gt; Investigation &lt;-&gt; InvestigationUser &lt;-&gt; User[name = :user]");
                     <br />
                     icat.create(sessionId, rule);
                 </code>
@@ -764,6 +764,12 @@
                     used by
                     the search except that INCLUDE, LIMIT and ORDER BY clauses may not be used. The syntax of the "What" may be either the old concise
                     syntax or the new JPQL syntax.
+                </p>
+                <p>There is currently an important restriction to avoid a problem which has occured in testing: with
+                    the JPQL syntax only one dot may
+                    appear for terms in the WHERE clause and for the old syntax no dots are allowed in the condition
+                    in square brackets. You will get
+                    an error message if you forget.
                 </p>
 
                 <p>Rules which allow every one to read a table are good for performance. For example:</p>

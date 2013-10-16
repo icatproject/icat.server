@@ -172,6 +172,33 @@ public class Rule extends EntityBaseBean implements Serializable {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage());
 		}
 
+		/* Check that there are no expressions with more than one "." */
+		input.reset();
+		try {
+			Token token = input.consume();
+			while (token != null) {
+				if (token.getType() == Token.Type.NAME) {
+					String value = token.getValue();
+					int count = 0;
+					for (int i = 0; i < value.length(); i++) {
+						if (value.charAt(i) == '.') {
+							count++;
+						}
+					}
+					if (count > 1)
+						throw new IcatException(
+								IcatException.IcatExceptionType.BAD_PARAMETER,
+								"Expression "
+										+ value
+										+ " is not currently permitted in a rule. Use extra JOINs to get rid of "
+										+ (count - 1) + " '.' characters.");
+				}
+				token = input.consume();
+			}
+		} catch (ParserException e) {
+			/* Already parsed once so can't happen */
+		}
+
 		fromJPQL = r.getFrom();
 		whereJPQL = r.getWhere();
 		crudJPQL = "SELECT COUNT($0$) FROM " + r.getCrudFrom() + " WHERE $0$.id = :pkid"

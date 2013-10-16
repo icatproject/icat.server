@@ -60,6 +60,7 @@ public class PropertyHandler {
 	private int luceneCommitSeconds;
 
 	private List<String> formattedProps = new ArrayList<String>();
+	private int luceneCommitCount;
 
 	@PostConstruct
 	private void init() {
@@ -232,20 +233,37 @@ public class PropertyHandler {
 		/* Lucene Directory */
 		luceneDirectory = props.getProperty("lucene.directory");
 		if (luceneDirectory != null) {
-			String luceneCommitString = props.getProperty("lucene.commitSeconds");
-			if (luceneCommitString == null) {
+			formattedProps.add("lucene.directory " + luceneDirectory);
+
+			String luceneCommitSecondsString = props.getProperty("lucene.commitSeconds");
+			if (luceneCommitSecondsString == null) {
 				abend("Value of 'lucene.commitSeconds' may not be null when the lucene.diretcory is set");
 			}
-			formattedProps.add("lucene.directory " + luceneDirectory);
 			try {
-				luceneCommitSeconds = Integer.parseInt(luceneCommitString);
+				luceneCommitSeconds = Integer.parseInt(luceneCommitSecondsString);
 				formattedProps.add("lucene.commitSeconds " + luceneCommitSeconds);
 				if (luceneCommitSeconds <= 0) {
-					abend("Value of 'lucene.commitSeconds'" + luceneCommitString
+					abend("Value of 'lucene.commitSeconds'" + luceneCommitSecondsString
 							+ "' is not an integer greater than 0");
 				}
 			} catch (NumberFormatException e) {
-				abend("Value of 'lucene.commitSeconds'" + luceneCommitString
+				abend("Value of 'lucene.commitSeconds'" + luceneCommitSecondsString
+						+ "' is not an integer greater than 0");
+			}
+
+			String luceneCommitCountString = props.getProperty("lucene.commitCount");
+			if (luceneCommitCountString == null) {
+				abend("Value of 'lucene.commitCount' may not be null when the lucene.diretcory is set");
+			}
+			try {
+				luceneCommitCount = Integer.parseInt(luceneCommitCountString);
+				formattedProps.add("lucene.commitCount " + luceneCommitCount);
+				if (luceneCommitCount <= 0) {
+					abend("Value of 'lucene.commitCount'" + luceneCommitCountString
+							+ "' is not an integer greater than 0");
+				}
+			} catch (NumberFormatException e) {
+				abend("Value of 'lucene.commitCount'" + luceneCommitCountString
 						+ "' is not an integer greater than 0");
 			}
 		}
@@ -274,6 +292,10 @@ public class PropertyHandler {
 
 	public List<String> props() {
 		return formattedProps;
+	}
+
+	public int getLuceneCommitCount() {
+		return luceneCommitCount;
 	}
 
 }

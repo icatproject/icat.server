@@ -41,7 +41,7 @@ public class SubSelectClause {
 					sb.append(" " + val);
 				} else {
 					int dot = val.indexOf('.');
-					String idv = dot >= 0 ? val.substring(0, dot).toUpperCase() : val;
+					String idv = dot >= 0 ? val.substring(0, dot).toUpperCase() : val.toUpperCase();
 					Integer intVal = idVarMap.get(idv);
 					if (intVal == null) {
 						intVal = idVarMap.size();

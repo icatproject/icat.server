@@ -78,6 +78,9 @@ public class BeanManager {
 	private Set<String> logRequests;
 
 	private Map<String, NotificationRequest> notificationRequests;
+
+	private int luceneCommitCount;
+
 	private static long next;
 	private static final Pattern timestampPattern = Pattern.compile(":ts(\\d{14})");
 
@@ -86,6 +89,7 @@ public class BeanManager {
 		logRequests = propertyHandler.getLogRequests();
 		log = !logRequests.isEmpty();
 		notificationRequests = propertyHandler.getNotificationRequests();
+		luceneCommitCount = propertyHandler.getLuceneCommitCount();
 	}
 
 	public CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
@@ -1063,8 +1067,8 @@ public class BeanManager {
 
 	}
 
-	public static void lucenePopulate(String entityName, EntityManager manager,
-			LuceneSingleton lucene) throws IcatException {
+	public void lucenePopulate(String entityName, EntityManager manager, LuceneSingleton lucene)
+			throws IcatException {
 
 		if (lucene != null) {
 			Class<?> klass = null;
@@ -1076,13 +1080,18 @@ public class BeanManager {
 			lucene.clear(entityName);
 			List<Long> ids = manager.createQuery("SELECT e.id from " + entityName + "  e",
 					Long.class).getResultList();
-			logger.debug("About to add " + ids.size() + " documents");
+			logger.debug("About to add " + ids.size() + " documents in blocks of "
+					+ luceneCommitCount);
 
 			try {
+				int i = 0;
 				for (Long id : ids) {
 					EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
 					if (bean != null) {
 						lucene.addDocument(bean);
+						if (i++ % luceneCommitCount == 0) {
+							lucene.commit();
+						}
 					}
 				}
 			} catch (Exception e) {
@@ -1092,19 +1101,19 @@ public class BeanManager {
 		}
 	}
 
-	public static void luceneClear(LuceneSingleton lucene) throws IcatException {
+	public void luceneClear(LuceneSingleton lucene) throws IcatException {
 		if (lucene != null) {
 			lucene.clear();
 		}
 	}
 
-	public static void luceneCommit(LuceneSingleton lucene) throws IcatException {
+	public void luceneCommit(LuceneSingleton lucene) throws IcatException {
 		if (lucene != null) {
 			lucene.commit();
 		}
 	}
 
-	public static List<String> luceneSearch(String query, int maxCount, String entityName,
+	public List<String> luceneSearch(String query, int maxCount, String entityName,
 			EntityManager manager, LuceneSingleton lucene) throws IcatException {
 		if (lucene != null) {
 			return lucene.search(query, maxCount, entityName).getResults();

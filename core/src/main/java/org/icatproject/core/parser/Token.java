@@ -2,7 +2,7 @@ package org.icatproject.core.parser;
 
 public class Token {
 
-	enum Type {
+	public enum Type {
 		// ICAT Tokens
 		STRING, NAME, OPENPAREN, CLOSEPAREN, COMPOP, INTEGER, PARAMETER, COMMA,
 

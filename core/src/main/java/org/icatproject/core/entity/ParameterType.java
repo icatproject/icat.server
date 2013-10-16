@@ -36,6 +36,9 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	private boolean applicableToSample;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
+	private List<DataCollectionParameter> dataCollectionParameters = new ArrayList<>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
 	private List<DatafileParameter> datafileParameters = new ArrayList<DatafileParameter>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
@@ -66,10 +69,10 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 	private String name;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
-	private List<PermissibleStringValue> permissibleStringValues = new ArrayList<PermissibleStringValue>();
+	private List<PermissibleStringValue> permissibleStringValues = new ArrayList<>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
-	private List<SampleParameter> sampleParameters = new ArrayList<SampleParameter>();
+	private List<SampleParameter> sampleParameters = new ArrayList<>();
 
 	@Comment("The name of the parameter type units")
 	@Column(name = "UNITS", nullable = false)
@@ -87,6 +90,10 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 
 	/* Needed for JPA */
 	public ParameterType() {
+	}
+
+	public List<DataCollectionParameter> getDataCollectionParameters() {
+		return dataCollectionParameters;
 	}
 
 	public List<DatafileParameter> getDatafileParameters() {
@@ -187,6 +194,10 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 
 	public void setApplicableToSample(boolean applicableToSample) {
 		this.applicableToSample = applicableToSample;
+	}
+
+	public void setDataCollectionParameters(List<DataCollectionParameter> dataCollectionParameters) {
+		this.dataCollectionParameters = dataCollectionParameters;
 	}
 
 	public void setDatafileParameters(List<DatafileParameter> datafileParameters) {

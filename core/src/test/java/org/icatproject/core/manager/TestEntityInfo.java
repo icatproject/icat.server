@@ -205,7 +205,7 @@ public class TestEntityInfo {
 		testGetters(Keyword.class, 3);
 		testGetters(InvestigationUser.class, 4);
 		testGetters(User.class, 7);
-		testGetters(ParameterType.class, 21);
+		testGetters(ParameterType.class, 22);
 		testGetters(Job.class, 5);
 	}
 

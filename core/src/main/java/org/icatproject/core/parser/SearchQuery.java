@@ -60,6 +60,8 @@ public class SearchQuery {
 			if (t.getType() == Token.Type.DISTINCT) {
 				input.consume(Token.Type.DISTINCT);
 				sb.append("DISTINCT ");
+			} else { // TODO remove force distinct
+				sb.append("DISTINCT "); // TODO remove force distinct
 			}
 			result = input.consume(Token.Type.NAME);
 			resultValue = result.getValue();
@@ -75,6 +77,7 @@ public class SearchQuery {
 				sb.append("DISTINCT ");
 				resultValue = input.consume(Token.Type.NAME).getValue();
 			} else {
+				sb.append("DISTINCT "); // TODO remove force distinct
 				resultValue = t.getValue();
 			}
 			int dot = resultValue.indexOf('.');
