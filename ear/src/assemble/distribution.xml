@@ -14,10 +14,12 @@
                 <exclude>*.dump</exclude>
             </excludes>
         </fileSet>
+
         <fileSet>
             <outputDirectory>icat</outputDirectory>
             <directory>${basedir}/src/main/config</directory>
         </fileSet>
+
         <fileSet>
             <outputDirectory>icat</outputDirectory>
             <directory>${basedir}</directory>

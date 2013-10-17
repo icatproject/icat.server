@@ -72,13 +72,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <archiverConfig>
-                        <fileMode>420</fileMode>
-                        <directoryMode>493</directoryMode>
-                        <defaultDirectoryMode>493</defaultDirectoryMode>
-                    </archiverConfig>
-                </configuration>
             </plugin>
 
         </plugins>
