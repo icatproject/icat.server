@@ -515,4 +515,8 @@ public class Session {
 		return iu;
 	}
 
+	public List<String> luceneGetPopulating() throws IcatException_Exception {
+		return icat.luceneGetPopulating(sessionId);
+	}
+
 }

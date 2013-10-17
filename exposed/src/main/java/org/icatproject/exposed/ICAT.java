@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -73,7 +72,6 @@ import org.icatproject.core.manager.CreateResponse;
 import org.icatproject.core.manager.EntityInfo;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.LuceneSingleton;
 import org.icatproject.core.manager.NotificationMessage;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.Transmitter;
@@ -94,8 +92,6 @@ public class ICAT {
 	GateKeeper gatekeeper;
 
 	private int lifetimeMinutes;
-
-	private LuceneSingleton lucene;
 
 	@PersistenceContext(unitName = "icat")
 	private EntityManager manager;
@@ -130,7 +126,7 @@ public class ICAT {
 		try {
 			String userId = getUserName(sessionId);
 			CreateResponse createResponse = beanManager.create(userId, bean, manager,
-					userTransaction, lucene);
+					userTransaction);
 			transmitter.processMessage(createResponse.getNotificationMessage());
 			return createResponse.getPk();
 		} catch (IcatException e) {
@@ -148,7 +144,7 @@ public class ICAT {
 		try {
 			String userId = getUserName(sessionId);
 			List<CreateResponse> createResponses = beanManager.createMany(userId, beans, manager,
-					userTransaction, lucene);
+					userTransaction);
 			List<Long> lo = new ArrayList<Long>();
 			for (CreateResponse createResponse : createResponses) {
 				transmitter.processMessage(createResponse.getNotificationMessage());
@@ -169,8 +165,7 @@ public class ICAT {
 			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			transmitter.processMessage(beanManager.delete(userId, bean, manager, userTransaction,
-					lucene));
+			transmitter.processMessage(beanManager.delete(userId, bean, manager, userTransaction));
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -186,7 +181,7 @@ public class ICAT {
 		try {
 			String userId = getUserName(sessionId);
 			List<NotificationMessage> nms = beanManager.deleteMany(userId, beans, manager,
-					userTransaction, lucene);
+					userTransaction);
 			for (NotificationMessage nm : nms) {
 				transmitter.processMessage(nm);
 			}
@@ -219,13 +214,6 @@ public class ICAT {
 			@WebParam DataCollectionDataset dataCollectionDataset,
 			@WebParam DataCollectionDatafile dataCollectionDatafile, @WebParam Grouping group,
 			@WebParam UserGroup userGroup, @WebParam Log log, @WebParam PublicStep publicStep) {
-	}
-
-	@PreDestroy
-	private void exit() {
-		if (lucene != null) {
-			lucene.close();
-		}
 	}
 
 	@WebMethod
@@ -282,9 +270,6 @@ public class ICAT {
 	private void init() {
 		authPlugins = propertyHandler.getAuthPlugins();
 		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
-		if (propertyHandler.getLuceneDirectory() != null) {
-			lucene = LuceneSingleton.getInstance(propertyHandler);
-		}
 		rootUserNames = gatekeeper.getRootUserNames();
 	}
 
@@ -354,7 +339,7 @@ public class ICAT {
 	public void luceneClear(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		try {
 			checkRoot(sessionId);
-			beanManager.luceneClear(lucene);
+			beanManager.luceneClear();
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -368,7 +353,22 @@ public class ICAT {
 	public void luceneCommit(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		try {
 			checkRoot(sessionId);
-			beanManager.luceneCommit(lucene);
+			beanManager.luceneCommit();
+		} catch (IcatException e) {
+			reportIcatException(e);
+			throw e;
+		} catch (Throwable e) {
+			reportThrowable(e);
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
+		}
+	}
+
+	@WebMethod
+	public List<String> luceneGetPopulating(@WebParam(name = "sessionId") String sessionId)
+			throws IcatException {
+		try {
+			checkRoot(sessionId);
+			return beanManager.luceneGetPopulating();
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -383,7 +383,7 @@ public class ICAT {
 			@WebParam(name = "entityName") String entityName) throws IcatException {
 		try {
 			checkRoot(sessionId);
-			beanManager.lucenePopulate(entityName, manager, lucene);
+			beanManager.lucenePopulate(entityName, manager);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -399,7 +399,7 @@ public class ICAT {
 			@WebParam(name = "entityName") String entityName) throws IcatException {
 		try {
 			checkRoot(sessionId);
-			return beanManager.luceneSearch(query, maxCount, entityName, manager, lucene);
+			return beanManager.luceneSearch(query, maxCount, entityName, manager);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -456,7 +456,7 @@ public class ICAT {
 		try {
 			String userId = getUserName(sessionId);
 			return beanManager.searchText(userId, query, maxCount, entityName, manager,
-					userTransaction, lucene);
+					userTransaction);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -471,8 +471,7 @@ public class ICAT {
 			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			transmitter.processMessage(beanManager.update(userId, bean, manager, userTransaction,
-					lucene));
+			transmitter.processMessage(beanManager.update(userId, bean, manager, userTransaction));
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;

@@ -68,6 +68,9 @@ public class BeanManager {
 	@EJB
 	PropertyHandler propertyHandler;
 
+	@EJB
+	LuceneSingleton lucene;
+
 	private static DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 	private boolean log;
@@ -79,7 +82,7 @@ public class BeanManager {
 
 	private Map<String, NotificationRequest> notificationRequests;
 
-	private int luceneCommitCount;
+	private boolean luceneActive;
 
 	private static long next;
 	private static final Pattern timestampPattern = Pattern.compile(":ts(\\d{14})");
@@ -89,11 +92,11 @@ public class BeanManager {
 		logRequests = propertyHandler.getLogRequests();
 		log = !logRequests.isEmpty();
 		notificationRequests = propertyHandler.getNotificationRequests();
-		luceneCommitCount = propertyHandler.getLuceneCommitCount();
+		luceneActive = lucene.getActive();
 	}
 
 	public CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
-			UserTransaction userTransaction, LuceneSingleton lucene) throws IcatException {
+			UserTransaction userTransaction) throws IcatException {
 
 		logger.info(userId + " creating " + bean.getClass().getSimpleName());
 		try {
@@ -157,8 +160,7 @@ public class BeanManager {
 	}
 
 	public List<CreateResponse> createMany(String userId, List<EntityBaseBean> beans,
-			EntityManager manager, UserTransaction userTransaction, LuceneSingleton lucene)
-			throws IcatException {
+			EntityManager manager, UserTransaction userTransaction) throws IcatException {
 		try {
 			userTransaction.begin();
 			List<CreateResponse> crs = new ArrayList<CreateResponse>();
@@ -268,7 +270,7 @@ public class BeanManager {
 	}
 
 	public NotificationMessage delete(String userId, EntityBaseBean bean, EntityManager manager,
-			UserTransaction userTransaction, LuceneSingleton lucene) throws IcatException {
+			UserTransaction userTransaction) throws IcatException {
 		try {
 			userTransaction.begin();
 			try {
@@ -314,8 +316,7 @@ public class BeanManager {
 	}
 
 	public List<NotificationMessage> deleteMany(String userId, List<EntityBaseBean> beans,
-			EntityManager manager, UserTransaction userTransaction, LuceneSingleton lucene)
-			throws IcatException {
+			EntityManager manager, UserTransaction userTransaction) throws IcatException {
 		try {
 			userTransaction.begin();
 			List<NotificationMessage> nms = new ArrayList<NotificationMessage>();
@@ -819,8 +820,7 @@ public class BeanManager {
 	}
 
 	public List<?> searchText(String userId, String query, int maxCount, String entityName,
-			EntityManager manager, UserTransaction userTransaction, LuceneSingleton lucene)
-			throws IcatException {
+			EntityManager manager, UserTransaction userTransaction) throws IcatException {
 		long time = log ? System.currentTimeMillis() : 0;
 		List<EntityBaseBean> results = new ArrayList<EntityBaseBean>();
 		if (lucene != null) {
@@ -937,7 +937,7 @@ public class BeanManager {
 	}
 
 	public NotificationMessage update(String userId, EntityBaseBean bean, EntityManager manager,
-			UserTransaction userTransaction, LuceneSingleton lucene) throws IcatException {
+			UserTransaction userTransaction) throws IcatException {
 		try {
 			userTransaction.begin();
 			try {
@@ -1067,55 +1067,33 @@ public class BeanManager {
 
 	}
 
-	public void lucenePopulate(String entityName, EntityManager manager, LuceneSingleton lucene)
-			throws IcatException {
-
-		if (lucene != null) {
+	public void lucenePopulate(String entityName, EntityManager manager) throws IcatException {
+		if (luceneActive) {
 			Class<?> klass = null;
 			try {
 				klass = Class.forName(Constants.ENTITY_PREFIX + entityName);
 			} catch (ClassNotFoundException e) {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
 			}
-			lucene.clear(entityName);
-			List<Long> ids = manager.createQuery("SELECT e.id from " + entityName + "  e",
-					Long.class).getResultList();
-			logger.debug("About to add " + ids.size() + " documents in blocks of "
-					+ luceneCommitCount);
-
-			try {
-				int i = 0;
-				for (Long id : ids) {
-					EntityBaseBean bean = (EntityBaseBean) manager.find(klass, id);
-					if (bean != null) {
-						lucene.addDocument(bean);
-						if (i++ % luceneCommitCount == 0) {
-							lucene.commit();
-						}
-					}
-				}
-			} catch (Exception e) {
-				throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
-			}
-			lucene.commit();
+			lucene.populate(klass);
 		}
 	}
 
-	public void luceneClear(LuceneSingleton lucene) throws IcatException {
-		if (lucene != null) {
+	public void luceneClear() throws IcatException {
+		if (luceneActive) {
 			lucene.clear();
 		}
 	}
 
-	public void luceneCommit(LuceneSingleton lucene) throws IcatException {
-		if (lucene != null) {
+	public void luceneCommit() throws IcatException {
+		if (luceneActive) {
 			lucene.commit();
 		}
 	}
 
 	public List<String> luceneSearch(String query, int maxCount, String entityName,
-			EntityManager manager, LuceneSingleton lucene) throws IcatException {
-		if (lucene != null) {
+			EntityManager manager) throws IcatException {
+		if (luceneActive) {
 			return lucene.search(query, maxCount, entityName).getResults();
 		} else {
 			return Collections.emptyList();
@@ -1127,4 +1105,11 @@ public class BeanManager {
 		return propertyHandler.props();
 	}
 
+	public List<String> luceneGetPopulating() {
+		if (luceneActive) {
+			return lucene.getPopulating();
+		} else {
+			return Collections.emptyList();
+		}
+	}
 }

@@ -1862,6 +1862,7 @@ public class TestWS {
 	public void lucene() throws Exception {
 		session.clear();
 		create();
+
 		List<String> props = session.getProperties();
 		assertTrue(props.contains("lucene.commitSeconds 1"));
 
@@ -1875,8 +1876,14 @@ public class TestWS {
 		session.lucenePopulate("Investigation");
 		session.lucenePopulate("Dataset");
 		session.lucenePopulate("Datafile");
+		List<String> left;
+		while (!(left = session.luceneGetPopulating()).isEmpty()) {
+			System.out.println("Process " + left);
+			Thread.sleep(10);
+		}
 
 		session.luceneCommit();
+
 		assertEquals(4, session.luceneSearch("*f*", 100, null).size());
 		assertEquals(2, session.luceneSearch("*f*", 100, "Dataset").size());
 	}
