@@ -77,6 +77,9 @@
                     has been introduced to perform operations for which the rule based authorization is not appropriate.
                 </li>
                 <li>Expired sessions are cleaned out of the database every hour.</li>
+                <li>The generated client jar contains two packages: org.icatproject and org.icatproject_4_3_0. Normal users should use the
+                    org.icatproject one. The other exists primarily for TopCAT so that multiple ICAT clients can co-exist.
+                </li>
             </ul>
         </section>
 
