@@ -620,7 +620,10 @@
                 <p>It is permissible to visit an entity type more than once in an INCLUDE - for example following a provenance chain.</p>
 
                 <h4>Free text syntax</h4>
-                <p class="call">List&lt;Object&gt; search(String sessionId, String query, int maxCount, String entityName)
+                <p class="call">List&lt;Object&gt;
+                    searchText
+                    <a name="searchText" />
+                    (String sessionId, String query, int maxCount, String entityName)
                 </p>
                 <p>This treats each ICAT entry as a document. The contents of that document is formed by concatenating all the non-blank text
                     fields
@@ -914,6 +917,75 @@
                 .
             </p>
 
+
+        </section>
+
+        <section name="Administration Calls">
+            <p>To be authorized to use these administration calls you must be authenticated with a name listed in the rootUserNames in the
+                icat.properties file.
+            </p>
+            <p class="call"> List&lt;String&gt; getProperties(String sessionId)
+            </p>
+
+            <p>lists the active contents of the icat.properties file. It does this by examining the properties after they have been read in
+                so any
+                superfluous definitions in the original properties file will not be seen. The current physical file is not re-examined
+            </p>
+
+            <p class="call">void lucenePopulate(String sessionId, String entityName)</p>
+            <p>instructs lucene to populate indices for the specified entityName. This is
+                useful if the database has been modified directly rather
+                than
+                by using
+                the ICAT API. This call is
+                asynchronous and simply places the request in a set of
+                entity types to be populated. When the
+                request
+                is processed all lucene
+                entries of the specified entity type are first cleared
+                then the corresponding icat entries are scanned
+                to
+                re-populate lucene. To
+                find the prcoessing state use the luceneGetPopulating() call desribed below.
+                Note that because of caching, ICAT
+                should ideally
+                be
+                reloaded after any direct database modifications are made.
+            </p>
+
+            <p class="call">List&lt;String&gt; luceneGetPopulating(String sessionId)</p>
+            <p>
+                returns a list of entity types to be processed for populating lucene following calls to lucenePopulate(). Normally the first
+                item
+                returned
+                will be being processed
+                currently. If nothing is returned then processing has completed.
+            </p>
+
+            <p class="call">void luceneCommit(String sessionId)</p>
+            <p>instructs lucene to update indices. Normally this is not needed as it is will be done periodically according to the value of
+                lucene.commitSeconds in the icat.properties file.
+            </p>
+
+            <p class="call">void luceneClear(String sessionId)</p>
+            <p>clears all the lucene indices. It does not commit itself; you may simply wait for the periodic commit depending upon the value of
+                lucene.commitSeconds in the icat.properties file.
+            </p>
+
+            <p class="call">List&lt;String&gt; luceneSearch(String sessionId, String query, int maxCount, String entityName)
+            </p>
+            <p>
+                searches lucene indices and returns a list of entity_name:entity_id values. "query" is a lucene query. Queries can contain AND and OR
+                in upper case as well as parentheses. The default operator is OR. Wildcards of * and ? are also supported. Other features
+                are described
+                for the
+                <a href="#searchText">searchText</a>
+                call. The maxCount argument specifies the maximum number
+                of values to return and the
+                entityName, if not null,
+                restricts results to
+                entities with that name.
+            </p>
 
         </section>
     </body>

@@ -138,11 +138,27 @@ def commit(args):
         fatal(exc.type + " exception: " + exc.message)
     except Exception, e:
         fatal(e)
+        
+def getPopulating(args): 
+    parser.set_usage(usagebase + "populating")
+    parser.set_description("Find entity names in the populate list")
+    options, args = parser.parse_args(args)
+
+    if len(args) > 0:
+        fatal("Must have no arguments after the operation 'commit'")
+
+    try:
+        service, sessionId = getService()
+        print service.luceneGetPopulating(sessionId)
+    except WebFault, wf:
+        exc = wf.fault.detail.IcatException
+        fatal(exc.type + " exception: " + exc.message)
+    except Exception, e:
+        fatal(e)
 
 def populate(args):
     parser.set_usage(usagebase + "populate [<name>]")
     parser.set_description("Populate lucene (for that entry name)")
-    parser.add_option("--timeout", "-t", type='int', default=90, help="timeout in seconds [90]")
     options, args = parser.parse_args(args)
 
     if len(args) == 0: 
@@ -150,7 +166,6 @@ def populate(args):
             service, sessionId = getService()
             for entity in service.getEntityNames():
                 print entity
-                service, sessionId = getService(options.timeout)
                 service.lucenePopulate(sessionId, entity)
         except WebFault, wf:
             exc = wf.fault.detail.IcatException
@@ -163,7 +178,7 @@ def populate(args):
         fatal("Must have zero arguments after the operation 'populate' or one - the name of the entity")
  
     try:
-        service, sessionId = getService(options.timeout)
+        service, sessionId = getService()
         service.lucenePopulate(sessionId, args[0])
     except WebFault, wf:
         exc = wf.fault.detail.IcatException
@@ -187,6 +202,7 @@ subcommands["properties"] = getProperties
 subcommands["populate"] = populate
 subcommands["commit"] = commit
 subcommands["clear"] = clear
+subcommands["populating"] = getPopulating
 subcommands["-h"] = help
 subcommands["--help"] = help
 

@@ -376,31 +376,43 @@
                 . Only users mentioned in the rootUserNames of the icat.properties file are authorized to use this command.
             </p>
             <dl>
-                <dt>props</dt>
+                <dt>properties</dt>
                 <dd>lists the active contents of the icat.properties file. It does this by examining the properties after they have been read in
                     so any
                     superfluous definitions in the original properties file will not be seen.
                 </dd>
+
+                <dt>populate [&lt;entity name&gt;]</dt>
+                <dd>
+                    re-populates lucene for the specified entity name. This is
+                    useful if the database has been modified directly rather than by using
+                    the ICAT API. Note that because of caching, ICAT should
+                    be
+                    reloaded after any direct database modifications are made. This call is
+                    asynchronous and simply places the request in a set of
+                    entity types to be populated. When the request is processed all lucene
+                    entries of the specified entity type are first cleared
+                    then the corresponding icat entries are scanned to re-populate lucene. To
+                    find what it is doing please use the "populating" operation desribed below.
+                    It may also be run without an entity name in which case
+                    it will process all entities.
+                </dd>
+
+                <dt>populating</dt>
+                <dd>returns a list of entity types to be processed for populating lucene. Normally the first
+                    item returned
+                    will be being processed
+                    currently.
+                </dd>
+
                 <dt>commit</dt>
                 <dd>instructs lucene to update indices. Normally this is not needed as it is will be done periodically according to the value of
                     lucene.commitSeconds
                 </dd>
-                <dt>clear</dt>
-                <dd>clears the lucene indices</dd>
-                <dt>populate [&lt;entity name&gt;]</dt>
-                <dd>
-                    clears all lucene entries of the specified entity type and scans the corresponding icat entries to re-populate lucene. This is
-                    useful if the database has been modified directly rather than by using the ICAT API. Note that because of caching, ICAT should
-                    be
-                    reloaded after any direct database modifications are made. As this call can take a long time your request may be aborted by
-                    a
-                    timeout (which defaults to 90 seconds). The timeout may be overridden by, for example:
-                    <blockquote>
-                        <code>icatadmin &lt;url&gt; &lt;username&gt; &lt;password&gt; populate Dataset --timeout 300</code>
-                    </blockquote>
-                    It may also be run without and entity name in which case it will process all entities.
 
-                </dd>
+                <dt>clear</dt>
+                <dd>clears all the lucene indices - but does not commit.</dd>
+
                 <dt>search &lt;query&gt; [&lt;maxCount&gt; [&lt;entityName&gt;]]</dt>
                 <dd>
                     searches lucene indices and returns a list of entity_name:entity_id values. Arguments are
