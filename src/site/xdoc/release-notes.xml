@@ -80,6 +80,7 @@
                 <li>The generated client jar contains two packages: org.icatproject and org.icatproject_4_3_0. Normal users should use the
                     org.icatproject one. The other exists primarily for TopCAT so that multiple ICAT clients can co-exist.
                 </li>
+                <li>The installation mechanism now has a single setup Python script which works both on Linux and Windows.</li>
             </ul>
         </section>
 
