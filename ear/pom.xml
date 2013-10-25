@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.icatproject</groupId>
         <artifactId>icat</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>4.3.0</version>
     </parent>
 
     <artifactId>icat.ear</artifactId>
@@ -20,14 +20,14 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.exposed</artifactId>
-            <version>4.3.0-SNAPSHOT</version>
+            <version>4.3.0</version>
             <type>ejb</type>
         </dependency>
 
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.utils</artifactId>
-            <version>4.3.0-SNAPSHOT</version>
+            <version>4.3.0</version>
         </dependency>
     </dependencies>
 
