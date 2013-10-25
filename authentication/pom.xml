@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.icatproject</groupId>
         <artifactId>icat</artifactId>
-        <version>4.3.0</version>
+        <version>4.3.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>icat.authentication</artifactId>
