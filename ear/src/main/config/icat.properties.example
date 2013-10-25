@@ -11,7 +11,7 @@ rootUserNames root
 authn.list db ldap anon simple
 
 # JNDI for each plugin
-authn.db.jndi   java:global/authn_db-1.1.0-SNAPSHOT/DB_Authenticator
+authn.db.jndi   java:global/authn_db-1.1.0/DB_Authenticator
 authn.ldap.jndi java:global/authn_ldap.ear-1.0.0/authn_ldap.ejb-1.0.0/LDAP_Authenticator
 authn.anon.jndi java:global/authn_anon.ear-1.0.1/authn_anon.ejb-1.0.1/ANON_Authenticator
 authn.simple.jndi java:global/authn_simple.ear-1.0.0/authn_simple.ejb-1.0.0/SIMPLE_Authenticator
