@@ -6,6 +6,6 @@ public class Constants {
 	
 	public static String ENUMPREFIX = "org.icatproject.";
 	
-	public static final String API_VERSION = "4.3.0";
+	public static final String API_VERSION = "4.3.1";
 
 }

@@ -566,12 +566,19 @@ public class BeanManager {
 				if (log) {
 					logSession(time, session.getUserName(), "logout", manager, userTransaction);
 				}
-			} catch (Throwable e) {
+			} catch (IcatException e) {
 				userTransaction.rollback();
 				logger.trace("Transaction rolled back for logout because of " + e.getClass() + " "
 						+ e.getMessage());
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
+				if (e.getType() == IcatExceptionType.SESSION) {
+					throw e;
+				} else {
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass()
+							+ " " + e.getMessage());
+				}
+			} catch (Exception e) {
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass()
+						+ " " + e.getMessage());
 			}
 		} catch (IllegalStateException e) {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -585,6 +592,9 @@ public class BeanManager {
 		} catch (NotSupportedException e) {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 					"NotSupportedException" + e.getMessage());
+		} catch (RuntimeException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " "
+					+ e.getMessage());
 		}
 	}
 

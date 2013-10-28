@@ -1161,6 +1161,16 @@ public class TestWS {
 		String piOneSessionId = session.login("db", "username", "piOne", "password", "piOne");
 		session.logout(piOneSessionId);
 	}
+	
+	@Test
+	public void logout() throws Exception {
+		try {
+			session.logout("wibble");
+			fail("Should throw an exception");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.SESSION, e.getFaultInfo().getType());
+		}
+	}
 
 	@Test
 	public void noDuplicates() throws Exception {

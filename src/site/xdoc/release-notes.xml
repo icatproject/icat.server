@@ -6,6 +6,14 @@
     </properties>
 
     <body>
+        <section name="4.3.1">
+            <p>This is a bug fix release.
+            </p>
+            <ul>
+                <li>logout called with an expired or otherwise invalid sessionId now throws an exception of type SESSION rather than INTERNAL.
+                </li>
+            </ul>
+        </section>
 
         <section name="4.3.0">
             <p>This includes schema changes and a number of speculative features.
