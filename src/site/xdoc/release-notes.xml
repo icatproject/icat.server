@@ -12,6 +12,8 @@
             <ul>
                 <li>logout called with an expired or otherwise invalid sessionId now throws an exception of type SESSION rather than INTERNAL.
                 </li>
+
+                <li>setup_utils allows keys without values not to require a separator</li>
             </ul>
         </section>
 

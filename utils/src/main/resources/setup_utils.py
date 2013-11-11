@@ -238,9 +238,12 @@ class Actions(object):
                     if match and match.start() < nfirst: 
                         nfirst = match.start()
                         nlast = match.end()
-                if nfirst == len(line): abort (line, "found in " + fileName + " has no recognised separator between key and value") 
-                key = line[:nfirst]
-                value = line[nlast:]
+                if nfirst == len(line):
+                    key = line
+                    value = ""
+                else:
+                    key = line[:nfirst]
+                    value = line[nlast:]
                 props[key] = value
         f.close()
         

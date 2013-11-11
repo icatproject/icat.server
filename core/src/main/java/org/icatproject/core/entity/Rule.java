@@ -156,7 +156,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 			logger.debug("New style rule: " + query);
 		} else {
 			/* This should be pure JPQL so can check it */
-			gateKeeper.checkRule(query);
+			gateKeeper.checkJPQL(query);
 		}
 
 		try {

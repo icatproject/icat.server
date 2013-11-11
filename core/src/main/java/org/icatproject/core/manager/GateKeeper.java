@@ -280,7 +280,7 @@ public class GateKeeper {
 		return results;
 	}
 
-	public void checkRule(String query) throws IcatException {
+	public void checkJPQL(String query) throws IcatException {
 
 		Matcher m = tsRegExp.matcher(query);
 

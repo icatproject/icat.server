@@ -1161,7 +1161,7 @@ public class TestWS {
 		String piOneSessionId = session.login("db", "username", "piOne", "password", "piOne");
 		session.logout(piOneSessionId);
 	}
-	
+
 	@Test
 	public void logout() throws Exception {
 		try {
@@ -1656,7 +1656,7 @@ public class TestWS {
 			fail("Should have thrown an expception");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
-			assertTrue(e.getMessage().indexOf("Please check your ICAT query") > 0);
+			assertTrue(e.getMessage().indexOf("EntityManager") > 0);
 		}
 
 		// Nested select

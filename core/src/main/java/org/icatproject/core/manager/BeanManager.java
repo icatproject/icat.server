@@ -765,8 +765,29 @@ public class BeanManager {
 		try {
 			jpqlQuery = manager.createQuery(jpql);
 		} catch (IllegalArgumentException e) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage()
-					+ " Please check your ICAT query");
+			/* Parse the original query but without trailing LIMIT and INCLUDE clauses */
+			try {
+				input.reset();
+				StringBuilder sb = new StringBuilder();
+				Token token = null;
+				token = input.consume();
+
+				while (token != null && token.getType() != Token.Type.LIMIT
+						&& token.getType() != Token.Type.INCLUDE) {
+					if (sb.length() != 0) {
+						sb.append(" ");
+					}
+					sb.append(token.getValue());
+					token = input.consume();
+				}
+				gateKeeper.checkJPQL(sb.toString());
+
+			} catch (ParserException e1) {
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"Parsing error should not occur as already parsed " + e.getMessage());
+			}
+			throw new IcatException(IcatExceptionType.INTERNAL, "Derived JPQL reports "
+					+ e.getMessage());
 		}
 
 		/* add parameter values for any timestamps */
