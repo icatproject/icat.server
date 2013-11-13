@@ -33,7 +33,7 @@ for i in range (3, len(args), 2):
     credentials.entry.append(entry)
 
 sessionId = service.login(plugin, credentials)
-print "Logged in with", service.getRemainingMinutes(sessionId), "minutes to go"
+print "Logged in as", service.getUserName(sessionId), "with", service.getRemainingMinutes(sessionId), "minutes to go"
 
 groups = service.search(sessionId, "Grouping[name='annoying animals']")
 if len(groups): 

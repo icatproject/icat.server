@@ -14,6 +14,7 @@
                 </li>
 
                 <li>setup_utils allows keys without values not to require a separator</li>
+                <li>small improvement to testicat to show who you are logged in as</li>
             </ul>
         </section>
 
