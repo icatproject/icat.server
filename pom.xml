@@ -54,13 +54,11 @@
     <name>ICAT</name>
 
     <modules>
-        <module>authentication</module>
         <module>core</module>
         <module>exposed</module>
         <module>ear</module>
         <module>client</module>
         <module>ws-test</module>
-        <module>utils</module>
     </modules>
 
     <dependencyManagement>
