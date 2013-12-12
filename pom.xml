@@ -32,9 +32,9 @@
     </issueManagement>
 
     <scm>
-        <connection>scm:svn:http://icatproject.googlecode.com/svn/icat/trunk</connection>
-        <developerConnection>scm:svn:https://icatproject.googlecode.com/svn/icat/trunk</developerConnection>
-        <url>http://code.google.com/p/icatproject/source/browse/#svn%2Ficat%2Ftrunk</url>
+        <connection>scm:svn:http://icatproject.googlecode.com/svn/icat/server/trunk</connection>
+        <developerConnection>scm:svn:https://icatproject.googlecode.com/svn/icat/server/trunk</developerConnection>
+        <url>http://code.google.com/p/icatproject/source/browse/#svn%2Ficat%2Fserver%2Ftrunk</url>
     </scm>
 
     <licenses>
