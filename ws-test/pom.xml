@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.icatproject</groupId>
         <artifactId>icat</artifactId>
-        <version>4.3.1-SNAPSHOT</version>
+        <version>4.3.1</version>
     </parent>
 
     <artifactId>icat.ws-test</artifactId>
@@ -17,7 +17,7 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.client</artifactId>
-            <version>4.3.1-SNAPSHOT</version>
+            <version>4.3.1</version>
         </dependency>
 
         <dependency>
