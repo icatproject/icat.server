@@ -23,7 +23,7 @@ public class DataCollection extends EntityBaseBean implements Serializable {
 	private List<DataCollectionDataset> dataCollectionDatasets = new ArrayList<DataCollectionDataset>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "dataCollection")
-	private List<DataCollectionParameter> dataCollectionParameters = new ArrayList<DataCollectionParameter>();
+	private List<DataCollectionParameter> parameters = new ArrayList<DataCollectionParameter>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "inputDataCollection")
 	private List<Job> jobsAsInput = new ArrayList<Job>();
@@ -39,8 +39,8 @@ public class DataCollection extends EntityBaseBean implements Serializable {
 		return dataCollectionDatasets;
 	}
 
-	public List<DataCollectionParameter> getDataCollectionParameters() {
-		return dataCollectionParameters;
+	public List<DataCollectionParameter> getParameters() {
+		return parameters;
 	}
 
 	public List<Job> getJobsAsInput() {
@@ -59,8 +59,8 @@ public class DataCollection extends EntityBaseBean implements Serializable {
 		this.dataCollectionDatasets = dataCollectionDatasets;
 	}
 
-	public void setDataCollectionParameters(List<DataCollectionParameter> dataCollectionParameters) {
-		this.dataCollectionParameters = dataCollectionParameters;
+	public void setParameters(List<DataCollectionParameter> parameters) {
+		this.parameters = parameters;
 	}
 
 	public void setJobsAsInput(List<Job> jobsAsInput) {
