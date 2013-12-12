@@ -1171,6 +1171,16 @@ public class TestWS {
 			assertEquals(IcatExceptionType.SESSION, e.getFaultInfo().getType());
 		}
 	}
+	
+	@Test
+	public void refresh() throws Exception {
+		try {
+			session.refresh("wibble");
+			fail("Should throw an exception");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.SESSION, e.getFaultInfo().getType());
+		}
+	}
 
 	@Test
 	public void noDuplicates() throws Exception {

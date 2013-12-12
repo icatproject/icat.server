@@ -419,6 +419,10 @@ public class Session {
 		this.icat.deleteMany(sessionId, beans);
 	}
 
+	public void refresh(String sessionId) throws IcatException_Exception {
+		this.icat.refresh(sessionId);
+	}
+
 	public void refresh() throws IcatException_Exception {
 		this.icat.refresh(sessionId);
 	}

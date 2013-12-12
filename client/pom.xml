@@ -67,7 +67,7 @@
                             <wsdlUrls>
                                 <wsdlUrl>${wsdl}</wsdlUrl>
                             </wsdlUrls>
-                            <packageName>org.icatproject_4_3_0</packageName>
+                            <packageName>org.icatproject_4_3_1</packageName>
                         </configuration>
                     </execution>
                 </executions>

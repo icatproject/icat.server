@@ -10,11 +10,13 @@
             <p>This is a bug fix release.
             </p>
             <ul>
-                <li>logout called with an expired or otherwise invalid sessionId now throws an exception of type SESSION rather than INTERNAL.
+                <li>The methods logout and refresh when called with an expired or otherwise invalid sessionId now throw an exception of type SESSION
+                    rather than INTERNAL.
                 </li>
-
-                <li>setup_utils allows keys without values not to require a separator</li>
-                <li>small improvement to testicat to show who you are logged in as</li>
+                <li>A small improvement to testicat has been made to show who you are logged in as.</li>
+                <li>The relationship from DataCollection to DataCollectionParameters is now called parameters and can be accessed by getParameters and
+                    setParameters.
+                </li>
             </ul>
         </section>
 
