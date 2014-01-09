@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.icatproject</groupId>
         <artifactId>icat</artifactId>
-        <version>4.3.2</version>
+        <version>4.3.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>icat.exposed</artifactId>
@@ -12,7 +12,7 @@
 
     <dependencies>
         <dependency>
-            <version>4.3.2</version>
+            <version>4.3.3-SNAPSHOT</version>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.core</artifactId>
         </dependency>

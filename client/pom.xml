@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.icatproject</groupId>
         <artifactId>icat</artifactId>
-        <version>4.3.2</version>
+        <version>4.3.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>icat.client</artifactId>
@@ -101,7 +101,7 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.ear</artifactId>
-            <version>4.3.2</version>
+            <version>4.3.3-SNAPSHOT</version>
             <type>ear</type>
         </dependency>
     </dependencies>
