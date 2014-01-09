@@ -10,10 +10,19 @@
     <artifactId>icat.ear</artifactId>
     <packaging>ear</packaging>
 
-
     <properties>
         <uniqueVersion>false</uniqueVersion>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>ICAT Repo</id>
+            <url>http://www.icatproject.org/mvn/repo</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencies>
 
@@ -27,7 +36,7 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.utils</artifactId>
-            <version>4.3.1</version>
+            <version>4.4.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

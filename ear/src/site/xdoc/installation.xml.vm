@@ -67,8 +67,8 @@
             <subsection name="Summary of steps">
 
                 <ol>
-                    <li> Upgrade the database schema if you already have a 4.2.x version which you wish to use with ICAT 4.3.1. If you have already
-                        upgraded to ICAT 4.3.0 then no changes to the database are required.
+                    <li> Upgrade the database schema if you already have a 4.2.x version which you wish to use with ICAT 4.3.2. If you have already
+                        upgraded to ICAT 4.3.x then no changes to the database are required.
                     </li>
                     <li>
                         Please follow
@@ -81,8 +81,8 @@
 
             <subsection name="Schema upgrade">
 
-                <p>This is for upgrading a 4.2.5 schema to 4.3.1. If you have already upgraded to 4.3.0 skip this step as the database structures for
-                    4.3.0 and 4.3.1 are identical. Do not attempt to use this procedure on a 4.3.0 schema!
+                <p>This is for upgrading a 4.2.5 schema to 4.3.2. If you have already upgraded to 4.3.x skip this step as the database structures for
+                    4.3.0, 4.3.1 and 4.3.2 are identical. Do not attempt to use this procedure on a 4.3.x schema!
                 </p>
 
                 <ol>
@@ -108,7 +108,7 @@
                         will
                         first check that everything should go work. If it reports problems fix them and try again. Once it gets past the checking
                         stage it starts the conversion which can take a long time (many hours for a production system). At the end you should have a
-                        4.3.1 database. Any indices which had
+                        4.3.2 database. Any indices which had
                         been created manually will have been removed.
                     </li>
 

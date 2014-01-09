@@ -1,7 +1,9 @@
 package org.icatproject.core.manager;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
@@ -22,7 +24,8 @@ import javax.ejb.DependsOn;
 import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
@@ -56,6 +59,9 @@ import org.icatproject.core.entity.EntityBaseBean;
 @Singleton
 public class LuceneSingleton {
 
+	@PersistenceUnit(unitName = "icat")
+	private EntityManagerFactory entityManagerFactory;
+
 	public class LuceneSearchResult {
 
 		private Query query;
@@ -71,14 +77,16 @@ public class LuceneSingleton {
 		public List<String> getResults() {
 			return results;
 		}
+
 	}
 
 	public class PopulateThread extends Thread {
 
 		private EntityManager manager;
 
-		public PopulateThread(EntityManager manager) {
-			this.manager = manager;
+		public PopulateThread(EntityManagerFactory entityManagerFactory) {
+			manager = entityManagerFactory.createEntityManager();
+			logger.debug("Start new populate thread");
 		}
 
 		public void run() {
@@ -137,7 +145,11 @@ public class LuceneSingleton {
 					}
 				} while (populatingClass != null);
 			} catch (Throwable t) {
-				logger.error(t.getMessage());
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				t.printStackTrace(new PrintStream(baos));
+				logger.error(baos);
+			} finally {
+				manager.close();
 			}
 		}
 	}
@@ -158,9 +170,6 @@ public class LuceneSingleton {
 	private String luceneDirectory;
 
 	private long luceneRefreshSeconds;
-
-	@PersistenceContext(unitName = "icat")
-	private EntityManager manager;
 
 	private StandardQueryParser parser;
 
@@ -390,9 +399,7 @@ public class LuceneSingleton {
 	public synchronized void populate(Class<?> klass) {
 		populateList.add(klass);
 		if (populateThread == null || (populateThread).getState() == Thread.State.TERMINATED) {
-			manager.clear();
-			logger.debug("manager " + manager);
-			populateThread = new PopulateThread(manager);
+			populateThread = new PopulateThread(entityManagerFactory);
 			populateThread.start();
 		}
 	}

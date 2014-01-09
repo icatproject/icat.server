@@ -408,7 +408,7 @@ public class BeanManager {
 		long time = log ? System.currentTimeMillis() : 0;
 		logger.debug(userId + " issues get for " + query);
 		String[] words = query.trim().split("\\s+");
-		if (words.length > 1 && words[1].equals("INCLUDE")) {
+		if (words.length > 1 && words[1].toUpperCase().equals("INCLUDE")) {
 			try {
 				query = new OldGetQuery(new OldInput(OldTokenizer.getTokens(query))).getNewQuery();
 				logger.debug("new style query: " + query);

@@ -6,6 +6,16 @@
     </properties>
 
     <body>
+
+        <section name="4.3.2">
+            <p>This is a bug fix release.
+            </p>
+            <ul>
+                <li>A get call using the old (non-JPQL) syntax will now accept the INCLUDE keyword in lower or mixed case.
+                </li>
+            </ul>
+        </section>
+
         <section name="4.3.1">
             <p>This is a bug fix release.
             </p>

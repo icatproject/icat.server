@@ -78,7 +78,7 @@ elif arg == "INSTALL":
     
         actions.asadmin("create-jms-resource --restype javax.jms.Topic jms/ICAT/Topic")
         
-        actions.deploy("icat.ear-*.ear")
+        actions.deploy("icat.ear-*.ear", deploymentorder=100)
         
         if not os.path.isdir(binDir): abort ("Please create directory " + binDir + " and try again.")
         for file in files:   

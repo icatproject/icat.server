@@ -10,7 +10,7 @@ import javax.persistence.OneToMany;
 
 @Comment("A set of Datafiles and Datasets which can span investigations and facilities. Note that it has "
 		+ "no constraint fields. "
-		+ "It is expected that a DataCollection would be identified by its DataCollectionParameters or its "
+		+ "It is expected that a DataCollection would be identified by its parameters or its "
 		+ "relationship to a Job.")
 @SuppressWarnings("serial")
 @Entity
