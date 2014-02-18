@@ -12,34 +12,13 @@
     <name>ICAT Java Client</name>
 
     <properties>
-        <wsdl>${basedir}/ICAT.wsdl</wsdl>
+        <wsdl>${serverUrl}/ICATService/ICAT?wsdl</wsdl>
     </properties>
 
     <build>
 
         <plugins>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>Hack the wsdl</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>sh</executable>
-                            <arguments>
-                                <argument>wsdl.sh</argument>
-                                <argument>${serverUrl}</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-
-            </plugin>
             <plugin>
                 <groupId>org.jvnet.jax-ws-commons</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
@@ -100,7 +79,7 @@
     <dependencies>
         <dependency>
             <groupId>org.icatproject</groupId>
-            <artifactId>icat.ear</artifactId>
+            <artifactId>icat.war</artifactId>
             <version>4.3.3-SNAPSHOT</version>
             <type>ear</type>
         </dependency>
