@@ -79,7 +79,7 @@
     <dependencies>
         <dependency>
             <groupId>org.icatproject</groupId>
-            <artifactId>icat.war</artifactId>
+            <artifactId>icat.ear</artifactId>
             <version>4.3.3-SNAPSHOT</version>
             <type>ear</type>
         </dependency>
