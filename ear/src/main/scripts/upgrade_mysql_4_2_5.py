@@ -116,17 +116,7 @@ def dropTables():
     cur.execute("DROP TABLE OUTPUTDATAFILE")
     cur.execute("DROP TABLE OUTPUTDATASET")
     
-def dropKeys():
-    for table in tables:
-        cur.execute("SHOW CREATE TABLE " + table) 
-        rows = cur.fetchall()
-        for row in rows:
-            create = row[1]
-            if not "InnoDB" in create:
-                query = "ALTER TABLE " + table + " ENGINE InnoDB"
-                print query
-                cur.execute(query)
-           
+def dropKeys(): 
     query = "select table_name, constraint_name from information_schema.KEY_COLUMN_USAGE where table_schema = '" + schema + "' and referenced_table_name is not null;"
     cur.execute(query)
     rows = cur.fetchall()
@@ -148,6 +138,16 @@ def dropKeys():
             query = "ALTER TABLE " + table + " DROP INDEX " + index
             print query
             cur.execute(query)
+            
+    for table in tables:
+        cur.execute("SHOW CREATE TABLE " + table) 
+        rows = cur.fetchall()
+        for row in rows:
+            create = row[1]
+            if not "InnoDB" in create:
+                query = "ALTER TABLE " + table + " ENGINE InnoDB"
+                print query
+                cur.execute(query)
                            
 def check():
     checkNotNull("APPLICATION", "NAME")
