@@ -340,7 +340,7 @@ public class Session {
 
 	public void setAuthz() throws Exception {
 		try {
-			this.addUserGroupMember("root", "root");
+			this.addUserGroupMember("root", "db/root");
 		} catch (IcatException_Exception e) {
 			if (e.getFaultInfo().getType() == IcatExceptionType.OBJECT_ALREADY_EXISTS) {
 				System.out.println("root is already a member of root - carry on");

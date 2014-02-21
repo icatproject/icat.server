@@ -12,12 +12,21 @@
 
     <name>Tests for a deployed ICAT</name>
 
+    <repositories>
+
+        <repository>
+            <id>ICAT Repo</id>
+            <url>http://www.icatproject.org/mvn/repo</url>
+        </repository>
+
+    </repositories>
+
     <dependencies>
 
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.client</artifactId>
-            <version>4.3.3-SNAPSHOT</version>
+            <version>4.3.2</version>
         </dependency>
 
         <dependency>
@@ -31,6 +40,13 @@
             <artifactId>javaee-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.icatproject</groupId>
+            <artifactId>icat.ear</artifactId>
+            <version>4.3.3-SNAPSHOT</version>
+            <type>ear</type>
+        </dependency>
+        
     </dependencies>
 
     <build>
