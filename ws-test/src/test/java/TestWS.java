@@ -121,7 +121,7 @@ public class TestWS {
 		session.createInvestigationInstrument(invA, wish);
 		session.createInvestigationInstrument(invB, wish);
 
-		User root = (User) session.search("User[name='root']").get(0);
+		User root = (User) session.search("User[name='db/root']").get(0);
 		session.createInstrumentScientist(wish, root);
 
 		session.createInvestigationUser(invA, root);
@@ -332,11 +332,11 @@ public class TestWS {
 		session.create(rule);
 
 		User piOne = new User();
-		piOne.setName("piOne");
+		piOne.setName("db/piOne");
 		piOne.setId(session.create(piOne));
 
 		User piTwo = new User();
-		piTwo.setName("piTwo");
+		piTwo.setName("db/piTwo");
 		piTwo.setId(session.create(piTwo));
 
 		Investigation invOne = session.createInvestigation(facility, "InvestigationOne",
@@ -447,7 +447,7 @@ public class TestWS {
 			session.delete((Rule) o);
 		}
 
-		Grouping rootG = (Grouping) session.search("Grouping [name=:user]").get(0);
+		Grouping rootG = (Grouping) session.search("Grouping [name='root']").get(0);
 
 		Rule rule = new Rule();
 		rule.setCrudFlags("C");
@@ -729,7 +729,7 @@ public class TestWS {
 		InvestigationType investigationType = session.createInvestigationType(facility,
 				"TestExperiment");
 
-		List<Object> objects = session.search("User [name = 'root']");
+		List<Object> objects = session.search("User [name = 'db/root']");
 		User u = (User) objects.get(0);
 		InvestigationUser iu = new InvestigationUser();
 		iu.setUser(u);
@@ -746,7 +746,7 @@ public class TestWS {
 		assertEquals(1, objects.size());
 		i = (Investigation) objects.get(0);
 		assertEquals(1, i.getInvestigationUsers().size());
-		assertEquals("root", i.getInvestigationUsers().get(0).getUser().getName());
+		assertEquals("db/root", i.getInvestigationUsers().get(0).getUser().getName());
 		session.synchLucene();
 
 		List<Object> results = session.searchText("frederick AND great", 10, null);
@@ -1152,7 +1152,7 @@ public class TestWS {
 		assertTrue(rm > 0);
 		assertEquals(System.getProperty("projectVersion").replace("-SNAPSHOT", ""),
 				session.getApiVersion());
-		assertEquals("root", session.getUserName());
+		assertEquals("db/root", session.getUserName());
 		Thread.sleep(10);
 		rm = session.getRemainingMinutes();
 		session.refresh();
@@ -1780,11 +1780,11 @@ public class TestWS {
 
 		/* Create user and rules */
 		User piOne = new User();
-		piOne.setName("piOne");
+		piOne.setName("db/piOne");
 		piOne.setId(session.create(piOne));
 
 		User piTwo = new User();
-		piTwo.setName("piTwo");
+		piTwo.setName("db/piTwo");
 		piTwo.setId(session.create(piTwo));
 
 		Grouping ones = new Grouping();
