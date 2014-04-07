@@ -1,24 +1,43 @@
-<?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.icatproject</groupId>
-        <artifactId>icat</artifactId>
-        <version>4.3.3-SNAPSHOT</version>
-    </parent>
 
+
+    <groupId>org.icatproject</groupId>
     <artifactId>icat.client</artifactId>
+    <version>4.3.3-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>ICAT Java Client</name>
 
     <properties>
-        <wsdl>${serverUrl}/ICATService/ICAT?wsdl</wsdl>
+        <wsdl>${basedir}/ICAT.wsdl</wsdl>
     </properties>
 
     <build>
 
         <plugins>
 
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <id>Hack the wsdl</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <arguments>
+                                <argument>wsdl.sh</argument>
+                                <argument>${serverUrl}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+
+            </plugin>
             <plugin>
                 <groupId>org.jvnet.jax-ws-commons</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
@@ -58,6 +77,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.2</version>
+
                 <executions>
                     <execution>
                         <phase>verify</phase>
@@ -71,19 +92,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
+                <version>3.3</version>
             </plugin>
 
         </plugins>
     </build>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.icatproject</groupId>
-            <artifactId>icat.ear</artifactId>
-            <version>4.3.3-SNAPSHOT</version>
-            <type>ear</type>
-        </dependency>
-    </dependencies>
 
     <reporting>
         <plugins>
@@ -96,6 +110,7 @@
     </reporting>
 
     <description>Provides facilities to login to an ICAT instance after which one can create, read, update or delete entities according to your permissions.</description>
+
 
 </project>
 
