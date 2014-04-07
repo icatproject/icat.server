@@ -14,10 +14,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import javax.ejb.DependsOn;
 import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.jms.TopicConnection;
+import javax.jms.TopicConnectionFactory;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -47,7 +57,7 @@ public class GateKeeper {
 	}
 
 	@PersistenceContext(unitName = "icat")
-	private EntityManager manager;
+	private EntityManager gateKeeperManager;
 
 	@EJB
 	PropertyHandler propertyHandler;
@@ -78,13 +88,63 @@ public class GateKeeper {
 
 	private Set<String> rootUserNames;
 
+	@Resource(mappedName = "jms/ICAT/CentralConnectionFactory")
+	private TopicConnectionFactory centralConnectionFactory;
+
+	@Resource(mappedName = "jms/ICAT/Synch")
+	private Topic synchTopic;
+
+	private TopicConnection centralConnection;
+
+	private TopicConnection consumerConnection;
+
+	private Session consumeSession;
+
+	private boolean stalePublicTables;
+
+	private boolean stalePublicSteps;
+
 	@PostConstruct
-	void init() {
+	private void init() {
 		logger.info("Creating GateKeeper singleton");
 		rootUserNames = propertyHandler.getRootUserNames();
-		updateCache();
+
 		SingletonFinder.setGateKeeper(this);
+
+		try {
+			centralConnection = centralConnectionFactory.createTopicConnection();
+			consumerConnection = centralConnectionFactory.createTopicConnection();
+			consumeSession = consumerConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			MessageConsumer consumer = consumeSession.createConsumer(synchTopic);
+			consumer.setMessageListener(new GateKeeperListener());
+			consumerConnection.start();
+		} catch (JMSException e) {
+			logger.fatal("Problem with JMS " + e);
+			throw new IllegalStateException(e.getMessage());
+		}
+
+		updatePublicTables();
+		updatePublicSteps();
+
 		logger.info("Created GateKeeper singleton" + rootSpecials);
+	}
+
+	@PreDestroy()
+	private void exit() {
+		try {
+			if (centralConnection != null) {
+				centralConnection.close();
+			}
+			if (consumeSession != null) {
+				consumeSession.close();
+			}
+			if (consumerConnection != null) {
+				consumerConnection.close();
+			}
+			logger.info("GateKeeper closing down");
+		} catch (JMSException e) {
+			throw new IllegalStateException(e.getMessage());
+		}
 	}
 
 	/**
@@ -163,8 +223,17 @@ public class GateKeeper {
 
 	}
 
+	public void requestUpdatePublicSteps() throws JMSException {
+		Session session = centralConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		MessageProducer jmsProducer = session.createProducer(synchTopic);
+		TextMessage jmsg = session.createTextMessage("updatePublicSteps");
+		logger.debug("Sending jms message: updatePublicSteps");
+		jmsProducer.send(jmsg);
+		session.close();
+	}
+
 	public void updatePublicSteps() {
-		List<PublicStep> steps = manager.createNamedQuery(PublicStep.GET_ALL_QUERY,
+		List<PublicStep> steps = gateKeeperManager.createNamedQuery(PublicStep.GET_ALL_QUERY,
 				PublicStep.class).getResultList();
 		publicSteps.clear();
 		for (PublicStep step : steps) {
@@ -175,15 +244,32 @@ public class GateKeeper {
 			}
 			fieldNames.add(step.getField());
 		}
+		stalePublicSteps = false;
 		logger.debug("There are " + steps.size() + " publicSteps");
 	}
 
+	public void requestUpdatePublicTables() throws JMSException {
+		Session session = centralConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		MessageProducer jmsProducer = session.createProducer(synchTopic);
+		TextMessage jmsg = session.createTextMessage("updatePublicTables");
+		logger.debug("Sending jms message: updatePublicTables");
+		jmsProducer.send(jmsg);
+		session.close();
+	}
+
 	public void updatePublicTables() {
-		List<String> tableNames = manager.createNamedQuery(Rule.PUBLIC_QUERY, String.class)
-				.getResultList();
-		publicTables.clear();
-		publicTables.addAll(tableNames);
-		logger.debug("There are " + publicTables.size() + " publicTables");
+		try {
+			List<String> tableNames = gateKeeperManager.createNamedQuery(Rule.PUBLIC_QUERY,
+					String.class).getResultList();
+			publicTables.clear();
+			publicTables.addAll(tableNames);
+			stalePublicTables = false;
+			logger.debug("There are " + publicTables.size() + " publicTables");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e);
+		}
 	}
 
 	/** Return true if allowed because destination table is public or because step is public */
@@ -193,6 +279,9 @@ public class GateKeeper {
 			return true;
 		}
 		String originBeanName = r.getOriginBean().getSimpleName();
+		if (stalePublicSteps) {
+			updatePublicSteps();
+		}
 		Set<String> fieldNames = publicSteps.get(originBeanName);
 		if (fieldNames != null && fieldNames.contains(r.getField().getName())) {
 			return true;
@@ -200,12 +289,15 @@ public class GateKeeper {
 		return false;
 	}
 
-	public void updateCache() {
-		updatePublicTables();
-		updatePublicSteps();
+	public void updateCache() throws JMSException {
+		requestUpdatePublicTables();
+		requestUpdatePublicSteps();
 	}
 
 	public Set<String> getPublicTables() {
+		if (stalePublicTables) {
+			updatePublicTables();
+		}
 		return publicTables;
 	}
 
@@ -286,7 +378,7 @@ public class GateKeeper {
 
 		query = m.replaceAll(" CURRENT_TIMESTAMP ");
 		try {
-			manager.createQuery(query);
+			gateKeeperManager.createQuery(query);
 		} catch (Exception e) {
 			m.reset();
 			if (m.find()) {
@@ -297,6 +389,16 @@ public class GateKeeper {
 			}
 
 		}
+
+	}
+
+	public void markStalePublicTables() {
+		stalePublicTables = true;
+
+	}
+
+	public void markStalePublicSteps() {
+		stalePublicSteps = true;
 
 	}
 

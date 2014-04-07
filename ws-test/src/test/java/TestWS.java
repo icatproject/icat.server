@@ -1150,8 +1150,7 @@ public class TestWS {
 	public void login() throws Exception {
 		double rm = session.getRemainingMinutes();
 		assertTrue(rm > 0);
-		assertEquals(System.getProperty("projectVersion").replace("-SNAPSHOT", ""),
-				session.getApiVersion());
+		assertTrue(session.getApiVersion().startsWith("4.3."));
 		assertEquals("db/root", session.getUserName());
 		Thread.sleep(10);
 		rm = session.getRemainingMinutes();

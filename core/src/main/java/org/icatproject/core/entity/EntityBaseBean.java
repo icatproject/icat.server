@@ -32,7 +32,7 @@ import org.icatproject.core.manager.AccessType;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.LuceneSingleton;
+import org.icatproject.core.manager.Lucene;
 import org.icatproject.core.parser.IncludeClause.Step;
 
 @SuppressWarnings("serial")
@@ -75,7 +75,7 @@ public abstract class EntityBaseBean implements Serializable {
 		clone.modTime = modTime;
 	}
 
-	public void addToLucene(LuceneSingleton lucene) throws IcatException {
+	public void addToLucene(Lucene lucene) throws IcatException {
 		lucene.addDocument(this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
 		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
@@ -447,7 +447,7 @@ public abstract class EntityBaseBean implements Serializable {
 
 	}
 
-	public void removeFromLucene(LuceneSingleton lucene) throws IcatException {
+	public void removeFromLucene(Lucene lucene) throws IcatException {
 		lucene.deleteDocument(this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
 		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
@@ -492,7 +492,7 @@ public abstract class EntityBaseBean implements Serializable {
 		this.modId = modId;
 	}
 
-	public void updateInLucene(LuceneSingleton lucene) throws IcatException {
+	public void updateInLucene(Lucene lucene) throws IcatException {
 		lucene.updateDocument(this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
 		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);

@@ -22,8 +22,6 @@ public class Transmitter {
 
 	private static Logger logger = Logger.getLogger(Transmitter.class);
 
-	// TODO - this use of mappedName rather than name lags elegance - but it
-	// works
 	@Resource(mappedName = "jms/ICAT/Topic")
 	private Topic topic;
 

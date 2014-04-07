@@ -57,7 +57,6 @@
         <module>core</module>
         <module>exposed</module>
         <module>ear</module>
-        <module>client</module>
         <module>ws-test</module>
     </modules>
 
@@ -79,7 +78,7 @@
             <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-api</artifactId>
-                <version>6.0</version>
+                <version>7.0</version>
             </dependency>
 
         </dependencies>

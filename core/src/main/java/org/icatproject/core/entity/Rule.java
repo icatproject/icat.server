@@ -349,7 +349,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 	@PostRemove()
 	void postRemove() {
 		try {
-			SingletonFinder.getGateKeeper().updatePublicTables();
+			SingletonFinder.getGateKeeper().requestUpdatePublicTables();
 		} catch (Throwable e) {
 			logger.error(e.getClass() + " " + e.getMessage());
 		}
@@ -358,7 +358,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 	@PostPersist()
 	void postPersist() {
 		try {
-			SingletonFinder.getGateKeeper().updatePublicTables();
+			SingletonFinder.getGateKeeper().requestUpdatePublicTables();
 		} catch (Throwable e) {
 			logger.error(e.getClass() + " " + e.getMessage());
 		}

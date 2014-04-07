@@ -279,6 +279,8 @@ if not fail:
             print line
             cur.execute(line)
     f.close()
+    
+    con.commit()
 
     print "Upgrade complete"
 

@@ -2,6 +2,8 @@ package org.icatproject.core.manager;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +19,6 @@ import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 import org.icatproject.authentication.Authenticator;
@@ -26,6 +27,46 @@ import org.icatproject.core.IcatException;
 @DependsOn("LoggingConfigurator")
 @Singleton
 public class PropertyHandler {
+
+	public class HostPort {
+
+		private String host;
+		private Integer port;
+
+		public HostPort(Properties props, String key) {
+			String hostPortString = props.getProperty(key);
+			if (hostPortString != null) {
+				String[] bits = hostPortString.split(":");
+				host = bits[0];
+				try {
+					port = Integer.parseInt(bits[1]);
+				} catch (NumberFormatException e) {
+					abend(e.getClass() + e.getMessage());
+				}
+				try {
+					String hostName = InetAddress.getLocalHost().getHostName();
+					if (hostName.equalsIgnoreCase(bits[0])) {
+						host = null;
+						port = null;
+						logger.debug(key + " is local machine so is ignored");
+					}
+				} catch (UnknownHostException e) {
+					abend(e.getClass() + e.getMessage());
+				}
+				formattedProps.add(key + " " + hostPortString);
+			}
+
+		}
+
+		public String getHost() {
+			return host;
+		}
+
+		public Integer getPort() {
+			return port;
+		}
+
+	}
 
 	public enum Operation {
 		C, U, D
@@ -62,6 +103,9 @@ public class PropertyHandler {
 	private List<String> formattedProps = new ArrayList<String>();
 	private int luceneCommitCount;
 
+	private String luceneHost;
+	private Integer lucenePort;
+
 	@PostConstruct
 	private void init() {
 		File f = new File("icat.properties");
@@ -89,12 +133,7 @@ public class PropertyHandler {
 			throw new IllegalStateException(msg);
 		}
 		formattedProps.add("authn.list " + authnList);
-		Context ctx = null;
-		try {
-			ctx = new InitialContext();
-		} catch (NamingException e) {
-			throw new IllegalStateException(e.getClass() + " " + e.getMessage());
-		}
+
 		for (String mnemonic : authnList.split("\\s+")) {
 			String key = "authn." + mnemonic + ".jndi";
 			String jndi = props.getProperty(key).trim();
@@ -103,7 +142,16 @@ public class PropertyHandler {
 				logger.fatal(msg);
 				throw new IllegalStateException(msg);
 			}
+			HostPort hostPort = new HostPort(props, "authn." + mnemonic + ".hostPort");
+			String host = hostPort.getHost();
+			Integer port = hostPort.getPort();
 			try {
+				Context ctx = new InitialContext();
+				if (host != null) {
+					ctx.addToEnvironment("org.omg.CORBA.ORBInitialHost", host);
+					ctx.addToEnvironment("org.omg.CORBA.ORBInitialPort", Integer.toString(port));
+					logger.debug("Requesting remote authenticator at " + host + ":" + port);
+				}
 				Authenticator authenticator = (Authenticator) ctx.lookup(jndi);
 				logger.debug("Found Authenticator: " + mnemonic + " with jndi " + jndi);
 				authPlugins.put(mnemonic, authenticator);
@@ -230,6 +278,11 @@ public class PropertyHandler {
 		}
 		logger.debug("There are " + logRequests.size() + " log requests");
 
+		/* Lucene Host */
+		HostPort hostPort = new HostPort(props, "lucene.hostPort");
+		luceneHost = hostPort.getHost();
+		lucenePort = hostPort.getPort();
+
 		/* Lucene Directory */
 		luceneDirectory = props.getProperty("lucene.directory");
 		if (luceneDirectory != null) {
@@ -237,7 +290,7 @@ public class PropertyHandler {
 
 			String luceneCommitSecondsString = props.getProperty("lucene.commitSeconds");
 			if (luceneCommitSecondsString == null) {
-				abend("Value of 'lucene.commitSeconds' may not be null when the lucene.diretcory is set");
+				abend("Value of 'lucene.commitSeconds' may not be null when the lucene.directory is set");
 			}
 			try {
 				luceneCommitSeconds = Integer.parseInt(luceneCommitSecondsString);
@@ -296,6 +349,14 @@ public class PropertyHandler {
 
 	public int getLuceneCommitCount() {
 		return luceneCommitCount;
+	}
+
+	public String getLuceneHost() {
+		return luceneHost;
+	}
+
+	public Integer getLucenePort() {
+		return lucenePort;
 	}
 
 }

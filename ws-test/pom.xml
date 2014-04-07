@@ -26,7 +26,7 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.client</artifactId>
-            <version>4.3.2</version>
+            <version>4.3.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -40,12 +40,12 @@
             <artifactId>javaee-api</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.icatproject</groupId>
-            <artifactId>icat.ear</artifactId>
-            <version>4.3.3-SNAPSHOT</version>
-            <type>ear</type>
-        </dependency>
+    <!-- <dependency> -->
+    <!-- <groupId>org.icatproject</groupId> -->
+    <!-- <artifactId>icat.ear</artifactId> -->
+    <!-- <version>4.3.3-SNAPSHOT</version> -->
+    <!-- <type>ear</type> -->
+    <!-- </dependency> -->
         
     </dependencies>
 

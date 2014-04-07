@@ -1,11 +1,30 @@
 package org.icatproject.core;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 public class Constants {
 
-	public static String ENTITY_PREFIX = "org.icatproject.core.entity.";
+	public static final String ENTITY_PREFIX = "org.icatproject.core.entity.";
 
-	public static String ENUMPREFIX = "org.icatproject.";
+	public static final String ENUMPREFIX = "org.icatproject.";
 
-	public static final String API_VERSION = "4.3.2";
+	public static String API_VERSION;
+
+	static {
+
+		InputStream inputStream = Constants.class.getClassLoader().getResourceAsStream(
+				"app.properties");
+		Properties p = new Properties();
+
+		try {
+			p.load(inputStream);
+			API_VERSION = p.getProperty("project.version");
+		} catch (IOException e) {
+			// API Version will be null
+		}
+
+	}
 
 }

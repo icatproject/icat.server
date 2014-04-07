@@ -92,7 +92,7 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 	@PostRemove()
 	void postRemove() {
 		try {
-			SingletonFinder.getGateKeeper().updatePublicSteps();
+			SingletonFinder.getGateKeeper().requestUpdatePublicSteps();
 		} catch (Throwable e) {
 			logger.error(e.getClass() + " " + e.getMessage());
 		}
@@ -101,7 +101,7 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 	@PostPersist()
 	void postPersist() {
 		try {
-			SingletonFinder.getGateKeeper().updatePublicSteps();
+			SingletonFinder.getGateKeeper().requestUpdatePublicSteps();
 		} catch (Throwable e) {
 			logger.error(e.getClass() + " " + e.getMessage());
 		}

@@ -27,6 +27,10 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import javax.jms.JMSException;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.transaction.NotSupportedException;
@@ -40,7 +44,7 @@ import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Log;
 import org.icatproject.core.entity.Session;
-import org.icatproject.core.manager.LuceneSingleton.LuceneSearchResult;
+import org.icatproject.core.manager.Lucene.LuceneSearchResult;
 import org.icatproject.core.manager.PropertyHandler.Operation;
 import org.icatproject.core.oldparser.OldGetQuery;
 import org.icatproject.core.oldparser.OldInput;
@@ -69,7 +73,9 @@ public class BeanManager {
 	PropertyHandler propertyHandler;
 
 	@EJB
-	LuceneSingleton lucene;
+	LuceneSingleton luceneSingleton;
+
+	Lucene lucene;
 
 	private static DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
@@ -89,6 +95,29 @@ public class BeanManager {
 
 	@PostConstruct
 	void init() {
+		String luceneHost = propertyHandler.getLuceneHost();
+		if (luceneHost != null) {
+			String jndi = "java:global/icat.ear-" + Constants.API_VERSION + "/icat.exposed-"
+					+ Constants.API_VERSION
+					+ "/LuceneSingleton!org.icatproject.core.manager.Lucene";
+
+			Context ctx = null;
+			try {
+				ctx = new InitialContext();
+				ctx.addToEnvironment("org.omg.CORBA.ORBInitialHost", luceneHost);
+				ctx.addToEnvironment("org.omg.CORBA.ORBInitialPort",
+						Integer.toString(propertyHandler.getLucenePort()));
+				lucene = (Lucene) ctx.lookup(jndi);
+				logger.debug("Found Lucene: " + lucene + " with jndi " + jndi);
+			} catch (NamingException e) {
+				String msg = e.getClass() + " reports " + e.getMessage() + " from " + jndi;
+				logger.fatal(msg);
+				throw new IllegalStateException(msg);
+			}
+		} else {
+			lucene = luceneSingleton;
+		}
+
 		logRequests = propertyHandler.getLogRequests();
 		log = !logRequests.isEmpty();
 		notificationRequests = propertyHandler.getNotificationRequests();
@@ -113,6 +142,7 @@ public class BeanManager {
 				gateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
 				NotificationMessage notification = new NotificationMessage(Operation.C, bean,
 						manager, notificationRequests);
+
 				userTransaction.commit();
 				long beanId = bean.getId();
 
@@ -135,7 +165,7 @@ public class BeanManager {
 				userTransaction.rollback();
 				logger.trace("Transaction rolled back for creation of " + bean + " because of "
 						+ e.getClass() + " " + e.getMessage());
-				gateKeeper.updateCache();
+				updateCache();
 				bean.preparePersist(userId, manager, gateKeeper);
 				bean.isUnique(manager);
 				bean.isValid(manager, true);
@@ -206,7 +236,7 @@ public class BeanManager {
 				userTransaction.rollback();
 				logger.trace("Transaction rolled back for creation because of " + e.getClass()
 						+ " " + e.getMessage());
-				gateKeeper.updateCache();
+				updateCache();
 				int pos = crs.size();
 				EntityBaseBean bean = beans.get(pos);
 				try {
@@ -296,7 +326,7 @@ public class BeanManager {
 				throw e;
 			} catch (Throwable e) {
 				userTransaction.rollback();
-				gateKeeper.updateCache();
+				updateCache();
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
 			}
@@ -360,7 +390,7 @@ public class BeanManager {
 				userTransaction.rollback();
 				logger.trace("Transaction rolled back for deletion because of " + e.getClass()
 						+ " " + e.getMessage());
-				gateKeeper.updateCache();
+				updateCache();
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage(), nms.size());
 			}
@@ -1003,7 +1033,7 @@ public class BeanManager {
 				throw e;
 			} catch (Throwable e) {
 				userTransaction.rollback();
-				gateKeeper.updateCache();
+				updateCache();
 				EntityBaseBean beanManaged = find(bean, manager);
 				beanManaged.setModId(userId);
 				merge(beanManaged, bean, manager);
@@ -1025,6 +1055,16 @@ public class BeanManager {
 		} catch (NotSupportedException e) {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 					"NotSupportedException" + e.getMessage());
+		}
+	}
+
+	private void updateCache() throws IcatException {
+		try {
+			gateKeeper.updateCache();
+		} catch (JMSException e1) {
+			String msg = e1.getClass() + " " + e1.getMessage();
+			logger.error(msg);
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, msg);
 		}
 	}
 

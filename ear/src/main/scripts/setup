@@ -1,28 +1,36 @@
 #!/usr/bin/env python
 from setup_utils import *
 import os
+import socket
 
 # icat
 
+def uninstall():
+    app = actions.getAppName("icat.ear")
+    if app: actions.asadmin("undeploy " + app)
+    actions.asadmin("delete-jdbc-resource jdbc/icat", tolerant=True)
+    actions.asadmin("delete-jdbc-connection-pool icat", tolerant=True)
+    actions.asadmin("delete-jms-resource jms/ICAT/TopicConnectionFactory", tolerant=True)
+    actions.asadmin("delete-jms-resource jms/ICAT/Topic", tolerant=True)
+    actions.asadmin("delete-jms-resource jms/ICAT/CentralConnectionFactory", tolerant=True) 
+    actions.asadmin("delete-jms-resource jms/ICAT/Synch", tolerant=True)
+    
 actions, options, arg = getActions(binDir=True)
-props = actions.getGlassfish("icat-setup.properties", ["icatProperties", "glassfish", "driver", "port"])
+props = actions.getGlassfish("icat-setup.properties", ["dbProperties", "glassfish", "driver", "port"])
 
 binDir = os.path.expanduser(options.binDir)
 files = ["testicat", "icatadmin"]
 prop_name = "icat.properties"
 prop_list = ["lifetimeMinutes", "rootUserNames", "authn.list", "notification.list", "log.list"]
 
-if arg == "CONFIGURE":
+if arg in ["CONFIGURE", "INSTALL"]:
     actions.configure(prop_name, prop_list) 
     icatProperties = actions.getProperties(prop_name, prop_list)
     log4jProperties = icatProperties.get("log4j.properties")
     if log4jProperties:actions.configure(os.path.basename(log4jProperties), [], log4jProperties)
-    actions.setConfigured()
+    actions.checkNoErrors()
 
-elif arg == "INSTALL":
-    
-    actions.checkConfigured()
-        
+if arg == "INSTALL":
     icatProperties = actions.getProperties(prop_name, prop_list)
     log4jProperties = icatProperties.get("log4j.properties")
        
@@ -60,39 +68,46 @@ elif arg == "INSTALL":
             actions.installFile(file)
     
     try:           
-        app = actions.getAppName("icat.ear")
-        if app: actions.asadmin("undeploy " + app)
-        
-        actions.asadmin("delete-jdbc-resource jdbc/icat", tolerant=True)
-        actions.asadmin("delete-jdbc-connection-pool icat", tolerant=True)
-        actions.asadmin("delete-jms-resource jms/ICAT/TopicConnectionFactory", tolerant=True)
-        actions.asadmin("delete-jms-resource jms/ICAT/Topic", tolerant=True)
+        uninstall()
         
         actions.asadmin('create-jdbc-connection-pool --datasourceclassname ' + props["driver"] + 
                 ' --restype javax.sql.DataSource --failconnection=true --steadypoolsize 2' + 
-                ' --maxpoolsize 8 --ping --property ' + props["icatProperties"] + ' icat', printOutput=True)
+                ' --maxpoolsize 32 --ping --property ' + props["dbProperties"] + ' icat', printOutput=True)
         
         actions.asadmin("create-jdbc-resource --connectionpoolid icat jdbc/icat")
     
         actions.asadmin("create-jms-resource --restype javax.jms.TopicConnectionFactory jms/ICAT/TopicConnectionFactory")
-    
         actions.asadmin("create-jms-resource --restype javax.jms.Topic jms/ICAT/Topic")
+        actions.asadmin("create-jms-resource --restype javax.jms.TopicConnectionFactory jms/ICAT/CentralConnectionFactory")
+        actions.asadmin("create-jms-resource --restype javax.jms.Topic jms/ICAT/Synch")
         
+        jmsHostPort = props.get("jmsHostPort")
+        if jmsHostPort:
+            bits = jmsHostPort.split(":")
+            if len(bits) != 2: abort("jmsHostPort must contain a colon separator")
+            jmsHost = bits[0].strip()
+            jmsPort = bits[1].strip()
+            if socket.getfqdn() == socket.getfqdn(jmsHost): 
+                jmsHostPort = None
+            else:
+                jmsHostPort = jmsHost + ":" + jmsPort
+        if jmsHostPort:
+            actions.asadmin("set resources.connector-connection-pool.jms/ICAT/CentralConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
+            actions.asadmin("set resources.connector-connection-pool.jms/ICAT/TopicConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
+            
         actions.deploy("icat.ear-*.ear", deploymentorder=100)
         
         if not os.path.isdir(binDir): abort ("Please create directory " + binDir + " and try again.")
         for file in files:   
-            os.chmod(file, 0755)    
+            if platform.system() != "Windows": os.chmod(file, 0755)    
             shutil.copy(file , binDir)
             if options.verbose:
                 print "\n", file, "copied to", binDir
                 
     except Exception, e:
-        raise
         abort(str(e))
                 
-else:  # UNINSTALL
-    
+if arg == "UNINSTALL":
     icatProperties = actions.getProperties(prop_name, prop_list)
     log4jProperties = icatProperties.get("log4j.properties")
     
@@ -105,13 +120,7 @@ else:  # UNINSTALL
             actions.removeFile(file)
     
     try:
-        app = actions.getAppName("icat.ear")
-        if app: actions.asadmin("undeploy " + app)
-        actions.asadmin("delete-jdbc-resource jdbc/icat", tolerant=True)
-        actions.asadmin("delete-jdbc-connection-pool icat", tolerant=True)
-        actions.asadmin("delete-jms-resource jms/ICAT/TopicConnectionFactory", tolerant=True)
-        actions.asadmin("delete-jms-resource jms/ICAT/Topic", tolerant=True)
-        
+        uninstall()
         for file in files:
             path = os.path.join(binDir, file)    
             if os.path.exists(path): 

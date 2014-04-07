@@ -22,6 +22,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.DependsOn;
 import javax.ejb.EJB;
+import javax.ejb.LocalBean;
+import javax.ejb.Remote;
 import javax.ejb.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -57,28 +59,12 @@ import org.icatproject.core.entity.EntityBaseBean;
 /* There is synchronization code in this class - please understand it before making any changes */
 @DependsOn("LoggingConfigurator")
 @Singleton
-public class LuceneSingleton {
+@LocalBean
+@Remote(Lucene.class)
+public class LuceneSingleton implements Lucene {
 
 	@PersistenceUnit(unitName = "icat")
 	private EntityManagerFactory entityManagerFactory;
-
-	public class LuceneSearchResult {
-
-		private Query query;
-		private List<String> results;
-		private ScoreDoc scoreDoc;
-
-		public LuceneSearchResult(List<String> results, ScoreDoc scoreDoc, Query query) {
-			this.results = results;
-			this.scoreDoc = scoreDoc;
-			this.query = query;
-		}
-
-		public List<String> getResults() {
-			return results;
-		}
-
-	}
 
 	public class PopulateThread extends Thread {
 
@@ -89,6 +75,7 @@ public class LuceneSingleton {
 			logger.debug("Start new populate thread");
 		}
 
+		@Override
 		public void run() {
 
 			try {
@@ -154,7 +141,7 @@ public class LuceneSingleton {
 		}
 	}
 
-	final static Logger logger = Logger.getLogger(LuceneSingleton.class);
+	final static Logger logger = Logger.getLogger(Lucene.class);
 
 	final static SearcherFactory searcherFactory = new SearcherFactory();
 
@@ -195,6 +182,7 @@ public class LuceneSingleton {
 
 	private Timer timer;
 
+	@Override
 	public void addDocument(EntityBaseBean bean) throws IcatException {
 		Document doc = buildDoc(bean);
 		try {
@@ -236,6 +224,7 @@ public class LuceneSingleton {
 		return doc;
 	}
 
+	@Override
 	public synchronized void clear() throws IcatException {
 		try {
 			populateList.clear();
@@ -267,6 +256,7 @@ public class LuceneSingleton {
 		}
 	}
 
+	@Override
 	public synchronized void commit() throws IcatException {
 		try {
 			int cached = iwriter.numRamDocs();
@@ -280,6 +270,7 @@ public class LuceneSingleton {
 		}
 	}
 
+	@Override
 	public void deleteDocument(EntityBaseBean bean) throws IcatException {
 		String id = bean.getClass().getSimpleName() + ":" + bean.getId();
 		try {
@@ -311,10 +302,12 @@ public class LuceneSingleton {
 		}
 	}
 
+	@Override
 	public boolean getActive() {
 		return active;
 	}
 
+	@Override
 	public synchronized List<String> getPopulating() {
 		List<String> result = new ArrayList<>();
 
@@ -396,6 +389,7 @@ public class LuceneSingleton {
 
 	}
 
+	@Override
 	public synchronized void populate(Class<?> klass) {
 		populateList.add(klass);
 		if (populateThread == null || (populateThread).getState() == Thread.State.TERMINATED) {
@@ -404,6 +398,7 @@ public class LuceneSingleton {
 		}
 	}
 
+	@Override
 	public LuceneSearchResult search(String queryString, int count, String entityName)
 			throws IcatException {
 		if (entityName != null) {
@@ -449,6 +444,7 @@ public class LuceneSingleton {
 		}
 	}
 
+	@Override
 	public LuceneSearchResult searchAfter(LuceneSearchResult last, int count) throws IcatException {
 		try {
 			List<String> results = new ArrayList<String>();
@@ -465,6 +461,7 @@ public class LuceneSingleton {
 		}
 	}
 
+	@Override
 	public void updateDocument(EntityBaseBean bean) throws IcatException {
 		Document doc = buildDoc(bean);
 		String id = bean.getClass().getSimpleName() + ":" + bean.getId();
