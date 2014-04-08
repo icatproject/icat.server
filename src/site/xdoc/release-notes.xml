@@ -7,6 +7,19 @@
 
     <body>
 
+        <section name="4.3.3">
+            <p>This is a bug fix release with support for a group of ICATs working together. It is not a cluster in the Glassfish sense.
+            </p>
+            <ul>
+                <li>The isAccessAllowed call, when used to check CREATE access, is now protected from invalid input.
+                </li>
+                <li>More than one ICAT may be used together to share the load and provide more resilience
+                    **** NEEDS DOC FOR icat.properties and
+                    icat-setup.properties ****).
+                </li>
+            </ul>
+        </section>
+
         <section name="4.3.2">
             <p>This is a bug fix release.
             </p>

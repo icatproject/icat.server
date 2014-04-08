@@ -34,6 +34,7 @@ import javax.naming.NamingException;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.transaction.NotSupportedException;
+import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
@@ -169,7 +170,6 @@ public class BeanManager {
 				bean.preparePersist(userId, manager, gateKeeper);
 				bean.isUnique(manager);
 				bean.isValid(manager, true);
-				e.printStackTrace(System.err);
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
 			}
@@ -966,23 +966,30 @@ public class BeanManager {
 		}
 	}
 
-	public boolean createAllowed(String userId, EntityBaseBean bean, EntityManager manager,
+	private boolean createAllowed(String userId, EntityBaseBean bean, EntityManager manager,
 			UserTransaction userTransaction) throws IcatException {
 		try {
 			userTransaction.begin();
 			try {
-				bean.setId(null);
-				bean.setModId(userId);
 				try {
+					bean.preparePersist(userId, manager, gateKeeper);
+					logger.debug(bean + " prepared for persist (createAllowed).");
 					manager.persist(bean);
+					logger.debug(bean + " persisted (createAllowed).");
+					manager.flush();
+					logger.debug(bean + " flushed (createAllowed).");
 				} catch (EntityExistsException e) {
 					throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS,
 							e.getMessage());
 				} catch (Throwable e) {
-					logger.trace("Transaction rolled back for test creation of " + bean
-							+ " because of " + e.getClass() + " " + e.getMessage());
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass()
-							+ " " + e.getMessage());
+					userTransaction.rollback();
+					logger.debug("Transaction rolled back for creation of " + bean + " because of "
+							+ e.getClass() + " " + e.getMessage());
+					bean.preparePersist(userId, manager, gateKeeper);
+					bean.isUnique(manager);
+					bean.isValid(manager, true);
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+							"Unexpected DB response " + e.getClass() + " " + e.getMessage());
 				}
 				try {
 					gateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
@@ -992,12 +999,21 @@ public class BeanManager {
 						throw e;
 					}
 					return false;
+				} catch (Throwable e) {
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass()
+							+ " " + e.getMessage());
 				}
 			} finally {
-				userTransaction.rollback();
+				if (userTransaction.getStatus() != Status.STATUS_NO_TRANSACTION) {
+					userTransaction.rollback();
+					logger.debug("Transaction rolled back (createAllowed)");
+				}
 			}
+		} catch (IcatException e) {
+			logger.debug(e.getClass() + " " + e.getMessage());
+			throw e;
 		} catch (Exception e) {
-			// Transaction problem
+			logger.error("Transaction problem? " + e.getClass() + " " + e.getMessage());
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " "
 					+ e.getMessage());
 		}

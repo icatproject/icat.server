@@ -1839,6 +1839,17 @@ public class TestWS {
 		// Object doesn't exist
 		assertFalse(session.getIcat().isAccessAllowed(piTwoSessionId, facility, AccessType.DELETE));
 
+		// Bad call
+		Investigation investigation = new Investigation();
+		investigation.setId(42L);
+		try {
+			session.getIcat().isAccessAllowed(piOneSessionId, investigation, AccessType.CREATE);
+			fail("Should have thrown exception");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
+			assertEquals("Investigation: facility cannot be null.", e.getMessage());
+		}
+
 		session.clearAuthz();
 		session.setAuthz();
 	}
