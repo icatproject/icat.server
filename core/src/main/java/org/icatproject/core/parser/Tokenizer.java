@@ -17,19 +17,14 @@ public class Tokenizer {
 	private final static Pattern tsRegExp = Pattern
 			.compile("\\{\\s*ts\\s+(\\d{4}-\\d{2}-\\d{2})\\s+(\\d{2}:\\d{2}:\\d{2})\\s*\\}");
 
-	private final static Set<String> boolops = new HashSet<String>(
-			Arrays.asList("AND", "OR", "NOT"));
-	private final static Set<String> keyWords = new HashSet<String>(Arrays.asList("ALL", "ANY",
-			"AND", "AS", "ASC", "BETWEEN", "BOTH", "BY", "DESC", "DISTINCT", "DIV", "EMPTY", "FALSE",
-			"FETCH", "FROM", "GROUP", "HAVING", "IN", "INNER", "IS", "JOIN", "LEADING", "LEFT",
-			"MEMBER", "MINUS", "MULT", "NOT", "NULL", "OR", "ORDER", "OUTER", "PLUS", "REAL",
-			"SELECT", "TRAILING", "WHERE", "INCLUDE", "LIMIT", "TIMESTAMP", "TRUE"));
-	private final static Set<String> aggFunctions = new HashSet<String>(Arrays.asList("MIN", "MAX",
-			"AVG", "COUNT", "SUM"));
-
-	private final static Set<String> otherFunctions = new HashSet<String>(Arrays.asList("CONCAT",
-			"LENGTH", "LOCATE", "SUBSTRING", "TRIM", "ABS", "MOD", "SQRT", "SIZE", "CURRENT_DATE",
-			"CURRENT_TIME", "CURRENT_TIMESTAMP"));
+	private final static Set<String> keyWords = new HashSet<String>(Arrays.asList("ABS", "ALL",
+			"AND", "ANY", "AS", "ASC", "AVG", "BETWEEN", "BOTH", "BY", "CONCAT", "COUNT",
+			"CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "DESC", "DISTINCT", "DIV",
+			"EMPTY", "FALSE", "FETCH", "FROM", "GROUP", "HAVING", "IN", "INCLUDE", "INNER", "IS",
+			"JOIN", "LEADING", "LEFT", "LENGTH", "LIMIT", "LOCATE", "LOWER", "MAX", "MEMBER",
+			"MIN", "MINUS", "MOD", "MULT", "NOT", "NULL", "OR", "ORDER", "OUTER", "PLUS", "REAL",
+			"SELECT", "SIZE", "SQRT", "SUBSTRING", "SUM", "TIMESTAMP", "TRAILING", "TRIM", "TRUE",
+			"UPPER", "WHERE"));
 
 	public static List<Token> getTokens(String input) throws LexerException {
 		List<Token> tokens = new ArrayList<Token>();
@@ -125,8 +120,7 @@ public class Tokenizer {
 				if (!Character.isLetterOrDigit(ch) && ch != '_' && ch != '.' && ch != '$') {
 					String name = input.substring(start, i);
 					String nameUp = name.toUpperCase();
-					if (boolops.contains(nameUp) || keyWords.contains(nameUp)
-							|| aggFunctions.contains(nameUp) || otherFunctions.contains(nameUp)) {
+					if (keyWords.contains(nameUp)) {
 						tokens.add(new Token(Token.Type.valueOf(nameUp), nameUp));
 					} else if (nameUp.equals("LIKE")) {
 						tokens.add(new Token(Token.Type.COMPOP, "LIKE"));

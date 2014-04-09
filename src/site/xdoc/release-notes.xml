@@ -13,6 +13,8 @@
             <ul>
                 <li>The isAccessAllowed call, when used to check CREATE access, is now protected from invalid input.
                 </li>
+                <li>All standard JPQL functions are now accepted in search() calls.
+                </li>
                 <li>More than one ICAT may be used together to share the load and provide more resilience
                     **** NEEDS DOC FOR icat.properties and
                     icat-setup.properties ****).
