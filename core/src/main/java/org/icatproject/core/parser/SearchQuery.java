@@ -1,5 +1,7 @@
 package org.icatproject.core.parser;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +43,15 @@ public class SearchQuery {
 
 	private GateKeeper gateKeeper;
 
+	private static ArrayList<Object> aListWithZero = new ArrayList<>(1);
+	static {
+		aListWithZero.add(0L);
+	}
+
+	private List<Object> noAuthzResult = Collections.emptyList();
+
 	public SearchQuery(Input input, GateKeeper gateKeeper) throws ParserException, IcatException {
 		this.gateKeeper = gateKeeper;
-
 		input.consume(Token.Type.SELECT);
 		StringBuilder sb = new StringBuilder("SELECT ");
 
@@ -54,6 +62,9 @@ public class SearchQuery {
 		if (t.getType() == Token.Type.COUNT || t.getType() == Token.Type.MAX
 				|| t.getType() == Token.Type.MIN || t.getType() == Token.Type.AVG
 				|| t.getType() == Token.Type.SUM) {
+			if (t.getType() == Token.Type.COUNT) {
+				noAuthzResult = aListWithZero;
+			}
 			sb.append(t.getValue() + "(");
 			input.consume(Token.Type.OPENPAREN);
 			t = input.peek(0);
@@ -241,6 +252,11 @@ public class SearchQuery {
 
 	public IncludeClause getIncludeClause() {
 		return includeClause;
+	}
+
+	public List<?> noAuthzResult() {
+		logger.debug("noAuthzResult is of length " + noAuthzResult.size());
+		return noAuthzResult;
 	}
 
 }

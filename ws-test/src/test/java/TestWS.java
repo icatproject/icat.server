@@ -423,6 +423,20 @@ public class TestWS {
 		} catch (Exception e) {
 		}
 
+		// User has no read perms on objects of this type at all, some objects exist
+		List<Object> results = session.getIcat().search(piTwoSessionId,
+				"SELECT COUNT(i) FROM Rule i");
+		assertEquals(1, results.size());
+		assertEquals(0L, results.get(0));
+
+		results = session.getIcat().search(piTwoSessionId, "SELECT SUM(i) FROM Rule i");
+		assertEquals(0, results.size());
+	
+		// User has no read perms on objects of this type at all, no objects exist
+		results = session.getIcat().search(piTwoSessionId, "SELECT COUNT(i) FROM DataCollection i");
+		assertEquals(1, results.size());
+		assertEquals(0L, results.get(0));
+
 		session.clearAuthz();
 		session.setAuthz();
 
@@ -476,7 +490,6 @@ public class TestWS {
 
 		session.clearAuthz();
 		session.setAuthz();
-
 	}
 
 	@Test
@@ -1636,7 +1649,7 @@ public class TestWS {
 						+ "WHERE df1.name = 'fred' AND df2.name = 'bill'");
 		assertEquals("Count", 1, results.size());
 		assertEquals("Result", "dfsin", results.get(0));
-		
+
 		results = session
 				.search("SELECT ds.name from Dataset ds JOIN ds.datafiles df1 JOIN ds.datafiles df2 "
 						+ "WHERE LOWER(df1.name) = 'fred' AND df2.name = LOWER('bill')");

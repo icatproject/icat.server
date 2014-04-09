@@ -794,7 +794,7 @@ public class BeanManager {
 
 		/* Null query indicates that nothing accepted by authz */
 		if (jpql == null) {
-			return Collections.emptyList();
+			return q.noAuthzResult();
 		}
 
 		/* Create query - which may go wrong */

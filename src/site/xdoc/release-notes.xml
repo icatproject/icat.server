@@ -15,6 +15,11 @@
                 </li>
                 <li>All standard JPQL functions are now accepted in search() calls.
                 </li>
+                <li>Queries returning results of aggregate functions should always return an array of length 1. However, due to the behaviour of JAXB
+                    a list containing just a null is not transmitted properly and instead an empty list is returned. This is a problem with the
+                    functions MIN, MAX, SUM and AVG all of which return null when they have no data to process. The COUNT function was also returning
+                    an empty list when it had no data but now returns a list containing 0L.
+                </li>
                 <li>More than one ICAT may be used together to share the load and provide more resilience
                     **** NEEDS DOC FOR icat.properties and
                     icat-setup.properties ****).
