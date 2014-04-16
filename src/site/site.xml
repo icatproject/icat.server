@@ -8,23 +8,16 @@
     </breadcrumbs>
 
     <menu name="Information for Users">
-    <item name="Java Client User Manual" href="icat.client/manual.html"/>
      <item name="Schema" href="icat.core/schema.html"/>
-     <item name="Java Client Javadoc" href="icat.client/apidocs/index.html"/>
       <item name="FAQ" href="faq.html"/>
        <item name="Issue Tracking" href="issue-tracking.html"/>
        <item name="Release Notes" href="release-notes.html"/>
     </menu>
        
     <menu name="Information for Installers">
-    <item name="Java Client Installation" href="icat.client/installation.html"/>
     <item name="Server Installation" href="icat.ear/installation.html"/>
     </menu>
     
-    <menu name="Information for Developers">
-    <item name="Authentication" href="icat.authentication/authentication.html"/>
-    </menu>
-   
     <menu ref="reports"/>
     <menu ref="modules"/>
  

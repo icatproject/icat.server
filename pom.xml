@@ -10,7 +10,7 @@
         <downloadUrl>http://www.icatproject.org/mvn/repo</downloadUrl>
         <site>
             <id>website</id>
-            <url>scp://www.icatproject.org/var/www/html/mvn/site/icat/${project.version}</url>
+            <url>scp://www.icatproject.org/var/www/html/mvn/site/icat/server/${project.version}</url>
         </site>
         <repository>
             <id>repo</id>

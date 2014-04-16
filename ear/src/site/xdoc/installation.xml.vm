@@ -31,15 +31,15 @@
                         <a href="${repoUrl}/org/icatproject/icat.ear/${project.version}/icat.ear-${project.version}-distro.zip">icat.ear-${project.version}-distro.zip</a>
                     </li>
                     <li>
-                        A suitable deployed container (here assumed to be glassfish though tomcat should be sufficient) to support a web
-                        application.
-                        Testing has been carried out with Glassfish 3.1.2.
-                        <a href="https://code.google.com/p/icatproject/wiki/Glassfish">Glassfish installation instructions</a>
+                        A suitable deployed container. The installation scripts only support Glassfish.
+                        Testing has been carried out with Glassfish
+                        4.0.
+                        <a href="http://icatproject.org/installation/glassfish/">Glassfish installation instructions</a>
                         are available.
                     </li>
                     <li>
                         A database as described in
-                        <a href="https://code.google.com/p/icatproject/wiki/Databases">Database installation instructions</a>
+                        <a href="http://icatproject.org/installation/database/">Database installation instructions</a>
                         installed on the server
                     </li>
                     <li>
@@ -67,15 +67,71 @@
             <subsection name="Summary of steps">
 
                 <ol>
-                    <li> Upgrade the database schema if you already have a 4.2.x version which you wish to use with ICAT 4.3.2. If you have already
+                    <li>Upgrade the database schema if you already have a 4.2.x version which you wish to use with ICAT 4.3.3. If you have already
                         upgraded to ICAT 4.3.x then no changes to the database are required.
                     </li>
                     <li>
+                        If you wish to install multiple servers each running an ICAT connected to the same database please see
+                        <a href="#cluster">Installing a group of ICATs</a>
+                    </li>
+                    <li>
                         Please follow
-                        <a href="http://code.google.com/p/icatproject/wiki/Installation"> the generic installation instructions</a>
+                        <a href="http://icatproject.org/installation/component/"> the generic installation instructions</a>
                     </li>
                     <li> See if it works.</li>
                 </ol>
+
+            </subsection>
+
+            <a name="cluster" />
+            <subsection name="Installing a group of ICATs">
+                <p>If your facility depends upon a single ICAT instance then ingestion of data can be held up by a user making an expensive query.</p>
+
+                <p>To avoid this it is suggested that you install multiple servers each running a Glassfish with an ICAT but all sharing one database.
+                    However there are a number of opportunities to get things wrong in the setup so it is recommended that you install the central
+                    machine first and make sure that it works before adding in the satellites. Ingestion can be directed to one node and the other
+                    nodes can be load balanced for user access by, for example, an Apache web server. In this documentation one machine is referred
+                    to
+                    as the central one and the others are referred to as satellites.
+                </p>
+
+                <p>
+                    All machines must use the same database. If the central machine is running the database then ports must be opened to the satellite
+                    machines. By default this is 3306 for MySQL and 1521 for Oracle. Ports must also be opened on the central machine for JMS and IIOP
+                    which are by default 7676 and 3700 and respectively. Security is not enabled for either JMS or IIOP communication so the firewalls
+                    should normally be configured to only allow traffic from the set of satellite machines.
+                </p>
+
+                <p>Authentication can either be carried out on the central machine - which has the advantage that you only have authenticator logs
+                    building up on that machine or it can be handled by the satellites so distributing the load better. Even if you choose to use
+                    central authentication the authenticators must, unfortunately still be installed on the satellites. Glassfish seems to get
+                    confused
+                    if the JNDI resources are not recognised locally on the satellites.
+                    To enable central authentication you need a line in the
+                    icat.properties file on each satellite machine for each authenticator of the form: authn.XXX.hostPort = &lt;central
+                    machine&gt;:3700
+                    where XXX is one of the
+                    values listed in the authn.list property.
+                </p>
+
+                <p>Lucene calls must also be directed to the central machine with a line in each satellite's icat.properties file of the form:
+                    lucene.hostPort = &lt;central machine&gt;:3700. This is the only lucene property that should be set on the satellites. It is
+                    essential that this property is set otherwise each node will only see changes made via that machine.
+                </p>
+
+                <p>JMS messages must all be sent to the central machine. This is important otherwise cache refresh messages may be missed. All
+                    machines may produce these messages and all machines are listening for them. To configure this an entry is added to the
+                    icat-setup.properties file (not the icat.properties file) of the satellite machines of the form jmsHostPort = &lt;central
+                    machine&gt;:7676
+                </p>
+
+                <p>
+                    You could then set up an Apache front end to do load balancing. This will probably just connect to the satellites leaving
+                    the
+                    central machine to handle ingestion of data. See
+                    <a href="http://icatproject.org/installation/apache-front-end/">Apache front end</a>
+                    for one way of doing this.
+                </p>
 
             </subsection>
 
@@ -129,6 +185,13 @@
                     </dd>
                     <dt>port</dt>
                     <dd>is the administration port of the chosen glassfish domain which is typically 4848.</dd>
+                    <dt>jmsHostPort</dt>
+                    <dd>
+                        This is optional. It should only be specified on satellite machines when you have a group of machines working together as
+                        described at
+                        <a href="#cluster">Installing a group of ICATs</a>
+                        . It takes the form machine:port where the port will normally be 7676.
+                    </dd>
                 </dl>
 
                 <p>For a local oracle-xe installation the following values of driver and icatProperties should be good except for
@@ -194,6 +257,20 @@
                         java:global/authn_db.ear-1.0.0/authn_db.ejb-1.0.0/DB_Authenticator. There must be one such entry for each
                         plugin.
                     </dd>
+                    <dt>
+                        authn.&lt;mnemonic&gt;.hostPort
+                    </dt>
+                    <dd>
+                        is optional. It should only be specified on satellite machines when
+                        you have a group of machines working together as
+                        described
+                        at
+                        <a href="#cluster">Installing a group of ICATs</a>
+                        and when you want to perform authentication on the central machine.
+                        The value takes the form machine:port where the port
+                        will
+                        normally be 3700.
+                    </dd>
                     <dt>notification.list</dt>
                     <dd>is a space separated set of Entity names for which you with to generate notifications. For each one there must be another line
                         saying under what conditions you wish to generate a notification for the entity.
@@ -208,7 +285,7 @@
                         there
                         must
                         be another line
-                        saying under what group of calls you wish to log.
+                        saying what group of calls you wish to log to that destination.
                     </dd>
 
                     <dt>log.&lt;destination&gt; </dt>
@@ -226,7 +303,8 @@
                     <dt>lucene.directory</dt>
                     <dd>This is optional. It is the path to a directory (whose parent must exist) in which to store the lucene index. If this is
                         specified then
-                        lucene.commitSeconds must also be specified. If it is omitted then lucene indices will not be created and the
+                        lucene.commitSeconds and lucene.commitCount must both be specified. If it is omitted and lucene.hostPort is also
+                        omitted then lucene indices will not be created and the
                         searchText()
                         call will return nothing.
                     </dd>
@@ -241,6 +319,16 @@
                     <dd>the number of changes to accumulate before committing them to disk. If the number is too high there can be memory
                         problems.
                         Currently this is only used by the call to lucenePopulate.
+                    </dd>
+
+                    <dt>lucene.hostPort</dt>
+                    <dd>
+                        This is optional and if set any other lucene settings will be ignored. It should only be specified on satellite machines when
+                        you have a group of machines working together as
+                        described at
+                        <a href="#cluster">Installing a group of ICATs</a>
+                        The value takes the form machine:port where the port
+                        will normally be 3700.
                     </dd>
                 </dl>
 

@@ -306,7 +306,7 @@ public class PropertyHandler {
 
 			String luceneCommitCountString = props.getProperty("lucene.commitCount");
 			if (luceneCommitCountString == null) {
-				abend("Value of 'lucene.commitCount' may not be null when the lucene.diretcory is set");
+				abend("Value of 'lucene.commitCount' may not be null when the lucene.directory is set");
 			}
 			try {
 				luceneCommitCount = Integer.parseInt(luceneCommitCountString);

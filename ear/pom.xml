@@ -14,16 +14,6 @@
         <uniqueVersion>false</uniqueVersion>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>ICAT Repo</id>
-            <url>http://www.icatproject.org/mvn/repo</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
     <dependencies>
 
         <dependency>

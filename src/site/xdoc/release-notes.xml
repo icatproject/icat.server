@@ -20,10 +20,9 @@
                     functions MIN, MAX, SUM and AVG all of which return null when they have no data to process. The COUNT function was also returning
                     an empty list when it had no data but now returns a list containing 0L.
                 </li>
-                <li>More than one ICAT may be used together to share the load and provide more resilience
-                    **** NEEDS DOC FOR icat.properties and
-                    icat-setup.properties ****).
+                <li>More than one ICAT may be used together to share the load and provide more resilience.
                 </li>
+                <li>The setup script does not require calling with the configure option.</li>
             </ul>
         </section>
 
