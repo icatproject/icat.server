@@ -172,12 +172,12 @@
 
             </subsection>
 
-            <subsection name="The icat.setup.properties file">
+            <subsection name="The icat-setup.properties file">
 
                 <dl>
                     <dt>driver</dt>
                     <dd>is the name of the jdbc driver and must match the jar file for your database that you stored in the previous step.</dd>
-                    <dt>icatProperties</dt>
+                    <dt>dbProperties</dt>
                     <dd>identifies the icat database and how to connect to it.</dd>
                     <dt>glassfish</dt>
                     <dd>is the top level of the glassfish installation. It must contain "glassfish/domains", and will be referred to here as
@@ -194,14 +194,14 @@
                     </dd>
                 </dl>
 
-                <p>For a local oracle-xe installation the following values of driver and icatProperties should be good except for
+                <p>For a local oracle-xe installation the following values of driver and dbProperties should be good except for
                     the user and password
                     values:
                 </p>
                 <code>
                     driver=oracle.jdbc.pool.OracleDataSource
                     <br />
-                    icatProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icat:password=secret
+                    dbProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icat:password=secret
                     <br />
                 </code>
                 <p>
@@ -213,7 +213,7 @@
                 <code>
                     driver=com.mysql.jdbc.jdbc2.optional.MysqlDataSource
                     <br />
-                    icatProperties=user=icat:password=secret:databaseName=icat
+                    dbProperties=user=icat:password=secret:databaseName=icat
                     <br />
                 </code>
             </subsection>

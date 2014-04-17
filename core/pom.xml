@@ -13,13 +13,6 @@
 
     <name>ICAT Core</name>
 
-    <repositories>
-        <repository>
-            <id>ICAT Repo</id>
-            <url>http://www.icatproject.org/mvn/repo</url>
-        </repository>
-    </repositories>
-
     <dependencies>
 
         <dependency>

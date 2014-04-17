@@ -25,6 +25,13 @@
         <serverHost>localhost</serverHost>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>ICAT Repo</id>
+            <url>http://www.icatproject.org/mvn/repo</url>
+        </repository>
+    </repositories>
+
     <description>Main pom to build all the icat components. For more information please see the individual components.</description>
     <issueManagement>
         <url>http://code.google.com/p/icatproject/issues/list</url>
@@ -210,6 +217,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>2.7</version>
+                <configuration>
+                    <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                </configuration>
                 <reportSets>
                     <reportSet>
                         <reports>

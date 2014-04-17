@@ -23,6 +23,7 @@
                 <li>More than one ICAT may be used together to share the load and provide more resilience.
                 </li>
                 <li>The setup script does not require calling with the configure option.</li>
+                <li>The icat-setup.properties file now uses the keyword dbProperties rather than icatProperties.</li>
             </ul>
         </section>
 
