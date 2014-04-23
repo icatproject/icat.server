@@ -431,7 +431,7 @@ public class TestWS {
 
 		results = session.getIcat().search(piTwoSessionId, "SELECT SUM(i) FROM Rule i");
 		assertEquals(0, results.size());
-	
+
 		// User has no read perms on objects of this type at all, no objects exist
 		results = session.getIcat().search(piTwoSessionId, "SELECT COUNT(i) FROM DataCollection i");
 		assertEquals(1, results.size());
