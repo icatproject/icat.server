@@ -24,6 +24,7 @@
                 </li>
                 <li>The setup script does not require calling with the configure option.</li>
                 <li>The icat-setup.properties file now uses the keyword dbProperties rather than icatProperties.</li>
+                <li>Fixed bug with handling of unary minus.</li>
             </ul>
         </section>
 

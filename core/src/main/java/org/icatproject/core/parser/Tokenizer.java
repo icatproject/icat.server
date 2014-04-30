@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class Tokenizer {
 
 	enum State {
-		RESET, NONE, INQUOTES, CLOSEDQUOTES, LT, NAME, INTEGER, REAL, NOT, PARAMETER, TIMESTAMP, GT
+		RESET, NONE, INQUOTES, CLOSEDQUOTES, LT, NAME, INTEGER, REAL, NOT, PARAMETER, TIMESTAMP, GT, MINUS
 	}
 
 	private final static Pattern tsRegExp = Pattern
@@ -75,13 +75,22 @@ public class Tokenizer {
 				} else if (ch == '+') {
 					tokens.add(new Token(Token.Type.PLUS, ch));
 				} else if (ch == '-') {
-					tokens.add(new Token(Token.Type.MINUS, ch));
+					state = State.MINUS;
+					start = i;
+
 				} else if (ch == '*') {
 					tokens.add(new Token(Token.Type.MULT, ch));
 				} else if (ch == '/') {
 					tokens.add(new Token(Token.Type.DIV, ch));
 				} else {
 					reportError(ch, state, i, input);
+				}
+			} else if (state == State.MINUS) {
+				if (Character.isDigit(ch)) {
+					state = State.INTEGER;
+				} else {
+					tokens.add(new Token(Token.Type.MINUS, '-'));
+					state = State.RESET;
 				}
 			} else if (state == State.INQUOTES) {
 				if (ch == '\'') {
