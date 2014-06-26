@@ -109,7 +109,8 @@ public class BeanManager {
 				ctx.addToEnvironment("org.omg.CORBA.ORBInitialPort",
 						Integer.toString(propertyHandler.getLucenePort()));
 				lucene = (Lucene) ctx.lookup(jndi);
-				logger.debug("Found Lucene: " + lucene + " with jndi " + jndi);
+				logger.info("Found Lucene: " + lucene + " with jndi " + jndi + " at " + luceneHost
+						+ ":" + propertyHandler.getLucenePort());
 			} catch (NamingException e) {
 				String msg = e.getClass() + " reports " + e.getMessage() + " from " + jndi;
 				logger.fatal(msg);
@@ -123,6 +124,9 @@ public class BeanManager {
 		log = !logRequests.isEmpty();
 		notificationRequests = propertyHandler.getNotificationRequests();
 		luceneActive = lucene.getActive();
+		if (luceneActive) {
+			logger.info("Lucene is active");
+		}
 	}
 
 	public CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
@@ -903,7 +907,7 @@ public class BeanManager {
 				if (last == null) {
 					last = lucene.search(query, blockSize, entityName);
 				} else {
-					last = lucene.searchAfter(last, blockSize);
+					last = lucene.searchAfter(query, blockSize, entityName, last);
 				}
 				allResults = last.getResults();
 				logger.debug("Got " + allResults.size() + " results from Lucene for '" + query

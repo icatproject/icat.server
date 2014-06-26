@@ -1,5 +1,6 @@
 package org.icatproject.core.manager;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.apache.lucene.search.Query;
@@ -9,43 +10,54 @@ import org.icatproject.core.entity.EntityBaseBean;
 
 public interface Lucene {
 
-	public class LuceneSearchResult {
+	@SuppressWarnings("serial")
+	public class LuceneSearchResult implements Serializable {
 
-		// TODO non-private?
-		Query query;
 		private List<String> results;
-		ScoreDoc scoreDoc;
+		private int doc;
+		private int shardIndex;
+		private float score;
+		private boolean scoreDocExists;
 
 		public LuceneSearchResult(List<String> results, ScoreDoc scoreDoc, Query query) {
 			this.results = results;
-			this.scoreDoc = scoreDoc;
-			this.query = query;
+			if (scoreDoc != null) {
+				this.doc = scoreDoc.doc;
+				this.shardIndex = scoreDoc.shardIndex;
+				this.score = scoreDoc.score;
+				scoreDocExists = true;
+			}
 		}
 
 		public List<String> getResults() {
 			return results;
 		}
 
+		public ScoreDoc getScoreDoc() {
+			return scoreDocExists ? new ScoreDoc(doc, score, shardIndex) : null;
+		}
+
 	}
 
-	LuceneSearchResult search(String query, int blockSize, String entityName) throws IcatException;
-
-	void populate(Class<?> klass);
+	void addDocument(EntityBaseBean entityBaseBean) throws IcatException;
 
 	void clear() throws IcatException;
 
 	void commit() throws IcatException;
 
-	List<String> getPopulating();
-
-	LuceneSearchResult searchAfter(LuceneSearchResult last, int blockSize) throws IcatException;
-
-	void addDocument(EntityBaseBean entityBaseBean) throws IcatException;
-
 	void deleteDocument(EntityBaseBean entityBaseBean) throws IcatException;
 
-	void updateDocument(EntityBaseBean entityBaseBean) throws IcatException;
-
 	boolean getActive();
+
+	List<String> getPopulating();
+
+	void populate(Class<?> klass);
+
+	LuceneSearchResult search(String query, int blockSize, String entityName) throws IcatException;
+
+	LuceneSearchResult searchAfter(String query, int blockSize, String entityName,
+			LuceneSearchResult last) throws IcatException;
+
+	void updateDocument(EntityBaseBean entityBaseBean) throws IcatException;
 
 }

@@ -440,16 +440,26 @@ public class LuceneSingleton implements Lucene {
 			ScoreDoc lastDoc = results.isEmpty() ? null : hits[hits.length - 1];
 			return new LuceneSearchResult(results, lastDoc, query);
 		} catch (Exception e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			e.printStackTrace(new PrintStream(baos));
+			logger.error(baos.toString());
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 	}
 
 	@Override
-	public LuceneSearchResult searchAfter(LuceneSearchResult last, int count) throws IcatException {
+	public LuceneSearchResult searchAfter(String queryString, int count, String entityName,
+			LuceneSearchResult last) throws IcatException {
 		try {
 			List<String> results = new ArrayList<String>();
-			Query query = last.query;
-			ScoreDoc[] hits = isearcher.searchAfter(last.scoreDoc, last.query, count).scoreDocs;
+			Query query = parser.parse(queryString, "all");
+			if (entityName != null) {
+				BooleanQuery bquery = new BooleanQuery();
+				bquery.add(query, Occur.MUST);
+				bquery.add(new TermQuery(new Term("entity", entityName)), Occur.MUST);
+				query = bquery;
+			}
+			ScoreDoc[] hits = isearcher.searchAfter(last.getScoreDoc(), query, count).scoreDocs;
 			for (ScoreDoc hit : hits) {
 				Document doc = isearcher.doc(hit.doc);
 				results.add(doc.get("id"));
@@ -471,4 +481,5 @@ public class LuceneSingleton implements Lucene {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
 		}
 	}
+
 }
