@@ -90,28 +90,25 @@
                 <p>To avoid this it is suggested that you install multiple servers each running a Glassfish with an ICAT but all sharing one database.
                     However there are a number of opportunities to get things wrong in the setup so it is recommended that you install the central
                     machine first and make sure that it works before adding in the satellites. Ingestion can be directed to one node and the other
-                    nodes can be load balanced for user access by, for example, an Apache web server. In this documentation one machine is referred
-                    to
+                    nodes can be load balanced for user access by, for example, an Apache web server. In this documentation one machine is referred to
                     as the central one and the others are referred to as satellites.
                 </p>
 
                 <p>
                     All machines must use the same database. If the central machine is running the database then ports must be opened to the satellite
                     machines. By default this is 3306 for MySQL and 1521 for Oracle. Ports must also be opened on the central machine for JMS and IIOP
-                    which are by default 7676 and 3700 and respectively. Security is not enabled for either JMS or IIOP communication so the firewalls
+                    which are by default 7676 and 3700 and respectively. In addition it seems that the ORB (IIOP) makes unusual use of the ephemeral
+                    ports which require that they are also open on the central machine. The set of ephemeral ports is large - and for unix may be
+                    found at /proc/sys/net/ipv4/ip_local_port_range. Security is not enabled for either JMS or IIOP communication so the firewalls
                     should normally be configured to only allow traffic from the set of satellite machines.
                 </p>
 
                 <p>Authentication can either be carried out on the central machine - which has the advantage that you only have authenticator logs
                     building up on that machine or it can be handled by the satellites so distributing the load better. Even if you choose to use
                     central authentication the authenticators must, unfortunately still be installed on the satellites. Glassfish seems to get
-                    confused
-                    if the JNDI resources are not recognised locally on the satellites.
-                    To enable central authentication you need a line in the
-                    icat.properties file on each satellite machine for each authenticator of the form: authn.XXX.hostPort = &lt;central
-                    machine&gt;:3700
-                    where XXX is one of the
-                    values listed in the authn.list property.
+                    confused if the JNDI resources are not recognised locally on the satellites. To enable central authentication you need a line in
+                    the icat.properties file on each satellite machine for each authenticator of the form: authn.XXX.hostPort = &lt;central
+                    machine&gt;:3700 where XXX is one of the values listed in the authn.list property.
                 </p>
 
                 <p>Lucene calls must also be directed to the central machine with a line in each satellite's icat.properties file of the form:
@@ -126,8 +123,7 @@
                 </p>
 
                 <p>
-                    You could then set up an Apache front end to do load balancing. This will probably just connect to the satellites leaving
-                    the
+                    You could then set up an Apache front end to do load balancing. This will probably just connect to the satellites leaving the
                     central machine to handle ingestion of data. See
                     <a href="http://icatproject.org/installation/apache-front-end/">Apache front end</a>
                     for one way of doing this.

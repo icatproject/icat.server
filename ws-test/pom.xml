@@ -39,14 +39,7 @@
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
         </dependency>
-
-    <!-- <dependency> -->
-    <!-- <groupId>org.icatproject</groupId> -->
-    <!-- <artifactId>icat.ear</artifactId> -->
-    <!-- <version>4.3.3-SNAPSHOT</version> -->
-    <!-- <type>ear</type> -->
-    <!-- </dependency> -->
-        
+       
     </dependencies>
 
     <build>
