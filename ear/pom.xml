@@ -7,7 +7,7 @@
         <version>4.4.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>icat.ear</artifactId>
+    <artifactId>icat.server</artifactId>
     <packaging>war</packaging>
 
     <properties>
@@ -176,7 +176,7 @@
 
     </build>
 
-    <name>ICAT Server ".ear"</name>
+    <name>ICAT Server</name>
 </project>
 
 
