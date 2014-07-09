@@ -3,7 +3,7 @@
 
     <groupId>org.icatproject</groupId>
     <artifactId>icat</artifactId>
-    <version>4.3.3-SNAPSHOT</version>
+    <version>4.3.3</version>
     <packaging>pom</packaging>
 
     <distributionManagement>
@@ -39,9 +39,9 @@
     </issueManagement>
 
     <scm>
-        <connection>scm:svn:http://icatproject.googlecode.com/svn/icat/server/trunk</connection>
-        <developerConnection>scm:svn:https://icatproject.googlecode.com/svn/icat/server/trunk</developerConnection>
-        <url>http://code.google.com/p/icatproject/source/browse/#svn%2Ficat%2Fserver%2Ftrunk</url>
+        <connection>scm:svn:http://icatproject.googlecode.com/svn/icat/server/tags/v4.3.3</connection>
+        <developerConnection>scm:svn:https://icatproject.googlecode.com/svn/icat/server/tags/v4.3.3</developerConnection>
+        <url>http://code.google.com/p/icatproject/source/browse/#svn%2Ficat%2Fserver%2Ftrunk/tags/v4.3.3</url>
     </scm>
 
     <licenses>
