@@ -36,7 +36,7 @@
             <outputDirectory>icat</outputDirectory>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <includes>
-                <include>org.icatproject:icat.ear</include>
+                <include>org.icatproject:icat.server</include>
             </includes>
         </dependencySet>
 
