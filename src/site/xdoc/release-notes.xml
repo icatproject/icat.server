@@ -7,6 +7,23 @@
 
     <body>
 
+        <section name="4.4.0">
+            <p>This introduces a number of "RESTful" calls and has some other small improvements.
+            </p>
+            <ul>
+                <li>There is a new parameter maxEntities which must be specified in icat.properties to restrict the total number of entities returned
+                    in calls to get, search and searchText.
+                </li>
+                <li>There is a new parameter maxIdsInQuery which must be specified in icat.properties to restrict the size of ICAT generated queries.
+                    This must not exceed 1000 if Oracle is being used.
+                </li>
+                <li>There are new parameters importCacheSize and exportCacheSize which must be specified in icat.properties to restrict the size of
+                    caches used during import and export. The cache is local to a call to import or export to ensure that authorization rules are
+                    enforced. As a by-product modifications to ICAT are less likely to result in stale information being returned from the cache.
+                </li>
+            </ul>
+        </section>
+
         <section name="4.3.3">
             <p>This is a bug fix release with support for a group of ICATs working together. It is not a cluster in the Glassfish sense.
             </p>

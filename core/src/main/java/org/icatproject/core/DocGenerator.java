@@ -62,7 +62,8 @@ public class DocGenerator {
 				}
 			}
 
-			for (List<Field> constraint : eiHandler.getConstraintFields(eklass)) {
+			List<Field> constraint = eiHandler.getConstraintFields(eklass);
+			if (!constraint.isEmpty()) {
 				out.print("<p><b>Uniqueness constraint</b> ");
 				first = true;
 				for (Field f : constraint) {

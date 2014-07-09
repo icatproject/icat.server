@@ -104,9 +104,12 @@ public class GateKeeper {
 
 	private boolean stalePublicSteps;
 
+	private int maxIdsInQuery;
+
 	@PostConstruct
 	private void init() {
 		logger.info("Creating GateKeeper singleton");
+		maxIdsInQuery = propertyHandler.getMaxIdsInQuery();
 		rootUserNames = propertyHandler.getRootUserNames();
 
 		SingletonFinder.setGateKeeper(this);
@@ -335,32 +338,43 @@ public class GateKeeper {
 		}
 
 		/*
-		 * Sort a copy of the results by string length. It is probably faster to evaluate a shorter
-		 * query.
+		 * IDs are processed in batches to avoid Oracle error: ORA-01795: maximum number of
+		 * expressions in a list is 1000
 		 */
-		List<String> sortedQueries = new ArrayList<String>();
-		sortedQueries.addAll(restrictions);
-		Collections.sort(sortedQueries, stringsBySize);
 
-		StringBuilder sb = new StringBuilder();
-		boolean first = true;
+		List<String> idLists = new ArrayList<>();
+		StringBuilder sb = null;
+
+		int i = 0;
 		for (EntityBaseBean bean : beans) {
-			if (first) {
+			if (i == 0) {
+				sb = new StringBuilder();
 				sb.append(bean.getId());
-				first = false;
+				i = 1;
 			} else {
 				sb.append("," + bean.getId());
+				i++;
 			}
+			if (i == maxIdsInQuery) {
+				i = 0;
+				idLists.add(sb.toString());
+				sb = null;
+			}
+		}
+		if (sb != null) {
+			idLists.add(sb.toString());
 		}
 
 		Set<Long> ids = new HashSet<>();
-		for (String qString : sortedQueries) {
-			TypedQuery<Long> q = manager.createQuery(qString.replace(":pkids", sb.toString()),
-					Long.class);
-			if (qString.contains(":user")) {
-				q.setParameter("user", userId);
+		for (String idList : idLists) {
+			for (String qString : restrictions) {
+				TypedQuery<Long> q = manager.createQuery(qString.replace(":pkids", idList),
+						Long.class);
+				if (qString.contains(":user")) {
+					q.setParameter("user", userId);
+				}
+				ids.addAll(q.getResultList());
 			}
-			ids.addAll(q.getResultList());
 		}
 
 		List<EntityBaseBean> results = new ArrayList<>();

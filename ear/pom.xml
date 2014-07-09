@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>icat.ear</artifactId>
-    <packaging>ear</packaging>
+    <packaging>war</packaging>
 
     <properties>
         <uniqueVersion>false</uniqueVersion>
@@ -30,15 +30,15 @@
         </dependency>
     </dependencies>
 
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-ear-plugin</artifactId>
-                <version>2.9</version>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.4</version>
                 <configuration>
-                    <defaultJavaBundleDir>lib/</defaultJavaBundleDir>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <archiveClasses>false</archiveClasses>
                 </configuration>
             </plugin>
 
@@ -60,7 +60,7 @@
                         <argument>--port=4848</argument>
                         <argument>deploy</argument>
                         <argument>--force=true</argument>
-                        <argument>${project.build.directory}/${project.build.finalName}.ear</argument>
+                        <argument>${project.build.directory}/${project.build.finalName}.war</argument>
                     </arguments>
                 </configuration>
             </plugin>

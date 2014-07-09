@@ -105,6 +105,10 @@ public class PropertyHandler {
 
 	private String luceneHost;
 	private Integer lucenePort;
+	private long maxEntities;
+	private int maxIdsInQuery;
+	private long importCacheSize;
+	private long exportCacheSize;
 
 	@PostConstruct
 	private void init() {
@@ -320,6 +324,31 @@ public class PropertyHandler {
 						+ "' is not an integer greater than 0");
 			}
 		}
+
+		/* maxEntities, importCacheSize, exportCacheSize, maxIdsInQuery */
+		maxEntities = getPostiveLong(props, "maxEntities");
+		importCacheSize = getPostiveLong(props, "importCacheSize");
+		exportCacheSize = getPostiveLong(props, "exportCacheSize");
+		maxIdsInQuery = (int) getPostiveLong(props, "maxIdsInQuery");
+	}
+
+	private long getPostiveLong(Properties props, String name) {
+		String s = props.getProperty(name);
+		long result = 0;
+		if (s != null) {
+			try {
+				result = Long.parseLong(s);
+			} catch (NumberFormatException e) {
+				abend("Value of '" + name + "'" + s + "' is not an integer greater than 0");
+			}
+			if (result <= 0) {
+				abend("Value of '" + name + "'" + s + "' is not an integer greater than 0");
+			}
+		} else {
+			abend("Property '" + name + "' must be set");
+		}
+		formattedProps.add(name + " " + maxEntities);
+		return result;
 	}
 
 	private void abend(String msg) {
@@ -357,6 +386,22 @@ public class PropertyHandler {
 
 	public Integer getLucenePort() {
 		return lucenePort;
+	}
+
+	public long getMaxEntities() {
+		return maxEntities;
+	}
+
+	public int getMaxIdsInQuery() {
+		return maxIdsInQuery;
+	}
+
+	public long getImportCacheSize() {
+		return importCacheSize;
+	}
+
+	public long getExportCacheSize() {
+		return exportCacheSize;
 	}
 
 }

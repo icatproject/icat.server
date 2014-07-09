@@ -1,6 +1,7 @@
 package org.icatproject.exposed;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ import org.icatproject.core.entity.StudyStatus;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
 import org.icatproject.core.manager.AccessType;
-import org.icatproject.core.manager.BeanManager;
+import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.CreateResponse;
 import org.icatproject.core.manager.EntityInfo;
 import org.icatproject.core.manager.EntityInfoHandler;
@@ -86,7 +87,7 @@ public class ICAT {
 	private Map<String, Authenticator> authPlugins = new HashMap<String, Authenticator>();
 
 	@EJB
-	BeanManager beanManager;
+	EntityBeanManager beanManager;
 
 	@EJB
 	GateKeeper gatekeeper;
@@ -106,8 +107,6 @@ public class ICAT {
 
 	@Resource
 	private UserTransaction userTransaction;
-
-	// private Set<String> rootUserNames;
 
 	@Resource
 	WebServiceContext webServiceContext;
@@ -268,6 +267,11 @@ public class ICAT {
 
 	@PostConstruct
 	private void init() {
+		System.out.println("************ S T A R T I N G 1 **************"
+				+ new File(".").getAbsolutePath());
+		System.err.println("************ S T A R T I N G 2 **************");
+		logger.debug("************ S T A R T I N G 3 **************");
+
 		authPlugins = propertyHandler.getAuthPlugins();
 		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
 		rootUserNames = gatekeeper.getRootUserNames();

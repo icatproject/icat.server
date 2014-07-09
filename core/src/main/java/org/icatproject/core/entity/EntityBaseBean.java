@@ -20,10 +20,11 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-import javax.persistence.Query;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
@@ -44,13 +45,16 @@ public abstract class EntityBaseBean implements Serializable {
 	private static final Logger logger = Logger.getLogger(EntityBaseBean.class);
 
 	@Column(name = "CREATE_ID", nullable = false)
-	@XmlElement
 	protected String createId;
 
 	@Column(name = "CREATE_TIME", nullable = false)
 	@Temporal(value = TemporalType.TIMESTAMP)
-	@XmlElement
 	protected Date createTime;
+
+	/** Count of this entity and its descendants */
+	@XmlTransient
+	@Transient
+	private long descendantCount = 1L;
 
 	@Id
 	@GeneratedValue
@@ -61,7 +65,6 @@ public abstract class EntityBaseBean implements Serializable {
 
 	@Column(name = "MOD_TIME", nullable = false)
 	@Temporal(value = TemporalType.TIMESTAMP)
-	@XmlElement
 	protected Date modTime;
 
 	/*
@@ -132,6 +135,59 @@ public abstract class EntityBaseBean implements Serializable {
 		return bean;
 	}
 
+	public void collectIds(Map<String, Set<Long>> ids, boolean one, int hereVarNum,
+			List<Step> steps, GateKeeper gateKeeper, String userId, EntityManager manager)
+			throws IcatException {
+
+		Class<? extends EntityBaseBean> klass = this.getClass();
+		String beanName = klass.getSimpleName();
+
+		ids.get(beanName).add(id);
+		try {
+			Map<Field, Method> getters = eiHandler.getGetters(klass);
+			if (one) {
+				for (Relationship r : eiHandler.getOnes(klass)) {
+					Field att = r.getField();
+					EntityBaseBean value = allowedOne(r, getters.get(att), gateKeeper, userId,
+							manager);
+					if (value != null) {
+						value.collectIds(ids, false, 0, null, gateKeeper, userId, manager);
+					}
+				}
+			} else if (steps != null) {
+				for (Step step : steps) {
+					if (step.getHereVarNum() == hereVarNum) {
+						Relationship r = step.getRelationship();
+						Field field = r.getField();
+						if (r.isCollection()) {
+							List<EntityBaseBean> values = allowedMany(step, getters, gateKeeper,
+									userId, manager);
+
+							for (EntityBaseBean value : values) {
+								value.collectIds(ids, false, step.getThereVarNum(), steps,
+										gateKeeper, userId, manager);
+
+							}
+						} else {
+							EntityBaseBean value = allowedOne(r, getters.get(field), gateKeeper,
+									userId, manager);
+							if (value != null) {
+								value.collectIds(ids, false, step.getThereVarNum(), steps,
+										gateKeeper, userId, manager);
+
+							}
+						}
+					}
+				}
+			}
+
+		} catch (Exception e) {
+			reportUnexpected(e);
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
+		}
+
+	}
+
 	/**
 	 * Gets the createId of this entity.
 	 * 
@@ -148,6 +204,14 @@ public abstract class EntityBaseBean implements Serializable {
 	 */
 	public Date getCreateTime() {
 		return this.createTime;
+	}
+
+	public long getDescendantCount(long maxEntities) throws IcatException {
+		if (descendantCount > maxEntities) {
+			throw new IcatException(IcatExceptionType.VALIDATION, "attempt to return more than "
+					+ maxEntities + " entitities");
+		}
+		return descendantCount;
 	}
 
 	public Long getId() {
@@ -170,71 +234,6 @@ public abstract class EntityBaseBean implements Serializable {
 	 */
 	public Date getModTime() {
 		return this.modTime;
-	}
-
-	final public void isUnique(EntityManager manager) throws IcatException {
-
-		Class<? extends EntityBaseBean> entityClass = this.getClass();
-
-		Map<Field, Method> getters = eiHandler.getGetters(entityClass);
-		for (List<Field> constraint : eiHandler.getConstraintFields(entityClass)) {
-			StringBuilder queryString = new StringBuilder();
-			for (Field f : constraint) {
-				if (queryString.length() == 0) {
-					queryString.append("SELECT COUNT(o) FROM " + entityClass.getSimpleName()
-							+ " o WHERE (");
-				} else {
-					queryString.append(") AND (");
-				}
-				String name = f.getName();
-				queryString.append("o." + name + " = :" + name + " OR o." + name + " IS NULL");
-			}
-			Query query = manager.createQuery(queryString.toString() + ")");
-			for (Field f : constraint) {
-				Object value;
-				try {
-					value = getters.get(f).invoke(this);
-				} catch (IllegalArgumentException e) {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							"IllegalArgumentException " + e.getMessage());
-				} catch (IllegalAccessException e) {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							"IllegalAccessException " + e.getMessage());
-				} catch (InvocationTargetException e) {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							"InvocationTargetException " + e.getMessage());
-				}
-				query = query.setParameter(f.getName(), value);
-			}
-			logger.debug("Checking uniqueness with " + query);
-			long count = (Long) query.getSingleResult();
-			if (count != 0) {
-				StringBuilder erm = new StringBuilder();
-				for (Field f : constraint) {
-					Object value;
-					try {
-						value = getters.get(f).invoke(this);
-					} catch (IllegalArgumentException e) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-								"IllegalArgumentException " + e.getMessage());
-					} catch (IllegalAccessException e) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-								"IllegalAccessException " + e.getMessage());
-					} catch (InvocationTargetException e) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-								"InvocationTargetException " + e.getMessage());
-					}
-					if (erm.length() == 0) {
-						erm.append(entityClass.getSimpleName() + " exists with ");
-					} else {
-						erm.append(", ");
-					}
-					erm.append(f.getName() + " = '" + value + "'");
-				}
-				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS,
-						erm.toString());
-			}
-		}
 	}
 
 	private void isValid() throws IcatException {
@@ -356,23 +355,7 @@ public abstract class EntityBaseBean implements Serializable {
 		modTime = new Date();
 	}
 
-	/**
-	 * Clone a pruned copy of tree
-	 * 
-	 * @param one
-	 *            true if INCLUDE 1 specified
-	 * @param hereVarNum
-	 *            current idVarNum. If steps is null this value is irrelevant.
-	 * @param steps
-	 *            list of steps to consider. This may be null. Steps starting with hereVarNum will
-	 *            be followed. Steps hold the starting idVarNum, the field to navigate and the
-	 *            destination idVarNum.
-	 * @param manager
-	 * @param userId
-	 * @return
-	 * @throws IcatException
-	 */
-	public EntityBaseBean pruned(boolean one, int hereVarNum, List<Step> steps,
+	public EntityBaseBean pruned(boolean one, int hereVarNum, List<Step> steps, long maxEntities,
 			GateKeeper gateKeeper, String userId, EntityManager manager) throws IcatException {
 		Class<? extends EntityBaseBean> klass = this.getClass();
 		if (logger.isDebugEnabled()) {
@@ -407,8 +390,10 @@ public abstract class EntityBaseBean implements Serializable {
 					EntityBaseBean value = allowedOne(r, getters.get(att), gateKeeper, userId,
 							manager);
 					if (value != null) {
-						value = value.pruned(false, 0, null, gateKeeper, userId, manager);
-						setters.get(att).invoke(clone, new Object[] { value });
+						value = value.pruned(false, 0, null, maxEntities, gateKeeper, userId,
+								manager);
+						setters.get(att).invoke(clone, value);
+						clone.descendantCount += value.getDescendantCount(maxEntities);
 					}
 				}
 			} else if (steps != null) {
@@ -424,16 +409,18 @@ public abstract class EntityBaseBean implements Serializable {
 									field).invoke(clone);
 							for (EntityBaseBean value : values) {
 								value = value.pruned(false, step.getThereVarNum(), steps,
-										gateKeeper, userId, manager);
+										maxEntities, gateKeeper, userId, manager);
 								cloneList.add(value);
+								clone.descendantCount += value.getDescendantCount(maxEntities);
 							}
 						} else {
 							EntityBaseBean value = allowedOne(r, getters.get(field), gateKeeper,
 									userId, manager);
 							if (value != null) {
 								value = value.pruned(false, step.getThereVarNum(), steps,
-										gateKeeper, userId, manager);
-								setters.get(field).invoke(clone, new Object[] { value });
+										maxEntities, gateKeeper, userId, manager);
+								setters.get(field).invoke(clone, value);
+								clone.descendantCount += value.getDescendantCount(maxEntities);
 							}
 						}
 					}
@@ -478,18 +465,24 @@ public abstract class EntityBaseBean implements Serializable {
 		logger.error("Internal exception: " + baos);
 	}
 
+	public void setCreateId(String createId) {
+		this.createId = createId;
+	}
+
+	public void setCreateTime(Date createTime) {
+		this.createTime = createTime;
+	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}
 
-	/**
-	 * Sets the modId of this entity to the specified value.
-	 * 
-	 * @param modId
-	 *            the new modId
-	 */
 	public void setModId(String modId) {
 		this.modId = modId;
+	}
+
+	public void setModTime(Date modTime) {
+		this.modTime = modTime;
 	}
 
 	public void updateInLucene(Lucene lucene) throws IcatException {
@@ -516,5 +509,4 @@ public abstract class EntityBaseBean implements Serializable {
 		}
 
 	}
-
 }

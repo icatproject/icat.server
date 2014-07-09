@@ -1,9 +1,12 @@
 package org.icatproject.core.manager;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,6 +18,9 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,10 +39,13 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.transaction.NotSupportedException;
 import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.Constants;
@@ -65,7 +74,19 @@ import org.icatproject.core.parser.Tokenizer;
 
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
-public class BeanManager {
+public class EntityBeanManager {
+
+	private class EntitySetResult {
+
+		private SearchQuery searchQuery;
+		private List<?> result;
+
+		public EntitySetResult(SearchQuery searchQuery, List<?> result) {
+			this.searchQuery = searchQuery;
+			this.result = result;
+		}
+
+	}
 
 	@EJB
 	GateKeeper gateKeeper;
@@ -78,18 +99,24 @@ public class BeanManager {
 
 	Lucene lucene;
 
+	private final static DateFormat df8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+	private static final String linesep = System.getProperty("line.separator");
 	private static DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 	private boolean log;
 	private static BufferedWriter logFile;
 
-	private static final Logger logger = Logger.getLogger(BeanManager.class);
+	private static final Logger logger = Logger.getLogger(EntityBeanManager.class);
 
 	private Set<String> logRequests;
 
 	private Map<String, NotificationRequest> notificationRequests;
 
 	private boolean luceneActive;
+
+	private long maxEntities;
+
+	private long exportCacheSize;
 
 	private static long next;
 	private static final Pattern timestampPattern = Pattern.compile(":ts(\\d{14})");
@@ -109,8 +136,7 @@ public class BeanManager {
 				ctx.addToEnvironment("org.omg.CORBA.ORBInitialPort",
 						Integer.toString(propertyHandler.getLucenePort()));
 				lucene = (Lucene) ctx.lookup(jndi);
-				logger.info("Found Lucene: " + lucene + " with jndi " + jndi + " at " + luceneHost
-						+ ":" + propertyHandler.getLucenePort());
+				logger.debug("Found Lucene: " + lucene + " with jndi " + jndi);
 			} catch (NamingException e) {
 				String msg = e.getClass() + " reports " + e.getMessage() + " from " + jndi;
 				logger.fatal(msg);
@@ -124,9 +150,8 @@ public class BeanManager {
 		log = !logRequests.isEmpty();
 		notificationRequests = propertyHandler.getNotificationRequests();
 		luceneActive = lucene.getActive();
-		if (luceneActive) {
-			logger.info("Lucene is active");
-		}
+		maxEntities = propertyHandler.getMaxEntities();
+		exportCacheSize = propertyHandler.getImportCacheSize();
 	}
 
 	public CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
@@ -172,7 +197,7 @@ public class BeanManager {
 						+ e.getClass() + " " + e.getMessage());
 				updateCache();
 				bean.preparePersist(userId, manager, gateKeeper);
-				bean.isUnique(manager);
+				isUnique(bean, manager);
 				bean.isValid(manager, true);
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
@@ -191,6 +216,77 @@ public class BeanManager {
 					"NotSupportedException" + e.getMessage());
 		}
 
+	}
+
+	private void isUnique(EntityBaseBean bean, EntityManager manager) throws IcatException {
+
+		EntityBaseBean other = lookup(bean, manager);
+		if (other != null) {
+			Class<? extends EntityBaseBean> entityClass = bean.getClass();
+			Map<Field, Method> getters = eiHandler.getGetters(entityClass);
+			List<Field> constraint = eiHandler.getConstraintFields(entityClass);
+
+			StringBuilder erm = new StringBuilder();
+			for (Field f : constraint) {
+				Object value;
+				try {
+					value = getters.get(f).invoke(bean);
+				} catch (IllegalArgumentException | IllegalAccessException
+						| InvocationTargetException e) {
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass()
+							+ " " + e.getMessage());
+				}
+				if (erm.length() == 0) {
+					erm.append(entityClass.getSimpleName() + " exists with ");
+				} else {
+					erm.append(", ");
+				}
+				erm.append(f.getName() + " = '" + value + "'");
+			}
+			throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS,
+					erm.toString());
+		}
+	}
+
+	public EntityBaseBean lookup(EntityBaseBean bean, EntityManager manager) throws IcatException {
+		Class<? extends EntityBaseBean> entityClass = bean.getClass();
+
+		Map<Field, Method> getters = eiHandler.getGetters(entityClass);
+		List<Field> constraint = eiHandler.getConstraintFields(entityClass);
+		if (constraint.isEmpty()) {
+			return null;
+		}
+		StringBuilder queryString = new StringBuilder();
+		for (Field f : constraint) {
+			if (queryString.length() == 0) {
+				queryString.append("SELECT o FROM " + entityClass.getSimpleName() + " o WHERE (");
+			} else {
+				queryString.append(") AND (");
+			}
+			String name = f.getName();
+			queryString.append("o." + name + " = :" + name);
+		}
+		TypedQuery<EntityBaseBean> query = manager.createQuery(queryString.toString() + ")",
+				EntityBaseBean.class);
+		for (Field f : constraint) {
+			Object value;
+			try {
+				value = getters.get(f).invoke(bean);
+			} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass()
+						+ " " + e.getMessage());
+			}
+			query = query.setParameter(f.getName(), value);
+		}
+		logger.debug("Looking up with " + queryString + ")");
+		List<EntityBaseBean> results = query.getResultList();
+		if (results.isEmpty()) {
+			return null;
+		} else if (results.size() != 1) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"lookup found more than one " + bean + "with same key");
+		}
+		return results.get(0);
 	}
 
 	public List<CreateResponse> createMany(String userId, List<EntityBaseBean> beans,
@@ -245,7 +341,7 @@ public class BeanManager {
 				EntityBaseBean bean = beans.get(pos);
 				try {
 					bean.preparePersist(userId, manager, gateKeeper);
-					bean.isUnique(manager);
+					isUnique(bean, manager);
 					bean.isValid(manager, true);
 				} catch (IcatException e1) {
 					e1.setOffset(pos);
@@ -255,7 +351,8 @@ public class BeanManager {
 				Class<? extends EntityBaseBean> entityClass = bean.getClass();
 				Map<Field, Method> getters = eiHandler.getGetters(entityClass);
 
-				for (List<Field> constraint : eiHandler.getConstraintFields(entityClass)) {
+				List<Field> constraint = eiHandler.getConstraintFields(entityClass);
+				if (!constraint.isEmpty()) {
 					for (int i = 0; i < pos; i++) {
 						boolean diff = false;
 						for (Field f : constraint) {
@@ -414,7 +511,7 @@ public class BeanManager {
 	}
 
 	private EntityBaseBean find(EntityBaseBean bean, EntityManager manager) throws IcatException {
-		Object primaryKey = bean.getId();
+		Long primaryKey = bean.getId();
 		Class<? extends EntityBaseBean> entityClass = bean.getClass();
 		if (primaryKey == null) {
 			throw new IcatException(IcatException.IcatExceptionType.NO_SUCH_OBJECT_FOUND,
@@ -481,7 +578,9 @@ public class BeanManager {
 			steps = include.getSteps();
 		}
 
-		EntityBaseBean result = beanManaged.pruned(one, 0, steps, gateKeeper, userId, manager);
+		EntityBaseBean result = beanManaged.pruned(one, 0, steps, maxEntities, gateKeeper, userId,
+				manager);
+		logger.debug("Obtained " + result.getDescendantCount(maxEntities) + " entities.");
 		if (log) {
 			logRead(time, userId, "get", result.getClass().getSimpleName(), result.getId(), query,
 					manager, userTransaction);
@@ -690,12 +789,12 @@ public class BeanManager {
 					if (value != null) {
 						Object pk = ((EntityBaseBean) value).getId();
 						value = (EntityBaseBean) manager.find(field.getType(), pk);
-						fieldAndMethod.getValue().invoke(thisBean, new Object[] { value });
+						fieldAndMethod.getValue().invoke(thisBean, value);
 					} else {
 						fieldAndMethod.getValue().invoke(thisBean, (EntityBaseBean) null);
 					}
 				} else {
-					fieldAndMethod.getValue().invoke(thisBean, new Object[] { value });
+					fieldAndMethod.getValue().invoke(thisBean, value);
 				}
 				logger.trace("Updated " + klass.getSimpleName() + "." + field.getName() + " to "
 						+ value);
@@ -759,6 +858,52 @@ public class BeanManager {
 		long time = log ? System.currentTimeMillis() : 0;
 		logger.info(userId + " searching for " + query);
 
+		EntitySetResult esr = getEntitySet(userId, query, manager, userTransaction);
+		List<?> result = esr.result;
+
+		if (result.size() > 0 && result.get(0) instanceof EntityBaseBean) {
+			IncludeClause include = esr.searchQuery.getIncludeClause();
+			boolean one = false;
+			List<Step> steps = null;
+			if (include != null) {
+				one = include.isOne();
+				steps = include.getSteps();
+			}
+			List<Object> clones = new ArrayList<Object>();
+			long descendantCount = 0;
+			for (Object beanManaged : result) {
+				EntityBaseBean eb = ((EntityBaseBean) beanManaged).pruned(one, 0, steps,
+						maxEntities, gateKeeper, userId, manager);
+				if ((descendantCount += eb.getDescendantCount(maxEntities)) > maxEntities) {
+					throw new IcatException(IcatExceptionType.VALIDATION,
+							"attempt to return more than " + maxEntities + " entitities");
+				}
+				clones.add(eb);
+			}
+			logger.debug("Obtained " + descendantCount + " entities.");
+			if (log) {
+				EntityBaseBean bean = (EntityBaseBean) clones.get(0);
+				logRead(time, userId, "search", bean.getClass().getSimpleName(), bean.getId(),
+						query, manager, userTransaction);
+			}
+			return clones;
+		} else {
+			if (log) {
+				logRead(time, userId, "search", null, null, query, manager, userTransaction);
+			}
+			return result;
+		}
+
+	}
+
+	private EntitySetResult getEntitySet(String userId, String query, EntityManager manager,
+			UserTransaction userTransaction) throws IcatException {
+
+		if (query == null) {
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+					"query may not be null");
+		}
+
 		if (!query.toUpperCase().trim().startsWith("SELECT")) {
 
 			/* Parse the query */
@@ -798,7 +943,7 @@ public class BeanManager {
 
 		/* Null query indicates that nothing accepted by authz */
 		if (jpql == null) {
-			return q.noAuthzResult();
+			return new EntitySetResult(q, q.noAuthzResult());
 		}
 
 		/* Create query - which may go wrong */
@@ -862,39 +1007,14 @@ public class BeanManager {
 		List<?> result = jpqlQuery.getResultList();
 
 		logger.debug("Obtained " + result.size() + " results.");
-
-		if (result.size() > 0 && result.get(0) instanceof EntityBaseBean) {
-			IncludeClause include = q.getIncludeClause();
-			boolean one = false;
-			List<Step> steps = null;
-			if (include != null) {
-				one = include.isOne();
-				steps = include.getSteps();
-			}
-			List<Object> clones = new ArrayList<Object>();
-			for (Object beanManaged : result) {
-				clones.add(((EntityBaseBean) beanManaged).pruned(one, 0, steps, gateKeeper, userId,
-						manager));
-			}
-			if (log) {
-				EntityBaseBean bean = (EntityBaseBean) clones.get(0);
-				logRead(time, userId, "search", bean.getClass().getSimpleName(), bean.getId(),
-						query, manager, userTransaction);
-			}
-			return clones;
-		} else {
-			if (log) {
-				logRead(time, userId, "search", null, null, query, manager, userTransaction);
-			}
-			return result;
-		}
-
+		return new EntitySetResult(q, result);
 	}
 
 	public List<?> searchText(String userId, String query, int maxCount, String entityName,
 			EntityManager manager, UserTransaction userTransaction) throws IcatException {
 		long time = log ? System.currentTimeMillis() : 0;
 		List<EntityBaseBean> results = new ArrayList<EntityBaseBean>();
+		long descendantCount = 0;
 		if (lucene != null) {
 			LuceneSearchResult last = null;
 			List<String> allResults = Collections.emptyList();
@@ -925,8 +1045,14 @@ public class BeanManager {
 							try {
 								gateKeeper.performAuthorisation(userId, beanManaged,
 										AccessType.READ, manager);
-								results.add(beanManaged.pruned(false, -1, null, gateKeeper, userId,
-										manager));
+								EntityBaseBean eb = beanManaged.pruned(false, -1, null,
+										maxEntities, gateKeeper, userId, manager);
+								results.add(eb);
+								if ((descendantCount += eb.getDescendantCount(maxEntities)) > maxEntities) {
+									throw new IcatException(IcatExceptionType.VALIDATION,
+											"attempt to return more than " + maxEntities
+													+ " entitities");
+								}
 								if (results.size() == maxCount) {
 									break;
 								}
@@ -949,7 +1075,8 @@ public class BeanManager {
 				logRead(time, userId, "searchText", null, null, query, manager, userTransaction);
 			}
 		}
-		logger.debug("Returning " + results.size() + " results");
+		logger.debug("Returning " + results.size() + " results with " + descendantCount
+				+ " entities");
 		return results;
 	}
 
@@ -990,7 +1117,7 @@ public class BeanManager {
 					logger.debug("Transaction rolled back for creation of " + bean + " because of "
 							+ e.getClass() + " " + e.getMessage());
 					bean.preparePersist(userId, manager, gateKeeper);
-					bean.isUnique(manager);
+					isUnique(bean, manager);
 					bean.isValid(manager, true);
 					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 							"Unexpected DB response " + e.getClass() + " " + e.getMessage());
@@ -1209,5 +1336,381 @@ public class BeanManager {
 		} else {
 			return Collections.emptyList();
 		}
+	}
+
+	/** export data described by the query */
+	@SuppressWarnings("serial")
+	public Response export(final String userId, String query, final boolean all,
+			final EntityManager manager, UserTransaction userTransaction) throws IcatException {
+
+		logger.info(userId + " exporting " + query);
+
+		EntitySetResult esr = getEntitySet(userId, query, manager, userTransaction);
+		List<?> result = esr.result;
+
+		if (result.size() > 0) {
+			if (result.get(0) instanceof EntityBaseBean) {
+				IncludeClause include = esr.searchQuery.getIncludeClause();
+				boolean one = false;
+				List<Step> steps = null;
+				if (include != null) {
+					one = include.isOne();
+					steps = include.getSteps();
+				}
+				final Map<String, Set<Long>> ids = new HashMap<>();
+				for (String s : EntityInfoHandler.getExportEntityNames()) {
+					ids.put(s, new HashSet<Long>());
+				}
+				for (Object beanManaged : result) {
+					((EntityBaseBean) beanManaged).collectIds(ids, one, 0, steps, gateKeeper,
+							userId, manager);
+				}
+				result = null; // Give gc a chance
+
+				final Map<String, Map<Long, String>> exportCaches = new HashMap<>();
+				for (String s : EntityInfoHandler.getExportEntityNames()) {
+					exportCaches.put(s, new LinkedHashMap<Long, String>() {
+						@Override
+						protected boolean removeEldestEntry(Map.Entry<Long, String> eldest) {
+							return size() > exportCacheSize;
+						}
+					});
+				}
+
+				StreamingOutput strOut = new StreamingOutput() {
+					@Override
+					public void write(OutputStream output) throws IOException {
+						output.write(("# ICAT Export file written by " + userId + linesep)
+								.getBytes());
+						output.write(("4.3" + linesep).getBytes());
+						for (String s : EntityInfoHandler.getExportEntityNames()) {
+							Set<Long> table = ids.get(s);
+							if (!table.isEmpty()) {
+								try {
+									exportTable(s, table, output, exportCaches, all, manager);
+								} catch (IOException e) {
+									throw e;
+								} catch (Exception e) {
+									ByteArrayOutputStream baos = new ByteArrayOutputStream();
+									e.printStackTrace(new PrintStream(baos));
+									logger.error(baos.toString());
+									throw new IOException(e.getClass() + " " + e.getMessage());
+								}
+							}
+						}
+						output.close();
+					}
+				};
+				return Response
+						.ok()
+						.entity(strOut)
+						.header("Content-Disposition",
+								"attachment; filename=\"" + "icat.export" + "\"")
+						.header("Accept-Ranges", "bytes").build();
+
+			}
+		} else {
+			// Do nothing?
+		}
+		return null;
+	}
+
+	/**
+	 * Export part of a table as specified by the list of ids
+	 * 
+	 * @param all
+	 */
+	@SuppressWarnings("unchecked")
+	private void exportTable(String beanName, Set<Long> ids, OutputStream output,
+			Map<String, Map<Long, String>> exportCaches, boolean all, EntityManager manager)
+			throws IcatException, IOException, IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException {
+		logger.debug("Export " + beanName + ": " + ids);
+		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		output.write((linesep).getBytes());
+		if (all) {
+			output.write(eiHandler.getExportHeaderAll(klass).getBytes());
+		} else {
+			output.write(eiHandler.getExportHeader(klass).getBytes());
+		}
+		output.write((linesep).getBytes());
+		List<Field> fields = eiHandler.getFields(klass);
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		Map<String, Field> fieldMap = eiHandler.getFieldsByName(klass);
+		Set<Field> atts = eiHandler.getAttributes(klass);
+		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
+		boolean qcolumn = eiHandler.getConstraintFields(klass).isEmpty();
+
+		for (Long id : ids) {
+			EntityBaseBean bean = manager.find(klass, id);
+			if (bean != null) {
+				boolean first = true;
+				if (qcolumn) {
+					output.write(('"' + id.toString() + '"').getBytes());
+					first = false;
+				}
+				for (Field field : fields) {
+					String name = field.getName();
+					if (updaters.contains(field)) {
+						if (first) {
+							first = false;
+						} else {
+							output.write(",".getBytes());
+						}
+						Object value = getters.get(fieldMap.get(name)).invoke(bean);
+						if (atts.contains(field)) {
+							if (value == null) {
+								output.write("NULL".getBytes());
+							} else {
+								output.write(getRep(field, value).getBytes());
+
+							}
+						} else {
+							if (value == null) {
+								output.write(eiHandler.getExportNull(
+										(Class<? extends EntityBaseBean>) field.getType())
+										.getBytes());
+							} else {
+								logger.debug("One " + field.getName() + " " + value);
+								long obId = ((EntityBaseBean) value).getId(); // Not allowed to be
+																				// null
+								String obType = value.getClass().getSimpleName();
+								logger.debug("One " + field.getName() + " " + obId + " " + obType);
+								Map<Long, String> idCache = exportCaches.get(obType);
+								String s = idCache.get(obId);
+								if (s == null) {
+									s = buildKey((EntityBaseBean) value, exportCaches);
+									idCache.put(obId, s);
+									logger.debug("Cached " + obType + " " + obId + " as " + s);
+								}
+								output.write(s.getBytes());
+							}
+						}
+					}
+				}
+				output.write((linesep).getBytes());
+			}
+		}
+	}
+
+	private String getRep(Field field, Object value) throws IcatException {
+		String type = field.getType().getSimpleName();
+		if (type.equals("String")) {
+			return "\"" + (String) value + "\"";
+		} else if (type.equals("Integer")) {
+			return ((Integer) value).toString();
+		} else if (type.equals("Double")) {
+			return value.toString();
+		} else if (type.equals("Long")) {
+			return value.toString();
+		} else if (type.equals("boolean")) {
+			return ((Boolean) value).toString();
+		} else if (type.equals("Date")) {
+			synchronized (df8601) {
+				return df8601.format((Date) value);
+			}
+		} else if (field.getType().isEnum()) {
+			return value.toString();
+		} else {
+			throw new IcatException(IcatExceptionType.INTERNAL,
+					"Don't know how to export field of type " + type);
+		}
+	}
+
+	private String buildKey(EntityBaseBean bean, Map<String, Map<Long, String>> exportCaches)
+			throws IcatException, IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException {
+		Class<? extends EntityBaseBean> klass = bean.getClass();
+		List<Field> constraintFields = eiHandler.getConstraintFields(klass);
+		if (constraintFields.isEmpty()) {
+			return '"' + bean.getId().toString() + '"';
+		}
+		List<Field> fields = eiHandler.getFields(klass);
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		Map<String, Field> fieldMap = eiHandler.getFieldsByName(klass);
+		Set<Field> atts = eiHandler.getAttributes(klass);
+		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
+		StringBuilder sb = new StringBuilder();
+		boolean first = true;
+		for (Field field : fields) {
+			String name = field.getName();
+			if (constraintFields.contains(field)) {
+				if (first) {
+					first = false;
+				} else {
+					sb.append(',');
+				}
+				Object value = getters.get(fieldMap.get(name)).invoke(bean);
+				if (atts.contains(field)) {
+					sb.append(getRep(field, value));
+				} else if (updaters.contains(field)) {
+					long obId = ((EntityBaseBean) value).getId(); // Not allowed to be null
+					String obType = value.getClass().getSimpleName();
+					logger.debug("One " + field.getName() + " " + obId + " " + obType);
+					Map<Long, String> idCache = exportCaches.get(obType);
+					String s = idCache.get(obId);
+					if (s == null) {
+						s = buildKey((EntityBaseBean) value, exportCaches);
+						idCache.put(obId, s);
+						logger.debug("Cached " + obType + " " + obId + " as " + s);
+					}
+					sb.append(s);
+				}
+			}
+		}
+
+		return sb.toString();
+	}
+
+	/** Export all data */
+	@SuppressWarnings("serial")
+	public Response export(final String userId, final boolean all, final EntityManager manager,
+			UserTransaction userTransaction) {
+
+		logger.info(userId + " exporting complete schema");
+
+		final Map<String, Map<Long, String>> exportCaches = new HashMap<>();
+		for (String s : EntityInfoHandler.getExportEntityNames()) {
+			exportCaches.put(s, new LinkedHashMap<Long, String>() {
+				@Override
+				protected boolean removeEldestEntry(Map.Entry<Long, String> eldest) {
+					return size() > exportCacheSize;
+				}
+			});
+		}
+
+		StreamingOutput strOut = new StreamingOutput() {
+			@Override
+			public void write(OutputStream output) throws IOException {
+				logger.debug("Streaming of export file started");
+				output.write(("# ICAT Export file written by " + userId + linesep).getBytes());
+				output.write(("4.3" + linesep).getBytes());
+				for (String s : EntityInfoHandler.getExportEntityNames()) {
+					try {
+						exportTable(s, output, exportCaches, all, manager);
+					} catch (IOException e) {
+						throw e;
+					} catch (Exception e) {
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						e.printStackTrace(new PrintStream(baos));
+						logger.error(baos.toString());
+						throw new IOException(e.getClass() + " " + e.getMessage());
+					}
+				}
+				output.close();
+				logger.debug("Streaming of export file complete");
+			}
+
+		};
+		return Response.ok().entity(strOut)
+				.header("Content-Disposition", "attachment; filename=\"" + "icat.export" + "\"")
+				.header("Accept-Ranges", "bytes").build();
+
+	}
+
+	/**
+	 * Export a complete table
+	 * 
+	 * @param all
+	 */
+	@SuppressWarnings("unchecked")
+	private void exportTable(String beanName, OutputStream output,
+			Map<String, Map<Long, String>> exportCaches, boolean all, EntityManager manager)
+			throws IOException, IcatException, IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException {
+		logger.debug("Export " + beanName);
+		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		output.write((linesep).getBytes());
+		if (all) {
+			output.write(eiHandler.getExportHeaderAll(klass).getBytes());
+		} else {
+			output.write(eiHandler.getExportHeader(klass).getBytes());
+		}
+		output.write((linesep).getBytes());
+		List<Field> fields = eiHandler.getFields(klass);
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		Map<String, Field> fieldMap = eiHandler.getFieldsByName(klass);
+		Set<Field> atts = eiHandler.getAttributes(klass);
+		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
+		boolean qcolumn = eiHandler.getConstraintFields(klass).isEmpty();
+
+		int start = 0;
+
+		while (true) {
+			/* Get ids in blocks */
+			List<Long> ids = manager
+					.createQuery("SELECT e.id from " + beanName + " e ORDER BY e.id", Long.class)
+					.setFirstResult(start).setMaxResults(500).getResultList();
+			if (ids.size() == 0) {
+				break;
+			}
+
+			for (Long id : ids) {
+				EntityBaseBean bean = manager.find(klass, id);
+				if (bean != null) {
+					boolean first = true;
+					if (qcolumn) {
+						output.write(('"' + id.toString() + '"').getBytes());
+						first = false;
+					}
+					if (all) {
+						if (first) {
+							first = false;
+						} else {
+							output.write(",".getBytes());
+						}
+						synchronized (df8601) {
+							output.write(("\"" + bean.getCreateId() + "\",").getBytes());
+							output.write((df8601.format(bean.getCreateTime()) + ",").getBytes());
+							output.write(("\"" + bean.getModId() + "\",").getBytes());
+							output.write((df8601.format(bean.getModTime())).getBytes());
+						}
+					}
+					for (Field field : fields) {
+						String name = field.getName();
+						if (updaters.contains(field)) {
+							if (first) {
+								first = false;
+							} else {
+								output.write(",".getBytes());
+							}
+							Object value = getters.get(fieldMap.get(name)).invoke(bean);
+							if (atts.contains(field)) {
+								if (value == null) {
+									output.write("NULL".getBytes());
+								} else {
+									output.write(getRep(field, value).getBytes());
+								}
+							} else {
+								if (value == null) {
+									output.write(eiHandler.getExportNull(
+											(Class<? extends EntityBaseBean>) field.getType())
+											.getBytes());
+								} else {
+									logger.debug("One " + field.getName() + " " + value);
+									long obId = ((EntityBaseBean) value).getId(); // Not allowed to
+																					// be null
+									String obType = value.getClass().getSimpleName();
+									logger.debug("One " + field.getName() + " " + obId + " "
+											+ obType);
+									Map<Long, String> idCache = exportCaches.get(obType);
+									String s = idCache.get(obId);
+									if (s == null) {
+										s = buildKey((EntityBaseBean) value, exportCaches);
+										idCache.put(obId, s);
+										logger.debug("Cached " + obType + " " + obId + " as " + s);
+									}
+									output.write(s.getBytes());
+								}
+							}
+						}
+					}
+					output.write((linesep).getBytes());
+				}
+			}
+
+			start = start + ids.size();
+		}
+
 	}
 }

@@ -5,8 +5,20 @@
 lifetimeMinutes  120
 
 # Provide CRUD access to authz tables
-rootUserNames root
+rootUserNames db/root
 
+# Restrict total number of entities to return in a search call
+maxEntities 1000
+
+# Maximum ids in a list - this must not exceed 1000 for Oracle
+maxIdsInQuery 500
+
+# Size of cache to be used when importing data into ICAT	
+importCacheSize 50
+
+# Size of cache to be used when exporting data from ICAT
+exportCacheSize 50
+	
 # Desired authentication plugin mnemonics
 authn.list db ldap anon simple
 

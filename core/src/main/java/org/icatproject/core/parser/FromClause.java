@@ -29,7 +29,7 @@ public class FromClause {
 			t = input.consume();
 			if (t.getType() == Token.Type.NAME) {
 				String val = t.getValue();
-				if (EntityInfoHandler.getEntityNames().contains(val)) {
+				if (EntityInfoHandler.getAlphabeticEntityNames().contains(val)) {
 					sb.append(" " + val);
 				} else {
 					if (!isQuery && state == State.NONE) {

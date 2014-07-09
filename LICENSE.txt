@@ -1,4 +1,4 @@
-Copyright (c) 2012-2013, The ICAT Collaboration
+Copyright (c) 2012-2014, The ICAT Collaboration
 
 All rights reserved.
 

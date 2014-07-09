@@ -35,7 +35,7 @@ public class WhereClause {
 					}
 					sb.append(" " + Constants.ENTITY_PREFIX
 							+ t.getValue().substring(Constants.ENUMPREFIX.length()));
-				} else if (EntityInfoHandler.getEntityNames().contains(val)) {
+				} else if (EntityInfoHandler.getAlphabeticEntityNames().contains(val)) {
 					sb.append(" " + val);
 				} else {
 					int dot = val.indexOf('.');

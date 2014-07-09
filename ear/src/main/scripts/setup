@@ -8,6 +8,8 @@ import socket
 def uninstall():
     app = actions.getAppName("icat.ear")
     if app: actions.asadmin("undeploy " + app)
+    app = actions.getAppName("icat.war")
+    if app: actions.asadmin("undeploy " + app)
     actions.asadmin("delete-jdbc-resource jdbc/icat", tolerant=True)
     actions.asadmin("delete-jdbc-connection-pool icat", tolerant=True)
     actions.asadmin("delete-jms-resource jms/ICAT/TopicConnectionFactory", tolerant=True)
@@ -95,7 +97,7 @@ if arg == "INSTALL":
             actions.asadmin("set resources.connector-connection-pool.jms/ICAT/CentralConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
             actions.asadmin("set resources.connector-connection-pool.jms/ICAT/TopicConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
             
-        actions.deploy("icat.ear-*.ear", deploymentorder=100)
+        actions.deploy("icat.ear-*.war", deploymentorder=100)
         
         if not os.path.isdir(binDir): abort ("Please create directory " + binDir + " and try again.")
         for file in files:   

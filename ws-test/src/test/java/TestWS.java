@@ -651,6 +651,56 @@ public class TestWS {
 		}
 	}
 
+	@Ignore
+	@Test
+	public void manyBigGets() throws Exception {
+		session.clear();
+		Facility facility = session.createFacility("Test Facility", 90);
+
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
+
+		DatasetType dst = session.createDatasetType(facility, "GQ");
+
+		Investigation inv = session.createInvestigation(facility, "A", "Not null",
+				investigationType);
+
+		Dataset wibble = session.createDataset("Wibble", dst, inv);
+
+		DatafileFormat dfmt = session.createDatafileFormat(facility, "png", "binary");
+
+		int n = 7500;
+
+		List<EntityBaseBean> dfs = new ArrayList<EntityBaseBean>();
+		for (int i = 0; i < n; i++) {
+			final Datafile datafile = new Datafile();
+			datafile.setDatafileFormat(dfmt);
+			datafile.setName("bill" + i);
+			datafile.setDataset(wibble);
+			dfs.add(datafile);
+		}
+		long start = System.currentTimeMillis();
+		session.createMany(dfs);
+		System.out.println("Time per datafile using createMany: "
+				+ (System.currentTimeMillis() - start) / (n + 0.) + "ms");
+
+		start = System.currentTimeMillis();
+
+		Long wibid = wibble.getId();
+		Dataset ds = null;
+		int m = 5;
+		for (int i = 0; i < m; i++) {
+			ds = (Dataset) session.get("Dataset INCLUDE Datafile, DatafileFormat", wibid);
+			System.out.print(i);
+			System.out.flush();
+		}
+
+		System.out.println("Time per datafile to retrieve: " + ds.getDatafiles().size()
+				+ " datafiles " + (System.currentTimeMillis() - start)
+				/ (ds.getDatafiles().size() * m) + "ms");
+
+	}
+
 	@Test
 	public void bigCreate() throws Exception {
 		session.clear();
@@ -1163,7 +1213,7 @@ public class TestWS {
 	public void login() throws Exception {
 		double rm = session.getRemainingMinutes();
 		assertTrue(rm > 0);
-		assertTrue(session.getApiVersion().startsWith("4.3."));
+		assertTrue(session.getApiVersion().startsWith("4.4."));
 		assertEquals("db/root", session.getUserName());
 		Thread.sleep(10);
 		rm = session.getRemainingMinutes();
@@ -1904,6 +1954,7 @@ public class TestWS {
 		session.update(df);
 		df = (Datafile) session.get("Datafile INCLUDE Dataset,DatafileFormat", df.getId());
 		assertEquals("Wobble", df.getDataset().getName());
+		assertNull(df.getDatafileFormat());
 	}
 
 	@Test

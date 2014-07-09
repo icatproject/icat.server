@@ -240,6 +240,28 @@
                         must be specified.
                     </dd>
 
+                    <dt>maxEntities</dt>
+                    <dd>Restrict total number of entities to return in a search or get call. This should be set as small as possible to protect the
+                        server from running out of memory. However if you set it too small it may prevent users from doing reasonable things.
+                    </dd>
+
+                    <dt>maxIdsInQuery</dt>
+                    <dd>For handling INCLUDEs, ICAT may generate queries which are not acceptable to the database system. To avoid this problem such
+                        queries are broken down. This is the maximum size of each chunk which must not exceed 1000 for Oracle.
+                    </dd>
+
+                    <dt>importCacheSize</dt>
+                    <dd>the size of a cache used during import to avoid an excessive number of calls to the database. The cache is dropped after each
+                        call to import to ensure that authorization rules are enforced. As the cache is short-lived, modifications to ICAT are
+                        unlikely to result in stale information being used from the cache.
+                    </dd>
+
+                    <dt>exportCacheSize</dt>
+                    <dd>the size of a cache used during export to avoid an excessive number of calls to the database. The cache is dropped after each
+                        call to export to ensure that authorization rules are enforced. As the cache is short-lived, modifications to ICAT are
+                        unlikely to result in stale information being used from the cache.
+                    </dd>
+
                     <dt>authn.list</dt>
                     <dd>
                         is a space separated set of mnemonics for user to select the plugin in the login call. This must not reference plugins which
