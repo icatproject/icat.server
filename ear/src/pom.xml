@@ -1,0 +1,81 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.icatproject</groupId>
+        <artifactId>icat</artifactId>
+        <version>4.4.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>icat.ear</artifactId>
+    <packaging>war</packaging>
+
+    <properties>
+        <uniqueVersion>false</uniqueVersion>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.icatproject</groupId>
+            <artifactId>icat.exposed</artifactId>
+            <version>4.4.0-SNAPSHOT</version>
+            <type>ejb</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.icatproject</groupId>
+            <artifactId>icat.utils</artifactId>
+            <version>4.5.0</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <archiveClasses>false</archiveClasses>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>asadmin</executable>
+                    <arguments>
+                        <argument>--echo</argument>
+                        <argument>--port=4848</argument>
+                        <argument>deploy</argument>
+                        <argument>--force=true</argument>
+                        <argument>${project.build.directory}/${project.build.finalName}.war</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+            </plugin>
+
+        </plugins>
+
+    </build>
+
+    <name>ICAT Server ".ear"</name>
+</project>
+
+
+

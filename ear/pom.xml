@@ -17,11 +17,65 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.icatproject</groupId>
-            <artifactId>icat.exposed</artifactId>
-            <version>4.4.0-SNAPSHOT</version>
-            <type>ejb</type>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+            <version>2.5.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.icatproject</groupId>
+            <artifactId>icat.authentication</artifactId>
+            <version>4.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>4.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-queryparser</artifactId>
+            <version>4.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analyzers-common</artifactId>
+            <version>4.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>1.0.4</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.3</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.icatproject</groupId>
@@ -31,7 +85,40 @@
     </dependencies>
 
     <build>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ejb-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <ejbVersion>3.1</ejbVersion>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.2</version>
+                <configuration>
+                    <workingDirectory>${basedir}/src/test/config</workingDirectory>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -47,22 +134,37 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>Generate doc</id>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <mainClass>org.icatproject.core.DocGenerator</mainClass>
+                            <arguments>
+                                <argument>${basedir}</argument>
+                            </arguments>
+                        </configuration>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+
+                    <execution>
+                        <id>Install .war</id>
                         <phase>install</phase>
+                        <configuration>
+                            <executable>asadmin</executable>
+                            <arguments>
+                                <argument>--echo</argument>
+                                <argument>--port=4848</argument>
+                                <argument>deploy</argument>
+                                <argument>--force=true</argument>
+                                <argument>${project.build.directory}/${project.build.finalName}.war</argument>
+                            </arguments>
+                        </configuration>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <executable>asadmin</executable>
-                    <arguments>
-                        <argument>--echo</argument>
-                        <argument>--port=4848</argument>
-                        <argument>deploy</argument>
-                        <argument>--force=true</argument>
-                        <argument>${project.build.directory}/${project.build.finalName}.war</argument>
-                    </arguments>
-                </configuration>
             </plugin>
 
             <plugin>

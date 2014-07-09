@@ -61,8 +61,6 @@
     <name>ICAT</name>
 
     <modules>
-        <module>core</module>
-        <module>exposed</module>
         <module>ear</module>
         <module>ws-test</module>
     </modules>
