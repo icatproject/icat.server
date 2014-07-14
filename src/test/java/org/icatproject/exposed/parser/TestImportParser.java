@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.icatproject.core.IcatException;
-import org.icatproject.core.parser.LexerException;
 import org.icatproject.exposed.RestfulBeanManager;
 import org.icatproject.exposed.importParser.Input;
 import org.icatproject.exposed.importParser.ParserException;
