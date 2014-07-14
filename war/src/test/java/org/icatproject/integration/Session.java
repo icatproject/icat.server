@@ -1,3 +1,5 @@
+package org.icatproject.integration;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -6,9 +8,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.namespace.QName;
 
 import org.icatproject.Application;
 import org.icatproject.DataCollection;
@@ -34,20 +33,23 @@ import org.icatproject.InvestigationInstrument;
 import org.icatproject.InvestigationType;
 import org.icatproject.InvestigationUser;
 import org.icatproject.Job;
-import org.icatproject.Login.Credentials;
 import org.icatproject.Login.Credentials.Entry;
 import org.icatproject.ParameterType;
 import org.icatproject.ParameterValueType;
 import org.icatproject.Rule;
+import org.icatproject.Login.Credentials;
 import org.icatproject.User;
 import org.icatproject.UserGroup;
+
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
 
 public class Session {
 	public enum ParameterApplicability {
 		DATASET, DATAFILE, SAMPLE, INVESTIGATION
 	};
 
-	public String dump(EntityBaseBean bean, int i) throws IllegalArgumentException,
+	private String dump(EntityBaseBean bean, int i) throws IllegalArgumentException,
 			IllegalAccessException, SecurityException, NoSuchMethodException,
 			InvocationTargetException {
 		StringBuilder result = new StringBuilder();

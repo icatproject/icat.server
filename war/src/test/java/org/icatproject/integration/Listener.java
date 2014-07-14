@@ -1,3 +1,5 @@
+package org.icatproject.integration;
+
 import java.util.LinkedList;
 import java.util.Queue;
 
