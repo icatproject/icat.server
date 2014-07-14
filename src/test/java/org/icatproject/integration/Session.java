@@ -49,33 +49,6 @@ public class Session {
 		DATASET, DATAFILE, SAMPLE, INVESTIGATION
 	};
 
-	private String dump(EntityBaseBean bean, int i) throws IllegalArgumentException,
-			IllegalAccessException, SecurityException, NoSuchMethodException,
-			InvocationTargetException {
-		StringBuilder result = new StringBuilder();
-		for (Field field : new ArrayList<Field>(Arrays.asList(bean.getClass().getDeclaredFields()))) {
-			String name = field.getName();
-			String getterName = "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
-			Method m = bean.getClass().getMethod(getterName);
-			Object o = m.invoke(bean);
-			if (result.length() != 0) {
-				result.append(", ");
-			}
-			if (o instanceof EntityBaseBean) {
-				if (i > 0) {
-					result.append(name + ":[" + dump((EntityBaseBean) o, i - 1) + "]");
-				} else {
-					result.append(name + ":...");
-				}
-			} else if (o instanceof List) {
-				result.append(name + ":" + ((List<?>) o).size());
-			} else {
-				result.append(name + ": '" + o + "'");
-			}
-		}
-		return result.toString();
-	}
-
 	private final ICAT icat;
 
 	public ICAT getIcat() {
