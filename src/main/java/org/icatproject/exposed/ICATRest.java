@@ -48,6 +48,7 @@ import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.GateKeeper;
+import org.icatproject.core.manager.Porter;
 import org.icatproject.core.manager.PropertyHandler;
 
 @Path("/")
@@ -58,19 +59,16 @@ public class ICATRest {
 	// TODO Need to check that all modes (CHECK, IGNORE etc) work properly for import and that the
 	// system attributes can only be set by somebody in root user names
 
-	// TODO get rid of javax.ws.rs
-
 	// TODO avoid processing IDS one by one for export
 
 	// TODO avoid duplicate code in two modes of export
 
+	private static Logger logger = Logger.getLogger(ICATRest.class);
+
+	private Map<String, Authenticator> authPlugins;
+
 	@EJB
 	EntityBeanManager beanManager;
-
-	@EJB
-	RestfulBeanManager restfulBeanManager;
-
-	private static Logger logger = Logger.getLogger(ICATRest.class);
 
 	@EJB
 	GateKeeper gatekeeper;
@@ -81,31 +79,105 @@ public class ICATRest {
 	private EntityManager manager;
 
 	@EJB
+	Porter porter;
+
+	@EJB
 	PropertyHandler propertyHandler;
 
 	private Set<String> rootUserNames;
-
-	private Map<String, Authenticator> authPlugins;
 
 	@Resource
 	private UserTransaction userTransaction;
 
 	@GET
+	@Path("port")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response exportData(@QueryParam("json") String jsonString) throws IcatException {
+		return porter.exportData(jsonString, manager, userTransaction);
+	}
+
+	@GET
+	@Path("session/{sessionId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getSession(@PathParam("sessionId") String sessionId) throws IcatException {
+
+		String userName = beanManager.getUserName(sessionId, manager);
+		double remainingMinutes = beanManager.getRemainingMinutes(sessionId, manager);
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		JsonGenerator gen = Json.createGenerator(baos);
+		gen.writeStartObject().write("userName", userName)
+				.write("remainingMinutes", remainingMinutes).writeEnd();
+		gen.close();
+		return baos.toString();
+	}
+
+	@GET
 	@Path("version")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getVersion() {
+	public String getVersion() {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonGenerator gen = Json.createGenerator(baos);
 		gen.writeStartObject().write("version", Constants.API_VERSION).writeEnd();
 		gen.close();
-		return Response.ok(baos.toString()).build();
+		return baos.toString();
+	}
+
+	@POST
+	@Path("port")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response importData(@Context HttpServletRequest request) throws IcatException,
+			IOException {
+		if (!ServletFileUpload.isMultipartContent(request)) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Multipart content expected");
+		}
+
+		ServletFileUpload upload = new ServletFileUpload();
+		String jsonString = null;
+		String name = null;
+		Response result = null;
+
+		// Parse the request
+		try {
+			FileItemIterator iter = upload.getItemIterator(request);
+			while (iter.hasNext()) {
+				FileItemStream item = iter.next();
+				String fieldName = item.getFieldName();
+				InputStream stream = item.openStream();
+				if (item.isFormField()) {
+					String value = Streams.asString(stream);
+					if (fieldName.equals("json")) {
+						jsonString = value;
+
+					} else {
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Form field "
+								+ fieldName + "is not recognised");
+					}
+				} else {
+					if (name == null) {
+						name = item.getName();
+					}
+					result = porter.importData(jsonString, stream, manager, userTransaction);
+				}
+			}
+			return result;
+		} catch (FileUploadException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+	}
+
+	@PostConstruct
+	private void init() {
+		authPlugins = propertyHandler.getAuthPlugins();
+		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
+		rootUserNames = gatekeeper.getRootUserNames();
 	}
 
 	@POST
 	@Path("session")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response login(@Context HttpServletRequest request, @FormParam("json") String jsonString)
+	public String login(@Context HttpServletRequest request, @FormParam("json") String jsonString)
 			throws IcatException {
 		logger.debug(jsonString);
 		if (jsonString == null) {
@@ -152,31 +224,8 @@ public class ICATRest {
 		JsonGenerator gen = Json.createGenerator(baos);
 		gen.writeStartObject().write("sessionId", sessionId).writeEnd();
 		gen.close();
-		return Response.ok(baos.toString()).build();
+		return baos.toString();
 
-	}
-
-	@GET
-	@Path("session/{sessionId}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getSession(@PathParam("sessionId") String sessionId) throws IcatException {
-
-		String userName = beanManager.getUserName(sessionId, manager);
-		double remainingMinutes = beanManager.getRemainingMinutes(sessionId, manager);
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		JsonGenerator gen = Json.createGenerator(baos);
-		gen.writeStartObject().write("userName", userName)
-				.write("remainingMinutes", remainingMinutes).writeEnd();
-		gen.close();
-		return Response.ok(baos.toString()).build();
-
-	}
-
-	@PUT
-	@Path("session/{sessionId}")
-	public void refresh(@PathParam("sessionId") String sessionId) throws IcatException {
-		beanManager.refresh(sessionId, lifetimeMinutes, manager, userTransaction);
 	}
 
 	@DELETE
@@ -185,61 +234,9 @@ public class ICATRest {
 		beanManager.logout(sessionId, manager, userTransaction);
 	}
 
-	@POST
-	@Path("port")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response importData(@Context HttpServletRequest request) throws IcatException,
-			IOException {
-		if (!ServletFileUpload.isMultipartContent(request)) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Multipart content expected");
-		}
-
-		ServletFileUpload upload = new ServletFileUpload();
-		String jsonString = null;
-		String name = null;
-		Response result = null;
-
-		// Parse the request
-		try {
-			FileItemIterator iter = upload.getItemIterator(request);
-			while (iter.hasNext()) {
-				FileItemStream item = iter.next();
-				String fieldName = item.getFieldName();
-				InputStream stream = item.openStream();
-				if (item.isFormField()) {
-					String value = Streams.asString(stream);
-					if (fieldName.equals("json")) {
-						jsonString = value;
-
-					} else {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Form field "
-								+ fieldName + "is not recognised");
-					}
-				} else {
-					if (name == null) {
-						name = item.getName();
-					}
-					result = restfulBeanManager.importData(jsonString, stream, manager,
-							userTransaction);
-				}
-			}
-			return result;
-		} catch (FileUploadException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	@GET
-	@Path("port")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response exportData(@QueryParam("json") String jsonString) throws IcatException {
-		return restfulBeanManager.exportData(jsonString, manager, userTransaction);
-	}
-
-	@PostConstruct
-	private void init() {
-		authPlugins = propertyHandler.getAuthPlugins();
-		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
-		rootUserNames = gatekeeper.getRootUserNames();
+	@PUT
+	@Path("session/{sessionId}")
+	public void refresh(@PathParam("sessionId") String sessionId) throws IcatException {
+		beanManager.refresh(sessionId, lifetimeMinutes, manager, userTransaction);
 	}
 }

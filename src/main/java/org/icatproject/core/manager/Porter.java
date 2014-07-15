@@ -1,4 +1,4 @@
-package org.icatproject.exposed;
+package org.icatproject.core.manager;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -42,22 +42,19 @@ import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.ParameterValueType;
 import org.icatproject.core.entity.Session;
-import org.icatproject.core.manager.EntityBeanManager;
-import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.core.manager.PropertyHandler;
+import org.icatproject.core.manager.importParser.Attribute;
+import org.icatproject.core.manager.importParser.Input;
+import org.icatproject.core.manager.importParser.ParserException;
+import org.icatproject.core.manager.importParser.Table;
+import org.icatproject.core.manager.importParser.TableField;
+import org.icatproject.core.manager.importParser.Token;
+import org.icatproject.core.manager.importParser.Token.Type;
+import org.icatproject.core.manager.importParser.Tokenizer;
 import org.icatproject.core.parser.LexerException;
-import org.icatproject.exposed.importParser.Attribute;
-import org.icatproject.exposed.importParser.Input;
-import org.icatproject.exposed.importParser.ParserException;
-import org.icatproject.exposed.importParser.Table;
-import org.icatproject.exposed.importParser.TableField;
-import org.icatproject.exposed.importParser.Token;
-import org.icatproject.exposed.importParser.Token.Type;
-import org.icatproject.exposed.importParser.Tokenizer;
 
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
-public class RestfulBeanManager {
+public class Porter {
 
 	public enum ExportType {
 		/** query field must be set with what to export */
@@ -95,7 +92,7 @@ public class RestfulBeanManager {
 	@EJB
 	PropertyHandler propertyHandler;
 
-	private static final Logger logger = Logger.getLogger(ICATRest.class);
+	private static final Logger logger = Logger.getLogger(Porter.class);
 	private final static Pattern tsRegExp = Pattern
 			.compile("(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})(\\.\\d+)?(.*?)");
 

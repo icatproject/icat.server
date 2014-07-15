@@ -1,11 +1,9 @@
 package org.icatproject.exposed;
 
-import java.io.StringWriter;
-import java.net.HttpURLConnection;
+import java.io.ByteArrayOutputStream;
 
 import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonWriter;
+import javax.json.stream.JsonGenerator;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -20,17 +18,12 @@ public class WebApplicationExceptionMapper implements ExceptionMapper<WebApplica
 
 	@Override
 	public Response toResponse(WebApplicationException e) {
-
 		logger.info("Processing: " + e.getClass() + " " + e.getMessage());
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		JsonGenerator gen = Json.createGenerator(baos);
+		gen.writeStartObject().write("code", "InternalException")
+				.write("message", e.getClass() + " " + e.getMessage()).writeEnd().close();
 
-		JsonObject om = Json.createObjectBuilder().add("code", "InternalException")
-				.add("message", e.getClass() + " " + e.getMessage()).build();
-		StringWriter stWriter = new StringWriter();
-		try (JsonWriter jsonWriter = Json.createWriter(stWriter)) {
-			jsonWriter.writeObject(om);
-		}
-		return Response.status(HttpURLConnection.HTTP_INTERNAL_ERROR).entity(stWriter.toString())
-				.build();
-
+		return Response.ok().entity(baos.toString()).build();
 	}
 }

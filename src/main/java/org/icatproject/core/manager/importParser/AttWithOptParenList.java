@@ -1,4 +1,4 @@
-package org.icatproject.exposed.importParser;
+package org.icatproject.core.manager.importParser;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -9,7 +9,7 @@ import java.util.Map;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
-import org.icatproject.exposed.importParser.Token.Type;
+import org.icatproject.core.manager.importParser.Token.Type;
 
 public class AttWithOptParenList {
 

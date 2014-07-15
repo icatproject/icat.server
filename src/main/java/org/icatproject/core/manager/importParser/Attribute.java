@@ -1,4 +1,4 @@
-package org.icatproject.exposed.importParser;
+package org.icatproject.core.manager.importParser;
 
 public class Attribute {
 

@@ -1,11 +1,9 @@
 package org.icatproject.exposed;
 
-import java.io.StringWriter;
-import java.net.HttpURLConnection;
+import java.io.ByteArrayOutputStream;
 
 import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonWriter;
+import javax.json.stream.JsonGenerator;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
@@ -23,39 +21,14 @@ public class IcatExceptionMapper implements ExceptionMapper<IcatException> {
 
 		logger.info("Processing: " + e.getType() + " " + e.getMessage());
 
-		JsonObjectBuilder omb = Json.createObjectBuilder().add("code", e.getType().name())
-				.add("message", e.getMessage());
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		JsonGenerator gen = Json.createGenerator(baos);
+		gen.writeStartObject().write("code", e.getType().name()).write("message", e.getMessage());
 		if (e.getOffset() >= 0) {
-			omb.add("offset", e.getOffset());
+			gen.write("offset", e.getOffset());
 		}
-		StringWriter stWriter = new StringWriter();
-		try (JsonWriter jsonWriter = Json.createWriter(stWriter)) {
-			jsonWriter.writeObject(omb.build());
-		}
-		int code = 0;
-		switch (e.getType()) {
-		case BAD_PARAMETER:
-			code = HttpURLConnection.HTTP_BAD_REQUEST;
-			break;
-		case INSUFFICIENT_PRIVILEGES:
-			code = HttpURLConnection.HTTP_FORBIDDEN;
-			break;
-		case NO_SUCH_OBJECT_FOUND:
-			code = HttpURLConnection.HTTP_NOT_FOUND;
-			break;
-		case OBJECT_ALREADY_EXISTS:
-			code = HttpURLConnection.HTTP_BAD_REQUEST;
-			break;
-		case SESSION:
-			code = HttpURLConnection.HTTP_FORBIDDEN;
-			break;
-		case VALIDATION:
-			code = HttpURLConnection.HTTP_BAD_REQUEST;
-			break;
-		default:
-			code = HttpURLConnection.HTTP_INTERNAL_ERROR;
-		}
-		return Response.status(code).entity(stWriter.toString()).build();
+		gen.writeEnd().close();
+		return Response.ok().entity(baos.toString()).build();
 
 	}
 }

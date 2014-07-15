@@ -1,9 +1,9 @@
-package org.icatproject.exposed.importParser;
+package org.icatproject.core.manager.importParser;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.icatproject.exposed.importParser.Token.Type;
+import org.icatproject.core.manager.importParser.Token.Type;
 
 @SuppressWarnings("serial")
 public class ParserException extends Exception {

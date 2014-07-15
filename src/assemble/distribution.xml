@@ -8,7 +8,7 @@
 
     <fileSets>
         <fileSet>
-            <outputDirectory>icat</outputDirectory>
+            <outputDirectory>icat.server</outputDirectory>
             <directory>${basedir}/src/main/scripts</directory>
             <excludes>
                 <exclude>*.dump</exclude>
@@ -16,12 +16,12 @@
         </fileSet>
 
         <fileSet>
-            <outputDirectory>icat</outputDirectory>
+            <outputDirectory>icat.server</outputDirectory>
             <directory>${basedir}/src/main/config</directory>
         </fileSet>
 
         <fileSet>
-            <outputDirectory>icat</outputDirectory>
+            <outputDirectory>icat.server</outputDirectory>
             <directory>${basedir}</directory>
             <filtered>true</filtered>
             <includes>
@@ -33,7 +33,7 @@
 
     <dependencySets>
         <dependencySet>
-            <outputDirectory>icat</outputDirectory>
+            <outputDirectory>icat.server</outputDirectory>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <includes>
                 <include>org.icatproject:icat.server</include>
@@ -41,7 +41,7 @@
         </dependencySet>
 
         <dependencySet>
-            <outputDirectory>icat</outputDirectory>
+            <outputDirectory>icat.server</outputDirectory>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <unpack>true</unpack>
             <unpackOptions>

@@ -9,14 +9,16 @@ import java.util.Date;
 import java.util.List;
 
 import org.icatproject.core.IcatException;
-import org.icatproject.exposed.RestfulBeanManager;
-import org.icatproject.exposed.importParser.Input;
-import org.icatproject.exposed.importParser.ParserException;
-import org.icatproject.exposed.importParser.Table;
-import org.icatproject.exposed.importParser.TableField;
-import org.icatproject.exposed.importParser.Token;
-import org.icatproject.exposed.importParser.Token.Type;
-import org.icatproject.exposed.importParser.Tokenizer;
+import org.icatproject.core.manager.Porter;
+import org.icatproject.core.manager.importParser.TableField;
+
+import org.icatproject.core.manager.importParser.ParserException;
+import org.icatproject.core.manager.importParser.Table;
+
+import org.icatproject.core.manager.importParser.Input;
+import org.icatproject.core.manager.importParser.Token;
+import org.icatproject.core.manager.importParser.Token.Type;
+import org.icatproject.core.manager.importParser.Tokenizer;
 import org.junit.Test;
 
 public class TestImportParser {
@@ -368,17 +370,17 @@ public class TestImportParser {
 
 	@Test
 	public void testTimestamp() throws IcatException {
-		Date d1 = RestfulBeanManager.getDate("2014-05-16T16:58:26.12+12:30");
-		Date d2 = RestfulBeanManager.getDate("2014-05-16T16:58:26.1234+12:30");
-		Date d3 = RestfulBeanManager.getDate("2014-05-16T16:58:26+12:30");
+		Date d1 = Porter.getDate("2014-05-16T16:58:26.12+12:30");
+		Date d2 = Porter.getDate("2014-05-16T16:58:26.1234+12:30");
+		Date d3 = Porter.getDate("2014-05-16T16:58:26+12:30");
 
-		Date d4 = RestfulBeanManager.getDate("2014-05-16T16:58:26.12");
-		Date d5 = RestfulBeanManager.getDate("2014-05-16T16:58:26.1234");
-		Date d6 = RestfulBeanManager.getDate("2014-05-16T16:58:26");
+		Date d4 = Porter.getDate("2014-05-16T16:58:26.12");
+		Date d5 = Porter.getDate("2014-05-16T16:58:26.1234");
+		Date d6 = Porter.getDate("2014-05-16T16:58:26");
 
-		Date d7 = RestfulBeanManager.getDate("2014-05-16T16:58:26.12Z");
-		Date d8 = RestfulBeanManager.getDate("2014-05-16T16:58:26.1234Z");
-		Date d9 = RestfulBeanManager.getDate("2014-05-16T16:58:26Z");
+		Date d7 = Porter.getDate("2014-05-16T16:58:26.12Z");
+		Date d8 = Porter.getDate("2014-05-16T16:58:26.1234Z");
+		Date d9 = Porter.getDate("2014-05-16T16:58:26Z");
 
 		assertEquals(3L, d5.getTime() - d4.getTime());
 		assertEquals(120L, d4.getTime() - d6.getTime());
