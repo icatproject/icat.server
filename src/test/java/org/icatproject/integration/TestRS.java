@@ -1,72 +1,23 @@
 package org.icatproject.integration;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.net.URISyntaxException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import javax.jms.MessageConsumer;
-import javax.jms.ObjectMessage;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
-
-import org.icatproject.AccessType;
-import org.icatproject.Application;
-import org.icatproject.Constraint;
-import org.icatproject.DataCollection;
-import org.icatproject.Datafile;
-import org.icatproject.DatafileFormat;
-import org.icatproject.Dataset;
-import org.icatproject.DatasetParameter;
-import org.icatproject.DatasetType;
-import org.icatproject.EntityBaseBean;
-import org.icatproject.EntityField;
-import org.icatproject.EntityInfo;
 import org.icatproject.Facility;
-import org.icatproject.Grouping;
-import org.icatproject.IcatException;
-import org.icatproject.IcatExceptionType;
-import org.icatproject.IcatException_Exception;
-import org.icatproject.Instrument;
-import org.icatproject.Investigation;
-import org.icatproject.InvestigationParameter;
-import org.icatproject.InvestigationType;
-import org.icatproject.InvestigationUser;
-import org.icatproject.Job;
-import org.icatproject.ParameterType;
-import org.icatproject.ParameterValueType;
-import org.icatproject.PermissibleStringValue;
-import org.icatproject.PublicStep;
-import org.icatproject.RelType;
-import org.icatproject.Rule;
-import org.icatproject.Sample;
-import org.icatproject.SampleParameter;
-import org.icatproject.SampleType;
-import org.icatproject.User;
-import org.icatproject.UserGroup;
 import org.icatproject.integration.client.ICAT;
+import org.icatproject.integration.client.IcatException;
+import org.icatproject.integration.client.IcatException.IcatExceptionType;
 import org.icatproject.integration.client.Session;
+import org.icatproject.integration.client.Session.Attributes;
+import org.icatproject.integration.client.Session.DuplicateAction;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -75,24 +26,17 @@ import org.junit.Test;
  */
 public class TestRS {
 
-	private static Random random;
-	private static TSession session;
+	private static WSession wSession;
+	private static long end;
+	private static long start;
 
-	// @AfterClass
-	public static void afterClass() throws Exception {
-		session.clear();
-		session.clearAuthz();
-	}
-
-	// @BeforeClass
+	@BeforeClass
 	public static void beforeClass() throws Exception {
 		try {
-			random = new Random();
-			session = new TSession();
-			session.setAuthz();
-			session.clearAuthz();
-			session.setAuthz();
-			session.clear();
+			wSession = new WSession();
+			wSession.setAuthz();
+			wSession.clearAuthz();
+			wSession.setAuthz();
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
@@ -107,6 +51,7 @@ public class TestRS {
 		credentials.put("password", "password");
 		Session session = icat.login("db", credentials);
 		assertEquals("db/root", session.getUserName());
+		Thread.sleep(500);
 		double remainingMinutes = session.getRemainingMinutes();
 		assertTrue(remainingMinutes > 119 && remainingMinutes < 120);
 		session.logout();
@@ -120,6 +65,141 @@ public class TestRS {
 		remainingMinutes = session.getRemainingMinutes();
 		session.refresh();
 		assertTrue(session.getRemainingMinutes() < remainingMinutes);
+	}
+
+	private static void ts(String msg) {
+		end = System.currentTimeMillis();
+		System.out.println("Time to " + msg + ": " + (end - start) + "ms.");
+		start = end;
+	}
+
+	@Test
+	public void importMetaDataUser() throws Exception {
+		importMetaData(Attributes.USER, "db/root");
+	}
+
+	@Test
+	public void importMetaDataAll() throws Exception {
+		importMetaData(Attributes.ALL, "Zorro");
+	}
+
+	@Test
+	public void importMetaDataAllNotRoot() throws Exception {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "piOne");
+		credentials.put("password", "piOne");
+		Session session = icat.login("db", credentials);
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		try {
+			session.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
+			fail();
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getType());
+		}
+	}
+
+	private void importMetaData(Attributes attributes, String userName) throws Exception {
+		wSession.clear();
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "root");
+		credentials.put("password", "password");
+		Session session = icat.login("db", credentials);
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+
+		start = System.currentTimeMillis();
+		session.importMetaData(path, DuplicateAction.CHECK, attributes);
+		ts("Simple import");
+
+		long facilityId = (Long) wSession.search("Facility.id [name = 'Test port facility']")
+				.get(0);
+
+		Facility facility = (Facility) wSession.get("Facility", facilityId);
+		assertEquals(userName, facility.getCreateId());
+
+		session.importMetaData(path, DuplicateAction.IGNORE, attributes);
+		facility = (Facility) wSession.get("Facility", facilityId);
+		assertEquals(userName, facility.getCreateId());
+		assertEquals((Integer) 90, facility.getDaysUntilRelease());
+		ts("Import with ignore");
+
+		session.importMetaData(path, DuplicateAction.CHECK, attributes);
+		facility = (Facility) wSession.get("Facility", facilityId);
+		assertEquals(userName, facility.getCreateId());
+		assertEquals((Integer) 90, facility.getDaysUntilRelease());
+		ts("Import with check");
+
+		try {
+			session.importMetaData(path, DuplicateAction.THROW, attributes);
+			fail();
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getType());
+		}
+		ts("Import with throw");
+
+		session.importMetaData(path, DuplicateAction.OVERWRITE, attributes);
+		facility = (Facility) wSession.get("Facility", facilityId);
+		assertEquals(userName, facility.getCreateId());
+		assertEquals((Integer) 90, facility.getDaysUntilRelease());
+		ts("Import with overwrite");
+
+		facility = (Facility) wSession.get("Facility INCLUDE 1", facilityId);
+		facility.setDaysUntilRelease(365);
+		wSession.update(facility);
+
+		session.importMetaData(path, DuplicateAction.IGNORE, attributes);
+		facility = (Facility) wSession.get("Facility", facilityId);
+		assertEquals(userName, facility.getCreateId());
+		assertEquals((Integer) 365, facility.getDaysUntilRelease());
+		ts("Import with ignore after edit");
+
+		try {
+			session.importMetaData(path, DuplicateAction.CHECK, attributes);
+			fail();
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.VALIDATION, e.getType());
+		}
+		facility = (Facility) wSession.get("Facility", facilityId);
+		assertEquals(userName, facility.getCreateId());
+		assertEquals((Integer) 365, facility.getDaysUntilRelease());
+		ts("Import with check after edit");
+
+		try {
+			session.importMetaData(path, DuplicateAction.THROW, attributes);
+			fail();
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getType());
+		}
+		facility = (Facility) wSession.get("Facility", facilityId);
+		assertEquals(userName, facility.getCreateId());
+		assertEquals((Integer) 365, facility.getDaysUntilRelease());
+		ts("Import with throw after edit");
+
+		session.importMetaData(path, DuplicateAction.OVERWRITE, attributes);
+		facility = (Facility) wSession.get("Facility", facilityId);
+		assertEquals(userName, facility.getCreateId());
+		assertEquals((Integer) 90, facility.getDaysUntilRelease());
+		ts("Import with overwrite after edit");
+
+		try {
+			session.importMetaData(path, DuplicateAction.THROW, attributes);
+			fail();
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getType());
+		}
+		facility = (Facility) wSession.get("Facility", facilityId);
+		assertEquals(userName, facility.getCreateId());
+		assertEquals((Integer) 90, facility.getDaysUntilRelease());
+		ts("Import with throw after edit and overwrite");
+
+		session.importMetaData(path, DuplicateAction.CHECK, attributes);
+
+		facility = (Facility) wSession.get("Facility", facilityId);
+		assertEquals(userName, facility.getCreateId());
+		assertEquals((Integer) 90, facility.getDaysUntilRelease());
+		ts("Import with check after edit and overwrite");
+
 	}
 
 }

@@ -125,7 +125,7 @@ public class ICAT {
 		try {
 			String userId = getUserName(sessionId);
 			CreateResponse createResponse = beanManager.create(userId, bean, manager,
-					userTransaction);
+					userTransaction, false, false);
 			transmitter.processMessage(createResponse.getNotificationMessage());
 			return createResponse.getPk();
 		} catch (IcatException e) {
@@ -475,7 +475,8 @@ public class ICAT {
 			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			transmitter.processMessage(beanManager.update(userId, bean, manager, userTransaction));
+			transmitter.processMessage(beanManager.update(userId, bean, manager, userTransaction,
+					false, false));
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;

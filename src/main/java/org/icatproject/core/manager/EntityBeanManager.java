@@ -155,21 +155,24 @@ public class EntityBeanManager {
 	}
 
 	public CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
-			UserTransaction userTransaction) throws IcatException {
+			UserTransaction userTransaction, boolean rootUser, boolean allAttributes)
+			throws IcatException {
 
 		logger.info(userId + " creating " + bean.getClass().getSimpleName());
 		try {
 			userTransaction.begin();
 			try {
 				long time = log ? System.currentTimeMillis() : 0;
-				bean.preparePersist(userId, manager, gateKeeper);
+				bean.preparePersist(userId, manager, gateKeeper, allAttributes);
 				logger.debug(bean + " prepared for persist.");
 				manager.persist(bean);
 				logger.debug(bean + " persisted.");
 				manager.flush();
 				logger.debug(bean + " flushed.");
 				// Check authz now everything persisted
-				gateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
+				if (!rootUser) {
+					gateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
+				}
 				NotificationMessage notification = new NotificationMessage(Operation.C, bean,
 						manager, notificationRequests);
 
@@ -179,7 +182,7 @@ public class EntityBeanManager {
 				if (lucene != null) {
 					bean.addToLucene(lucene);
 				}
-				if (log) {
+				if (log && !rootUser) {
 					logWrite(time, userId, "create", bean.getClass().getSimpleName(), beanId,
 							manager, userTransaction);
 				}
@@ -196,7 +199,7 @@ public class EntityBeanManager {
 				logger.trace("Transaction rolled back for creation of " + bean + " because of "
 						+ e.getClass() + " " + e.getMessage());
 				updateCache();
-				bean.preparePersist(userId, manager, gateKeeper);
+				bean.preparePersist(userId, manager, gateKeeper, allAttributes);
 				isUnique(bean, manager);
 				bean.isValid(manager, true);
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -297,7 +300,7 @@ public class EntityBeanManager {
 			try {
 				long time = log ? System.currentTimeMillis() : 0;
 				for (EntityBaseBean bean : beans) {
-					bean.preparePersist(userId, manager, gateKeeper);
+					bean.preparePersist(userId, manager, gateKeeper, false);
 					logger.trace(bean + " prepared for persist.");
 					manager.persist(bean);
 					logger.trace(bean + " persisted.");
@@ -340,7 +343,7 @@ public class EntityBeanManager {
 				int pos = crs.size();
 				EntityBaseBean bean = beans.get(pos);
 				try {
-					bean.preparePersist(userId, manager, gateKeeper);
+					bean.preparePersist(userId, manager, gateKeeper, false);
 					isUnique(bean, manager);
 					bean.isValid(manager, true);
 				} catch (IcatException e1) {
@@ -773,7 +776,7 @@ public class EntityBeanManager {
 
 	// This code might be in EntityBaseBean however this would mean that it
 	// would be processed by JPA which gets confused by it.
-	public void merge(EntityBaseBean thisBean, Object fromBean, EntityManager manager)
+	private void merge(EntityBaseBean thisBean, Object fromBean, EntityManager manager)
 			throws IcatException {
 		Class<? extends EntityBaseBean> klass = thisBean.getClass();
 		Map<Field, Method> setters = eiHandler.getSettersForUpdate(klass);
@@ -1103,7 +1106,7 @@ public class EntityBeanManager {
 			userTransaction.begin();
 			try {
 				try {
-					bean.preparePersist(userId, manager, gateKeeper);
+					bean.preparePersist(userId, manager, gateKeeper, false);
 					logger.debug(bean + " prepared for persist (createAllowed).");
 					manager.persist(bean);
 					logger.debug(bean + " persisted (createAllowed).");
@@ -1116,7 +1119,7 @@ public class EntityBeanManager {
 					userTransaction.rollback();
 					logger.debug("Transaction rolled back for creation of " + bean + " because of "
 							+ e.getClass() + " " + e.getMessage());
-					bean.preparePersist(userId, manager, gateKeeper);
+					bean.preparePersist(userId, manager, gateKeeper, false);
 					isUnique(bean, manager);
 					bean.isValid(manager, true);
 					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -1152,14 +1155,48 @@ public class EntityBeanManager {
 	}
 
 	public NotificationMessage update(String userId, EntityBaseBean bean, EntityManager manager,
-			UserTransaction userTransaction) throws IcatException {
+			UserTransaction userTransaction, boolean rootUser, boolean allAttributes)
+			throws IcatException {
 		try {
 			userTransaction.begin();
 			try {
 				long time = log ? System.currentTimeMillis() : 0;
 				EntityBaseBean beanManaged = find(bean, manager);
-				gateKeeper.performAuthorisation(userId, beanManaged, AccessType.UPDATE, manager);
-				beanManaged.setModId(userId);
+				if (!rootUser) {
+					gateKeeper
+							.performAuthorisation(userId, beanManaged, AccessType.UPDATE, manager);
+				}
+				if (allAttributes) {
+					if (bean.getCreateId() != null) {
+						beanManaged.setCreateId(bean.getCreateId());
+					} else {
+						beanManaged.setCreateId(userId);
+					}
+					if (bean.getModId() != null) {
+						beanManaged.setModId(bean.getModId());
+					} else {
+						beanManaged.setModId(userId);
+					}
+					Date now = null;
+					if (bean.getCreateTime() != null) {
+						beanManaged.setCreateTime(bean.getCreateTime());
+					} else {
+						now = new Date();
+						beanManaged.setCreateTime(now);
+					}
+					if (bean.getModTime() != null) {
+						beanManaged.setModTime(bean.getModTime());
+					} else {
+						if (now == null) {
+							now = new Date();
+						}
+						beanManaged.setModTime(now);
+					}
+				} else {
+					beanManaged.setModId(userId);
+					beanManaged.setModTime(new Date());
+				}
+
 				merge(beanManaged, bean, manager);
 				beanManaged.postMergeFixup(manager, gateKeeper);
 				manager.flush();
@@ -1167,7 +1204,7 @@ public class EntityBeanManager {
 				NotificationMessage notification = new NotificationMessage(Operation.U, bean,
 						manager, notificationRequests);
 				userTransaction.commit();
-				if (log) {
+				if (log && !rootUser) {
 					logWrite(time, userId, "update", bean.getClass().getSimpleName(), bean.getId(),
 							manager, userTransaction);
 				}
@@ -1264,7 +1301,7 @@ public class EntityBeanManager {
 			Log logEntry = null;
 			try {
 				logEntry = new Log(operation, duration, entityName, entityId, query);
-				logEntry.preparePersist(userId, manager, gateKeeper);
+				logEntry.preparePersist(userId, manager, gateKeeper, false);
 				manager.persist(logEntry);
 				manager.flush();
 				userTransaction.commit();

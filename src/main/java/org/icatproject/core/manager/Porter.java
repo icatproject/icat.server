@@ -137,8 +137,8 @@ public class Porter {
 
 	}
 
-	public Response importData(String jsonString, InputStream body, EntityManager manager,
-			UserTransaction userTransaction) throws IcatException {
+	public void importData(String jsonString, InputStream body, EntityManager manager,
+			UserTransaction userTransaction, Set<String> rootUserNames) throws IcatException {
 
 		@SuppressWarnings("serial")
 		LinkedHashMap<String, EntityBaseBean> jpqlCache = new LinkedHashMap<String, EntityBaseBean>() {
@@ -162,6 +162,7 @@ public class Porter {
 		}
 		String sessionId = null;
 		DuplicateAction duplicateAction = DuplicateAction.THROW;
+		Attributes attributes = Attributes.USER;
 		try (JsonParser parser = Json.createParser(new ByteArrayInputStream(jsonString.getBytes()))) {
 			String key = null;
 			while (parser.hasNext()) {
@@ -179,14 +180,30 @@ public class Porter {
 							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 									parser.getString() + " is not a valid value for 'duplicate'");
 						}
+					} else if (key.equals("attributes")) {
+						try {
+							attributes = Attributes.valueOf(parser.getString().toUpperCase());
+						} catch (IllegalArgumentException e) {
+							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+									parser.getString() + " is not a valid value for 'attributes'");
+						}
+					} else {
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER, key
+								+ " is not an expected key in the json");
 					}
 				}
 			}
 		}
 
-		Map<String, Long> ids = new HashMap<>();
-
 		String userId = getUserName(sessionId, manager);
+		boolean rootUser = rootUserNames.contains(userId);
+		boolean allAttributes = attributes == Attributes.ALL;
+		if (allAttributes && !rootUser) {
+			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES,
+					"Only root users may import with Attributes.ALL");
+		}
+
+		Map<String, Long> ids = new HashMap<>();
 		int linum = 0;
 
 		try (BufferedReader data = new BufferedReader(new InputStreamReader(body))) {
@@ -227,7 +244,7 @@ public class Porter {
 					table = processTableHeader(line);
 				} else {
 					processTuple(table, line, userId, jpqlCache, ids, idCache, manager,
-							userTransaction, duplicateAction);
+							userTransaction, duplicateAction, attributes, rootUser, allAttributes);
 				}
 			}
 			if (table != null) {
@@ -236,18 +253,16 @@ public class Porter {
 
 		} catch (IOException e) {
 			throw new IcatException(IcatExceptionType.VALIDATION, e.getClass() + " "
-					+ e.getMessage());
+					+ e.getMessage(), linum);
 		} catch (IcatException e) {
-			throw new IcatException(e.getType(), e.getMessage() + " at line " + linum);
+			throw new IcatException(e.getType(), e.getMessage() + " at line " + linum, linum);
 		} catch (LexerException | ParserException e) {
 			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage()
-					+ " at line " + linum);
+					+ " at line " + linum, linum);
 		} catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass()
-					.getSimpleName() + " " + e.getMessage() + " at line " + linum);
+					.getSimpleName() + " " + e.getMessage() + " at line " + linum, linum);
 		}
-		return Response.ok().build();
-
 	}
 
 	private Session getSession(String sessionId, EntityManager manager) throws IcatException {
@@ -280,10 +295,12 @@ public class Porter {
 	private void processTuple(Table table, String line, String userId,
 			Map<String, EntityBaseBean> cache, Map<String, Long> ids,
 			LinkedHashMap<Long, EntityBaseBean> idCache, EntityManager manager,
-			UserTransaction userTransaction, DuplicateAction duplicateAction) throws IcatException,
+			UserTransaction userTransaction, DuplicateAction duplicateAction,
+			Attributes attributes, boolean rootUser, boolean allAttributes) throws IcatException,
 			LexerException, ParserException, IllegalArgumentException, InvocationTargetException,
 			IllegalAccessException {
-		logger.debug("Requested add " + line + " to " + table.getName());
+		logger.debug("Requested add " + line + " to " + table.getName()
+				+ (rootUser ? " as rootUser" : ""));
 		Input input = new Input(Tokenizer.getTokens(line));
 		List<TableField> tableFields = table.getTableFields();
 		EntityBaseBean bean = table.createEntity();
@@ -456,9 +473,15 @@ public class Porter {
 				}
 			}
 		}
+		boolean createTimeSet = bean.getCreateTime() != null;
+		boolean modTimeSet = bean.getModTime() != null;
+		boolean createIdSet = bean.getCreateId() != null;
+		boolean modIdSet = bean.getModId() != null;
 		Long id = null;
 		try {
-			id = beanManager.create(userId, bean, manager, userTransaction).getPk();
+			id = beanManager
+					.create(userId, bean, manager, userTransaction, rootUser, allAttributes)
+					.getPk();
 		} catch (IcatException e) {
 			if (e.getType() == IcatExceptionType.OBJECT_ALREADY_EXISTS) {
 				if (duplicateAction == DuplicateAction.IGNORE) {
@@ -468,10 +491,38 @@ public class Porter {
 				} else if (duplicateAction == DuplicateAction.CHECK) {
 					EntityBaseBean other = beanManager.lookup(bean, manager);
 					if (other == null) {// Somebody else got rid of it meanwhile
-						id = beanManager.create(userId, bean, manager, userTransaction).getPk();
+						id = beanManager.create(userId, bean, manager, userTransaction, false,
+								false).getPk();
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but it has now vanished");
 					} else { // Compare bean and other
+						if (allAttributes) {
+							if (createIdSet && !bean.getCreateId().equals(other.getCreateId())) {
+								throw new IcatException(IcatExceptionType.VALIDATION,
+										"Duplicate check fails for field \"createId\" of "
+												+ table.getName());
+							}
+							if (createTimeSet
+									&& Math.abs(bean.getCreateTime().getTime()
+											- other.getCreateTime().getTime()) > 1000) {
+								throw new IcatException(IcatExceptionType.VALIDATION,
+										"Duplicate check fails for field \"createTime\" of "
+												+ table.getName());
+							}
+							if (modIdSet && !bean.getModId().equals(other.getModId())) {
+								throw new IcatException(IcatExceptionType.VALIDATION,
+										"Duplicate check fails for field \"modId\" of "
+												+ table.getName());
+							}
+							if (modTimeSet
+									&& Math.abs(bean.getModTime().getTime()
+											- other.getModTime().getTime()) > 1000) {
+								throw new IcatException(IcatExceptionType.VALIDATION,
+										"Duplicate check fails for field \"modTime\" of "
+												+ table.getName());
+							}
+
+						}
 						Class<? extends EntityBaseBean> klass = bean.getClass();
 						Map<Field, Method> getters = eiHandler.getGetters(klass);
 						Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
@@ -549,13 +600,15 @@ public class Porter {
 				} else if (duplicateAction == DuplicateAction.OVERWRITE) {
 					EntityBaseBean other = beanManager.lookup(bean, manager);
 					if (other == null) {// Somebody else got rid of it meanwhile
-						id = beanManager.create(userId, bean, manager, userTransaction).getPk();
+						id = beanManager.create(userId, bean, manager, userTransaction, false,
+								false).getPk();
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but it has now vanished");
 					} else {
 						id = other.getId();
 						bean.setId(id);
-						beanManager.update(userId, bean, manager, userTransaction);
+						beanManager.update(userId, bean, manager, userTransaction, rootUser,
+								allAttributes);
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but DuplicateAction is OVERWRITE");
 					}
@@ -618,6 +671,9 @@ public class Porter {
 							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 									parser.getString() + " is not a valid value for 'attributes'");
 						}
+					} else {
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER, key
+								+ " is not an expected key in the json");
 					}
 				}
 			}

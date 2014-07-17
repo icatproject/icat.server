@@ -41,7 +41,7 @@ import org.icatproject.Rule;
 import org.icatproject.User;
 import org.icatproject.UserGroup;
 
-public class TSession {
+public class WSession {
 	public enum ParameterApplicability {
 		DATASET, DATAFILE, SAMPLE, INVESTIGATION
 	};
@@ -54,7 +54,7 @@ public class TSession {
 
 	private final String sessionId;
 
-	public TSession() throws MalformedURLException, IcatException_Exception {
+	public WSession() throws MalformedURLException, IcatException_Exception {
 		String url = System.getProperty("serverUrl");
 		System.out.println("Using ICAT service at " + url);
 		final URL icatUrl = new URL(url + "/ICATService/ICAT?wsdl");

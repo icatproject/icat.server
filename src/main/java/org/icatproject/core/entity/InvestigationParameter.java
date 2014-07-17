@@ -35,9 +35,9 @@ public class InvestigationParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper)
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser)
 			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper);
+		super.preparePersist(modId, manager, gateKeeper, rootUser);
 		this.id = null;
 		if (type == null) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,

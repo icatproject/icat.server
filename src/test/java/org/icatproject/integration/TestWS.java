@@ -71,7 +71,7 @@ import org.junit.Test;
 public class TestWS {
 
 	private static Random random;
-	private static TSession session;
+	private static WSession session;
 
 	// @AfterClass
 	public static void afterClass() throws Exception {
@@ -83,7 +83,7 @@ public class TestWS {
 	public static void beforeClass() throws Exception {
 		try {
 			random = new Random();
-			session = new TSession();
+			session = new WSession();
 			session.setAuthz();
 			session.clearAuthz();
 			session.setAuthz();

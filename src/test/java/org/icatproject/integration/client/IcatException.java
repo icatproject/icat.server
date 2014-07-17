@@ -1,5 +1,6 @@
 package org.icatproject.integration.client;
 
+@SuppressWarnings("serial")
 public class IcatException extends Exception {
 
 	public enum IcatExceptionType {
@@ -28,16 +29,12 @@ public class IcatException extends Exception {
 		return offset;
 	}
 
-//	public void setOffset(int offset) {
-//		this.offset = offset;
-//	}
-
-	// public IcatExceptionType getType() {
-	// return type;
-	// }
+	public IcatExceptionType getType() {
+		return type;
+	}
 
 	public void setType(IcatExceptionType type) {
 		this.type = type;
 	}
-}
 
+}

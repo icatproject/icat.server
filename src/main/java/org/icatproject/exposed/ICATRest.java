@@ -126,7 +126,7 @@ public class ICATRest {
 	@POST
 	@Path("port")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response importData(@Context HttpServletRequest request) throws IcatException,
+	public void importData(@Context HttpServletRequest request) throws IcatException,
 			IOException {
 		if (!ServletFileUpload.isMultipartContent(request)) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Multipart content expected");
@@ -135,7 +135,6 @@ public class ICATRest {
 		ServletFileUpload upload = new ServletFileUpload();
 		String jsonString = null;
 		String name = null;
-		Response result = null;
 
 		// Parse the request
 		try {
@@ -148,7 +147,6 @@ public class ICATRest {
 					String value = Streams.asString(stream);
 					if (fieldName.equals("json")) {
 						jsonString = value;
-
 					} else {
 						throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Form field "
 								+ fieldName + "is not recognised");
@@ -157,10 +155,9 @@ public class ICATRest {
 					if (name == null) {
 						name = item.getName();
 					}
-					result = porter.importData(jsonString, stream, manager, userTransaction);
+					porter.importData(jsonString, stream, manager, userTransaction, rootUserNames);
 				}
 			}
-			return result;
 		} catch (FileUploadException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}

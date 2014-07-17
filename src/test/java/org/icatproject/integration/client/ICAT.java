@@ -1,12 +1,14 @@
 package org.icatproject.integration.client;
 
-import static org.junit.Assert.fail;
-
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,12 +31,17 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-
 import org.icatproject.integration.client.IcatException.IcatExceptionType;
+import org.icatproject.integration.client.Session.Attributes;
+import org.icatproject.integration.client.Session.DuplicateAction;
 
 public class ICAT {
 
@@ -62,9 +69,31 @@ public class ICAT {
 		checkStatus(response);
 		HttpEntity entity = response.getEntity();
 		if (entity != null) {
-			if (!EntityUtils.toString(entity).isEmpty()) {
-				throw new IcatException(IcatExceptionType.INTERNAL,
-						"No http entity expected in response");
+			String error = EntityUtils.toString(entity);
+			if (!error.isEmpty()) {
+				try (JsonParser parser = Json.createParser(new ByteArrayInputStream(error
+						.getBytes()))) {
+					String code = null;
+					String message = null;
+					String key = "";
+					while (parser.hasNext()) {
+						JsonParser.Event event = parser.next();
+						if (event == Event.KEY_NAME) {
+							key = parser.getString();
+						} else if (event == Event.VALUE_STRING) {
+							if (key.equals("code")) {
+								code = parser.getString();
+							} else if (key.equals("message")) {
+								message = parser.getString();
+							}
+						}
+					}
+					if (code != null && message != null) {
+						throw new IcatException(IcatExceptionType.valueOf(code), message);
+					}
+					throw new IcatException(IcatExceptionType.INTERNAL,
+							"No http entity expected in response " + error);
+				}
 			}
 		}
 	}
@@ -117,9 +146,7 @@ public class ICAT {
 					throw new IcatException(IcatExceptionType.INTERNAL, "TestingClient " + error);
 				}
 				throw new IcatException(IcatExceptionType.valueOf(code), message);
-
 			}
-
 		}
 	}
 
@@ -224,6 +251,37 @@ public class ICAT {
 		} catch (IOException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
+	}
+
+	public void importMetaData(String sessionId, Path path, DuplicateAction duplicate,
+			Attributes attributes) throws IcatException {
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		JsonGenerator gen = Json.createGenerator(baos);
+		gen.writeStartObject().write("sessionId", sessionId)
+				.write("duplicate", duplicate.name().toLowerCase())
+				.write("attributes", attributes.name().toLowerCase()).writeEnd().close();
+
+		URI uri = getUri(getUriBuilder("port"));
+
+		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			InputStream stream = new BufferedInputStream(Files.newInputStream(path));
+
+			HttpEntity httpEntity = MultipartEntityBuilder
+					.create()
+					.addPart("json", new StringBody(baos.toString(), ContentType.TEXT_PLAIN))
+					.addPart("file",
+							new InputStreamBody(stream, ContentType.APPLICATION_OCTET_STREAM, ""))
+					.build();
+			HttpPost httpPost = new HttpPost(uri);
+			httpPost.setEntity(httpEntity);
+			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+				expectNothing(response);
+			}
+		} catch (IOException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+
 	}
 
 }

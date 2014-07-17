@@ -18,8 +18,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
@@ -306,10 +304,27 @@ public abstract class EntityBaseBean implements Serializable {
 	 * If this method is overridden it should be called as well by super.preparePersist(). Note that
 	 * it recurses down though all to-many relationships.
 	 */
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper)
-			throws IcatException {
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper,
+			boolean allAttributes) throws IcatException {
 		this.id = null;
-		this.modId = modId;
+		if (!allAttributes || createId == null) {
+			createId = modId;
+		}
+		if (!allAttributes || this.modId == null) {
+			this.modId = modId;
+		}
+		Date now = null;
+		if (!allAttributes || createTime == null) {
+			now = new Date();
+			createTime = now;
+		}
+		if (!allAttributes || modTime == null) {
+			if (now == null) {
+				now = new Date();
+			}
+			modTime = now;
+		}
+
 		Class<? extends EntityBaseBean> klass = this.getClass();
 		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
 		Map<Field, Method> getters = eiHandler.getGetters(klass);
@@ -322,7 +337,7 @@ public abstract class EntityBaseBean implements Serializable {
 					if (!collection.isEmpty()) {
 						Method rev = r.getInverseSetter();
 						for (EntityBaseBean bean : collection) {
-							bean.preparePersist(modId, manager, gateKeeper);
+							bean.preparePersist(modId, manager, gateKeeper, allAttributes);
 							rev.invoke(bean, this);
 						}
 					}
@@ -332,26 +347,6 @@ public abstract class EntityBaseBean implements Serializable {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Automatically updates deleted, modTime, createTime and modId when entity is created
-	 */
-	@PrePersist
-	public void prePersist() {
-		if (modId == null) {
-			throw new RuntimeException("modId not set on " + this);
-		}
-		createId = modId;
-		createTime = modTime = new Date();
-	}
-
-	/**
-	 * Automatically updates modTime when entity is persisted or merged
-	 */
-	@PreUpdate
-	public void preUpdate() {
-		modTime = new Date();
 	}
 
 	public EntityBaseBean pruned(boolean one, int hereVarNum, List<Step> steps, long maxEntities,

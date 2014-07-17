@@ -1,0 +1,51 @@
+# Version of ICAT server for which this matches
+4.3
+
+Facility ( name:0, daysUntilRelease:1, createId:2, createTime:3)
+"Test port facility", 90, "Zorro", 1920-05-16T16:58:26.12Z
+
+InvestigationType (facility(name:0), name:1)
+"Test port facility", "atype"
+"Test port facility", "btype"
+
+Investigation(facility(name:0), name:1, visitId:2, type(facility(name:0), name:3),title:4)
+"Test port facility", "expt1", "one", "atype", "a title"
+
+DatasetType(facility(name:0), name:1)
+"Test port facility", "calibration"
+
+Dataset (investigation(facility(name:0), name:1, visitId:2) , name:3, type(facility(name:0), name:4), complete:5, startDate:6)
+"Test port facility", "expt1", "one", "ds1", "calibration", true, 2014-05-16T16:58:26.12+12:30
+"Test port facility", "expt1", "one", "ds2", "calibration", null, 2014-05-16T16:58:26.12Z
+"Test port facility", "expt1", "one", "ds3", "calibration", False, null,  2014-05-16T16:58:26.12
+
+ParameterType(facility(name:0),name:1, units:2, minimumNumericValue:3, applicableToInvestigation:4, valueType:5)
+"Test port facility", "temp", "degrees Kelvin", 73.4, true, NUMERIC
+"Test port facility", "pressure", "kPa", 73, null, numERIC
+
+Datafile(dataset(investigation(facility(name:0), name:1, visitId:2), name:3), name:4, fileSize:5)
+"Test port facility", "expt1", "one", "ds1", "df1", 12345
+"Test port facility", "expt1", "one", "ds1", "df2", 12345
+"Test port facility", "expt1", "one", "ds1", "df3", 12345
+
+Application(facility(name:0), name:1, version:2)
+"Test port facility", "aprog", "1.2.3"
+"Test port facility", "aprog", "1.2.6"
+
+DataCollection(?:0)
+"a"
+"b"
+"c"
+
+DataCollectionDatafile(datafile(dataset(investigation(facility(name:0), name:1, visitId:2), name:3), name:4), dataCollection(?:5))
+"Test port facility", "expt1", "one", "ds1", "df1",  "a"
+"Test port facility", "expt1", "one", "ds1", "df2",  "b"
+
+
+Job(application(facility(name:0), name:1, version:2), inputDataCollection(?:3), outputDataCollection(?:4))
+"Test port facility", "aprog", "1.2.3", "a", "b"
+
+
+
+
+

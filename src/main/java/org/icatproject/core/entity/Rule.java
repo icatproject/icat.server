@@ -287,9 +287,9 @@ public class Rule extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper)
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser)
 			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper);
+		super.preparePersist(modId, manager, gateKeeper, rootUser);
 		this.fixup(manager, gateKeeper);
 		logger.debug("PreparePersist of Rule for " + this.crudFlags + " of " + this.what);
 	}
