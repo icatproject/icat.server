@@ -92,6 +92,8 @@ public class Porter {
 	@EJB
 	PropertyHandler propertyHandler;
 
+	private Set<String> rootUserNames;
+
 	private static final Logger logger = Logger.getLogger(Porter.class);
 	private final static Pattern tsRegExp = Pattern
 			.compile("(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})(\\.\\d+)?(.*?)");
@@ -104,6 +106,7 @@ public class Porter {
 	@PostConstruct
 	void init() {
 		importCacheSize = propertyHandler.getImportCacheSize();
+		rootUserNames = propertyHandler.getRootUserNames();
 	}
 
 	private long importCacheSize;
@@ -138,7 +141,7 @@ public class Porter {
 	}
 
 	public void importData(String jsonString, InputStream body, EntityManager manager,
-			UserTransaction userTransaction, Set<String> rootUserNames) throws IcatException {
+			UserTransaction userTransaction) throws IcatException {
 
 		@SuppressWarnings("serial")
 		LinkedHashMap<String, EntityBaseBean> jpqlCache = new LinkedHashMap<String, EntityBaseBean>() {
@@ -196,9 +199,8 @@ public class Porter {
 		}
 
 		String userId = getUserName(sessionId, manager);
-		boolean rootUser = rootUserNames.contains(userId);
 		boolean allAttributes = attributes == Attributes.ALL;
-		if (allAttributes && !rootUser) {
+		if (allAttributes && !rootUserNames.contains(userId)) {
 			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES,
 					"Only root users may import with Attributes.ALL");
 		}
@@ -244,7 +246,7 @@ public class Porter {
 					table = processTableHeader(line);
 				} else {
 					processTuple(table, line, userId, jpqlCache, ids, idCache, manager,
-							userTransaction, duplicateAction, attributes, rootUser, allAttributes);
+							userTransaction, duplicateAction, attributes, allAttributes);
 				}
 			}
 			if (table != null) {
@@ -296,11 +298,10 @@ public class Porter {
 			Map<String, EntityBaseBean> cache, Map<String, Long> ids,
 			LinkedHashMap<Long, EntityBaseBean> idCache, EntityManager manager,
 			UserTransaction userTransaction, DuplicateAction duplicateAction,
-			Attributes attributes, boolean rootUser, boolean allAttributes) throws IcatException,
-			LexerException, ParserException, IllegalArgumentException, InvocationTargetException,
+			Attributes attributes, boolean allAttributes) throws IcatException, LexerException,
+			ParserException, IllegalArgumentException, InvocationTargetException,
 			IllegalAccessException {
-		logger.debug("Requested add " + line + " to " + table.getName()
-				+ (rootUser ? " as rootUser" : ""));
+		logger.debug("Requested add " + line + " to " + table.getName());
 		Input input = new Input(Tokenizer.getTokens(line));
 		List<TableField> tableFields = table.getTableFields();
 		EntityBaseBean bean = table.createEntity();
@@ -479,9 +480,7 @@ public class Porter {
 		boolean modIdSet = bean.getModId() != null;
 		Long id = null;
 		try {
-			id = beanManager
-					.create(userId, bean, manager, userTransaction, rootUser, allAttributes)
-					.getPk();
+			id = beanManager.create(userId, bean, manager, userTransaction, allAttributes).getPk();
 		} catch (IcatException e) {
 			if (e.getType() == IcatExceptionType.OBJECT_ALREADY_EXISTS) {
 				if (duplicateAction == DuplicateAction.IGNORE) {
@@ -491,8 +490,8 @@ public class Porter {
 				} else if (duplicateAction == DuplicateAction.CHECK) {
 					EntityBaseBean other = beanManager.lookup(bean, manager);
 					if (other == null) {// Somebody else got rid of it meanwhile
-						id = beanManager.create(userId, bean, manager, userTransaction, false,
-								false).getPk();
+						id = beanManager.create(userId, bean, manager, userTransaction, false)
+								.getPk();
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but it has now vanished");
 					} else { // Compare bean and other
@@ -600,15 +599,14 @@ public class Porter {
 				} else if (duplicateAction == DuplicateAction.OVERWRITE) {
 					EntityBaseBean other = beanManager.lookup(bean, manager);
 					if (other == null) {// Somebody else got rid of it meanwhile
-						id = beanManager.create(userId, bean, manager, userTransaction, false,
-								false).getPk();
+						id = beanManager.create(userId, bean, manager, userTransaction, false)
+								.getPk();
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but it has now vanished");
 					} else {
 						id = other.getId();
 						bean.setId(id);
-						beanManager.update(userId, bean, manager, userTransaction, rootUser,
-								allAttributes);
+						beanManager.update(userId, bean, manager, userTransaction, allAttributes);
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but DuplicateAction is OVERWRITE");
 					}

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -56,13 +55,6 @@ import org.icatproject.core.manager.PropertyHandler;
 @TransactionManagement(TransactionManagementType.BEAN)
 public class ICATRest {
 
-	// TODO Need to check that all modes (CHECK, IGNORE etc) work properly for import and that the
-	// system attributes can only be set by somebody in root user names
-
-	// TODO avoid processing IDS one by one for export
-
-	// TODO avoid duplicate code in two modes of export
-
 	private static Logger logger = Logger.getLogger(ICATRest.class);
 
 	private Map<String, Authenticator> authPlugins;
@@ -84,7 +76,7 @@ public class ICATRest {
 	@EJB
 	PropertyHandler propertyHandler;
 
-	private Set<String> rootUserNames;
+
 
 	@Resource
 	private UserTransaction userTransaction;
@@ -126,8 +118,7 @@ public class ICATRest {
 	@POST
 	@Path("port")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public void importData(@Context HttpServletRequest request) throws IcatException,
-			IOException {
+	public void importData(@Context HttpServletRequest request) throws IcatException, IOException {
 		if (!ServletFileUpload.isMultipartContent(request)) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Multipart content expected");
 		}
@@ -155,7 +146,7 @@ public class ICATRest {
 					if (name == null) {
 						name = item.getName();
 					}
-					porter.importData(jsonString, stream, manager, userTransaction, rootUserNames);
+					porter.importData(jsonString, stream, manager, userTransaction);
 				}
 			}
 		} catch (FileUploadException e) {
@@ -167,7 +158,6 @@ public class ICATRest {
 	private void init() {
 		authPlugins = propertyHandler.getAuthPlugins();
 		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
-		rootUserNames = gatekeeper.getRootUserNames();
 	}
 
 	@POST

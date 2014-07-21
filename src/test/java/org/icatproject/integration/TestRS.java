@@ -4,11 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import org.icatproject.Facility;
 import org.icatproject.integration.client.ICAT;
@@ -51,7 +53,6 @@ public class TestRS {
 		credentials.put("password", "password");
 		Session session = icat.login("db", credentials);
 		assertEquals("db/root", session.getUserName());
-		Thread.sleep(500);
 		double remainingMinutes = session.getRemainingMinutes();
 		assertTrue(remainingMinutes > 119 && remainingMinutes < 120);
 		session.logout();
@@ -62,9 +63,10 @@ public class TestRS {
 			// No action
 		}
 		session = icat.login("db", credentials);
+		Thread.sleep(500);
 		remainingMinutes = session.getRemainingMinutes();
 		session.refresh();
-		assertTrue(session.getRemainingMinutes() < remainingMinutes);
+		assertTrue(session.getRemainingMinutes() > remainingMinutes);
 	}
 
 	private static void ts(String msg) {
@@ -81,6 +83,97 @@ public class TestRS {
 	@Test
 	public void importMetaDataAll() throws Exception {
 		importMetaData(Attributes.ALL, "Zorro");
+	}
+
+	@Test
+	public void exportMetaDataDumpUser() throws Exception {
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "piOne");
+		credentials.put("password", "piOne");
+		exportMetaDataDump(credentials);
+	}
+
+	@Test
+	public void exportMetaDataDumpRoot() throws Exception {
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "root");
+		credentials.put("password", "password");
+		exportMetaDataDump(credentials);
+	}
+
+	private void exportMetaDataDump(Map<String, String> credentials) throws Exception {
+		wSession.clear();
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Session session = icat.login("db", credentials);
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+
+		Map<String, String> rootCredentials = new HashMap<>();
+		rootCredentials.put("username", "root");
+		rootCredentials.put("password", "password");
+		Session rootSession = icat.login("db", rootCredentials);
+
+		// Get known configuration
+		rootSession.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
+		wSession.setAuthz();
+		wSession.clearAuthz();
+		wSession.setAuthz();
+
+		Path dump1 = Files.createTempFile("dump1", ".tmp");
+		Path dump2 = Files.createTempFile("dump2", ".tmp");
+		start = System.currentTimeMillis();
+		try (InputStream stream = session.exportMetaData(Attributes.ALL)) {
+			Files.copy(stream, dump1, StandardCopyOption.REPLACE_EXISTING);
+		}
+		ts("Create dump1 for " + credentials.get("username"));
+		wSession.clear();
+		wSession.clearAuthz();
+
+		rootSession.importMetaData(dump1, DuplicateAction.THROW, Attributes.ALL);
+		start = System.currentTimeMillis();
+		try (InputStream stream = session.exportMetaData(Attributes.ALL)) {
+			Files.copy(stream, dump2, StandardCopyOption.REPLACE_EXISTING);
+		}
+		ts("Create dump2 for " + credentials.get("username"));
+		assertEquals(dump1.toFile().length(), dump2.toFile().length());
+		Files.delete(dump1);
+		Files.delete(dump2);
+	}
+
+	@Test
+	public void exportMetaDataQuery() throws Exception {
+		wSession.clear();
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "root");
+		credentials.put("password", "password");
+		Session session = icat.login("db", credentials);
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+
+		// Get known configuration
+		session.importMetaData(path, DuplicateAction.CHECK, Attributes.ALL);
+		wSession.setAuthz();
+		wSession.clearAuthz();
+		wSession.setAuthz();
+
+		Path dump = Files.createTempFile("dump1", ".tmp");
+		start = System.currentTimeMillis();
+		try (InputStream stream = session.exportMetaData("Investigation INCLUDE Facility, Dataset",
+				Attributes.USER)) {
+			Files.copy(stream, dump, StandardCopyOption.REPLACE_EXISTING);
+		}
+		ts("Create dump USER");
+		assertEquals(1031, dump.toFile().length());
+		session.importMetaData(dump, DuplicateAction.CHECK, Attributes.USER);
+
+		start = System.currentTimeMillis();
+		try (InputStream stream = session.exportMetaData("Investigation INCLUDE Facility, Dataset",
+				Attributes.ALL)) {
+			Files.copy(stream, dump, StandardCopyOption.REPLACE_EXISTING);
+		}
+		ts("Create dump ALL");
+		assertEquals(1563, dump.toFile().length());
+		session.importMetaData(dump, DuplicateAction.CHECK, Attributes.ALL);
+		Files.delete(dump);
 	}
 
 	@Test

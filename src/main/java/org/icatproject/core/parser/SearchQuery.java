@@ -163,8 +163,7 @@ public class SearchQuery {
 
 		boolean restricted;
 		List<Rule> rules = null;
-		if (gateKeeper.getRootUserNames().contains(userId)
-				&& gateKeeper.getRootSpecials().contains(beanName)) {
+		if (gateKeeper.getRootUserNames().contains(userId)) {
 			logger.info("\"Root\" user " + userId + " is allowed READ to " + beanName);
 			restricted = false;
 		} else if (gateKeeper.getPublicTables().contains(beanName)) {

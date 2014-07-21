@@ -1,7 +1,6 @@
 package org.icatproject.core.manager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -48,10 +47,6 @@ public class GateKeeper {
 	private final static Pattern tsRegExp = Pattern
 			.compile("\\{\\s*ts\\s+\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\s*\\}");
 
-	public Set<String> getRootSpecials() {
-		return rootSpecials;
-	}
-
 	public Set<String> getRootUserNames() {
 		return rootUserNames;
 	}
@@ -82,9 +77,6 @@ public class GateKeeper {
 
 	private Set<String> publicTables = new ConcurrentSkipListSet<>();
 	private Map<String, Set<String>> publicSteps = new ConcurrentSkipListMap<>();
-
-	private Set<String> rootSpecials = new HashSet<String>(Arrays.asList("User", "Grouping",
-			"UserGroup", "Rule", "PublicStep"));
 
 	private Set<String> rootUserNames;
 
@@ -129,7 +121,7 @@ public class GateKeeper {
 		updatePublicTables();
 		updatePublicSteps();
 
-		logger.info("Created GateKeeper singleton" + rootSpecials);
+		logger.info("Created GateKeeper singleton");
 	}
 
 	@PreDestroy()
@@ -161,10 +153,8 @@ public class GateKeeper {
 		Class<? extends EntityBaseBean> objectClass = object.getClass();
 		String simpleName = objectClass.getSimpleName();
 		if (rootUserNames.contains(user)) {
-			if (rootSpecials.contains(simpleName)) {
-				logger.info("\"Root\" user " + user + " is allowed " + access + " to " + simpleName);
-				return;
-			}
+			logger.info("\"Root\" user " + user + " is allowed " + access + " to " + simpleName);
+			return;
 		}
 
 		String qName = null;
@@ -316,10 +306,8 @@ public class GateKeeper {
 		Class<? extends EntityBaseBean> objectClass = object.getClass();
 		String simpleName = objectClass.getSimpleName();
 		if (rootUserNames.contains(userId)) {
-			if (rootSpecials.contains(simpleName)) {
-				logger.info("\"Root\" user " + userId + " is allowed READ to " + simpleName);
-				return beans;
-			}
+			logger.info("\"Root\" user " + userId + " is allowed READ to " + simpleName);
+			return beans;
 		}
 
 		TypedQuery<String> query = manager.createNamedQuery(Rule.INCLUDE_QUERY, String.class)

@@ -18,11 +18,11 @@ import javax.json.Json;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
+import javax.json.stream.JsonParsingException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.ParseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -108,8 +108,7 @@ public class ICAT {
 		return EntityUtils.toString(entity);
 	}
 
-	private void checkStatus(HttpResponse response) throws IcatException, ParseException,
-			IOException {
+	private void checkStatus(HttpResponse response) throws IcatException, IOException {
 		StatusLine status = response.getStatusLine();
 		if (status == null) {
 			throw new IcatException(IcatExceptionType.INTERNAL, "Status line returned is empty");
@@ -124,6 +123,7 @@ public class ICAT {
 				error = EntityUtils.toString(entity);
 			}
 
+			System.out.println(error);
 			try (JsonParser parser = Json.createParser(new ByteArrayInputStream(error.getBytes()))) {
 				String code = null;
 				String message = null;
@@ -143,9 +143,11 @@ public class ICAT {
 				}
 
 				if (code == null || message == null) {
-					throw new IcatException(IcatExceptionType.INTERNAL, "TestingClient " + error);
+					throw new IcatException(IcatExceptionType.INTERNAL, error);
 				}
 				throw new IcatException(IcatExceptionType.valueOf(code), message);
+			} catch (JsonParsingException e) {
+				throw new IcatException(IcatExceptionType.INTERNAL, error);
 			}
 		}
 	}
@@ -280,6 +282,56 @@ public class ICAT {
 			}
 		} catch (IOException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+
+	}
+
+	public InputStream exportMetaData(String sessionId, String query, Attributes attributes)
+			throws IcatException {
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		JsonGenerator gen = Json.createGenerator(baos);
+		gen.writeStartObject().write("sessionId", sessionId);
+		if (query == null) {
+			gen.write("type", "dump");
+		} else {
+			gen.write("type", "query");
+			gen.write("query", query);
+		}
+		gen.write("attributes", attributes.name().toLowerCase()).writeEnd().close();
+
+		URIBuilder uriBuilder = getUriBuilder("port");
+		uriBuilder.setParameter("json", baos.toString());
+		URI uri = getUri(uriBuilder);
+
+		CloseableHttpResponse response = null;
+		CloseableHttpClient httpclient = null;
+		HttpGet httpGet = new HttpGet(uri);
+
+		boolean closeNeeded = true;
+		try {
+			httpclient = HttpClients.createDefault();
+			response = httpclient.execute(httpGet);
+			checkStatus(response);
+			closeNeeded = false;
+			return new HttpInputStream(httpclient, response);
+		} catch (IOException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		} finally {
+			if (closeNeeded && httpclient != null) {
+				try {
+					if (response != null) {
+						try {
+							response.close();
+						} catch (Exception e) {
+							// Ignore it
+						}
+					}
+					httpclient.close();
+				} catch (IOException e) {
+					// Ignore it
+				}
+			}
 		}
 
 	}

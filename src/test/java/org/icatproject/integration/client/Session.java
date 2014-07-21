@@ -1,6 +1,9 @@
 package org.icatproject.integration.client;
 
+import java.io.InputStream;
 import java.nio.file.Path;
+
+import org.icatproject.integration.client.Session.Attributes;
 
 public class Session {
 
@@ -53,6 +56,14 @@ public class Session {
 	public void importMetaData(Path path, DuplicateAction duplicateAction, Attributes attributes)
 			throws IcatException {
 		icat.importMetaData(sessionId, path, duplicateAction, attributes);
+	}
+
+	public InputStream exportMetaData(Attributes attributes) throws IcatException {
+		return icat.exportMetaData(sessionId, null, attributes);
+	}
+
+	public InputStream exportMetaData(String query, Attributes attributes) throws IcatException {
+		return icat.exportMetaData(sessionId, query, attributes);
 	}
 
 }
