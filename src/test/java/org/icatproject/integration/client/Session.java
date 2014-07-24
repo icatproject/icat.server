@@ -3,8 +3,6 @@ package org.icatproject.integration.client;
 import java.io.InputStream;
 import java.nio.file.Path;
 
-import org.icatproject.integration.client.Session.Attributes;
-
 public class Session {
 
 	public enum Attributes {
@@ -64,6 +62,14 @@ public class Session {
 
 	public InputStream exportMetaData(String query, Attributes attributes) throws IcatException {
 		return icat.exportMetaData(sessionId, query, attributes);
+	}
+
+	public String search(String query) throws IcatException {
+		return icat.search(sessionId, query);
+	}
+
+	public String create(String bean) throws IcatException {
+		return icat.create(sessionId, bean);
 	}
 
 }

@@ -357,19 +357,6 @@ public class TestEntityInfo {
 		testGetters(Job.class, 5);
 	}
 
-	private void testGetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
-		Map<Field, Method> results = eiHandler.getGetters(klass);
-		assertEquals(klass.getSimpleName() + " count", count, results.size());
-		for (Entry<Field, Method> entry : results.entrySet()) {
-			String cap = entry.getKey().getName();
-			cap = Character.toUpperCase(cap.charAt(0)) + cap.substring(1);
-			String m = entry.getValue().getName();
-			assertTrue(klass.getSimpleName() + " value ",
-					m.equals("get" + cap) || m.equals("is" + cap));
-		}
-
-	}
-
 	@Test
 	public void setters() throws Exception {
 		testSetters(Investigation.class, 20);
@@ -390,11 +377,26 @@ public class TestEntityInfo {
 		testSettersForUpdate(User.class, 2);
 		testSettersForUpdate(ParameterType.class, 15);
 		testSettersForUpdate(Job.class, 4);
+		testSettersForUpdate(Facility.class, 5);
+		testSettersForUpdate(InvestigationType.class, 3);
+	}
+
+	private void testGetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {
+		Map<Field, Method> results = eiHandler.getGetters(klass);
+		assertEquals(klass.getSimpleName() + " count", count, results.size());
+		for (Entry<Field, Method> entry : results.entrySet()) {
+			String cap = entry.getKey().getName();
+			cap = Character.toUpperCase(cap.charAt(0)) + cap.substring(1);
+			String m = entry.getValue().getName();
+			assertTrue(klass.getSimpleName() + " value ",
+					m.equals("get" + cap) || m.equals("is" + cap));
+		}
 	}
 
 	private void testSettersForUpdate(Class<? extends EntityBaseBean> klass, int count)
 			throws Exception {
 		Map<Field, Method> results = eiHandler.getSettersForUpdate(klass);
+
 		assertEquals(klass.getSimpleName() + " count", count, results.size());
 		for (Entry<Field, Method> entry : results.entrySet()) {
 			String cap = entry.getKey().getName();

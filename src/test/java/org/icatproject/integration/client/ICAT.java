@@ -336,4 +336,42 @@ public class ICAT {
 
 	}
 
+	public String search(String sessionId, String query) throws IcatException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		JsonGenerator gen = Json.createGenerator(baos);
+		gen.writeStartObject().write("sessionId", sessionId).write("query", query).writeEnd()
+				.close();
+
+		URIBuilder uriBuilder = getUriBuilder("entity");
+		uriBuilder.setParameter("json", baos.toString());
+		URI uri = getUri(uriBuilder);
+
+		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			HttpGet httpGet = new HttpGet(uri);
+			try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
+				return getString(response);
+			}
+		} catch (IOException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+
+	}
+
+	public String create(String sessionId, String entity) throws IcatException {
+		URI uri = getUri(getUriBuilder("entity"));
+		List<NameValuePair> formparams = new ArrayList<>();
+		formparams.add(new BasicNameValuePair("json", "{\"sessionId\":\"" + sessionId
+				+ "\",\"entity\":" + entity + "}"));
+		System.out.println(formparams.get(0));
+		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			HttpPost httpPost = new HttpPost(uri);
+			httpPost.setEntity(new UrlEncodedFormEntity(formparams));
+			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+				return getString(response);
+			}
+		} catch (IOException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+	}
+
 }

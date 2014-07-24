@@ -12,6 +12,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.icatproject.EntityBaseBean;
 import org.icatproject.Facility;
 import org.icatproject.integration.client.ICAT;
 import org.icatproject.integration.client.IcatException;
@@ -43,6 +44,30 @@ public class TestRS {
 			e.printStackTrace();
 			throw e;
 		}
+	}
+
+	@Test
+	public void search() throws Exception {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "root");
+		credentials.put("password", "password");
+		Session session = icat.login("db", credentials);
+		System.out.println(session.search("InvestigationType INCLUDE 1"));
+		System.out.println(session.search("Facility INCLUDE InvestigationType"));
+	}
+
+	@Test
+	public void create() throws Exception {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "root");
+		credentials.put("password", "password");
+		Session session = icat.login("db", credentials);
+		Long fid = ((EntityBaseBean) wSession.search("Facility INCLUDE InvestigationType").get(0))
+				.getId();
+		System.out.println(session.create("[{\"InvestigationType\":{\"facility\":{\"id\":" + fid
+				+ "},\"name\":\"ztype\"}}]"));
 	}
 
 	@Test

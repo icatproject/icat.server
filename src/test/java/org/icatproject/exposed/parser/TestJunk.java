@@ -1,5 +1,7 @@
 package org.icatproject.exposed.parser;
 
+import static org.junit.Assert.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
@@ -21,7 +23,25 @@ public class TestJunk {
 	@Test()
 	public void testDataCollection() throws Exception {
 
-		JsonObject model = Json.createObjectBuilder().add("sessionId", "aaa-bbb")
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		JsonGenerator gen = Json.createGenerator(baos);
+
+		gen.writeStartArray();
+		gen.writeStartObject();
+		gen.writeStartObject("c");
+		gen.write("a", "b");
+		gen.writeEnd();
+		gen.writeEnd();
+		gen.writeEnd();
+		gen.close();
+		System.out.println(baos.toString());
+
+		String j = "{\"sessionId\":\"fe79139a-11a6-4359-9456-8cd905b4f3f\",\"entity\":[{\"InvestigationType\":{\"facility\":{\"id\":24907},\"name\":\"ztype\"}}]}";
+		JsonReader reader = Json.createReader(new ByteArrayInputStream(j.getBytes()));
+		JsonObject model = (JsonObject) reader.read();
+		System.out.println(model);
+
+		model = Json.createObjectBuilder().add("sessionId", "aaa-bbb")
 				.add("query", "Investigation").build();
 
 		StringWriter stWriter = new StringWriter();
@@ -29,20 +49,20 @@ public class TestJunk {
 			jsonWriter.writeObject(model);
 		}
 
-		JsonReader reader = Json.createReader(new ByteArrayInputStream(stWriter.toString()
-				.getBytes()));
+		reader = Json.createReader(new ByteArrayInputStream(stWriter.toString().getBytes()));
 		model = (JsonObject) reader.read();
 
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		JsonGenerator gen = Json.createGenerator(baos);
+		baos = new ByteArrayOutputStream();
+		gen = Json.createGenerator(baos);
 		gen.writeStartObject().write("sessionId", "ccc-ddd").write("query", "Job").writeEnd();
 		gen.close();
 		System.out.println(baos.toString());
 
+		String t = baos.toString();
+
 		String sessionId = null;
 		String query = null;
-		try (JsonParser parser = Json.createParser(new ByteArrayInputStream(baos.toString()
-				.getBytes()))) {
+		try (JsonParser parser = Json.createParser(new ByteArrayInputStream(t.getBytes()))) {
 			String key = null;
 			while (parser.hasNext()) {
 				JsonParser.Event event = parser.next();

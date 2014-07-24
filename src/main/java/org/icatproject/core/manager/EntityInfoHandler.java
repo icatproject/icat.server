@@ -583,6 +583,10 @@ public class EntityInfoHandler {
 				exportHeaderAll.toString());
 	}
 
+	/**
+	 * Set of fields that are "simple attributes". This excludes relationships, id, createId,
+	 * CreateTime, modId and modTime
+	 */
 	public Set<Field> getAttributes(Class<? extends EntityBaseBean> objectClass)
 			throws IcatException {
 		PrivateEntityInfo ei = null;
@@ -767,7 +771,10 @@ public class EntityInfoHandler {
 		}
 	}
 
-	/** map from field to its getter - includes the id */
+	/**
+	 * Map from field to getter for all fields including id but not for createId, modId, createTime
+	 * nor modTime
+	 */
 	public Map<Field, Method> getGetters(Class<? extends EntityBaseBean> objectClass)
 			throws IcatException {
 		PrivateEntityInfo ei = null;
@@ -820,6 +827,10 @@ public class EntityInfoHandler {
 		}
 	}
 
+	/**
+	 * Map from field to setter for all fields including id but not for createId, modId, createTime
+	 * nor modTime
+	 */
 	public Map<Field, Method> getSetters(Class<? extends EntityBaseBean> objectClass)
 			throws IcatException {
 		PrivateEntityInfo ei = null;
@@ -833,6 +844,10 @@ public class EntityInfoHandler {
 		}
 	}
 
+	/**
+	 * Returns the setters for those fields that are not one to many relationships and not id,
+	 * createId, modId, createTime nor modTime
+	 */
 	public Map<Field, Method> getSettersForUpdate(Class<? extends EntityBaseBean> objectClass)
 			throws IcatException {
 		PrivateEntityInfo ei = null;
@@ -846,6 +861,9 @@ public class EntityInfoHandler {
 		}
 	}
 
+	/**
+	 * Returns all string fields except for createId and modId
+	 */
 	public Map<Field, Integer> getStringFields(Class<? extends EntityBaseBean> objectClass)
 			throws IcatException {
 		PrivateEntityInfo ei = null;
@@ -859,7 +877,9 @@ public class EntityInfoHandler {
 		}
 	}
 
-	/* Returns all user settable fields (not id, createId, modId, createTime nor modTime */
+	/**
+	 * Returns all user settable fields (not id, createId, modId, createTime nor modTime
+	 */
 	public List<Field> getFields(Class<? extends EntityBaseBean> objectClass) throws IcatException {
 		PrivateEntityInfo ei = null;
 		synchronized (this.map) {
