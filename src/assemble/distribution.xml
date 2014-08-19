@@ -8,7 +8,7 @@
 
     <fileSets>
         <fileSet>
-            <outputDirectory>icat.server</outputDirectory>
+            <outputDirectory>ijp.unixbatch</outputDirectory>
             <directory>${basedir}/src/main/scripts</directory>
             <excludes>
                 <exclude>*.dump</exclude>
@@ -16,12 +16,12 @@
         </fileSet>
 
         <fileSet>
-            <outputDirectory>icat.server</outputDirectory>
+            <outputDirectory>ijp.unixbatch</outputDirectory>
             <directory>${basedir}/src/main/config</directory>
         </fileSet>
 
         <fileSet>
-            <outputDirectory>icat.server</outputDirectory>
+            <outputDirectory>ijp.unixbatch</outputDirectory>
             <directory>${basedir}</directory>
             <filtered>true</filtered>
             <includes>
@@ -33,15 +33,16 @@
 
     <dependencySets>
         <dependencySet>
-            <outputDirectory>icat.server</outputDirectory>
+            <outputDirectory>ijp.unixbatch</outputDirectory>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <includes>
-                <include>org.icatproject:icat.server</include>
+                <include>org.icatproject:ijp.unixbatch</include>
             </includes>
         </dependencySet>
 
         <dependencySet>
-            <outputDirectory>icat.server</outputDirectory>
+            <outputDirectory>
+    ijp.unixbatch</outputDirectory>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <unpack>true</unpack>
             <unpackOptions>
