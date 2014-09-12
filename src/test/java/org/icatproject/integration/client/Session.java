@@ -68,7 +68,7 @@ public class Session {
 		return icat.search(sessionId, query);
 	}
 
-	public String create(String bean) throws IcatException {
+	public long create(String bean) throws IcatException {
 		return icat.create(sessionId, bean);
 	}
 

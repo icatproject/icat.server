@@ -32,10 +32,7 @@ if arg in ["CONFIGURE", "INSTALL"]:
     if log4jProperties:actions.configure(os.path.basename(log4jProperties), [], log4jProperties)
     actions.checkNoErrors()
 
-if arg == "INSTALL":
-    icatProperties = actions.getProperties(prop_name, prop_list)
-    log4jProperties = icatProperties.get("log4j.properties")
-       
+if arg == "INSTALL":       
     for v in icatProperties["authn.list"].split():
         if "authn." + v + ".jndi" not in icatProperties:
             abort ("authn.list included " + v + " but authn." + v + ".jndi is not defined") 
@@ -113,7 +110,7 @@ if arg == "UNINSTALL":
     icatProperties = actions.getProperties(prop_name, prop_list)
     log4jProperties = icatProperties.get("log4j.properties")
     
-    actions.removeFile("icat.properties")
+    actions.removeFile(prop_name)
     if log4jProperties:
         dir, file = os.path.split(log4jProperties)
         if dir:

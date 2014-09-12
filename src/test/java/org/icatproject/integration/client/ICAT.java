@@ -357,7 +357,7 @@ public class ICAT {
 
 	}
 
-	public String create(String sessionId, String entity) throws IcatException {
+	public long create(String sessionId, String entity) throws IcatException {
 		URI uri = getUri(getUriBuilder("entity"));
 		List<NameValuePair> formparams = new ArrayList<>();
 		formparams.add(new BasicNameValuePair("json", "{\"sessionId\":\"" + sessionId
@@ -367,7 +367,7 @@ public class ICAT {
 			HttpPost httpPost = new HttpPost(uri);
 			httpPost.setEntity(new UrlEncodedFormEntity(formparams));
 			try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-				return getString(response);
+				return Long.parseLong(getString(response));
 			}
 		} catch (IOException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());

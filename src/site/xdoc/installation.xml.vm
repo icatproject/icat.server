@@ -28,7 +28,7 @@
                 <ul>
                     <li>
                         The icat distribution:
-                        <a href="${repoUrl}/org/icatproject/icat.ear/${project.version}/icat.ear-${project.version}-distro.zip">icat.ear-${project.version}-distro.zip</a>
+                        <a href="${repoUrl}/org/icatproject/icat.war/${project.version}/icat.war-${project.version}-distro.zip">icat.ear-${project.version}-distro.zip</a>
                     </li>
                     <li>
                         A suitable deployed container. The installation scripts only support Glassfish.

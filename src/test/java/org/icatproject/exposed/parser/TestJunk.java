@@ -1,7 +1,5 @@
 package org.icatproject.exposed.parser;
 
-import static org.junit.Assert.fail;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
@@ -21,7 +19,15 @@ import org.junit.Test;
 public class TestJunk {
 
 	@Test()
-	public void testDataCollection() throws Exception {
+	public void testJunk() throws Exception {
+
+		try (JsonParser parser = Json.createParser(new ByteArrayInputStream("12".getBytes()))) {
+			JsonParser.Event event = parser.next();
+			System.out.println(event);
+			System.out.println(parser.getBigDecimal());
+			System.out.println(parser.getString());
+
+		}
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonGenerator gen = Json.createGenerator(baos);

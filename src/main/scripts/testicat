@@ -31,6 +31,8 @@ for i in range (3, len(args), 2):
     else:
         entry.value = args[i + 1]
     credentials.entry.append(entry)
+    
+print "ICAT version", service.getApiVersion() 
 
 sessionId = service.login(plugin, credentials)
 print "Logged in as", service.getUserName(sessionId), "with", service.getRemainingMinutes(sessionId), "minutes to go"
