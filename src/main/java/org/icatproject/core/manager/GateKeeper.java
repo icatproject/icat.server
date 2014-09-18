@@ -353,6 +353,9 @@ public class GateKeeper {
 			idLists.add(sb.toString());
 		}
 
+		logger.debug("Check readability of " + beans.size() + " beans has been divided into "
+				+ idLists.size() + " queries.");
+
 		Set<Long> ids = new HashSet<>();
 		for (String idList : idLists) {
 			for (String qString : restrictions) {

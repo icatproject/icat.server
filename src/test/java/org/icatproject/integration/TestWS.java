@@ -123,11 +123,11 @@ public class TestWS {
 		session.createInvestigationInstrument(invA, wish);
 		session.createInvestigationInstrument(invB, wish);
 
-		User root = (User) session.search("User[name='db/root']").get(0);
-		session.createInstrumentScientist(wish, root);
+		User notroot = (User) session.search("User[name='db/notroot']").get(0);
+		session.createInstrumentScientist(wish, notroot);
 
-		session.createInvestigationUser(invA, root);
-		session.createInvestigationUser(invC, root);
+		session.createInvestigationUser(invA, notroot);
+		session.createInvestigationUser(invC, notroot);
 
 		ParameterType p = new ParameterType();
 		p.setName("TIMESTAMP");
@@ -253,7 +253,7 @@ public class TestWS {
 
 	@Test
 	public void entities() throws Exception {
-		List<String> entities = session.getIcat().getEntityNames();
+		List<String> entities = session.getEntityNames();
 		assertEquals(38, entities.size());
 		assertTrue(entities.contains("Application"));
 	}
@@ -290,32 +290,32 @@ public class TestWS {
 		assertEquals(2L, session.search(q3).get(0));
 
 		try {
-			session.addRule("root", "Dataset [type.name = ' ']", "R");
+			session.addRule("notroot", "Dataset [type.name = ' ']", "R");
 			fail("Exception should be thrown");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
 		}
 
 		try {
-			session.delRule("root", "Dataset", "CRUD");
+			session.delRule("notroot", "Dataset", "CRUD");
 			// The space between the single quotes is necessary - I suspect a bug in eclipselink
 
-			session.addRule("root", "Dataset <-> DatasetType [name = ' ']", "R");
+			session.addRule("notroot", "Dataset <-> DatasetType [name = ' ']", "R");
 
 			assertEquals(0L, session.search(q1).get(0));
 			assertEquals(0L, session.search(q2).get(0));
 			assertEquals(0L, session.search(q3).get(0));
 
-			session.delRule("root", "Dataset <-> DatasetType [name = ' ']", "R");
-			session.addRule("root", "Dataset  <-> DatasetType[name = 'PB']", "R");
+			session.delRule("notroot", "Dataset <-> DatasetType [name = ' ']", "R");
+			session.addRule("notroot", "Dataset  <-> DatasetType[name = 'PB']", "R");
 
 			assertEquals(1L, session.search(q1).get(0));
 			assertEquals(1L, session.search(q2).get(0));
 			assertEquals(1L, session.search(q3).get(0));
 
-			session.delRule("root", "Dataset  <-> DatasetType[name = 'PB']", "R");
+			session.delRule("notroot", "Dataset  <-> DatasetType[name = 'PB']", "R");
 		} finally {
-			session.addRule("root", "Dataset", "CRUD");
+			session.addRule("notroot", "Dataset", "CRUD");
 		}
 	}
 
@@ -359,14 +359,14 @@ public class TestWS {
 		iuTwo.setRole("Principal Investigator");
 		iuTwo.setId(session.create(iuTwo));
 
-		String piOneSessionId = session.login("db", "username", "piOne", "password", "piOne");
-		String piTwoSessionId = session.login("db", "username", "piTwo", "password", "piTwo");
+		WSession piOneSession = session.getSession("db", "username", "piOne", "password", "piOne");
+		WSession piTwoSession = session.getSession("db", "username", "piTwo", "password", "piTwo");
 
-		List<Object> invsOne = session.getIcat().search(piOneSessionId, "Investigation");
+		List<Object> invsOne = piOneSession.search("Investigation");
 		assertEquals(1, invsOne.size());
 		assertEquals("InvestigationOne", ((Investigation) invsOne.get(0)).getName());
 
-		List<Object> invsTwo = session.getIcat().search(piTwoSessionId, "Investigation");
+		List<Object> invsTwo = piTwoSession.search("Investigation");
 		assertEquals(1, invsTwo.size());
 		assertEquals("InvestigationTwo", ((Investigation) invsTwo.get(0)).getName());
 
@@ -394,7 +394,7 @@ public class TestWS {
 			InvestigationUser iuaone = new InvestigationUser();
 			iuaone.setInvestigation(invTwo);
 			iuaone.setUser(aone);
-			iuaone.setId(session.getIcat().create(piOneSessionId, iuaone));
+			iuaone.setId(piOneSession.create(iuaone));
 			fail("Should not get here as can't grant access to inv two");
 		} catch (Exception e) {
 		}
@@ -403,11 +403,11 @@ public class TestWS {
 			InvestigationUser iuaone = new InvestigationUser();
 			iuaone.setInvestigation(invOne);
 			iuaone.setUser(aone);
-			iuaone.setId(session.getIcat().create(piOneSessionId, iuaone));
+			iuaone.setId(piOneSession.create(iuaone));
 		}
 
-		assertEquals(2, (session.getIcat().search(piOneSessionId, "InvestigationUser")).size());
-		assertEquals(0, (session.getIcat().search(piTwoSessionId, "InvestigationUser")).size());
+		assertEquals(2, (piOneSession.search("InvestigationUser")).size());
+		assertEquals(0, (piTwoSession.search("InvestigationUser")).size());
 
 		// Create a simple rule allowing oneControllers full access to InvestigationUser and ensure
 		// that reading works.
@@ -418,24 +418,23 @@ public class TestWS {
 		rule.setWhat("InvestigationUser");
 		session.create(rule);
 
-		assertEquals(3, (session.getIcat().search(piOneSessionId, "InvestigationUser")).size());
+		assertEquals(3, (piOneSession.search("InvestigationUser")).size());
 
 		try {
-			session.getIcat().search(piTwoSessionId, "InvestigationUser");
+			piTwoSession.search("InvestigationUser");
 		} catch (Exception e) {
 		}
 
 		// User has no read perms on objects of this type at all, some objects exist
-		List<Object> results = session.getIcat().search(piTwoSessionId,
-				"SELECT COUNT(i) FROM Rule i");
+		List<Object> results = piTwoSession.search("SELECT COUNT(i) FROM Rule i");
 		assertEquals(1, results.size());
 		assertEquals(0L, results.get(0));
 
-		results = session.getIcat().search(piTwoSessionId, "SELECT SUM(i) FROM Rule i");
+		results = piTwoSession.search("SELECT SUM(i) FROM Rule i");
 		assertEquals(0, results.size());
 
 		// User has no read perms on objects of this type at all, no objects exist
-		results = session.getIcat().search(piTwoSessionId, "SELECT COUNT(i) FROM DataCollection i");
+		results = piTwoSession.search("SELECT COUNT(i) FROM DataCollection i");
 		assertEquals(1, results.size());
 		assertEquals(0L, results.get(0));
 
@@ -542,7 +541,7 @@ public class TestWS {
 
 	@Test
 	public void authz5() throws Exception {
-		session.delRule("root", "SELECT x FROM Investigation x", "CRUD");
+		session.delRule("notroot", "SELECT x FROM Investigation x", "CRUD");
 		try {
 			Rule isInv = new Rule();
 			isInv.setCrudFlags("CRU");
@@ -552,7 +551,7 @@ public class TestWS {
 			session.search("SELECT COUNT(i) FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst WHERE inst.name='WISH'");
 			session.delete(isInv);
 		} finally {
-			session.addRule("root", "SELECT x FROM Investigation x", "CRUD");
+			session.addRule("notroot", "SELECT x FROM Investigation x", "CRUD");
 		}
 	}
 
@@ -560,14 +559,12 @@ public class TestWS {
 	public void authz6() throws Exception {
 		session.clear();
 		create();
-		session.delRule("root", "SELECT x FROM Investigation x", "CRUD");
+		session.delRule("notroot", "SELECT x FROM Investigation x", "CRUD");
 		try {
 			// Create a rule for me as an Instrument Scientist on WISH
 			System.out.println("Adding InstrumentScientist Rule");
 			Rule isInv = new Rule();
 			isInv.setCrudFlags("CRU");
-			// isInv.setWhat("SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci WHERE instSci.user.name = :user");
-
 			isInv.setWhat("SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user");
 			isInv.setId(session.create(isInv));
 
@@ -639,7 +636,7 @@ public class TestWS {
 			session.delete(isInv);
 			session.delete(invUserinv);
 		} finally {
-			session.addRule("root", "SELECT x FROM Investigation x", "CRUD");
+			session.addRule("notroot", "SELECT x FROM Investigation x", "CRUD");
 		}
 	}
 
@@ -761,7 +758,7 @@ public class TestWS {
 				inv.getId());
 		assertEquals(0, inv.getSamples().size());
 
-		session.addRule("root", "Sample", "R");
+		session.addRule("notroot", "Sample", "R");
 
 		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter",
 				inv.getId());
@@ -770,7 +767,7 @@ public class TestWS {
 			assertEquals(0, s.getParameters().size());
 		}
 
-		session.addRule("root", "SampleParameter", "R");
+		session.addRule("notroot", "SampleParameter", "R");
 
 		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter",
 				inv.getId());
@@ -981,6 +978,64 @@ public class TestWS {
 			assertTrue(ue.getMessage().startsWith(
 					"InvestigationType exists with name = 'Two', facility = 'id:"));
 			assertEquals(3, ue.getOffset());
+		}
+	}
+
+	@Ignore("Needs Oracle for this test to be useful")
+	@Test
+	public void getInvestigationWithVeryManyDatasets() throws Exception {
+
+		try {
+			session.clear();
+
+			WSession piOneSession = session.getSession("db", "username", "piOne", "password",
+					"piOne");
+
+			Facility facility = session.createFacility("Test Facility", 90);
+
+			SampleType sampleType = new SampleType();
+			sampleType.setFacility(facility);
+			sampleType.setName("somename");
+			sampleType.setMolecularFormula("Someformula");
+			session.create(sampleType);
+
+			InvestigationType investigationType = session.createInvestigationType(facility,
+					"TestExperiment");
+
+			DatasetType dst = session.createDatasetType(facility, "GQ");
+
+			Investigation inv = session.createInvestigation(facility, "A", "Not null",
+					investigationType);
+
+			session.addRule(null, "Investigation <-> InvestigationUser <-> User [name = :user]",
+					"R");
+			session.addRule(null,
+					"Dataset <-> Investigation <-> InvestigationUser <-> User [name = :user]", "R");
+
+			User piOne = new User();
+			piOne.setName("db/piOne");
+			piOne.setId(session.create(piOne));
+
+			InvestigationUser iuOne = new InvestigationUser();
+			iuOne.setInvestigation(inv);
+			iuOne.setUser(piOne);
+			iuOne.setRole("Principal Investigator");
+			iuOne.setId(session.create(iuOne));
+
+			int ndataset = 1500;
+			for (int i = 0; i < ndataset; i++) {
+				session.createDataset("Wibble" + i, dst, inv);
+			}
+
+			for (Object o : piOneSession.search("Investigation INCLUDE Dataset")) {
+				inv = (Investigation) o;
+				assertEquals("A", inv.getName());
+				assertEquals(ndataset, inv.getDatasets().size());
+			}
+
+		} finally {
+			session.clearAuthz();
+			session.setAuthz();
 		}
 	}
 
@@ -1216,24 +1271,14 @@ public class TestWS {
 		double rm = session.getRemainingMinutes();
 		assertTrue(rm > 0);
 		assertTrue(session.getApiVersion().startsWith("4.4."));
-		assertEquals("db/root", session.getUserName());
+		assertEquals("db/notroot", session.getUserName());
 		Thread.sleep(10);
 		rm = session.getRemainingMinutes();
 		session.refresh();
 		assertTrue(session.getRemainingMinutes() > rm);
 
-		String piOneSessionId = session.login("db", "username", "piOne", "password", "piOne");
-		session.logout(piOneSessionId);
-	}
-
-	@Test
-	public void logout() throws Exception {
-		try {
-			session.logout("wibble");
-			fail("Should throw an exception");
-		} catch (IcatException_Exception e) {
-			assertEquals(IcatExceptionType.SESSION, e.getFaultInfo().getType());
-		}
+		WSession piOneSession = session.getSession("db", "username", "piOne", "password", "piOne");
+		piOneSession.logout();
 	}
 
 	@Test
@@ -1872,49 +1917,49 @@ public class TestWS {
 		rule.setWhat("Facility");
 		session.create(rule);
 
-		String piOneSessionId = session.login("db", "username", "piOne", "password", "piOne");
-		String piTwoSessionId = session.login("db", "username", "piTwo", "password", "piTwo");
+		WSession piOneSession = session.getSession("db", "username", "piOne", "password", "piOne");
+		WSession piTwoSession = session.getSession("db", "username", "piTwo", "password", "piTwo");
 
 		Facility facility = new Facility();
 		facility.setName("A Facility");
 
 		/* testCreate */
-		assertTrue(session.getIcat().isAccessAllowed(piOneSessionId, facility, AccessType.CREATE));
+		assertTrue(piOneSession.isAccessAllowed(facility, AccessType.CREATE));
 
-		assertFalse(session.getIcat().isAccessAllowed(piTwoSessionId, facility, AccessType.CREATE));
+		assertFalse(piTwoSession.isAccessAllowed(facility, AccessType.CREATE));
 
-		facility.setId(session.getIcat().create(piOneSessionId, facility));
+		facility.setId(piOneSession.create(facility));
 
 		/* testUpdate */
 		facility.setName("Banana");
-		assertTrue(session.getIcat().isAccessAllowed(piOneSessionId, facility, AccessType.UPDATE));
+		assertTrue(piOneSession.isAccessAllowed(facility, AccessType.UPDATE));
 
-		assertFalse(session.getIcat().isAccessAllowed(piTwoSessionId, facility, AccessType.UPDATE));
+		assertFalse(piTwoSession.isAccessAllowed(facility, AccessType.UPDATE));
 
-		session.getIcat().update(piOneSessionId, facility);
+		piOneSession.update(facility);
 
-		assertTrue(session.getIcat().isAccessAllowed(piOneSessionId, facility, AccessType.UPDATE));
+		assertTrue(piOneSession.isAccessAllowed(facility, AccessType.UPDATE));
 
-		assertFalse(session.getIcat().isAccessAllowed(piTwoSessionId, facility, AccessType.UPDATE));
+		assertFalse(piTwoSession.isAccessAllowed(facility, AccessType.UPDATE));
 
 		/* testDelete */
-		session.getIcat().isAccessAllowed(piOneSessionId, facility, AccessType.DELETE);
+		piOneSession.isAccessAllowed(facility, AccessType.DELETE);
 
-		assertFalse(session.getIcat().isAccessAllowed(piTwoSessionId, facility, AccessType.DELETE));
+		assertFalse(piTwoSession.isAccessAllowed(facility, AccessType.DELETE));
 
-		session.getIcat().delete(piOneSessionId, facility);
-
-		// Object doesn't exist
-		assertFalse(session.getIcat().isAccessAllowed(piOneSessionId, facility, AccessType.DELETE));
+		piOneSession.delete(facility);
 
 		// Object doesn't exist
-		assertFalse(session.getIcat().isAccessAllowed(piTwoSessionId, facility, AccessType.DELETE));
+		assertFalse(piOneSession.isAccessAllowed(facility, AccessType.DELETE));
+
+		// Object doesn't exist
+		assertFalse(piTwoSession.isAccessAllowed(facility, AccessType.DELETE));
 
 		// Bad call
 		Investigation investigation = new Investigation();
 		investigation.setId(42L);
 		try {
-			session.getIcat().isAccessAllowed(piOneSessionId, investigation, AccessType.CREATE);
+			piOneSession.isAccessAllowed(investigation, AccessType.CREATE);
 			fail("Should have thrown exception");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
