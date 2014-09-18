@@ -2,11 +2,14 @@ package org.icatproject.core.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
@@ -21,8 +24,8 @@ public class IncludeClause {
 		private int thereVarNum;
 		private boolean allowed;
 
-		public Step(int hereVarNum, String fieldName, int thereVarNum, GateKeeper gateKeeper)
-				throws IcatException, ParserException {
+		public Step(int hereVarNum, String fieldName, int thereVarNum, GateKeeper gateKeeper,
+				Set<String> keys) throws IcatException, ParserException {
 			for (Relationship r : eiHandler.getRelatedEntities(types.get(hereVarNum))) {
 				if (r.getField().getName().equals(fieldName)) {
 					types.put(thereVarNum, r.getDestinationBean());
@@ -37,6 +40,13 @@ public class IncludeClause {
 			this.hereVarNum = hereVarNum;
 			this.thereVarNum = thereVarNum;
 			this.allowed = gateKeeper.allowed(relationship);
+
+			String key = hereVarNum + " " + relationship.getField().getName();
+			if (!keys.add(key)) {
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+						"INCLUDE clause contains redundant path to "
+								+ relationship.getField().getName());
+			}
 		}
 
 		public Relationship getRelationship() {
@@ -74,20 +84,26 @@ public class IncludeClause {
 		int fabricatedStepCount = 0;
 		input.consume(Token.Type.INCLUDE);
 		Token t = input.peek(0);
+		Set<String> keys = new HashSet<>();
 		if (t.getValue().equals("1")) {
 			input.consume(Token.Type.INTEGER);
 			one = true;
 		} else {
-			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount, gateKeeper);
+			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount, gateKeeper,
+					keys);
 		}
 
 		t = input.peek(0);
 		while (t != null && t.getType() == Token.Type.COMMA) {
 			t = input.consume(Token.Type.COMMA);
-			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount, gateKeeper);
+			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount, gateKeeper,
+					keys);
 			t = input.peek(0);
 		}
-		logger.debug(this);
+		if (one && fabricatedStepCount != 0) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+					"\"INCLUDE 1\" must not be followed by other things to include.");
+		}
 	}
 
 	public List<Step> getSteps() {
@@ -99,7 +115,7 @@ public class IncludeClause {
 	}
 
 	private int processStep(Input input, Map<String, Integer> idVarMap, int fabricatedStepCount,
-			GateKeeper gateKeeper) throws ParserException, IcatException {
+			GateKeeper gateKeeper, Set<String> keys) throws ParserException, IcatException {
 		Token t = input.consume(Token.Type.NAME);
 		String path = t.getValue();
 		String var = null;
@@ -127,7 +143,7 @@ public class IncludeClause {
 		}
 		for (int i = 1; i < eles.length - 1; i++) {
 			thereVarNum = idVarMap.size() + fabricatedStepCount;
-			steps.add(new Step(hereVarNum, eles[i], thereVarNum, gateKeeper));
+			steps.add(new Step(hereVarNum, eles[i], thereVarNum, gateKeeper, keys));
 			fabricatedStepCount++;
 			hereVarNum = thereVarNum;
 		}
@@ -145,10 +161,10 @@ public class IncludeClause {
 			}
 			thereVarNum = idVarMap.size() + fabricatedStepCount;
 			idVarMap.put(idv, thereVarNum);
-			steps.add(new Step(hereVarNum, eles[eles.length - 1], thereVarNum, gateKeeper));
+			steps.add(new Step(hereVarNum, eles[eles.length - 1], thereVarNum, gateKeeper, keys));
 		} else {
 			thereVarNum = idVarMap.size() + fabricatedStepCount;
-			steps.add(new Step(hereVarNum, eles[eles.length - 1], thereVarNum, gateKeeper));
+			steps.add(new Step(hereVarNum, eles[eles.length - 1], thereVarNum, gateKeeper, keys));
 			fabricatedStepCount++;
 		}
 		return fabricatedStepCount;

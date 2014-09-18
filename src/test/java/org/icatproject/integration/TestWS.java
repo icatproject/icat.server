@@ -45,6 +45,7 @@ import org.icatproject.IcatExceptionType;
 import org.icatproject.IcatException_Exception;
 import org.icatproject.Instrument;
 import org.icatproject.Investigation;
+import org.icatproject.InvestigationInstrument;
 import org.icatproject.InvestigationParameter;
 import org.icatproject.InvestigationType;
 import org.icatproject.InvestigationUser;
@@ -1253,15 +1254,49 @@ public class TestWS {
 		}
 
 		try {
-			results = session
-					.search("SELECT DISTINCT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst "
-							+ "WHERE inst.name='WISH' ORDER BY i.id ASC INCLUDE ii.instruments, i.parameters LIMIT 100, 100");
+			session.search("SELECT DISTINCT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst "
+					+ "WHERE inst.name='WISH' ORDER BY i.id ASC INCLUDE ii.instruments, i.parameters LIMIT 100, 100");
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
 			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
-			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().contains("II"));
+		}
+
+		try {
+			results = session
+					.search("SELECT inv FROM Investigation inv INCLUDE 1, inv.investigationInstruments");
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(-1, ue.getOffset());
+			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
+			assertTrue(e.getMessage().contains("INCLUDE 1"));
+		}
+
+		try {
+			results = session
+					.search("SELECT inv FROM Investigation inv INCLUDE inv.investigationInstruments, inv.investigationInstruments.instrument");
+			fail("Exception not thrown");
+		} catch (IcatException_Exception e) {
+			IcatException ue = e.getFaultInfo();
+			assertEquals(-1, ue.getOffset());
+			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
+			assertTrue(e.getMessage().contains("investigationInstruments"));
+		}
+
+		for (Object o : session
+				.search("SELECT inv FROM Investigation inv INCLUDE inv.investigationInstruments.instrument")) {
+			Investigation inv = (Investigation) o;
+			String invName = inv.getName();
+			assertTrue(Arrays.asList("A", "B", "C").contains(invName));
+			int nii = inv.getInvestigationInstruments().size();
+			if (invName.equals("C")) {
+				assertEquals(0, nii);
+			} else {
+				assertEquals(1, nii);
+			}
 		}
 
 	}
