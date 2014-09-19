@@ -37,7 +37,6 @@ public class TestRS {
 	public static void beforeClass() throws Exception {
 		try {
 			wSession = new WSession();
-			wSession.setAuthz();
 			wSession.clearAuthz();
 			wSession.setAuthz();
 		} catch (Exception e) {
@@ -50,7 +49,7 @@ public class TestRS {
 	public void search() throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "root");
+		credentials.put("username", "notroot");
 		credentials.put("password", "password");
 		Session session = icat.login("db", credentials);
 		System.out.println(session.search("InvestigationType INCLUDE 1"));
@@ -61,7 +60,7 @@ public class TestRS {
 	public void create() throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "root");
+		credentials.put("username", "notroot");
 		credentials.put("password", "password");
 		Session session = icat.login("db", credentials);
 		Long fid = ((EntityBaseBean) wSession.search("Facility INCLUDE InvestigationType").get(0))
@@ -74,10 +73,10 @@ public class TestRS {
 	public void testSession() throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "root");
+		credentials.put("username", "notroot");
 		credentials.put("password", "password");
 		Session session = icat.login("db", credentials);
-		assertEquals("db/root", session.getUserName());
+		assertEquals("db/notroot", session.getUserName());
 		double remainingMinutes = session.getRemainingMinutes();
 		assertTrue(remainingMinutes > 119 && remainingMinutes < 120);
 		session.logout();
@@ -88,7 +87,7 @@ public class TestRS {
 			// No action
 		}
 		session = icat.login("db", credentials);
-		Thread.sleep(500);
+		Thread.sleep(1000);
 		remainingMinutes = session.getRemainingMinutes();
 		session.refresh();
 		assertTrue(session.getRemainingMinutes() > remainingMinutes);

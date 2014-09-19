@@ -1,5 +1,7 @@
 package org.icatproject.exposed.parser;
 
+import static org.junit.Assert.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
@@ -7,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.json.Json;
+import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
@@ -18,15 +21,14 @@ import org.junit.Test;
 
 public class TestJunk {
 
-	@Test()
+	@Test
 	public void testJunk() throws Exception {
 
 		try (JsonParser parser = Json.createParser(new ByteArrayInputStream("12".getBytes()))) {
-			JsonParser.Event event = parser.next();
-			System.out.println(event);
-			System.out.println(parser.getBigDecimal());
-			System.out.println(parser.getString());
-
+			parser.next();
+			fail("Exception expected as values are not accepted");
+		} catch (JsonException e) {
+			// Do nothing
 		}
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
