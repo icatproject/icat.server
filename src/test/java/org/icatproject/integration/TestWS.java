@@ -45,7 +45,6 @@ import org.icatproject.IcatExceptionType;
 import org.icatproject.IcatException_Exception;
 import org.icatproject.Instrument;
 import org.icatproject.Investigation;
-import org.icatproject.InvestigationInstrument;
 import org.icatproject.InvestigationParameter;
 import org.icatproject.InvestigationType;
 import org.icatproject.InvestigationUser;

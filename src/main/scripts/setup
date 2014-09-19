@@ -69,10 +69,9 @@ if arg == "INSTALL":
     try:           
         uninstall()
         
-        actions.asadmin('create-jdbc-connection-pool --datasourceclassname ' + props["driver"] + 
-                ' --restype javax.sql.DataSource --failconnection=true --steadypoolsize 2' + 
-                ' --maxpoolsize 32 --ping --property ' + props["dbProperties"] + ' icat', printOutput=True)
-        
+        actions.asadmin('create-jdbc-connection-pool' + actions.getJDBCProps(props["driver"]) + 
+                '--property ' + props["dbProperties"] + ' icat', printOutput=True)
+             
         actions.asadmin("create-jdbc-resource --connectionpoolid icat jdbc/icat")
     
         actions.asadmin("create-jms-resource --restype javax.jms.TopicConnectionFactory jms/ICAT/TopicConnectionFactory")
