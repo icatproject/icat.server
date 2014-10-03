@@ -8,7 +8,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@Comment("Many to many relationship between investigation and user which might be used within authorization rules. The role should normally be set otherwise the InvestigationGroup is more appropriate.")
+@Comment("Many to many relationship between investigation and user. The role should normally be set otherwise the InvestigationGroup is more appropriate.")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "USER_ID", "INVESTIGATION_ID" }) })
