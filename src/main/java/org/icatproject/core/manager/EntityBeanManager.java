@@ -120,6 +120,8 @@ public class EntityBeanManager {
 
 	private Set<String> rootUserNames;
 
+	private int logQueryLength;
+
 	private static long next;
 	private static final Pattern timestampPattern = Pattern.compile(":ts(\\d{14})");
 
@@ -155,6 +157,8 @@ public class EntityBeanManager {
 		maxEntities = propertyHandler.getMaxEntities();
 		exportCacheSize = propertyHandler.getImportCacheSize();
 		rootUserNames = propertyHandler.getRootUserNames();
+		
+		logQueryLength = 4000;
 	}
 
 	public CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
@@ -738,6 +742,9 @@ public class EntityBeanManager {
 			Long entityId, String query, EntityManager manager, UserTransaction userTransaction)
 			throws IcatException {
 		long now = System.currentTimeMillis();
+		if (query.length()>logQueryLength) {
+			query = query.substring(0, logQueryLength-3) + "...";
+		}
 		if (logRequests.contains("file:R")) {
 			writeLogFile(now, userName + "\t" + operation + "\t" + time + "\t" + (now - time)
 					+ "\t" + entityName + "\t" + entityId + "\t" + query);
