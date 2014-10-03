@@ -143,7 +143,7 @@ public class TestEntityInfo {
 				Facility.class);
 		testField("description,facility,investigations,name", InvestigationType.class);
 		testField(
-				"datasets,doi,endDate,facility,investigationInstruments,investigationUsers,keywords,"
+				"datasets,doi,endDate,facility,investigationGroups,investigationInstruments,investigationUsers,keywords,"
 						+ "name,parameters,publications,releaseDate,samples,shifts,startDate,studyInvestigations,"
 						+ "summary,title,type,visitId", Investigation.class);
 		testField(
@@ -220,6 +220,7 @@ public class TestEntityInfo {
 				"From Investigation to Dataset by datasets many setInvestigation",
 				"From Investigation to Publication by publications many setInvestigation",
 				"From Investigation to InvestigationUser by investigationUsers many setInvestigation",
+				"From Investigation to InvestigationGroup by investigationGroups many setInvestigation",
 				"From Investigation to InvestigationInstrument by investigationInstruments many setInvestigation",
 				"From Investigation to InvestigationType by type one",
 				"From Investigation to Facility by facility one",
@@ -348,7 +349,7 @@ public class TestEntityInfo {
 
 	@Test
 	public void getters() throws Exception {
-		testGetters(Investigation.class, 20);
+		testGetters(Investigation.class, 21);
 		testGetters(Dataset.class, 14);
 		testGetters(Keyword.class, 3);
 		testGetters(InvestigationUser.class, 4);
@@ -359,7 +360,7 @@ public class TestEntityInfo {
 
 	@Test
 	public void setters() throws Exception {
-		testSetters(Investigation.class, 20);
+		testSetters(Investigation.class, 21);
 		testSetters(Dataset.class, 14);
 		testSetters(Keyword.class, 3);
 		testSetters(InvestigationUser.class, 4);

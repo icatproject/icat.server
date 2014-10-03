@@ -21,6 +21,9 @@
                     caches used during import and export. The cache is local to a call to import or export to ensure that authorization rules are
                     enforced. As a by-product modifications to ICAT are less likely to result in stale information being returned from the cache.
                 </li>
+                <li>ID values are obtained from the database SEQUENCE table in groups of 500 rather than 50 to improve performance. This is to
+                    circumvent a problem seen occasionally in Oracle.
+                </li>
             </ul>
         </section>
 

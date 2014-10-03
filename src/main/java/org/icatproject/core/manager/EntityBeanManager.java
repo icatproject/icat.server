@@ -37,6 +37,7 @@ import javax.jms.JMSException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.persistence.Column;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -157,8 +158,16 @@ public class EntityBeanManager {
 		maxEntities = propertyHandler.getMaxEntities();
 		exportCacheSize = propertyHandler.getImportCacheSize();
 		rootUserNames = propertyHandler.getRootUserNames();
-		
-		logQueryLength = 4000;
+
+		try {
+			logQueryLength = Log.class.getDeclaredField("query").getAnnotation(Column.class)
+					.length();
+		} catch (Exception e) {
+			String msg = e.getClass() + " reports " + e.getMessage()
+					+ " looking up information about query column of Log";
+			logger.fatal(msg);
+			throw new IllegalStateException(msg);
+		}
 	}
 
 	public CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
@@ -742,8 +751,8 @@ public class EntityBeanManager {
 			Long entityId, String query, EntityManager manager, UserTransaction userTransaction)
 			throws IcatException {
 		long now = System.currentTimeMillis();
-		if (query.length()>logQueryLength) {
-			query = query.substring(0, logQueryLength-3) + "...";
+		if (query.length() > logQueryLength) {
+			query = query.substring(0, logQueryLength - 3) + "...";
 		}
 		if (logRequests.contains("file:R")) {
 			writeLogFile(now, userName + "\t" + operation + "\t" + time + "\t" + (now - time)

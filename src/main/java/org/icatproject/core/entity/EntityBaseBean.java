@@ -16,11 +16,14 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.persistence.GenerationType;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
@@ -53,8 +56,9 @@ public abstract class EntityBaseBean implements Serializable {
 	@Transient
 	private long descendantCount = 1L;
 
+	@TableGenerator(name = "TABLE_GEN", allocationSize = 500)
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "TABLE_GEN")
 	protected Long id;
 
 	@Column(name = "MOD_ID", nullable = false)

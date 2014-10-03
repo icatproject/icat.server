@@ -24,7 +24,7 @@ import javax.persistence.UniqueConstraint;
 public class Investigation extends EntityBaseBean implements Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private List<Dataset> datasets = new ArrayList<Dataset>();
+	private List<Dataset> datasets = new ArrayList<>();
 
 	@Comment("The Digital Object Identifier associated with this investigation")
 	private String doi;
@@ -37,39 +37,42 @@ public class Investigation extends EntityBaseBean implements Serializable {
 	private Facility facility;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private List<InvestigationInstrument> investigationInstruments = new ArrayList<InvestigationInstrument>();
+	private List<InvestigationGroup> investigationGroups = new ArrayList<>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private List<InvestigationUser> investigationUsers = new ArrayList<InvestigationUser>();
+	private List<InvestigationInstrument> investigationInstruments = new ArrayList<>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private List<Keyword> keywords = new ArrayList<Keyword>();
+	private List<InvestigationUser> investigationUsers = new ArrayList<>();
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
+	private List<Keyword> keywords = new ArrayList<>();
 
 	@Comment("A short name for the investigation")
 	@Column(name = "NAME", nullable = false)
 	private String name;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private List<InvestigationParameter> parameters = new ArrayList<InvestigationParameter>();
+	private List<InvestigationParameter> parameters = new ArrayList<>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private List<Publication> publications = new ArrayList<Publication>();
+	private List<Publication> publications = new ArrayList<>();
 
 	@Comment("When the data will be made freely available")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date releaseDate;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private List<Sample> samples = new ArrayList<Sample>();
+	private List<Sample> samples = new ArrayList<>();
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private List<Shift> shifts = new ArrayList<Shift>();
+	private List<Shift> shifts = new ArrayList<>();
 
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date startDate;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
-	private List<StudyInvestigation> studyInvestigations = new ArrayList<StudyInvestigation>();
+	private List<StudyInvestigation> studyInvestigations = new ArrayList<>();
 
 	@Comment("Summary or abstract")
 	@Column(length = 4000)
@@ -105,6 +108,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public Facility getFacility() {
 		return facility;
+	}
+
+	public List<InvestigationGroup> getInvestigationGroups() {
+		return investigationGroups;
 	}
 
 	public List<InvestigationInstrument> getInvestigationInstruments() {
@@ -181,6 +188,10 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public void setFacility(Facility facility) {
 		this.facility = facility;
+	}
+
+	public void setInvestigationGroups(List<InvestigationGroup> investigationGroups) {
+		this.investigationGroups = investigationGroups;
 	}
 
 	public void setInvestigationInstruments(List<InvestigationInstrument> investigationInstruments) {
