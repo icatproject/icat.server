@@ -143,8 +143,8 @@ public class TestWS {
 		DatafileFormat dft1 = session.createDatafileFormat(facility, "png", "binary");
 		DatafileFormat dft2 = session.createDatafileFormat(facility, "bmp", "binary");
 
-		session.createDatafile("wib1", dft1, wibble);
-		session.createDatafile("wib2", dft2, wibble);
+		session.createDatafile("wib1", dft1, wibble, 5L);
+		session.createDatafile("wib2", dft2, wibble, 7L);
 
 		GregorianCalendar c = new GregorianCalendar();
 		c.setTime(new Date());
@@ -152,14 +152,14 @@ public class TestWS {
 		session.createDatasetParameter(date, p, wibble);
 
 		Dataset wobble = session.createDataset("Wobble", dst, invA);
-		session.createDatafile("wob1", dft1, wobble);
+		session.createDatafile("wob1", dft1, wobble, 0L);
 
 		Dataset dfsin = session.createDataset("dfsin", dst, invA);
-		Datafile fred = session.createDatafile("fred", dft1, dfsin);
-		Datafile bill = session.createDatafile("bill", dft1, dfsin);
+		Datafile fred = session.createDatafile("fred", dft1, dfsin, 11L);
+		Datafile bill = session.createDatafile("bill", dft1, dfsin, 17L);
 
 		Dataset dfsout = session.createDataset("dfsout", dst, invA);
-		Datafile mog = session.createDatafile("mog", dft1, dfsout);
+		Datafile mog = session.createDatafile("mog", dft1, dfsout, 11L);
 
 		Application application = session.createApplication(facility, "The one", "1.0");
 
@@ -278,8 +278,8 @@ public class TestWS {
 
 		DatafileFormat dfmt = session.createDatafileFormat(facility, "png", "binary");
 
-		session.createDatafile("PB", dfmt, dsPB);
-		session.createDatafile("QQ", dfmt, dsQQ);
+		session.createDatafile("PB", dfmt, dsPB, 3L);
+		session.createDatafile("QQ", dfmt, dsQQ, 7L);
 
 		String q1 = "COUNT(Dataset.name) [type.name = 'PB'] <-> Datafile[name = 'PB']";
 		String q2 = "COUNT(Dataset.name)";
@@ -430,7 +430,7 @@ public class TestWS {
 		assertEquals(1, results.size());
 		assertEquals(0L, results.get(0));
 
-		results = piTwoSession.search("SELECT SUM(i) FROM Rule i");
+		results = piTwoSession.search("SELECT SUM(i.id) FROM Rule i");
 		assertEquals(0, results.size());
 
 		// User has no read perms on objects of this type at all, no objects exist
@@ -637,6 +637,69 @@ public class TestWS {
 			session.delete(invUserinv);
 		} finally {
 			session.addRule("notroot", "SELECT x FROM Investigation x", "CRUD");
+		}
+	}
+
+	/*
+	 * Create two rules allowing access to the same investigation and ensure that only one instance
+	 * is returned - i.e, no DISTINCT problem remains
+	 */
+	@Test
+	public void authz7() throws Exception {
+		try {
+			session.clear();
+			create();
+
+			session.addRule(
+					null,
+					"Datafile <-> Dataset <-> Investigation <-> InvestigationUser <-> User [name = :user]",
+					"R");
+			session.addRule(null, "Datafile <-> Dataset  [name = 'dfsin']", "R");
+
+			User piOne = new User();
+			piOne.setName("db/piOne");
+			piOne.setId(session.create(piOne));
+
+			List<Object> invAs = session.search("Investigation [name = 'A']");
+			assertEquals(1, invAs.size());
+			Investigation invOne = (Investigation) invAs.get(0);
+
+			InvestigationUser iuOne = new InvestigationUser();
+			iuOne.setInvestigation(invOne);
+			iuOne.setUser(piOne);
+			iuOne.setRole("Principal Investigator");
+			iuOne.setId(session.create(iuOne));
+
+			WSession piOneSession = session.getSession("db", "username", "piOne", "password",
+					"piOne");
+
+			List<Object> freds = piOneSession.search("SELECT DISTINCT df FROM Datafile df");
+
+			assertEquals(6, freds.size());
+
+			assertEquals(51L, piOneSession.search("SELECT SUM(df.fileSize) from Datafile df")
+					.get(0));
+			assertEquals(40L,
+					piOneSession.search("SELECT SUM(DISTINCT df.fileSize) from Datafile df").get(0));
+			assertEquals(6L,
+					piOneSession.search("SELECT COUNT(df.fileSize) from Datafile df").get(0));
+			assertEquals(
+					5L,
+					piOneSession.search("SELECT COUNT(DISTINCT df.fileSize) from Datafile df").get(
+							0));
+			assertEquals(6L, piOneSession.search("SELECT COUNT(df) from Datafile df").get(0));
+			assertEquals(6L,
+					piOneSession.search("SELECT COUNT(DISTINCT df) from Datafile df").get(0));
+			assertEquals(17L, piOneSession.search("SELECT MAX(df.fileSize) from Datafile df")
+					.get(0));
+			assertEquals(17L,
+					piOneSession.search("SELECT MAX(DISTINCT df.fileSize) from Datafile df").get(0));
+			assertEquals(0L, piOneSession.search("SELECT MIN(df.fileSize) from Datafile df").get(0));
+			assertEquals(0L,
+					piOneSession.search("SELECT MIN(DISTINCT df.fileSize) from Datafile df").get(0));
+		} finally {
+			session.clearAuthz();
+			session.setAuthz();
 		}
 	}
 
@@ -1635,7 +1698,7 @@ public class TestWS {
 		long start = System.currentTimeMillis();
 		int n = 100;
 		for (int i = 0; i < n; i++) {
-			session.createDatafile("fred" + i, dfmt, wibble);
+			session.createDatafile("fred" + i, dfmt, wibble, 0L);
 		}
 		System.out.println("Time per datafile to write: " + (System.currentTimeMillis() - start)
 				/ (n + 0.) + "ms");
@@ -2023,7 +2086,7 @@ public class TestWS {
 
 		DatafileFormat dfmt = session.createDatafileFormat(facility, "png", "binary");
 
-		Datafile df = session.createDatafile("fred", dfmt, wibble);
+		Datafile df = session.createDatafile("fred", dfmt, wibble, 0L);
 		df = (Datafile) session.get("Datafile INCLUDE Dataset, DatafileFormat", df.getId());
 		assertEquals("Wibble", df.getDataset().getName());
 

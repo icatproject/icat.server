@@ -218,12 +218,13 @@ public class WSession {
 		return application;
 	}
 
-	public Datafile createDatafile(String name, DatafileFormat format, Dataset ds)
+	public Datafile createDatafile(String name, DatafileFormat format, Dataset ds, Long fileSize)
 			throws IcatException_Exception {
 		final Datafile datafile = new Datafile();
 		datafile.setDatafileFormat(format);
 		datafile.setName(name);
 		datafile.setDataset(ds);
+		datafile.setFileSize(fileSize);
 		datafile.setId(this.icat.create(this.sessionId, datafile));
 		return datafile;
 	}

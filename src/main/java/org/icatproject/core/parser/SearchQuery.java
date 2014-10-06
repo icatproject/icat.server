@@ -1,5 +1,6 @@
 package org.icatproject.core.parser;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,8 +12,10 @@ import javax.persistence.TypedQuery;
 
 import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Rule;
+import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.parser.Token.Type;
 
@@ -26,6 +29,8 @@ public class SearchQuery {
 	private static Logger logger = Logger.getLogger(SearchQuery.class);
 
 	private String idVar;
+
+	private static final EntityInfoHandler ei = EntityInfoHandler.instance;
 
 	private String string;
 
@@ -50,51 +55,86 @@ public class SearchQuery {
 
 	private List<Object> noAuthzResult = Collections.emptyList();
 
+	private String attributeToReturn;
+
+	private Type aggregateFunctionToReturn;
+
 	public SearchQuery(Input input, GateKeeper gateKeeper) throws ParserException, IcatException {
+		/*
+		 * The authz rules can lead to multiple values being returned. If complete entities are
+		 * requested or the COUNT of complete entities then we always add the DISTINCT keyword (if
+		 * not present) to avoid duplicates.
+		 * 
+		 * If an attribute is requested without the DISTINCT keyword or if AVG, SUM or COUNT of an
+		 * attribute without the DISTINCT keyword is requested we get the entities rather than the
+		 * attributes back with DISTINCT in the query and manually extract the requested
+		 * information.
+		 * 
+		 * All other cases are treated directly - including MAX and MIN aggregate functions.
+		 */
 		this.gateKeeper = gateKeeper;
 		input.consume(Token.Type.SELECT);
 		StringBuilder sb = new StringBuilder("SELECT ");
 
 		Token t = input.consume(Token.Type.NAME, Token.Type.DISTINCT, Token.Type.COUNT,
 				Token.Type.MAX, Token.Type.MIN, Token.Type.AVG, Token.Type.SUM);
-		Token result;
 		String resultValue;
 		if (t.getType() == Token.Type.COUNT || t.getType() == Token.Type.MAX
 				|| t.getType() == Token.Type.MIN || t.getType() == Token.Type.AVG
 				|| t.getType() == Token.Type.SUM) {
-			if (t.getType() == Token.Type.COUNT) {
+			Token aggregateFunction = t;
+			if (aggregateFunction.getType() == Token.Type.COUNT) {
 				noAuthzResult = aListWithZero;
 			}
-			sb.append(t.getValue() + "(");
 			input.consume(Token.Type.OPENPAREN);
 			t = input.peek(0);
-			if (t.getType() == Token.Type.DISTINCT) {
+			boolean distinct = t.getType() == Token.Type.DISTINCT;
+			if (distinct) {
 				input.consume(Token.Type.DISTINCT);
-				sb.append("DISTINCT ");
-			} else { // TODO remove force distinct
-				sb.append("DISTINCT "); // TODO remove force distinct
 			}
-			result = input.consume(Token.Type.NAME);
-			resultValue = result.getValue();
+			resultValue = input.consume(Token.Type.NAME).getValue();
 			int dot = resultValue.indexOf('.');
 			input.consume(Token.Type.CLOSEPAREN);
-			sb.append("$0$");
+
 			if (dot > 0) {
-				sb.append(resultValue.substring(dot));
-			}
-			sb.append(")");
-		} else {
-			if (t.getType() == Token.Type.DISTINCT) {
+				if (distinct || aggregateFunction.getType() == Token.Type.MAX
+						|| aggregateFunction.getType() == Token.Type.MIN) {
+					sb.append(aggregateFunction.getValue() + "(DISTINCT ");
+					sb.append("$0$");
+					sb.append(resultValue.substring(dot));
+					sb.append(")");
+				} else {
+					sb.append("DISTINCT ");
+					sb.append("$0$");
+					attributeToReturn = resultValue.substring(dot + 1);
+					aggregateFunctionToReturn = aggregateFunction.getType();
+				}
+			} else if (aggregateFunction.getType() == Token.Type.COUNT) { // Should be COUNT
 				sb.append("DISTINCT ");
+				sb.append("$0$");
+				attributeToReturn = "id";
+				aggregateFunctionToReturn = aggregateFunction.getType();
+			} else {
+				throw new ParserException("Found aggregate function "
+						+ aggregateFunction.getValue()
+						+ " where only COUNT works without attributes");
+			}
+		} else {
+			sb.append("DISTINCT ");
+			boolean distinct = t.getType() == Token.Type.DISTINCT;
+			if (distinct) {
 				resultValue = input.consume(Token.Type.NAME).getValue();
 			} else {
-				sb.append("DISTINCT "); // TODO remove force distinct
 				resultValue = t.getValue();
 			}
 			int dot = resultValue.indexOf('.');
 			sb.append("$0$");
 			if (dot > 0) {
-				sb.append(resultValue.substring(dot));
+				if (distinct) {
+					sb.append(resultValue.substring(dot));
+				} else {
+					attributeToReturn = resultValue.substring(dot + 1);
+				}
 			}
 		}
 		idVar = resultValue.split("\\.")[0].toUpperCase();
@@ -256,6 +296,23 @@ public class SearchQuery {
 	public List<?> noAuthzResult() {
 		logger.debug("noAuthzResult is of length " + noAuthzResult.size());
 		return noAuthzResult;
+	}
+
+	public Field getAttributeToReturn() throws IcatException {
+		if (attributeToReturn == null) {
+			return null;
+		}
+		Map<String, Field> fieldsByName = ei.getFieldsByName(fromClause.getBean());
+		Field result = fieldsByName.get(attributeToReturn);
+		if (result == null) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, fromClause.getBean()
+					.getSimpleName() + " does not contain " + attributeToReturn);
+		}
+		return result;
+	}
+
+	public Type getAggregateFunctionToReturn() {
+		return aggregateFunctionToReturn;
 	}
 
 }

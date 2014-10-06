@@ -71,6 +71,7 @@ import org.icatproject.core.parser.LexerException;
 import org.icatproject.core.parser.ParserException;
 import org.icatproject.core.parser.SearchQuery;
 import org.icatproject.core.parser.Token;
+import org.icatproject.core.parser.Token.Type;
 import org.icatproject.core.parser.Tokenizer;
 
 @Stateless
@@ -112,6 +113,8 @@ public class EntityBeanManager {
 	private Set<String> logRequests;
 
 	private Map<String, NotificationRequest> notificationRequests;
+
+	private static final EntityInfoHandler ei = EntityInfoHandler.instance;
 
 	private boolean luceneActive;
 
@@ -914,6 +917,7 @@ public class EntityBeanManager {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private EntitySetResult getEntitySet(String userId, String query, EntityManager manager)
 			throws IcatException {
 
@@ -1013,16 +1017,125 @@ public class EntityBeanManager {
 			// Ignore
 		}
 
-		Integer offset = q.getOffset();
-		if (offset != null) {
-			jpqlQuery.setFirstResult(offset);
-		}
-		Integer number = q.getNumber();
-		if (number != null) {
-			jpqlQuery.setMaxResults(number);
-		}
+		Field attributeToReturn = q.getAttributeToReturn();
+		List<Object> result = null;
+		if (attributeToReturn != null) { // Need to extract individual attributes or functions of
+											// them
+			Type aggregateFunctionToReturn = q.getAggregateFunctionToReturn();
+			if (aggregateFunctionToReturn == Token.Type.COUNT) {
+				result = new ArrayList<>(1);
+				result.add(Long.valueOf(jpqlQuery.getResultList().size()));
+			} else {
 
-		List<?> result = jpqlQuery.getResultList();
+				if (aggregateFunctionToReturn == null) {
+					Integer offset = q.getOffset();
+					if (offset != null) {
+						jpqlQuery.setFirstResult(offset);
+					}
+					Integer number = q.getNumber();
+					if (number != null) {
+						jpqlQuery.setMaxResults(number);
+					}
+				}
+
+				String name = attributeToReturn.getName();
+				Method method = ei.getGetters(q.getBean()).get(name);
+				if (method == null) { // May be one of those not returned by getGetters
+					Class<?> objc = attributeToReturn.getDeclaringClass();
+					String prop = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+					try {
+						method = objc.getMethod("get" + prop);
+					} catch (NoSuchMethodException e) {
+						try {
+							method = objc.getMethod("is" + prop);
+						} catch (Exception e1) {
+							throw new IcatException(IcatException.IcatExceptionType.INTERNAL, ""
+									+ e);
+						}
+					}
+				}
+				result = new ArrayList<>();
+				for (Object one : jpqlQuery.getResultList()) {
+					Object att;
+					try {
+						att = method.invoke(one);
+					} catch (IllegalAccessException | IllegalArgumentException
+							| InvocationTargetException e) {
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
+					}
+					result.add(att);
+				}
+				/*
+				 * Now result has the array attributes - see if want AVG or SUM function. Return
+				 * types are intended to conform to JPQL specification
+				 */
+				Class<?> type = attributeToReturn.getType();
+				if (aggregateFunctionToReturn == Token.Type.AVG) {
+					Double total = 0.0;
+					int n = 0;
+					for (Object one : result) {
+						if (one != null) {
+							n++;
+							if (type == Long.class) {
+								total += (Long) one;
+							} else if (type == Integer.class) {
+								total += (Integer) one;
+							} else if (type == Double.class) {
+								total += (Double) one;
+							} else {
+								throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+										"Unexpected type for AVG function " + type);
+							}
+						}
+					}
+					Double avg = total / n;
+					result = new ArrayList<>(1);
+					result.add(avg);
+				} else if (aggregateFunctionToReturn == Token.Type.SUM) {
+					if (type == Long.class) {
+						Long sum = 0L;
+						for (Object one : result) {
+							if (one != null) {
+								sum += (Long) one;
+							}
+						}
+						result = new ArrayList<>(1);
+						result.add(sum);
+					} else if (type == Integer.class) {
+						Long sum = 0L;
+						for (Object one : result) {
+							if (one != null) {
+								sum += (Integer) one;
+							}
+						}
+						result = new ArrayList<>(1);
+						result.add(sum);
+					} else if (type == Double.class) {
+						Double sum = 0.0;
+						for (Object one : result) {
+							if (one != null) {
+								sum += (Double) one;
+							}
+						}
+						result = new ArrayList<>(1);
+						result.add(sum);
+					} else {
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+								"Unexpected type for SUM function " + type);
+					}
+				}
+			}
+		} else {
+			Integer offset = q.getOffset();
+			if (offset != null) {
+				jpqlQuery.setFirstResult(offset);
+			}
+			Integer number = q.getNumber();
+			if (number != null) {
+				jpqlQuery.setMaxResults(number);
+			}
+			result = jpqlQuery.getResultList();
+		}
 
 		logger.debug("Obtained " + result.size() + " results.");
 		return new EntitySetResult(q, result);
@@ -1038,7 +1151,7 @@ public class EntityBeanManager {
 			List<String> allResults = Collections.emptyList();
 			/*
 			 * As results may be rejected and maxCount may be 1 ensure that we don't make a huge
-			 * number of a calls to Lucene
+			 * number of calls to Lucene
 			 */
 			int blockSize = Math.max(1000, maxCount);
 			do {
