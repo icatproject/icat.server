@@ -123,7 +123,6 @@ public class ICAT {
 				error = EntityUtils.toString(entity);
 			}
 
-			System.out.println(error);
 			try (JsonParser parser = Json.createParser(new ByteArrayInputStream(error.getBytes()))) {
 				String code = null;
 				String message = null;
@@ -217,7 +216,7 @@ public class ICAT {
 		}
 	}
 
-	public double getRemainingMinutes(String sessionId) throws IcatException {
+	 double getRemainingMinutes(String sessionId) throws IcatException {
 		URI uri = getUri(getUriBuilder("session/" + sessionId));
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			HttpGet httpGet = new HttpGet(uri);
@@ -230,7 +229,7 @@ public class ICAT {
 		}
 	}
 
-	public void logout(String sessionId) throws IcatException {
+	 void logout(String sessionId) throws IcatException {
 		URI uri = getUri(getUriBuilder("session/" + sessionId));
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			HttpDelete httpDelete = new HttpDelete(uri);
@@ -243,7 +242,7 @@ public class ICAT {
 
 	}
 
-	public void refresh(String sessionId) throws IcatException {
+	 void refresh(String sessionId) throws IcatException {
 		URI uri = getUri(getUriBuilder("session/" + sessionId));
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			HttpPut httpPut = new HttpPut(uri);
@@ -255,7 +254,7 @@ public class ICAT {
 		}
 	}
 
-	public void importMetaData(String sessionId, Path path, DuplicateAction duplicate,
+	 void importMetaData(String sessionId, Path path, DuplicateAction duplicate,
 			Attributes attributes) throws IcatException {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -286,7 +285,7 @@ public class ICAT {
 
 	}
 
-	public InputStream exportMetaData(String sessionId, String query, Attributes attributes)
+	 InputStream exportMetaData(String sessionId, String query, Attributes attributes)
 			throws IcatException {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -336,7 +335,7 @@ public class ICAT {
 
 	}
 
-	public String search(String sessionId, String query) throws IcatException {
+	 String search(String sessionId, String query) throws IcatException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonGenerator gen = Json.createGenerator(baos);
 		gen.writeStartObject().write("sessionId", sessionId).write("query", query).writeEnd()
@@ -357,12 +356,11 @@ public class ICAT {
 
 	}
 
-	public long create(String sessionId, String entity) throws IcatException {
+	long create(String sessionId, String entity) throws IcatException {
 		URI uri = getUri(getUriBuilder("entity"));
 		List<NameValuePair> formparams = new ArrayList<>();
 		formparams.add(new BasicNameValuePair("json", "{\"sessionId\":\"" + sessionId
 				+ "\",\"entity\":" + entity + "}"));
-		System.out.println(formparams.get(0));
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 			HttpPost httpPost = new HttpPost(uri);
 			httpPost.setEntity(new UrlEncodedFormEntity(formparams));
