@@ -1,5 +1,5 @@
 # Version of ICAT server for which this matches
-4.3
+4.4
 
 Facility ( name:0, daysUntilRelease:1, createId:2, createTime:3)
 "Test port facility", 90, "Zorro", 1920-05-16T16:58:26.12Z
@@ -40,7 +40,6 @@ DataCollection(?:0)
 DataCollectionDatafile(datafile(dataset(investigation(facility(name:0), name:1, visitId:2), name:3), name:4), dataCollection(?:5))
 "Test port facility", "expt1", "one", "ds1", "df1",  "a"
 "Test port facility", "expt1", "one", "ds1", "df2",  "b"
-
 
 Job(application(facility(name:0), name:1, version:2), inputDataCollection(?:3), outputDataCollection(?:4))
 "Test port facility", "aprog", "1.2.3", "a", "b"
