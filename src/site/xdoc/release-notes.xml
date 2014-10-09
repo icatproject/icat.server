@@ -31,6 +31,7 @@
                     Oracle RAC servers.
                 </li>
                 <li>It is now treated as an error to have redundant paths in an INCLUDE clause.</li>
+                <li>The application is now built and deployed as a .war files rather than a .ear file which makes it easier to deploy on Wildfly.</li>
             </ul>
         </section>
 
