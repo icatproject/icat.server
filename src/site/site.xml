@@ -8,18 +8,17 @@
     </breadcrumbs>
 
     <menu name="Information for Users">
-     <item name="Schema" href="icat.core/schema.html"/>
+      <item name="Schema" href="schema.html"/>
       <item name="FAQ" href="faq.html"/>
-       <item name="Issue Tracking" href="issue-tracking.html"/>
-       <item name="Release Notes" href="release-notes.html"/>
+      <item name="Issue Tracking" href="issue-tracking.html"/>
+      <item name="Release Notes" href="release-notes.html"/>
     </menu>
        
     <menu name="Information for Installers">
-    <item name="Server Installation" href="icat.ear/installation.html"/>
+    <item name="Server Installation" href="installation.html"/>
     </menu>
     
     <menu ref="reports"/>
-    <menu ref="modules"/>
  
   </body>
 </project>

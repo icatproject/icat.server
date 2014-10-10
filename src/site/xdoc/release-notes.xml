@@ -32,6 +32,9 @@
                 </li>
                 <li>It is now treated as an error to have redundant paths in an INCLUDE clause.</li>
                 <li>The application is now built and deployed as a .war files rather than a .ear file which makes it easier to deploy on Wildfly.</li>
+                <li>The InvestigationGroup has been introduced. It is expected that this will be generally used in Rule based authorization in
+                    preference to InvestigationUser except for those cases where the role of the individual is significant.
+                </li>
             </ul>
         </section>
 

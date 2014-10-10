@@ -17,6 +17,9 @@ import javax.persistence.UniqueConstraint;
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 public class Grouping extends EntityBaseBean implements Serializable {
 
+	@OneToMany(mappedBy = "grouping", cascade = CascadeType.ALL)
+	private List<InvestigationGroup> investigationGroups = new ArrayList<>();
+
 	@Comment("A short name identifying this group of users")
 	@Column(name = "NAME", nullable = false)
 	private String name;
@@ -25,10 +28,14 @@ public class Grouping extends EntityBaseBean implements Serializable {
 	private List<Rule> rules = new ArrayList<Rule>();
 
 	@OneToMany(mappedBy = "grouping", cascade = CascadeType.ALL)
-	private List<UserGroup> userGroups = new ArrayList<UserGroup>();
+	private List<UserGroup> userGroups = new ArrayList<>();
 
 	// Needed for JPA
 	public Grouping() {
+	}
+
+	public List<InvestigationGroup> getInvestigationGroups() {
+		return investigationGroups;
 	}
 
 	public String getName() {
@@ -41,6 +48,10 @@ public class Grouping extends EntityBaseBean implements Serializable {
 
 	public List<UserGroup> getUserGroups() {
 		return userGroups;
+	}
+
+	public void setInvestigationGroups(List<InvestigationGroup> investigationGroups) {
+		this.investigationGroups = investigationGroups;
 	}
 
 	public void setName(String name) {

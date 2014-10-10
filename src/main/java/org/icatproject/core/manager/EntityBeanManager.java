@@ -1543,7 +1543,7 @@ public class EntityBeanManager {
 					public void write(OutputStream output) throws IOException {
 						output.write(("# ICAT Export file written by " + userId + linesep)
 								.getBytes());
-						output.write(("4.3" + linesep).getBytes());
+						output.write(("1.0" + linesep).getBytes());
 						for (String s : EntityInfoHandler.getExportEntityNames()) {
 							Set<Long> table = ids.get(s);
 							if (!table.isEmpty()) {
@@ -1733,7 +1733,7 @@ public class EntityBeanManager {
 			public void write(OutputStream output) throws IOException {
 				logger.debug("Streaming of export file started");
 				output.write(("# ICAT Export file written by " + userId + linesep).getBytes());
-				output.write(("4.3" + linesep).getBytes());
+				output.write(("1.0" + linesep).getBytes());
 				for (String s : EntityInfoHandler.getExportEntityNames()) {
 					try {
 						exportTable(s, null, output, exportCaches, allAttributes, manager, userId);

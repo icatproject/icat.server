@@ -1,5 +1,5 @@
-# Version of ICAT server for which this matches
-4.4
+# Version of file format
+1.0
 
 Facility ( name:0, daysUntilRelease:1, createId:2, createTime:3)
 "Test port facility", 90, "Zorro", 1920-05-16T16:58:26.12Z

@@ -227,8 +227,8 @@ public class Porter {
 				throw new IcatException(IcatExceptionType.VALIDATION,
 						"No version of file encountered");
 			}
-			if (!version.equals("4.3")) {
-				throw new IcatException(IcatExceptionType.VALIDATION, "Version of file must be 4.3");
+			if (!version.equals("1.0")) {
+				throw new IcatException(IcatExceptionType.VALIDATION, "Version of file must be 1.0");
 			}
 
 			Table table = null;
