@@ -23,7 +23,6 @@ import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import javax.persistence.GenerationType;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
