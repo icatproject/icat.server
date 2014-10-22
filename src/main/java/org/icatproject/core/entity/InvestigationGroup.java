@@ -8,7 +8,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@Comment("Many to many relationship between investigation and group which might be used within authorization rules. Please see UserInvestigation")
+@Comment("Many to many relationship between investigation and group which might be used within authorization rules. Please see InvestigationUser")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "GROUP_ID", "INVESTIGATION_ID" }) })
