@@ -37,6 +37,7 @@ import org.icatproject.core.parser.IncludeClause.Step;
 
 @SuppressWarnings("serial")
 @MappedSuperclass
+@TableGenerator(name = "SEQ_GEN", allocationSize = 500)
 public abstract class EntityBaseBean implements Serializable {
 
 	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
@@ -55,9 +56,8 @@ public abstract class EntityBaseBean implements Serializable {
 	@Transient
 	private long descendantCount = 1L;
 
-	@TableGenerator(name = "TABLE_GEN", allocationSize = 500)
 	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "TABLE_GEN")
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "SEQ_GEN")
 	protected Long id;
 
 	@Column(name = "MOD_ID", nullable = false)
