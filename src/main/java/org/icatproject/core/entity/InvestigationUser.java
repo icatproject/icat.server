@@ -8,13 +8,16 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@Comment("Many to many relationship between investigation and user. The role should normally be set otherwise the InvestigationGroup is more appropriate.")
+@Comment("Many to many relationship between investigation and user. It is expected that this will show the association of "
+		+ "individual users with an investigation which might be derived from the proposal. It may also be used as the "
+		+ "basis of authorization rules. See InvestigationGroup if you wish to separate authorization rules from who is "
+		+ "on the proposal.")
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "USER_ID", "INVESTIGATION_ID" }) })
 public class InvestigationUser extends EntityBaseBean implements Serializable {
 
-	@Comment("A role such as PI")
+	@Comment("A role such as PI showing the position of the user with respect to the investigation")
 	private String role;
 
 	@JoinColumn(name = "USER_ID", nullable = false)

@@ -4,13 +4,24 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.stream.JsonGenerator;
 
 import org.icatproject.EntityBaseBean;
 import org.icatproject.Facility;
@@ -46,27 +57,178 @@ public class TestRS {
 	}
 
 	@Test
-	public void search() throws Exception {
+	public void testVersion() throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "notroot");
-		credentials.put("password", "password");
-		Session session = icat.login("db", credentials);
-		System.out.println(session.search("InvestigationType INCLUDE 1"));
-		System.out.println(session.search("Facility INCLUDE InvestigationType"));
+		assertTrue(icat.getApiVersion().startsWith("4."));
 	}
 
 	@Test
-	public void create() throws Exception {
+	public void testGet() throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "notroot");
 		credentials.put("password", "password");
 		Session session = icat.login("db", credentials);
+
+		// Get known configuration
+		wSession.clear();
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
+		wSession.setAuthz();
+		wSession.clearAuthz();
+		wSession.setAuthz();
+
+		long fid = search(session, "Facility.id", 1).getJsonNumber(0).longValueExact();
+
+		JsonObject fac = Json
+				.createReader(
+						new ByteArrayInputStream(session.get("Facility INCLUDE InvestigationType",
+								fid).getBytes())).readObject().getJsonObject("Facility");
+
+		assertEquals("Test port facility", fac.getString("name"));
+		JsonArray its = fac.getJsonArray("investigationTypes");
+		assertEquals(2, its.size());
+		List<String> names = new ArrayList<>();
+		for (int j = 0; j < its.size(); j++) {
+			JsonObject it = its.getJsonObject(j);
+			names.add(it.getString("name"));
+		}
+		Collections.sort(names);
+		assertEquals(Arrays.asList("atype", "btype"), names);
+	}
+
+	@Test
+	public void testSearch() throws Exception {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "notroot");
+		credentials.put("password", "password");
+		Session session = icat.login("db", credentials);
+
+		// Get known configuration
+		wSession.clear();
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
+		wSession.setAuthz();
+		wSession.clearAuthz();
+		wSession.setAuthz();
+
+		JsonArray array;
+		array = search(session, "SELECT it FROM InvestigationType it INCLUDE 1", 2);
+		List<String> names = new ArrayList<>();
+		for (int i = 0; i < array.size(); i++) {
+			JsonObject it = array.getJsonObject(i).getJsonObject("InvestigationType");
+			names.add(it.getString("name"));
+		}
+		Collections.sort(names);
+		assertEquals(Arrays.asList("atype", "btype"), names);
+
+		array = search(session, "SELECT ds.id FROM Dataset ds", 3);
+		List<Long> ids = new ArrayList<>();
+		for (int i = 0; i < array.size(); i++) {
+			ids.add(array.getJsonNumber(i).longValueExact());
+		}
+		Collections.sort(ids);
+
+		array = search(session, "SELECT MIN(ds.id) FROM Dataset ds", 1);
+		assertEquals((Long) ids.get(0), (Long) array.getJsonNumber(0).longValueExact());
+
+		array = search(session, "SELECT COUNT(ds.id) FROM Dataset ds", 1);
+		assertEquals((Long) 3L, (Long) array.getJsonNumber(0).longValueExact());
+
+		double avg = (ids.get(0) + ids.get(1) + ids.get(2)) / 3.;
+		array = search(session, "SELECT AVG(ds.id) FROM Dataset ds", 1);
+		assertEquals(avg, array.getJsonNumber(0).doubleValue(), 0.001);
+
+		array = search(session, "SELECT ds.id FROM Dataset ds WHERE ds.id = 0", 0);
+
+		array = search(session, "SELECT MIN(ds.id) FROM Dataset ds WHERE ds.id = 0", 1);
+		assertTrue(array.isNull(0));
+
+		array = search(session, "SELECT COUNT(ds.id) FROM Dataset ds WHERE ds.id = 0", 1);
+		assertEquals((Long) 0L, (Long) array.getJsonNumber(0).longValueExact());
+
+		array = search(session, "SELECT AVG(ds.id) FROM Dataset ds WHERE ds.id = 0", 1);
+		assertTrue(array.isNull(0));
+
+		array = search(session, "SELECT ds.complete FROM Dataset ds", 3);
+		int trues = 0;
+		int falses = 0;
+		for (int i = 0; i < array.size(); i++) {
+			if (array.getBoolean(i)) {
+				trues++;
+			} else {
+				falses++;
+			}
+		}
+		assertEquals(1, trues);
+		assertEquals(2, falses);
+
+		array = search(session, "Facility INCLUDE InvestigationType", 1);
+		for (int i = 0; i < array.size(); i++) {
+			JsonObject fac = array.getJsonObject(i).getJsonObject("Facility");
+			assertEquals("Test port facility", fac.getString("name"));
+			JsonArray its = fac.getJsonArray("investigationTypes");
+			assertEquals(2, its.size());
+			names.clear();
+			for (int j = 0; j < its.size(); j++) {
+				JsonObject it = its.getJsonObject(j);
+				names.add(it.getString("name"));
+			}
+			Collections.sort(names);
+			assertEquals(Arrays.asList("atype", "btype"), names);
+		}
+	}
+
+	private JsonArray search(Session session, String query, int n) throws IcatException {
+		JsonArray result = Json.createReader(
+				new ByteArrayInputStream(session.search(query).getBytes())).readArray();
+		assertEquals(n, result.size());
+		return result;
+	}
+
+	@Test
+	public void testCreate() throws Exception {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "notroot");
+		credentials.put("password", "password");
+		Session session = icat.login("db", credentials);
+
+		// Get known configuration
+		wSession.clear();
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
+		wSession.setAuthz();
+		wSession.clearAuthz();
+		wSession.setAuthz();
+
 		Long fid = ((EntityBaseBean) wSession.search("Facility INCLUDE InvestigationType").get(0))
 				.getId();
-		System.out.println(session.create("[{\"InvestigationType\":{\"facility\":{\"id\":" + fid
-				+ "},\"name\":\"ztype\"}}]"));
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject();
+			jw.writeStartObject("InvestigationType");
+			jw.writeStartObject("facility");
+			jw.write("id", fid);
+			jw.writeEnd();
+			jw.write("name", "ztype");
+			jw.writeEnd();
+			jw.writeEnd();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "another fred")
+					.writeEnd();
+			jw.writeEnd();
+
+			jw.writeEnd();
+		}
+
+		List<Long> ids = session.create(baos.toString());
+		assertEquals(2, ids.size());
+
 	}
 
 	@Test
@@ -195,7 +357,9 @@ public class TestRS {
 			Files.copy(stream, dump, StandardCopyOption.REPLACE_EXISTING);
 		}
 		ts("Create dump ALL");
-		assertEquals(1563, dump.toFile().length());
+		long n = dump.toFile().length();
+		assertTrue("Size is dependent upon time zone in which test is run " + n, n == 1563
+				|| n == 1518);
 		session.importMetaData(dump, DuplicateAction.CHECK, Attributes.ALL);
 		Files.delete(dump);
 	}

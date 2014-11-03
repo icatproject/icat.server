@@ -79,7 +79,7 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.authentication</artifactId>
-            <version>4.3.0</version>
+            <version>4.4.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -274,6 +274,12 @@
                             <arguments>
                                 <argument>${basedir}</argument>
                             </arguments>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>log4j.configuration</key>
+                                    <value>other.properties</value>
+                                </systemProperty>
+                            </systemProperties>
                         </configuration>
                         <goals>
                             <goal>java</goal>

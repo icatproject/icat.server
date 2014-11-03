@@ -28,7 +28,7 @@ public class IcatExceptionMapper implements ExceptionMapper<IcatException> {
 			gen.write("offset", e.getOffset());
 		}
 		gen.writeEnd().close();
-		return Response.ok().entity(baos.toString()).build();
+		return Response.status(e.getType().getStatus()).entity(baos.toString()).build();
 
 	}
 }

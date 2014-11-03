@@ -7,17 +7,38 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.PropertyConfigurator;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
+import org.icatproject.core.manager.LoggingConfigurator;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 
 public class DocGenerator {
 
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
+	private static Logger logger = Logger.getRootLogger();
+
 	public static void main(String[] args) throws Exception {
+
+		logger.debug("DocGenerator starting");
+
+		// ConsoleAppender console = new ConsoleAppender(); // create appender
+		// // configure the appender
+		// // String PATTERN = "%d [%p|%c|%C{1}] %m%n";
+		// // console.setLayout(new PatternLayout(PATTERN));
+		// console.setThreshold(Level.FATAL);
+		// console.activateOptions();
+		// // add appender to any Logger (here is root)
+		// Logger.getRootLogger().addAppender(console);
 
 		File dir = new File(args[0]);
 		PrintWriter out = new PrintWriter(new File(dir, "src/site/resources/schema.html"));

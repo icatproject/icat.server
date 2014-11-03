@@ -2,6 +2,7 @@ package org.icatproject.integration.client;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.List;
 
 public class Session {
 
@@ -14,46 +15,29 @@ public class Session {
 	}
 
 	public enum DuplicateAction {
-		/** Throw an expection */
-		THROW,
+		/** Check that new data matches the old */
+		CHECK,
 
 		/** Don't check just go to the next row */
 		IGNORE,
 
-		/** Check that new data matches the old */
-		CHECK,
-
 		/** Replace old data with new */
-		OVERWRITE
+		OVERWRITE,
+
+		/** Throw an expection */
+		THROW
 	}
 
-	private String sessionId;
 	private ICAT icat;
+	private String sessionId;
 
 	Session(ICAT icat, String sessionId) {
 		this.icat = icat;
 		this.sessionId = sessionId;
 	}
 
-	public String getUserName() throws IcatException {
-		return icat.getUserName(sessionId);
-	}
-
-	public double getRemainingMinutes() throws IcatException {
-		return icat.getRemainingMinutes(sessionId);
-	}
-
-	public void logout() throws IcatException {
-		icat.logout(sessionId);
-	}
-
-	public void refresh() throws IcatException {
-		icat.refresh(sessionId);
-	}
-
-	public void importMetaData(Path path, DuplicateAction duplicateAction, Attributes attributes)
-			throws IcatException {
-		icat.importMetaData(sessionId, path, duplicateAction, attributes);
+	public List<Long> create(String entities) throws IcatException {
+		return icat.create(sessionId, entities);
 	}
 
 	public InputStream exportMetaData(Attributes attributes) throws IcatException {
@@ -64,12 +48,33 @@ public class Session {
 		return icat.exportMetaData(sessionId, query, attributes);
 	}
 
-	public String search(String query) throws IcatException {
-		return icat.search(sessionId, query);
+	public String get(String query, long id) throws IcatException {
+		return icat.get(sessionId, query, id);
 	}
 
-	public long create(String bean) throws IcatException {
-		return icat.create(sessionId, bean);
+	public double getRemainingMinutes() throws IcatException {
+		return icat.getRemainingMinutes(sessionId);
+	}
+
+	public String getUserName() throws IcatException {
+		return icat.getUserName(sessionId);
+	}
+
+	public void importMetaData(Path path, DuplicateAction duplicateAction, Attributes attributes)
+			throws IcatException {
+		icat.importMetaData(sessionId, path, duplicateAction, attributes);
+	}
+
+	public void logout() throws IcatException {
+		icat.logout(sessionId);
+	}
+
+	public void refresh() throws IcatException {
+		icat.refresh(sessionId);
+	}
+
+	public String search(String query) throws IcatException {
+		return icat.search(sessionId, query);
 	}
 
 }
