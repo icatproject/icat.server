@@ -404,7 +404,6 @@ public class LuceneSingleton implements Lucene {
 		if (entityName != null) {
 			try {
 				Class<?> klass = Class.forName(Constants.ENTITY_PREFIX + entityName);
-				System.out.println(klass);
 				if (!EntityBaseBean.class.isAssignableFrom(klass)) {
 					throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Invalid entity name "
 							+ entityName);
