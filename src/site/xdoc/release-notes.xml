@@ -35,6 +35,7 @@
                 <li>The InvestigationGroup has been introduced. It is expected that this will be generally used in Rule based authorization in
                     preference to InvestigationUser except for those cases where the role of the individual is significant.
                 </li>
+                <li>The Rule.what column has been increased in length from the default of 255 to 1024.</li>
             </ul>
         </section>
 

@@ -31,8 +31,7 @@
                         <a href="${repoUrl}/org/icatproject/icat.server/${project.version}/icat.server-${project.version}-distro.zip">icat.server-${project.version}-distro.zip</a>
                     </li>
                     <li>
-                        A suitable deployed container. The installation scripts only support Glassfish.
-                        Testing has been carried out with Glassfish
+                        A suitable deployed container. The installation scripts only support Glassfish. Testing has been carried out with Glassfish
                         4.0.
                         <a href="http://icatproject.org/installation/glassfish/">Glassfish installation instructions</a>
                         are available.
@@ -68,7 +67,8 @@
 
                 <ol>
                     <li>Upgrade the database schema if you already have a 4.2.x version which you wish to use with ICAT 4.3.3. If you have already
-                        upgraded to ICAT 4.3.x then no changes to the database are required.
+                        upgraded to ICAT 4.3.x then no changes to the database are required except that you may increase the size of the "what" column
+                        of the Rule table to 1024 to match the size the column has on a brand new installation.
                     </li>
                     <li>
                         If you wish to install multiple servers each running an ICAT connected to the same database please see

@@ -99,7 +99,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 	private int varCount;
 
 	@Comment("To what the rules applies")
-	@Column(nullable = false)
+	@Column(nullable = false, length = 1024)
 	private String what;
 
 	@XmlTransient
@@ -287,8 +287,8 @@ public class Rule extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser)
-			throws IcatException {
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper,
+			boolean rootUser) throws IcatException {
 		super.preparePersist(modId, manager, gateKeeper, rootUser);
 		this.fixup(manager, gateKeeper);
 		logger.debug("PreparePersist of Rule for " + this.crudFlags + " of " + this.what);
