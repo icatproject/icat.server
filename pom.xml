@@ -27,6 +27,7 @@
         <uniqueVersion>false</uniqueVersion>
         <maven.install.skip>false</maven.install.skip>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <luceneVersion>4.10.2</luceneVersion>
     </properties>
 
     <repositories>
@@ -98,19 +99,25 @@
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-core</artifactId>
-            <version>4.3.0</version>
+            <version>${luceneVersion}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-queryparser</artifactId>
-            <version>4.3.0</version>
+            <version>${luceneVersion}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-analyzers-common</artifactId>
-            <version>4.3.0</version>
+            <version>${luceneVersion}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-join</artifactId>
+            <version>${luceneVersion}</version>
         </dependency>
 
         <dependency>
@@ -135,7 +142,7 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.client</artifactId>
-            <version>4.3.3</version>
+            <version>4.4.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 

@@ -333,8 +333,8 @@ public class LuceneSingleton implements Lucene {
 			try {
 				directory = FSDirectory.open(new File(luceneDirectory));
 				logger.debug("Opened FSDirectory with lockid " + directory.getLockID());
-				Analyzer analyzer = new IcatAnalyzer(Version.LUCENE_43);
-				IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_43, analyzer);
+				Analyzer analyzer = new IcatAnalyzer();
+				IndexWriterConfig config = new IndexWriterConfig(Version.LATEST, analyzer);
 				iwriter = new IndexWriter(directory, config);
 				String[] files = directory.listAll();
 				if (files.length == 1 && files[0].equals("write.lock")) {

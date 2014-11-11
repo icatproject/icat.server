@@ -41,6 +41,7 @@ import org.icatproject.ParameterValueType;
 import org.icatproject.Rule;
 import org.icatproject.User;
 import org.icatproject.UserGroup;
+import org.icatproject.InvestigationGroup;
 
 public class WSession {
 	public enum ParameterApplicability {
@@ -89,35 +90,6 @@ public class WSession {
 		return this.icat.login(plugin, credentials);
 	}
 
-	// TODO restore code
-	// public void addInputDatafile(Job job, Datafile df) throws IcatException_Exception {
-	// final InputDatafile idf = new InputDatafile();
-	// idf.setDatafile(df);
-	// idf.setJob(job);
-	// this.icat.create(this.sessionId, idf);
-	// }
-	//
-	// public void addInputDataset(Job job, Dataset ds) throws IcatException_Exception {
-	// final InputDataset ids = new InputDataset();
-	// ids.setDataset(ds);
-	// ids.setJob(job);
-	// this.icat.create(this.sessionId, ids);
-	// }
-	//
-	// public void addOutputDatafile(Job job, Datafile df) throws IcatException_Exception {
-	// final OutputDatafile odf = new OutputDatafile();
-	// odf.setDatafile(df);
-	// odf.setJob(job);
-	// this.icat.create(this.sessionId, odf);
-	// }
-	//
-	// public void addOutputDataset(Job job, Dataset ds) throws IcatException_Exception {
-	// final OutputDataset ods = new OutputDataset();
-	// ods.setDataset(ds);
-	// ods.setJob(job);
-	// this.icat.create(this.sessionId, ods);
-	// }
-
 	public void addRule(String groupName, String what, String crudFlags) throws Exception {
 		Rule rule = new Rule();
 		if (groupName != null) {
@@ -149,31 +121,36 @@ public class WSession {
 	}
 
 	public void addUserGroupMember(String groupName, String userName) throws Exception {
-		Grouping group = null;
+		Grouping grouping = null;
 		if (groupName != null) {
-			List<Object> groups = search("Grouping [name= '" + groupName + "']");
-			if (groups.isEmpty()) {
-				group = new Grouping();
-				group.setName(groupName);
-				group.setId(this.icat.create(rootsessionId, group));
+			List<Object> groupings = icat.search(rootsessionId, "Grouping [name= '" + groupName
+					+ "']");
+			if (groupings.isEmpty()) {
+				grouping = new Grouping();
+				grouping.setName(groupName);
+				grouping.setId(icat.create(rootsessionId, grouping));
 			} else {
-				group = (Grouping) groups.get(0);
+				grouping = (Grouping) groupings.get(0);
 			}
 		}
 		User user = null;
-		List<Object> users = search("User [name= '" + userName + "']");
-		if (users.isEmpty()) {
-			user = new User();
-			user.setName(userName);
-			user.setId(this.icat.create(rootsessionId, user));
-		} else {
-			user = (User) users.get(0);
+		if (userName != null) {
+			List<Object> users = icat.search(rootsessionId, "User [name= '" + userName + "']");
+			if (users.isEmpty()) {
+				user = new User();
+				user.setName(userName);
+				user.setId(icat.create(rootsessionId, user));
+			} else {
+				user = (User) users.get(0);
+			}
 		}
 
-		UserGroup userGroup = new UserGroup();
-		userGroup.setUser(user);
-		userGroup.setGrouping(group);
-		this.icat.create(rootsessionId, userGroup);
+		if (user != null && grouping != null) {
+			UserGroup userGroup = new UserGroup();
+			userGroup.setUser(user);
+			userGroup.setGrouping(grouping);
+			this.icat.create(rootsessionId, userGroup);
+		}
 	}
 
 	public void clear() throws Exception {
@@ -275,7 +252,7 @@ public class WSession {
 		final Facility f = new Facility();
 		f.setName(shortName);
 		f.setDaysUntilRelease(daysUntilRelease);
-		f.setId(this.icat.create(this.sessionId, f));
+		f.setId(icat.create(this.sessionId, f));
 		return f;
 	}
 
@@ -516,6 +493,18 @@ public class WSession {
 
 	public List<String> getEntityNames() throws IcatException_Exception {
 		return icat.getEntityNames();
+	}
+
+	public void createInvestigationGroup(Investigation inv, String groupName, String role)
+			throws IcatException_Exception {
+		List<Object> groupings = icat.search(rootsessionId, "Grouping [name= '" + groupName + "']");
+
+		Grouping grouping = (Grouping) groupings.get(0);
+		InvestigationGroup ig = new InvestigationGroup();
+		ig.setInvestigation(inv);
+		ig.setGrouping(grouping);
+		ig.setRole(role);
+		icat.create(sessionId, ig);
 	}
 
 }

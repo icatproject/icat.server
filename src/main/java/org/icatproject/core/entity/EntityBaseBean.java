@@ -126,6 +126,7 @@ public abstract class EntityBaseBean implements Serializable {
 				gateKeeper.performAuthorisation(userId, bean, AccessType.READ, manager);
 			} catch (IcatException e) {
 				if (e.getType() == IcatExceptionType.INSUFFICIENT_PRIVILEGES) {
+					logger.info("READ of " + bean + " is not permitted");
 					return null;
 				} else {
 					throw e;
@@ -505,5 +506,10 @@ public abstract class EntityBaseBean implements Serializable {
 
 		}
 
+	}
+
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + ":" + id;
 	}
 }

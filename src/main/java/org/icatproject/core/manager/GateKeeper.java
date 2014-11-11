@@ -44,21 +44,6 @@ import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 @Startup
 public class GateKeeper {
 
-	private final static Pattern tsRegExp = Pattern
-			.compile("\\{\\s*ts\\s+\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\s*\\}");
-
-	public Set<String> getRootUserNames() {
-		return rootUserNames;
-	}
-
-	@PersistenceContext(unitName = "icat")
-	private EntityManager gateKeeperManager;
-
-	@EJB
-	PropertyHandler propertyHandler;
-
-	private final Logger logger = Logger.getLogger(GateKeeper.class);
-
 	public static Comparator<String> stringsBySize = new Comparator<String>() {
 
 		@Override
@@ -75,195 +60,39 @@ public class GateKeeper {
 		}
 	};
 
-	private Set<String> publicTables = new ConcurrentSkipListSet<>();
-	private Map<String, Set<String>> publicSteps = new ConcurrentSkipListMap<>();
+	private final static Pattern tsRegExp = Pattern
+			.compile("\\{\\s*ts\\s+\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\s*\\}");
 
-	private Set<String> rootUserNames;
+	private TopicConnection centralConnection;
 
 	@Resource(mappedName = "jms/ICAT/CentralConnectionFactory")
 	private TopicConnectionFactory centralConnectionFactory;
-
-	@Resource(mappedName = "jms/ICAT/Synch")
-	private Topic synchTopic;
-
-	private TopicConnection centralConnection;
 
 	private TopicConnection consumerConnection;
 
 	private Session consumeSession;
 
-	private boolean stalePublicTables;
-
-	private boolean stalePublicSteps;
+	@PersistenceContext(unitName = "icat")
+	private EntityManager gateKeeperManager;
+	private final Logger logger = Logger.getLogger(GateKeeper.class);
 
 	private int maxIdsInQuery;
 
-	@PostConstruct
-	private void init() {
-		logger.info("Creating GateKeeper singleton");
-		maxIdsInQuery = propertyHandler.getMaxIdsInQuery();
-		rootUserNames = propertyHandler.getRootUserNames();
+	@EJB
+	PropertyHandler propertyHandler;
 
-		SingletonFinder.setGateKeeper(this);
+	private Map<String, Set<String>> publicSteps = new ConcurrentSkipListMap<>();
 
-		try {
-			centralConnection = centralConnectionFactory.createTopicConnection();
-			consumerConnection = centralConnectionFactory.createTopicConnection();
-			consumeSession = consumerConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			MessageConsumer consumer = consumeSession.createConsumer(synchTopic);
-			consumer.setMessageListener(new GateKeeperListener());
-			consumerConnection.start();
-		} catch (JMSException e) {
-			logger.fatal("Problem with JMS " + e);
-			throw new IllegalStateException(e.getMessage());
-		}
+	private Set<String> publicTables = new ConcurrentSkipListSet<>();
 
-		updatePublicTables();
-		updatePublicSteps();
+	private Set<String> rootUserNames;
 
-		logger.info("Created GateKeeper singleton");
-	}
+	private boolean stalePublicSteps;
 
-	@PreDestroy()
-	private void exit() {
-		try {
-			if (centralConnection != null) {
-				centralConnection.close();
-			}
-			if (consumeSession != null) {
-				consumeSession.close();
-			}
-			if (consumerConnection != null) {
-				consumerConnection.close();
-			}
-			logger.info("GateKeeper closing down");
-		} catch (JMSException e) {
-			throw new IllegalStateException(e.getMessage());
-		}
-	}
+	private boolean stalePublicTables;
 
-	/**
-	 * Perform authorization check for any object
-	 * 
-	 * @throws IcatException
-	 */
-	public void performAuthorisation(String user, EntityBaseBean object, AccessType access,
-			EntityManager manager) throws IcatException {
-
-		Class<? extends EntityBaseBean> objectClass = object.getClass();
-		String simpleName = objectClass.getSimpleName();
-		if (rootUserNames.contains(user)) {
-			logger.info("\"Root\" user " + user + " is allowed " + access + " to " + simpleName);
-			return;
-		}
-
-		String qName = null;
-		if (access == AccessType.CREATE) {
-			qName = Rule.CREATE_QUERY;
-		} else if (access == AccessType.READ) {
-			if (publicTables.contains(simpleName)) {
-				logger.info("All are allowed " + access + " to " + simpleName);
-				return;
-			}
-			qName = Rule.READ_QUERY;
-		} else if (access == AccessType.UPDATE) {
-			qName = Rule.UPDATE_QUERY;
-		} else if (access == AccessType.DELETE) {
-			qName = Rule.DELETE_QUERY;
-		} else {
-			throw new RuntimeException(access + " is not handled yet");
-		}
-
-		TypedQuery<String> query = manager.createNamedQuery(qName, String.class)
-				.setParameter("member", user).setParameter("bean", simpleName);
-
-		List<String> restrictions = query.getResultList();
-		logger.debug("Got " + restrictions.size() + " authz queries for " + access + " by " + user
-				+ " to a " + objectClass.getSimpleName());
-
-		for (String restriction : restrictions) {
-			logger.debug("Query: " + restriction);
-			if (restriction == null) {
-				logger.info("Null restriction => " + access + " permitted to " + simpleName);
-				return;
-			}
-		}
-
-		/*
-		 * Sort a copy of the results by string length. It is probably faster to evaluate a shorter
-		 * query.
-		 */
-		List<String> sortedQueries = new ArrayList<String>();
-		sortedQueries.addAll(restrictions);
-		Collections.sort(sortedQueries, stringsBySize);
-
-		Long keyVal = object.getId();
-
-		for (String qString : sortedQueries) {
-			TypedQuery<Long> q = manager.createQuery(qString, Long.class);
-			if (qString.contains(":user")) {
-				q.setParameter("user", user);
-			}
-			q.setParameter("pkid", keyVal);
-			Long r = q.getSingleResult();
-			if (r == 1) {
-				logger.info(access + " to " + simpleName + " permitted by " + qString);
-				return;
-			}
-		}
-		throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES, access
-				+ " access to this " + objectClass.getSimpleName() + " is not allowed.");
-
-	}
-
-	public void requestUpdatePublicSteps() throws JMSException {
-		Session session = centralConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		MessageProducer jmsProducer = session.createProducer(synchTopic);
-		TextMessage jmsg = session.createTextMessage("updatePublicSteps");
-		logger.debug("Sending jms message: updatePublicSteps");
-		jmsProducer.send(jmsg);
-		session.close();
-	}
-
-	public void updatePublicSteps() {
-		List<PublicStep> steps = gateKeeperManager.createNamedQuery(PublicStep.GET_ALL_QUERY,
-				PublicStep.class).getResultList();
-		publicSteps.clear();
-		for (PublicStep step : steps) {
-			Set<String> fieldNames = publicSteps.get(step.getOrigin());
-			if (fieldNames == null) {
-				fieldNames = new ConcurrentSkipListSet<>();
-				publicSteps.put(step.getOrigin(), fieldNames);
-			}
-			fieldNames.add(step.getField());
-		}
-		stalePublicSteps = false;
-		logger.debug("There are " + steps.size() + " publicSteps");
-	}
-
-	public void requestUpdatePublicTables() throws JMSException {
-		Session session = centralConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		MessageProducer jmsProducer = session.createProducer(synchTopic);
-		TextMessage jmsg = session.createTextMessage("updatePublicTables");
-		logger.debug("Sending jms message: updatePublicTables");
-		jmsProducer.send(jmsg);
-		session.close();
-	}
-
-	public void updatePublicTables() {
-		try {
-			List<String> tableNames = gateKeeperManager.createNamedQuery(Rule.PUBLIC_QUERY,
-					String.class).getResultList();
-			publicTables.clear();
-			publicTables.addAll(tableNames);
-			stalePublicTables = false;
-			logger.debug("There are " + publicTables.size() + " publicTables");
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error(e);
-		}
-	}
+	@Resource(mappedName = "jms/ICAT/Synch")
+	private Topic synchTopic;
 
 	/** Return true if allowed because destination table is public or because step is public */
 	public boolean allowed(Relationship r) {
@@ -282,9 +111,42 @@ public class GateKeeper {
 		return false;
 	}
 
-	public void updateCache() throws JMSException {
-		requestUpdatePublicTables();
-		requestUpdatePublicSteps();
+	public void checkJPQL(String query) throws IcatException {
+
+		Matcher m = tsRegExp.matcher(query);
+
+		query = m.replaceAll(" CURRENT_TIMESTAMP ");
+		try {
+			gateKeeperManager.createQuery(query);
+		} catch (Exception e) {
+			m.reset();
+			if (m.find()) {
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+						"Timestamp literals have been replaced... " + e.getMessage());
+			} else {
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
+			}
+
+		}
+
+	}
+
+	@PreDestroy()
+	private void exit() {
+		try {
+			if (centralConnection != null) {
+				centralConnection.close();
+			}
+			if (consumeSession != null) {
+				consumeSession.close();
+			}
+			if (consumerConnection != null) {
+				consumerConnection.close();
+			}
+			logger.info("GateKeeper closing down");
+		} catch (JMSException e) {
+			throw new IllegalStateException(e.getMessage());
+		}
 	}
 
 	public Set<String> getPublicTables() {
@@ -377,23 +239,38 @@ public class GateKeeper {
 		return results;
 	}
 
-	public void checkJPQL(String query) throws IcatException {
+	public Set<String> getRootUserNames() {
+		return rootUserNames;
+	}
 
-		Matcher m = tsRegExp.matcher(query);
+	@PostConstruct
+	private void init() {
+		logger.info("Creating GateKeeper singleton");
+		maxIdsInQuery = propertyHandler.getMaxIdsInQuery();
+		rootUserNames = propertyHandler.getRootUserNames();
 
-		query = m.replaceAll(" CURRENT_TIMESTAMP ");
+		SingletonFinder.setGateKeeper(this);
+
 		try {
-			gateKeeperManager.createQuery(query);
-		} catch (Exception e) {
-			m.reset();
-			if (m.find()) {
-				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-						"Timestamp literals have been replaced... " + e.getMessage());
-			} else {
-				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
-			}
-
+			centralConnection = centralConnectionFactory.createTopicConnection();
+			consumerConnection = centralConnectionFactory.createTopicConnection();
+			consumeSession = consumerConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			MessageConsumer consumer = consumeSession.createConsumer(synchTopic);
+			consumer.setMessageListener(new GateKeeperListener());
+			consumerConnection.start();
+		} catch (JMSException e) {
+			logger.fatal("Problem with JMS " + e);
+			throw new IllegalStateException(e.getMessage());
 		}
+
+		updatePublicTables();
+		updatePublicSteps();
+
+		logger.info("Created GateKeeper singleton");
+	}
+
+	public void markStalePublicSteps() {
+		stalePublicSteps = true;
 
 	}
 
@@ -402,9 +279,131 @@ public class GateKeeper {
 
 	}
 
-	public void markStalePublicSteps() {
-		stalePublicSteps = true;
+	/**
+	 * Perform authorization check for any object
+	 * 
+	 * @throws IcatException
+	 */
+	public void performAuthorisation(String user, EntityBaseBean object, AccessType access,
+			EntityManager manager) throws IcatException {
 
+		Class<? extends EntityBaseBean> objectClass = object.getClass();
+		String simpleName = objectClass.getSimpleName();
+		if (rootUserNames.contains(user)) {
+			logger.info("\"Root\" user " + user + " is allowed " + access + " to " + simpleName);
+			return;
+		}
+
+		String qName = null;
+		if (access == AccessType.CREATE) {
+			qName = Rule.CREATE_QUERY;
+		} else if (access == AccessType.READ) {
+			if (publicTables.contains(simpleName)) {
+				logger.info("All are allowed " + access + " to " + simpleName);
+				return;
+			}
+			qName = Rule.READ_QUERY;
+		} else if (access == AccessType.UPDATE) {
+			qName = Rule.UPDATE_QUERY;
+		} else if (access == AccessType.DELETE) {
+			qName = Rule.DELETE_QUERY;
+		} else {
+			throw new RuntimeException(access + " is not handled yet");
+		}
+
+		TypedQuery<String> query = manager.createNamedQuery(qName, String.class)
+				.setParameter("member", user).setParameter("bean", simpleName);
+
+		List<String> restrictions = query.getResultList();
+		logger.debug("Got " + restrictions.size() + " authz queries for " + access + " by " + user
+				+ " to a " + objectClass.getSimpleName());
+
+		for (String restriction : restrictions) {
+			logger.debug("Query: " + restriction);
+			if (restriction == null) {
+				logger.info("Null restriction => " + access + " permitted to " + simpleName);
+				return;
+			}
+		}
+
+		/*
+		 * Sort a copy of the results by string length. It is probably faster to evaluate a shorter
+		 * query.
+		 */
+		List<String> sortedQueries = new ArrayList<String>();
+		sortedQueries.addAll(restrictions);
+		Collections.sort(sortedQueries, stringsBySize);
+
+		Long keyVal = object.getId();
+
+		for (String qString : sortedQueries) {
+			TypedQuery<Long> q = manager.createQuery(qString, Long.class);
+			if (qString.contains(":user")) {
+				q.setParameter("user", user);
+			}
+			q.setParameter("pkid", keyVal);
+			if (q.getSingleResult() > 0) {
+				logger.info(access + " to " + simpleName + " permitted by " + qString);
+				return;
+			}
+		}
+		throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES, access
+				+ " access to this " + objectClass.getSimpleName() + " is not allowed.");
+
+	}
+
+	public void requestUpdatePublicSteps() throws JMSException {
+		Session session = centralConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		MessageProducer jmsProducer = session.createProducer(synchTopic);
+		TextMessage jmsg = session.createTextMessage("updatePublicSteps");
+		logger.debug("Sending jms message: updatePublicSteps");
+		jmsProducer.send(jmsg);
+		session.close();
+	}
+
+	public void requestUpdatePublicTables() throws JMSException {
+		Session session = centralConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		MessageProducer jmsProducer = session.createProducer(synchTopic);
+		TextMessage jmsg = session.createTextMessage("updatePublicTables");
+		logger.debug("Sending jms message: updatePublicTables");
+		jmsProducer.send(jmsg);
+		session.close();
+	}
+
+	public void updateCache() throws JMSException {
+		requestUpdatePublicTables();
+		requestUpdatePublicSteps();
+	}
+
+	public void updatePublicSteps() {
+		List<PublicStep> steps = gateKeeperManager.createNamedQuery(PublicStep.GET_ALL_QUERY,
+				PublicStep.class).getResultList();
+		publicSteps.clear();
+		for (PublicStep step : steps) {
+			Set<String> fieldNames = publicSteps.get(step.getOrigin());
+			if (fieldNames == null) {
+				fieldNames = new ConcurrentSkipListSet<>();
+				publicSteps.put(step.getOrigin(), fieldNames);
+			}
+			fieldNames.add(step.getField());
+		}
+		stalePublicSteps = false;
+		logger.debug("There are " + steps.size() + " publicSteps");
+	}
+
+	public void updatePublicTables() {
+		try {
+			List<String> tableNames = gateKeeperManager.createNamedQuery(Rule.PUBLIC_QUERY,
+					String.class).getResultList();
+			publicTables.clear();
+			publicTables.addAll(tableNames);
+			stalePublicTables = false;
+			logger.debug("There are " + publicTables.size() + " publicTables");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e);
+		}
 	}
 
 }

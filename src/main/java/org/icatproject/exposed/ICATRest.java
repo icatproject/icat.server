@@ -71,6 +71,14 @@ import org.icatproject.core.manager.Transmitter;
 @TransactionManagement(TransactionManagementType.BEAN)
 public class ICATRest {
 
+	private void checkRoot(String sessionId) throws IcatException {
+		String userId = beanManager.getUserName(sessionId, manager);
+		if (!rootUserNames.contains(userId)) {
+			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES,
+					"user must be in rootUserNames");
+		}
+	}
+
 	public class EventChecker {
 
 		private JsonParser parser;
@@ -137,6 +145,8 @@ public class ICATRest {
 	@Resource
 	private UserTransaction userTransaction;
 
+	private Set<String> rootUserNames;
+
 	@GET
 	@Path("port")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -158,6 +168,37 @@ public class ICATRest {
 				.write("remainingMinutes", remainingMinutes).writeEnd();
 		gen.close();
 		return baos.toString();
+	}
+
+	@GET
+	@Path("jpql")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getJpql(@QueryParam("sessionId") String sessionId,
+			@QueryParam("query") String query) throws IcatException {
+		checkRoot(sessionId);
+		if (query == null) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
+		}
+		int nMax = 5;
+		List<Object> os = manager.createQuery(query, Object.class).setMaxResults(nMax)
+				.getResultList();
+		StringBuilder sb = new StringBuilder();
+		if (os.size() == nMax) {
+			sb.append("Count at least 5");
+		} else {
+			sb.append("Count " + os.size());
+		}
+		boolean first = true;
+		for (Object o : os) {
+			if (!first) {
+				sb.append(", ");
+			} else {
+				sb.append(": ");
+				first = false;
+			}
+			sb.append(o);
+		}
+		return sb.toString();
 	}
 
 	@GET
@@ -463,6 +504,7 @@ public class ICATRest {
 	private void init() {
 		authPlugins = propertyHandler.getAuthPlugins();
 		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
+		rootUserNames = propertyHandler.getRootUserNames();
 	}
 
 	@POST

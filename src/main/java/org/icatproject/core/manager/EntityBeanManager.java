@@ -961,7 +961,7 @@ public class EntityBeanManager {
 
 		/* Get the JPQL which includes authz restrictions */
 		String jpql = q.getJPQL(userId, manager);
-		logger.info("JPQL: " + jpql);
+		logger.info("Final search JPQL: " + jpql);
 
 		/* Null query indicates that nothing accepted by authz */
 		if (jpql == null) {
@@ -1819,6 +1819,6 @@ public class EntityBeanManager {
 			}
 		}
 		output.write((linesep).getBytes());
-
 	}
+
 }

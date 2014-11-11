@@ -60,6 +60,7 @@ import org.icatproject.SampleParameter;
 import org.icatproject.SampleType;
 import org.icatproject.User;
 import org.icatproject.UserGroup;
+import org.icatproject.core.manager.EntityInfoHandler;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -84,7 +85,6 @@ public class TestWS {
 		try {
 			random = new Random();
 			session = new WSession();
-			session.setAuthz();
 			session.clearAuthz();
 			session.setAuthz();
 			session.clear();
@@ -1100,6 +1100,87 @@ public class TestWS {
 			session.clearAuthz();
 			session.setAuthz();
 		}
+	}
+
+	@Test
+	public void groupAuthz() throws Exception {
+		try {
+			session.clear();
+			session.clearAuthz();
+			session.addUserGroupMember("notroot", "db/notroot");
+
+			session.addUserGroupMember("investigation_test_owner", "db/piOne");
+			session.addUserGroupMember("investigation_test_reader", null);
+			session.addUserGroupMember("investigation_test_writer", "db/CIC");
+			session.addUserGroupMember("investigation_test_writer", "db/piOne");
+
+			session.addUserGroupMember("root", "root");
+			session.addUserGroupMember("root", "useroffice");
+
+			for (String t : EntityInfoHandler.getAlphabeticEntityNames()) {
+				session.addRule("root", "SELECT x FROM " + t + " x", "CRUD");
+				session.addRule("notroot", "SELECT x FROM " + t + " x", "CRUD");
+			}
+
+			for (String t : Arrays.asList("DatafileFormat", "DatasetType", "Facility")) {
+				session.addRule(null, "SELECT x FROM " + t + " x", "R");
+			}
+
+			session.addRule(null,
+					"Dataset <-> Investigation <-> InvestigationGroup [role='writer'] "
+							+ "<-> Grouping <-> UserGroup <-> User [name=:user]", "CRUD");
+
+			session.addRule(null, "Dataset <-> Investigation <-> InvestigationGroup <-> Grouping "
+					+ "<-> UserGroup <-> User [name=:user]", "R");
+
+			session.addRule(null,
+					" Investigation <-> InvestigationGroup <-> Grouping <-> UserGroup "
+							+ "<-> User [name=:user]", "R");
+
+			Facility facility = session.createFacility("Test Facility", 90);
+
+			InvestigationType investigationType = session.createInvestigationType(facility,
+					"TestExperiment");
+
+			Investigation invA = session.createInvestigation(facility, "A", "Not null",
+					investigationType);
+
+			DatasetType dst = session.createDatasetType(facility, "GQ");
+
+			session.createDataset("DS1", dst, invA);
+
+			session.createInvestigationGroup(invA, "investigation_test_owner", "owner");
+			session.createInvestigationGroup(invA, "investigation_test_reader", "reader");
+			session.createInvestigationGroup(invA, "investigation_test_writer", "writer");
+
+			WSession aSession = session.getSession("db", "username", "piOne", "password", "piOne");
+
+			Long invId = ((Investigation) aSession.search("Investigation [name='A']").get(0))
+					.getId();
+			System.out.println(invId);
+
+			List<Object> dss = aSession
+					.search("Dataset INCLUDE Investigation [name='DS1' AND investigation.id = "
+							+ invId + "]");
+			assertEquals(1, dss.size());
+			Investigation inv = ((Dataset) dss.get(0)).getInvestigation();
+			assertNotNull(inv);
+			assertEquals(invId, inv.getId());
+
+			aSession = session.getSession("db", "username", "CIC", "password", "password");
+			dss = aSession
+					.search("Dataset INCLUDE Investigation [name='DS1' AND investigation.id = "
+							+ invId + "]");
+			assertEquals(1, dss.size());
+			inv = ((Dataset) dss.get(0)).getInvestigation();
+			assertNotNull(inv);
+			assertEquals(invId, inv.getId());
+
+		} finally {
+			session.clearAuthz();
+			session.setAuthz();
+		}
+
 	}
 
 	@Test

@@ -16,20 +16,17 @@ import org.apache.lucene.util.Version;
 
 public class IcatAnalyzer extends StopwordAnalyzerBase {
 
-	private Version matchVersion;
-
-	public IcatAnalyzer(Version matchVersion) {
-		super(matchVersion, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
-		this.matchVersion = matchVersion;
+	public IcatAnalyzer() {
+		super(StopAnalyzer.ENGLISH_STOP_WORDS_SET);
 	}
 
 	@Override
 	protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
-		final Tokenizer source = new StandardTokenizer(matchVersion, reader);
-		TokenStream sink = new StandardFilter(matchVersion, source);
-		sink = new EnglishPossessiveFilter(matchVersion, sink);
-		sink = new LowerCaseFilter(matchVersion, sink);
-		sink = new StopFilter(matchVersion, sink, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
+		Tokenizer source = new StandardTokenizer(reader);
+		TokenStream sink = new StandardFilter(source);
+		sink = new EnglishPossessiveFilter(Version.LATEST, sink);
+		sink = new LowerCaseFilter(sink);
+		sink = new StopFilter(sink, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
 		sink = new PorterStemFilter(sink);
 		return new TokenStreamComponents(source, sink);
 	}
