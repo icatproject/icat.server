@@ -11,12 +11,29 @@
 		DBMS. This document describes the RESTful interface but assumes some
 		knowledge of ICAT as explained in the ICAT Java Client manual.</p>
 
+	<h3>Notation</h3>
 	<p>For each call the Java annotations in the server code are shown
 		as these indicate precisely what is expected. @POST, @PUT, @DELETE and
 		@GET denote the method and @Path shows the relative url path. They are
 		all relative to "icat". The @Consumes and @Produces shows the expected
 		format of the body of the message.</p>
 
+	<h3>Error handling</h3>
+	<p>
+		In the case of an error from the ICAT code the returned json will be
+		of the form:
+		<samp>{"code":"BAD_PARAMETER", "message":"password too short",
+			"offset":"0"}</samp>
+		where the offset (which shows the offset to the entity which caused
+		the error) will be omitted when it is not relevant. The status code
+		will correspond to the type of the ICAT exception as shown by the code
+		value. In the case of any other error, the code field will always be
+		"INTERNAL", the offset will always be omitted and the status code will
+		be 500 ("Internal Server Error"). Clients should always check the
+		status code and if status/100 is not 2 then an error has occured.
+	</p>
+
+	<h3>Testing</h3>
 	<p>
 		The @GET calls can be tried on a web browser and curl can be used to
 		make any of the calls. For example a url of the form:
@@ -25,20 +42,7 @@
 		<samp>{"version":"4.4.0"}</samp>
 	</p>
 
-	<p>
-		In the case of an error from the ICAT code the returned json will be
-		of the form:
-		<samp>{"code":"BAD_PARAMETER", "message":"password too short",
-			"offset":"0"}</samp>
-		where the offset will be omitted when it is not useful. It is to show
-		how many entities would have been succesfully processed if a
-		subsequent error had not occured. The status code will correspond to
-		the type of the ICAT exception as shown by the code value. In the case
-		of any other error, the returned json will be of the form:
-		<samp>{"code":"INTERNAL", "message":"null pointer exception"}</samp>
-		and the status code will be 500 ("Internal Server Error"). Clients
-		should check the status code and if status/100 is not 2 then an error
-		has occured.
+	<h3>Structure</h3>
 	<div>
 		This document is divided into sections covering
 		<ul>
@@ -48,8 +52,6 @@
 			<li><a href="#misc">Miscellaneous</a></li>
 		</ul>
 	</div>
-
-
 
 	<h2>
 		<a id="session">Session management</a>
