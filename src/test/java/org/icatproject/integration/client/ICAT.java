@@ -170,10 +170,7 @@ public class ICAT {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonGenerator gen = Json.createGenerator(baos);
 		gen.writeStartObject().write("sessionId", sessionId);
-		if (query == null) {
-			gen.write("type", "dump");
-		} else {
-			gen.write("type", "query");
+		if (query != null) {
 			gen.write("query", query);
 		}
 		gen.write("attributes", attributes.name().toLowerCase()).writeEnd().close();

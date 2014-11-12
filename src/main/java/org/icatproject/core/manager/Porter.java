@@ -56,19 +56,11 @@ import org.icatproject.core.parser.LexerException;
 @TransactionManagement(TransactionManagementType.BEAN)
 public class Porter {
 
-	public enum ExportType {
-		/** query field must be set with what to export */
-		QUERY,
-
-		/** query field must not be set - dump everything */
-		DUMP
-	}
-
 	public enum Attributes {
 		/** Include createId etc */
 		ALL,
 
-		/** Only export attributes which may normally be set by the user */
+		/** Only process attributes which may normally be set by the user */
 		USER
 	}
 
@@ -642,7 +634,6 @@ public class Porter {
 		}
 		String sessionId = null;
 		String query = null;
-		ExportType exportType = ExportType.QUERY;
 		Attributes attributes = Attributes.USER;
 		try (JsonParser parser = Json.createParser(new ByteArrayInputStream(jsonString.getBytes()))) {
 			String key = null;
@@ -655,13 +646,6 @@ public class Porter {
 						sessionId = parser.getString();
 					} else if (key.equals("query")) {
 						query = parser.getString();
-					} else if (key.equals("type")) {
-						try {
-							exportType = ExportType.valueOf(parser.getString().toUpperCase());
-						} catch (IllegalArgumentException e) {
-							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-									parser.getString() + " is not a valid value for 'type'");
-						}
 					} else if (key.equals("attributes")) {
 						try {
 							attributes = Attributes.valueOf(parser.getString().toUpperCase());
@@ -678,7 +662,7 @@ public class Porter {
 		}
 		logger.debug(sessionId + " issues " + query);
 		String userId = getUserName(sessionId, manager);
-		if (exportType == ExportType.QUERY) {
+		if (query != null) {
 			return beanManager.export(userId, query, attributes == Attributes.ALL, manager,
 					userTransaction);
 		} else {

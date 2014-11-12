@@ -12,6 +12,7 @@
       <item name="FAQ" href="faq.html"/>
       <item name="Issue Tracking" href="issue-tracking.html"/>
       <item name="Release Notes" href="release-notes.html"/>
+      <item name="RESTful interface" href="manual_rest.html"/>
     </menu>
        
     <menu name="Information for Installers">

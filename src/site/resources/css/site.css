@@ -1,11 +1,10 @@
-tt {
-	font-family: Courier, monospace;
-	font-size: 12px;
-	background-color: palegreen
+tt,kbd,samp,pre {
+	font-family: monospace;
+	background-color: #E3DAA6
 }
 
 p.call {
-	font-family: Courier, monospace;
+	font-family: monospace;
 	padding: 8 0 0 0;
 	font-weight: normal;
 	font-size: 13px;
