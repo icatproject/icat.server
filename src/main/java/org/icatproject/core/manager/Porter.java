@@ -605,6 +605,8 @@ public class Porter {
 				} else {
 					throw e;
 				}
+			} else {
+				throw e;
 			}
 		}
 		if (save != null && id != null) {
