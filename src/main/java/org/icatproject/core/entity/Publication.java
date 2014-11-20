@@ -85,9 +85,4 @@ public class Publication extends EntityBaseBean implements Serializable {
 		this.url = url;
 	}
 
-	@Override
-	public String toString() {
-		return "Publication[id=" + id + "]";
-	}
-
 }

@@ -71,9 +71,4 @@ public class DatasetType extends EntityBaseBean implements Serializable {
 		this.name = name;
 	}
 
-	@Override
-	public String toString() {
-		return "DatasetType[name=" + this.name + "]";
-	}
-
 }

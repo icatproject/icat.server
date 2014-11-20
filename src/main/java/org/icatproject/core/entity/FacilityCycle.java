@@ -83,9 +83,4 @@ public class FacilityCycle extends EntityBaseBean implements Serializable {
 		this.startDate = startDate;
 	}
 
-	@Override
-	public String toString() {
-		return "FacilityCycle[name=" + name + "]";
-	}
-
 }

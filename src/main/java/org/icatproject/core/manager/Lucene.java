@@ -3,12 +3,50 @@ package org.icatproject.core.manager;
 import java.io.Serializable;
 import java.util.List;
 
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 
 public interface Lucene {
+
+	@SuppressWarnings("serial")
+	public class ParameterPOJO implements Serializable {
+
+		private String name;
+		private String units;
+		private String stringValue;
+
+		public ParameterPOJO(String name, String units, String stringValue) {
+			this.name = name;
+			this.units = units;
+			this.stringValue = stringValue;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getUnits() {
+			return units;
+		}
+
+		public String getStringValue() {
+			return stringValue;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder("name:" + name);
+			if (units != null) {
+				sb.append(" units:" + units);
+			}
+			if (stringValue != null) {
+				sb.append(" stringValue: " + stringValue);
+			}
+			return sb.toString();
+		}
+
+	}
 
 	@SuppressWarnings("serial")
 	public class LuceneSearchResult implements Serializable {
@@ -19,12 +57,12 @@ public interface Lucene {
 		private float score;
 		private boolean scoreDocExists;
 
-		public LuceneSearchResult(List<String> results, ScoreDoc scoreDoc, Query query) {
+		public LuceneSearchResult(List<String> results, ScoreDoc lastDoc) {
 			this.results = results;
-			if (scoreDoc != null) {
-				this.doc = scoreDoc.doc;
-				this.shardIndex = scoreDoc.shardIndex;
-				this.score = scoreDoc.score;
+			if (lastDoc != null) {
+				this.doc = lastDoc.doc;
+				this.shardIndex = lastDoc.shardIndex;
+				this.score = lastDoc.score;
 				scoreDocExists = true;
 			}
 		}
@@ -59,5 +97,13 @@ public interface Lucene {
 			LuceneSearchResult last) throws IcatException;
 
 	void updateDocument(EntityBaseBean entityBaseBean) throws IcatException;
+
+	LuceneSearchResult investigations(String user, String text, String lower, String upper,
+			List<ParameterPOJO> parms, List<String> samples, String userFullName, int maxResults)
+			throws IcatException;
+
+	LuceneSearchResult investigationsAfter(String user, String text, String lower, String upper,
+			List<ParameterPOJO> parms, List<String> samples, String userFullName, int blockSize,
+			LuceneSearchResult last) throws IcatException;
 
 }

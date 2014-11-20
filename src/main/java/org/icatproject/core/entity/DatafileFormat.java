@@ -95,9 +95,4 @@ public class DatafileFormat extends EntityBaseBean implements Serializable {
 		this.version = version;
 	}
 
-	@Override
-	public String toString() {
-		return "DatafileFormat[id=" + this.id + "]";
-	}
-
 }

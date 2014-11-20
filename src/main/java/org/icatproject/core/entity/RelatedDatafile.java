@@ -57,9 +57,4 @@ public class RelatedDatafile extends EntityBaseBean implements Serializable {
 	public RelatedDatafile() {
 	}
 
-	@Override
-	public String toString() {
-		return "RelatedDatafile[id=" + id + "]";
-	}
-
 }

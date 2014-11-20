@@ -56,6 +56,7 @@ import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Log;
 import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.Lucene.LuceneSearchResult;
+import org.icatproject.core.manager.Lucene.ParameterPOJO;
 import org.icatproject.core.manager.PropertyHandler.Operation;
 import org.icatproject.core.oldparser.OldGetQuery;
 import org.icatproject.core.oldparser.OldInput;
@@ -1819,6 +1820,82 @@ public class EntityBeanManager {
 			}
 		}
 		output.write((linesep).getBytes());
+	}
+
+	public List<EntityBaseBean> luceneInvestigations(String userId, String user, String text,
+			String lower, String upper, List<ParameterPOJO> parms, List<String> samples,
+			String userFullName, int maxCount, EntityManager manager,
+			UserTransaction userTransaction) throws IcatException {
+
+		long time = log ? System.currentTimeMillis() : 0;
+		List<EntityBaseBean> results = new ArrayList<EntityBaseBean>();
+		long descendantCount = 0;
+		if (lucene != null) {
+			LuceneSearchResult last = null;
+			List<String> allResults = Collections.emptyList();
+			/*
+			 * As results may be rejected and maxCount may be 1 ensure that we don't make a huge
+			 * number of calls to Lucene
+			 */
+			int blockSize = Math.max(1000, maxCount);
+			do {
+				if (last == null) {
+					last = lucene.investigations(user, text, lower, upper, parms, samples,
+							userFullName, blockSize);
+				} else {
+					last = lucene.investigationsAfter(user, text, lower, upper, parms, samples,
+							userFullName, blockSize, last);
+				}
+				allResults = last.getResults();
+				logger.debug("Got " + allResults.size() + " results from Lucene for blockSize = "
+						+ blockSize);
+				for (String result : allResults) {
+					int i = result.indexOf(':');
+					String eName = result.substring(0, i);
+					long entityId = Long.parseLong(result.substring(i + 1));
+					try {
+						@SuppressWarnings("unchecked")
+						Class<EntityBaseBean> klass = (Class<EntityBaseBean>) Class
+								.forName(Constants.ENTITY_PREFIX + eName);
+						EntityBaseBean beanManaged = manager.find(klass, entityId);
+						if (beanManaged != null) {
+							try {
+								gateKeeper.performAuthorisation(userId, beanManaged,
+										AccessType.READ, manager);
+								EntityBaseBean eb = beanManaged.pruned(false, -1, null,
+										maxEntities, gateKeeper, userId, manager);
+								results.add(eb);
+								if ((descendantCount += eb.getDescendantCount(maxEntities)) > maxEntities) {
+									throw new IcatException(IcatExceptionType.VALIDATION,
+											"attempt to return more than " + maxEntities
+													+ " entitities");
+								}
+								if (results.size() == maxCount) {
+									break;
+								}
+							} catch (IcatException e) {
+								// Nothing to do
+							}
+						}
+					} catch (ClassNotFoundException e) {
+						throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+					}
+				}
+			} while (results.size() != maxCount && allResults.size() == blockSize);
+		}
+		if (log) {
+			if (results.size() > 0) {
+				EntityBaseBean result = results.get(0);
+				logRead(time, userId, "luceneInvestigations", result.getClass().getSimpleName(),
+						result.getId(), "", manager, userTransaction);
+			} else {
+				logRead(time, userId, "luceneInvestigations", null, null, "", manager,
+						userTransaction);
+			}
+		}
+		logger.debug("Returning " + results.size() + " results with " + descendantCount
+				+ " entities");
+		return results;
 	}
 
 }

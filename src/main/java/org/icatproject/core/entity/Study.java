@@ -92,9 +92,4 @@ public class Study extends EntityBaseBean implements Serializable {
 		this.studyInvestigations = studyInvestigations;
 	}
 
-	@Override
-	public String toString() {
-		return "Study[id=" + this.id + "]";
-	}
-
 }

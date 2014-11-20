@@ -42,11 +42,6 @@ public class Shift extends EntityBaseBean implements Serializable {
 		return this.investigation;
 	}
 
-	@Override
-	public String toString() {
-		return "Shift[id=" + id + "]";
-	}
-
 	public Date getStartDate() {
 		return startDate;
 	}

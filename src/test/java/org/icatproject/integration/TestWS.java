@@ -85,7 +85,6 @@ public class TestWS {
 		try {
 			random = new Random();
 			session = new WSession();
-			session.clearAuthz();
 			session.setAuthz();
 			session.clear();
 		} catch (Exception e) {
@@ -438,7 +437,6 @@ public class TestWS {
 		assertEquals(1, results.size());
 		assertEquals(0L, results.get(0));
 
-		session.clearAuthz();
 		session.setAuthz();
 
 	}
@@ -489,7 +487,6 @@ public class TestWS {
 
 		assertEquals(2, (session.search("Investigation")).size());
 
-		session.clearAuthz();
 		session.setAuthz();
 	}
 
@@ -698,7 +695,6 @@ public class TestWS {
 			assertEquals(0L,
 					piOneSession.search("SELECT MIN(DISTINCT df.fileSize) from Datafile df").get(0));
 		} finally {
-			session.clearAuthz();
 			session.setAuthz();
 		}
 	}
@@ -1097,7 +1093,6 @@ public class TestWS {
 			}
 
 		} finally {
-			session.clearAuthz();
 			session.setAuthz();
 		}
 	}
@@ -1177,7 +1172,6 @@ public class TestWS {
 			assertEquals(invId, inv.getId());
 
 		} finally {
-			session.clearAuthz();
 			session.setAuthz();
 		}
 
@@ -1975,6 +1969,26 @@ public class TestWS {
 	}
 
 	@Test
+	public void duplicateIds() throws Exception {
+		session.clear();
+		Facility facility = session.createFacility("Test Facility", 90);
+		InvestigationType investigationType = session.createInvestigationType(facility,
+				"TestExperiment");
+		Investigation inv1 = session.createInvestigation(facility, "inv1", "Not null",
+				investigationType);
+		Investigation inv2 = session.createInvestigation(facility, "inv2", "Not null",
+				investigationType);
+		DatasetType dst1 = session.createDatasetType(facility, "type1");
+		DatasetType dst2 = session.createDatasetType(facility, "type2");
+		session.createDataset("ds", dst1, inv1);
+		session.createDataset("ds", dst2, inv2);
+		assertEquals(1, session.search("DISTINCT Dataset.name").size());
+		assertEquals(2, session.search("Dataset.name").size());
+		assertEquals(2, session.search("DISTINCT Dataset.id").size());
+		assertEquals(2, session.search("Dataset.id").size());
+	}
+
+	@Test
 	public void stringParameterRanges() throws Exception {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
@@ -2144,7 +2158,6 @@ public class TestWS {
 			assertEquals("Investigation: facility cannot be null.", e.getMessage());
 		}
 
-		session.clearAuthz();
 		session.setAuthz();
 	}
 
@@ -2180,36 +2193,6 @@ public class TestWS {
 		df = (Datafile) session.get("Datafile INCLUDE Dataset,DatafileFormat", df.getId());
 		assertEquals("Wobble", df.getDataset().getName());
 		assertNull(df.getDatafileFormat());
-	}
-
-	@Test
-	public void lucene() throws Exception {
-		session.clear();
-		create();
-
-		List<String> props = session.getProperties();
-		assertTrue(props.contains("lucene.commitSeconds 1"));
-
-		session.luceneClear();
-
-		session.luceneCommit();
-		assertEquals(0, session.luceneSearch("*f*", 100, null).size());
-		assertEquals(0, session.luceneSearch("*f*", 100, "Dataset").size());
-
-		session.lucenePopulate("Facility");
-		session.lucenePopulate("Investigation");
-		session.lucenePopulate("Dataset");
-		session.lucenePopulate("Datafile");
-		List<String> left;
-		while (!(left = session.luceneGetPopulating()).isEmpty()) {
-			System.out.println("Process " + left);
-			Thread.sleep(10);
-		}
-
-		session.luceneCommit();
-
-		assertEquals(4, session.luceneSearch("*f*", 100, null).size());
-		assertEquals(2, session.luceneSearch("*f*", 100, "Dataset").size());
 	}
 
 }

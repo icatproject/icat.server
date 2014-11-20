@@ -28,11 +28,6 @@ public class Keyword extends EntityBaseBean implements Serializable {
 	public Keyword() {
 	}
 
-	@Override
-	public String toString() {
-		return "Keyword[id=" + id + "]";
-	}
-
 	public Investigation getInvestigation() {
 		return investigation;
 	}

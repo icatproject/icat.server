@@ -26,6 +26,7 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.document.Document;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.manager.AccessType;
@@ -511,5 +512,10 @@ public abstract class EntityBaseBean implements Serializable {
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + ":" + id;
+	}
+
+	/* This should be overridden by classes wishing to index things in lucene */
+	public Document getDoc() {
+		return null;
 	}
 }

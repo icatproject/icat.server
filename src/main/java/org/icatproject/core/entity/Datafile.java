@@ -18,6 +18,13 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.DateTools.Resolution;
+import org.apache.lucene.document.Field.Store;
+
 @Comment("A data file")
 @SuppressWarnings("serial")
 @Entity
@@ -189,8 +196,32 @@ public class Datafile extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public String toString() {
-		return "Datafile[id=" + id + "]";
-	}
+	public Document getDoc() {
+		Document doc = new Document();
+		StringBuilder sb = new StringBuilder(name);
+		if (description != null) {
+			sb.append(" " + description);
+		}
+		if (doi != null) {
+			sb.append(" " + doi);
+		}
+		if (datafileFormat != null) {
+			sb.append(" " + datafileFormat.getName());
 
+		}
+		doc.add(new TextField("text", sb.toString(), Store.NO));
+		if (datafileModTime != null) {
+			doc.add(new StringField("date", DateTools.dateToString(datafileModTime,
+					Resolution.MINUTE), Store.NO));
+
+		} else if (datafileCreateTime != null) {
+			doc.add(new StringField("date", DateTools.dateToString(datafileCreateTime,
+					Resolution.MINUTE), Store.NO));
+		} else {
+			doc.add(new StringField("date", DateTools.dateToString(modTime, Resolution.MINUTE),
+					Store.NO));
+		}
+		doc.add(new StringField("dataset", "Dataset:" + dataset.id, Store.YES));
+		return doc;
+	}
 }

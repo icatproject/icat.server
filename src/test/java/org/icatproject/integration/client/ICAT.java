@@ -10,6 +10,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,6 +40,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.DateTools.Resolution;
 import org.icatproject.integration.client.IcatException.IcatExceptionType;
 import org.icatproject.integration.client.Session.Attributes;
 import org.icatproject.integration.client.Session.DuplicateAction;
@@ -401,6 +404,69 @@ public class ICAT {
 			}
 		} catch (IOException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		}
+	}
+
+	public String searchInvestigations(String sessionId, String user, String text, Date lower,
+			Date upper, List<ParameterForLucene> parameters, List<String> samples,
+			String userFullName, int maxResults) throws IcatException {
+		URIBuilder uriBuilder = getUriBuilder("lucene");
+		uriBuilder.setParameter("sessionId", sessionId);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartObject();
+			gen.write("target", "Investigation");
+			if (user != null) {
+				gen.write("user", user);
+			}
+			if (text != null) {
+				gen.write("text", text);
+			}
+			if (lower != null) {
+				gen.write("lower", DateTools.dateToString(lower, Resolution.MINUTE));
+			}
+			if (upper != null) {
+				gen.write("upper", DateTools.dateToString(upper, Resolution.MINUTE));
+			}
+			if (parameters != null && !parameters.isEmpty()) {
+				gen.writeStartArray("parameters");
+				for (ParameterForLucene parameter : parameters) {
+					gen.writeStartObject().write("name", parameter.getName());
+					if (parameter.getUnits() != null) {
+						gen.write("units", parameter.getUnits());
+					}
+					if (parameter.getStringValue() != null) {
+						gen.write("stringValue", parameter.getStringValue());
+					}
+					gen.writeEnd();
+				}
+				gen.writeEnd();
+			}
+			if (samples != null && !samples.isEmpty()) {
+				gen.writeStartArray("samples");
+				for (String sample : samples) {
+					gen.write(sample);
+				}
+				gen.writeEnd();
+			}
+			if (userFullName != null) {
+				gen.write("userFullName", userFullName);
+			}
+			gen.writeEnd();
+		}
+
+		uriBuilder.setParameter("query", baos.toString());
+		uriBuilder.setParameter("maxCount", Integer.toString(maxResults));
+		URI uri = getUri(uriBuilder);
+
+		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			HttpGet httpGet = new HttpGet(uri);
+			try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
+				return getString(response);
+			}
+		} catch (IOException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+
 		}
 	}
 }

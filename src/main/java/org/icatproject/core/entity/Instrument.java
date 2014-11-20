@@ -115,9 +115,4 @@ public class Instrument extends EntityBaseBean implements Serializable {
 		this.type = type;
 	}
 
-	@Override
-	public String toString() {
-		return "Instrument[name=" + this.name + "]";
-	}
-
 }

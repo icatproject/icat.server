@@ -26,11 +26,6 @@ public class StudyInvestigation extends EntityBaseBean implements Serializable {
 	public StudyInvestigation() {
 	}
 
-	@Override
-	public String toString() {
-		return "StudyInvestigation[id=" + id + "]";
-	}
-
 	public Study getStudy() {
 		return study;
 	}

@@ -26,6 +26,10 @@ import javax.ejb.TransactionManagementType;
 import javax.jms.JMSException;
 import javax.json.Json;
 import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
@@ -62,6 +66,7 @@ import org.icatproject.core.manager.CreateResponse;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
+import org.icatproject.core.manager.Lucene.ParameterPOJO;
 import org.icatproject.core.manager.Porter;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.Transmitter;
@@ -340,14 +345,74 @@ public class ICATRest {
 	}
 
 	@GET
+	@Path("lucene")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String lucene(@QueryParam("sessionId") String sessionId,
+			@QueryParam("query") String query, @QueryParam("maxCount") int maxCount)
+			throws IcatException {
+		if (query == null) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
+		}
+		String userName = beanManager.getUserName(sessionId, manager);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonReader jr = Json.createReader(new ByteArrayInputStream(query.getBytes()))) {
+			JsonObject jo = jr.readObject();
+			String target = jo.getString("target", null);
+			String user = jo.getString("user", null);
+			String text = jo.getString("text", null);
+			if (target.equals("Investigation")) {
+				String lower = jo.getString("lower", null);
+				String upper = jo.getString("upper", null);
+				List<ParameterPOJO> parms = new ArrayList<>();
+				if (jo.containsKey("parameters")) {
+					for (JsonValue val : jo.getJsonArray("parameters")) {
+						JsonObject parm = (JsonObject) val;
+						String name = parm.getString("name");
+						String units = parm.getString("units");
+						if (parm.containsKey("stringValue")) {
+							parms.add(new ParameterPOJO(name, units, parm.getString("stringValue")));
+						}
+					}
+				}
+				List<String> samples = new ArrayList<>();
+				if (jo.containsKey("samples")) {
+					for (JsonValue val : jo.getJsonArray("samples")) {
+						JsonString samp = (JsonString) val;
+						samples.add(samp.getString());
+					}
+				}
+				String userFullName = jo.getString("userFullName", null);
+
+				List<EntityBaseBean> objects = beanManager.luceneInvestigations(userName, user,
+						text, lower, upper, parms, samples, userFullName, maxCount, manager,
+						userTransaction);
+
+				JsonGenerator gen = Json.createGenerator(baos);
+				gen.writeStartArray();
+				for (EntityBaseBean investigation : objects) {
+					gen.writeStartObject();
+					gen.writeStartObject("Investigation");
+					jsonise(investigation, gen);
+					gen.writeEnd();
+					gen.writeEnd();
+				}
+				gen.writeEnd();
+				gen.close();
+
+			} else {
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target
+						+ " is not expected");
+			}
+			return baos.toString();
+		}
+	}
+
+	@GET
 	@Path("entityManager")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String search(@QueryParam("sessionId") String sessionId,
 			@QueryParam("query") String query, @QueryParam("id") Long id) throws IcatException {
 
-		if (sessionId == null) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "sessionId is not set");
-		}
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
 		}

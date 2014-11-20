@@ -1,6 +1,11 @@
 # Version of file format
 1.0
 
+User (name:0, fullName:1)
+"db/tr", "Professor Tap Root"
+"db/minion", "Mr Minion"
+"db/fred","Professor Fred Brown"
+
 Facility ( name:0, daysUntilRelease:1, createId:2, createTime:3)
 "Test port facility", 90, "Zorro", 1920-05-16T16:58:26.12Z
 
@@ -8,20 +13,42 @@ InvestigationType (facility(name:0), name:1)
 "Test port facility", "atype"
 "Test port facility", "btype"
 
-Investigation(facility(name:0), name:1, visitId:2, type(facility(name:0), name:3),title:4)
-"Test port facility", "expt1", "one", "atype", "a title"
+ParameterType(facility(name:0),name:1, units:2, minimumNumericValue:3, applicableToInvestigation:4, valueType:5)
+"Test port facility", "temp", "degrees Kelvin", 73.4, true, NUMERIC
+"Test port facility", "pressure", "kPa", 73, null, numERIC
+"Test port facility", "colour", "name", null, true, STRING
+
+Investigation(facility(name:0), name:1, visitId:2, type(facility(name:0), name:3),title:4,startDate:5,endDate:6)
+"Test port facility", "expt1", "zero", "atype", "a title at the beginning", 2010-01-01T00:00:00Z, 2010-12-31T23:59:59Z
+"Test port facility", "expt1", "one", "atype", "a title in the middle",2011-01-01T00:00:00Z, 2011-12-31T23:59:59Z
+"Test port facility", "expt1", "two", "atype", "a title at the end",2012-01-01T00:00:00Z, 2012-12-31T23:59:59Z
+
+InvestigationUser(investigation(facility(name:0), name:1, visitId:2),user(name:3))
+"Test port facility", "expt1", "zero", "db/tr"
+"Test port facility", "expt1", "one", "db/tr"
+"Test port facility", "expt1", "two", "db/minion"
+"Test port facility", "expt1", "one", "db/minion"
+
+SampleType(facility(name:0), name:1, molecularFormula:2, safetyInformation:3)
+"Test port facility", "diamond", "C", "fairly harmless"
+"Test port facility", "graphite", "C", "bit messy"
+"Test port facility", "rust", "Fe3O4", "messy"
+
+Sample(investigation(facility(name:0), name:1, visitId:2), type(facility(name:0), name:3, molecularFormula:4), name:5)
+"Test port facility", "expt1", "one", "diamond", "C", "Koh-I-Noor"
+"Test port facility", "expt1", "one", "rust",  "Fe3O4", "Ford Anglia"
+
+InvestigationParameter(investigation(facility(name:0), name:1, visitId:2), type(facility(name:0), name:3 , units:4),stringValue:5)
+"Test port facility", "expt1", "one", "colour" , "name", "green"
 
 DatasetType(facility(name:0), name:1)
 "Test port facility", "calibration"
 
-Dataset (investigation(facility(name:0), name:1, visitId:2) , name:3, type(facility(name:0), name:4), complete:5, startDate:6)
-"Test port facility", "expt1", "one", "ds1", "calibration", true, 2014-05-16T16:58:26.12+12:30
-"Test port facility", "expt1", "one", "ds2", "calibration", null, 2014-05-16T16:58:26.12Z
-"Test port facility", "expt1", "one", "ds3", "calibration", False, null,  2014-05-16T16:58:26.12
+Dataset (investigation(facility(name:0), name:1, visitId:2) , name:3, type(facility(name:0), name:4), complete:5, startDate:6, sample(investigation(facility(name:0), name:1, visitId:2), name:7))
+"Test port facility", "expt1", "one", "ds1", "calibration", true, 2014-05-16T16:58:26.12+12:30, "Koh-I-Noor"
+"Test port facility", "expt1", "one", "ds2", "calibration", null, 2014-05-16T16:58:26.12Z, "Ford Anglia"
+"Test port facility", "expt1", "one", "ds3", "calibration", False, 2014-05-16T16:58:26.12, null
 
-ParameterType(facility(name:0),name:1, units:2, minimumNumericValue:3, applicableToInvestigation:4, valueType:5)
-"Test port facility", "temp", "degrees Kelvin", 73.4, true, NUMERIC
-"Test port facility", "pressure", "kPa", 73, null, numERIC
 
 Datafile(dataset(investigation(facility(name:0), name:1, visitId:2), name:3), name:4, fileSize:5)
 "Test port facility", "expt1", "one", "ds1", "df1", 12345

@@ -14,6 +14,12 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.DateTools.Resolution;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.DoubleField;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.StringField;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.GateKeeper;
 
@@ -111,8 +117,8 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser)
-			throws IcatException {
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper,
+			boolean rootUser) throws IcatException {
 		super.preparePersist(modId, manager, gateKeeper, rootUser);
 		check(manager);
 	}
@@ -162,6 +168,22 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	public void postMergeFixup(EntityManager manager, GateKeeper gateKeeper) throws IcatException {
 		super.postMergeFixup(manager, gateKeeper);
 		check(manager);
+	}
+
+	@Override
+	public Document getDoc() {
+		Document doc = new Document();
+		doc.add(new StringField("name", type.getName(), Store.NO));
+		doc.add(new StringField("units", type.getUnits(), Store.NO));
+		if (stringValue != null) {
+			doc.add(new StringField("stringValue", stringValue, Store.NO));
+		} else if (numericValue != null) {
+			doc.add(new DoubleField("numericValue", numericValue, Store.NO));
+		} else if (dateTimeValue != null) {
+			doc.add(new StringField("dateTimeValue", DateTools.dateToString(dateTimeValue,
+					Resolution.MINUTE), Store.NO));
+		}
+		return doc;
 	}
 
 }

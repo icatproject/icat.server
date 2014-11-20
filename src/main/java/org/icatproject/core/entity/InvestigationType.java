@@ -71,9 +71,4 @@ public class InvestigationType extends EntityBaseBean implements Serializable {
 		this.description = description;
 	}
 
-	@Override
-	public String toString() {
-		return "InvestigationType[id=" + id + "]";
-	}
-
 }

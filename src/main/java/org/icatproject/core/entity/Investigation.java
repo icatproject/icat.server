@@ -17,6 +17,13 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.DateTools.Resolution;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+
 @Comment("An investigation or experiment")
 @SuppressWarnings("serial")
 @Entity
@@ -252,6 +259,38 @@ public class Investigation extends EntityBaseBean implements Serializable {
 
 	public void setVisitId(String visitId) {
 		this.visitId = visitId;
+	}
+
+	@Override
+	public Document getDoc() {
+		Document doc = new Document();
+		StringBuilder sb = new StringBuilder(visitId + " " + name + " " + facility.getName() + " "
+				+ type.getName());
+		if (summary != null) {
+			sb.append(" " + summary);
+		}
+		if (doi != null) {
+			sb.append(" " + doi);
+		}
+		if (title != null) {
+			sb.append(" " + title);
+		}
+		doc.add(new TextField("text", sb.toString(), Store.NO));
+		if (startDate != null) {
+			doc.add(new StringField("startDate", DateTools.dateToString(startDate, Resolution.MINUTE),
+					Store.NO));
+		} else {
+			doc.add(new StringField("startDate",
+					DateTools.dateToString(modTime, Resolution.MINUTE), Store.NO));
+		}
+		if (endDate != null) {
+			doc.add(new StringField("endDate", DateTools.dateToString(endDate, Resolution.MINUTE),
+					Store.NO));
+		} else {
+			doc.add(new StringField("endDate",
+					DateTools.dateToString(modTime, Resolution.MINUTE), Store.NO));
+		}
+		return doc;
 	}
 
 }

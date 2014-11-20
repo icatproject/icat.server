@@ -10,6 +10,9 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.Field.Store;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.GateKeeper;
 
@@ -50,6 +53,13 @@ public class DatafileParameter extends Parameter implements Serializable {
 
 	public void setDatafile(Datafile datafile) {
 		this.datafile = datafile;
+	}
+	
+	@Override
+	public Document getDoc() {
+		Document doc = super.getDoc();
+		doc.add(new StringField("datafile", "Datafile:" + datafile.id, Store.YES));
+		return doc;
 	}
 
 }

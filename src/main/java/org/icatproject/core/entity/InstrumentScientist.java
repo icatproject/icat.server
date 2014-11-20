@@ -43,9 +43,4 @@ public class InstrumentScientist extends EntityBaseBean implements Serializable 
 	public InstrumentScientist() {
 	}
 
-	@Override
-	public String toString() {
-		return "InstrumentScientist[id=" + id + "]";
-	}
-
 }

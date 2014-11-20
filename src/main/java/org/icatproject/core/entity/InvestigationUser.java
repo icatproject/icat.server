@@ -8,6 +8,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.Field.Store;
+
 @Comment("Many to many relationship between investigation and user. It is expected that this will show the association of "
 		+ "individual users with an investigation which might be derived from the proposal. It may also be used as the "
 		+ "basis of authorization rules. See InvestigationGroup if you wish to separate authorization rules from who is "
@@ -33,8 +38,14 @@ public class InvestigationUser extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public String toString() {
-		return "InvestigationUser[id=" + id + "]";
+	public Document getDoc() {
+		Document doc = new Document();
+		if (user.getFullName() != null) {
+			doc.add(new TextField("text", user.getFullName(), Store.NO));
+		}
+		doc.add(new StringField("name", user.getName(), Store.NO));
+		doc.add(new StringField("investigation", "Investigation:" + investigation.id, Store.YES));
+		return doc;
 	}
 
 	public String getRole() {

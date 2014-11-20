@@ -15,6 +15,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.icatproject.core.IcatException;
 
 @Comment("A sample to be used in an investigation")
@@ -97,7 +101,14 @@ public class Sample extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public String toString() {
-		return "Sample[id=" + this.id + "]";
+	public Document getDoc() {
+		Document doc = new Document();
+		StringBuilder sb = new StringBuilder(name);
+		if (type != null) {
+			sb.append(" " + type.getName());
+		}
+		doc.add(new TextField("text", sb.toString(), Store.NO));
+		doc.add(new StringField("investigation", "Investigation:" + investigation.id, Store.YES));
+		return doc;
 	}
 }
