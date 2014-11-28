@@ -24,7 +24,7 @@ public class IcatAnalyzer extends StopwordAnalyzerBase {
 	protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
 		Tokenizer source = new StandardTokenizer(reader);
 		TokenStream sink = new StandardFilter(source);
-		sink = new EnglishPossessiveFilter(Version.LATEST, sink);
+		sink = new EnglishPossessiveFilter(Version.LUCENE_43, sink);
 		sink = new LowerCaseFilter(sink);
 		sink = new StopFilter(sink, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
 		sink = new PorterStemFilter(sink);
