@@ -2,6 +2,7 @@ package org.icatproject.core.entity;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -12,10 +13,12 @@ import javax.persistence.UniqueConstraint;
 		+ "Please see InvestigationUser")
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "GROUP_ID", "INVESTIGATION_ID" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "GROUP_ID", "INVESTIGATION_ID",
+		"ROLE" }) })
 public class InvestigationGroup extends EntityBaseBean implements Serializable {
 
 	@Comment("A role showing the position of the members of the group with respect to the investigation")
+	@Column(name = "ROLE", nullable = false)
 	private String role;
 
 	public String getRole() {
