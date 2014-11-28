@@ -66,9 +66,40 @@
             <subsection name="Summary of steps">
 
                 <ol>
-                    <li>Upgrade the database schema if you already have a 4.2.x version which you wish to use with ICAT 4.3.3. If you have already
+                    <li>
+                        Upgrade the database schema if you already have a 4.2.x version which you wish to use with ICAT 4.4.0. If you have already
                         upgraded to ICAT 4.3.x then no changes to the database are required except that you may increase the size of the "what" column
-                        of the Rule table to 1024 to match the size the column has on a brand new installation.
+                        of the Rule table to 1024 to match the size the column has on a brand new installation and you must modify the
+                        INVESTIGATIONUSER table as role values may no longer be null. Choose a name to use for the default role - for example 'member'
+                        and for MySQL:
+                        <p>
+                            <code>
+                                UPDATE INVESTIGATIONUSER SET ROLE = 'member' WHERE ROLE IS NULL;
+                                <br />
+                                ALTER TABLE INVESTIGATIONUSER MODIFY COLUMN ROLE varchar(255) NOT NULL;
+                                <br />
+                                ALTER TABLE INVESTIGATIONUSER DROP FOREIGN KEY FK_INVESTIGATIONUSER_USER_ID;
+                                <br />
+                                ALTER TABLE INVESTIGATIONUSER DROP INDEX UNQ_INVESTIGATIONUSER_0;
+                                <br />
+                                ALTER TABLE INVESTIGATIONUSER ADD CONSTRAINT UNQ_INVESTIGATIONUSER_0 UNIQUE (USER_ID, INVESTIGATION_ID, ROLE);
+                                <br />
+                                ALTER TABLE INVESTIGATIONUSER ADD CONSTRAINT FK_INVESTIGATIONUSER_USER_ID FOREIGN KEY (USER_ID) REFERENCES USER_ (ID)
+                            </code>
+                        </p>
+                        <p>or for Oracle:</p>
+                        <p>
+                            <code>
+                                UPDATE INVESTIGATIONUSER SET ROLE = 'member' WHERE ROLE IS NULL;
+                                <br />
+                                ALTER TABLE INVESTIGATIONUSER MODIFY (ROLE varchar2(255) NOT NULL);
+                                <br />
+                                ALTER TABLE DROP CONSTRAINT UNQ_INVESTIGATIONUSER_0;
+                                <br />
+                                ALTER TABLE INVESTIGATIONUSER ADD CONSTRAINT UNQ_INVESTIGATIONUSER_0 UNIQUE (USER_ID, INVESTIGATION_ID, ROLE);
+                                <br />
+                            </code>
+                        </p>
                     </li>
                     <li>
                         If you wish to install multiple servers each running an ICAT connected to the same database please see
