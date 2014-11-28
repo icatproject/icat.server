@@ -14,7 +14,6 @@
                 <li>A bug in the authorization computation has been fixed which was previously prohibiting operations that should have been allowed in
                     some cases where multiple authorization rules were relevant.
                 </li>
-                <li>The lucene version has been moved to 4.10.2</li>
                 <li>A partial prototype of a "RESTful" interface has been added.</li>
                 <li>There is a new parameter maxEntities which must be specified in icat.properties to restrict the total number of entities returned
                     in calls to get, search and searchText.
@@ -39,6 +38,8 @@
                 <li>The InvestigationGroup has been introduced. It is expected that this will be generally used in Rule based authorization in
                     preference to InvestigationUser except for those cases where the role of the individual is significant.
                 </li>
+                <li>The role field in the InvestigationUser is now part of the key and can now not be null. This allows a User to have multiple roles
+                    relative to an Investigation</li>
                 <li>The Rule.what column has been increased in length from the default of 255 to 1024.</li>
             </ul>
         </section>
