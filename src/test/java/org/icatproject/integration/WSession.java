@@ -475,11 +475,12 @@ public class WSession {
 
 	}
 
-	public InvestigationUser createInvestigationUser(Investigation inv, User user)
+	public InvestigationUser createInvestigationUser(Investigation inv, User user, String role)
 			throws IcatException_Exception {
 		InvestigationUser iu = new InvestigationUser();
 		iu.setInvestigation(inv);
 		iu.setUser(user);
+		iu.setRole(role);
 		iu.setId(icat.create(sessionId, iu));
 		return iu;
 	}
