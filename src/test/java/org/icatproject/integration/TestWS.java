@@ -125,8 +125,8 @@ public class TestWS {
 		User notroot = (User) session.search("User[name='db/notroot']").get(0);
 		session.createInstrumentScientist(wish, notroot);
 
-		session.createInvestigationUser(invA, notroot);
-		session.createInvestigationUser(invC, notroot);
+		session.createInvestigationUser(invA, notroot, "A role");
+		session.createInvestigationUser(invC, notroot, "Another role");
 
 		ParameterType p = new ParameterType();
 		p.setName("TIMESTAMP");
@@ -402,6 +402,7 @@ public class TestWS {
 			InvestigationUser iuaone = new InvestigationUser();
 			iuaone.setInvestigation(invOne);
 			iuaone.setUser(aone);
+			iuaone.setRole("PI");
 			iuaone.setId(piOneSession.create(iuaone));
 		}
 
@@ -854,6 +855,7 @@ public class TestWS {
 		User u = (User) objects.get(0);
 		InvestigationUser iu = new InvestigationUser();
 		iu.setUser(u);
+		iu.setRole("PI");
 		Investigation i = new Investigation();
 		i.setFacility(facility);
 		i.setName("Frederick");
