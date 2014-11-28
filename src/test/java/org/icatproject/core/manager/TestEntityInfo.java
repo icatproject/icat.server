@@ -175,7 +175,7 @@ public class TestEntityInfo {
 		testConstraint(Investigation.class, "facility", "name", "visitId");
 		testConstraint(Dataset.class, "investigation", "name");
 		testConstraint(Keyword.class, "name", "investigation");
-		testConstraint(InvestigationUser.class, "user", "investigation");
+		testConstraint(InvestigationUser.class, "user", "investigation", "role");
 		testConstraint(User.class, "name");
 		testConstraint(Job.class);
 	}
@@ -301,7 +301,7 @@ public class TestEntityInfo {
 		testNNF(Investigation.class, "name", "title", "facility", "visitId", "type");
 		testNNF(Dataset.class, "type", "name", "complete", "investigation");
 		testNNF(Keyword.class, "name", "investigation");
-		testNNF(InvestigationUser.class, "investigation", "user");
+		testNNF(InvestigationUser.class, "investigation", "user", "role");
 		testNNF(User.class, "name");
 		testNNF(ParameterType.class, "valueType", "name", "facility", "units");
 		testNNF(Job.class, "application");
