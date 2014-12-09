@@ -52,4 +52,8 @@ public class SampleParameter extends Parameter implements Serializable {
 		this.sample = sample;
 	}
 
+	@Override
+	public String toString() {
+		return "SampleParameter[id=" + this.id + "]";
+	}
 }

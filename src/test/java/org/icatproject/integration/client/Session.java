@@ -2,7 +2,6 @@ package org.icatproject.integration.client;
 
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Date;
 import java.util.List;
 
 public class Session {
@@ -76,13 +75,6 @@ public class Session {
 
 	public String search(String query) throws IcatException {
 		return icat.search(sessionId, query);
-	}
-
-	public String searchInvestigations(String user, String text, Date lower, Date upper,
-			List<ParameterForLucene> parameters, List<String> samples, String userFullName, int maxResults)
-			throws IcatException {
-		return icat.searchInvestigations(sessionId, user, text, lower, upper, parameters, samples,
-				userFullName, maxResults);
 	}
 
 }

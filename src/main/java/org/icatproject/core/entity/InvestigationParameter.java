@@ -10,9 +10,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.StringField;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.GateKeeper;
 
@@ -38,8 +35,8 @@ public class InvestigationParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper,
-			boolean rootUser) throws IcatException {
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser)
+			throws IcatException {
 		super.preparePersist(modId, manager, gateKeeper, rootUser);
 		this.id = null;
 		if (type == null) {
@@ -58,9 +55,7 @@ public class InvestigationParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public Document getDoc() {
-		Document doc = super.getDoc();
-		doc.add(new StringField("investigation", "Investigation:" + investigation.id, Store.YES));
-		return doc;
+	public String toString() {
+		return "InvestigationParameter[id=" + this.id + "]";
 	}
 }

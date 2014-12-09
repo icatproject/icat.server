@@ -45,4 +45,9 @@ public class PermissibleStringValue extends EntityBaseBean implements Serializab
 		this.value = value;
 	}
 
+	@Override
+	public String toString() {
+		return "PermissibleStringValue[id=" + this.id + "]";
+	}
+
 }

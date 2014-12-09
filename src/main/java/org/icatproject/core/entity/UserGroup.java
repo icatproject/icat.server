@@ -9,13 +9,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.apache.lucene.document.DateTools;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
-import org.apache.lucene.document.DateTools.Resolution;
-import org.apache.lucene.document.Field.Store;
-
 @Comment("Many to many relationship between user and group")
 @SuppressWarnings("serial")
 @Entity
@@ -48,17 +41,6 @@ public class UserGroup extends EntityBaseBean implements Serializable {
 
 	public void setUser(User user) {
 		this.user = user;
-	}
-	
-	@Override
-	public Document getDoc() {
-		Document doc = new Document();
-		if (user.getFullName() != null) {
-			doc.add(new TextField("text", user.getFullName(), Store.NO));
-		}
-		doc.add(new StringField("user", user.getName(), Store.NO));
-		doc.add(new StringField("grouping", "Grouping:" + grouping.id, Store.YES));
-		return doc;
 	}
 
 }

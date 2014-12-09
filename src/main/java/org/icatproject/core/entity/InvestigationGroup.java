@@ -49,6 +49,11 @@ public class InvestigationGroup extends EntityBaseBean implements Serializable {
 	public InvestigationGroup() {
 	}
 
+	@Override
+	public String toString() {
+		return "InvestigationGroup[id=" + id + "]";
+	}
+
 	public Investigation getInvestigation() {
 		return investigation;
 	}

@@ -260,4 +260,9 @@ public class ParameterType extends EntityBaseBean implements Serializable {
 		this.verified = verified;
 	}
 
+	@Override
+	public String toString() {
+		return "ParameterType[id=" + id + "]";
+	}
+
 }

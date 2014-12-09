@@ -300,7 +300,6 @@ public class WSession {
 	}
 
 	public void setAuthz() throws Exception {
-		clearAuthz();
 		try {
 			this.addUserGroupMember("notroot", "db/notroot");
 			this.addUserGroupMember("root", "db/root");
@@ -340,7 +339,6 @@ public class WSession {
 		this.addRule("notroot", "InvestigationInstrument", "CRUD");
 		this.addRule("notroot", "InstrumentScientist", "CRUD");
 		this.addRule("notroot", "SampleType", "CRUD");
-		this.addRule("notroot", "Sample", "CRUD");
 		this.addRule("notroot", "PublicStep", "CRUD");
 	}
 

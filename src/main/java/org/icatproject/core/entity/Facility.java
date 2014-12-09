@@ -177,4 +177,9 @@ public class Facility extends EntityBaseBean implements Serializable {
 		this.url = url;
 	}
 
+	@Override
+	public String toString() {
+		return "Facility[name=" + this.name + "]";
+	}
+
 }
