@@ -4,7 +4,7 @@
     <groupId>org.icatproject</groupId>
 
     <artifactId>icat.server</artifactId>
-    <version>4.4.1-SNAPSHOT</version>
+    <version>4.4.0</version>
     <packaging>war</packaging>
 
     <distributionManagement>
@@ -44,9 +44,9 @@
     </issueManagement>
 
     <scm>
-        <connection>scm:svn:http://icatproject.googlecode.com/svn/icat/server/trunk</connection>
-        <developerConnection>scm:svn:https://icatproject.googlecode.com/svn/icat/server/trunk</developerConnection>
-        <url>http://code.google.com/p/icatproject/source/browse/#svn%2Ficat%2Fserver%2Ftrunk</url>
+        <connection>scm:svn:http://icatproject.googlecode.com/svn/icat/server/tags/v4.4.0</connection>
+        <developerConnection>scm:svn:https://icatproject.googlecode.com/svn/icat/server/tags/v4.4.0</developerConnection>
+        <url>http://code.google.com/p/icatproject/source/browse/#svn%2Ficat%2Fserver%2Ftrunk/tags/v4.4.0</url>
     </scm>
 
     <licenses>
