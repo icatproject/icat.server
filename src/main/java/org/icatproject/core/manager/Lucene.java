@@ -15,11 +15,45 @@ public interface Lucene {
 		private String name;
 		private String units;
 		private String stringValue;
+		private String lowerDateValue;
+		private String upperDateValue;
+		private Double lowerNumericValue;
+		private Double upperNumericValue;
 
 		public ParameterPOJO(String name, String units, String stringValue) {
 			this.name = name;
 			this.units = units;
 			this.stringValue = stringValue;
+		}
+
+		public ParameterPOJO(String name, String units, String lower, String upper) {
+			this.name = name;
+			this.units = units;
+			lowerDateValue = lower;
+			upperDateValue = upper;
+		}
+
+		public ParameterPOJO(String name, String units, double lower, double upper) {
+			this.name = name;
+			this.units = units;
+			lowerNumericValue = lower;
+			upperNumericValue = upper;
+		}
+
+		public String getLowerDateValue() {
+			return lowerDateValue;
+		}
+
+		public String getUpperDateValue() {
+			return upperDateValue;
+		}
+
+		public Double getLowerNumericValue() {
+			return lowerNumericValue;
+		}
+
+		public Double getUpperNumericValue() {
+			return upperNumericValue;
 		}
 
 		public String getName() {
@@ -41,7 +75,12 @@ public interface Lucene {
 				sb.append(" units:" + units);
 			}
 			if (stringValue != null) {
-				sb.append(" stringValue: " + stringValue);
+				sb.append(" stringValue:" + stringValue);
+			} else if (lowerDateValue != null) {
+				sb.append(" lowerDateValue:" + lowerDateValue + " upperDateValue:" + upperDateValue);
+			} else if (lowerNumericValue != null) {
+				sb.append(", lowerNumericValue:" + lowerNumericValue + " upperNumericValue:"
+						+ upperNumericValue);
 			}
 			return sb.toString();
 		}
@@ -105,5 +144,12 @@ public interface Lucene {
 	LuceneSearchResult investigationsAfter(String user, String text, String lower, String upper,
 			List<ParameterPOJO> parms, List<String> samples, String userFullName, int blockSize,
 			LuceneSearchResult last) throws IcatException;
+
+	LuceneSearchResult datasets(String user, String text, String lower, String upper,
+			List<ParameterPOJO> parms, int maxResults) throws IcatException;
+
+	LuceneSearchResult datasetsAfter(String user, String text, String lower, String upper,
+			List<ParameterPOJO> parms, int maxResults, LuceneSearchResult last)
+			throws IcatException;
 
 }
