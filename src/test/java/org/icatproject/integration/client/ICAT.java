@@ -429,18 +429,7 @@ public class ICAT {
 				gen.write("upper", DateTools.dateToString(upper, Resolution.MINUTE));
 			}
 			if (parameters != null && !parameters.isEmpty()) {
-				gen.writeStartArray("parameters");
-				for (ParameterForLucene parameter : parameters) {
-					gen.writeStartObject().write("name", parameter.getName());
-					if (parameter.getUnits() != null) {
-						gen.write("units", parameter.getUnits());
-					}
-					if (parameter.getStringValue() != null) {
-						gen.write("stringValue", parameter.getStringValue());
-					}
-					gen.writeEnd();
-				}
-				gen.writeEnd();
+				writeParameters(gen, parameters);
 			}
 			if (samples != null && !samples.isEmpty()) {
 				gen.writeStartArray("samples");
@@ -468,5 +457,75 @@ public class ICAT {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 
 		}
+	}
+
+	public String searchDatasets(String sessionId, String user, String text, Date lower,
+			Date upper, List<ParameterForLucene> parameters, int maxResults) throws IcatException {
+		URIBuilder uriBuilder = getUriBuilder("lucene");
+		uriBuilder.setParameter("sessionId", sessionId);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartObject();
+			gen.write("target", "Dataset");
+			if (user != null) {
+				gen.write("user", user);
+			}
+			if (text != null) {
+				gen.write("text", text);
+			}
+			if (lower != null) {
+				gen.write("lower", DateTools.dateToString(lower, Resolution.MINUTE));
+			}
+			if (upper != null) {
+				gen.write("upper", DateTools.dateToString(upper, Resolution.MINUTE));
+			}
+			if (parameters != null && !parameters.isEmpty()) {
+				writeParameters(gen, parameters);
+			}
+			gen.writeEnd();
+		}
+
+		uriBuilder.setParameter("query", baos.toString());
+		uriBuilder.setParameter("maxCount", Integer.toString(maxResults));
+		URI uri = getUri(uriBuilder);
+
+		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			HttpGet httpGet = new HttpGet(uri);
+			try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
+				return getString(response);
+			}
+		} catch (IOException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+
+		}
+	}
+
+	private void writeParameters(JsonGenerator gen, List<ParameterForLucene> parameters) {
+		gen.writeStartArray("parameters");
+		for (ParameterForLucene parameter : parameters) {
+			gen.writeStartObject();
+			if (parameter.getName() != null) {
+				gen.write("name", parameter.getName());
+			}
+			if (parameter.getUnits() != null) {
+				gen.write("units", parameter.getUnits());
+			}
+			if (parameter.getStringValue() != null) {
+				gen.write("stringValue", parameter.getStringValue());
+			} else if (parameter.getLowerDateValue() != null
+					&& parameter.getUpperDateValue() != null) {
+				gen.write("lowerDateValue",
+						DateTools.dateToString(parameter.getLowerDateValue(), Resolution.MINUTE));
+				gen.write("upperDateValue",
+						DateTools.dateToString(parameter.getUpperDateValue(), Resolution.MINUTE));
+			} else if (parameter.getLowerNumericValue() != null
+					&& parameter.getUpperNumericValue() != null) {
+				gen.write("lowerNumericValue", parameter.getLowerNumericValue());
+				gen.write("upperNumericValue", parameter.getUpperNumericValue());
+			}
+			gen.writeEnd();
+		}
+		gen.writeEnd();
+
 	}
 }

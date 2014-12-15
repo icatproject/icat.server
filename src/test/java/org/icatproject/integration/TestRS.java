@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,6 +29,7 @@ import javax.json.stream.JsonGenerator;
 
 import org.icatproject.EntityBaseBean;
 import org.icatproject.Facility;
+import org.icatproject.IcatException_Exception;
 import org.icatproject.integration.client.ICAT;
 import org.icatproject.integration.client.IcatException;
 import org.icatproject.integration.client.IcatException.IcatExceptionType;
@@ -61,27 +63,79 @@ public class TestRS {
 	}
 
 	@Test
-	public void testLucene() throws Exception {
+	public void testLuceneDatasets() throws Exception {
 
-		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "notroot");
-		credentials.put("password", "password");
-		Session session = icat.login("db", credentials);
+		Session session = setupLuceneTest();
 
-		// Clear lucene - just in case
-		wSession.luceneClear();
-		wSession.luceneCommit();
-		List<String> props = wSession.getProperties();
-		assertTrue(props.contains("lucene.commitSeconds 1"));
+		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-		// Get known configuration
-		wSession.clear();
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
-		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		wSession.setAuthz();
+		List<ParameterForLucene> parameters = new ArrayList<>();
+		parameters.add(new ParameterForLucene("colour", "name", "green"));
+		// parameters.add(new ParameterForLucene("birthday", "date", dft
+		// .parse("2014-05-16T16:58:26.12Z"), dft.parse("2014-05-16T16:58:26.12Z")));
+		parameters.add(new ParameterForLucene("current", "amps", 140, 165));
 
-		wSession.luceneCommit();
+		// All datasets
+		searchDatasets(session, null, null, null, null, null, 20, 5);
+
+		JsonArray array = searchDatasets(session, null, "gamma AND ds3",
+				dft.parse("2014-05-16T06:09:03"), dft.parse("2014-05-16T06:15:26"), parameters, 20,
+				1);
+		assertEquals("gamma",
+				array.getJsonObject(0).getJsonObject("Dataset").getString("description"));
+
+		//
+		// JsonArray array = searchInvestigations(session, "db/tr", "title AND one",
+		// dft.parse("2011-01-01T00:00:00"), dft.parse("2011-12-31T23:59:59"), parameters,
+		// Arrays.asList("ford AND rust", "koh* AND diamond"), "Professor", 20, 1);
+		// assertEquals("one",
+		// array.getJsonObject(0).getJsonObject("Investigation").getString("visitId"));
+		//
+		// // change user
+		// searchInvestigations(session, "db/fred", "title AND one", null, null, parameters, null,
+		// null, 20, 0);
+		//
+		// // change text
+		// searchInvestigations(session, "db/tr", "title AND two", null, null, parameters, null,
+		// null,
+		// 20, 0);
+		//
+		// // Only working to a minute
+		// searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:01"),
+		// dft.parse("2011-12-31T23:59:59"), parameters, null, null, 20, 1);
+		//
+		// searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00"),
+		// dft.parse("2011-12-31T23:59:58"), parameters, null, null, 20, 1);
+		//
+		// searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:01:00"),
+		// dft.parse("2011-12-31T23:59:59"), parameters, null, null, 20, 0);
+		//
+		// searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00"),
+		// dft.parse("2011-12-31T23:58:00"), parameters, null, null, 20, 0);
+		//
+		// // Change parameters
+		// List<ParameterForLucene> badParameters = new ArrayList<>();
+		// badParameters.add(new ParameterForLucene("color", "name", "green"));
+		// searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00"),
+		// dft.parse("2011-12-31T23:59:59"), badParameters,
+		// Arrays.asList("ford + rust", "koh + diamond"), null, 20, 0);
+		//
+		// // Change samples
+		// searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00"),
+		// dft.parse("2011-12-31T23:59:59"), parameters,
+		// Arrays.asList("ford AND rust", "kog* AND diamond"), null, 20, 0);
+		//
+		// // Change userFullName
+		// searchInvestigations(session, "db/tr", "title + one", dft.parse("2011-01-01T00:00:00"),
+		// dft.parse("2011-12-31T23:59:59"), parameters,
+		// Arrays.asList("ford AND rust", "koh* AND diamond"), "Doctor", 20, 0);
+
+	}
+
+	@Test
+	public void testLuceneInvestigations() throws Exception {
+
+		Session session = setupLuceneTest();
 
 		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -90,7 +144,7 @@ public class TestRS {
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
 
-		JsonArray array = searchInvestigations(session, "db/tr", "title + one",
+		JsonArray array = searchInvestigations(session, "db/tr", "title AND one",
 				dft.parse("2011-01-01T00:00:00"), dft.parse("2011-12-31T23:59:59"), parameters,
 				Arrays.asList("ford AND rust", "koh* AND diamond"), "Professor", 20, 1);
 		assertEquals("one",
@@ -134,8 +188,15 @@ public class TestRS {
 				dft.parse("2011-12-31T23:59:59"), parameters,
 				Arrays.asList("ford AND rust", "koh* AND diamond"), "Doctor", 20, 0);
 
-		wSession.luceneClear();
-		wSession.luceneCommit();
+		// All datasets
+		searchDatasets(session, null, null, null, null, null, 20, 5);
+
+		array = searchDatasets(session, null, "gamma AND ds3", null, null, null, 20, 1);
+		assertEquals("gamma",
+				array.getJsonObject(0).getJsonObject("Dataset").getString("description"));
+
+		// wSession.luceneClear();
+		// wSession.luceneCommit();
 		// assertEquals(0, session.luceneSearch("*f*", 100, null).size());
 		// assertEquals(0, session.luceneSearch("*f*", 100, "Dataset").size());
 		//
@@ -158,6 +219,39 @@ public class TestRS {
 		//
 		// assertEquals(4, session.luceneSearch("*f*", 100, null).size());
 		// assertEquals(2, session.luceneSearch("*f*", 100, "Dataset").size());
+	}
+
+	private Session setupLuceneTest() throws Exception {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "notroot");
+		credentials.put("password", "password");
+		Session session = icat.login("db", credentials);
+
+		// Clear lucene - just in case
+		wSession.luceneClear();
+		wSession.luceneCommit();
+		List<String> props = wSession.getProperties();
+		assertTrue(props.contains("lucene.commitSeconds 1"));
+
+		// Get known configuration
+		wSession.clear();
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
+		wSession.setAuthz();
+
+		wSession.luceneCommit();
+		return session;
+	}
+
+	private JsonArray searchDatasets(Session session, String user, String text, Date lower,
+			Date upper, List<ParameterForLucene> parameters, int maxResults, int n)
+			throws IcatException {
+		JsonArray result = Json.createReader(
+				new ByteArrayInputStream(session.searchDatasets(user, text, lower, upper,
+						parameters, maxResults).getBytes())).readArray();
+		assertEquals(n, result.size());
+		return result;
 	}
 
 	@Test
@@ -227,7 +321,8 @@ public class TestRS {
 		Collections.sort(names);
 		assertEquals(Arrays.asList("atype", "btype"), names);
 
-		array = search(session, "SELECT ds.id FROM Dataset ds", 3);
+		int n = 5;
+		array = search(session, "SELECT ds.id FROM Dataset ds", n);
 		List<Long> ids = new ArrayList<>();
 		for (int i = 0; i < array.size(); i++) {
 			ids.add(array.getJsonNumber(i).longValueExact());
@@ -238,9 +333,13 @@ public class TestRS {
 		assertEquals((Long) ids.get(0), (Long) array.getJsonNumber(0).longValueExact());
 
 		array = search(session, "SELECT COUNT(ds.id) FROM Dataset ds", 1);
-		assertEquals((Long) 3L, (Long) array.getJsonNumber(0).longValueExact());
+		assertEquals((Long) 5L, (Long) array.getJsonNumber(0).longValueExact());
 
-		double avg = (ids.get(0) + ids.get(1) + ids.get(2)) / 3.;
+		Long sum = 0L;
+		for (Long id : ids) {
+			sum += id;
+		}
+		double avg = sum.doubleValue() / n;
 		array = search(session, "SELECT AVG(ds.id) FROM Dataset ds", 1);
 		assertEquals(avg, array.getJsonNumber(0).doubleValue(), 0.001);
 
@@ -255,7 +354,7 @@ public class TestRS {
 		array = search(session, "SELECT AVG(ds.id) FROM Dataset ds WHERE ds.id = 0", 1);
 		assertTrue(array.isNull(0));
 
-		array = search(session, "SELECT ds.complete FROM Dataset ds", 3);
+		array = search(session, "SELECT ds.complete FROM Dataset ds", 5);
 		int trues = 0;
 		int falses = 0;
 		for (int i = 0; i < array.size(); i++) {
@@ -266,7 +365,7 @@ public class TestRS {
 			}
 		}
 		assertEquals(1, trues);
-		assertEquals(2, falses);
+		assertEquals(4, falses);
 
 		array = search(session, "Facility INCLUDE InvestigationType", 1);
 		for (int i = 0; i < array.size(); i++) {
@@ -423,8 +522,9 @@ public class TestRS {
 		ts("Create dump1 for " + credentials.get("username"));
 		wSession.clear();
 		wSession.clearAuthz();
-
+		System.out.println(dump1);
 		rootSession.importMetaData(dump1, DuplicateAction.THROW, Attributes.ALL);
+
 		start = System.currentTimeMillis();
 		try (InputStream stream = session.exportMetaData(Attributes.ALL)) {
 			Files.copy(stream, dump2, StandardCopyOption.REPLACE_EXISTING);
@@ -456,7 +556,7 @@ public class TestRS {
 			Files.copy(stream, dump, StandardCopyOption.REPLACE_EXISTING);
 		}
 		ts("Create dump USER");
-		assertEquals(1031, dump.toFile().length());
+		assertEquals(1919, dump.toFile().length());
 		session.importMetaData(dump, DuplicateAction.CHECK, Attributes.USER);
 
 		start = System.currentTimeMillis();
@@ -466,7 +566,7 @@ public class TestRS {
 		}
 		ts("Create dump ALL");
 		long n = dump.toFile().length();
-		assertTrue("Size is dependent upon time zone in which test is run " + n, n == 1563
+		assertTrue("Size is dependent upon time zone in which test is run " + n, n == 2686
 				|| n == 1518);
 		session.importMetaData(dump, DuplicateAction.CHECK, Attributes.ALL);
 		Files.delete(dump);

@@ -1855,6 +1855,20 @@ public class TestWS {
 			min = Math.min(ds.getId(), min);
 		}
 
+		assertEquals(0,
+				session.search("SELECT ds FROM Dataset ds WHERE ds.name = 'dfsin' LIMIT 1,10")
+						.size());
+
+		// TODO This next test fails on MySQL as the limit is not sent to the generated SQL
+		// assertEquals(0,
+		// session.search("SELECT ds FROM Dataset ds WHERE ds.id = " + max + " LIMIT 1,10")
+		// .size());
+
+		assertEquals(
+				0,
+				session.search("SELECT ds FROM Dataset ds WHERE ds.id IN ( " + max + ") LIMIT 1,10")
+						.size());
+
 		assertEquals(min,
 				session.search("SELECT MIN(ds.id) FROM  Dataset ds WHERE ds.id > 0").get(0));
 		assertEquals(max,

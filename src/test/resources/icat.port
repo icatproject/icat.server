@@ -13,10 +13,12 @@ InvestigationType (facility(name:0), name:1)
 "Test port facility", "atype"
 "Test port facility", "btype"
 
-ParameterType(facility(name:0),name:1, units:2, minimumNumericValue:3, applicableToInvestigation:4, valueType:5)
-"Test port facility", "temp", "degrees Kelvin", 73.4, true, NUMERIC
-"Test port facility", "pressure", "kPa", 73, null, numERIC
-"Test port facility", "colour", "name", null, true, STRING
+ParameterType(facility(name:0),name:1, units:2, minimumNumericValue:3, applicableToInvestigation:4, applicableToDataset:5, applicableToDatafile:6 valueType:7)
+"Test port facility", "temp", "degrees Kelvin", 73.4, true, true, true, NUMERIC
+"Test port facility", "pressure", "kPa", 73, null, true, true, numERIC
+"Test port facility", "colour", "name", null, true,true, true, STRING
+"Test port facility", "current", "amps", null, true,true, true, NUMERIC
+"Test port facility", "birthday", "date", null, true,true, true, DATE_AND_TIME
 
 Investigation(facility(name:0), name:1, visitId:2, type(facility(name:0), name:3),title:4,startDate:5,endDate:6)
 "Test port facility", "expt1", "zero", "atype", "a title at the beginning", 2010-01-01T00:00:00Z, 2010-12-31T23:59:59Z
@@ -44,16 +46,22 @@ InvestigationParameter(investigation(facility(name:0), name:1, visitId:2), type(
 DatasetType(facility(name:0), name:1)
 "Test port facility", "calibration"
 
-Dataset (investigation(facility(name:0), name:1, visitId:2) , name:3, type(facility(name:0), name:4), complete:5, startDate:6, sample(investigation(facility(name:0), name:1, visitId:2), name:7))
-"Test port facility", "expt1", "one", "ds1", "calibration", true, 2014-05-16T16:58:26.12+12:30, "Koh-I-Noor"
-"Test port facility", "expt1", "one", "ds2", "calibration", null, 2014-05-16T16:58:26.12Z, "Ford Anglia"
-"Test port facility", "expt1", "one", "ds3", "calibration", False, 2014-05-16T16:58:26.12, null
+Dataset (investigation(facility(name:0), name:1, visitId:2) , name:3, type(facility(name:0), name:4), complete:5, startDate:6, endDate:7 sample(investigation(facility(name:0), name:1, visitId:2), name:8), description:9)
+"Test port facility", "expt1", "one", "ds1", "calibration", true,  2014-05-16T16:58:26.12+12:30, 2014-05-16T16:58:26.12+12:30, "Koh-I-Noor", "alpha"
+"Test port facility", "expt1", "one", "ds2", "calibration", null,  2014-05-16T06:05:26.12Z, 2014-05-16T06:07:26.12+12:30,"Ford Anglia", "beta"
+"Test port facility", "expt1", "one", "ds3", "calibration", False, 2014-05-16T06:09:26.12, 2014-05-16T06:15:26.12, null, "gamma"
+"Test port facility", "expt1", "two", "ds3", "calibration", False, 2014-05-16T06:20:26.12, 2014-05-16T06:21:26.12, null, "delta"
+"Test port facility", "expt1", "two", "ds4", "calibration", False, 2014-05-16T06:31:26.12, 2014-05-16T06:32:26.12, null, "epsilon"
 
+DatasetParameter(dataset(investigation(facility(name:0), name:1, visitId:2) , name:3), type(facility(name:0), name:4 , units:5),stringValue:6, numericValue:7, dateTimeValue:8)
+"Test port facility", "expt1", "one", "ds3", "colour" , "name", "green", null, null
+"Test port facility", "expt1", "one", "ds3", "birthday", "date", null, null, 2014-05-16T16:58:26.12Z
+"Test port facility", "expt1", "one", "ds3", "current" , "amps", null, 150, null
 
 Datafile(dataset(investigation(facility(name:0), name:1, visitId:2), name:3), name:4, fileSize:5)
-"Test port facility", "expt1", "one", "ds1", "df1", 12345
-"Test port facility", "expt1", "one", "ds1", "df2", 12345
-"Test port facility", "expt1", "one", "ds1", "df3", 12345
+"Test port facility", "expt1", "one", "ds2", "df1", 12345
+"Test port facility", "expt1", "one", "ds2", "df2", 12345
+"Test port facility", "expt1", "one", "ds2", "df3", 12345
 
 Application(facility(name:0), name:1, version:2)
 "Test port facility", "aprog", "1.2.3"
@@ -65,8 +73,8 @@ DataCollection(?:0)
 "c"
 
 DataCollectionDatafile(datafile(dataset(investigation(facility(name:0), name:1, visitId:2), name:3), name:4), dataCollection(?:5))
-"Test port facility", "expt1", "one", "ds1", "df1",  "a"
-"Test port facility", "expt1", "one", "ds1", "df2",  "b"
+"Test port facility", "expt1", "one", "ds2", "df1",  "a"
+"Test port facility", "expt1", "one", "ds2", "df2",  "b"
 
 Job(application(facility(name:0), name:1, version:2), inputDataCollection(?:3), outputDataCollection(?:4))
 "Test port facility", "aprog", "1.2.3", "a", "b"

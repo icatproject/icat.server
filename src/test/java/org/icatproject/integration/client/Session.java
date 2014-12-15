@@ -85,4 +85,9 @@ public class Session {
 				userFullName, maxResults);
 	}
 
+	public String searchDatasets(String user, String text, Date lower, Date upper,
+			List<ParameterForLucene> parameters, int maxResults) throws IcatException {
+		return icat.searchDatasets(sessionId, user, text, lower, upper, parameters, maxResults);
+	}
+
 }
