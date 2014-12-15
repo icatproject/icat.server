@@ -360,20 +360,33 @@ public class ICATRest {
 			String target = jo.getString("target", null);
 			String user = jo.getString("user", null);
 			String text = jo.getString("text", null);
-			if (target.equals("Investigation")) {
-				String lower = jo.getString("lower", null);
-				String upper = jo.getString("upper", null);
-				List<ParameterPOJO> parms = new ArrayList<>();
-				if (jo.containsKey("parameters")) {
-					for (JsonValue val : jo.getJsonArray("parameters")) {
-						JsonObject parm = (JsonObject) val;
-						String name = parm.getString("name");
-						String units = parm.getString("units");
-						if (parm.containsKey("stringValue")) {
-							parms.add(new ParameterPOJO(name, units, parm.getString("stringValue")));
-						}
+			String lower = jo.getString("lower", null);
+			String upper = jo.getString("upper", null);
+			List<ParameterPOJO> parms = new ArrayList<>();
+			if (jo.containsKey("parameters")) {
+				for (JsonValue val : jo.getJsonArray("parameters")) {
+					JsonObject parm = (JsonObject) val;
+					String name = parm.getString("name");
+					String units = parm.getString("units");
+					if (parm.containsKey("stringValue")) {
+						parms.add(new ParameterPOJO(name, units, parm.getString("stringValue")));
+					} else if (parm.containsKey("lowerDateValue")
+							&& parm.containsKey("upperDateValue")) {
+						parms.add(new ParameterPOJO(name, units, parm.getString("lowerDateValue"),
+								parm.getString("upperDateValue")));
+					} else if (parm.containsKey("lowerNumericValue")
+							&& parm.containsKey("upperNumericValue")) {
+						parms.add(new ParameterPOJO(name, units, parm.getJsonNumber(
+								"lowerNumericValue").doubleValue(), parm.getJsonNumber(
+								"upperNumericValue").doubleValue()));
+					} else {
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER, parm.toString());
 					}
 				}
+			}
+			List<EntityBaseBean> objects;
+			if (target.equals("Investigation")) {
+
 				List<String> samples = new ArrayList<>();
 				if (jo.containsKey("samples")) {
 					for (JsonValue val : jo.getJsonArray("samples")) {
@@ -383,26 +396,28 @@ public class ICATRest {
 				}
 				String userFullName = jo.getString("userFullName", null);
 
-				List<EntityBaseBean> objects = beanManager.luceneInvestigations(userName, user,
-						text, lower, upper, parms, samples, userFullName, maxCount, manager,
-						userTransaction);
+				objects = beanManager.luceneInvestigations(userName, user, text, lower, upper,
+						parms, samples, userFullName, maxCount, manager, userTransaction);
 
-				JsonGenerator gen = Json.createGenerator(baos);
-				gen.writeStartArray();
-				for (EntityBaseBean investigation : objects) {
-					gen.writeStartObject();
-					gen.writeStartObject("Investigation");
-					jsonise(investigation, gen);
-					gen.writeEnd();
-					gen.writeEnd();
-				}
-				gen.writeEnd();
-				gen.close();
+			} else if (target.equals("Dataset")) {
+				objects = beanManager.luceneDatasets(userName, user, text, lower, upper, parms,
+						maxCount, manager, userTransaction);
 
 			} else {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target
 						+ " is not expected");
 			}
+			JsonGenerator gen = Json.createGenerator(baos);
+			gen.writeStartArray();
+			for (EntityBaseBean bean : objects) {
+				gen.writeStartObject();
+				gen.writeStartObject(bean.getClass().getSimpleName());
+				jsonise(bean, gen);
+				gen.writeEnd();
+				gen.writeEnd();
+			}
+			gen.writeEnd();
+			gen.close();
 			return baos.toString();
 		}
 	}
