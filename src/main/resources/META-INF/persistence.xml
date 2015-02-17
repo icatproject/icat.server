@@ -1,65 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+<persistence version="1.0"
+	xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
 
-    <persistence-unit name="icat" transaction-type="JTA">
-        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-        <jta-data-source>jdbc/icat</jta-data-source>
-        <class>org.icatproject.core.entity.Application</class>
-        <class>org.icatproject.core.entity.DataCollection</class>
-        <class>org.icatproject.core.entity.DataCollectionDatafile</class>
-        <class>org.icatproject.core.entity.DataCollectionDataset</class>
-        <class>org.icatproject.core.entity.DataCollectionParameter</class>
-        <class>org.icatproject.core.entity.Datafile</class>
-        <class>org.icatproject.core.entity.DatafileFormat</class>
-        <class>org.icatproject.core.entity.DatafileParameter</class>
-        <class>org.icatproject.core.entity.Dataset</class>
-        <class>org.icatproject.core.entity.DatasetParameter</class>
-        <class>org.icatproject.core.entity.DatasetType</class>
-        <class>org.icatproject.core.entity.Facility</class>
-        <class>org.icatproject.core.entity.FacilityCycle</class>
-        <class>org.icatproject.core.entity.FacilityUser</class>
-        <class>org.icatproject.core.entity.Grouping</class>
-        <class>org.icatproject.core.entity.IcatAuthorisation</class>
-        <class>org.icatproject.core.entity.IcatRole</class>
-        <class>org.icatproject.core.entity.Instrument</class>
-        <class>org.icatproject.core.entity.InstrumentScientist</class>
-        <class>org.icatproject.core.entity.Investigation</class>
-        <class>org.icatproject.core.entity.InvestigationInstrument</class>
-        <class>org.icatproject.core.entity.InvestigationParameter</class>
-        <class>org.icatproject.core.entity.InvestigationType</class>
-        <class>org.icatproject.core.entity.InvestigationUser</class>
-        <class>org.icatproject.core.entity.InvestigationGroup</class>
-        <class>org.icatproject.core.entity.Job</class>
-        <class>org.icatproject.core.entity.Keyword</class>
-        <class>org.icatproject.core.entity.Log</class>
-        <class>org.icatproject.core.entity.ParameterType</class>
-        <class>org.icatproject.core.entity.PermissibleStringValue</class>
-        <class>org.icatproject.core.entity.Publication</class>
-        <class>org.icatproject.core.entity.PublicStep</class>
-        <class>org.icatproject.core.entity.RelatedDatafile</class>
-        <class>org.icatproject.core.entity.Rule</class>
-        <class>org.icatproject.core.entity.Sample</class>
-        <class>org.icatproject.core.entity.SampleParameter</class>
-        <class>org.icatproject.core.entity.SampleType</class>
-        <class>org.icatproject.core.entity.Session</class>
-        <class>org.icatproject.core.entity.Shift</class>
-        <class>org.icatproject.core.entity.Study</class>
-        <class>org.icatproject.core.entity.StudyInvestigation</class>
-        <class>org.icatproject.core.entity.StudyStatus</class>
-        <class>org.icatproject.core.entity.User</class>
-        <class>org.icatproject.core.entity.UserGroup</class>
-        <exclude-unlisted-classes>true</exclude-unlisted-classes>
-        <properties>
-            <property name="eclipselink.target-server" value="SunAS9" />
-            <property name="eclipselink.cache.shared.default" value="false" />
-            <property name="eclipselink.logging.level" value="SEVERE" />
-            <!-- <property name="eclipselink.logging.level" value="FINE" /> -->
-            <!-- <property name="eclipselink.logging.level.sql" value="FINE" /> -->
-            <!-- <property name="eclipselink.logging.parameters" value="true" /> -->
-            <property name="eclipselink.ddl-generation" value="create-tables" />
-            <property name="eclipselink.ddl-generation.output_mode" value="both" />
-        </properties>
-    </persistence-unit>
+	<persistence-unit name="icat" transaction-type="JTA">
+		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+		<jta-data-source>jdbc/icat</jta-data-source>
+		<properties>
+			<property name="eclipselink.cache.shared.default" value="false" />
+			<property name="eclipselink.logging.level" value="SEVERE" />
+			<!-- <property name="eclipselink.logging.level" value="FINE" /> -->
+			<!-- <property name="eclipselink.logging.level.sql" value="FINE" /> -->
+			<!-- <property name="eclipselink.logging.parameters" value="true" /> -->
+			<property name="eclipselink.ddl-generation" value="create-tables" />
+			<property name="eclipselink.ddl-generation.output_mode"
+				value="both" />
+		</properties>
+	</persistence-unit>
 
 </persistence>

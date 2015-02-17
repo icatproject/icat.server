@@ -1,317 +1,481 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
-    <properties>
-        <title>ICAT Release Notes</title>
-    </properties>
+	<properties>
+		<title>ICAT Release Notes</title>
+	</properties>
 
-    <body>
+	<body>
 
-        <section name="4.4.0">
-            <p>This introduces a number of "RESTful" calls and has some other small improvements and bug fixes.
-            </p>
-            <ul>
-                <li>A bug in the authorization computation has been fixed which was previously prohibiting operations that should have been allowed in
-                    some cases where multiple authorization rules were relevant.
-                </li>
-                <li>A partial prototype of a "RESTful" interface has been added.</li>
-                <li>There is a new parameter maxEntities which must be specified in icat.properties to restrict the total number of entities returned
-                    in calls to get, search and searchText.
-                </li>
-                <li>There is a new parameter maxIdsInQuery which must be specified in icat.properties to restrict the size of ICAT generated queries.
-                    This must not exceed 1000 if Oracle is being used.
-                </li>
-                <li>There are new parameters importCacheSize and exportCacheSize which must be specified in icat.properties to restrict the size of
-                    caches used during import and export. The cache is local to a call to import or export to ensure that authorization rules are
-                    enforced. As a by-product modifications to ICAT are less likely to result in stale information being returned from the cache.
-                </li>
-                <li>ID values are obtained from the database SEQUENCE table in groups of 500 rather than 50 to improve performance. This is to
-                    circumvent a problem seen occasionally in Oracle.
-                </li>
-                <li>The DISTINCT keyword now works as in regular JPQL.</li>
-                <li>Queries are now truncated to 4000 characters before storing them in the table or file log.</li>
-                <li>The installation script has been made more robust and will also ensure that JDBC connectors are set up in a resilient manner for
-                    Oracle RAC servers.
-                </li>
-                <li>It is now treated as an error to have redundant paths in an INCLUDE clause.</li>
-                <li>The application is now built and deployed as a .war files rather than a .ear file which makes it easier to deploy on Wildfly.</li>
-                <li>The InvestigationGroup has been introduced. It is expected that this will be generally used in Rule based authorization in
-                    preference to InvestigationUser except for those cases where the role of the individual is significant.
-                </li>
-                <li>The role field in the InvestigationUser is now part of the key and can now not be null. This allows a User to have multiple roles
-                    relative to an Investigation</li>
-                <li>The Rule.what column has been increased in length from the default of 255 to 1024.</li>
-            </ul>
-        </section>
-
-        <section name="4.3.3">
-            <p>This is a bug fix release with support for a group of ICATs working together. It is not a cluster in the Glassfish sense.
-            </p>
-            <ul>
-                <li>The isAccessAllowed call, when used to check CREATE access, is now protected from invalid input.
-                </li>
-                <li>All standard JPQL functions are now accepted in search() calls.
-                </li>
-                <li>Queries returning results of aggregate functions should always return an array of length 1. However, due to the behaviour of JAXB
-                    a list containing just a null is not transmitted properly and instead an empty list is returned. This is a problem with the
-                    functions MIN, MAX, SUM and AVG all of which return null when they have no data to process. The COUNT function was also returning
-                    an empty list when it had no data but now returns a list containing 0L.
-                </li>
-                <li>More than one ICAT may be used together to share the load and provide more resilience.
-                </li>
-                <li>The setup script does not require calling with the configure option.</li>
-                <li>The icat-setup.properties file now uses the keyword dbProperties rather than icatProperties.</li>
-                <li>Fixed bug with handling of unary minus.</li>
-            </ul>
-        </section>
-
-        <section name="4.3.2">
-            <p>This is a bug fix release.
-            </p>
-            <ul>
-                <li>A get call using the old (non-JPQL) syntax will now accept the INCLUDE keyword in lower or mixed case.
-                </li>
-            </ul>
-        </section>
-
-        <section name="4.3.1">
-            <p>This is a bug fix release.
-            </p>
-            <ul>
-                <li>The methods logout and refresh when called with an expired or otherwise invalid sessionId now throw an exception of type SESSION
-                    rather than INTERNAL.
-                </li>
-                <li>A small improvement to testicat has been made to show who you are logged in as.</li>
-                <li>The relationship from DataCollection to DataCollectionParameters is now called parameters and can be accessed by getParameters and
-                    setParameters.
-                </li>
-            </ul>
-        </section>
-
-        <section name="4.3.0">
-            <p>This includes schema changes and a number of speculative features.
-            </p>
-            <ul>
-                <li>The "ICATCompat" service for backwards compatibility with ICAT 3.x has now been removed.
-                </li>
-                <li>A method "void refresh(String sid)" has been added to refresh an ICAT session.
-                </li>
-                <li>The notification mechanism has been completely changed.</li>
-                <li>It is not legal in queries with an INCLUDE to use a "1" in conjunction with and entity name. This will now reliably throw an
-                    exception.
-                </li>
-                <li>A new call "boolean isAccessAllowed" has been created to test whether a specific access type is allowed.
-                </li>
-                <li>A call has been provided to return all the available entity names. This is of more use to tools than regular users.</li>
-                <li>Column names in the Database table for UserGroup have been changed as they were inconsistent.</li>
-                <li>The Rule entities are now store in a database table called RULE_. for compatibility with Microsoft SQLServer.</li>
-                <li>A file indices.sql is being distributed with the .ear file with indices which may improve performance. You should assess whether
-                    or not each index will be useful to your installation for while an index can give a huge improvement to a query there is also a
-                    cost in maintaining an index.
-                </li>
-                <li>JPA mappings for floating point numbers now use precision 38 and scale 19. This is still not good on Oracle as mentioned in the
-                    installation instructions.
-                </li>
-                <li>testicat.py (which replaces test.py) expects https://hostname:port rather than a pair of parameters</li>
-                <li>Call logging has been added either to file or to a log table or both.</li>
-                <li>Lucene free text search has been included via the new searchText call.</li>
-                <li>
-                    Changed uniqueness constraints to:
-                    <dl>
-                        <dt>Datafile</dt>
-                        <dd>dataset, name (-location)</dd>
-                        <dt>Dataset</dt>
-                        <dd>investigation, name (-sample -type)</dd>
-                        <dt>Application</dt>
-                        <dd>facility, name, version (+facility)</dd>
-                        <dt>Sample</dt>
-                        <dd>investigation, name (-type)</dd>
-                        <dt>Investigation</dt>
-                        <dd>facility, name, visitid (-facilityCycle -instrument)</dd>
-                        <dt>SampleType</dt>
-                        <dd>facility, name, molecularFormula (+molecularFormula)</dd>
-                    </dl>
-                </li>
-                <li>Made all constraint fields not nullable. This is checked by ICAT to ensure that future changes do not break this rule.</li>
-                <li>Add a string attribute: "arguments" to the job to
-                    store the program arguments that were used.
-                </li>
-                <li>Relationship between
-                    FacilityCycle and Investigation removed.
-                </li>
-                <li>Table between Investigation and
-                    Instrument added to represent many-to-many relationships between them.
-                </li>
-                <li>
-                    Added DataCollection and changed Job to make use if it.
-                </li>
-                <li>Group has been changed to Grouping as Group is a JPQL keyword.</li>
-                <li>Add attribute 'url' to Instrument.</li>
-                <li>Added new alternate query syntax that may be used in queries and authz rules. It is distinguished by starting with the keyword
-                    "SELECT".
-                </li>
-                <li>It is no longer considered an error to have no authz rules matching a search call - you just get no data back.</li>
-                <li>Packaging now conforms to http://code.google.com/p/icatproject/wiki/ComponentGuidelines</li>
-                <li>
-                    A command
-                    <tt>icatadmin</tt>
-                    has been introduced to perform operations for which the rule based authorization is not appropriate.
-                </li>
-                <li>Expired sessions are cleaned out of the database every hour.</li>
-                <li>The generated client jar contains two packages: org.icatproject and org.icatproject_4_3_0. Normal users should use the
-                    org.icatproject one. The other exists primarily for TopCAT so that multiple ICAT clients can co-exist.
-                </li>
-                <li>The installation mechanism now has a single setup Python script which works both on Linux and Windows.</li>
-            </ul>
-        </section>
-
-        <section name="4.2.5">
-            <p>
-                This is a bug fix release. If you already have 4.2.0, 4.2.1, 4.2.2, 4.2.3 or 4.2.4 installed, then simply remove the old ear file and
-                deploy the new one. If you have changed log4j.properties from the one supplied then add an entry to your icat.properties:
-                <tt>log4j.properties = log4j.properties</tt>
-                which tells the ICAT to use the existing log4j.properties file in the config directory rather than the built in one. If you have not
-                changed it then it is preferable to delete the log4j.properties from the config directory to avoid any possible confusion. The
-                log4j.properties file is no longer reread, if you have configured your own copy and wish to change it then you must at least reload
-                ICAT for the properties file to be read again.
-            </p>
-            <ul>
-                <li>
-                    A significant leak has been fixed which was causing an unlimited number of threads to be created. This has been addressed by
-                    changing the way in which the log4j.properties file is read. Only if you have a line in the icat.properties identifying a specific
-                    log4j.properties file will that file be used, otherwise a default file packaged within the .ear file will be used.
-                </li>
-            </ul>
-        </section>
+		<section name="4.5.0">
+			<p>......</p>
+			<ul>
+				<li>Permit lucene not to be used by omitting references in
+					icat.setup. This used to work but stopped working when multiple
+					ICATs were supported in 4.3.3.
+				</li>
+			</ul>
+		</section>
 
 
-        <section name="4.2.4">
-            <p>This is a bug fix release. If you already have 4.2.0, 4.2.1, 4.2.2 or 4.2.3 installed, then simply remove the old ear file and deploy
-                the new one.
-            </p>
-            <ul>
-                <li>Version number updated to 4.2.4 and test updated to ensure that the version corresponds to the maven project version.
-                </li>
-                <li>LICENSE.txt file added to top directory of the source tree.
-                </li>
-                <li>Creating an Investigation which refers to a new InvestigationUser now works properly.</li>
-                <li>Using INCLUDE with User and Group now works properly. Previously it could throw a null pointer exception.</li>
-                <li>Database requirements have been made more precise in the deployment instructions.</li>
-            </ul>
-        </section>
+		<section name="4.4.0">
+			<p>This introduces a number of "RESTful" calls and has some other
+				small improvements and bug fixes.
+			</p>
+			<ul>
+				<li>A bug in the authorization computation has been fixed which was
+					previously prohibiting operations that should have been allowed in
+					some cases where multiple authorization rules were relevant.
+				</li>
+				<li>A partial prototype of a "RESTful" interface has been added.
+				</li>
+				<li>There is a new parameter maxEntities which must be specified in
+					icat.properties to restrict the total number of entities returned
+					in calls to get, search and searchText.
+				</li>
+				<li>There is a new parameter maxIdsInQuery which must be specified
+					in icat.properties to restrict the size of ICAT generated queries.
+					This must not exceed 1000 if Oracle is being used.
+				</li>
+				<li>There are new parameters importCacheSize and exportCacheSize
+					which must be specified in icat.properties to restrict the size of
+					caches used during import and export. The cache is local to a call
+					to import or export to ensure that authorization rules are
+					enforced. As a by-product modifications to ICAT are less likely to
+					result in stale information being returned from the cache.
+				</li>
+				<li>ID values are obtained from the database SEQUENCE table in
+					groups of 500 rather than 50 to improve performance. This is to
+					circumvent a problem seen occasionally in Oracle.
+				</li>
+				<li>The DISTINCT keyword now works as in regular JPQL.</li>
+				<li>Queries are now truncated to 4000 characters before storing
+					them
+					in the table or file log.
+				</li>
+				<li>The installation script has been made more robust and will also
+					ensure that JDBC connectors are set up in a resilient manner for
+					Oracle RAC servers.
+				</li>
+				<li>It is now treated as an error to have redundant paths in an
+					INCLUDE clause.
+				</li>
+				<li>The application is now built and deployed as a .war files
+					rather
+					than a .ear file which makes it easier to deploy on
+					Wildfly.
+				</li>
+				<li>The InvestigationGroup has been introduced. It is expected that
+					this will be generally used in Rule based authorization in
+					preference to InvestigationUser except for those cases where the
+					role of the individual is significant.
+				</li>
+				<li>The role field in the InvestigationUser is now part of the key
+					and can now not be null. This allows a User to have multiple roles
+					relative to an Investigation
+				</li>
+				<li>The Rule.what column has been increased in length from the
+					default of 255 to 1024.
+				</li>
+			</ul>
+		</section>
 
-        <section name="4.2.3">
-            <p>This is a bug fix release. If you already have 4.2.0, 4.2.1 or 4.2.2 installed, then simply remove the old ear file and deploy the new
-                one.
-            </p>
-            <ul>
-                <li>Two different error conditions were not being handled correctly in calls to createMany when a user attempted to violate a
-                    uniqueness constraint. In the case of a conflict with a pre-existing entry in ICAT the offset returned was -1. In the case that
-                    there were duplicates in the list passed in the call to createMany - rather than conflicts with existing database entries - an
-                    IcatException of type INTERNAL was being thrown, also with an offset of -1. These bugs are now fixed.
-                </li>
-            </ul>
-        </section>
+		<section name="4.3.3">
+			<p>This is a bug fix release with support for a group of ICATs
+				working together. It is not a cluster in the Glassfish sense.
+			</p>
+			<ul>
+				<li>The isAccessAllowed call, when used to check CREATE access, is
+					now protected from invalid input.
+				</li>
+				<li>All standard JPQL functions are now accepted in search() calls.
+				</li>
+				<li>Queries returning results of aggregate functions should always
+					return an array of length 1. However, due to the behaviour of JAXB
+					a list containing just a null is not transmitted properly and
+					instead an empty list is returned. This is a problem with the
+					functions MIN, MAX, SUM and AVG all of which return null when they
+					have no data to process. The COUNT function was also returning
+					an
+					empty list when it had no data but now returns a list containing
+					0L.
+				</li>
+				<li>More than one ICAT may be used together to share the load and
+					provide more resilience.
+				</li>
+				<li>The setup script does not require calling with the configure
+					option.
+				</li>
+				<li>The icat-setup.properties file now uses the keyword
+					dbProperties
+					rather than icatProperties.
+				</li>
+				<li>Fixed bug with handling of unary minus.</li>
+			</ul>
+		</section>
 
-        <section name="4.2.2">
-            <p>This is a bug fix release. If you already have 4.2.0 or 4.2.1 installed, then simply remove the old ear file and deploy the new one.
-            </p>
-            <ul>
-                <li>A bug causing read access to be denied in certain circumstances, when it should have been permitted, has been fixed.
-                </li>
-                <li>When attempting to format an error message about an invalid list of INCLUDES a null pointer exception is no longer thrown.</li>
-            </ul>
-        </section>
+		<section name="4.3.2">
+			<p>This is a bug fix release.
+			</p>
+			<ul>
+				<li>A get call using the old (non-JPQL) syntax will now accept the
+					INCLUDE keyword in lower or mixed case.
+				</li>
+			</ul>
+		</section>
 
-        <section name="4.2.1">
-            <p>This is a bug fix release. If you already have 4.2.0 installed, then simply remove the old ear file and deploy the new one.</p>
-            <ul>
-                <li>Authorization rules without explicit relationships to groups (of the form "Investigation &lt;-&gt; InvestigationUser &lt;-&gt;
-                    User [name =
-                    :user]") now work properly.
-                </li>
-                <li>It is now possible to use boolean values in queries. Attributes can be compared against literal values of TRUE and
-                    FALSE (not case
-                    sensitive) as in "ParameterType [enforced = TRUE]"
-                </li>
-                <li>Null pointer exceptions were being throw with some authorization rules when using an Oracle database. This has now been fixed.
-                </li>
-            </ul>
-        </section>
+		<section name="4.3.1">
+			<p>This is a bug fix release.
+			</p>
+			<ul>
+				<li>The methods logout and refresh when called with an expired or
+					otherwise invalid sessionId now throw an exception of type SESSION
+					rather than INTERNAL.
+				</li>
+				<li>A small improvement to testicat has been made to show who you
+					are logged in as.
+				</li>
+				<li>The relationship from DataCollection to
+					DataCollectionParameters
+					is now called parameters and can be
+					accessed by getParameters and
+					setParameters.
+				</li>
+			</ul>
+		</section>
 
-        <section name="4.2.0">
-            <p>This introduces a clean mechanism for handling authentication plugins and provides significant speed enhancements.</p>
-            <ul>
-                <li>ICAT now contains no authentication plugins but it does provide an Authenticator interface for plugin writers. If you plan to use
-                    the new authn_db database authentication plugin you will need to manually move data from the old table to the new passwd table.
-                </li>
-                <li>The login call now accepts two parameters, the mnemonic for the authentication plugin and a map of credentials. This change
-                    necessitated the increase in the version number to 4.2.
-                </li>
-                <li>There was a serious performance bug in release 4.1 and to a lesser extent in 4.0. In both case this affected read operations -
-                    search and get. This bug in the marshalling of the XML has now been addressed.
-                </li>
-                <li>Previously JMS messages had the property "query" set to the primary key and the actual query value was not available. They are now
-                    assigned correctly to the properties "query" and "entityId".
-                </li>
-                <li>You will need an up-to-date version of JAX-WS such as the one packaged with Glassfish 3.1.2</li>
-                <li>The main database schema is almost unchanged. The only difference is that some text fields have been made larger. </li>
-                <li>A bug has been fixed in the handling of enum types in expressions.</li>
+		<section name="4.3.0">
+			<p>This includes schema changes and a number of speculative
+				features.
+			</p>
+			<ul>
+				<li>The "ICATCompat" service for backwards compatibility with ICAT
+					3.x has now been removed.
+				</li>
+				<li>A method "void refresh(String sid)" has been added to refresh
+					an
+					ICAT session.
+				</li>
+				<li>The notification mechanism has been completely changed.</li>
+				<li>It is not legal in queries with an INCLUDE to use a "1" in
+					conjunction with and entity name. This will now reliably throw an
+					exception.
+				</li>
+				<li>A new call "boolean isAccessAllowed" has been created to test
+					whether a specific access type is allowed.
+				</li>
+				<li>A call has been provided to return all the available entity
+					names. This is of more use to tools than regular users.
+				</li>
+				<li>Column names in the Database table for UserGroup have been
+					changed as they were inconsistent.
+				</li>
+				<li>The Rule entities are now store in a database table called
+					RULE_. for compatibility with Microsoft SQLServer.
+				</li>
+				<li>A file indices.sql is being distributed with the .ear file with
+					indices which may improve performance. You should assess whether
+					or
+					not each index will be useful to your installation for while an
+					index can give a huge improvement to a query there is also a
+					cost in
+					maintaining an index.
+				</li>
+				<li>JPA mappings for floating point numbers now use precision 38
+					and
+					scale 19. This is still not good on Oracle as mentioned in the
+					installation instructions.
+				</li>
+				<li>testicat.py (which replaces test.py) expects
+					https://hostname:port rather than a pair of parameters
+				</li>
+				<li>Call logging has been added either to file or to a log table or
+					both.
+				</li>
+				<li>Lucene free text search has been included via the new
+					searchText
+					call.
+				</li>
+				<li>
+					Changed uniqueness constraints to:
+					<dl>
+						<dt>Datafile</dt>
+						<dd>dataset, name (-location)</dd>
+						<dt>Dataset</dt>
+						<dd>investigation, name (-sample -type)</dd>
+						<dt>Application</dt>
+						<dd>facility, name, version (+facility)</dd>
+						<dt>Sample</dt>
+						<dd>investigation, name (-type)</dd>
+						<dt>Investigation</dt>
+						<dd>facility, name, visitid (-facilityCycle -instrument)</dd>
+						<dt>SampleType</dt>
+						<dd>facility, name, molecularFormula (+molecularFormula)</dd>
+					</dl>
+				</li>
+				<li>Made all constraint fields not nullable. This is checked by
+					ICAT
+					to ensure that future changes do not break this rule.
+				</li>
+				<li>Add a string attribute: "arguments" to the job to
+					store the
+					program arguments that were used.
+				</li>
+				<li>Relationship between
+					FacilityCycle and Investigation removed.
+				</li>
+				<li>Table between Investigation and
+					Instrument added to represent
+					many-to-many relationships between them.
+				</li>
+				<li>
+					Added DataCollection and changed Job to make use if it.
+				</li>
+				<li>Group has been changed to Grouping as Group is a JPQL keyword.
+				</li>
+				<li>Add attribute 'url' to Instrument.</li>
+				<li>Added new alternate query syntax that may be used in queries
+					and
+					authz rules. It is distinguished by starting with the keyword
+					"SELECT".
+				</li>
+				<li>It is no longer considered an error to have no authz rules
+					matching a search call - you just get no data back.
+				</li>
+				<li>Packaging now conforms to
+					http://code.google.com/p/icatproject/wiki/ComponentGuidelines
+				</li>
+				<li>
+					A command
+					<tt>icatadmin</tt>
+					has been introduced to perform operations for which the rule based
+					authorization is not appropriate.
+				</li>
+				<li>Expired sessions are cleaned out of the database every hour.
+				</li>
+				<li>The generated client jar contains two packages: org.icatproject
+					and org.icatproject_4_3_0. Normal users should use the
+					org.icatproject one. The other exists primarily for TopCAT so that
+					multiple ICAT clients can co-exist.
+				</li>
+				<li>The installation mechanism now has a single setup Python script
+					which works both on Linux and Windows.
+				</li>
+			</ul>
+		</section>
 
-            </ul>
-        </section>
+		<section name="4.2.5">
+			<p>
+				This is a bug fix release. If you already have 4.2.0, 4.2.1, 4.2.2,
+				4.2.3 or 4.2.4 installed, then simply remove the old ear file and
+				deploy the new one. If you have changed log4j.properties from the
+				one supplied then add an entry to your icat.properties:
+				<tt>log4j.properties = log4j.properties</tt>
+				which tells the ICAT to use the existing log4j.properties file in
+				the config directory rather than the built in one. If you have not
+				changed it then it is preferable to delete the log4j.properties
+				from
+				the config directory to avoid any possible confusion. The
+				log4j.properties file is no longer reread, if you have configured
+				your own copy and wish to change it then you must at least reload
+				ICAT for the properties file to be read again.
+			</p>
+			<ul>
+				<li>
+					A significant leak has been fixed which was causing an unlimited
+					number of threads to be created. This has been addressed by
+					changing the way in which the log4j.properties file is read. Only
+					if you have a line in the icat.properties identifying a specific
+					log4j.properties file will that file be used, otherwise a default
+					file packaged within the .ear file will be used.
+				</li>
+			</ul>
+		</section>
 
-        <section name="4.1.1">
-            <p>This is a bug fix release.</p>
-            <ul>
-                <li>Aggregate functions (MIN, MAX, AVG, COUNT etc) no longer generate an internal exception.</li>
-                <li>Minor improvements to the installation documentation.</li>
-            </ul>
-        </section>
+
+		<section name="4.2.4">
+			<p>This is a bug fix release. If you already have 4.2.0, 4.2.1,
+				4.2.2
+				or 4.2.3 installed, then simply remove the old ear file and
+				deploy
+				the new one.
+			</p>
+			<ul>
+				<li>Version number updated to 4.2.4 and test updated to ensure that
+					the version corresponds to the maven project version.
+				</li>
+				<li>LICENSE.txt file added to top directory of the source tree.
+				</li>
+				<li>Creating an Investigation which refers to a new
+					InvestigationUser now works properly.
+				</li>
+				<li>Using INCLUDE with User and Group now works properly.
+					Previously
+					it could throw a null pointer exception.
+				</li>
+				<li>Database requirements have been made more precise in the
+					deployment instructions.
+				</li>
+			</ul>
+		</section>
+
+		<section name="4.2.3">
+			<p>This is a bug fix release. If you already have 4.2.0, 4.2.1 or
+				4.2.2 installed, then simply remove the old ear file and deploy the
+				new
+				one.
+			</p>
+			<ul>
+				<li>Two different error conditions were not being handled correctly
+					in calls to createMany when a user attempted to violate a
+					uniqueness constraint. In the case of a conflict with a
+					pre-existing entry in ICAT the offset returned was -1. In the case
+					that
+					there were duplicates in the list passed in the call to
+					createMany -
+					rather than conflicts with existing database entries -
+					an
+					IcatException of type INTERNAL was being thrown, also with an
+					offset of -1. These bugs are now fixed.
+				</li>
+			</ul>
+		</section>
+
+		<section name="4.2.2">
+			<p>This is a bug fix release. If you already have 4.2.0 or 4.2.1
+				installed, then simply remove the old ear file and deploy the new
+				one.
+			</p>
+			<ul>
+				<li>A bug causing read access to be denied in certain
+					circumstances,
+					when it should have been permitted, has been fixed.
+				</li>
+				<li>When attempting to format an error message about an invalid
+					list
+					of INCLUDES a null pointer exception is no longer thrown.
+				</li>
+			</ul>
+		</section>
+
+		<section name="4.2.1">
+			<p>This is a bug fix release. If you already have 4.2.0 installed,
+				then simply remove the old ear file and deploy the new one.
+			</p>
+			<ul>
+				<li>Authorization rules without explicit relationships to groups
+					(of
+					the form "Investigation &lt;-&gt; InvestigationUser &lt;-&gt;
+					User
+					[name =
+					:user]") now work properly.
+				</li>
+				<li>It is now possible to use boolean values in queries. Attributes
+					can be compared against literal values of TRUE and
+					FALSE (not case
+					sensitive) as in "ParameterType [enforced = TRUE]"
+				</li>
+				<li>Null pointer exceptions were being throw with some
+					authorization
+					rules when using an Oracle database. This has now
+					been fixed.
+				</li>
+			</ul>
+		</section>
+
+		<section name="4.2.0">
+			<p>This introduces a clean mechanism for handling authentication
+				plugins and provides significant speed enhancements.
+			</p>
+			<ul>
+				<li>ICAT now contains no authentication plugins but it does provide
+					an Authenticator interface for plugin writers. If you plan to use
+					the new authn_db database authentication plugin you will need to
+					manually move data from the old table to the new passwd table.
+				</li>
+				<li>The login call now accepts two parameters, the mnemonic for the
+					authentication plugin and a map of credentials. This change
+					necessitated the increase in the version number to 4.2.
+				</li>
+				<li>There was a serious performance bug in release 4.1 and to a
+					lesser extent in 4.0. In both case this affected read operations -
+					search and get. This bug in the marshalling of the XML has now
+					been
+					addressed.
+				</li>
+				<li>Previously JMS messages had the property "query" set to the
+					primary key and the actual query value was not available. They are
+					now
+					assigned correctly to the properties "query" and "entityId".
+				</li>
+				<li>You will need an up-to-date version of JAX-WS such as the one
+					packaged with Glassfish 3.1.2
+				</li>
+				<li>The main database schema is almost unchanged. The only
+					difference is that some text fields have been made larger.
+				</li>
+				<li>A bug has been fixed in the handling of enum types in
+					expressions.
+				</li>
+
+			</ul>
+		</section>
+
+		<section name="4.1.1">
+			<p>This is a bug fix release.</p>
+			<ul>
+				<li>Aggregate functions (MIN, MAX, AVG, COUNT etc) no longer
+					generate an internal exception.
+				</li>
+				<li>Minor improvements to the installation documentation.</li>
+			</ul>
+		</section>
 
 
-        <section name="4.1.0">
+		<section name="4.1.0">
 
-            <p>This is the first release of ICAT4 which is meant to be approaching production quality.
-            </p>
-            <ul>
-                <li>
-                    More changes to the API - too numerous to list here providing
-                    <ul>
-                        <li> support for pluggable authn,</li>
-                        <li> support for rule based authz,</li>
-                        <li>support for notifications and</li>
-                        <li> a powerful search mechanism</li>
-                    </ul>
-                </li>
-                <li>Database independent</li>
-                <li>More regular schema with simple provenance mechanism</li>
-            </ul>
+			<p>This is the first release of ICAT4 which is meant to be
+				approaching production quality.
+			</p>
+			<ul>
+				<li>
+					More changes to the API - too numerous to list here providing
+					<ul>
+						<li> support for pluggable authn,</li>
+						<li> support for rule based authz,</li>
+						<li>support for notifications and</li>
+						<li> a powerful search mechanism</li>
+					</ul>
+				</li>
+				<li>Database independent</li>
+				<li>More regular schema with simple provenance mechanism</li>
+			</ul>
 
-        </section>
+		</section>
 
-        <section name="4.0">
-            <p> Technology
-                preview release - not for production use
-            </p>
-            <ul>
-                <li> Many changes to the API</li>
-            </ul>
-        </section>
+		<section name="4.0">
+			<p> Technology
+				preview release - not for production use
+			</p>
+			<ul>
+				<li> Many changes to the API</li>
+			</ul>
+		</section>
 
-        <section name="3.3.4">
-            <ul>
-                <li> Changed the JPA provider from TopLink to EclipseLink</li>
-                <li>Removed Dataportal from the installation</li>
-            </ul>
+		<section name="3.3.4">
+			<ul>
+				<li> Changed the JPA provider from TopLink to EclipseLink</li>
+				<li>Removed Dataportal from the installation</li>
+			</ul>
 
-        </section>
+		</section>
 
-        <section name="3.3.3">
-            <p>Public release</p>
-        </section>
+		<section name="3.3.3">
+			<p>Public release</p>
+		</section>
 
-    </body>
+	</body>
 </document>
             
             

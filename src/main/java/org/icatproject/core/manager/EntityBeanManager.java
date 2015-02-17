@@ -196,7 +196,7 @@ public class EntityBeanManager {
 				userTransaction.commit();
 				long beanId = bean.getId();
 
-				if (lucene != null) {
+				if (luceneActive) {
 					bean.addToLucene(lucene);
 				}
 				if (log) {
@@ -337,7 +337,7 @@ public class EntityBeanManager {
 							crs.get(0).getPk(), manager, userTransaction);
 				}
 
-				if (lucene != null) {
+				if (luceneActive) {
 					for (EntityBaseBean bean : beans) {
 						bean.addToLucene(lucene);
 					}
@@ -434,7 +434,7 @@ public class EntityBeanManager {
 				manager.flush();
 				logger.trace("Deleted bean " + bean + " flushed.");
 				userTransaction.commit();
-				if (lucene != null) {
+				if (luceneActive) {
 					bean.removeFromLucene(lucene);
 				}
 				if (log) {
@@ -491,7 +491,7 @@ public class EntityBeanManager {
 				}
 				userTransaction.commit();
 
-				if (lucene != null) {
+				if (luceneActive) {
 					for (EntityBaseBean bean : beans) {
 						bean.removeFromLucene(lucene);
 					}
@@ -1147,7 +1147,7 @@ public class EntityBeanManager {
 		long time = log ? System.currentTimeMillis() : 0;
 		List<EntityBaseBean> results = new ArrayList<EntityBaseBean>();
 		long descendantCount = 0;
-		if (lucene != null) {
+		if (luceneActive) {
 			LuceneSearchResult last = null;
 			List<String> allResults = Collections.emptyList();
 			/*
@@ -1333,7 +1333,7 @@ public class EntityBeanManager {
 					logWrite(time, userId, "update", bean.getClass().getSimpleName(), bean.getId(),
 							manager, userTransaction);
 				}
-				if (lucene != null) {
+				if (luceneActive) {
 					bean.updateInLucene(lucene);
 				}
 				return notification;
@@ -1827,7 +1827,7 @@ public class EntityBeanManager {
 			EntityManager manager, UserTransaction userTransaction) throws IcatException {
 		long time = log ? System.currentTimeMillis() : 0;
 		List<EntityBaseBean> results = new ArrayList<EntityBaseBean>();
-		if (lucene != null) {
+		if (luceneActive) {
 			LuceneSearchResult last = null;
 			List<String> allResults = Collections.emptyList();
 			/*
@@ -1866,7 +1866,7 @@ public class EntityBeanManager {
 		long time = log ? System.currentTimeMillis() : 0;
 		List<EntityBaseBean> results = new ArrayList<EntityBaseBean>();
 		long descendantCount = 0;
-		if (lucene != null) {
+		if (luceneActive) {
 			LuceneSearchResult last = null;
 			List<String> allResults = Collections.emptyList();
 			/*
