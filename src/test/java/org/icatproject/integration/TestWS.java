@@ -66,8 +66,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 /**
- * These tests are for those aspects that cannot be tested by the core tests. In particular does the
- * INCLUDE mechanism work properly.
+ * These tests are for those aspects that cannot be tested by the core tests. In
+ * particular does the INCLUDE mechanism work properly.
  */
 public class TestWS {
 
@@ -103,19 +103,15 @@ public class TestWS {
 		sampleType.setMolecularFormula("Someformula");
 		session.create(sampleType);
 
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
-		Investigation invA = session.createInvestigation(facility, "A", "Not null",
-				investigationType);
+		Investigation invA = session.createInvestigation(facility, "A", "Not null", investigationType);
 
-		Investigation invB = session.createInvestigation(facility, "B", "Not null",
-				investigationType);
+		Investigation invB = session.createInvestigation(facility, "B", "Not null", investigationType);
 
-		Investigation invC = session.createInvestigation(facility, "C", "Not null",
-				investigationType);
+		Investigation invC = session.createInvestigation(facility, "C", "Not null", investigationType);
 
 		Instrument wish = session.createInstrument(facility, "wish");
 
@@ -245,8 +241,7 @@ public class TestWS {
 			fail("Should have thrown exception");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
-			assertEquals("Field value Jobs does not implement a relationship from Application",
-					e.getMessage());
+			assertEquals("Field value Jobs does not implement a relationship from Application", e.getMessage());
 		}
 	}
 
@@ -263,14 +258,12 @@ public class TestWS {
 
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 
 		DatasetType dstPB = session.createDatasetType(facility, "PB");
 		DatasetType dstQQ = session.createDatasetType(facility, "QQ");
 
-		Investigation inv = session.createInvestigation(facility, "A", "Not null",
-				investigationType);
+		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
 
 		Dataset dsPB = session.createDataset("PB", dstPB, inv);
 		Dataset dsQQ = session.createDataset("QQ", dstQQ, inv);
@@ -297,7 +290,8 @@ public class TestWS {
 
 		try {
 			session.delRule("notroot", "Dataset", "CRUD");
-			// The space between the single quotes is necessary - I suspect a bug in eclipselink
+			// The space between the single quotes is necessary - I suspect a
+			// bug in eclipselink
 
 			session.addRule("notroot", "Dataset <-> DatasetType [name = ' ']", "R");
 
@@ -324,8 +318,7 @@ public class TestWS {
 
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 
 		Rule rule = new Rule();
 		rule.setCrudFlags("R");
@@ -340,11 +333,11 @@ public class TestWS {
 		piTwo.setName("db/piTwo");
 		piTwo.setId(session.create(piTwo));
 
-		Investigation invOne = session.createInvestigation(facility, "InvestigationOne",
-				"Investigation one", investigationType);
+		Investigation invOne = session.createInvestigation(facility, "InvestigationOne", "Investigation one",
+				investigationType);
 
-		Investigation invTwo = session.createInvestigation(facility, "InvestigationTwo",
-				"Investigation two", investigationType);
+		Investigation invTwo = session.createInvestigation(facility, "InvestigationTwo", "Investigation two",
+				investigationType);
 
 		InvestigationUser iuOne = new InvestigationUser();
 		iuOne.setInvestigation(invOne);
@@ -409,7 +402,8 @@ public class TestWS {
 		assertEquals(2, (piOneSession.search("InvestigationUser")).size());
 		assertEquals(0, (piTwoSession.search("InvestigationUser")).size());
 
-		// Create a simple rule allowing oneControllers full access to InvestigationUser and ensure
+		// Create a simple rule allowing oneControllers full access to
+		// InvestigationUser and ensure
 		// that reading works.
 
 		rule = new Rule();
@@ -425,7 +419,8 @@ public class TestWS {
 		} catch (Exception e) {
 		}
 
-		// User has no read perms on objects of this type at all, some objects exist
+		// User has no read perms on objects of this type at all, some objects
+		// exist
 		List<Object> results = piTwoSession.search("SELECT COUNT(i) FROM Rule i");
 		assertEquals(1, results.size());
 		assertEquals(0L, results.get(0));
@@ -433,7 +428,8 @@ public class TestWS {
 		results = piTwoSession.search("SELECT SUM(i.id) FROM Rule i");
 		assertEquals(0, results.size());
 
-		// User has no read perms on objects of this type at all, no objects exist
+		// User has no read perms on objects of this type at all, no objects
+		// exist
 		results = piTwoSession.search("SELECT COUNT(i) FROM DataCollection i");
 		assertEquals(1, results.size());
 		assertEquals(0L, results.get(0));
@@ -443,8 +439,9 @@ public class TestWS {
 	}
 
 	/**
-	 * To test with the case when an operation is allowed by a general rule but an unrestricted rule
-	 * also exists. This used to give a problem if the unrestricted rule was not processed first.
+	 * To test with the case when an operation is allowed by a general rule but
+	 * an unrestricted rule also exists. This used to give a problem if the
+	 * unrestricted rule was not processed first.
 	 */
 	@Test
 	public void authz3() throws Exception {
@@ -452,11 +449,9 @@ public class TestWS {
 
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 
-		List<Object> objects = session
-				.search("Rule [bean='Investigation']<-> Grouping[name='root']");
+		List<Object> objects = session.search("Rule [bean='Investigation']<-> Grouping[name='root']");
 		for (Object o : objects) {
 			session.delete((Rule) o);
 		}
@@ -474,11 +469,9 @@ public class TestWS {
 		rule.setWhat("Investigation <-> InvestigationUser <-> User [name = :user]");
 		session.create(rule);
 
-		session.createInvestigation(facility, "InvestigationOne", "Investigation one",
-				investigationType);
+		session.createInvestigation(facility, "InvestigationOne", "Investigation one", investigationType);
 
-		session.createInvestigation(facility, "InvestigationTwo", "Investigation two",
-				investigationType);
+		session.createInvestigation(facility, "InvestigationTwo", "Investigation two", investigationType);
 
 		rule = new Rule();
 		rule.setCrudFlags("CRUD");
@@ -501,8 +494,7 @@ public class TestWS {
 			fail("Should have thrown exception");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
-			assertTrue(e.getMessage().startsWith(
-					"An exception occurred while creating a query in EntityManager:"));
+			assertTrue(e.getMessage().startsWith("An exception occurred while creating a query in EntityManager:"));
 		}
 	}
 
@@ -571,17 +563,16 @@ public class TestWS {
 
 			assertEquals(
 					2L,
-					session.search(
-							"COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']")
-							.get(0));
+					session.search("COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']").get(
+							0));
 			checkInvestigationNames(
-					"Investigation ORDER BY name <-> InvestigationInstrument <-> Instrument[name='WISH']",
-					"A", "B");
+					"Investigation ORDER BY name <-> InvestigationInstrument <-> Instrument[name='WISH']", "A", "B");
 
 			// Delete the rule
 			session.delete(isInv);
 
-			// Create a rule so I can see 'My' Investigations (those where I am an investigator)
+			// Create a rule so I can see 'My' Investigations (those where I am
+			// an investigator)
 			Rule invUserinv = new Rule();
 			invUserinv.setCrudFlags("R");
 			invUserinv.setWhat("Investigation <-> InvestigationUser <-> User [name = :user]");
@@ -590,22 +581,14 @@ public class TestWS {
 			assertEquals(2L, session.search("SELECT COUNT(i) FROM Investigation i").get(0));
 			checkInvestigationNames("Investigation ORDER BY name", "A", "C");
 
-			assertEquals(
-					2L,
-					session.search(
-							"COUNT(Investigation) <-> InvestigationUser <-> User[name=:user]").get(
-							0));
-			checkInvestigationNames(
-					"Investigation ORDER BY name <-> InvestigationUser <-> User[name=:user]", "A",
-					"C");
+			assertEquals(2L, session.search("COUNT(Investigation) <-> InvestigationUser <-> User[name=:user]").get(0));
+			checkInvestigationNames("Investigation ORDER BY name <-> InvestigationUser <-> User[name=:user]", "A", "C");
 
 			assertEquals(
 					1L,
-					session.search(
-							"COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']")
-							.get(0));
-			checkInvestigationNames(
-					"Investigation <-> InvestigationInstrument <-> Instrument[name='WISH']", "A");
+					session.search("COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']").get(
+							0));
+			checkInvestigationNames("Investigation <-> InvestigationInstrument <-> Instrument[name='WISH']", "A");
 
 			// Add the InstrumentScientist rule back in.
 			isInv.setId(session.create(isInv));
@@ -615,21 +598,12 @@ public class TestWS {
 
 			assertEquals(
 					2L,
-					session.search(
-							"COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']")
-							.get(0));
-			checkInvestigationNames(
-					"Investigation <-> InvestigationInstrument <-> Instrument[name='WISH']", "A",
-					"B");
-
-			assertEquals(
-					2L,
-					session.search(
-							"COUNT(Investigation) <-> InvestigationUser <-> User[name=:user]").get(
+					session.search("COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']").get(
 							0));
-			checkInvestigationNames(
-					"Investigation ORDER BY name <-> InvestigationUser <-> User[name=:user]", "A",
-					"C");
+			checkInvestigationNames("Investigation <-> InvestigationInstrument <-> Instrument[name='WISH']", "A", "B");
+
+			assertEquals(2L, session.search("COUNT(Investigation) <-> InvestigationUser <-> User[name=:user]").get(0));
+			checkInvestigationNames("Investigation ORDER BY name <-> InvestigationUser <-> User[name=:user]", "A", "C");
 
 			session.delete(isInv);
 			session.delete(invUserinv);
@@ -639,8 +613,8 @@ public class TestWS {
 	}
 
 	/*
-	 * Create two rules allowing access to the same investigation and ensure that only one instance
-	 * is returned - i.e, no DISTINCT problem remains
+	 * Create two rules allowing access to the same investigation and ensure
+	 * that only one instance is returned - i.e, no DISTINCT problem remains
 	 */
 	@Test
 	public void authz7() throws Exception {
@@ -648,10 +622,8 @@ public class TestWS {
 			session.clear();
 			create();
 
-			session.addRule(
-					null,
-					"Datafile <-> Dataset <-> Investigation <-> InvestigationUser <-> User [name = :user]",
-					"R");
+			session.addRule(null,
+					"Datafile <-> Dataset <-> Investigation <-> InvestigationUser <-> User [name = :user]", "R");
 			session.addRule(null, "Datafile <-> Dataset  [name = 'dfsin']", "R");
 
 			User piOne = new User();
@@ -668,40 +640,28 @@ public class TestWS {
 			iuOne.setRole("Principal Investigator");
 			iuOne.setId(session.create(iuOne));
 
-			WSession piOneSession = session.getSession("db", "username", "piOne", "password",
-					"piOne");
+			WSession piOneSession = session.getSession("db", "username", "piOne", "password", "piOne");
 
 			List<Object> freds = piOneSession.search("SELECT DISTINCT df FROM Datafile df");
 
 			assertEquals(6, freds.size());
 
-			assertEquals(51L, piOneSession.search("SELECT SUM(df.fileSize) from Datafile df")
-					.get(0));
-			assertEquals(40L,
-					piOneSession.search("SELECT SUM(DISTINCT df.fileSize) from Datafile df").get(0));
-			assertEquals(6L,
-					piOneSession.search("SELECT COUNT(df.fileSize) from Datafile df").get(0));
-			assertEquals(
-					5L,
-					piOneSession.search("SELECT COUNT(DISTINCT df.fileSize) from Datafile df").get(
-							0));
+			assertEquals(51L, piOneSession.search("SELECT SUM(df.fileSize) from Datafile df").get(0));
+			assertEquals(40L, piOneSession.search("SELECT SUM(DISTINCT df.fileSize) from Datafile df").get(0));
+			assertEquals(6L, piOneSession.search("SELECT COUNT(df.fileSize) from Datafile df").get(0));
+			assertEquals(5L, piOneSession.search("SELECT COUNT(DISTINCT df.fileSize) from Datafile df").get(0));
 			assertEquals(6L, piOneSession.search("SELECT COUNT(df) from Datafile df").get(0));
-			assertEquals(6L,
-					piOneSession.search("SELECT COUNT(DISTINCT df) from Datafile df").get(0));
-			assertEquals(17L, piOneSession.search("SELECT MAX(df.fileSize) from Datafile df")
-					.get(0));
-			assertEquals(17L,
-					piOneSession.search("SELECT MAX(DISTINCT df.fileSize) from Datafile df").get(0));
+			assertEquals(6L, piOneSession.search("SELECT COUNT(DISTINCT df) from Datafile df").get(0));
+			assertEquals(17L, piOneSession.search("SELECT MAX(df.fileSize) from Datafile df").get(0));
+			assertEquals(17L, piOneSession.search("SELECT MAX(DISTINCT df.fileSize) from Datafile df").get(0));
 			assertEquals(0L, piOneSession.search("SELECT MIN(df.fileSize) from Datafile df").get(0));
-			assertEquals(0L,
-					piOneSession.search("SELECT MIN(DISTINCT df.fileSize) from Datafile df").get(0));
+			assertEquals(0L, piOneSession.search("SELECT MIN(DISTINCT df.fileSize) from Datafile df").get(0));
 		} finally {
 			session.setAuthz();
 		}
 	}
 
-	private void checkInvestigationNames(String query, String... names)
-			throws IcatException_Exception {
+	private void checkInvestigationNames(String query, String... names) throws IcatException_Exception {
 		List<Object> objects = session.search(query);
 		assertEquals(names.length, objects.size());
 		int i = 0;
@@ -716,13 +676,11 @@ public class TestWS {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
-		Investigation inv = session.createInvestigation(facility, "A", "Not null",
-				investigationType);
+		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
 
 		Dataset wibble = session.createDataset("Wibble", dst, inv);
 
@@ -740,8 +698,8 @@ public class TestWS {
 		}
 		long start = System.currentTimeMillis();
 		session.createMany(dfs);
-		System.out.println("Time per datafile using createMany: "
-				+ (System.currentTimeMillis() - start) / (n + 0.) + "ms");
+		System.out.println("Time per datafile using createMany: " + (System.currentTimeMillis() - start) / (n + 0.)
+				+ "ms");
 
 		start = System.currentTimeMillis();
 
@@ -754,20 +712,21 @@ public class TestWS {
 			System.out.flush();
 		}
 
-		System.out.println("Time per datafile to retrieve: " + ds.getDatafiles().size()
-				+ " datafiles " + (System.currentTimeMillis() - start)
-				/ (ds.getDatafiles().size() * m) + "ms");
+		System.out.println("Time per datafile to retrieve: " + ds.getDatafiles().size() + " datafiles "
+				+ (System.currentTimeMillis() - start) / (ds.getDatafiles().size() * m) + "ms");
 
 	}
 
 	@Test
 	public void bigCreate() throws Exception {
 		session.clear();
+		session.delRule("notroot", "SampleType", "CRUD");
+		session.delRule("notroot", "Sample", "CRUD");
+		session.delRule("notroot", "PublicStep", "CRUD");
 
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
@@ -814,14 +773,12 @@ public class TestWS {
 
 		session.registerInvestigation(inv);
 
-		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter",
-				inv.getId());
+		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter", inv.getId());
 		assertEquals(0, inv.getSamples().size());
 
 		session.addRule("notroot", "Sample", "R");
 
-		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter",
-				inv.getId());
+		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter", inv.getId());
 		assertEquals(2, inv.getSamples().size());
 		for (Sample s : inv.getSamples()) {
 			assertEquals(0, s.getParameters().size());
@@ -829,8 +786,7 @@ public class TestWS {
 
 		session.addRule("notroot", "SampleParameter", "R");
 
-		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter",
-				inv.getId());
+		inv = (Investigation) session.get("Investigation INCLUDE  Sample, SampleParameter", inv.getId());
 		assertEquals(2, inv.getSamples().size());
 		for (Sample s : inv.getSamples()) {
 			if (s.getName().equals("S1")) {
@@ -848,8 +804,7 @@ public class TestWS {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 
 		List<Object> objects = session.search("User [name = 'db/root']");
 		User u = (User) objects.get(0);
@@ -864,60 +819,64 @@ public class TestWS {
 		i.setType(investigationType);
 		i.getInvestigationUsers().add(iu);
 		Long invid = session.create(i);
-		objects = session
-				.search("Investigation INCLUDE InvestigationUser, User [name='Frederick']");
+		objects = session.search("Investigation INCLUDE InvestigationUser, User [name='Frederick']");
 		assertEquals(1, objects.size());
 		i = (Investigation) objects.get(0);
 		assertEquals(1, i.getInvestigationUsers().size());
 		assertEquals("db/root", i.getInvestigationUsers().get(0).getUser().getName());
 		session.synchLucene();
 
-		List<Object> results = session.searchText("frederick AND great", 10, null);
-		assertEquals(1, results.size());
-		EntityBaseBean result = (EntityBaseBean) results.get(0);
-		assertEquals("Investigation", result.getClass().getSimpleName());
-		assertEquals(invid, result.getId());
-
-		results = session.searchText("frederick AND great", 10, "Investigation");
-		assertEquals(1, results.size());
-		result = (EntityBaseBean) results.get(0);
-		assertEquals("Investigation", result.getClass().getSimpleName());
-		assertEquals(invid, result.getId());
-
-		results = session.searchText("frederick AND wimp", 10, null);
-		assertEquals(0, results.size());
-
-		i = (Investigation) session.get("Investigation INCLUDE 1", invid);
-		i.setTitle("the Wimp");
-		session.update(i);
-		session.synchLucene();
-
-		results = session.searchText("frederick AND wimp", 10, null);
-		assertEquals(1, results.size());
-		result = (EntityBaseBean) results.get(0);
-		assertEquals("Investigation", result.getClass().getSimpleName());
-		assertEquals(invid, result.getId());
-
-		results = session.searchText("frederick AND wimp", 10, "Investigation");
-		assertEquals(1, results.size());
-		result = (EntityBaseBean) results.get(0);
-		assertEquals("Investigation", result.getClass().getSimpleName());
-		assertEquals(invid, result.getId());
-
-		results = session.searchText("frederick AND great", 10, null);
-		assertEquals(0, results.size());
-
-		session.delete(i);
-		session.synchLucene();
-
-		results = session.searchText("frederick AND wimp", 10, null);
-		assertEquals(0, results.size());
-
-		results = session.searchText("frederick AND wimp", 10, "Investigation");
-		assertEquals(0, results.size());
-
-		results = session.searchText("frederick AND great", 10, null);
-		assertEquals(0, results.size());
+		// TODO removed lucene tests
+		// List<Object> results = session.searchText("frederick AND great", 10,
+		// null);
+		// assertEquals(1, results.size());
+		// EntityBaseBean result = (EntityBaseBean) results.get(0);
+		// assertEquals("Investigation", result.getClass().getSimpleName());
+		// assertEquals(invid, result.getId());
+		//
+		// results = session.searchText("frederick AND great", 10,
+		// "Investigation");
+		// assertEquals(1, results.size());
+		// result = (EntityBaseBean) results.get(0);
+		// assertEquals("Investigation", result.getClass().getSimpleName());
+		// assertEquals(invid, result.getId());
+		//
+		// results = session.searchText("frederick AND wimp", 10, null);
+		// assertEquals(0, results.size());
+		//
+		// i = (Investigation) session.get("Investigation INCLUDE 1", invid);
+		// i.setTitle("the Wimp");
+		// session.update(i);
+		// session.synchLucene();
+		//
+		// results = session.searchText("frederick AND wimp", 10, null);
+		// assertEquals(1, results.size());
+		// result = (EntityBaseBean) results.get(0);
+		// assertEquals("Investigation", result.getClass().getSimpleName());
+		// assertEquals(invid, result.getId());
+		//
+		// results = session.searchText("frederick AND wimp", 10,
+		// "Investigation");
+		// assertEquals(1, results.size());
+		// result = (EntityBaseBean) results.get(0);
+		// assertEquals("Investigation", result.getClass().getSimpleName());
+		// assertEquals(invid, result.getId());
+		//
+		// results = session.searchText("frederick AND great", 10, null);
+		// assertEquals(0, results.size());
+		//
+		// session.delete(i);
+		// session.synchLucene();
+		//
+		// results = session.searchText("frederick AND wimp", 10, null);
+		// assertEquals(0, results.size());
+		//
+		// results = session.searchText("frederick AND wimp", 10,
+		// "Investigation");
+		// assertEquals(0, results.size());
+		//
+		// results = session.searchText("frederick AND great", 10, null);
+		// assertEquals(0, results.size());
 	}
 
 	@Test
@@ -1036,8 +995,7 @@ public class TestWS {
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertTrue(ue.getMessage().startsWith(
-					"InvestigationType exists with name = 'Two', facility = 'id:"));
+			assertTrue(ue.getMessage().startsWith("InvestigationType exists with name = 'Two', facility = 'id:"));
 			assertEquals(3, ue.getOffset());
 		}
 	}
@@ -1049,8 +1007,7 @@ public class TestWS {
 		try {
 			session.clear();
 
-			WSession piOneSession = session.getSession("db", "username", "piOne", "password",
-					"piOne");
+			WSession piOneSession = session.getSession("db", "username", "piOne", "password", "piOne");
 
 			Facility facility = session.createFacility("Test Facility", 90);
 
@@ -1060,18 +1017,14 @@ public class TestWS {
 			sampleType.setMolecularFormula("Someformula");
 			session.create(sampleType);
 
-			InvestigationType investigationType = session.createInvestigationType(facility,
-					"TestExperiment");
+			InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 
 			DatasetType dst = session.createDatasetType(facility, "GQ");
 
-			Investigation inv = session.createInvestigation(facility, "A", "Not null",
-					investigationType);
+			Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
 
-			session.addRule(null, "Investigation <-> InvestigationUser <-> User [name = :user]",
-					"R");
-			session.addRule(null,
-					"Dataset <-> Investigation <-> InvestigationUser <-> User [name = :user]", "R");
+			session.addRule(null, "Investigation <-> InvestigationUser <-> User [name = :user]", "R");
+			session.addRule(null, "Dataset <-> Investigation <-> InvestigationUser <-> User [name = :user]", "R");
 
 			User piOne = new User();
 			piOne.setName("db/piOne");
@@ -1123,24 +1076,20 @@ public class TestWS {
 				session.addRule(null, "SELECT x FROM " + t + " x", "R");
 			}
 
-			session.addRule(null,
-					"Dataset <-> Investigation <-> InvestigationGroup [role='writer'] "
-							+ "<-> Grouping <-> UserGroup <-> User [name=:user]", "CRUD");
+			session.addRule(null, "Dataset <-> Investigation <-> InvestigationGroup [role='writer'] "
+					+ "<-> Grouping <-> UserGroup <-> User [name=:user]", "CRUD");
 
 			session.addRule(null, "Dataset <-> Investigation <-> InvestigationGroup <-> Grouping "
 					+ "<-> UserGroup <-> User [name=:user]", "R");
 
-			session.addRule(null,
-					" Investigation <-> InvestigationGroup <-> Grouping <-> UserGroup "
-							+ "<-> User [name=:user]", "R");
+			session.addRule(null, " Investigation <-> InvestigationGroup <-> Grouping <-> UserGroup "
+					+ "<-> User [name=:user]", "R");
 
 			Facility facility = session.createFacility("Test Facility", 90);
 
-			InvestigationType investigationType = session.createInvestigationType(facility,
-					"TestExperiment");
+			InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 
-			Investigation invA = session.createInvestigation(facility, "A", "Not null",
-					investigationType);
+			Investigation invA = session.createInvestigation(facility, "A", "Not null", investigationType);
 
 			DatasetType dst = session.createDatasetType(facility, "GQ");
 
@@ -1152,22 +1101,18 @@ public class TestWS {
 
 			WSession aSession = session.getSession("db", "username", "piOne", "password", "piOne");
 
-			Long invId = ((Investigation) aSession.search("Investigation [name='A']").get(0))
-					.getId();
+			Long invId = ((Investigation) aSession.search("Investigation [name='A']").get(0)).getId();
 			System.out.println(invId);
 
-			List<Object> dss = aSession
-					.search("Dataset INCLUDE Investigation [name='DS1' AND investigation.id = "
-							+ invId + "]");
+			List<Object> dss = aSession.search("Dataset INCLUDE Investigation [name='DS1' AND investigation.id = "
+					+ invId + "]");
 			assertEquals(1, dss.size());
 			Investigation inv = ((Dataset) dss.get(0)).getInvestigation();
 			assertNotNull(inv);
 			assertEquals(invId, inv.getId());
 
 			aSession = session.getSession("db", "username", "CIC", "password", "password");
-			dss = aSession
-					.search("Dataset INCLUDE Investigation [name='DS1' AND investigation.id = "
-							+ invId + "]");
+			dss = aSession.search("Dataset INCLUDE Investigation [name='DS1' AND investigation.id = " + invId + "]");
 			assertEquals(1, dss.size());
 			inv = ((Dataset) dss.get(0)).getInvestigation();
 			assertNotNull(inv);
@@ -1187,8 +1132,7 @@ public class TestWS {
 
 		assertEquals("Wibble", ((Dataset) session.get("Dataset", dsId)).getName());
 
-		Dataset ds = (Dataset) session.get("Dataset ds INCLUDE ds.datafiles df, df.datafileFormat",
-				dsId);
+		Dataset ds = (Dataset) session.get("Dataset ds INCLUDE ds.datafiles df, df.datafileFormat", dsId);
 		assertEquals("Wibble", ds.getName());
 		assertEquals(2, ds.getDatafiles().size());
 		for (Datafile df : ds.getDatafiles()) {
@@ -1237,10 +1181,8 @@ public class TestWS {
 	public void inapplicableParameterType() throws Exception {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
-		Investigation inv = session.createInvestigation(facility, "A", "Not null",
-				investigationType);
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
+		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
 
 		ParameterType pts = new ParameterType();
 		pts.setName("UselessString");
@@ -1260,8 +1202,7 @@ public class TestWS {
 			fail("No throw");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.VALIDATION, e.getFaultInfo().getType());
-			assertEquals("Parameter of type UselessString is not applicable to an Investigation",
-					e.getMessage());
+			assertEquals("Parameter of type UselessString is not applicable to an Investigation", e.getMessage());
 		}
 	}
 
@@ -1298,8 +1239,7 @@ public class TestWS {
 			IcatException ue = e.getFaultInfo();
 			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
-			assertEquals(
-					"Expected token from types [ENTSEP] at token , in INCLUDE 1 < , > Datafile [ ",
+			assertEquals("Expected token from types [ENTSEP] at token , in INCLUDE 1 < , > Datafile [ ",
 					ue.getMessage());
 		}
 
@@ -1310,8 +1250,7 @@ public class TestWS {
 			IcatException ue = e.getFaultInfo();
 			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
-			assertEquals("Expected token from types [NAME] at token 1 in Datafile , < 1 > [ id ",
-					ue.getMessage());
+			assertEquals("Expected token from types [NAME] at token 1 in Datafile , < 1 > [ id ", ue.getMessage());
 		}
 
 		results = session.search("Dataset INCLUDE 1 [id = " + dsid + "]");
@@ -1338,8 +1277,7 @@ public class TestWS {
 		assertEquals("Params", 1, ds.getParameters().size());
 		assertNull("No inv", ds.getInvestigation());
 
-		results = session.search("Dataset INCLUDE Datafile, DatasetParameter, Investigation [id = "
-				+ dsid + "]");
+		results = session.search("Dataset INCLUDE Datafile, DatasetParameter, Investigation [id = " + dsid + "]");
 		assertEquals("Count", 1, results.size());
 		ds = (Dataset) results.get(0);
 		assertEquals("Value", dsid, ds.getId());
@@ -1404,8 +1342,7 @@ public class TestWS {
 		}
 
 		try {
-			results = session
-					.search("SELECT inv FROM Investigation inv INCLUDE 1, inv.investigationInstruments");
+			results = session.search("SELECT inv FROM Investigation inv INCLUDE 1, inv.investigationInstruments");
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
@@ -1515,8 +1452,7 @@ public class TestWS {
 		Topic topic = (Topic) context.lookup("jms/ICAT/Topic");
 
 		TopicConnection topicConnection = topicConnectionFactory.createTopicConnection();
-		javax.jms.Session jsession = topicConnection.createSession(false,
-				javax.jms.Session.AUTO_ACKNOWLEDGE);
+		javax.jms.Session jsession = topicConnection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
 		MessageConsumer consumer = jsession.createConsumer(topic);
 		Listener topicListener = new Listener();
 		consumer.setMessageListener(topicListener);
@@ -1580,10 +1516,8 @@ public class TestWS {
 	public void numericParameterRanges() throws Exception {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
-		Investigation inv = session.createInvestigation(facility, "A", "Not null",
-				investigationType);
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
+		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
 
 		ParameterType ptn = new ParameterType();
 		ptn.setName("TestNumeric");
@@ -1684,8 +1618,7 @@ public class TestWS {
 
 		Long invId = (Long) session.search("Investigation.id").get(0);
 
-		List<?> results = session.search("Dataset.id "
-				+ "<-> DatasetParameter[type.name = 'TIMESTAMP'] "
+		List<?> results = session.search("Dataset.id " + "<-> DatasetParameter[type.name = 'TIMESTAMP'] "
 				+ "<-> Investigation[name <> 12]");
 		assertEquals("Count", 1, results.size());
 
@@ -1694,14 +1627,13 @@ public class TestWS {
 
 		String query = "Dataset.id  ORDER BY id [type.name IN :types] <-> Investigation[id BETWEEN :lower AND :upper]";
 
-		query = query.replace(":lower", Long.toString(invId))
-				.replace(":upper", Long.toString(invId)).replace(":types", "('GS', 'GQ')");
+		query = query.replace(":lower", Long.toString(invId)).replace(":upper", Long.toString(invId))
+				.replace(":types", "('GS', 'GQ')");
 		results = session.search(query);
 		assertEquals("Count", 4, results.size());
 
 		query = "Dataset.id ORDER BY startDate [type.name IN :types AND name >= :lower AND name <= :upper]";
-		query = query.replace(":lower", "'Wabble'").replace(":upper", "'Wobble'")
-				.replace(":types", "('GS', 'GQ')");
+		query = query.replace(":lower", "'Wabble'").replace(":upper", "'Wobble'").replace(":types", "('GS', 'GQ')");
 		results = session.search(query);
 		assertEquals("Count", 2, results.size());
 
@@ -1741,12 +1673,10 @@ public class TestWS {
 		results = session.search("DISTINCT ParameterType.valueType");
 		ParameterValueType pvt = (ParameterValueType) results.get(0);
 
-		results = session.search("ParameterType [facility.id=" + facility.getId()
-				+ " AND valueType=" + pvt + "]");
+		results = session.search("ParameterType [facility.id=" + facility.getId() + " AND valueType=" + pvt + "]");
 		assertEquals(1, results.size());
 
-		results = session.search("ParameterType [facility.id=" + facility.getId() + " AND " + pvt
-				+ "= valueType]");
+		results = session.search("ParameterType [facility.id=" + facility.getId() + " AND " + pvt + "= valueType]");
 		assertEquals(1, results.size());
 
 		results = session.search("Dataset [complete = TRUE]");
@@ -1760,13 +1690,11 @@ public class TestWS {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
-		Investigation inv = session.createInvestigation(facility, "A", "Not null",
-				investigationType);
+		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
 
 		Dataset wibble = session.createDataset("Wibble", dst, inv);
 
@@ -1777,8 +1705,7 @@ public class TestWS {
 		for (int i = 0; i < n; i++) {
 			session.createDatafile("fred" + i, dfmt, wibble, 0L);
 		}
-		System.out.println("Time per datafile to write: " + (System.currentTimeMillis() - start)
-				/ (n + 0.) + "ms");
+		System.out.println("Time per datafile to write: " + (System.currentTimeMillis() - start) / (n + 0.) + "ms");
 		List<EntityBaseBean> dfs = new ArrayList<EntityBaseBean>();
 		for (int i = 0; i < n; i++) {
 			final Datafile datafile = new Datafile();
@@ -1789,8 +1716,8 @@ public class TestWS {
 		}
 		start = System.currentTimeMillis();
 		session.createMany(dfs);
-		System.out.println("Time per datafile using createMany: "
-				+ (System.currentTimeMillis() - start) / (n + 0.) + "ms");
+		System.out.println("Time per datafile using createMany: " + (System.currentTimeMillis() - start) / (n + 0.)
+				+ "ms");
 
 		start = System.currentTimeMillis();
 		List<Object> results = null;
@@ -1798,8 +1725,7 @@ public class TestWS {
 		// int m = 10000000;
 		int m = 1;
 		for (int i = 0; i < m; i++) {
-			results = session
-					.search("SELECT df FROM Datafile df INCLUDE df.datafileFormat, df.dataset");
+			results = session.search("SELECT df FROM Datafile df INCLUDE df.datafileFormat, df.dataset");
 		}
 
 		System.out.println("Time per datafile to retrieve: " + results.size() + " datafiles "
@@ -1807,9 +1733,8 @@ public class TestWS {
 
 		start = System.currentTimeMillis();
 		results = session.search("SELECT df FROM Datafile df");
-		System.out.println("Time per datafile to retrieve no includes: " + results.size()
-				+ " datafiles " + (System.currentTimeMillis() - start) / (results.size() + 0.)
-				+ "ms");
+		System.out.println("Time per datafile to retrieve no includes: " + results.size() + " datafiles "
+				+ (System.currentTimeMillis() - start) / (results.size() + 0.) + "ms");
 
 		start = System.currentTimeMillis();
 		@SuppressWarnings("unused")
@@ -1827,9 +1752,8 @@ public class TestWS {
 
 		start = System.currentTimeMillis();
 		session.deleteMany(dfs);
-		System.out.println("Time per datafile to delete: " + results.size()
-				+ " datafiles with deleteMany: " + (System.currentTimeMillis() - start)
-				/ (results.size() + 0.) + "ms");
+		System.out.println("Time per datafile to delete: " + results.size() + " datafiles with deleteMany: "
+				+ (System.currentTimeMillis() - start) / (results.size() + 0.) + "ms");
 	}
 
 	@Test
@@ -1855,24 +1779,19 @@ public class TestWS {
 			min = Math.min(ds.getId(), min);
 		}
 
-		assertEquals(0,
-				session.search("SELECT ds FROM Dataset ds WHERE ds.name = 'dfsin' LIMIT 1,10")
-						.size());
+		assertEquals(0, session.search("SELECT ds FROM Dataset ds WHERE ds.name = 'dfsin' LIMIT 1,10").size());
 
-		// TODO This next test fails on MySQL as the limit is not sent to the generated SQL
+		// TODO This next test fails on MySQL as the limit is not sent to the
+		// generated SQL
 		// assertEquals(0,
-		// session.search("SELECT ds FROM Dataset ds WHERE ds.id = " + max + " LIMIT 1,10")
+		// session.search("SELECT ds FROM Dataset ds WHERE ds.id = " + max +
+		// " LIMIT 1,10")
 		// .size());
 
-		assertEquals(
-				0,
-				session.search("SELECT ds FROM Dataset ds WHERE ds.id IN ( " + max + ") LIMIT 1,10")
-						.size());
+		assertEquals(0, session.search("SELECT ds FROM Dataset ds WHERE ds.id IN ( " + max + ") LIMIT 1,10").size());
 
-		assertEquals(min,
-				session.search("SELECT MIN(ds.id) FROM  Dataset ds WHERE ds.id > 0").get(0));
-		assertEquals(max,
-				session.search("SELECT MAX(ds.id) FROM  Dataset ds WHERE ds.id > 0").get(0));
+		assertEquals(min, session.search("SELECT MIN(ds.id) FROM  Dataset ds WHERE ds.id > 0").get(0));
+		assertEquals(max, session.search("SELECT MAX(ds.id) FROM  Dataset ds WHERE ds.id > 0").get(0));
 
 		Long invId = (Long) session.search("SELECT inv.id FROM Investigation inv").get(0);
 
@@ -1886,16 +1805,14 @@ public class TestWS {
 		assertEquals("Count", 1, results.size());
 
 		String query = "SELECT ds.id FROM Dataset ds JOIN ds.investigation inv "
-				+ "WHERE ds.type.name IN :types AND inv.id BETWEEN :lower AND :upper "
-				+ "ORDER BY ds.id";
-		query = query.replace(":lower", Long.toString(invId))
-				.replace(":upper", Long.toString(invId)).replace(":types", "('GS', 'GQ')");
+				+ "WHERE ds.type.name IN :types AND inv.id BETWEEN :lower AND :upper " + "ORDER BY ds.id";
+		query = query.replace(":lower", Long.toString(invId)).replace(":upper", Long.toString(invId))
+				.replace(":types", "('GS', 'GQ')");
 		results = session.search(query);
 		assertEquals("Count", 4, results.size());
 
 		query = "SELECT ds.id FROM Dataset ds WHERE ds.type.name IN :types AND ds.name >= :lower AND ds.name <= :upper ORDER BY ds.startDate";
-		query = query.replace(":lower", "'Wabble'").replace(":upper", "'Wobble'")
-				.replace(":types", "('GS', 'GQ')");
+		query = query.replace(":lower", "'Wabble'").replace(":upper", "'Wobble'").replace(":types", "('GS', 'GQ')");
 		results = session.search(query);
 		assertEquals("Count", 2, results.size());
 
@@ -1929,15 +1846,13 @@ public class TestWS {
 		assertEquals("Result", "wib1", results.get(0));
 		assertEquals("Result", "wib2", results.get(1));
 
-		results = session
-				.search("SELECT ds.name from Dataset ds JOIN ds.datafiles df1 JOIN ds.datafiles df2 "
-						+ "WHERE df1.name = 'fred' AND df2.name = 'bill'");
+		results = session.search("SELECT ds.name from Dataset ds JOIN ds.datafiles df1 JOIN ds.datafiles df2 "
+				+ "WHERE df1.name = 'fred' AND df2.name = 'bill'");
 		assertEquals("Count", 1, results.size());
 		assertEquals("Result", "dfsin", results.get(0));
 
-		results = session
-				.search("SELECT ds.name from Dataset ds JOIN ds.datafiles df1 JOIN ds.datafiles df2 "
-						+ "WHERE LOWER(df1.name) = 'fred' AND df2.name = LOWER('bill')");
+		results = session.search("SELECT ds.name from Dataset ds JOIN ds.datafiles df1 JOIN ds.datafiles df2 "
+				+ "WHERE LOWER(df1.name) = 'fred' AND df2.name = LOWER('bill')");
 		assertEquals("Count", 1, results.size());
 		assertEquals("Result", "dfsin", results.get(0));
 
@@ -1947,13 +1862,12 @@ public class TestWS {
 		results = session.search("SELECT DISTINCT pt.valueType FROM ParameterType pt");
 		ParameterValueType pvt = (ParameterValueType) results.get(0);
 
-		results = session.search("SELECT pt FROM ParameterType pt WHERE pt.facility.id="
-				+ facility.getId() + " AND pt.valueType=" + pvt.getClass().getName() + "." + pvt);
+		results = session.search("SELECT pt FROM ParameterType pt WHERE pt.facility.id=" + facility.getId()
+				+ " AND pt.valueType=" + pvt.getClass().getName() + "." + pvt);
 		assertEquals(1, results.size());
 
-		results = session.search("SELECT pt FROM ParameterType pt WHERE pt.facility.id="
-				+ facility.getId() + " AND " + pvt.getClass().getName() + "." + pvt
-				+ "= pt.valueType");
+		results = session.search("SELECT pt FROM ParameterType pt WHERE pt.facility.id=" + facility.getId() + " AND "
+				+ pvt.getClass().getName() + "." + pvt + "= pt.valueType");
 		assertEquals(1, results.size());
 
 		results = session.search("SELECT ds FROM Dataset ds WHERE ds.complete = TRUE");
@@ -1961,19 +1875,21 @@ public class TestWS {
 		results = session.search("SELECT ds FROM Dataset ds WHERE ds.complete = FALSE");
 		assertEquals(4, results.size());
 
-		// Bad query - TODO this should throw an exception as datafile is not an attribute of
+		// Bad query - TODO this should throw an exception as datafile is not an
+		// attribute of
 		// Dataset however the bad JPQL is not spotted.
 		/*
-		 * try { results = session
-		 * .search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafile df) = 2");
-		 * fail("Should have thrown an exception"); } catch (IcatException_Exception e) {
-		 * assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+		 * try { results = session .search(
+		 * "SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafile df) = 2"
+		 * ); fail("Should have thrown an exception"); } catch
+		 * (IcatException_Exception e) {
+		 * assertEquals(IcatExceptionType.BAD_PARAMETER,
+		 * e.getFaultInfo().getType());
 		 * assertTrue(e.getMessage().indexOf("EntityManager") > 0); }
 		 */
 
 		// Nested select
-		results = session
-				.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafiles df) = 2");
+		results = session.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafiles df) = 2");
 		assertEquals(2, results.size());
 
 		results = session
@@ -1982,18 +1898,27 @@ public class TestWS {
 						+ "AND st.id = (SELECT st2.id FROM SampleType st2 JOIN st2.samples s2 JOIN s2.investigation i2 WHERE i2.id=i.id) "
 						+ "ORDER BY st.name");
 
+		assertEquals(3, session.search("SELECT i FROM Investigation i").size());
+		assertEquals(3, session.search("SELECT i.facility FROM Investigation i").size());
+		assertEquals(1, session.search("SELECT DISTINCT i.facility FROM Investigation i").size());
+
+		/* Should be 3 but WS handles nulls badly */
+		assertEquals(0, session.search("SELECT i.facility.url FROM Investigation i").size());
+
+		assertEquals(3L, session.search("SELECT COUNT(i) FROM Investigation i").get(0));
+		assertEquals(3L, session.search("SELECT COUNT(i.facility) FROM Investigation i").get(0));
+		assertEquals(1L, session.search("SELECT COUNT(DISTINCT i.facility) FROM Investigation i").get(0));
+		assertEquals(0L, session.search("SELECT COUNT(i.facility.url) FROM Investigation i").get(0));
+
 	}
 
 	@Test
 	public void duplicateIds() throws Exception {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
-		Investigation inv1 = session.createInvestigation(facility, "inv1", "Not null",
-				investigationType);
-		Investigation inv2 = session.createInvestigation(facility, "inv2", "Not null",
-				investigationType);
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
+		Investigation inv1 = session.createInvestigation(facility, "inv1", "Not null", investigationType);
+		Investigation inv2 = session.createInvestigation(facility, "inv2", "Not null", investigationType);
 		DatasetType dst1 = session.createDatasetType(facility, "type1");
 		DatasetType dst2 = session.createDatasetType(facility, "type2");
 		session.createDataset("ds", dst1, inv1);
@@ -2008,10 +1933,8 @@ public class TestWS {
 	public void stringParameterRanges() throws Exception {
 		session.clear();
 		Facility facility = session.createFacility("Test Facility", 90);
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
-		Investigation inv = session.createInvestigation(facility, "A", "Not null",
-				investigationType);
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
+		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
 
 		ParameterType pts = new ParameterType();
 		pts.setName("TestString");
@@ -2183,13 +2106,11 @@ public class TestWS {
 
 		Facility facility = session.createFacility("Test Facility", 90);
 
-		InvestigationType investigationType = session.createInvestigationType(facility,
-				"TestExperiment");
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
 
 		DatasetType dst = session.createDatasetType(facility, "GQ");
 
-		Investigation inv = session.createInvestigation(facility, "A", "Not null",
-				investigationType);
+		Investigation inv = session.createInvestigation(facility, "A", "Not null", investigationType);
 
 		Dataset wibble = session.createDataset("Wibble", dst, inv);
 		Dataset wobble = session.createDataset("Wobble", dst, inv);

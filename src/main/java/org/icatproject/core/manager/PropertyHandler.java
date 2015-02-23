@@ -105,7 +105,7 @@ public class PropertyHandler {
 
 	private String luceneHost;
 	private Integer lucenePort;
-	private long maxEntities;
+	private int maxEntities;
 	private int maxIdsInQuery;
 	private long importCacheSize;
 	private long exportCacheSize;
@@ -326,18 +326,37 @@ public class PropertyHandler {
 		}
 
 		/* maxEntities, importCacheSize, exportCacheSize, maxIdsInQuery */
-		maxEntities = getPostiveLong(props, "maxEntities");
-		importCacheSize = getPostiveLong(props, "importCacheSize");
-		exportCacheSize = getPostiveLong(props, "exportCacheSize");
-		maxIdsInQuery = (int) getPostiveLong(props, "maxIdsInQuery");
+		maxEntities = getPositiveInt(props, "maxEntities");
+		importCacheSize = getPositiveLong(props, "importCacheSize");
+		exportCacheSize = getPositiveLong(props, "exportCacheSize");
+		maxIdsInQuery =  getPositiveInt(props, "maxIdsInQuery");
 	}
 
-	private long getPostiveLong(Properties props, String name) {
+	private long getPositiveLong(Properties props, String name) {
 		String s = props.getProperty(name);
 		long result = 0;
 		if (s != null) {
 			try {
 				result = Long.parseLong(s);
+			} catch (NumberFormatException e) {
+				abend("Value of '" + name + "'" + s + "' is not a long greater than 0");
+			}
+			if (result <= 0) {
+				abend("Value of '" + name + "'" + s + "' is not a long greater than 0");
+			}
+		} else {
+			abend("Property '" + name + "' must be set");
+		}
+		formattedProps.add(name + " " + maxEntities);
+		return result;
+	}
+	
+	private int getPositiveInt(Properties props, String name) {
+		String s = props.getProperty(name);
+		int result = 0;
+		if (s != null) {
+			try {
+				result = Integer.parseInt(s);
 			} catch (NumberFormatException e) {
 				abend("Value of '" + name + "'" + s + "' is not an integer greater than 0");
 			}
@@ -388,7 +407,7 @@ public class PropertyHandler {
 		return lucenePort;
 	}
 
-	public long getMaxEntities() {
+	public int getMaxEntities() {
 		return maxEntities;
 	}
 
