@@ -73,6 +73,7 @@ public class SearchQuery {
 		 * aggregate functions.
 		 */
 		this.gateKeeper = gateKeeper;
+		//TODO use rootUser as a short cut to evaluate query directly
 		boolean rootUser = this.gateKeeper.getRootUserNames().contains(userId);
 		input.consume(Token.Type.SELECT);
 		StringBuilder sb = new StringBuilder("SELECT ");
