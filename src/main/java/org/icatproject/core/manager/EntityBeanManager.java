@@ -157,6 +157,7 @@ public class EntityBeanManager {
 		log = !logRequests.isEmpty();
 		notificationRequests = propertyHandler.getNotificationRequests();
 		luceneActive = lucene.getActive();
+		luceneActive = false; // TODO get rid of this line in next release
 		maxEntities = propertyHandler.getMaxEntities();
 		exportCacheSize = propertyHandler.getImportCacheSize();
 		rootUserNames = propertyHandler.getRootUserNames();
@@ -1003,15 +1004,10 @@ public class EntityBeanManager {
 			Class<?> ftype = null;
 			Class<? extends EntityBaseBean> objc = q.getBean();
 			for (String name : relativePathToReturn.split("\\.")) {
-				Method method = ei.getGetters(objc).get(name);
+				Method method = ei.getGettersFromName(objc).get(name);
 				if (method == null) {
-					String prop = Character.toUpperCase(name.charAt(0)) + name.substring(1);
-					try {
-						method = objc.getMethod("get" + prop);
-					} catch (Exception e) {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER, objc.getSimpleName()
-								+ " does not contain " + name);
-					}
+					throw new IcatException(IcatExceptionType.BAD_PARAMETER, objc.getSimpleName()
+							+ " does not contain " + name);
 				}
 				methods.add(method);
 				ftype = method.getReturnType();

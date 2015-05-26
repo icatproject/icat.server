@@ -58,8 +58,7 @@ public class WSession {
 		String url = System.getProperty("serverUrl");
 		System.out.println("Using ICAT service at " + url);
 		final URL icatUrl = new URL(url + "/ICATService/ICAT?wsdl");
-		final ICATService icatService = new ICATService(icatUrl, new QName(
-				"http://icatproject.org", "ICATService"));
+		final ICATService icatService = new ICATService(icatUrl, new QName("http://icatproject.org", "ICATService"));
 		this.icat = icatService.getICATPort();
 		this.rootsessionId = login("db", "username", "root", "password", "password");
 		this.sessionId = login("db", "username", "notroot", "password", "password");
@@ -93,8 +92,7 @@ public class WSession {
 	public void addRule(String groupName, String what, String crudFlags) throws Exception {
 		Rule rule = new Rule();
 		if (groupName != null) {
-			Grouping g = (Grouping) icat.search(rootsessionId,
-					"Grouping [name= '" + groupName + "']").get(0);
+			Grouping g = (Grouping) icat.search(rootsessionId, "Grouping [name= '" + groupName + "']").get(0);
 			rule.setGrouping(g);
 		}
 		rule.setWhat(what);
@@ -106,25 +104,23 @@ public class WSession {
 		what = what.replace("'", "''");
 		List<Object> rules = null;
 		if (groupName == null) {
-			rules = search("select r FROM Rule r WHERE r.what = '" + what + "' AND r.crudFlags = '"
-					+ crudFlags + "' AND r.grouping IS NULL");
+			rules = search("select r FROM Rule r WHERE r.what = '" + what + "' AND r.crudFlags = '" + crudFlags
+					+ "' AND r.grouping IS NULL");
 		} else {
-			rules = search("Rule [what = '" + what + "' and crudFlags = '" + crudFlags
-					+ "'] <-> Grouping [name= '" + groupName + "']");
+			rules = search("Rule [what = '" + what + "' and crudFlags = '" + crudFlags + "'] <-> Grouping [name= '"
+					+ groupName + "']");
 		}
 		if (rules.size() == 1) {
 			delete((EntityBaseBean) rules.get(0));
 		} else {
-			throw new Exception(rules.size() + " rules match " + groupName + ", " + what + ", "
-					+ crudFlags);
+			throw new Exception(rules.size() + " rules match " + groupName + ", " + what + ", " + crudFlags);
 		}
 	}
 
 	public void addUserGroupMember(String groupName, String userName) throws Exception {
 		Grouping grouping = null;
 		if (groupName != null) {
-			List<Object> groupings = icat.search(rootsessionId, "Grouping [name= '" + groupName
-					+ "']");
+			List<Object> groupings = icat.search(rootsessionId, "Grouping [name= '" + groupName + "']");
 			if (groupings.isEmpty()) {
 				grouping = new Grouping();
 				grouping.setName(groupName);
@@ -168,8 +164,7 @@ public class WSession {
 				} else {
 					sb.append(" and");
 				}
-				sb.append(" " + lo.size() + " object" + (lo.size() == 1 ? "" : "s") + " of type "
-						+ type);
+				sb.append(" " + lo.size() + " object" + (lo.size() == 1 ? "" : "s") + " of type " + type);
 				for (Object o : lo) {
 					toDelete.add((EntityBaseBean) o);
 				}
@@ -185,8 +180,7 @@ public class WSession {
 		deleteAll(Arrays.asList("Rule", "UserGroup", "User", "Grouping", "PublicStep"));
 	}
 
-	public Application createApplication(Facility facility, String name, String version)
-			throws IcatException_Exception {
+	public Application createApplication(Facility facility, String name, String version) throws IcatException_Exception {
 		final Application application = new Application();
 		application.setFacility(facility);
 		application.setName(name);
@@ -206,8 +200,7 @@ public class WSession {
 		return datafile;
 	}
 
-	public DatafileFormat createDatafileFormat(Facility facility, String name, String formatType)
-			throws Exception {
+	public DatafileFormat createDatafileFormat(Facility facility, String name, String formatType) throws Exception {
 		final DatafileFormat dff = new DatafileFormat();
 		dff.setName(name);
 		dff.setVersion("1");
@@ -217,8 +210,7 @@ public class WSession {
 		return dff;
 	}
 
-	public Dataset createDataset(String name, DatasetType type, Investigation inv)
-			throws IcatException_Exception {
+	public Dataset createDataset(String name, DatasetType type, Investigation inv) throws IcatException_Exception {
 		final Dataset dataset = new Dataset();
 		dataset.setName(name);
 		dataset.setType(type);
@@ -256,8 +248,8 @@ public class WSession {
 		return f;
 	}
 
-	public Investigation createInvestigation(Facility facility, String name, String title,
-			InvestigationType invType) throws Exception {
+	public Investigation createInvestigation(Facility facility, String name, String title, InvestigationType invType)
+			throws Exception {
 		final Investigation i = new Investigation();
 		i.setFacility(facility);
 		i.setName(name);
@@ -268,8 +260,7 @@ public class WSession {
 		return i;
 	}
 
-	public InvestigationType createInvestigationType(Facility facility, String name)
-			throws Exception {
+	public InvestigationType createInvestigationType(Facility facility, String name) throws Exception {
 		final InvestigationType type = new InvestigationType();
 		type.setFacility(facility);
 		type.setName(name);
@@ -396,18 +387,17 @@ public class WSession {
 		icat.logout(sessionId);
 	}
 
-	public List<Object> searchText(String query, int maxCount, String entity)
-			throws IcatException_Exception {
-		return this.icat.searchText(sessionId, query, maxCount, entity);
-	}
+	/*
+	 * TODO in 4.6.0 public List<Object> searchText(String query, int maxCount,
+	 * String entity) throws IcatException_Exception { return
+	 * this.icat.searchText(sessionId, query, maxCount, entity); }
+	 * 
+	 * // This assumes that the lucene.commitSeconds is set to 1 for testing //
+	 * purposes public void synchLucene() throws InterruptedException {
+	 * Thread.sleep(2000); }
+	 */
 
-	// This assumes that the lucene.commitSeconds is set to 1 for testing purposes
-	public void synchLucene() throws InterruptedException {
-		Thread.sleep(2000);
-	}
-
-	public DataCollection createDataCollection(EntityBaseBean... beans)
-			throws IcatException_Exception {
+	public DataCollection createDataCollection(EntityBaseBean... beans) throws IcatException_Exception {
 		DataCollection dataCollection = new DataCollection();
 		for (EntityBaseBean bean : beans) {
 			if (bean instanceof Datafile) {
@@ -430,25 +420,27 @@ public class WSession {
 		return icat.getProperties(rootsessionId);
 	}
 
-	public void luceneClear() throws IcatException_Exception {
-		icat.luceneClear(rootsessionId);
-	}
+	// TODO bring back in 4.6
+	// public void luceneClear() throws IcatException_Exception {
+	// icat.luceneClear(rootsessionId);
+	// }
+	//
+	// public void luceneCommit() throws IcatException_Exception {
+	// icat.luceneCommit(rootsessionId);
+	// }
+	//
+	// public void lucenePopulate(String entityName) throws
+	// IcatException_Exception {
+	// icat.lucenePopulate(rootsessionId, entityName);
+	// }
+	//
+	// public List<String> luceneSearch(String query, int maxCount, String
+	// entityName)
+	// throws IcatException_Exception {
+	// return icat.luceneSearch(rootsessionId, query, maxCount, entityName);
+	// }
 
-	public void luceneCommit() throws IcatException_Exception {
-		icat.luceneCommit(rootsessionId);
-	}
-
-	public void lucenePopulate(String entityName) throws IcatException_Exception {
-		icat.lucenePopulate(rootsessionId, entityName);
-	}
-
-	public List<String> luceneSearch(String query, int maxCount, String entityName)
-			throws IcatException_Exception {
-		return icat.luceneSearch(rootsessionId, query, maxCount, entityName);
-	}
-
-	public Instrument createInstrument(Facility facility, String name)
-			throws IcatException_Exception {
+	public Instrument createInstrument(Facility facility, String name) throws IcatException_Exception {
 		Instrument ins = new Instrument();
 		ins.setFacility(facility);
 		ins.setName(name);
@@ -465,8 +457,7 @@ public class WSession {
 		return ii;
 	}
 
-	public InstrumentScientist createInstrumentScientist(Instrument ins, User user)
-			throws IcatException_Exception {
+	public InstrumentScientist createInstrumentScientist(Instrument ins, User user) throws IcatException_Exception {
 		InstrumentScientist is = new InstrumentScientist();
 		is.setInstrument(ins);
 		is.setUser(user);
@@ -485,12 +476,13 @@ public class WSession {
 		return iu;
 	}
 
-	public List<String> luceneGetPopulating() throws IcatException_Exception {
-		return icat.luceneGetPopulating(rootsessionId);
-	}
+	// TODO restore in ICAT 4.6.0
+	// public List<String> luceneGetPopulating() throws IcatException_Exception
+	// {
+	// return icat.luceneGetPopulating(rootsessionId);
+	// }
 
-	public boolean isAccessAllowed(EntityBaseBean bean, AccessType aType)
-			throws IcatException_Exception {
+	public boolean isAccessAllowed(EntityBaseBean bean, AccessType aType) throws IcatException_Exception {
 		return icat.isAccessAllowed(sessionId, bean, aType);
 	}
 

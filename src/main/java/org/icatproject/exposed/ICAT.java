@@ -113,18 +113,16 @@ public class ICAT {
 	private void checkRoot(String sessionId) throws IcatException {
 		String userId = beanManager.getUserName(sessionId, manager);
 		if (!rootUserNames.contains(userId)) {
-			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES,
-					"user must be in rootUserNames");
+			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES, "user must be in rootUserNames");
 		}
 	}
 
 	@WebMethod
-	public long create(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
+	public long create(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "bean") EntityBaseBean bean)
+			throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			CreateResponse createResponse = beanManager.create(userId, bean, manager,
-					userTransaction, false);
+			CreateResponse createResponse = beanManager.create(userId, bean, manager, userTransaction, false);
 			transmitter.processMessage(createResponse.getNotificationMessage());
 			return createResponse.getPk();
 		} catch (IcatException e) {
@@ -141,8 +139,7 @@ public class ICAT {
 			@WebParam(name = "beans") List<EntityBaseBean> beans) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			List<CreateResponse> createResponses = beanManager.createMany(userId, beans, manager,
-					userTransaction);
+			List<CreateResponse> createResponses = beanManager.createMany(userId, beans, manager, userTransaction);
 			List<Long> lo = new ArrayList<Long>();
 			for (CreateResponse createResponse : createResponses) {
 				transmitter.processMessage(createResponse.getNotificationMessage());
@@ -159,8 +156,8 @@ public class ICAT {
 	}
 
 	@WebMethod
-	public void delete(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
+	public void delete(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "bean") EntityBaseBean bean)
+			throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
 			transmitter.processMessage(beanManager.delete(userId, bean, manager, userTransaction));
@@ -178,8 +175,7 @@ public class ICAT {
 			@WebParam(name = "beans") List<EntityBaseBean> beans) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			List<NotificationMessage> nms = beanManager.deleteMany(userId, beans, manager,
-					userTransaction);
+			List<NotificationMessage> nms = beanManager.deleteMany(userId, beans, manager, userTransaction);
 			for (NotificationMessage nm : nms) {
 				transmitter.processMessage(nm);
 			}
@@ -200,14 +196,12 @@ public class ICAT {
 			@WebParam Facility facility, @WebParam FacilityCycle facilityCycle,
 			@WebParam InstrumentScientist facilityInstrumentScientist, @WebParam User user,
 			@WebParam Instrument instrument, @WebParam Investigation investigation,
-			@WebParam InvestigationType investigationType,
-			@WebParam InvestigationUser investigator, @WebParam Keyword keyword,
-			@WebParam ParameterType parameter, @WebParam Publication publication,
+			@WebParam InvestigationType investigationType, @WebParam InvestigationUser investigator,
+			@WebParam Keyword keyword, @WebParam ParameterType parameter, @WebParam Publication publication,
 			@WebParam RelatedDatafile relatedDatafile, @WebParam Sample sample,
-			@WebParam SampleParameter sampleParameter, @WebParam Shift shift,
-			@WebParam Study study, @WebParam StudyInvestigation studyInvestigation,
-			@WebParam StudyStatus studyStatus, @WebParam Application application,
-			@WebParam Job job, @WebParam DataCollection dataCollection,
+			@WebParam SampleParameter sampleParameter, @WebParam Shift shift, @WebParam Study study,
+			@WebParam StudyInvestigation studyInvestigation, @WebParam StudyStatus studyStatus,
+			@WebParam Application application, @WebParam Job job, @WebParam DataCollection dataCollection,
 			@WebParam DataCollectionParameter dataCollectionParameter,
 			@WebParam DataCollectionDataset dataCollectionDataset,
 			@WebParam DataCollectionDatafile dataCollectionDatafile, @WebParam Grouping group,
@@ -215,9 +209,8 @@ public class ICAT {
 	}
 
 	@WebMethod
-	public EntityBaseBean get(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "query") String query, @WebParam(name = "primaryKey") long primaryKey)
-			throws IcatException {
+	public EntityBaseBean get(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "query") String query,
+			@WebParam(name = "primaryKey") long primaryKey) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
 			return beanManager.get(userId, query, primaryKey, manager, userTransaction);
@@ -236,8 +229,7 @@ public class ICAT {
 	}
 
 	@WebMethod
-	public EntityInfo getEntityInfo(@WebParam(name = "beanName") String beanName)
-			throws IcatException {
+	public EntityInfo getEntityInfo(@WebParam(name = "beanName") String beanName) throws IcatException {
 		return beanManager.getEntityInfo(beanName);
 	}
 
@@ -247,15 +239,13 @@ public class ICAT {
 	}
 
 	@WebMethod
-	public List<String> getProperties(@WebParam(name = "sessionId") String sessionId)
-			throws IcatException {
+	public List<String> getProperties(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		checkRoot(sessionId);
 		return beanManager.getProperties();
 	}
 
 	@WebMethod()
-	public double getRemainingMinutes(@WebParam(name = "sessionId") String sessionId)
-			throws IcatException {
+	public double getRemainingMinutes(@WebParam(name = "sessionId") String sessionId) throws IcatException {
 		return beanManager.getRemainingMinutes(sessionId, manager);
 	}
 
@@ -273,8 +263,8 @@ public class ICAT {
 
 	@WebMethod
 	public boolean isAccessAllowed(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "bean") EntityBaseBean bean,
-			@WebParam(name = "accessType") AccessType accessType) throws IcatException {
+			@WebParam(name = "bean") EntityBaseBean bean, @WebParam(name = "accessType") AccessType accessType)
+			throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
 			return beanManager.isAccessAllowed(userId, bean, manager, userTransaction, accessType);
@@ -294,12 +284,11 @@ public class ICAT {
 		HttpServletRequest req = (HttpServletRequest) msgCtxt.get(MessageContext.SERVLET_REQUEST);
 		Authenticator authenticator = authPlugins.get(plugin);
 		if (authenticator == null) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION,
-					"Authenticator mnemonic " + plugin + " not recognised");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Authenticator mnemonic " + plugin
+					+ " not recognised");
 		}
 		logger.debug("Using " + plugin + " to authenticate");
-		String userName = authenticator.authenticate(credentials, req.getRemoteAddr())
-				.getUserName();
+		String userName = authenticator.authenticate(credentials, req.getRemoteAddr()).getUserName();
 		return beanManager.login(userName, lifetimeMinutes, manager, userTransaction);
 	}
 
@@ -333,79 +322,91 @@ public class ICAT {
 		beanManager.logout(sessionId, manager, userTransaction);
 	}
 
-	@WebMethod
-	public void luceneClear(@WebParam(name = "sessionId") String sessionId) throws IcatException {
-		try {
-			checkRoot(sessionId);
-			beanManager.luceneClear();
-		} catch (IcatException e) {
-			reportIcatException(e);
-			throw e;
-		} catch (Throwable e) {
-			reportThrowable(e);
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
-		}
-	}
-
-	@WebMethod
-	public void luceneCommit(@WebParam(name = "sessionId") String sessionId) throws IcatException {
-		try {
-			checkRoot(sessionId);
-			beanManager.luceneCommit();
-		} catch (IcatException e) {
-			reportIcatException(e);
-			throw e;
-		} catch (Throwable e) {
-			reportThrowable(e);
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
-		}
-	}
-
-	@WebMethod
-	public List<String> luceneGetPopulating(@WebParam(name = "sessionId") String sessionId)
-			throws IcatException {
-		try {
-			checkRoot(sessionId);
-			return beanManager.luceneGetPopulating();
-		} catch (IcatException e) {
-			reportIcatException(e);
-			throw e;
-		} catch (Throwable e) {
-			reportThrowable(e);
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
-		}
-	}
-
-	@WebMethod
-	public void lucenePopulate(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "entityName") String entityName) throws IcatException {
-		try {
-			checkRoot(sessionId);
-			beanManager.lucenePopulate(entityName, manager);
-		} catch (IcatException e) {
-			reportIcatException(e);
-			throw e;
-		} catch (Throwable e) {
-			reportThrowable(e);
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
-		}
-	}
-
-	@WebMethod
-	public List<String> luceneSearch(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "query") String query, @WebParam(name = "maxCount") int maxCount,
-			@WebParam(name = "entityName") String entityName) throws IcatException {
-		try {
-			checkRoot(sessionId);
-			return beanManager.luceneSearch(query, maxCount, entityName, manager);
-		} catch (IcatException e) {
-			reportIcatException(e);
-			throw e;
-		} catch (Throwable e) {
-			reportThrowable(e);
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
-		}
-	}
+	// TODO Commented out waiting for 4.6.0
+	// @WebMethod
+	// public void luceneClear(@WebParam(name = "sessionId") String sessionId)
+	// throws IcatException {
+	// try {
+	// checkRoot(sessionId);
+	// beanManager.luceneClear();
+	// } catch (IcatException e) {
+	// reportIcatException(e);
+	// throw e;
+	// } catch (Throwable e) {
+	// reportThrowable(e);
+	// throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+	// e.getMessage());
+	// }
+	// }
+	//
+	// @WebMethod
+	// public void luceneCommit(@WebParam(name = "sessionId") String sessionId)
+	// throws IcatException {
+	// try {
+	// checkRoot(sessionId);
+	// beanManager.luceneCommit();
+	// } catch (IcatException e) {
+	// reportIcatException(e);
+	// throw e;
+	// } catch (Throwable e) {
+	// reportThrowable(e);
+	// throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+	// e.getMessage());
+	// }
+	// }
+	//
+	// @WebMethod
+	// public List<String> luceneGetPopulating(@WebParam(name = "sessionId")
+	// String sessionId)
+	// throws IcatException {
+	// try {
+	// checkRoot(sessionId);
+	// return beanManager.luceneGetPopulating();
+	// } catch (IcatException e) {
+	// reportIcatException(e);
+	// throw e;
+	// } catch (Throwable e) {
+	// reportThrowable(e);
+	// throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+	// e.getMessage());
+	// }
+	// }
+	//
+	// @WebMethod
+	// public void lucenePopulate(@WebParam(name = "sessionId") String
+	// sessionId,
+	// @WebParam(name = "entityName") String entityName) throws IcatException {
+	// try {
+	// checkRoot(sessionId);
+	// beanManager.lucenePopulate(entityName, manager);
+	// } catch (IcatException e) {
+	// reportIcatException(e);
+	// throw e;
+	// } catch (Throwable e) {
+	// reportThrowable(e);
+	// throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+	// e.getMessage());
+	// }
+	// }
+	//
+	// @WebMethod
+	// public List<String> luceneSearch(@WebParam(name = "sessionId") String
+	// sessionId,
+	// @WebParam(name = "query") String query, @WebParam(name = "maxCount") int
+	// maxCount,
+	// @WebParam(name = "entityName") String entityName) throws IcatException {
+	// try {
+	// checkRoot(sessionId);
+	// return beanManager.luceneSearch(query, maxCount, entityName, manager);
+	// } catch (IcatException e) {
+	// reportIcatException(e);
+	// throw e;
+	// } catch (Throwable e) {
+	// reportThrowable(e);
+	// throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+	// e.getMessage());
+	// }
+	// }
 
 	@WebMethod
 	public void refresh(@WebParam(name = "sessionId") String sessionId) throws IcatException {
@@ -428,13 +429,12 @@ public class ICAT {
 		PrintStream s = new PrintStream(baos);
 		e.printStackTrace(s);
 		s.close();
-		logger.error("Unexpected failure in Java "
-				+ System.getProperties().getProperty("java.version") + " " + baos);
+		logger.error("Unexpected failure in Java " + System.getProperties().getProperty("java.version") + " " + baos);
 	}
 
 	@WebMethod
-	public List<?> search(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "query") String query) throws IcatException {
+	public List<?> search(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "query") String query)
+			throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
 			return beanManager.search(userId, query, manager, userTransaction);
@@ -447,30 +447,33 @@ public class ICAT {
 		}
 	}
 
-	@WebMethod
-	public List<?> searchText(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "query") String query, @WebParam(name = "maxCount") int maxCount,
-			@WebParam(name = "entityName") String entityName) throws IcatException {
-		try {
-			String userId = getUserName(sessionId);
-			return beanManager.searchText(userId, query, maxCount, entityName, manager,
-					userTransaction);
-		} catch (IcatException e) {
-			reportIcatException(e);
-			throw e;
-		} catch (Throwable e) {
-			reportThrowable(e);
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getMessage());
-		}
-	}
+	// TODO May be needed in 4.6.0
+	// @WebMethod
+	// public List<?> searchText(@WebParam(name = "sessionId") String sessionId,
+	// @WebParam(name = "query") String query,
+	// @WebParam(name = "maxCount") int maxCount, @WebParam(name = "entityName")
+	// String entityName)
+	// throws IcatException {
+	// try {
+	// String userId = getUserName(sessionId);
+	// return beanManager.searchText(userId, query, maxCount, entityName,
+	// manager, userTransaction);
+	// } catch (IcatException e) {
+	// reportIcatException(e);
+	// throw e;
+	// } catch (Throwable e) {
+	// reportThrowable(e);
+	// throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+	// e.getMessage());
+	// }
+	// }
 
 	@WebMethod
-	public void update(@WebParam(name = "sessionId") String sessionId,
-			@WebParam(name = "bean") EntityBaseBean bean) throws IcatException {
+	public void update(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "bean") EntityBaseBean bean)
+			throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			transmitter.processMessage(beanManager.update(userId, bean, manager, userTransaction,
-					false));
+			transmitter.processMessage(beanManager.update(userId, bean, manager, userTransaction, false));
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;

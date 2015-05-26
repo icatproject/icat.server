@@ -1,386 +1,387 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.icatproject</groupId>
+	<groupId>org.icatproject</groupId>
 
-    <artifactId>icat.server</artifactId>
-    <version>4.5.0-SNAPSHOT</version>
-    <packaging>war</packaging>
+	<artifactId>icat.server</artifactId>
+	<version>4.5.0-SNAPSHOT</version>
+	<packaging>war</packaging>
 
-    <distributionManagement>
-        <downloadUrl>http://www.icatproject.org/mvn/repo</downloadUrl>
-        <site>
-            <id>website</id>
-            <url>scp://www.icatproject.org/var/www/html/mvn/site/icat/server/${project.version}</url>
-        </site>
-        <repository>
-            <id>repo</id>
-            <url>scp://www.icatproject.org/var/www/html/mvn/repo</url>
-        </repository>
-    </distributionManagement>
+	<distributionManagement>
+		<downloadUrl>http://www.icatproject.org/mvn/repo</downloadUrl>
+		<site>
+			<id>website</id>
+			<url>scp://www.icatproject.org/var/www/html/mvn/site/icat/server/${project.version}</url>
+		</site>
+		<repository>
+			<id>repo</id>
+			<url>scp://www.icatproject.org/var/www/html/mvn/repo</url>
+		</repository>
+	</distributionManagement>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <repoUrl>http://www.icatproject.org/mvn/repo</repoUrl>
-        <serverPort>8181</serverPort>
-        <serverHost>localhost</serverHost>
-        <uniqueVersion>false</uniqueVersion>
-        <maven.install.skip>false</maven.install.skip>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <luceneVersion>4.10.2</luceneVersion>
-    </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<repoUrl>http://www.icatproject.org/mvn/repo</repoUrl>
+		<serverPort>8181</serverPort>
+		<serverHost>localhost</serverHost>
+		<uniqueVersion>false</uniqueVersion>
+		<maven.install.skip>false</maven.install.skip>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<luceneVersion>4.10.2</luceneVersion>
+	</properties>
 
-    <repositories>
-        <repository>
-            <id>ICAT Repo</id>
-            <url>http://www.icatproject.org/mvn/repo</url>
-        </repository>
-    </repositories>
+	<repositories>
+		<repository>
+			<id>ICAT Repo</id>
+			<url>http://www.icatproject.org/mvn/repo</url>
+		</repository>
+	</repositories>
 
-    <description>Main pom to build all the icat components. For more information please see the individual components.</description>
-    <issueManagement>
-        <url>http://code.google.com/p/icatproject/issues/list</url>
-        <system>Google Code</system>
-    </issueManagement>
+	<description>Main pom to build all the icat components. For more information please see the individual components.</description>
+	<issueManagement>
+		<url>http://code.google.com/p/icatproject/issues/list</url>
+		<system>Google Code</system>
+	</issueManagement>
 
-    <scm>
-        <connection>scm:svn:http://icatproject.googlecode.com/svn/icat/server/trunk</connection>
-        <developerConnection>scm:svn:https://icatproject.googlecode.com/svn/icat/server/trunk</developerConnection>
-        <url>http://code.google.com/p/icatproject/source/browse/#svn%2Ficat%2Fserver%2Ftrunk</url>
-    </scm>
+	<scm>
+		<connection>scm:svn:http://icatproject.googlecode.com/svn/icat/server/trunk</connection>
+		<developerConnection>scm:svn:https://icatproject.googlecode.com/svn/icat/server/trunk</developerConnection>
+		<url>http://code.google.com/p/icatproject/source/browse/#svn%2Ficat%2Fserver%2Ftrunk</url>
+	</scm>
 
-    <licenses>
-        <license>
-            <name>BSD 2-Clause</name>
-            <url>http://www.opensource.org/licenses/BSD-2-Clause</url>
-            <distribution>repo</distribution>
-            <comments>Also know informally as the Simplified BSD or FreeBSD License</comments>
-        </license>
-    </licenses>
+	<licenses>
+		<license>
+			<name>BSD 2-Clause</name>
+			<url>http://www.opensource.org/licenses/BSD-2-Clause</url>
+			<distribution>repo</distribution>
+			<comments>Also know informally as the Simplified BSD or FreeBSD License</comments>
+		</license>
+	</licenses>
 
-    <organization>
-        <name>The ICAT Collaboration</name>
-        <url>http://www.icatproject.org</url>
-    </organization>
+	<organization>
+		<name>The ICAT Collaboration</name>
+		<url>http://www.icatproject.org</url>
+	</organization>
 
-    <dependencies>
+	<dependencies>
 
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <version>7.0</version>
-        </dependency>
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>7.0</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>eclipselink</artifactId>
-            <version>2.5.1</version>
-        </dependency>
+		<dependency>
+			<groupId>org.eclipse.persistence</groupId>
+			<artifactId>eclipselink</artifactId>
+			<version>2.5.1</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.icatproject</groupId>
-            <artifactId>icat.authentication</artifactId>
-            <version>4.4.0</version>
-        </dependency>
+		<dependency>
+			<groupId>org.icatproject</groupId>
+			<artifactId>icat.authentication</artifactId>
+			<version>4.4.0</version>
+		</dependency>
 
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
-        </dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.16</version>
+		</dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.1</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>${luceneVersion}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>${luceneVersion}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-queryparser</artifactId>
-            <version>${luceneVersion}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queryparser</artifactId>
+			<version>${luceneVersion}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-analyzers-common</artifactId>
-            <version>${luceneVersion}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-analyzers-common</artifactId>
+			<version>${luceneVersion}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-join</artifactId>
-            <version>${luceneVersion}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-join</artifactId>
+			<version>${luceneVersion}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <version>1.0.4</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
+			<version>1.0.4</version>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-            <version>1.3</version>
-        </dependency>
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.3</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.icatproject</groupId>
-            <artifactId>icat.utils</artifactId>
-            <version>4.7.0</version>
-        </dependency>
+		<dependency>
+			<groupId>org.icatproject</groupId>
+			<artifactId>icat.utils</artifactId>
+			<version>4.7.0</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.icatproject</groupId>
-            <artifactId>icat.client</artifactId>
-            <version>4.4.0</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.icatproject</groupId>
+			<artifactId>icat.client</artifactId>
+			<version>4.5.0-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.3.4</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.3.4</version>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-            <version>4.3.4</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpmime</artifactId>
+			<version>4.3.4</version>
+			<scope>test</scope>
+		</dependency>
 
-    </dependencies>
+	</dependencies>
 
-    <build>
+	<build>
 
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 
-        <plugins>
+		<plugins>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.1.2</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                    </execution>
-                </executions>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.2</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+					</execution>
+				</executions>
+			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.3</version>
-                <dependencies>
-                    <dependency><!-- add support for ssh/scp -->
-                        <groupId>org.apache.maven.wagon</groupId>
-                        <artifactId>wagon-ssh</artifactId>
-                        <version>1.0</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.3</version>
+				<dependencies>
+					<dependency><!-- add support for ssh/scp -->
+						<groupId>org.apache.maven.wagon</groupId>
+						<artifactId>wagon-ssh</artifactId>
+						<version>1.0</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.16</version>
-                <configuration>
-                    <workingDirectory>${basedir}/src/test/config</workingDirectory>
-                    <excludes>
-                        <exclude>
-                            **/integration/*.java
-                        </exclude>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.16</version>
+				<configuration>
+					<workingDirectory>${basedir}/src/test/config</workingDirectory>
+					<excludes>
+						<exclude>
+							**/integration/*.java
+						</exclude>
 
-                    </excludes>
-                    <testFailureIgnore>false</testFailureIgnore>
-                </configuration>
-            </plugin>
+					</excludes>
+					<testFailureIgnore>false</testFailureIgnore>
+				</configuration>
+			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.17</version>
-                <configuration>
-                    <includes>
-                        <include>**/integration/Test*.java</include>
-                    </includes>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.17</version>
+				<configuration>
+					<includes>
+						<include>**/integration/Test*.java</include>
+					</includes>
 
-                    <systemPropertyVariables>
-                        <javax.net.ssl.trustStore>${javax.net.ssl.trustStore}</javax.net.ssl.trustStore>
-                        <serverUrl>${serverUrl}</serverUrl>
-                    </systemPropertyVariables>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+					<systemPropertyVariables>
+						<javax.net.ssl.trustStore>${javax.net.ssl.trustStore}</javax.net.ssl.trustStore>
+						<serverUrl>${serverUrl}</serverUrl>
+					</systemPropertyVariables>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <archiveClasses>false</archiveClasses>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+					<archiveClasses>false</archiveClasses>
+				</configuration>
+			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<encoding>${project.build.sourceEncoding}</encoding>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.1</version>
-                <configuration>
-                    <tagNameFormat>v@{project.version}</tagNameFormat>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.1</version>
+				<configuration>
+					<tagNameFormat>v@{project.version}</tagNameFormat>
+				</configuration>
+			</plugin>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <id>Generate doc</id>
-                        <phase>process-classes</phase>
-                        <configuration>
-                            <mainClass>org.icatproject.core.DocGenerator</mainClass>
-                            <arguments>
-                                <argument>${basedir}</argument>
-                            </arguments>
-                            <systemProperties>
-                                <systemProperty>
-                                    <key>log4j.configuration</key>
-                                    <value>other.properties</value>
-                                </systemProperty>
-                            </systemProperties>
-                        </configuration>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                    </execution>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.2.1</version>
+				<executions>
+					<execution>
+						<id>Generate doc</id>
+						<phase>process-classes</phase>
+						<configuration>
+							<mainClass>org.icatproject.core.DocGenerator</mainClass>
+							<arguments>
+								<argument>${basedir}</argument>
+							</arguments>
+							<systemProperties>
+								<systemProperty>
+									<key>log4j.configuration</key>
+									<value>other.properties</value>
+								</systemProperty>
+							</systemProperties>
+						</configuration>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
 
-                    <execution>
-                        <id>Install .war</id>
-                        <phase>package</phase>
+					<execution>
+						<id>Install .war</id>
+						<phase>package</phase>
 
-                        <configuration>
-                            <skip>${maven.install.skip}</skip>
-                            <executable>asadmin</executable>
-                            <arguments>
-                                <argument>--echo</argument>
-                                <argument>--port=4848</argument>
-                                <argument>deploy</argument>
-                                <argument>--force=true</argument>
-                                <argument>${project.build.directory}/${project.build.finalName}.war</argument>
-                            </arguments>
-                        </configuration>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+						<configuration>
+							<skip>${maven.install.skip}</skip>
+							<executable>asadmin</executable>
+							<arguments>
+								<argument>--echo</argument>
+								<argument>--port=4848</argument>
+								<argument>deploy</argument>
+								<argument>--force=true</argument>
+								<argument>${project.build.directory}/${project.build.finalName}.war</argument>
+							</arguments>
+						</configuration>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/assemble/distribution.xml</descriptor>
-                    </descriptors>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.7</version>
-                <dependencies>
-                    <dependency><!-- add support for ssh/scp -->
-                        <groupId>org.apache.maven.wagon</groupId>
-                        <artifactId>wagon-ssh</artifactId>
-                        <version>1.0</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<descriptors>
+						<descriptor>src/assemble/distribution.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 
-        </plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.7</version>
+				<dependencies>
+					<dependency><!-- add support for ssh/scp -->
+						<groupId>org.apache.maven.wagon</groupId>
+						<artifactId>wagon-ssh</artifactId>
+						<version>1.0</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 
-    </build>
 
-    <reporting>
-        <plugins>
+		</plugins>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-                </configuration>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>index</report>
-                            <report>summary</report>
-                            <report>dependencies</report>
-                            <report>issue-tracking</report>
-                            <report>license</report>
-                            <report>plugins</report>
-                            <report>scm</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
+	</build>
 
-        </plugins>
-    </reporting>
+	<reporting>
+		<plugins>
 
-    <name>ICAT Server</name>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.7</version>
+				<configuration>
+					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>index</report>
+							<report>summary</report>
+							<report>dependencies</report>
+							<report>issue-tracking</report>
+							<report>license</report>
+							<report>plugins</report>
+							<report>scm</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+
+		</plugins>
+	</reporting>
+
+	<name>ICAT Server</name>
 </project>
 
 

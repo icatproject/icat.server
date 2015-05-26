@@ -349,13 +349,13 @@ public class TestEntityInfo {
 
 	@Test
 	public void getters() throws Exception {
-		testGetters(Investigation.class, 21);
-		testGetters(Dataset.class, 14);
-		testGetters(Keyword.class, 3);
-		testGetters(InvestigationUser.class, 4);
-		testGetters(User.class, 7);
-		testGetters(ParameterType.class, 22);
-		testGetters(Job.class, 5);
+		testGetters(Investigation.class, 25);
+		testGetters(Dataset.class, 18);
+		testGetters(Keyword.class, 7);
+		testGetters(InvestigationUser.class, 8);
+		testGetters(User.class, 11);
+		testGetters(ParameterType.class, 26);
+		testGetters(Job.class, 9);
 	}
 
 	@Test

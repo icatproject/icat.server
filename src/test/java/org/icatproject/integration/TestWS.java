@@ -818,13 +818,13 @@ public class TestWS {
 		i.setVisitId("42");
 		i.setType(investigationType);
 		i.getInvestigationUsers().add(iu);
-		Long invid = session.create(i);
+		// Long invid = session.create(i);
 		objects = session.search("Investigation INCLUDE InvestigationUser, User [name='Frederick']");
 		assertEquals(1, objects.size());
 		i = (Investigation) objects.get(0);
 		assertEquals(1, i.getInvestigationUsers().size());
 		assertEquals("db/root", i.getInvestigationUsers().get(0).getUser().getName());
-		session.synchLucene();
+		// TODO restore session.synchLucene();
 
 		// TODO removed lucene tests
 		// List<Object> results = session.searchText("frederick AND great", 10,
@@ -1381,7 +1381,7 @@ public class TestWS {
 	public void login() throws Exception {
 		double rm = session.getRemainingMinutes();
 		assertTrue(rm > 0);
-		assertTrue(session.getApiVersion().startsWith("4.4."));
+		assertTrue("API version", session.getApiVersion().startsWith("4.5."));
 		assertEquals("db/notroot", session.getUserName());
 		Thread.sleep(10);
 		rm = session.getRemainingMinutes();
@@ -1986,7 +1986,7 @@ public class TestWS {
 		for (Constraint constraint : ei.getConstraints()) {
 			assertEquals(Arrays.asList("facility", "name", "visitId"), constraint.getFieldNames());
 		}
-		assertEquals(21, ei.getFields().size());
+		assertEquals(25, ei.getFields().size());
 		int n = 0;
 		for (EntityField field : ei.getFields()) {
 			if (field.getName().equals("id")) {
@@ -1995,9 +1995,9 @@ public class TestWS {
 				assertEquals(null, field.getComment());
 				assertEquals(RelType.ATTRIBUTE, field.getRelType());
 				assertEquals(null, field.getStringLength());
-			} else if (field.getName().equals("facilityCycle")) {
-				assertEquals("FacilityCycle", field.getType());
-				assertEquals(false, field.isNotNullable());
+			} else if (field.getName().equals("facility")) {
+				assertEquals("Facility", field.getType());
+				assertEquals(true, field.isNotNullable());
 				assertEquals(null, field.getComment());
 				assertEquals(RelType.ONE, field.getRelType());
 				assertEquals(null, field.getStringLength());
@@ -2017,7 +2017,7 @@ public class TestWS {
 				n++;
 			}
 		}
-		assertEquals(18, n);
+		assertEquals(21, n);
 	}
 
 	@Test
