@@ -12,7 +12,7 @@ import org.icatproject.core.parser.LexerException;
 public class Tokenizer {
 
 	enum State {
-		RESET, NONE, INQUOTES, CLOSEDQUOTES, NAME, INTEGER, TIMESTAMP, MINUS, REAL
+		RESET, NONE, INQUOTES, ESCAPED, NAME, INTEGER, TIMESTAMP, MINUS, REAL
 	}
 
 	private final static Pattern tsRegExp1 = Pattern
@@ -21,13 +21,16 @@ public class Tokenizer {
 	private final static Pattern tsRegExp2 = Pattern
 			.compile("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?[+-]\\d{2}:\\d{2}");
 
-	private final static Set<String> keyWords = new HashSet<String>(Arrays.asList("NULL"));
-	private final static Set<String> booleans = new HashSet<String>(Arrays.asList("TRUE", "FALSE"));
+	private final static Set<String> keyWords = new HashSet<String>(
+			Arrays.asList("NULL"));
+	private final static Set<String> booleans = new HashSet<String>(
+			Arrays.asList("TRUE", "FALSE"));
 
 	public static List<Token> getTokens(String input) throws LexerException {
 		List<Token> tokens = new ArrayList<Token>();
 		State state = State.NONE;
 		int start = 0;
+		StringBuilder string = null;
 		char ch = ' ';
 		for (int i = 0; i < input.length() + 1; i++) {
 			if (state == State.RESET) {
@@ -51,6 +54,7 @@ public class Tokenizer {
 				} else if (ch == '"') {
 					state = State.INQUOTES;
 					start = i;
+					string = new StringBuilder();
 				} else if (ch == '(') {
 					tokens.add(new Token(Token.Type.OPENPAREN, ch));
 				} else if (ch == ')') {
@@ -75,18 +79,36 @@ public class Tokenizer {
 				}
 			} else if (state == State.INQUOTES) {
 				if (ch == '"') {
-					state = State.CLOSEDQUOTES;
+					tokens.add(new Token(Token.Type.STRING, string.toString()));
+					state = State.NONE;
+				} else if (ch == '\\') {
+					state = State.ESCAPED;
 				} else if (ch == 0) {
 					reportError(ch, state, i, input);
-				}
-			} else if (state == State.CLOSEDQUOTES) {
-				if (ch == '"') {
-					state = State.INQUOTES;
 				} else {
-					tokens.add(new Token(Token.Type.STRING, input.substring(start + 1, i - 1)
-							.replace("\"\"", "\"")));
-					state = State.RESET;
+					string.append(ch);
 				}
+			} else if (state == State.ESCAPED) {
+				if (ch == 't') {
+					string.append('\t');
+				} else if (ch == 'n') {
+					string.append('\n');
+				} else if (ch == 'r') {
+					string.append('\r');
+				} else if (ch == 'f') {
+					string.append('\f');
+				} else if (ch == 'b') {
+					string.append('\b');
+				} else if (ch == '"') {
+					string.append('\"');
+				} else if (ch == '\'') {
+					string.append('\'');
+				} else if (ch == '\\') {
+					string.append('\\');
+				} else {
+					reportError(ch, state, i, input);
+				}
+				state = State.INQUOTES;
 			} else if (state == State.NAME) {
 				if (!Character.isLetterOrDigit(ch) && ch != '_') {
 					String name = input.substring(start, i);
@@ -106,12 +128,13 @@ public class Tokenizer {
 				} else if (ch == '-') {
 					state = State.TIMESTAMP;
 				} else if (!Character.isDigit(ch)) {
-					tokens.add(new Token(Token.Type.INTEGER, input.substring(start, i)));
+					tokens.add(new Token(Token.Type.INTEGER, input.substring(
+							start, i)));
 					state = State.RESET;
 				}
 			} else if (state == State.REAL) {
-				if (!Character.isDigit(ch) && ch != 'e' && ch != 'E' && ch != '.' && ch != '+'
-						&& ch != '-') {
+				if (!Character.isDigit(ch) && ch != 'e' && ch != 'E'
+						&& ch != '.' && ch != '+' && ch != '-') {
 					Double d = null;
 					try {
 						d = Double.parseDouble(input.substring(start, i));
@@ -123,14 +146,17 @@ public class Tokenizer {
 				}
 
 			} else if (state == State.TIMESTAMP) {
-				if (!Character.isDigit(ch) && ch != 'T' && ch != 'Z' && ch != '.' && ch != ':'
-						&& ch != '+' && ch != '-') {
+				if (!Character.isDigit(ch) && ch != 'T' && ch != 'Z'
+						&& ch != '.' && ch != ':' && ch != '+' && ch != '-') {
 					String ts = input.substring(start, i);
 
-					if (!tsRegExp1.matcher(ts).matches() && !tsRegExp2.matcher(ts).matches()) {
-						throw new LexerException("Timestamp " + ts + " is not of required form");
+					if (!tsRegExp1.matcher(ts).matches()
+							&& !tsRegExp2.matcher(ts).matches()) {
+						throw new LexerException("Timestamp " + ts
+								+ " is not of required form");
 					}
-					tokens.add(new Token(Token.Type.TIMESTAMP, input.substring(start, i)));
+					tokens.add(new Token(Token.Type.TIMESTAMP, input.substring(
+							start, i)));
 					state = State.RESET;
 				}
 			}
@@ -144,11 +170,12 @@ public class Tokenizer {
 		int i1 = Math.max(0, i - 4);
 		int i2 = Math.min(i + 5, input.length());
 		if (ch != 0) {
-			throw new LexerException("Unexpected character '" + ch + "' near \""
-					+ input.substring(i1, i2) + "\" in state " + state + " for string: " + input);
+			throw new LexerException("Unexpected character '" + ch
+					+ "' near \"" + input.substring(i1, i2) + "\" in state "
+					+ state + " for string: " + input);
 		} else {
-			throw new LexerException("Unexpected end of string in state " + state + " for string: "
-					+ input);
+			throw new LexerException("Unexpected end of string in state "
+					+ state + " for string: " + input);
 		}
 	}
 

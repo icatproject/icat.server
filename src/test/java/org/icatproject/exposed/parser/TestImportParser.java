@@ -25,7 +25,8 @@ public class TestImportParser {
 
 	@Test()
 	public void testDataCollection() throws Exception {
-		Table t = new Table(new Input(Tokenizer.getTokens(" DataCollection(?:0)")));
+		Table t = new Table(new Input(
+				Tokenizer.getTokens(" DataCollection(?:0)")));
 		assertEquals("DataCollection(?:0)", t.toString());
 		List<TableField> tableFields = t.getTableFields();
 
@@ -41,8 +42,10 @@ public class TestImportParser {
 
 	@Test()
 	public void testJob() throws Exception {
-		Input input = new Input(Tokenizer.getTokens(" Job(application(facility(name:0), name:1, "
-				+ "version:2), inputDataCollection(?:3), outputDataCollection(?:4))"));
+		Input input = new Input(
+				Tokenizer
+						.getTokens(" Job(application(facility(name:0), name:1, "
+								+ "version:2), inputDataCollection(?:3), outputDataCollection(?:4))"));
 		Table t = new Table(input);
 		assertNull(input.peek(0));
 		assertEquals(
@@ -55,15 +58,19 @@ public class TestImportParser {
 				"private org.icatproject.core.entity.Application org.icatproject.core.entity.Job.application",
 				tableField.getField().toString());
 		assertNull(tableField.getOffset());
-		assertEquals("SELECT n0 FROM Application n0 JOIN n0.facility n0n0 "
-				+ "WHERE n0n0.name = :p0 AND n0.name = :p1 AND n0.version = :p2",
+		assertEquals(
+				"SELECT n0 FROM Application n0 JOIN n0.facility n0n0 "
+						+ "WHERE n0n0.name = :p0 AND n0.name = :p1 AND n0.version = :p2",
 				tableField.getJPQL());
 		assertEquals(3, tableField.getAttributes().size());
-		assertEquals((Integer) 0, tableField.getAttributes().get(0).getFieldNum());
+		assertEquals((Integer) 0, tableField.getAttributes().get(0)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(0).getType());
-		assertEquals((Integer) 1, tableField.getAttributes().get(1).getFieldNum());
+		assertEquals((Integer) 1, tableField.getAttributes().get(1)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(1).getType());
-		assertEquals((Integer) 2, tableField.getAttributes().get(2).getFieldNum());
+		assertEquals((Integer) 2, tableField.getAttributes().get(2)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(2).getType());
 		assertFalse(tableField.isQmark());
 
@@ -91,8 +98,10 @@ public class TestImportParser {
 
 	@Test(expected = ParserException.class)
 	public void testBadFacility() throws Exception {
-		Input input = new Input(Tokenizer.getTokens(" Facility (createId:0, createTime:1,  "
-				+ "modId : 2,  modTime: 3, name :4, daysUntilRelease:5))"));
+		Input input = new Input(
+				Tokenizer
+						.getTokens(" Facility (createId:0, createTime:1,  "
+								+ "modId : 2,  modTime: 3, name :4, daysUntilRelease:5))"));
 		new Table(input);
 		input.checkEnded();
 
@@ -100,8 +109,10 @@ public class TestImportParser {
 
 	@Test()
 	public void testFacility() throws Exception {
-		Input input = new Input(Tokenizer.getTokens(" Facility (createId:0, createTime:1,  "
-				+ "modId : 2,  modTime: 3, name :4, daysUntilRelease:5)"));
+		Input input = new Input(
+				Tokenizer
+						.getTokens(" Facility (createId:0, createTime:1,  "
+								+ "modId : 2,  modTime: 3, name :4, daysUntilRelease:5)"));
 		Table t = new Table(input);
 		assertNull(input.peek(0));
 		assertEquals(
@@ -122,12 +133,16 @@ public class TestImportParser {
 
 	@Test
 	public void testDataCollectionDatafile() throws Exception {
-		Table t = new Table(new Input(Tokenizer.getTokens("DataCollectionDatafile(datafile(dataset"
-				+ "(investigation(facility(name:0), name:1, visitId:2), name:3), name:4), "
-				+ "dataCollection(?:5))")));
+		Table t = new Table(
+				new Input(
+						Tokenizer
+								.getTokens("DataCollectionDatafile(datafile(dataset"
+										+ "(investigation(facility(name:0), name:1, visitId:2), name:3), name:4), "
+										+ "dataCollection(?:5))")));
 		assertEquals(
 				"DataCollectionDatafile(datafile(dataset(investigation(facility(name:0),name:1,"
-						+ "visitId:2),name:3),name:4),dataCollection(?:5))", t.toString());
+						+ "visitId:2),name:3),name:4),dataCollection(?:5))",
+				t.toString());
 		List<TableField> tableFields = t.getTableFields();
 
 		TableField tableField = tableFields.get(0);
@@ -140,15 +155,20 @@ public class TestImportParser {
 						+ "WHERE n0n0n0n0.name = :p0 AND n0n0n0.name = :p1 AND n0n0n0.visitId = :p2 AND n0n0.name = :p3 AND n0.name = :p4",
 				tableField.getJPQL());
 		assertEquals(5, tableField.getAttributes().size());
-		assertEquals((Integer) 0, tableField.getAttributes().get(0).getFieldNum());
+		assertEquals((Integer) 0, tableField.getAttributes().get(0)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(0).getType());
-		assertEquals((Integer) 1, tableField.getAttributes().get(1).getFieldNum());
+		assertEquals((Integer) 1, tableField.getAttributes().get(1)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(1).getType());
-		assertEquals((Integer) 2, tableField.getAttributes().get(2).getFieldNum());
+		assertEquals((Integer) 2, tableField.getAttributes().get(2)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(2).getType());
-		assertEquals((Integer) 3, tableField.getAttributes().get(3).getFieldNum());
+		assertEquals((Integer) 3, tableField.getAttributes().get(3)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(3).getType());
-		assertEquals((Integer) 4, tableField.getAttributes().get(4).getFieldNum());
+		assertEquals((Integer) 4, tableField.getAttributes().get(4)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(3).getType());
 		assertFalse(tableField.isQmark());
 
@@ -167,9 +187,11 @@ public class TestImportParser {
 
 	@Test()
 	public void testDatafile() throws Exception {
-		Table t = new Table(new Input(
-				Tokenizer.getTokens("Datafile(dataset(investigation    (   facility(name:0), "
-						+ "name:1, visitId:2), name:3  ) , name:4, fileSize:5) ")));
+		Table t = new Table(
+				new Input(
+						Tokenizer
+								.getTokens("Datafile(dataset(investigation    (   facility(name:0), "
+										+ "name:1, visitId:2), name:3  ) , name:4, fileSize:5) ")));
 		assertEquals(
 				"Datafile(dataset(investigation(facility(name:0),name:1,visitId:2),name:3),name:4,fileSize:5)",
 				t.toString());
@@ -185,24 +207,30 @@ public class TestImportParser {
 						+ "WHERE n0n0n0.name = :p0 AND n0n0.name = :p1 AND n0n0.visitId = :p2 AND n0.name = :p3",
 				tableField.getJPQL());
 		assertEquals(4, tableField.getAttributes().size());
-		assertEquals((Integer) 0, tableField.getAttributes().get(0).getFieldNum());
+		assertEquals((Integer) 0, tableField.getAttributes().get(0)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(0).getType());
-		assertEquals((Integer) 1, tableField.getAttributes().get(1).getFieldNum());
+		assertEquals((Integer) 1, tableField.getAttributes().get(1)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(1).getType());
-		assertEquals((Integer) 2, tableField.getAttributes().get(2).getFieldNum());
+		assertEquals((Integer) 2, tableField.getAttributes().get(2)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(2).getType());
-		assertEquals((Integer) 3, tableField.getAttributes().get(3).getFieldNum());
+		assertEquals((Integer) 3, tableField.getAttributes().get(3)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(3).getType());
 
 		tableField = tableFields.get(1);
-		assertEquals("private java.lang.String org.icatproject.core.entity.Datafile.name",
+		assertEquals(
+				"private java.lang.String org.icatproject.core.entity.Datafile.name",
 				tableField.getField().toString());
 		assertEquals((Integer) 4, tableField.getOffset());
 		assertNull(tableField.getJPQL());
 		assertEquals(0, tableField.getAttributes().size());
 
 		tableField = tableFields.get(2);
-		assertEquals("private java.lang.Long org.icatproject.core.entity.Datafile.fileSize",
+		assertEquals(
+				"private java.lang.Long org.icatproject.core.entity.Datafile.fileSize",
 				tableField.getField().toString());
 		assertEquals((Integer) 5, tableField.getOffset());
 		assertNull(tableField.getJPQL());
@@ -231,15 +259,19 @@ public class TestImportParser {
 				"SELECT n0 FROM Investigation n0 JOIN n0.facility n0n0 WHERE n0n0.name = :p0 AND n0.name = :p1 AND n0.visitId = :p2",
 				tableField.getJPQL());
 		assertEquals(3, tableField.getAttributes().size());
-		assertEquals((Integer) 0, tableField.getAttributes().get(0).getFieldNum());
+		assertEquals((Integer) 0, tableField.getAttributes().get(0)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(0).getType());
-		assertEquals((Integer) 1, tableField.getAttributes().get(1).getFieldNum());
+		assertEquals((Integer) 1, tableField.getAttributes().get(1)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(1).getType());
-		assertEquals((Integer) 2, tableField.getAttributes().get(2).getFieldNum());
+		assertEquals((Integer) 2, tableField.getAttributes().get(2)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(2).getType());
 
 		tableField = tableFields.get(1);
-		assertEquals("private java.lang.String org.icatproject.core.entity.Dataset.name",
+		assertEquals(
+				"private java.lang.String org.icatproject.core.entity.Dataset.name",
 				tableField.getField().toString());
 		assertEquals((Integer) 3, tableField.getOffset());
 		assertNull(tableField.getJPQL());
@@ -254,20 +286,24 @@ public class TestImportParser {
 				"SELECT n0 FROM DatasetType n0 JOIN n0.facility n0n0 WHERE n0n0.name = :p0 AND n0.name = :p4",
 				tableField.getJPQL());
 		assertEquals(2, tableField.getAttributes().size());
-		assertEquals((Integer) 0, tableField.getAttributes().get(0).getFieldNum());
+		assertEquals((Integer) 0, tableField.getAttributes().get(0)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(0).getType());
-		assertEquals((Integer) 4, tableField.getAttributes().get(1).getFieldNum());
+		assertEquals((Integer) 4, tableField.getAttributes().get(1)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(1).getType());
 
 		tableField = tableFields.get(3);
-		assertEquals("private boolean org.icatproject.core.entity.Dataset.complete", tableField
-				.getField().toString());
+		assertEquals(
+				"private boolean org.icatproject.core.entity.Dataset.complete",
+				tableField.getField().toString());
 		assertEquals((Integer) 5, tableField.getOffset());
 		assertNull(tableField.getJPQL());
 		assertEquals(0, tableField.getAttributes().size());
 
 		tableField = tableFields.get(4);
-		assertEquals("private java.util.Date org.icatproject.core.entity.Dataset.startDate",
+		assertEquals(
+				"private java.util.Date org.icatproject.core.entity.Dataset.startDate",
 				tableField.getField().toString());
 		assertEquals((Integer) 6, tableField.getOffset());
 		assertNull(tableField.getJPQL());
@@ -278,9 +314,11 @@ public class TestImportParser {
 
 	@Test()
 	public void testInvestigation() throws Exception {
-		Table t = new Table(new Input(
-				Tokenizer.getTokens("Investigation(facility  ( name:0), name  :  1, visitId:2, "
-						+ "type(facility(name:0), name:3))")));
+		Table t = new Table(
+				new Input(
+						Tokenizer
+								.getTokens("Investigation(facility  ( name:0), name  :  1, visitId:2, "
+										+ "type(facility(name:0), name:3))")));
 		assertEquals(
 				"Investigation(facility(name:0),name:1,visitId:2,type(facility(name:0),name:3))",
 				t.toString());
@@ -292,20 +330,24 @@ public class TestImportParser {
 				"private org.icatproject.core.entity.Facility org.icatproject.core.entity.Investigation.facility",
 				tableField.getField().toString());
 		assertNull(tableField.getOffset());
-		assertEquals("SELECT n0 FROM Facility n0 WHERE n0.name = :p0", tableField.getJPQL());
+		assertEquals("SELECT n0 FROM Facility n0 WHERE n0.name = :p0",
+				tableField.getJPQL());
 		assertEquals(1, tableField.getAttributes().size());
-		assertEquals((Integer) 0, tableField.getAttributes().get(0).getFieldNum());
+		assertEquals((Integer) 0, tableField.getAttributes().get(0)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(0).getType());
 
 		tableField = tableFields.get(1);
-		assertEquals("private java.lang.String org.icatproject.core.entity.Investigation.name",
+		assertEquals(
+				"private java.lang.String org.icatproject.core.entity.Investigation.name",
 				tableField.getField().toString());
 		assertEquals((Integer) 1, tableField.getOffset());
 		assertNull(tableField.getJPQL());
 		assertEquals(0, tableField.getAttributes().size());
 
 		tableField = tableFields.get(2);
-		assertEquals("private java.lang.String org.icatproject.core.entity.Investigation.visitId",
+		assertEquals(
+				"private java.lang.String org.icatproject.core.entity.Investigation.visitId",
 				tableField.getField().toString());
 		assertEquals((Integer) 2, tableField.getOffset());
 		assertNull(tableField.getJPQL());
@@ -320,9 +362,11 @@ public class TestImportParser {
 				"SELECT n0 FROM InvestigationType n0 JOIN n0.facility n0n0 WHERE n0n0.name = :p0 AND n0.name = :p3",
 				tableField.getJPQL());
 		assertEquals(2, tableField.getAttributes().size());
-		assertEquals((Integer) 0, tableField.getAttributes().get(0).getFieldNum());
+		assertEquals((Integer) 0, tableField.getAttributes().get(0)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(0).getType());
-		assertEquals((Integer) 3, tableField.getAttributes().get(1).getFieldNum());
+		assertEquals((Integer) 3, tableField.getAttributes().get(1)
+				.getFieldNum());
 		assertEquals("String", tableField.getAttributes().get(1).getType());
 
 		assertEquals(4, tableFields.size());
@@ -397,9 +441,11 @@ public class TestImportParser {
 								+ "2014-05-16T16:58:26Z \"Test Facility\" 90 -5 17.4 -17.3 Null TRue fAlse NUMERIC"));
 		assertEquals("db/root", i.consume(Token.Type.STRING).getValue());
 		assertEquals(",", i.consume(Token.Type.COMMA).getValue());
-		assertEquals("2014-05-16T16:58:26.12+12:30", i.consume(Token.Type.TIMESTAMP).getValue());
+		assertEquals("2014-05-16T16:58:26.12+12:30",
+				i.consume(Token.Type.TIMESTAMP).getValue());
 		assertEquals("db/root", i.consume(Token.Type.STRING).getValue());
-		assertEquals("2014-05-16T16:58:26Z", i.consume(Token.Type.TIMESTAMP).getValue());
+		assertEquals("2014-05-16T16:58:26Z", i.consume(Token.Type.TIMESTAMP)
+				.getValue());
 		assertEquals("Test Facility", i.consume(Token.Type.STRING).getValue());
 		assertEquals("90", i.consume(Token.Type.INTEGER).getValue());
 		assertEquals("-5", i.consume(Token.Type.INTEGER).getValue());
@@ -414,20 +460,26 @@ public class TestImportParser {
 
 	@Test
 	public void tokens() throws Exception {
-		List<Token> ts = Tokenizer.getTokens("\"db/root\",  2014-05-16T16:58:26.12+12:30  "
-				+ " DATE_AND_TIME NULL NA trUE false");
+		List<Token> ts = Tokenizer
+				.getTokens("\"db/root\",  2014-05-16T16:58:26.12+12:30  "
+						+ " DATE_AND_TIME NULL NA trUE false");
 		tokenCheck(ts.get(0), Token.Type.STRING, "db/root");
 		tokenCheck(ts.get(1), Token.Type.COMMA, ",");
-
-		tokenCheck(ts.get(2), Token.Type.TIMESTAMP, "2014-05-16T16:58:26.12+12:30");
-
+		tokenCheck(ts.get(2), Token.Type.TIMESTAMP,
+				"2014-05-16T16:58:26.12+12:30");
 		tokenCheck(ts.get(3), Token.Type.NAME, "DATE_AND_TIME");
-
 		tokenCheck(ts.get(4), Token.Type.NULL, "NULL");
 		tokenCheck(ts.get(5), Token.Type.NAME, "NA");
 		tokenCheck(ts.get(6), Token.Type.BOOLEAN, "TRUE");
 		tokenCheck(ts.get(7), Token.Type.BOOLEAN, "FALSE");
+	}
 
+	@Test
+	public void escapes() throws Exception {
+		String input = "\"n \\n r \\r f \\f dq \\\" sq \\' esc \\\\\"";
+		String output = "n \n r \r f \f dq \" sq ' esc \\";
+		List<Token> ts = Tokenizer.getTokens(input);
+		tokenCheck(ts.get(0), Token.Type.STRING, output);
 	}
 
 	private void tokenCheck(Token token, Type type, String value) {

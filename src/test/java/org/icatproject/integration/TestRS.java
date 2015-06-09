@@ -529,7 +529,6 @@ public class TestRS {
 		ts("Create dump1 for " + credentials.get("username"));
 		wSession.clear();
 		wSession.clearAuthz();
-		System.out.println(dump1);
 		rootSession.importMetaData(dump1, DuplicateAction.THROW, Attributes.ALL);
 
 		start = System.currentTimeMillis();

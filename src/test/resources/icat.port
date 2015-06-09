@@ -38,7 +38,7 @@ SampleType(facility(name:0), name:1, molecularFormula:2, safetyInformation:3)
 
 Sample(investigation(facility(name:0), name:1, visitId:2), type(facility(name:0), name:3, molecularFormula:4), name:5)
 "Test port facility", "expt1", "one", "diamond", "C", "Koh-I-Noor"
-"Test port facility", "expt1", "one", "rust",  "Fe3O4", "Ford Anglia"
+"Test port facility", "expt1", "one", "rust",  "Fe3O4", "Ford\t\"Anglia\""
 
 InvestigationParameter(investigation(facility(name:0), name:1, visitId:2), type(facility(name:0), name:3 , units:4),stringValue:5)
 "Test port facility", "expt1", "one", "colour" , "name", "green"
@@ -48,7 +48,7 @@ DatasetType(facility(name:0), name:1)
 
 Dataset (investigation(facility(name:0), name:1, visitId:2) , name:3, type(facility(name:0), name:4), complete:5, startDate:6, endDate:7 sample(investigation(facility(name:0), name:1, visitId:2), name:8), description:9)
 "Test port facility", "expt1", "one", "ds1", "calibration", true,  2014-05-16T16:58:26.12+12:30, 2014-05-16T16:58:26.12+12:30, "Koh-I-Noor", "alpha"
-"Test port facility", "expt1", "one", "ds2", "calibration", null,  2014-05-16T06:05:26.12Z, 2014-05-16T06:07:26.12+12:30,"Ford Anglia", "beta"
+"Test port facility", "expt1", "one", "ds2", "calibration", null,  2014-05-16T06:05:26.12Z, 2014-05-16T06:07:26.12+12:30,"Ford\t\"Anglia\"", "beta"
 "Test port facility", "expt1", "one", "ds3", "calibration", False, 2014-05-16T06:09:26.12, 2014-05-16T06:15:26.12, null, "gamma"
 "Test port facility", "expt1", "two", "ds3", "calibration", False, 2014-05-16T06:20:26.12, 2014-05-16T06:21:26.12, null, "delta"
 "Test port facility", "expt1", "two", "ds4", "calibration", False, 2014-05-16T06:31:26.12, 2014-05-16T06:32:26.12, null, "epsilon"
@@ -59,7 +59,7 @@ DatasetParameter(dataset(investigation(facility(name:0), name:1, visitId:2) , na
 "Test port facility", "expt1", "one", "ds3", "current" , "amps", null, 150, null
 
 Datafile(dataset(investigation(facility(name:0), name:1, visitId:2), name:3), name:4, fileSize:5)
-"Test port facility", "expt1", "one", "ds2", "df1", 12345
+"Test port facility", "expt1", "one", "ds2", "df1 \t \r \n \\ \f \b \' \"", 12345
 "Test port facility", "expt1", "one", "ds2", "df2", 12345
 "Test port facility", "expt1", "one", "ds2", "df3", 12345
 
@@ -73,7 +73,7 @@ DataCollection(?:0)
 "c"
 
 DataCollectionDatafile(datafile(dataset(investigation(facility(name:0), name:1, visitId:2), name:3), name:4), dataCollection(?:5))
-"Test port facility", "expt1", "one", "ds2", "df1",  "a"
+"Test port facility", "expt1", "one", "ds2", "df1 \t \r \n \\ \f \b \' \"",  "a"
 "Test port facility", "expt1", "one", "ds2", "df2",  "b"
 
 Job(application(facility(name:0), name:1, version:2), inputDataCollection(?:3), outputDataCollection(?:4))

@@ -818,7 +818,8 @@ public class TestWS {
 		i.setVisitId("42");
 		i.setType(investigationType);
 		i.getInvestigationUsers().add(iu);
-		// Long invid = session.create(i);
+		// Long invid = 
+		session.create(i);
 		objects = session.search("Investigation INCLUDE InvestigationUser, User [name='Frederick']");
 		assertEquals(1, objects.size());
 		i = (Investigation) objects.get(0);

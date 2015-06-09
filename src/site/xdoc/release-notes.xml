@@ -9,10 +9,14 @@
 	<body>
 
 		<section name="4.5.0">
-			<p>......</p>
+			<p>Remove lucene calls and apply bug fixes.</p>
 			<ul>
 				<li>Permit lucene not to be used by omitting references in
 					icat.setup.
+				</li>
+				<li>All lucene calls have been commented out - they will be
+					reinstated in
+					4.6 but they will be different.
 				</li>
 				<li>Allow queries of the form "SELECT a.b.c FROM ..." This was not
 					documented but used to work in ICAT 4.3 and is standard JPQL.
@@ -28,6 +32,15 @@
 					AVG are potentially very slow as they cannot benefit from any
 					indexing.
 				</li>
+				<li>Fixed the ordering of entities appearing in the output file when
+					using exportData in the restful API so that the file can be
+					re-imported.
+				</li>
+				<li>Instead of doubled up '"' characters use '\"' and also introduce
+					\b \t \n \f \r \\ and the not strictly necessary \' for the import
+					export format.
+				</li>
+				<li>Avoid the use of a sequence table for allocating IDs</li>
 			</ul>
 		</section>
 

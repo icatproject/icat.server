@@ -52,10 +52,8 @@
 
 	<licenses>
 		<license>
-			<name>BSD 2-Clause</name>
-			<url>http://www.opensource.org/licenses/BSD-2-Clause</url>
-			<distribution>repo</distribution>
-			<comments>Also know informally as the Simplified BSD or FreeBSD License</comments>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 		</license>
 	</licenses>
 
