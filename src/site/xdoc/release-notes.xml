@@ -40,7 +40,9 @@
 					\b \t \n \f \r \\ and the not strictly necessary \' for the import
 					export format.
 				</li>
-				<li>Avoid the use of a sequence table for allocating IDs</li>
+				<li>Avoid the use of a sequence table for allocating IDs.</li>
+				<li>LIMIT clause in the query now works properly when searching by
+					id.</li>
 			</ul>
 		</section>
 

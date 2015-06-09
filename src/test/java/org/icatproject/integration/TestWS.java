@@ -818,7 +818,7 @@ public class TestWS {
 		i.setVisitId("42");
 		i.setType(investigationType);
 		i.getInvestigationUsers().add(iu);
-		// Long invid = 
+		// Long invid =
 		session.create(i);
 		objects = session.search("Investigation INCLUDE InvestigationUser, User [name='Frederick']");
 		assertEquals(1, objects.size());
@@ -1782,12 +1782,7 @@ public class TestWS {
 
 		assertEquals(0, session.search("SELECT ds FROM Dataset ds WHERE ds.name = 'dfsin' LIMIT 1,10").size());
 
-		// TODO This next test fails on MySQL as the limit is not sent to the
-		// generated SQL
-		// assertEquals(0,
-		// session.search("SELECT ds FROM Dataset ds WHERE ds.id = " + max +
-		// " LIMIT 1,10")
-		// .size());
+		assertEquals(0, session.search("SELECT ds FROM Dataset ds WHERE ds.id = " + max + " LIMIT 1,10").size());
 
 		assertEquals(0, session.search("SELECT ds FROM Dataset ds WHERE ds.id IN ( " + max + ") LIMIT 1,10").size());
 
@@ -1879,15 +1874,16 @@ public class TestWS {
 		// Bad query - TODO this should throw an exception as datafile is not an
 		// attribute of
 		// Dataset however the bad JPQL is not spotted.
-		/*
-		 * try { results = session .search(
-		 * "SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafile df) = 2"
-		 * ); fail("Should have thrown an exception"); } catch
-		 * (IcatException_Exception e) {
-		 * assertEquals(IcatExceptionType.BAD_PARAMETER,
-		 * e.getFaultInfo().getType());
-		 * assertTrue(e.getMessage().indexOf("EntityManager") > 0); }
-		 */
+
+		// try {
+		// results =
+		// session.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafile df) = 2");
+		// fail("Should have thrown an exception");
+		// } catch (IcatException_Exception e) {
+		// assertEquals(IcatExceptionType.BAD_PARAMETER,
+		// e.getFaultInfo().getType());
+		// assertTrue(e.getMessage().indexOf("EntityManager") > 0);
+		// }
 
 		// Nested select
 		results = session.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafiles df) = 2");

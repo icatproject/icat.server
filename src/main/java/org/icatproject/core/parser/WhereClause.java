@@ -6,7 +6,6 @@ import org.icatproject.core.Constants;
 import org.icatproject.core.manager.EntityInfoHandler;
 
 public class WhereClause {
-	// static Logger logger = Logger.getLogger(WhereClause.class);
 
 	private String string;
 

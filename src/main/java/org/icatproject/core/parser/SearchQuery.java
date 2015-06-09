@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -43,6 +44,8 @@ public class SearchQuery {
 
 	private GateKeeper gateKeeper;
 
+	private Pattern idSearch = Pattern.compile("^\\s?\\$0\\$.id = [0-9]+s?$");
+
 	private static ArrayList<Object> aListWithZero = new ArrayList<>(1);
 	static {
 		aListWithZero.add(0L);
@@ -73,7 +76,7 @@ public class SearchQuery {
 		 * aggregate functions.
 		 */
 		this.gateKeeper = gateKeeper;
-		//TODO use rootUser as a short cut to evaluate query directly
+		// TODO use rootUser as a short cut to evaluate query directly
 		boolean rootUser = this.gateKeeper.getRootUserNames().contains(userId);
 		input.consume(Token.Type.SELECT);
 		StringBuilder sb = new StringBuilder("SELECT ");
@@ -109,7 +112,7 @@ public class SearchQuery {
 					relativePathToReturn = resultValue.substring(dot + 1);
 					aggregateFunctionToReturn = aggregateFunction.getType();
 				}
-			} else if (aggregateFunction.getType() == Token.Type.COUNT) { 
+			} else if (aggregateFunction.getType() == Token.Type.COUNT) {
 				sb.append("COUNT (DISTINCT $0$)");
 			} else {
 				throw new ParserException("Found aggregate function " + aggregateFunction.getValue()
@@ -159,8 +162,8 @@ public class SearchQuery {
 		if (t != null && t.getType() == Token.Type.LIMIT) {
 			limitClause = new LimitClause(input);
 			t = input.peek(0);
-
 		}
+
 		if (includeClause == null && t != null && t.getType() == Token.Type.INCLUDE) {
 			includeClause = new IncludeClause(getBean(), input, idVar, gateKeeper);
 			t = input.peek(0);
@@ -193,6 +196,16 @@ public class SearchQuery {
 		logger.debug("Processing: " + this);
 		logger.debug("=> fromClause: " + fromClause);
 		logger.debug("=> whereClause: " + whereClause);
+
+		// Trap case of selecting on id values where the LIMIT is ignored in the
+		// eclipselink generated SQL
+		if (limitClause != null && whereClause != null) {
+			if (limitClause.getOffset() > 0 && idSearch.matcher(whereClause.toString()).matches()) {
+				logger.debug("LIMIT offset is non-zero but can only return at most one entry");
+				return null;
+			}
+		}
+
 		StringBuilder sb = new StringBuilder(string);
 		sb.append(" FROM" + fromClause.toString());
 		String beanName = fromClause.getBean().getSimpleName();
