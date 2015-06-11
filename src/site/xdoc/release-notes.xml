@@ -42,7 +42,11 @@
 				</li>
 				<li>Avoid the use of a sequence table for allocating IDs.</li>
 				<li>LIMIT clause in the query now works properly when searching by
-					id.</li>
+					id.
+				</li>
+				<li>Ensure that createTime and endTime are represented by ISO 8601
+					style json strings like other TIMESTAMP fields using the RESTful
+					search call.</li>
 			</ul>
 		</section>
 
