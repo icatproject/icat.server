@@ -171,6 +171,7 @@ public class SearchQuery {
 		if (t != null) {
 			throw new ParserException(input, new Type[0]);
 		}
+
 	}
 
 	@Override
@@ -312,6 +313,11 @@ public class SearchQuery {
 
 	public Type getAggregateFunctionToReturn() {
 		return aggregateFunctionToReturn;
+	}
+
+	public String typeQuery() {
+		String s = string.substring(11, string.length() - 1).replace("DISTINCT ", "");
+		return "SELECT " + s + " FROM" + fromClause + " WHERE " + s + " IS NOT NULL";
 	}
 
 }

@@ -42,7 +42,22 @@
 				</li>
 				<li>Avoid the use of a sequence table for allocating IDs.</li>
 				<li>LIMIT clause in the query now works properly when searching by
-					id.</li>
+					id. This requires a manual schema upgrade if you already have an
+					ICAT installed.
+				</li>
+				<li>Ensure that createTime and endTime are represented by ISO 8601
+					style json strings like other TIMESTAMP fields using the RESTful
+					search call.
+				</li>
+				<li>Provide protection against an EclipseLink bug with Oracle which
+					resulted in BigDecimal objects being returned instead of Long or
+					Double values when MIN or MAX of a value of that type was
+					requested.
+				</li>
+				<li>The documentation for the rootUserNames parameter has been
+					updated to match a change introduced in release 4.4 whereby users
+					listed in rootUserNames have full access to all tables.
+				</li>
 			</ul>
 		</section>
 

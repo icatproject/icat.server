@@ -7,11 +7,6 @@
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 		<jta-data-source>jdbc/icat</jta-data-source>
 		<properties>
-<!-- 			<property name="eclipselink.jdbc.sequence-connection-pool" -->
-<!-- 				value="true" /> -->
-<!-- 			<property -->
-<!-- 				name="eclipselink.jdbc.sequence-connection-pool.non-jta-data-source" -->
-<!-- 				value="jdbc/icat" /> -->
 			<property name="eclipselink.cache.shared.default" value="false" />
 			<property name="eclipselink.logging.level" value="SEVERE" />
 			<!-- <property name="eclipselink.logging.level" value="FINE" /> -->

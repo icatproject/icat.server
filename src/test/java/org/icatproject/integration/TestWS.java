@@ -113,7 +113,7 @@ public class TestWS {
 
 		Investigation invC = session.createInvestigation(facility, "C", "Not null", investigationType);
 
-		Instrument wish = session.createInstrument(facility, "wish");
+		Instrument wish = session.createInstrument(facility, "WISH");
 
 		session.createInvestigationInstrument(invA, wish);
 		session.createInvestigationInstrument(invB, wish);
@@ -1608,16 +1608,16 @@ public class TestWS {
 
 		long max = -999999999999999L;
 		long min = 999999999999999L;
-		for (Object result : session.search("Dataset")) {
-			Dataset ds = (Dataset) result;
+		Dataset ds = null;
+		for (Object result : session.search("Dataset INCLUDE Investigation")) {
+			ds = (Dataset) result;
 			max = Math.max(ds.getId(), max);
 			min = Math.min(ds.getId(), min);
 		}
+		Long invId = ds.getInvestigation().getId();
 
 		assertEquals(min, session.search("MIN(Dataset.id) [id > 0]").get(0));
 		assertEquals(max, session.search("MAX(Dataset.id) [id > 0]").get(0));
-
-		Long invId = (Long) session.search("Investigation.id").get(0);
 
 		List<?> results = session.search("Dataset.id " + "<-> DatasetParameter[type.name = 'TIMESTAMP'] "
 				+ "<-> Investigation[name <> 12]");
@@ -1789,7 +1789,8 @@ public class TestWS {
 		assertEquals(min, session.search("SELECT MIN(ds.id) FROM  Dataset ds WHERE ds.id > 0").get(0));
 		assertEquals(max, session.search("SELECT MAX(ds.id) FROM  Dataset ds WHERE ds.id > 0").get(0));
 
-		Long invId = (Long) session.search("SELECT inv.id FROM Investigation inv").get(0);
+		Long invId = (Long) session.search("SELECT inv.id FROM Investigation inv WHERE inv.datasets IS NOT EMPTY").get(
+				0);
 
 		List<?> results = session
 				.search("SELECT ds.id FROM Dataset ds JOIN ds.parameters dsp JOIN ds.investigation inv"
@@ -1804,6 +1805,7 @@ public class TestWS {
 				+ "WHERE ds.type.name IN :types AND inv.id BETWEEN :lower AND :upper " + "ORDER BY ds.id";
 		query = query.replace(":lower", Long.toString(invId)).replace(":upper", Long.toString(invId))
 				.replace(":types", "('GS', 'GQ')");
+
 		results = session.search(query);
 		assertEquals("Count", 4, results.size());
 

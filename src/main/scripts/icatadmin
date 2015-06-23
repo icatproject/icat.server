@@ -195,14 +195,15 @@ def help(args):
 logging.basicConfig(level=logging.CRITICAL)
 
 usagebase = "usage: %prog <url> <username> <password> "
-           
+       
+# TODO restore lucene operations in 4.6.0    
 subcommands = {}
-subcommands["search"] = search
+# subcommands["search"] = search
 subcommands["properties"] = getProperties
-subcommands["populate"] = populate
-subcommands["commit"] = commit
-subcommands["clear"] = clear
-subcommands["populating"] = getPopulating
+# subcommands["populate"] = populate
+# subcommands["commit"] = commit
+# subcommands["clear"] = clear
+# subcommands["populating"] = getPopulating
 subcommands["-h"] = help
 subcommands["--help"] = help
 

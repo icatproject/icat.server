@@ -79,8 +79,7 @@ public class ICATRest {
 	private void checkRoot(String sessionId) throws IcatException {
 		String userId = beanManager.getUserName(sessionId, manager);
 		if (!rootUserNames.contains(userId)) {
-			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES,
-					"user must be in rootUserNames");
+			throw new IcatException(IcatExceptionType.INSUFFICIENT_PRIVILEGES, "user must be in rootUserNames");
 		}
 	}
 
@@ -169,8 +168,7 @@ public class ICATRest {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonGenerator gen = Json.createGenerator(baos);
-		gen.writeStartObject().write("userName", userName)
-				.write("remainingMinutes", remainingMinutes).writeEnd();
+		gen.writeStartObject().write("userName", userName).write("remainingMinutes", remainingMinutes).writeEnd();
 		gen.close();
 		return baos.toString();
 	}
@@ -178,15 +176,14 @@ public class ICATRest {
 	@GET
 	@Path("jpql")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getJpql(@QueryParam("sessionId") String sessionId,
-			@QueryParam("query") String query) throws IcatException {
+	public String getJpql(@QueryParam("sessionId") String sessionId, @QueryParam("query") String query)
+			throws IcatException {
 		checkRoot(sessionId);
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
 		}
 		int nMax = 5;
-		List<Object> os = manager.createQuery(query, Object.class).setMaxResults(nMax)
-				.getResultList();
+		List<Object> os = manager.createQuery(query, Object.class).setMaxResults(nMax).getResultList();
 		StringBuilder sb = new StringBuilder();
 		if (os.size() == nMax) {
 			sb.append("Count at least 5");
@@ -221,8 +218,8 @@ public class ICATRest {
 	@Path("entityManager")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	public String create(@FormParam("sessionId") String sessionId,
-			@FormParam("entities") String json) throws IcatException {
+	public String create(@FormParam("sessionId") String sessionId, @FormParam("entities") String json)
+			throws IcatException {
 		List<EntityBaseBean> entities = new ArrayList<>();
 
 		try (JsonParser parser = Json.createParser(new ByteArrayInputStream(json.getBytes()))) {
@@ -244,8 +241,7 @@ public class ICATRest {
 		}
 		String userName = beanManager.getUserName(sessionId, manager);
 
-		List<CreateResponse> createResponses = beanManager.createMany(userName, entities, manager,
-				userTransaction);
+		List<CreateResponse> createResponses = beanManager.createMany(userName, entities, manager, userTransaction);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
@@ -256,8 +252,7 @@ public class ICATRest {
 			}
 			gen.writeEnd();
 		} catch (JMSException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " "
-					+ e.getMessage());
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 		return baos.toString();
 	}
@@ -281,8 +276,8 @@ public class ICATRest {
 				}
 				Field field = fieldsByName.get(parser.getString());
 				if (field == null) {
-					throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Field "
-							+ parser.getString() + " not found in " + beanName);
+					throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Field " + parser.getString()
+							+ " not found in " + beanName);
 				} else if (field.getName().equals("id")) {
 					checker.get(Event.VALUE_NUMBER);
 					bean.setId(Long.parseLong(parser.getString()));
@@ -308,8 +303,8 @@ public class ICATRest {
 							try {
 								arg = df8601.parse(parser.getString());
 							} catch (ParseException e) {
-								throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-										"Badly formatted date " + parser.getString());
+								throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Badly formatted date "
+										+ parser.getString());
 							}
 						}
 					} else {
@@ -324,8 +319,7 @@ public class ICATRest {
 				} else {
 					checker.get(Event.START_ARRAY);
 					@SuppressWarnings("unchecked")
-					List<EntityBaseBean> col = (List<EntityBaseBean>) getters.get(field).invoke(
-							bean);
+					List<EntityBaseBean> col = (List<EntityBaseBean>) getters.get(field).invoke(bean);
 					while (true) {
 						event = checker.get(Event.START_OBJECT, Event.END_ARRAY);
 						if (event == Event.END_ARRAY) {
@@ -336,10 +330,10 @@ public class ICATRest {
 					}
 				}
 			}
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException | JsonException e) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getClass() + " "
-					+ e.getMessage() + " at " + parser.getLocation().getStreamOffset() + " in json");
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| JsonException e) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getClass() + " " + e.getMessage() + " at "
+					+ parser.getLocation().getStreamOffset() + " in json");
 		}
 		return bean;
 	}
@@ -347,9 +341,8 @@ public class ICATRest {
 	@GET
 	@Path("lucene")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String lucene(@QueryParam("sessionId") String sessionId,
-			@QueryParam("query") String query, @QueryParam("maxCount") int maxCount)
-			throws IcatException {
+	public String lucene(@QueryParam("sessionId") String sessionId, @QueryParam("query") String query,
+			@QueryParam("maxCount") int maxCount) throws IcatException {
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
 		}
@@ -370,15 +363,12 @@ public class ICATRest {
 					String units = parm.getString("units");
 					if (parm.containsKey("stringValue")) {
 						parms.add(new ParameterPOJO(name, units, parm.getString("stringValue")));
-					} else if (parm.containsKey("lowerDateValue")
-							&& parm.containsKey("upperDateValue")) {
-						parms.add(new ParameterPOJO(name, units, parm.getString("lowerDateValue"),
-								parm.getString("upperDateValue")));
-					} else if (parm.containsKey("lowerNumericValue")
-							&& parm.containsKey("upperNumericValue")) {
-						parms.add(new ParameterPOJO(name, units, parm.getJsonNumber(
-								"lowerNumericValue").doubleValue(), parm.getJsonNumber(
-								"upperNumericValue").doubleValue()));
+					} else if (parm.containsKey("lowerDateValue") && parm.containsKey("upperDateValue")) {
+						parms.add(new ParameterPOJO(name, units, parm.getString("lowerDateValue"), parm
+								.getString("upperDateValue")));
+					} else if (parm.containsKey("lowerNumericValue") && parm.containsKey("upperNumericValue")) {
+						parms.add(new ParameterPOJO(name, units, parm.getJsonNumber("lowerNumericValue").doubleValue(),
+								parm.getJsonNumber("upperNumericValue").doubleValue()));
 					} else {
 						throw new IcatException(IcatExceptionType.BAD_PARAMETER, parm.toString());
 					}
@@ -396,16 +386,15 @@ public class ICATRest {
 				}
 				String userFullName = jo.getString("userFullName", null);
 
-				objects = beanManager.luceneInvestigations(userName, user, text, lower, upper,
-						parms, samples, userFullName, maxCount, manager, userTransaction);
+				objects = beanManager.luceneInvestigations(userName, user, text, lower, upper, parms, samples,
+						userFullName, maxCount, manager, userTransaction);
 
 			} else if (target.equals("Dataset")) {
-				objects = beanManager.luceneDatasets(userName, user, text, lower, upper, parms,
-						maxCount, manager, userTransaction);
+				objects = beanManager.luceneDatasets(userName, user, text, lower, upper, parms, maxCount, manager,
+						userTransaction);
 
 			} else {
-				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target
-						+ " is not expected");
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
 			}
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartArray();
@@ -425,8 +414,8 @@ public class ICATRest {
 	@GET
 	@Path("entityManager")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String search(@QueryParam("sessionId") String sessionId,
-			@QueryParam("query") String query, @QueryParam("id") Long id) throws IcatException {
+	public String search(@QueryParam("sessionId") String sessionId, @QueryParam("query") String query,
+			@QueryParam("id") Long id) throws IcatException {
 
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
@@ -461,8 +450,8 @@ public class ICATRest {
 				} else if (result instanceof Boolean) {
 					gen.write((Boolean) result);
 				} else {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							"Don't know how to jsonise " + result.getClass());
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Don't know how to jsonise "
+							+ result.getClass());
 				}
 			}
 
@@ -481,10 +470,11 @@ public class ICATRest {
 	}
 
 	private void jsonise(EntityBaseBean bean, JsonGenerator gen) throws IcatException {
-
-		gen.write("id", bean.getId()).write("createId", bean.getCreateId())
-				.write("createTime", bean.getCreateTime().toString())
-				.write("modId", bean.getModId()).write("modTime", bean.getModTime().toString());
+		synchronized (df8601) {
+			gen.write("id", bean.getId()).write("createId", bean.getCreateId())
+					.write("createTime", df8601.format(bean.getCreateTime())).write("modId", bean.getModId())
+					.write("modTime", df8601.format(bean.getModTime()));
+		}
 
 		Class<? extends EntityBaseBean> klass = bean.getClass();
 		Map<Field, Method> getters = eiHandler.getGetters(klass);
@@ -496,8 +486,7 @@ public class ICATRest {
 			try {
 				value = getters.get(field).invoke(bean);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " "
-						+ e.getMessage());
+				throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 			}
 			if (value == null) {
 				// Ignore null values
@@ -520,8 +509,8 @@ public class ICATRest {
 						gen.write(field.getName(), df8601.format((Date) value));
 					}
 				} else {
-					throw new IcatException(IcatExceptionType.INTERNAL,
-							"Don't know how to jsonise field of type " + type);
+					throw new IcatException(IcatExceptionType.INTERNAL, "Don't know how to jsonise field of type "
+							+ type);
 				}
 			} else if (updaters.contains(field)) {
 				gen.writeStartObject(field.getName());
@@ -565,8 +554,8 @@ public class ICATRest {
 					if (fieldName.equals("json")) {
 						jsonString = value;
 					} else {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Form field "
-								+ fieldName + "is not recognised");
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Form field " + fieldName
+								+ "is not recognised");
 					}
 				} else {
 					if (name == null) {
@@ -591,8 +580,7 @@ public class ICATRest {
 	@Path("session")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	public String login(@Context HttpServletRequest request, @FormParam("json") String jsonString)
-			throws IcatException {
+	public String login(@Context HttpServletRequest request, @FormParam("json") String jsonString) throws IcatException {
 		logger.debug(jsonString);
 		if (jsonString == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "json must not be null");
@@ -625,13 +613,12 @@ public class ICATRest {
 
 		Authenticator authenticator = authPlugins.get(plugin);
 		if (authenticator == null) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION,
-					"Authenticator mnemonic " + plugin + " not recognised");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Authenticator mnemonic " + plugin
+					+ " not recognised");
 		}
 		logger.debug("Using " + plugin + " to authenticate");
 
-		String userName = authenticator.authenticate(credentials, request.getRemoteAddr())
-				.getUserName();
+		String userName = authenticator.authenticate(credentials, request.getRemoteAddr()).getUserName();
 		String sessionId = beanManager.login(userName, lifetimeMinutes, manager, userTransaction);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();

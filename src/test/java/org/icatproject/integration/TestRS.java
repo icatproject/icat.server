@@ -20,9 +20,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.stream.JsonGenerator;
 
@@ -322,6 +324,22 @@ public class TestRS {
 		wSession.setAuthz();
 
 		JsonArray array;
+
+		// Make sure that fetching a non-id Double gives no problems
+		assertEquals(73.0, ((JsonNumber) search(session, "SELECT MIN(pt.minimumNumericValue) FROM ParameterType pt", 1)
+				.get(0)).doubleValue(), 0.001);
+		assertEquals(73.4, ((JsonNumber) search(session, "SELECT MAX(pt.minimumNumericValue) FROM ParameterType pt", 1)
+				.get(0)).doubleValue(), 0.001);
+		assertEquals(73.2, ((JsonNumber) search(session, "SELECT AVG(pt.minimumNumericValue) FROM ParameterType pt", 1)
+				.get(0)).doubleValue(), 0.001);
+
+		JsonObject inv = search(session, "SELECT inv FROM Investigation inv WHERE inv.visitId = 'zero'", 1)
+				.getJsonObject(0).getJsonObject("Investigation");
+		Pattern p = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}");
+		for (String name : Arrays.asList("createTime", "modTime", "startDate", "endDate")) {
+			assertTrue(name + ": " + inv.getString(name), p.matcher(inv.getString(name)).find());
+		}
+
 		array = search(session, "SELECT it FROM InvestigationType it INCLUDE 1", 2);
 		List<String> names = new ArrayList<>();
 		for (int i = 0; i < array.size(); i++) {
@@ -561,7 +579,7 @@ public class TestRS {
 			Files.copy(stream, dump, StandardCopyOption.REPLACE_EXISTING);
 		}
 		ts("Create dump USER");
-		assertEquals(1919, dump.toFile().length());
+		assertEquals(1924, dump.toFile().length());
 		session.importMetaData(dump, DuplicateAction.CHECK, Attributes.USER);
 
 		start = System.currentTimeMillis();
@@ -570,7 +588,8 @@ public class TestRS {
 		}
 		ts("Create dump ALL");
 		long n = dump.toFile().length();
-		assertTrue("Size is dependent upon time zone in which test is run " + n, n == 2686 || n == 1518 || n == 2771);
+		assertTrue("Size is dependent upon time zone in which test is run " + n, n == 2686 || n == 1518 || n == 2771
+				|| n == 2776);
 		session.importMetaData(dump, DuplicateAction.CHECK, Attributes.ALL);
 		Files.delete(dump);
 	}
