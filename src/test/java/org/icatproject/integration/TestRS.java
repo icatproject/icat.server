@@ -588,6 +588,7 @@ public class TestRS {
 		}
 		ts("Create dump ALL");
 		long n = dump.toFile().length();
+
 		assertTrue("Size is dependent upon time zone in which test is run " + n, n == 2686 || n == 1518 || n == 2771
 				|| n == 2776);
 		session.importMetaData(dump, DuplicateAction.CHECK, Attributes.ALL);
