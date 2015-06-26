@@ -58,6 +58,9 @@
 					updated to match a change introduced in release 4.4 whereby users
 					listed in rootUserNames have full access to all tables.
 				</li>
+				<li>json returned by resful calls now encodes numbers and booleans
+					correctly.
+				</li>
 			</ul>
 		</section>
 

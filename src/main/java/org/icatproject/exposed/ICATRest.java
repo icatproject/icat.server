@@ -495,13 +495,13 @@ public class ICATRest {
 				if (type.equals("String")) {
 					gen.write(field.getName(), (String) value);
 				} else if (type.equals("Integer")) {
-					gen.write(field.getName(), value.toString());
+					gen.write(field.getName(), (Integer) value);
 				} else if (type.equals("Double")) {
-					gen.write(field.getName(), value.toString());
+					gen.write(field.getName(), (Double) value);
 				} else if (type.equals("Long")) {
-					gen.write(field.getName(), value.toString());
+					gen.write(field.getName(), (Long) value);
 				} else if (type.equals("boolean")) {
-					gen.write(field.getName(), value.toString());
+					gen.write(field.getName(), (Boolean) value);
 				} else if (field.getType().isEnum()) {
 					gen.write(field.getName(), value.toString());
 				} else if (type.equals("Date")) {

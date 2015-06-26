@@ -1,6 +1,8 @@
 package org.icatproject.integration;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -296,6 +298,7 @@ public class TestRS {
 				.readObject().getJsonObject("Facility");
 
 		assertEquals("Test port facility", fac.getString("name"));
+		assertEquals(90, fac.getInt("daysUntilRelease"));
 		JsonArray its = fac.getJsonArray("investigationTypes");
 		assertEquals(2, its.size());
 		List<String> names = new ArrayList<>();
@@ -326,8 +329,8 @@ public class TestRS {
 		JsonArray array;
 
 		// Make sure that fetching a non-id Double gives no problems
-		assertEquals(73.0, ((JsonNumber) search(session, "SELECT MIN(pt.minimumNumericValue) FROM ParameterType pt", 1)
-				.get(0)).doubleValue(), 0.001);
+		assertEquals(73.0, search(session, "SELECT MIN(pt.minimumNumericValue) FROM ParameterType pt", 1)
+				.getJsonNumber(0).doubleValue(), 0.001);
 		assertEquals(73.4, ((JsonNumber) search(session, "SELECT MAX(pt.minimumNumericValue) FROM ParameterType pt", 1)
 				.get(0)).doubleValue(), 0.001);
 		assertEquals(73.2, ((JsonNumber) search(session, "SELECT AVG(pt.minimumNumericValue) FROM ParameterType pt", 1)
@@ -339,6 +342,13 @@ public class TestRS {
 		for (String name : Arrays.asList("createTime", "modTime", "startDate", "endDate")) {
 			assertTrue(name + ": " + inv.getString(name), p.matcher(inv.getString(name)).find());
 		}
+
+		// Make sure all types are handled properly
+		JsonObject pt = search(session, "SELECT pt FROM ParameterType pt LIMIT 0,1", 1).getJsonObject(0).getJsonObject(
+				"ParameterType");
+		assertEquals("STRING", pt.getString("valueType"));
+		assertFalse(pt.getBoolean("enforced"));
+		assertNull(pt.get("minimumNumericValue"));
 
 		array = search(session, "SELECT it FROM InvestigationType it INCLUDE 1", 2);
 		List<String> names = new ArrayList<>();
