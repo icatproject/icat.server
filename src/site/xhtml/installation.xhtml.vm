@@ -202,9 +202,9 @@
 		called SEQUENCE) in the case of Oracle. Do not omit this step
 		otherwise the id values for new rows will not be set correctly and you
 		will run into problems with duplicate values. For MySQL run
-		<kbd>mysql -u icat -p icat &lt; upgrade_mysql_4.4.sql</kbd>
+		<kbd>mysql -u icat -p icat &lt; upgrade_mysql_4_4.sql</kbd>
 		or for Oracle run
-		<kbd>sqlplus system @upgrade_oracle_4.4.sql</kbd>
+		<kbd>sqlplus icat @upgrade_oracle_4_4.sql</kbd>
 		where in both cases it is assumed that the tables are owned by user
 		"icat". The MySQL script is simply a list of alter table statements
 		for each table in the 4.4.0 schema. The oracle script takes the last
@@ -433,8 +433,8 @@
 	</p>
 	<h2>Upgrade</h2>
 	<p>
-		If you have performed a schema upgrade from 4.3.x then you should restore the
-		rules using the
+		If you have performed a schema upgrade from 4.3.x then you should
+		restore the rules using the
 		<kbd>icat-setup</kbd>
 		tool. For example:
 	</p>
@@ -519,50 +519,50 @@
 			any superfluous definitions in the original properties file will not
 			be seen.</dd>
 
-<!-- 		<dt>populate [&lt;entity name&gt;]</dt> -->
-<!-- 		<dd>re-populates lucene for the specified entity name. This is -->
-<!-- 			useful if the database has been modified directly rather than by -->
-<!-- 			using the ICAT API. Note that because of caching, ICAT should be -->
-<!-- 			reloaded after any direct database modifications are made. This call -->
-<!-- 			is asynchronous and simply places the request in a set of entity -->
-<!-- 			types to be populated. When the request is processed all lucene -->
-<!-- 			entries of the specified entity type are first cleared then the -->
-<!-- 			corresponding icat entries are scanned to re-populate lucene. To find -->
-<!-- 			what it is doing please use the "populating" operation desribed -->
-<!-- 			below. It may also be run without an entity name in which case it -->
-<!-- 			will process all entities.</dd> -->
+		<!-- 		<dt>populate [&lt;entity name&gt;]</dt> -->
+		<!-- 		<dd>re-populates lucene for the specified entity name. This is -->
+		<!-- 			useful if the database has been modified directly rather than by -->
+		<!-- 			using the ICAT API. Note that because of caching, ICAT should be -->
+		<!-- 			reloaded after any direct database modifications are made. This call -->
+		<!-- 			is asynchronous and simply places the request in a set of entity -->
+		<!-- 			types to be populated. When the request is processed all lucene -->
+		<!-- 			entries of the specified entity type are first cleared then the -->
+		<!-- 			corresponding icat entries are scanned to re-populate lucene. To find -->
+		<!-- 			what it is doing please use the "populating" operation desribed -->
+		<!-- 			below. It may also be run without an entity name in which case it -->
+		<!-- 			will process all entities.</dd> -->
 
-<!-- 		<dt>populating</dt> -->
-<!-- 		<dd>returns a list of entity types to be processed for populating -->
-<!-- 			lucene. Normally the first item returned will be being processed -->
-<!-- 			currently.</dd> -->
+		<!-- 		<dt>populating</dt> -->
+		<!-- 		<dd>returns a list of entity types to be processed for populating -->
+		<!-- 			lucene. Normally the first item returned will be being processed -->
+		<!-- 			currently.</dd> -->
 
-<!-- 		<dt>commit</dt> -->
-<!-- 		<dd>instructs lucene to update indices. Normally this is not -->
-<!-- 			needed as it is will be done periodically according to the value of -->
-<!-- 			lucene.commitSeconds</dd> -->
+		<!-- 		<dt>commit</dt> -->
+		<!-- 		<dd>instructs lucene to update indices. Normally this is not -->
+		<!-- 			needed as it is will be done periodically according to the value of -->
+		<!-- 			lucene.commitSeconds</dd> -->
 
-<!-- 		<dt>clear</dt> -->
-<!-- 		<dd>clears all the lucene indices - but does not commit.</dd> -->
+		<!-- 		<dt>clear</dt> -->
+		<!-- 		<dd>clears all the lucene indices - but does not commit.</dd> -->
 
-<!-- 		<dt>search &lt;query&gt; [&lt;maxCount&gt; [&lt;entityName&gt;]]</dt> -->
-<!-- 		<dd> -->
-<!-- 			searches lucene indices and returns a list of entity_name:entity_id -->
-<!-- 			values. Arguments are -->
-<!-- 			<dl> -->
-<!-- 				<dt>query</dt> -->
-<!-- 				<dd>a lucene query which should be enclosed in quotes if it -->
-<!-- 					contains more than one word. Queries can contain AND and OR in -->
-<!-- 					upper case as well as parentheses. The default operator is OR. -->
-<!-- 					Wildcards of * and ? are also supported. Other features are -->
-<!-- 					described in the user documentation for the searchText call.</dd> -->
-<!-- 				<dt>maxCount</dt> -->
-<!-- 				<dd>maximum number of values to return (defaults to 100)</dd> -->
-<!-- 				<dt>entityName</dt> -->
-<!-- 				<dd>if specified, this restrict results to entities with this -->
-<!-- 					name</dd> -->
-<!-- 			</dl> -->
-<!-- 		</dd> -->
+		<!-- 		<dt>search &lt;query&gt; [&lt;maxCount&gt; [&lt;entityName&gt;]]</dt> -->
+		<!-- 		<dd> -->
+		<!-- 			searches lucene indices and returns a list of entity_name:entity_id -->
+		<!-- 			values. Arguments are -->
+		<!-- 			<dl> -->
+		<!-- 				<dt>query</dt> -->
+		<!-- 				<dd>a lucene query which should be enclosed in quotes if it -->
+		<!-- 					contains more than one word. Queries can contain AND and OR in -->
+		<!-- 					upper case as well as parentheses. The default operator is OR. -->
+		<!-- 					Wildcards of * and ? are also supported. Other features are -->
+		<!-- 					described in the user documentation for the searchText call.</dd> -->
+		<!-- 				<dt>maxCount</dt> -->
+		<!-- 				<dd>maximum number of values to return (defaults to 100)</dd> -->
+		<!-- 				<dt>entityName</dt> -->
+		<!-- 				<dd>if specified, this restrict results to entities with this -->
+		<!-- 					name</dd> -->
+		<!-- 			</dl> -->
+		<!-- 		</dd> -->
 	</dl>
 
 </body>
