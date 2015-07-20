@@ -61,6 +61,7 @@
 				<li>json returned by restful calls now encodes numbers and booleans
 					correctly.
 				</li>
+				<li>The restful calls now produce CORS headers.</li>
 			</ul>
 		</section>
 
