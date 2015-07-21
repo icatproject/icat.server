@@ -344,8 +344,8 @@ public class TestRS {
 		}
 
 		// Make sure all types are handled properly
-		JsonObject pt = search(session, "SELECT pt FROM ParameterType pt LIMIT 0,1", 1).getJsonObject(0).getJsonObject(
-				"ParameterType");
+		JsonObject pt = search(session, "SELECT pt FROM ParameterType pt WHERE pt.name = 'colour' LIMIT 0,1", 1)
+				.getJsonObject(0).getJsonObject("ParameterType");
 		assertEquals("STRING", pt.getString("valueType"));
 		assertFalse(pt.getBoolean("enforced"));
 		assertNull(pt.get("minimumNumericValue"));
