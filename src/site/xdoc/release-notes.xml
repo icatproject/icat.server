@@ -43,7 +43,9 @@
 				<li>Avoid the use of a sequence table for allocating IDs.</li>
 				<li>LIMIT clause in the query now works properly when searching by
 					id. This requires a manual schema upgrade if you already have an
-					ICAT installed.
+					ICAT installed. It should be noted that a side effect of this is
+					that for MySQL there is no longer a global ID sequence but the ID
+					sequences are specific to a table.
 				</li>
 				<li>Ensure that createTime and endTime are represented by ISO 8601
 					style json strings like other TIMESTAMP fields using the RESTful
