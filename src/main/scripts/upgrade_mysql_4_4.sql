@@ -32,7 +32,6 @@ alter table RULE_                   modify ID bigint auto_increment;
 alter table SAMPLE                  modify ID bigint auto_increment;
 alter table SAMPLEPARAMETER         modify ID bigint auto_increment;
 alter table SAMPLETYPE              modify ID bigint auto_increment;
-alter table SESSION_                modify ID bigint auto_increment;
 alter table SHIFT                   modify ID bigint auto_increment;
 alter table STUDY                   modify ID bigint auto_increment;
 alter table STUDYINVESTIGATION      modify ID bigint auto_increment;
