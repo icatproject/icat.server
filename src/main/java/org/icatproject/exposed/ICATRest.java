@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -25,11 +27,14 @@ import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.jms.JMSException;
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonException;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonString;
 import javax.json.JsonValue;
+import javax.json.JsonWriter;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
@@ -69,6 +74,7 @@ import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.Lucene.ParameterPOJO;
 import org.icatproject.core.manager.Porter;
 import org.icatproject.core.manager.PropertyHandler;
+import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
 import org.icatproject.core.manager.Transmitter;
 
 @Path("/")
@@ -124,7 +130,7 @@ public class ICATRest {
 
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
-	private Map<String, Authenticator> authPlugins;
+	private Map<String, ExtendedAuthenticator> authPlugins;
 
 	@EJB
 	EntityBeanManager beanManager;
@@ -151,11 +157,49 @@ public class ICATRest {
 
 	private Set<String> rootUserNames;
 
+	private int maxEntities;
+
 	@GET
 	@Path("port")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response exportData(@QueryParam("json") String jsonString) throws IcatException {
 		return porter.exportData(jsonString, manager, userTransaction);
+	}
+
+	@GET
+	@Path("properties")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getProperties() {
+
+		JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+		JsonArrayBuilder authenticatorArrayBuilder = Json.createArrayBuilder();
+
+		for (Entry<String, ExtendedAuthenticator> entry : authPlugins.entrySet()) {
+			ExtendedAuthenticator extendedAuthenticator = entry.getValue();
+			JsonObjectBuilder authenticatorBuilder = Json.createObjectBuilder();
+			authenticatorBuilder.add("mnemonic", entry.getKey());
+			JsonReader jsonReader = Json.createReader(new StringReader(extendedAuthenticator.getAuthenticator()
+					.getDescription()));
+			JsonObject description = jsonReader.readObject();
+			jsonReader.close();
+			authenticatorBuilder.add("description", description);
+			if (extendedAuthenticator.isAdmin()) {
+				authenticatorBuilder.add("admin", true);
+			}
+			if (extendedAuthenticator.getFriendly() != null) {
+				authenticatorBuilder.add("friendly", extendedAuthenticator.getFriendly());
+			}
+			authenticatorArrayBuilder.add(authenticatorBuilder);
+		}
+
+		jsonBuilder.add("maxEntities", maxEntities).add("lifetimeMinutes", lifetimeMinutes)
+				.add("authenticators", authenticatorArrayBuilder);
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		JsonWriter writer = Json.createWriter(baos);
+		writer.writeObject(jsonBuilder.build());
+		writer.close();
+		return baos.toString();
 	}
 
 	@GET
@@ -574,6 +618,7 @@ public class ICATRest {
 		authPlugins = propertyHandler.getAuthPlugins();
 		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
 		rootUserNames = propertyHandler.getRootUserNames();
+		maxEntities = propertyHandler.getMaxEntities();
 	}
 
 	@POST
@@ -611,7 +656,7 @@ public class ICATRest {
 			}
 		}
 
-		Authenticator authenticator = authPlugins.get(plugin);
+		Authenticator authenticator = authPlugins.get(plugin).getAuthenticator();
 		if (authenticator == null) {
 			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Authenticator mnemonic " + plugin
 					+ " not recognised");
@@ -640,4 +685,5 @@ public class ICATRest {
 	public void refresh(@PathParam("sessionId") String sessionId) throws IcatException {
 		beanManager.refresh(sessionId, lifetimeMinutes, manager, userTransaction);
 	}
+
 }

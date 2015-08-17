@@ -3,19 +3,18 @@ from setup_utils import *
 import os
 import socket
 
-# icat
+# icat.server
 
 def uninstall():
     app = actions.getAppName("icat.ear")
-    if app: actions.asadmin("undeploy " + app)
+    if app: actions.undeploy(app)
     app = actions.getAppName("icat.server")
-    if app: actions.asadmin("undeploy " + app)
-    actions.asadmin("delete-jdbc-resource jdbc/icat", tolerant=True)
-    actions.asadmin("delete-jdbc-connection-pool icat", tolerant=True)
-    actions.asadmin("delete-jms-resource jms/ICAT/TopicConnectionFactory", tolerant=True)
-    actions.asadmin("delete-jms-resource jms/ICAT/Topic", tolerant=True)
-    actions.asadmin("delete-jms-resource jms/ICAT/CentralConnectionFactory", tolerant=True) 
-    actions.asadmin("delete-jms-resource jms/ICAT/Synch", tolerant=True)
+    if app: actions.undeploy(app)
+    actions.unregisterDB("icat")
+    actions.deleteJMSResource("jms/ICAT/TopicConnectionFactory")
+    actions.deleteJMSResource("jms/ICAT/Topic")
+    actions.deleteJMSResource("jms/ICAT/CentralConnectionFactory") 
+    actions.deleteJMSResource("jms/ICAT/Synch")
     
 actions, options, arg = getActions(binDir=True)
 props = actions.getGlassfish("icat-setup.properties", ["dbProperties", "glassfish", "driver", "port"])
@@ -47,7 +46,7 @@ if arg == "INSTALL":
      
     if  log4jProperties:
         dir, file = os.path.split(log4jProperties)
-        if not os.path.exists(file): abort("log4j.properties file " + file + " not found")
+        if not os.path.exists(file): abort("log4create-jms-resourcej.properties file " + file + " not found")
         
     ld = icatProperties.get("lucene.Directory")
     if ld:
@@ -68,16 +67,11 @@ if arg == "INSTALL":
     
     try:           
         uninstall()
-        
-        actions.asadmin('create-jdbc-connection-pool' + actions.getJDBCProps(props["driver"]) + 
-                '--property ' + props["dbProperties"] + ' icat', printOutput=True)
-             
-        actions.asadmin("create-jdbc-resource --connectionpoolid icat jdbc/icat")
-    
-        actions.asadmin("create-jms-resource --restype javax.jms.TopicConnectionFactory jms/ICAT/TopicConnectionFactory")
-        actions.asadmin("create-jms-resource --restype javax.jms.Topic jms/ICAT/Topic")
-        actions.asadmin("create-jms-resource --restype javax.jms.TopicConnectionFactory jms/ICAT/CentralConnectionFactory")
-        actions.asadmin("create-jms-resource --restype javax.jms.Topic jms/ICAT/Synch")
+        actions.registerDB(props["driver"], props["dbProperties"], "icat")
+        actions.createJMSResource("javax.jms.TopicConnectionFactory", "jms/ICAT/TopicConnectionFactory")
+        actions.createJMSResource("javax.jms.Topic", "jms/ICAT/Topic")
+        actions.createJMSResource("javax.jms.TopicConnectionFactory", "jms/ICAT/CentralConnectionFactory")
+        actions.createJMSResource("javax.jms.Topic", "jms/ICAT/Synch")
         
         jmsHostPort = props.get("jmsHostPort")
         if jmsHostPort:

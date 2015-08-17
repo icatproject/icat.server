@@ -8,6 +8,19 @@
 
 	<body>
 
+		<section name="4.6.0">
+			<p>Small change to icat.properties</p>
+			<ul>
+				<li>notification.list and log.list may now be omitted but must not
+					be present and empty in the icat.properties file
+				</li>
+				<li>Provide a "getProperties()" restful call to find out what can be
+					revealed about a server without a sessionId. This includes
+					maxEntities and information about the available authenticators.
+				</li>
+			</ul>
+		</section>
+
 		<section name="4.5.0">
 			<p>Remove lucene calls and apply bug fixes.</p>
 			<ul>
@@ -43,7 +56,8 @@
 				<li>Avoid the use of a sequence table for allocating IDs. It should
 					be noted that a side effect of this is that for MySQL there is no
 					longer a global ID sequence but the ID sequences are specific to a
-					table.</li>
+					table.
+				</li>
 				<li>LIMIT clause in the query now works properly when searching by
 					id. This requires a manual schema upgrade if you already have an
 					ICAT installed.

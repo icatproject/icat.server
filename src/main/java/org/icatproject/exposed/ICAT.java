@@ -74,6 +74,7 @@ import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.NotificationMessage;
 import org.icatproject.core.manager.PropertyHandler;
+import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
 import org.icatproject.core.manager.Transmitter;
 
 @Stateless
@@ -83,7 +84,7 @@ public class ICAT {
 
 	private static Logger logger = Logger.getLogger(ICAT.class);
 
-	private Map<String, Authenticator> authPlugins = new HashMap<String, Authenticator>();
+	private Map<String, ExtendedAuthenticator> authPlugins = new HashMap<>();
 
 	@EJB
 	EntityBeanManager beanManager;
@@ -282,7 +283,7 @@ public class ICAT {
 			@WebParam(name = "credentials") Map<String, String> credentials) throws IcatException {
 		MessageContext msgCtxt = webServiceContext.getMessageContext();
 		HttpServletRequest req = (HttpServletRequest) msgCtxt.get(MessageContext.SERVLET_REQUEST);
-		Authenticator authenticator = authPlugins.get(plugin);
+		Authenticator authenticator = authPlugins.get(plugin).getAuthenticator();
 		if (authenticator == null) {
 			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Authenticator mnemonic " + plugin
 					+ " not recognised");

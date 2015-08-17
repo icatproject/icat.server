@@ -37,6 +37,11 @@ public class MockDirContext implements DirContext {
 					throws IcatException {
 				return new Authentication("root", null);
 			}
+
+			@Override
+			public String getDescription() {
+				return null;
+			}
 		};
 	}
 
