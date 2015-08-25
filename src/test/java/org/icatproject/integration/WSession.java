@@ -240,9 +240,9 @@ public class WSession {
 		return dst;
 	}
 
-	public Facility createFacility(String shortName, int daysUntilRelease) throws Exception {
+	public Facility createFacility(String name, int daysUntilRelease) throws Exception {
 		final Facility f = new Facility();
-		f.setName(shortName);
+		f.setName(name);
 		f.setDaysUntilRelease(daysUntilRelease);
 		f.setId(icat.create(this.sessionId, f));
 		return f;

@@ -1909,6 +1909,19 @@ public class TestWS {
 		assertEquals(1L, session.search("SELECT COUNT(DISTINCT i.facility) FROM Investigation i").get(0));
 		assertEquals(0L, session.search("SELECT COUNT(i.facility.url) FROM Investigation i").get(0));
 
+		// Check on wild card handling
+		session.createFacility("Test__Facility", 90);
+		session.createFacility("TestXYFacility", 90);
+		session.createFacility("TestX_Facility", 90);
+
+		query = "SELECT f.name FROM Facility f WHERE f.name LIKE 'Test__Facility'";
+		assertEquals("Count", 3, session.search(query).size());
+
+		query = "SELECT f.name FROM Facility f WHERE f.name LIKE 'Test$_$_Facility'";
+		assertEquals("Count", 0, session.search(query).size());
+
+		query = "SELECT f.name FROM Facility f WHERE f.name LIKE 'Test$_$_Facility' ESCAPE '$'";
+		assertEquals("Count", 1, session.search(query).size());
 	}
 
 	@Test

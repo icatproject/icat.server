@@ -11,9 +11,9 @@ public class TestTokenizer {
 	@Test
 	public void testGood1() throws Exception {
 		List<Token> tokens = Tokenizer
-				.getTokens("<-> investigation investigator facility_user_id = '$user' 1 -12  15");
+				.getTokens("<-> investigation investigator facility_user_id = '$user' 1 -12  15 EscapE");
 		String[] tostrings = { "<", "-", ">", "investigation", "investigator", "facility_user_id",
-				"=", "$user", "1", "-12", "15" };
+				"=", "$user", "1", "-12", "15", "ESCAPE" };
 		assertEquals(tostrings.length, tokens.size());
 		int i = 0;
 		for (Token t : tokens) {
