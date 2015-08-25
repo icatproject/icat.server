@@ -49,8 +49,7 @@ public class TestJunk {
 		JsonObject model = (JsonObject) reader.read();
 		System.out.println(model);
 
-		model = Json.createObjectBuilder().add("sessionId", "aaa-bbb")
-				.add("query", "Investigation").build();
+		model = Json.createObjectBuilder().add("sessionId", "aaa-bbb").add("query", "Investigation").build();
 
 		StringWriter stWriter = new StringWriter();
 		try (JsonWriter jsonWriter = Json.createWriter(stWriter)) {
@@ -90,14 +89,13 @@ public class TestJunk {
 
 		baos = new ByteArrayOutputStream();
 		gen = Json.createGenerator(baos);
-		gen.writeStartObject().write("plugin", "db").writeStartArray("credentials")
-				.writeStartObject().write("username", "root").writeEnd().writeStartObject()
-				.write("password", "password").writeEnd().writeEnd().writeEnd();
+		gen.writeStartObject().write("plugin", "db").writeStartArray("credentials").writeStartObject()
+				.write("username", "root").writeEnd().writeStartObject().write("password", "password").writeEnd()
+				.writeEnd().writeEnd();
 		gen.close();
 		System.out.println(baos.toString());
 
-		try (JsonParser parser = Json.createParser(new ByteArrayInputStream(baos.toString()
-				.getBytes()))) {
+		try (JsonParser parser = Json.createParser(new ByteArrayInputStream(baos.toString().getBytes()))) {
 			String key = null;
 			boolean inCredentials = false;
 			String plugin = null;
