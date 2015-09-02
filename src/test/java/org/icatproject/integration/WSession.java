@@ -317,6 +317,7 @@ public class WSession {
 		this.addRule("notroot", "SELECT x FROM ParameterType x", "CRUD");
 		this.addRule("notroot", "SELECT x FROM DatasetParameter x", "CRUD");
 		this.addRule("notroot", "SELECT x FROM Datafile x", "CRUD");
+		this.addRule("notroot", "SELECT x FROM DatafileParameter x", "CRUD");
 		this.addRule("notroot", "SELECT x FROM DatafileFormat x", "CRUD");
 		this.addRule("notroot", "SELECT x FROM DatasetType x", "CRUD");
 		this.addRule("notroot", "SELECT x FROM Application x", "CRUD");
@@ -387,15 +388,11 @@ public class WSession {
 		icat.logout(sessionId);
 	}
 
-	/*
-	 * TODO in 4.6.0 public List<Object> searchText(String query, int maxCount,
-	 * String entity) throws IcatException_Exception { return
-	 * this.icat.searchText(sessionId, query, maxCount, entity); }
-	 * 
-	 * // This assumes that the lucene.commitSeconds is set to 1 for testing //
-	 * purposes public void synchLucene() throws InterruptedException {
-	 * Thread.sleep(2000); }
-	 */
+	// This assumes that the lucene.commitSeconds is set to 1 for testing
+	// purposes
+	public void synchLucene() throws InterruptedException {
+		Thread.sleep(2000);
+	}
 
 	public DataCollection createDataCollection(EntityBaseBean... beans) throws IcatException_Exception {
 		DataCollection dataCollection = new DataCollection();
@@ -419,26 +416,6 @@ public class WSession {
 	public List<String> getProperties() throws IcatException_Exception {
 		return icat.getProperties(rootsessionId);
 	}
-
-	// TODO bring back in 4.6
-	// public void luceneClear() throws IcatException_Exception {
-	// icat.luceneClear(rootsessionId);
-	// }
-	//
-	// public void luceneCommit() throws IcatException_Exception {
-	// icat.luceneCommit(rootsessionId);
-	// }
-	//
-	// public void lucenePopulate(String entityName) throws
-	// IcatException_Exception {
-	// icat.lucenePopulate(rootsessionId, entityName);
-	// }
-	//
-	// public List<String> luceneSearch(String query, int maxCount, String
-	// entityName)
-	// throws IcatException_Exception {
-	// return icat.luceneSearch(rootsessionId, query, maxCount, entityName);
-	// }
 
 	public Instrument createInstrument(Facility facility, String name) throws IcatException_Exception {
 		Instrument ins = new Instrument();
@@ -475,12 +452,6 @@ public class WSession {
 		iu.setId(icat.create(sessionId, iu));
 		return iu;
 	}
-
-	// TODO restore in ICAT 4.6.0
-	// public List<String> luceneGetPopulating() throws IcatException_Exception
-	// {
-	// return icat.luceneGetPopulating(rootsessionId);
-	// }
 
 	public boolean isAccessAllowed(EntityBaseBean bean, AccessType aType) throws IcatException_Exception {
 		return icat.isAccessAllowed(sessionId, bean, aType);

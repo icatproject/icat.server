@@ -79,8 +79,7 @@ public interface Lucene {
 			} else if (lowerDateValue != null) {
 				sb.append(" lowerDateValue:" + lowerDateValue + " upperDateValue:" + upperDateValue);
 			} else if (lowerNumericValue != null) {
-				sb.append(", lowerNumericValue:" + lowerNumericValue + " upperNumericValue:"
-						+ upperNumericValue);
+				sb.append(", lowerNumericValue:" + lowerNumericValue + " upperNumericValue:" + upperNumericValue);
 			}
 			return sb.toString();
 		}
@@ -132,24 +131,28 @@ public interface Lucene {
 
 	LuceneSearchResult search(String query, int blockSize, String entityName) throws IcatException;
 
-	LuceneSearchResult searchAfter(String query, int blockSize, String entityName,
-			LuceneSearchResult last) throws IcatException;
+	LuceneSearchResult searchAfter(String query, int blockSize, String entityName, LuceneSearchResult last)
+			throws IcatException;
 
 	void updateDocument(EntityBaseBean entityBaseBean) throws IcatException;
 
-	LuceneSearchResult investigations(String user, String text, String lower, String upper,
-			List<ParameterPOJO> parms, List<String> samples, String userFullName, int maxResults)
-			throws IcatException;
+	LuceneSearchResult investigations(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
+			List<String> samples, String userFullName, int maxResults) throws IcatException;
 
 	LuceneSearchResult investigationsAfter(String user, String text, String lower, String upper,
-			List<ParameterPOJO> parms, List<String> samples, String userFullName, int blockSize,
-			LuceneSearchResult last) throws IcatException;
-
-	LuceneSearchResult datasets(String user, String text, String lower, String upper,
-			List<ParameterPOJO> parms, int maxResults) throws IcatException;
-
-	LuceneSearchResult datasetsAfter(String user, String text, String lower, String upper,
-			List<ParameterPOJO> parms, int maxResults, LuceneSearchResult last)
+			List<ParameterPOJO> parms, List<String> samples, String userFullName, int blockSize, LuceneSearchResult last)
 			throws IcatException;
+
+	LuceneSearchResult datasets(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
+			int maxResults) throws IcatException;
+
+	LuceneSearchResult datasetsAfter(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
+			int maxResults, LuceneSearchResult last) throws IcatException;
+
+	LuceneSearchResult datafiles(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
+			int maxResults) throws IcatException;
+
+	LuceneSearchResult datafilesAfter(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
+			int maxResults, LuceneSearchResult last) throws IcatException;
 
 }

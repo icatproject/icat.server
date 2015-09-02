@@ -275,10 +275,11 @@ public class PropertyHandler {
 			key = "lucene.directory";
 			if (props.has(key)) {
 				luceneDirectory = props.getString(key);
-				formattedProps.add("lucene.directory " + luceneDirectory);
+				formattedProps.add(key + " " + luceneDirectory);
 				luceneCommitSeconds = props.getPositiveInt("lucene.commitSeconds");
-				formattedProps.add(key + " " + luceneCommitSeconds);
+				formattedProps.add("lucene.commitSeconds " + luceneCommitSeconds);
 				luceneCommitCount = props.getPositiveInt("lucene.commitCount");
+				formattedProps.add("lucene.commitCount " + luceneCommitCount);
 			}
 
 			/* maxEntities, importCacheSize, exportCacheSize, maxIdsInQuery */

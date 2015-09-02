@@ -20,14 +20,21 @@ importCacheSize = 50
 exportCacheSize = 50
 	
 # Desired authentication plugin mnemonics
-authn.list = db ldap anon simple
+authn.list = db ldap simple anon
 
-# JNDI for each plugin
-authn.db.jndi     =   java:global/authn_db-1.1.1/DB_Authenticator   
-authn.ldap.jndi   = java:global/authn_ldap-1.1.0/LDAP_Authenticator
-authn.anon.jndi   = java:global/authn_anon.ear-1.0.1/authn_anon.ejb-1.0.1/ANON_Authenticator
-authn.simple.jndi = java:global/authn_simple.ear-1.0.0/authn_simple.ejb-1.0.0/SIMPLE_Authenticator
+# Parameters for each of the four plugins
+authn.db.jndi       = java:global/authn.db-1.2.0/DB_Authenticator
 
+authn.ldap.jndi     = java:global/authn.ldap-1.2.0/LDAP_Authenticator
+authn.ldap.admin    = true
+authn.ldap.friendly = Federal Id
+
+authn.simple.jndi = java:global/authn.simple-1.1.0/SIMPLE_Authenticator
+
+authn.anon.jndi     = java:global/authn.anon-1.1.0/ANON_Authenticator
+authn.anon.friendly = Anonymous
+
+# Uncomment to permit configuration of log4j
 !log4j.properties = icat.log4j.properties
 
 # Notification setup

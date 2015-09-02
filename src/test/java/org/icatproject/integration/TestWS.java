@@ -818,66 +818,12 @@ public class TestWS {
 		i.setVisitId("42");
 		i.setType(investigationType);
 		i.getInvestigationUsers().add(iu);
-		// Long invid =
 		session.create(i);
 		objects = session.search("Investigation INCLUDE InvestigationUser, User [name='Frederick']");
 		assertEquals(1, objects.size());
 		i = (Investigation) objects.get(0);
 		assertEquals(1, i.getInvestigationUsers().size());
 		assertEquals("db/root", i.getInvestigationUsers().get(0).getUser().getName());
-		// TODO restore session.synchLucene();
-
-		// TODO removed lucene tests
-		// List<Object> results = session.searchText("frederick AND great", 10,
-		// null);
-		// assertEquals(1, results.size());
-		// EntityBaseBean result = (EntityBaseBean) results.get(0);
-		// assertEquals("Investigation", result.getClass().getSimpleName());
-		// assertEquals(invid, result.getId());
-		//
-		// results = session.searchText("frederick AND great", 10,
-		// "Investigation");
-		// assertEquals(1, results.size());
-		// result = (EntityBaseBean) results.get(0);
-		// assertEquals("Investigation", result.getClass().getSimpleName());
-		// assertEquals(invid, result.getId());
-		//
-		// results = session.searchText("frederick AND wimp", 10, null);
-		// assertEquals(0, results.size());
-		//
-		// i = (Investigation) session.get("Investigation INCLUDE 1", invid);
-		// i.setTitle("the Wimp");
-		// session.update(i);
-		// session.synchLucene();
-		//
-		// results = session.searchText("frederick AND wimp", 10, null);
-		// assertEquals(1, results.size());
-		// result = (EntityBaseBean) results.get(0);
-		// assertEquals("Investigation", result.getClass().getSimpleName());
-		// assertEquals(invid, result.getId());
-		//
-		// results = session.searchText("frederick AND wimp", 10,
-		// "Investigation");
-		// assertEquals(1, results.size());
-		// result = (EntityBaseBean) results.get(0);
-		// assertEquals("Investigation", result.getClass().getSimpleName());
-		// assertEquals(invid, result.getId());
-		//
-		// results = session.searchText("frederick AND great", 10, null);
-		// assertEquals(0, results.size());
-		//
-		// session.delete(i);
-		// session.synchLucene();
-		//
-		// results = session.searchText("frederick AND wimp", 10, null);
-		// assertEquals(0, results.size());
-		//
-		// results = session.searchText("frederick AND wimp", 10,
-		// "Investigation");
-		// assertEquals(0, results.size());
-		//
-		// results = session.searchText("frederick AND great", 10, null);
-		// assertEquals(0, results.size());
 	}
 
 	@Test

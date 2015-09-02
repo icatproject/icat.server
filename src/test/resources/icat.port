@@ -63,6 +63,9 @@ Datafile(dataset(investigation(facility(name:0), name:1, visitId:2), name:3), na
 "Test port facility", "expt1", "one", "ds2", "df2", 12345
 "Test port facility", "expt1", "one", "ds2", "df3", 12345
 
+DatafileParameter(datafile(dataset(investigation(facility(name:0), name:1, visitId:2) , name:3), name:4), type(facility(name:0), name:5 , units:6),stringValue:7, numericValue:8, dateTimeValue:9)
+"Test port facility", "expt1", "one", "ds2", "df2", "colour" , "name", "green", null, null
+
 Application(facility(name:0), name:1, version:2)
 "Test port facility", "aprog", "1.2.3"
 "Test port facility", "aprog", "1.2.6"
