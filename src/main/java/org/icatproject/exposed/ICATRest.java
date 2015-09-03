@@ -661,14 +661,95 @@ public class ICATRest {
 	 * @summary lucene
 	 * 
 	 * @param sessionId
-	 *            a sessionId of a user
+	 *            a sessionId of a user which takes the form
+	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
 	 * @param query
-	 *            json encoded query. One of the fields is "target" which may be
-	 *            Investigation, Dataset or Datafile.
+	 *            json encoded query object. One of the fields is "target" which
+	 *            must be "Investigation", "Dataset" or "Datafile". The other
+	 *            fields are all optional:
+	 *            <dl>
+	 *            <dt>user</dt>
+	 *            <dd>name of user as in the User table which may include a
+	 *            prefix</dd>
+	 *            <dt>text</dt>
+	 *            <dd>some text occurring somewhere in the entity. This is
+	 *            understood by the <a href=
+	 *            "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
+	 *            >lucene parser</a> but avoid trying to use fields.</dd>
+	 *            <dt>lower</dt>
+	 *            <dd>earliest date to search for in the form
+	 *            <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
+	 *            timezone. In the case of an investigation or data set search
+	 *            the date is compared with the start date and in the case of a
+	 *            data file the date field is used.</dd>
+	 *            <dt>upper</dt>
+	 *            <dd>latest date to search for in the form
+	 *            <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
+	 *            timezone. In the case of an investigation or data set search
+	 *            the date is compared with the end date and in the case of a
+	 *            data file the date field is used.</dd>
+	 *            <dt>parameters</dt>
+	 *            <dd>this holds a list of json parameter objects all of which
+	 *            must match. Parameters have the following fields, all of which
+	 *            are optional:
+	 *            <dl>
+	 *            <dt>name</dt>
+	 *            <dd>A wildcard search for a parameter with this name.
+	 *            Supported wildcards are <code>*</code>, which matches any
+	 *            character sequence (including the empty one), and
+	 *            <code>?</code>, which matches any single character.
+	 *            <code>\</code> is the escape character. Note this query can be
+	 *            slow, as it needs to iterate over many terms. In order to
+	 *            prevent extremely slow queries, a name should not start with
+	 *            the wildcard <code>*</code></dd>
+	 *            <dt>units</dt>
+	 *            <dd>A wildcard search for a parameter with these units.
+	 *            Supported wildcards are <code>*</code>, which matches any
+	 *            character sequence (including the empty one), and
+	 *            <code>?</code>, which matches any single character.
+	 *            <code>\</code> is the escape character. Note this query can be
+	 *            slow, as it needs to iterate over many terms. In order to
+	 *            prevent extremely slow queries, units should not start with
+	 *            the wildcard <code>*</code></dd>
+	 *            <dt>stringValue</dt>
+	 *            <dd>A wildcard search for a parameter stringValue. Supported
+	 *            wildcards are <code>*</code>, which matches any character
+	 *            sequence (including the empty one), and <code>?</code>, which
+	 *            matches any single character. <code>\</code> is the escape
+	 *            character. Note this query can be slow, as it needs to iterate
+	 *            over many terms. In order to prevent extremely slow queries,
+	 *            requested stringValues should not start with the wildcard
+	 *            <code>*</code></dd>
+	 *            <dt>lowerDateValue and upperDateValue</dt>
+	 *            <dd>latest and highest date to search for in the form
+	 *            <code>201509030842</code> i.e. yyyyMMddHHmm using UTC as
+	 *            timezone. This should be used to search on parameters having a
+	 *            dateValue. If only one bound is set the restriction has not
+	 *            effect.</dd>
+	 *            <dt>lowerNumericValue and upperNumericValue</dt>
+	 *            <dd>This should be used to search on parameters having a
+	 *            numericValue. If only one bound is set the restriction has not
+	 *            effect.</dd>
+	 *            </dl>
+	 *            </dd>
+	 *            <dt>samples</dt>
+	 *            <dd>A json array of strings each of which must match text
+	 *            found in a sample. This is understood by the <a href=
+	 *            "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
+	 *            >lucene parser</a> but avoid trying to use fields. This is
+	 *            only respected in the case of an investigation search.</dd>
+	 *            <dt>userFullName</dt>
+	 *            <dd>Full name of user in the User table which may contain
+	 *            titles etc. Matching is done by the <a href=
+	 *            "https://lucene.apache.org/core/4_10_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description"
+	 *            >lucene parser</a> but avoid trying to use fields. This is
+	 *            only respected in the case of an investigation search.</dd>
+	 *            </dl>
+	 * 
 	 * @param maxCount
 	 *            maximum number of entities to return
 	 * 
-	 * @return set of entitites encoded as json
+	 * @return set of entities encoded as json
 	 * 
 	 * @throws IcatException
 	 *             when something is wrong

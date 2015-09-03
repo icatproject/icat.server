@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import json
 import httplib
 from urllib import urlencode
 import sys
@@ -38,12 +39,12 @@ def reportProblem(wf):
     except:
         fatal(fault.faultstring)
 
-def getService(timeout=90):
+def getService():
     hurl = url
     suffix = "/ICATService/ICAT?wsdl"
     if not url.endswith(suffix): hurl = hurl + suffix
  
-    client = Client(hurl, timeout=timeout)
+    client = Client(hurl)
     service = client.service
     factory = client.factory
     credentials = factory.create("credentials")
@@ -56,6 +57,7 @@ def getService(timeout=90):
             entry.value = creds[i + 1]
         credentials.entry.append(entry)
     sessionId = service.login(plugin, credentials)
+        
     return client.service, sessionId
  
 
@@ -76,35 +78,6 @@ def getProperties(args):
     except Exception, e:
         fatal(e)
     
-    
-def search(args):
-    parser.set_usage(usagebase + "search <query> [<maxCount> [<entityName>]]")
-    parser.set_description("Perform a lucene search")
-    options, args = parser.parse_args(args)
-    
-    query = None
-    if len(args) >= 1:
-        query = args[0]
-        maxCount = 100
-        entityName = None
-    if len(args) >= 2:
-        try:
-            maxCount = int(args[1])
-        except ValueError as e:
-            fatal("'" + args[1] + "' is not an integer")
-    if len(args) >= 3:
-        entityName = args[2]
-    if len(args) > 3 or not query:
-        fatal("Must have one, two or three arguments after the operation 'search' - query, maxCount, entityName")
-
-    try:
-        service, sessionId = getService()
-        print service.luceneSearch(sessionId, query, maxCount, entityName)
-    except WebFault, wf:
-        reportProblem(wf)
-    except Exception, e:
-        fatal(e)
-
 def clear(args):
     parser.set_usage(usagebase + "clear")
     parser.set_description("Clear all lucene indices")
@@ -115,7 +88,8 @@ def clear(args):
 
     try:
         service, sessionId = getService()
-        service.luceneClear(sessionId)
+        parameters = {"sessionId": sessionId}
+        _process("lucene/db/", parameters, "DELETE")
     except WebFault, wf:
         exc = wf.fault.detail.IcatException
         fatal(exc.type + " exception: " + exc.message)
@@ -132,12 +106,76 @@ def commit(args):
 
     try:
         service, sessionId = getService()
-        service.luceneCommit(sessionId)
+        parameters = {"sessionId": sessionId}
+        _process("lucene/db/", parameters, "POST")
     except WebFault, wf:
         exc = wf.fault.detail.IcatException
         fatal(exc.type + " exception: " + exc.message)
     except Exception, e:
         fatal(e)
+        
+def _process(relativeUrl, parameters, method, headers=None, body=None):
+     path = icatpath + relativeUrl
+     if parameters: parameters = urlencode(parameters)
+     if parameters and method != "POST":
+         path = path + "?" + parameters
+     urllen = 4 + len(path) + len(host)
+     if secure:
+         conn = httplib.HTTPSConnection(host)
+         urllen += 5
+     else:
+         conn = httplib.HTTPConnection(host)
+         urllen += 4
+     if urllen > 2048: fatal("Generated URI is of length " + urllen + " which exceeds 2048")
+          
+     conn.putrequest(method, path, skip_accept_encoding=True)
+     conn.putheader("Cache-Control", "no-cache")
+     conn.putheader("Pragma", "no-cache")
+     conn.putheader("Accept", "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2")
+     conn.putheader("Connection", "keep-alive") 
+     
+     if parameters and method == "POST":
+         conn.putheader('Content-Length', str(len(parameters)))
+     elif body:
+         conn.putheader('Transfer-Encoding', 'chunked')
+        
+     if headers:
+         for header in headers:
+             conn.putheader(header, headers[header])
+             
+     if parameters and method == "POST":
+         conn.putheader('Content-Type', 'application/x-www-form-urlencoded')       
+             
+     conn.endheaders()
+     
+     if parameters and method == "POST":
+         conn.send(parameters)
+     elif body:
+         blocksize = 8192
+         datablock = body.read(blocksize)
+         crc32 = 0
+         while datablock:
+             conn.send(hex(len(datablock))[2:] + "\r\n")
+             conn.send(datablock + "\r\n")
+             crc32 = zlib.crc32(datablock, crc32)
+             datablock = body.read(blocksize)
+         conn.send("0\r\n\r\n")
+    
+     response = conn.getresponse()
+     rc = response.status
+     if (rc / 100 != 2):
+         try:
+             responseContent = response.read()
+             om = json.loads(responseContent)
+         except Exception:
+             fatal("InternalException " + responseContent)
+         code = om["code"]
+         message = om["message"]
+         fatal(code + " " + message)
+     if body:
+         return response, crc32 & 0xffffffff
+     else:
+         return response        
         
 def getPopulating(args): 
     parser.set_usage(usagebase + "populating")
@@ -145,11 +183,11 @@ def getPopulating(args):
     options, args = parser.parse_args(args)
 
     if len(args) > 0:
-        fatal("Must have no arguments after the operation 'commit'")
-
+        fatal("Must have no arguments after the operation 'populating'")
     try:
         service, sessionId = getService()
-        print service.luceneGetPopulating(sessionId)
+        parameters = {"sessionId": sessionId}
+        print _process("lucene/db", parameters, "GET").read()
     except WebFault, wf:
         exc = wf.fault.detail.IcatException
         fatal(exc.type + " exception: " + exc.message)
@@ -163,10 +201,11 @@ def populate(args):
 
     if len(args) == 0: 
         try:
-            service, sessionId = getService()
+            service, sessionId = getService() 
+            parameters = {"sessionId": sessionId}
             for entity in service.getEntityNames():
                 print entity
-                service.lucenePopulate(sessionId, entity)
+                _process("lucene/db/" + entity, parameters, "POST")
         except WebFault, wf:
             exc = wf.fault.detail.IcatException
             fatal(exc.type + " exception: " + exc.message)
@@ -179,7 +218,9 @@ def populate(args):
  
     try:
         service, sessionId = getService()
-        service.lucenePopulate(sessionId, args[0])
+        parameters = {"sessionId": sessionId}
+        entity = args[0]
+        _process("lucene/db/" + entity, parameters, "POST")
     except WebFault, wf:
         exc = wf.fault.detail.IcatException
         fatal(exc.type + " exception: " + exc.message)
@@ -196,14 +237,12 @@ logging.basicConfig(level=logging.CRITICAL)
 
 usagebase = "usage: %prog <url> <username> <password> "
        
-# TODO restore lucene operations in 4.6.0    
 subcommands = {}
-# subcommands["search"] = search
 subcommands["properties"] = getProperties
-# subcommands["populate"] = populate
-# subcommands["commit"] = commit
-# subcommands["clear"] = clear
-# subcommands["populating"] = getPopulating
+subcommands["populate"] = populate
+subcommands["commit"] = commit
+subcommands["clear"] = clear
+subcommands["populating"] = getPopulating
 subcommands["-h"] = help
 subcommands["--help"] = help
 
@@ -224,6 +263,13 @@ except ValueError:
 if len(start) > 2:
     url, plugin = start[:2]
     creds = start[2:]
+       
+    o = urlparse(url)
+    secure = o.scheme == "https"
+    host = o.netloc
+    icatpath = o.path
+    if not icatpath.endswith("/"): icatpath = icatpath + "/"
+    icatpath = icatpath + "icat/"
 
     if not end:
         
