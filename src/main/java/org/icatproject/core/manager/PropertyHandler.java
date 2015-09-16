@@ -142,10 +142,10 @@ public class PropertyHandler {
 		try {
 			props.loadFromFile("icat.properties");
 			logger.info("Property file icat.properties loaded");
-
 			/* log4j.properties */
-			String path = props.getString("log4j.properties");
-			if (path != null) {
+			String key = "log4j.properties";
+			if (props.has(key)) {
+				String path = props.getString("log4j.properties");
 				formattedProps.add("log4j.properties " + path);
 			}
 
@@ -154,7 +154,7 @@ public class PropertyHandler {
 			formattedProps.add("authn.list " + authnList);
 
 			for (String mnemonic : authnList.split("\\s+")) {
-				String key = "authn." + mnemonic + ".jndi";
+				key = "authn." + mnemonic + ".jndi";
 				String jndi = props.getString(key);
 				HostPort hostPort = new HostPort(props, "authn." + mnemonic + ".hostPort");
 				String host = hostPort.getHost();
@@ -201,7 +201,7 @@ public class PropertyHandler {
 			formattedProps.add("rootUserNames " + names);
 
 			/* notification.list */
-			String key = "notification.list";
+			key = "notification.list";
 			if (props.has(key)) {
 				String notificationList = props.getString(key);
 				formattedProps.add(key + " " + notificationList);
