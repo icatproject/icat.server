@@ -3,7 +3,7 @@
 
 	<groupId>org.icatproject</groupId>
 	<artifactId>icat.server</artifactId>
-	<version>4.5.1-SNAPSHOT</version>
+	<version>4.5.1</version>
 	<packaging>war</packaging>
 	<name>ICAT Server</name>
 
@@ -30,7 +30,7 @@
 		<connection>scm:git:https://github.com/icatproject/icat.server.git</connection>
 		<developerConnection>scm:git:https://github.com/icatproject/icat.server.git</developerConnection>
 		<url>https://github.com/icatproject/icat.server</url>
-	  <tag>v4.5.0</tag>
+	  <tag>v4.5.1</tag>
   </scm>
 
 	<issueManagement>
