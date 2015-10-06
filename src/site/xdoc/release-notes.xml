@@ -8,6 +8,12 @@
 
 	<body>
 
+		<section name="4.5.1">
+			<p>Fix bug where ICAT won't start up with an empty lucene
+				index
+			</p>
+		</section>
+
 		<section name="4.5.0">
 			<p>Remove lucene calls and apply bug fixes.</p>
 			<ul>

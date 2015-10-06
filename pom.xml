@@ -3,7 +3,7 @@
 
 	<groupId>org.icatproject</groupId>
 	<artifactId>icat.server</artifactId>
-	<version>4.5.0</version>
+	<version>4.5.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>ICAT Server</name>
 
