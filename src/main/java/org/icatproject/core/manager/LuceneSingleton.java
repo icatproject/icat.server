@@ -27,7 +27,6 @@ import javax.ejb.Remote;
 import javax.ejb.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnit;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
@@ -110,8 +109,7 @@ public class LuceneSingleton implements Lucene {
 								}
 							}
 							/* Get next block of ids */
-							ids = manager
-									.createQuery("SELECT e.id from " + entityName + " e ORDER BY e.id", Long.class)
+							ids = manager.createQuery("SELECT e.id from " + entityName + " e ORDER BY e.id", Long.class)
 									.setFirstResult(start).setMaxResults(luceneCommitCount).getResultList();
 							if (ids.size() == 0) {
 								break;
@@ -146,7 +144,6 @@ public class LuceneSingleton implements Lucene {
 
 	final static SearcherFactory searcherFactory = new SearcherFactory();
 
-	@PersistenceUnit(unitName = "icat")
 	private EntityManagerFactory entityManagerFactory;
 
 	private boolean active;
@@ -206,10 +203,10 @@ public class LuceneSingleton implements Lucene {
 		}
 	}
 
-	private Query buildDatafileQuery(String userName, String text, String lower, String upper, List<ParameterPOJO> parms)
-			throws IOException, QueryNodeException {
-		logger.debug("Lucene Datafile search user:" + userName + " text:" + text + " lower:" + lower + " upper:"
-				+ upper + " parameters: " + parms);
+	private Query buildDatafileQuery(String userName, String text, String lower, String upper,
+			List<ParameterPOJO> parms) throws IOException, QueryNodeException {
+		logger.debug("Lucene Datafile search user:" + userName + " text:" + text + " lower:" + lower + " upper:" + upper
+				+ " parameters: " + parms);
 		BooleanQuery theQuery = new BooleanQuery();
 		theQuery.add(new TermQuery(new Term("entity", "Datafile")), Occur.MUST);
 
@@ -238,10 +235,8 @@ public class LuceneSingleton implements Lucene {
 		}
 
 		if (lower != null && upper != null) {
-			theQuery.add(new TermRangeQuery("date", new BytesRef(lower), new BytesRef(upper), true, true),
-					Occur.MUST);
-			theQuery.add(new TermRangeQuery("date", new BytesRef(lower), new BytesRef(upper), true, true),
-					Occur.MUST);
+			theQuery.add(new TermRangeQuery("date", new BytesRef(lower), new BytesRef(upper), true, true), Occur.MUST);
+			theQuery.add(new TermRangeQuery("date", new BytesRef(lower), new BytesRef(upper), true, true), Occur.MUST);
 		}
 
 		for (ParameterPOJO parameter : parms) {
@@ -260,9 +255,8 @@ public class LuceneSingleton implements Lucene {
 						new BytesRef(upper), true, true), Occur.MUST);
 
 			} else if (parameter.getLowerNumericValue() != null && parameter.getUpperNumericValue() != null) {
-				paramQuery.add(
-						NumericRangeQuery.newDoubleRange("numericValue", parameter.getLowerNumericValue(),
-								parameter.getUpperNumericValue(), true, true), Occur.MUST);
+				paramQuery.add(NumericRangeQuery.newDoubleRange("numericValue", parameter.getLowerNumericValue(),
+						parameter.getUpperNumericValue(), true, true), Occur.MUST);
 			}
 			Query toQuery = JoinUtil.createJoinQuery("datafile", false, "id", paramQuery, isearcher, ScoreMode.None);
 			theQuery.add(toQuery, Occur.MUST);
@@ -314,16 +308,14 @@ public class LuceneSingleton implements Lucene {
 						new BytesRef(upper), true, true), Occur.MUST);
 
 			} else if (parameter.getLowerNumericValue() != null && parameter.getUpperNumericValue() != null) {
-				paramQuery.add(
-						NumericRangeQuery.newDoubleRange("numericValue", parameter.getLowerNumericValue(),
-								parameter.getUpperNumericValue(), true, true), Occur.MUST);
+				paramQuery.add(NumericRangeQuery.newDoubleRange("numericValue", parameter.getLowerNumericValue(),
+						parameter.getUpperNumericValue(), true, true), Occur.MUST);
 			}
 			Query toQuery = JoinUtil.createJoinQuery("dataset", false, "id", paramQuery, isearcher, ScoreMode.None);
 			theQuery.add(toQuery, Occur.MUST);
 		}
 
 		return theQuery;
-
 	}
 
 	private void buildDoc(Document doc, EntityBaseBean bean) {
@@ -366,8 +358,8 @@ public class LuceneSingleton implements Lucene {
 	}
 
 	private Query buildInvestigationQuery(String userName, String text, String lower, String upper,
-			List<ParameterPOJO> parms, List<String> samples, String userFullName) throws QueryNodeException,
-			IOException {
+			List<ParameterPOJO> parms, List<String> samples, String userFullName)
+					throws QueryNodeException, IOException {
 		logger.debug("Lucene Investigation search user:" + userName + " text:" + text + " lower:" + lower + " upper:"
 				+ upper + " parameters: " + parms + " samples:" + samples + " userFullName:" + userFullName);
 		BooleanQuery theQuery = new BooleanQuery();
@@ -377,8 +369,8 @@ public class LuceneSingleton implements Lucene {
 			BooleanQuery userQuery = new BooleanQuery();
 			userQuery.add(new TermQuery(new Term("entity", "InvestigationUser")), Occur.MUST);
 			userQuery.add(new TermQuery(new Term("name", userName)), Occur.MUST);
-			Query toQuery = JoinUtil
-					.createJoinQuery("investigation", false, "id", userQuery, isearcher, ScoreMode.None);
+			Query toQuery = JoinUtil.createJoinQuery("investigation", false, "id", userQuery, isearcher,
+					ScoreMode.None);
 			theQuery.add(toQuery, Occur.MUST);
 		}
 
@@ -479,8 +471,8 @@ public class LuceneSingleton implements Lucene {
 	}
 
 	@Override
-	public LuceneSearchResult datafiles(String user, String text, String lower, String upper,
-			List<ParameterPOJO> parms, int maxResults) throws IcatException {
+	public LuceneSearchResult datafiles(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
+			int maxResults) throws IcatException {
 		try {
 			refreshSearcher();
 			Query query = buildDatafileQuery(user, text, lower, upper, parms);
@@ -592,10 +584,14 @@ public class LuceneSingleton implements Lucene {
 				iwriter = new IndexWriter(directory, config);
 				String[] files = directory.listAll();
 				if (files.length == 1 && files[0].equals("write.lock")) {
-					logger.debug("Directory only has the write.lock file so commit and reopen");
+					logger.debug("Directory only has the write.lock file so store and delete a dummy document");
+					Document doc = new Document();
+					doc.add(new StringField("dummy", "dummy", Store.NO));
+					iwriter.addDocument(doc);
 					iwriter.commit();
-					iwriter.close();
-					iwriter = new IndexWriter(directory, config);
+					iwriter.deleteDocuments(new Term("dummy", "dummy"));
+					iwriter.commit();
+					logger.debug("Now have " + iwriter.numDocs() + " documents indexed");
 				}
 
 				searcherManager = new SearcherManager(directory, new SearcherFactory());
@@ -684,6 +680,7 @@ public class LuceneSingleton implements Lucene {
 	}
 
 	@Override
+
 	public synchronized void populate(Class<?> klass) {
 		populateList.add(klass);
 		if (populateThread == null || (populateThread).getState() == Thread.State.TERMINATED) {
@@ -782,5 +779,4 @@ public class LuceneSingleton implements Lucene {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
 		}
 	}
-
 }

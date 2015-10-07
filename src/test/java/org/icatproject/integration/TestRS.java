@@ -20,10 +20,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import java.util.regex.Pattern;
 
 import javax.json.Json;
@@ -34,6 +36,7 @@ import javax.json.stream.JsonGenerator;
 
 import org.icatproject.EntityBaseBean;
 import org.icatproject.Facility;
+
 import org.icatproject.icat.client.ICAT;
 import org.icatproject.icat.client.IcatException;
 import org.icatproject.icat.client.IcatException.IcatExceptionType;
@@ -42,6 +45,7 @@ import org.icatproject.icat.client.Session;
 import org.icatproject.icat.client.Session.Attributes;
 import org.icatproject.icat.client.Session.DuplicateAction;
 import org.junit.BeforeClass;
+
 import org.junit.Test;
 
 /**
@@ -210,18 +214,20 @@ public class TestRS {
 
 	private JsonArray searchDatasets(Session session, String user, String text, Date lower, Date upper,
 			List<ParameterForLucene> parameters, int maxResults, int n) throws IcatException {
-		JsonArray result = Json.createReader(
-				new ByteArrayInputStream(session.searchDatasets(user, text, lower, upper, parameters, maxResults)
-						.getBytes())).readArray();
+		JsonArray result = Json
+				.createReader(new ByteArrayInputStream(
+						session.searchDatasets(user, text, lower, upper, parameters, maxResults).getBytes()))
+				.readArray();
 		assertEquals(n, result.size());
 		return result;
 	}
 
 	private JsonArray searchDatafiles(Session session, String user, String text, Date lower, Date upper,
 			List<ParameterForLucene> parameters, int maxResults, int n) throws IcatException {
-		JsonArray result = Json.createReader(
-				new ByteArrayInputStream(session.searchDatafiles(user, text, lower, upper, parameters, maxResults)
-						.getBytes())).readArray();
+		JsonArray result = Json
+				.createReader(new ByteArrayInputStream(
+						session.searchDatafiles(user, text, lower, upper, parameters, maxResults).getBytes()))
+				.readArray();
 		assertEquals(n, result.size());
 		return result;
 	}
@@ -287,10 +293,14 @@ public class TestRS {
 		// Make sure that fetching a non-id Double gives no problems
 		assertEquals(73.0, search(session, "SELECT MIN(pt.minimumNumericValue) FROM ParameterType pt", 1)
 				.getJsonNumber(0).doubleValue(), 0.001);
-		assertEquals(73.4, ((JsonNumber) search(session, "SELECT MAX(pt.minimumNumericValue) FROM ParameterType pt", 1)
-				.get(0)).doubleValue(), 0.001);
-		assertEquals(73.2, ((JsonNumber) search(session, "SELECT AVG(pt.minimumNumericValue) FROM ParameterType pt", 1)
-				.get(0)).doubleValue(), 0.001);
+		assertEquals(73.4,
+				((JsonNumber) search(session, "SELECT MAX(pt.minimumNumericValue) FROM ParameterType pt", 1).get(0))
+						.doubleValue(),
+				0.001);
+		assertEquals(73.2,
+				((JsonNumber) search(session, "SELECT AVG(pt.minimumNumericValue) FROM ParameterType pt", 1).get(0))
+						.doubleValue(),
+				0.001);
 
 		JsonObject inv = search(session, "SELECT inv FROM Investigation inv WHERE inv.visitId = 'zero'", 1)
 				.getJsonObject(0).getJsonObject("Investigation");
@@ -383,36 +393,13 @@ public class TestRS {
 		return result;
 	}
 
-	/**
-	 * 
-	 * @param session
-	 *            Session object
-	 * @param user
-	 *            Investigation belonging to user
-	 * @param text
-	 *            Text associated with investigation
-	 * @param lower
-	 *            Lower date to consider
-	 * @param upper
-	 *            Upper date to consider
-	 * @param parameters
-	 *            List of ParameterForLucene objects that must all match
-	 * @param samples
-	 *            List of sample texts that must all match
-	 * @param userFullName
-	 * @param maxResults
-	 *            Maximum number of results to return
-	 * @param n
-	 *            Expected number of results to return
-	 * @return json
-	 * @throws IcatException
-	 */
 	private JsonArray searchInvestigations(Session session, String user, String text, Date lower, Date upper,
 			List<ParameterForLucene> parameters, List<String> samples, String userFullName, int maxResults, int n)
-			throws IcatException {
-		JsonArray result = Json.createReader(
-				new ByteArrayInputStream(session.searchInvestigations(user, text, lower, upper, parameters, samples,
-						userFullName, maxResults).getBytes())).readArray();
+					throws IcatException {
+		JsonArray result = Json.createReader(new ByteArrayInputStream(
+				session.searchInvestigations(user, text, lower, upper, parameters, samples, userFullName, maxResults)
+						.getBytes()))
+				.readArray();
 		assertEquals(n, result.size());
 		return result;
 	}
@@ -579,8 +566,8 @@ public class TestRS {
 		ts("Create dump ALL");
 		long n = dump.toFile().length();
 
-		assertTrue("Size is dependent upon time zone in which test is run " + n, n == 2686 || n == 1518 || n == 2771
-				|| n == 2776);
+		assertTrue("Size is dependent upon time zone in which test is run " + n,
+				n == 2686 || n == 1518 || n == 2771 || n == 2776);
 		session.importMetaData(dump, DuplicateAction.CHECK, Attributes.ALL);
 		Files.delete(dump);
 	}

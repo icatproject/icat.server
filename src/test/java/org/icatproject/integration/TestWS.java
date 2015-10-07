@@ -512,19 +512,20 @@ public class TestWS {
 		// Samples - via investigation
 		Rule isSampleInv = new Rule();
 		isSampleInv.setCrudFlags("CRU");
-		isSampleInv
-				.setWhat("SELECT s FROM Sample s JOIN s.investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user");
+		isSampleInv.setWhat(
+				"SELECT s FROM Sample s JOIN s.investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user");
 		isSampleInv.setId(session.create(isSampleInv));
 
 		// Samples - via dataset
 		Rule isSampleDs = new Rule();
 		isSampleDs.setCrudFlags("CRU");
-		isSampleDs
-				.setWhat("SELECT s FROM Sample AS s JOIN s.datasets AS ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst JOIN inst.instrumentScientists AS instSci JOIN instSci.user user WHERE user.name = :user");
+		isSampleDs.setWhat(
+				"SELECT s FROM Sample AS s JOIN s.datasets AS ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst JOIN inst.instrumentScientists AS instSci JOIN instSci.user user WHERE user.name = :user");
 		isSampleDs.setId(session.create(isSampleDs));
 
 		// Test
-		session.search("SELECT COUNT(s) FROM Sample AS s JOIN s.datasets as ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst WHERE (inst.name = 'WISH')");
+		session.search(
+				"SELECT COUNT(s) FROM Sample AS s JOIN s.datasets as ds JOIN ds.investigation AS i JOIN i.investigationInstruments AS ii JOIN ii.instrument AS inst WHERE (inst.name = 'WISH')");
 		session.delete(isSampleInv);
 		session.delete(isSampleDs);
 	}
@@ -535,10 +536,12 @@ public class TestWS {
 		try {
 			Rule isInv = new Rule();
 			isInv.setCrudFlags("CRU");
-			isInv.setWhat("SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user");
+			isInv.setWhat(
+					"SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user");
 			isInv.setId(session.create(isInv));
 
-			session.search("SELECT COUNT(i) FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst WHERE inst.name='WISH'");
+			session.search(
+					"SELECT COUNT(i) FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst WHERE inst.name='WISH'");
 			session.delete(isInv);
 		} finally {
 			session.addRule("notroot", "SELECT x FROM Investigation x", "CRUD");
@@ -555,16 +558,15 @@ public class TestWS {
 			System.out.println("Adding InstrumentScientist Rule");
 			Rule isInv = new Rule();
 			isInv.setCrudFlags("CRU");
-			isInv.setWhat("SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user");
+			isInv.setWhat(
+					"SELECT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst JOIN inst.instrumentScientists instSci JOIN instSci.user user WHERE user.name = :user");
 			isInv.setId(session.create(isInv));
 
 			assertEquals(2L, session.search("SELECT COUNT(i) FROM Investigation i").get(0));
 			checkInvestigationNames("Investigation ORDER BY name", "A", "B");
 
-			assertEquals(
-					2L,
-					session.search("COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']").get(
-							0));
+			assertEquals(2L, session
+					.search("COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']").get(0));
 			checkInvestigationNames(
 					"Investigation ORDER BY name <-> InvestigationInstrument <-> Instrument[name='WISH']", "A", "B");
 
@@ -584,10 +586,8 @@ public class TestWS {
 			assertEquals(2L, session.search("COUNT(Investigation) <-> InvestigationUser <-> User[name=:user]").get(0));
 			checkInvestigationNames("Investigation ORDER BY name <-> InvestigationUser <-> User[name=:user]", "A", "C");
 
-			assertEquals(
-					1L,
-					session.search("COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']").get(
-							0));
+			assertEquals(1L, session
+					.search("COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']").get(0));
 			checkInvestigationNames("Investigation <-> InvestigationInstrument <-> Instrument[name='WISH']", "A");
 
 			// Add the InstrumentScientist rule back in.
@@ -596,10 +596,8 @@ public class TestWS {
 			assertEquals(3L, session.search("SELECT COUNT(i) FROM Investigation i").get(0));
 			checkInvestigationNames("Investigation ORDER BY name", "A", "B", "C");
 
-			assertEquals(
-					2L,
-					session.search("COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']").get(
-							0));
+			assertEquals(2L, session
+					.search("COUNT(Investigation) <-> InvestigationInstrument <-> Instrument[name='WISH']").get(0));
 			checkInvestigationNames("Investigation <-> InvestigationInstrument <-> Instrument[name='WISH']", "A", "B");
 
 			assertEquals(2L, session.search("COUNT(Investigation) <-> InvestigationUser <-> User[name=:user]").get(0));
@@ -698,8 +696,8 @@ public class TestWS {
 		}
 		long start = System.currentTimeMillis();
 		session.createMany(dfs);
-		System.out.println("Time per datafile using createMany: " + (System.currentTimeMillis() - start) / (n + 0.)
-				+ "ms");
+		System.out.println(
+				"Time per datafile using createMany: " + (System.currentTimeMillis() - start) / (n + 0.) + "ms");
 
 		start = System.currentTimeMillis();
 
@@ -1029,8 +1027,8 @@ public class TestWS {
 			session.addRule(null, "Dataset <-> Investigation <-> InvestigationGroup <-> Grouping "
 					+ "<-> UserGroup <-> User [name=:user]", "R");
 
-			session.addRule(null, " Investigation <-> InvestigationGroup <-> Grouping <-> UserGroup "
-					+ "<-> User [name=:user]", "R");
+			session.addRule(null,
+					" Investigation <-> InvestigationGroup <-> Grouping <-> UserGroup " + "<-> User [name=:user]", "R");
 
 			Facility facility = session.createFacility("Test Facility", 90);
 
@@ -1051,8 +1049,8 @@ public class TestWS {
 			Long invId = ((Investigation) aSession.search("Investigation [name='A']").get(0)).getId();
 			System.out.println(invId);
 
-			List<Object> dss = aSession.search("Dataset INCLUDE Investigation [name='DS1' AND investigation.id = "
-					+ invId + "]");
+			List<Object> dss = aSession
+					.search("Dataset INCLUDE Investigation [name='DS1' AND investigation.id = " + invId + "]");
 			assertEquals(1, dss.size());
 			Investigation inv = ((Dataset) dss.get(0)).getInvestigation();
 			assertNotNull(inv);
@@ -1268,8 +1266,8 @@ public class TestWS {
 		}
 
 		try {
-			results = session
-					.search("Job INCLUDE InputDataset, InputDatafile, OutputDataset, OutputDatafile, Dataset, Datafile");
+			results = session.search(
+					"Job INCLUDE InputDataset, InputDatafile, OutputDataset, OutputDatafile, Dataset, Datafile");
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
@@ -1278,8 +1276,9 @@ public class TestWS {
 		}
 
 		try {
-			session.search("SELECT DISTINCT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst "
-					+ "WHERE inst.name='WISH' ORDER BY i.id ASC INCLUDE ii.instruments, i.parameters LIMIT 100, 100");
+			session.search(
+					"SELECT DISTINCT i FROM Investigation i JOIN i.investigationInstruments ii JOIN ii.instrument inst "
+							+ "WHERE inst.name='WISH' ORDER BY i.id ASC INCLUDE ii.instruments, i.parameters LIMIT 100, 100");
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
@@ -1299,8 +1298,8 @@ public class TestWS {
 		}
 
 		try {
-			results = session
-					.search("SELECT inv FROM Investigation inv INCLUDE inv.investigationInstruments, inv.investigationInstruments.instrument");
+			results = session.search(
+					"SELECT inv FROM Investigation inv INCLUDE inv.investigationInstruments, inv.investigationInstruments.instrument");
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
@@ -1565,8 +1564,8 @@ public class TestWS {
 		assertEquals(min, session.search("MIN(Dataset.id) [id > 0]").get(0));
 		assertEquals(max, session.search("MAX(Dataset.id) [id > 0]").get(0));
 
-		List<?> results = session.search("Dataset.id " + "<-> DatasetParameter[type.name = 'TIMESTAMP'] "
-				+ "<-> Investigation[name <> 12]");
+		List<?> results = session.search(
+				"Dataset.id " + "<-> DatasetParameter[type.name = 'TIMESTAMP'] " + "<-> Investigation[name <> 12]");
 		assertEquals("Count", 1, results.size());
 
 		results = session.search("Datafile [name = 'fred'] <-> Dataset[id <> 42]");
@@ -1574,8 +1573,8 @@ public class TestWS {
 
 		String query = "Dataset.id  ORDER BY id [type.name IN :types] <-> Investigation[id BETWEEN :lower AND :upper]";
 
-		query = query.replace(":lower", Long.toString(invId)).replace(":upper", Long.toString(invId))
-				.replace(":types", "('GS', 'GQ')");
+		query = query.replace(":lower", Long.toString(invId)).replace(":upper", Long.toString(invId)).replace(":types",
+				"('GS', 'GQ')");
 		results = session.search(query);
 		assertEquals("Count", 4, results.size());
 
@@ -1663,8 +1662,8 @@ public class TestWS {
 		}
 		start = System.currentTimeMillis();
 		session.createMany(dfs);
-		System.out.println("Time per datafile using createMany: " + (System.currentTimeMillis() - start) / (n + 0.)
-				+ "ms");
+		System.out.println(
+				"Time per datafile using createMany: " + (System.currentTimeMillis() - start) / (n + 0.) + "ms");
 
 		start = System.currentTimeMillis();
 		List<Object> results = null;
@@ -1735,12 +1734,11 @@ public class TestWS {
 		assertEquals(min, session.search("SELECT MIN(ds.id) FROM  Dataset ds WHERE ds.id > 0").get(0));
 		assertEquals(max, session.search("SELECT MAX(ds.id) FROM  Dataset ds WHERE ds.id > 0").get(0));
 
-		Long invId = (Long) session.search("SELECT inv.id FROM Investigation inv WHERE inv.datasets IS NOT EMPTY").get(
-				0);
+		Long invId = (Long) session.search("SELECT inv.id FROM Investigation inv WHERE inv.datasets IS NOT EMPTY")
+				.get(0);
 
-		List<?> results = session
-				.search("SELECT ds.id FROM Dataset ds JOIN ds.parameters dsp JOIN ds.investigation inv"
-						+ " WHERE dsp.type.name = 'TIMESTAMP' AND inv.name <> 12");
+		List<?> results = session.search("SELECT ds.id FROM Dataset ds JOIN ds.parameters dsp JOIN ds.investigation inv"
+				+ " WHERE dsp.type.name = 'TIMESTAMP' AND inv.name <> 12");
 		assertEquals("Count", 1, results.size());
 
 		results = session
@@ -1749,8 +1747,8 @@ public class TestWS {
 
 		String query = "SELECT ds.id FROM Dataset ds JOIN ds.investigation inv "
 				+ "WHERE ds.type.name IN :types AND inv.id BETWEEN :lower AND :upper " + "ORDER BY ds.id";
-		query = query.replace(":lower", Long.toString(invId)).replace(":upper", Long.toString(invId))
-				.replace(":types", "('GS', 'GQ')");
+		query = query.replace(":lower", Long.toString(invId)).replace(":upper", Long.toString(invId)).replace(":types",
+				"('GS', 'GQ')");
 
 		results = session.search(query);
 		assertEquals("Count", 4, results.size());
@@ -1825,7 +1823,8 @@ public class TestWS {
 
 		// try {
 		// results =
-		// session.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafile df) = 2");
+		// session.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df)
+		// FROM ds.datafile df) = 2");
 		// fail("Should have thrown an exception");
 		// } catch (IcatException_Exception e) {
 		// assertEquals(IcatExceptionType.BAD_PARAMETER,
@@ -1837,9 +1836,8 @@ public class TestWS {
 		results = session.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafiles df) = 2");
 		assertEquals(2, results.size());
 
-		results = session
-				.search("SELECT i.id FROM Investigation i JOIN i.samples s JOIN s.type st "
-						+ "WHERE i.type.name = 'Data' "
+		results = session.search(
+				"SELECT i.id FROM Investigation i JOIN i.samples s JOIN s.type st " + "WHERE i.type.name = 'Data' "
 						+ "AND st.id = (SELECT st2.id FROM SampleType st2 JOIN st2.samples s2 JOIN s2.investigation i2 WHERE i2.id=i.id) "
 						+ "ORDER BY st.name");
 

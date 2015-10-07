@@ -193,10 +193,9 @@ public class ICAT {
 	@WebMethod
 	public void dummy(@WebParam Datafile datafile, @WebParam DatafileFormat datafileFormat,
 			@WebParam DatafileParameter datafileParameter, @WebParam Dataset dataset,
-			@WebParam DatasetParameter datasetParameter, @WebParam DatasetType datasetType,
-			@WebParam Facility facility, @WebParam FacilityCycle facilityCycle,
-			@WebParam InstrumentScientist facilityInstrumentScientist, @WebParam User user,
-			@WebParam Instrument instrument, @WebParam Investigation investigation,
+			@WebParam DatasetParameter datasetParameter, @WebParam DatasetType datasetType, @WebParam Facility facility,
+			@WebParam FacilityCycle facilityCycle, @WebParam InstrumentScientist facilityInstrumentScientist,
+			@WebParam User user, @WebParam Instrument instrument, @WebParam Investigation investigation,
 			@WebParam InvestigationType investigationType, @WebParam InvestigationUser investigator,
 			@WebParam Keyword keyword, @WebParam ParameterType parameter, @WebParam Publication publication,
 			@WebParam RelatedDatafile relatedDatafile, @WebParam Sample sample,
@@ -265,7 +264,7 @@ public class ICAT {
 	@WebMethod
 	public boolean isAccessAllowed(@WebParam(name = "sessionId") String sessionId,
 			@WebParam(name = "bean") EntityBaseBean bean, @WebParam(name = "accessType") AccessType accessType)
-			throws IcatException {
+					throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
 			return beanManager.isAccessAllowed(userId, bean, manager, userTransaction, accessType);
@@ -283,10 +282,11 @@ public class ICAT {
 			@WebParam(name = "credentials") Map<String, String> credentials) throws IcatException {
 		MessageContext msgCtxt = webServiceContext.getMessageContext();
 		HttpServletRequest req = (HttpServletRequest) msgCtxt.get(MessageContext.SERVLET_REQUEST);
+
 		Authenticator authenticator = authPlugins.get(plugin).getAuthenticator();
 		if (authenticator == null) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Authenticator mnemonic " + plugin
-					+ " not recognised");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION,
+					"Authenticator mnemonic " + plugin + " not recognised");
 		}
 		logger.debug("Using " + plugin + " to authenticate");
 		String userName = authenticator.authenticate(credentials, req.getRemoteAddr()).getUserName();
