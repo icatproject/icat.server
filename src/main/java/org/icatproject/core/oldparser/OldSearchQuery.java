@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
@@ -13,7 +12,8 @@ import org.icatproject.core.oldparser.DagHandler.Step;
 
 public class OldSearchQuery {
 
-	// OldSearchQuery ::= ( [ [num] "," [num] ] [ "DISTINCT" ] name OldInclude Order ) |
+	// OldSearchQuery ::= ( [ [num] "," [num] ] [ "DISTINCT" ] name OldInclude
+	// Order ) |
 	// ( "MIN" | "MAX" | "AVG" | "COUNT" | "SUM" "(" name ")" )
 	// ( "[" SearchCondition "]" )? ( "<->" name ( "[" SearchCondition "]") ?
 	// )*
@@ -29,8 +29,6 @@ public class OldSearchQuery {
 		}
 
 	}
-
-	static Logger logger = Logger.getLogger(OldSearchQuery.class);
 
 	private boolean distinct;
 	private Order order;
@@ -50,12 +48,11 @@ public class OldSearchQuery {
 
 	public OldSearchQuery(OldInput input) throws OldParserException, IcatException {
 
-		OldToken t = input.consume(OldToken.Type.NAME, OldToken.Type.DISTINCT,
-				OldToken.Type.INTEGER, OldToken.Type.COMMA, OldToken.Type.COUNT, OldToken.Type.MAX,
-				OldToken.Type.MIN, OldToken.Type.AVG, OldToken.Type.SUM);
-		if (t.getType() == OldToken.Type.COUNT || t.getType() == OldToken.Type.MAX
-				|| t.getType() == OldToken.Type.MIN || t.getType() == OldToken.Type.AVG
-				|| t.getType() == OldToken.Type.SUM) {
+		OldToken t = input.consume(OldToken.Type.NAME, OldToken.Type.DISTINCT, OldToken.Type.INTEGER,
+				OldToken.Type.COMMA, OldToken.Type.COUNT, OldToken.Type.MAX, OldToken.Type.MIN, OldToken.Type.AVG,
+				OldToken.Type.SUM);
+		if (t.getType() == OldToken.Type.COUNT || t.getType() == OldToken.Type.MAX || t.getType() == OldToken.Type.MIN
+				|| t.getType() == OldToken.Type.AVG || t.getType() == OldToken.Type.SUM) {
 			aggFunction = t.getValue();
 			input.consume(OldToken.Type.OPENPAREN);
 			this.result = input.consume(OldToken.Type.NAME);
@@ -67,15 +64,13 @@ public class OldSearchQuery {
 			if (t.getType() == OldToken.Type.INTEGER) {
 				this.offset = Integer.parseInt(t.getValue());
 				input.consume(OldToken.Type.COMMA);
-				t = input
-						.consume(OldToken.Type.NAME, OldToken.Type.DISTINCT, OldToken.Type.INTEGER);
+				t = input.consume(OldToken.Type.NAME, OldToken.Type.DISTINCT, OldToken.Type.INTEGER);
 				if (t.getType() == OldToken.Type.INTEGER) {
 					this.number = Integer.parseInt(t.getValue());
 					t = input.consume(OldToken.Type.NAME, OldToken.Type.DISTINCT);
 				}
 			} else if (t.getType() == OldToken.Type.COMMA) {
-				t = input
-						.consume(OldToken.Type.NAME, OldToken.Type.DISTINCT, OldToken.Type.INTEGER);
+				t = input.consume(OldToken.Type.NAME, OldToken.Type.DISTINCT, OldToken.Type.INTEGER);
 				if (t.getType() == OldToken.Type.INTEGER) {
 					this.number = Integer.parseInt(t.getValue());
 					t = input.consume(OldToken.Type.NAME, OldToken.Type.DISTINCT);

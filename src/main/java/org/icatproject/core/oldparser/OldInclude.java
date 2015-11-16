@@ -3,11 +3,12 @@ package org.icatproject.core.oldparser;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OldInclude {
 
@@ -25,12 +26,11 @@ public class OldInclude {
 
 	private Set<Class<? extends EntityBaseBean>> includes = new HashSet<Class<? extends EntityBaseBean>>();
 
-	static Logger logger = Logger.getLogger(OldInclude.class);
+	static Logger logger = LoggerFactory.getLogger(OldInclude.class);
 
 	private boolean one;
 
-	public OldInclude(Class<? extends EntityBaseBean> bean, OldInput input)
-			throws OldParserException, IcatException {
+	public OldInclude(Class<? extends EntityBaseBean> bean, OldInput input) throws OldParserException, IcatException {
 
 		input.consume(OldToken.Type.INCLUDE);
 		OldToken name = input.consume(OldToken.Type.NAME, OldToken.Type.INTEGER);
@@ -67,10 +67,9 @@ public class OldInclude {
 		return sb.toString();
 	}
 
-	private static String addIncludes(StringBuilder sb,
-			Class<? extends EntityBaseBean> entityClass,
-			Set<Class<? extends EntityBaseBean>> includes, FollowCascades followCascades,
-			Position position) throws IcatException {
+	private static String addIncludes(StringBuilder sb, Class<? extends EntityBaseBean> entityClass,
+			Set<Class<? extends EntityBaseBean>> includes, FollowCascades followCascades, Position position)
+					throws IcatException {
 		boolean first = position == Position.FIRST;
 		String suffix = first ? "$" : "_$";
 		Set<Relationship> relationships = eiHandler.getRelatedEntities(entityClass);
@@ -85,8 +84,8 @@ public class OldInclude {
 						sb.append(", ");
 					}
 
-					sb.append(entityClass.getSimpleName() + suffix + "." + r.getField().getName()
-							+ " AS " + bean.getSimpleName() + "_$");
+					sb.append(entityClass.getSimpleName() + suffix + "." + r.getField().getName() + " AS "
+							+ bean.getSimpleName() + "_$");
 
 					// Avoid looping forever
 					Set<Class<? extends EntityBaseBean>> includeReduced = new HashSet<Class<? extends EntityBaseBean>>(
