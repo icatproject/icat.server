@@ -1,13 +1,17 @@
 package org.icatproject.integration;
 
-import java.net.MalformedURLException;
+import java.io.ByteArrayInputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
+import javax.json.Json;
+import javax.json.JsonString;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
 
 import org.icatproject.AccessType;
 import org.icatproject.Application;
@@ -30,6 +34,7 @@ import org.icatproject.IcatException_Exception;
 import org.icatproject.Instrument;
 import org.icatproject.InstrumentScientist;
 import org.icatproject.Investigation;
+import org.icatproject.InvestigationGroup;
 import org.icatproject.InvestigationInstrument;
 import org.icatproject.InvestigationType;
 import org.icatproject.InvestigationUser;
@@ -41,7 +46,8 @@ import org.icatproject.ParameterValueType;
 import org.icatproject.Rule;
 import org.icatproject.User;
 import org.icatproject.UserGroup;
-import org.icatproject.InvestigationGroup;
+import org.icatproject.utils.ContainerGetter;
+import org.icatproject.utils.ContainerGetter.ContainerType;
 
 public class WSession {
 	public enum ParameterApplicability {
@@ -54,15 +60,39 @@ public class WSession {
 
 	private String rootsessionId;
 
-	public WSession() throws MalformedURLException, IcatException_Exception {
+	private ContainerType containerType;
+
+	private static String[] suffices = new String[] { "ICATService/ICAT?wsdl", "icat/ICAT?wsdl" };
+
+	public WSession() throws Exception {
 		String url = System.getProperty("serverUrl");
 		System.out.println("Using ICAT service at " + url);
-		final URL icatUrl = new URL(url + "/ICATService/ICAT?wsdl");
-		final ICATService icatService = new ICATService(icatUrl, new QName("http://icatproject.org", "ICATService"));
+		ICATService icatService = null;
+		for (String suffix : suffices) {
+			URL icatUrl = new URL(url + "/" + suffix);
+
+			try {
+				icatService = new ICATService(icatUrl, new QName("http://icatproject.org", "ICATService"));
+			} catch (WebServiceException e) {
+				Throwable cause = e.getCause();
+				if (cause != null && cause.getMessage().contains("security")) {
+					throw e;
+				}
+			}
+		}
+		if (icatService == null) {
+			throw new Exception("Unable to connect to: " + url);
+		}
 		this.icat = icatService.getICATPort();
 		this.rootsessionId = login("db", "username", "root", "password", "password");
 		this.sessionId = login("db", "username", "notroot", "password", "password");
-		System.out.println("Logged in");
+
+		String json = (new org.icatproject.icat.client.ICAT(System.getProperty("serverUrl"))).getProperties();
+		containerType = ContainerGetter.ContainerType
+				.valueOf(((JsonString) Json.createReader(new ByteArrayInputStream(json.getBytes())).readObject()
+						.get("containerType")).getString());
+
+		System.out.println("Logged in to " + containerType + " container");
 	}
 
 	private WSession(ICAT icat, String plugin, String[] credbits) throws IcatException_Exception {
@@ -101,15 +131,32 @@ public class WSession {
 	}
 
 	public void delRule(String groupName, String what, String crudFlags) throws Exception {
-		what = what.replace("'", "''");
 		List<Object> rules = null;
-		if (groupName == null) {
-			rules = search("select r FROM Rule r WHERE r.what = '" + what + "' AND r.crudFlags = '" + crudFlags
-					+ "' AND r.grouping IS NULL");
+		if (containerType == ContainerType.WILDFLY) {
+			// Hibernate does not match "What" properly as it mangles strings
+			if (groupName == null) {
+				rules = search("select r FROM Rule r WHERE r.crudFlags = '" + crudFlags + "' AND r.grouping IS NULL");
+			} else {
+				rules = search("Rule [crudFlags = '" + crudFlags + "'] <-> Grouping [name= '" + groupName + "']");
+			}
+			Iterator<Object> iter = rules.iterator();
+			while (iter.hasNext()) {
+				Rule r = (Rule) iter.next();
+				if (!r.getWhat().equals(what)) {
+					iter.remove();
+				}
+			}
 		} else {
-			rules = search("Rule [what = '" + what + "' and crudFlags = '" + crudFlags + "'] <-> Grouping [name= '"
-					+ groupName + "']");
+			what = what.replace("'", "''");
+			if (groupName == null) {
+				rules = search("select r FROM Rule r WHERE r.what = '" + what + "' AND r.crudFlags = '" + crudFlags
+						+ "' AND r.grouping IS NULL");
+			} else {
+				rules = search("Rule [what = '" + what + "' and crudFlags = '" + crudFlags + "'] <-> Grouping [name= '"
+						+ groupName + "']");
+			}
 		}
+
 		if (rules.size() == 1) {
 			delete((EntityBaseBean) rules.get(0));
 		} else {
@@ -180,7 +227,8 @@ public class WSession {
 		deleteAll(Arrays.asList("Rule", "UserGroup", "User", "Grouping", "PublicStep"));
 	}
 
-	public Application createApplication(Facility facility, String name, String version) throws IcatException_Exception {
+	public Application createApplication(Facility facility, String name, String version)
+			throws IcatException_Exception {
 		final Application application = new Application();
 		application.setFacility(facility);
 		application.setName(name);
@@ -471,6 +519,10 @@ public class WSession {
 		ig.setGrouping(grouping);
 		ig.setRole(role);
 		icat.create(sessionId, ig);
+	}
+
+	public ContainerType getContainerType() {
+		return containerType;
 	}
 
 }
