@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.GateKeeper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IncludeClause {
 
@@ -24,8 +25,8 @@ public class IncludeClause {
 		private int thereVarNum;
 		private boolean allowed;
 
-		public Step(int hereVarNum, String fieldName, int thereVarNum, GateKeeper gateKeeper,
-				Set<String> keys) throws IcatException, ParserException {
+		public Step(int hereVarNum, String fieldName, int thereVarNum, GateKeeper gateKeeper, Set<String> keys)
+				throws IcatException, ParserException {
 			for (Relationship r : eiHandler.getRelatedEntities(types.get(hereVarNum))) {
 				if (r.getField().getName().equals(fieldName)) {
 					types.put(thereVarNum, r.getDestinationBean());
@@ -34,8 +35,8 @@ public class IncludeClause {
 				}
 			}
 			if (relationship == null) {
-				throw new ParserException("Problem with INCLUDE clause: " + fieldName
-						+ " is not a field of " + types.get(hereVarNum).getSimpleName());
+				throw new ParserException("Problem with INCLUDE clause: " + fieldName + " is not a field of "
+						+ types.get(hereVarNum).getSimpleName());
 			}
 			this.hereVarNum = hereVarNum;
 			this.thereVarNum = thereVarNum;
@@ -44,8 +45,7 @@ public class IncludeClause {
 			String key = hereVarNum + " " + relationship.getField().getName();
 			if (!keys.add(key)) {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-						"INCLUDE clause contains redundant path to "
-								+ relationship.getField().getName());
+						"INCLUDE clause contains redundant path to " + relationship.getField().getName());
 			}
 		}
 
@@ -69,15 +69,15 @@ public class IncludeClause {
 
 	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
-	static Logger logger = Logger.getLogger(IncludeClause.class);
+	static Logger logger = LoggerFactory.getLogger(IncludeClause.class);
 
 	private boolean one;
 
 	private List<Step> steps = new ArrayList<Step>();
 	Map<Integer, Class<? extends EntityBaseBean>> types = new HashMap<>();
 
-	public IncludeClause(Class<? extends EntityBaseBean> bean, Input input, String idVar,
-			GateKeeper gateKeeper) throws ParserException, IcatException {
+	public IncludeClause(Class<? extends EntityBaseBean> bean, Input input, String idVar, GateKeeper gateKeeper)
+			throws ParserException, IcatException {
 		Map<String, Integer> idVarMap = new HashMap<>();
 		idVarMap.put(idVar, 0);
 		types.put(0, bean);
@@ -89,15 +89,13 @@ public class IncludeClause {
 			input.consume(Token.Type.INTEGER);
 			one = true;
 		} else {
-			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount, gateKeeper,
-					keys);
+			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount, gateKeeper, keys);
 		}
 
 		t = input.peek(0);
 		while (t != null && t.getType() == Token.Type.COMMA) {
 			t = input.consume(Token.Type.COMMA);
-			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount, gateKeeper,
-					keys);
+			fabricatedStepCount = processStep(input, idVarMap, fabricatedStepCount, gateKeeper, keys);
 			t = input.peek(0);
 		}
 		if (one && fabricatedStepCount != 0) {
@@ -114,8 +112,8 @@ public class IncludeClause {
 		return one;
 	}
 
-	private int processStep(Input input, Map<String, Integer> idVarMap, int fabricatedStepCount,
-			GateKeeper gateKeeper, Set<String> keys) throws ParserException, IcatException {
+	private int processStep(Input input, Map<String, Integer> idVarMap, int fabricatedStepCount, GateKeeper gateKeeper,
+			Set<String> keys) throws ParserException, IcatException {
 		Token t = input.consume(Token.Type.NAME);
 		String path = t.getValue();
 		String var = null;
@@ -138,8 +136,7 @@ public class IncludeClause {
 		Integer hereVarNum = idVarMap.get(idv);
 		Integer thereVarNum;
 		if (hereVarNum == null) {
-			throw new ParserException("variable " + idv
-					+ " mentioned in INCLUDE clause is not defined");
+			throw new ParserException("variable " + idv + " mentioned in INCLUDE clause is not defined");
 		}
 		for (int i = 1; i < eles.length - 1; i++) {
 			thereVarNum = idVarMap.size() + fabricatedStepCount;
@@ -156,8 +153,7 @@ public class IncludeClause {
 			idv = var.toUpperCase();
 			thereVarNum = idVarMap.get(idv);
 			if (thereVarNum != null) {
-				throw new ParserException("variable " + idv
-						+ " mentioned in INCLUDE clause is already defined");
+				throw new ParserException("variable " + idv + " mentioned in INCLUDE clause is already defined");
 			}
 			thereVarNum = idVarMap.size() + fabricatedStepCount;
 			idVarMap.put(idv, thereVarNum);
@@ -182,8 +178,7 @@ public class IncludeClause {
 				} else {
 					sb.append(", ");
 				}
-				sb.append(step.hereVarNum + "." + step.relationship.getField().getName() + " -> "
-						+ step.thereVarNum);
+				sb.append(step.hereVarNum + "." + step.relationship.getField().getName() + " -> " + step.thereVarNum);
 			}
 			return sb.toString();
 		}

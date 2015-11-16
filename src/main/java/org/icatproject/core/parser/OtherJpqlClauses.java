@@ -2,11 +2,12 @@ package org.icatproject.core.parser;
 
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OtherJpqlClauses {
 
-	static Logger logger = Logger.getLogger(OtherJpqlClauses.class);
+	static Logger logger = LoggerFactory.getLogger(OtherJpqlClauses.class);
 
 	private String string;
 
@@ -15,22 +16,19 @@ public class OtherJpqlClauses {
 		Token t = input.peek(0);
 		while (t != null && t.getType() != Token.Type.INCLUDE && t.getType() != Token.Type.LIMIT) {
 			if (t.getType() == Token.Type.GROUP || t.getType() == Token.Type.HAVING) {
-				throw new ParserException(
-						"GROUP BY and HAVING keywords are not compatible with returned result");
+				throw new ParserException("GROUP BY and HAVING keywords are not compatible with returned result");
 			}
 			input.consume();
 			String val = t.getValue();
 			if (t.getType() == Token.Type.NAME) {
 				int dot = val.indexOf('.');
 				if (dot < 0) {
-					throw new ParserException("path " + val
-							+ " mentioned in ORDER BY clause contains no dots");
+					throw new ParserException("path " + val + " mentioned in ORDER BY clause contains no dots");
 				}
 				String idv = val.substring(0, dot).toUpperCase();
 				Integer intVal = idVarMap.get(idv);
 				if (intVal == null) {
-					throw new ParserException("variable " + idv
-							+ " mentioned in ORDER BY clause is not defined");
+					throw new ParserException("variable " + idv + " mentioned in ORDER BY clause is not defined");
 				}
 				sb.append(" $" + intVal + "$" + val.substring(dot));
 			} else {

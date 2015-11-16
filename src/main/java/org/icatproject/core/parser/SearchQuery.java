@@ -10,12 +10,13 @@ import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Rule;
 import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.parser.Token.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SearchQuery {
 
@@ -24,7 +25,7 @@ public class SearchQuery {
 	// from_clause [where_clause] [other_jpql_clauses]
 	// (([include_clause] [limit_clause]) | ([limit_clause] [include_clause]))
 
-	private static Logger logger = Logger.getLogger(SearchQuery.class);
+	private static Logger logger = LoggerFactory.getLogger(SearchQuery.class);
 
 	private String idVar;
 
