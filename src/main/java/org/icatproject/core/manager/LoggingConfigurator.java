@@ -8,8 +8,14 @@ import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.Context;
+import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.util.StatusPrinter;
 
 @Singleton
 @Startup
@@ -26,30 +32,30 @@ public class LoggingConfigurator {
 			throw new IllegalStateException(msg);
 		}
 
-		String path = props.getProperty("log4j.properties");
+		String path = props.getProperty("logback.xml");
 		if (path != null) {
 			f = new File(path);
 			if (!f.exists()) {
-				String msg = "log4j.properties file " + f.getAbsolutePath()
-						+ " specified in icat.properties not found";
+				String msg = "logback.xml file " + f.getAbsolutePath() + " specified in icat.properties not found";
 				throw new IllegalStateException(msg);
 			}
-			PropertyConfigurator.configure(path);
-
-		} else {
-			/*
-			 * This seems to be necessary even though the default initialisation is to load from the
-			 * Classpath
-			 */
-			PropertyConfigurator.configure(LoggingConfigurator.class.getClassLoader().getResource(
-					"log4j.properties"));
+			LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+			try {
+				JoranConfigurator configurator = new JoranConfigurator();
+				configurator.setContext((Context) LoggerFactory.getILoggerFactory());
+				context.reset();
+				configurator.doConfigure(f);
+			} catch (JoranException je) {
+				// StatusPrinter will handle this
+			}
+			StatusPrinter.printInCaseOfErrorsOrWarnings(context);
 		}
 
-		Logger logger = Logger.getLogger(LoggingConfigurator.class);
+		Logger logger = LoggerFactory.getLogger(LoggingConfigurator.class);
 		if (path != null) {
 			logger.info("Logging configuration read from " + path);
 		} else {
-			logger.info("Using log4j default configuration");
+			logger.info("Using logback default configuration");
 		}
 	}
 }
