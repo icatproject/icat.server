@@ -1,0 +1,3 @@
+<jboss-web>
+	<context-root>icat</context-root>
+</jboss-web>
