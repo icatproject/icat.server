@@ -13,7 +13,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.apache.log4j.Logger;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
@@ -22,13 +21,15 @@ import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StringField;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.GateKeeper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 @MappedSuperclass
 @NamedQuery(name = "Parameter.psv", query = "SELECT DISTINCT p.value FROM PermissibleStringValue p LEFT JOIN p.type t WHERE t.id = :tid")
 public abstract class Parameter extends EntityBaseBean implements Serializable {
 
-	private static Logger logger = Logger.getLogger(Parameter.class);
+	private static Logger logger = LoggerFactory.getLogger(Parameter.class);
 
 	@Comment("The type of the parameter")
 	@JoinColumn(name = "PARAMETER_TYPE_ID", nullable = false)
@@ -117,49 +118,43 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper,
-			boolean rootUser) throws IcatException {
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser)
+			throws IcatException {
 		super.preparePersist(modId, manager, gateKeeper, rootUser);
 		check(manager);
 	}
 
 	private void check(EntityManager manager) throws IcatException {
 		if (type == null) {
-			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
-					"Type of parameter is not set");
+			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
 		}
-		logger.debug("PreparePersist of type " + type.getName() + " " + type.isEnforced() + " "
-				+ type.getValueType());
+		logger.debug("PreparePersist of type " + type.getName() + " " + type.isEnforced() + " " + type.getValueType());
 		if (!type.isEnforced()) {
 			return;
 		}
 		ParameterValueType pvt = type.getValueType();
 		if (pvt == ParameterValueType.NUMERIC) {
-			logger.debug("Parameter of type " + type.getName() + " has numeric value "
-					+ numericValue + " to be checked");
+			logger.debug(
+					"Parameter of type " + type.getName() + " has numeric value " + numericValue + " to be checked");
 			Double min = type.getMinimumNumericValue();
 			Double max = type.getMaximumNumericValue();
 			if (min != null && numericValue < min) {
 				throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
-						"Parameter of type " + type.getName() + " has value " + numericValue
-								+ " < " + min);
+						"Parameter of type " + type.getName() + " has value " + numericValue + " < " + min);
 			}
 			if (max != null && numericValue > max) {
 				throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
-						"Parameter of type " + type.getName() + " has value " + numericValue
-								+ " > " + max);
+						"Parameter of type " + type.getName() + " has value " + numericValue + " > " + max);
 			}
 		} else if (pvt == ParameterValueType.STRING) {
-			logger.debug("Parameter of type " + type.getName() + " has string value " + stringValue
-					+ " to be checked");
+			logger.debug("Parameter of type " + type.getName() + " has string value " + stringValue + " to be checked");
 			// The query is used because the ParameterType passed in may not
 			// include its PermissibleStringValues
 			List<String> values = manager.createNamedQuery("Parameter.psv", String.class)
 					.setParameter("tid", type.getId()).getResultList();
 			if (!values.isEmpty() && values.indexOf(stringValue) < 0) {
-				throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
-						"Parameter of type " + type.getName() + " has value " + stringValue
-								+ " not in allowed set " + values);
+				throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Parameter of type "
+						+ type.getName() + " has value " + stringValue + " not in allowed set " + values);
 			}
 		}
 	}
@@ -180,8 +175,8 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 		} else if (numericValue != null) {
 			doc.add(new DoubleField("numericValue", numericValue, Store.NO));
 		} else if (dateTimeValue != null) {
-			doc.add(new StringField("dateTimeValue", DateTools.dateToString(dateTimeValue,
-					Resolution.MINUTE), Store.NO));
+			doc.add(new StringField("dateTimeValue", DateTools.dateToString(dateTimeValue, Resolution.MINUTE),
+					Store.NO));
 		}
 		return doc;
 	}
