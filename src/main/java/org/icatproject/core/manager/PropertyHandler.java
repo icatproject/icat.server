@@ -308,6 +308,7 @@ public class PropertyHandler {
 			/* JMS stuff */
 			jmsTopicConnectionFactory = props.getString("jms.topicConnectionFactory",
 					"java:comp/DefaultJMSConnectionFactory");
+			formattedProps.add("jms.topicConnectionFactory " + jmsTopicConnectionFactory);
 
 			/* find type of container and set flags */
 			containerType = ContainerGetter.getContainer();
@@ -319,7 +320,7 @@ public class PropertyHandler {
 			jmsPrefix = "";
 			if (containerType == ContainerType.WILDFLY) {
 				jmsPrefix = "java:/";
-			} 
+			}
 
 		} catch (CheckedPropertyException e) {
 			abend(e.getMessage());

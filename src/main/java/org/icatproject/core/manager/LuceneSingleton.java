@@ -29,7 +29,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 
-import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -63,6 +62,10 @@ import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /* There is synchronization code in this class - please understand it before making any changes */
 @DependsOn("LoggingConfigurator")
@@ -110,8 +113,7 @@ public class LuceneSingleton implements Lucene {
 								}
 							}
 							/* Get next block of ids */
-							ids = manager
-									.createQuery("SELECT e.id from " + entityName + " e ORDER BY e.id", Long.class)
+							ids = manager.createQuery("SELECT e.id from " + entityName + " e ORDER BY e.id", Long.class)
 									.setFirstResult(start).setMaxResults(luceneCommitCount).getResultList();
 							if (ids.size() == 0) {
 								break;
@@ -135,14 +137,15 @@ public class LuceneSingleton implements Lucene {
 			} catch (Throwable t) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				t.printStackTrace(new PrintStream(baos));
-				logger.error(baos);
+				logger.error(baos.toString());
 			} finally {
 				manager.close();
 			}
 		}
 	}
 
-	final static Logger logger = Logger.getLogger(LuceneSingleton.class);
+	final static Logger logger = LoggerFactory.getLogger(LuceneSingleton.class);
+	final static Marker fatal = MarkerFactory.getMarker("FATAL");
 
 	final static SearcherFactory searcherFactory = new SearcherFactory();
 
@@ -206,10 +209,10 @@ public class LuceneSingleton implements Lucene {
 		}
 	}
 
-	private Query buildDatafileQuery(String userName, String text, String lower, String upper, List<ParameterPOJO> parms)
-			throws IOException, QueryNodeException {
-		logger.debug("Lucene Datafile search user:" + userName + " text:" + text + " lower:" + lower + " upper:"
-				+ upper + " parameters: " + parms);
+	private Query buildDatafileQuery(String userName, String text, String lower, String upper,
+			List<ParameterPOJO> parms) throws IOException, QueryNodeException {
+		logger.debug("Lucene Datafile search user:" + userName + " text:" + text + " lower:" + lower + " upper:" + upper
+				+ " parameters: " + parms);
 		BooleanQuery theQuery = new BooleanQuery();
 		theQuery.add(new TermQuery(new Term("entity", "Datafile")), Occur.MUST);
 
@@ -238,10 +241,8 @@ public class LuceneSingleton implements Lucene {
 		}
 
 		if (lower != null && upper != null) {
-			theQuery.add(new TermRangeQuery("date", new BytesRef(lower), new BytesRef(upper), true, true),
-					Occur.MUST);
-			theQuery.add(new TermRangeQuery("date", new BytesRef(lower), new BytesRef(upper), true, true),
-					Occur.MUST);
+			theQuery.add(new TermRangeQuery("date", new BytesRef(lower), new BytesRef(upper), true, true), Occur.MUST);
+			theQuery.add(new TermRangeQuery("date", new BytesRef(lower), new BytesRef(upper), true, true), Occur.MUST);
 		}
 
 		for (ParameterPOJO parameter : parms) {
@@ -260,9 +261,8 @@ public class LuceneSingleton implements Lucene {
 						new BytesRef(upper), true, true), Occur.MUST);
 
 			} else if (parameter.getLowerNumericValue() != null && parameter.getUpperNumericValue() != null) {
-				paramQuery.add(
-						NumericRangeQuery.newDoubleRange("numericValue", parameter.getLowerNumericValue(),
-								parameter.getUpperNumericValue(), true, true), Occur.MUST);
+				paramQuery.add(NumericRangeQuery.newDoubleRange("numericValue", parameter.getLowerNumericValue(),
+						parameter.getUpperNumericValue(), true, true), Occur.MUST);
 			}
 			Query toQuery = JoinUtil.createJoinQuery("datafile", false, "id", paramQuery, isearcher, ScoreMode.None);
 			theQuery.add(toQuery, Occur.MUST);
@@ -314,9 +314,8 @@ public class LuceneSingleton implements Lucene {
 						new BytesRef(upper), true, true), Occur.MUST);
 
 			} else if (parameter.getLowerNumericValue() != null && parameter.getUpperNumericValue() != null) {
-				paramQuery.add(
-						NumericRangeQuery.newDoubleRange("numericValue", parameter.getLowerNumericValue(),
-								parameter.getUpperNumericValue(), true, true), Occur.MUST);
+				paramQuery.add(NumericRangeQuery.newDoubleRange("numericValue", parameter.getLowerNumericValue(),
+						parameter.getUpperNumericValue(), true, true), Occur.MUST);
 			}
 			Query toQuery = JoinUtil.createJoinQuery("dataset", false, "id", paramQuery, isearcher, ScoreMode.None);
 			theQuery.add(toQuery, Occur.MUST);
@@ -366,8 +365,8 @@ public class LuceneSingleton implements Lucene {
 	}
 
 	private Query buildInvestigationQuery(String userName, String text, String lower, String upper,
-			List<ParameterPOJO> parms, List<String> samples, String userFullName) throws QueryNodeException,
-			IOException {
+			List<ParameterPOJO> parms, List<String> samples, String userFullName)
+					throws QueryNodeException, IOException {
 		logger.debug("Lucene Investigation search user:" + userName + " text:" + text + " lower:" + lower + " upper:"
 				+ upper + " parameters: " + parms + " samples:" + samples + " userFullName:" + userFullName);
 		BooleanQuery theQuery = new BooleanQuery();
@@ -377,8 +376,8 @@ public class LuceneSingleton implements Lucene {
 			BooleanQuery userQuery = new BooleanQuery();
 			userQuery.add(new TermQuery(new Term("entity", "InvestigationUser")), Occur.MUST);
 			userQuery.add(new TermQuery(new Term("name", userName)), Occur.MUST);
-			Query toQuery = JoinUtil
-					.createJoinQuery("investigation", false, "id", userQuery, isearcher, ScoreMode.None);
+			Query toQuery = JoinUtil.createJoinQuery("investigation", false, "id", userQuery, isearcher,
+					ScoreMode.None);
 			theQuery.add(toQuery, Occur.MUST);
 		}
 
@@ -479,8 +478,8 @@ public class LuceneSingleton implements Lucene {
 	}
 
 	@Override
-	public LuceneSearchResult datafiles(String user, String text, String lower, String upper,
-			List<ParameterPOJO> parms, int maxResults) throws IcatException {
+	public LuceneSearchResult datafiles(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
+			int maxResults) throws IcatException {
 		try {
 			refreshSearcher();
 			Query query = buildDatafileQuery(user, text, lower, upper, parms);
@@ -552,7 +551,7 @@ public class LuceneSingleton implements Lucene {
 		} catch (Exception e) {
 			StringWriter errors = new StringWriter();
 			e.printStackTrace(new PrintWriter(errors));
-			logger.fatal(errors.toString());
+			logger.error(fatal, errors.toString());
 		}
 	}
 
@@ -609,7 +608,7 @@ public class LuceneSingleton implements Lucene {
 			} catch (Exception e) {
 				StringWriter errors = new StringWriter();
 				e.printStackTrace(new PrintWriter(errors));
-				logger.fatal(errors.toString());
+				logger.error(fatal, errors.toString());
 				if (directory != null) {
 					try {
 						String lockId = directory.getLockID();

@@ -51,3 +51,6 @@ log.table = S
 lucene.directory = ../data/icat/lucene
 lucene.commitSeconds = 1
 lucene.commitCount = 1000
+
+# JMS - uncomment and edit if needed
+!jms.topicConnectionFactory = java:comp/DefaultJMSConnectionFactory
