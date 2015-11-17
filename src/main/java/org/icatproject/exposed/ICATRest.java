@@ -579,7 +579,7 @@ public class ICATRest {
 	 * @param request
 	 * @param jsonString
 	 *            with plugin and credentials which takes the form
-	 *            <code>{"plugin":"db", "credentials[{"username":"root"},
+	 *            <code>{"plugin":"db", "credentials:[{"username":"root"},
 				{"password":"guess"}]}</code>
 	 * 
 	 * @return json with sessionId of the form
