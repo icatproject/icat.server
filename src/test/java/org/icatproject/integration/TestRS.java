@@ -246,6 +246,10 @@ public class TestRS {
 
 	@Test
 	public void testGet() throws Exception {
+		if (wSession.getContainerType() == ContainerType.WILDFLY) {
+			return;
+		}
+
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "notroot");

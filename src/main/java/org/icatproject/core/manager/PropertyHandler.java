@@ -143,6 +143,8 @@ public class PropertyHandler {
 	private long exportCacheSize;
 	private boolean needReadTransaction;
 	private ContainerType containerType;
+	private String jmsTopicConnectionFactory;
+	private String jmsPrefix;
 
 	@PostConstruct
 	private void init() {
@@ -303,6 +305,10 @@ public class PropertyHandler {
 			maxIdsInQuery = props.getPositiveInt("maxIdsInQuery");
 			formattedProps.add("maxIdsInQuery " + maxIdsInQuery);
 
+			/* JMS stuff */
+			jmsTopicConnectionFactory = props.getString("jms.topicConnectionFactory",
+					"java:comp/DefaultJMSConnectionFactory");
+
 			/* find type of container and set flags */
 			containerType = ContainerGetter.getContainer();
 			logger.info("ICAT has been deployed in a " + containerType + " container");
@@ -310,6 +316,10 @@ public class PropertyHandler {
 				abend("Container type " + containerType + " is not recognised");
 			}
 			needReadTransaction = containerType == ContainerType.WILDFLY;
+			jmsPrefix = "";
+			if (containerType == ContainerType.WILDFLY) {
+				jmsPrefix = "java:/";
+			} 
 
 		} catch (CheckedPropertyException e) {
 			abend(e.getMessage());
@@ -376,6 +386,14 @@ public class PropertyHandler {
 
 	public ContainerType getContainerType() {
 		return containerType;
+	}
+
+	public String getJmsTopicConnectionFactory() {
+		return jmsTopicConnectionFactory;
+	}
+
+	public String getJmsPrefix() {
+		return jmsPrefix;
 	}
 
 }
