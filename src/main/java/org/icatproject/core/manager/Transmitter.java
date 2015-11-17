@@ -2,8 +2,8 @@ package org.icatproject.core.manager;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import javax.ejb.DependsOn;
+import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
@@ -12,21 +12,26 @@ import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.manager.NotificationMessage.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 @DependsOn("LoggingConfigurator")
 @Singleton
 public class Transmitter {
 
-	private static Logger logger = Logger.getLogger(Transmitter.class);
+	private static Logger logger = LoggerFactory.getLogger(Transmitter.class);
+	private final static Marker fatal = MarkerFactory.getMarker("FATAL");
 
-	@Resource(mappedName = "jms/ICAT/Topic")
 	private Topic topic;
 
-	@Resource(name = "jms/ICAT/TopicConnectionFactory")
-	private TopicConnectionFactory topicConnectionFactory;
+	@EJB
+	PropertyHandler propertyHandler;
 
 	private TopicConnection topicConnection;
 
@@ -34,10 +39,14 @@ public class Transmitter {
 	private void init() {
 
 		try {
+			InitialContext ic = new InitialContext();
+			TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) ic
+					.lookup(propertyHandler.getJmsTopicConnectionFactory());
 			topicConnection = topicConnectionFactory.createTopicConnection();
+			topic = (Topic) ic.lookup(propertyHandler.getJmsPrefix() + "jms/ICAT/Topic");
 			logger.info("Transmitter created");
-		} catch (JMSException e) {
-			logger.fatal("Problem with JMS " + e);
+		} catch (JMSException | NamingException e) {
+			logger.error(fatal, "Problem with JMS " + e);
 			throw new IllegalStateException(e.getMessage());
 		}
 
@@ -65,8 +74,8 @@ public class Transmitter {
 			jmsg.setStringProperty("operation", message.getOperation());
 			jmsg.setObject(message.getEntityId());
 			jmsProducer.send(jmsg);
-			logger.debug("Sent jms message " + message.getOperation() + " "
-					+ message.getEntityName() + " " + message.getEntityId());
+			logger.debug("Sent jms message " + message.getOperation() + " " + message.getEntityName() + " "
+					+ message.getEntityId());
 			jmsSession.close();
 		}
 

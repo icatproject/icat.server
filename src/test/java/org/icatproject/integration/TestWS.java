@@ -61,6 +61,7 @@ import org.icatproject.SampleType;
 import org.icatproject.User;
 import org.icatproject.UserGroup;
 import org.icatproject.core.manager.EntityInfoHandler;
+import org.icatproject.utils.ContainerGetter.ContainerType;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -300,13 +301,13 @@ public class TestWS {
 			assertEquals(0L, session.search(q3).get(0));
 
 			session.delRule("notroot", "Dataset <-> DatasetType [name = ' ']", "R");
-			session.addRule("notroot", "Dataset  <-> DatasetType[name = 'PB']", "R");
+			session.addRule("notroot", "Dataset <-> DatasetType[name = 'PB']", "R");
 
 			assertEquals(1L, session.search(q1).get(0));
 			assertEquals(1L, session.search(q2).get(0));
 			assertEquals(1L, session.search(q3).get(0));
 
-			session.delRule("notroot", "Dataset  <-> DatasetType[name = 'PB']", "R");
+			session.delRule("notroot", "Dataset <-> DatasetType[name = 'PB']", "R");
 		} finally {
 			session.addRule("notroot", "Dataset", "CRUD");
 		}
@@ -494,7 +495,9 @@ public class TestWS {
 			fail("Should have thrown exception");
 		} catch (IcatException_Exception e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
-			assertTrue(e.getMessage().startsWith("An exception occurred while creating a query in EntityManager:"));
+			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().startsWith("An exception occurred while creating a query in EntityManager:")
+					| e.getMessage().startsWith("org.hibernate.QueryException"));
 		}
 	}
 
@@ -645,15 +648,19 @@ public class TestWS {
 			assertEquals(6, freds.size());
 
 			assertEquals(51L, piOneSession.search("SELECT SUM(df.fileSize) from Datafile df").get(0));
-			assertEquals(40L, piOneSession.search("SELECT SUM(DISTINCT df.fileSize) from Datafile df").get(0));
+			if (session.getContainerType() != ContainerType.WILDFLY) {
+				assertEquals(40L, piOneSession.search("SELECT SUM(DISTINCT df.fileSize) from Datafile df").get(0));
+			}
 			assertEquals(6L, piOneSession.search("SELECT COUNT(df.fileSize) from Datafile df").get(0));
 			assertEquals(5L, piOneSession.search("SELECT COUNT(DISTINCT df.fileSize) from Datafile df").get(0));
 			assertEquals(6L, piOneSession.search("SELECT COUNT(df) from Datafile df").get(0));
 			assertEquals(6L, piOneSession.search("SELECT COUNT(DISTINCT df) from Datafile df").get(0));
-			assertEquals(17L, piOneSession.search("SELECT MAX(df.fileSize) from Datafile df").get(0));
-			assertEquals(17L, piOneSession.search("SELECT MAX(DISTINCT df.fileSize) from Datafile df").get(0));
-			assertEquals(0L, piOneSession.search("SELECT MIN(df.fileSize) from Datafile df").get(0));
-			assertEquals(0L, piOneSession.search("SELECT MIN(DISTINCT df.fileSize) from Datafile df").get(0));
+			if (session.getContainerType() != ContainerType.WILDFLY) {
+				assertEquals(17L, piOneSession.search("SELECT MAX(df.fileSize) from Datafile df").get(0));
+				assertEquals(17L, piOneSession.search("SELECT MAX(DISTINCT df.fileSize) from Datafile df").get(0));
+				assertEquals(0L, piOneSession.search("SELECT MIN(df.fileSize) from Datafile df").get(0));
+				assertEquals(0L, piOneSession.search("SELECT MIN(DISTINCT df.fileSize) from Datafile df").get(0));
+			}
 		} finally {
 			session.setAuthz();
 		}
@@ -835,10 +842,10 @@ public class TestWS {
 			session.create(f);
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
+			assertEquals("Facility exists with name = 'TestDuplicates'", e.getMessage());
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals("Facility exists with name = 'TestDuplicates'", ue.getMessage());
-			assertEquals(-1, ue.getOffset());
+			assertEquals((Integer) (-1), ue.getOffset());
 		}
 	}
 
@@ -866,10 +873,10 @@ public class TestWS {
 			session.createMany(beans);
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
+			assertEquals("Facility exists with name = 'Two'", e.getMessage());
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals("Facility exists with name = 'Two'", ue.getMessage());
-			assertEquals(3, ue.getOffset());
+			assertEquals((Integer) 3, ue.getOffset());
 		}
 	}
 
@@ -900,10 +907,10 @@ public class TestWS {
 			session.createMany(beans);
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
+			assertEquals("Facility exists with name = 'Two'", e.getMessage());
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals("Facility exists with name = 'Two'", ue.getMessage());
-			assertEquals(1, ue.getOffset());
+			assertEquals((Integer) 1, ue.getOffset());
 		}
 	}
 
@@ -938,10 +945,10 @@ public class TestWS {
 			session.createMany(beans);
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
+			assertTrue(e.getMessage().startsWith("InvestigationType exists with name = 'Two', facility = 'id:"));
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertTrue(ue.getMessage().startsWith("InvestigationType exists with name = 'Two', facility = 'id:"));
-			assertEquals(3, ue.getOffset());
+			assertEquals((Integer) 3, ue.getOffset());
 		}
 	}
 
@@ -1182,10 +1189,10 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals(-1, ue.getOffset());
+			assertEquals((Integer) (-1), ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertEquals("Expected token from types [ENTSEP] at token , in INCLUDE 1 < , > Datafile [ ",
-					ue.getMessage());
+					e.getMessage());
 		}
 
 		try {
@@ -1193,9 +1200,9 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals(-1, ue.getOffset());
+			assertEquals((Integer) (-1), ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
-			assertEquals("Expected token from types [NAME] at token 1 in Datafile , < 1 > [ id ", ue.getMessage());
+			assertEquals("Expected token from types [NAME] at token 1 in Datafile , < 1 > [ id ", e.getMessage());
 		}
 
 		results = session.search("Dataset INCLUDE 1 [id = " + dsid + "]");
@@ -1261,7 +1268,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals(-1, ue.getOffset());
+			assertEquals((Integer) (-1), ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 		}
 
@@ -1271,7 +1278,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals(-1, ue.getOffset());
+			assertEquals((Integer) (-1), ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 		}
 
@@ -1282,7 +1289,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals(-1, ue.getOffset());
+			assertEquals((Integer) (-1), ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertTrue(e.getMessage().contains("II"));
 		}
@@ -1292,7 +1299,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals(-1, ue.getOffset());
+			assertEquals((Integer) (-1), ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertTrue(e.getMessage().contains("INCLUDE 1"));
 		}
@@ -1303,7 +1310,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals(-1, ue.getOffset());
+			assertEquals((Integer) (-1), ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertTrue(e.getMessage().contains("investigationInstruments"));
 		}
@@ -1561,8 +1568,10 @@ public class TestWS {
 		}
 		Long invId = ds.getInvestigation().getId();
 
-		assertEquals(min, session.search("MIN(Dataset.id) [id > 0]").get(0));
-		assertEquals(max, session.search("MAX(Dataset.id) [id > 0]").get(0));
+		if (session.getContainerType() != ContainerType.WILDFLY) {
+			assertEquals(min, session.search("MIN(Dataset.id) [id > 0]").get(0));
+			assertEquals(max, session.search("MAX(Dataset.id) [id > 0]").get(0));
+		}
 
 		List<?> results = session.search(
 				"Dataset.id " + "<-> DatasetParameter[type.name = 'TIMESTAMP'] " + "<-> Investigation[name <> 12]");
@@ -1731,8 +1740,10 @@ public class TestWS {
 
 		assertEquals(0, session.search("SELECT ds FROM Dataset ds WHERE ds.id IN ( " + max + ") LIMIT 1,10").size());
 
-		assertEquals(min, session.search("SELECT MIN(ds.id) FROM  Dataset ds WHERE ds.id > 0").get(0));
-		assertEquals(max, session.search("SELECT MAX(ds.id) FROM  Dataset ds WHERE ds.id > 0").get(0));
+		if (session.getContainerType() != ContainerType.WILDFLY) {
+			assertEquals(min, session.search("SELECT MIN(ds.id) FROM Dataset ds WHERE ds.id > 0").get(0));
+			assertEquals(max, session.search("SELECT MAX(ds.id) FROM Dataset ds WHERE ds.id > 0").get(0));
+		}
 
 		Long invId = (Long) session.search("SELECT inv.id FROM Investigation inv WHERE inv.datasets IS NOT EMPTY")
 				.get(0);
@@ -1817,20 +1828,18 @@ public class TestWS {
 		results = session.search("SELECT ds FROM Dataset ds WHERE ds.complete = FALSE");
 		assertEquals(4, results.size());
 
-		// Bad query - TODO this should throw an exception as datafile is not an
-		// attribute of
-		// Dataset however the bad JPQL is not spotted.
-
-		// try {
-		// results =
-		// session.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df)
-		// FROM ds.datafile df) = 2");
-		// fail("Should have thrown an exception");
-		// } catch (IcatException_Exception e) {
-		// assertEquals(IcatExceptionType.BAD_PARAMETER,
-		// e.getFaultInfo().getType());
-		// assertTrue(e.getMessage().indexOf("EntityManager") > 0);
-		// }
+		if (session.getContainerType() != ContainerType.GLASSFISH) {
+			// This should throw an exception as datafile is not an attribute of
+			// Dataset.
+			try {
+				results = session.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafile df) = 2");
+				fail("Should have thrown an exception");
+			} catch (IcatException_Exception e) {
+				assertEquals(IcatExceptionType.BAD_PARAMETER, e.getFaultInfo().getType());
+				assertTrue(e.getMessage().indexOf("EntityManager") > 0
+						|| e.getMessage().indexOf("could not resolve property") > 0);
+			}
+		}
 
 		// Nested select
 		results = session.search("SELECT ds from Dataset ds WHERE (SELECT COUNT(df) FROM ds.datafiles df) = 2");

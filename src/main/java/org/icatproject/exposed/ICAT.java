@@ -26,7 +26,6 @@ import javax.transaction.UserTransaction;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
-import org.apache.log4j.Logger;
 import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
@@ -76,13 +75,15 @@ import org.icatproject.core.manager.NotificationMessage;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
 import org.icatproject.core.manager.Transmitter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Stateless
 @WebService(targetNamespace = "http://icatproject.org")
 @TransactionManagement(TransactionManagementType.BEAN)
 public class ICAT {
 
-	private static Logger logger = Logger.getLogger(ICAT.class);
+	private static Logger logger = LoggerFactory.getLogger(ICAT.class);
 
 	private Map<String, ExtendedAuthenticator> authPlugins = new HashMap<>();
 

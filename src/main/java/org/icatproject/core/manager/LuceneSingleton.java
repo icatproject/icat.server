@@ -28,7 +28,6 @@ import javax.ejb.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -62,6 +61,10 @@ import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /* There is synchronization code in this class - please understand it before making any changes */
 @DependsOn("LoggingConfigurator")
@@ -133,14 +136,15 @@ public class LuceneSingleton implements Lucene {
 			} catch (Throwable t) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				t.printStackTrace(new PrintStream(baos));
-				logger.error(baos);
+				logger.error(baos.toString());
 			} finally {
 				manager.close();
 			}
 		}
 	}
 
-	final static Logger logger = Logger.getLogger(LuceneSingleton.class);
+	final static Logger logger = LoggerFactory.getLogger(LuceneSingleton.class);
+	final static Marker fatal = MarkerFactory.getMarker("FATAL");
 
 	final static SearcherFactory searcherFactory = new SearcherFactory();
 
@@ -544,7 +548,7 @@ public class LuceneSingleton implements Lucene {
 		} catch (Exception e) {
 			StringWriter errors = new StringWriter();
 			e.printStackTrace(new PrintWriter(errors));
-			logger.fatal(errors.toString());
+			logger.error(fatal, errors.toString());
 		}
 	}
 
@@ -605,7 +609,7 @@ public class LuceneSingleton implements Lucene {
 			} catch (Exception e) {
 				StringWriter errors = new StringWriter();
 				e.printStackTrace(new PrintWriter(errors));
-				logger.fatal(errors.toString());
+				logger.error(fatal, errors.toString());
 				if (directory != null) {
 					try {
 						String lockId = directory.getLockID();

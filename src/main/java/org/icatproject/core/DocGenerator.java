@@ -9,16 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DocGenerator {
 
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
-	private static Logger logger = Logger.getRootLogger();
+	private static Logger logger = LoggerFactory.getLogger(DocGenerator.class);
 
 	public static void main(String[] args) throws Exception {
 
@@ -26,7 +27,8 @@ public class DocGenerator {
 
 		File dir = new File(args[0]);
 		PrintWriter out = new PrintWriter(new File(dir, "src/site/resources/schema.html"));
-		out.print("<!DOCTYPE HTML><html><head><style type=\"text/css\">h1,h2,h3 {color:sienna;} table { border-collapse:collapse; } td, th { border:1px solid sienna; padding:4px; font-weight:normal; text-align:left} th { color:sienna; }</style><title>ICAT Schema</title><link rel=\"icon\" href=\"http://www.icatproject.org/favicon.ico\"/></head><body><h1>ICAT Schema</h1>");
+		out.print(
+				"<!DOCTYPE HTML><html><head><style type=\"text/css\">h1,h2,h3 {color:sienna;} table { border-collapse:collapse; } td, th { border:1px solid sienna; padding:4px; font-weight:normal; text-align:left} th { color:sienna; }</style><title>ICAT Schema</title><link rel=\"icon\" href=\"http://www.icatproject.org/favicon.ico\"/></head><body><h1>ICAT Schema</h1>");
 		List<String> cnames = EntityInfoHandler.getEntityNamesList();
 
 		out.print("<p style=\"max-width:50em;\">");
@@ -82,7 +84,8 @@ public class DocGenerator {
 				out.println("</p>");
 			}
 
-			out.println("<h3>Relationships</h3><table><tr><th>Card</th><th>Class</th><th>Field</th><th>Cascaded</th><th>Description</th></tr>");
+			out.println(
+					"<h3>Relationships</h3><table><tr><th>Card</th><th>Class</th><th>Field</th><th>Cascaded</th><th>Description</th></tr>");
 			for (Relationship r : eiHandler.getRelatedEntities(eklass)) {
 				Field f = r.getField();
 				boolean notnullable = notnullables.contains(f);

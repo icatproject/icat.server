@@ -17,7 +17,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.SingletonFinder;
@@ -32,6 +31,8 @@ import org.icatproject.core.parser.ParserException;
 import org.icatproject.core.parser.RuleWhat;
 import org.icatproject.core.parser.Token;
 import org.icatproject.core.parser.Tokenizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Comment("An authorization rule")
 @SuppressWarnings("serial")
@@ -52,7 +53,7 @@ public class Rule extends EntityBaseBean implements Serializable {
 	@Transient
 	private GateKeeper gatekeeper;
 
-	private final static Logger logger = Logger.getLogger(Rule.class);
+	private final static Logger logger = LoggerFactory.getLogger(Rule.class);
 
 	public static final String CREATE_QUERY = "Rule.CreateQuery";
 	public static final String DELETE_QUERY = "Rule.DeleteQuery";

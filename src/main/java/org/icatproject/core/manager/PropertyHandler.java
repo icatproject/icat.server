@@ -18,11 +18,16 @@ import javax.ejb.Singleton;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import org.apache.log4j.Logger;
 import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.IcatException;
 import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
+import org.icatproject.utils.ContainerGetter;
+import org.icatproject.utils.ContainerGetter.ContainerType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 @DependsOn("LoggingConfigurator")
 @Singleton
@@ -98,7 +103,8 @@ public class PropertyHandler {
 		C, U, D
 	}
 
-	private final static Logger logger = Logger.getLogger(PropertyHandler.class);;
+	private final static Logger logger = LoggerFactory.getLogger(PropertyHandler.class);
+	private final static Marker fatal = MarkerFactory.getMarker("FATAL");
 	private final static Pattern cudPattern = Pattern.compile("[CUD]*");
 	private final static Pattern srwPattern = Pattern.compile("[SRW]*");
 
@@ -135,6 +141,10 @@ public class PropertyHandler {
 	private int maxIdsInQuery;
 	private long importCacheSize;
 	private long exportCacheSize;
+	private boolean needReadTransaction;
+	private ContainerType containerType;
+	private String jmsTopicConnectionFactory;
+	private String jmsPrefix;
 
 	@PostConstruct
 	private void init() {
@@ -212,7 +222,7 @@ public class PropertyHandler {
 						ei.getEntityInfo(entity);
 					} catch (IcatException e) {
 						String msg = "Value '" + entity + "' specified in 'notification.list' is not an ICAT entity";
-						logger.fatal(msg);
+						logger.error(fatal, msg);
 						throw new IllegalStateException(msg);
 					}
 					key = "notification." + entity;
@@ -223,7 +233,7 @@ public class PropertyHandler {
 					Matcher m = cudPattern.matcher(notificationOps);
 					if (!m.matches()) {
 						String msg = "Property  '" + key + "' must only contain the letters C, U and D";
-						logger.fatal(msg);
+						logger.error(fatal, msg);
 						throw new IllegalStateException(msg);
 					}
 					for (String c : new String[] { "C", "U", "D" }) {
@@ -295,6 +305,23 @@ public class PropertyHandler {
 			maxIdsInQuery = props.getPositiveInt("maxIdsInQuery");
 			formattedProps.add("maxIdsInQuery " + maxIdsInQuery);
 
+			/* JMS stuff */
+			jmsTopicConnectionFactory = props.getString("jms.topicConnectionFactory",
+					"java:comp/DefaultJMSConnectionFactory");
+			formattedProps.add("jms.topicConnectionFactory " + jmsTopicConnectionFactory);
+
+			/* find type of container and set flags */
+			containerType = ContainerGetter.getContainer();
+			logger.info("ICAT has been deployed in a " + containerType + " container");
+			if (containerType == ContainerType.UNKNOWN) {
+				abend("Container type " + containerType + " is not recognised");
+			}
+			needReadTransaction = containerType == ContainerType.WILDFLY;
+			jmsPrefix = "";
+			if (containerType == ContainerType.WILDFLY) {
+				jmsPrefix = "java:/";
+			}
+
 		} catch (CheckedPropertyException e) {
 			abend(e.getMessage());
 		}
@@ -302,7 +329,7 @@ public class PropertyHandler {
 	}
 
 	private void abend(String msg) {
-		logger.fatal(msg);
+		logger.error(fatal, msg);
 		throw new IllegalStateException(msg);
 	}
 
@@ -352,6 +379,22 @@ public class PropertyHandler {
 
 	public long getExportCacheSize() {
 		return exportCacheSize;
+	}
+
+	public boolean needReadTransaction() {
+		return needReadTransaction;
+	}
+
+	public ContainerType getContainerType() {
+		return containerType;
+	}
+
+	public String getJmsTopicConnectionFactory() {
+		return jmsTopicConnectionFactory;
+	}
+
+	public String getJmsPrefix() {
+		return jmsPrefix;
 	}
 
 }

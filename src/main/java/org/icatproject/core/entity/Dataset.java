@@ -192,9 +192,11 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		if (description != null) {
 			sb.append(" " + description);
 		}
+
 		if (doi != null) {
 			sb.append(" " + doi);
 		}
+
 		if (sample != null) {
 			sb.append(" " + sample.getName());
 			if (sample.getType() != null) {
@@ -202,20 +204,19 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			}
 		}
 		doc.add(new TextField("text", sb.toString(), Store.NO));
+
 		if (startDate != null) {
-			doc.add(new StringField("startDate", DateTools.dateToString(startDate,
-					Resolution.MINUTE), Store.NO));
+			doc.add(new StringField("startDate", DateTools.dateToString(startDate, Resolution.MINUTE), Store.NO));
 		} else {
-			doc.add(new StringField("startDate",
-					DateTools.dateToString(modTime, Resolution.MINUTE), Store.NO));
+			doc.add(new StringField("startDate", DateTools.dateToString(modTime, Resolution.MINUTE), Store.NO));
 		}
+
 		if (endDate != null) {
-			doc.add(new StringField("endDate", DateTools.dateToString(endDate, Resolution.MINUTE),
-					Store.NO));
+			doc.add(new StringField("endDate", DateTools.dateToString(endDate, Resolution.MINUTE), Store.NO));
 		} else {
-			doc.add(new StringField("endDate", DateTools.dateToString(modTime, Resolution.MINUTE),
-					Store.NO));
+			doc.add(new StringField("endDate", DateTools.dateToString(modTime, Resolution.MINUTE), Store.NO));
 		}
+
 		doc.add(new StringField("investigation", "Investigation:" + investigation.id, Store.YES));
 		return doc;
 	}

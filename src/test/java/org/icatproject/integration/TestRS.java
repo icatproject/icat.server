@@ -44,6 +44,7 @@ import org.icatproject.icat.client.ParameterForLucene;
 import org.icatproject.icat.client.Session;
 import org.icatproject.icat.client.Session.Attributes;
 import org.icatproject.icat.client.Session.DuplicateAction;
+import org.icatproject.utils.ContainerGetter.ContainerType;
 import org.junit.BeforeClass;
 
 import org.junit.Test;
@@ -72,6 +73,9 @@ public class TestRS {
 
 	@Test
 	public void testLuceneDatafiles() throws Exception {
+		if (wSession.getContainerType() == ContainerType.WILDFLY) {
+			return;
+		}
 
 		Session session = setupLuceneTest();
 
@@ -94,6 +98,9 @@ public class TestRS {
 
 	@Test
 	public void testLuceneDatasets() throws Exception {
+		if (wSession.getContainerType() == ContainerType.WILDFLY) {
+			return;
+		}
 
 		Session session = setupLuceneTest();
 
@@ -130,6 +137,9 @@ public class TestRS {
 
 	@Test
 	public void testLuceneInvestigations() throws Exception {
+		if (wSession.getContainerType() == ContainerType.WILDFLY) {
+			return;
+		}
 
 		Session session = setupLuceneTest();
 
@@ -240,6 +250,10 @@ public class TestRS {
 
 	@Test
 	public void testGet() throws Exception {
+		if (wSession.getContainerType() == ContainerType.WILDFLY) {
+			return;
+		}
+
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "notroot");
@@ -276,6 +290,10 @@ public class TestRS {
 
 	@Test
 	public void testSearch() throws Exception {
+		if (wSession.getContainerType() == ContainerType.WILDFLY) {
+			return;
+		}
+
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "notroot");
@@ -494,6 +512,10 @@ public class TestRS {
 
 	@Test
 	public void exportMetaDataDumpRoot() throws Exception {
+		if (wSession.getContainerType() == ContainerType.WILDFLY) {
+			return;
+		}
+
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "root");
 		credentials.put("password", "password");
@@ -538,6 +560,10 @@ public class TestRS {
 
 	@Test
 	public void exportMetaDataQuery() throws Exception {
+		if (wSession.getContainerType() == ContainerType.WILDFLY) {
+			return;
+		}
+
 		wSession.clear();
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
@@ -567,7 +593,8 @@ public class TestRS {
 		long n = dump.toFile().length();
 
 		assertTrue("Size is dependent upon time zone in which test is run " + n,
-				n == 2686 || n == 1518 || n == 2771 || n == 2776);
+				n == 2686 || n == 1518 || n == 2771 || n == 2776 || n == 2691);
+
 		session.importMetaData(dump, DuplicateAction.CHECK, Attributes.ALL);
 		Files.delete(dump);
 	}
@@ -589,6 +616,9 @@ public class TestRS {
 	}
 
 	private void importMetaData(Attributes attributes, String userName) throws Exception {
+		if (wSession.getContainerType() == ContainerType.WILDFLY) {
+			return;
+		}
 		wSession.clear();
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();

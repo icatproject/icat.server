@@ -216,18 +216,33 @@
 
 	<h2>The icat-setup.properties file</h2>
 	<dl>
-		<dt>driver</dt>
+		<dt>container</dt>
+		<dd>May be either glassfish or wildfly - though only glassfish is
+			working properly at the moment.
+		<dt>home</dt>
+		<dd>is the top level of the container installation. For
+			glasssfish it must contain "glassfish/domains" and for wildfly it
+			must contain jboss-modules.jar.</dd>
+		<dt>port</dt>
+		<dd>is the administration port of the container which is
+			typically 4848 for glassfish and 9990 for wildfly.</dd>
+		<dt>secure</dt>
+		<dd>must be set to true or false. If true then only https and not
+			http connections will be allowed.</dd>
+		<dt>db.vendor</dt>
+		<dd>This is the conventional name of the database: such as oracle
+			or mysql. Currently the only value that is significant is "oracle"
+			which should be used to mark such databases.</dd>
+		<dt>db.driver</dt>
 		<dd>is the name of the jdbc driver and must match the jar file
 			for your database that you stored in the previous step.</dd>
-		<dt>dbProperties</dt>
-		<dd>identifies the icat database and how to connect to it.</dd>
-		<dt>glassfish</dt>
-		<dd>is the top level of the glassfish installation. It must
-			contain "glassfish/domains", and will be referred to here as
-			GLASSFISH_HOME as if an environment variable had been set.</dd>
-		<dt>port</dt>
-		<dd>is the administration port of the chosen glassfish domain
-			which is typically 4848.</dd>
+		<dt>db.url</dt>
+		<dd>url to connect to your database. For example:
+			jdbc:mysql://localhost:3306/icat</dd>
+		<dt>db.username</dt>
+		<dd>username to connect to your database.</dd>
+		<dt>db.password</dt>
+		<dd>password to connect to your database.</dd>
 		<dt>jmsHostPort</dt>
 		<dd>
 			This is optional. It should only be specified on satellite machines

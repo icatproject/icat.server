@@ -61,7 +61,6 @@ import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
-import org.apache.log4j.Logger;
 import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
@@ -76,6 +75,9 @@ import org.icatproject.core.manager.Porter;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
 import org.icatproject.core.manager.Transmitter;
+import org.icatproject.utils.ContainerGetter.ContainerType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Path("/")
 @Stateless
@@ -95,7 +97,7 @@ public class ICATRest {
 			if (event == Event.KEY_NAME || event == Event.VALUE_STRING) {
 				logger.debug(event + ": " + parser.getString());
 			} else {
-				logger.debug(event);
+				logger.debug(event.toString());
 			}
 			for (Event e : events) {
 				if (event == e) {
@@ -117,7 +119,7 @@ public class ICATRest {
 		}
 	}
 
-	private static Logger logger = Logger.getLogger(ICATRest.class);
+	private static Logger logger = LoggerFactory.getLogger(ICATRest.class);
 
 	private final static DateFormat df8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
@@ -152,6 +154,8 @@ public class ICATRest {
 
 	private int maxEntities;
 
+	private ContainerType containerType;
+
 	private void checkRoot(String sessionId) throws IcatException {
 		String userId = beanManager.getUserName(sessionId, manager);
 		if (!rootUserNames.contains(userId)) {
@@ -170,11 +174,11 @@ public class ICATRest {
 	 * @param json
 	 *            description of entities to create which takes the form
 	 *            <code>[{"InvestigationType":{"facility":{"id":12042},"name":"ztype"}},{"Facility":{"name":"another
-	 * 			fred"}}]</code> . It is a list of objects where each object has a name
-	 *            which is the type of the entity and a value which is an object
-	 *            with name value pairs where these names are the names of the
-	 *            attributes and the values are either simple or they may be
-	 *            objects themselves. In this case two entities are being
+	 * 			fred"}}]</code> . It is a list of objects where each object has
+	 *            a name which is the type of the entity and a value which is an
+	 *            object with name value pairs where these names are the names
+	 *            of the attributes and the values are either simple or they may
+	 *            be objects themselves. In this case two entities are being
 	 *            created an InvestigationType and a Facility with a name of
 	 *            "another fred". The InvestigationType being created will
 	 *            reference an existing facility with an id of 12042 and will
@@ -240,10 +244,10 @@ public class ICATRest {
 	 * @param jsonString
 	 *            what to export which takes the form
 	 *            <code>{"sessionId":"0d9a3706-80d4-4d29-9ff3-4d65d4308a24","query":"Facility",
-	 * 			, "attributes":"ALL"</code> where query if specified is a normal ICAT
-	 *            query which may have an INCLUDE clause. This is used to define
-	 *            the metadata to export. If not present then the whole ICAT
-	 *            will be exported.
+	 * 			, "attributes":"ALL"</code> where query if specified is a normal
+	 *            ICAT query which may have an INCLUDE clause. This is used to
+	 *            define the metadata to export. If not present then the whole
+	 *            ICAT will be exported.
 	 *            <p>
 	 *            The value "attributes" if not specified defaults to "USER". It
 	 *            is not case sensitive and it defines which attributes to
@@ -334,8 +338,8 @@ public class ICATRest {
 			ExtendedAuthenticator extendedAuthenticator = entry.getValue();
 			JsonObjectBuilder authenticatorBuilder = Json.createObjectBuilder();
 			authenticatorBuilder.add("mnemonic", entry.getKey());
-			JsonReader jsonReader = Json.createReader(new StringReader(extendedAuthenticator.getAuthenticator()
-					.getDescription()));
+			JsonReader jsonReader = Json
+					.createReader(new StringReader(extendedAuthenticator.getAuthenticator().getDescription()));
 			JsonObject description = jsonReader.readObject();
 			jsonReader.close();
 			authenticatorBuilder.add("description", description);
@@ -349,7 +353,7 @@ public class ICATRest {
 		}
 
 		jsonBuilder.add("maxEntities", maxEntities).add("lifetimeMinutes", lifetimeMinutes)
-				.add("authenticators", authenticatorArrayBuilder);
+				.add("authenticators", authenticatorArrayBuilder).add("containerType", containerType.name());
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonWriter writer = Json.createWriter(baos);
@@ -368,9 +372,8 @@ public class ICATRest {
 	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
 	 * 
 	 * @return a json string with userName and remainingMinutes of the form
-	 *         <samp>
-	 *         {"userName":"db/root","remainingMinutes":117.87021666666666}
-	 *         </samp>
+	 *         <samp> {"userName":"db/root","remainingMinutes":117.
+	 *         87021666666666} </samp>
 	 * 
 	 * @throws IcatException
 	 *             when something is wrong
@@ -483,8 +486,8 @@ public class ICATRest {
 					if (fieldName.equals("json")) {
 						jsonString = value;
 					} else {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Form field " + fieldName
-								+ "is not recognised");
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+								"Form field " + fieldName + "is not recognised");
 					}
 				} else {
 					if (name == null) {
@@ -504,6 +507,7 @@ public class ICATRest {
 		lifetimeMinutes = propertyHandler.getLifetimeMinutes();
 		rootUserNames = propertyHandler.getRootUserNames();
 		maxEntities = propertyHandler.getMaxEntities();
+		containerType = propertyHandler.getContainerType();
 	}
 
 	private void jsonise(EntityBaseBean bean, JsonGenerator gen) throws IcatException {
@@ -546,8 +550,8 @@ public class ICATRest {
 						gen.write(field.getName(), df8601.format((Date) value));
 					}
 				} else {
-					throw new IcatException(IcatExceptionType.INTERNAL, "Don't know how to jsonise field of type "
-							+ type);
+					throw new IcatException(IcatExceptionType.INTERNAL,
+							"Don't know how to jsonise field of type " + type);
 				}
 			} else if (updaters.contains(field)) {
 				gen.writeStartObject(field.getName());
@@ -588,7 +592,8 @@ public class ICATRest {
 	@Path("session")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	public String login(@Context HttpServletRequest request, @FormParam("json") String jsonString) throws IcatException {
+	public String login(@Context HttpServletRequest request, @FormParam("json") String jsonString)
+			throws IcatException {
 		logger.debug(jsonString);
 		if (jsonString == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "json must not be null");
@@ -621,8 +626,8 @@ public class ICATRest {
 
 		Authenticator authenticator = authPlugins.get(plugin).getAuthenticator();
 		if (authenticator == null) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Authenticator mnemonic " + plugin
-					+ " not recognised");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION,
+					"Authenticator mnemonic " + plugin + " not recognised");
 		}
 		logger.debug("Using " + plugin + " to authenticate");
 
@@ -780,8 +785,8 @@ public class ICATRest {
 					if (parm.containsKey("stringValue")) {
 						parms.add(new ParameterPOJO(name, units, parm.getString("stringValue")));
 					} else if (parm.containsKey("lowerDateValue") && parm.containsKey("upperDateValue")) {
-						parms.add(new ParameterPOJO(name, units, parm.getString("lowerDateValue"), parm
-								.getString("upperDateValue")));
+						parms.add(new ParameterPOJO(name, units, parm.getString("lowerDateValue"),
+								parm.getString("upperDateValue")));
 					} else if (parm.containsKey("lowerNumericValue") && parm.containsKey("upperNumericValue")) {
 						parms.add(new ParameterPOJO(name, units, parm.getJsonNumber("lowerNumericValue").doubleValue(),
 								parm.getJsonNumber("upperNumericValue").doubleValue()));
@@ -934,8 +939,8 @@ public class ICATRest {
 				}
 				Field field = fieldsByName.get(parser.getString());
 				if (field == null) {
-					throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Field " + parser.getString()
-							+ " not found in " + beanName);
+					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+							"Field " + parser.getString() + " not found in " + beanName);
 				} else if (field.getName().equals("id")) {
 					checker.get(Event.VALUE_NUMBER);
 					bean.setId(Long.parseLong(parser.getString()));
@@ -961,8 +966,8 @@ public class ICATRest {
 							try {
 								arg = df8601.parse(parser.getString());
 							} catch (ParseException e) {
-								throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Badly formatted date "
-										+ parser.getString());
+								throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+										"Badly formatted date " + parser.getString());
 							}
 						}
 					} else {
@@ -990,8 +995,8 @@ public class ICATRest {
 			}
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| JsonException e) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getClass() + " " + e.getMessage() + " at "
-					+ parser.getLocation().getStreamOffset() + " in json");
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+					e.getClass() + " " + e.getMessage() + " at " + parser.getLocation().getStreamOffset() + " in json");
 		}
 		return bean;
 	}
@@ -1080,8 +1085,8 @@ public class ICATRest {
 				} else if (result instanceof Boolean) {
 					gen.write((Boolean) result);
 				} else {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "Don't know how to jsonise "
-							+ result.getClass());
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+							"Don't know how to jsonise " + result.getClass());
 				}
 			}
 

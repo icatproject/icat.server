@@ -8,13 +8,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Provider
 public class IcatExceptionMapper implements ExceptionMapper<IcatException> {
 
-	private static Logger logger = Logger.getLogger(IcatExceptionMapper.class);
+	private static Logger logger = LoggerFactory.getLogger(IcatExceptionMapper.class);
 
 	@Override
 	public Response toResponse(IcatException e) {

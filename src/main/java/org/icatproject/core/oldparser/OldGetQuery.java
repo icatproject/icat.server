@@ -1,6 +1,5 @@
 package org.icatproject.core.oldparser;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
@@ -8,8 +7,6 @@ import org.icatproject.core.manager.EntityInfoHandler;
 public class OldGetQuery {
 
 	// GetQuery ::= name Include?
-
-	static Logger logger = Logger.getLogger(OldGetQuery.class);
 
 	private Class<? extends EntityBaseBean> bean;
 
@@ -29,8 +26,7 @@ public class OldGetQuery {
 	}
 
 	public String getNewQuery() throws IcatException {
-		StringBuilder sb = new StringBuilder(bean.getSimpleName() + " AS " + bean.getSimpleName()
-				+ "$");
+		StringBuilder sb = new StringBuilder(bean.getSimpleName() + " AS " + bean.getSimpleName() + "$");
 		if (include != null) {
 			sb.append(" " + include.getNewInclude(bean));
 		}

@@ -1,16 +1,17 @@
 package org.icatproject.core.parser;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GetQuery {
 
 	// GetQuery ::= name (AS? name Include);
 
-	static Logger logger = Logger.getLogger(GetQuery.class);
+	static Logger logger = LoggerFactory.getLogger(GetQuery.class);
 
 	private Class<? extends EntityBaseBean> bean;
 

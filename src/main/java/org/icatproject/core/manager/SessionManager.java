@@ -6,14 +6,15 @@ import javax.ejb.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.entity.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @DependsOn("LoggingConfigurator")
 @Singleton
 public class SessionManager {
 
-	private static final Logger logger = Logger.getLogger(SessionManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
 
 	@PersistenceContext(unitName = "icat")
 	private EntityManager manager;

@@ -9,13 +9,14 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException.IcatExceptionType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Provider
 public class ThrowableExceptionMapper implements ExceptionMapper<Throwable> {
 
-	private static Logger logger = Logger.getLogger(ThrowableExceptionMapper.class);
+	private static Logger logger = LoggerFactory.getLogger(ThrowableExceptionMapper.class);
 
 	@Override
 	public Response toResponse(Throwable e) {
