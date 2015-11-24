@@ -27,6 +27,7 @@ import javax.ejb.Remote;
 import javax.ejb.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
@@ -72,6 +73,26 @@ import org.slf4j.MarkerFactory;
 @LocalBean
 @Remote(Lucene.class)
 public class LuceneSingleton implements Lucene {
+
+	class ScoredResult {
+
+		private String result;
+		private float score;
+
+		private ScoredResult(String result, float score) {
+			this.result = result;
+			this.score = score;
+		}
+
+		public String getResult() {
+			return result;
+		}
+
+		public float getScore() {
+			return score;
+		}
+
+	}
 
 	public class PopulateThread extends Thread {
 
@@ -148,6 +169,7 @@ public class LuceneSingleton implements Lucene {
 
 	final static SearcherFactory searcherFactory = new SearcherFactory();
 
+	@PersistenceUnit(unitName = "icat")
 	private EntityManagerFactory entityManagerFactory;
 
 	private boolean active;
@@ -669,22 +691,17 @@ public class LuceneSingleton implements Lucene {
 	private LuceneSearchResult luceneSearchResult(TopDocs topDocs) throws IOException {
 		ScoreDoc[] hits = topDocs.scoreDocs;
 		logger.debug("Hits " + topDocs.totalHits + " maxscore " + topDocs.getMaxScore());
+		List<ScoredResult> results = new ArrayList<>();
 		for (ScoreDoc hit : hits) {
-			logger.debug(hit + " " + isearcher.doc(hit.doc));
-		}
-
-		List<String> results = new ArrayList<String>();
-
-		for (int i = 0; i < hits.length; i++) {
-			Document doc = isearcher.doc(hits[i].doc);
-			results.add(doc.get("id"));
+			Document doc = isearcher.doc(hit.doc);
+			results.add(new ScoredResult(doc.get("id"), hit.score));
+			logger.debug(doc + " -> " + hit);
 		}
 		ScoreDoc lastDoc = results.isEmpty() ? null : hits[hits.length - 1];
 		return new LuceneSearchResult(results, lastDoc);
 	}
 
 	@Override
-
 	public synchronized void populate(Class<?> klass) {
 		populateList.add(klass);
 		if (populateThread == null || (populateThread).getState() == Thread.State.TERMINATED) {
@@ -726,7 +743,7 @@ public class LuceneSingleton implements Lucene {
 				logger.debug("Got a new IndexSearcher " + isearcher);
 			}
 
-			List<String> results = new ArrayList<String>();
+			List<ScoredResult> results = new ArrayList<>();
 			Query query = parser.parse(queryString, "all");
 			if (entityName != null) {
 				BooleanQuery bquery = new BooleanQuery();
@@ -735,9 +752,9 @@ public class LuceneSingleton implements Lucene {
 				query = bquery;
 			}
 			ScoreDoc[] hits = isearcher.search(query, count).scoreDocs;
-			for (int i = 0; i < hits.length; i++) {
-				Document doc = isearcher.doc(hits[i].doc);
-				results.add(doc.get("id"));
+			for (ScoreDoc hit : hits) {
+				Document doc = isearcher.doc(hit.doc);
+				results.add(new ScoredResult(doc.get("id"), hit.score));
 			}
 			ScoreDoc lastDoc = results.isEmpty() ? null : hits[hits.length - 1];
 			return new LuceneSearchResult(results, lastDoc);
@@ -753,7 +770,7 @@ public class LuceneSingleton implements Lucene {
 	public LuceneSearchResult searchAfter(String queryString, int count, String entityName, LuceneSearchResult last)
 			throws IcatException {
 		try {
-			List<String> results = new ArrayList<String>();
+			List<ScoredResult> results = new ArrayList<>();
 			Query query = parser.parse(queryString, "all");
 			if (entityName != null) {
 				BooleanQuery bquery = new BooleanQuery();
@@ -764,7 +781,7 @@ public class LuceneSingleton implements Lucene {
 			ScoreDoc[] hits = isearcher.searchAfter(last.getScoreDoc(), query, count).scoreDocs;
 			for (ScoreDoc hit : hits) {
 				Document doc = isearcher.doc(hit.doc);
-				results.add(doc.get("id"));
+				results.add(new ScoredResult(doc.get("id"), hit.score));
 			}
 			ScoreDoc lastDoc = results.isEmpty() ? null : hits[hits.length - 1];
 			return new LuceneSearchResult(results, lastDoc);

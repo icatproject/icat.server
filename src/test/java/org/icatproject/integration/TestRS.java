@@ -87,6 +87,7 @@ public class TestRS {
 		// Use the user
 
 		JsonArray array = searchDatafiles(session, "db/tr", null, null, null, null, 20, 3);
+		System.out.println(array);
 
 		// Try a bad user
 		searchDatafiles(session, "db/fred", null, null, null, null, 20, 0);

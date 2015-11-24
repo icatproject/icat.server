@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.lucene.search.ScoreDoc;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.manager.LuceneSingleton.ScoredResult;
 
 public interface Lucene {
 
@@ -89,13 +90,13 @@ public interface Lucene {
 	@SuppressWarnings("serial")
 	public class LuceneSearchResult implements Serializable {
 
-		private List<String> results;
+		private List<ScoredResult> results;
 		private int doc;
 		private int shardIndex;
 		private float score;
 		private boolean scoreDocExists;
 
-		public LuceneSearchResult(List<String> results, ScoreDoc lastDoc) {
+		public LuceneSearchResult(List<ScoredResult> results, ScoreDoc lastDoc) {
 			this.results = results;
 			if (lastDoc != null) {
 				this.doc = lastDoc.doc;
@@ -105,7 +106,7 @@ public interface Lucene {
 			}
 		}
 
-		public List<String> getResults() {
+		public List<ScoredResult> getResults() {
 			return results;
 		}
 

@@ -58,6 +58,7 @@ import org.icatproject.core.entity.Log;
 import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.Lucene.LuceneSearchResult;
 import org.icatproject.core.manager.Lucene.ParameterPOJO;
+import org.icatproject.core.manager.LuceneSingleton.ScoredResult;
 import org.icatproject.core.manager.PropertyHandler.Operation;
 import org.icatproject.core.oldparser.OldGetQuery;
 import org.icatproject.core.oldparser.OldInput;
@@ -803,11 +804,12 @@ public class EntityBeanManager {
 		}
 	}
 
-	private void filterReadAccess(List<EntityBaseBean> results, List<String> allResults, int maxCount, String userId,
-			EntityManager manager) throws IcatException {
+	private void filterReadAccess(List<ScoredEntityBaseBean> results, List<ScoredResult> allResults, int maxCount,
+			String userId, EntityManager manager) throws IcatException {
 
 		logger.debug("Got " + allResults.size() + " results from Lucene");
-		for (String result : allResults) {
+		for (ScoredResult sr : allResults) {
+			String result = sr.getResult();
 			int i = result.indexOf(':');
 			String eName = result.substring(0, i);
 			long entityId = Long.parseLong(result.substring(i + 1));
@@ -820,7 +822,7 @@ public class EntityBeanManager {
 						gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
 						EntityBaseBean eb = beanManaged.pruned(false, -1, null, maxEntities, gateKeeper, userId,
 								manager);
-						results.add(eb);
+						results.add(new ScoredEntityBaseBean(eb, sr.getScore()));
 						if (results.size() > maxEntities) {
 							throw new IcatException(IcatExceptionType.VALIDATION,
 									"attempt to return more than " + maxEntities + " entitities");
@@ -1515,14 +1517,14 @@ public class EntityBeanManager {
 		}
 	}
 
-	public List<EntityBaseBean> luceneDatafiles(String userName, String user, String text, String lower, String upper,
-			List<ParameterPOJO> parms, int maxCount, EntityManager manager, UserTransaction userTransaction)
-					throws IcatException {
+	public List<ScoredEntityBaseBean> luceneDatafiles(String userName, String user, String text, String lower,
+			String upper, List<ParameterPOJO> parms, int maxCount, EntityManager manager,
+			UserTransaction userTransaction) throws IcatException {
 		long time = log ? System.currentTimeMillis() : 0;
-		List<EntityBaseBean> results = new ArrayList<EntityBaseBean>();
+		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
 			LuceneSearchResult last = null;
-			List<String> allResults = Collections.emptyList();
+			List<ScoredResult> allResults = Collections.emptyList();
 			/*
 			 * As results may be rejected and maxCount may be 1 ensure that we
 			 * don't make a huge number of calls to Lucene
@@ -1540,7 +1542,7 @@ public class EntityBeanManager {
 		}
 		if (log) {
 			if (results.size() > 0) {
-				EntityBaseBean result = results.get(0);
+				EntityBaseBean result = results.get(0).getEntityBaseBean();
 				logRead(time, userName, "luceneDatafiles", result.getClass().getSimpleName(), result.getId(), "",
 						manager, userTransaction);
 			} else {
@@ -1551,14 +1553,14 @@ public class EntityBeanManager {
 		return results;
 	}
 
-	public List<EntityBaseBean> luceneDatasets(String userName, String user, String text, String lower, String upper,
-			List<ParameterPOJO> parms, int maxCount, EntityManager manager, UserTransaction userTransaction)
-					throws IcatException {
+	public List<ScoredEntityBaseBean> luceneDatasets(String userName, String user, String text, String lower,
+			String upper, List<ParameterPOJO> parms, int maxCount, EntityManager manager,
+			UserTransaction userTransaction) throws IcatException {
 		long time = log ? System.currentTimeMillis() : 0;
-		List<EntityBaseBean> results = new ArrayList<EntityBaseBean>();
+		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
 			LuceneSearchResult last = null;
-			List<String> allResults = Collections.emptyList();
+			List<ScoredResult> allResults = Collections.emptyList();
 			/*
 			 * As results may be rejected and maxCount may be 1 ensure that we
 			 * don't make a huge number of calls to Lucene
@@ -1576,7 +1578,7 @@ public class EntityBeanManager {
 		}
 		if (log) {
 			if (results.size() > 0) {
-				EntityBaseBean result = results.get(0);
+				EntityBaseBean result = results.get(0).getEntityBaseBean();
 				logRead(time, userName, "luceneDatasets", result.getClass().getSimpleName(), result.getId(), "",
 						manager, userTransaction);
 			} else {
@@ -1595,16 +1597,16 @@ public class EntityBeanManager {
 		}
 	}
 
-	public List<EntityBaseBean> luceneInvestigations(String userId, String user, String text, String lower,
+	public List<ScoredEntityBaseBean> luceneInvestigations(String userId, String user, String text, String lower,
 			String upper, List<ParameterPOJO> parms, List<String> samples, String userFullName, int maxCount,
 			EntityManager manager, UserTransaction userTransaction) throws IcatException {
 
 		long time = log ? System.currentTimeMillis() : 0;
-		List<EntityBaseBean> results = new ArrayList<EntityBaseBean>();
+		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		long descendantCount = 0;
 		if (luceneActive) {
 			LuceneSearchResult last = null;
-			List<String> allResults = Collections.emptyList();
+			List<ScoredResult> allResults = Collections.emptyList();
 			/*
 			 * As results may be rejected and maxCount may be 1 ensure that we
 			 * don't make a huge number of calls to Lucene
@@ -1623,7 +1625,7 @@ public class EntityBeanManager {
 		}
 		if (log) {
 			if (results.size() > 0) {
-				EntityBaseBean result = results.get(0);
+				EntityBaseBean result = results.get(0).getEntityBaseBean();
 				logRead(time, userId, "luceneInvestigations", result.getClass().getSimpleName(), result.getId(), "",
 						manager, userTransaction);
 			} else {

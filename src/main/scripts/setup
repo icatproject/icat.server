@@ -68,6 +68,8 @@ if arg == "INSTALL":
         actions.createJMSResource("javax.jms.Topic", "jms/ICAT/Topic")
         actions.createJMSResource("javax.jms.Topic", "jms/ICAT/Synch")
         
+        actions.convertWarfile(jmsTopicConnectionFactory=icatProperties.get("jms.topicConnectionFactory")
+                               )    
         jmsHostPort = props.get("jmsHostPort")
         if jmsHostPort:
             bits = jmsHostPort.split(":")

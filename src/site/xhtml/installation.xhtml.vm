@@ -218,7 +218,7 @@
 	<dl>
 		<dt>container</dt>
 		<dd>May be either glassfish or wildfly - though only glassfish is
-			working properly at the moment.
+			working properly at the moment.</dd>
 		<dt>home</dt>
 		<dd>is the top level of the container installation. For
 			glasssfish it must contain "glassfish/domains" and for wildfly it
@@ -251,26 +251,6 @@
 			machine:port where the port will normally be 7676.
 		</dd>
 	</dl>
-
-	<p>For a local oracle-xe installation the following values of
-		driver and dbProperties should be good except for the user and
-		password values:</p>
-	<code>
-		driver=oracle.jdbc.pool.OracleDataSource <br />
-		dbProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icat:password=secret
-		<br />
-	</code>
-	<p>
-		Note the
-		<code>"'"</code>
-		which is needed because the url contains colons which also separate
-		individual properties.
-	</p>
-	<p>For MySQL:</p>
-	<code>
-		driver=com.mysql.jdbc.jdbc2.optional.MysqlDataSource <br />
-		dbProperties=user=icat:password=secret:databaseName=icat <br />
-	</code>
 
 	<h2>The icat.properties and icat.log4j.properties files</h2>
 

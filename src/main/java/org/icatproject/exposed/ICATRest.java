@@ -74,6 +74,7 @@ import org.icatproject.core.manager.Lucene.ParameterPOJO;
 import org.icatproject.core.manager.Porter;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
+import org.icatproject.core.manager.ScoredEntityBaseBean;
 import org.icatproject.core.manager.Transmitter;
 import org.icatproject.utils.ContainerGetter.ContainerType;
 import org.slf4j.Logger;
@@ -795,7 +796,7 @@ public class ICATRest {
 					}
 				}
 			}
-			List<EntityBaseBean> objects;
+			List<ScoredEntityBaseBean> objects;
 			if (target.equals("Investigation")) {
 
 				List<String> samples = new ArrayList<>();
@@ -823,11 +824,13 @@ public class ICATRest {
 			}
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartArray();
-			for (EntityBaseBean bean : objects) {
+			for (ScoredEntityBaseBean sb : objects) {
+				EntityBaseBean bean = sb.getEntityBaseBean();
 				gen.writeStartObject();
 				gen.writeStartObject(bean.getClass().getSimpleName());
 				jsonise(bean, gen);
 				gen.writeEnd();
+				gen.write("score", sb.getScore());
 				gen.writeEnd();
 			}
 			gen.writeEnd();
