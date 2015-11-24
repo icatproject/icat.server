@@ -44,6 +44,8 @@ import org.icatproject.Login.Credentials.Entry;
 import org.icatproject.ParameterType;
 import org.icatproject.ParameterValueType;
 import org.icatproject.Rule;
+import org.icatproject.Study;
+import org.icatproject.StudyInvestigation;
 import org.icatproject.User;
 import org.icatproject.UserGroup;
 import org.icatproject.utils.ContainerGetter;
@@ -197,7 +199,7 @@ public class WSession {
 	}
 
 	public void clear() throws Exception {
-		deleteAll(Arrays.asList("Facility", "Log", "DataCollection"));
+		deleteAll(Arrays.asList("Facility", "Log", "DataCollection", "Study"));
 	}
 
 	private void deleteAll(List<String> names) throws IcatException_Exception {
@@ -382,6 +384,8 @@ public class WSession {
 		this.addRule("notroot", "SampleType", "CRUD");
 		this.addRule("notroot", "Sample", "CRUD");
 		this.addRule("notroot", "PublicStep", "CRUD");
+		this.addRule("notroot", "Study", "CRUD");
+		this.addRule("notroot", "StudyInvestigation", "CRUD");
 	}
 
 	public void update(EntityBaseBean df) throws IcatException_Exception {
@@ -523,6 +527,21 @@ public class WSession {
 
 	public ContainerType getContainerType() {
 		return containerType;
+	}
+
+	public Study createStudy(String name) throws IcatException_Exception {
+		Study s = new Study();
+		s.setName(name);
+		s.setId(icat.create(sessionId, s));
+		return s;
+	}
+
+	public void createStudyInvestigation(Study study, Investigation inv) throws IcatException_Exception {
+		StudyInvestigation si = new StudyInvestigation();
+		si.setStudy(study);
+		si.setInvestigation(inv);
+		icat.create(sessionId, si);
+
 	}
 
 }

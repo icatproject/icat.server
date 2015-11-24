@@ -58,6 +58,7 @@ import org.icatproject.Rule;
 import org.icatproject.Sample;
 import org.icatproject.SampleParameter;
 import org.icatproject.SampleType;
+import org.icatproject.Study;
 import org.icatproject.User;
 import org.icatproject.UserGroup;
 import org.icatproject.core.manager.EntityInfoHandler;
@@ -115,6 +116,9 @@ public class TestWS {
 		Investigation invC = session.createInvestigation(facility, "C", "Not null", investigationType);
 
 		Instrument wish = session.createInstrument(facility, "WISH");
+
+		Study study = session.createStudy("long");
+		session.createStudyInvestigation(study, invA);
 
 		session.createInvestigationInstrument(invA, wish);
 		session.createInvestigationInstrument(invB, wish);
@@ -1715,6 +1719,8 @@ public class TestWS {
 	public void searches() throws Exception {
 		session.clear();
 		create();
+
+		assertEquals(1, session.search("Study INCLUDE StudyInvestigation").size());
 
 		Date now = new Date(new Date().getTime() + 1001); // Move on a second
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
