@@ -100,7 +100,7 @@ public class LuceneSingleton implements Lucene {
 
 		public PopulateThread(EntityManagerFactory entityManagerFactory) {
 			manager = entityManagerFactory.createEntityManager();
-			logger.debug("Start new populate thread");
+			logger.info("Start new populate thread");
 		}
 
 		@Override
@@ -124,7 +124,7 @@ public class LuceneSingleton implements Lucene {
 						clear(entityName);
 						int start = 0;
 						List<Long> ids;
-						logger.debug("Populating " + entityName);
+						logger.info("Populating " + entityName);
 						while (true) {
 							synchronized (this) {
 								if (stopPopulation) {
@@ -151,6 +151,7 @@ public class LuceneSingleton implements Lucene {
 							}
 							commit();
 							start = start + ids.size();
+							manager.clear();
 						}
 					}
 				} while (populatingClass != null);
@@ -348,7 +349,7 @@ public class LuceneSingleton implements Lucene {
 		String id = bean.getClass().getSimpleName() + ":" + bean.getId();
 		doc.add(new StringField("id", id, Store.YES));
 		doc.add(new StringField("entity", bean.getClass().getSimpleName(), Store.NO));
-		logger.debug("Created document '" + doc + "' to index for " + id);
+		logger.trace("Created document '" + doc + "' to index for " + id);
 	}
 
 	private Document buildDoc(EntityBaseBean bean) throws IcatException {
@@ -379,7 +380,7 @@ public class LuceneSingleton implements Lucene {
 		doc.add(new StringField("id", id, Store.YES));
 		doc.add(new StringField("entity", bean.getClass().getSimpleName(), Store.NO));
 		doc.add(new TextField("all", sb.toString(), Store.NO));
-		logger.debug("Created document '" + sb.toString() + "' to index for " + id);
+		logger.trace("Created document '" + sb.toString() + "' to index for " + id);
 		return doc;
 	}
 
@@ -547,7 +548,7 @@ public class LuceneSingleton implements Lucene {
 		String id = bean.getClass().getSimpleName() + ":" + bean.getId();
 		try {
 			iwriter.deleteDocuments(new Term("id", id));
-			// TODO logger.debug("Deleted document: " + id);
+			logger.trace("Deleted document: " + id);
 		} catch (IOException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
 		}

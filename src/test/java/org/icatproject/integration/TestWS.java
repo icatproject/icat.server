@@ -116,11 +116,13 @@ public class TestWS {
 		Investigation invC = session.createInvestigation(facility, "C", "Not null", investigationType);
 
 		Instrument wish = session.createInstrument(facility, "WISH");
+		Instrument bone = session.createInstrument(facility, "BONE");
 
 		Study study = session.createStudy("long");
 		session.createStudyInvestigation(study, invA);
 
 		session.createInvestigationInstrument(invA, wish);
+		session.createInvestigationInstrument(invA, bone);
 		session.createInvestigationInstrument(invB, wish);
 
 		User notroot = (User) session.search("User[name='db/notroot']").get(0);
@@ -1325,10 +1327,12 @@ public class TestWS {
 			String invName = inv.getName();
 			assertTrue(Arrays.asList("A", "B", "C").contains(invName));
 			int nii = inv.getInvestigationInstruments().size();
-			if (invName.equals("C")) {
-				assertEquals(0, nii);
-			} else {
+			if (invName.equals("A")) {
+				assertEquals(2, nii);
+			} else if (invName.equals("B")) {
 				assertEquals(1, nii);
+			} else if (invName.equals("C")) {
+				assertEquals(0, nii);
 			}
 		}
 
@@ -1719,6 +1723,23 @@ public class TestWS {
 	public void searches() throws Exception {
 		session.clear();
 		create();
+
+		assertEquals(1,
+				session.search(
+						"SELECT inv FROM Investigation inv, inv.facility f, inv.investigationInstruments ii WHERE inv.name ='A'")
+						.size());
+
+		for (Object o : session.search(
+				"SELECT inv FROM Investigation inv, inv.facility f, inv.investigationInstruments ii WHERE inv.name ='A' INCLUDE inv.investigationInstruments")) {
+			Investigation i = (Investigation) o;
+			assertEquals(2, i.getInvestigationInstruments().size());
+			System.out.println(i.getName());
+		}
+
+		assertEquals(1,
+				session.search(
+						"SELECT inv FROM Investigation inv, inv.facility f, inv.investigationInstruments ii WHERE inv.name ='A' ORDER BY ii.instrument.fullName ASC")
+						.size());
 
 		assertEquals(1, session.search("Study INCLUDE StudyInvestigation").size());
 
