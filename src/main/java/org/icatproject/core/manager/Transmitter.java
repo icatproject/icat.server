@@ -43,7 +43,7 @@ public class Transmitter {
 			TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) ic
 					.lookup(propertyHandler.getJmsTopicConnectionFactory());
 			topicConnection = topicConnectionFactory.createTopicConnection();
-			topic = (Topic) ic.lookup(propertyHandler.getJmsPrefix() + "jms/ICAT/Topic");
+			topic = (Topic) ic.lookup("jms/ICAT/Topic");
 			logger.info("Transmitter created");
 		} catch (JMSException | NamingException e) {
 			logger.error(fatal, "Problem with JMS " + e);

@@ -247,7 +247,7 @@ public class GateKeeper {
 			TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) ic
 					.lookup(propertyHandler.getJmsTopicConnectionFactory());
 			topicConnection = topicConnectionFactory.createTopicConnection();
-			topic = (Topic) ic.lookup(propertyHandler.getJmsPrefix() + "jms/ICAT/Synch");
+			topic = (Topic) ic.lookup("jms/ICAT/Synch");
 		} catch (JMSException | NamingException e) {
 			logger.error(fatal, "Problem with JMS " + e);
 			throw new IllegalStateException(e.getMessage());

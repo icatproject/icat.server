@@ -317,11 +317,6 @@ public class PropertyHandler {
 				abend("Container type " + containerType + " is not recognised");
 			}
 			needReadTransaction = containerType == ContainerType.WILDFLY;
-			jmsPrefix = "";
-			if (containerType == ContainerType.WILDFLY) {
-				jmsPrefix = "java:/";
-			}
-
 		} catch (CheckedPropertyException e) {
 			abend(e.getMessage());
 		}
@@ -391,10 +386,6 @@ public class PropertyHandler {
 
 	public String getJmsTopicConnectionFactory() {
 		return jmsTopicConnectionFactory;
-	}
-
-	public String getJmsPrefix() {
-		return jmsPrefix;
 	}
 
 }
