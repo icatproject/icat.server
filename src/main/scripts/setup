@@ -68,8 +68,6 @@ if arg == "INSTALL":
         actions.createJMSResource("javax.jms.Topic", "jms/ICAT/Topic")
         actions.createJMSResource("javax.jms.Topic", "jms/ICAT/Synch")
         
-        actions.convertWarfile(jmsTopicConnectionFactory=icatProperties.get("jms.topicConnectionFactory")
-                               )    
         jmsHostPort = props.get("jmsHostPort")
         if jmsHostPort:
             bits = jmsHostPort.split(":")
@@ -84,7 +82,7 @@ if arg == "INSTALL":
             actions.asadmin("set resources.connector-connection-pool.jms/ICAT/CentralConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
             actions.asadmin("set resources.connector-connection-pool.jms/ICAT/TopicConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
             
-        actions.deploy(deploymentorder=100)
+        actions.deploy(deploymentorder=100, jmsTopicConnectionFactory=icatProperties.get("jms.topicConnectionFactory"))
         
         if not os.path.isdir(binDir): abort ("Please create directory " + binDir + " and try again.")
         for file in files:   

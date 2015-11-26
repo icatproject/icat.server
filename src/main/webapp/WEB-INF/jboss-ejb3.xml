@@ -9,11 +9,12 @@
 			<ejb-name>GateKeeperListener</ejb-name>
 			<activation-config>
 				<activation-config-property>
-					<activation-config-property-name>destination</activation-config-property-name>
-					<activation-config-property-value>java:jboss/jms/ICAT/Synch</activation-config-property-value>
+					<activation-config-property-name>destination
+						</activation-config-property-name>
+					<activation-config-property-value>java:jboss/jms/ICAT/Synch
+						</activation-config-property-value>
 				</activation-config-property>
 			</activation-config>
 		</message-driven>
 	</enterprise-beans>
-
 </jboss:ejb-jar>

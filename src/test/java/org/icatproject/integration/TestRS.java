@@ -211,7 +211,7 @@ public class TestRS {
 		rootSession.luceneCommit();
 		List<String> props = wSession.getProperties();
 		System.out.println(props);
-		assertTrue(props.contains("lucene.commitSeconds 1"));
+		assertTrue(props.contains("lucene.commitSeconds 5"));
 
 		// Get known configuration
 		wSession.clear();
