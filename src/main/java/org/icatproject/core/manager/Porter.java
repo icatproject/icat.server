@@ -33,9 +33,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.TypedQuery;
-import javax.transaction.NotSupportedException;
-import javax.transaction.Status;
-import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 import javax.ws.rs.core.Response;
 
@@ -90,8 +87,6 @@ public class Porter {
 
 	private Set<String> rootUserNames;
 
-	private boolean needReadTransaction;
-
 	private static final Logger logger = LoggerFactory.getLogger(Porter.class);
 	private final static Pattern tsRegExp = Pattern
 			.compile("(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})(\\.\\d+)?(.*?)");
@@ -105,7 +100,6 @@ public class Porter {
 	void init() {
 		importCacheSize = propertyHandler.getImportCacheSize();
 		rootUserNames = propertyHandler.getRootUserNames();
-		needReadTransaction = propertyHandler.needReadTransaction();
 	}
 
 	private long importCacheSize;
@@ -466,113 +460,94 @@ public class Porter {
 							+ " gives duplicate exception but DuplicateAction is IGNORE");
 					return;
 				} else if (duplicateAction == DuplicateAction.CHECK) {
-					try {
-						if (needReadTransaction) {
-							userTransaction.begin();
-						}
 
-						EntityBaseBean other = beanManager.lookup(bean, manager);
-						if (other == null) {// Somebody else got rid of it
-											// meanwhile
-							id = beanManager.create(userId, bean, manager, userTransaction, false).getPk();
-							logger.debug("Adding " + line + " to " + table.getName()
-									+ " gives duplicate exception but it has now vanished");
-						} else { // Compare bean and other
-							if (allAttributes) {
-								if (createIdSet && !bean.getCreateId().equals(other.getCreateId())) {
-									throw new IcatException(IcatExceptionType.VALIDATION,
-											"Duplicate check fails for field \"createId\" of " + table.getName());
-								}
-								if (createTimeSet && Math
-										.abs(bean.getCreateTime().getTime() - other.getCreateTime().getTime()) > 1000) {
-									throw new IcatException(IcatExceptionType.VALIDATION,
-											"Duplicate check fails for field \"createTime\" of " + table.getName());
-								}
-								if (modIdSet && !bean.getModId().equals(other.getModId())) {
-									throw new IcatException(IcatExceptionType.VALIDATION,
-											"Duplicate check fails for field \"modId\" of " + table.getName());
-								}
-								if (modTimeSet && Math
-										.abs(bean.getModTime().getTime() - other.getModTime().getTime()) > 1000) {
-									throw new IcatException(IcatExceptionType.VALIDATION,
-											"Duplicate check fails for field \"modTime\" of " + table.getName());
-								}
-
+					EntityBaseBean other = beanManager.lookup(bean, manager);
+					if (other == null) {// Somebody else got rid of it
+										// meanwhile
+						id = beanManager.create(userId, bean, manager, userTransaction, false).getPk();
+						logger.debug("Adding " + line + " to " + table.getName()
+								+ " gives duplicate exception but it has now vanished");
+					} else { // Compare bean and other
+						if (allAttributes) {
+							if (createIdSet && !bean.getCreateId().equals(other.getCreateId())) {
+								throw new IcatException(IcatExceptionType.VALIDATION,
+										"Duplicate check fails for field \"createId\" of " + table.getName());
 							}
-							Class<? extends EntityBaseBean> klass = bean.getClass();
-							Map<Field, Method> getters = eiHandler.getGetters(klass);
-							Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
-							for (Field f : eiHandler.getFields(klass)) {
-								if (updaters.contains(f)) {
-									if (EntityBaseBean.class.isAssignableFrom(f.getType())) {
-										EntityBaseBean beanField = (EntityBaseBean) getters.get(f).invoke(bean);
-										EntityBaseBean otherField = (EntityBaseBean) getters.get(f).invoke(other);
-										if (beanField == null) {
-											if (otherField != null) {
-												throw new IcatException(IcatExceptionType.VALIDATION,
-														"Duplicate check fails for field " + f.getName() + " of "
-																+ f.getDeclaringClass().getSimpleName());
-											}
-										} else { // beanField is not null
-											if (otherField == null) {
-												throw new IcatException(IcatExceptionType.VALIDATION,
-														"Duplicate check fails for field " + f.getName() + " of "
-																+ f.getDeclaringClass().getSimpleName());
-											} // both not null
-											if (beanField.getId().longValue() != otherField.getId().longValue()) {
-												throw new IcatException(IcatExceptionType.VALIDATION,
-														"Duplicate check fails for field " + f.getName() + " of "
-																+ f.getDeclaringClass().getSimpleName());
-											}
-										}
-									} else {
-										Object beanField = getters.get(f).invoke(bean);
-										Object otherField = getters.get(f).invoke(other);
-										if (beanField == null) {
-											if (otherField != null) {
-												throw new IcatException(IcatExceptionType.VALIDATION,
-														"Duplicate check fails for field " + f.getName() + " of "
-																+ f.getDeclaringClass().getSimpleName());
-											}
-										} else {// beanField is not null
-											if (beanField instanceof Date) { // Milliseconds
-																				// get
-																				// lost
-												if (Math.abs(((Date) beanField).getTime()
-														- ((Date) otherField).getTime()) > 1000) {
-													throw new IcatException(IcatExceptionType.VALIDATION,
-															"Duplicate check fails for field " + f.getName() + " of "
-																	+ f.getDeclaringClass().getSimpleName());
-												}
-											} else {
-												if (!beanField.equals(otherField)) {
-													throw new IcatException(IcatExceptionType.VALIDATION,
-															"Duplicate check fails for field " + f.getName() + " of "
-																	+ f.getDeclaringClass().getSimpleName());
-												}
-											}
-										}
+							if (createTimeSet && Math
+									.abs(bean.getCreateTime().getTime() - other.getCreateTime().getTime()) > 1000) {
+								throw new IcatException(IcatExceptionType.VALIDATION,
+										"Duplicate check fails for field \"createTime\" of " + table.getName());
+							}
+							if (modIdSet && !bean.getModId().equals(other.getModId())) {
+								throw new IcatException(IcatExceptionType.VALIDATION,
+										"Duplicate check fails for field \"modId\" of " + table.getName());
+							}
+							if (modTimeSet
+									&& Math.abs(bean.getModTime().getTime() - other.getModTime().getTime()) > 1000) {
+								throw new IcatException(IcatExceptionType.VALIDATION,
+										"Duplicate check fails for field \"modTime\" of " + table.getName());
+							}
 
+						}
+						Class<? extends EntityBaseBean> klass = bean.getClass();
+						Map<Field, Method> getters = eiHandler.getGetters(klass);
+						Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
+						for (Field f : eiHandler.getFields(klass)) {
+							if (updaters.contains(f)) {
+								if (EntityBaseBean.class.isAssignableFrom(f.getType())) {
+									EntityBaseBean beanField = (EntityBaseBean) getters.get(f).invoke(bean);
+									EntityBaseBean otherField = (EntityBaseBean) getters.get(f).invoke(other);
+									if (beanField == null) {
+										if (otherField != null) {
+											throw new IcatException(IcatExceptionType.VALIDATION,
+													"Duplicate check fails for field " + f.getName() + " of "
+															+ f.getDeclaringClass().getSimpleName());
+										}
+									} else { // beanField is not null
+										if (otherField == null) {
+											throw new IcatException(IcatExceptionType.VALIDATION,
+													"Duplicate check fails for field " + f.getName() + " of "
+															+ f.getDeclaringClass().getSimpleName());
+										} // both not null
+										if (beanField.getId().longValue() != otherField.getId().longValue()) {
+											throw new IcatException(IcatExceptionType.VALIDATION,
+													"Duplicate check fails for field " + f.getName() + " of "
+															+ f.getDeclaringClass().getSimpleName());
+										}
 									}
+								} else {
+									Object beanField = getters.get(f).invoke(bean);
+									Object otherField = getters.get(f).invoke(other);
+									if (beanField == null) {
+										if (otherField != null) {
+											throw new IcatException(IcatExceptionType.VALIDATION,
+													"Duplicate check fails for field " + f.getName() + " of "
+															+ f.getDeclaringClass().getSimpleName());
+										}
+									} else {// beanField is not null
+										if (beanField instanceof Date) { // Milliseconds
+																			// get
+																			// lost
+											if (Math.abs(((Date) beanField).getTime()
+													- ((Date) otherField).getTime()) > 1000) {
+												throw new IcatException(IcatExceptionType.VALIDATION,
+														"Duplicate check fails for field " + f.getName() + " of "
+																+ f.getDeclaringClass().getSimpleName());
+											}
+										} else {
+											if (!beanField.equals(otherField)) {
+												throw new IcatException(IcatExceptionType.VALIDATION,
+														"Duplicate check fails for field " + f.getName() + " of "
+																+ f.getDeclaringClass().getSimpleName());
+											}
+										}
+									}
+
 								}
 							}
-							logger.debug("Adding " + line + " to " + table.getName()
-									+ " gives duplicate exception but DuplicateAction is CHECK");
 						}
-					} catch (NotSupportedException | SystemException e1) {
-						logger.error("Begin read transaction failed with", e);
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-								e.getClass() + " " + e.getMessage());
-					} finally {
-						if (needReadTransaction) {
-							try {
-								if (userTransaction.getStatus() != Status.STATUS_NO_TRANSACTION) {
-									userTransaction.rollback();
-								}
-							} catch (IllegalStateException | SecurityException | SystemException e2) {
-								logger.error("Rollback read transaction failed with", e2);
-							}
-						}
+						logger.debug("Adding " + line + " to " + table.getName()
+								+ " gives duplicate exception but DuplicateAction is CHECK");
 					}
 
 				} else if (duplicateAction == DuplicateAction.OVERWRITE) {

@@ -141,10 +141,8 @@ public class PropertyHandler {
 	private int maxIdsInQuery;
 	private long importCacheSize;
 	private long exportCacheSize;
-	private boolean needReadTransaction;
 	private ContainerType containerType;
 	private String jmsTopicConnectionFactory;
-	private String jmsPrefix;
 
 	@PostConstruct
 	private void init() {
@@ -316,7 +314,6 @@ public class PropertyHandler {
 			if (containerType == ContainerType.UNKNOWN) {
 				abend("Container type " + containerType + " is not recognised");
 			}
-			needReadTransaction = containerType == ContainerType.WILDFLY;
 		} catch (CheckedPropertyException e) {
 			abend(e.getMessage());
 		}
@@ -374,10 +371,6 @@ public class PropertyHandler {
 
 	public long getExportCacheSize() {
 		return exportCacheSize;
-	}
-
-	public boolean needReadTransaction() {
-		return needReadTransaction;
 	}
 
 	public ContainerType getContainerType() {

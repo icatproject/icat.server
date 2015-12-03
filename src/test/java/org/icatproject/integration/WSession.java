@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.json.Json;
@@ -134,29 +133,14 @@ public class WSession {
 
 	public void delRule(String groupName, String what, String crudFlags) throws Exception {
 		List<Object> rules = null;
-		if (containerType == ContainerType.WILDFLY) {
-			// Hibernate does not match "What" properly as it mangles strings
-			if (groupName == null) {
-				rules = search("select r FROM Rule r WHERE r.crudFlags = '" + crudFlags + "' AND r.grouping IS NULL");
-			} else {
-				rules = search("Rule [crudFlags = '" + crudFlags + "'] <-> Grouping [name= '" + groupName + "']");
-			}
-			Iterator<Object> iter = rules.iterator();
-			while (iter.hasNext()) {
-				Rule r = (Rule) iter.next();
-				if (!r.getWhat().equals(what)) {
-					iter.remove();
-				}
-			}
+
+		what = what.replace("'", "''");
+		if (groupName == null) {
+			rules = search("select r FROM Rule r WHERE r.what = '" + what + "' AND r.crudFlags = '" + crudFlags
+					+ "' AND r.grouping IS NULL");
 		} else {
-			what = what.replace("'", "''");
-			if (groupName == null) {
-				rules = search("select r FROM Rule r WHERE r.what = '" + what + "' AND r.crudFlags = '" + crudFlags
-						+ "' AND r.grouping IS NULL");
-			} else {
-				rules = search("Rule [what = '" + what + "' and crudFlags = '" + crudFlags + "'] <-> Grouping [name= '"
-						+ groupName + "']");
-			}
+			rules = search("Rule [what = '" + what + "' and crudFlags = '" + crudFlags + "'] <-> Grouping [name= '"
+					+ groupName + "']");
 		}
 
 		if (rules.size() == 1) {

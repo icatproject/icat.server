@@ -654,19 +654,15 @@ public class TestWS {
 			assertEquals(6, freds.size());
 
 			assertEquals(51L, piOneSession.search("SELECT SUM(df.fileSize) from Datafile df").get(0));
-			if (session.getContainerType() != ContainerType.WILDFLY) {
-				assertEquals(40L, piOneSession.search("SELECT SUM(DISTINCT df.fileSize) from Datafile df").get(0));
-			}
+			assertEquals(40L, piOneSession.search("SELECT SUM(DISTINCT df.fileSize) from Datafile df").get(0));
 			assertEquals(6L, piOneSession.search("SELECT COUNT(df.fileSize) from Datafile df").get(0));
 			assertEquals(5L, piOneSession.search("SELECT COUNT(DISTINCT df.fileSize) from Datafile df").get(0));
 			assertEquals(6L, piOneSession.search("SELECT COUNT(df) from Datafile df").get(0));
 			assertEquals(6L, piOneSession.search("SELECT COUNT(DISTINCT df) from Datafile df").get(0));
-			if (session.getContainerType() != ContainerType.WILDFLY) {
-				assertEquals(17L, piOneSession.search("SELECT MAX(df.fileSize) from Datafile df").get(0));
-				assertEquals(17L, piOneSession.search("SELECT MAX(DISTINCT df.fileSize) from Datafile df").get(0));
-				assertEquals(0L, piOneSession.search("SELECT MIN(df.fileSize) from Datafile df").get(0));
-				assertEquals(0L, piOneSession.search("SELECT MIN(DISTINCT df.fileSize) from Datafile df").get(0));
-			}
+			assertEquals(17L, piOneSession.search("SELECT MAX(df.fileSize) from Datafile df").get(0));
+			assertEquals(17L, piOneSession.search("SELECT MAX(DISTINCT df.fileSize) from Datafile df").get(0));
+			assertEquals(0L, piOneSession.search("SELECT MIN(df.fileSize) from Datafile df").get(0));
+			assertEquals(0L, piOneSession.search("SELECT MIN(DISTINCT df.fileSize) from Datafile df").get(0));
 		} finally {
 			session.setAuthz();
 		}
@@ -1576,10 +1572,8 @@ public class TestWS {
 		}
 		Long invId = ds.getInvestigation().getId();
 
-		if (session.getContainerType() != ContainerType.WILDFLY) {
-			assertEquals(min, session.search("MIN(Dataset.id) [id > 0]").get(0));
-			assertEquals(max, session.search("MAX(Dataset.id) [id > 0]").get(0));
-		}
+		assertEquals(min, session.search("MIN(Dataset.id) [id > 0]").get(0));
+		assertEquals(max, session.search("MAX(Dataset.id) [id > 0]").get(0));
 
 		List<?> results = session.search(
 				"Dataset.id " + "<-> DatasetParameter[type.name = 'TIMESTAMP'] " + "<-> Investigation[name <> 12]");
@@ -1762,15 +1756,10 @@ public class TestWS {
 		}
 
 		assertEquals(0, session.search("SELECT ds FROM Dataset ds WHERE ds.name = 'dfsin' LIMIT 1,10").size());
-
 		assertEquals(0, session.search("SELECT ds FROM Dataset ds WHERE ds.id = " + max + " LIMIT 1,10").size());
-
 		assertEquals(0, session.search("SELECT ds FROM Dataset ds WHERE ds.id IN ( " + max + ") LIMIT 1,10").size());
-
-		if (session.getContainerType() != ContainerType.WILDFLY) {
-			assertEquals(min, session.search("SELECT MIN(ds.id) FROM Dataset ds WHERE ds.id > 0").get(0));
-			assertEquals(max, session.search("SELECT MAX(ds.id) FROM Dataset ds WHERE ds.id > 0").get(0));
-		}
+		assertEquals(min, session.search("SELECT MIN(ds.id) FROM Dataset ds WHERE ds.id > 0").get(0));
+		assertEquals(max, session.search("SELECT MAX(ds.id) FROM Dataset ds WHERE ds.id > 0").get(0));
 
 		Long invId = (Long) session.search("SELECT inv.id FROM Investigation inv WHERE inv.datasets IS NOT EMPTY")
 				.get(0);
@@ -1855,7 +1844,8 @@ public class TestWS {
 		results = session.search("SELECT ds FROM Dataset ds WHERE ds.complete = FALSE");
 		assertEquals(4, results.size());
 
-		if (session.getContainerType() != ContainerType.GLASSFISH) {
+		if (session.getContainerType() != ContainerType.GLASSFISH
+				&& session.getContainerType() != ContainerType.WILDFLY) {
 			// This should throw an exception as datafile is not an attribute of
 			// Dataset.
 			try {

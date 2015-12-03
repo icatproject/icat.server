@@ -279,14 +279,7 @@ public class GateKeeper {
 
 		Class<? extends EntityBaseBean> objectClass = object.getClass();
 		String simpleName = objectClass.getSimpleName();
-		// TODO remove this WildFly hack
-		{
-			int n = simpleName.indexOf('_');
-			if (n > 0) {
-				simpleName = simpleName.substring(0, n);
-				logger.warn("Truncating simple name to " + simpleName);
-			}
-		}
+
 		if (rootUserNames.contains(user)) {
 			logger.info("\"Root\" user " + user + " is allowed " + access + " to " + simpleName);
 			return;

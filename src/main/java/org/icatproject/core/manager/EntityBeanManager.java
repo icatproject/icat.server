@@ -151,8 +151,6 @@ public class EntityBeanManager {
 
 	}
 
-	private boolean needReadTransaction;
-
 	@EJB
 	GateKeeper gateKeeper;
 	@EJB
@@ -246,10 +244,6 @@ public class EntityBeanManager {
 						notificationRequests);
 
 				long beanId = bean.getId();
-
-				if (needReadTransaction) {
-					manager.refresh(bean);
-				}
 
 				if (luceneActive) {
 					logger.debug("Is " + bean + " managed: " + manager.contains(bean));
@@ -889,44 +883,25 @@ public class EntityBeanManager {
 		Class<? extends EntityBaseBean> entityClass = getQuery.getBean();
 
 		EntityBaseBean result;
-		try {
-			if (needReadTransaction) {
-				userTransaction.begin();
-			}
 
-			EntityBaseBean beanManaged = manager.find(entityClass, primaryKey);
-			if (beanManaged == null) {
-				throw new IcatException(IcatException.IcatExceptionType.NO_SUCH_OBJECT_FOUND,
-						entityClass.getSimpleName() + "[id:" + primaryKey + "] not found.");
-			}
-
-			gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
-			logger.debug("got " + entityClass.getSimpleName() + "[id:" + primaryKey + "]");
-
-			IncludeClause include = getQuery.getInclude();
-			boolean one = false;
-			List<Step> steps = null;
-			if (include != null) {
-				one = include.isOne();
-				steps = include.getSteps();
-			}
-			result = beanManaged.pruned(one, 0, steps, maxEntities, gateKeeper, userId, manager);
-			logger.debug("Obtained " + result.getDescendantCount(maxEntities) + " entities.");
-
-		} catch (NotSupportedException | SystemException e) {
-			logger.error("Begin read transaction failed with", e);
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		} finally {
-			try {
-				if (needReadTransaction) {
-					if (userTransaction.getStatus() != Status.STATUS_NO_TRANSACTION) {
-						userTransaction.rollback();
-					}
-				}
-			} catch (IllegalStateException | SecurityException | SystemException e) {
-				logger.error("Rollback read transaction failed with", e);
-			}
+		EntityBaseBean beanManaged = manager.find(entityClass, primaryKey);
+		if (beanManaged == null) {
+			throw new IcatException(IcatException.IcatExceptionType.NO_SUCH_OBJECT_FOUND,
+					entityClass.getSimpleName() + "[id:" + primaryKey + "] not found.");
 		}
+
+		gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
+		logger.debug("got " + entityClass.getSimpleName() + "[id:" + primaryKey + "]");
+
+		IncludeClause include = getQuery.getInclude();
+		boolean one = false;
+		List<Step> steps = null;
+		if (include != null) {
+			one = include.isOne();
+			steps = include.getSteps();
+		}
+		result = beanManaged.pruned(one, 0, steps, maxEntities, gateKeeper, userId, manager);
+		logger.debug("Obtained " + result.getDescendantCount(maxEntities) + " entities.");
 
 		if (log) {
 			logRead(time, userId, "get", result.getClass().getSimpleName(), result.getId(), query, manager,
@@ -1306,7 +1281,6 @@ public class EntityBeanManager {
 			logger.error(fatal, msg);
 			throw new IllegalStateException(msg);
 		}
-		needReadTransaction = propertyHandler.needReadTransaction();
 	}
 
 	public boolean isAccessAllowed(String userId, EntityBaseBean bean, EntityManager manager,
@@ -1725,81 +1699,56 @@ public class EntityBeanManager {
 		long time = log ? System.currentTimeMillis() : 0;
 		logger.info(userId + " searching for " + query);
 
-		try {
-			if (needReadTransaction) {
-				userTransaction.begin();
+		EntitySetResult esr = getEntitySet(userId, query, manager);
+		List<?> result = esr.result;
+
+		if (result.size() > 0 && (result.get(0) == null || result.get(0) instanceof EntityBaseBean)) {
+			IncludeClause include = esr.searchQuery.getIncludeClause();
+			boolean one = false;
+			List<Step> steps = null;
+			if (include != null) {
+				one = include.isOne();
+				steps = include.getSteps();
 			}
-			EntitySetResult esr = getEntitySet(userId, query, manager);
-			List<?> result = esr.result;
-
-			if (result.size() > 0 && (result.get(0) == null || result.get(0) instanceof EntityBaseBean)) {
-				IncludeClause include = esr.searchQuery.getIncludeClause();
-				boolean one = false;
-				List<Step> steps = null;
-				if (include != null) {
-					one = include.isOne();
-					steps = include.getSteps();
-				}
-				List<Object> clones = new ArrayList<Object>();
-				long descendantCount = 0;
-				for (Object beanManaged : result) {
-					if (beanManaged == null) {
-						if ((descendantCount += 1) > maxEntities) {
-							throw new IcatException(IcatExceptionType.VALIDATION,
-									"attempt to return more than " + maxEntities + " entitities");
-						}
-						clones.add(null);
-					} else {
-						EntityBaseBean eb = ((EntityBaseBean) beanManaged).pruned(one, 0, steps, maxEntities,
-								gateKeeper, userId, manager);
-						if ((descendantCount += eb.getDescendantCount(maxEntities)) > maxEntities) {
-							throw new IcatException(IcatExceptionType.VALIDATION,
-									"attempt to return more than " + maxEntities + " entitities");
-						}
-						clones.add(eb);
+			List<Object> clones = new ArrayList<Object>();
+			long descendantCount = 0;
+			for (Object beanManaged : result) {
+				if (beanManaged == null) {
+					if ((descendantCount += 1) > maxEntities) {
+						throw new IcatException(IcatExceptionType.VALIDATION,
+								"attempt to return more than " + maxEntities + " entitities");
 					}
-				}
-				logger.debug("Obtained " + descendantCount + " entities.");
-				if (needReadTransaction) {
-					userTransaction.rollback();
-				}
-
-				if (log) {
-					EntityBaseBean bean = (EntityBaseBean) clones.get(0);
-					if (bean == null) {
-						logRead(time, userId, "search", null, null, query, manager, userTransaction);
-					} else {
-						logRead(time, userId, "search", bean.getClass().getSimpleName(), bean.getId(), query, manager,
-								userTransaction);
+					clones.add(null);
+				} else {
+					EntityBaseBean eb = ((EntityBaseBean) beanManaged).pruned(one, 0, steps, maxEntities, gateKeeper,
+							userId, manager);
+					if ((descendantCount += eb.getDescendantCount(maxEntities)) > maxEntities) {
+						throw new IcatException(IcatExceptionType.VALIDATION,
+								"attempt to return more than " + maxEntities + " entitities");
 					}
+					clones.add(eb);
 				}
-				logger.debug("Clones " + clones);
-				return clones;
-			} else {
-				if (needReadTransaction) {
-					userTransaction.rollback();
-				}
-				if (log) {
+			}
+			logger.debug("Obtained " + descendantCount + " entities.");
+
+			if (log) {
+				EntityBaseBean bean = (EntityBaseBean) clones.get(0);
+				if (bean == null) {
 					logRead(time, userId, "search", null, null, query, manager, userTransaction);
+				} else {
+					logRead(time, userId, "search", bean.getClass().getSimpleName(), bean.getId(), query, manager,
+							userTransaction);
 				}
-				logger.debug("Result " + result);
-				return result;
 			}
-		} catch (NotSupportedException | SystemException e) {
-			logger.error("Begin read transaction failed with", e);
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		} finally {
-			try {
-				if (needReadTransaction) {
-					if (userTransaction.getStatus() != Status.STATUS_NO_TRANSACTION) {
-						userTransaction.rollback();
-					}
-				}
-			} catch (IllegalStateException | SecurityException | SystemException e) {
-				logger.error("Rollback read transaction failed with", e);
+			logger.debug("Clones " + clones);
+			return clones;
+		} else {
+			if (log) {
+				logRead(time, userId, "search", null, null, query, manager, userTransaction);
 			}
+			logger.debug("Result " + result);
+			return result;
 		}
-
 	}
 
 	public NotificationMessage update(String userId, EntityBaseBean bean, EntityManager manager,
