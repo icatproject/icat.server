@@ -1712,30 +1712,11 @@ public class TestWS {
 		System.out.println("Time per datafile to delete: " + results.size() + " datafiles with deleteMany: "
 				+ (System.currentTimeMillis() - start) / (results.size() + 0.) + "ms");
 	}
-
+	
 	@Test
 	public void searches() throws Exception {
 		session.clear();
 		create();
-
-		assertEquals(1,
-				session.search(
-						"SELECT inv FROM Investigation inv, inv.facility f, inv.investigationInstruments ii WHERE inv.name ='A'")
-						.size());
-
-		for (Object o : session.search(
-				"SELECT inv FROM Investigation inv, inv.facility f, inv.investigationInstruments ii WHERE inv.name ='A' INCLUDE inv.investigationInstruments")) {
-			Investigation i = (Investigation) o;
-			assertEquals(2, i.getInvestigationInstruments().size());
-			System.out.println(i.getName());
-		}
-
-		assertEquals(1,
-				session.search(
-						"SELECT inv FROM Investigation inv, inv.facility f, inv.investigationInstruments ii WHERE inv.name ='A' ORDER BY ii.instrument.fullName ASC")
-						.size());
-
-		assertEquals(1, session.search("Study INCLUDE StudyInvestigation").size());
 
 		Date now = new Date(new Date().getTime() + 1001); // Move on a second
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");

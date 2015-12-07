@@ -42,6 +42,7 @@ import org.icatproject.icat.client.Session;
 import org.icatproject.icat.client.Session.Attributes;
 import org.icatproject.icat.client.Session.DuplicateAction;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -64,6 +65,26 @@ public class TestRS {
 			e.printStackTrace();
 			throw e;
 		}
+	}
+
+	@Ignore("Test fails becuase of bug in eclipselink")
+	@Test
+	public void testDistinctBehaviour() throws Exception {
+		wSession.clear();
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "root");
+		credentials.put("password", "password");
+		Session session = icat.login("db", credentials);
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
+
+		// See what happens to query with bad order by
+		System.out.println(search(session, "SELECT inv FROM Investigation inv", 3));
+
+		System.out.println(
+				search(session, "SELECT inv FROM Investigation inv, inv.investigationUsers u ORDER BY u.user.name", 3));
+
 	}
 
 	@Test
