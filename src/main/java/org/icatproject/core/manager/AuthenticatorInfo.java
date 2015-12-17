@@ -1,19 +1,23 @@
 package org.icatproject.core.manager;
 
+import org.icatproject.core.manager.AuthenticatorDescription;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
 
 public class AuthenticatorInfo {
 
     private String mnemonic;
-    private String description;
+    private AuthenticatorDescription description;
     private String friendly;
-    private boolean admin;
+    private Boolean admin;
 
     public AuthenticatorInfo(String mnemonic, ExtendedAuthenticator auth) {
 	this.mnemonic = mnemonic;
-	this.description = auth.getAuthenticator().getDescription();
+	String desc = auth.getAuthenticator().getDescription();
+	this.description = new AuthenticatorDescription(desc);
 	this.friendly = auth.getFriendly();
-	this.admin = auth.isAdmin();
+	if (auth.isAdmin()) {
+	    this.admin = true;
+	}
     }
 
     public String getMnemonic() {
@@ -24,11 +28,11 @@ public class AuthenticatorInfo {
 	this.mnemonic = mnemonic;
     }
 
-    public String getDescription() {
+    public AuthenticatorDescription getDescription() {
 	return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(AuthenticatorDescription description) {
 	this.description = description;
     }
 
@@ -40,11 +44,11 @@ public class AuthenticatorInfo {
 	this.friendly = friendly;
     }
 
-    public boolean getAdmin() {
+    public Boolean getAdmin() {
 	return admin;
     }
 
-    public void setAdmin(boolean admin) {
+    public void setAdmin(Boolean admin) {
 	this.admin = admin;
     }
 
