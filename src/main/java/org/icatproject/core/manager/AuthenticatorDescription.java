@@ -25,6 +25,11 @@ public class AuthenticatorDescription {
 		JsonObject jkey = jkeys.getJsonObject(i);
 		key.setName(jkey.getString("name"));
 		try {
+		    key.setPattern(jkey.getString("pattern"));
+		} catch (NullPointerException e) {
+		    // pattern is not set.
+		}
+		try {
 		    key.setHide(jkey.getBoolean("hide"));
 		} catch (NullPointerException e) {
 		    // hide is not set.
