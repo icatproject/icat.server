@@ -21,11 +21,12 @@ files = ["testicat", "icatadmin"]
 prop_name = "icat.properties"
 prop_list = ["lifetimeMinutes", "rootUserNames", "authn.list", "notification.list", "log.list"]
 
+if arg in ["CONFIGURE", "INSTALL"]: actions.configure(prop_name, prop_list) 
+icatProperties = getProperties(prop_name, prop_list)
+log4backXml = icatProperties.get("logback.xml")
+
 if arg in ["CONFIGURE", "INSTALL"]:
-    actions.configure(prop_name, prop_list) 
-    icatProperties = getProperties(prop_name, prop_list)
-    log4backXml = icatProperties.get("logback.xml")
-    if log4backXml:actions.configure(os.path.basename(log4backXml), [], log4backXml)
+    if log4backXml: actions.configure(os.path.basename(log4backXml), [], log4backXml)
     actions.checkNoErrors()
 
 if arg == "INSTALL":       
@@ -91,10 +92,7 @@ if arg == "INSTALL":
     except Exception, e:
         abort(str(e))
                 
-if arg == "UNINSTALL":
-    icatProperties = actions.getProperties(prop_name, prop_list)
-    log4backXml = icatProperties.get("logback.xml")
-    
+if arg == "UNINSTALL":        
     actions.removeFile(prop_name)
     if log4backXml:
         dir, file = os.path.split(log4backXml)

@@ -34,8 +34,8 @@ authn.simple.jndi = java:global/authn.simple-1.1.0/SIMPLE_Authenticator
 authn.anon.jndi     = java:global/authn.anon-1.1.0/ANON_Authenticator
 authn.anon.friendly = Anonymous
 
-# Uncomment to permit configuration of log4j
-!log4j.properties = icat.log4j.properties
+# Uncomment to permit configuration of logback
+!logback.xml = icat.logback.xml
 
 # Notification setup
 notification.list = Dataset Datafile

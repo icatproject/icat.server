@@ -252,10 +252,10 @@
 		</dd>
 	</dl>
 
-	<h2>The icat.properties and icat.log4j.properties files</h2>
+	<h2>The icat.properties and icat.logback.xml files</h2>
 
 	<p>If you wish to modify the provided logging levels then rename
-		icat.log4j.properties.example to icat.log4j.properties and update the
+		icat.logback.xml.example to icat.logback.xml and update the
 		icat.properties file to reference it as explained below. The
 		icat.properties file may need other changes:</p>
 	<dl>
@@ -348,9 +348,9 @@
 			for the various read calls and "W" is used for all write calls
 			(create, update and delete).</dd>
 
-		<dt>log4j.properties</dt>
+		<dt>logback.xml</dt>
 		<dd>This is optional. If present it must specify the path to a
-			log4j.properties file. The path may be absolute or relative to the
+			logback.xml file. The path may be absolute or relative to the
 			config directory.</dd>
 
 		<dt>lucene.directory</dt>
