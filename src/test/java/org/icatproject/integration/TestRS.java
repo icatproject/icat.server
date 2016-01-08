@@ -106,7 +106,7 @@ public class TestRS {
 
 		// Set text and parameters
 		array = searchDatafiles(session, null, "df2", null, null, parameters, 20, 1);
-		assertEquals("df2", array.getJsonObject(0).getJsonObject("Datafile").getString("name"));
+		checkResultFromLuceneSearch(session, "df2", array, "Datafile", "name");
 	}
 
 	@Test
@@ -131,7 +131,11 @@ public class TestRS {
 		JsonArray array = searchDatasets(session, "db/tr", null, null, null, null, 20, 3);
 
 		for (int i = 0; i < 3; i++) {
-			names.add(array.getJsonObject(i).getJsonObject("Dataset").getString("name"));
+
+			long n = array.getJsonObject(i).getJsonNumber("id").longValueExact();
+			JsonObject result = Json.createReader(new ByteArrayInputStream(session.get("Dataset", n).getBytes()))
+					.readObject();
+			names.add(result.getJsonObject("Dataset").getString("name"));
 		}
 		assertTrue(names.contains("ds1"));
 		assertTrue(names.contains("ds2"));
@@ -142,7 +146,7 @@ public class TestRS {
 
 		array = searchDatasets(session, null, "gamma AND ds3", dft.parse("2014-05-16T06:09:03"),
 				dft.parse("2014-05-16T06:15:26"), parameters, 20, 1);
-		assertEquals("gamma", array.getJsonObject(0).getJsonObject("Dataset").getString("description"));
+		checkResultFromLuceneSearch(session, "gamma", array, "Dataset", "description");
 	}
 
 	@Test
@@ -159,7 +163,7 @@ public class TestRS {
 		JsonArray array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00"),
 				dft.parse("2011-12-31T23:59:59"), parameters, Arrays.asList("ford AND rust", "koh* AND diamond"),
 				"Professor", 20, 1);
-		assertEquals("one", array.getJsonObject(0).getJsonObject("Investigation").getString("visitId"));
+		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
 		// change user
 		searchInvestigations(session, "db/fred", "title AND one", null, null, parameters, null, null, 20, 0);
@@ -170,11 +174,11 @@ public class TestRS {
 		// Only working to a minute
 		array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:01"),
 				dft.parse("2011-12-31T23:59:59"), parameters, null, null, 20, 1);
-		assertEquals("one", array.getJsonObject(0).getJsonObject("Investigation").getString("visitId"));
+		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
 		array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00"),
 				dft.parse("2011-12-31T23:59:58"), parameters, null, null, 20, 1);
-		assertEquals("one", array.getJsonObject(0).getJsonObject("Investigation").getString("visitId"));
+		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
 		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:01:00"),
 				dft.parse("2011-12-31T23:59:59"), parameters, null, null, 20, 0);
@@ -198,6 +202,23 @@ public class TestRS {
 		searchInvestigations(session, "db/tr", "title + one", dft.parse("2011-01-01T00:00:00"),
 				dft.parse("2011-12-31T23:59:59"), parameters, Arrays.asList("ford AND rust", "koh* AND diamond"),
 				"Doctor", 20, 0);
+
+		// Try provoking an error
+		badParameters = new ArrayList<>();
+		badParameters.add(new ParameterForLucene("color", null, "green"));
+		try {
+			searchInvestigations(session, "db/tr", null, null, null, badParameters, null, null, 10, 0);
+			fail("BAD_PARAMETER exception not caught");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
+		}
+	}
+
+	private void checkResultFromLuceneSearch(Session session, String val, JsonArray array, String ename, String field)
+			throws IcatException {
+		long n = array.getJsonObject(0).getJsonNumber("id").longValueExact();
+		JsonObject result = Json.createReader(new ByteArrayInputStream(session.get(ename, n).getBytes())).readObject();
+		assertEquals(val, result.getJsonObject(ename).getString(field));
 	}
 
 	private Session setupLuceneTest() throws Exception {

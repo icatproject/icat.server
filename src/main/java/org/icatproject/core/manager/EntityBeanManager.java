@@ -814,9 +814,7 @@ public class EntityBeanManager {
 				if (beanManaged != null) {
 					try {
 						gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
-						EntityBaseBean eb = beanManaged.pruned(false, -1, null, maxEntities, gateKeeper, userId,
-								manager);
-						results.add(new ScoredEntityBaseBean(eb, sr.getScore()));
+						results.add(new ScoredEntityBaseBean(entityId, sr.getScore()));
 						if (results.size() > maxEntities) {
 							throw new IcatException(IcatExceptionType.VALIDATION,
 									"attempt to return more than " + maxEntities + " entitities");
@@ -1516,8 +1514,7 @@ public class EntityBeanManager {
 		}
 		if (log) {
 			if (results.size() > 0) {
-				EntityBaseBean result = results.get(0).getEntityBaseBean();
-				logRead(time, userName, "luceneDatafiles", result.getClass().getSimpleName(), result.getId(), "",
+				logRead(time, userName, "luceneDatafiles", "Datafile", results.get(0).getEntityBaseBeanId(), "",
 						manager, userTransaction);
 			} else {
 				logRead(time, userName, "luceneDatafiles", null, null, "", manager, userTransaction);
@@ -1552,9 +1549,8 @@ public class EntityBeanManager {
 		}
 		if (log) {
 			if (results.size() > 0) {
-				EntityBaseBean result = results.get(0).getEntityBaseBean();
-				logRead(time, userName, "luceneDatasets", result.getClass().getSimpleName(), result.getId(), "",
-						manager, userTransaction);
+				logRead(time, userName, "luceneDatasets", "Dataset", results.get(0).getEntityBaseBeanId(), "", manager,
+						userTransaction);
 			} else {
 				logRead(time, userName, "luceneDatasets", null, null, "", manager, userTransaction);
 			}
@@ -1599,8 +1595,7 @@ public class EntityBeanManager {
 		}
 		if (log) {
 			if (results.size() > 0) {
-				EntityBaseBean result = results.get(0).getEntityBaseBean();
-				logRead(time, userId, "luceneInvestigations", result.getClass().getSimpleName(), result.getId(), "",
+				logRead(time, userId, "luceneInvestigations", "Investigation", results.get(0).getEntityBaseBeanId(), "",
 						manager, userTransaction);
 			} else {
 				logRead(time, userId, "luceneInvestigations", null, null, "", manager, userTransaction);

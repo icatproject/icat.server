@@ -781,8 +781,15 @@ public class ICATRest {
 			if (jo.containsKey("parameters")) {
 				for (JsonValue val : jo.getJsonArray("parameters")) {
 					JsonObject parm = (JsonObject) val;
-					String name = parm.getString("name");
-					String units = parm.getString("units");
+					String name = parm.getString("name", null);
+					if (name == null) {
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER, "name not set in one of parameters");
+					}
+					String units = parm.getString("units", null);
+					if (units == null) {
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+								"units not set in parameter '" + name + "'");
+					}
 					if (parm.containsKey("stringValue")) {
 						parms.add(new ParameterPOJO(name, units, parm.getString("stringValue")));
 					} else if (parm.containsKey("lowerDateValue") && parm.containsKey("upperDateValue")) {
@@ -825,17 +832,16 @@ public class ICATRest {
 			JsonGenerator gen = Json.createGenerator(baos);
 			gen.writeStartArray();
 			for (ScoredEntityBaseBean sb : objects) {
-				EntityBaseBean bean = sb.getEntityBaseBean();
 				gen.writeStartObject();
-				gen.writeStartObject(bean.getClass().getSimpleName());
-				jsonise(bean, gen);
-				gen.writeEnd();
+				gen.write("id", sb.getEntityBaseBeanId());
 				gen.write("score", sb.getScore());
 				gen.writeEnd();
 			}
 			gen.writeEnd();
 			gen.close();
 			return baos.toString();
+		} catch (JsonException e) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "JsonException " + e.getMessage());
 		}
 	}
 
