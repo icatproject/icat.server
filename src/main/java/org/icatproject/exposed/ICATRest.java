@@ -285,8 +285,10 @@ public class ICATRest {
 	 *            a sessionId of a user listed in rootUserNames
 	 * @param query
 	 *            the jpql
+	 * @param max
+	 *            if specified changes the number of entries to return from 5
 	 * 
-	 * @return the first 5 entities that match the query as simple text for
+	 * @return the first entities that match the query as simple text for
 	 *         testing
 	 * 
 	 * @throws IcatException
@@ -295,14 +297,18 @@ public class ICATRest {
 	@GET
 	@Path("jpql")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getJpql(@QueryParam("sessionId") String sessionId, @QueryParam("query") String query)
-			throws IcatException {
+	public String getJpql(@QueryParam("sessionId") String sessionId, @QueryParam("query") String query,
+			@QueryParam("max") Integer max) throws IcatException {
 		checkRoot(sessionId);
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
 		}
 		int nMax = 5;
+		if (max != null) {
+			nMax = max;
+		}
 		List<Object> os = manager.createQuery(query, Object.class).setMaxResults(nMax).getResultList();
+
 		StringBuilder sb = new StringBuilder();
 		if (os.size() == nMax) {
 			sb.append("Count at least 5");
@@ -317,7 +323,21 @@ public class ICATRest {
 				sb.append(": ");
 				first = false;
 			}
-			sb.append(o);
+			if (o.getClass().isArray()) {
+				boolean firstInArray = true;
+				sb.append('[');
+				for (Object z : (Object[]) o) {
+					if (!firstInArray) {
+						sb.append(", ");
+					} else {
+						firstInArray = false;
+					}
+					sb.append(z);
+				}
+				sb.append(']');
+			} else {
+				sb.append(o);
+			}
 		}
 		return sb.toString();
 	}
@@ -570,6 +590,34 @@ public class ICATRest {
 				gen.writeEnd();
 			}
 		}
+	}
+
+	private void jsonise(Object result, JsonGenerator gen) throws IcatException {
+		if (result == null) {
+			gen.writeNull();
+		} else if (result instanceof EntityBaseBean) {
+			gen.writeStartObject();
+			gen.writeStartObject(result.getClass().getSimpleName());
+			jsonise((EntityBaseBean) result, gen);
+			gen.writeEnd();
+			gen.writeEnd();
+		} else if (result instanceof Long) {
+			gen.write((Long) result);
+		} else if (result instanceof Double) {
+			if (Double.isNaN((double) result)) {
+				gen.writeNull();
+			} else {
+				gen.write((Double) result);
+			}
+		} else if (result instanceof String) {
+			gen.write((String) result);
+		} else if (result instanceof Boolean) {
+			gen.write((Boolean) result);
+		} else {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"Don't know how to jsonise " + result.getClass());
+		}
+
 	}
 
 	/**
@@ -1039,12 +1087,19 @@ public class ICATRest {
 	 *            functionality of get is required in which case the query must
 	 *            be as described in the ICAT Java Client manual.
 	 * 
-	 * @return entities as a json string of the form
-	 *         <samp>[{"Facility":{"id":126, "name":"another fred"}}]</samp> and
-	 *         is a list of the objects returned and takes the same form as the
-	 *         data passed in for create. If an id value is specified then only
-	 *         one object can be returned so <em>the outer square brackets are
-	 *         omitted</em>.
+	 * @return entities or arrays of values as a json string. The query
+	 *         <code>SELECT f FROM Facility f</code> might return
+	 *         <samp>[{"Facility":{"id":126, "name":"another fred"
+	 *         }},{"Facility":{"id":185, "name":"a fred"}} ]</samp> and is a
+	 *         list of the objects returned and takes the same form as the data
+	 *         passed in for create. If more than one quantity is listed in the
+	 *         select clause then instead of a single value being returned for
+	 *         each result an array of values is returned. For example
+	 *         <code>SELECT f.id, f.name FROM Facility f</code> might return:
+	 *         <samp> [[126, "another fred"],[185, "a fred"]]</samp>. If an id
+	 *         value is specified then only one object can be returned so
+	 *         <em>the outer square brackets are
+	 *         omitted.</em>.
 	 * 
 	 * @throws IcatException
 	 *             when something is wrong
@@ -1065,32 +1120,19 @@ public class ICATRest {
 		String userName = beanManager.getUserName(sessionId, manager);
 		if (id == null) {
 			gen.writeStartArray();
-
 			for (Object result : beanManager.search(userName, query, manager, userTransaction)) {
 				if (result == null) {
 					gen.writeNull();
-				} else if (result instanceof EntityBaseBean) {
-					gen.writeStartObject();
-					gen.writeStartObject(result.getClass().getSimpleName());
-					jsonise((EntityBaseBean) result, gen);
-					gen.writeEnd();
-					gen.writeEnd();
-				} else if (result instanceof Long) {
-					gen.write((Long) result);
-				} else if (result instanceof Double) {
-					if (Double.isNaN((double) result)) {
-						gen.writeNull();
-					} else {
-						gen.write((Double) result);
+				} else if (result.getClass().isArray()) {
+					gen.writeStartArray();
+					for (Object field : (Object[]) result) {
+						jsonise(field, gen);
 					}
-				} else if (result instanceof String) {
-					gen.write((String) result);
-				} else if (result instanceof Boolean) {
-					gen.write((Boolean) result);
+					gen.writeEnd();
 				} else {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							"Don't know how to jsonise " + result.getClass());
+					jsonise(result, gen);
 				}
+
 			}
 
 			gen.writeEnd();

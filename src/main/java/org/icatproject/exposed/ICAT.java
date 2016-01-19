@@ -341,11 +341,7 @@ public class ICAT {
 	}
 
 	private void reportThrowable(Throwable e) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintStream s = new PrintStream(baos);
-		e.printStackTrace(s);
-		s.close();
-		logger.error("Unexpected failure in Java " + System.getProperties().getProperty("java.version") + " " + baos);
+		logger.error("Unexpected failure in Java " + System.getProperties().getProperty("java.version"), e);
 	}
 
 	@WebMethod

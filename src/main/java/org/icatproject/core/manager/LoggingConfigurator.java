@@ -53,6 +53,13 @@ public class LoggingConfigurator {
 			} else {
 				logger.info("Using logback default configuration");
 			}
+
+			try {
+				logger.info("Version of eclipselink is {}",
+						Class.forName("org.eclipse.persistence.Version").getMethod("getVersion").invoke(null));
+			} catch (Exception e) {
+				logger.info("Unable to determine the version of eclipselink", e);
+			}
 		} catch (CheckedPropertyException e) {
 			throw new IllegalStateException(e.getMessage());
 		}

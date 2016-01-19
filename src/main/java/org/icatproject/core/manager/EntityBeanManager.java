@@ -74,7 +74,6 @@ import org.icatproject.core.parser.LexerException;
 import org.icatproject.core.parser.ParserException;
 import org.icatproject.core.parser.SearchQuery;
 import org.icatproject.core.parser.Token;
-import org.icatproject.core.parser.Token.Type;
 import org.icatproject.core.parser.Tokenizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,7 +107,7 @@ public class EntityBeanManager {
 	private static BufferedWriter logFile;
 
 	private static final Logger logger = LoggerFactory.getLogger(EntityBeanManager.class);
-	private static final EntityInfoHandler ei = EntityInfoHandler.instance;
+
 	private static long next;
 	private static final Pattern timestampPattern = Pattern.compile(":ts(\\d{14})");
 
@@ -233,11 +232,11 @@ public class EntityBeanManager {
 			try {
 				long time = log ? System.currentTimeMillis() : 0;
 				bean.preparePersist(userId, manager, gateKeeper, allAttributes);
-				logger.debug(bean + " prepared for persist.");
+				logger.trace(bean + " prepared for persist.");
 				manager.persist(bean);
-				logger.debug(bean + " persisted.");
+				logger.trace(bean + " persisted.");
 				manager.flush();
-				logger.debug(bean + " flushed.");
+				logger.trace(bean + " flushed.");
 				// Check authz now everything persisted
 				gateKeeper.performAuthorisation(userId, bean, AccessType.CREATE, manager);
 				NotificationMessage notification = new NotificationMessage(Operation.C, bean, manager,
@@ -246,7 +245,6 @@ public class EntityBeanManager {
 				long beanId = bean.getId();
 
 				if (luceneActive) {
-					logger.debug("Is " + bean + " managed: " + manager.contains(bean));
 					bean.addToLucene(lucene);
 				}
 				userTransaction.commit();
@@ -956,7 +954,7 @@ public class EntityBeanManager {
 
 		/* Null query indicates that nothing accepted by authz */
 		if (jpql == null) {
-			return new EntitySetResult(q, q.noAuthzResult());
+			return new EntitySetResult(q, q.getNoAuthzResult());
 		}
 
 		/* Create query - which may go wrong */
@@ -1030,135 +1028,33 @@ public class EntityBeanManager {
 					"attempt to process more than " + maxEntities + " entitities");
 		}
 
-		String relativePathToReturn = q.getRelativePathToReturn();
-
 		List<Object> result = null;
-		if (relativePathToReturn == null) {
-			result = (List<Object>) objects;
-			// eclipselink returns BigDecimal for aggregate
-			// functions on Long and Double for oracle
-			if (result.size() == 1) {
-				logger.debug("One result only - look for bad return types");
-				Object obj = result.get(0);
-				if (obj != null) {
-					logger.debug("Type is " + obj.getClass());
-					if (obj.getClass() == BigDecimal.class) {
-						String typeQueryString = q.typeQuery();
-						logger.debug("Type query: " + typeQueryString);
-						Query typeQuery = manager.createQuery(typeQueryString).setMaxResults(1);
-						Class<? extends Object> klass = typeQuery.getSingleResult().getClass();
-						logger.debug("Class is " + klass);
-						if (klass == Long.class) {
-							result.set(0, ((BigDecimal) obj).longValue());
-						} else if (klass == Double.class) {
-							result.set(0, ((BigDecimal) obj).doubleValue());
-						} else
-							throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-									"Type " + klass + " neither Long nor Double");
-					}
-				}
-			}
-		} else {
-			Type aggregateFunctionToReturn = q.getAggregateFunctionToReturn();
-			logger.debug("Aggregate function " + aggregateFunctionToReturn + " for " + relativePathToReturn);
-			List<Method> methods = new ArrayList<>();
-			Class<?> ftype = null;
-			Class<? extends EntityBaseBean> objc = q.getBean();
-			for (String name : relativePathToReturn.split("\\.")) {
-				Method method = ei.getGettersFromName(objc).get(name);
-				if (method == null) {
-					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-							objc.getSimpleName() + " does not contain " + name);
-				}
-				methods.add(method);
-				ftype = method.getReturnType();
-				if (EntityBaseBean.class.isAssignableFrom(ftype)) {
-					objc = (Class<? extends EntityBaseBean>) ftype;
-				}
-			}
-			logger.debug(methods.toString());
 
-			result = new ArrayList<>();
-			for (Object one : objects) {
-				Object att = one;
-				for (Method method : methods) {
-					if (att == null)
-						break;
-					try {
-						att = method.invoke(att);
-					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-						throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
-					}
-				}
-				if (att != null || aggregateFunctionToReturn == null) {
-					result.add(att);
-				}
-			}
-			/*
-			 * Now result has the array attributes - see if want COUNT, AVG or
-			 * SUM function. Return types are intended to conform to JPQL
-			 * specification.
-			 */
-
-			if (aggregateFunctionToReturn == Token.Type.COUNT) {
-				long count = result.size();
-				result = new ArrayList<>(1);
-				result.add(count);
-			} else if (aggregateFunctionToReturn == Token.Type.AVG) {
-				Double total = 0.0;
-				int n = 0;
-				for (Object one : result) {
-					if (one != null) {
-						n++;
-						if (ftype == Long.class) {
-							total += (Long) one;
-						} else if (ftype == Integer.class) {
-							total += (Integer) one;
-						} else if (ftype == Double.class) {
-							total += (Double) one;
-						} else {
-							throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-									"Unexpected type for AVG function " + ftype);
-						}
-					}
-				}
-				Double avg = total / n;
-				result = new ArrayList<>(1);
-				result.add(avg);
-			} else if (aggregateFunctionToReturn == Token.Type.SUM) {
-				if (ftype == Long.class) {
-					Long sum = 0L;
-					for (Object one : result) {
-						if (one != null) {
-							sum += (Long) one;
-						}
-					}
-					result = new ArrayList<>(1);
-					result.add(sum);
-				} else if (ftype == Integer.class) {
-					Long sum = 0L;
-					for (Object one : result) {
-						if (one != null) {
-							sum += (Integer) one;
-						}
-					}
-					result = new ArrayList<>(1);
-					result.add(sum);
-				} else if (ftype == Double.class) {
-					Double sum = 0.0;
-					for (Object one : result) {
-						if (one != null) {
-							sum += (Double) one;
-						}
-					}
-					result = new ArrayList<>(1);
-					result.add(sum);
-				} else {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							"Unexpected type for SUM function " + ftype);
+		result = (List<Object>) objects;
+		// eclipselink returns BigDecimal for aggregate
+		// functions on Long and Double for oracle
+		if (result.size() == 1) {
+			logger.debug("One result only - look for bad return types");
+			Object obj = result.get(0);
+			if (obj != null) {
+				logger.debug("Type is " + obj.getClass());
+				if (obj.getClass() == BigDecimal.class) {
+					String typeQueryString = q.typeQuery();
+					logger.debug("Type query: " + typeQueryString);
+					Query typeQuery = manager.createQuery(typeQueryString).setMaxResults(1);
+					Class<? extends Object> klass = typeQuery.getSingleResult().getClass();
+					logger.debug("Class is " + klass);
+					if (klass == Long.class) {
+						result.set(0, ((BigDecimal) obj).longValue());
+					} else if (klass == Double.class) {
+						result.set(0, ((BigDecimal) obj).doubleValue());
+					} else
+						throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+								"Type " + klass + " neither Long nor Double");
 				}
 			}
 		}
+
 		logger.debug("Obtained " + result.size() + " results.");
 		return new EntitySetResult(q, result);
 	}

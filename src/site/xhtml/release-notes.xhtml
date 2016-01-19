@@ -6,6 +6,29 @@
 
 	<h1>ICAT Server Release Notes</h1>
 
+	<h2>4.7.0</h2>
+	<p>Enhanced Rest interface and changes to the authorization code</p>
+	<ul>
+		<li>A select can mention multiple quantities to be returned</li>
+		<li>A major re-write of the authorization code should make it
+			more efficient in most cases as all the work is carried out by the
+			database unless the INCLUDE mechanism is used.</li>
+		<li>COUNT queries will not fail because they are are counting
+			more than maxEntities values</li>
+		<li>A couple of bugs in eclipse link result in incorrect
+			information being returned. One of these bugs was trapped previously
+			but with the generality of the queries now supported it has become
+			impractical to trap.
+			<ul>
+				<li>"SELECT f from Facility WHERE f.id = 1 LIMIT 1,10" which
+					should always return an empty list now ignores the LIMIT clause.</li>
+				<li>"SELECT ds.complete FROM Dataset ds" only returns the false
+					values but that "SELECT ds.id, ds.complete FROM Dataset ds" works
+					properly.</li>
+			</ul>
+		</li>
+	</ul>
+
 	<h2>4.6.0</h2>
 	<p>Small change to icat.properties</p>
 	<ul>

@@ -1,9 +1,6 @@
 package org.icatproject.core.parser;
 
-import java.util.Map;
-
 import org.icatproject.core.Constants;
-import org.icatproject.core.manager.EntityInfoHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +10,7 @@ public class SubSelectClause {
 
 	private String string;
 
-	public SubSelectClause(Input input, Map<String, Integer> idVarMap) throws ParserException {
+	public SubSelectClause(Input input) throws ParserException {
 		StringBuilder sb = new StringBuilder();
 		Token t = input.peek(0);
 		int level = 1; // Once we get back to the same level of brackets leave
@@ -37,20 +34,8 @@ public class SubSelectClause {
 								"Enum literal " + val + " must contain exactly " + (n + 2) + " parts");
 					}
 					sb.append(" " + Constants.ENTITY_PREFIX + t.getValue().substring(Constants.ENUMPREFIX.length()));
-				} else if (EntityInfoHandler.getAlphabeticEntityNames().contains(val)) {
-					sb.append(" " + val);
 				} else {
-					int dot = val.indexOf('.');
-					String idv = dot >= 0 ? val.substring(0, dot).toUpperCase() : val.toUpperCase();
-					Integer intVal = idVarMap.get(idv);
-					if (intVal == null) {
-						intVal = idVarMap.size();
-						idVarMap.put(idv, intVal);
-					}
-					sb.append(" $" + intVal + "$");
-					if (dot >= 0) {
-						sb.append(val.substring(dot));
-					}
+					sb.append(" " + val);
 				}
 			} else {
 				if (t.getType() == Token.Type.STRING) {

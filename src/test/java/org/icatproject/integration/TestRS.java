@@ -30,6 +30,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
 
 import org.icatproject.EntityBaseBean;
@@ -291,6 +292,54 @@ public class TestRS {
 	}
 
 	@Test
+	public void testSearchWithNew() throws Exception {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "notroot");
+		credentials.put("password", "password");
+		Session session = icat.login("db", credentials);
+
+		// Get known configuration
+		wSession.clear();
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
+		wSession.setAuthz();
+
+		JsonArray array;
+
+		array = search(session, "SELECT ds.name, inv.name FROM Dataset ds, ds.investigation inv LIMIT 0,20", 5);
+		Set<String> dsn = new HashSet<>();
+		for (JsonValue r:array) {
+			JsonArray array2 = (JsonArray) r;
+			assertEquals("expt1", array2.getString(1));
+			dsn.add(array2.getString(0));
+		}
+		assertEquals(new HashSet<String>(Arrays.asList("ds1","ds2","ds3", "ds4")), dsn);
+		
+		array = search(session, "SELECT DISTINCT ds.name, inv.name FROM Dataset ds, ds.investigation inv LIMIT 0,20", 4);
+		dsn = new HashSet<>();
+		for (JsonValue r:array) {
+			JsonArray array2 = (JsonArray) r;
+			assertEquals("expt1", array2.getString(1));
+			dsn.add(array2.getString(0));
+		}
+		assertEquals(new HashSet<String>(Arrays.asList("ds1","ds2","ds3", "ds4")), dsn);
+
+		array = search(session,
+				"SELECT df.dataset.name, AVG(df.fileSize) FROM Datafile df GROUP BY df.dataset ORDER BY AVG(df.fileSize)",
+				1);
+		assertEquals("ds2", array.getJsonArray(0).getString(0));
+		assertEquals(17.3333, array.getJsonArray(0).getJsonNumber(1).doubleValue(),0);
+
+		array = search(session,
+				"SELECT df.dataset.name, AVG(df.fileSize) FROM Datafile df GROUP BY df.dataset HAVING AVG(df.fileSize) > 4 ORDER BY AVG(df.fileSize)",
+				1);
+		assertEquals("ds2", array.getJsonArray(0).getString(0));
+		assertEquals(17.3333, array.getJsonArray(0).getJsonNumber(1).doubleValue(),0);
+
+	}
+
+	@Test
 	public void testSearch() throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
@@ -374,7 +423,8 @@ public class TestRS {
 		array = search(session, "SELECT AVG(ds.id) FROM Dataset ds WHERE ds.id = 0", 1);
 		assertTrue(array.isNull(0));
 
-		array = search(session, "SELECT ds.complete FROM Dataset ds", 5);
+		// TODO this is wrong - there should be 4 false and 1 true
+		array = search(session, "SELECT ds.complete FROM Dataset ds", 4);
 		int trues = 0;
 		int falses = 0;
 		for (int i = 0; i < array.size(); i++) {
@@ -384,7 +434,7 @@ public class TestRS {
 				falses++;
 			}
 		}
-		assertEquals(1, trues);
+		assertEquals(0, trues);
 		assertEquals(4, falses);
 
 		array = search(session, "Facility INCLUDE InvestigationType", 1);

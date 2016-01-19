@@ -17,12 +17,13 @@ public class Tokenizer {
 	private final static Pattern tsRegExp = Pattern
 			.compile("\\{\\s*ts\\s+(\\d{4}-\\d{2}-\\d{2})\\s+(\\d{2}:\\d{2}:\\d{2})\\s*\\}");
 
-	private final static Set<String> keyWords = new HashSet<String>(Arrays.asList("ABS", "ALL", "AND", "ANY", "AS",
-			"ASC", "AVG", "BETWEEN", "BOTH", "BY", "CONCAT", "COUNT", "CURRENT_DATE", "CURRENT_TIME",
-			"CURRENT_TIMESTAMP", "DESC", "DISTINCT", "DIV", "EMPTY", "ESCAPE", "FALSE", "FETCH", "FROM", "GROUP",
-			"HAVING", "IN", "INCLUDE", "INNER", "IS", "JOIN", "LEADING", "LEFT", "LENGTH", "LIMIT", "LOCATE", "LOWER",
-			"MAX", "MEMBER", "MIN", "MINUS", "MOD", "MULT", "NOT", "NULL", "OR", "ORDER", "OUTER", "PLUS", "REAL",
-			"SELECT", "SIZE", "SQRT", "SUBSTRING", "SUM", "TIMESTAMP", "TRAILING", "TRIM", "TRUE", "UPPER", "WHERE"));
+	private final static Set<String> keyWords = new HashSet<String>(
+			Arrays.asList("ABS", "ALL", "AND", "ANY", "AS", "ASC", "AVG", "BETWEEN", "BOTH", "BY", "CONCAT", "COUNT",
+					"CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "DESC", "DISTINCT", "DIV", "EMPTY", "ESCAPE",
+					"FALSE", "FETCH", "FROM", "GROUP", "HAVING", "IN", "INCLUDE", "INNER", "IS", "JOIN", "LEADING",
+					"LEFT", "LENGTH", "LIMIT", "LOCATE", "LOWER", "MAX", "MEMBER", "MIN", "MINUS", "MOD", "MULT", "NOT",
+					"NULL", "OBJECT", "OR", "ORDER", "OUTER", "PLUS", "REAL", "SELECT", "SIZE", "SQRT", "SUBSTRING",
+					"SUM", "TIMESTAMP", "TRAILING", "TRIM", "TRUE", "UPPER", "WHERE"));
 
 	public static List<Token> getTokens(String input) throws LexerException {
 		List<Token> tokens = new ArrayList<Token>();
@@ -172,7 +173,8 @@ public class Tokenizer {
 					if (!matcher.matches()) {
 						throw new LexerException("Timestamp " + ts + " is not of form {ts yyyy-mm-dd hh:mm:ss}.");
 					}
-					tokens.add(new Token(Token.Type.TIMESTAMP, "{ts " + matcher.group(1) + " " + matcher.group(2) + "}"));
+					tokens.add(
+							new Token(Token.Type.TIMESTAMP, "{ts " + matcher.group(1) + " " + matcher.group(2) + "}"));
 					state = State.NONE;
 				}
 			}
