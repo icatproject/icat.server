@@ -96,9 +96,9 @@ public class ICATRest {
 		public Event get(Event... events) {
 			Event event = parser.next();
 			if (event == Event.KEY_NAME || event == Event.VALUE_STRING) {
-				logger.debug(event + ": " + parser.getString());
+				logger.trace(event + ": " + parser.getString());
 			} else {
-				logger.debug(event.toString());
+				logger.trace(event.toString());
 			}
 			for (Event e : events) {
 				if (event == e) {
@@ -217,7 +217,7 @@ public class ICATRest {
 				checker.get(Event.END_OBJECT);
 			}
 		} catch (JsonException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage() + " in json " + json);
 		}
 		String userName = beanManager.getUserName(sessionId, manager);
 
@@ -235,6 +235,66 @@ public class ICATRest {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 		return baos.toString();
+	}
+
+	/**
+	 * Delete entities as a json string.
+	 * 
+	 * @summary delete
+	 * 
+	 * @param sessionId
+	 *            a sessionId of a user which takes the form
+	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 * @param json
+	 *            specifies what to delete as a single entity or as an array of
+	 *            entities such as <code>{"Facility": {"id" : 42}}</code> where
+	 *            only the id is significant.
+	 * 
+	 * @throws IcatException
+	 *             when something is wrong
+	 */
+	@DELETE
+	@Path("entityManager")
+	@Produces(MediaType.APPLICATION_JSON)
+	public void delete(@QueryParam("sessionId") String sessionId, @QueryParam("entities") String json)
+			throws IcatException {
+		List<EntityBaseBean> entities = getEntities(json);
+		String userName = beanManager.getUserName(sessionId, manager);
+		beanManager.deleteMany(userName, entities, manager, userTransaction);
+	}
+
+	private List<EntityBaseBean> getEntities(String json) throws IcatException {
+		if (json == null) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "entities is not set");
+		}
+
+		List<EntityBaseBean> entities = new ArrayList<>();
+		try (JsonParser parser = Json.createParser(new ByteArrayInputStream(json.getBytes()))) {
+			EventChecker checker = new EventChecker(parser);
+			Event event = checker.get(Event.START_ARRAY, Event.START_OBJECT);
+			if (event == Event.START_OBJECT) {
+				checker.get(Event.KEY_NAME);
+				String entityName = parser.getString();
+				checker.get(Event.START_OBJECT);
+				entities.add(parseEntity(checker, entityName));
+				checker.get(Event.END_OBJECT);
+			} else {
+				while (true) {
+					event = checker.get(Event.START_OBJECT, Event.END_ARRAY);
+					if (event == Event.END_ARRAY) {
+						break;
+					}
+					checker.get(Event.KEY_NAME);
+					String entityName = parser.getString();
+					checker.get(Event.START_OBJECT);
+					entities.add(parseEntity(checker, entityName));
+					checker.get(Event.END_OBJECT);
+				}
+			}
+		} catch (JsonException e) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage() + " in json " + json);
+		}
+		return entities;
 	}
 
 	/**

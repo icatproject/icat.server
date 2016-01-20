@@ -840,7 +840,7 @@ public class TestWS {
 			assertEquals("Facility exists with name = 'TestDuplicates'", e.getMessage());
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 		}
 	}
 
@@ -871,7 +871,7 @@ public class TestWS {
 			assertEquals("Facility exists with name = 'Two'", e.getMessage());
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals((Integer) 3, ue.getOffset());
+			assertEquals(3, ue.getOffset());
 		}
 	}
 
@@ -905,7 +905,7 @@ public class TestWS {
 			assertEquals("Facility exists with name = 'Two'", e.getMessage());
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals((Integer) 1, ue.getOffset());
+			assertEquals(1, ue.getOffset());
 		}
 	}
 
@@ -943,7 +943,7 @@ public class TestWS {
 			assertTrue(e.getMessage().startsWith("InvestigationType exists with name = 'Two', facility = 'id:"));
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals((Integer) 3, ue.getOffset());
+			assertEquals(3, ue.getOffset());
 		}
 	}
 
@@ -1184,7 +1184,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertEquals("Expected token from types [ENTSEP] at token , in INCLUDE 1 < , > Datafile [ ",
 					e.getMessage());
@@ -1195,7 +1195,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertEquals("Expected token from types [NAME] at token 1 in Datafile , < 1 > [ id ", e.getMessage());
 		}
@@ -1263,7 +1263,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 		}
 
@@ -1273,7 +1273,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 		}
 
@@ -1284,7 +1284,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertTrue(e.getMessage().contains("II"));
 		}
@@ -1294,7 +1294,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertTrue(e.getMessage().contains("INCLUDE 1"));
 		}
@@ -1305,7 +1305,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertTrue(e.getMessage().contains("investigationInstruments"));
 		}

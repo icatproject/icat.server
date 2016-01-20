@@ -21,13 +21,13 @@ public class IcatExceptionMapper implements ExceptionMapper<IcatException> {
 	public Response toResponse(IcatException e) {
 
 		logger.info("Processing: " + e.getType() + " " + e.getMessage());
-		logger.debug("IcatException", e);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonGenerator gen = Json.createGenerator(baos);
 		gen.writeStartObject().write("code", e.getType().name()).write("message", e.getMessage());
 		if (e.getOffset() >= 0) {
 			gen.write("offset", e.getOffset());
+			logger.debug("Offset {}", e.getOffset());
 		}
 		gen.writeEnd().close();
 		return Response.status(e.getType().getStatus()).entity(baos.toString()).build();

@@ -489,6 +489,7 @@ public class EntityBeanManager {
 		if (beans == null) { // Wildlfy 10 receives null instead of empty list
 			beans = Collections.emptyList();
 		}
+		logger.info("{} requests delete of {} entities", userId, beans.size());
 		try {
 			userTransaction.begin();
 			List<NotificationMessage> nms = new ArrayList<NotificationMessage>();

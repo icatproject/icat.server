@@ -309,33 +309,34 @@ public class TestRS {
 
 		array = search(session, "SELECT ds.name, inv.name FROM Dataset ds, ds.investigation inv LIMIT 0,20", 5);
 		Set<String> dsn = new HashSet<>();
-		for (JsonValue r:array) {
+		for (JsonValue r : array) {
 			JsonArray array2 = (JsonArray) r;
 			assertEquals("expt1", array2.getString(1));
 			dsn.add(array2.getString(0));
 		}
-		assertEquals(new HashSet<String>(Arrays.asList("ds1","ds2","ds3", "ds4")), dsn);
-		
-		array = search(session, "SELECT DISTINCT ds.name, inv.name FROM Dataset ds, ds.investigation inv LIMIT 0,20", 4);
+		assertEquals(new HashSet<String>(Arrays.asList("ds1", "ds2", "ds3", "ds4")), dsn);
+
+		array = search(session, "SELECT DISTINCT ds.name, inv.name FROM Dataset ds, ds.investigation inv LIMIT 0,20",
+				4);
 		dsn = new HashSet<>();
-		for (JsonValue r:array) {
+		for (JsonValue r : array) {
 			JsonArray array2 = (JsonArray) r;
 			assertEquals("expt1", array2.getString(1));
 			dsn.add(array2.getString(0));
 		}
-		assertEquals(new HashSet<String>(Arrays.asList("ds1","ds2","ds3", "ds4")), dsn);
+		assertEquals(new HashSet<String>(Arrays.asList("ds1", "ds2", "ds3", "ds4")), dsn);
 
 		array = search(session,
 				"SELECT df.dataset.name, AVG(df.fileSize) FROM Datafile df GROUP BY df.dataset ORDER BY AVG(df.fileSize)",
 				1);
 		assertEquals("ds2", array.getJsonArray(0).getString(0));
-		assertEquals(17.3333, array.getJsonArray(0).getJsonNumber(1).doubleValue(),0);
+		assertEquals(17.3333, array.getJsonArray(0).getJsonNumber(1).doubleValue(), 0);
 
 		array = search(session,
 				"SELECT df.dataset.name, AVG(df.fileSize) FROM Datafile df GROUP BY df.dataset HAVING AVG(df.fileSize) > 4 ORDER BY AVG(df.fileSize)",
 				1);
 		assertEquals("ds2", array.getJsonArray(0).getString(0));
-		assertEquals(17.3333, array.getJsonArray(0).getJsonNumber(1).doubleValue(),0);
+		assertEquals(17.3333, array.getJsonArray(0).getJsonNumber(1).doubleValue(), 0);
 
 	}
 
@@ -472,17 +473,8 @@ public class TestRS {
 
 	@Test
 	public void testCreate() throws Exception {
-		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "notroot");
-		credentials.put("password", "password");
-		Session session = icat.login("db", credentials);
 
-		// Get known configuration
-		wSession.clear();
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
-		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		wSession.setAuthz();
+		Session session = createAndPopulate();
 
 		Long fid = ((EntityBaseBean) wSession.search("Facility INCLUDE InvestigationType").get(0)).getId();
 
@@ -508,6 +500,71 @@ public class TestRS {
 		List<Long> ids = session.create(baos.toString());
 		assertEquals(2, ids.size());
 
+		try {
+			session.create("rubbish");
+			fail("Should have thrown an exception");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
+			assertEquals(-1, e.getOffset());
+		}
+
+	}
+
+	private Session createAndPopulate() throws Exception {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "notroot");
+		credentials.put("password", "password");
+		Session session = icat.login("db", credentials);
+
+		// Get known configuration
+		wSession.clear();
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
+		wSession.setAuthz();
+
+		return session;
+	}
+
+	@Test
+	public void testDelete() throws Exception {
+		Session session = createAndPopulate();
+		search(session, "Dataset", 5);
+		Long did = search(session, "SELECT ds.id FROM Dataset ds LIMIT 0, 1", 1).getJsonNumber(0).longValueExact();
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Dataset").write("id", did).writeEnd().writeEnd();
+		}
+
+		session.delete(baos.toString());
+		search(session, "Dataset", 4);
+
+		JsonArray dids = search(session, "SELECT ds.id FROM Dataset ds LIMIT 0, 2", 2);
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+			jw.writeStartObject().writeStartObject("Dataset").write("id", dids.getJsonNumber(0).longValueExact())
+					.writeEnd().writeEnd();
+			jw.writeStartObject().writeStartObject("Dataset").write("id", dids.getJsonNumber(1).longValueExact())
+					.writeEnd().writeEnd();
+			jw.writeEnd();
+		}
+
+		session.delete(baos.toString());
+		search(session, "Dataset", 2);
+
+		try {
+			baos = new ByteArrayOutputStream();
+			try (JsonGenerator jw = Json.createGenerator(baos)) {
+				jw.writeStartObject().writeStartObject("Dataset").write("id", -1).writeEnd().writeEnd();
+			}
+			session.delete(baos.toString());
+			fail("Should have thrown an error");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getType());
+			assertEquals(0, e.getOffset());
+		}
 	}
 
 	@Test
