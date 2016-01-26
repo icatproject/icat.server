@@ -37,9 +37,9 @@ public class DatafileParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser)
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser, boolean clearId)
 			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser);
+		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId);
 		this.id = null;
 		if (type == null) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,

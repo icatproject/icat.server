@@ -79,6 +79,7 @@ public abstract class EntityBaseBean implements Serializable {
 		clone.modTime = modTime;
 	}
 
+	// This is only used by the older create and createMany calls and not by the new Restful write call
 	public void addToLucene(Lucene lucene) throws IcatException {
 		lucene.addDocument(this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
@@ -299,12 +300,14 @@ public abstract class EntityBaseBean implements Serializable {
 
 	/*
 	 * If this method is overridden it should be called as well by
-	 * super.preparePersist(). Note that it recurses down though all to-many
+	 * super.preparePersist(). Note that it recurses down through all to-many
 	 * relationships.
 	 */
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean allAttributes)
-			throws IcatException {
-		this.id = null;
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean allAttributes,
+			boolean clearId) throws IcatException {
+		if (clearId) {
+			this.id = null;
+		}
 		if (!allAttributes || createId == null) {
 			createId = modId;
 		}
@@ -335,7 +338,7 @@ public abstract class EntityBaseBean implements Serializable {
 					if (!collection.isEmpty()) {
 						Method rev = r.getInverseSetter();
 						for (EntityBaseBean bean : collection) {
-							bean.preparePersist(modId, manager, gateKeeper, allAttributes);
+							bean.preparePersist(modId, manager, gateKeeper, allAttributes, clearId);
 							rev.invoke(bean, this);
 						}
 					}

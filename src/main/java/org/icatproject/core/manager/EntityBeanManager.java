@@ -1,6 +1,7 @@
 package org.icatproject.core.manager;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
@@ -35,6 +36,16 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.jms.JMSException;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonException;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonString;
+import javax.json.JsonStructure;
+import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -56,6 +67,7 @@ import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Log;
 import org.icatproject.core.entity.Session;
+import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.Lucene.LuceneSearchResult;
 import org.icatproject.core.manager.Lucene.ParameterPOJO;
 import org.icatproject.core.manager.LuceneSingleton.ScoredResult;
@@ -231,7 +243,7 @@ public class EntityBeanManager {
 			userTransaction.begin();
 			try {
 				long time = log ? System.currentTimeMillis() : 0;
-				bean.preparePersist(userId, manager, gateKeeper, allAttributes);
+				bean.preparePersist(userId, manager, gateKeeper, allAttributes, true);
 				logger.trace(bean + " prepared for persist.");
 				manager.persist(bean);
 				logger.trace(bean + " persisted.");
@@ -263,7 +275,7 @@ public class EntityBeanManager {
 				logger.trace("Transaction rolled back for creation of " + bean + " because of " + e.getClass() + " "
 						+ e.getMessage());
 				updateCache();
-				bean.preparePersist(userId, manager, gateKeeper, allAttributes);
+				bean.preparePersist(userId, manager, gateKeeper, allAttributes, true);
 				isUnique(bean, manager);
 				bean.isValid(manager, true);
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -287,7 +299,7 @@ public class EntityBeanManager {
 			userTransaction.begin();
 			try {
 				try {
-					bean.preparePersist(userId, manager, gateKeeper, false);
+					bean.preparePersist(userId, manager, gateKeeper, false, true);
 					logger.debug(bean + " prepared for persist (createAllowed).");
 					manager.persist(bean);
 					logger.debug(bean + " persisted (createAllowed).");
@@ -299,7 +311,7 @@ public class EntityBeanManager {
 					userTransaction.rollback();
 					logger.debug("Transaction rolled back for creation of " + bean + " because of " + e.getClass() + " "
 							+ e.getMessage());
-					bean.preparePersist(userId, manager, gateKeeper, false);
+					bean.preparePersist(userId, manager, gateKeeper, false, true);
 					isUnique(bean, manager);
 					bean.isValid(manager, true);
 					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -341,7 +353,7 @@ public class EntityBeanManager {
 			try {
 				long time = log ? System.currentTimeMillis() : 0;
 				for (EntityBaseBean bean : beans) {
-					bean.preparePersist(userId, manager, gateKeeper, false);
+					bean.preparePersist(userId, manager, gateKeeper, false, true);
 					logger.trace(bean + " prepared for persist.");
 					manager.persist(bean);
 					logger.trace(bean + " persisted.");
@@ -383,7 +395,7 @@ public class EntityBeanManager {
 				int pos = crs.size();
 				EntityBaseBean bean = beans.get(pos);
 				try {
-					bean.preparePersist(userId, manager, gateKeeper, false);
+					bean.preparePersist(userId, manager, gateKeeper, false, true);
 					isUnique(bean, manager);
 					bean.isValid(manager, true);
 				} catch (IcatException e1) {
@@ -440,6 +452,269 @@ public class EntityBeanManager {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException" + e.getMessage(),
 					-1);
 		}
+	}
+
+	public List<Long> write(String userId, String json, EntityManager manager, UserTransaction userTransaction,
+			Transmitter transmitter) throws IcatException {
+		logger.info("write called with {}", json);
+
+		if (json == null) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "entities is not set");
+		}
+
+		List<Long> beanIds = new ArrayList<>();
+		List<NotificationMessage> notifications = new ArrayList<>();
+		List<EntityBaseBean> creates = new ArrayList<>();
+		List<EntityBaseBean> updates = new ArrayList<>();
+
+		try {
+			int offset = 0;
+			userTransaction.begin();
+			try (JsonReader reader = Json.createReader(new ByteArrayInputStream(json.getBytes()))) {
+				long time = log ? System.currentTimeMillis() : 0;
+				JsonStructure top = reader.read();
+
+				EntityBaseBean bean = null;
+				if (top.getValueType() == ValueType.ARRAY) {
+
+					for (JsonValue obj : (JsonArray) top) {
+						bean = writeOne((JsonObject) obj, offset++, manager, userId, notifications, creates, updates);
+						if (bean != null) {
+							beanIds.add(bean.getId());
+						}
+
+					}
+				} else {
+					bean = writeOne((JsonObject) top, 0, manager, userId, notifications, creates, updates);
+					if (bean != null) {
+						beanIds.add(bean.getId());
+					}
+				}
+				userTransaction.commit();
+
+				/*
+				 * Nothing should be able to go wrong now so log, update lucene
+				 * and send notification messages
+				 */
+				if (log) {
+					if (bean != null) {
+						logWrite(time, userId, "write", bean.getClass().getSimpleName(), bean.getId(), manager,
+								userTransaction);
+					} else {
+						logWrite(time, userId, "write", "", 0, manager, userTransaction);
+					}
+				}
+
+				if (luceneActive) {
+					for (EntityBaseBean eb : creates) {
+						lucene.addDocument(eb);
+					}
+					for (EntityBaseBean eb : updates) {
+						lucene.updateDocument(eb);
+					}
+				}
+
+				for (NotificationMessage notification : notifications) {
+					transmitter.processMessage(notification);
+				}
+
+				return beanIds;
+			} catch (JsonException e) {
+				userTransaction.rollback();
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage() + " in json " + json, offset);
+			} catch (EntityExistsException e) {
+				userTransaction.rollback();
+				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getMessage(), offset);
+			} catch (IcatException e) {
+				userTransaction.rollback();
+				e.setOffset(offset);
+				throw e;
+			} catch (Throwable e) {
+				userTransaction.rollback();
+				logger.trace("Transaction rolled back for creation because of " + e.getClass() + " " + e.getMessage());
+
+				// TODO should do clever things here
+
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"Unexpected DB response " + e.getClass() + " " + e.getMessage(), offset);
+			}
+		} catch (IllegalStateException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException" + e.getMessage());
+		} catch (SecurityException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException" + e.getMessage());
+		} catch (SystemException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException" + e.getMessage());
+		} catch (NotSupportedException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException" + e.getMessage());
+		}
+	}
+
+	private EntityBaseBean writeOne(JsonObject entity, int offset, EntityManager manager, String userId,
+			List<NotificationMessage> notifications, List<EntityBaseBean> creates, List<EntityBaseBean> updates)
+					throws IcatException {
+		logger.debug("write one {}", entity);
+
+		if (entity.size() != 1) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+					"entity must have one keyword followed by its values in json " + entity, offset);
+		}
+		Entry<String, JsonValue> entry = entity.entrySet().iterator().next();
+		String beanName = entry.getKey();
+		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		JsonObject contents = (JsonObject) entry.getValue();
+
+		EntityBaseBean bean = null;
+		try {
+			bean = klass.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, "failed to instantiate " + beanName, offset);
+		}
+
+		boolean create = !contents.containsKey("id");
+		if (!create) {
+			bean.setId(contents.getJsonNumber("id").longValueExact());
+			bean = find(bean, manager);
+		}
+
+		List<EntityBaseBean> localCreates = new ArrayList<>();
+		List<EntityBaseBean> localUpdates = new ArrayList<>();
+		parseEntity(bean, contents, klass, offset, manager, notifications, localCreates, localUpdates, create);
+
+		bean.preparePersist(userId, manager, gateKeeper, false, false);
+		if (create) {
+			manager.persist(bean);
+			logger.trace(bean + " persisted.");
+		}
+		manager.flush();
+		logger.trace(bean + " flushed.");
+
+		// Check authz now everything persisted and update creates and updates
+		for (EntityBaseBean eb : localCreates) {
+			gateKeeper.performAuthorisation(userId, eb, AccessType.CREATE, manager);
+			creates.add(eb);
+		}
+		for (EntityBaseBean eb : localUpdates) {
+			gateKeeper.performAuthorisation(userId, eb, AccessType.UPDATE, manager);
+			updates.add(eb);
+		}
+
+		if (create) {
+			return bean;
+		} else {
+			return null;
+		}
+
+	}
+
+	private EntityBaseBean parseSubEntity(JsonObject contents, Relationship relationship, int offset,
+			EntityManager manager, List<NotificationMessage> notifications, List<EntityBaseBean> creates,
+			List<EntityBaseBean> updates, boolean create2) throws IcatException {
+		logger.debug("Parse entity {} from relationship {}", contents, relationship);
+		Class<? extends EntityBaseBean> klass = relationship.getDestinationBean();
+
+		EntityBaseBean bean = null;
+		try {
+			bean = klass.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, "failed to instantiate " + klass.getSimpleName(),
+					offset);
+		}
+
+		boolean create = !contents.containsKey("id");
+		if (create) {
+			if (!relationship.isCollection()) {
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+						"One to many related objects should not have the id value set: " + contents);
+			}
+		} else {
+			if (relationship.isCollection()) {
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+						"Many to one related objects should have the id value set: " + contents);
+			}
+			bean.setId(contents.getJsonNumber("id").longValueExact());
+			bean = find(bean, manager);
+		}
+
+		parseEntity(bean, contents, klass, offset, manager, notifications, creates, updates, create);
+		return bean;
+
+	}
+
+	private void parseEntity(EntityBaseBean bean, JsonObject contents, Class<? extends EntityBaseBean> klass,
+			int offset, EntityManager manager, List<NotificationMessage> notifications, List<EntityBaseBean> creates,
+			List<EntityBaseBean> updates, boolean create) throws IcatException {
+		Map<String, Field> fieldsByName = eiHandler.getFieldsByName(klass);
+		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
+		Map<Field, Method> setters = eiHandler.getSetters(klass);
+		Map<String, Relationship> rels = eiHandler.getRelationshipsByName(klass);
+
+		for (Entry<String, JsonValue> fentry : contents.entrySet()) {
+			String fName = fentry.getKey();
+			if (!fName.equals("id")) {
+				JsonValue fValue = fentry.getValue();
+				logger.trace("Setting {}.{} to {}", klass.getSimpleName(), fName, fValue);
+				Field field = fieldsByName.get(fName);
+				if (field == null) {
+					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+							"Field " + fName + " not found in " + klass.getSimpleName());
+				} else if (updaters.contains(field)) {
+					String type = field.getType().getSimpleName();
+					Object arg = null;
+					if (fValue.getValueType() == ValueType.NULL) {
+					} else if (type.equals("String")) {
+						arg = ((JsonString) fValue).getString();
+					} else if (type.equals("Integer")) {
+						arg = ((JsonNumber) fValue).intValueExact();
+					} else if (type.equals("Double")) {
+						arg = ((JsonNumber) fValue).doubleValue();
+					} else if (type.equals("Long")) {
+						arg = ((JsonNumber) fValue).longValueExact();
+					} else if (type.equals("boolean")) {
+						if (fValue.getValueType() == ValueType.TRUE) {
+							arg = true;
+						} else if (fValue.getValueType() == ValueType.FALSE) {
+							arg = false;
+						} else {
+							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+									"Field " + fName + " must be true or false in " + klass.getSimpleName());
+						}
+						// } else if (field.getType().isEnum()) {
+						// arg =
+						// gen.write(field.getName(), value.toString());
+					} else if (type.equals("Date")) {
+						synchronized (df8601) {
+							try {
+								arg = df8601.parse(((JsonString) fValue).getString());
+							} catch (ParseException e) {
+								throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+										"Badly formatted date " + fValue);
+							}
+						}
+					} else {
+						arg = parseSubEntity((JsonObject) fValue, rels.get(fName), offset, manager, notifications,
+								creates, updates, create);
+					}
+					try {
+						setters.get(field).invoke(bean, arg);
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+						throw new IcatException(IcatExceptionType.INTERNAL,
+								"failed to set field " + fName + " of " + klass.getSimpleName(), offset);
+					}
+				} else {
+					logger.debug("Need to process " + field);
+				}
+			}
+
+		}
+
+		if (create) {
+			creates.add(bean);
+			notifications.add(new NotificationMessage(Operation.C, bean, manager, notificationRequests));
+		} else {
+			updates.add(bean);
+			notifications.add(new NotificationMessage(Operation.U, bean, manager, notificationRequests));
+		}
+
 	}
 
 	public NotificationMessage delete(String userId, EntityBaseBean bean, EntityManager manager,
@@ -568,6 +843,7 @@ public class EntityBeanManager {
 		}
 
 		StreamingOutput strOut = new StreamingOutput() {
+
 			@Override
 			public void write(OutputStream output) throws IOException {
 				logger.debug("Streaming of export file started");
@@ -635,6 +911,7 @@ public class EntityBeanManager {
 				}
 
 				StreamingOutput strOut = new StreamingOutput() {
+
 					@Override
 					public void write(OutputStream output) throws IOException {
 						output.write(("# ICAT Export file written by " + userId + linesep).getBytes());
@@ -656,6 +933,7 @@ public class EntityBeanManager {
 						}
 						output.close();
 					}
+
 				};
 				return Response.ok().entity(strOut)
 						.header("Content-Disposition", "attachment; filename=\"" + "icat.export" + "\"")
@@ -1746,7 +2024,7 @@ public class EntityBeanManager {
 			Log logEntry = null;
 			try {
 				logEntry = new Log(operation, duration, entityName, entityId, query);
-				logEntry.preparePersist(userId, manager, gateKeeper, false);
+				logEntry.preparePersist(userId, manager, gateKeeper, false, true);
 				manager.persist(logEntry);
 				manager.flush();
 				userTransaction.commit();

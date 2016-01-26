@@ -68,7 +68,7 @@ public class TestRS {
 		}
 	}
 
-	@Ignore("Test fails becuase of bug in eclipselink")
+	@Ignore("Test fails because of bug in eclipselink")
 	@Test
 	public void testDistinctBehaviour() throws Exception {
 		wSession.clear();
@@ -439,6 +439,7 @@ public class TestRS {
 		assertEquals(4, falses);
 
 		array = search(session, "Facility INCLUDE InvestigationType", 1);
+		System.out.println(array);
 		for (int i = 0; i < array.size(); i++) {
 			JsonObject fac = array.getJsonObject(i).getJsonObject("Facility");
 			assertEquals("Test port facility", fac.getString("name"));
@@ -472,7 +473,7 @@ public class TestRS {
 	}
 
 	@Test
-	public void testCreate() throws Exception {
+	public void testWrite() throws Exception {
 
 		Session session = createAndPopulate();
 
@@ -482,30 +483,59 @@ public class TestRS {
 		try (JsonGenerator jw = Json.createGenerator(baos)) {
 			jw.writeStartArray();
 
-			jw.writeStartObject();
-			jw.writeStartObject("InvestigationType");
-			jw.writeStartObject("facility");
-			jw.write("id", fid);
-			jw.writeEnd();
-			jw.write("name", "ztype");
-			jw.writeEnd();
-			jw.writeEnd();
+			jw.writeStartObject().writeStartObject("InvestigationType").writeStartObject("facility").write("id", fid)
+					.writeEnd().write("name", "ztype").writeEnd().writeEnd();
 
-			jw.writeStartObject().writeStartObject("Facility").write("name", "another fred").writeEnd();
-			jw.writeEnd();
+			jw.writeStartObject().writeStartObject("Facility").write("name", "another fred").writeEnd().writeEnd();
 
 			jw.writeEnd();
 		}
 
-		List<Long> ids = session.create(baos.toString());
+		List<Long> ids = session.write(baos.toString());
+		assertEquals(2, ids.size());
+		long newInvTypeId = ids.get(0);
+		long newFid = ids.get(1);
+		System.out.println(session.get("InvestigationType", newInvTypeId));
+		System.out.println(session.get("Facility", newFid));
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("InvestigationType").writeStartObject("facility").write("id", newFid)
+					.write("fullName", "Frederick").write("description", "some new words").writeEnd()
+					.write("name", "ztype").writeEnd().writeEnd();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "yet another fred").writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+
+		ids = session.write(baos.toString());
 		assertEquals(2, ids.size());
 
+		System.out.println(session.get("InvestigationType", newInvTypeId));
+		System.out.println(session.get("Facility", newFid));
+		Long newestFid = ids.get(1);
+		System.out.println(session.get("Facility", newestFid));
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+
+			jw.writeStartObject().writeStartObject("Facility").write("id", newestFid).write("name", "Not Fred")
+					.writeEnd().writeEnd();
+
+		}
+		ids = session.write(baos.toString());
+		assertEquals(0, ids.size());
+		System.out.println(session.get("Facility", newestFid));
+
 		try {
-			session.create("rubbish");
+			session.write("rubbish");
 			fail("Should have thrown an exception");
 		} catch (IcatException e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
-			assertEquals(-1, e.getOffset());
+			assertEquals(0, e.getOffset());
 		}
 
 	}

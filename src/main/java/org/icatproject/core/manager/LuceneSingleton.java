@@ -6,14 +6,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,7 +28,6 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
@@ -176,7 +170,6 @@ public class LuceneSingleton implements Lucene {
 	private boolean active;
 
 	private FSDirectory directory;
-	private EntityInfoHandler ei;
 
 	private IndexSearcher isearcher;
 
@@ -350,38 +343,6 @@ public class LuceneSingleton implements Lucene {
 		doc.add(new StringField("id", id, Store.YES));
 		doc.add(new StringField("entity", bean.getClass().getSimpleName(), Store.NO));
 		logger.trace("Created document '" + doc + "' to index for " + id);
-	}
-
-	private Document buildDoc(EntityBaseBean bean) throws IcatException {
-		Map<Field, Integer> stringFields = ei.getStringFields(bean.getClass());
-		StringBuilder sb = new StringBuilder();
-		for (Entry<Field, Integer> item : stringFields.entrySet()) {
-			Field field = item.getKey();
-			Method getter = ei.getGetters(bean.getClass()).get(field);
-			try {
-				String text = (String) getter.invoke(bean);
-				if (text != null) {
-					if (sb.length() != 0) {
-						sb.append(' ');
-					}
-					sb.append(text);
-				}
-			} catch (IllegalArgumentException e) {
-				throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
-			} catch (IllegalAccessException e) {
-				throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
-			} catch (InvocationTargetException e) {
-				throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
-			}
-		}
-
-		Document doc = new Document();
-		String id = bean.getClass().getSimpleName() + ":" + bean.getId();
-		doc.add(new StringField("id", id, Store.YES));
-		doc.add(new StringField("entity", bean.getClass().getSimpleName(), Store.NO));
-		doc.add(new TextField("all", sb.toString(), Store.NO));
-		logger.trace("Created document '" + sb.toString() + "' to index for " + id);
-		return doc;
 	}
 
 	private Query buildInvestigationQuery(String userName, String text, String lower, String upper,
@@ -601,7 +562,6 @@ public class LuceneSingleton implements Lucene {
 		if (active) {
 			luceneRefreshSeconds = propertyHandler.getLuceneRefreshSeconds() * 1000L;
 			luceneCommitCount = propertyHandler.getLuceneCommitCount();
-			ei = EntityInfoHandler.getInstance();
 
 			try {
 				directory = FSDirectory.open(new File(luceneDirectory));
@@ -793,7 +753,11 @@ public class LuceneSingleton implements Lucene {
 
 	@Override
 	public void updateDocument(EntityBaseBean bean) throws IcatException {
-		Document doc = buildDoc(bean);
+		Document doc = bean.getDoc();
+		if (doc == null) {
+			return;
+		}
+		buildDoc(doc, bean);
 		String id = bean.getClass().getSimpleName() + ":" + bean.getId();
 		try {
 			iwriter.updateDocument(new Term("id", id), doc);

@@ -33,9 +33,9 @@ public class DataCollectionParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser)
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser, boolean clearId)
 			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser);
+		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId);
 		if (!type.isApplicableToDataCollection()) { // type has been checked as not null by super
 													// call
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
