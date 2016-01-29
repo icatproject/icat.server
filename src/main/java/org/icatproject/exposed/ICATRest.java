@@ -25,13 +25,17 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonException;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonString;
+import javax.json.JsonStructure;
 import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
 import javax.json.JsonWriter;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParser;
@@ -81,45 +85,6 @@ import org.slf4j.LoggerFactory;
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
 public class ICATRest {
-
-	private class EventChecker {
-
-		private JsonParser parser;
-
-		private EventChecker(JsonParser parser) {
-			this.parser = parser;
-		}
-
-		public Event get(Event... events) {
-			Event event = parser.next();
-			if (event == Event.KEY_NAME || event == Event.VALUE_STRING) {
-				logger.trace(event + ": " + parser.getString());
-			} else {
-				logger.trace(event.toString());
-			}
-			for (Event e : events) {
-				if (event == e) {
-					return event;
-				}
-			}
-			StringBuilder sb = new StringBuilder("event " + event + " is not of expected type [");
-			boolean first = true;
-			for (Event e : events) {
-				if (!first) {
-					sb.append(", ");
-				} else {
-					first = false;
-				}
-				sb.append(e);
-			}
-			sb.append(']');
-			throw new JsonException(sb.toString());
-		}
-
-		public JsonParser getParser() {
-			return parser;
-		}
-	}
 
 	private static Logger logger = LoggerFactory.getLogger(ICATRest.class);
 
@@ -232,7 +197,7 @@ public class ICATRest {
 	 * @param json
 	 *            specifies what to delete as a single entity or as an array of
 	 *            entities such as <code>{"Facility": {"id" : 42}}</code> where
-	 *            only the id is significant.
+	 *            the id must be specified and no other attributes.
 	 * 
 	 * @throws IcatException
 	 *             when something is wrong
@@ -247,58 +212,57 @@ public class ICATRest {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "entities is not set");
 		}
 
-		List<EntityBaseBean> entities = new ArrayList<>();
-		try (JsonParser parser = Json.createParser(new ByteArrayInputStream(json.getBytes()))) {
-			EventChecker checker = new EventChecker(parser);
-			Event event = checker.get(Event.START_ARRAY, Event.START_OBJECT);
-			if (event == Event.START_OBJECT) {
-				entities.add(parseEntity(checker));
-			} else {
-				while (true) {
-					event = checker.get(Event.START_OBJECT, Event.END_ARRAY);
-					if (event == Event.END_ARRAY) {
-						break;
-					}
-					entities.add(parseEntity(checker));
+		List<EntityBaseBean> beans = new ArrayList<>();
+		try (JsonReader reader = Json.createReader(new ByteArrayInputStream(json.getBytes()))) {
+			JsonStructure top = reader.read();
+			int offset = 0;
+			if (top.getValueType() == ValueType.ARRAY) {
+				for (JsonValue obj : (JsonArray) top) {
+					beans.add(getOne((JsonObject) obj, offset++));
 				}
+			} else {
+				beans.add(getOne((JsonObject) top, 0));
 			}
 		} catch (JsonException e) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage() + " in json " + json);
 		}
 		String userName = beanManager.getUserName(sessionId, manager);
-		beanManager.deleteMany(userName, entities, manager, userTransaction);
+		beanManager.delete(userName, beans, manager, userTransaction);
 	}
 
-	/*
-	 * TODO This is only used in one place along with the EventChecker - should
-	 * probably use other JSON parsing method
-	 */
-	private EntityBaseBean parseEntity(EventChecker checker) throws IcatException {
-		JsonParser parser = checker.getParser();
-		checker.get(Event.KEY_NAME);
-		String beanName = parser.getString();
-		checker.get(Event.START_OBJECT);
+	private EntityBaseBean getOne(JsonObject entity, int offset) throws IcatException {
+		logger.debug("Get one {} for delete", entity);
 
+		if (entity.size() != 1) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+					"entity must have one keyword followed by its values in json " + entity, offset);
+		}
+		Entry<String, JsonValue> entry = entity.entrySet().iterator().next();
+		String beanName = entry.getKey();
 		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		JsonObject contents = (JsonObject) entry.getValue();
 
 		EntityBaseBean bean = null;
-
 		try {
 			bean = klass.newInstance();
-			checker.get(Event.KEY_NAME);
-			if (parser.getString().equals("id")) {
-				checker.get(Event.VALUE_NUMBER);
-				bean.setId(Long.parseLong(parser.getString()));
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, "failed to instantiate " + beanName, offset);
+		}
+
+		for (Entry<String, JsonValue> pair : contents.entrySet()) {
+			if (pair.getKey().equals("id")) {
+				bean.setId(((JsonNumber) pair.getValue()).longValueExact());
 			} else {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-						"Only the id field should be specified for delete");
+						"entity must have only the id value specified in json " + entity, offset);
 			}
-			checker.get(Event.END_OBJECT);
-			checker.get(Event.END_OBJECT);
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | JsonException e) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-					e.getClass() + " " + e.getMessage() + " at " + parser.getLocation().getStreamOffset() + " in json");
 		}
+
+		if (bean.getId() == null) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+					"entity must have the id value specified in json " + entity, offset);
+		}
+		logger.trace("Got {} for delete", bean);
 		return bean;
 	}
 

@@ -79,7 +79,8 @@ public abstract class EntityBaseBean implements Serializable {
 		clone.modTime = modTime;
 	}
 
-	// This is only used by the older create and createMany calls and not by the new Restful write call
+	// This is only used by the older create and createMany calls and not by the
+	// new Restful write call
 	public void addToLucene(Lucene lucene) throws IcatException {
 		lucene.addDocument(this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
@@ -234,9 +235,8 @@ public abstract class EntityBaseBean implements Serializable {
 	}
 
 	private void isValid() throws IcatException {
-
+		logger.trace("Checking validity of {}", this);
 		Class<? extends EntityBaseBean> klass = this.getClass();
-		logger.trace("Checking validity of " + klass.getSimpleName());
 		List<Field> notNullFields = eiHandler.getNotNullableFields(klass);
 		Map<Field, Method> getters = eiHandler.getGetters(klass);
 
@@ -245,7 +245,6 @@ public abstract class EntityBaseBean implements Serializable {
 			Object value;
 			try {
 				Method method = getters.get(field);
-				logger.trace("Getter: " + method);
 				value = method.invoke(this, (Object[]) new Class[] {});
 			} catch (Exception e) {
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
@@ -419,31 +418,6 @@ public abstract class EntityBaseBean implements Serializable {
 		} catch (Exception e) {
 			reportUnexpected(e);
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
-		}
-
-	}
-
-	public void removeFromLucene(Lucene lucene) throws IcatException {
-		lucene.deleteDocument(this);
-		Class<? extends EntityBaseBean> klass = this.getClass();
-		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-		for (Relationship r : rs) {
-			if (r.isCollection()) {
-				Method m = getters.get(r.getField());
-				try {
-					@SuppressWarnings("unchecked")
-					List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(this);
-					if (!collection.isEmpty()) {
-						for (EntityBaseBean bean : collection) {
-							bean.removeFromLucene(lucene);
-						}
-					}
-				} catch (Exception e) {
-					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
-				}
-			}
-
 		}
 
 	}

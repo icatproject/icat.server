@@ -91,15 +91,16 @@ public class TestRS {
 	@Test
 	public void testLuceneDatafiles() throws Exception {
 		Session session = setupLuceneTest();
+		JsonArray array;
 
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
 
 		// All data files
 		searchDatafiles(session, null, null, null, null, null, 20, 3);
-		// Use the user
 
-		JsonArray array = searchDatafiles(session, "db/tr", null, null, null, null, 20, 3);
+		// Use the user
+		array = searchDatafiles(session, "db/tr", null, null, null, null, 20, 3);
 		System.out.println(array);
 
 		// Try a bad user
@@ -202,6 +203,7 @@ public class TestRS {
 	}
 
 	private Session setupLuceneTest() throws Exception {
+		wSession.setAuthz();
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "notroot");
@@ -223,7 +225,6 @@ public class TestRS {
 		wSession.clear();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		wSession.setAuthz();
 
 		rootSession.luceneCommit();
 		return session;
@@ -473,12 +474,12 @@ public class TestRS {
 	}
 
 	@Test
-	public void testWrite() throws Exception {
+	public void testWriteGood() throws Exception {
 
 		Session session = createAndPopulate();
 
+		// One
 		Long fid = ((EntityBaseBean) wSession.search("Facility INCLUDE InvestigationType").get(0)).getId();
-
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator jw = Json.createGenerator(baos)) {
 			jw.writeStartArray();
@@ -490,14 +491,21 @@ public class TestRS {
 
 			jw.writeEnd();
 		}
-
 		List<Long> ids = session.write(baos.toString());
 		assertEquals(2, ids.size());
 		long newInvTypeId = ids.get(0);
 		long newFid = ids.get(1);
-		System.out.println(session.get("InvestigationType", newInvTypeId));
-		System.out.println(session.get("Facility", newFid));
 
+		JsonArray array = search(session,
+				"SELECT it.name, it.facility.name FROM InvestigationType it WHERE it.id = " + newInvTypeId, 1)
+						.getJsonArray(0);
+		assertEquals("ztype", array.getString(0));
+		assertEquals("Test port facility", array.getString(1));
+
+		array = search(session, "SELECT f.name FROM Facility f WHERE f.id = " + newFid, 1);
+		assertEquals("another fred", array.getString(0));
+
+		// Two
 		baos = new ByteArrayOutputStream();
 		try (JsonGenerator jw = Json.createGenerator(baos)) {
 			jw.writeStartArray();
@@ -513,12 +521,30 @@ public class TestRS {
 
 		ids = session.write(baos.toString());
 		assertEquals(2, ids.size());
+		long newestFid = ids.get(1);
 
-		System.out.println(session.get("InvestigationType", newInvTypeId));
-		System.out.println(session.get("Facility", newFid));
-		Long newestFid = ids.get(1);
-		System.out.println(session.get("Facility", newestFid));
+		array = search(session,
+				"SELECT it.name, it.facility.name, it.facility.description FROM InvestigationType it WHERE it.id = "
+						+ ids.get(0),
+				1).getJsonArray(0);
+		assertEquals("ztype", array.getString(0));
+		assertEquals("another fred", array.getString(1));
+		assertEquals("some new words", array.getString(2));
 
+		array = search(session, "SELECT f.id, f.name, f.description FROM Facility f WHERE f.id = " + newFid, 1)
+				.getJsonArray(0);
+
+		assertEquals(newFid, array.getJsonNumber(0).longValueExact());
+		assertEquals("another fred", array.getString(1));
+		assertEquals("some new words", array.getString(2));
+
+		array = search(session, "SELECT f.id, f.name, f.description FROM Facility f WHERE f.id = " + newestFid, 1)
+				.getJsonArray(0);
+		assertEquals(newestFid, array.getJsonNumber(0).longValueExact());
+		assertEquals("yet another fred", array.getString(1));
+		assertTrue(array.isNull(2));
+
+		// Three
 		baos = new ByteArrayOutputStream();
 		try (JsonGenerator jw = Json.createGenerator(baos)) {
 
@@ -528,16 +554,137 @@ public class TestRS {
 		}
 		ids = session.write(baos.toString());
 		assertEquals(0, ids.size());
-		System.out.println(session.get("Facility", newestFid));
 
+		array = search(session, "SELECT f.id, f.name, f.description FROM Facility f WHERE f.id = " + newestFid, 1)
+				.getJsonArray(0);
+		assertEquals(newestFid, array.getJsonNumber(0).longValueExact());
+		assertEquals("Not Fred", array.getString(1));
+		assertTrue(array.isNull(2));
+
+		// Four
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Pinot Grigio")
+					.writeStartArray("investigationTypes");
+
+			jw.writeStartObject().write("name", "a").writeEnd();
+			jw.writeStartObject().write("name", "b").writeEnd();
+
+			jw.writeEnd().writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		ids = session.write(baos.toString());
+		assertEquals(1, ids.size());
+		array = search(session, "SELECT f.name, it.name FROM Facility f, f.investigationTypes it WHERE f.id = "
+				+ ids.get(0) + " ORDER BY it.name", 2);
+		assertEquals("Pinot Grigio", array.getJsonArray(0).getString(0));
+		assertEquals("Pinot Grigio", array.getJsonArray(1).getString(0));
+		assertEquals("a", array.getJsonArray(0).getString(1));
+		assertEquals("b", array.getJsonArray(1).getString(1));
+	}
+
+	@Test
+	public void testWriteBad() throws Exception {
+
+		Session session = createAndPopulate();
+		ByteArrayOutputStream baos;
+
+		// One
 		try {
 			session.write("rubbish");
 			fail("Should have thrown an exception");
 		} catch (IcatException e) {
 			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
+			assertEquals("Unexpected char=r in json rubbish", e.getMessage());
 			assertEquals(0, e.getOffset());
 		}
 
+		// Two
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Woderwick").writeEnd().writeEnd();
+			jw.writeStartObject().writeStartObject("Facility").writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		try {
+			session.write(baos.toString());
+			fail("Should have thrown an exception");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.VALIDATION, e.getType());
+			assertEquals("Facility: name cannot be null.", e.getMessage());
+			assertEquals(1, e.getOffset());
+		}
+
+		// Three
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Woderwick").writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		session.write(baos.toString());
+		try {
+			session.write(baos.toString());
+			fail("Should have thrown an exception");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getType());
+			assertEquals("Facility exists with name = 'Woderwick'", e.getMessage());
+			assertEquals(0, e.getOffset());
+		}
+
+		// Four
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Gargantua").writeEnd().writeEnd();
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Gargantua").writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		try {
+			session.write(baos.toString());
+			fail("Should have thrown an exception");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getType());
+			assertEquals("Facility exists with name = 'Gargantua'", e.getMessage());
+			assertEquals(1, e.getOffset());
+		}
+
+		// Five
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Pinot Grigio")
+					.writeStartArray("investigationTypes");
+
+			jw.writeStartObject().write("name", "a").writeEnd();
+			jw.writeStartObject().write("name", "b").writeEnd();
+			jw.writeStartObject().write("name", "c").writeEnd();
+			jw.writeStartObject().write("name", "c").writeEnd();
+			jw.writeStartObject().write("name", "d").writeEnd();
+
+			jw.writeEnd().writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		try {
+			session.write(baos.toString());
+			fail("Should have thrown an exception");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getType());
+			assertEquals("InvestigationType exists with name = 'c', facility = 'id:", e.getMessage().substring(0, 57));
+			assertEquals(0, e.getOffset());
+		}
 	}
 
 	private Session createAndPopulate() throws Exception {

@@ -39,8 +39,8 @@ authn.anon.friendly = Anonymous
 
 # Notification setup
 notification.list = Dataset Datafile
-notification.Dataset = CUD
-notification.Datafile = CUD
+notification.Dataset = CU
+notification.Datafile = CU
 
 # Call logging setup
 log.list = file table

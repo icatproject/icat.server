@@ -71,7 +71,6 @@ import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfo;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
-import org.icatproject.core.manager.NotificationMessage;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
 import org.icatproject.core.manager.Transmitter;
@@ -162,7 +161,9 @@ public class ICAT {
 			throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			transmitter.processMessage(beanManager.delete(userId, bean, manager, userTransaction));
+			ArrayList<EntityBaseBean> beans = new ArrayList<EntityBaseBean>();
+			beans.add(bean);
+			beanManager.delete(userId, beans, manager, userTransaction);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
@@ -177,10 +178,7 @@ public class ICAT {
 			@WebParam(name = "beans") List<EntityBaseBean> beans) throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
-			List<NotificationMessage> nms = beanManager.deleteMany(userId, beans, manager, userTransaction);
-			for (NotificationMessage nm : nms) {
-				transmitter.processMessage(nm);
-			}
+			beanManager.delete(userId, beans, manager, userTransaction);
 		} catch (IcatException e) {
 			reportIcatException(e);
 			throw e;
