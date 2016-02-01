@@ -16,13 +16,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Random;
 
-import javax.jms.MessageConsumer;
-import javax.jms.ObjectMessage;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -847,7 +840,7 @@ public class TestWS {
 			assertEquals("Facility exists with name = 'TestDuplicates'", e.getMessage());
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 		}
 	}
 
@@ -878,7 +871,7 @@ public class TestWS {
 			assertEquals("Facility exists with name = 'Two'", e.getMessage());
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals((Integer) 3, ue.getOffset());
+			assertEquals(3, ue.getOffset());
 		}
 	}
 
@@ -912,7 +905,7 @@ public class TestWS {
 			assertEquals("Facility exists with name = 'Two'", e.getMessage());
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals((Integer) 1, ue.getOffset());
+			assertEquals(1, ue.getOffset());
 		}
 	}
 
@@ -950,7 +943,7 @@ public class TestWS {
 			assertTrue(e.getMessage().startsWith("InvestigationType exists with name = 'Two', facility = 'id:"));
 			IcatException ue = e.getFaultInfo();
 			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, ue.getType());
-			assertEquals((Integer) 3, ue.getOffset());
+			assertEquals(3, ue.getOffset());
 		}
 	}
 
@@ -1191,7 +1184,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertEquals("Expected token from types [ENTSEP] at token , in INCLUDE 1 < , > Datafile [ ",
 					e.getMessage());
@@ -1202,7 +1195,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertEquals("Expected token from types [NAME] at token 1 in Datafile , < 1 > [ id ", e.getMessage());
 		}
@@ -1270,7 +1263,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 		}
 
@@ -1280,7 +1273,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 		}
 
@@ -1291,7 +1284,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertTrue(e.getMessage().contains("II"));
 		}
@@ -1301,7 +1294,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertTrue(e.getMessage().contains("INCLUDE 1"));
 		}
@@ -1312,7 +1305,7 @@ public class TestWS {
 			fail("Exception not thrown");
 		} catch (IcatException_Exception e) {
 			IcatException ue = e.getFaultInfo();
-			assertEquals((Integer) (-1), ue.getOffset());
+			assertEquals(-1, ue.getOffset());
 			assertEquals(IcatExceptionType.BAD_PARAMETER, ue.getType());
 			assertTrue(e.getMessage().contains("investigationInstruments"));
 		}
@@ -1392,81 +1385,6 @@ public class TestWS {
 
 		session.createMany(beans);
 
-	}
-
-	@Ignore("Need to include gf-client.jar from glassfish3/glassfish/lib/ - no good maven solution found yet")
-	// Need to have notification.list = Dataset Datafile
-	// notification.Dataset = CUD
-	// notification.Datafile = CUD
-	@Test
-	public void notifications() throws Exception {
-		session.clear();
-
-		Context context = new InitialContext();
-		TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) context
-				.lookup("jms/ICAT/TopicConnectionFactory");
-
-		Topic topic = (Topic) context.lookup("jms/ICAT/Topic");
-
-		TopicConnection topicConnection = topicConnectionFactory.createTopicConnection();
-		javax.jms.Session jsession = topicConnection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
-		MessageConsumer consumer = jsession.createConsumer(topic);
-		Listener topicListener = new Listener();
-		consumer.setMessageListener(topicListener);
-		topicConnection.start();
-
-		create();
-
-		Long dfid = ((EntityBaseBean) session.search("Datafile ORDER BY id").get(0)).getId();
-		Datafile datafile = (Datafile) session.get("Datafile INCLUDE 1", dfid);
-		datafile.setDescription("Junk");
-		session.update(datafile);
-		session.delete(datafile);
-
-		Long dsid = ((EntityBaseBean) session.search("Dataset ORDER BY id").get(0)).getId();
-		Dataset dataset = (Dataset) session.get("Dataset INCLUDE 1", dsid);
-		dataset.setDescription("Obscure junk");
-		session.update(dataset);
-		session.delete(dataset);
-
-		// Wait for a second - though it does not appear to be needed
-		Thread.sleep(1000);
-
-		int ncreate = 0;
-		int nupdate = 0;
-		int ndelete = 0;
-		int ndataset = 0;
-		int ndatafile = 0;
-
-		while (true) {
-			ObjectMessage msg = topicListener.getMessage();
-			if (msg == null) {
-				break;
-			}
-			String operation = msg.getStringProperty("operation");
-			String entity = msg.getStringProperty("entity");
-			Long id = (Long) msg.getObject();
-
-			System.out.println(operation + " " + entity + " " + id);
-			if (operation.equals("C")) {
-				ncreate++;
-			} else if (operation.equals("U")) {
-				nupdate++;
-			} else if (operation.equals("D")) {
-				ndelete++;
-			}
-			if (entity.equals("Datafile")) {
-				ndatafile++;
-			} else if (entity.equals("Dataset")) {
-				ndataset++;
-			}
-
-		}
-		assertEquals(10, ncreate);
-		assertEquals(2, nupdate);
-		assertEquals(2, ndelete);
-		assertEquals(8, ndatafile);
-		assertEquals(6, ndataset);
 	}
 
 	@Test
@@ -1712,7 +1630,7 @@ public class TestWS {
 		System.out.println("Time per datafile to delete: " + results.size() + " datafiles with deleteMany: "
 				+ (System.currentTimeMillis() - start) / (results.size() + 0.) + "ms");
 	}
-	
+
 	@Test
 	public void searches() throws Exception {
 		session.clear();

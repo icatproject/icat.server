@@ -17,6 +17,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -74,6 +80,33 @@ import org.slf4j.MarkerFactory;
 @Remote(Lucene.class)
 public class LuceneSingleton implements Lucene {
 
+	public class IndexSome implements Callable<Void> {
+
+		private List<Long> ids;
+		private EntityManager manager;
+
+		public IndexSome(List<Long> ids, EntityManagerFactory entityManagerFactory) {
+			this.ids = ids;
+			manager = entityManagerFactory.createEntityManager();
+		}
+
+		@Override
+		public Void call() throws Exception {
+			try {
+				for (Long id : ids) {
+					EntityBaseBean bean = (EntityBaseBean) manager.find(populatingClass, id);
+					if (bean != null) {
+						addDocument(bean);
+					}
+				}
+				manager.close();
+				return null;
+			} catch (Exception e) {
+				throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+			}
+		}
+	}
+
 	class ScoredResult {
 
 		private String result;
@@ -97,8 +130,10 @@ public class LuceneSingleton implements Lucene {
 	public class PopulateThread extends Thread {
 
 		private EntityManager manager;
+		private EntityManagerFactory entityManagerFactory;
 
 		public PopulateThread(EntityManagerFactory entityManagerFactory) {
+			this.entityManagerFactory = entityManagerFactory;
 			manager = entityManagerFactory.createEntityManager();
 			logger.info("Start new populate thread");
 		}
@@ -122,9 +157,13 @@ public class LuceneSingleton implements Lucene {
 					if (populatingClass != null) {
 						String entityName = populatingClass.getSimpleName();
 						clear(entityName);
-						int start = 0;
-						List<Long> ids;
+						Long start = -1L;
+
 						logger.info("Populating " + entityName);
+
+						CompletionService<Void> threads = new ExecutorCompletionService<>(executorService);
+						int tasksIn = 0;
+
 						while (true) {
 							synchronized (this) {
 								if (stopPopulation) {
@@ -133,33 +172,50 @@ public class LuceneSingleton implements Lucene {
 								}
 							}
 							/* Get next block of ids */
-							ids = manager.createQuery("SELECT e.id from " + entityName + " e ORDER BY e.id", Long.class)
-									.setFirstResult(start).setMaxResults(luceneCommitCount).getResultList();
+							List<Long> ids = manager
+									.createQuery("SELECT e.id from " + entityName + " e WHERE e.id > " + start
+											+ " ORDER BY e.id", Long.class)
+									.setMaxResults(luceneCommitCount).getResultList();
 							if (ids.size() == 0) {
 								break;
 							}
-							logger.debug("About to add " + ids.size() + " " + entityName + " documents");
-							try {
-								for (Long id : ids) {
-									EntityBaseBean bean = (EntityBaseBean) manager.find(populatingClass, id);
-									if (bean != null) {
-										addDocument(bean);
-									}
-								}
-							} catch (Exception e) {
-								throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
+							start = ids.get(ids.size() - 1);
+
+							Future<Void> fut;
+							/* Remove any completed ones */
+							while ((fut = threads.poll()) != null) {
+								tasksIn--;
+								fut.get();
 							}
+
+							/* If full then wait */
+							if (tasksIn == maxThreads) {
+								fut = threads.take();
+								tasksIn--;
+								fut.get();
+							}
+
+							logger.debug("About to submit " + ids.size() + " " + entityName + " documents");
+							threads.submit(new IndexSome(ids, entityManagerFactory));
+							tasksIn++;
+
 							commit();
-							start = start + ids.size();
+
 							manager.clear();
 						}
 					}
 				} while (populatingClass != null);
-			} catch (Throwable t) {
+			} catch (
+
+			Throwable t)
+
+			{
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				t.printStackTrace(new PrintStream(baos));
 				logger.error(baos.toString());
-			} finally {
+			} finally
+
+			{
 				manager.close();
 			}
 		}
@@ -215,6 +271,8 @@ public class LuceneSingleton implements Lucene {
 	private boolean stopPopulation;
 
 	private Timer timer;
+	private ExecutorService executorService;
+	private int maxThreads;
 
 	@Override
 	public void addDocument(EntityBaseBean bean) throws IcatException {
@@ -349,7 +407,7 @@ public class LuceneSingleton implements Lucene {
 		String id = bean.getClass().getSimpleName() + ":" + bean.getId();
 		doc.add(new StringField("id", id, Store.YES));
 		doc.add(new StringField("entity", bean.getClass().getSimpleName(), Store.NO));
-		logger.trace("Created document '" + doc + "' to index for " + id);
+		// logger.trace("Created document '" + doc + "' to index for " + id);
 	}
 
 	private Document buildDoc(EntityBaseBean bean) throws IcatException {
@@ -568,6 +626,7 @@ public class LuceneSingleton implements Lucene {
 			directory.close();
 			directory = null;
 			logger.info("Directory closed");
+			executorService.shutdown();
 		} catch (Exception e) {
 			StringWriter errors = new StringWriter();
 			e.printStackTrace(new PrintWriter(errors));
@@ -659,6 +718,9 @@ public class LuceneSingleton implements Lucene {
 					}
 				}
 			}, luceneRefreshSeconds, luceneRefreshSeconds);
+
+			maxThreads = Runtime.getRuntime().availableProcessors();
+			executorService = Executors.newWorkStealingPool(maxThreads);
 
 			logger.debug("Created LuceneSingleton");
 		}

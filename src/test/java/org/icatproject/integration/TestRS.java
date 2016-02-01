@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,9 +29,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
-import javax.json.stream.JsonGenerator;
 
-import org.icatproject.EntityBaseBean;
 import org.icatproject.Facility;
 import org.icatproject.icat.client.ICAT;
 import org.icatproject.icat.client.IcatException;
@@ -59,8 +56,8 @@ public class TestRS {
 	public static void beforeClass() throws Exception {
 		try {
 			wSession = new WSession();
-			wSession.clearAuthz();
-			wSession.setAuthz();
+			// wSession.clearAuthz();
+			// wSession.setAuthz();
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
@@ -222,6 +219,7 @@ public class TestRS {
 	}
 
 	private Session setupLuceneTest() throws Exception {
+		wSession.setAuthz();
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "notroot");
@@ -243,7 +241,6 @@ public class TestRS {
 		wSession.clear();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		wSession.setAuthz();
 
 		rootSession.luceneCommit();
 		return session;
@@ -287,8 +284,6 @@ public class TestRS {
 		wSession.clear();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		wSession.setAuthz();
-
 		wSession.setAuthz();
 
 		long fid = search(session, "Facility.id", 1).getJsonNumber(0).longValueExact();
@@ -439,46 +434,6 @@ public class TestRS {
 				.readArray();
 		assertEquals(n, result.size());
 		return result;
-	}
-
-	@Test
-	public void testCreate() throws Exception {
-		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "notroot");
-		credentials.put("password", "password");
-		Session session = icat.login("db", credentials);
-
-		// Get known configuration
-		wSession.clear();
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
-		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		wSession.setAuthz();
-
-		Long fid = ((EntityBaseBean) wSession.search("Facility INCLUDE InvestigationType").get(0)).getId();
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try (JsonGenerator jw = Json.createGenerator(baos)) {
-			jw.writeStartArray();
-
-			jw.writeStartObject();
-			jw.writeStartObject("InvestigationType");
-			jw.writeStartObject("facility");
-			jw.write("id", fid);
-			jw.writeEnd();
-			jw.write("name", "ztype");
-			jw.writeEnd();
-			jw.writeEnd();
-
-			jw.writeStartObject().writeStartObject("Facility").write("name", "another fred").writeEnd();
-			jw.writeEnd();
-
-			jw.writeEnd();
-		}
-
-		List<Long> ids = session.create(baos.toString());
-		assertEquals(2, ids.size());
-
 	}
 
 	@Test
