@@ -10,7 +10,6 @@ from urlparse import urlparse
 import ssl
 import logging
 import getpass
-from suds.client import Client, WebFault
 import subprocess
 import shlex
 try:
@@ -18,66 +17,22 @@ try:
 except:  # Probably windows
     pass
 
-def readServices(path):
-    try:
-        result = {}
-        with open(path) as ss:
-            for line in ss.readlines():
-                i = line.index(" ")
-                key = line[:i].strip()
-                value = line[i + 1:].strip()
-                result[key] = value
-        return result
-    except IOError:
-        return None
-
-def reportProblem(wf):
-    fault = wf.fault
-    try:
-        exc = wf.fault.detail.IcatException
-        fatal(exc.type + " exception: " + exc.message)
-    except:
-        fatal(fault.faultstring)
-
 def getService():
-    hurl = url
-    suffix = "/ICATService/ICAT?wsdl"
-    if not url.endswith(suffix): hurl = hurl + suffix
- 
-    client = Client(hurl)
-    service = client.service
-    factory = client.factory
-    credentials = factory.create("credentials")
+    credList = []  
     for i in range (0, len(creds), 2):
-        entry = factory.create("credentials.entry")
-        entry.key = creds[i]   
+        key = creds[i]   
         if creds[i + 1] == "-":
-            entry.value = getpass.getpass()
+            value = getpass.getpass()
         else:
-            entry.value = creds[i + 1]
-        credentials.entry.append(entry)
-    sessionId = service.login(plugin, credentials)
-        
-    return client.service, sessionId
- 
-
-def getProperties(args):
-    parser.set_usage(usagebase + "properties")
-    parser.set_description("Display icat properties") 
-    options, args = parser.parse_args(args)
-
-    if len(args) > 0:
-        fatal("Must have no arguments after the operation 'properties'")
-
-    try:
-        service, sessionId = getService()
-        for prop in service.getProperties(sessionId): print prop
-    except WebFault, wf:
-        exc = wf.fault.detail.IcatException
-        fatal(exc.type + " exception: " + exc.message)
-    except Exception, e:
-        fatal(e)
-    
+            value = creds[i + 1]
+        credList.append({key:value})
+    jsonDump = {}
+    jsonDump["plugin"] = plugin
+    jsonDump["credentials"] = credList
+    parameters = {"json": json.dumps(jsonDump)}
+    result = json.loads(_process("session", parameters, "POST").read())  
+    return result["sessionId"]
+     
 def clear(args):
     parser.set_usage(usagebase + "clear")
     parser.set_description("Clear all lucene indices")
@@ -87,12 +42,9 @@ def clear(args):
         fatal("Must have no arguments after the operation 'clear'")
 
     try:
-        service, sessionId = getService()
+        sessionId = getService()
         parameters = {"sessionId": sessionId}
         _process("lucene/db/", parameters, "DELETE")
-    except WebFault, wf:
-        exc = wf.fault.detail.IcatException
-        fatal(exc.type + " exception: " + exc.message)
     except Exception, e:
         fatal(e)
 
@@ -105,12 +57,9 @@ def commit(args):
         fatal("Must have no arguments after the operation 'commit'")
 
     try:
-        service, sessionId = getService()
+        sessionId = getService()
         parameters = {"sessionId": sessionId}
         _process("lucene/db/", parameters, "POST")
-    except WebFault, wf:
-        exc = wf.fault.detail.IcatException
-        fatal(exc.type + " exception: " + exc.message)
     except Exception, e:
         fatal(e)
         
@@ -185,12 +134,9 @@ def getPopulating(args):
     if len(args) > 0:
         fatal("Must have no arguments after the operation 'populating'")
     try:
-        service, sessionId = getService()
+        sessionId = getService()
         parameters = {"sessionId": sessionId}
         print _process("lucene/db", parameters, "GET").read()
-    except WebFault, wf:
-        exc = wf.fault.detail.IcatException
-        fatal(exc.type + " exception: " + exc.message)
     except Exception, e:
         fatal(e)
 
@@ -201,14 +147,11 @@ def populate(args):
 
     if len(args) == 0: 
         try:
-            service, sessionId = getService() 
+            sessionId = getService() 
             parameters = {"sessionId": sessionId}
-            for entity in service.getEntityNames():
+            for entity in "Datafile", "DatafileParameter", "Dataset", "DatasetParameter", "Investigation", "InvestigationParameter":
                 print entity
                 _process("lucene/db/" + entity, parameters, "POST")
-        except WebFault, wf:
-            exc = wf.fault.detail.IcatException
-            fatal(exc.type + " exception: " + exc.message)
         except Exception, e:
             fatal(e)
         return    
@@ -217,13 +160,10 @@ def populate(args):
         fatal("Must have zero arguments after the operation 'populate' or one - the name of the entity")
  
     try:
-        service, sessionId = getService()
+        sessionId = getService()
         parameters = {"sessionId": sessionId}
         entity = args[0]
         _process("lucene/db/" + entity, parameters, "POST")
-    except WebFault, wf:
-        exc = wf.fault.detail.IcatException
-        fatal(exc.type + " exception: " + exc.message)
     except Exception, e:
         fatal(e)
 
@@ -238,7 +178,6 @@ logging.basicConfig(level=logging.CRITICAL)
 usagebase = "usage: %prog <url> <username> <password> "
        
 subcommands = {}
-subcommands["properties"] = getProperties
 subcommands["populate"] = populate
 subcommands["commit"] = commit
 subcommands["clear"] = clear
@@ -270,12 +209,10 @@ if len(start) > 2:
     icatpath = o.path
     if not icatpath.endswith("/"): icatpath = icatpath + "/"
     icatpath = icatpath + "icat/"
-
+    
     if not end:
-        
         try:
-            service, sessionId = getService()
-            service.getProperties(sessionId)
+            sessionId = getService()
         except Exception, e:
             fatal(e)
        
