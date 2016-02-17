@@ -149,7 +149,7 @@ def populate(args):
         try:
             sessionId = getService() 
             parameters = {"sessionId": sessionId}
-            for entity in "Datafile", "DatafileParameter", "Dataset", "DatasetParameter", "Investigation", "InvestigationParameter":
+            for entity in "Datafile", "DatafileParameter", "Dataset", "DatasetParameter", "Investigation", "InvestigationParameter", "InvestigationUser", "Sample", "UserGroup":
                 print entity
                 _process("lucene/db/" + entity, parameters, "POST")
         except Exception, e:

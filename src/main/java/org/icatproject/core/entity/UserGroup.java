@@ -10,7 +10,9 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 
@@ -55,7 +57,7 @@ public class UserGroup extends EntityBaseBean implements Serializable {
 			doc.add(new TextField("text", user.getFullName(), Store.NO));
 		}
 		doc.add(new StringField("user", user.getName(), Store.NO));
-		doc.add(new StringField("grouping", "Grouping:" + grouping.id, Store.YES));
+		doc.add(new SortedDocValuesField("grouping", new BytesRef(Long.toString(grouping.id))));
 		return doc;
 	}
 

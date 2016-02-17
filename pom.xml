@@ -16,7 +16,7 @@
 		<uniqueVersion>false</uniqueVersion>
 		<maven.install.skip>false</maven.install.skip>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<luceneVersion>4.10.4</luceneVersion>
+		<luceneVersion>5.3.0</luceneVersion>
 		<project.scm.id>github</project.scm.id>
 	</properties>
 

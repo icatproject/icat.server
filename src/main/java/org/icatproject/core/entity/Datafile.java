@@ -19,11 +19,11 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.document.DateTools.Resolution;
-import org.apache.lucene.document.Field.Store;
 
 @Comment("A data file")
 @SuppressWarnings("serial")
@@ -211,17 +211,15 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		}
 		doc.add(new TextField("text", sb.toString(), Store.NO));
 		if (datafileModTime != null) {
-			doc.add(new StringField("date", DateTools.dateToString(datafileModTime,
-					Resolution.MINUTE), Store.NO));
+			doc.add(new StringField("date", DateTools.dateToString(datafileModTime, Resolution.MINUTE), Store.NO));
 
 		} else if (datafileCreateTime != null) {
-			doc.add(new StringField("date", DateTools.dateToString(datafileCreateTime,
-					Resolution.MINUTE), Store.NO));
+			doc.add(new StringField("date", DateTools.dateToString(datafileCreateTime, Resolution.MINUTE), Store.NO));
 		} else {
-			doc.add(new StringField("date", DateTools.dateToString(modTime, Resolution.MINUTE),
-					Store.NO));
+			doc.add(new StringField("date", DateTools.dateToString(modTime, Resolution.MINUTE), Store.NO));
 		}
-		doc.add(new StringField("dataset", "Dataset:" + dataset.id, Store.YES));
+		doc.add(new StringField("id", Long.toString(id), Store.YES));
+		doc.add(new StringField("dataset", Long.toString(dataset.id), Store.NO));
 		return doc;
 	}
 }

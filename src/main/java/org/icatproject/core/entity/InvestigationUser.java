@@ -10,9 +10,12 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.FieldType;
+import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.util.BytesRef;
 
 @Comment("Many to many relationship between investigation and user. It is expected that this will show the association of "
 		+ "individual users with an investigation which might be derived from the proposal. It may also be used as the "
@@ -39,6 +42,13 @@ public class InvestigationUser extends EntityBaseBean implements Serializable {
 	public InvestigationUser() {
 	}
 
+	private static final FieldType STRING_FIELD_TYPE_STORED_SORTED = new FieldType(StringField.TYPE_STORED);
+
+	static {
+		STRING_FIELD_TYPE_STORED_SORTED.setNumericType(FieldType.NumericType.DOUBLE);
+		STRING_FIELD_TYPE_STORED_SORTED.freeze();
+	}
+
 	@Override
 	public Document getDoc() {
 		Document doc = new Document();
@@ -46,7 +56,7 @@ public class InvestigationUser extends EntityBaseBean implements Serializable {
 			doc.add(new TextField("text", user.getFullName(), Store.NO));
 		}
 		doc.add(new StringField("name", user.getName(), Store.NO));
-		doc.add(new StringField("investigation", "Investigation:" + investigation.id, Store.YES));
+		doc.add(new SortedDocValuesField("investigation", new BytesRef(Long.toString(investigation.id))));
 		return doc;
 	}
 

@@ -124,9 +124,11 @@
 	</p>
 
 	<h2>Schema upgrade</h2>
-
-	<p>The schema must be upgraded in steps depending upon how old your
-		icat installation is</p>
+	<p>Any existing lucene database should be removed. See the
+		icat.properties file for the value of lucene.directory and ensure that
+		the directory specified there is empty.</p>
+	<p>The database schema must be upgraded in steps depending upon how
+		old your icat installation is</p>
 	<h3>Upgrade 4.2.5 schema to 4.3.x</h3>
 
 	<p>This is for upgrading a 4.2.5 schema to 4.3.2. If you have
@@ -350,8 +352,8 @@
 
 		<dt>logback.xml</dt>
 		<dd>This is optional. If present it must specify the path to a
-			logback.xml file. The path may be absolute or relative to the
-			config directory.</dd>
+			logback.xml file. The path may be absolute or relative to the config
+			directory.</dd>
 
 		<dt>lucene.directory</dt>
 		<dd>This is optional. It is the path to a directory (whose parent
@@ -514,24 +516,20 @@
 	are authorized to use this command.
 
 	<dl>
-		<dt>properties</dt>
-		<dd>lists the active contents of the icat.properties file. It
-			does this by examining the properties after they have been read in so
-			any superfluous definitions in the original properties file will not
-			be seen.</dd>
 
 		<dt>populate [&lt;entity name&gt;]</dt>
 		<dd>re-populates lucene for the specified entity name. This is
 			useful if the database has been modified directly rather than by
-			using the ICAT API. Note that because of caching, ICAT should be
-			reloaded after any direct database modifications are made. This call
-			is asynchronous and simply places the request in a set of entity
-			types to be populated. When the request is processed all lucene
-			entries of the specified entity type are first cleared then the
-			corresponding icat entries are scanned to re-populate lucene. To find
-			what it is doing please use the "populating" operation desribed
-			below. It may also be run without an entity name in which case it
-			will process all entities.</dd>
+			using the ICAT API. This call is asynchronous and simply places the
+			request in a set of entity types to be populated. When the request is
+			processed all lucene entries of the specified entity type are first
+			cleared then the corresponding icat entries are scanned to
+			re-populate lucene. To find what it is doing please use the
+			"populating" operation described below. It may also be run without an
+			entity name in which case it will process all entities. The new
+			lucene index will not be seen until it is completely rebuilt. While
+			the index is being rebuilt ICAT can be used as normal as any lucene
+			updates are stored to be applied later.</dd>
 
 		<dt>populating</dt>
 		<dd>returns a list of entity types to be processed for populating
@@ -544,7 +542,7 @@
 			lucene.commitSeconds</dd>
 
 		<dt>clear</dt>
-		<dd>clears all the lucene indices - but does not commit.</dd>
+		<dd>stops any population and clears all the lucene indices.</dd>
 
 	</dl>
 

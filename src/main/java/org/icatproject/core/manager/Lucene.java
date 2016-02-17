@@ -90,13 +90,23 @@ public interface Lucene {
 	@SuppressWarnings("serial")
 	public class LuceneSearchResult implements Serializable {
 
+		public long getUid() {
+			return uid;
+		}
+
+//		public void setUid(long uid) { TODO
+//			this.uid = uid;
+//		}
+
 		private List<ScoredResult> results;
 		private int doc;
 		private int shardIndex;
 		private float score;
 		private boolean scoreDocExists;
 
-		public LuceneSearchResult(List<ScoredResult> results, ScoreDoc lastDoc) {
+		private Long uid;
+
+		public LuceneSearchResult(List<ScoredResult> results, ScoreDoc lastDoc, long uid) {
 			this.results = results;
 			if (lastDoc != null) {
 				this.doc = lastDoc.doc;
@@ -104,6 +114,7 @@ public interface Lucene {
 				this.score = lastDoc.score;
 				scoreDocExists = true;
 			}
+			this.uid = uid;
 		}
 
 		public List<ScoredResult> getResults() {
@@ -126,14 +137,11 @@ public interface Lucene {
 
 	boolean getActive();
 
+	void freeSearcher(LuceneSearchResult last) throws IcatException;
+
 	List<String> getPopulating();
 
-	void populate(Class<?> klass);
-
-	LuceneSearchResult search(String query, int blockSize, String entityName) throws IcatException;
-
-	LuceneSearchResult searchAfter(String query, int blockSize, String entityName, LuceneSearchResult last)
-			throws IcatException;
+	void populate(String entityName) throws IcatException;
 
 	void updateDocument(EntityBaseBean entityBaseBean) throws IcatException;
 
@@ -141,8 +149,8 @@ public interface Lucene {
 			List<String> samples, String userFullName, int maxResults) throws IcatException;
 
 	LuceneSearchResult investigationsAfter(String user, String text, String lower, String upper,
-			List<ParameterPOJO> parms, List<String> samples, String userFullName, int blockSize, LuceneSearchResult last)
-			throws IcatException;
+			List<ParameterPOJO> parms, List<String> samples, String userFullName, int blockSize,
+			LuceneSearchResult last) throws IcatException;
 
 	LuceneSearchResult datasets(String user, String text, String lower, String upper, List<ParameterPOJO> parms,
 			int maxResults) throws IcatException;

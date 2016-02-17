@@ -245,10 +245,10 @@ public class ICATRest {
 	 * @param jsonString
 	 *            what to export which takes the form
 	 *            <code>{"sessionId":"0d9a3706-80d4-4d29-9ff3-4d65d4308a24","query":"Facility",
-	 * 			, "attributes":"ALL"</code> where query if specified is a normal
-	 *            ICAT query which may have an INCLUDE clause. This is used to
-	 *            define the metadata to export. If not present then the whole
-	 *            ICAT will be exported.
+	 * 			  "attributes":"ALL"}</code> where query if specified is a
+	 *            normal ICAT query which may have an INCLUDE clause. This is
+	 *            used to define the metadata to export. If not present then the
+	 *            whole ICAT will be exported.
 	 *            <p>
 	 *            The value "attributes" if not specified defaults to "USER". It
 	 *            is not case sensitive and it defines which attributes to
@@ -423,8 +423,8 @@ public class ICATRest {
 	 * 
 	 * <p>
 	 * The json takes the form:
-	 * <code>"{sessionId", "0d9a3706-80d4-4d29-9ff3-4d65d4308a24",
-			"duplicate", "THROW", "attributes", "USER"}</code> . The value
+	 * <code>"{sessionId":"0d9a3706-80d4-4d29-9ff3-4d65d4308a24",
+			"duplicate":"THROW", "attributes":"USER"}</code> . The value
 	 * "duplicate" if not specified defaults to "THROW". It is not case
 	 * sensitive and it defines the action to be taken if a duplicate is found:
 	 * </p>

@@ -53,7 +53,10 @@ import javax.ws.rs.core.StreamingOutput;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
+import org.icatproject.core.entity.Datafile;
+import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.entity.Investigation;
 import org.icatproject.core.entity.Log;
 import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.Lucene.LuceneSearchResult;
@@ -530,22 +533,15 @@ public class EntityBeanManager {
 				e.setOffset(nms.size());
 				throw e;
 			} catch (Throwable e) {
+				logger.error("Problem in deleteMany", e);
 				userTransaction.rollback();
 				updateCache();
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage(), nms.size());
 			}
-		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException " + e.getMessage(),
-					-1);
-		} catch (SecurityException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException " + e.getMessage(),
-					-1);
-		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException " + e.getMessage(), -1);
-		} catch (NotSupportedException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException " + e.getMessage(),
-					-1);
+		} catch (IllegalStateException | SecurityException | SystemException | NotSupportedException e) {
+			logger.error("Problem in deleteMany", e);
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage(), -1);
 		}
 	}
 
@@ -799,35 +795,26 @@ public class EntityBeanManager {
 	}
 
 	private void filterReadAccess(List<ScoredEntityBaseBean> results, List<ScoredResult> allResults, int maxCount,
-			String userId, EntityManager manager) throws IcatException {
+			String userId, EntityManager manager, Class<? extends EntityBaseBean> klass) throws IcatException {
 
 		logger.debug("Got " + allResults.size() + " results from Lucene");
 		for (ScoredResult sr : allResults) {
-			String result = sr.getResult();
-			int i = result.indexOf(':');
-			String eName = result.substring(0, i);
-			long entityId = Long.parseLong(result.substring(i + 1));
-			try {
-				@SuppressWarnings("unchecked")
-				Class<EntityBaseBean> klass = (Class<EntityBaseBean>) Class.forName(Constants.ENTITY_PREFIX + eName);
-				EntityBaseBean beanManaged = manager.find(klass, entityId);
-				if (beanManaged != null) {
-					try {
-						gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
-						results.add(new ScoredEntityBaseBean(entityId, sr.getScore()));
-						if (results.size() > maxEntities) {
-							throw new IcatException(IcatExceptionType.VALIDATION,
-									"attempt to return more than " + maxEntities + " entitities");
-						}
-						if (results.size() == maxCount) {
-							break;
-						}
-					} catch (IcatException e) {
-						// Nothing to do
+			long entityId = Long.parseLong(sr.getResult());
+			EntityBaseBean beanManaged = manager.find(klass, entityId);
+			if (beanManaged != null) {
+				try {
+					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.READ, manager);
+					results.add(new ScoredEntityBaseBean(entityId, sr.getScore()));
+					if (results.size() > maxEntities) {
+						throw new IcatException(IcatExceptionType.VALIDATION,
+								"attempt to return more than " + maxEntities + " entitities");
 					}
+					if (results.size() == maxCount) {
+						break;
+					}
+				} catch (IcatException e) {
+					// Nothing to do
 				}
-			} catch (ClassNotFoundException e) {
-				throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
 			}
 		}
 	}
@@ -1502,6 +1489,7 @@ public class EntityBeanManager {
 			 * don't make a huge number of calls to Lucene
 			 */
 			int blockSize = Math.max(1000, maxCount);
+
 			do {
 				if (last == null) {
 					last = lucene.datafiles(user, text, lower, upper, parms, blockSize);
@@ -1509,8 +1497,10 @@ public class EntityBeanManager {
 					last = lucene.datafilesAfter(user, text, lower, upper, parms, blockSize, last);
 				}
 				allResults = last.getResults();
-				filterReadAccess(results, allResults, maxCount, userName, manager);
+				filterReadAccess(results, allResults, maxCount, userName, manager, Datafile.class);
 			} while (results.size() != maxCount && allResults.size() == blockSize);
+			/* failing lucene retrieval calls clean up before throwing */
+			lucene.freeSearcher(last);
 		}
 		if (log) {
 			if (results.size() > 0) {
@@ -1537,6 +1527,7 @@ public class EntityBeanManager {
 			 * don't make a huge number of calls to Lucene
 			 */
 			int blockSize = Math.max(1000, maxCount);
+
 			do {
 				if (last == null) {
 					last = lucene.datasets(user, text, lower, upper, parms, blockSize);
@@ -1544,8 +1535,10 @@ public class EntityBeanManager {
 					last = lucene.datasetsAfter(user, text, lower, upper, parms, blockSize, last);
 				}
 				allResults = last.getResults();
-				filterReadAccess(results, allResults, maxCount, userName, manager);
+				filterReadAccess(results, allResults, maxCount, userName, manager, Dataset.class);
 			} while (results.size() != maxCount && allResults.size() == blockSize);
+			/* failing lucene retrieval calls clean up before throwing */
+			lucene.freeSearcher(last);
 		}
 		if (log) {
 			if (results.size() > 0) {
@@ -1582,6 +1575,7 @@ public class EntityBeanManager {
 			 * don't make a huge number of calls to Lucene
 			 */
 			int blockSize = Math.max(1000, maxCount);
+
 			do {
 				if (last == null) {
 					last = lucene.investigations(user, text, lower, upper, parms, samples, userFullName, blockSize);
@@ -1590,8 +1584,10 @@ public class EntityBeanManager {
 							last);
 				}
 				allResults = last.getResults();
-				filterReadAccess(results, allResults, maxCount, userId, manager);
+				filterReadAccess(results, allResults, maxCount, userId, manager, Investigation.class);
 			} while (results.size() != maxCount && allResults.size() == blockSize);
+			/* failing lucene retrieval calls clean up before throwing */
+			lucene.freeSearcher(last);
 		}
 		if (log) {
 			if (results.size() > 0) {
@@ -1607,13 +1603,12 @@ public class EntityBeanManager {
 
 	public void lucenePopulate(String entityName, EntityManager manager) throws IcatException {
 		if (luceneActive) {
-			Class<?> klass = null;
 			try {
-				klass = Class.forName(Constants.ENTITY_PREFIX + entityName);
+				Class.forName(Constants.ENTITY_PREFIX + entityName);
 			} catch (ClassNotFoundException e) {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage());
 			}
-			lucene.populate(klass);
+			lucene.populate(entityName);
 		}
 	}
 

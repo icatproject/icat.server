@@ -17,8 +17,9 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.TextField;
+import org.apache.lucene.util.BytesRef;
 import org.icatproject.core.IcatException;
 
 @Comment("A sample to be used in an investigation")
@@ -108,7 +109,7 @@ public class Sample extends EntityBaseBean implements Serializable {
 			sb.append(" " + type.getName());
 		}
 		doc.add(new TextField("text", sb.toString(), Store.NO));
-		doc.add(new StringField("investigation", "Investigation:" + investigation.id, Store.YES));
+		doc.add(new SortedDocValuesField("investigation", new BytesRef(Long.toString(investigation.id))));
 		return doc;
 	}
 }
