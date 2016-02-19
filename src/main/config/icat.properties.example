@@ -8,7 +8,7 @@ lifetimeMinutes = 120
 rootUserNames = db/root
 
 # Restrict total number of entities to return in a search call
-maxEntities = 1000
+maxEntities = 10000
 
 # Maximum ids in a list - this must not exceed 1000 for Oracle
 maxIdsInQuery = 500
@@ -39,8 +39,8 @@ authn.anon.friendly = Anonymous
 
 # Notification setup
 notification.list = Dataset Datafile
-notification.Dataset = CUD
-notification.Datafile = CUD
+notification.Dataset = CU
+notification.Datafile = CU
 
 # Call logging setup
 log.list = file table
@@ -50,7 +50,7 @@ log.table = S
 # Lucene
 lucene.directory = ../data/icat/lucene
 lucene.commitSeconds = 5
-lucene.commitCount = 1000
+lucene.commitCount = 10000
 
 # JMS - uncomment and edit if needed
 !jms.topicConnectionFactory = java:comp/DefaultJMSConnectionFactory
