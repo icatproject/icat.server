@@ -1,100 +1,133 @@
 package org.icatproject.core.parser;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.manager.EntityInfoHandler;
+import org.icatproject.core.manager.EntityInfoHandler.Relationship;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FromClause {
 
-	private String string;
-	private Class<? extends EntityBaseBean> bean;
+	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
-	private enum State {
-		LEFT, LJOIN, JOIN, NONE
-	}
+	private String clause;
 
-	private State state;
+	private Map<String, Class<? extends EntityBaseBean>> authzMap = new HashMap<>();
 
-	public FromClause(Input input, String idVar, Map<String, Integer> idVarMap, boolean isQuery)
-			throws ParserException, IcatException {
+	private static Logger logger = LoggerFactory.getLogger(FromClause.class);
+
+	@SuppressWarnings("unchecked")
+	public FromClause(Input input, Set<String> idPaths) throws ParserException, IcatException {
+		logger.trace("Creating FromClause for idPaths {}", idPaths);
+
 		StringBuilder sb = new StringBuilder();
+		Class<? extends EntityBaseBean> currentEntity = null;
 		input.consume(Token.Type.FROM);
 		Token t = input.peek(0);
-		state = State.NONE;
+
+		Map<String, Class<? extends EntityBaseBean>> beans = new HashMap<>();
+
+		/* Look at each token until the end of the FROM clause is detected */
 		while (t != null && t.getType() != Token.Type.WHERE && t.getType() != Token.Type.GROUP
 				&& t.getType() != Token.Type.HAVING && t.getType() != Token.Type.ORDER
 				&& t.getType() != Token.Type.INCLUDE && t.getType() != Token.Type.LIMIT) {
-			t = input.consume();
+			input.consume();
+			String val = t.getValue();
+			sb.append(" " + val);
 			if (t.getType() == Token.Type.NAME) {
-				String val = t.getValue();
 				if (EntityInfoHandler.getAlphabeticEntityNames().contains(val)) {
-					sb.append(" " + val);
+					currentEntity = EntityInfoHandler.getClass(val);
 				} else {
-					if (!isQuery && state == State.NONE) {
-						sb = new StringBuilder();
-					} else {
-						int dot = val.indexOf('.');
-						String idv = dot < 0 ? val.toUpperCase() : val.substring(0, dot)
-								.toUpperCase();
-						Integer intVal = idVarMap.get(idv);
-						if (intVal == null) {
-							intVal = idVarMap.size();
-							idVarMap.put(idv, intVal);
+					int dot = val.indexOf('.');
+					if (dot <= 0) {
+						/* Must be a JPQL identification variable */
+						if (currentEntity == null) {
+							throw new ParserException(
+									"No information to determine type of " + val + " in the FROM clause");
 						}
-						sb.append(" $" + intVal + "$");
-						if (dot >= 0) {
-							sb.append(val.substring(dot));
+						if (beans.put(val.toUpperCase(), currentEntity) != null) {
+							throw new ParserException("JPQL indentification variable " + val
+									+ "has already been defined in the FROM clause");
+						}
+					} else {
+						String idv = val.substring(0, dot).toUpperCase();
+						currentEntity = beans.get(idv);
+
+						while (dot >= 0) {
+							int dotn = val.indexOf(".", dot + 1);
+							String relPath = dotn < 0 ? val.substring(dot + 1) : val.substring(dot + 1, dotn);
+
+							Relationship r = eiHandler.getRelationshipsByName(currentEntity).get(relPath);
+							if (r == null) {
+								throw new ParserException(
+										currentEntity.getSimpleName() + " has no relationship field " + relPath);
+							}
+							currentEntity = r.getDestinationBean();
+							dot = dotn;
+						}
+
+						if (currentEntity == null) {
+							throw new ParserException(
+									"idVar '" + idv + "' referenced in the FROM clause is not defined.");
 						}
 					}
+
 				}
-			} else if (t.getType() == Token.Type.FETCH || t.getType() == Token.Type.INNER
-					|| t.getType() == Token.Type.OUTER || t.getType() == Token.Type.FETCH) {
-				// Skip token
-			} else {
-				if (t.getType() == Token.Type.LEFT) {
-					state = State.LEFT;
-				} else if (t.getType() == Token.Type.JOIN) {
-					if (state == State.LEFT || !isQuery) {
-						state = State.LJOIN;
-						sb.append(" LEFT JOIN");
-					} else {
-						state = State.JOIN;
-						sb.append(" JOIN");
+			} else if (t.getType() == Token.Type.FETCH) {
+				throw new ParserException("The FETCH keyword is not permitted");
+			}
+			t = input.peek(0);
+		}
+
+		for (String idPath : idPaths) {
+			int dot = idPath.indexOf(".");
+			String idv = dot < 0 ? idPath.toUpperCase() : idPath.substring(0, dot).toUpperCase();
+			Class<? extends EntityBaseBean> bean = beans.get(idv);
+			if (bean == null) {
+				throw new ParserException(
+						"idVar '" + idv + "' referenced in the SELECT clause is not defined in the FROM clause.");
+			}
+			String authzPath = idPath + ".id";
+			while (dot >= 0) {
+				int dotn = idPath.indexOf(".", dot + 1);
+				String relPath = dotn < 0 ? idPath.substring(dot + 1) : idPath.substring(dot + 1, dotn);
+
+				Field f = eiHandler.getFieldsByName(bean).get(relPath);
+				if (f == null) {
+					throw new ParserException(bean.getSimpleName() + " has no field " + relPath);
+				}
+				Class<?> ftype = f.getType();
+
+				if (EntityBaseBean.class.isAssignableFrom(ftype)) {
+					bean = (Class<? extends EntityBaseBean>) ftype;
+					if (dotn >= 0) {
+						authzPath = idPath.substring(0, dotn) + ".id";
 					}
 				} else {
-					sb.append(" " + t.getValue());
+					authzPath = idPath.substring(0, dot) + ".id";
 				}
+				dot = dotn;
 			}
-			Token next = input.peek(0);
-			if (next != null && next.getType() == Token.Type.AS) {
-				input.consume(Token.Type.AS);
-				next = input.peek(0);
-			}
-			if (next != null && next.getType() == Token.Type.NAME
-					&& next.getValue().toUpperCase().equals(idVar)) {
-				if (bean != null) {
-					throw new ParserException("Attempt to define " + idVar
-							+ " more than once in FROM clause");
-				}
-				bean = EntityInfoHandler.getClass(t.getValue());
-			}
-			t = next;
+			logger.trace("For authz will check {} using rules for {}", authzPath, bean.getSimpleName());
+			authzMap.put(authzPath, bean);
 		}
-		if (bean == null) {
-			throw new ParserException(idVar + " is not defined in the FROM clause");
-		}
-		string = sb.toString();
+
+		clause = sb.toString();
 	}
 
 	@Override
 	public String toString() {
-		return string;
+		return clause;
 	}
 
-	public Class<? extends EntityBaseBean> getBean() {
-		return bean;
+	public Map<String, Class<? extends EntityBaseBean>> getAuthzMap() {
+		return authzMap;
 	}
 
 }

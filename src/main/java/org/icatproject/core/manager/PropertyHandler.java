@@ -100,12 +100,12 @@ public class PropertyHandler {
 	}
 
 	public enum Operation {
-		C, U, D
+		C, U
 	}
 
 	private final static Logger logger = LoggerFactory.getLogger(PropertyHandler.class);
 	private final static Marker fatal = MarkerFactory.getMarker("FATAL");
-	private final static Pattern cudPattern = Pattern.compile("[CUD]*");
+	private final static Pattern cuPattern = Pattern.compile("[CU]*");
 	private final static Pattern srwPattern = Pattern.compile("[SRW]*");
 
 	private Map<String, ExtendedAuthenticator> authPlugins = new LinkedHashMap<>();
@@ -228,13 +228,13 @@ public class PropertyHandler {
 
 					formattedProps.add(key + " " + notificationOps);
 
-					Matcher m = cudPattern.matcher(notificationOps);
+					Matcher m = cuPattern.matcher(notificationOps);
 					if (!m.matches()) {
-						String msg = "Property  '" + key + "' must only contain the letters C, U and D";
+						String msg = "Property  '" + key + "' must only contain the letters C and U";
 						logger.error(fatal, msg);
 						throw new IllegalStateException(msg);
 					}
-					for (String c : new String[] { "C", "U", "D" }) {
+					for (String c : new String[] { "C", "U" }) {
 						if (notificationOps.indexOf(c) >= 0) {
 							notificationRequests.put(entity + ":" + c,
 									new NotificationRequest(Operation.valueOf(Operation.class, c), entity));

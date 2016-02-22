@@ -118,9 +118,9 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser)
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser, boolean clearId)
 			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser);
+		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId);
 		check(manager);
 	}
 

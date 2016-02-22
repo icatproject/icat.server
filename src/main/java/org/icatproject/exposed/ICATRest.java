@@ -9,7 +9,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,15 +24,18 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
-import javax.jms.JMSException;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonException;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonString;
+import javax.json.JsonStructure;
 import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
 import javax.json.JsonWriter;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParser;
@@ -66,7 +68,6 @@ import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
-import org.icatproject.core.manager.CreateResponse;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
@@ -84,41 +85,6 @@ import org.slf4j.LoggerFactory;
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
 public class ICATRest {
-
-	public class EventChecker {
-
-		private JsonParser parser;
-
-		public EventChecker(JsonParser parser) {
-			this.parser = parser;
-		}
-
-		public Event get(Event... events) {
-			Event event = parser.next();
-			if (event == Event.KEY_NAME || event == Event.VALUE_STRING) {
-				logger.debug(event + ": " + parser.getString());
-			} else {
-				logger.debug(event.toString());
-			}
-			for (Event e : events) {
-				if (event == e) {
-					return event;
-				}
-			}
-			StringBuilder sb = new StringBuilder("event " + event + " is not of expected type [");
-			boolean first = true;
-			for (Event e : events) {
-				if (!first) {
-					sb.append(", ");
-				} else {
-					first = false;
-				}
-				sb.append(e);
-			}
-			sb.append(']');
-			throw new JsonException(sb.toString());
-		}
-	}
 
 	private static Logger logger = LoggerFactory.getLogger(ICATRest.class);
 
@@ -167,7 +133,7 @@ public class ICATRest {
 	/**
 	 * Create one or more entities
 	 * 
-	 * @summary Create
+	 * @summary Write
 	 * 
 	 * @param sessionId
 	 *            a sessionId of a user which takes the form
@@ -188,6 +154,10 @@ public class ICATRest {
 	 *            to be created at the same time then the "id" should not be set
 	 *            but the other desired attributes should.
 	 * 
+	 *            This call can also perform updates as any object included
+	 *            which has an id value provided has any other specified fields
+	 *            updated.
+	 * 
 	 * @return ids of created entities as a json string of the form <samp>[125,
 	 *         126]</samp>
 	 * 
@@ -198,43 +168,102 @@ public class ICATRest {
 	@Path("entityManager")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	public String create(@FormParam("sessionId") String sessionId, @FormParam("entities") String json)
+	public String write(@FormParam("sessionId") String sessionId, @FormParam("entities") String json)
 			throws IcatException {
-		List<EntityBaseBean> entities = new ArrayList<>();
 
-		try (JsonParser parser = Json.createParser(new ByteArrayInputStream(json.getBytes()))) {
-			EventChecker checker = new EventChecker(parser);
-			checker.get(Event.START_ARRAY);
-			while (true) {
-				Event event = checker.get(Event.START_OBJECT, Event.END_ARRAY);
-				if (event == Event.END_ARRAY) {
-					break;
-				}
-				checker.get(Event.KEY_NAME);
-				String entityName = parser.getString();
-				checker.get(Event.START_OBJECT);
-				entities.add(parseEntity(checker, entityName));
-				checker.get(Event.END_OBJECT);
-			}
-		} catch (JsonException e) {
-			throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
-		}
 		String userName = beanManager.getUserName(sessionId, manager);
 
-		List<CreateResponse> createResponses = beanManager.createMany(userName, entities, manager, userTransaction);
+		List<Long> beanIds = beanManager.write(userName, json, manager, userTransaction, transmitter);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
 			gen.writeStartArray();
-			for (CreateResponse createResponse : createResponses) {
-				transmitter.processMessage(createResponse.getNotificationMessage());
-				gen.write(createResponse.getPk());
+			for (Long id : beanIds) {
+				gen.write(id);
 			}
 			gen.writeEnd();
-		} catch (JMSException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 		return baos.toString();
+	}
+
+	/**
+	 * Delete entities as a json string.
+	 * 
+	 * @summary delete
+	 * 
+	 * @param sessionId
+	 *            a sessionId of a user which takes the form
+	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 * @param json
+	 *            specifies what to delete as a single entity or as an array of
+	 *            entities such as <code>{"Facility": {"id" : 42}}</code> where
+	 *            the id must be specified and no other attributes.
+	 * 
+	 * @throws IcatException
+	 *             when something is wrong
+	 */
+	@DELETE
+	@Path("entityManager")
+	@Produces(MediaType.APPLICATION_JSON)
+	public void delete(@QueryParam("sessionId") String sessionId, @QueryParam("entities") String json)
+			throws IcatException {
+
+		if (json == null) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "entities is not set");
+		}
+
+		List<EntityBaseBean> beans = new ArrayList<>();
+		try (JsonReader reader = Json.createReader(new ByteArrayInputStream(json.getBytes()))) {
+			JsonStructure top = reader.read();
+			int offset = 0;
+			if (top.getValueType() == ValueType.ARRAY) {
+				for (JsonValue obj : (JsonArray) top) {
+					beans.add(getOne((JsonObject) obj, offset++));
+				}
+			} else {
+				beans.add(getOne((JsonObject) top, 0));
+			}
+		} catch (JsonException e) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage() + " in json " + json);
+		}
+		String userName = beanManager.getUserName(sessionId, manager);
+		beanManager.delete(userName, beans, manager, userTransaction);
+	}
+
+	private EntityBaseBean getOne(JsonObject entity, int offset) throws IcatException {
+		logger.debug("Get one {} for delete", entity);
+
+		if (entity.size() != 1) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+					"entity must have one keyword followed by its values in json " + entity, offset);
+		}
+		Entry<String, JsonValue> entry = entity.entrySet().iterator().next();
+		String beanName = entry.getKey();
+		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		JsonObject contents = (JsonObject) entry.getValue();
+
+		EntityBaseBean bean = null;
+		try {
+			bean = klass.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, "failed to instantiate " + beanName, offset);
+		}
+
+		for (Entry<String, JsonValue> pair : contents.entrySet()) {
+			if (pair.getKey().equals("id")) {
+				bean.setId(((JsonNumber) pair.getValue()).longValueExact());
+			} else {
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+						"entity must have only the id value specified in json " + entity, offset);
+			}
+		}
+
+		if (bean.getId() == null) {
+			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+					"entity must have the id value specified in json " + entity, offset);
+		}
+		logger.trace("Got {} for delete", bean);
+		return bean;
 	}
 
 	/**
@@ -285,8 +314,10 @@ public class ICATRest {
 	 *            a sessionId of a user listed in rootUserNames
 	 * @param query
 	 *            the jpql
+	 * @param max
+	 *            if specified changes the number of entries to return from 5
 	 * 
-	 * @return the first 5 entities that match the query as simple text for
+	 * @return the first entities that match the query as simple text for
 	 *         testing
 	 * 
 	 * @throws IcatException
@@ -295,14 +326,18 @@ public class ICATRest {
 	@GET
 	@Path("jpql")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getJpql(@QueryParam("sessionId") String sessionId, @QueryParam("query") String query)
-			throws IcatException {
+	public String getJpql(@QueryParam("sessionId") String sessionId, @QueryParam("query") String query,
+			@QueryParam("max") Integer max) throws IcatException {
 		checkRoot(sessionId);
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
 		}
 		int nMax = 5;
+		if (max != null) {
+			nMax = max;
+		}
 		List<Object> os = manager.createQuery(query, Object.class).setMaxResults(nMax).getResultList();
+
 		StringBuilder sb = new StringBuilder();
 		if (os.size() == nMax) {
 			sb.append("Count at least 5");
@@ -317,7 +352,21 @@ public class ICATRest {
 				sb.append(": ");
 				first = false;
 			}
-			sb.append(o);
+			if (o.getClass().isArray()) {
+				boolean firstInArray = true;
+				sb.append('[');
+				for (Object z : (Object[]) o) {
+					if (!firstInArray) {
+						sb.append(", ");
+					} else {
+						firstInArray = false;
+					}
+					sb.append(z);
+				}
+				sb.append(']');
+			} else {
+				sb.append(o);
+			}
 		}
 		return sb.toString();
 	}
@@ -570,6 +619,34 @@ public class ICATRest {
 				gen.writeEnd();
 			}
 		}
+	}
+
+	private void jsonise(Object result, JsonGenerator gen) throws IcatException {
+		if (result == null) {
+			gen.writeNull();
+		} else if (result instanceof EntityBaseBean) {
+			gen.writeStartObject();
+			gen.writeStartObject(result.getClass().getSimpleName());
+			jsonise((EntityBaseBean) result, gen);
+			gen.writeEnd();
+			gen.writeEnd();
+		} else if (result instanceof Long) {
+			gen.write((Long) result);
+		} else if (result instanceof Double) {
+			if (Double.isNaN((double) result)) {
+				gen.writeNull();
+			} else {
+				gen.write((Double) result);
+			}
+		} else if (result instanceof String) {
+			gen.write((String) result);
+		} else if (result instanceof Boolean) {
+			gen.write((Boolean) result);
+		} else {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					"Don't know how to jsonise " + result.getClass());
+		}
+
 	}
 
 	/**
@@ -929,87 +1006,6 @@ public class ICATRest {
 		beanManager.lucenePopulate(entityName, manager);
 	}
 
-	// Note that the START_OBJECT has already been swallowed
-	private EntityBaseBean parseEntity(EventChecker checker, String beanName) throws IcatException {
-		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-		Map<Field, Method> setters = eiHandler.getSetters(klass);
-		Set<Field> atts = eiHandler.getAttributes(klass);
-		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
-		Map<String, Field> fieldsByName = eiHandler.getFieldsByName(klass);
-		EntityBaseBean bean = null;
-		JsonParser parser = checker.parser;
-		try {
-			bean = klass.newInstance();
-			while (true) {
-				Event event = checker.get(Event.KEY_NAME, Event.END_OBJECT);
-				if (event == Event.END_OBJECT) {
-					break;
-				}
-				Field field = fieldsByName.get(parser.getString());
-				if (field == null) {
-					throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-							"Field " + parser.getString() + " not found in " + beanName);
-				} else if (field.getName().equals("id")) {
-					checker.get(Event.VALUE_NUMBER);
-					bean.setId(Long.parseLong(parser.getString()));
-				} else if (atts.contains(field)) {
-					checker.get(Event.VALUE_NUMBER, Event.VALUE_STRING);
-					String type = field.getType().getSimpleName();
-					Object arg;
-					if (type.equals("String")) {
-						arg = parser.getString();
-					} else if (type.equals("Integer")) {
-						arg = Integer.parseInt(parser.getString());
-					} else if (type.equals("Double")) {
-						arg = Double.parseDouble(parser.getString());
-					} else if (type.equals("Long")) {
-						arg = Long.parseLong(parser.getString());
-					} else if (type.equals("boolean")) {
-						arg = Boolean.parseBoolean(parser.getString());
-						// } else if (field.getType().isEnum()) {
-						// arg =
-						// gen.write(field.getName(), value.toString());
-					} else if (type.equals("Date")) {
-						synchronized (df8601) {
-							try {
-								arg = df8601.parse(parser.getString());
-							} catch (ParseException e) {
-								throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-										"Badly formatted date " + parser.getString());
-							}
-						}
-					} else {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-								"Don't know how to parseEntity field of type " + type);
-					}
-					setters.get(field).invoke(bean, arg);
-				} else if (updaters.contains(field)) {
-					event = checker.get(Event.START_OBJECT);
-					EntityBaseBean arg = parseEntity(checker, field.getType().getSimpleName());
-					setters.get(field).invoke(bean, arg);
-				} else {
-					checker.get(Event.START_ARRAY);
-					@SuppressWarnings("unchecked")
-					List<EntityBaseBean> col = (List<EntityBaseBean>) getters.get(field).invoke(bean);
-					while (true) {
-						event = checker.get(Event.START_OBJECT, Event.END_ARRAY);
-						if (event == Event.END_ARRAY) {
-							break;
-						}
-						EntityBaseBean arg = parseEntity(checker, field.getName());
-						col.add(arg);
-					}
-				}
-			}
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| JsonException e) {
-			throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-					e.getClass() + " " + e.getMessage() + " at " + parser.getLocation().getStreamOffset() + " in json");
-		}
-		return bean;
-	}
-
 	/**
 	 * Refresh session
 	 * 
@@ -1045,12 +1041,19 @@ public class ICATRest {
 	 *            functionality of get is required in which case the query must
 	 *            be as described in the ICAT Java Client manual.
 	 * 
-	 * @return entities as a json string of the form
-	 *         <samp>[{"Facility":{"id":126, "name":"another fred"}}]</samp> and
-	 *         is a list of the objects returned and takes the same form as the
-	 *         data passed in for create. If an id value is specified then only
-	 *         one object can be returned so <em>the outer square brackets are
-	 *         omitted</em>.
+	 * @return entities or arrays of values as a json string. The query
+	 *         <code>SELECT f FROM Facility f</code> might return
+	 *         <samp>[{"Facility":{"id":126, "name":"another fred"
+	 *         }},{"Facility":{"id":185, "name":"a fred"}} ]</samp> and is a
+	 *         list of the objects returned and takes the same form as the data
+	 *         passed in for create. If more than one quantity is listed in the
+	 *         select clause then instead of a single value being returned for
+	 *         each result an array of values is returned. For example
+	 *         <code>SELECT f.id, f.name FROM Facility f</code> might return:
+	 *         <samp> [[126, "another fred"],[185, "a fred"]]</samp>. If an id
+	 *         value is specified then only one object can be returned so
+	 *         <em>the outer square brackets are
+	 *         omitted.</em>.
 	 * 
 	 * @throws IcatException
 	 *             when something is wrong
@@ -1071,32 +1074,19 @@ public class ICATRest {
 		String userName = beanManager.getUserName(sessionId, manager);
 		if (id == null) {
 			gen.writeStartArray();
-
 			for (Object result : beanManager.search(userName, query, manager, userTransaction)) {
 				if (result == null) {
 					gen.writeNull();
-				} else if (result instanceof EntityBaseBean) {
-					gen.writeStartObject();
-					gen.writeStartObject(result.getClass().getSimpleName());
-					jsonise((EntityBaseBean) result, gen);
-					gen.writeEnd();
-					gen.writeEnd();
-				} else if (result instanceof Long) {
-					gen.write((Long) result);
-				} else if (result instanceof Double) {
-					if (Double.isNaN((double) result)) {
-						gen.writeNull();
-					} else {
-						gen.write((Double) result);
+				} else if (result.getClass().isArray()) {
+					gen.writeStartArray();
+					for (Object field : (Object[]) result) {
+						jsonise(field, gen);
 					}
-				} else if (result instanceof String) {
-					gen.write((String) result);
-				} else if (result instanceof Boolean) {
-					gen.write((Boolean) result);
+					gen.writeEnd();
 				} else {
-					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-							"Don't know how to jsonise " + result.getClass());
+					jsonise(result, gen);
 				}
+
 			}
 
 			gen.writeEnd();

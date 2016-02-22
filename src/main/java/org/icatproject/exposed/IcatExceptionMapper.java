@@ -33,6 +33,7 @@ public class IcatExceptionMapper implements ExceptionMapper<IcatException> {
 		gen.writeStartObject().write("code", e.getType().name()).write("message", e.getMessage());
 		if (e.getOffset() >= 0) {
 			gen.write("offset", e.getOffset());
+			logger.debug("Offset {}", e.getOffset());
 		}
 		gen.writeEnd().close();
 		return Response.status(e.getType().getStatus()).entity(baos.toString()).build();
