@@ -55,7 +55,7 @@ public class TestEntityInfo {
 						+ "name:5,visitId:6),location:7,name:8,sample(investigation(facility(name:9),"
 						+ "name:10,visitId:11),name:12),startDate:13,type(facility(name:14),name:15))",
 				eiHandler.getExportHeader(Dataset.class));
-		assertEquals("DataCollection(?:0)", eiHandler.getExportHeader(DataCollection.class));
+		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals(
 				"Job(?:0,application(facility(name:1),name:2,version:3),arguments:4,inputDataCollection(?:5),outputDataCollection(?:6))",
 				eiHandler.getExportHeader(Job.class));
@@ -68,7 +68,7 @@ public class TestEntityInfo {
 				+ "applicableToInvestigation:3,applicableToSample:4,description:5,enforced:6,facility(name:7),"
 				+ "maximumNumericValue:8,minimumNumericValue:9,name:10,units:11,unitsFullName:12,"
 				+ "valueType:13,verified:14)", eiHandler.getExportHeader(ParameterType.class));
-		assertEquals("DataCollection(?:0)", eiHandler.getExportHeader(DataCollection.class));
+		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals("Rule(?:0,crudFlags:1,grouping(name:2),what:3)", eiHandler.getExportHeader(Rule.class));
 		assertEquals(
 				"DataCollectionDatafile(dataCollection(?:0),datafile(dataset(investigation(facility(name:1),name:2,visitId:3),name:4),name:5))",
@@ -97,7 +97,7 @@ public class TestEntityInfo {
 						+ "sample(investigation(facility(name:13),name:14,visitId:15),"
 						+ "name:16),startDate:17,type(facility(name:18),name:19))",
 				eiHandler.getExportHeaderAll(Dataset.class));
-		assertEquals("DataCollection(?:0,createId:1,createTime:2,modId:3,modTime:4)",
+		assertEquals("DataCollection(?:0,createId:1,createTime:2,modId:3,modTime:4,doi:5)",
 				eiHandler.getExportHeaderAll(DataCollection.class));
 		assertEquals(
 				"Job(?:0,createId:1,createTime:2,modId:3,modTime:4,"
@@ -118,7 +118,7 @@ public class TestEntityInfo {
 						+ "maximumNumericValue:12,minimumNumericValue:13,name:14,units:15,"
 						+ "unitsFullName:16,valueType:17,verified:18)",
 				eiHandler.getExportHeaderAll(ParameterType.class));
-		assertEquals("DataCollection(?:0)", eiHandler.getExportHeader(DataCollection.class));
+		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals("Rule(?:0,createId:1,createTime:2,modId:3,modTime:4," + "crudFlags:5,grouping(name:6),what:7)",
 				eiHandler.getExportHeaderAll(Rule.class));
 		assertEquals(
@@ -154,7 +154,7 @@ public class TestEntityInfo {
 				Investigation.class);
 		testField("complete,dataCollectionDatasets,datafiles,description,doi,endDate,investigation,location,"
 				+ "name,parameters,sample,startDate,type", Dataset.class);
-		testField("dataCollectionDatafiles,dataCollectionDatasets,jobsAsInput,jobsAsOutput,parameters",
+		testField("dataCollectionDatafiles,dataCollectionDatasets,doi,jobsAsInput,jobsAsOutput,parameters",
 				DataCollection.class);
 		testField("application,arguments,inputDataCollection,outputDataCollection", Job.class);
 		testField("dataset,dateTimeValue,error,numericValue,rangeBottom,rangeTop,stringValue,type",

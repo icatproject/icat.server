@@ -3,6 +3,7 @@ package org.icatproject.core.manager;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -32,6 +33,10 @@ import org.slf4j.MarkerFactory;
 @DependsOn("LoggingConfigurator")
 @Singleton
 public class PropertyHandler {
+
+	public enum CallType {
+		READ, WRITE, SESSION, INFO
+	}
 
 	public class ExtendedAuthenticator {
 
@@ -106,7 +111,6 @@ public class PropertyHandler {
 	private final static Logger logger = LoggerFactory.getLogger(PropertyHandler.class);
 	private final static Marker fatal = MarkerFactory.getMarker("FATAL");
 	private final static Pattern cuPattern = Pattern.compile("[CU]*");
-	private final static Pattern srwPattern = Pattern.compile("[SRW]*");
 
 	private Map<String, ExtendedAuthenticator> authPlugins = new LinkedHashMap<>();
 
@@ -128,7 +132,7 @@ public class PropertyHandler {
 
 	private int lifetimeMinutes;
 
-	private Set<String> logRequests = new HashSet<String>();
+	private Set<CallType> logSet = new HashSet<>();
 	private String luceneDirectory;
 	private int luceneCommitSeconds;
 
@@ -241,38 +245,30 @@ public class PropertyHandler {
 						}
 					}
 				}
+				logger.info("notification.list: {}", notificationList);
+			} else {
+				logger.info("'notification.list' entry not present so no notifications will be sent");
 			}
 
-			/* log.list */
+			/* Call logging categories */
 			key = "log.list";
 			if (props.has(key)) {
 				String callLogs = props.getString(key);
-
 				formattedProps.add(key + " " + callLogs);
-
-				for (String logDest : callLogs.split("\\s+")) {
-					if (logDest.equals("file") || logDest.equals("table")) {
-						key = "log." + logDest;
-						String logOps = props.getString(key);
-						formattedProps.add(key + " " + logOps);
-						if (!logOps.isEmpty()) {
-							Matcher m = srwPattern.matcher(logOps);
-							if (!m.matches()) {
-								abend("Property  '" + key + "' must only contain the letters S, R and W");
-							}
-							for (String c : new String[] { "S", "R", "W" }) {
-								if (logOps.indexOf(c) >= 0) {
-									logRequests.add(logDest + ":" + c);
-									logger.debug("Log request added " + logDest + ":" + c);
-								}
-							}
-						}
-					} else {
-						abend("Value '" + logDest + "' specified in 'log.list' is neither 'file' nor 'tables'");
+				for (String callTypeString : callLogs.split("\\s+")) {
+					try {
+						logSet.add(CallType.valueOf(callTypeString.toUpperCase()));
+					} catch (IllegalArgumentException e) {
+						String msg = "Value " + callTypeString + " in log.list must be chosen from "
+								+ Arrays.asList(CallType.values());
+						logger.error(fatal, msg);
+						throw new IllegalStateException(msg);
 					}
 				}
+				logger.info("log.list: {}", logSet);
+			} else {
+				logger.info("'log.list' entry not present so no JMS call logging will be performed");
 			}
-			logger.debug("There are " + logRequests.size() + " log requests");
 
 			/* Lucene Host */
 			HostPort hostPort = new HostPort(props, "lucene.hostPort");
@@ -329,8 +325,8 @@ public class PropertyHandler {
 		return notificationRequests;
 	}
 
-	public Set<String> getLogRequests() {
-		return logRequests;
+	public Set<CallType> getLogSet() {
+		return logSet;
 	}
 
 	public String getLuceneDirectory() {

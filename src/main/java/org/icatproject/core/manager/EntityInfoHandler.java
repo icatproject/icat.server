@@ -58,7 +58,6 @@ import org.icatproject.core.entity.InvestigationType;
 import org.icatproject.core.entity.InvestigationUser;
 import org.icatproject.core.entity.Job;
 import org.icatproject.core.entity.Keyword;
-import org.icatproject.core.entity.Log;
 import org.icatproject.core.entity.ParameterType;
 import org.icatproject.core.entity.PermissibleStringValue;
 import org.icatproject.core.entity.PublicStep;
@@ -194,8 +193,8 @@ public class EntityInfoHandler {
 			Investigation.class, Sample.class, Dataset.class, Datafile.class, FacilityCycle.class, DataCollection.class,
 			DataCollectionDatafile.class, DataCollectionDataset.class, DataCollectionParameter.class,
 			DatafileParameter.class, DatasetParameter.class, InvestigationParameter.class, Job.class, Keyword.class,
-			Log.class, PermissibleStringValue.class, Publication.class, RelatedDatafile.class, SampleParameter.class,
-			Shift.class, Study.class, InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class,
+			PermissibleStringValue.class, Publication.class, RelatedDatafile.class, SampleParameter.class, Shift.class,
+			Study.class, InvestigationUser.class, InvestigationGroup.class, StudyInvestigation.class,
 			InvestigationInstrument.class, InstrumentScientist.class);
 	private static Set<String> entityNames = new HashSet<>();
 

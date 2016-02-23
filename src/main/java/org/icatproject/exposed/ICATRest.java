@@ -76,7 +76,6 @@ import org.icatproject.core.manager.Porter;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
 import org.icatproject.core.manager.ScoredEntityBaseBean;
-import org.icatproject.core.manager.Transmitter;
 import org.icatproject.utils.ContainerGetter.ContainerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,9 +106,6 @@ public class ICATRest {
 
 	@EJB
 	Porter porter;
-
-	@EJB
-	Transmitter transmitter;
 
 	@EJB
 	PropertyHandler propertyHandler;
@@ -168,12 +164,12 @@ public class ICATRest {
 	@Path("entityManager")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	public String write(@FormParam("sessionId") String sessionId, @FormParam("entities") String json)
-			throws IcatException {
+	public String write(@Context HttpServletRequest request, @FormParam("sessionId") String sessionId,
+			@FormParam("entities") String json) throws IcatException {
 
 		String userName = beanManager.getUserName(sessionId, manager);
 
-		List<Long> beanIds = beanManager.write(userName, json, manager, userTransaction, transmitter);
+		List<Long> beanIds = beanManager.write(userName, json, manager, userTransaction, request.getRemoteAddr());
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator gen = Json.createGenerator(baos)) {
@@ -205,8 +201,8 @@ public class ICATRest {
 	@DELETE
 	@Path("entityManager")
 	@Produces(MediaType.APPLICATION_JSON)
-	public void delete(@QueryParam("sessionId") String sessionId, @QueryParam("entities") String json)
-			throws IcatException {
+	public void delete(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
+			@QueryParam("entities") String json) throws IcatException {
 
 		if (json == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "entities is not set");
@@ -227,7 +223,7 @@ public class ICATRest {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage() + " in json " + json);
 		}
 		String userName = beanManager.getUserName(sessionId, manager);
-		beanManager.delete(userName, beans, manager, userTransaction);
+		beanManager.delete(userName, beans, manager, userTransaction, request.getRemoteAddr());
 	}
 
 	private EntityBaseBean getOne(JsonObject entity, int offset) throws IcatException {
@@ -543,7 +539,7 @@ public class ICATRest {
 					if (name == null) {
 						name = item.getName();
 					}
-					porter.importData(jsonString, stream, manager, userTransaction);
+					porter.importData(jsonString, stream, manager, userTransaction, request.getRemoteAddr());
 				}
 			}
 		} catch (FileUploadException | IOException e) {
@@ -710,7 +706,8 @@ public class ICATRest {
 		logger.debug("Using " + plugin + " to authenticate");
 
 		String userName = authenticator.authenticate(credentials, request.getRemoteAddr()).getUserName();
-		String sessionId = beanManager.login(userName, lifetimeMinutes, manager, userTransaction);
+		String sessionId = beanManager.login(userName, lifetimeMinutes, manager, userTransaction,
+				request.getRemoteAddr());
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		JsonGenerator gen = Json.createGenerator(baos);
@@ -734,8 +731,9 @@ public class ICATRest {
 	 */
 	@DELETE
 	@Path("session/{sessionId}")
-	public void logout(@PathParam("sessionId") String sessionId) throws IcatException {
-		beanManager.logout(sessionId, manager, userTransaction);
+	public void logout(@Context HttpServletRequest request, @PathParam("sessionId") String sessionId)
+			throws IcatException {
+		beanManager.logout(sessionId, manager, userTransaction, request.getRemoteAddr());
 	}
 
 	/**
@@ -840,8 +838,8 @@ public class ICATRest {
 	@GET
 	@Path("lucene/data")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String lucene(@QueryParam("sessionId") String sessionId, @QueryParam("query") String query,
-			@QueryParam("maxCount") int maxCount) throws IcatException {
+	public String lucene(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
+			@QueryParam("query") String query, @QueryParam("maxCount") int maxCount) throws IcatException {
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
 		}
@@ -893,15 +891,15 @@ public class ICATRest {
 				String userFullName = jo.getString("userFullName", null);
 
 				objects = beanManager.luceneInvestigations(userName, user, text, lower, upper, parms, samples,
-						userFullName, maxCount, manager, userTransaction);
+						userFullName, maxCount, manager, request.getRemoteAddr());
 
 			} else if (target.equals("Dataset")) {
 				objects = beanManager.luceneDatasets(userName, user, text, lower, upper, parms, maxCount, manager,
-						userTransaction);
+						request.getRemoteAddr());
 
 			} else if (target.equals("Datafile")) {
 				objects = beanManager.luceneDatafiles(userName, user, text, lower, upper, parms, maxCount, manager,
-						userTransaction);
+						request.getRemoteAddr());
 
 			} else {
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, "target:" + target + " is not expected");
@@ -1020,8 +1018,9 @@ public class ICATRest {
 	 */
 	@PUT
 	@Path("session/{sessionId}")
-	public void refresh(@PathParam("sessionId") String sessionId) throws IcatException {
-		beanManager.refresh(sessionId, lifetimeMinutes, manager, userTransaction);
+	public void refresh(@Context HttpServletRequest request, @PathParam("sessionId") String sessionId)
+			throws IcatException {
+		beanManager.refresh(sessionId, lifetimeMinutes, manager, userTransaction, request.getRemoteAddr());
 	}
 
 	/**
@@ -1061,8 +1060,8 @@ public class ICATRest {
 	@GET
 	@Path("entityManager")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String search(@QueryParam("sessionId") String sessionId, @QueryParam("query") String query,
-			@QueryParam("id") Long id) throws IcatException {
+	public String search(@Context HttpServletRequest request, @QueryParam("sessionId") String sessionId,
+			@QueryParam("query") String query, @QueryParam("id") Long id) throws IcatException {
 
 		if (query == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "query is not set");
@@ -1074,7 +1073,7 @@ public class ICATRest {
 		String userName = beanManager.getUserName(sessionId, manager);
 		if (id == null) {
 			gen.writeStartArray();
-			for (Object result : beanManager.search(userName, query, manager, userTransaction)) {
+			for (Object result : beanManager.search(userName, query, manager, request.getRemoteAddr())) {
 				if (result == null) {
 					gen.writeNull();
 				} else if (result.getClass().isArray()) {
@@ -1091,7 +1090,7 @@ public class ICATRest {
 
 			gen.writeEnd();
 		} else {
-			EntityBaseBean result = beanManager.get(userName, query, id, manager, userTransaction);
+			EntityBaseBean result = beanManager.get(userName, query, id, manager, request.getRemoteAddr());
 			gen.writeStartObject();
 			gen.writeStartObject(result.getClass().getSimpleName());
 			jsonise(result, gen);

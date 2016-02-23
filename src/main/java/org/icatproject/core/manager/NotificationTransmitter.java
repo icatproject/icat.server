@@ -7,32 +7,33 @@ import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
 import javax.jms.Session;
-import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.icatproject.core.manager.NotificationMessage.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-@Singleton
 @DependsOn("LoggingConfigurator")
-public class Transmitter {
+@Singleton
+public class NotificationTransmitter {
 
-	private static Logger logger = LoggerFactory.getLogger(Transmitter.class);
+	private static Logger logger = LoggerFactory.getLogger(NotificationTransmitter.class);
 	private final static Marker fatal = MarkerFactory.getMarker("FATAL");
 
 	private Topic topic;
 
-	private TopicConnection topicConnection;
-
 	@EJB
 	PropertyHandler propertyHandler;
+
+	private TopicConnection topicConnection;
 
 	@PostConstruct
 	private void init() {
@@ -42,7 +43,7 @@ public class Transmitter {
 			TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) ic
 					.lookup(propertyHandler.getJmsTopicConnectionFactory());
 			topicConnection = topicConnectionFactory.createTopicConnection();
-			topic = (Topic) ic.lookup("jms/ICAT/log");
+			topic = (Topic) ic.lookup("jms/ICAT/Topic");
 			logger.info("Transmitter created");
 		} catch (JMSException | NamingException e) {
 			logger.error(fatal, "Problem with JMS " + e);
@@ -63,21 +64,20 @@ public class Transmitter {
 		}
 	}
 
-	public void processMessage(String operation, String ip, String body, long startMillis) {
-		try {
+	public void processMessage(NotificationMessage notificationMessage) throws JMSException {
+		Message message = notificationMessage.getMessage();
+		if (message != null) {
 			Session jmsSession = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			TextMessage jmsg = jmsSession.createTextMessage(body);
-			jmsg.setStringProperty("operation", operation);
-			jmsg.setStringProperty("ip", ip);
-			jmsg.setLongProperty("millis", System.currentTimeMillis() - startMillis);
-			jmsg.setLongProperty("start", startMillis);
 			MessageProducer jmsProducer = jmsSession.createProducer(topic);
+			ObjectMessage jmsg = jmsSession.createObjectMessage();
+			jmsg.setStringProperty("entity", message.getEntityName());
+			jmsg.setStringProperty("operation", message.getOperation());
+			jmsg.setObject(message.getEntityId());
 			jmsProducer.send(jmsg);
-			logger.debug("Sent jms message " + operation + " " + ip);
+			logger.debug("Sent jms message " + message.getOperation() + " " + message.getEntityName() + " "
+					+ message.getEntityId());
 			jmsSession.close();
-		} catch (JMSException e) {
-			logger.error("Failed to send jms message " + operation + " " + ip);
 		}
-	}
 
+	}
 }

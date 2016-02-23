@@ -1,10 +1,7 @@
 package org.icatproject.core.manager;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -16,10 +13,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -46,10 +41,10 @@ import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
+import javax.json.stream.JsonGenerator;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.Column;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -68,12 +63,12 @@ import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Investigation;
-import org.icatproject.core.entity.Log;
 import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.Lucene.LuceneSearchResult;
 import org.icatproject.core.manager.Lucene.ParameterPOJO;
 import org.icatproject.core.manager.LuceneSingleton.ScoredResult;
+import org.icatproject.core.manager.PropertyHandler.CallType;
 import org.icatproject.core.manager.PropertyHandler.Operation;
 import org.icatproject.core.oldparser.OldGetQuery;
 import org.icatproject.core.oldparser.OldInput;
@@ -119,56 +114,21 @@ public class EntityBeanManager {
 
 	private static EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 
-	private static BufferedWriter logFile;
-
 	private static final Logger logger = LoggerFactory.getLogger(EntityBeanManager.class);
 
-	private static long next;
 	private static final Pattern timestampPattern = Pattern.compile(":ts(\\d{14})");
-
-	private synchronized static void writeLogFile(long now, String entry) {
-		if (now > next) {
-			if (next != 0) {
-				try {
-					logFile.close();
-				} catch (IOException e1) {
-					logger.warn("Unable to close file " + logFile);
-				}
-			}
-			GregorianCalendar nextCal = new GregorianCalendar();
-			String fileName = "icat.call.log." + nextCal.get(Calendar.YEAR) + "-" + (nextCal.get(Calendar.MONTH) + 1)
-					+ "-" + nextCal.get(Calendar.DAY_OF_MONTH);
-
-			nextCal.add(Calendar.DATE, 1);
-			nextCal.set(Calendar.HOUR_OF_DAY, 0);
-			nextCal.set(Calendar.MINUTE, 0);
-			nextCal.set(Calendar.SECOND, 0);
-			nextCal.set(Calendar.MILLISECOND, 0);
-			next = nextCal.getTimeInMillis();
-
-			try {
-				logFile = new BufferedWriter(new FileWriter(new File(new File("..", "logs"), fileName), true));
-			} catch (IOException e) {
-				logger.warn("Unable to open file " + fileName + " for appending");
-				next = 0;
-			}
-		}
-		try {
-			if (next != 0) {
-				logFile.write(entry, 0, entry.length());
-				logFile.newLine();
-				logFile.flush();
-			}
-		} catch (IOException e) {
-			logger.warn("Unable to write to " + logFile);
-		}
-
-	}
 
 	@EJB
 	GateKeeper gateKeeper;
+
 	@EJB
 	PropertyHandler propertyHandler;
+
+	@EJB
+	NotificationTransmitter notificationTransmitter;
+
+	@EJB
+	Transmitter transmitter;
 
 	@EJB
 	LuceneSingleton luceneSingleton;
@@ -179,7 +139,7 @@ public class EntityBeanManager {
 
 	Marker fatal = MarkerFactory.getMarker("FATAL");
 
-	private Set<String> logRequests;
+	private Set<CallType> logRequests;
 
 	private Map<String, NotificationRequest> notificationRequests;
 
@@ -189,8 +149,6 @@ public class EntityBeanManager {
 
 	private long exportCacheSize;
 	private Set<String> rootUserNames;
-
-	private int logQueryLength;
 
 	private String buildKey(EntityBaseBean bean, Map<String, Map<Long, String>> exportCaches)
 			throws IcatException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -239,13 +197,13 @@ public class EntityBeanManager {
 	}
 
 	public CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
-			UserTransaction userTransaction, boolean allAttributes) throws IcatException {
+			UserTransaction userTransaction, boolean allAttributes, String ip) throws IcatException {
 
 		logger.info(userId + " creating " + bean.getClass().getSimpleName());
 		try {
 			userTransaction.begin();
 			try {
-				long time = log ? System.currentTimeMillis() : 0;
+				long startMillis = log ? System.currentTimeMillis() : 0;
 				bean.preparePersist(userId, manager, gateKeeper, allAttributes, true);
 				logger.trace(bean + " prepared for persist.");
 				manager.persist(bean);
@@ -263,8 +221,15 @@ public class EntityBeanManager {
 					bean.addToLucene(lucene);
 				}
 				userTransaction.commit();
-				if (log) {
-					logWrite(time, userId, "create", bean.getClass().getSimpleName(), beanId, manager, userTransaction);
+				if (logRequests.contains(CallType.WRITE)) {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+						gen.write("userName", userId);
+						gen.write("entityName", bean.getClass().getSimpleName());
+						gen.write("entityId", beanId);
+						gen.writeEnd();
+					}
+					transmitter.processMessage("create", ip, baos.toString(), startMillis);
 				}
 				return new CreateResponse(beanId, notification);
 			} catch (EntityExistsException e) {
@@ -349,12 +314,12 @@ public class EntityBeanManager {
 	}
 
 	public List<CreateResponse> createMany(String userId, List<EntityBaseBean> beans, EntityManager manager,
-			UserTransaction userTransaction) throws IcatException {
+			UserTransaction userTransaction, String ip) throws IcatException {
 		try {
 			userTransaction.begin();
 			List<CreateResponse> crs = new ArrayList<CreateResponse>();
 			try {
-				long time = log ? System.currentTimeMillis() : 0;
+				long startMillis = log ? System.currentTimeMillis() : 0;
 				for (EntityBaseBean bean : beans) {
 					bean.preparePersist(userId, manager, gateKeeper, false, true);
 					logger.trace(bean + " prepared for persist.");
@@ -371,9 +336,15 @@ public class EntityBeanManager {
 				}
 				userTransaction.commit();
 
-				if (log && !crs.isEmpty()) {
-					logWrite(time, userId, "createMany", beans.get(0).getClass().getSimpleName(), crs.get(0).getPk(),
-							manager, userTransaction);
+				if (logRequests.contains(CallType.WRITE) && !crs.isEmpty()) {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+						gen.write("userName", userId);
+						gen.write("entityName", beans.get(0).getClass().getSimpleName());
+						gen.write("entityId", crs.get(0).getPk());
+						gen.writeEnd();
+					}
+					transmitter.processMessage("createMany", ip, baos.toString(), startMillis);
 				}
 
 				if (luceneActive) {
@@ -458,7 +429,7 @@ public class EntityBeanManager {
 	}
 
 	public void delete(String userId, List<EntityBaseBean> beans, EntityManager manager,
-			UserTransaction userTransaction) throws IcatException {
+			UserTransaction userTransaction, String ip) throws IcatException {
 		if (beans == null) { // Wildlfy 10 receives null instead of empty list
 			beans = Collections.emptyList();
 		}
@@ -468,7 +439,7 @@ public class EntityBeanManager {
 			userTransaction.begin();
 			EntityBaseBean firstBean = null;
 			try {
-				long time = log ? System.currentTimeMillis() : 0;
+				long startMillis = log ? System.currentTimeMillis() : 0;
 
 				List<EntityBaseBean> allBeansToDelete = new ArrayList<>();
 				for (EntityBaseBean bean : beans) {
@@ -498,9 +469,15 @@ public class EntityBeanManager {
 					}
 				}
 
-				if (log && firstBean != null) {
-					logWrite(time, userId, "deleteMany", firstBean.getClass().getSimpleName(), firstBean.getId(),
-							manager, userTransaction);
+				if (logRequests.contains(CallType.WRITE) && firstBean != null) {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+						gen.write("userName", userId);
+						gen.write("entityName", firstBean.getClass().getSimpleName());
+						gen.write("entityId", firstBean.getId());
+						gen.writeEnd();
+					}
+					transmitter.processMessage("delete", ip, baos.toString(), startMillis);
 				}
 			} catch (IcatException e) {
 				userTransaction.rollback();
@@ -817,10 +794,10 @@ public class EntityBeanManager {
 		return object;
 	}
 
-	public EntityBaseBean get(String userId, String query, long primaryKey, EntityManager manager,
-			UserTransaction userTransaction) throws IcatException {
+	public EntityBaseBean get(String userId, String query, long primaryKey, EntityManager manager, String ip)
+			throws IcatException {
 
-		long time = log ? System.currentTimeMillis() : 0;
+		long startMillis = log ? System.currentTimeMillis() : 0;
 		logger.debug(userId + " issues get for " + query);
 		String[] words = query.trim().split("\\s+");
 		if (words.length > 1 && words[1].toUpperCase().equals("INCLUDE")) {
@@ -865,9 +842,16 @@ public class EntityBeanManager {
 		result = beanManaged.pruned(one, 0, steps, maxEntities, gateKeeper, userId, manager);
 		logger.debug("Obtained " + result.getDescendantCount(maxEntities) + " entities.");
 
-		if (log) {
-			logRead(time, userId, "get", result.getClass().getSimpleName(), result.getId(), query, manager,
-					userTransaction);
+		if (logRequests.contains(CallType.READ)) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+				gen.write("userName", userId);
+				gen.write("entityName", result.getClass().getSimpleName());
+				gen.write("entityId", result.getId());
+				gen.write("query", query);
+				gen.writeEnd();
+			}
+			transmitter.processMessage("get", ip, baos.toString(), startMillis);
 		}
 		return result;
 	}
@@ -1149,7 +1133,7 @@ public class EntityBeanManager {
 			lucene = luceneSingleton;
 		}
 
-		logRequests = propertyHandler.getLogRequests();
+		logRequests = propertyHandler.getLogSet();
 		log = !logRequests.isEmpty();
 		notificationRequests = propertyHandler.getNotificationRequests();
 		luceneActive = lucene.getActive();
@@ -1157,14 +1141,6 @@ public class EntityBeanManager {
 		exportCacheSize = propertyHandler.getImportCacheSize();
 		rootUserNames = propertyHandler.getRootUserNames();
 
-		try {
-			logQueryLength = Log.class.getDeclaredField("query").getAnnotation(Column.class).length();
-		} catch (Exception e) {
-			String msg = e.getClass() + " reports " + e.getMessage()
-					+ " looking up information about query column of Log";
-			logger.error(fatal, msg);
-			throw new IllegalStateException(msg);
-		}
 	}
 
 	public boolean isAccessAllowed(String userId, EntityBaseBean bean, EntityManager manager,
@@ -1213,20 +1189,25 @@ public class EntityBeanManager {
 		}
 	}
 
-	public String login(String userName, int lifetimeMinutes, EntityManager manager, UserTransaction userTransaction)
-			throws IcatException {
+	public String login(String userName, int lifetimeMinutes, EntityManager manager, UserTransaction userTransaction,
+			String ip) throws IcatException {
 		Session session = new Session(userName, lifetimeMinutes);
 		try {
 			userTransaction.begin();
 			try {
-				long time = log ? System.currentTimeMillis() : 0;
+				long startMillis = log ? System.currentTimeMillis() : 0;
 				manager.persist(session);
 				manager.flush();
 				userTransaction.commit();
 				String result = session.getId();
 				logger.debug("Session " + result + " persisted.");
-				if (log) {
-					logSession(time, userName, "login", manager, userTransaction);
+				if (logRequests.contains(CallType.SESSION)) {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+						gen.write("userName", userName);
+						gen.writeEnd();
+					}
+					transmitter.processMessage("login", ip, baos.toString(), startMillis);
 				}
 				return result;
 			} catch (Throwable e) {
@@ -1248,19 +1229,25 @@ public class EntityBeanManager {
 		}
 	}
 
-	public void logout(String sessionId, EntityManager manager, UserTransaction userTransaction) throws IcatException {
+	public void logout(String sessionId, EntityManager manager, UserTransaction userTransaction, String ip)
+			throws IcatException {
 		logger.debug("logout for sessionId " + sessionId);
 		try {
 			userTransaction.begin();
 			try {
-				long time = log ? System.currentTimeMillis() : 0;
+				long startMillis = log ? System.currentTimeMillis() : 0;
 				Session session = getSession(sessionId, manager);
 				manager.remove(session);
 				manager.flush();
 				userTransaction.commit();
-				logger.debug("Session " + session.getId() + " removed.");
-				if (log) {
-					logSession(time, session.getUserName(), "logout", manager, userTransaction);
+				logger.debug("Session {} removed.", session.getId());
+				if (logRequests.contains(CallType.SESSION)) {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+						gen.write("userName", session.getUserName());
+						gen.writeEnd();
+					}
+					transmitter.processMessage("logout", ip, baos.toString(), startMillis);
 				}
 			} catch (IcatException e) {
 				userTransaction.rollback();
@@ -1284,44 +1271,6 @@ public class EntityBeanManager {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException" + e.getMessage());
 		} catch (RuntimeException e) {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
-		}
-	}
-
-	private void logRead(long time, String userName, String operation, String entityName, Long entityId, String query,
-			EntityManager manager, UserTransaction userTransaction) throws IcatException {
-		long now = System.currentTimeMillis();
-		if (query.length() > logQueryLength) {
-			query = query.substring(0, logQueryLength - 3) + "...";
-		}
-		if (logRequests.contains("file:R")) {
-			writeLogFile(now, userName + "\t" + operation + "\t" + time + "\t" + (now - time) + "\t" + entityName + "\t"
-					+ entityId + "\t" + query);
-		}
-		if (logRequests.contains("table:R")) {
-			writeTable(now, userName, operation, now - time, entityName, entityId, query, manager, userTransaction);
-		}
-	}
-
-	private void logSession(long time, String userName, String operation, EntityManager manager,
-			UserTransaction userTransaction) throws IcatException {
-		long now = System.currentTimeMillis();
-		if (logRequests.contains("file:S")) {
-			writeLogFile(now, userName + "\t" + operation + "\t" + time + "\t" + (now - time));
-		}
-		if (logRequests.contains("table:S")) {
-			writeTable(now, userName, operation, now - time, null, null, null, manager, userTransaction);
-		}
-	}
-
-	private void logWrite(long time, String userName, String operation, String entityName, long entityId,
-			EntityManager manager, UserTransaction userTransaction) throws IcatException {
-		long now = System.currentTimeMillis();
-		if (logRequests.contains("file:W")) {
-			writeLogFile(now, userName + "\t" + operation + "\t" + time + "\t" + (now - time) + "\t" + entityName + "\t"
-					+ entityId);
-		}
-		if (logRequests.contains("table:W")) {
-			writeTable(now, userName, operation, now - time, entityName, entityId, null, manager, userTransaction);
 		}
 	}
 
@@ -1377,9 +1326,9 @@ public class EntityBeanManager {
 	}
 
 	public List<ScoredEntityBaseBean> luceneDatafiles(String userName, String user, String text, String lower,
-			String upper, List<ParameterPOJO> parms, int maxCount, EntityManager manager,
-			UserTransaction userTransaction) throws IcatException {
-		long time = log ? System.currentTimeMillis() : 0;
+			String upper, List<ParameterPOJO> parms, int maxCount, EntityManager manager, String ip)
+					throws IcatException {
+		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
 			LuceneSearchResult last = null;
@@ -1402,22 +1351,26 @@ public class EntityBeanManager {
 			/* failing lucene retrieval calls clean up before throwing */
 			lucene.freeSearcher(last);
 		}
-		if (log) {
-			if (results.size() > 0) {
-				logRead(time, userName, "luceneDatafiles", "Datafile", results.get(0).getEntityBaseBeanId(), "",
-						manager, userTransaction);
-			} else {
-				logRead(time, userName, "luceneDatafiles", null, null, "", manager, userTransaction);
+
+		if (logRequests.contains("R")) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+				gen.write("userName", userName);
+				if (results.size() > 0) {
+					gen.write("entityId", results.get(0).getEntityBaseBeanId());
+				}
+				gen.writeEnd();
 			}
+			transmitter.processMessage("luceneDatafiles", ip, baos.toString(), startMillis);
 		}
-		logger.debug("Returning " + results.size() + " results");
+		logger.debug("Returning {} results", results.size());
 		return results;
 	}
 
 	public List<ScoredEntityBaseBean> luceneDatasets(String userName, String user, String text, String lower,
-			String upper, List<ParameterPOJO> parms, int maxCount, EntityManager manager,
-			UserTransaction userTransaction) throws IcatException {
-		long time = log ? System.currentTimeMillis() : 0;
+			String upper, List<ParameterPOJO> parms, int maxCount, EntityManager manager, String ip)
+					throws IcatException {
+		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
 			LuceneSearchResult last = null;
@@ -1440,15 +1393,18 @@ public class EntityBeanManager {
 			/* failing lucene retrieval calls clean up before throwing */
 			lucene.freeSearcher(last);
 		}
-		if (log) {
-			if (results.size() > 0) {
-				logRead(time, userName, "luceneDatasets", "Dataset", results.get(0).getEntityBaseBeanId(), "", manager,
-						userTransaction);
-			} else {
-				logRead(time, userName, "luceneDatasets", null, null, "", manager, userTransaction);
+		if (logRequests.contains("R")) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+				gen.write("userName", userName);
+				if (results.size() > 0) {
+					gen.write("entityId", results.get(0).getEntityBaseBeanId());
+				}
+				gen.writeEnd();
 			}
+			transmitter.processMessage("luceneDatasets", ip, baos.toString(), startMillis);
 		}
-		logger.debug("Returning " + results.size() + " results");
+		logger.debug("Returning {} results", results.size());
 		return results;
 	}
 
@@ -1460,13 +1416,12 @@ public class EntityBeanManager {
 		}
 	}
 
-	public List<ScoredEntityBaseBean> luceneInvestigations(String userId, String user, String text, String lower,
+	public List<ScoredEntityBaseBean> luceneInvestigations(String userName, String user, String text, String lower,
 			String upper, List<ParameterPOJO> parms, List<String> samples, String userFullName, int maxCount,
-			EntityManager manager, UserTransaction userTransaction) throws IcatException {
+			EntityManager manager, String ip) throws IcatException {
 
-		long time = log ? System.currentTimeMillis() : 0;
+		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
-		long descendantCount = 0;
 		if (luceneActive) {
 			LuceneSearchResult last = null;
 			List<ScoredResult> allResults = Collections.emptyList();
@@ -1484,20 +1439,23 @@ public class EntityBeanManager {
 							last);
 				}
 				allResults = last.getResults();
-				filterReadAccess(results, allResults, maxCount, userId, manager, Investigation.class);
+				filterReadAccess(results, allResults, maxCount, userName, manager, Investigation.class);
 			} while (results.size() != maxCount && allResults.size() == blockSize);
 			/* failing lucene retrieval calls clean up before throwing */
 			lucene.freeSearcher(last);
 		}
-		if (log) {
-			if (results.size() > 0) {
-				logRead(time, userId, "luceneInvestigations", "Investigation", results.get(0).getEntityBaseBeanId(), "",
-						manager, userTransaction);
-			} else {
-				logRead(time, userId, "luceneInvestigations", null, null, "", manager, userTransaction);
+		if (logRequests.contains("R")) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+				gen.write("userName", userName);
+				if (results.size() > 0) {
+					gen.write("entityId", results.get(0).getEntityBaseBeanId());
+				}
+				gen.writeEnd();
 			}
+			transmitter.processMessage("luceneInvestigations", ip, baos.toString(), startMillis);
 		}
-		logger.debug("Returning " + results.size() + " results with " + descendantCount + " entities");
+		logger.debug("Returning {} results", results.size());
 		return results;
 	}
 
@@ -1664,20 +1622,25 @@ public class EntityBeanManager {
 
 	}
 
-	public void refresh(String sessionId, int lifetimeMinutes, EntityManager manager, UserTransaction userTransaction)
-			throws IcatException {
+	public void refresh(String sessionId, int lifetimeMinutes, EntityManager manager, UserTransaction userTransaction,
+			String ip) throws IcatException {
 		logger.debug("logout for sessionId " + sessionId);
 		try {
 			userTransaction.begin();
 			try {
-				long time = log ? System.currentTimeMillis() : 0;
+				long startMillis = log ? System.currentTimeMillis() : 0;
 				Session session = getSession(sessionId, manager);
 				session.refresh(lifetimeMinutes);
 				manager.flush();
 				userTransaction.commit();
-				logger.debug("Session " + session.getId() + " refreshed.");
-				if (log) {
-					logSession(time, session.getUserName(), "refresh", manager, userTransaction);
+				logger.debug("Session {} refreshed.", session.getId());
+				if (logRequests.contains(CallType.SESSION)) {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+						gen.write("userName", session.getUserName());
+						gen.writeEnd();
+					}
+					transmitter.processMessage("refresh", ip, baos.toString(), startMillis);
 				}
 			} catch (IcatException e) {
 				userTransaction.rollback();
@@ -1702,10 +1665,9 @@ public class EntityBeanManager {
 		}
 	}
 
-	public List<?> search(String userId, String query, EntityManager manager, UserTransaction userTransaction)
-			throws IcatException {
+	public List<?> search(String userId, String query, EntityManager manager, String ip) throws IcatException {
 
-		long time = log ? System.currentTimeMillis() : 0;
+		long startMillis = log ? System.currentTimeMillis() : 0;
 		logger.info(userId + " searching for " + query);
 
 		EntitySetResult esr = getEntitySet(userId, query, manager);
@@ -1740,32 +1702,43 @@ public class EntityBeanManager {
 			}
 			logger.debug("Obtained " + descendantCount + " entities.");
 
-			if (log) {
+			if (logRequests.contains(CallType.READ)) {
 				EntityBaseBean bean = (EntityBaseBean) clones.get(0);
-				if (bean == null) {
-					logRead(time, userId, "search", null, null, query, manager, userTransaction);
-				} else {
-					logRead(time, userId, "search", bean.getClass().getSimpleName(), bean.getId(), query, manager,
-							userTransaction);
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+					gen.write("userName", userId);
+					if (bean != null) {
+						gen.write("entityName", bean.getClass().getSimpleName());
+						gen.write("entityId", bean.getId());
+					}
+					gen.write("query", query);
+					gen.writeEnd();
 				}
+				transmitter.processMessage("search", ip, baos.toString(), startMillis);
 			}
-			logger.debug("Clones " + clones);
+			logger.debug("Clones {}", clones);
 			return clones;
 		} else {
-			if (log) {
-				logRead(time, userId, "search", null, null, query, manager, userTransaction);
+			if (logRequests.contains(CallType.READ)) {
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+					gen.write("userName", userId);
+					gen.write("query", query);
+					gen.writeEnd();
+				}
+				transmitter.processMessage("search", ip, baos.toString(), startMillis);
 			}
-			logger.debug("Result " + result);
+			logger.debug("Result {}", result);
 			return result;
 		}
 	}
 
 	public NotificationMessage update(String userId, EntityBaseBean bean, EntityManager manager,
-			UserTransaction userTransaction, boolean allAttributes) throws IcatException {
+			UserTransaction userTransaction, boolean allAttributes, String ip) throws IcatException {
 		try {
 			userTransaction.begin();
 			try {
-				long time = log ? System.currentTimeMillis() : 0;
+				long startMillis = log ? System.currentTimeMillis() : 0;
 				EntityBaseBean beanManaged = find(bean, manager);
 				gateKeeper.performAuthorisation(userId, beanManaged, AccessType.UPDATE, manager);
 				if (allAttributes) {
@@ -1806,12 +1779,18 @@ public class EntityBeanManager {
 				NotificationMessage notification = new NotificationMessage(Operation.U, bean, manager,
 						notificationRequests);
 				userTransaction.commit();
-				if (log) {
-					logWrite(time, userId, "update", bean.getClass().getSimpleName(), bean.getId(), manager,
-							userTransaction);
+				if (logRequests.contains(CallType.WRITE)) {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+						gen.write("userName", userId);
+						gen.write("entityName", bean.getClass().getSimpleName());
+						gen.write("entityId", bean.getId());
+						gen.writeEnd();
+					}
+					transmitter.processMessage("update", ip, baos.toString(), startMillis);
 				}
 				if (luceneActive) {
-					bean.updateInLucene(lucene);
+					beanManaged.updateInLucene(lucene);
 				}
 				return notification;
 			} catch (IcatException e) {
@@ -1825,33 +1804,27 @@ public class EntityBeanManager {
 				merge(beanManaged, bean, manager);
 				beanManaged.postMergeFixup(manager, gateKeeper);
 				beanManaged.isValid(manager, false);
-				e.printStackTrace(System.err);
+				logger.error("Internal error", e);
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
 			}
-		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException" + e.getMessage());
-		} catch (SecurityException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException" + e.getMessage());
-		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException" + e.getMessage());
-		} catch (NotSupportedException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException" + e.getMessage());
+		} catch (IllegalStateException | SecurityException | SystemException | NotSupportedException e) {
+			logger.error("Internal error", e);
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 	}
 
 	private void updateCache() throws IcatException {
 		try {
 			gateKeeper.updateCache();
-		} catch (JMSException e1) {
-			String msg = e1.getClass() + " " + e1.getMessage();
-			logger.error(msg);
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, msg);
+		} catch (JMSException e) {
+			logger.error("Internal error", e);
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
 	}
 
 	public List<Long> write(String userId, String json, EntityManager manager, UserTransaction userTransaction,
-			Transmitter transmitter) throws IcatException {
+			String ip) throws IcatException {
 		logger.info("write called with {}", json);
 
 		if (json == null) {
@@ -1866,7 +1839,7 @@ public class EntityBeanManager {
 			int offset = 0;
 			userTransaction.begin();
 			try (JsonReader reader = Json.createReader(new ByteArrayInputStream(json.getBytes()))) {
-				long time = log ? System.currentTimeMillis() : 0;
+				long startMillis = log ? System.currentTimeMillis() : 0;
 				JsonStructure top = reader.read();
 
 				if (top.getValueType() == ValueType.ARRAY) {
@@ -1892,18 +1865,28 @@ public class EntityBeanManager {
 				 * Nothing should be able to go wrong now so log, update lucene
 				 * and send notification messages
 				 */
-				if (log) {
+				if (logRequests.contains(CallType.WRITE)) {
+
 					EntityBaseBean bean = null;
 					if (!creates.isEmpty()) {
 						bean = creates.get(0);
-						logWrite(time, userId, "create", bean.getClass().getSimpleName(), bean.getId(), manager,
-								userTransaction);
+
 					} else if (!updates.isEmpty()) {
 						bean = updates.get(0);
-						logWrite(time, userId, "update", bean.getClass().getSimpleName(), bean.getId(), manager,
-								userTransaction);
 					}
 
+					if (bean != null) {
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+						try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+							gen.write("userName", userId);
+							gen.write("entityName", bean.getClass().getSimpleName());
+							gen.write("entityId", bean.getId());
+							gen.writeEnd();
+						}
+						transmitter.processMessage("write", ip, baos.toString(), startMillis);
+
+					}
 				}
 
 				if (luceneActive) {
@@ -1916,10 +1899,12 @@ public class EntityBeanManager {
 				}
 
 				for (EntityBaseBean eb : creates) {
-					transmitter.processMessage(new NotificationMessage(Operation.C, eb, manager, notificationRequests));
+					notificationTransmitter
+							.processMessage(new NotificationMessage(Operation.C, eb, manager, notificationRequests));
 				}
 				for (EntityBaseBean eb : updates) {
-					transmitter.processMessage(new NotificationMessage(Operation.U, eb, manager, notificationRequests));
+					notificationTransmitter
+							.processMessage(new NotificationMessage(Operation.U, eb, manager, notificationRequests));
 				}
 
 				return beanIds;
@@ -2078,40 +2063,6 @@ public class EntityBeanManager {
 			return bean;
 		} else {
 			return null;
-		}
-
-	}
-
-	private void writeTable(long timeStamp, String userId, String operation, long duration, String entityName,
-			Long entityId, String query, EntityManager manager, UserTransaction userTransaction) throws IcatException {
-
-		try {
-			userTransaction.begin();
-			Log logEntry = null;
-			try {
-				logEntry = new Log(operation, duration, entityName, entityId, query);
-				logEntry.preparePersist(userId, manager, gateKeeper, false, true);
-				manager.persist(logEntry);
-				manager.flush();
-				userTransaction.commit();
-			} catch (Throwable e) {
-				userTransaction.rollback();
-				logger.error("Transaction rolled back for creation of " + logEntry + " because of " + e.getClass() + " "
-						+ e.getMessage());
-
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
-			}
-		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-					"IllegalStateException " + e.getMessage());
-		} catch (SecurityException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException " + e.getMessage());
-		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException " + e.getMessage());
-		} catch (NotSupportedException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-					"NotSupportedException " + e.getMessage());
 		}
 
 	}
