@@ -20,8 +20,9 @@
 			href="${repoUrl}/org/icatproject/icat.server/${project.version}/icat.server-${project.version}-distro.zip">icat.server-${project.version}-distro.zip</a>
 		</li>
 		<li>Java 8</li>
-		<li>A suitable deployed container. The installation scripts only
-			support Glassfish. Testing has been carried out with Glassfish 4.0. <a
+		<li>A suitable deployed container. The installation scripts
+			support Glassfish and to a lesser extent WildFly. Testing has been
+			carried out with Glassfish 4.0. <a
 			href="http://icatproject.org/installation/glassfish/">Glassfish
 				installation instructions</a> are available.
 		</li>
