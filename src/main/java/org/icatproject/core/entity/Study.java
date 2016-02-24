@@ -1,6 +1,7 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class Study extends EntityBaseBean implements Serializable {
 	private StudyStatus status;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
-	private List<StudyInvestigation> studyInvestigations;
+	private List<StudyInvestigation> studyInvestigations = new ArrayList<>();;
 
 	/* Needed for JPA */
 	public Study() {

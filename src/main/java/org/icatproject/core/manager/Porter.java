@@ -36,7 +36,6 @@ import javax.persistence.TypedQuery;
 import javax.transaction.UserTransaction;
 import javax.ws.rs.core.Response;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
@@ -51,6 +50,8 @@ import org.icatproject.core.manager.importParser.Token;
 import org.icatproject.core.manager.importParser.Token.Type;
 import org.icatproject.core.manager.importParser.Tokenizer;
 import org.icatproject.core.parser.LexerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
@@ -86,7 +87,7 @@ public class Porter {
 
 	private Set<String> rootUserNames;
 
-	private static final Logger logger = Logger.getLogger(Porter.class);
+	private static final Logger logger = LoggerFactory.getLogger(Porter.class);
 	private final static Pattern tsRegExp = Pattern
 			.compile("(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})(\\.\\d+)?(.*?)");
 
@@ -117,8 +118,7 @@ public class Porter {
 					}
 
 				} catch (ParseException e) {
-					throw new IcatException(IcatExceptionType.INTERNAL, "Unable to parse "
-							+ fullString);
+					throw new IcatException(IcatExceptionType.INTERNAL, "Unable to parse " + fullString);
 				}
 			}
 			if (m.group(2) != null && m.group(2).length() > 1) {
@@ -132,8 +132,8 @@ public class Porter {
 
 	}
 
-	public void importData(String jsonString, InputStream body, EntityManager manager,
-			UserTransaction userTransaction) throws IcatException {
+	public void importData(String jsonString, InputStream body, EntityManager manager, UserTransaction userTransaction)
+			throws IcatException {
 
 		@SuppressWarnings("serial")
 		LinkedHashMap<String, EntityBaseBean> jpqlCache = new LinkedHashMap<String, EntityBaseBean>() {
@@ -169,8 +169,7 @@ public class Porter {
 						sessionId = parser.getString();
 					} else if (key.equals("duplicate")) {
 						try {
-							duplicateAction = DuplicateAction.valueOf(parser.getString()
-									.toUpperCase());
+							duplicateAction = DuplicateAction.valueOf(parser.getString().toUpperCase());
 						} catch (IllegalArgumentException e) {
 							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 									parser.getString() + " is not a valid value for 'duplicate'");
@@ -183,8 +182,8 @@ public class Porter {
 									parser.getString() + " is not a valid value for 'attributes'");
 						}
 					} else {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER, key
-								+ " is not an expected key in the json");
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+								key + " is not an expected key in the json");
 					}
 				}
 			}
@@ -216,8 +215,7 @@ public class Porter {
 				}
 			}
 			if (version == null) {
-				throw new IcatException(IcatExceptionType.VALIDATION,
-						"No version of file encountered");
+				throw new IcatException(IcatExceptionType.VALIDATION, "No version of file encountered");
 			}
 			if (!version.equals("1.0")) {
 				throw new IcatException(IcatExceptionType.VALIDATION, "Version of file must be 1.0");
@@ -237,8 +235,8 @@ public class Porter {
 				} else if (table == null) {
 					table = processTableHeader(line);
 				} else {
-					processTuple(table, line, userId, jpqlCache, ids, idCache, manager,
-							userTransaction, duplicateAction, attributes, allAttributes);
+					processTuple(table, line, userId, jpqlCache, ids, idCache, manager, userTransaction,
+							duplicateAction, attributes, allAttributes);
 				}
 			}
 			if (table != null) {
@@ -246,24 +244,22 @@ public class Porter {
 			}
 
 		} catch (IOException e) {
-			throw new IcatException(IcatExceptionType.VALIDATION, e.getClass() + " "
-					+ e.getMessage(), linum);
+			throw new IcatException(IcatExceptionType.VALIDATION, e.getClass() + " " + e.getMessage(), linum);
 		} catch (IcatException e) {
 			throw new IcatException(e.getType(), e.getMessage() + " at line " + linum, linum);
 		} catch (LexerException | ParserException e) {
-			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage()
-					+ " at line " + linum, linum);
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, e.getMessage() + " at line " + linum,
+					linum);
 		} catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass()
-					.getSimpleName() + " " + e.getMessage() + " at line " + linum, linum);
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					e.getClass().getSimpleName() + " " + e.getMessage() + " at line " + linum, linum);
 		}
 	}
 
 	private Session getSession(String sessionId, EntityManager manager) throws IcatException {
 		Session session = null;
 		if (sessionId == null || sessionId.equals("")) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION,
-					"Session Id cannot be null or empty.");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session Id cannot be null or empty.");
 		}
 		session = manager.find(Session.class, sessionId);
 		if (session == null) {
@@ -280,19 +276,16 @@ public class Porter {
 			logger.debug("user: " + userName + " is associated with: " + sessionId);
 			return userName;
 		} catch (IcatException e) {
-			logger.debug("sessionId " + sessionId + " is not associated with valid session "
-					+ e.getMessage());
+			logger.debug("sessionId " + sessionId + " is not associated with valid session " + e.getMessage());
 			throw e;
 		}
 	}
 
-	private void processTuple(Table table, String line, String userId,
-			Map<String, EntityBaseBean> cache, Map<String, Long> ids,
-			LinkedHashMap<Long, EntityBaseBean> idCache, EntityManager manager,
-			UserTransaction userTransaction, DuplicateAction duplicateAction,
-			Attributes attributes, boolean allAttributes) throws IcatException, LexerException,
-			ParserException, IllegalArgumentException, InvocationTargetException,
-			IllegalAccessException {
+	private void processTuple(Table table, String line, String userId, Map<String, EntityBaseBean> cache,
+			Map<String, Long> ids, LinkedHashMap<Long, EntityBaseBean> idCache, EntityManager manager,
+			UserTransaction userTransaction, DuplicateAction duplicateAction, Attributes attributes,
+			boolean allAttributes) throws IcatException, LexerException, ParserException, IllegalArgumentException,
+					InvocationTargetException, IllegalAccessException {
 		logger.debug("Requested add " + line + " to " + table.getName());
 		Input input = new Input(Tokenizer.getTokens(line));
 		List<TableField> tableFields = table.getTableFields();
@@ -325,22 +318,19 @@ public class Porter {
 						if (tType == Token.Type.STRING) {
 							setter.invoke(bean, token.getValue());
 						} else {
-							throw new ParserException("Expected a String value for column "
-									+ offset);
+							throw new ParserException("Expected a String value for column " + offset);
 						}
 					} else if (fType.equals("Integer")) {
 						if (tType == Token.Type.INTEGER) {
 							setter.invoke(bean, Integer.parseInt(token.getValue()));
 						} else {
-							throw new ParserException("Expected an integer value for column "
-									+ offset);
+							throw new ParserException("Expected an integer value for column " + offset);
 						}
 					} else if (fType.equals("boolean")) {
 						if (tType == Token.Type.BOOLEAN) {
 							setter.invoke(bean, Boolean.parseBoolean(token.getValue()));
 						} else {
-							throw new ParserException("Expected an boolean value for column "
-									+ offset);
+							throw new ParserException("Expected an boolean value for column " + offset);
 						}
 					} else if (fType.equals("Date")) {
 						if (tType == Token.Type.TIMESTAMP) {
@@ -352,43 +342,38 @@ public class Porter {
 						if (tType == Token.Type.REAL || tType == Token.Type.INTEGER) {
 							setter.invoke(bean, Double.parseDouble((token.getValue())));
 						} else {
-							throw new ParserException(
-									"Expected an real or integer value for column " + offset);
+							throw new ParserException("Expected an real or integer value for column " + offset);
 						}
 					} else if (fType.equals("Long")) {
 						if (tType == Token.Type.INTEGER) {
 							setter.invoke(bean, Long.parseLong((token.getValue())));
 						} else {
-							throw new ParserException("Expected an integer value for column "
-									+ offset);
+							throw new ParserException("Expected an integer value for column " + offset);
 						}
 					} else if (fType.equals("ParameterValueType")) {
 						if (tType == Token.Type.NAME) {
-							setter.invoke(bean,
-									ParameterValueType.valueOf(token.getValue().toUpperCase()));
+							setter.invoke(bean, ParameterValueType.valueOf(token.getValue().toUpperCase()));
 						} else {
-							throw new ParserException("Expected a " + ParameterValueType.values()
-									+ " value for column " + offset);
+							throw new ParserException(
+									"Expected a " + ParameterValueType.values() + " value for column " + offset);
 						}
 					} else if (tableField.isQmark()) {
 						Long id = ids.get(fType + "." + token.getValue());
 						if (id == null) {
-							throw new ParserException("? field '" + token.getValue()
-									+ "' not defined yet");
+							throw new ParserException("? field '" + token.getValue() + "' not defined yet");
 						}
 						EntityBaseBean eb = idCache.get(id);
 						if (eb == null) {
 							eb = (EntityBaseBean) manager.find(f.getType(), id);
 							if (eb == null) {
-								throw new ParserException("? field '" + token.getValue()
-										+ "' => id " + id + " no longer exists");
+								throw new ParserException(
+										"? field '" + token.getValue() + "' => id " + id + " no longer exists");
 							}
 							idCache.put(id, eb);
 						}
 						setter.invoke(bean, eb);
 					} else {
-						throw new IcatException(IcatExceptionType.INTERNAL,
-								"Don't know how to process " + fType);
+						throw new IcatException(IcatExceptionType.INTERNAL, "Don't know how to process " + fType);
 					}
 				} else {
 					if (tType == Token.Type.STRING) {
@@ -397,7 +382,8 @@ public class Porter {
 						throw new ParserException("Expected a String value for column " + offset);
 					}
 				}
-			} else { // Not all types are considered here - only those used in "keys"
+			} else { // Not all types are considered here - only those used in
+						// "keys"
 				String jpql = tableField.getJPQL();
 				StringBuilder sb = new StringBuilder(jpql);
 				boolean nullRef = false;
@@ -418,8 +404,7 @@ public class Porter {
 					EntityBaseBean eb = cache.get(key);
 					if (eb == null) {
 						logger.debug("'" + key + "' not found in import cache");
-						TypedQuery<EntityBaseBean> query = manager.createQuery(jpql,
-								EntityBaseBean.class);
+						TypedQuery<EntityBaseBean> query = manager.createQuery(jpql, EntityBaseBean.class);
 						for (Attribute attribute : tableField.getAttributes()) {
 							int n = attribute.getFieldNum();
 							token = tokens.get(n);
@@ -431,22 +416,18 @@ public class Porter {
 									query.setParameter("p" + n, token.getValue());
 									logger.debug("Setting " + n + " to " + token.getValue());
 								} else {
-									throw new ParserException("Expected a String value for column "
-											+ n);
+									throw new ParserException("Expected a String value for column " + n);
 								}
 							} else if (fType.equals("Integer")) {
 								if (tType == Token.Type.INTEGER) {
 									query.setParameter("p" + n, Integer.parseInt(token.getValue()));
-									logger.debug("Setting " + n + " to "
-											+ query.getParameter("p" + n));
+									logger.debug("Setting " + n + " to " + query.getParameter("p" + n));
 								} else {
-									throw new ParserException(
-											"Expected an integer value for column " + n);
+									throw new ParserException("Expected an integer value for column " + n);
 								}
 							} else {
 								throw new IcatException(IcatExceptionType.INTERNAL,
-										"Don't know how to process " + fType
-												+ " as selection attribute");
+										"Don't know how to process " + fType + " as selection attribute");
 							}
 						}
 						try {
@@ -454,8 +435,7 @@ public class Porter {
 							cache.put(key, eb);
 						} catch (NoResultException e) {
 							throw new IcatException(IcatExceptionType.NO_SUCH_OBJECT_FOUND,
-									"Import failed when looking up existing object for attribute "
-											+ f.getName());
+									"Import failed when looking up existing object for attribute " + f.getName());
 						} catch (NonUniqueResultException e) {
 							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 									"Import failed with multiple results when looking up existing object for attribute "
@@ -480,37 +460,32 @@ public class Porter {
 							+ " gives duplicate exception but DuplicateAction is IGNORE");
 					return;
 				} else if (duplicateAction == DuplicateAction.CHECK) {
+
 					EntityBaseBean other = beanManager.lookup(bean, manager);
-					if (other == null) {// Somebody else got rid of it meanwhile
-						id = beanManager.create(userId, bean, manager, userTransaction, false)
-								.getPk();
+					if (other == null) {// Somebody else got rid of it
+										// meanwhile
+						id = beanManager.create(userId, bean, manager, userTransaction, false).getPk();
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but it has now vanished");
 					} else { // Compare bean and other
 						if (allAttributes) {
 							if (createIdSet && !bean.getCreateId().equals(other.getCreateId())) {
 								throw new IcatException(IcatExceptionType.VALIDATION,
-										"Duplicate check fails for field \"createId\" of "
-												+ table.getName());
+										"Duplicate check fails for field \"createId\" of " + table.getName());
 							}
-							if (createTimeSet
-									&& Math.abs(bean.getCreateTime().getTime()
-											- other.getCreateTime().getTime()) > 1000) {
+							if (createTimeSet && Math
+									.abs(bean.getCreateTime().getTime() - other.getCreateTime().getTime()) > 1000) {
 								throw new IcatException(IcatExceptionType.VALIDATION,
-										"Duplicate check fails for field \"createTime\" of "
-												+ table.getName());
+										"Duplicate check fails for field \"createTime\" of " + table.getName());
 							}
 							if (modIdSet && !bean.getModId().equals(other.getModId())) {
 								throw new IcatException(IcatExceptionType.VALIDATION,
-										"Duplicate check fails for field \"modId\" of "
-												+ table.getName());
+										"Duplicate check fails for field \"modId\" of " + table.getName());
 							}
 							if (modTimeSet
-									&& Math.abs(bean.getModTime().getTime()
-											- other.getModTime().getTime()) > 1000) {
+									&& Math.abs(bean.getModTime().getTime() - other.getModTime().getTime()) > 1000) {
 								throw new IcatException(IcatExceptionType.VALIDATION,
-										"Duplicate check fails for field \"modTime\" of "
-												+ table.getName());
+										"Duplicate check fails for field \"modTime\" of " + table.getName());
 							}
 
 						}
@@ -520,29 +495,23 @@ public class Porter {
 						for (Field f : eiHandler.getFields(klass)) {
 							if (updaters.contains(f)) {
 								if (EntityBaseBean.class.isAssignableFrom(f.getType())) {
-									EntityBaseBean beanField = (EntityBaseBean) getters.get(f)
-											.invoke(bean);
-									EntityBaseBean otherField = (EntityBaseBean) getters.get(f)
-											.invoke(other);
+									EntityBaseBean beanField = (EntityBaseBean) getters.get(f).invoke(bean);
+									EntityBaseBean otherField = (EntityBaseBean) getters.get(f).invoke(other);
 									if (beanField == null) {
 										if (otherField != null) {
 											throw new IcatException(IcatExceptionType.VALIDATION,
-													"Duplicate check fails for field "
-															+ f.getName() + " of "
+													"Duplicate check fails for field " + f.getName() + " of "
 															+ f.getDeclaringClass().getSimpleName());
 										}
 									} else { // beanField is not null
 										if (otherField == null) {
 											throw new IcatException(IcatExceptionType.VALIDATION,
-													"Duplicate check fails for field "
-															+ f.getName() + " of "
+													"Duplicate check fails for field " + f.getName() + " of "
 															+ f.getDeclaringClass().getSimpleName());
 										} // both not null
-										if (beanField.getId().longValue() != otherField.getId()
-												.longValue()) {
+										if (beanField.getId().longValue() != otherField.getId().longValue()) {
 											throw new IcatException(IcatExceptionType.VALIDATION,
-													"Duplicate check fails for field "
-															+ f.getName() + " of "
+													"Duplicate check fails for field " + f.getName() + " of "
 															+ f.getDeclaringClass().getSimpleName());
 										}
 									}
@@ -552,31 +521,24 @@ public class Porter {
 									if (beanField == null) {
 										if (otherField != null) {
 											throw new IcatException(IcatExceptionType.VALIDATION,
-													"Duplicate check fails for field "
-															+ f.getName() + " of "
+													"Duplicate check fails for field " + f.getName() + " of "
 															+ f.getDeclaringClass().getSimpleName());
 										}
 									} else {// beanField is not null
-										if (beanField instanceof Date) { // Milliseconds get lost
+										if (beanField instanceof Date) { // Milliseconds
+																			// get
+																			// lost
 											if (Math.abs(((Date) beanField).getTime()
 													- ((Date) otherField).getTime()) > 1000) {
-												throw new IcatException(
-														IcatExceptionType.VALIDATION,
-														"Duplicate check fails for field "
-																+ f.getName()
-																+ " of "
-																+ f.getDeclaringClass()
-																		.getSimpleName());
+												throw new IcatException(IcatExceptionType.VALIDATION,
+														"Duplicate check fails for field " + f.getName() + " of "
+																+ f.getDeclaringClass().getSimpleName());
 											}
 										} else {
 											if (!beanField.equals(otherField)) {
-												throw new IcatException(
-														IcatExceptionType.VALIDATION,
-														"Duplicate check fails for field "
-																+ f.getName()
-																+ " of "
-																+ f.getDeclaringClass()
-																		.getSimpleName());
+												throw new IcatException(IcatExceptionType.VALIDATION,
+														"Duplicate check fails for field " + f.getName() + " of "
+																+ f.getDeclaringClass().getSimpleName());
 											}
 										}
 									}
@@ -591,8 +553,7 @@ public class Porter {
 				} else if (duplicateAction == DuplicateAction.OVERWRITE) {
 					EntityBaseBean other = beanManager.lookup(bean, manager);
 					if (other == null) {// Somebody else got rid of it meanwhile
-						id = beanManager.create(userId, bean, manager, userTransaction, false)
-								.getPk();
+						id = beanManager.create(userId, bean, manager, userTransaction, false).getPk();
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but it has now vanished");
 					} else {
@@ -613,13 +574,11 @@ public class Porter {
 			bean.setId(id);
 			ids.put(table.getName() + "." + save, id);
 			idCache.put(id, bean);
-			logger.debug("Saved " + id + " as " + table.getName() + "." + save
-					+ " for import lookup");
+			logger.debug("Saved " + id + " as " + table.getName() + "." + save + " for import lookup");
 		}
 	}
 
-	private Table processTableHeader(String header) throws IcatException, LexerException,
-			ParserException {
+	private Table processTableHeader(String header) throws IcatException, LexerException, ParserException {
 		logger.debug("Process import table header " + header);
 		List<Token> tokens = null;
 		tokens = Tokenizer.getTokens(header);
@@ -629,8 +588,8 @@ public class Porter {
 		return table;
 	}
 
-	public Response exportData(String jsonString, EntityManager manager,
-			UserTransaction userTransaction) throws IcatException {
+	public Response exportData(String jsonString, EntityManager manager, UserTransaction userTransaction)
+			throws IcatException {
 		if (jsonString == null) {
 			throw new IcatException(IcatExceptionType.BAD_PARAMETER, "json must not be null");
 		}
@@ -656,8 +615,8 @@ public class Porter {
 									parser.getString() + " is not a valid value for 'attributes'");
 						}
 					} else {
-						throw new IcatException(IcatExceptionType.BAD_PARAMETER, key
-								+ " is not an expected key in the json");
+						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+								key + " is not an expected key in the json");
 					}
 				}
 			}
@@ -665,11 +624,9 @@ public class Porter {
 		logger.debug(sessionId + " issues " + query);
 		String userId = getUserName(sessionId, manager);
 		if (query != null) {
-			return beanManager.export(userId, query, attributes == Attributes.ALL, manager,
-					userTransaction);
+			return beanManager.export(userId, query, attributes == Attributes.ALL, manager, userTransaction);
 		} else {
-			return beanManager.export(userId, attributes == Attributes.ALL, manager,
-					userTransaction);
+			return beanManager.export(userId, attributes == Attributes.ALL, manager, userTransaction);
 		}
 	}
 

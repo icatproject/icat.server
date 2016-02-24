@@ -12,12 +12,13 @@ import javax.persistence.PostRemove;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.manager.SingletonFinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Comment("An allowed step for an INCLUDE identifed by the origin entity and the field name for navigation. "
 		+ "Including an entry here is much more efficient than having to use the authorization rules.")
@@ -28,7 +29,7 @@ import org.icatproject.core.manager.SingletonFinder;
 public class PublicStep extends EntityBaseBean implements Serializable {
 
 	public static final String GET_ALL_QUERY = "AllowedStep.GetAllQuery";
-	private static final Logger logger = Logger.getLogger(PublicStep.class);
+	private static final Logger logger = LoggerFactory.getLogger(PublicStep.class);
 
 	private static final EntityInfoHandler eiHandler = EntityInfoHandler.getInstance();
 

@@ -30,7 +30,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.Application;
@@ -74,6 +73,8 @@ import org.icatproject.core.entity.Study;
 import org.icatproject.core.entity.StudyInvestigation;
 import org.icatproject.core.entity.User;
 import org.icatproject.core.entity.UserGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // Note that this does not use a Singleton Bean as there is no need for the
 // extra complexity and
@@ -202,7 +203,7 @@ public class EntityInfoHandler {
 
 	public static EntityInfoHandler instance = new EntityInfoHandler();
 
-	protected final static Logger logger = Logger.getLogger(EntityInfoHandler.class);
+	protected final static Logger logger = LoggerFactory.getLogger(EntityInfoHandler.class);
 
 	static {
 		for (Class<? extends EntityBaseBean> entity : entities) {

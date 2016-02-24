@@ -27,7 +27,6 @@ import javax.transaction.UserTransaction;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
-import org.apache.log4j.Logger;
 import org.icatproject.authentication.Authenticator;
 import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
@@ -78,13 +77,15 @@ import org.icatproject.core.manager.NotificationMessage;
 import org.icatproject.core.manager.PropertyHandler;
 import org.icatproject.core.manager.PropertyHandler.ExtendedAuthenticator;
 import org.icatproject.core.manager.Transmitter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Stateless
 @WebService(targetNamespace = "http://icatproject.org")
 @TransactionManagement(TransactionManagementType.BEAN)
 public class ICAT {
 
-	private static Logger logger = Logger.getLogger(ICAT.class);
+	private static Logger logger = LoggerFactory.getLogger(ICAT.class);
 
 	private Map<String, ExtendedAuthenticator> authPlugins = new HashMap<>();
 
@@ -195,10 +196,9 @@ public class ICAT {
 	@WebMethod
 	public void dummy(@WebParam Datafile datafile, @WebParam DatafileFormat datafileFormat,
 			@WebParam DatafileParameter datafileParameter, @WebParam Dataset dataset,
-			@WebParam DatasetParameter datasetParameter, @WebParam DatasetType datasetType,
-			@WebParam Facility facility, @WebParam FacilityCycle facilityCycle,
-			@WebParam InstrumentScientist facilityInstrumentScientist, @WebParam User user,
-			@WebParam Instrument instrument, @WebParam Investigation investigation,
+			@WebParam DatasetParameter datasetParameter, @WebParam DatasetType datasetType, @WebParam Facility facility,
+			@WebParam FacilityCycle facilityCycle, @WebParam InstrumentScientist facilityInstrumentScientist,
+			@WebParam User user, @WebParam Instrument instrument, @WebParam Investigation investigation,
 			@WebParam InvestigationType investigationType, @WebParam InvestigationUser investigator,
 			@WebParam Keyword keyword, @WebParam ParameterType parameter, @WebParam Publication publication,
 			@WebParam RelatedDatafile relatedDatafile, @WebParam Sample sample,
@@ -267,7 +267,7 @@ public class ICAT {
 	@WebMethod
 	public boolean isAccessAllowed(@WebParam(name = "sessionId") String sessionId,
 			@WebParam(name = "bean") EntityBaseBean bean, @WebParam(name = "accessType") AccessType accessType)
-			throws IcatException {
+					throws IcatException {
 		try {
 			String userId = getUserName(sessionId);
 			return beanManager.isAccessAllowed(userId, bean, manager, userTransaction, accessType);
@@ -285,10 +285,11 @@ public class ICAT {
 			@WebParam(name = "credentials") Map<String, String> credentials) throws IcatException {
 		MessageContext msgCtxt = webServiceContext.getMessageContext();
 		HttpServletRequest req = (HttpServletRequest) msgCtxt.get(MessageContext.SERVLET_REQUEST);
+
 		Authenticator authenticator = authPlugins.get(plugin).getAuthenticator();
 		if (authenticator == null) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Authenticator mnemonic " + plugin
-					+ " not recognised");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION,
+					"Authenticator mnemonic " + plugin + " not recognised");
 		}
 		logger.debug("Using " + plugin + " to authenticate");
 		String userName = authenticator.authenticate(credentials, req.getRemoteAddr()).getUserName();

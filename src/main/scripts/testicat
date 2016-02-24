@@ -15,16 +15,25 @@ if len(args) < 3 or len(args) % 2 != 1:
 
 url = args[1]
 plugin = args[2]
-
-suffix = "/ICATService/ICAT?wsdl"
-if not url.endswith(suffix): url = url + suffix
-client = Client(url)
+client = None
+suffices = ["/ICATService/ICAT?wsdl", "/icat/ICAT?wsdl"]
+for suffix in suffices:
+    url = args[1]
+    if not url.endswith(suffix): url = url + suffix
+    try:
+        client = Client(url)
+        break;
+    except:
+        pass
+if not client:
+    print >> sys.stderr, "Service at url" + args[1] + " not found"
+    sys.exit(1)
 service = client.service
 factory = client.factory
 
-credentials = factory.create("credentials")
+credentials = factory.create("login.credentials")
 for i in range (3, len(args), 2):
-    entry = factory.create("credentials.entry")
+    entry = factory.create("login.credentials.entry")
     entry.key = args[i]   
     if args[i + 1] == "-":
         entry.value = getpass.getpass()

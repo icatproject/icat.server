@@ -10,12 +10,13 @@ import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Rule;
 import org.icatproject.core.manager.GateKeeper;
 import org.icatproject.core.parser.Token.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SearchQuery {
 
@@ -24,7 +25,7 @@ public class SearchQuery {
 	// from_clause [where_clause] [other_jpql_clauses]
 	// (([include_clause] [limit_clause]) | ([limit_clause] [include_clause]))
 
-	private static Logger logger = Logger.getLogger(SearchQuery.class);
+	private static Logger logger = LoggerFactory.getLogger(SearchQuery.class);
 
 	private String idVar;
 
@@ -47,6 +48,7 @@ public class SearchQuery {
 	private Pattern idSearch = Pattern.compile("^\\s?\\$0\\$.id = [0-9]+s?$");
 
 	private static ArrayList<Object> aListWithZero = new ArrayList<>(1);
+
 	static {
 		aListWithZero.add(0L);
 	}
@@ -150,8 +152,8 @@ public class SearchQuery {
 
 		varCount = idVarMap.size() - 1; // variables up to end of where clause
 										// without the $0
-		if (t != null
-				&& (t.getType() == Token.Type.GROUP || t.getType() == Token.Type.HAVING || t.getType() == Token.Type.ORDER)) {
+		if (t != null && (t.getType() == Token.Type.GROUP || t.getType() == Token.Type.HAVING
+				|| t.getType() == Token.Type.ORDER)) {
 			otherJpqlClauses = new OtherJpqlClauses(input, idVarMap);
 			t = input.peek(0);
 		}
@@ -223,8 +225,8 @@ public class SearchQuery {
 			TypedQuery<Rule> query = manager.createNamedQuery(Rule.SEARCH_QUERY, Rule.class)
 					.setParameter("member", userId).setParameter("bean", beanName);
 			rules = query.getResultList();
-			SearchQuery.logger.debug("Got " + rules.size() + " authz queries for search by " + userId + " to a "
-					+ beanName);
+			SearchQuery.logger
+					.debug("Got " + rules.size() + " authz queries for search by " + userId + " to a " + beanName);
 			if (rules.size() == 0) {
 				return null;
 			}

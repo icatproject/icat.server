@@ -1,10 +1,11 @@
 package org.icatproject.core.parser;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LimitClause {
 
-	static Logger logger = Logger.getLogger(LimitClause.class);
+	static Logger logger = LoggerFactory.getLogger(LimitClause.class);
 
 	private int offset;
 
@@ -19,12 +20,12 @@ public class LimitClause {
 		if (t.getType() == Token.Type.INTEGER) {
 			number = Integer.parseInt(t.getValue());
 		}
-		logger.debug(this);
+		logger.debug(this.toString());
 	}
 
 	@Override
 	public String toString() {
-		return "LIMIT " + offset + "," + (number == null?"*":number);
+		return "LIMIT " + offset + "," + (number == null ? "*" : number);
 	}
 
 	public int getOffset() {

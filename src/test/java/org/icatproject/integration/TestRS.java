@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,9 +29,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
-import javax.json.stream.JsonGenerator;
 
-import org.icatproject.EntityBaseBean;
 import org.icatproject.Facility;
 import org.icatproject.icat.client.ICAT;
 import org.icatproject.icat.client.IcatException;
@@ -42,6 +39,7 @@ import org.icatproject.icat.client.Session;
 import org.icatproject.icat.client.Session.Attributes;
 import org.icatproject.icat.client.Session.DuplicateAction;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -58,17 +56,36 @@ public class TestRS {
 	public static void beforeClass() throws Exception {
 		try {
 			wSession = new WSession();
-			wSession.clearAuthz();
-			wSession.setAuthz();
+			// wSession.clearAuthz();
+			// wSession.setAuthz();
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
 		}
 	}
 
+	@Ignore("Test fails becuase of bug in eclipselink")
+	@Test
+	public void testDistinctBehaviour() throws Exception {
+		wSession.clear();
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "root");
+		credentials.put("password", "password");
+		Session session = icat.login("db", credentials);
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
+
+		// See what happens to query with bad order by
+		System.out.println(search(session, "SELECT inv FROM Investigation inv", 3));
+
+		System.out.println(
+				search(session, "SELECT inv FROM Investigation inv, inv.investigationUsers u ORDER BY u.user.name", 3));
+
+	}
+
 	@Test
 	public void testLuceneDatafiles() throws Exception {
-
 		Session session = setupLuceneTest();
 
 		List<ParameterForLucene> parameters = new ArrayList<>();
@@ -79,13 +96,14 @@ public class TestRS {
 		// Use the user
 
 		JsonArray array = searchDatafiles(session, "db/tr", null, null, null, null, 20, 3);
+		System.out.println(array);
 
 		// Try a bad user
 		searchDatafiles(session, "db/fred", null, null, null, null, 20, 0);
 
 		// Set text and parameters
 		array = searchDatafiles(session, null, "df2", null, null, parameters, 20, 1);
-		assertEquals("df2", array.getJsonObject(0).getJsonObject("Datafile").getString("name"));
+		checkResultFromLuceneSearch(session, "df2", array, "Datafile", "name");
 	}
 
 	@Test
@@ -110,7 +128,11 @@ public class TestRS {
 		JsonArray array = searchDatasets(session, "db/tr", null, null, null, null, 20, 3);
 
 		for (int i = 0; i < 3; i++) {
-			names.add(array.getJsonObject(i).getJsonObject("Dataset").getString("name"));
+
+			long n = array.getJsonObject(i).getJsonNumber("id").longValueExact();
+			JsonObject result = Json.createReader(new ByteArrayInputStream(session.get("Dataset", n).getBytes()))
+					.readObject();
+			names.add(result.getJsonObject("Dataset").getString("name"));
 		}
 		assertTrue(names.contains("ds1"));
 		assertTrue(names.contains("ds2"));
@@ -121,12 +143,11 @@ public class TestRS {
 
 		array = searchDatasets(session, null, "gamma AND ds3", dft.parse("2014-05-16T06:09:03"),
 				dft.parse("2014-05-16T06:15:26"), parameters, 20, 1);
-		assertEquals("gamma", array.getJsonObject(0).getJsonObject("Dataset").getString("description"));
+		checkResultFromLuceneSearch(session, "gamma", array, "Dataset", "description");
 	}
 
 	@Test
 	public void testLuceneInvestigations() throws Exception {
-
 		Session session = setupLuceneTest();
 
 		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -139,7 +160,7 @@ public class TestRS {
 		JsonArray array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00"),
 				dft.parse("2011-12-31T23:59:59"), parameters, Arrays.asList("ford AND rust", "koh* AND diamond"),
 				"Professor", 20, 1);
-		assertEquals("one", array.getJsonObject(0).getJsonObject("Investigation").getString("visitId"));
+		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
 		// change user
 		searchInvestigations(session, "db/fred", "title AND one", null, null, parameters, null, null, 20, 0);
@@ -150,11 +171,11 @@ public class TestRS {
 		// Only working to a minute
 		array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:01"),
 				dft.parse("2011-12-31T23:59:59"), parameters, null, null, 20, 1);
-		assertEquals("one", array.getJsonObject(0).getJsonObject("Investigation").getString("visitId"));
+		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
 		array = searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:00:00"),
 				dft.parse("2011-12-31T23:59:58"), parameters, null, null, 20, 1);
-		assertEquals("one", array.getJsonObject(0).getJsonObject("Investigation").getString("visitId"));
+		checkResultFromLuceneSearch(session, "one", array, "Investigation", "visitId");
 
 		searchInvestigations(session, "db/tr", "title AND one", dft.parse("2011-01-01T00:01:00"),
 				dft.parse("2011-12-31T23:59:59"), parameters, null, null, 20, 0);
@@ -178,9 +199,27 @@ public class TestRS {
 		searchInvestigations(session, "db/tr", "title + one", dft.parse("2011-01-01T00:00:00"),
 				dft.parse("2011-12-31T23:59:59"), parameters, Arrays.asList("ford AND rust", "koh* AND diamond"),
 				"Doctor", 20, 0);
+
+		// Try provoking an error
+		badParameters = new ArrayList<>();
+		badParameters.add(new ParameterForLucene("color", null, "green"));
+		try {
+			searchInvestigations(session, "db/tr", null, null, null, badParameters, null, null, 10, 0);
+			fail("BAD_PARAMETER exception not caught");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
+		}
+	}
+
+	private void checkResultFromLuceneSearch(Session session, String val, JsonArray array, String ename, String field)
+			throws IcatException {
+		long n = array.getJsonObject(0).getJsonNumber("id").longValueExact();
+		JsonObject result = Json.createReader(new ByteArrayInputStream(session.get(ename, n).getBytes())).readObject();
+		assertEquals(val, result.getJsonObject(ename).getString(field));
 	}
 
 	private Session setupLuceneTest() throws Exception {
+		wSession.setAuthz();
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "notroot");
@@ -196,13 +235,12 @@ public class TestRS {
 		rootSession.luceneCommit();
 		List<String> props = wSession.getProperties();
 		System.out.println(props);
-		assertTrue(props.contains("lucene.commitSeconds 1"));
+		assertTrue(props.contains("lucene.commitSeconds 5"));
 
 		// Get known configuration
 		wSession.clear();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		wSession.setAuthz();
 
 		rootSession.luceneCommit();
 		return session;
@@ -210,18 +248,20 @@ public class TestRS {
 
 	private JsonArray searchDatasets(Session session, String user, String text, Date lower, Date upper,
 			List<ParameterForLucene> parameters, int maxResults, int n) throws IcatException {
-		JsonArray result = Json.createReader(
-				new ByteArrayInputStream(session.searchDatasets(user, text, lower, upper, parameters, maxResults)
-						.getBytes())).readArray();
+		JsonArray result = Json
+				.createReader(new ByteArrayInputStream(
+						session.searchDatasets(user, text, lower, upper, parameters, maxResults).getBytes()))
+				.readArray();
 		assertEquals(n, result.size());
 		return result;
 	}
 
 	private JsonArray searchDatafiles(Session session, String user, String text, Date lower, Date upper,
 			List<ParameterForLucene> parameters, int maxResults, int n) throws IcatException {
-		JsonArray result = Json.createReader(
-				new ByteArrayInputStream(session.searchDatafiles(user, text, lower, upper, parameters, maxResults)
-						.getBytes())).readArray();
+		JsonArray result = Json
+				.createReader(new ByteArrayInputStream(
+						session.searchDatafiles(user, text, lower, upper, parameters, maxResults).getBytes()))
+				.readArray();
 		assertEquals(n, result.size());
 		return result;
 	}
@@ -244,8 +284,6 @@ public class TestRS {
 		wSession.clear();
 		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
 		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		wSession.setAuthz();
-
 		wSession.setAuthz();
 
 		long fid = search(session, "Facility.id", 1).getJsonNumber(0).longValueExact();
@@ -287,10 +325,14 @@ public class TestRS {
 		// Make sure that fetching a non-id Double gives no problems
 		assertEquals(73.0, search(session, "SELECT MIN(pt.minimumNumericValue) FROM ParameterType pt", 1)
 				.getJsonNumber(0).doubleValue(), 0.001);
-		assertEquals(73.4, ((JsonNumber) search(session, "SELECT MAX(pt.minimumNumericValue) FROM ParameterType pt", 1)
-				.get(0)).doubleValue(), 0.001);
-		assertEquals(73.2, ((JsonNumber) search(session, "SELECT AVG(pt.minimumNumericValue) FROM ParameterType pt", 1)
-				.get(0)).doubleValue(), 0.001);
+		assertEquals(73.4,
+				((JsonNumber) search(session, "SELECT MAX(pt.minimumNumericValue) FROM ParameterType pt", 1).get(0))
+						.doubleValue(),
+				0.001);
+		assertEquals(73.2,
+				((JsonNumber) search(session, "SELECT AVG(pt.minimumNumericValue) FROM ParameterType pt", 1).get(0))
+						.doubleValue(),
+				0.001);
 
 		JsonObject inv = search(session, "SELECT inv FROM Investigation inv WHERE inv.visitId = 'zero'", 1)
 				.getJsonObject(0).getJsonObject("Investigation");
@@ -383,78 +425,15 @@ public class TestRS {
 		return result;
 	}
 
-	/**
-	 * 
-	 * @param session
-	 *            Session object
-	 * @param user
-	 *            Investigation belonging to user
-	 * @param text
-	 *            Text associated with investigation
-	 * @param lower
-	 *            Lower date to consider
-	 * @param upper
-	 *            Upper date to consider
-	 * @param parameters
-	 *            List of ParameterForLucene objects that must all match
-	 * @param samples
-	 *            List of sample texts that must all match
-	 * @param userFullName
-	 * @param maxResults
-	 *            Maximum number of results to return
-	 * @param n
-	 *            Expected number of results to return
-	 * @return json
-	 * @throws IcatException
-	 */
 	private JsonArray searchInvestigations(Session session, String user, String text, Date lower, Date upper,
 			List<ParameterForLucene> parameters, List<String> samples, String userFullName, int maxResults, int n)
-			throws IcatException {
-		JsonArray result = Json.createReader(
-				new ByteArrayInputStream(session.searchInvestigations(user, text, lower, upper, parameters, samples,
-						userFullName, maxResults).getBytes())).readArray();
+					throws IcatException {
+		JsonArray result = Json.createReader(new ByteArrayInputStream(
+				session.searchInvestigations(user, text, lower, upper, parameters, samples, userFullName, maxResults)
+						.getBytes()))
+				.readArray();
 		assertEquals(n, result.size());
 		return result;
-	}
-
-	@Test
-	public void testCreate() throws Exception {
-		ICAT icat = new ICAT(System.getProperty("serverUrl"));
-		Map<String, String> credentials = new HashMap<>();
-		credentials.put("username", "notroot");
-		credentials.put("password", "password");
-		Session session = icat.login("db", credentials);
-
-		// Get known configuration
-		wSession.clear();
-		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
-		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
-		wSession.setAuthz();
-
-		Long fid = ((EntityBaseBean) wSession.search("Facility INCLUDE InvestigationType").get(0)).getId();
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try (JsonGenerator jw = Json.createGenerator(baos)) {
-			jw.writeStartArray();
-
-			jw.writeStartObject();
-			jw.writeStartObject("InvestigationType");
-			jw.writeStartObject("facility");
-			jw.write("id", fid);
-			jw.writeEnd();
-			jw.write("name", "ztype");
-			jw.writeEnd();
-			jw.writeEnd();
-
-			jw.writeStartObject().writeStartObject("Facility").write("name", "another fred").writeEnd();
-			jw.writeEnd();
-
-			jw.writeEnd();
-		}
-
-		List<Long> ids = session.create(baos.toString());
-		assertEquals(2, ids.size());
-
 	}
 
 	@Test
@@ -579,8 +558,9 @@ public class TestRS {
 		ts("Create dump ALL");
 		long n = dump.toFile().length();
 
-		assertTrue("Size is dependent upon time zone in which test is run " + n, n == 2686 || n == 1518 || n == 2771
-				|| n == 2776);
+		assertTrue("Size is dependent upon time zone in which test is run " + n,
+				n == 2686 || n == 1518 || n == 2771 || n == 2776 || n == 2691);
+
 		session.importMetaData(dump, DuplicateAction.CHECK, Attributes.ALL);
 		Files.delete(dump);
 	}

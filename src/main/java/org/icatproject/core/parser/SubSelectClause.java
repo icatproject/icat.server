@@ -2,13 +2,14 @@ package org.icatproject.core.parser;
 
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.Constants;
 import org.icatproject.core.manager.EntityInfoHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SubSelectClause {
 
-	static Logger logger = Logger.getLogger(SubSelectClause.class);
+	static Logger logger = LoggerFactory.getLogger(SubSelectClause.class);
 
 	private String string;
 
@@ -32,11 +33,10 @@ public class SubSelectClause {
 					int n = Constants.ENUMPREFIX.split("\\.").length;
 					String vals[] = val.split("\\.");
 					if (vals.length != n + 2) {
-						throw new ParserException("Enum literal " + val + " must contain exactly "
-								+ (n + 2) + " parts");
+						throw new ParserException(
+								"Enum literal " + val + " must contain exactly " + (n + 2) + " parts");
 					}
-					sb.append(" " + Constants.ENTITY_PREFIX
-							+ t.getValue().substring(Constants.ENUMPREFIX.length()));
+					sb.append(" " + Constants.ENTITY_PREFIX + t.getValue().substring(Constants.ENUMPREFIX.length()));
 				} else if (EntityInfoHandler.getAlphabeticEntityNames().contains(val)) {
 					sb.append(" " + val);
 				} else {
@@ -57,8 +57,7 @@ public class SubSelectClause {
 					val = "'" + val.replace("'", "''") + "'";
 				} else if (t.getType() == Token.Type.TIMESTAMP) {
 					val = ":"
-							+ val.replace(" ", "").replace(":", "").replace("-", "")
-									.replace("{", "").replace("}", "");
+							+ val.replace(" ", "").replace(":", "").replace("-", "").replace("{", "").replace("}", "");
 				}
 				sb.append(" " + val);
 			}

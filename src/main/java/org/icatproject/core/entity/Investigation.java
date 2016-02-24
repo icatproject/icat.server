@@ -20,7 +20,9 @@ import javax.persistence.UniqueConstraint;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 
@@ -290,6 +292,8 @@ public class Investigation extends EntityBaseBean implements Serializable {
 			doc.add(new StringField("endDate",
 					DateTools.dateToString(modTime, Resolution.MINUTE), Store.NO));
 		}
+		doc.add(new SortedDocValuesField("id", new BytesRef(Long.toString(id))));
+		doc.add(new StringField("id", Long.toString(id), Store.YES));
 		return doc;
 	}
 

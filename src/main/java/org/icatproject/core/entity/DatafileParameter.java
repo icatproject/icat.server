@@ -11,8 +11,8 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.SortedDocValuesField;
+import org.apache.lucene.util.BytesRef;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.manager.GateKeeper;
 
@@ -42,8 +42,7 @@ public class DatafileParameter extends Parameter implements Serializable {
 		super.preparePersist(modId, manager, gateKeeper, rootUser);
 		this.id = null;
 		if (type == null) {
-			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
-					"Type of parameter is not set");
+			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
 		}
 		if (!type.isApplicableToDatafile()) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
@@ -54,11 +53,11 @@ public class DatafileParameter extends Parameter implements Serializable {
 	public void setDatafile(Datafile datafile) {
 		this.datafile = datafile;
 	}
-	
+
 	@Override
 	public Document getDoc() {
 		Document doc = super.getDoc();
-		doc.add(new StringField("datafile", "Datafile:" + datafile.id, Store.YES));
+		doc.add(new SortedDocValuesField("datafile", new BytesRef(Long.toString(datafile.id))));
 		return doc;
 	}
 

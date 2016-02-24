@@ -14,30 +14,33 @@ import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import javax.ejb.DependsOn;
 import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
-import org.apache.log4j.Logger;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.PublicStep;
 import org.icatproject.core.entity.Rule;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 @DependsOn("LoggingConfigurator")
 @Singleton
@@ -63,18 +66,14 @@ public class GateKeeper {
 	private final static Pattern tsRegExp = Pattern
 			.compile("\\{\\s*ts\\s+\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\s*\\}");
 
-	private TopicConnection centralConnection;
+	private TopicConnection topicConnection;
 
-	@Resource(mappedName = "jms/ICAT/CentralConnectionFactory")
-	private TopicConnectionFactory centralConnectionFactory;
-
-	private TopicConnection consumerConnection;
-
-	private Session consumeSession;
+	private Topic topic;
 
 	@PersistenceContext(unitName = "icat")
 	private EntityManager gateKeeperManager;
-	private final Logger logger = Logger.getLogger(GateKeeper.class);
+	private final Logger logger = LoggerFactory.getLogger(GateKeeper.class);
+	Marker fatal = MarkerFactory.getMarker("FATAL");
 
 	private int maxIdsInQuery;
 
@@ -91,10 +90,10 @@ public class GateKeeper {
 
 	private boolean stalePublicTables;
 
-	@Resource(mappedName = "jms/ICAT/Synch")
-	private Topic synchTopic;
-
-	/** Return true if allowed because destination table is public or because step is public */
+	/**
+	 * Return true if allowed because destination table is public or because
+	 * step is public
+	 */
 	public boolean allowed(Relationship r) {
 		String beanName = r.getDestinationBean().getSimpleName();
 		if (publicTables.contains(beanName)) {
@@ -134,14 +133,8 @@ public class GateKeeper {
 	@PreDestroy()
 	private void exit() {
 		try {
-			if (centralConnection != null) {
-				centralConnection.close();
-			}
-			if (consumeSession != null) {
-				consumeSession.close();
-			}
-			if (consumerConnection != null) {
-				consumerConnection.close();
+			if (topicConnection != null) {
+				topicConnection.close();
 			}
 			logger.info("GateKeeper closing down");
 		} catch (JMSException e) {
@@ -156,8 +149,7 @@ public class GateKeeper {
 		return publicTables;
 	}
 
-	public List<EntityBaseBean> getReadable(String userId, List<EntityBaseBean> beans,
-			EntityManager manager) {
+	public List<EntityBaseBean> getReadable(String userId, List<EntityBaseBean> beans, EntityManager manager) {
 
 		if (beans.size() == 0) {
 			return beans;
@@ -176,8 +168,8 @@ public class GateKeeper {
 				.setParameter("member", userId).setParameter("bean", simpleName);
 
 		List<String> restrictions = query.getResultList();
-		logger.debug("Got " + restrictions.size() + " authz queries for READ by " + userId
-				+ " to a " + objectClass.getSimpleName());
+		logger.debug("Got " + restrictions.size() + " authz queries for READ by " + userId + " to a "
+				+ objectClass.getSimpleName());
 
 		for (String restriction : restrictions) {
 			logger.debug("Query: " + restriction);
@@ -188,8 +180,8 @@ public class GateKeeper {
 		}
 
 		/*
-		 * IDs are processed in batches to avoid Oracle error: ORA-01795: maximum number of
-		 * expressions in a list is 1000
+		 * IDs are processed in batches to avoid Oracle error: ORA-01795:
+		 * maximum number of expressions in a list is 1000
 		 */
 
 		List<String> idLists = new ArrayList<>();
@@ -215,14 +207,13 @@ public class GateKeeper {
 			idLists.add(sb.toString());
 		}
 
-		logger.debug("Check readability of " + beans.size() + " beans has been divided into "
-				+ idLists.size() + " queries.");
+		logger.debug("Check readability of " + beans.size() + " beans has been divided into " + idLists.size()
+				+ " queries.");
 
 		Set<Long> ids = new HashSet<>();
 		for (String idList : idLists) {
 			for (String qString : restrictions) {
-				TypedQuery<Long> q = manager.createQuery(qString.replace(":pkids", idList),
-						Long.class);
+				TypedQuery<Long> q = manager.createQuery(qString.replace(":pkids", idList), Long.class);
 				if (qString.contains(":user")) {
 					q.setParameter("user", userId);
 				}
@@ -252,14 +243,13 @@ public class GateKeeper {
 		SingletonFinder.setGateKeeper(this);
 
 		try {
-			centralConnection = centralConnectionFactory.createTopicConnection();
-			consumerConnection = centralConnectionFactory.createTopicConnection();
-			consumeSession = consumerConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			MessageConsumer consumer = consumeSession.createConsumer(synchTopic);
-			consumer.setMessageListener(new GateKeeperListener());
-			consumerConnection.start();
-		} catch (JMSException e) {
-			logger.fatal("Problem with JMS " + e);
+			InitialContext ic = new InitialContext();
+			TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) ic
+					.lookup(propertyHandler.getJmsTopicConnectionFactory());
+			topicConnection = topicConnectionFactory.createTopicConnection();
+			topic = (Topic) ic.lookup("jms/ICAT/Synch");
+		} catch (JMSException | NamingException e) {
+			logger.error(fatal, "Problem with JMS " + e);
 			throw new IllegalStateException(e.getMessage());
 		}
 
@@ -284,11 +274,12 @@ public class GateKeeper {
 	 * 
 	 * @throws IcatException
 	 */
-	public void performAuthorisation(String user, EntityBaseBean object, AccessType access,
-			EntityManager manager) throws IcatException {
+	public void performAuthorisation(String user, EntityBaseBean object, AccessType access, EntityManager manager)
+			throws IcatException {
 
 		Class<? extends EntityBaseBean> objectClass = object.getClass();
 		String simpleName = objectClass.getSimpleName();
+
 		if (rootUserNames.contains(user)) {
 			logger.info("\"Root\" user " + user + " is allowed " + access + " to " + simpleName);
 			return;
@@ -311,12 +302,14 @@ public class GateKeeper {
 			throw new RuntimeException(access + " is not handled yet");
 		}
 
-		TypedQuery<String> query = manager.createNamedQuery(qName, String.class)
-				.setParameter("member", user).setParameter("bean", simpleName);
-
+		logger.debug("Checking " + qName + " " + user + " " + simpleName);
+		TypedQuery<String> query = manager.createNamedQuery(qName, String.class).setParameter("member", user)
+				.setParameter("bean", simpleName);
+		logger.debug("Parsed " + qName);
 		List<String> restrictions = query.getResultList();
-		logger.debug("Got " + restrictions.size() + " authz queries for " + access + " by " + user
-				+ " to a " + objectClass.getSimpleName());
+		logger.debug("Checked " + qName);
+		logger.debug(
+				"Got " + restrictions.size() + " authz queries for " + access + " by " + user + " to a " + simpleName);
 
 		for (String restriction : restrictions) {
 			logger.debug("Query: " + restriction);
@@ -327,8 +320,8 @@ public class GateKeeper {
 		}
 
 		/*
-		 * Sort a copy of the results by string length. It is probably faster to evaluate a shorter
-		 * query.
+		 * Sort a copy of the results by string length. It is probably faster to
+		 * evaluate a shorter query.
 		 */
 		List<String> sortedQueries = new ArrayList<String>();
 		sortedQueries.addAll(restrictions);
@@ -347,14 +340,14 @@ public class GateKeeper {
 				return;
 			}
 		}
-		throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES, access
-				+ " access to this " + objectClass.getSimpleName() + " is not allowed.");
+		throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
+				access + " access to this " + objectClass.getSimpleName() + " is not allowed.");
 
 	}
 
 	public void requestUpdatePublicSteps() throws JMSException {
-		Session session = centralConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		MessageProducer jmsProducer = session.createProducer(synchTopic);
+		Session session = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		MessageProducer jmsProducer = session.createProducer(topic);
 		TextMessage jmsg = session.createTextMessage("updatePublicSteps");
 		logger.debug("Sending jms message: updatePublicSteps");
 		jmsProducer.send(jmsg);
@@ -362,8 +355,8 @@ public class GateKeeper {
 	}
 
 	public void requestUpdatePublicTables() throws JMSException {
-		Session session = centralConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		MessageProducer jmsProducer = session.createProducer(synchTopic);
+		Session session = topicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		MessageProducer jmsProducer = session.createProducer(topic);
 		TextMessage jmsg = session.createTextMessage("updatePublicTables");
 		logger.debug("Sending jms message: updatePublicTables");
 		jmsProducer.send(jmsg);
@@ -376,8 +369,8 @@ public class GateKeeper {
 	}
 
 	public void updatePublicSteps() {
-		List<PublicStep> steps = gateKeeperManager.createNamedQuery(PublicStep.GET_ALL_QUERY,
-				PublicStep.class).getResultList();
+		List<PublicStep> steps = gateKeeperManager.createNamedQuery(PublicStep.GET_ALL_QUERY, PublicStep.class)
+				.getResultList();
 		publicSteps.clear();
 		for (PublicStep step : steps) {
 			Set<String> fieldNames = publicSteps.get(step.getOrigin());
@@ -393,16 +386,15 @@ public class GateKeeper {
 
 	public void updatePublicTables() {
 		try {
-			List<String> tableNames = gateKeeperManager.createNamedQuery(Rule.PUBLIC_QUERY,
-					String.class).getResultList();
+			List<String> tableNames = gateKeeperManager.createNamedQuery(Rule.PUBLIC_QUERY, String.class)
+					.getResultList();
 			publicTables.clear();
 			publicTables.addAll(tableNames);
 			stalePublicTables = false;
 			logger.debug("There are " + publicTables.size() + " publicTables");
-
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error(e);
+			logger.error("Unexpected exception", e);
 		}
 	}
 

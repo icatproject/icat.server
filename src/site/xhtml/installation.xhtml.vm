@@ -124,9 +124,11 @@
 	</p>
 
 	<h2>Schema upgrade</h2>
-
-	<p>The schema must be upgraded in steps depending upon how old your
-		icat installation is</p>
+	<p>Any existing lucene database should be removed. See the
+		icat.properties file for the value of lucene.directory and ensure that
+		the directory specified there is empty.</p>
+	<p>The database schema must be upgraded in steps depending upon how
+		old your icat installation is</p>
 	<h3>Upgrade 4.2.5 schema to 4.3.x</h3>
 
 	<p>This is for upgrading a 4.2.5 schema to 4.3.2. If you have
@@ -216,18 +218,33 @@
 
 	<h2>The icat-setup.properties file</h2>
 	<dl>
-		<dt>driver</dt>
+		<dt>container</dt>
+		<dd>May be either glassfish or wildfly - though only glassfish is
+			working properly at the moment.</dd>
+		<dt>home</dt>
+		<dd>is the top level of the container installation. For
+			glasssfish it must contain "glassfish/domains" and for wildfly it
+			must contain jboss-modules.jar.</dd>
+		<dt>port</dt>
+		<dd>is the administration port of the container which is
+			typically 4848 for glassfish and 9990 for wildfly.</dd>
+		<dt>secure</dt>
+		<dd>must be set to true or false. If true then only https and not
+			http connections will be allowed.</dd>
+		<dt>db.vendor</dt>
+		<dd>This is the conventional name of the database: such as oracle
+			or mysql. Currently the only value that is significant is "oracle"
+			which should be used to mark such databases.</dd>
+		<dt>db.driver</dt>
 		<dd>is the name of the jdbc driver and must match the jar file
 			for your database that you stored in the previous step.</dd>
-		<dt>dbProperties</dt>
-		<dd>identifies the icat database and how to connect to it.</dd>
-		<dt>glassfish</dt>
-		<dd>is the top level of the glassfish installation. It must
-			contain "glassfish/domains", and will be referred to here as
-			GLASSFISH_HOME as if an environment variable had been set.</dd>
-		<dt>port</dt>
-		<dd>is the administration port of the chosen glassfish domain
-			which is typically 4848.</dd>
+		<dt>db.url</dt>
+		<dd>url to connect to your database. For example:
+			jdbc:mysql://localhost:3306/icat</dd>
+		<dt>db.username</dt>
+		<dd>username to connect to your database.</dd>
+		<dt>db.password</dt>
+		<dd>password to connect to your database.</dd>
 		<dt>jmsHostPort</dt>
 		<dd>
 			This is optional. It should only be specified on satellite machines
@@ -237,30 +254,10 @@
 		</dd>
 	</dl>
 
-	<p>For a local oracle-xe installation the following values of
-		driver and dbProperties should be good except for the user and
-		password values:</p>
-	<code>
-		driver=oracle.jdbc.pool.OracleDataSource <br />
-		dbProperties=url="'"jdbc:oracle:thin:@//localhost:1521/XE"'":ImplicitCachingEnabled=true:MaxStatements=200:user=icat:password=secret
-		<br />
-	</code>
-	<p>
-		Note the
-		<code>"'"</code>
-		which is needed because the url contains colons which also separate
-		individual properties.
-	</p>
-	<p>For MySQL:</p>
-	<code>
-		driver=com.mysql.jdbc.jdbc2.optional.MysqlDataSource <br />
-		dbProperties=user=icat:password=secret:databaseName=icat <br />
-	</code>
-
-	<h2>The icat.properties and icat.log4j.properties files</h2>
+	<h2>The icat.properties and icat.logback.xml files</h2>
 
 	<p>If you wish to modify the provided logging levels then rename
-		icat.log4j.properties.example to icat.log4j.properties and update the
+		icat.logback.xml.example to icat.logback.xml and update the
 		icat.properties file to reference it as explained below. The
 		icat.properties file may need other changes:</p>
 	<dl>
@@ -337,8 +334,8 @@
 			another line saying under what conditions you wish to generate a
 			notification for the entity.</dd>
 		<dt>notification.&lt;entity name&gt;</dt>
-		<dd>a string of letters taken from the set "C", "U" and "D"
-			indicating for which operations (create, update and delete) you wish
+		<dd>a string of letters taken from the set "C" and "U"
+			indicating for which operations (create and update) you wish
 			to be notified for that kind of operation on the entity.</dd>
 		<dt>log.list</dt>
 		<dd>is optional. It is a space separated set of call logging
@@ -353,10 +350,10 @@
 			for the various read calls and "W" is used for all write calls
 			(create, update and delete).</dd>
 
-		<dt>log4j.properties</dt>
+		<dt>logback.xml</dt>
 		<dd>This is optional. If present it must specify the path to a
-			log4j.properties file. The path may be absolute or relative to the
-			config directory.</dd>
+			logback.xml file. The path may be absolute or relative to the config
+			directory.</dd>
 
 		<dt>lucene.directory</dt>
 		<dd>This is optional. It is the path to a directory (whose parent
@@ -519,24 +516,20 @@
 	are authorized to use this command.
 
 	<dl>
-		<dt>properties</dt>
-		<dd>lists the active contents of the icat.properties file. It
-			does this by examining the properties after they have been read in so
-			any superfluous definitions in the original properties file will not
-			be seen.</dd>
 
 		<dt>populate [&lt;entity name&gt;]</dt>
 		<dd>re-populates lucene for the specified entity name. This is
 			useful if the database has been modified directly rather than by
-			using the ICAT API. Note that because of caching, ICAT should be
-			reloaded after any direct database modifications are made. This call
-			is asynchronous and simply places the request in a set of entity
-			types to be populated. When the request is processed all lucene
-			entries of the specified entity type are first cleared then the
-			corresponding icat entries are scanned to re-populate lucene. To find
-			what it is doing please use the "populating" operation desribed
-			below. It may also be run without an entity name in which case it
-			will process all entities.</dd>
+			using the ICAT API. This call is asynchronous and simply places the
+			request in a set of entity types to be populated. When the request is
+			processed all lucene entries of the specified entity type are first
+			cleared then the corresponding icat entries are scanned to
+			re-populate lucene. To find what it is doing please use the
+			"populating" operation described below. It may also be run without an
+			entity name in which case it will process all entities. The new
+			lucene index will not be seen until it is completely rebuilt. While
+			the index is being rebuilt ICAT can be used as normal as any lucene
+			updates are stored to be applied later.</dd>
 
 		<dt>populating</dt>
 		<dd>returns a list of entity types to be processed for populating
@@ -549,7 +542,7 @@
 			lucene.commitSeconds</dd>
 
 		<dt>clear</dt>
-		<dd>clears all the lucene indices - but does not commit.</dd>
+		<dd>stops any population and clears all the lucene indices.</dd>
 
 	</dl>
 

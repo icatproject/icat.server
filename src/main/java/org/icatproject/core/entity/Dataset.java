@@ -21,7 +21,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 
@@ -192,9 +194,11 @@ public class Dataset extends EntityBaseBean implements Serializable {
 		if (description != null) {
 			sb.append(" " + description);
 		}
+
 		if (doi != null) {
 			sb.append(" " + doi);
 		}
+
 		if (sample != null) {
 			sb.append(" " + sample.getName());
 			if (sample.getType() != null) {
@@ -202,21 +206,21 @@ public class Dataset extends EntityBaseBean implements Serializable {
 			}
 		}
 		doc.add(new TextField("text", sb.toString(), Store.NO));
+
 		if (startDate != null) {
-			doc.add(new StringField("startDate", DateTools.dateToString(startDate,
-					Resolution.MINUTE), Store.NO));
+			doc.add(new StringField("startDate", DateTools.dateToString(startDate, Resolution.MINUTE), Store.NO));
 		} else {
-			doc.add(new StringField("startDate",
-					DateTools.dateToString(modTime, Resolution.MINUTE), Store.NO));
+			doc.add(new StringField("startDate", DateTools.dateToString(modTime, Resolution.MINUTE), Store.NO));
 		}
+
 		if (endDate != null) {
-			doc.add(new StringField("endDate", DateTools.dateToString(endDate, Resolution.MINUTE),
-					Store.NO));
+			doc.add(new StringField("endDate", DateTools.dateToString(endDate, Resolution.MINUTE), Store.NO));
 		} else {
-			doc.add(new StringField("endDate", DateTools.dateToString(modTime, Resolution.MINUTE),
-					Store.NO));
+			doc.add(new StringField("endDate", DateTools.dateToString(modTime, Resolution.MINUTE), Store.NO));
 		}
-		doc.add(new StringField("investigation", "Investigation:" + investigation.id, Store.YES));
+		doc.add(new StringField("id", Long.toString(id), Store.YES));
+		doc.add(new SortedDocValuesField("id", new BytesRef(Long.toString(id))));
+		doc.add(new StringField("investigation", Long.toString(investigation.id), Store.NO));
 		return doc;
 	}
 

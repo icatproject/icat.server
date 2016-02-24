@@ -11,24 +11,22 @@ def uninstall():
     app = actions.getAppName("icat.server")
     if app: actions.undeploy(app)
     actions.unregisterDB("icat")
-    actions.deleteJMSResource("jms/ICAT/TopicConnectionFactory")
     actions.deleteJMSResource("jms/ICAT/Topic")
-    actions.deleteJMSResource("jms/ICAT/CentralConnectionFactory") 
     actions.deleteJMSResource("jms/ICAT/Synch")
     
-actions, options, arg = getActions(binDir=True)
-props = actions.getGlassfish("icat-setup.properties", ["dbProperties", "glassfish", "driver", "port"])
+actions, arg, props = getActions("icat-setup.properties", ["db.vendor", "db.driver", "db.url", "db.username", "db.password"], binDir=True)
 
-binDir = os.path.expanduser(options.binDir)
+binDir = actions.getBinDir();
 files = ["testicat", "icatadmin"]
 prop_name = "icat.properties"
 prop_list = ["lifetimeMinutes", "rootUserNames", "authn.list", "notification.list", "log.list"]
 
+if arg in ["CONFIGURE", "INSTALL"]: actions.configure(prop_name, prop_list) 
+icatProperties = getProperties(prop_name, prop_list)
+log4backXml = icatProperties.get("logback.xml")
+
 if arg in ["CONFIGURE", "INSTALL"]:
-    actions.configure(prop_name, prop_list) 
-    icatProperties = actions.getProperties(prop_name, prop_list)
-    log4jProperties = icatProperties.get("log4j.properties")
-    if log4jProperties:actions.configure(os.path.basename(log4jProperties), [], log4jProperties)
+    if log4backXml: actions.configure(os.path.basename(log4backXml), [], log4backXml)
     actions.checkNoErrors()
 
 if arg == "INSTALL":       
@@ -44,9 +42,9 @@ if arg == "INSTALL":
         if "log." + v not in icatProperties:
             abort ("log.list included " + v + " but log." + v + " is not defined")
      
-    if  log4jProperties:
-        dir, file = os.path.split(log4jProperties)
-        if not os.path.exists(file): abort("log4create-jms-resourcej.properties file " + file + " not found")
+    if  log4backXml:
+        dir, file = os.path.split(log4backXml)
+        if not os.path.exists(file): abort("log4back.xml file " + file + " not found")
         
     ld = icatProperties.get("lucene.Directory")
     if ld:
@@ -58,8 +56,8 @@ if arg == "INSTALL":
             abort("'lucene.commitSeconds' not specified in icat.properties")
         
     actions.installFile("icat.properties")
-    if log4jProperties:
-        dir, file = os.path.split(log4jProperties)
+    if log4backXml:
+        dir, file = os.path.split(log4backXml)
         if dir:
             actions.installFile(file, dir)
         else:
@@ -67,10 +65,8 @@ if arg == "INSTALL":
     
     try:           
         uninstall()
-        actions.registerDB(props["driver"], props["dbProperties"], "icat")
-        actions.createJMSResource("javax.jms.TopicConnectionFactory", "jms/ICAT/TopicConnectionFactory")
+        actions.registerDB("icat", props["db.vendor"], props["db.driver"], props["db.url"], props["db.username"], props["db.password"])
         actions.createJMSResource("javax.jms.Topic", "jms/ICAT/Topic")
-        actions.createJMSResource("javax.jms.TopicConnectionFactory", "jms/ICAT/CentralConnectionFactory")
         actions.createJMSResource("javax.jms.Topic", "jms/ICAT/Synch")
         
         jmsHostPort = props.get("jmsHostPort")
@@ -87,25 +83,19 @@ if arg == "INSTALL":
             actions.asadmin("set resources.connector-connection-pool.jms/ICAT/CentralConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
             actions.asadmin("set resources.connector-connection-pool.jms/ICAT/TopicConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
             
-        actions.deploy("icat.server-*.war", deploymentorder=100)
+        actions.deploy(deploymentorder=100, jmsTopicConnectionFactory=icatProperties.get("jms.topicConnectionFactory"))
         
         if not os.path.isdir(binDir): abort ("Please create directory " + binDir + " and try again.")
         for file in files:   
             if platform.system() != "Windows": os.chmod(file, 0755)    
-            shutil.copy(file , binDir)
-            if options.verbose:
-                print "\n", file, "copied to", binDir
-                
+            actions.installFile(file , binDir)
     except Exception, e:
         abort(str(e))
                 
-if arg == "UNINSTALL":
-    icatProperties = actions.getProperties(prop_name, prop_list)
-    log4jProperties = icatProperties.get("log4j.properties")
-    
+if arg == "UNINSTALL":        
     actions.removeFile(prop_name)
-    if log4jProperties:
-        dir, file = os.path.split(log4jProperties)
+    if log4backXml:
+        dir, file = os.path.split(log4backXml)
         if dir:
             actions.removeFile(file, dir)
         else:
@@ -114,12 +104,7 @@ if arg == "UNINSTALL":
     try:
         uninstall()
         for file in files:
-            path = os.path.join(binDir, file)    
-            if os.path.exists(path): 
-                os.remove(path)
-                if options.verbose:
-                    print file, "removed from", binDir
-     
+            actions.removeFile(file, binDir) 
     except Exception, e:
         abort(str(e))       
     
