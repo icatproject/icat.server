@@ -2002,6 +2002,7 @@ public class TestWS {
 		df = (Datafile) session.get("Datafile INCLUDE Dataset, DatafileFormat", df.getId());
 		assertEquals("Wibble", df.getDataset().getName());
 
+		df.setModTime(null); // To provoke a bug
 		df.setDataset(wobble);
 		df.setLocation("guess");
 		df.setDatafileFormat(session.createDatafileFormat(facility, "notpng", "notbinary"));

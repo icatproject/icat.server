@@ -6,6 +6,18 @@
 
 	<h1>ICAT Server Release Notes</h1>
 
+	<h2>4.6.1</h2>
+	<p>Bug fix release</p>
+	<ul>
+		<li>Previously the update call failed if a Datafile was passed in
+			with all datafileCreateTime, datafileModTime and modTime all set to
+			null. If the Datafile was fetched, modified in memory and then update
+			was called then modTime would be set and the problem would not reveal
+			itself.</li>
+		<li>It should also be noted that from release 4.6.0 Java 8 is
+			required to run the code.</li>
+	</ul>
+
 	<h2>4.6.0</h2>
 	<p>Small change to icat.properties</p>
 	<ul>

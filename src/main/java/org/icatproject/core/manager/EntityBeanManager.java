@@ -1779,7 +1779,6 @@ public class EntityBeanManager {
 					beanManaged.setModId(userId);
 					beanManaged.setModTime(new Date());
 				}
-
 				merge(beanManaged, bean, manager);
 				beanManaged.postMergeFixup(manager, gateKeeper);
 				manager.flush();
@@ -1792,7 +1791,7 @@ public class EntityBeanManager {
 							userTransaction);
 				}
 				if (luceneActive) {
-					bean.updateInLucene(lucene);
+					beanManaged.updateInLucene(lucene);
 				}
 				return notification;
 			} catch (IcatException e) {
