@@ -1,9 +1,6 @@
 package org.icatproject.core.parser;
 
-import java.util.Map;
-
 import org.icatproject.core.Constants;
-import org.icatproject.core.manager.EntityInfoHandler;
 
 public class WhereClause {
 
@@ -11,7 +8,7 @@ public class WhereClause {
 
 	private SubSelectClause subSelectClause;
 
-	public WhereClause(Input input, Map<String, Integer> idVarMap) throws ParserException {
+	public WhereClause(Input input) throws ParserException {
 		StringBuilder sb = new StringBuilder();
 		input.consume(Token.Type.WHERE);
 		Token t = input.peek(0);
@@ -21,7 +18,7 @@ public class WhereClause {
 			t = input.consume();
 			String val = t.getValue();
 			if (t.getType() == Token.Type.OPENPAREN && input.peek(0).getType() == Token.Type.SELECT) {
-				subSelectClause = new SubSelectClause(input, idVarMap);
+				subSelectClause = new SubSelectClause(input);
 				t = input.consume(Token.Type.CLOSEPAREN);
 				sb.append("(" + subSelectClause + ")");
 			} else if (t.getType() == Token.Type.NAME) {
@@ -29,34 +26,19 @@ public class WhereClause {
 					int n = Constants.ENUMPREFIX.split("\\.").length;
 					String vals[] = val.split("\\.");
 					if (vals.length != n + 2) {
-						throw new ParserException("Enum literal " + val + " must contain exactly "
-								+ (n + 2) + " parts");
+						throw new ParserException(
+								"Enum literal " + val + " must contain exactly " + (n + 2) + " parts");
 					}
-					sb.append(" " + Constants.ENTITY_PREFIX
-							+ t.getValue().substring(Constants.ENUMPREFIX.length()));
-				} else if (EntityInfoHandler.getAlphabeticEntityNames().contains(val)) {
-					sb.append(" " + val);
+					sb.append(" " + Constants.ENTITY_PREFIX + t.getValue().substring(Constants.ENUMPREFIX.length()));
 				} else {
-					int dot = val.indexOf('.');
-					if (dot < 0) {
-						throw new ParserException("path " + val
-								+ " mentioned in WHERE clause contains no dots");
-					}
-					String idv = val.substring(0, dot).toUpperCase();
-					Integer intVal = idVarMap.get(idv);
-					if (intVal == null) {
-						throw new ParserException("variable " + idv
-								+ " mentioned in WHERE clause is not defined");
-					}
-					sb.append(" $" + intVal + "$" + val.substring(dot));
+					sb.append(" " + val);
 				}
 			} else {
 				if (t.getType() == Token.Type.STRING) {
 					val = "'" + val.replace("'", "''") + "'";
 				} else if (t.getType() == Token.Type.TIMESTAMP) {
 					val = ":"
-							+ val.replace(" ", "").replace(":", "").replace("-", "")
-									.replace("{", "").replace("}", "");
+							+ val.replace(" ", "").replace(":", "").replace("-", "").replace("{", "").replace("}", "");
 				}
 				sb.append(" " + val);
 			}

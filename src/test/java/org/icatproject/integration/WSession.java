@@ -183,7 +183,7 @@ public class WSession {
 	}
 
 	public void clear() throws Exception {
-		deleteAll(Arrays.asList("Facility", "Log", "DataCollection", "Study"));
+		deleteAll(Arrays.asList("Facility", "DataCollection", "Study"));
 	}
 
 	private void deleteAll(List<String> names) throws IcatException_Exception {
@@ -361,7 +361,6 @@ public class WSession {
 		this.addRule("notroot", "SELECT x FROM DataCollectionDataset x", "CRUD");
 		this.addRule("notroot", "SELECT x FROM DataCollectionDatafile x", "CRUD");
 		this.addRule("notroot", "SELECT x FROM InvestigationParameter x", "CRUD");
-		this.addRule("notroot", "SELECT x FROM Log x", "CRUD");
 		this.addRule("notroot", "Instrument", "CRUD");
 		this.addRule("notroot", "InvestigationInstrument", "CRUD");
 		this.addRule("notroot", "InstrumentScientist", "CRUD");

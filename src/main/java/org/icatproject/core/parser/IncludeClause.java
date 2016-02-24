@@ -114,6 +114,7 @@ public class IncludeClause {
 
 	private int processStep(Input input, Map<String, Integer> idVarMap, int fabricatedStepCount, GateKeeper gateKeeper,
 			Set<String> keys) throws ParserException, IcatException {
+		logger.trace("idVarMap {}", idVarMap);
 		Token t = input.consume(Token.Type.NAME);
 		String path = t.getValue();
 		String var = null;

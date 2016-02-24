@@ -46,25 +46,29 @@ public class TestEntityInfo {
 				eiHandler.getExportHeader(Facility.class));
 		assertEquals("InvestigationType(description:0,facility(name:1),name:2)",
 				eiHandler.getExportHeader(InvestigationType.class));
-		assertEquals("Investigation(doi:0,endDate:1,facility(name:2),name:3,releaseDate:4,startDate:5,"
-				+ "summary:6,title:7,type(facility(name:8),name:9),visitId:10)",
+		assertEquals(
+				"Investigation(doi:0,endDate:1,facility(name:2),name:3,releaseDate:4,startDate:5,"
+						+ "summary:6,title:7,type(facility(name:8),name:9),visitId:10)",
 				eiHandler.getExportHeader(Investigation.class));
-		assertEquals("Dataset(complete:0,description:1,doi:2,endDate:3,investigation(facility(name:4),"
-				+ "name:5,visitId:6),location:7,name:8,sample(investigation(facility(name:9),"
-				+ "name:10,visitId:11),name:12),startDate:13,type(facility(name:14),name:15))",
+		assertEquals(
+				"Dataset(complete:0,description:1,doi:2,endDate:3,investigation(facility(name:4),"
+						+ "name:5,visitId:6),location:7,name:8,sample(investigation(facility(name:9),"
+						+ "name:10,visitId:11),name:12),startDate:13,type(facility(name:14),name:15))",
 				eiHandler.getExportHeader(Dataset.class));
-		assertEquals("DataCollection(?:0)", eiHandler.getExportHeader(DataCollection.class));
+		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals(
 				"Job(?:0,application(facility(name:1),name:2,version:3),arguments:4,inputDataCollection(?:5),outputDataCollection(?:6))",
 				eiHandler.getExportHeader(Job.class));
-		assertEquals("DatasetParameter(dataset(investigation(facility(name:0),name:1,visitId:2),name:3),"
-				+ "dateTimeValue:4,error:5,numericValue:6,rangeBottom:7,rangeTop:8,stringValue:9,"
-				+ "type(facility(name:10),name:11,units:12))", eiHandler.getExportHeader(DatasetParameter.class));
+		assertEquals(
+				"DatasetParameter(dataset(investigation(facility(name:0),name:1,visitId:2),name:3),"
+						+ "dateTimeValue:4,error:5,numericValue:6,rangeBottom:7,rangeTop:8,stringValue:9,"
+						+ "type(facility(name:10),name:11,units:12))",
+				eiHandler.getExportHeader(DatasetParameter.class));
 		assertEquals("ParameterType(applicableToDataCollection:0,applicableToDatafile:1,applicableToDataset:2,"
 				+ "applicableToInvestigation:3,applicableToSample:4,description:5,enforced:6,facility(name:7),"
 				+ "maximumNumericValue:8,minimumNumericValue:9,name:10,units:11,unitsFullName:12,"
 				+ "valueType:13,verified:14)", eiHandler.getExportHeader(ParameterType.class));
-		assertEquals("DataCollection(?:0)", eiHandler.getExportHeader(DataCollection.class));
+		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals("Rule(?:0,crudFlags:1,grouping(name:2),what:3)", eiHandler.getExportHeader(Rule.class));
 		assertEquals(
 				"DataCollectionDatafile(dataCollection(?:0),datafile(dataset(investigation(facility(name:1),name:2,visitId:3),name:4),name:5))",
@@ -73,43 +77,55 @@ public class TestEntityInfo {
 
 	@Test
 	public void testExportHeaderAll() throws Exception {
-		assertEquals("Facility(createId:0,createTime:1,modId:2,"
-				+ "modTime:3,daysUntilRelease:4,description:5,fullName:6,name:7,url:8)",
+		assertEquals(
+				"Facility(createId:0,createTime:1,modId:2,"
+						+ "modTime:3,daysUntilRelease:4,description:5,fullName:6,name:7,url:8)",
 				eiHandler.getExportHeaderAll(Facility.class));
-		assertEquals("InvestigationType(createId:0,createTime:1,modId:2,"
-				+ "modTime:3,description:4,facility(name:5),name:6)",
+		assertEquals(
+				"InvestigationType(createId:0,createTime:1,modId:2,"
+						+ "modTime:3,description:4,facility(name:5),name:6)",
 				eiHandler.getExportHeaderAll(InvestigationType.class));
-		assertEquals("Investigation(createId:0,createTime:1,modId:2,modTime:3,"
-				+ "doi:4,endDate:5,facility(name:6),name:7,releaseDate:8,startDate:9,"
-				+ "summary:10,title:11,type(facility(name:12),name:13),visitId:14)",
+		assertEquals(
+				"Investigation(createId:0,createTime:1,modId:2,modTime:3,"
+						+ "doi:4,endDate:5,facility(name:6),name:7,releaseDate:8,startDate:9,"
+						+ "summary:10,title:11,type(facility(name:12),name:13),visitId:14)",
 				eiHandler.getExportHeaderAll(Investigation.class));
-		assertEquals("Dataset(createId:0,createTime:1,modId:2,modTime:3,"
-				+ "complete:4,description:5,doi:6,endDate:7,investigation(facility(name:8),"
-				+ "name:9,visitId:10),location:11,name:12,"
-				+ "sample(investigation(facility(name:13),name:14,visitId:15),"
-				+ "name:16),startDate:17,type(facility(name:18),name:19))", eiHandler.getExportHeaderAll(Dataset.class));
-		assertEquals("DataCollection(?:0,createId:1,createTime:2,modId:3,modTime:4)",
+		assertEquals(
+				"Dataset(createId:0,createTime:1,modId:2,modTime:3,"
+						+ "complete:4,description:5,doi:6,endDate:7,investigation(facility(name:8),"
+						+ "name:9,visitId:10),location:11,name:12,"
+						+ "sample(investigation(facility(name:13),name:14,visitId:15),"
+						+ "name:16),startDate:17,type(facility(name:18),name:19))",
+				eiHandler.getExportHeaderAll(Dataset.class));
+		assertEquals("DataCollection(?:0,createId:1,createTime:2,modId:3,modTime:4,doi:5)",
 				eiHandler.getExportHeaderAll(DataCollection.class));
-		assertEquals("Job(?:0,createId:1,createTime:2,modId:3,modTime:4,"
-				+ "application(facility(name:5),name:6,version:7),arguments:8,"
-				+ "inputDataCollection(?:9),outputDataCollection(?:10))", eiHandler.getExportHeaderAll(Job.class));
-		assertEquals("DatasetParameter(createId:0,createTime:1,modId:2,modTime:3,"
-				+ "dataset(investigation(facility(name:4),name:5,visitId:6),name:7),"
-				+ "dateTimeValue:8,error:9,numericValue:10,rangeBottom:11,"
-				+ "rangeTop:12,stringValue:13,type(facility(name:14),name:15,units:16))",
+		assertEquals(
+				"Job(?:0,createId:1,createTime:2,modId:3,modTime:4,"
+						+ "application(facility(name:5),name:6,version:7),arguments:8,"
+						+ "inputDataCollection(?:9),outputDataCollection(?:10))",
+				eiHandler.getExportHeaderAll(Job.class));
+		assertEquals(
+				"DatasetParameter(createId:0,createTime:1,modId:2,modTime:3,"
+						+ "dataset(investigation(facility(name:4),name:5,visitId:6),name:7),"
+						+ "dateTimeValue:8,error:9,numericValue:10,rangeBottom:11,"
+						+ "rangeTop:12,stringValue:13,type(facility(name:14),name:15,units:16))",
 				eiHandler.getExportHeaderAll(DatasetParameter.class));
-		assertEquals("ParameterType(createId:0,createTime:1,modId:2,modTime:3,"
-				+ "applicableToDataCollection:4,applicableToDatafile:5,"
-				+ "applicableToDataset:6,applicableToInvestigation:7,"
-				+ "applicableToSample:8,description:9,enforced:10,facility(name:11),"
-				+ "maximumNumericValue:12,minimumNumericValue:13,name:14,units:15,"
-				+ "unitsFullName:16,valueType:17,verified:18)", eiHandler.getExportHeaderAll(ParameterType.class));
-		assertEquals("DataCollection(?:0)", eiHandler.getExportHeader(DataCollection.class));
+		assertEquals(
+				"ParameterType(createId:0,createTime:1,modId:2,modTime:3,"
+						+ "applicableToDataCollection:4,applicableToDatafile:5,"
+						+ "applicableToDataset:6,applicableToInvestigation:7,"
+						+ "applicableToSample:8,description:9,enforced:10,facility(name:11),"
+						+ "maximumNumericValue:12,minimumNumericValue:13,name:14,units:15,"
+						+ "unitsFullName:16,valueType:17,verified:18)",
+				eiHandler.getExportHeaderAll(ParameterType.class));
+		assertEquals("DataCollection(?:0,doi:1)", eiHandler.getExportHeader(DataCollection.class));
 		assertEquals("Rule(?:0,createId:1,createTime:2,modId:3,modTime:4," + "crudFlags:5,grouping(name:6),what:7)",
 				eiHandler.getExportHeaderAll(Rule.class));
-		assertEquals("DataCollectionDatafile(createId:0,createTime:1,modId:2,modTime:3,"
-				+ "dataCollection(?:4),datafile(dataset(investigation(facility(name:5),"
-				+ "name:6,visitId:7),name:8),name:9))", eiHandler.getExportHeaderAll(DataCollectionDatafile.class));
+		assertEquals(
+				"DataCollectionDatafile(createId:0,createTime:1,modId:2,modTime:3,"
+						+ "dataCollection(?:4),datafile(dataset(investigation(facility(name:5),"
+						+ "name:6,visitId:7),name:8),name:9))",
+				eiHandler.getExportHeaderAll(DataCollectionDatafile.class));
 	}
 
 	@Test
@@ -126,17 +142,19 @@ public class TestEntityInfo {
 
 	@Test
 	public void testFields() throws Exception {
-		testField("applications,datafileFormats,datasetTypes,daysUntilRelease,description,facilityCycles,"
-				+ "fullName,instruments,investigationTypes,investigations,name,parameterTypes,sampleTypes,url",
+		testField(
+				"applications,datafileFormats,datasetTypes,daysUntilRelease,description,facilityCycles,"
+						+ "fullName,instruments,investigationTypes,investigations,name,parameterTypes,sampleTypes,url",
 				Facility.class);
 		testField("description,facility,investigations,name", InvestigationType.class);
 		testField(
 				"datasets,doi,endDate,facility,investigationGroups,investigationInstruments,investigationUsers,keywords,"
 						+ "name,parameters,publications,releaseDate,samples,shifts,startDate,studyInvestigations,"
-						+ "summary,title,type,visitId", Investigation.class);
+						+ "summary,title,type,visitId",
+				Investigation.class);
 		testField("complete,dataCollectionDatasets,datafiles,description,doi,endDate,investigation,location,"
 				+ "name,parameters,sample,startDate,type", Dataset.class);
-		testField("dataCollectionDatafiles,dataCollectionDatasets,jobsAsInput,jobsAsOutput,parameters",
+		testField("dataCollectionDatafiles,dataCollectionDatasets,doi,jobsAsInput,jobsAsOutput,parameters",
 				DataCollection.class);
 		testField("application,arguments,inputDataCollection,outputDataCollection", Job.class);
 		testField("dataset,dateTimeValue,error,numericValue,rangeBottom,rangeTop,stringValue,type",
@@ -184,8 +202,8 @@ public class TestEntityInfo {
 	@Test
 	public void testFieldByName() throws Exception {
 		Map<String, Field> fields = eiHandler.getFieldsByName(EntityInfoHandler.getClass("DatafileParameter"));
-		assertEquals("protected java.lang.Long org.icatproject.core.entity.EntityBaseBean.id", fields.get("id")
-				.toString());
+		assertEquals("protected java.lang.Long org.icatproject.core.entity.EntityBaseBean.id",
+				fields.get("id").toString());
 		assertEquals(
 				"private org.icatproject.core.entity.Datafile org.icatproject.core.entity.DatafileParameter.datafile",
 				fields.get("datafile").toString());
@@ -205,8 +223,7 @@ public class TestEntityInfo {
 				"From Investigation to InvestigationUser by investigationUsers many setInvestigation",
 				"From Investigation to InvestigationGroup by investigationGroups many setInvestigation",
 				"From Investigation to InvestigationInstrument by investigationInstruments many setInvestigation",
-				"From Investigation to InvestigationType by type one",
-				"From Investigation to Facility by facility one",
+				"From Investigation to InvestigationType by type one", "From Investigation to Facility by facility one",
 				"From Investigation to InvestigationParameter by parameters many setInvestigation");
 
 		testRel(Dataset.class, "From Dataset to DataCollectionDataset by dataCollectionDatasets many setDataset",
@@ -239,10 +256,16 @@ public class TestEntityInfo {
 		for (Relationship rel : results) {
 			rStrings.add(rel.toString());
 		}
-		System.out.println(results);
 		assertEquals(klass.getSimpleName() + " count", rels.length, results.size());
 		for (String rel : rels) {
 			assertTrue(klass.getSimpleName() + " value " + rel, rStrings.contains(rel));
+		}
+		Set<Entry<String, Relationship>> map = eiHandler.getRelationshipsByName(klass).entrySet();
+		assertEquals(rels.length, map.size());
+		for (Entry<String, Relationship> e : map) {
+			Relationship rel = e.getValue();
+			assertEquals(rel.getField().getName(), e.getKey());
+			assertTrue(klass.getSimpleName() + " value " + rel, rStrings.contains(rel.toString()));
 		}
 	}
 
