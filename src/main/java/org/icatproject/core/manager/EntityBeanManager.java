@@ -1555,7 +1555,7 @@ public class EntityBeanManager {
 							}
 						}
 					} else {
-						arg = parseSubEntity((JsonObject) fValue, rels.get(fName), manager, creates, updates, create);
+						arg = parseSubEntity((JsonObject) fValue, rels.get(fName), manager, creates, updates);
 					}
 					try {
 						setters.get(field).invoke(bean, arg);
@@ -1570,7 +1570,7 @@ public class EntityBeanManager {
 						List<EntityBaseBean> beans = (List<EntityBaseBean>) getters.get(fName).invoke(bean);
 						for (JsonValue aValue : (JsonArray) fValue) {
 							EntityBaseBean arg = parseSubEntity((JsonObject) aValue, rels.get(fName), manager, creates,
-									updates, create);
+									updates);
 							beans.add(arg);
 						}
 					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -1591,7 +1591,7 @@ public class EntityBeanManager {
 	}
 
 	private EntityBaseBean parseSubEntity(JsonObject contents, Relationship relationship, EntityManager manager,
-			List<EntityBaseBean> creates, List<EntityBaseBean> updates, boolean create2) throws IcatException {
+			List<EntityBaseBean> creates, List<EntityBaseBean> updates) throws IcatException {
 		logger.debug("Parse entity {} from relationship {}", contents, relationship);
 		Class<? extends EntityBaseBean> klass = relationship.getDestinationBean();
 
@@ -1772,6 +1772,7 @@ public class EntityBeanManager {
 					beanManaged.setModTime(new Date());
 				}
 				merge(beanManaged, bean, manager);
+				gateKeeper.performAuthorisation(userId, beanManaged, AccessType.CREATE, manager);
 				beanManaged.postMergeFixup(manager, gateKeeper);
 				manager.flush();
 				logger.trace("Updated bean " + bean + " flushed.");
@@ -1961,6 +1962,7 @@ public class EntityBeanManager {
 		if (!create) {
 			bean.setId(contents.getJsonNumber("id").longValueExact());
 			bean = find(bean, manager);
+			gateKeeper.performAuthorisation(userId, bean, AccessType.UPDATE, manager);
 		}
 
 		List<EntityBaseBean> localCreates = new ArrayList<>();
@@ -2054,7 +2056,7 @@ public class EntityBeanManager {
 			creates.add(eb);
 		}
 		for (EntityBaseBean eb : localUpdates) {
-			gateKeeper.performAuthorisation(userId, eb, AccessType.UPDATE, manager);
+			gateKeeper.performAuthorisation(userId, eb, AccessType.CREATE, manager);
 			updates.add(eb);
 		}
 

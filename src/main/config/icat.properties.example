@@ -43,9 +43,7 @@ notification.Dataset = CU
 notification.Datafile = CU
 
 # Call logging setup
-log.list = file table
-log.file = S
-log.table = S
+log.list = SESSION WRITE READ INFO
 
 # Lucene
 lucene.directory = ../data/icat/lucene
