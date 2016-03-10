@@ -533,7 +533,7 @@ public class ICATRest {
 						jsonString = value;
 					} else {
 						throw new IcatException(IcatExceptionType.BAD_PARAMETER,
-								"Form field " + fieldName + "is not recognised");
+								"Form field '" + fieldName + "' is not recognised");
 					}
 				} else {
 					if (name == null) {

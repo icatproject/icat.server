@@ -5,7 +5,7 @@
 <body>
 	<h1>Overview</h1>
 	<p>
-		This document is made up of three sections, describing <a
+		This document is made up of four sections, describing <a
 			href="#installation">installation</a> , <a href="#post">post-installation
 			work</a> , <a href="#performance">performance</a> and the <a
 			href="#icatadmin">admin interface</a>
@@ -40,11 +40,7 @@
 		<li><a
 			href="http://www.icatproject.org/mvn/site/tools/icat-setup/">icat-setup</a>
 			version 1.1.x or higher must be installed if you have a 4.2.x schema
-			you need to upgrade and you wish to preserve existing rules but it is
-			also generally a useful component to install.</li>
-		<li><a href="http://www.icatproject.org/mvn/site/tools/ice/">ice</a>
-			, the ICAT editor will make it easier to configure your ICAT.
-			Alternatively use the ICAT Manager.</li>
+			you need to upgrade and you wish to preserve existing rules.</li>
 	</ul>
 
 	<h2>Summary of steps</h2>
@@ -163,6 +159,26 @@
 			which had been created manually will have been removed.
 		</li>
 
+		<li>Install the new icat</li>
+
+		<li>Restore the rules using the <kbd>icat-setup</kbd> tool. For
+			example:
+
+			<blockquote>
+				<code> icat-setup -f rules.authz https://example.com:8181 db
+					username root password secret </code>
+			</blockquote>
+			<p>This assumes that you are in the directory where you ran
+				get_rules.py which will have created a file rules.authz. The
+				credentials (keyword value pairs following the authenticator
+				mnemonic) should be those of one of the users specified in the
+				rootUserNames of the icat.properties file.</p>
+			<p>Please check the rules.authz first as it will not work if it
+				references entities that no longer exist. For example "Group" must
+				be replaced by "Grouping" and InputDatafile is no longer part of
+				ICAT. Also because some problems have been found with conditions
+				containing dots (such as "InvestigationUser [user.name='fred']") in
+				rules these must now be re-expressed without dots.</p></li>
 	</ol>
 
 	<h3>Upgrade 4.3.x schema to 4.4.0</h3>
@@ -216,6 +232,33 @@
 		sequence. Note that the increment for the sequence must be exactly 50
 		and the start value must be at least 51 more than the number in the
 		old SEQUENCE table.
+	</p>
+	<h3>Upgrade 4.5.x or 4.6.x schema to 4.7.0</h3>
+	<p>
+		The Rule and DataCollection tables have changed. First dump the
+		existing rules with:
+		<kbd> ./rules.py dump https://example.com:8181 db username root
+			password secret &gt; rules.ie </kbd>
+
+		i.e. run the rules.py script in the unpacked distribution directory
+		with the "dump" parameter, the url of your icat and then the
+		authenticator plugin and credentials to identify a user specified in
+		the rootUserNames list in icat.properties. This will redirect the dump
+		into a file called rules.ie. Then undeploy the existing icat
+		<kbd>./setup uninstall -v</kbd>
+
+		Then for MySQL run
+		<kbd>mysql -u icat -p icat &lt; upgrade_mysql_4_7.sql</kbd>
+		or for Oracle run
+		<kbd>sqlplus icat @upgrade_oracle_4_7.sql</kbd>
+		where in both cases it is assumed that the tables are owned by user
+		"icat". The script will drop the Rule table and add a DOI column to
+		the DataCollection table. Next install the new ICAT (which will
+		recreate an empty Rule table) Finally run
+		<kbd>./rules.py load https://example.com:8181 db username root
+			password secret &lt; rules.ie</kbd>
+		which will populate the Rule table. <em>Only run this script once
+			or you will get duplicate entries in the table.</em>
 	</p>
 
 	<h2>The icat-setup.properties file</h2>
@@ -415,13 +458,9 @@
 		<a id="post"></a> Post-installation work
 	</h1>
 	<h2>Fresh Install</h2>
-	<p>
-		If this is a fresh install then you can use
-		<kbd>icat-setup</kbd>
-		to add rules to ICAT, then use ice or the icat manager to create a
-		Facility and other high level entities. Alternatively you can use the
-		import facility to do the initial icat population.
-	</p>
+	<p>If this is a fresh install then you can use the import facility
+		to do the initial icat population or you could use the icat manager to
+		create rules, a Facility and other high level entities.</p>
 
 	<p>
 		If you are using Oracle the type NUMBER(38, 19) will have been used
@@ -430,35 +469,10 @@
 		the SQL statements in
 		<kbd>fix_floats_oracle.sql</kbd>
 	</p>
-	<h2>Upgrade</h2>
-	<p>
-		If you have performed a schema upgrade from 4.3.x then you should
-		restore the rules using the
-		<kbd>icat-setup</kbd>
-		tool. For example:
-	</p>
+	<h2>In all cases</h2>
+	Populate the lucene index by using the
+	<a href="#icatadmin">icatadmin</a> tool.
 
-	<blockquote>
-		<code> icat-setup -f rules.authz https://example.com:8181 db
-			username root password secret </code>
-	</blockquote>
-	<p>This assumes that you are in the directory where ran
-		get_rules.py which will created a file rules.authz. The credentials
-		(keyword value pairs following the authenticator mnemonic) should be
-		those of one of the users specified in the rootUserNames of the
-		icat.properties file.</p>
-	<p>Please check the rules.authz first as it will not work if it
-		references entities that no longer exist. For example "Group" must be
-		replaced by "Grouping" and InputDatafile is no longer part of ICAT.
-		Also because some problems have been found with conditions containing
-		dots (such as "InvestigationUser [user.name='fred']") in rules these
-		must now be re-expressed without dots.</p>
-	<p>Finally you should run the icatadmin populate command to
-		populate lucene for all existing data as in the example below:</p>
-	<blockquote>
-		<code> icatadmin https://example.com:8181 db username root
-			password secret -- populate</code>
-	</blockquote>
 	<h1>
 		<a id="performance"></a> Performance
 	</h1>
