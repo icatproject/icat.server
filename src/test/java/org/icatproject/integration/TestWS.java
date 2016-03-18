@@ -1629,6 +1629,12 @@ public class TestWS {
 		session.clear();
 		create();
 
+		List<?> results = session.search("select investigation from Investigation investigation, "
+				+ "investigation.investigationUsers as investigationUser, investigationUser.user as user "
+				+ "where user.name = :user ORDER BY investigation.startDate desc limit 0, 50 "
+				+ "include investigation.investigationInstruments.instrument");
+		assertEquals("Count", 2, results.size());
+
 		Date now = new Date(new Date().getTime() + 1001); // Move on a second
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
 		String nowString = "{ts " + df.format(now) + "}";
@@ -1657,7 +1663,7 @@ public class TestWS {
 		Long invId = (Long) session.search("SELECT inv.id FROM Investigation inv WHERE inv.datasets IS NOT EMPTY")
 				.get(0);
 
-		List<?> results = session.search("SELECT ds.id FROM Dataset ds JOIN ds.parameters dsp JOIN ds.investigation inv"
+		results = session.search("SELECT ds.id FROM Dataset ds JOIN ds.parameters dsp JOIN ds.investigation inv"
 				+ " WHERE dsp.type.name = 'TIMESTAMP' AND inv.name <> 12");
 		assertEquals("Count", 1, results.size());
 

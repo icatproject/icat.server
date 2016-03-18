@@ -84,7 +84,7 @@ public class SearchQuery {
 			} else {
 				String idv = selectClause.getIdPaths().iterator().next();
 				Class<? extends EntityBaseBean> bean = fromClause.getAuthzMap().get(idv + ".id");
-				includeClause = new IncludeClause(bean, input, idv, gateKeeper);
+				includeClause = new IncludeClause(bean, input, idv.toUpperCase(), gateKeeper);
 				t = input.peek(0);
 			}
 		}

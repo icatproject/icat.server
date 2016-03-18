@@ -246,7 +246,8 @@
 		the rootUserNames list in icat.properties. This will redirect the dump
 		into a file called rules.ie. Then undeploy the existing icat
 		<kbd>./setup uninstall -v</kbd>
-
+	</p>
+	<p>
 		Then for MySQL run
 		<kbd>mysql -u icat -p icat &lt; upgrade_mysql_4_7.sql</kbd>
 		or for Oracle run
@@ -260,6 +261,13 @@
 		which will populate the Rule table. <em>Only run this script once
 			or you will get duplicate entries in the table.</em>
 	</p>
+	<p>
+		In addition the
+		<kbd>Log</kbd>
+		table is no longer used and may be dropped after you have extracted
+		any information from it that you need.
+	</p>
+
 
 	<h2>The icat-setup.properties file</h2>
 	<dl>
