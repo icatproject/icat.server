@@ -46,12 +46,16 @@
 			by a log.list in the icat.properties which may contain one or more of
 			READ, WRITE, SESSION and INFO.</li>
 		<li>Updates whether from the SOAP call or the restful write call
-			are both checked for UPDATE permission before the call and CREATE
-			permission after the call.</li>
+			are both checked for UPDATE permission before the call and if a
+			relationship field is changed which is used to identify that object
+			then DELETE permission is required before the change and CREATE
+			permission afterwards.</li>
 		<li>Added attributes email and orcidId to the User table</li>
-		<li>testicat and icatadmin have certificates checking disabled.
+		<li>testicat and icatadmin have certificate checking disabled.
 			This used to be the normal behaviour but newer version of python, by
 			default, expect a certificate accessible by openssl.</li>
+		<li>Produce an error message rather than a null pointer exception
+			if an invalid authenticator mnemonic is used in a login call.</li>
 	</ul>
 
 	<h2>4.6.1</h2>

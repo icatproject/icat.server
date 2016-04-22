@@ -34,8 +34,13 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
 
+import org.icatproject.Dataset;
+import org.icatproject.DatasetType;
 import org.icatproject.EntityBaseBean;
 import org.icatproject.Facility;
+import org.icatproject.IcatException_Exception;
+import org.icatproject.Investigation;
+import org.icatproject.InvestigationType;
 import org.icatproject.icat.client.ICAT;
 import org.icatproject.icat.client.IcatException;
 import org.icatproject.icat.client.IcatException.IcatExceptionType;
@@ -474,6 +479,177 @@ public class TestRS {
 		}
 	}
 
+	@Test
+	public void authzForUpdate() throws Exception {
+		wSession.setAuthz();
+		Session session = createAndPopulate();
+
+		// Make sure that fetching a non-id Double gives no problems
+		assertEquals(73.0, search(session, "SELECT MIN(pt.minimumNumericValue) FROM ParameterType pt", 1)
+				.getJsonNumber(0).doubleValue(), 0.001);
+
+		wSession.clear();
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Test Facility")
+					.write("daysUntilRelease", 90).writeEnd().writeEnd();
+		}
+		List<Long> ids = session.write(baos.toString());
+		Long fid = ids.get(0);
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("InvestigationType").writeStartObject("facility").write("id", fid)
+					.writeEnd().write("name", "TestExperiment").writeEnd().writeEnd();
+		}
+		ids = session.write(baos.toString());
+		Long itid = ids.get(0);
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("DatasetType").writeStartObject("facility").write("id", fid)
+					.writeEnd().write("name", "X").writeEnd().writeEnd();
+
+			jw.writeStartObject().writeStartObject("DatasetType").writeStartObject("facility").write("id", fid)
+					.writeEnd().write("name", "Y").writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		ids = session.write(baos.toString());
+		Long dstX = ids.get(0);
+		Long dstY = ids.get(1);
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("Investigation").writeStartObject("facility").write("id", fid)
+					.writeEnd().writeStartObject("type").write("id", itid).writeEnd().write("name", "A")
+					.write("title", "Not null").write("visitId", "42").writeEnd().writeEnd();
+
+			jw.writeStartObject().writeStartObject("Investigation").writeStartObject("facility").write("id", fid)
+					.writeEnd().writeStartObject("type").write("id", itid).writeEnd().write("name", "B")
+					.write("title", "Not null").write("visitId", "42").writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		ids = session.write(baos.toString());
+		Long invA = ids.get(0);
+		Long invB = ids.get(1);
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Dataset").writeStartObject("type").write("id", dstX).writeEnd()
+					.writeStartObject("investigation").write("id", invA).writeEnd().write("name", "A1").writeEnd()
+					.writeEnd();
+		}
+		ids = session.write(baos.toString());
+		Long dsid = ids.get(0);
+
+		try {
+			/* Initially can read datasets from investigations A and B */
+			wSession.delRule("notroot", "Dataset", "CRUD");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "R");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'B']", "R");
+
+			assertEquals(dsid,
+					(Long) search(session, "SELECT ds.id FROM Dataset ds WHERE ds.investigation.name = 'A' INCLUDE 1",
+							1).getJsonNumber(0).longValueExact());
+
+			try {
+				baos = new ByteArrayOutputStream();
+				try (JsonGenerator jw = Json.createGenerator(baos)) {
+					jw.writeStartObject().writeStartObject("Dataset").write("id", dsid).write("name", "A2").writeEnd()
+							.writeEnd();
+				}
+				ids = session.write(baos.toString());
+				fail();
+			} catch (IcatException e) {
+				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getType());
+				assertEquals("UPDATE access to this Dataset is not allowed.", e.getMessage());
+			}
+
+			/*
+			 * Permissions were insufficient to change an attribute value so
+			 * change to allow update for data sets from investigation A
+			 */
+			wSession.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "R");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "U");
+
+			baos = new ByteArrayOutputStream();
+			try (JsonGenerator jw = Json.createGenerator(baos)) {
+				jw.writeStartObject().writeStartObject("Dataset").write("id", dsid).write("name", "A2").writeEnd()
+						.writeEnd();
+			}
+			ids = session.write(baos.toString());
+
+			/*
+			 * Check that non-defining relationship fields can also be updated
+			 */
+			baos = new ByteArrayOutputStream();
+			try (JsonGenerator jw = Json.createGenerator(baos)) {
+				jw.writeStartObject().writeStartObject("Dataset").write("id", dsid).writeStartObject("type")
+						.write("id", dstY).writeEnd().writeEnd().writeEnd();
+			}
+			ids = session.write(baos.toString());
+
+			/* Changing a defining relationship field will fail however */
+			try {
+				baos = new ByteArrayOutputStream();
+				try (JsonGenerator jw = Json.createGenerator(baos)) {
+					jw.writeStartObject().writeStartObject("Dataset").write("id", dsid)
+							.writeStartObject("investigation").write("id", invB).writeEnd().writeEnd().writeEnd();
+				}
+				ids = session.write(baos.toString());
+				fail();
+			} catch (IcatException e) {
+				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getType());
+				assertEquals("DELETE access implied by UPDATE to this Dataset is not allowed.", e.getMessage());
+			}
+
+			/*
+			 * This effectively does a delete from investigation A so permit
+			 * this
+			 */
+			wSession.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "U");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
+			try {
+				session.write(baos.toString());
+				fail();
+			} catch (IcatException e) {
+				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getType());
+				assertEquals("CREATE access to this Dataset is not allowed.", e.getMessage());
+			}
+
+			/*
+			 * But it also is effectively a create in investigation B. So add
+			 * create to A - which won't work of course
+			 */
+			wSession.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "CUD");
+			try {
+				session.write(baos.toString());
+				fail();
+			} catch (IcatException e) {
+				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getType());
+				assertEquals("CREATE access to this Dataset is not allowed.", e.getMessage());
+			}
+
+			/* So now add create to B - and it works */
+			wSession.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "CUD");
+			wSession.delRule("notroot", "Dataset <-> Investigation [name = 'B']", "R");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'B']", "C");
+			session.write(baos.toString());
+		} finally {
+			wSession.setAuthz();
+		}
+
+	}
+
 	private JsonArray search(Session session, String query, int n) throws IcatException {
 		JsonArray result = Json.createReader(new ByteArrayInputStream(session.search(query).getBytes())).readArray();
 		assertEquals(n, result.size());
@@ -482,7 +658,7 @@ public class TestRS {
 
 	private JsonArray searchInvestigations(Session session, String user, String text, Date lower, Date upper,
 			List<ParameterForLucene> parameters, List<String> samples, String userFullName, int maxResults, int n)
-					throws IcatException {
+			throws IcatException {
 		JsonArray result = Json.createReader(new ByteArrayInputStream(
 				session.searchInvestigations(user, text, lower, upper, parameters, samples, userFullName, maxResults)
 						.getBytes()))

@@ -698,11 +698,12 @@ public class ICATRest {
 			}
 		}
 
-		Authenticator authenticator = authPlugins.get(plugin).getAuthenticator();
-		if (authenticator == null) {
+		ExtendedAuthenticator extendedAuthenticator = authPlugins.get(plugin);
+		if (extendedAuthenticator == null) {
 			throw new IcatException(IcatException.IcatExceptionType.SESSION,
 					"Authenticator mnemonic " + plugin + " not recognised");
 		}
+		Authenticator authenticator = extendedAuthenticator.getAuthenticator();
 		logger.debug("Using " + plugin + " to authenticate");
 
 		String userName = authenticator.authenticate(credentials, request.getRemoteAddr()).getUserName();

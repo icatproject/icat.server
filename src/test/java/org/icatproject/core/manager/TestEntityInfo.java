@@ -15,6 +15,7 @@ import java.util.Set;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.DataCollection;
 import org.icatproject.core.entity.DataCollectionDatafile;
+import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.DatasetParameter;
 import org.icatproject.core.entity.EntityBaseBean;
@@ -311,7 +312,6 @@ public class TestEntityInfo {
 
 	private void testNNF(Class<? extends EntityBaseBean> klass, String... nnfs) throws Exception {
 		List<Field> results = eiHandler.getNotNullableFields(klass);
-		// System.out.println(results);
 		Set<String> rStrings = new HashSet<String>();
 		for (Field field : results) {
 			rStrings.add(field.getName());
@@ -329,7 +329,7 @@ public class TestEntityInfo {
 		testSF(Dataset.class, "name 255", "description 255", "location 255", "doi 255");
 		testSF(Keyword.class, "name 255");
 		testSF(InvestigationUser.class, "role 255");
-		testSF(User.class, "name 255", "fullName 255");
+		testSF(User.class, "name 255", "fullName 255", "email 255", "orcidId 255");
 		testSF(ParameterType.class, "description 255", "unitsFullName 255", "units 255", "name 255");
 		testSF(Job.class, "arguments 255");
 
@@ -354,7 +354,7 @@ public class TestEntityInfo {
 		testGetters(Dataset.class, 18);
 		testGetters(Keyword.class, 7);
 		testGetters(InvestigationUser.class, 8);
-		testGetters(User.class, 11);
+		testGetters(User.class, 13);
 		testGetters(ParameterType.class, 26);
 		testGetters(Job.class, 9);
 	}
@@ -365,7 +365,7 @@ public class TestEntityInfo {
 		testSetters(Dataset.class, 14);
 		testSetters(Keyword.class, 3);
 		testSetters(InvestigationUser.class, 4);
-		testSetters(User.class, 7);
+		testSetters(User.class, 9);
 		testSetters(ParameterType.class, 22);
 		testSetters(Job.class, 5);
 	}
@@ -376,11 +376,32 @@ public class TestEntityInfo {
 		testSettersForUpdate(Dataset.class, 10);
 		testSettersForUpdate(Keyword.class, 2);
 		testSettersForUpdate(InvestigationUser.class, 3);
-		testSettersForUpdate(User.class, 2);
+		testSettersForUpdate(User.class, 4);
 		testSettersForUpdate(ParameterType.class, 15);
 		testSettersForUpdate(Job.class, 4);
 		testSettersForUpdate(Facility.class, 5);
 		testSettersForUpdate(InvestigationType.class, 3);
+	}
+
+	@Test
+	public void relInKey() throws Exception {
+		testRelInkey(Dataset.class, "investigation");
+		testRelInkey(Datafile.class, "dataset");
+		testRelInkey(Facility.class);
+		testRelInkey(DataCollectionDatafile.class, "dataCollection", "datafile");
+	}
+
+	private void testRelInkey(Class<? extends EntityBaseBean> klass, String... fieldNames) throws Exception {
+		Set<Field> results = eiHandler.getRelInKey(klass);
+		Set<String> rStrings = new HashSet<String>();
+		for (Field field : results) {
+			rStrings.add(field.getName());
+		}
+		assertEquals(klass.getSimpleName() + " count", fieldNames.length, results.size());
+
+		for (String fn : fieldNames) {
+			assertTrue(klass.getSimpleName() + " value " + fn, rStrings.contains(fn));
+		}
 	}
 
 	private void testGetters(Class<? extends EntityBaseBean> klass, int count) throws Exception {

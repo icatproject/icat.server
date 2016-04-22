@@ -654,6 +654,104 @@ public class TestWS {
 		}
 	}
 
+	@Test
+	public void authzForUpdate() throws Exception {
+
+		session.clear();
+
+		Facility facility = session.createFacility("Test Facility", 90);
+
+		InvestigationType investigationType = session.createInvestigationType(facility, "TestExperiment");
+
+		DatasetType dstX = session.createDatasetType(facility, "X");
+		DatasetType dstY = session.createDatasetType(facility, "Y");
+
+		Investigation invA = session.createInvestigation(facility, "A", "Not null", investigationType);
+		Investigation invB = session.createInvestigation(facility, "B", "Not null", investigationType);
+
+		Dataset ds = session.createDataset("A1", dstX, invA);
+
+		try {
+			/* Initially can read datasets from investigations A and B */
+			session.delRule("notroot", "Dataset", "CRUD");
+			session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "R");
+			session.addRule("notroot", "Dataset <-> Investigation [name = 'B']", "R");
+			ds = (Dataset) session.search("SELECT ds FROM Dataset ds WHERE ds.investigation.name = 'A' INCLUDE 1")
+					.get(0);
+			ds.setName("A2");
+			try {
+				session.update(ds);
+				fail();
+			} catch (IcatException_Exception e) {
+				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+				assertEquals("UPDATE access to this Dataset is not allowed.", e.getMessage());
+			}
+
+			/*
+			 * Permissions were insufficient to change an attribute value so
+			 * change to allow update for data sets from investigation A
+			 */
+			session.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "R");
+			session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "U");
+			session.update(ds);
+
+			/*
+			 * Check that non-defining relationship fields can also be updated
+			 */
+			ds.setType(dstY);
+			session.update(ds);
+
+			/* Changing a defining relationship field will fail however */
+
+			ds.setInvestigation(invB);
+			try {
+				session.update(ds);
+				fail();
+			} catch (IcatException_Exception e) {
+				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+				assertEquals("DELETE access to this Dataset is not allowed.", e.getMessage());
+			}
+
+			/*
+			 * This effectively does a delete from investigation A so permit
+			 * this
+			 */
+			session.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "U");
+			session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
+			try {
+				session.update(ds);
+				fail();
+			} catch (IcatException_Exception e) {
+				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+				assertEquals("CREATE access to this Dataset is not allowed.", e.getMessage());
+			}
+
+			/*
+			 * But it also is effectively a create in investigation B. So add
+			 * create to A - which won't work of course
+			 */
+			session.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
+			session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "CUD");
+			try {
+				session.update(ds);
+				fail();
+			} catch (IcatException_Exception e) {
+				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getFaultInfo().getType());
+				assertEquals("CREATE access to this Dataset is not allowed.", e.getMessage());
+			}
+
+			/* So now add create to B - and it works */
+			session.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "CUD");
+			session.delRule("notroot", "Dataset <-> Investigation [name = 'B']", "R");
+			session.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
+			session.addRule("notroot", "Dataset <-> Investigation [name = 'B']", "C");
+			session.update(ds);
+		} finally {
+			session.setAuthz();
+		}
+
+	}
+
 	private void checkInvestigationNames(String query, String... names) throws IcatException_Exception {
 		List<Object> objects = session.search(query);
 		assertEquals(names.length, objects.size());

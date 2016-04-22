@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -623,7 +624,7 @@ public class EntityBeanManager {
 	private void exportBean(EntityBaseBean bean, OutputStream output, boolean qcolumn, boolean all, List<Field> fields,
 			Set<Field> updaters, Map<String, Map<Long, String>> exportCaches, Map<Field, Method> getters,
 			Map<String, Field> fieldMap, Set<Field> atts) throws IOException, IllegalAccessException,
-					IllegalArgumentException, InvocationTargetException, IcatException {
+			IllegalArgumentException, InvocationTargetException, IcatException {
 		boolean first = true;
 		if (qcolumn) {
 			output.write(('"' + bean.getId().toString() + '"').getBytes());
@@ -691,8 +692,8 @@ public class EntityBeanManager {
 	 */
 	private void exportTable(String beanName, Set<Long> ids, OutputStream output,
 			Map<String, Map<Long, String>> exportCaches, boolean allAttributes, EntityManager manager, String userId)
-					throws IcatException, IOException, IllegalAccessException, IllegalArgumentException,
-					InvocationTargetException {
+			throws IcatException, IOException, IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException {
 		logger.debug("Export " + (ids == null ? "complete" : "partial") + " " + beanName);
 		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
 		output.write((linesep).getBytes());
@@ -1327,7 +1328,7 @@ public class EntityBeanManager {
 
 	public List<ScoredEntityBaseBean> luceneDatafiles(String userName, String user, String text, String lower,
 			String upper, List<ParameterPOJO> parms, int maxCount, EntityManager manager, String ip)
-					throws IcatException {
+			throws IcatException {
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
@@ -1369,7 +1370,7 @@ public class EntityBeanManager {
 
 	public List<ScoredEntityBaseBean> luceneDatasets(String userName, String user, String text, String lower,
 			String upper, List<ParameterPOJO> parms, int maxCount, EntityManager manager, String ip)
-					throws IcatException {
+			throws IcatException {
 		long startMillis = log ? System.currentTimeMillis() : 0;
 		List<ScoredEntityBaseBean> results = new ArrayList<>();
 		if (luceneActive) {
@@ -1500,17 +1501,17 @@ public class EntityBeanManager {
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
 			}
 		}
-
 	}
 
 	private void parseEntity(EntityBaseBean bean, JsonObject contents, Class<? extends EntityBaseBean> klass,
-			EntityManager manager, List<EntityBaseBean> creates, List<EntityBaseBean> updates, boolean create)
-					throws IcatException {
+			EntityManager manager, List<EntityBaseBean> creates, List<EntityBaseBean> updates, boolean create,
+			AtomicBoolean changedIdentity) throws IcatException {
 		Map<String, Field> fieldsByName = eiHandler.getFieldsByName(klass);
 		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
 		Map<Field, Method> setters = eiHandler.getSetters(klass);
 		Map<String, Relationship> rels = eiHandler.getRelationshipsByName(klass);
 		Map<String, Method> getters = eiHandler.getGettersFromName(klass);
+		Set<Field> relInKey = eiHandler.getRelInKey(klass);
 
 		for (Entry<String, JsonValue> fentry : contents.entrySet()) {
 			String fName = fentry.getKey();
@@ -1555,7 +1556,17 @@ public class EntityBeanManager {
 							}
 						}
 					} else {
-						arg = parseSubEntity((JsonObject) fValue, rels.get(fName), manager, creates, updates);
+						arg = parseSubEntity((JsonObject) fValue, rels.get(fName), manager, creates, updates,
+								changedIdentity);
+						/* This may be an illegal update */
+						if (relInKey.contains(field)) {
+							if (bean.getId() != ((EntityBaseBean) arg).getId()) {
+								logger.debug("Identity relationship field " + field.getName() + " of " + bean
+										+ " is being changed from " + ((EntityBaseBean) arg).getId() + " to "
+										+ bean.getId());
+								changedIdentity.set(true);
+							}
+						}
 					}
 					try {
 						setters.get(field).invoke(bean, arg);
@@ -1570,7 +1581,7 @@ public class EntityBeanManager {
 						List<EntityBaseBean> beans = (List<EntityBaseBean>) getters.get(fName).invoke(bean);
 						for (JsonValue aValue : (JsonArray) fValue) {
 							EntityBaseBean arg = parseSubEntity((JsonObject) aValue, rels.get(fName), manager, creates,
-									updates);
+									updates, changedIdentity);
 							beans.add(arg);
 						}
 					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -1591,7 +1602,8 @@ public class EntityBeanManager {
 	}
 
 	private EntityBaseBean parseSubEntity(JsonObject contents, Relationship relationship, EntityManager manager,
-			List<EntityBaseBean> creates, List<EntityBaseBean> updates) throws IcatException {
+			List<EntityBaseBean> creates, List<EntityBaseBean> updates, AtomicBoolean changedIdentity)
+			throws IcatException {
 		logger.debug("Parse entity {} from relationship {}", contents, relationship);
 		Class<? extends EntityBaseBean> klass = relationship.getDestinationBean();
 
@@ -1617,7 +1629,7 @@ public class EntityBeanManager {
 			bean = find(bean, manager);
 		}
 
-		parseEntity(bean, contents, klass, manager, creates, updates, create);
+		parseEntity(bean, contents, klass, manager, creates, updates, create, changedIdentity);
 		return bean;
 
 	}
@@ -1741,6 +1753,11 @@ public class EntityBeanManager {
 				long startMillis = log ? System.currentTimeMillis() : 0;
 				EntityBaseBean beanManaged = find(bean, manager);
 				gateKeeper.performAuthorisation(userId, beanManaged, AccessType.UPDATE, manager);
+				boolean identityChange = checkIdentityChange(beanManaged, bean);
+				if (identityChange) {
+					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.DELETE, manager);
+				}
+
 				if (allAttributes) {
 					if (bean.getCreateId() != null) {
 						beanManaged.setCreateId(bean.getCreateId());
@@ -1772,7 +1789,9 @@ public class EntityBeanManager {
 					beanManaged.setModTime(new Date());
 				}
 				merge(beanManaged, bean, manager);
-				gateKeeper.performAuthorisation(userId, beanManaged, AccessType.CREATE, manager);
+				if (identityChange) {
+					gateKeeper.performAuthorisation(userId, beanManaged, AccessType.CREATE, manager);
+				}
 				beanManaged.postMergeFixup(manager, gateKeeper);
 				manager.flush();
 				logger.trace("Updated bean " + bean + " flushed.");
@@ -1812,6 +1831,34 @@ public class EntityBeanManager {
 			logger.error("Internal error", e);
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
+	}
+
+	private boolean checkIdentityChange(EntityBaseBean thisBean, EntityBaseBean fromBean) throws IcatException {
+
+		Class<? extends EntityBaseBean> klass = thisBean.getClass();
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		for (Field field : eiHandler.getRelInKey(klass)) {
+			try {
+				Method m = getters.get(field);
+				EntityBaseBean newValue = (EntityBaseBean) m.invoke(fromBean, new Object[0]);
+				if (newValue != null) {
+					long newPk = newValue.getId();
+					long oldPk = ((EntityBaseBean) m.invoke(thisBean)).getId();
+					boolean idChange = newPk != oldPk;
+					if (idChange) {
+						logger.debug("Identity relationship field " + field.getName() + " of " + thisBean
+								+ " is being changed from " + oldPk + " to " + newPk);
+						return true;
+					}
+				} else {
+					throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
+							"Attempt to set field " + field.getName() + " of " + thisBean + " to null");
+				}
+			} catch (Exception e) {
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
+			}
+		}
+		return false;
 	}
 
 	private void updateCache() throws IcatException {
@@ -1870,7 +1917,6 @@ public class EntityBeanManager {
 					EntityBaseBean bean = null;
 					if (!creates.isEmpty()) {
 						bean = creates.get(0);
-
 					} else if (!updates.isEmpty()) {
 						bean = updates.get(0);
 					}
@@ -1902,6 +1948,7 @@ public class EntityBeanManager {
 					notificationTransmitter
 							.processMessage(new NotificationMessage(Operation.C, eb, manager, notificationRequests));
 				}
+
 				for (EntityBaseBean eb : updates) {
 					notificationTransmitter
 							.processMessage(new NotificationMessage(Operation.U, eb, manager, notificationRequests));
@@ -1938,8 +1985,7 @@ public class EntityBeanManager {
 
 	private EntityBaseBean writeOne(JsonObject entity, EntityManager manager, String userId,
 			List<EntityBaseBean> creates, List<EntityBaseBean> updates, UserTransaction userTransaction)
-					throws IcatException, IllegalStateException, SecurityException, SystemException,
-					NotSupportedException {
+			throws IcatException, IllegalStateException, SecurityException, SystemException, NotSupportedException {
 		logger.debug("write one {}", entity);
 
 		if (entity.size() != 1) {
@@ -1957,17 +2003,28 @@ public class EntityBeanManager {
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IcatException(IcatExceptionType.INTERNAL, "failed to instantiate " + beanName);
 		}
-
 		boolean create = !contents.containsKey("id");
+		boolean deleteAllowed = true;
 		if (!create) {
 			bean.setId(contents.getJsonNumber("id").longValueExact());
 			bean = find(bean, manager);
 			gateKeeper.performAuthorisation(userId, bean, AccessType.UPDATE, manager);
-		}
 
+			/*
+			 * See if delete is allowed - it may not be relevant but need to
+			 * check now before modifications are made
+			 */
+			deleteAllowed = gateKeeper.isAccessAllowed(userId, bean, AccessType.DELETE, manager);
+
+		}
 		List<EntityBaseBean> localCreates = new ArrayList<>();
 		List<EntityBaseBean> localUpdates = new ArrayList<>();
-		parseEntity(bean, contents, klass, manager, localCreates, localUpdates, create);
+		AtomicBoolean changedIdentity = new AtomicBoolean();
+		parseEntity(bean, contents, klass, manager, localCreates, localUpdates, create, changedIdentity);
+		if (changedIdentity.get() && !deleteAllowed) {
+			throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
+					"DELETE access implied by UPDATE to this " + klass.getSimpleName() + " is not allowed.");
+		}
 
 		try {
 			bean.preparePersist(userId, manager, gateKeeper, false, false);
@@ -2055,8 +2112,11 @@ public class EntityBeanManager {
 			gateKeeper.performAuthorisation(userId, eb, AccessType.CREATE, manager);
 			creates.add(eb);
 		}
+
 		for (EntityBaseBean eb : localUpdates) {
-			gateKeeper.performAuthorisation(userId, eb, AccessType.CREATE, manager);
+			if (changedIdentity.get()) {
+				gateKeeper.performAuthorisation(userId, eb, AccessType.CREATE, manager);
+			}
 			updates.add(eb);
 		}
 
