@@ -440,6 +440,51 @@ public class ICATRest {
 	}
 
 	/**
+	 * Return whether or not a given user is logged in - i.e. has at least one
+	 * unexpired session. This call should be used for a user logged in using an
+	 * authentication plugin configured to not return the mnemonic.
+	 * 
+	 * @param userName
+	 *            the name of the user (without mnemonic)
+	 * 
+	 * @return json string of the form: <samp>{"isLoggedIn":true}</samp>
+	 */
+	@GET
+	@Path("user/{userName}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String isLoggedIn1(@PathParam("userName") String userName) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartObject().write("loggedIn", beanManager.isLoggedIn(userName, manager)).writeEnd();
+		}
+		return baos.toString();
+	}
+
+	/**
+	 * Return whether or not a given user is logged in - i.e. has at least one
+	 * unexpired session. This call should be used for a user logged in using an
+	 * authentication plugin configured to return the mnemonic.
+	 * 
+	 * @param mnemonic
+	 *            the mnemomnic used to identify the authentication plugin
+	 * @param userName
+	 *            the name of the user (without mnemonic)
+	 * 
+	 * @return json string of the form: <samp>{"isLoggedIn":true}</samp>
+	 */
+	@GET
+	@Path("user/{mnemonic}/{userName}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String isLoggedIn2(@PathParam("mnemonic") String mnemonic, @PathParam("userName") String userName) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator gen = Json.createGenerator(baos)) {
+			gen.writeStartObject().write("loggedIn", beanManager.isLoggedIn(mnemonic + "/" + userName, manager))
+					.writeEnd();
+		}
+		return baos.toString();
+	}
+
+	/**
 	 * return the version of the icat server
 	 * 
 	 * @summary getVersion

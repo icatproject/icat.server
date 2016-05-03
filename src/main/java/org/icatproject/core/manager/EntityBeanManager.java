@@ -2128,4 +2128,9 @@ public class EntityBeanManager {
 
 	}
 
+	public boolean isLoggedIn(String userName, EntityManager manager) {
+		logger.debug("isLoggedIn for user " + userName);
+		return manager.createNamedQuery(Session.ISLOGGEDIN, Long.class).setParameter("userName", userName).getSingleResult() > 0;
+	}
+
 }

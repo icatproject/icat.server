@@ -30,17 +30,11 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
-
 import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
 
-import org.icatproject.Dataset;
-import org.icatproject.DatasetType;
 import org.icatproject.EntityBaseBean;
 import org.icatproject.Facility;
-import org.icatproject.IcatException_Exception;
-import org.icatproject.Investigation;
-import org.icatproject.InvestigationType;
 import org.icatproject.icat.client.ICAT;
 import org.icatproject.icat.client.IcatException;
 import org.icatproject.icat.client.IcatException.IcatExceptionType;
@@ -941,6 +935,8 @@ public class TestRS {
 	@Test
 	public void testSession() throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		assertFalse(icat.isLoggedIn("mnemonic/rubbish"));
+		assertFalse(icat.isLoggedIn("rubbish"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "notroot");
 		credentials.put("password", "password");
@@ -948,6 +944,7 @@ public class TestRS {
 		assertEquals("db/notroot", session.getUserName());
 		double remainingMinutes = session.getRemainingMinutes();
 		assertTrue(remainingMinutes > 119 && remainingMinutes < 120);
+		assertTrue(icat.isLoggedIn("db/notroot"));
 		session.logout();
 		try {
 			session.getRemainingMinutes();

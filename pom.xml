@@ -143,7 +143,7 @@
 		<dependency>
 			<groupId>org.icatproject</groupId>
 			<artifactId>icat.client</artifactId>
-			<version>4.6.0</version>
+			<version>4.7.0-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 
