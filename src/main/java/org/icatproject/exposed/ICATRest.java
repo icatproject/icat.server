@@ -68,6 +68,7 @@ import org.icatproject.core.Constants;
 import org.icatproject.core.IcatException;
 import org.icatproject.core.IcatException.IcatExceptionType;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.entity.ParameterValueType;
 import org.icatproject.core.manager.EntityBeanManager;
 import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.manager.GateKeeper;
@@ -634,8 +635,8 @@ public class ICATRest {
 					gen.write(field.getName(), (Long) value);
 				} else if (type.equals("boolean")) {
 					gen.write(field.getName(), (Boolean) value);
-				} else if (field.getType().isEnum()) {
-					gen.write(field.getName(), value.toString());
+				} else if (type.equals("ParameterValueType")) {
+					gen.write(field.getName(), ((ParameterValueType) value).name());
 				} else if (type.equals("Date")) {
 					synchronized (df8601) {
 						gen.write(field.getName(), df8601.format((Date) value));
@@ -683,6 +684,12 @@ public class ICATRest {
 			gen.write((String) result);
 		} else if (result instanceof Boolean) {
 			gen.write((Boolean) result);
+		} else if (result instanceof ParameterValueType) {
+			gen.write(((ParameterValueType) result).name());
+		} else if (result instanceof Date) {
+			synchronized (df8601) {
+				gen.write(df8601.format((Date) result));
+			}
 		} else {
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 					"Don't know how to jsonise " + result.getClass());

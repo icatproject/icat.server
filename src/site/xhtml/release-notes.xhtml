@@ -57,6 +57,11 @@
 		<li>Produce an error message rather than a null pointer exception
 			if an invalid authenticator mnemonic is used in a login call.</li>
 		<li>Added "isLogedIn" REST call</li>
+		<li>Fixed bug when trying to read or write ParameterValueType
+			values (an enum) through REST call. These are now represented as json
+			string values.</li>
+		<li>Fixed bug trying to read back an individual date value
+			through a REST call.</li>
 	</ul>
 
 	<h2>4.6.1</h2>

@@ -772,6 +772,42 @@ public class TestRS {
 		assertEquals("Pinot Grigio", array.getJsonArray(1).getString(0));
 		assertEquals("a", array.getJsonArray(0).getString(1));
 		assertEquals("b", array.getJsonArray(1).getString(1));
+
+		// Five
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+
+			jw.writeStartObject().writeStartObject("ParameterType").write("name", "test").write("units", "seconds")
+					.writeStartObject("facility").write("id", fid).writeEnd().write("valueType", "NUMERIC")
+					.write("applicableToDatafile", true).writeEnd().writeEnd();
+
+		}
+		ids = session.write(baos.toString());
+		assertEquals(1, ids.size());
+		Long ptId = ids.get(0);
+		array = search(session,
+				"SELECT p.name, p.units, p.valueType, p.createTime FROM ParameterType p where p.id = " + ptId, 1);
+		assertEquals("test", array.getJsonArray(0).getString(0));
+		assertEquals("seconds", array.getJsonArray(0).getString(1));
+		assertEquals("NUMERIC", array.getJsonArray(0).getString(2));
+
+		// Six
+		long dfId = search(session, "SELECT df.id FROM Datafile df LIMIT 0, 1", 1).getJsonNumber(0).longValueExact();
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+
+			jw.writeStartObject().writeStartObject("DatafileParameter").write("numericValue", 20)
+					.writeStartObject("datafile").write("id", dfId).writeEnd().writeStartObject("type")
+					.write("id", ptId).writeEnd().writeEnd().writeEnd();
+
+		}
+		System.out.println(baos.toString());
+		ids = session.write(baos.toString());
+		assertEquals(1, ids.size());
+		Long dfpId = ids.get(0);
+		array = search(session, "SELECT p.numericValue FROM DatafileParameter p where p.id = " + dfpId, 1);
+		assertEquals(20.0, array.getJsonNumber(0).doubleValue(), .001);
 	}
 
 	@Test

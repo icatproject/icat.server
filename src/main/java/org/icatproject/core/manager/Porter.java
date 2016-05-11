@@ -285,7 +285,7 @@ public class Porter {
 			Map<String, Long> ids, LinkedHashMap<Long, EntityBaseBean> idCache, EntityManager manager,
 			UserTransaction userTransaction, DuplicateAction duplicateAction, Attributes attributes,
 			boolean allAttributes, String ip) throws IcatException, LexerException, ParserException,
-					IllegalArgumentException, InvocationTargetException, IllegalAccessException {
+			IllegalArgumentException, InvocationTargetException, IllegalAccessException {
 		logger.debug("Requested add " + line + " to " + table.getName());
 		Input input = new Input(Tokenizer.getTokens(line));
 		List<TableField> tableFields = table.getTableFields();
@@ -318,7 +318,7 @@ public class Porter {
 						if (tType == Token.Type.STRING) {
 							setter.invoke(bean, token.getValue());
 						} else {
-							throw new ParserException("Expected a String value for column " + offset);
+							throw new ParserException("Expected a string value for column " + offset);
 						}
 					} else if (fType.equals("Integer")) {
 						if (tType == Token.Type.INTEGER) {
@@ -330,19 +330,19 @@ public class Porter {
 						if (tType == Token.Type.BOOLEAN) {
 							setter.invoke(bean, Boolean.parseBoolean(token.getValue()));
 						} else {
-							throw new ParserException("Expected an boolean value for column " + offset);
+							throw new ParserException("Expected a boolean value for column " + offset);
 						}
 					} else if (fType.equals("Date")) {
 						if (tType == Token.Type.TIMESTAMP) {
 							setter.invoke(bean, getDate(token.getValue()));
 						} else {
-							throw new ParserException("Expected an date value for column " + offset);
+							throw new ParserException("Expected a date value for column " + offset);
 						}
 					} else if (fType.equals("Double")) {
 						if (tType == Token.Type.REAL || tType == Token.Type.INTEGER) {
 							setter.invoke(bean, Double.parseDouble((token.getValue())));
 						} else {
-							throw new ParserException("Expected an real or integer value for column " + offset);
+							throw new ParserException("Expected a real or integer value for column " + offset);
 						}
 					} else if (fType.equals("Long")) {
 						if (tType == Token.Type.INTEGER) {
@@ -382,8 +382,10 @@ public class Porter {
 						throw new ParserException("Expected a String value for column " + offset);
 					}
 				}
-			} else { // Not all types are considered here - only those used in
-						// "keys"
+			} else {
+				/*
+				 * Not all types are considered here - only those used in "keys"
+				 */
 				String jpql = tableField.getJPQL();
 				StringBuilder sb = new StringBuilder(jpql);
 				boolean nullRef = false;

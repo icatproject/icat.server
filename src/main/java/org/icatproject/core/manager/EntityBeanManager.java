@@ -13,6 +13,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,6 +65,7 @@ import org.icatproject.core.entity.Datafile;
 import org.icatproject.core.entity.Dataset;
 import org.icatproject.core.entity.EntityBaseBean;
 import org.icatproject.core.entity.Investigation;
+import org.icatproject.core.entity.ParameterValueType;
 import org.icatproject.core.entity.Session;
 import org.icatproject.core.manager.EntityInfoHandler.Relationship;
 import org.icatproject.core.manager.Lucene.LuceneSearchResult;
@@ -1526,6 +1528,7 @@ public class EntityBeanManager {
 					String type = field.getType().getSimpleName();
 					Object arg = null;
 					if (fValue.getValueType() == ValueType.NULL) {
+						// Do nothing
 					} else if (type.equals("String")) {
 						arg = ((JsonString) fValue).getString();
 					} else if (type.equals("Integer")) {
@@ -1543,9 +1546,13 @@ public class EntityBeanManager {
 							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 									"Field " + fName + " must be true or false in " + klass.getSimpleName());
 						}
-						// } else if (field.getType().isEnum()) {
-						// arg =
-						// gen.write(field.getName(), value.toString());
+					} else if (type.equals("ParameterValueType")) {
+						try {
+							arg = ParameterValueType.valueOf(((JsonString) fValue).getString().toUpperCase());
+						} catch (IllegalArgumentException e) {
+							throw new IcatException(IcatExceptionType.BAD_PARAMETER, "Field " + fName + " must be in "
+									+ Arrays.asList(ParameterValueType.values()) + " for " + klass.getSimpleName());
+						}
 					} else if (type.equals("Date")) {
 						synchronized (df8601) {
 							try {
@@ -1967,7 +1974,7 @@ public class EntityBeanManager {
 				throw e;
 			} catch (Throwable e) {
 				userTransaction.rollback();
-				logger.trace("Transaction rolled back for creation because of " + e.getClass() + " " + e.getMessage());
+				logger.error("Transaction rolled back for creation because of", e);
 				updateCache();
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage(), offset);
@@ -2130,7 +2137,8 @@ public class EntityBeanManager {
 
 	public boolean isLoggedIn(String userName, EntityManager manager) {
 		logger.debug("isLoggedIn for user " + userName);
-		return manager.createNamedQuery(Session.ISLOGGEDIN, Long.class).setParameter("userName", userName).getSingleResult() > 0;
+		return manager.createNamedQuery(Session.ISLOGGEDIN, Long.class).setParameter("userName", userName)
+				.getSingleResult() > 0;
 	}
 
 }
