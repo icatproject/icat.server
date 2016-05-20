@@ -1841,8 +1841,8 @@ public class TestWS {
 		results = session.search("SELECT ds FROM Dataset ds WHERE ds.complete = FALSE");
 		assertEquals(4, results.size());
 
-		if (session.getContainerType() != ContainerType.GLASSFISH
-				&& session.getContainerType() != ContainerType.WILDFLY) {
+		if (session.getContainerType() != ContainerType.Glassfish
+				&& session.getContainerType() != ContainerType.JBoss) {
 			// This should throw an exception as datafile is not an attribute of
 			// Dataset.
 			try {
