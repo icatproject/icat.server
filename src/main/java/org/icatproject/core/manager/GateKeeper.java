@@ -277,12 +277,23 @@ public class GateKeeper {
 	public void performAuthorisation(String user, EntityBaseBean object, AccessType access, EntityManager manager)
 			throws IcatException {
 
+		if (!isAccessAllowed(user, object, access, manager)) {
+			throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
+					access + " access to this " + object.getClass().getSimpleName() + " is not allowed.");
+		}
+	}
+
+	/**
+	 * Is the operation allowed
+	 */
+	public boolean isAccessAllowed(String user, EntityBaseBean object, AccessType access, EntityManager manager) {
+
 		Class<? extends EntityBaseBean> objectClass = object.getClass();
 		String simpleName = objectClass.getSimpleName();
 
 		if (rootUserNames.contains(user)) {
 			logger.info("\"Root\" user " + user + " is allowed " + access + " to " + simpleName);
-			return;
+			return true;
 		}
 
 		String qName = null;
@@ -291,7 +302,7 @@ public class GateKeeper {
 		} else if (access == AccessType.READ) {
 			if (publicTables.contains(simpleName)) {
 				logger.info("All are allowed " + access + " to " + simpleName);
-				return;
+				return true;
 			}
 			qName = Rule.READ_QUERY;
 		} else if (access == AccessType.UPDATE) {
@@ -305,9 +316,7 @@ public class GateKeeper {
 		logger.debug("Checking " + qName + " " + user + " " + simpleName);
 		TypedQuery<String> query = manager.createNamedQuery(qName, String.class).setParameter("member", user)
 				.setParameter("bean", simpleName);
-		logger.debug("Parsed " + qName);
 		List<String> restrictions = query.getResultList();
-		logger.debug("Checked " + qName);
 		logger.debug(
 				"Got " + restrictions.size() + " authz queries for " + access + " by " + user + " to a " + simpleName);
 
@@ -315,7 +324,7 @@ public class GateKeeper {
 			logger.debug("Query: " + restriction);
 			if (restriction == null) {
 				logger.info("Null restriction => " + access + " permitted to " + simpleName);
-				return;
+				return true;
 			}
 		}
 
@@ -337,11 +346,10 @@ public class GateKeeper {
 			q.setParameter("pkid", keyVal);
 			if (q.getSingleResult() > 0) {
 				logger.info(access + " to " + simpleName + " permitted by " + qString);
-				return;
+				return true;
 			}
 		}
-		throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
-				access + " access to this " + objectClass.getSimpleName() + " is not allowed.");
+		return false;
 
 	}
 

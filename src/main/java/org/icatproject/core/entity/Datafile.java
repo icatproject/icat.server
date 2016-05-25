@@ -212,7 +212,6 @@ public class Datafile extends EntityBaseBean implements Serializable {
 		doc.add(new TextField("text", sb.toString(), Store.NO));
 		if (datafileModTime != null) {
 			doc.add(new StringField("date", DateTools.dateToString(datafileModTime, Resolution.MINUTE), Store.NO));
-
 		} else if (datafileCreateTime != null) {
 			doc.add(new StringField("date", DateTools.dateToString(datafileCreateTime, Resolution.MINUTE), Store.NO));
 		} else {

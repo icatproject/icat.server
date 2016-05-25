@@ -1,4 +1,4 @@
-<configuration debug="true">
+<configuration debug="false">
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder 
@@ -9,7 +9,11 @@
 		</encoder>
 	</appender>
 
-	<root level="INFO">
+	<root level="trace">
 		<appender-ref ref="STDOUT" />
 	</root>
+
+	<logger name="org.icatproject.core.manager.EntityInfoHandler"
+		level="OFF" />
+
 </configuration>

@@ -13,8 +13,9 @@ def uninstall():
     actions.unregisterDB("icat")
     actions.deleteJMSResource("jms/ICAT/Topic")
     actions.deleteJMSResource("jms/ICAT/Synch")
+    actions.deleteJMSResource("jms/ICAT/log")
     
-actions, arg, props = getActions("icat-setup.properties", ["db.vendor", "db.driver", "db.url", "db.username", "db.password"], binDir=True)
+actions, arg, props = getActions("icat-setup.properties", ["db.driver", "db.url", "db.username", "db.password"], binDir=True)
 
 binDir = actions.getBinDir();
 files = ["testicat", "icatadmin"]
@@ -34,14 +35,11 @@ if arg == "INSTALL":
         if "authn." + v + ".jndi" not in icatProperties:
             abort ("authn.list included " + v + " but authn." + v + ".jndi is not defined") 
     
-    for v in icatProperties["notification.list"].split():
-        if "notification." + v not in icatProperties:
-            abort ("notification.list included " + v + " but notification." + v + " is not defined") 
-   
-    for v in icatProperties["log.list"].split():
-        if "log." + v not in icatProperties:
-            abort ("log.list included " + v + " but log." + v + " is not defined")
-     
+    if icatProperties["notification.list"]:
+        for v in icatProperties["notification.list"].split():
+            if "notification." + v not in icatProperties:
+                abort ("notification.list included " + v + " but notification." + v + " is not defined") 
+           
     if  log4backXml:
         dir, file = os.path.split(log4backXml)
         if not os.path.exists(file): abort("log4back.xml file " + file + " not found")
@@ -65,9 +63,10 @@ if arg == "INSTALL":
     
     try:           
         uninstall()
-        actions.registerDB("icat", props["db.vendor"], props["db.driver"], props["db.url"], props["db.username"], props["db.password"])
+        actions.registerDB("icat", props["db.driver"], props["db.url"], props["db.username"], props["db.password"])
         actions.createJMSResource("javax.jms.Topic", "jms/ICAT/Topic")
         actions.createJMSResource("javax.jms.Topic", "jms/ICAT/Synch")
+        actions.createJMSResource("javax.jms.Topic", "jms/ICAT/log")
         
         jmsHostPort = props.get("jmsHostPort")
         if jmsHostPort:
@@ -83,7 +82,7 @@ if arg == "INSTALL":
             actions.asadmin("set resources.connector-connection-pool.jms/ICAT/CentralConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
             actions.asadmin("set resources.connector-connection-pool.jms/ICAT/TopicConnectionFactory-Connection-Pool.property.AddressList=" + jmsHostPort)
             
-        actions.deploy(deploymentorder=100, jmsTopicConnectionFactory=icatProperties.get("jms.topicConnectionFactory"))
+        actions.deploy(deploymentorder=100, jmsTopicConnectionFactory=icatProperties.get("jms.topicConnectionFactory"), target=props.get("db.target"), logging=props.get("db.logging"))
         
         if not os.path.isdir(binDir): abort ("Please create directory " + binDir + " and try again.")
         for file in files:   

@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -17,10 +18,13 @@ import org.icatproject.core.IcatException;
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "SESSION_")
-@NamedQuery(name = "Session.DeleteExpired", query = "DELETE FROM Session s WHERE s.expireDateTime < CURRENT_TIMESTAMP")
+@NamedQueries({
+		@NamedQuery(name = "Session.DeleteExpired", query = "DELETE FROM Session s WHERE s.expireDateTime < CURRENT_TIMESTAMP"),
+		@NamedQuery(name = "Session.isLoggedIn", query = "SELECT COUNT(s) FROM Session s where s.userName = :userName") })
 public class Session implements Serializable {
 
 	public final static String DELETE_EXPIRED = "Session.DeleteExpired";
+	public final static String ISLOGGEDIN = "Session.isLoggedIn";
 
 	@Id
 	private String id;
@@ -44,8 +48,7 @@ public class Session implements Serializable {
 
 	public String getUserName() throws IcatException {
 		if (expireDateTime.before(new Date()))
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session id:" + id
-					+ " has expired");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session id:" + id + " has expired");
 		return userName;
 	}
 
@@ -56,8 +59,7 @@ public class Session implements Serializable {
 	public double getRemainingMinutes() throws IcatException {
 		long millis = expireDateTime.getTime() - System.currentTimeMillis();
 		if (millis < 0) {
-			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session id:" + id
-					+ " has expired");
+			throw new IcatException(IcatException.IcatExceptionType.SESSION, "Session id:" + id + " has expired");
 		}
 		return millis / 60000.0;
 	}

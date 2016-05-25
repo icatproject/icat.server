@@ -72,8 +72,8 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 			}
 		}
 		if (!found) {
-			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER, "Field value "
-					+ this.field + " does not implement a relationship from " + origin);
+			throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+					"Field value " + this.field + " does not implement a relationship from " + origin);
 		}
 	}
 
@@ -84,9 +84,9 @@ public class PublicStep extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser)
-			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser);
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser,
+			boolean clearId) throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId);
 		this.fixup(manager, gateKeeper);
 	}
 

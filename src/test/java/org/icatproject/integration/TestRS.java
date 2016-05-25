@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +30,10 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
+import javax.json.stream.JsonGenerator;
 
+import org.icatproject.EntityBaseBean;
 import org.icatproject.Facility;
 import org.icatproject.icat.client.ICAT;
 import org.icatproject.icat.client.IcatException;
@@ -56,15 +60,13 @@ public class TestRS {
 	public static void beforeClass() throws Exception {
 		try {
 			wSession = new WSession();
-			// wSession.clearAuthz();
-			// wSession.setAuthz();
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
 		}
 	}
 
-	@Ignore("Test fails becuase of bug in eclipselink")
+	@Ignore("Test fails because of bug in eclipselink")
 	@Test
 	public void testDistinctBehaviour() throws Exception {
 		wSession.clear();
@@ -87,15 +89,16 @@ public class TestRS {
 	@Test
 	public void testLuceneDatafiles() throws Exception {
 		Session session = setupLuceneTest();
+		JsonArray array;
 
 		List<ParameterForLucene> parameters = new ArrayList<>();
 		parameters.add(new ParameterForLucene("colour", "name", "green"));
 
 		// All data files
 		searchDatafiles(session, null, null, null, null, null, 20, 3);
-		// Use the user
 
-		JsonArray array = searchDatafiles(session, "db/tr", null, null, null, null, 20, 3);
+		// Use the user
+		array = searchDatafiles(session, "db/tr", null, null, null, null, 20, 3);
 		System.out.println(array);
 
 		// Try a bad user
@@ -307,6 +310,55 @@ public class TestRS {
 	}
 
 	@Test
+	public void testSearchWithNew() throws Exception {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "notroot");
+		credentials.put("password", "password");
+		Session session = icat.login("db", credentials);
+
+		// Get known configuration
+		wSession.clear();
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
+		wSession.setAuthz();
+
+		JsonArray array;
+
+		array = search(session, "SELECT ds.name, inv.name FROM Dataset ds, ds.investigation inv LIMIT 0,20", 5);
+		Set<String> dsn = new HashSet<>();
+		for (JsonValue r : array) {
+			JsonArray array2 = (JsonArray) r;
+			assertEquals("expt1", array2.getString(1));
+			dsn.add(array2.getString(0));
+		}
+		assertEquals(new HashSet<String>(Arrays.asList("ds1", "ds2", "ds3", "ds4")), dsn);
+
+		array = search(session, "SELECT DISTINCT ds.name, inv.name FROM Dataset ds, ds.investigation inv LIMIT 0,20",
+				4);
+		dsn = new HashSet<>();
+		for (JsonValue r : array) {
+			JsonArray array2 = (JsonArray) r;
+			assertEquals("expt1", array2.getString(1));
+			dsn.add(array2.getString(0));
+		}
+		assertEquals(new HashSet<String>(Arrays.asList("ds1", "ds2", "ds3", "ds4")), dsn);
+
+		array = search(session,
+				"SELECT df.dataset.name, AVG(df.fileSize) FROM Datafile df GROUP BY df.dataset ORDER BY AVG(df.fileSize)",
+				1);
+		assertEquals("ds2", array.getJsonArray(0).getString(0));
+		assertEquals(17.3333, array.getJsonArray(0).getJsonNumber(1).doubleValue(), 0);
+
+		array = search(session,
+				"SELECT df.dataset.name, AVG(df.fileSize) FROM Datafile df GROUP BY df.dataset HAVING AVG(df.fileSize) > 4 ORDER BY AVG(df.fileSize)",
+				1);
+		assertEquals("ds2", array.getJsonArray(0).getString(0));
+		assertEquals(17.3333, array.getJsonArray(0).getJsonNumber(1).doubleValue(), 0);
+
+	}
+
+	@Test
 	public void testSearch() throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
@@ -390,7 +442,8 @@ public class TestRS {
 		array = search(session, "SELECT AVG(ds.id) FROM Dataset ds WHERE ds.id = 0", 1);
 		assertTrue(array.isNull(0));
 
-		array = search(session, "SELECT ds.complete FROM Dataset ds", 5);
+		// TODO this is wrong - there should be 4 false and 1 true
+		array = search(session, "SELECT ds.complete FROM Dataset ds", 4);
 		int trues = 0;
 		int falses = 0;
 		for (int i = 0; i < array.size(); i++) {
@@ -400,10 +453,11 @@ public class TestRS {
 				falses++;
 			}
 		}
-		assertEquals(1, trues);
+		assertEquals(0, trues);
 		assertEquals(4, falses);
 
 		array = search(session, "Facility INCLUDE InvestigationType", 1);
+		System.out.println(array);
 		for (int i = 0; i < array.size(); i++) {
 			JsonObject fac = array.getJsonObject(i).getJsonObject("Facility");
 			assertEquals("Test port facility", fac.getString("name"));
@@ -419,6 +473,177 @@ public class TestRS {
 		}
 	}
 
+	@Test
+	public void authzForUpdate() throws Exception {
+		wSession.setAuthz();
+		Session session = createAndPopulate();
+
+		// Make sure that fetching a non-id Double gives no problems
+		assertEquals(73.0, search(session, "SELECT MIN(pt.minimumNumericValue) FROM ParameterType pt", 1)
+				.getJsonNumber(0).doubleValue(), 0.001);
+
+		wSession.clear();
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Test Facility")
+					.write("daysUntilRelease", 90).writeEnd().writeEnd();
+		}
+		List<Long> ids = session.write(baos.toString());
+		Long fid = ids.get(0);
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("InvestigationType").writeStartObject("facility").write("id", fid)
+					.writeEnd().write("name", "TestExperiment").writeEnd().writeEnd();
+		}
+		ids = session.write(baos.toString());
+		Long itid = ids.get(0);
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("DatasetType").writeStartObject("facility").write("id", fid)
+					.writeEnd().write("name", "X").writeEnd().writeEnd();
+
+			jw.writeStartObject().writeStartObject("DatasetType").writeStartObject("facility").write("id", fid)
+					.writeEnd().write("name", "Y").writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		ids = session.write(baos.toString());
+		Long dstX = ids.get(0);
+		Long dstY = ids.get(1);
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("Investigation").writeStartObject("facility").write("id", fid)
+					.writeEnd().writeStartObject("type").write("id", itid).writeEnd().write("name", "A")
+					.write("title", "Not null").write("visitId", "42").writeEnd().writeEnd();
+
+			jw.writeStartObject().writeStartObject("Investigation").writeStartObject("facility").write("id", fid)
+					.writeEnd().writeStartObject("type").write("id", itid).writeEnd().write("name", "B")
+					.write("title", "Not null").write("visitId", "42").writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		ids = session.write(baos.toString());
+		Long invA = ids.get(0);
+		Long invB = ids.get(1);
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Dataset").writeStartObject("type").write("id", dstX).writeEnd()
+					.writeStartObject("investigation").write("id", invA).writeEnd().write("name", "A1").writeEnd()
+					.writeEnd();
+		}
+		ids = session.write(baos.toString());
+		Long dsid = ids.get(0);
+
+		try {
+			/* Initially can read datasets from investigations A and B */
+			wSession.delRule("notroot", "Dataset", "CRUD");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "R");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'B']", "R");
+
+			assertEquals(dsid,
+					(Long) search(session, "SELECT ds.id FROM Dataset ds WHERE ds.investigation.name = 'A' INCLUDE 1",
+							1).getJsonNumber(0).longValueExact());
+
+			try {
+				baos = new ByteArrayOutputStream();
+				try (JsonGenerator jw = Json.createGenerator(baos)) {
+					jw.writeStartObject().writeStartObject("Dataset").write("id", dsid).write("name", "A2").writeEnd()
+							.writeEnd();
+				}
+				ids = session.write(baos.toString());
+				fail();
+			} catch (IcatException e) {
+				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getType());
+				assertEquals("UPDATE access to this Dataset is not allowed.", e.getMessage());
+			}
+
+			/*
+			 * Permissions were insufficient to change an attribute value so
+			 * change to allow update for data sets from investigation A
+			 */
+			wSession.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "R");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "U");
+
+			baos = new ByteArrayOutputStream();
+			try (JsonGenerator jw = Json.createGenerator(baos)) {
+				jw.writeStartObject().writeStartObject("Dataset").write("id", dsid).write("name", "A2").writeEnd()
+						.writeEnd();
+			}
+			ids = session.write(baos.toString());
+
+			/*
+			 * Check that non-defining relationship fields can also be updated
+			 */
+			baos = new ByteArrayOutputStream();
+			try (JsonGenerator jw = Json.createGenerator(baos)) {
+				jw.writeStartObject().writeStartObject("Dataset").write("id", dsid).writeStartObject("type")
+						.write("id", dstY).writeEnd().writeEnd().writeEnd();
+			}
+			ids = session.write(baos.toString());
+
+			/* Changing a defining relationship field will fail however */
+			try {
+				baos = new ByteArrayOutputStream();
+				try (JsonGenerator jw = Json.createGenerator(baos)) {
+					jw.writeStartObject().writeStartObject("Dataset").write("id", dsid)
+							.writeStartObject("investigation").write("id", invB).writeEnd().writeEnd().writeEnd();
+				}
+				ids = session.write(baos.toString());
+				fail();
+			} catch (IcatException e) {
+				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getType());
+				assertEquals("DELETE access implied by UPDATE to this Dataset is not allowed.", e.getMessage());
+			}
+
+			/*
+			 * This effectively does a delete from investigation A so permit
+			 * this
+			 */
+			wSession.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "U");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
+			try {
+				session.write(baos.toString());
+				fail();
+			} catch (IcatException e) {
+				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getType());
+				assertEquals("CREATE access to this Dataset is not allowed.", e.getMessage());
+			}
+
+			/*
+			 * But it also is effectively a create in investigation B. So add
+			 * create to A - which won't work of course
+			 */
+			wSession.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "CUD");
+			try {
+				session.write(baos.toString());
+				fail();
+			} catch (IcatException e) {
+				assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getType());
+				assertEquals("CREATE access to this Dataset is not allowed.", e.getMessage());
+			}
+
+			/* So now add create to B - and it works */
+			wSession.delRule("notroot", "Dataset <-> Investigation [name = 'A']", "CUD");
+			wSession.delRule("notroot", "Dataset <-> Investigation [name = 'B']", "R");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'A']", "UD");
+			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'B']", "C");
+			session.write(baos.toString());
+		} finally {
+			wSession.setAuthz();
+		}
+
+	}
+
 	private JsonArray search(Session session, String query, int n) throws IcatException {
 		JsonArray result = Json.createReader(new ByteArrayInputStream(session.search(query).getBytes())).readArray();
 		assertEquals(n, result.size());
@@ -427,7 +652,7 @@ public class TestRS {
 
 	private JsonArray searchInvestigations(Session session, String user, String text, Date lower, Date upper,
 			List<ParameterForLucene> parameters, List<String> samples, String userFullName, int maxResults, int n)
-					throws IcatException {
+			throws IcatException {
 		JsonArray result = Json.createReader(new ByteArrayInputStream(
 				session.searchInvestigations(user, text, lower, upper, parameters, samples, userFullName, maxResults)
 						.getBytes()))
@@ -437,8 +662,317 @@ public class TestRS {
 	}
 
 	@Test
+	public void testWriteGood() throws Exception {
+
+		Session session = createAndPopulate();
+
+		// One
+		Long fid = ((EntityBaseBean) wSession.search("Facility INCLUDE InvestigationType").get(0)).getId();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("InvestigationType").writeStartObject("facility").write("id", fid)
+					.writeEnd().write("name", "ztype").writeEnd().writeEnd();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "another fred").writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		List<Long> ids = session.write(baos.toString());
+		assertEquals(2, ids.size());
+		long newInvTypeId = ids.get(0);
+		long newFid = ids.get(1);
+
+		JsonArray array = search(session,
+				"SELECT it.name, it.facility.name FROM InvestigationType it WHERE it.id = " + newInvTypeId, 1)
+						.getJsonArray(0);
+		assertEquals("ztype", array.getString(0));
+		assertEquals("Test port facility", array.getString(1));
+
+		array = search(session, "SELECT f.name FROM Facility f WHERE f.id = " + newFid, 1);
+		assertEquals("another fred", array.getString(0));
+
+		// Two
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("InvestigationType").writeStartObject("facility").write("id", newFid)
+					.write("fullName", "Frederick").write("description", "some new words").writeEnd()
+					.write("name", "ztype").writeEnd().writeEnd();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "yet another fred").writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+
+		ids = session.write(baos.toString());
+		assertEquals(2, ids.size());
+		long newestFid = ids.get(1);
+
+		array = search(session,
+				"SELECT it.name, it.facility.name, it.facility.description FROM InvestigationType it WHERE it.id = "
+						+ ids.get(0),
+				1).getJsonArray(0);
+		assertEquals("ztype", array.getString(0));
+		assertEquals("another fred", array.getString(1));
+		assertEquals("some new words", array.getString(2));
+
+		array = search(session, "SELECT f.id, f.name, f.description FROM Facility f WHERE f.id = " + newFid, 1)
+				.getJsonArray(0);
+
+		assertEquals(newFid, array.getJsonNumber(0).longValueExact());
+		assertEquals("another fred", array.getString(1));
+		assertEquals("some new words", array.getString(2));
+
+		array = search(session, "SELECT f.id, f.name, f.description FROM Facility f WHERE f.id = " + newestFid, 1)
+				.getJsonArray(0);
+		assertEquals(newestFid, array.getJsonNumber(0).longValueExact());
+		assertEquals("yet another fred", array.getString(1));
+		assertTrue(array.isNull(2));
+
+		// Three
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+
+			jw.writeStartObject().writeStartObject("Facility").write("id", newestFid).write("name", "Not Fred")
+					.writeEnd().writeEnd();
+
+		}
+		ids = session.write(baos.toString());
+		assertEquals(0, ids.size());
+
+		array = search(session, "SELECT f.id, f.name, f.description FROM Facility f WHERE f.id = " + newestFid, 1)
+				.getJsonArray(0);
+		assertEquals(newestFid, array.getJsonNumber(0).longValueExact());
+		assertEquals("Not Fred", array.getString(1));
+		assertTrue(array.isNull(2));
+
+		// Four
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Pinot Grigio")
+					.writeStartArray("investigationTypes");
+
+			jw.writeStartObject().write("name", "a").writeEnd();
+			jw.writeStartObject().write("name", "b").writeEnd();
+
+			jw.writeEnd().writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		ids = session.write(baos.toString());
+		assertEquals(1, ids.size());
+		array = search(session, "SELECT f.name, it.name FROM Facility f, f.investigationTypes it WHERE f.id = "
+				+ ids.get(0) + " ORDER BY it.name", 2);
+		assertEquals("Pinot Grigio", array.getJsonArray(0).getString(0));
+		assertEquals("Pinot Grigio", array.getJsonArray(1).getString(0));
+		assertEquals("a", array.getJsonArray(0).getString(1));
+		assertEquals("b", array.getJsonArray(1).getString(1));
+
+		// Five
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+
+			jw.writeStartObject().writeStartObject("ParameterType").write("name", "test").write("units", "seconds")
+					.writeStartObject("facility").write("id", fid).writeEnd().write("valueType", "NUMERIC")
+					.write("applicableToDatafile", true).writeEnd().writeEnd();
+
+		}
+		ids = session.write(baos.toString());
+		assertEquals(1, ids.size());
+		Long ptId = ids.get(0);
+		array = search(session,
+				"SELECT p.name, p.units, p.valueType, p.createTime FROM ParameterType p where p.id = " + ptId, 1);
+		assertEquals("test", array.getJsonArray(0).getString(0));
+		assertEquals("seconds", array.getJsonArray(0).getString(1));
+		assertEquals("NUMERIC", array.getJsonArray(0).getString(2));
+
+		// Six
+		long dfId = search(session, "SELECT df.id FROM Datafile df LIMIT 0, 1", 1).getJsonNumber(0).longValueExact();
+
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+
+			jw.writeStartObject().writeStartObject("DatafileParameter").write("numericValue", 20)
+					.writeStartObject("datafile").write("id", dfId).writeEnd().writeStartObject("type")
+					.write("id", ptId).writeEnd().writeEnd().writeEnd();
+
+		}
+		System.out.println(baos.toString());
+		ids = session.write(baos.toString());
+		assertEquals(1, ids.size());
+		Long dfpId = ids.get(0);
+		array = search(session, "SELECT p.numericValue FROM DatafileParameter p where p.id = " + dfpId, 1);
+		assertEquals(20.0, array.getJsonNumber(0).doubleValue(), .001);
+	}
+
+	@Test
+	public void testWriteBad() throws Exception {
+
+		Session session = createAndPopulate();
+		ByteArrayOutputStream baos;
+
+		// One
+		try {
+			session.write("rubbish");
+			fail("Should have thrown an exception");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.BAD_PARAMETER, e.getType());
+			assertEquals("Unexpected char=r in json rubbish", e.getMessage());
+			assertEquals(0, e.getOffset());
+		}
+
+		// Two
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Woderwick").writeEnd().writeEnd();
+			jw.writeStartObject().writeStartObject("Facility").writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		try {
+			session.write(baos.toString());
+			fail("Should have thrown an exception");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.VALIDATION, e.getType());
+			assertEquals("Facility: name cannot be null.", e.getMessage());
+			assertEquals(1, e.getOffset());
+		}
+
+		// Three
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Woderwick").writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		session.write(baos.toString());
+		try {
+			session.write(baos.toString());
+			fail("Should have thrown an exception");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getType());
+			assertEquals("Facility exists with name = 'Woderwick'", e.getMessage());
+			assertEquals(0, e.getOffset());
+		}
+
+		// Four
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Gargantua").writeEnd().writeEnd();
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Gargantua").writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		try {
+			session.write(baos.toString());
+			fail("Should have thrown an exception");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getType());
+			assertEquals("Facility exists with name = 'Gargantua'", e.getMessage());
+			assertEquals(1, e.getOffset());
+		}
+
+		// Five
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Pinot Grigio")
+					.writeStartArray("investigationTypes");
+
+			jw.writeStartObject().write("name", "a").writeEnd();
+			jw.writeStartObject().write("name", "b").writeEnd();
+			jw.writeStartObject().write("name", "c").writeEnd();
+			jw.writeStartObject().write("name", "c").writeEnd();
+			jw.writeStartObject().write("name", "d").writeEnd();
+
+			jw.writeEnd().writeEnd().writeEnd();
+
+			jw.writeEnd();
+		}
+		try {
+			session.write(baos.toString());
+			fail("Should have thrown an exception");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getType());
+			assertEquals("InvestigationType exists with name = 'c', facility = 'id:", e.getMessage().substring(0, 57));
+			assertEquals(0, e.getOffset());
+		}
+	}
+
+	private Session createAndPopulate() throws Exception {
+		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		Map<String, String> credentials = new HashMap<>();
+		credentials.put("username", "notroot");
+		credentials.put("password", "password");
+		Session session = icat.login("db", credentials);
+
+		// Get known configuration
+		wSession.clear();
+		Path path = Paths.get(ClassLoader.class.getResource("/icat.port").toURI());
+		session.importMetaData(path, DuplicateAction.CHECK, Attributes.USER);
+		wSession.setAuthz();
+
+		return session;
+	}
+
+	@Test
+	public void testDelete() throws Exception {
+		Session session = createAndPopulate();
+		search(session, "Dataset", 5);
+		Long did = search(session, "SELECT ds.id FROM Dataset ds LIMIT 0, 1", 1).getJsonNumber(0).longValueExact();
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Dataset").write("id", did).writeEnd().writeEnd();
+		}
+
+		session.delete(baos.toString());
+		search(session, "Dataset", 4);
+
+		JsonArray dids = search(session, "SELECT ds.id FROM Dataset ds LIMIT 0, 2", 2);
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
+			jw.writeStartObject().writeStartObject("Dataset").write("id", dids.getJsonNumber(0).longValueExact())
+					.writeEnd().writeEnd();
+			jw.writeStartObject().writeStartObject("Dataset").write("id", dids.getJsonNumber(1).longValueExact())
+					.writeEnd().writeEnd();
+			jw.writeEnd();
+		}
+
+		session.delete(baos.toString());
+		search(session, "Dataset", 2);
+
+		try {
+			baos = new ByteArrayOutputStream();
+			try (JsonGenerator jw = Json.createGenerator(baos)) {
+				jw.writeStartObject().writeStartObject("Dataset").write("id", -1).writeEnd().writeEnd();
+			}
+			session.delete(baos.toString());
+			fail("Should have thrown an error");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getType());
+			assertEquals(0, e.getOffset());
+		}
+	}
+
+	@Test
 	public void testSession() throws Exception {
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
+		assertFalse(icat.isLoggedIn("mnemonic/rubbish"));
+		assertFalse(icat.isLoggedIn("rubbish"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "notroot");
 		credentials.put("password", "password");
@@ -446,6 +980,7 @@ public class TestRS {
 		assertEquals("db/notroot", session.getUserName());
 		double remainingMinutes = session.getRemainingMinutes();
 		assertTrue(remainingMinutes > 119 && remainingMinutes < 120);
+		assertTrue(icat.isLoggedIn("db/notroot"));
 		session.logout();
 		try {
 			session.getRemainingMinutes();

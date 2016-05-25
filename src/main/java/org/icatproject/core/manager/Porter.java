@@ -132,8 +132,8 @@ public class Porter {
 
 	}
 
-	public void importData(String jsonString, InputStream body, EntityManager manager, UserTransaction userTransaction)
-			throws IcatException {
+	public void importData(String jsonString, InputStream body, EntityManager manager, UserTransaction userTransaction,
+			String ip) throws IcatException {
 
 		@SuppressWarnings("serial")
 		LinkedHashMap<String, EntityBaseBean> jpqlCache = new LinkedHashMap<String, EntityBaseBean>() {
@@ -236,7 +236,7 @@ public class Porter {
 					table = processTableHeader(line);
 				} else {
 					processTuple(table, line, userId, jpqlCache, ids, idCache, manager, userTransaction,
-							duplicateAction, attributes, allAttributes);
+							duplicateAction, attributes, allAttributes, ip);
 				}
 			}
 			if (table != null) {
@@ -284,8 +284,8 @@ public class Porter {
 	private void processTuple(Table table, String line, String userId, Map<String, EntityBaseBean> cache,
 			Map<String, Long> ids, LinkedHashMap<Long, EntityBaseBean> idCache, EntityManager manager,
 			UserTransaction userTransaction, DuplicateAction duplicateAction, Attributes attributes,
-			boolean allAttributes) throws IcatException, LexerException, ParserException, IllegalArgumentException,
-					InvocationTargetException, IllegalAccessException {
+			boolean allAttributes, String ip) throws IcatException, LexerException, ParserException,
+			IllegalArgumentException, InvocationTargetException, IllegalAccessException {
 		logger.debug("Requested add " + line + " to " + table.getName());
 		Input input = new Input(Tokenizer.getTokens(line));
 		List<TableField> tableFields = table.getTableFields();
@@ -318,7 +318,7 @@ public class Porter {
 						if (tType == Token.Type.STRING) {
 							setter.invoke(bean, token.getValue());
 						} else {
-							throw new ParserException("Expected a String value for column " + offset);
+							throw new ParserException("Expected a string value for column " + offset);
 						}
 					} else if (fType.equals("Integer")) {
 						if (tType == Token.Type.INTEGER) {
@@ -330,19 +330,19 @@ public class Porter {
 						if (tType == Token.Type.BOOLEAN) {
 							setter.invoke(bean, Boolean.parseBoolean(token.getValue()));
 						} else {
-							throw new ParserException("Expected an boolean value for column " + offset);
+							throw new ParserException("Expected a boolean value for column " + offset);
 						}
 					} else if (fType.equals("Date")) {
 						if (tType == Token.Type.TIMESTAMP) {
 							setter.invoke(bean, getDate(token.getValue()));
 						} else {
-							throw new ParserException("Expected an date value for column " + offset);
+							throw new ParserException("Expected a date value for column " + offset);
 						}
 					} else if (fType.equals("Double")) {
 						if (tType == Token.Type.REAL || tType == Token.Type.INTEGER) {
 							setter.invoke(bean, Double.parseDouble((token.getValue())));
 						} else {
-							throw new ParserException("Expected an real or integer value for column " + offset);
+							throw new ParserException("Expected a real or integer value for column " + offset);
 						}
 					} else if (fType.equals("Long")) {
 						if (tType == Token.Type.INTEGER) {
@@ -382,8 +382,10 @@ public class Porter {
 						throw new ParserException("Expected a String value for column " + offset);
 					}
 				}
-			} else { // Not all types are considered here - only those used in
-						// "keys"
+			} else {
+				/*
+				 * Not all types are considered here - only those used in "keys"
+				 */
 				String jpql = tableField.getJPQL();
 				StringBuilder sb = new StringBuilder(jpql);
 				boolean nullRef = false;
@@ -452,7 +454,7 @@ public class Porter {
 		boolean modIdSet = bean.getModId() != null;
 		Long id = null;
 		try {
-			id = beanManager.create(userId, bean, manager, userTransaction, allAttributes).getPk();
+			id = beanManager.create(userId, bean, manager, userTransaction, allAttributes, ip).getPk();
 		} catch (IcatException e) {
 			if (e.getType() == IcatExceptionType.OBJECT_ALREADY_EXISTS) {
 				if (duplicateAction == DuplicateAction.IGNORE) {
@@ -464,7 +466,7 @@ public class Porter {
 					EntityBaseBean other = beanManager.lookup(bean, manager);
 					if (other == null) {// Somebody else got rid of it
 										// meanwhile
-						id = beanManager.create(userId, bean, manager, userTransaction, false).getPk();
+						id = beanManager.create(userId, bean, manager, userTransaction, false, ip).getPk();
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but it has now vanished");
 					} else { // Compare bean and other
@@ -553,13 +555,13 @@ public class Porter {
 				} else if (duplicateAction == DuplicateAction.OVERWRITE) {
 					EntityBaseBean other = beanManager.lookup(bean, manager);
 					if (other == null) {// Somebody else got rid of it meanwhile
-						id = beanManager.create(userId, bean, manager, userTransaction, false).getPk();
+						id = beanManager.create(userId, bean, manager, userTransaction, false, ip).getPk();
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but it has now vanished");
 					} else {
 						id = other.getId();
 						bean.setId(id);
-						beanManager.update(userId, bean, manager, userTransaction, allAttributes);
+						beanManager.update(userId, bean, manager, userTransaction, allAttributes, ip);
 						logger.debug("Adding " + line + " to " + table.getName()
 								+ " gives duplicate exception but DuplicateAction is OVERWRITE");
 					}

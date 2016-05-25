@@ -6,6 +6,80 @@
 
 	<h1>ICAT Server Release Notes</h1>
 
+	<h2>4.7.0</h2>
+	<p>Enhanced Rest interface and changes to the authorization code</p>
+	<ul>
+		<li>A restful select can mention multiple quantities to be
+			returned</li>
+		<li>A major re-write of the authorization code should make it
+			more efficient in most cases as all the work is carried out by the
+			database unless the INCLUDE mechanism is used. This has required that
+			the Rule table has a slightly different structure from 4.6.0 so the
+			correct upgrade procedure from earlier versions must be followed.</li>
+		<li>COUNT queries will not fail because they are counting more
+			than maxEntities values</li>
+		<li>A couple of bugs in eclipse link result in incorrect
+			information being returned. One of these bugs was trapped previously
+			but with the generality of the queries now supported it has become
+			impractical to trap.
+			<ul>
+				<li>"SELECT f from Facility WHERE f.id = 1 LIMIT 1,10" which
+					should always return an empty list now ignores the LIMIT clause.</li>
+				<li>"SELECT ds.complete FROM Dataset ds" only returns the false
+					values but that "SELECT ds.id, ds.complete FROM Dataset ds" works
+					properly.</li>
+			</ul>
+		</li>
+		<li>A restful delete call has been added</li>
+		<li>The delete(Many) call, whether restful or not, checks the
+			authz rules for all objects that will be deleted by the cascade
+			mechanism.</li>
+		<li>A restful write call to do both create(Many) and update(Many)
+			has been written. Notifications are sent for all objects created
+			and/or updated. Authz is also applied to all new or updated entries.</li>
+		<li>Notifications are no longer generated for deletes as the
+			information could never be used. This means that only C and U are
+			valid notification letters in the icat.properties file.</li>
+		<li>DataCollection now has a doi attribute</li>
+		<li>Call logging has been changed to generate only jms messages.
+			It is very similar to the call logging in the IDS. It is controlled
+			by a log.list in the icat.properties which may contain one or more of
+			READ, WRITE, SESSION and INFO.</li>
+		<li>Updates whether from the SOAP call or the restful write call
+			are both checked for UPDATE permission before the call and if a
+			relationship field is changed which is used to identify that object
+			then DELETE permission is required before the change and CREATE
+			permission afterwards.</li>
+		<li>Added attributes email and orcidId to the User table</li>
+		<li>testicat and icatadmin have certificate checking disabled.
+			This used to be the normal behaviour but newer version of python, by
+			default, expect a certificate accessible by openssl.</li>
+		<li>Produce an error message rather than a null pointer exception
+			if an invalid authenticator mnemonic is used in a login call.</li>
+		<li>Added "isLogedIn" REST call</li>
+		<li>Fixed bug when trying to read or write ParameterValueType
+			values (an enum) through REST call. These are now represented as json
+			string values.</li>
+		<li>Fixed bug trying to read back an individual date value
+			through a REST call.</li>
+		<li>Remove db.vendor and add db.target and db.logging to
+			icat-setup.properties.</li>
+		<li>The jdbc driver jar if present in the domain's lib directory
+			must be moved to lib/ext.</li>
+	</ul>
+
+	<h2>4.6.1</h2>
+	<p>Bug fix release</p>
+	<ul>
+		<li>Previously the update call failed if a Datafile was passed in
+			with all datafileCreateTime, datafileModTime and modTime all set to
+			null. If the Datafile was fetched, modified in memory and then update
+			was called then modTime would be set and the problem would not reveal
+			itself.</li>
+		<li>It should also be noted that from release 4.6.0 Java 8 is
+			required to run the code.</li>
+	</ul>
+
 	<h2>4.6.0</h2>
 	<p>Small change to icat.properties</p>
 	<ul>
@@ -396,6 +470,5 @@
 
 	<h2>3.3.3</h2>
 	<p>Public release</p>
-
 </body>
 </html>

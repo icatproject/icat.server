@@ -24,20 +24,14 @@ public class User extends EntityBaseBean implements Serializable {
 	@Comment("May include title")
 	private String fullName;
 
-	public String getFullName() {
-		return fullName;
-	}
+	@Comment("An email address for the user")
+	private String email;
 
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
-	}
+	@Comment("An ORCID iD for the user")
+	private String orcidId;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private List<UserGroup> userGroups = new ArrayList<UserGroup>();
-
-	public List<UserGroup> getUserGroups() {
-		return userGroups;
-	}
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private List<InvestigationUser> investigationUsers = new ArrayList<InvestigationUser>();
@@ -48,8 +42,63 @@ public class User extends EntityBaseBean implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private List<Study> studies = new ArrayList<Study>();
 
+	public User() {
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public String getFullName() {
+		return fullName;
+	}
+
+	public List<InstrumentScientist> getInstrumentScientists() {
+		return instrumentScientists;
+	}
+
+	public List<InvestigationUser> getInvestigationUsers() {
+		return investigationUsers;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public String getOrcidId() {
+		return orcidId;
+	}
+
 	public List<Study> getStudies() {
 		return studies;
+	}
+
+	public List<UserGroup> getUserGroups() {
+		return userGroups;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+
+	public void setInstrumentScientists(List<InstrumentScientist> instrumentScientists) {
+		this.instrumentScientists = instrumentScientists;
+	}
+
+	public void setInvestigationUsers(List<InvestigationUser> investigationUsers) {
+		this.investigationUsers = investigationUsers;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setOrcidId(String orcidId) {
+		this.orcidId = orcidId;
 	}
 
 	public void setStudies(List<Study> studies) {
@@ -60,36 +109,9 @@ public class User extends EntityBaseBean implements Serializable {
 		this.userGroups = userGroups;
 	}
 
-	public User() {
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	@Override
 	public String toString() {
 		return "User[name=" + name + "]";
-	}
-
-	public List<InvestigationUser> getInvestigationUsers() {
-		return investigationUsers;
-	}
-
-	public void setInvestigationUsers(List<InvestigationUser> investigationUsers) {
-		this.investigationUsers = investigationUsers;
-	}
-
-	public List<InstrumentScientist> getInstrumentScientists() {
-		return instrumentScientists;
-	}
-
-	public void setInstrumentScientists(List<InstrumentScientist> instrumentScientists) {
-		this.instrumentScientists = instrumentScientists;
 	}
 
 }

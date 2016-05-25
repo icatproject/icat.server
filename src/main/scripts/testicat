@@ -5,8 +5,18 @@ from suds.client import Client
 import logging
 import sys
 import getpass
+import ssl
 
 logging.basicConfig(level=logging.CRITICAL)
+
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    # Legacy Python that doesn't verify HTTPS certificates by default
+    pass
+else:
+    # Handle target environment that doesn't support HTTPS verification
+    ssl._create_default_https_context = _create_unverified_https_context
 
 args = sys.argv
 if len(args) < 3 or len(args) % 2 != 1:

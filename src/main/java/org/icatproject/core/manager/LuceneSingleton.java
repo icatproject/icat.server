@@ -259,6 +259,7 @@ public class LuceneSingleton implements Lucene {
 	private EntityManagerFactory entityManagerFactory;
 
 	private boolean active;
+
 	private int luceneCommitCount;
 
 	private String luceneDirectory;
@@ -422,6 +423,7 @@ public class LuceneSingleton implements Lucene {
 			}
 		}
 		return maybeEmptyQuery(theQuery);
+
 	}
 
 	private Query buildInvestigationQuery(String userName, String text, String lower, String upper,
@@ -868,6 +870,7 @@ public class LuceneSingleton implements Lucene {
 					throw new IcatException(IcatExceptionType.INTERNAL, e.getMessage());
 				}
 			}
+
 		}
 	}
 
