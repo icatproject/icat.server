@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.icatproject</groupId>
@@ -9,20 +10,19 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<repoUrl>http://www.icatproject.org/mvn/repo</repoUrl>
+		<repoUrl>https://repo.icatproject.org/repo</repoUrl>
 		<serverPort>8181</serverPort>
 		<serverHost>localhost</serverHost>
-		<uniqueVersion>false</uniqueVersion>
-		<maven.install.skip>false</maven.install.skip>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<luceneVersion>5.3.0</luceneVersion>
 		<project.scm.id>github</project.scm.id>
+		<gitUrl>https://github.com/icatproject/icat.server</gitUrl>
 	</properties>
 
 	<repositories>
 		<repository>
 			<id>ICAT Repo</id>
-			<url>http://www.icatproject.org/mvn/repo</url>
+			<url>https://repo.icatproject.org/repo</url>
 		</repository>
 	</repositories>
 
@@ -35,14 +35,13 @@
 	</pluginRepositories>
 
 	<scm>
-		<connection>scm:git:https://github.com/icatproject/icat.server.git</connection>
-		<developerConnection>scm:git:https://github.com/icatproject/icat.server.git</developerConnection>
-		<url>https://github.com/icatproject/icat.server</url>
-		<tag>HEAD</tag>
+		<connection>scm:git:${gitUrl}.git</connection>
+		<developerConnection>scm:git:${gitUrl}.git</developerConnection>
+		<url>${gitUrl}</url>
 	</scm>
 
 	<issueManagement>
-		<url>https://github.com/icatproject/icat.server/issues</url>
+		<url>${gitUrl}/issues</url>
 		<system>GitHub</system>
 	</issueManagement>
 
@@ -55,18 +54,18 @@
 
 	<organization>
 		<name>The ICAT Collaboration</name>
-		<url>http://www.icatproject.org</url>
+		<url>https://www.icatproject.org</url>
 	</organization>
 
 	<distributionManagement>
-		<downloadUrl>http://www.icatproject.org/mvn/repo</downloadUrl>
+		<downloadUrl>https://repo.icatproject.org/repo</downloadUrl>
 		<site>
-			<id>website</id>
-			<url>scp://www.icatproject.org/var/www/html/mvn/site/icat/server/${project.version}</url>
+			<id>repo.icatproject.org</id>
+			<url>dav:https://repo.icatproject.org/site/icat/server/${project.version}</url>
 		</site>
 		<repository>
-			<id>repo</id>
-			<url>scp://www.icatproject.org/var/www/html/mvn/repo</url>
+			<id>repo.icatproject.org</id>
+			<url>dav:https://repo.icatproject.org/repo</url>
 		</repository>
 	</distributionManagement>
 
@@ -165,6 +164,14 @@
 
 	<build>
 
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-webdav-jackrabbit</artifactId>
+				<version>2.10</version>
+			</extension>
+		</extensions>
+
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -227,13 +234,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
 				<version>3.3</version>
-				<dependencies>
-					<dependency><!-- add support for ssh/scp -->
-						<groupId>org.apache.maven.wagon</groupId>
-						<artifactId>wagon-ssh</artifactId>
-						<version>2.10</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 
 			<plugin>
@@ -376,13 +376,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.7</version>
-				<dependencies>
-					<dependency><!-- add support for ssh/scp -->
-						<groupId>org.apache.maven.wagon</groupId>
-						<artifactId>wagon-ssh</artifactId>
-						<version>2.10</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 
 			<plugin>

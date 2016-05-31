@@ -995,6 +995,21 @@ public class TestRS {
 		assertTrue(session.getRemainingMinutes() > remainingMinutes);
 	}
 
+	@Test
+	public void badPlugin() throws Exception {
+		try {
+			ICAT icat = new ICAT(System.getProperty("serverUrl"));
+			Map<String, String> credentials = new HashMap<>();
+			credentials.put("username", "notroot");
+			credentials.put("password", "password");
+			icat.login("typo", credentials);
+			fail("Should throw an exception");
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.SESSION, e.getType());
+			assertEquals("Authenticator mnemonic typo not recognised", e.getMessage());
+		}
+	}
+
 	private static void ts(String msg) {
 		end = System.currentTimeMillis();
 		System.out.println("Time to " + msg + ": " + (end - start) + "ms.");

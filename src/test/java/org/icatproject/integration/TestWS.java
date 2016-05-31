@@ -1434,6 +1434,17 @@ public class TestWS {
 	}
 
 	@Test
+	public void badPlugin() throws Exception {
+		try {
+			session.getSession("typo", "username", "notroot", "password", "password");
+			fail("Should throw an exception");
+		} catch (IcatException_Exception e) {
+			assertEquals(IcatExceptionType.SESSION, e.getFaultInfo().getType());
+			assertEquals("Authenticator mnemonic typo not recognised", e.getMessage());
+		}
+	}
+
+	@Test
 	public void refresh() throws Exception {
 		try {
 			session.refresh("wibble");
