@@ -1,0 +1,224 @@
+<html>
+<head>
+<title>ICAT Server User Manual</title>
+</head>
+<body>
+
+	<h1>Introduction</h1>
+
+	<p>The ICAT server is a layer on top of a relational DBMS. The
+		database is wrapped both as a SOAP web service and as a RESTful web
+		service.</p>
+
+	<h2>SOAP interface</h2>
+	<p>For the SOAP web service each table in the database is mapped
+		onto a data structure exposed by the web service. When the web service
+		interface definition (WSDL) is processed by a client then it has
+		sufficient information to allow an object to be built on the client
+		side matching rows of each table in the database. The convenience of
+		using the SOAP interface depends critically upon the level of support
+		provided by the libraries available.</p>
+	<p>
+		In Java support is good and tools such as wsimport can be used to
+		generate client stubs to make it very easy to use and to provide type
+		safety. Java client libraries have been - see <a
+			href="https://repo.icatproject.org/site/icat/client/">icat.client</a>.
+	</p>
+	<p>
+		In the case of Python, Suds (or preferably the jurko fork of suds) can
+		be used. This uses the wsdl to allow factory methods to create the
+		objects in the python client corresponding to the rows of the database
+		tables. In addition there is the <a
+			href="https://icatproject.org/user-documentation/python-icat/">python-icat</a>
+		library which s a Python package that provides a collection of modules
+		for writing programs that access an ICAT service using the SOAP
+		interface. It is based on Suds and extends it with ICAT specific
+		features and also provides a level of protection from server version
+		dependency.
+	</p>
+	<p>SOAP is basically RPC and the client must match the server. The
+		protocol is XML based and so is rather verbose and because you can
+		only transfer predefined objects you cannot issue a query which
+		returns a projection of a join as you would expect to be able to do in
+		an RDBMS. This means that more data are transferred than needed. This
+		means that you cannot get back a table of Facility names and
+		Investigation names for all investigations with a DOI attached.
+		Instead you would have to get all the matching Investigations along
+		with the the related Facility. Not only would you get back all the
+		columns of the Investigation and Facility tables that you don't want
+		but all the Facility information would typically be sent many times -
+		each time it is referenced by an Investigation. In addition the WSDL
+		(though generated automatically from the Java code of the server)
+		contains no code derived documentation.</p>
+
+	<h2>RESTful interface</h2>
+	<p>
+		This service acts upon HTTP methods (GET, PUT, DELETE etc.) and
+		processes JSON input and returns JSON. The client programmer gets no
+		help in producing these JSON messages to represent sets of database
+		rows to send to the server nor in dealing with the JSON which is
+		returned. Some help is provided by the rest part of the <a
+			href="https://repo.icatproject.org/site/icat/client/">icat.client</a>
+		with those calls that don't pass sets of entities around. Otherwise
+		for manipulating JSON from Java the javax.json package is recommended
+		and from Python the json package is recommended. The javax.json
+		package provides streaming and non-streaming libraries and the Python
+		json library allows for conversion between JSON and Python object
+		trees made up of lists and dictionaries.
+	</p>
+
+	<h1>Session Management</h1>
+	<p>The icat server is configured with a number of authenticator
+		plugins. To login to a server requires that you identify the plugin
+		and pass it suitable credentials. These credentials are sent as key
+		value pairs. Mostly the keywords are username and password but this is
+		not necessarily the case and in particular the anonymous authenticator
+		requires no credentials.</p>
+
+	<p>The server returns a sessionId string which identifies your
+		session and which is passed to any subsequent calls which require that
+		you are authenticated.</p>
+
+	<p>A session will time out after a server determined period of time
+		which reduces the risk of losing a sessionId. There are calls to
+		logout, to refresh a session and to find out how much time is left and
+		to find the username from the sessionId.</p>
+
+	<h1>The schema"</h1>
+	<p>
+		To understand exactly how the data manipulation calls work requires an
+		understanding of the <a href="schema.html" target="_blank">schema.</a>
+		Please take a look now to make sense of the following explanation.
+	</p>
+	<p>
+		Each table in the database, representing a set of entities, is mapped
+		onto a class in the API so terminology mixes OO and database concepts.
+		Each class has uniqueness constraints, relationships and other fields.
+		Each object is identified by a field "id" which is managed by ICAT and
+		is returned when you create an object. This is common to all objects
+		and is not described in the schema. The "id" field is used as the
+		primary key in the database. There will normally be some combinations
+		of fields, some of which may be relationships, which must be unique
+		across all entries in the table. This is marked as "Uniqueness
+		constraint". For Dataset this is
+		<tt>investigation, name</tt>
+		where
+		<tt>investigation</tt>
+		represents a relationship. No more than one one Dataset may exist with
+		those two fields having the same value. These constraints are enforced
+		by ICAT.
+	</p>
+	<p>The relationship table is shown next. The first column shows the
+		minimum and maximum cardinality of the relationships. A Dataset may be
+		related to any number of DataCollectionDatasets, to at most one Sample
+		and to exactly one DatasetType. The next column shows the name of the
+		related class and this is followed by the name of the field which is
+		used to represent the relationship. The basic field name is normally
+		the name of the related class unless it is ambiguous or unnecessarily
+		long. The field name is in the plural for "to many" relationships. The
+		next column, "cascaded", is marked yes to show that create and delete
+		operations are cascaded. If a Dataset is deleted then all its
+		DataCollectionDatasets, DatasetParameters and Datafiles are deleted at
+		the same time by one call to ICAT. In a similar manner a tree, created
+		in memory with a Dataset having a a set of Datafiles and
+		Datasetparameters, can be persisted to ICAT in a single call. This
+		will be explained more later.</p>
+	<p>Note that:</p>
+	<ul>
+		<li>relationships are all "one to many" in one direction and
+			"many to one" in the opposite direction</li>
+		<li>all "one to many" relationships are cascaded but no "many to
+			one" relationships</li>
+		<li>there are no other kinds of relationship in the ICAT model</li>
+		<li>all relationships are navigable in both directions</li>
+	</ul>
+	<p>In addition each entity has four special attributes: createId,
+		createTime, modId and modTime which are maintained by ICAT though they
+		may be queried. For each each entity they record who created it and
+		when, and who modified it and when.</p>
+
+	<h2>Creating objects</h2>
+	<p>Whichever interface is being used the mechanism is to create a
+		representation of the new data object or objects on the client side
+		and send them to the server.</p>
+		
+				
+		<p class="call">long create(String sessionId, EntityBaseBean bean)
+		</p>
+		<p>To create an object in ICAT, first instantiate the object of
+			interest, for example a Dataset, and then call the setters to set its
+			attributes and finally make a call to create the object in ICAT.</p>
+		<p>So typical code in Java might look like:</p>
+		<code>
+			Dataset ds = new Dataset(); <br /> ds.setName("Name of dataset"); <br />
+			ds.set ... <br /> Long dsid = icat.create(sessionId, ds);
+		</code>
+		<p>You will see that no convenient constructors are generated,
+			rather each field of the object must be set individually. Most fields
+			are optional and may be left with null values, however some are
+			compulsory and the call to create will fail if they are not set. Each
+			object has a primary key that identifies it in the database - this is
+			a value of type "long" that is generated by ICAT and is used to
+			represent relationships in a regular manner.</p>
+		<p>Some fields represent attributes of the object but others are
+			used to represent relationships. The relationships are represented in
+			the class definitions by a variable which either holds a reference to
+			a single object or a list of objects. In the case of a list it may be
+			"cascaded". Consider creating a dataset with a set of datafiles.
+			Because the relationship from dataset to datafile is cascaded they
+			may be created in one call as outlined below:</p>
+		<code>
+			Dataset ds = new Dataset(); <br /> ds.setName(dsName); <br />
+			ds.setType(type); <br /> Datafile datafile = new Datafile(); <br />
+			datafile.setDatafileFormat(format); <br /> datafile.setName(dfName);
+			<br /> ds.getDatafiles().add(datafile); // Add the datafile to the
+			dataset <br /> icat.create(sessionId, ds);
+		</code>
+
+		<p>The call to create returns the key of the created object. If
+			you choose to write:</p>
+
+		<code>ds.setId(icat.create(sessionId, ds));</code>
+
+		<p>then the client copy of the Dataset will be updated to have the
+			correct key value - however the keys in any other objects "within"
+			the Dataset will still be null on the client side. In this case
+			datafile.getId() will remain null.</p>
+
+		<p>
+			When creating multiple objects in one call, the value of the cascaded
+			flag must be noted. The line
+			<tt>ds.getDatafiles().add(datafile)</tt>
+			requires that the datafile is not already in the ICAT database
+			because the cascade flag is set. If the cascaded flag is set then
+			objects to be included in the "create" operation must not exist.
+			However if the cascaded flag is not set then objects which are being
+			referenced must already exist in the ICAT database.
+		</p>
+
+		<p>
+			It might help to understand what is happening when you call create.
+			The client side object you pass in, and <em>everything it refers
+				to </em> , is encoded as XML and sent to the server. There it is unpacked
+			into the same set of objects and persisted in the database. The
+			structure passed in must be a tree structure (or more correctly a <a
+				href="http://en.wikipedia.org/wiki/Directed_acyclic_graph"
+				target="_blank">DAG</a> ) - if, for example, you modify the code
+			above to create a dataset with one datafile and add
+			<tt>datafile.setDataset(dataset)</tt>
+			attempting to put in a reverse link which physically will appear in
+			the ICAT database the call will be rejected by the client because you
+			have a loop in the graph as you can then go backwards and forwards
+			between datafile and dataset. If you passed in a proper DAG the
+			database will create one row in the dataset table and one in the
+			datafile table where the datafile entry includes the field
+			<tt>datafile.dataset_id</tt>
+			holding the
+			<tt>dataset.id</tt>
+			of the dataset entry just created. Relationships are represented in
+			the database by holding the id value of the related object.
+		</p>
+		
+
+</body>
+</html>

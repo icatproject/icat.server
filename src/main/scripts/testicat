@@ -27,16 +27,19 @@ url = args[1]
 plugin = args[2]
 client = None
 suffices = ["/ICATService/ICAT?wsdl", "/icat/ICAT?wsdl"]
+probs = []
 for suffix in suffices:
     url = args[1]
     if not url.endswith(suffix): url = url + suffix
     try:
         client = Client(url)
         break;
-    except:
-        pass
+    except Exception as e:
+        probs.append(e)
 if not client:
-    print >> sys.stderr, "Service at url" + args[1] + " not found"
+    for prob in probs:
+        print >> sys.stderr, prob
+    print >> sys.stderr, "Service at url " + args[1] + " not found"
     sys.exit(1)
 service = client.service
 factory = client.factory
