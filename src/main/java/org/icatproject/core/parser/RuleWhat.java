@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import org.icatproject.core.IcatException;
 import org.icatproject.core.entity.EntityBaseBean;
+import org.icatproject.core.manager.EntityInfoHandler;
 import org.icatproject.core.parser.Token.Type;
 
 public class RuleWhat {
@@ -20,7 +21,11 @@ public class RuleWhat {
 
 	private FromClause fromClause;
 
+	private String attribute;
+
 	private Pattern idPattern = Pattern.compile("^[a-zA-Z_$]([\\w_$])*$");
+
+	EntityInfoHandler ei = EntityInfoHandler.getInstance();
 
 	public RuleWhat(String query) throws ParserException, IcatException {
 		List<Token> tokens;
@@ -34,12 +39,27 @@ public class RuleWhat {
 		input.consume(Token.Type.SELECT);
 		idVar = input.consume(Token.Type.NAME).getValue();
 
+		int offset = idVar.indexOf('.');
+		if (offset > 0) {
+			attribute = idVar.substring(offset + 1);
+			idVar = idVar.substring(0, offset);
+		}
+
 		if (!idPattern.matcher(idVar).matches()) {
-			throw new ParserException("Rule must have an entity reference in the SELECT clause rather than " + idVar);
+			throw new ParserException(
+					"Rule must have an entity reference possibly followed by an attribute in the SELECT clause rather than "
+							+ idVar);
 		}
 
 		Set<String> idPaths = new HashSet<>(Arrays.asList(idVar));
 		fromClause = new FromClause(input, idPaths);
+
+		if (offset > 0) {
+			Class<? extends EntityBaseBean> bean = fromClause.getAuthzMap().get(idVar + ".id");
+			if (ei.getFieldsByName(bean).get(attribute) == null) {
+				throw new ParserException(bean + " does not have attribute " + attribute);
+			}
+		}
 
 		Token t = input.peek(0);
 		if (t != null && t.getType() == Token.Type.WHERE) {
@@ -66,6 +86,10 @@ public class RuleWhat {
 
 	public String getIdPath() {
 		return idVar + ".id";
+	}
+
+	public String getAttribute() {
+		return attribute;
 	}
 
 }

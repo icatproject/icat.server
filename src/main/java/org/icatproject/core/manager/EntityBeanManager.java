@@ -1557,7 +1557,7 @@ public class EntityBeanManager {
 						synchronized (df8601) {
 							try {
 								arg = df8601.parse(((JsonString) fValue).getString());
-							} catch (ParseException e) {
+							} catch (ParseException | ClassCastException e) {
 								throw new IcatException(IcatExceptionType.BAD_PARAMETER,
 										"Badly formatted date " + fValue);
 							}
@@ -2013,9 +2013,14 @@ public class EntityBeanManager {
 		boolean create = !contents.containsKey("id");
 		boolean deleteAllowed = true;
 		if (!create) {
-			bean.setId(contents.getJsonNumber("id").longValueExact());
+			try {
+				bean.setId(contents.getJsonNumber("id").longValueExact());
+			} catch (ClassCastException e) {
+				throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+						"Badly formatted id: " + contents.getString("id"));
+			}
 			bean = find(bean, manager);
-			gateKeeper.performAuthorisation(userId, bean, AccessType.UPDATE, manager);
+			gateKeeper.performUpdateAuthorisation(userId, bean, contents, manager);
 
 			/*
 			 * See if delete is allowed - it may not be relevant but need to

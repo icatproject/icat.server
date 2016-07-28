@@ -474,6 +474,102 @@ public class TestRS {
 	}
 
 	@Test
+	public void authzForUpdateAttribute() throws Exception {
+		wSession.setAuthz();
+		Session session = createAndPopulate();
+
+		// Just start with Facility, InvestigationType and Investigation
+		wSession.clear();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Facility").write("name", "Test Facility")
+					.write("daysUntilRelease", 90).writeEnd().writeEnd();
+		}
+		List<Long> ids = session.write(baos.toString());
+		Long fid = ids.get(0);
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("InvestigationType").writeStartObject("facility").write("id", fid)
+					.writeEnd().write("name", "TestExperiment").writeEnd().writeEnd();
+		}
+		ids = session.write(baos.toString());
+		Long itid = ids.get(0);
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+
+			jw.writeStartObject().writeStartObject("Investigation").writeStartObject("facility").write("id", fid)
+					.writeEnd().writeStartObject("type").write("id", itid).writeEnd().write("name", "A")
+					.write("title", "Not null").write("visitId", "42").writeEnd().writeEnd();
+
+		}
+		ids = session.write(baos.toString());
+		Long invid = ids.get(0);
+
+		// Should be able to change the inv.doi and inv.releaseDate
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Investigation").write("id", invid).write("doi", "huedhjkwqdh")
+					.write("releaseDate", "2001-01-01T17:59:00.000Z").writeEnd().writeEnd();
+		}
+		ids = session.write(baos.toString());
+
+		// Now delete the the entity rule and try again -it should fail
+		wSession.delRule("notroot", "SELECT x FROM Investigation x", "CRUD");
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Investigation").write("id", invid).write("doi", "huedhjkwqdh")
+					.write("releaseDate", "2001-01-01T17:59:00.000Z").writeEnd().writeEnd();
+		}
+		try {
+			ids = session.write(baos.toString());
+			fail();
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getType());
+			assertEquals("UPDATE access to this Investigation is not allowed.", e.getMessage());
+		}
+
+		// Now add the rule to just allow update of doi
+		wSession.addRule("notroot", "SELECT x FROM Investigation x", "CRD");
+		wSession.addRule("notroot", "SELECT x.doi FROM Investigation x", "U");
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Investigation").write("id", invid).write("doi", "D O I").writeEnd()
+					.writeEnd();
+		}
+		ids = session.write(baos.toString());
+		assertEquals(0, ids.size());
+
+		// Now try again with two attributes
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Investigation").write("id", invid).write("doi", "new DOI")
+					.write("releaseDate", "2015-01-01T17:59:00.000Z").writeEnd().writeEnd();
+		}
+		try {
+			ids = session.write(baos.toString());
+			fail();
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getType());
+			assertEquals("UPDATE access to this Investigation is not allowed.", e.getMessage());
+		}
+
+		// Now add the rule for second attribute so now it should work
+		wSession.addRule("notroot", "SELECT x.releaseDate FROM Investigation x", "U");
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Investigation").write("id", invid).write("doi", "new DOI")
+					.write("releaseDate", "2015-01-01T17:59:00.000Z").writeEnd().writeEnd();
+		}
+		ids = session.write(baos.toString());
+		assertEquals(0, ids.size());
+
+		try {
+		} finally {
+			// wSession.setAuthz();
+		}
+	}
+
+	@Test
 	public void authzForUpdate() throws Exception {
 		wSession.setAuthz();
 		Session session = createAndPopulate();
