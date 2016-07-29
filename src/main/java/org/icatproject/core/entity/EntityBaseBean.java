@@ -10,7 +10,6 @@ import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -109,7 +108,7 @@ public abstract class EntityBaseBean implements Serializable {
 	@SuppressWarnings("unchecked")
 	private List<EntityBaseBean> allowedMany(Step step, Map<Field, Method> getters, GateKeeper gateKeeper,
 			String userId, EntityManager manager)
-					throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, IcatException {
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, IcatException {
 		Field field = step.getRelationship().getField();
 		List<EntityBaseBean> beans = (List<EntityBaseBean>) getters.get(field).invoke(this);
 		if (step.isAllowed()) {
@@ -121,7 +120,7 @@ public abstract class EntityBaseBean implements Serializable {
 
 	private EntityBaseBean allowedOne(Relationship r, Method method, GateKeeper gateKeeper, String userId,
 			EntityManager manager)
-					throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, IcatException {
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, IcatException {
 		EntityBaseBean bean = (EntityBaseBean) method.invoke(this);
 
 		if (bean != null && !gateKeeper.allowed(r)) {
@@ -232,61 +231,6 @@ public abstract class EntityBaseBean implements Serializable {
 	 */
 	public Date getModTime() {
 		return this.modTime;
-	}
-
-	private void isValid() throws IcatException {
-		logger.trace("Checking validity of {}", this);
-		Class<? extends EntityBaseBean> klass = this.getClass();
-		List<Field> notNullFields = eiHandler.getNotNullableFields(klass);
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-
-		for (Field field : notNullFields) {
-
-			Object value;
-			try {
-				Method method = getters.get(field);
-				value = method.invoke(this, (Object[]) new Class[] {});
-			} catch (Exception e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
-			}
-
-			if (value == null) {
-				throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
-						this.getClass().getSimpleName() + ": " + field.getName() + " cannot be null.");
-			}
-		}
-
-		Map<Field, Integer> stringFields = eiHandler.getStringFields(klass);
-		for (Entry<Field, Integer> entry : stringFields.entrySet()) {
-			Field field = entry.getKey();
-			Integer length = entry.getValue();
-			Method method = getters.get(field);
-			Object value;
-			try {
-				value = method.invoke(this, (Object[]) new Class[] {});
-			} catch (Exception e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
-			}
-			if (value != null) {
-				if (((String) value).length() > length) {
-					throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
-							getClass().getSimpleName() + ": " + field.getName() + " cannot have length > " + length);
-				}
-			}
-		}
-
-	}
-
-	/*
-	 * If this method is overridden it should normally be called as well by
-	 * super.isValid()
-	 */
-	public void isValid(EntityManager manager) throws IcatException {
-		isValid(manager, true);
-	}
-
-	public void isValid(EntityManager manager, boolean deepValidation) throws IcatException {
-		isValid();
 	}
 
 	/*

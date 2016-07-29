@@ -424,13 +424,12 @@ public class GateKeeper {
 		String simpleName = klass.getSimpleName();
 		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
 		Map<String, Field> fieldsByName = eiHandler.getFieldsByName(klass);
-		Map<String, Relationship> rels = eiHandler.getRelationshipsByName(klass);
 
 		for (Entry<String, JsonValue> fentry : contents.entrySet()) {
 			String fName = fentry.getKey();
 			if (!fName.equals("id")) {
 				Field field = fieldsByName.get(fName);
-				if (updaters.contains(field) && rels.get(fName) == null) {
+				if (updaters.contains(field)) {
 					String qName = Rule.UPDATE_ATTRIBUTE_QUERY;
 					logger.debug("Checking " + qName + " " + user + " " + simpleName + "." + fName);
 					TypedQuery<String> query = manager.createNamedQuery(qName, String.class)

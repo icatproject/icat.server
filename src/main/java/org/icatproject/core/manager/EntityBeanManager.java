@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -199,6 +198,34 @@ public class EntityBeanManager {
 		return sb.toString();
 	}
 
+	private boolean checkIdentityChange(EntityBaseBean thisBean, EntityBaseBean fromBean) throws IcatException {
+
+		Class<? extends EntityBaseBean> klass = thisBean.getClass();
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		for (Field field : eiHandler.getRelInKey(klass)) {
+			try {
+				Method m = getters.get(field);
+				EntityBaseBean newValue = (EntityBaseBean) m.invoke(fromBean, new Object[0]);
+				if (newValue != null) {
+					long newPk = newValue.getId();
+					long oldPk = ((EntityBaseBean) m.invoke(thisBean)).getId();
+					boolean idChange = newPk != oldPk;
+					if (idChange) {
+						logger.debug("Identity relationship field " + field.getName() + " of " + thisBean
+								+ " is being changed from " + oldPk + " to " + newPk);
+						return true;
+					}
+				} else {
+					throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
+							"Attempt to set field " + field.getName() + " of " + thisBean + " to null");
+				}
+			} catch (Exception e) {
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
+			}
+		}
+		return false;
+	}
+
 	public CreateResponse create(String userId, EntityBaseBean bean, EntityManager manager,
 			UserTransaction userTransaction, boolean allAttributes, String ip) throws IcatException {
 
@@ -248,7 +275,7 @@ public class EntityBeanManager {
 				updateCache();
 				bean.preparePersist(userId, manager, gateKeeper, allAttributes, true);
 				isUnique(bean, manager);
-				bean.isValid(manager, true);
+				isValid(bean);
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
 			}
@@ -284,7 +311,7 @@ public class EntityBeanManager {
 							+ e.getMessage());
 					bean.preparePersist(userId, manager, gateKeeper, false, true);
 					isUnique(bean, manager);
-					bean.isValid(manager, true);
+					isValid(bean);
 					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 							"Unexpected DB response " + e.getClass() + " " + e.getMessage());
 				}
@@ -374,7 +401,7 @@ public class EntityBeanManager {
 				try {
 					bean.preparePersist(userId, manager, gateKeeper, false, true);
 					isUnique(bean, manager);
-					bean.isValid(manager, true);
+					isValid(bean);
 				} catch (IcatException e1) {
 					e1.setOffset(pos);
 					throw e1;
@@ -1163,6 +1190,12 @@ public class EntityBeanManager {
 		}
 	}
 
+	public boolean isLoggedIn(String userName, EntityManager manager) {
+		logger.debug("isLoggedIn for user " + userName);
+		return manager.createNamedQuery(Session.ISLOGGEDIN, Long.class).setParameter("userName", userName)
+				.getSingleResult() > 0;
+	}
+
 	private void isUnique(EntityBaseBean bean, EntityManager manager) throws IcatException {
 		logger.trace("Check uniqueness of {}", bean);
 		EntityBaseBean other = lookup(bean, manager);
@@ -1190,6 +1223,49 @@ public class EntityBeanManager {
 			}
 			throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS, erm.toString());
 		}
+	}
+
+	private void isValid(EntityBaseBean bean) throws IcatException {
+		logger.trace("Checking validity of {}", bean);
+		Class<? extends EntityBaseBean> klass = bean.getClass();
+		List<Field> notNullFields = eiHandler.getNotNullableFields(klass);
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
+
+		for (Field field : notNullFields) {
+
+			Object value;
+			try {
+				Method method = getters.get(field);
+				value = method.invoke(bean, (Object[]) new Class[] {});
+			} catch (Exception e) {
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
+			}
+
+			if (value == null) {
+				throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
+						klass.getSimpleName() + ": " + field.getName() + " cannot be null.");
+			}
+		}
+
+		Map<Field, Integer> stringFields = eiHandler.getStringFields(klass);
+		for (Entry<Field, Integer> entry : stringFields.entrySet()) {
+			Field field = entry.getKey();
+			Integer length = entry.getValue();
+			Method method = getters.get(field);
+			Object value;
+			try {
+				value = method.invoke(bean, (Object[]) new Class[] {});
+			} catch (Exception e) {
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
+			}
+			if (value != null) {
+				if (((String) value).length() > length) {
+					throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
+							klass.getSimpleName() + ": " + field.getName() + " cannot have length > " + length);
+				}
+			}
+		}
+
 	}
 
 	public String login(String userName, int lifetimeMinutes, EntityManager manager, UserTransaction userTransaction,
@@ -1506,14 +1582,27 @@ public class EntityBeanManager {
 	}
 
 	private void parseEntity(EntityBaseBean bean, JsonObject contents, Class<? extends EntityBaseBean> klass,
-			EntityManager manager, List<EntityBaseBean> creates, List<EntityBaseBean> updates, boolean create,
-			AtomicBoolean changedIdentity) throws IcatException {
+			EntityManager manager, List<EntityBaseBean> creates, Map<EntityBaseBean, Boolean> localUpdates,
+			boolean create, String userId) throws IcatException {
 		Map<String, Field> fieldsByName = eiHandler.getFieldsByName(klass);
 		Set<Field> updaters = eiHandler.getSettersForUpdate(klass).keySet();
 		Map<Field, Method> setters = eiHandler.getSetters(klass);
 		Map<String, Relationship> rels = eiHandler.getRelationshipsByName(klass);
 		Map<String, Method> getters = eiHandler.getGettersFromName(klass);
 		Set<Field> relInKey = eiHandler.getRelInKey(klass);
+
+		boolean deleteAllowed = false;
+		if (!create) {
+			gateKeeper.performUpdateAuthorisation(userId, bean, contents, manager);
+
+			/*
+			 * See if delete is allowed - it may not be relevant but need to
+			 * check now before modifications are made
+			 */
+			deleteAllowed = gateKeeper.isAccessAllowed(userId, bean, AccessType.DELETE, manager);
+		}
+
+		boolean changedIdentity = false;
 
 		for (Entry<String, JsonValue> fentry : contents.entrySet()) {
 			String fName = fentry.getKey();
@@ -1563,16 +1652,21 @@ public class EntityBeanManager {
 							}
 						}
 					} else {
-						arg = parseSubEntity((JsonObject) fValue, rels.get(fName), manager, creates, updates,
-								changedIdentity);
-						/* This may be an illegal update */
-						if (relInKey.contains(field)) {
-							if (bean.getId() != ((EntityBaseBean) arg).getId()) {
-								logger.debug("Identity relationship field " + field.getName() + " of " + bean
-										+ " is being changed from " + ((EntityBaseBean) arg).getId() + " to "
-										+ bean.getId());
-								changedIdentity.set(true);
+						try {
+							arg = parseSubEntity((JsonObject) fValue, rels.get(fName), manager, creates, localUpdates,
+									userId);
+							/* This may be an illegal update */
+							if (relInKey.contains(field)) {
+								if (bean.getId() != ((EntityBaseBean) arg).getId()) {
+									logger.debug("Identity relationship field " + field.getName() + " of " + bean
+											+ " is being changed from " + ((EntityBaseBean) arg).getId() + " to "
+											+ bean.getId());
+									changedIdentity = true;
+								}
 							}
+						} catch (ClassCastException e) {
+							throw new IcatException(IcatExceptionType.BAD_PARAMETER,
+									"Badly formatted relationship object " + fValue);
 						}
 					}
 					try {
@@ -1588,7 +1682,7 @@ public class EntityBeanManager {
 						List<EntityBaseBean> beans = (List<EntityBaseBean>) getters.get(fName).invoke(bean);
 						for (JsonValue aValue : (JsonArray) fValue) {
 							EntityBaseBean arg = parseSubEntity((JsonObject) aValue, rels.get(fName), manager, creates,
-									updates, changedIdentity);
+									localUpdates, userId);
 							beans.add(arg);
 						}
 					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -1602,14 +1696,19 @@ public class EntityBeanManager {
 		if (create) {
 			creates.add(bean);
 		} else {
-			updates.add(bean);
+			if (changedIdentity && !deleteAllowed) {
+				throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
+						"DELETE access implied by UPDATE to this " + klass.getSimpleName() + " is not allowed.");
+			}
+			// Will need to check after commit that CREATE is permitted if the
+			// identity has changed
+			localUpdates.put(bean, changedIdentity);
 		}
-		logger.debug("Creates {} updates {}", creates, updates);
 
 	}
 
 	private EntityBaseBean parseSubEntity(JsonObject contents, Relationship relationship, EntityManager manager,
-			List<EntityBaseBean> creates, List<EntityBaseBean> updates, AtomicBoolean changedIdentity)
+			List<EntityBaseBean> creates, Map<EntityBaseBean, Boolean> localUpdates, String userId)
 			throws IcatException {
 		logger.debug("Parse entity {} from relationship {}", contents, relationship);
 		Class<? extends EntityBaseBean> klass = relationship.getDestinationBean();
@@ -1636,7 +1735,7 @@ public class EntityBeanManager {
 			bean = find(bean, manager);
 		}
 
-		parseEntity(bean, contents, klass, manager, creates, updates, create, changedIdentity);
+		parseEntity(bean, contents, klass, manager, creates, localUpdates, create, userId);
 		return bean;
 
 	}
@@ -1829,7 +1928,7 @@ public class EntityBeanManager {
 				beanManaged.setModId(userId);
 				merge(beanManaged, bean, manager);
 				beanManaged.postMergeFixup(manager, gateKeeper);
-				beanManaged.isValid(manager, false);
+				isValid(beanManaged);
 				logger.error("Internal error", e);
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
@@ -1838,34 +1937,6 @@ public class EntityBeanManager {
 			logger.error("Internal error", e);
 			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
 		}
-	}
-
-	private boolean checkIdentityChange(EntityBaseBean thisBean, EntityBaseBean fromBean) throws IcatException {
-
-		Class<? extends EntityBaseBean> klass = thisBean.getClass();
-		Map<Field, Method> getters = eiHandler.getGetters(klass);
-		for (Field field : eiHandler.getRelInKey(klass)) {
-			try {
-				Method m = getters.get(field);
-				EntityBaseBean newValue = (EntityBaseBean) m.invoke(fromBean, new Object[0]);
-				if (newValue != null) {
-					long newPk = newValue.getId();
-					long oldPk = ((EntityBaseBean) m.invoke(thisBean)).getId();
-					boolean idChange = newPk != oldPk;
-					if (idChange) {
-						logger.debug("Identity relationship field " + field.getName() + " of " + thisBean
-								+ " is being changed from " + oldPk + " to " + newPk);
-						return true;
-					}
-				} else {
-					throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
-							"Attempt to set field " + field.getName() + " of " + thisBean + " to null");
-				}
-			} catch (Exception e) {
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
-			}
-		}
-		return false;
 	}
 
 	private void updateCache() throws IcatException {
@@ -1974,7 +2045,7 @@ public class EntityBeanManager {
 				throw e;
 			} catch (Throwable e) {
 				userTransaction.rollback();
-				logger.error("Transaction rolled back for creation because of", e);
+				logger.error("Transaction rolled back for creation/update because of", e);
 				updateCache();
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
 						"Unexpected DB response " + e.getClass() + " " + e.getMessage(), offset);
@@ -2011,7 +2082,6 @@ public class EntityBeanManager {
 			throw new IcatException(IcatExceptionType.INTERNAL, "failed to instantiate " + beanName);
 		}
 		boolean create = !contents.containsKey("id");
-		boolean deleteAllowed = true;
 		if (!create) {
 			try {
 				bean.setId(contents.getJsonNumber("id").longValueExact());
@@ -2020,29 +2090,19 @@ public class EntityBeanManager {
 						"Badly formatted id: " + contents.getString("id"));
 			}
 			bean = find(bean, manager);
-			gateKeeper.performUpdateAuthorisation(userId, bean, contents, manager);
-
-			/*
-			 * See if delete is allowed - it may not be relevant but need to
-			 * check now before modifications are made
-			 */
-			deleteAllowed = gateKeeper.isAccessAllowed(userId, bean, AccessType.DELETE, manager);
-
 		}
 		List<EntityBaseBean> localCreates = new ArrayList<>();
-		List<EntityBaseBean> localUpdates = new ArrayList<>();
-		AtomicBoolean changedIdentity = new AtomicBoolean();
-		parseEntity(bean, contents, klass, manager, localCreates, localUpdates, create, changedIdentity);
-		if (changedIdentity.get() && !deleteAllowed) {
-			throw new IcatException(IcatException.IcatExceptionType.INSUFFICIENT_PRIVILEGES,
-					"DELETE access implied by UPDATE to this " + klass.getSimpleName() + " is not allowed.");
-		}
+		Map<EntityBaseBean, Boolean> localUpdates = new HashMap<>();
+		parseEntity(bean, contents, klass, manager, localCreates, localUpdates, create, userId);
 
 		try {
 			bean.preparePersist(userId, manager, gateKeeper, false, false);
 			if (create) {
 				manager.persist(bean);
 				logger.trace(bean + " persisted.");
+			}
+			for (EntityBaseBean b : localUpdates.keySet()) {
+				b.postMergeFixup(manager, gateKeeper);
 			}
 			manager.flush();
 			logger.trace(bean + " flushed.");
@@ -2055,8 +2115,14 @@ public class EntityBeanManager {
 					e.getMessage());
 			userTransaction.rollback();
 			userTransaction.begin();
-			isUnique(bean, manager);
-			bean.isValid(manager, true);
+			for (EntityBaseBean b : localCreates) {
+				isValid(b);
+				isUnique(b, manager);
+			}
+			for (EntityBaseBean b : localUpdates.keySet()) {
+				isValid(b);
+				isUnique(b, manager);
+			}
 
 			/*
 			 * Now look for duplicates within the list of objects provided
@@ -2125,8 +2191,10 @@ public class EntityBeanManager {
 			creates.add(eb);
 		}
 
-		for (EntityBaseBean eb : localUpdates) {
-			if (changedIdentity.get()) {
+		for (Entry<EntityBaseBean, Boolean> beanEntry : localUpdates.entrySet()) {
+			EntityBaseBean eb = beanEntry.getKey();
+			if (beanEntry.getValue()) {
+				// Identity has changed
 				gateKeeper.performAuthorisation(userId, eb, AccessType.CREATE, manager);
 			}
 			updates.add(eb);
@@ -2138,12 +2206,6 @@ public class EntityBeanManager {
 			return null;
 		}
 
-	}
-
-	public boolean isLoggedIn(String userName, EntityManager manager) {
-		logger.debug("isLoggedIn for user " + userName);
-		return manager.createNamedQuery(Session.ISLOGGEDIN, Long.class).setParameter("userName", userName)
-				.getSingleResult() > 0;
 	}
 
 }

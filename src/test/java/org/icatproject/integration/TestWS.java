@@ -1422,7 +1422,7 @@ public class TestWS {
 	public void login() throws Exception {
 		double rm = session.getRemainingMinutes();
 		assertTrue(rm > 0);
-		assertTrue("API version", session.getApiVersion().startsWith("4.7."));
+		assertTrue("API version", session.getApiVersion().startsWith("4.8."));
 		assertEquals("db/notroot", session.getUserName());
 		Thread.sleep(10);
 		rm = session.getRemainingMinutes();

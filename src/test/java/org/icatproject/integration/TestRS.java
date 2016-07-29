@@ -478,7 +478,7 @@ public class TestRS {
 		wSession.setAuthz();
 		Session session = createAndPopulate();
 
-		// Just start with Facility, InvestigationType and Investigation
+		// Just start with Facility, two InvestigationTypes and Investigation
 		wSession.clear();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (JsonGenerator jw = Json.createGenerator(baos)) {
@@ -489,16 +489,21 @@ public class TestRS {
 		Long fid = ids.get(0);
 		baos = new ByteArrayOutputStream();
 		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartArray();
 			jw.writeStartObject().writeStartObject("InvestigationType").writeStartObject("facility").write("id", fid)
 					.writeEnd().write("name", "TestExperiment").writeEnd().writeEnd();
+			jw.writeStartObject().writeStartObject("InvestigationType").writeStartObject("facility").write("id", fid)
+					.writeEnd().write("name", "TestExperiment2").writeEnd().writeEnd();
+			jw.writeEnd();
 		}
 		ids = session.write(baos.toString());
-		Long itid = ids.get(0);
+		Long itid1 = ids.get(0);
+		Long itid2 = ids.get(1);
 		baos = new ByteArrayOutputStream();
 		try (JsonGenerator jw = Json.createGenerator(baos)) {
 
 			jw.writeStartObject().writeStartObject("Investigation").writeStartObject("facility").write("id", fid)
-					.writeEnd().writeStartObject("type").write("id", itid).writeEnd().write("name", "A")
+					.writeEnd().writeStartObject("type").write("id", itid1).writeEnd().write("name", "A")
 					.write("title", "Not null").write("visitId", "42").writeEnd().writeEnd();
 
 		}
@@ -562,6 +567,47 @@ public class TestRS {
 		}
 		ids = session.write(baos.toString());
 		assertEquals(0, ids.size());
+
+		// Now try changing the type - a relationship which should not be
+		// allowed
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Investigation").write("id", invid).write("doi", "very new DOI")
+					.write("releaseDate", "1984-01-01T17:59:00.000Z").writeStartObject("type").write("id", itid2)
+					.writeEnd().writeEnd().writeEnd();
+		}
+		try {
+			ids = session.write(baos.toString());
+			fail();
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.INSUFFICIENT_PRIVILEGES, e.getType());
+			assertEquals("UPDATE access to this Investigation is not allowed.", e.getMessage());
+		}
+
+		// Now add a rule allowing the relationship change
+		wSession.addRule("notroot", "SELECT x.type FROM Investigation x", "U");
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Investigation").write("id", invid).write("doi", "very new DOI")
+					.write("releaseDate", "1984-01-01T17:59:00.000Z").writeStartObject("type").write("id", itid2)
+					.writeEnd().writeEnd().writeEnd();
+		}
+		ids = session.write(baos.toString());
+		assertEquals(0, ids.size());
+
+		// Now try a writeNull which should produce a decent error message
+		baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Investigation").write("id", invid).write("doi", "very new DOI")
+					.write("releaseDate", "1984-01-01T17:59:00.000Z").writeNull("type").writeEnd().writeEnd();
+		}
+		try {
+			ids = session.write(baos.toString());
+			fail();
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.VALIDATION, e.getType());
+			assertEquals("Investigation: type cannot be null.", e.getMessage());
+		}
 
 		try {
 		} finally {
