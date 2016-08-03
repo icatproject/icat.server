@@ -23,11 +23,11 @@
 		<li>A suitable deployed container. The installation scripts
 			support Glassfish and to a lesser extent WildFly. Testing has been
 			carried out with Glassfish 4.0. <a
-			href="http://icatproject.org/installation/glassfish/">Glassfish
+			href="https://icatproject.org/installation/glassfish/">Glassfish
 				installation instructions</a> are available.
 		</li>
 		<li>A database as described in <a
-			href="http://icatproject.org/installation/database/">Database
+			href="https://icatproject.org/installation/database/">Database
 				installation instructions</a> installed on the server
 		</li>
 		<li>Deployed ICAT authenticators.</li>
@@ -267,7 +267,15 @@
 		table is no longer used and may be dropped after you have extracted
 		any information from it that you need.
 	</p>
-
+	<h3>Upgrade 4.7.0 schema to 4.8.0</h3>
+	A column must be added to the RULE_ table. This can be done or MySQL or
+	MariaDB by
+	<kbd>mysql -u icat -p icat &lt; upgrade_mysql_4_8.sql</kbd>
+	or for Oracle run
+	<kbd>sqlplus icat @upgrade_oracle_4_8.sql</kbd>
+	where in both cases it is assumed that the tables are owned by user
+	"icat". This can be done be done while icat.server 4.7.0 is running as
+	the old code is unaware of the addition of the new column.
 
 	<h2>The icat-setup.properties file</h2>
 	<dl>

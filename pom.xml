@@ -199,6 +199,7 @@
 						<html>
 							<location>site/miredot</location>
 							<baseUrl>https://example.com/icat</baseUrl>
+							<intro>miredot.intro.html</intro>
 						</html>
 					</output>
 					<analysis>

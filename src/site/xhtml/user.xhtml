@@ -4,13 +4,14 @@
 </head>
 <body>
 
-	<h1>Introduction</h1>
+	<h1>ICAT Server User Manual</h1>
+	<h2>Introduction</h2>
 
 	<p>The ICAT server is a layer on top of a relational DBMS. The
 		database is wrapped both as a SOAP web service and as a RESTful web
 		service.</p>
 
-	<h2>SOAP interface</h2>
+	<h3>SOAP interface</h3>
 	<p>For the SOAP web service each table in the database is mapped
 		onto a data structure exposed by the web service. When the web service
 		interface definition (WSDL) is processed by a client then it has
@@ -36,7 +37,8 @@
 		features and also provides a level of protection from server version
 		dependency.
 	</p>
-	<p>SOAP is basically RPC and the client must match the server. The
+	<p>
+		SOAP is basically RPC and the client must match the server. The
 		protocol is XML based and so is rather verbose and because you can
 		only transfer predefined objects you cannot issue a query which
 		returns a projection of a join as you would expect to be able to do in
@@ -49,9 +51,11 @@
 		but all the Facility information would typically be sent many times -
 		each time it is referenced by an Investigation. In addition the WSDL
 		(though generated automatically from the Java code of the server)
-		contains no code derived documentation.</p>
+		contains no code derived documentation. The calls are listed in the <a
+			href="soap.html">SOAP interface.</a>
+	</p>
 
-	<h2>RESTful interface</h2>
+	<h3>RESTful interface</h3>
 	<p>
 		This service acts upon HTTP methods (GET, PUT, DELETE etc.) and
 		processes JSON input and returns JSON. The client programmer gets no
@@ -64,10 +68,11 @@
 		and from Python the json package is recommended. The javax.json
 		package provides streaming and non-streaming libraries and the Python
 		json library allows for conversion between JSON and Python object
-		trees made up of lists and dictionaries.
+		trees made up of lists and dictionaries.The calls are listed in the <a
+			href="miredot/">REST interface.</a>
 	</p>
 
-	<h1>Session Management</h1>
+	<h2>Session Management</h2>
 	<p>The icat server is configured with a number of authenticator
 		plugins. To login to a server requires that you identify the plugin
 		and pass it suitable credentials. These credentials are sent as key
@@ -84,7 +89,7 @@
 		logout, to refresh a session and to find out how much time is left and
 		to find the username from the sessionId.</p>
 
-	<h1>The schema"</h1>
+	<h2>The schema</h2>
 	<p>
 		To understand exactly how the data manipulation calls work requires an
 		understanding of the <a href="schema.html" target="_blank">schema.</a>
@@ -101,9 +106,9 @@
 		of fields, some of which may be relationships, which must be unique
 		across all entries in the table. This is marked as "Uniqueness
 		constraint". For Dataset this is
-		<tt>investigation, name</tt>
+		<kbd>investigation, name</kbd>
 		where
-		<tt>investigation</tt>
+		<kbd>investigation</kbd>
 		represents a relationship. No more than one one Dataset may exist with
 		those two fields having the same value. These constraints are enforced
 		by ICAT.
@@ -117,12 +122,13 @@
 		the name of the related class unless it is ambiguous or unnecessarily
 		long. The field name is in the plural for "to many" relationships. The
 		next column, "cascaded", is marked yes to show that create and delete
-		operations are cascaded. If a Dataset is deleted then all its
+		operations are cascaded. For simplicity all "to many" relatsionships
+		are cascaded and all to one" relationships are not so the "cascaded"
+		column is not really needed. If a Dataset is deleted then all its
 		DataCollectionDatasets, DatasetParameters and Datafiles are deleted at
 		the same time by one call to ICAT. In a similar manner a tree, created
 		in memory with a Dataset having a a set of Datafiles and
-		Datasetparameters, can be persisted to ICAT in a single call. This
-		will be explained more later.</p>
+		Datasetparameters, can be persisted to ICAT in a single call.</p>
 	<p>Note that:</p>
 	<ul>
 		<li>relationships are all "one to many" in one direction and
@@ -137,88 +143,61 @@
 		may be queried. For each each entity they record who created it and
 		when, and who modified it and when.</p>
 
-	<h2>Creating objects</h2>
-	<p>Whichever interface is being used the mechanism is to create a
-		representation of the new data object or objects on the client side
-		and send them to the server.</p>
-		
-				
-		<p class="call">long create(String sessionId, EntityBaseBean bean)
-		</p>
-		<p>To create an object in ICAT, first instantiate the object of
-			interest, for example a Dataset, and then call the setters to set its
-			attributes and finally make a call to create the object in ICAT.</p>
-		<p>So typical code in Java might look like:</p>
-		<code>
-			Dataset ds = new Dataset(); <br /> ds.setName("Name of dataset"); <br />
-			ds.set ... <br /> Long dsid = icat.create(sessionId, ds);
-		</code>
-		<p>You will see that no convenient constructors are generated,
-			rather each field of the object must be set individually. Most fields
-			are optional and may be left with null values, however some are
-			compulsory and the call to create will fail if they are not set. Each
-			object has a primary key that identifies it in the database - this is
-			a value of type "long" that is generated by ICAT and is used to
-			represent relationships in a regular manner.</p>
-		<p>Some fields represent attributes of the object but others are
-			used to represent relationships. The relationships are represented in
-			the class definitions by a variable which either holds a reference to
-			a single object or a list of objects. In the case of a list it may be
-			"cascaded". Consider creating a dataset with a set of datafiles.
-			Because the relationship from dataset to datafile is cascaded they
-			may be created in one call as outlined below:</p>
-		<code>
-			Dataset ds = new Dataset(); <br /> ds.setName(dsName); <br />
-			ds.setType(type); <br /> Datafile datafile = new Datafile(); <br />
-			datafile.setDatafileFormat(format); <br /> datafile.setName(dfName);
-			<br /> ds.getDatafiles().add(datafile); // Add the datafile to the
-			dataset <br /> icat.create(sessionId, ds);
-		</code>
+	<h2>Logging</h2>
+	The server can be configured to send PubSub JMS messages to allow for
+	monitoring its behaviour. It will send one message for each enabled
+	successful call. The message has a text body and, in addition to the
+	normal JMS headers has properties of:
 
-		<p>The call to create returns the key of the created object. If
-			you choose to write:</p>
+	<dl>
+		<dt>operation</dt>
+		<dd>the name of the call</dd>
+		<dt>ip</dt>
+		<dd>the ip address of the client machine making the request</dd>
+		<dt>millis</dt>
+		<dd>the duration of the call in ms</dd>
+		<dt>start</dt>
+		<dd>the time of the start of the call im ms since the epoch</dd>
+	</dl>
 
-		<code>ds.setId(icat.create(sessionId, ds));</code>
+	The text of the body contains nothing that might reveal private
+	information. The properties make it easy to write a consumer that only
+	selects the data it is interested in. The logging is enabled by groups
+	of operations. Calls are classified as one of READ, WRITE, SESSION or
+	INFO.
 
-		<p>then the client copy of the Dataset will be updated to have the
-			correct key value - however the keys in any other objects "within"
-			the Dataset will still be null on the client side. In this case
-			datafile.getId() will remain null.</p>
+	<h2>Notifications</h2>
+	Notifications may also be sent when an entity is created or updated.
+	The JMS message is always PubSub rather than point to point. This means
+	that there can be multiple listeners for a message. The message is an
+	object message holding the id of the entity that has been created or
+	updated. In addition to the normal JMS headers it has properties of:
 
-		<p>
-			When creating multiple objects in one call, the value of the cascaded
-			flag must be noted. The line
-			<tt>ds.getDatafiles().add(datafile)</tt>
-			requires that the datafile is not already in the ICAT database
-			because the cascade flag is set. If the cascaded flag is set then
-			objects to be included in the "create" operation must not exist.
-			However if the cascaded flag is not set then objects which are being
-			referenced must already exist in the ICAT database.
-		</p>
+	<dl>
+		<dt>entity</dt>
+		<dd>the name of the type of entity</dd>
+		<dt>operation</dt>
+		<dd>C for create or U for update</dd>
+	</dl>
 
-		<p>
-			It might help to understand what is happening when you call create.
-			The client side object you pass in, and <em>everything it refers
-				to </em> , is encoded as XML and sent to the server. There it is unpacked
-			into the same set of objects and persisted in the database. The
-			structure passed in must be a tree structure (or more correctly a <a
-				href="http://en.wikipedia.org/wiki/Directed_acyclic_graph"
-				target="_blank">DAG</a> ) - if, for example, you modify the code
-			above to create a dataset with one datafile and add
-			<tt>datafile.setDataset(dataset)</tt>
-			attempting to put in a reverse link which physically will appear in
-			the ICAT database the call will be rejected by the client because you
-			have a loop in the graph as you can then go backwards and forwards
-			between datafile and dataset. If you passed in a proper DAG the
-			database will create one row in the dataset table and one in the
-			datafile table where the datafile entry includes the field
-			<tt>datafile.dataset_id</tt>
-			holding the
-			<tt>dataset.id</tt>
-			of the dataset entry just created. Relationships are represented in
-			the database by holding the id value of the related object.
-		</p>
-		
+	<p>This mechanism does not leak information because all the user
+		receives is an entity id. To read the entity with that id the user
+		must have read access to that entity instance.</p>
+
+	<p>Notifications must be requested for individual entity types and
+		for each one whether you want to know about creates, updates or both.
+		As this is a server setting if you have users wanting to receive
+		notifications of different entity types you might take the OR of the
+		requests. If you are writing an automated job processing system then
+		you may be interested to watch for creations or updates of entities of
+		type Dataset, Datafile and Job.</p>
+	<p>
+		There is an <a
+			href="https://github.com/icatproject-contrib/notification-receiver-example">example
+			MDB</a> available which should make it easy to understand how to use the
+		messages.
+	</p>
+
 
 </body>
 </html>
