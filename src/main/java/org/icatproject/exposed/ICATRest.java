@@ -184,6 +184,50 @@ public class ICATRest {
 	}
 
 	/**
+	 * Clone an entity
+	 * 
+	 * @summary Clone
+	 * 
+	 * @param sessionId
+	 *            a sessionId of a user which takes the form
+	 *            <code>0d9a3706-80d4-4d29-9ff3-4d65d4308a24</code>
+	 * @param name
+	 *            name of type of entity such as "Investigation"
+	 * @param id
+	 *            id of entity to be cloned
+	 * @param keys
+	 *            json string with keys to identify the clone which takes the
+	 *            form <code>{"name":"anInvName", "visitId":"v42"]</code>. If
+	 *            the entity type has more than one field to identify it then
+	 *            any value not supplied in the map represented by the json
+	 *            string will be taken from the object being cloned.
+	 * 
+	 * @return id of clone as a json string of the form <samp>{"id":126}</samp>
+	 * 
+	 * @throws IcatException
+	 *             when something is wrong
+	 */
+	@POST
+	@Path("cloner")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces(MediaType.APPLICATION_JSON)
+	public String cloneEntity(@Context HttpServletRequest request, @FormParam("sessionId") String sessionId,
+			@FormParam("name") String name, @FormParam("id") long id, @FormParam("keys") String keys)
+			throws IcatException {
+
+		String userName = beanManager.getUserName(sessionId, manager);
+
+		long beanId = beanManager.cloneEntity(userName, name, id, keys, manager, userTransaction,
+				request.getRemoteAddr());
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		JsonGenerator gen = Json.createGenerator(baos);
+		gen.writeStartObject().write("id", beanId).writeEnd();
+		gen.close();
+		return baos.toString();
+	}
+
+	/**
 	 * Delete entities as a json string.
 	 * 
 	 * @summary delete

@@ -247,7 +247,8 @@ public abstract class EntityBaseBean implements Serializable {
 	 * relationships.
 	 */
 	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean allAttributes,
-			boolean clearId) throws IcatException {
+			boolean clearId, Set<EntityBaseBean> done) throws IcatException {
+
 		if (clearId) {
 			this.id = null;
 		}
@@ -269,6 +270,8 @@ public abstract class EntityBaseBean implements Serializable {
 			modTime = now;
 		}
 
+		done.add(this);
+
 		Class<? extends EntityBaseBean> klass = this.getClass();
 		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
 		Map<Field, Method> getters = eiHandler.getGetters(klass);
@@ -281,7 +284,7 @@ public abstract class EntityBaseBean implements Serializable {
 					if (!collection.isEmpty()) {
 						Method rev = r.getInverseSetter();
 						for (EntityBaseBean bean : collection) {
-							bean.preparePersist(modId, manager, gateKeeper, allAttributes, clearId);
+							bean.preparePersist(modId, manager, gateKeeper, allAttributes, clearId, done);
 							rev.invoke(bean, this);
 						}
 					}
@@ -290,6 +293,7 @@ public abstract class EntityBaseBean implements Serializable {
 				}
 			}
 		}
+
 	}
 
 	public EntityBaseBean pruned(boolean one, int hereVarNum, List<Step> steps, long maxEntities, GateKeeper gateKeeper,

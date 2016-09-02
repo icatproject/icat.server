@@ -234,7 +234,8 @@ public class EntityBeanManager {
 			userTransaction.begin();
 			try {
 				long startMillis = log ? System.currentTimeMillis() : 0;
-				bean.preparePersist(userId, manager, gateKeeper, allAttributes, true);
+				Set<EntityBaseBean> done = new HashSet<>();
+				bean.preparePersist(userId, manager, gateKeeper, allAttributes, true, done);
 				logger.trace(bean + " prepared for persist.");
 				manager.persist(bean);
 				logger.trace(bean + " persisted.");
@@ -273,7 +274,8 @@ public class EntityBeanManager {
 				logger.trace("Transaction rolled back for creation of " + bean + " because of " + e.getClass() + " "
 						+ e.getMessage());
 				updateCache();
-				bean.preparePersist(userId, manager, gateKeeper, allAttributes, true);
+				Set<EntityBaseBean> done = new HashSet<>();
+				bean.preparePersist(userId, manager, gateKeeper, allAttributes, true, done);
 				isUnique(bean, manager);
 				isValid(bean);
 				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -297,7 +299,8 @@ public class EntityBeanManager {
 			userTransaction.begin();
 			try {
 				try {
-					bean.preparePersist(userId, manager, gateKeeper, false, true);
+					Set<EntityBaseBean> done = new HashSet<>();
+					bean.preparePersist(userId, manager, gateKeeper, false, true, done);
 					logger.debug(bean + " prepared for persist (createAllowed).");
 					manager.persist(bean);
 					logger.debug(bean + " persisted (createAllowed).");
@@ -309,7 +312,8 @@ public class EntityBeanManager {
 					userTransaction.rollback();
 					logger.debug("Transaction rolled back for creation of " + bean + " because of " + e.getClass() + " "
 							+ e.getMessage());
-					bean.preparePersist(userId, manager, gateKeeper, false, true);
+					Set<EntityBaseBean> done = new HashSet<>();
+					bean.preparePersist(userId, manager, gateKeeper, false, true, done);
 					isUnique(bean, manager);
 					isValid(bean);
 					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
@@ -351,7 +355,8 @@ public class EntityBeanManager {
 			try {
 				long startMillis = log ? System.currentTimeMillis() : 0;
 				for (EntityBaseBean bean : beans) {
-					bean.preparePersist(userId, manager, gateKeeper, false, true);
+					Set<EntityBaseBean> done = new HashSet<>();
+					bean.preparePersist(userId, manager, gateKeeper, false, true, done);
 					logger.trace(bean + " prepared for persist.");
 					manager.persist(bean);
 					logger.trace(bean + " persisted.");
@@ -399,7 +404,8 @@ public class EntityBeanManager {
 				int pos = crs.size();
 				EntityBaseBean bean = beans.get(pos);
 				try {
-					bean.preparePersist(userId, manager, gateKeeper, false, true);
+					Set<EntityBaseBean> done = new HashSet<>();
+					bean.preparePersist(userId, manager, gateKeeper, false, true, done);
 					isUnique(bean, manager);
 					isValid(bean);
 				} catch (IcatException e1) {
@@ -2095,8 +2101,9 @@ public class EntityBeanManager {
 		Map<EntityBaseBean, Boolean> localUpdates = new HashMap<>();
 		parseEntity(bean, contents, klass, manager, localCreates, localUpdates, create, userId);
 
+		Set<EntityBaseBean> done = new HashSet<>();
 		try {
-			bean.preparePersist(userId, manager, gateKeeper, false, false);
+			bean.preparePersist(userId, manager, gateKeeper, false, false, done);
 			if (create) {
 				manager.persist(bean);
 				logger.trace(bean + " persisted.");
@@ -2204,6 +2211,228 @@ public class EntityBeanManager {
 			return bean;
 		} else {
 			return null;
+		}
+
+	}
+
+	public long cloneEntity(String userId, String beanName, long id, String keys, EntityManager manager,
+			UserTransaction userTransaction, String ip) throws IcatException {
+		long startMillis = log ? System.currentTimeMillis() : 0;
+		logger.info("{} cloning {}/{}", userId, beanName, id);
+
+		Class<EntityBaseBean> klass = EntityInfoHandler.getClass(beanName);
+		EntityBaseBean bean = manager.find(klass, id);
+		if (bean == null) {
+			throw new IcatException(IcatExceptionType.NO_SUCH_OBJECT_FOUND, beanName + ":" + id);
+		}
+		EntityBaseBean clone = null;
+		try {
+			clone = klass.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new IcatException(IcatExceptionType.INTERNAL, "failed to instantiate " + beanName);
+		}
+		Map<EntityBaseBean, EntityBaseBean> clonedTo = new HashMap<>();
+		clonedTo.put(bean, clone);
+		Map<Field, Method> setters = eiHandler.getSettersForUpdate(klass);
+		Map<Field, Method> getters = eiHandler.getGetters(klass);
+		List<Field> constraintFields = eiHandler.getConstraintFields(klass);
+		Set<Relationship> rs = eiHandler.getRelatedEntities(klass);
+
+		for (Entry<Field, Method> fieldAndMethod : setters.entrySet()) {
+			Field field = fieldAndMethod.getKey();
+			try {
+				Method m = getters.get(field);
+				Object value = m.invoke(bean);
+				if (EntityBaseBean.class.isAssignableFrom(field.getType())) {
+					if (value != null) {
+						Object pk = ((EntityBaseBean) value).getId();
+						value = (EntityBaseBean) manager.find(field.getType(), pk);
+						fieldAndMethod.getValue().invoke(clone, value);
+					}
+				} else {
+					fieldAndMethod.getValue().invoke(clone, value);
+				}
+			} catch (Exception e) {
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
+			}
+		}
+
+		try (JsonReader reader = Json.createReader(new ByteArrayInputStream(keys.getBytes()))) {
+			JsonStructure obj = reader.read();
+
+			if (obj.getValueType() == ValueType.OBJECT) {
+
+				for (Entry<String, JsonValue> field : ((JsonObject) obj).entrySet()) {
+					String fieldName = field.getKey();
+					Field f = null;
+					for (Field con : constraintFields) {
+						if (con.getName().equals(fieldName)) {
+							f = con;
+							break;
+						}
+					}
+					if (f == null) {
+						throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+								fieldName + " is not a constraint field of " + beanName);
+					}
+					if (EntityBaseBean.class.isAssignableFrom(f.getType())) {
+						throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+								fieldName + " can't override a many to one relationship field " + beanName);
+					}
+					Method setter = setters.get(f);
+					logger.debug("Setting {} to {} by {}", fieldName, field.getValue(), setter);
+					setter.invoke(clone, ((JsonString) field.getValue()).getString());
+				}
+			} else {
+				throw new IcatException(IcatException.IcatExceptionType.BAD_PARAMETER,
+						"Keys " + keys + " do not represent a json object");
+			}
+		} catch (Exception e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
+		}
+
+		cloneOneToManys(bean, clone, klass, getters, setters, rs, manager, clonedTo, userId);
+		Set<EntityBaseBean> done = new HashSet<>();
+		clone.preparePersist(userId, manager, gateKeeper, false, true, done);
+		logger.trace(clone + " prepared for persist.");
+
+		try {
+			try {
+				userTransaction.begin();
+				manager.persist(clone);
+				manager.flush();
+				logger.trace(clone + " flushed.");
+
+				// Check authz now everything flushed
+				for (EntityBaseBean c : clonedTo.values()) {
+					gateKeeper.performAuthorisation(userId, c, AccessType.CREATE, manager);
+				}
+
+				userTransaction.commit();
+
+			} catch (EntityExistsException e) {
+				userTransaction.rollback();
+				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getMessage());
+			} catch (Throwable e) {
+				userTransaction.rollback();
+				logger.trace("Transaction rolled back for creation of " + clone + " because of " + e.getClass() + " "
+						+ e.getMessage());
+				updateCache();
+				done = new HashSet<>();
+				bean.preparePersist(userId, manager, gateKeeper, false, true, done);
+				isUnique(clone, manager);
+				isValid(clone);
+				logger.error("Database unhappy", e);
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"Unexpected DB response " + e.getClass() + " " + e.getMessage());
+			}
+		} catch (IllegalStateException | SecurityException | SystemException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+					e.getClass().getSimpleName() + e.getMessage());
+		}
+
+		/*
+		 * Nothing should be able to go wrong now so log, update lucene and send
+		 * notification messages
+		 */
+		if (logRequests.contains(CallType.WRITE)) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+			try (JsonGenerator gen = Json.createGenerator(baos).writeStartObject()) {
+				gen.write("userName", userId);
+				gen.write("entityName", clone.getClass().getSimpleName());
+				gen.write("entityId", clone.getId());
+				gen.writeEnd();
+			}
+			transmitter.processMessage("write", ip, baos.toString(), startMillis);
+		}
+
+		if (luceneActive) {
+			for (EntityBaseBean c : clonedTo.values()) {
+				lucene.addDocument(c);
+			}
+		}
+
+		for (EntityBaseBean c : clonedTo.values()) {
+			try {
+				notificationTransmitter
+						.processMessage(new NotificationMessage(Operation.C, c, manager, notificationRequests));
+			} catch (JMSException e) {
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						"Operation completed but unable to send JMS message " + e.getMessage());
+			}
+		}
+		return clone.getId();
+	}
+
+	private void cloneOneToManys(EntityBaseBean bean, EntityBaseBean clone, Class<? extends EntityBaseBean> klass,
+			Map<Field, Method> getters, Map<Field, Method> setters, Set<Relationship> rs, EntityManager manager,
+			Map<EntityBaseBean, EntityBaseBean> clonedTo, String userId) throws IcatException {
+
+		gateKeeper.performAuthorisation(userId, bean, AccessType.READ, manager);
+
+		for (Relationship r : rs) {
+			if (r.isCollection()) {
+				Method m = getters.get(r.getField());
+				Method back = r.getInverseSetter();
+				try {
+					@SuppressWarnings("unchecked")
+					List<EntityBaseBean> collection = (List<EntityBaseBean>) m.invoke(bean);
+					@SuppressWarnings("unchecked")
+					List<EntityBaseBean> clonedCollection = (List<EntityBaseBean>) m.invoke(clone);
+
+					for (EntityBaseBean c : collection) {
+						Class<? extends EntityBaseBean> subKlass = c.getClass();
+						EntityBaseBean subClone = clonedTo.get(c);
+
+						if (subClone == null) {
+							try {
+								subClone = subKlass.newInstance();
+							} catch (InstantiationException | IllegalAccessException e) {
+								throw new IcatException(IcatExceptionType.INTERNAL,
+										"failed to instantiate " + subKlass.getSimpleName());
+							}
+
+							clonedCollection.add(subClone);
+							clonedTo.put(c, subClone);
+
+							Map<Field, Method> subSetters = eiHandler.getSettersForUpdate(subKlass);
+							Map<Field, Method> subGetters = eiHandler.getGetters(subKlass);
+							Set<Relationship> subRs = eiHandler.getRelatedEntities(subKlass);
+
+							for (Entry<Field, Method> fieldAndMethod : subSetters.entrySet()) {
+								Field field = fieldAndMethod.getKey();
+								try {
+									Method subM = subGetters.get(field);
+									Object value = subM.invoke(c);
+									if (EntityBaseBean.class.isAssignableFrom(field.getType())) {
+										Method setRel = fieldAndMethod.getValue();
+										if (setRel.equals(back)) {
+											value = clone;
+											logger.trace("Setting back ref {} {} {}", subClone, back, clone);
+										}
+										if (value != null) {
+											setRel.invoke(subClone, value);
+										}
+									} else {
+										fieldAndMethod.getValue().invoke(subClone, value);
+									}
+								} catch (Exception e) {
+									throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "" + e);
+								}
+							}
+							cloneOneToManys(c, subClone, subKlass, subGetters, subSetters, subRs, manager, clonedTo,
+									userId);
+						} else {
+							logger.trace("Setting back ref for existing clone {} {} {}", subClone, back, clone);
+							clonedCollection.add(subClone);
+							back.invoke(subClone, clone);
+						}
+					}
+				} catch (Exception e) {
+					throw new IcatException(IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+				}
+			}
 		}
 
 	}

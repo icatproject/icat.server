@@ -1,6 +1,7 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -35,8 +36,8 @@ public class SampleParameter extends Parameter implements Serializable {
 
 	@Override
 	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser,
-			boolean clearId) throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId);
+			boolean clearId, Set<EntityBaseBean> done) throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId, done);
 		this.id = null;
 		if (type == null) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");

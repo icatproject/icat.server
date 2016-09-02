@@ -3,6 +3,7 @@ package org.icatproject.core.entity;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
@@ -118,9 +119,9 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser, boolean clearId)
-			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId);
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser,
+			boolean clearId, Set<EntityBaseBean> done) throws IcatException {
+		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId, done);
 		check(manager);
 	}
 
@@ -128,7 +129,6 @@ public abstract class Parameter extends EntityBaseBean implements Serializable {
 		if (type == null) {
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION, "Type of parameter is not set");
 		}
-		logger.debug("PreparePersist of type " + type.getName() + " " + type.isEnforced() + " " + type.getValueType());
 		if (!type.isEnforced()) {
 			return;
 		}

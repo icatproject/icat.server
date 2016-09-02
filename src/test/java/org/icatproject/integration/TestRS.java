@@ -87,6 +87,91 @@ public class TestRS {
 	}
 
 	@Test
+	public void testClone() throws Exception {
+		Session session = createAndPopulate();
+		long id;
+		long idClone;
+		Map<String, String> keys;
+		JsonArray result;
+
+		id = search(session, "SELECT df.id FROM Datafile df WHERE df.name = 'df2'", 1).getJsonNumber(0)
+				.longValueExact();
+		keys = new HashMap<>();
+		keys.put("name", "NewDf");
+		idClone = session.cloneEntity("Datafile", id, keys);
+		result = search(session,
+				"SELECT df.id, df.name, p.stringValue FROM Datafile df JOIN df.parameters p WHERE df.name IN  ('df2', 'NewDf')",
+				2);
+		for (JsonValue r : result) {
+			JsonArray ra = (JsonArray) r;
+			assertEquals("green", ra.getString(2));
+			if (ra.getJsonNumber(0).longValueExact() == id) {
+				assertEquals("df2", ra.getString(1));
+			} else if (ra.getJsonNumber(0).longValueExact() == idClone) {
+				assertEquals("NewDf", ra.getString(1));
+			} else {
+				fail();
+			}
+		}
+
+		id = search(session, "SELECT ds.id FROM Dataset ds WHERE ds.name = 'ds2'", 1).getJsonNumber(0).longValueExact();
+		keys = new HashMap<>();
+		keys.put("name", "NewDs");
+		idClone = session.cloneEntity("Dataset", id, keys);
+		result = search(session,
+				"SELECT ds.id, ds.name, df.name FROM Dataset ds JOIN ds.datafiles df WHERE ds.name IN  ('ds2', 'NewDs')",
+				8);
+		for (JsonValue r : result) {
+			JsonArray ra = (JsonArray) r;
+			if (ra.getJsonNumber(0).longValueExact() == id) {
+				assertEquals("ds2", ra.getString(1));
+			} else if (ra.getJsonNumber(0).longValueExact() == idClone) {
+				assertEquals("NewDs", ra.getString(1));
+			} else {
+				fail();
+			}
+		}
+
+		id = search(session, "SELECT i.id FROM Investigation i WHERE i.visitId = 'one'", 1).getJsonNumber(0)
+				.longValueExact();
+		keys = new HashMap<>();
+		keys.put("name", "NewInv");
+		keys.put("visitId", "42");
+		idClone = session.cloneEntity("Investigation", id, keys);
+		assertEquals(4, search(session, "SELECT COUNT(x) FROM Investigation x", 1).getInt(0));
+		assertEquals(8, search(session, "SELECT COUNT(x) FROM DatafileParameter x", 1).getInt(0));
+		assertEquals(1, search(session, "SELECT COUNT(x) FROM Facility x", 1).getInt(0));
+		assertEquals(16, search(session, "SELECT COUNT(x) FROM Datafile x", 1).getInt(0));
+
+		id = search(session, "SELECT f.id FROM Facility f WHERE f.name = 'Test port facility'", 1).getJsonNumber(0)
+				.longValueExact();
+		keys = new HashMap<>();
+		keys.put("name", "NewFac");
+		idClone = session.cloneEntity("Facility", id, keys);
+		assertEquals(8, search(session, "SELECT COUNT(x) FROM Investigation x", 1).getInt(0));
+		assertEquals(16, search(session, "SELECT COUNT(x) FROM DatafileParameter x", 1).getInt(0));
+		assertEquals(2, search(session, "SELECT COUNT(x) FROM Facility x", 1).getInt(0));
+		assertEquals(32, search(session, "SELECT COUNT(x) FROM Datafile x", 1).getInt(0));
+
+		try {
+			keys = new HashMap<>();
+			idClone = session.cloneEntity("Facility", id, keys);
+			fail();
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getType());
+		}
+
+		try {
+			keys = new HashMap<>();
+			idClone = session.cloneEntity("Investigation", 0, keys);
+			fail();
+		} catch (IcatException e) {
+			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getType());
+		}
+
+	}
+
+	@Test
 	public void testLuceneDatafiles() throws Exception {
 		Session session = setupLuceneTest();
 		JsonArray array;

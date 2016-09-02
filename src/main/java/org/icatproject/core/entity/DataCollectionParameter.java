@@ -1,6 +1,7 @@
 package org.icatproject.core.entity;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -33,9 +34,9 @@ public class DataCollectionParameter extends Parameter implements Serializable {
 	}
 
 	@Override
-	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser, boolean clearId)
+	public void preparePersist(String modId, EntityManager manager, GateKeeper gateKeeper, boolean rootUser, boolean clearId, Set<EntityBaseBean> done)
 			throws IcatException {
-		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId);
+		super.preparePersist(modId, manager, gateKeeper, rootUser, clearId, done);
 		if (!type.isApplicableToDataCollection()) { // type has been checked as not null by super
 													// call
 			throw new IcatException(IcatException.IcatExceptionType.VALIDATION,
