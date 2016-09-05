@@ -50,7 +50,10 @@ import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
@@ -2028,48 +2031,44 @@ public class EntityBeanManager {
 					}
 				}
 
-				for (EntityBaseBean eb : creates) {
-					notificationTransmitter
-							.processMessage(new NotificationMessage(Operation.C, eb, manager, notificationRequests));
-				}
+				try {
+					for (EntityBaseBean eb : creates) {
+						notificationTransmitter.processMessage(
+								new NotificationMessage(Operation.C, eb, manager, notificationRequests));
+					}
 
-				for (EntityBaseBean eb : updates) {
-					notificationTransmitter
-							.processMessage(new NotificationMessage(Operation.U, eb, manager, notificationRequests));
+					for (EntityBaseBean eb : updates) {
+						notificationTransmitter.processMessage(
+								new NotificationMessage(Operation.U, eb, manager, notificationRequests));
+					}
+				} catch (JMSException e) {
+					throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+							"Operation completed but unable to send JMS message " + e.getMessage());
 				}
 
 				return beanIds;
 			} catch (JsonException e) {
-				userTransaction.rollback();
 				throw new IcatException(IcatExceptionType.BAD_PARAMETER, e.getMessage() + " in json " + json, offset);
-			} catch (EntityExistsException e) {
-				userTransaction.rollback();
-				throw new IcatException(IcatException.IcatExceptionType.OBJECT_ALREADY_EXISTS, e.getMessage(), offset);
 			} catch (IcatException e) {
-				userTransaction.rollback();
 				e.setOffset(offset);
 				throw e;
-			} catch (Throwable e) {
-				userTransaction.rollback();
-				logger.error("Transaction rolled back for creation/update because of", e);
-				updateCache();
-				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
-						"Unexpected DB response " + e.getClass() + " " + e.getMessage(), offset);
 			}
-		} catch (IllegalStateException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "IllegalStateException" + e.getMessage());
-		} catch (SecurityException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SecurityException" + e.getMessage());
-		} catch (SystemException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "SystemException" + e.getMessage());
-		} catch (NotSupportedException e) {
-			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, "NotSupportedException" + e.getMessage());
+		} catch (IllegalStateException | SecurityException | SystemException | NotSupportedException | RollbackException
+				| HeuristicMixedException | HeuristicRollbackException e) {
+			throw new IcatException(IcatException.IcatExceptionType.INTERNAL, e.getClass() + " " + e.getMessage());
+		} catch (IcatException e) {
+			try {
+				userTransaction.rollback();
+			} catch (IllegalStateException | SecurityException | SystemException e1) {
+				// Ignore it
+			}
+			throw e;
 		}
 	}
 
 	private EntityBaseBean writeOne(JsonObject entity, EntityManager manager, String userId,
 			List<EntityBaseBean> creates, List<EntityBaseBean> updates, UserTransaction userTransaction)
-			throws IcatException, IllegalStateException, SecurityException, SystemException, NotSupportedException {
+			throws IcatException {
 		logger.debug("write one {}", entity);
 
 		if (entity.size() != 1) {
@@ -2120,8 +2119,12 @@ public class EntityBeanManager {
 			 */
 			logger.debug("Problem shows up with persist/flush will rollback and check: {} {}", e.getClass(),
 					e.getMessage());
-			userTransaction.rollback();
-			userTransaction.begin();
+			try {
+				userTransaction.rollback();
+			} catch (IllegalStateException | SecurityException | SystemException e1) {
+				throw new IcatException(IcatException.IcatExceptionType.INTERNAL,
+						e1.getClass() + " " + e1.getMessage());
+			}
 			for (EntityBaseBean b : localCreates) {
 				isValid(b);
 				isUnique(b, manager);

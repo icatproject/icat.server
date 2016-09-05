@@ -696,7 +696,7 @@ public class TestRS {
 
 		try {
 		} finally {
-			// wSession.setAuthz();
+			wSession.setAuthz();
 		}
 	}
 
@@ -866,7 +866,7 @@ public class TestRS {
 			wSession.addRule("notroot", "Dataset <-> Investigation [name = 'B']", "C");
 			session.write(baos.toString());
 		} finally {
-			wSession.setAuthz();
+			// wSession.setAuthz();
 		}
 
 	}
@@ -1139,6 +1139,7 @@ public class TestRS {
 	}
 
 	private Session createAndPopulate() throws Exception {
+		wSession.setAuthz();
 		ICAT icat = new ICAT(System.getProperty("serverUrl"));
 		Map<String, String> credentials = new HashMap<>();
 		credentials.put("username", "notroot");
