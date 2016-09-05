@@ -450,6 +450,11 @@
 				href="#cluster">Installing a group of ICATs</a> The value takes the
 			form machine:port where the port will normally be 3700.
 		</dd>
+
+		<dt>key</dt>
+		<dd>This is optional but if there is an IDS server in use and it
+			has a key for digest protection of Datafile.location then this key
+			value must be identical.</dd>
 	</dl>
 
 	<h2>Check that ICAT works</h2>

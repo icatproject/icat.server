@@ -147,6 +147,7 @@ public class PropertyHandler {
 	private long exportCacheSize;
 	private ContainerType containerType;
 	private String jmsTopicConnectionFactory;
+	private String digestKey;
 
 	@PostConstruct
 	private void init() {
@@ -286,7 +287,9 @@ public class PropertyHandler {
 				formattedProps.add("lucene.commitCount " + luceneCommitCount);
 			}
 
-			/* maxEntities, importCacheSize, exportCacheSize, maxIdsInQuery */
+			/*
+			 * maxEntities, importCacheSize, exportCacheSize, maxIdsInQuery, key
+			 */
 			maxEntities = props.getPositiveInt("maxEntities");
 			formattedProps.add("maxEntities " + maxEntities);
 
@@ -298,6 +301,12 @@ public class PropertyHandler {
 
 			maxIdsInQuery = props.getPositiveInt("maxIdsInQuery");
 			formattedProps.add("maxIdsInQuery " + maxIdsInQuery);
+
+			if (props.has("key")) {
+				digestKey = props.getString("key");
+				formattedProps.add("key " + digestKey);
+				logger.info("Key is " + (digestKey == null ? "not set" : "set"));
+			}
 
 			/* JMS stuff */
 			jmsTopicConnectionFactory = props.getString("jms.topicConnectionFactory",
@@ -375,6 +384,10 @@ public class PropertyHandler {
 
 	public String getJmsTopicConnectionFactory() {
 		return jmsTopicConnectionFactory;
+	}
+
+	public String getKey() {
+		return digestKey;
 	}
 
 }

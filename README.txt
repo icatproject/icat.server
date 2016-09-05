@@ -1,7 +1,7 @@
 icat.server
 -----------
 
-General installation instructions are at https://www.icatproject.org/installation/component
+General installation instructions are at https://icatproject.org/installation/component
 
 Specific installation instructions are at https://repo.icatproject.org/site/icat/server/${project.version}/installation.html
 

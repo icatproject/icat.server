@@ -169,6 +169,19 @@ public class TestRS {
 			assertEquals(IcatExceptionType.NO_SUCH_OBJECT_FOUND, e.getType());
 		}
 
+		long dsid = search(session, "SELECT ds.id FROM Dataset ds LIMIT 0,1", 1).getJsonNumber(0).longValueExact();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (JsonGenerator jw = Json.createGenerator(baos)) {
+			jw.writeStartObject().writeStartObject("Datafile").writeStartObject("dataset").write("id", dsid).writeEnd()
+					.write("name", "secure").write("location", "here pseudokey").writeEnd().writeEnd();
+		}
+		List<Long> dfids = session.write(baos.toString());
+		assertEquals(1, dfids.size());
+		id = dfids.get(0);
+		keys = new HashMap<>();
+		keys.put("name", "newSecure");
+		idClone = session.cloneEntity("Datafile", id, keys);
+
 	}
 
 	@Test

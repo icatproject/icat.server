@@ -90,6 +90,7 @@ import org.icatproject.core.parser.ParserException;
 import org.icatproject.core.parser.SearchQuery;
 import org.icatproject.core.parser.Token;
 import org.icatproject.core.parser.Tokenizer;
+import org.icatproject.utils.IcatSecurity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -154,6 +155,8 @@ public class EntityBeanManager {
 
 	private long exportCacheSize;
 	private Set<String> rootUserNames;
+
+	private String key;
 
 	private String buildKey(EntityBaseBean bean, Map<String, Map<Long, String>> exportCaches)
 			throws IcatException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -1179,7 +1182,7 @@ public class EntityBeanManager {
 		maxEntities = propertyHandler.getMaxEntities();
 		exportCacheSize = propertyHandler.getImportCacheSize();
 		rootUserNames = propertyHandler.getRootUserNames();
-
+		key = propertyHandler.getKey();
 	}
 
 	public boolean isAccessAllowed(String userId, EntityBaseBean bean, EntityManager manager,
@@ -2309,6 +2312,23 @@ public class EntityBeanManager {
 				// Check authz now everything flushed
 				for (EntityBaseBean c : clonedTo.values()) {
 					gateKeeper.performAuthorisation(userId, c, AccessType.CREATE, manager);
+				}
+
+				// Update any Datafile.location values if key provided
+				if (key != null) {
+					for (EntityBaseBean c : clonedTo.values()) {
+						if (c.getClass().getSimpleName().equals("Datafile")) {
+							Datafile df = (Datafile) c;
+							String location = df.getLocation();
+							if (location != null) {
+								int i = location.lastIndexOf(' ');
+								if (i >= 0) {
+									location = location.substring(0, i);
+									df.setLocation(location + " " + IcatSecurity.digest(df.getId(), location, key));
+								}
+							}
+						}
+					}
 				}
 
 				userTransaction.commit();

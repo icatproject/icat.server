@@ -52,3 +52,6 @@ lucene.commitCount = 10000
 
 # JMS - uncomment and edit if needed
 !jms.topicConnectionFactory = java:comp/DefaultJMSConnectionFactory
+
+# Optional key which must match that of the IDS server if the IDS is in use and has a key for digest protection of Datafile.location
+!key = ???
